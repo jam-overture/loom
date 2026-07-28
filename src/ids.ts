@@ -34,6 +34,18 @@ export const deltaIdSchema = z
   .brand<"DeltaId">()
 export type DeltaId = z.infer<typeof deltaIdSchema>
 
+export const intentIdSchema = z
+  .string()
+  .regex(new RegExp(`^i_${ID_BODY}$`))
+  .brand<"IntentId">()
+export type IntentId = z.infer<typeof intentIdSchema>
+
+export const proposalIdSchema = z
+  .string()
+  .regex(new RegExp(`^p_${ID_BODY}$`))
+  .brand<"ProposalId">()
+export type ProposalId = z.infer<typeof proposalIdSchema>
+
 /**
  * Id minting is a side effect, so it enters the runtime through this seam
  * rather than being called directly from pure code. Tests and replay tooling
@@ -43,6 +55,8 @@ export interface IdFactory {
   readonly nodeId: () => NodeId
   readonly treeId: () => TreeId
   readonly deltaId: () => DeltaId
+  readonly intentId: () => IntentId
+  readonly proposalId: () => ProposalId
 }
 
 const RANDOM_ID_LENGTH = 20
@@ -59,6 +73,8 @@ export const randomIdFactory: IdFactory = {
   nodeId: () => nodeIdSchema.parse(`n_${randomBody()}`),
   treeId: () => treeIdSchema.parse(`t_${randomBody()}`),
   deltaId: () => deltaIdSchema.parse(`d_${randomBody()}`),
+  intentId: () => intentIdSchema.parse(`i_${randomBody()}`),
+  proposalId: () => proposalIdSchema.parse(`p_${randomBody()}`),
 }
 
 /**
@@ -68,11 +84,13 @@ export const randomIdFactory: IdFactory = {
  * that builds nodes for an existing tree passes one.
  */
 export const sequentialIdFactory = (namespace = ""): IdFactory => {
-  const counters = { node: 0, tree: 0, delta: 0 }
+  const counters = { node: 0, tree: 0, delta: 0, intent: 0, proposal: 0 }
 
   return {
     nodeId: () => nodeIdSchema.parse(`n_${namespace}${(counters.node += 1)}`),
     treeId: () => treeIdSchema.parse(`t_${namespace}${(counters.tree += 1)}`),
     deltaId: () => deltaIdSchema.parse(`d_${namespace}${(counters.delta += 1)}`),
+    intentId: () => intentIdSchema.parse(`i_${namespace}${(counters.intent += 1)}`),
+    proposalId: () => proposalIdSchema.parse(`p_${namespace}${(counters.proposal += 1)}`),
   }
 }

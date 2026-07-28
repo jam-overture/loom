@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 830" width="1080" height="830" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="aOk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669"/>
+    </marker>
+    <marker id="aWarn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+    </marker>
+    <marker id="aBad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .title { font-size: 21px; font-weight: 650; fill: #0f172a; }
+      .sub { font-size: 13px; fill: #64748b; }
+      .panel { font-size: 12px; font-weight: 650; fill: #475569; letter-spacing: 0.09em; }
+      .stage { font-size: 12.5px; font-weight: 650; fill: #0f172a; }
+      .seam { font-size: 10.5px; fill: #7c3aed; font-weight: 600; letter-spacing: 0.04em; }
+      .pure { font-size: 10.5px; fill: #0891b2; font-weight: 600; letter-spacing: 0.04em; }
+      .ev { font-size: 10.5px; fill: #64748b; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .rule { font-size: 12px; fill: #0f172a; }
+      .rule-code { font-size: 11px; fill: #475569; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .note { font-size: 11.5px; fill: #475569; }
+      .cell { font-size: 11.5px; font-weight: 600; }
+      .axis { font-size: 11px; fill: #64748b; font-weight: 600; letter-spacing: 0.05em; }
+    </style>
+  </defs>
+
+  <rect width="1080" height="830" fill="#ffffff"/>
+
+  <text class="title" x="40" y="46">Loom — the Composition Runtime</text>
+  <text class="sub" x="40" y="70">Build order §2 · 2026-07-28 · an intent becomes a change only if a pure Gate lets it</text>
+  <line x1="40" y1="88" x2="1040" y2="88" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- ── Panel A: pipeline ─────────────────────────────────────────────── -->
+  <text class="panel" x="40" y="120">THE PIPELINE</text>
+
+  <rect x="40" y="138" width="140" height="58" rx="9" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text class="stage" x="56" y="163">EditIntent</text>
+  <text class="note" x="56" y="181">"make it quieter"</text>
+
+  <rect x="202" y="138" width="140" height="58" rx="9" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6"/>
+  <text class="stage" x="218" y="161">Interpreter</text>
+  <text class="seam" x="218" y="179">SEAM · AI · async</text>
+
+  <rect x="364" y="138" width="140" height="58" rx="9" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text class="stage" x="380" y="161">ProposedChange</text>
+  <text class="note" x="380" y="179">delta + provenance</text>
+
+  <rect x="526" y="138" width="140" height="58" rx="9" fill="#ecfeff" stroke="#0891b2" stroke-width="1.6"/>
+  <text class="stage" x="542" y="161">assessChange</text>
+  <text class="pure" x="542" y="179">PURE · stakes + undo</text>
+
+  <rect x="688" y="138" width="140" height="58" rx="9" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+  <text class="stage" x="704" y="161">Gate</text>
+  <text class="pure" x="704" y="179">PURE · no IO, no state</text>
+
+  <rect x="850" y="138" width="150" height="58" rx="9" fill="#ecfeff" stroke="#0891b2" stroke-width="1.6"/>
+  <text class="stage" x="866" y="161">applyDelta</text>
+  <text class="pure" x="866" y="179">PURE · atomic</text>
+
+  <path d="M 180 167 L 202 167" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <path d="M 342 167 L 364 167" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <path d="M 504 167 L 526 167" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <path d="M 666 167 L 688 167" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <path d="M 828 167 L 850 167" stroke="#059669" stroke-width="1.8" fill="none" marker-end="url(#aOk)"/>
+  <text class="cell" x="832" y="130" fill="#059669">accepted</text>
+
+  <!-- held-back branches -->
+  <path d="M 758 196 L 758 232 L 654 232" stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#aWarn)"/>
+  <rect x="472" y="214" width="180" height="36" rx="8" fill="#fffbeb" stroke="#b45309" stroke-width="1.5"/>
+  <text class="cell" x="488" y="237" fill="#b45309">requires-confirmation</text>
+
+  <path d="M 758 196 L 758 276 L 654 276" stroke="#dc2626" stroke-width="1.5" fill="none" marker-end="url(#aBad)"/>
+  <rect x="532" y="258" width="120" height="36" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+  <text class="cell" x="548" y="281" fill="#dc2626">rejected</text>
+
+  <path d="M 925 196 L 925 232" stroke="#059669" stroke-width="1.5" fill="none" marker-end="url(#aOk)"/>
+  <rect x="850" y="232" width="150" height="58" rx="9" fill="#ecfdf5" stroke="#059669" stroke-width="1.6"/>
+  <text class="stage" x="866" y="256">LoomTree′</text>
+  <text class="note" x="866" y="274">+ inverse delta</text>
+
+  <!-- event trail -->
+  <line x1="40" y1="312" x2="1040" y2="312" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3"/>
+  <text class="panel" x="40" y="334">EMITTED AT EVERY STAGE, INCLUDING THE FAILURES</text>
+  <text class="ev" x="40" y="356">intent-received → change-proposed → change-assessed → disposition-decided → change-applied</text>
+  <text class="ev" x="40" y="374">interpretation-failed · assessment-failed · application-failed</text>
+  <text class="note" x="40" y="394">A Gate that refuses the right things is only demonstrable if refusals are recorded, so §6 gets its inputs from day one.</text>
+
+  <!-- ── Panel B: gate rules ──────────────────────────────────────────── -->
+  <line x1="40" y1="418" x2="1040" y2="418" stroke="#e2e8f0" stroke-width="1"/>
+  <text class="panel" x="40" y="446">THE GATE — FIRST RULE THAT FIRES WINS</text>
+
+  <rect x="40" y="462" width="470" height="34" rx="7" fill="#fef2f2" stroke="#fecaca" stroke-width="1.3"/>
+  <text class="rule" x="56" y="484">1 · confidence below the floor</text>
+  <text class="rule-code" x="360" y="484">→ rejected</text>
+
+  <rect x="40" y="502" width="470" height="34" rx="7" fill="#fef2f2" stroke="#fecaca" stroke-width="1.3"/>
+  <text class="rule" x="56" y="524">2 · stakes at the refusal floor</text>
+  <text class="rule-code" x="360" y="524">→ rejected</text>
+
+  <rect x="40" y="542" width="470" height="34" rx="7" fill="#fffbeb" stroke="#fde68a" stroke-width="1.3"/>
+  <text class="rule" x="56" y="564">3 · undo would not undo reality</text>
+  <text class="rule-code" x="360" y="564">→ confirm</text>
+
+  <rect x="40" y="582" width="470" height="34" rx="7" fill="#fffbeb" stroke="#fde68a" stroke-width="1.3"/>
+  <text class="rule" x="56" y="604">4 · stakes above this origin's ceiling</text>
+  <text class="rule-code" x="360" y="604">→ confirm</text>
+
+  <rect x="40" y="622" width="470" height="34" rx="7" fill="#fffbeb" stroke="#fde68a" stroke-width="1.3"/>
+  <text class="rule" x="56" y="644">5 · confidence below the minimum</text>
+  <text class="rule-code" x="360" y="644">→ confirm</text>
+
+  <rect x="40" y="662" width="470" height="34" rx="7" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.3"/>
+  <text class="rule" x="56" y="684">6 · nothing objected</text>
+  <text class="rule-code" x="360" y="684">→ accepted</text>
+
+  <text class="note" x="40" y="720">Order encodes precedence. Rule 3 sits above rule 4 so that a change which is</text>
+  <text class="note" x="40" y="737">small, cheap, and permanent is never quietly auto-applied.</text>
+  <text class="note" x="40" y="761">Ceilings are per origin: user-instruction earns "medium", an unrequested</text>
+  <text class="note" x="40" y="778">system-signal only "low". Who asked is a real input.</text>
+
+  <!-- ── Panel C: two axes ────────────────────────────────────────────── -->
+  <line x1="540" y1="436" x2="540" y2="800" stroke="#e2e8f0" stroke-width="1"/>
+  <text class="panel" x="570" y="446">TWO AXES, WEIGHED SEPARATELY</text>
+
+  <text class="axis" x="700" y="480">REVERSIBLE</text>
+  <text class="axis" x="860" y="480">NOT REVERSIBLE</text>
+
+  <text class="axis" x="570" y="516">LOW</text>
+  <rect x="670" y="494" width="160" height="46" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.4"/>
+  <text class="cell" x="686" y="522" fill="#047857">auto-apply</text>
+  <rect x="840" y="494" width="160" height="46" rx="8" fill="#fffbeb" stroke="#b45309" stroke-width="1.4"/>
+  <text class="cell" x="856" y="522" fill="#b45309">confirm</text>
+
+  <text class="axis" x="570" y="570">MEDIUM</text>
+  <rect x="670" y="548" width="160" height="46" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4"/>
+  <text class="cell" x="686" y="576" fill="#475569">depends on origin</text>
+  <rect x="840" y="548" width="160" height="46" rx="8" fill="#fffbeb" stroke="#b45309" stroke-width="1.4"/>
+  <text class="cell" x="856" y="576" fill="#b45309">confirm</text>
+
+  <text class="axis" x="570" y="624">HIGH</text>
+  <rect x="670" y="602" width="160" height="46" rx="8" fill="#fffbeb" stroke="#b45309" stroke-width="1.4"/>
+  <text class="cell" x="686" y="630" fill="#b45309">confirm</text>
+  <rect x="840" y="602" width="160" height="46" rx="8" fill="#fffbeb" stroke="#b45309" stroke-width="1.4"/>
+  <text class="cell" x="856" y="630" fill="#b45309">confirm</text>
+
+  <text class="axis" x="570" y="678">CRITICAL</text>
+  <rect x="670" y="656" width="160" height="46" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.4"/>
+  <text class="cell" x="686" y="684" fill="#dc2626">refuse</text>
+  <rect x="840" y="656" width="160" height="46" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.4"/>
+  <text class="cell" x="856" y="684" fill="#dc2626">refuse</text>
+
+  <text class="note" x="570" y="730">Stakes measure damage. Reversibility measures whether it can be taken</text>
+  <text class="note" x="570" y="747">back. Blending them into one score was the bug this session caught: a</text>
+  <text class="note" x="570" y="764">change can be devastating and trivially undone, or tiny and permanent,</text>
+  <text class="note" x="570" y="781">and the Gate has to see both properties on their own terms.</text>
+</svg>
