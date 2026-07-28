@@ -45,3 +45,5 @@ leave the existing record standing until someone decides.
 | [0003](0003-ai-drafts-the-runtime-names.md)                  | AI drafts a change; the runtime names what it creates         | Accepted | §2      |
 | [0004](0004-model-facing-schema-is-a-projection.md)          | The model-facing schema is a projection, not the AST          | Accepted | §2      |
 | [0005](0005-model-access-is-an-optional-adapter.md)          | Model access is a narrow seam with an optional adapter        | Accepted | §2      |
+| [0006](0006-one-repair-attempt-and-both-halves-recorded.md)  | A refused proposal gets exactly one repair attempt            | Accepted | §2      |
+| [0007](0007-confidence-is-self-graded-and-must-be-calibrated.md) | Confidence is self-graded, trusted on purpose, and must be calibrated | Accepted | §2 → §6 |

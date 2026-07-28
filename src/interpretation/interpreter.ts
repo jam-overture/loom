@@ -2,7 +2,12 @@ import type { IdFactory } from "../ids.js"
 import { assertNever, err, ok, type Result } from "../result.js"
 import type { Clock } from "../runtime/events.js"
 import type { EditIntent } from "../runtime/intent.js"
-import type { ChangeInterpreter, InterpretationError } from "../runtime/interpreter.js"
+import type {
+  ChangeInterpreter,
+  ChangeRepairer,
+  InterpretationError,
+  RepairRequest,
+} from "../runtime/interpreter.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { parseDelta, type TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
@@ -10,7 +15,7 @@ import type { LoomTree } from "../tree/tree.js"
 import type { ModelClient, ModelClientError, ModelEffort } from "./client.js"
 import { interpretationReplySchema, type InterpretationReply } from "./draft.js"
 import { materializeDelta } from "./materialize.js"
-import { buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
+import { buildRepairMessage, buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
 import { DEFAULT_DRAFT_DEPTH, interpretationReplyJsonSchema } from "./schema.js"
 
 /**
@@ -48,7 +53,7 @@ const fromClientError = (error: ModelClientError): InterpretationError => {
     case "unavailable":
       return { code: "interpreter-unavailable", detail: error.detail }
     case "refused":
-      return { code: "interpreter-unavailable", detail: `model declined to answer: ${error.detail}` }
+      return { code: "refused", detail: `model declined to answer: ${error.detail}` }
     case "incomplete":
       return { code: "malformed-proposal", detail: `reply was cut off: ${error.detail}` }
     default:
@@ -103,50 +108,68 @@ const buildDelta = (
     : err({ code: "malformed-proposal", detail: `${parsed.error.code}: ${JSON.stringify(parsed.error)}` })
 }
 
-export const modelInterpreter = (config: ModelInterpreterConfig): ChangeInterpreter => ({
-  interpret: async (
-    intent: EditIntent,
-    tree: LoomTree
-  ): Promise<Result<ProposedChange, InterpretationError>> => {
-    const userMessage = buildUserMessage(intent, tree)
+/**
+ * The one call path. Interpreting an utterance and revising a refused proposal
+ * differ only in the user message, so they share everything else — the same
+ * system prompt (which keeps the cacheable prefix identical), the same output
+ * schema, the same parsing, and the same rules about what a bad answer means.
+ */
+const propose = async (
+  config: ModelInterpreterConfig,
+  intent: EditIntent,
+  userMessage: string
+): Promise<Result<ProposedChange, InterpretationError>> => {
+  const completion = await config.client.complete({
+    model: config.model ?? DEFAULT_INTERPRETER_MODEL,
+    maxTokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
+    effort: config.effort ?? DEFAULT_EFFORT,
+    system: INTERPRETER_SYSTEM_PROMPT,
+    userMessage,
+    outputSchema: interpretationReplyJsonSchema(config.draftDepth ?? DEFAULT_DRAFT_DEPTH),
+  })
 
-    const completion = await config.client.complete({
-      model: config.model ?? DEFAULT_INTERPRETER_MODEL,
-      maxTokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
-      effort: config.effort ?? DEFAULT_EFFORT,
-      system: INTERPRETER_SYSTEM_PROMPT,
-      userMessage,
-      outputSchema: interpretationReplyJsonSchema(config.draftDepth ?? DEFAULT_DRAFT_DEPTH),
-    })
+  if (!completion.ok) return err(fromClientError(completion.error))
 
-    if (!completion.ok) return err(fromClientError(completion.error))
+  const reply = parseReply(completion.value.text)
+  if (!reply.ok) return reply
 
-    const reply = parseReply(completion.value.text)
-    if (!reply.ok) return reply
+  if (reply.value.outcome === "no-change") {
+    return err({ code: "no-change-needed", detail: reply.value.rationale })
+  }
 
-    if (reply.value.outcome === "no-change") {
-      return err({ code: "no-change-needed", detail: reply.value.rationale })
-    }
+  if (reply.value.outcome === "not-understood") {
+    return err({ code: "not-understood", detail: reply.value.rationale })
+  }
 
-    if (reply.value.outcome === "not-understood") {
-      return err({ code: "not-understood", detail: reply.value.rationale })
-    }
+  const delta = buildDelta(reply.value, intent, config)
+  if (!delta.ok) return delta
 
-    const delta = buildDelta(reply.value, intent, config)
-    if (!delta.ok) return delta
+  return ok({
+    proposalId: config.idFactory.proposalId(),
+    intentId: intent.intentId,
+    delta: delta.value,
+    rationale: reply.value.rationale,
+    provenance: {
+      origin: intent.origin,
+      interpreter: completion.value.servedBy,
+      promptHash: await hashPrompt(INTERPRETER_SYSTEM_PROMPT, userMessage),
+      confidence: reply.value.confidence,
+      interpretedAt: config.clock.now(),
+    },
+  })
+}
 
-    return ok({
-      proposalId: config.idFactory.proposalId(),
-      intentId: intent.intentId,
-      delta: delta.value,
-      rationale: reply.value.rationale,
-      provenance: {
-        origin: intent.origin,
-        interpreter: completion.value.servedBy,
-        promptHash: await hashPrompt(INTERPRETER_SYSTEM_PROMPT, userMessage),
-        confidence: reply.value.confidence,
-        interpretedAt: config.clock.now(),
-      },
-    })
-  },
+/**
+ * Implements both seams. Whether a deployment actually repairs is decided by
+ * whether this object is also wired in as the runtime's `repairer` — the
+ * capability is offered here, but never assumed.
+ */
+export const modelInterpreter = (
+  config: ModelInterpreterConfig
+): ChangeInterpreter & ChangeRepairer => ({
+  interpret: (intent: EditIntent, tree: LoomTree) =>
+    propose(config, intent, buildUserMessage(intent, tree)),
+
+  repair: (request: RepairRequest, tree: LoomTree) =>
+    propose(config, request.intent, buildRepairMessage(request, tree)),
 })

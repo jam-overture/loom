@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type NodeId } from "../ids.js"
-import { buildIntent } from "../testing/doubles.js"
+import type { RepairRequest } from "../runtime/interpreter.js"
+import { buildIntent, buildProposal } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 
-import { buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
+import { buildRepairMessage, buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
 
 const intentFor = (utterance: string, scopeNodeId?: NodeId) => {
   const { tree } = sampleTree()
@@ -58,5 +59,71 @@ describe("hashPrompt", () => {
 
   it("carries no prompt text", async () => {
     expect(await hashPrompt(INTERPRETER_SYSTEM_PROMPT, "delete everything")).not.toContain("delete")
+  })
+})
+
+describe("buildRepairMessage", () => {
+  const requestFor = () => {
+    const { tree, ids } = sampleTree()
+    const idFactory = sequentialIdFactory("p")
+    const intent = buildIntent(idFactory, {
+      treeId: tree.treeId,
+      baseRevision: tree.revision,
+      utterance: "delete the card",
+    })
+
+    const refused = buildProposal(idFactory, {
+      intentId: intent.intentId,
+      delta: {
+        deltaId: idFactory.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: [{ op: "remove", nodeId: ids.card }],
+      },
+      rationale: "the card is what was named",
+    })
+
+    const request: RepairRequest = {
+      intent,
+      refused,
+      disposition: {
+        kind: "rejected",
+        reason: { code: "stakes-at-refusal-floor", detail: "destroys a protected primitive" },
+        stakes: "critical",
+        reversible: true,
+        confidence: 0.9,
+      },
+    }
+
+    return { request, tree }
+  }
+
+  it("restates the request, the refused delta, and the reason", () => {
+    const { request, tree } = requestFor()
+    const message = buildRepairMessage(request, tree)
+
+    expect(message).toContain("Request (user-instruction): delete the card")
+    expect(message).toContain("1. remove n_4 and its subtree")
+    expect(message).toContain("stakes-at-refusal-floor: destroys a protected primitive")
+    expect(message).toContain("the card is what was named")
+  })
+
+  it("still shows the tree, so a repair is proposed against what exists now", () => {
+    const { request, tree } = requestFor()
+
+    expect(buildRepairMessage(request, tree)).toContain("n_7 element loom.page")
+  })
+
+  it("offers not-understood as an answer rather than demanding a weaker change", () => {
+    const { request, tree } = requestFor()
+
+    expect(buildRepairMessage(request, tree)).toContain("not-understood")
+  })
+})
+
+describe("INTERPRETER_SYSTEM_PROMPT on repair", () => {
+  it("forbids slicing a refused change into a smaller piece of the same thing", () => {
+    expect(INTERPRETER_SYSTEM_PROMPT).toContain("one revision")
+    expect(INTERPRETER_SYSTEM_PROMPT).toContain("must not be the same change split into a smaller piece")
   })
 })
