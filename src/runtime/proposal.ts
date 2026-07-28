@@ -43,6 +43,12 @@ export const proposedChangeSchema = z.object({
   delta: treeDeltaSchema,
   rationale: z.string().min(1),
   provenance: provenanceSchema,
+  /**
+   * Set when this proposal replaces one the Gate refused. Stamped by the
+   * runtime rather than claimed by the proposer, so a weaker change offered
+   * after a refusal cannot present itself as an unrelated first attempt.
+   */
+  repairOf: proposalIdSchema.optional(),
 })
 
 export type ProposedChange = {
@@ -51,4 +57,5 @@ export type ProposedChange = {
   readonly delta: TreeDelta
   readonly rationale: string
   readonly provenance: Provenance
+  readonly repairOf?: ProposalId
 }

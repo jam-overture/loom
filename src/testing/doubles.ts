@@ -8,7 +8,12 @@ import type { IdFactory, IntentId, TreeId } from "../ids.js"
 import { ok, type Result } from "../result.js"
 import type { Clock, EventSink, RuntimeEventEnvelope } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
-import type { ChangeInterpreter, InterpretationError } from "../runtime/interpreter.js"
+import type {
+  ChangeInterpreter,
+  ChangeRepairer,
+  InterpretationError,
+  RepairRequest,
+} from "../runtime/interpreter.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import type { TreeDelta } from "../tree/delta.js"
 
@@ -71,6 +76,30 @@ export const scriptedInterpreter = (
 ): ChangeInterpreter => ({
   interpret: () => Promise.resolve(script),
 })
+
+export type RecordingRepairer = ChangeRepairer & {
+  readonly requests: readonly RepairRequest[]
+}
+
+/**
+ * A repairer that answers from a script and remembers what it was asked, so a
+ * test can assert both that the refusal reached it and that exactly one attempt
+ * was made.
+ */
+export const scriptedRepairer = (
+  script: Result<ProposedChange, InterpretationError>
+): RecordingRepairer => {
+  const requests: RepairRequest[] = []
+
+  return {
+    repair: (request) => {
+      requests.push(request)
+
+      return Promise.resolve(script)
+    },
+    requests,
+  }
+}
 
 export type IntentDraft = {
   readonly treeId: TreeId

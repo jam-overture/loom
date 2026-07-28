@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory } from "../ids.js"
-import { err, ok } from "../result.js"
+import { err, ok, type Result } from "../result.js"
 import {
   buildIntent,
   buildProposal,
   collectingEventSink,
   fixedClock,
   scriptedInterpreter,
+  scriptedRepairer,
   type CollectingEventSink,
 } from "../testing/doubles.js"
 import { sampleTree, type SampleTree } from "../testing/fixtures.js"
@@ -16,6 +17,7 @@ import { findNode } from "../tree/navigation.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import type { IntentOrigin } from "./intent.js"
+import type { InterpretationError } from "./interpreter.js"
 import { composeChange, confirmChange, type CompositionRuntime } from "./pipeline.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
@@ -244,5 +246,184 @@ describe("confirmChange", () => {
     if (outcome.kind !== "not-applicable") throw new Error(`unexpected ${outcome.kind}`)
 
     expect(outcome.error.code).toBe("revision-mismatch")
+  })
+})
+
+describe("composeChange when a refusal is repaired", () => {
+  /**
+   * The first proposal is refused for low confidence; the repair comes back
+   * confident. Both halves of that story have to survive in the record.
+   */
+  const refusedThenRepaired = (repair: Result<ProposedChange, InterpretationError>) => {
+    const base = harnessFor({ build: tweak, confidence: 0.05 })
+    const repairer = scriptedRepairer(repair)
+
+    return { ...base, repairer, runtime: { ...base.runtime, repairer } }
+  }
+
+  const confidentRepair = (tree: LoomTree, ids: SampleTree["ids"]): ProposedChange =>
+    buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: [{ op: "configure", nodeId: ids.body, set: { value: "Gentler" }, unset: [] }],
+      },
+      rationale: "a smaller change that respects the objection",
+      confidence: 0.95,
+    })
+
+  it("leaves a refusal terminal when no repairer is wired in", async () => {
+    const { runtime, events, tree } = harnessFor({ build: tweak, confidence: 0.05 })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("rejected")
+    expect(events.types()).not.toContain("repair-requested")
+  })
+
+  it("hands the refusal back and applies the repaired change", async () => {
+    const { tree, ids } = sampleTree()
+    const { runtime } = refusedThenRepaired(ok(confidentRepair(tree, ids)))
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    const body = findNode(outcome.tree.root, ids.body)
+    expect(body?.kind === "text" && body.value).toBe("Gentler")
+  })
+
+  it("records the refusal as well as the repair, in order", async () => {
+    const { tree, ids } = sampleTree()
+    const { runtime, events } = refusedThenRepaired(ok(confidentRepair(tree, ids)))
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    expect(events.types()).toEqual([
+      "intent-received",
+      "change-proposed",
+      "change-assessed",
+      "disposition-decided",
+      "repair-requested",
+      "change-proposed",
+      "change-assessed",
+      "disposition-decided",
+      "change-applied",
+    ])
+  })
+
+  it("keeps the original refusal legible in the record after a successful repair", async () => {
+    const { tree, ids } = sampleTree()
+    const { runtime, events } = refusedThenRepaired(ok(confidentRepair(tree, ids)))
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    const dispositions = events.envelopes
+      .map((envelope) => envelope.event)
+      .filter((event) => event.type === "disposition-decided")
+
+    expect(dispositions).toHaveLength(2)
+    expect(dispositions[0]?.type === "disposition-decided" && dispositions[0].disposition.kind).toBe(
+      "rejected"
+    )
+    expect(dispositions[1]?.type === "disposition-decided" && dispositions[1].disposition.kind).toBe(
+      "accepted"
+    )
+  })
+
+  it("tells the repairer which proposal was refused and why", async () => {
+    const { tree, ids } = sampleTree()
+    const { runtime, repairer, proposal } = refusedThenRepaired(ok(confidentRepair(tree, ids)))
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    expect(repairer.requests).toHaveLength(1)
+    expect(repairer.requests[0]?.refused.proposalId).toBe(proposal.proposalId)
+    expect(repairer.requests[0]?.disposition.kind).toBe("rejected")
+    expect(repairer.requests[0]?.disposition.reason.code).toBe("confidence-below-floor")
+  })
+
+  it("stamps the repair with what it replaces, whatever the repairer claimed", async () => {
+    const { tree, ids } = sampleTree()
+    const claimed = { ...confidentRepair(tree, ids), repairOf: spare.proposalId() }
+    const { runtime, events, proposal } = refusedThenRepaired(ok(claimed))
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    const proposals = events.envelopes
+      .map((envelope) => envelope.event)
+      .filter((event) => event.type === "change-proposed")
+
+    expect(proposals[1]?.type === "change-proposed" && proposals[1].proposal.repairOf).toBe(
+      proposal.proposalId
+    )
+  })
+
+  it("allows exactly one attempt — a repair that is refused again is terminal", async () => {
+    const { tree, ids } = sampleTree()
+    const weak = { ...confidentRepair(tree, ids), provenance: { ...confidentRepair(tree, ids).provenance, confidence: 0.05 } }
+    const { runtime, events, repairer } = refusedThenRepaired(ok(weak))
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("rejected")
+    expect(repairer.requests).toHaveLength(1)
+    expect(events.types().filter((type) => type === "repair-requested")).toHaveLength(1)
+  })
+
+  it("leaves the original refusal standing when the repairer declines", async () => {
+    const { tree } = sampleTree()
+    const { runtime, events } = refusedThenRepaired(
+      err({ code: "not-understood", detail: "no gentler version exists" })
+    )
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.reason.code).toBe("confidence-below-floor")
+    expect(events.types()).toContain("repair-failed")
+    expect(events.types()).not.toContain("change-applied")
+  })
+
+  it("does not repair a change the Gate merely held back for a human", async () => {
+    const base = harnessFor({ build: tweak, confidence: 0.5 })
+    const repairer = scriptedRepairer(err({ code: "not-understood", detail: "unused" }))
+    const runtime = { ...base.runtime, repairer }
+
+    const outcome = await composeChange(runtime, base.tree, intentFor(base.tree))
+
+    expect(outcome.kind).toBe("awaiting-confirmation")
+    expect(repairer.requests).toHaveLength(0)
+  })
+
+  it("does not repair a proposal that never applied in the first place", async () => {
+    const base = harnessFor({ build: () => [{ op: "remove", nodeId: spare.nodeId() }] })
+    const repairer = scriptedRepairer(err({ code: "not-understood", detail: "unused" }))
+    const runtime = { ...base.runtime, repairer }
+
+    const outcome = await composeChange(runtime, base.tree, intentFor(base.tree))
+
+    expect(outcome.kind).toBe("not-applicable")
+    expect(repairer.requests).toHaveLength(0)
+  })
+
+  it("reports a repair that does not apply as inapplicable", async () => {
+    const { tree } = sampleTree()
+    const broken = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: [{ op: "remove", nodeId: spare.nodeId() }],
+      },
+      confidence: 0.95,
+    })
+    const { runtime } = refusedThenRepaired(ok(broken))
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("not-applicable")
   })
 })

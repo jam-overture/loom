@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory } from "../ids.js"
+import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, treeIdSchema } from "../ids.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
+import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { createTree } from "../tree/tree.js"
 
-import { renderTree } from "./render.js"
+import { renderDelta, renderTree } from "./render.js"
 
 describe("renderTree", () => {
   it("renders the whole tree as an indented outline with ids first", () => {
@@ -52,5 +53,76 @@ describe("renderTree", () => {
     const { tree } = sampleTree()
 
     expect(renderTree({ ...tree, revision: 7 })).toContain("revision 7")
+  })
+})
+
+describe("renderDelta", () => {
+  const deltaOf = (operations: readonly TreeOperation[]): TreeDelta => ({
+    deltaId: deltaIdSchema.parse("d_1"),
+    treeId: treeIdSchema.parse("t_1"),
+    baseRevision: 0,
+    operations,
+  })
+
+  it("numbers operations in the order they apply", () => {
+    const rendered = renderDelta(
+      deltaOf([
+        { op: "remove", nodeId: nodeIdSchema.parse("n_4") },
+        {
+          op: "move",
+          nodeId: nodeIdSchema.parse("n_2"),
+          parentId: nodeIdSchema.parse("n_5"),
+          index: 1,
+        },
+      ])
+    )
+
+    expect(rendered).toBe(
+      ["1. remove n_4 and its subtree", "2. move n_2 into n_5 at 1"].join("\n")
+    )
+  })
+
+  it("shows the subtree an insert would introduce", () => {
+    const idFactory = sequentialIdFactory("r")
+    const note = buildElement(idFactory, {
+      type: "loom.note",
+      props: { tone: "quiet" },
+      children: [buildText(idFactory, "Thanks")],
+    })
+
+    const rendered = renderDelta(
+      deltaOf([{ op: "insert", parentId: nodeIdSchema.parse("n_6"), index: 0, node: note }])
+    )
+
+    expect(rendered).toBe(
+      [
+        "1. insert into n_6 at 0:",
+        '    n_r2 element loom.note tone="quiet"',
+        '      n_r1 text "Thanks"',
+      ].join("\n")
+    )
+  })
+
+  it("names the prop keys a configure touches, sorted, without their values", () => {
+    const rendered = renderDelta(
+      deltaOf([
+        {
+          op: "configure",
+          nodeId: nodeIdSchema.parse("n_4"),
+          set: { variant: "filled", elevation: 0 },
+          unset: ["padding"],
+        },
+      ])
+    )
+
+    expect(rendered).toBe("1. configure n_4 set elevation, variant unset padding")
+  })
+
+  it("omits an empty set or unset rather than printing an empty list", () => {
+    const rendered = renderDelta(
+      deltaOf([{ op: "configure", nodeId: nodeIdSchema.parse("n_4"), set: {}, unset: ["variant"] }])
+    )
+
+    expect(rendered).toBe("1. configure n_4 unset variant")
   })
 })

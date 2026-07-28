@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory } from "../ids.js"
+import { nodeIdSchema, sequentialIdFactory } from "../ids.js"
 import { err, type Result } from "../result.js"
 import { gate } from "../runtime/gate.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
 import { composeChange } from "../runtime/pipeline.js"
 import { assessChange } from "../runtime/assessment.js"
+import type { EditIntent } from "../runtime/intent.js"
+import type { RepairRequest } from "../runtime/interpreter.js"
+import type { ProposedChange } from "../runtime/proposal.js"
 import {
   buildIntent,
+  buildProposal,
   collectingEventSink,
   fixedClock,
   scriptedModelClient,
@@ -248,12 +252,12 @@ describe("modelInterpreter — client failures", () => {
     expect(interpreted.ok ? "" : interpreted.error.detail).toContain("429")
   })
 
-  it("treats a declined request as unavailable and says so plainly", async () => {
+  it("keeps a declined request apart from an unavailable one", async () => {
     const { interpreter, intent, tree } = harness(err({ code: "refused", detail: "cyber" }))
     const interpreted = await interpreter.interpret(intent, tree)
 
-    expect(interpreted.ok ? "" : interpreted.error.code).toBe("interpreter-unavailable")
-    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("declined")
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("refused")
+    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("cyber")
   })
 
   it("treats a cut-off reply as malformed rather than absent", async () => {
@@ -341,5 +345,73 @@ describe("modelInterpreter — through the composition runtime", () => {
     if (!assessed.ok) throw new Error("expected an assessment")
 
     expect(gate(assessed.value, policy).kind).toBe("accepted")
+  })
+})
+
+describe("modelInterpreter — repairing a refusal", () => {
+  const repairRequestFor = (refused: ProposedChange, intent: EditIntent): RepairRequest => ({
+    intent,
+    refused,
+    disposition: {
+      kind: "rejected",
+      reason: { code: "stakes-at-refusal-floor", detail: "removes 14 nodes" },
+      stakes: "critical",
+      reversible: true,
+      confidence: 0.9,
+    },
+  })
+
+  it("shows the model what was refused and why, on the same system prompt", async () => {
+    const { interpreter, intent, tree, client } = harness(INSERT_NOTE_REPLY)
+    const first = await interpreter.interpret(intent, tree)
+    if (!first.ok) throw new Error("expected a proposal")
+
+    await interpreter.repair(repairRequestFor(first.value, intent), tree)
+
+    const [initial, repair] = client.requests
+    expect(client.requests).toHaveLength(2)
+    expect(repair?.system).toBe(initial?.system)
+    expect(repair?.userMessage).toContain("it was refused")
+    expect(repair?.userMessage).toContain("removes 14 nodes")
+  })
+
+  it("produces a proposal on the same terms as a first interpretation", async () => {
+    const { interpreter, intent, tree } = harness(CONFIGURE_CARD_REPLY)
+    const first = await interpreter.interpret(intent, tree)
+    if (!first.ok) throw new Error("expected a proposal")
+
+    const repaired = await interpreter.repair(repairRequestFor(first.value, intent), tree)
+    if (!repaired.ok) throw new Error("expected a repaired proposal")
+
+    expect(repaired.value.intentId).toBe(intent.intentId)
+    expect(repaired.value.delta.operations[0]?.op).toBe("configure")
+    expect(repaired.value.provenance.confidence).toBe(0.71)
+  })
+
+  it("does not stamp repairOf itself — that is the runtime's to record", async () => {
+    const { interpreter, intent, tree } = harness(CONFIGURE_CARD_REPLY)
+    const first = await interpreter.interpret(intent, tree)
+    if (!first.ok) throw new Error("expected a proposal")
+
+    const repaired = await interpreter.repair(repairRequestFor(first.value, intent), tree)
+
+    expect(repaired.ok && repaired.value.repairOf).toBeUndefined()
+  })
+
+  it("can decline to repair, which is not a malformed answer", async () => {
+    const { interpreter, intent, tree } = harness(NOT_UNDERSTOOD_REPLY)
+    const proposal = buildProposal(sequentialIdFactory("r"), {
+      intentId: intent.intentId,
+      delta: {
+        deltaId: sequentialIdFactory("r").deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: [{ op: "remove", nodeId: nodeIdSchema.parse("n_4") }],
+      },
+    })
+
+    const repaired = await interpreter.repair(repairRequestFor(proposal, intent), tree)
+
+    expect(repaired.ok ? "" : repaired.error.code).toBe("not-understood")
   })
 })

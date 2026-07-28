@@ -3,7 +3,7 @@ import type { TreeDelta } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
 
 import type { ChangeAssessment } from "./assessment.js"
-import type { Disposition } from "./disposition.js"
+import type { Disposition, DispositionReason } from "./disposition.js"
 import type { EditIntent } from "./intent.js"
 import type { InterpretationError } from "./interpreter.js"
 import type { ProposedChange } from "./proposal.js"
@@ -25,6 +25,22 @@ export type RuntimeEvent =
   | { readonly type: "assessment-failed"; readonly proposal: ProposedChange; readonly error: TreeError }
   | { readonly type: "change-assessed"; readonly assessment: ChangeAssessment }
   | { readonly type: "disposition-decided"; readonly proposalId: ProposalId; readonly disposition: Disposition }
+  /**
+   * A refusal was handed back for one more attempt. Emitted *after* the
+   * refusal's own `disposition-decided`, never instead of it: a change that was
+   * refused and then repaired into something acceptable must leave both halves
+   * of that story in the record, or the pattern becomes invisible.
+   */
+  | {
+      readonly type: "repair-requested"
+      readonly refusedProposalId: ProposalId
+      readonly reason: DispositionReason
+    }
+  | {
+      readonly type: "repair-failed"
+      readonly refusedProposalId: ProposalId
+      readonly error: InterpretationError
+    }
   | {
       readonly type: "change-applied"
       readonly proposalId: ProposalId

@@ -1,6 +1,7 @@
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
 import { assertNever } from "../result.js"
+import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import type { LoomNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -51,3 +52,36 @@ const renderNode = (node: LoomNode, depth: number, scopeNodeId?: NodeId): readon
 
 export const renderTree = (tree: LoomTree, scopeNodeId?: NodeId): string =>
   [`tree ${tree.treeId} revision ${tree.revision}`, ...renderNode(tree.root, 0, scopeNodeId)].join("\n")
+
+const renderPropKeys = (label: string, keys: readonly string[]): string =>
+  keys.length === 0 ? "" : ` ${label} ${keys.join(", ")}`
+
+/**
+ * One operation per line, in the order they apply. Used to show a model the
+ * proposal the Gate refused, so a repair is a revision of something specific
+ * rather than a second guess at the same utterance.
+ */
+const renderOperation = (operation: TreeOperation, position: number): readonly string[] => {
+  const prefix = `${position + 1}. `
+
+  switch (operation.op) {
+    case "insert":
+      return [
+        `${prefix}insert into ${operation.parentId} at ${operation.index}:`,
+        ...renderNode(operation.node, 2),
+      ]
+    case "remove":
+      return [`${prefix}remove ${operation.nodeId} and its subtree`]
+    case "move":
+      return [`${prefix}move ${operation.nodeId} into ${operation.parentId} at ${operation.index}`]
+    case "configure":
+      return [
+        `${prefix}configure ${operation.nodeId}${renderPropKeys("set", Object.keys(operation.set).sort())}${renderPropKeys("unset", operation.unset)}`,
+      ]
+    default:
+      return assertNever(operation, "renderOperation")
+  }
+}
+
+export const renderDelta = (delta: TreeDelta): string =>
+  delta.operations.flatMap((operation, position) => renderOperation(operation, position)).join("\n")

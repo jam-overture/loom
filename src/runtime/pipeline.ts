@@ -9,7 +9,7 @@ import type { Disposition } from "./disposition.js"
 import type { Clock, EventSink, RuntimeEvent } from "./events.js"
 import { gate } from "./gate.js"
 import type { EditIntent } from "./intent.js"
-import type { ChangeInterpreter, InterpretationError } from "./interpreter.js"
+import type { ChangeInterpreter, ChangeRepairer, InterpretationError } from "./interpreter.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 
@@ -29,6 +29,13 @@ export type CompositionRuntime = {
   readonly events: EventSink
   readonly clock: Clock
   readonly idFactory: IdFactory
+  /**
+   * Optional, and absent by default. With no repairer, a refusal is terminal.
+   * With one, a refused proposal gets exactly one more attempt — see
+   * `attemptRepair`, where the "exactly one" is structural rather than a
+   * counter that could drift.
+   */
+  readonly repairer?: ChangeRepairer
 }
 
 export type CompositionOutcome =
@@ -115,22 +122,25 @@ const dispositionOutcome = (
   }
 }
 
-export const composeChange = async (
+/**
+ * Assess a proposal and put it to the Gate, narrating both. Shared by the first
+ * attempt and the repaired one so that a repair is judged by exactly the same
+ * function, against exactly the same policy, as the proposal it replaces.
+ */
+type Judgement =
+  | {
+      readonly kind: "judged"
+      readonly assessment: ChangeAssessment
+      readonly disposition: Disposition
+    }
+  | { readonly kind: "not-applicable"; readonly proposal: ProposedChange; readonly error: TreeError }
+
+const judgeProposal = (
   runtime: CompositionRuntime,
   tree: LoomTree,
-  intent: EditIntent
-): Promise<CompositionOutcome> => {
+  proposal: ProposedChange
+): Judgement => {
   const emit = emitter(runtime, tree)
-  emit({ type: "intent-received", intent })
-
-  const interpreted = await runtime.interpreter.interpret(intent, tree)
-  if (!interpreted.ok) {
-    emit({ type: "interpretation-failed", intent, error: interpreted.error })
-
-    return { kind: "not-interpreted", error: interpreted.error }
-  }
-
-  const proposal = interpreted.value
   emit({ type: "change-proposed", proposal })
 
   const assessed = assessChange(tree, proposal, runtime.policy, runtime.idFactory.deltaId())
@@ -146,7 +156,78 @@ export const composeChange = async (
   const disposition = gate(assessment, runtime.policy)
   emit({ type: "disposition-decided", proposalId: proposal.proposalId, disposition })
 
-  return dispositionOutcome(runtime, tree, assessment, disposition)
+  return { kind: "judged", assessment, disposition }
+}
+
+/**
+ * One attempt, and the "one" is structural: this function judges the repaired
+ * proposal and returns its outcome, so there is no path back into itself and no
+ * counter to get wrong. A repair that is refused again is terminal.
+ *
+ * The runtime — not the repairer — stamps `repairOf`, so a weaker second
+ * proposal cannot present itself as an unrelated first attempt. Both
+ * dispositions are already in the event stream by the time this returns, which
+ * is what makes "refused, then accepted a smaller version" a pattern telemetry
+ * can find rather than one it has to infer.
+ */
+const attemptRepair = async (
+  runtime: CompositionRuntime,
+  tree: LoomTree,
+  intent: EditIntent,
+  repairer: ChangeRepairer,
+  refusal: { readonly assessment: ChangeAssessment; readonly disposition: Disposition }
+): Promise<CompositionOutcome> => {
+  const emit = emitter(runtime, tree)
+  const refused = refusal.assessment.proposal
+  const { disposition } = refusal
+
+  emit({
+    type: "repair-requested",
+    refusedProposalId: refused.proposalId,
+    reason: disposition.reason,
+  })
+
+  const repaired = await repairer.repair({ intent, refused, disposition }, tree)
+  if (!repaired.ok) {
+    emit({ type: "repair-failed", refusedProposalId: refused.proposalId, error: repaired.error })
+
+    return { kind: "rejected", assessment: refusal.assessment, disposition }
+  }
+
+  const judged = judgeProposal(runtime, tree, {
+    ...repaired.value,
+    repairOf: refused.proposalId,
+  })
+
+  return judged.kind === "not-applicable"
+    ? judged
+    : dispositionOutcome(runtime, tree, judged.assessment, judged.disposition)
+}
+
+export const composeChange = async (
+  runtime: CompositionRuntime,
+  tree: LoomTree,
+  intent: EditIntent
+): Promise<CompositionOutcome> => {
+  const emit = emitter(runtime, tree)
+  emit({ type: "intent-received", intent })
+
+  const interpreted = await runtime.interpreter.interpret(intent, tree)
+  if (!interpreted.ok) {
+    emit({ type: "interpretation-failed", intent, error: interpreted.error })
+
+    return { kind: "not-interpreted", error: interpreted.error }
+  }
+
+  const judged = judgeProposal(runtime, tree, interpreted.value)
+  if (judged.kind === "not-applicable") return judged
+
+  const { repairer } = runtime
+  if (judged.disposition.kind === "rejected" && repairer) {
+    return attemptRepair(runtime, tree, intent, repairer, judged)
+  }
+
+  return dispositionOutcome(runtime, tree, judged.assessment, judged.disposition)
 }
 
 /**
