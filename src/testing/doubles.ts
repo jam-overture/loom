@@ -1,5 +1,11 @@
+import type {
+  ModelClient,
+  ModelClientError,
+  ModelCompletion,
+  ModelRequest,
+} from "../interpretation/client.js"
 import type { IdFactory, IntentId, TreeId } from "../ids.js"
-import type { Result } from "../result.js"
+import { ok, type Result } from "../result.js"
 import type { Clock, EventSink, RuntimeEventEnvelope } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
 import type { ChangeInterpreter, InterpretationError } from "../runtime/interpreter.js"
@@ -30,6 +36,32 @@ export const collectingEventSink = (): CollectingEventSink => {
     },
     envelopes,
     types: () => envelopes.map((envelope) => envelope.event.type),
+  }
+}
+
+export type RecordingModelClient = ModelClient & {
+  readonly requests: readonly ModelRequest[]
+}
+
+/**
+ * A model that answers from a script and remembers what it was asked, so the
+ * interpreter's request assembly and its reply handling can be tested
+ * separately, and neither needs a network or a key.
+ */
+export const scriptedModelClient = (
+  reply: string | Result<ModelCompletion, ModelClientError>,
+  servedBy = "claude-test-1"
+): RecordingModelClient => {
+  const requests: ModelRequest[] = []
+  const script = typeof reply === "string" ? ok({ text: reply, servedBy }) : reply
+
+  return {
+    complete: (request) => {
+      requests.push(request)
+
+      return Promise.resolve(script)
+    },
+    requests,
   }
 }
 

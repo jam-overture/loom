@@ -1,4 +1,5 @@
 export * from "./ids.js"
+export * from "./interpretation/index.js"
 export * from "./json.js"
 export * from "./primitive-type.js"
 export * from "./result.js"
