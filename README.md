@@ -16,8 +16,8 @@ pure function, attributable in telemetry, and reversible.
 
 ## Build order
 
-1. **Tree schema** — the AST, the NodeId scheme, `TreeDelta`. ← current
-2. **Composition Runtime** — `EditIntent → ProposedChange → Gate → Disposition → Apply`
+1. **Tree schema** — the AST, the NodeId scheme, `TreeDelta`
+2. **Composition Runtime** — `EditIntent → ProposedChange → Gate → Disposition → Apply` ← current
 3. **Adaptive Renderer** — edge/RSC resolver, tree → React, per request
 4. **Framework SDK** — primitive registration contract, CLI scaffolding
 5. **Portal** — a thin UI over the persisted tree
@@ -32,16 +32,28 @@ src/
 ├── json.ts            # The JSON value space every boundary is restricted to
 ├── primitive-type.ts  # Primitive type and slot name identifiers
 ├── result.ts          # Result<T, E> — nothing throws across a seam
-├── testing/           # Deterministic fixtures
-└── tree/
-    ├── node.ts          # The discriminated-union AST: element | text | slot
-    ├── tree.ts          # The LoomTree document, revisions, boundary parsing
-    ├── navigation.ts    # Read-only traversal
-    ├── configuration.ts # The settable surface of each node kind
-    ├── mutation.ts      # Immutable structural edits
-    ├── delta.ts         # TreeDelta and its four operations
-    ├── apply.ts         # Pure, atomic delta application
-    └── builders.ts      # Construction helpers for trusted callers
+├── testing/           # Deterministic fixtures and test doubles
+├── tree/
+│   ├── node.ts          # The discriminated-union AST: element | text | slot
+│   ├── tree.ts          # The LoomTree document, revisions, boundary parsing
+│   ├── navigation.ts    # Read-only traversal
+│   ├── configuration.ts # The settable surface of each node kind
+│   ├── mutation.ts      # Immutable structural edits
+│   ├── delta.ts         # TreeDelta and its four operations
+│   ├── apply.ts         # Pure, atomic delta application
+│   ├── inverse.ts       # The delta that undoes a delta
+│   └── builders.ts      # Construction helpers for trusted callers
+└── runtime/
+    ├── intent.ts        # EditIntent — what someone wants, before interpretation
+    ├── proposal.ts      # ProposedChange + Provenance — what came back, and from where
+    ├── interpreter.ts   # The AI seam; the only non-deterministic step
+    ├── analysis.ts      # Pure facts about what a delta does
+    ├── stakes.ts        # How much damage, as named factors
+    ├── reversibility.ts # Whether it can be taken back, via the inverse
+    ├── policy.ts        # GatePolicy — the knobs, host and structural
+    ├── gate.ts          # The pure decision function
+    ├── events.ts        # RuntimeEvent, EventSink, Clock
+    └── pipeline.ts      # composeChange / confirmChange
 ```
 
 ## Commands
