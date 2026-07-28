@@ -6,7 +6,8 @@
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./anthropic": "./src/interpretation/anthropic.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -18,7 +19,16 @@
   "dependencies": {
     "zod": "^3.24.1"
   },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": "^0.115.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@types/node": "^26.1.2",
     "@vitest/coverage-v8": "^3.2.7",
     "typescript": "^5.7.3",
