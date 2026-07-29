@@ -109,6 +109,13 @@ const interpreter = modelInterpreter({
 exercises the real API and skips when the key is absent, so `pnpm verify` is
 green offline.
 
+That test reads **`LOOM_ANTHROPIC_API_KEY` first**, falling back to
+`ANTHROPIC_API_KEY`. The scheduled agent that develops this repo authenticates
+with `ANTHROPIC_API_KEY` itself and strips it from the environment of the
+processes it spawns, so a key set under the standard name never reaches Vitest
+there. Set `LOOM_ANTHROPIC_API_KEY` in that environment; the standard name works
+everywhere else.
+
 ## Optional: the React renderer
 
 The renderer is a separate entry point too, and `react` is an optional peer

@@ -20,14 +20,28 @@ import { modelInterpreter } from "./interpreter.js"
  * model is one a real model can actually satisfy, which no fixture can tell us.
  */
 
-const hasCredentials = Boolean(process.env["ANTHROPIC_API_KEY"])
+/**
+ * Two names, because the standard one is reserved where this suite runs.
+ *
+ * The scheduled agent that runs these sessions strips `ANTHROPIC_API_KEY` from
+ * the environment of every process it spawns — it is the credential the agent
+ * itself authenticates with, so it does not hand it to subprocesses. A key set
+ * under that name therefore reaches the session and never reaches Vitest, which
+ * is why this test skipped for three consecutive runs while the variable was
+ * correctly configured.
+ *
+ * `LOOM_ANTHROPIC_API_KEY` is not reserved by anything and passes through, so it
+ * is preferred here. The standard name is still honoured, for every environment
+ * that does not reserve it.
+ */
+const liveApiKey = process.env["LOOM_ANTHROPIC_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"]
 
-describe.skipIf(!hasCredentials)("modelInterpreter against the live API", () => {
+describe.skipIf(!liveApiKey)("modelInterpreter against the live API", () => {
   it(
     "turns a plain instruction into a delta that applies",
     async () => {
       const { tree } = sampleTree()
-      const anthropic = new Anthropic()
+      const anthropic = new Anthropic({ apiKey: liveApiKey })
       const interpreter = modelInterpreter({
         client: anthropicModelClient(anthropic.messages),
         idFactory: randomIdFactory,
