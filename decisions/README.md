@@ -47,3 +47,6 @@ leave the existing record standing until someone decides.
 | [0005](0005-model-access-is-an-optional-adapter.md)          | Model access is a narrow seam with an optional adapter        | Accepted | §2      |
 | [0006](0006-one-repair-attempt-and-both-halves-recorded.md)  | A refused proposal gets exactly one repair attempt            | Accepted | §2      |
 | [0007](0007-confidence-is-self-graded-and-must-be-calibrated.md) | Confidence is self-graded, trusted on purpose, and must be calibrated | Accepted | §2 → §6 |
+| [0008](0008-the-renderer-is-a-total-pure-projection.md)      | The renderer is a total, pure projection of the tree           | Accepted | §3      |
+| [0009](0009-primitives-receive-props-in-a-bag.md)            | Primitives receive AI-authored props in a bag, never spread    | Accepted | §3 → §4 |
+| [0010](0010-edit-mode-decorates-it-does-not-restructure.md)  | Edit mode decorates; it never invents DOM                      | Accepted | §3 → §5 |

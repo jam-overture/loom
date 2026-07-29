@@ -18,8 +18,8 @@ pure function, attributable in telemetry, and reversible.
 
 1. **Tree schema** — the AST, the NodeId scheme, `TreeDelta`
 2. **Composition Runtime** — `EditIntent → ProposedChange → Gate → Disposition → Apply`
-3. **Adaptive Renderer** — edge/RSC resolver, tree → React, per request ← current
-4. **Framework SDK** — primitive registration contract, CLI scaffolding
+3. **Adaptive Renderer** — edge/RSC resolver, tree → React, per request
+4. **Framework SDK** — primitive registration contract, CLI scaffolding ← current
 5. **Portal** — a thin UI over the persisted tree
 6. **Telemetry** — proposal, provenance, disposition, and outcome, captured from day one
 7. **Marketplace** — last
@@ -54,15 +54,21 @@ src/
 │   ├── gate.ts          # The pure decision function
 │   ├── events.ts        # RuntimeEvent, EventSink, Clock
 │   └── pipeline.ts      # composeChange / confirmChange
-└── interpretation/      # The model-backed ChangeInterpreter
-    ├── client.ts        # ModelClient — the whole network boundary
-    ├── draft.ts         # What a model may say: the AST, minus identity
-    ├── schema.ts        # The JSON Schema its reply is constrained to
-    ├── render.ts        # The tree as an outline the model can address
-    ├── prompt.ts        # Prompt assembly and the provenance hash
-    ├── materialize.ts   # Draft → TreeDelta, minting every new id
-    ├── interpreter.ts   # The ChangeInterpreter itself
-    └── anthropic.ts     # Vendor adapter — a separate entry point
+├── interpretation/      # The model-backed ChangeInterpreter
+│   ├── client.ts        # ModelClient — the whole network boundary
+│   ├── draft.ts         # What a model may say: the AST, minus identity
+│   ├── schema.ts        # The JSON Schema its reply is constrained to
+│   ├── render.ts        # The tree as an outline the model can address
+│   ├── prompt.ts        # Prompt assembly and the provenance hash
+│   ├── materialize.ts   # Draft → TreeDelta, minting every new id
+│   ├── interpreter.ts   # The ChangeInterpreter itself
+│   └── anthropic.ts     # Vendor adapter — a separate entry point
+└── render/              # The adaptive renderer — a separate entry point
+    ├── primitive.ts     # What a primitive receives; the resolver seam
+    ├── editable.ts      # Edit-mode decoration, as attributes
+    ├── diagnostics.ts   # What rendering could not honour
+    ├── render.ts        # The tree, projected into React
+    └── request.ts       # Per-request resolution: load, validate, render
 ```
 
 ## Decisions
@@ -102,6 +108,30 @@ const interpreter = modelInterpreter({
 `ANTHROPIC_API_KEY` is read from the environment by the SDK. One live smoke test
 exercises the real API and skips when the key is absent, so `pnpm verify` is
 green offline.
+
+## Optional: the React renderer
+
+The renderer is a separate entry point too, and `react` is an optional peer
+dependency, so a host that only composes and stores trees never installs it:
+
+```bash
+pnpm add react   # optional peer dependency
+```
+
+```ts
+import { renderRequest, staticPrimitiveResolver } from "@loom/runtime/react"
+
+const rendered = await renderRequest(
+  { treeId, editMode: false },
+  { source, resolver: staticPrimitiveResolver({ "loom.page": Page, "loom.card": Card }) }
+)
+```
+
+A primitive receives three props — `loom` (its node id, type, and edit-mode
+decoration), `props` (the node's props, unspread), and `children`. Rendering is
+pure and total: it has no hooks and no IO, so it runs per request at the edge or
+in a Server Component, and anything it could not render comes back in
+`diagnostics` rather than as a thrown error.
 
 ## Daily reports
 
