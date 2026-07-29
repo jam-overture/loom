@@ -4,3 +4,9 @@ coverage/
 .DS_Store
 *.tsbuildinfo
 .claude/settings.local.json
+
+# Never commit credentials. The interpreter reads ANTHROPIC_API_KEY from the
+# environment; in the cloud routine it comes from the environment config.
+.env
+.env.*
+!.env.example
