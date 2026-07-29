@@ -7,6 +7,7 @@ import type { LoomTree } from "../tree/tree.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { editableAttributes } from "./editable.js"
 import type { LoomPrimitive, LoomRenderContext, PrimitiveResolver } from "./primitive.js"
+import type { PropsValidator } from "./props.js"
 
 /**
  * The tree, projected into React.
@@ -32,6 +33,12 @@ export type SlotContent = Readonly<Record<string, ReactNode>>
 
 export type RenderOptions = {
   readonly resolver: PrimitiveResolver
+  /**
+   * Absent means props are not checked against declared schemas. A registry
+   * built by §4's SDK satisfies both this and `resolver`, so wiring the same
+   * object into both is the ordinary case.
+   */
+  readonly validator?: PropsValidator
   /** Off by default: decoration is opt-in per request, never ambient. */
   readonly editMode?: boolean
   readonly slots?: SlotContent
@@ -44,6 +51,7 @@ export type RenderOutput = {
 
 type RenderContext = {
   readonly resolver: PrimitiveResolver
+  readonly validator: PropsValidator | undefined
   readonly editMode: boolean
   readonly slots: SlotContent
   readonly tree: LoomTree
@@ -77,6 +85,30 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
   if (!primitive) {
     context.collect({ code: "unknown-primitive", nodeId: node.id, type: node.type })
     return null
+  }
+
+  /**
+   * Props that do not satisfy the primitive's declared schema omit the node the
+   * same way an unknown primitive does. Rendering it anyway would hand a
+   * primitive a bag its own types say cannot occur, which pushes an unchecked
+   * cast into every primitive author's lap; refusing one node and reporting why
+   * keeps the failure where the mismatch is.
+   */
+  const verdict = context.validator?.validateProps(node.type, node.props)
+
+  if (verdict?.outcome === "invalid") {
+    context.collect({
+      code: "invalid-props",
+      nodeId: node.id,
+      type: node.type,
+      issues: verdict.issues,
+    })
+
+    return null
+  }
+
+  if (verdict?.outcome === "undeclared") {
+    context.collect({ code: "props-undeclared", nodeId: node.id, type: node.type })
   }
 
   return createElement(primitive, {
@@ -119,6 +151,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
 
   const element = renderNode(tree.root, {
     resolver: options.resolver,
+    validator: options.validator,
     editMode: options.editMode ?? false,
     slots: options.slots ?? {},
     tree,

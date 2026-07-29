@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, type NodeId } from "../ids.js"
+import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, type NodeId } from "../ids.js"
+import { catalogueOf } from "../sdk/catalogue.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
+import { testRegistry } from "../testing/definitions.js"
 import { buildIntent, buildProposal } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 
@@ -34,6 +36,66 @@ describe("buildUserMessage", () => {
       `Confine the change to the subtree rooted at ${ids.card}`
     )
     expect(buildUserMessage(intentFor("make this quieter"), tree)).not.toContain("Confine the change")
+  })
+})
+
+describe("the catalogue block", () => {
+  const catalogue = catalogueOf(testRegistry())
+
+  it("is absent when the host wired no catalogue", () => {
+    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree)
+
+    expect(message).not.toContain("registered")
+    expect(message.startsWith("Current tree:")).toBe(true)
+  })
+
+  it("leads the message, ahead of the tree and the request", () => {
+    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree, catalogue)
+
+    expect(message.indexOf("Primitives this deployment has registered")).toBeLessThan(
+      message.indexOf("Current tree:")
+    )
+    expect(message).toContain("- loom.card — A bounded block of related content. props: elevation?, variant")
+  })
+
+  it("tells the model that a type outside the list will not render", () => {
+    const message = buildUserMessage(intentFor("add a buy button"), sampleTree().tree, catalogue)
+
+    expect(message).toContain("Insert only primitives from that list")
+  })
+
+  /** An empty registry is not a list of nothing; it is nothing to say. */
+  it("is absent for an empty catalogue rather than an empty heading", () => {
+    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree, [])
+
+    expect(message.startsWith("Current tree:")).toBe(true)
+  })
+
+  it("reaches a repair, so a revision is bound by the same list", () => {
+    const { tree } = sampleTree()
+    const intent = intentFor("delete the card")
+
+    const request: RepairRequest = {
+      intent,
+      refused: buildProposal(sequentialIdFactory("r"), {
+        intentId: intent.intentId,
+        delta: {
+          deltaId: deltaIdSchema.parse("d_r1"),
+          treeId: tree.treeId,
+          baseRevision: tree.revision,
+          operations: [{ op: "remove", nodeId: nodeIdSchema.parse("n_4") }],
+        },
+      }),
+      disposition: {
+        kind: "rejected",
+        reason: { code: "stakes-at-refusal-floor", detail: "destroys a protected primitive" },
+        stakes: "critical",
+        reversible: true,
+        confidence: 0.9,
+      },
+    }
+
+    expect(buildRepairMessage(request, tree, catalogue)).toContain("Primitives this deployment has registered")
   })
 })
 

@@ -50,3 +50,6 @@ leave the existing record standing until someone decides.
 | [0008](0008-the-renderer-is-a-total-pure-projection.md)      | The renderer is a total, pure projection of the tree           | Accepted | §3      |
 | [0009](0009-primitives-receive-props-in-a-bag.md)            | Primitives receive AI-authored props in a bag, never spread    | Accepted | §3 → §4 |
 | [0010](0010-edit-mode-decorates-it-does-not-restructure.md)  | Edit mode decorates; it never invents DOM                      | Accepted | §3 → §5 |
+| [0011](0011-a-primitive-declares-its-props-and-the-seam-enforces-them.md) | A primitive declares its props, and the render seam enforces them | Accepted | §4      |
+| [0012](0012-conformance-is-probed-and-reported-not-enforced.md) | Conformance is probed and reported, never enforced by registration | Accepted | §4      |
+| [0013](0013-the-registry-is-what-the-model-is-told-it-may-build.md) | The registry is what the model is told it may build              | Accepted | §4 → §2 |
