@@ -77,14 +77,19 @@ src/
 │   ├── conformance.ts   # Does a primitive spread loom.editable?
 │   ├── audit.ts         # The conformance check a host runs
 │   └── catalogue.ts     # The registry, projected for consumers outside it
-└── cli/                 # Scaffolding — a separate entry point
-    ├── args.ts          # The grammar: two commands, one option
-    ├── templates.ts     # What gets written, as pure functions of a name
-    ├── plan.ts          # What a command would write, decided before writing
-    ├── filesystem.ts    # The one impure seam
-    ├── run.ts           # parse → plan → write
-    ├── main.ts          # The executable entry point
-    └── scaffold-fixture/ # `loom init`'s output, committed so it is typechecked
+├── cli/                 # Scaffolding — a separate entry point
+│   ├── args.ts          # The grammar: two commands, one option
+│   ├── templates.ts     # What gets written, as pure functions of a name
+│   ├── plan.ts          # What a command would write, decided before writing
+│   ├── filesystem.ts    # The one impure seam
+│   ├── run.ts           # parse → plan → write
+│   ├── main.ts          # The executable entry point
+│   └── scaffold-fixture/ # `loom init`'s output, committed so it is typechecked
+└── store/               # Persistence — a separate entry point
+    ├── store.ts         # TreeStore: the contract, and what it may refuse
+    ├── memory.ts        # The reference implementation: log plus snapshot
+    ├── replay.ts        # Folding the log, and auditing the snapshot against it
+    └── source.ts        # The store as the renderer's TreeSource
 ```
 
 ## Decisions

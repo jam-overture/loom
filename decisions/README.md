@@ -55,3 +55,6 @@ leave the existing record standing until someone decides.
 | [0013](0013-the-registry-is-what-the-model-is-told-it-may-build.md) | The registry is what the model is told it may build              | Accepted | §4 → §2 |
 | [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md)   | The reply schema must fit a compiled-grammar budget            | Accepted — supersedes 0004 | §2 |
 | [0015](0015-the-registry-is-generated-and-a-filename-is-a-type.md) | The registry is generated from the directory, and a module's name is its type | Accepted | §4 |
+| [0016](0016-the-log-is-the-truth-and-the-snapshot-is-a-view.md) | The log is the truth and the snapshot is a materialised view | Accepted | §5 |
+| [0017](0017-every-write-goes-through-one-server-side-path.md) | Every write goes through one server-side path | Accepted | §5 |
+| [0018](0018-the-portal-is-a-consumer-not-an-insider.md) | The portal is a consumer of the framework, not an insider | Accepted | §5 |

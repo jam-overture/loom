@@ -10,7 +10,8 @@
     "./anthropic": "./src/interpretation/anthropic.ts",
     "./react": "./src/render/index.ts",
     "./sdk": "./src/sdk/index.ts",
-    "./cli": "./src/cli/index.ts"
+    "./cli": "./src/cli/index.ts",
+    "./store": "./src/store/index.ts"
   },
   "bin": {
     "loom": "./src/cli/main.ts"
