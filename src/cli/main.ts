@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 import { nodeFileSystem } from "./filesystem.js"
 import { describeCliError, runCli } from "./run.js"
 
@@ -7,6 +8,12 @@ import { describeCliError, runCli } from "./run.js"
  * Everything it does is decide an exit code and choose a stream: usage and
  * progress go to stdout, failures to stderr. Keeping that here is what lets the
  * rest of the CLI be ordinary tested functions.
+ *
+ * The shebang runs it through `tsx`, because this package has no build step and
+ * Node's own type stripping does not resolve the `.js` import specifiers the
+ * repo uses to their `.ts` sources. That makes `tsx` a real dependency of the
+ * executable rather than a convenience — when a build step exists, `bin` should
+ * point at the emitted entry and this line should go.
  */
 
 const main = async (): Promise<number> => {

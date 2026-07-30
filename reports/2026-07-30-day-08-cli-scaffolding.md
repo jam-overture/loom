@@ -158,12 +158,13 @@ decisions index, and one comment in `schema.ts`.
 ## Test coverage / status
 
 ```
-Test files  46 passed
-Tests       423 passed | 0 skipped
+Test files  47 passed
+Tests       426 passed | 0 skipped
 ```
 
-`pnpm verify` green, live smoke test included and passing. **45 new tests**
-across five files, plus the two generated tests that now run in our suite.
+`pnpm verify` green, live smoke test included and passing. **48 new tests** across
+six files — 45 for the CLI's logic, three for the executable itself (added in the
+addendum above) — plus the two generated tests that now run in our suite.
 
 What the new tests pin down:
 
@@ -188,9 +189,52 @@ What the new tests pin down:
 
 ---
 
+## Addendum — the executable, wired
+
+Written after the rest of this report. You answered the packaging question with
+**"Number 2"** while #12 was open, and merged #12 before the change landed, so the
+wiring went out as a follow-up (`day-08-loom-binary`) rather than an update to a
+finished PR.
+
+`bin` now points at `src/cli/main.ts` with a `#!/usr/bin/env tsx` shebang, and
+`tsx` is a dev dependency. `pnpm loom …` works, and so does the bin. Verified by
+running it, not by reasoning about it:
+
+```
+$ pnpm loom init --dir <dir>
+wrote <dir>/primitives/loom.page.ts
+wrote <dir>/primitives/registry.ts
+wrote <dir>/primitives/registry.test.ts
+
+$ pnpm loom add primitive commerce.product-card --dir <dir>
+Regenerated <dir>/primitives/registry.ts with 2 primitives.
+
+$ loom init --dir <dir>                       # exit 1
+<dir>/primitives/loom.page.ts already exists; nothing was written
+$ loom add primitive Loom.Card --dir <dir>    # exit 1
+"Loom.Card" is not a valid primitive type — expected dot-namespaced kebab-case…
+$ loom add primitive registry --dir <dir>     # exit 1
+"registry" is reserved: its module would overwrite the generated registry
+```
+
+**A new test spawns the real executable** (`main.smoke.test.ts`): usage exits 0,
+`init` then `add primitive` produce four files in a real temporary directory, and a
+second `init` exits 1 with the message on stderr and nothing on stdout. It is the
+only test here that spawns a process, and it exists because the gap it covers was
+invisible to every unit test — `runCli` was correct the whole time and `loom` did
+not run.
+
+The comment in `main.ts` records that `tsx` is load-bearing for the executable
+rather than incidental, and that both it and the shebang should go when a build
+step arrives.
+
 ## Open questions for the next session
 
-1. **The `loom` executable needs a build step.** Node's type stripping will not
+1. ~~**The `loom` executable needs a build step.**~~ **Answered and done** — see
+   the addendum above. What remains is the larger packaging question, deferred
+   deliberately: a compile step is what a *published* package needs, and it
+   changes what every entry point resolves to, so it deserves its own unit of work
+   rather than being smuggled in with the CLI. Original note kept for the trail: Node's type stripping will not
    resolve this repo's `.js` import specifiers to `.ts` sources — verified, not
    assumed — so there is no working `loom` binary today. The scaffolding logic is
    complete and tested as library code (`runCli` from `@loom/runtime/cli`, with

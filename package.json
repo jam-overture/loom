@@ -12,7 +12,11 @@
     "./sdk": "./src/sdk/index.ts",
     "./cli": "./src/cli/index.ts"
   },
+  "bin": {
+    "loom": "./src/cli/main.ts"
+  },
   "scripts": {
+    "loom": "tsx src/cli/main.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -42,6 +46,7 @@
     "@vitest/coverage-v8": "^3.2.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "tsx": "^4.23.1",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
