@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest"
 
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, treeIdSchema } from "../ids.js"
+import { primitiveTypeSchema } from "../primitive-type.js"
+import { catalogueOf } from "../sdk/catalogue.js"
+import { testRegistry } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { createTree } from "../tree/tree.js"
 
-import { renderDelta, renderTree } from "./render.js"
+import { renderCatalogue, renderDelta, renderTree } from "./render.js"
 
 describe("renderTree", () => {
   it("renders the whole tree as an indented outline with ids first", () => {
@@ -124,5 +127,44 @@ describe("renderDelta", () => {
     )
 
     expect(rendered).toBe("1. configure n_4 unset variant")
+  })
+})
+
+describe("renderCatalogue", () => {
+  const catalogue = catalogueOf(testRegistry())
+
+  it("gives one line per primitive, with its description", () => {
+    const rendered = renderCatalogue(catalogue)
+
+    expect(rendered.split("\n")).toHaveLength(catalogue.length)
+    expect(rendered).toContain("- loom.card — A bounded block of related content.")
+  })
+
+  it("marks an optional prop with a trailing question mark", () => {
+    expect(renderCatalogue(catalogue)).toContain("props: subtitle?, title")
+  })
+
+  it("names the slots a primitive projects, and says nothing when it has none", () => {
+    const rendered = renderCatalogue(catalogue).split("\n")
+
+    expect(rendered[0]).toContain("slots: main")
+    expect(rendered[2]).not.toContain("slots")
+  })
+
+  it("says a primitive declares no props, rather than leaving it unsaid", () => {
+    expect(renderCatalogue(catalogue)).toContain("- loom.header — The banner at the top of a page. props: none")
+  })
+
+  it("distinguishes props it cannot enumerate from props that do not exist", () => {
+    const rendered = renderCatalogue([
+      {
+        type: primitiveTypeSchema.parse("loom.either"),
+        description: "one shape or another",
+        props: undefined,
+        slots: [],
+      },
+    ])
+
+    expect(rendered).toContain("props: not declared")
   })
 })

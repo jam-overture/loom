@@ -1,8 +1,9 @@
+import type { PrimitiveCatalogue } from "../catalogue.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { renderDelta, renderTree } from "./render.js"
+import { renderCatalogue, renderDelta, renderTree } from "./render.js"
 
 /**
  * Prompt assembly, kept pure so the exact bytes sent to a model are a value a
@@ -44,19 +45,48 @@ Rules you must follow:
 
 Sometimes you will be shown a proposal that was refused, and the reason. You get one revision, and the rules above still apply. A revision must be a more conservative way to satisfy the same request — smaller in what it destroys, or narrower in what it touches. It must not be the same change split into a smaller piece so that the remainder can be asked for again: if the request cannot be satisfied within the stated objection, say "not-understood" and explain what would have to change. Reproposing what was already refused, or working around the objection rather than respecting it, is the one thing a revision must never do.`
 
-export const buildUserMessage = (intent: EditIntent, tree: LoomTree): string => {
+/**
+ * The catalogue block, and why it leads the message rather than following the
+ * tree: it is the most stable thing here — a property of the deployment, not of
+ * the request — so it sits where a cache can hold it across intents.
+ *
+ * Absent when the host wired no catalogue, in which case the model is told
+ * nothing about what exists beyond what the tree already shows. That is the
+ * honest fallback: inventing a list would be worse than admitting there isn't
+ * one, and the closing instruction below only applies when a list was given.
+ */
+const catalogueBlock = (catalogue: PrimitiveCatalogue | undefined): string =>
+  catalogue === undefined || catalogue.length === 0
+    ? ""
+    : `Primitives this deployment has registered. A prop marked with "?" is optional; every other listed prop is required.
+
+${renderCatalogue(catalogue)}
+
+Insert only primitives from that list — a type that is not on it has nothing to render it, so the node would be dropped. Set only props a primitive declares, and put children in the slots it names.
+
+`
+
+export const buildUserMessage = (
+  intent: EditIntent,
+  tree: LoomTree,
+  catalogue?: PrimitiveCatalogue
+): string => {
   const scopeLine = intent.scopeNodeId
     ? `\nConfine the change to the subtree rooted at ${intent.scopeNodeId}, marked "<- scope" above.`
     : ""
 
-  return `Current tree:
+  return `${catalogueBlock(catalogue)}Current tree:
 
 ${renderTree(tree, intent.scopeNodeId)}
 
 Request (${intent.origin}): ${intent.utterance}${scopeLine}`
 }
 
-export const buildRepairMessage = (request: RepairRequest, tree: LoomTree): string => `${buildUserMessage(request.intent, tree)}
+export const buildRepairMessage = (
+  request: RepairRequest,
+  tree: LoomTree,
+  catalogue?: PrimitiveCatalogue
+): string => `${buildUserMessage(request.intent, tree, catalogue)}
 
 You proposed this, and it was refused:
 

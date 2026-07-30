@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from "react"
 
 import type { NodeId } from "../ids.js"
-import type { JsonObject } from "../json.js"
+import type { JsonObject, JsonObjectView } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 import type { EditableAttributes } from "./editable.js"
@@ -29,15 +29,25 @@ export type LoomRenderContext = {
   readonly editable?: EditableAttributes
 }
 
-export type LoomPrimitiveProps = {
+/**
+ * `TProps` is what a primitive's declared schema accepts. It defaults to the
+ * whole JSON object space, so a primitive that declares nothing — or a host
+ * that registers without §4's SDK — is still a `LoomPrimitive`. A narrower
+ * `TProps` is a claim about what the bag contains, and the only thing that
+ * makes the claim true is the render seam validating against the same schema
+ * the type came from; that pairing is the registry's job (see `sdk/registry.ts`).
+ */
+export type LoomPrimitiveProps<TProps extends JsonObjectView = JsonObject> = {
   readonly loom: LoomRenderContext
   /** The node's props, exactly as they appear in the tree. */
-  readonly props: JsonObject
+  readonly props: TProps
   /** Rendered children in tree order, or null when the node has none. */
   readonly children: ReactNode
 }
 
-export type LoomPrimitive = ComponentType<LoomPrimitiveProps>
+export type LoomPrimitive<TProps extends JsonObjectView = JsonObject> = ComponentType<
+  LoomPrimitiveProps<TProps>
+>
 
 /**
  * The renderer's whole dependency on the registry: one lookup. §4 owns

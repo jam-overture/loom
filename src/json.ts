@@ -20,4 +20,16 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
 
 export type JsonObject = { [key: string]: JsonValue }
 
+/**
+ * A narrower view of a `JsonObject` — what a schema declares it needs, rather
+ * than everything a stored object may hold. Optional members are allowed to be
+ * `undefined` because an absent key in a `JsonObject` reads that way; the value
+ * space itself is unchanged, since `undefined` never survives serialisation and
+ * so can never be a stored prop.
+ *
+ * Every `JsonObject` is a `JsonObjectView`; the reverse is what validation at a
+ * boundary establishes.
+ */
+export type JsonObjectView = { [key: string]: JsonValue | undefined }
+
 export const jsonObjectSchema: z.ZodType<JsonObject> = z.record(z.string(), jsonValueSchema)

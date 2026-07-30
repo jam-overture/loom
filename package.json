@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./anthropic": "./src/interpretation/anthropic.ts",
-    "./react": "./src/render/index.ts"
+    "./react": "./src/render/index.ts",
+    "./sdk": "./src/sdk/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -5,6 +5,7 @@ import type { TreeError } from "../tree/errors.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
 
 import type { PrimitiveResolver } from "./primitive.js"
+import type { PropsValidator } from "./props.js"
 import { renderLoomTree, type RenderOutput, type SlotContent } from "./render.js"
 
 /**
@@ -41,6 +42,7 @@ export interface TreeSource {
 export type RenderDependencies = {
   readonly source: TreeSource
   readonly resolver: PrimitiveResolver
+  readonly validator?: PropsValidator
   readonly slots?: SlotContent
 }
 
@@ -82,6 +84,7 @@ export const renderRequest = async (
   const rendered = renderLoomTree(tree, {
     resolver: dependencies.resolver,
     editMode: request.editMode,
+    ...(dependencies.validator ? { validator: dependencies.validator } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
   })
 

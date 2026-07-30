@@ -1,5 +1,6 @@
 export * from "./diagnostics.js"
 export * from "./editable.js"
 export * from "./primitive.js"
+export * from "./props.js"
 export * from "./render.js"
 export * from "./request.js"
