@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 700" width="980" height="700" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="700" fill="#ffffff"/>
+
+  <text x="32" y="40" font-size="20" font-weight="bold" fill="#111827">§4 — the primitive registration contract</text>
+  <text x="32" y="62" font-size="13" fill="#4b5563">One declaration; two seams the renderer depends on; one projection everything else reads.</text>
+
+  <!-- author's declaration -->
+  <rect x="32" y="92" width="248" height="176" rx="8" fill="#f9fafb" stroke="#9ca3af"/>
+  <text x="48" y="116" font-size="13" font-weight="bold" fill="#111827">definePrimitive</text>
+  <text x="48" y="134" font-size="11" fill="#6b7280">what an author declares</text>
+  <text x="48" y="158" font-size="11.5" font-family="monospace" fill="#111827">type        loom.card</text>
+  <text x="48" y="176" font-size="11.5" font-family="monospace" fill="#111827">description "a block of…"</text>
+  <text x="48" y="194" font-size="11.5" font-family="monospace" fill="#111827">props       z.object({…})</text>
+  <text x="48" y="212" font-size="11.5" font-family="monospace" fill="#111827">slots       ["main"]</text>
+  <text x="48" y="230" font-size="11.5" font-family="monospace" fill="#111827">component   &lt;Card/&gt;</text>
+  <text x="48" y="254" font-size="10.5" fill="#6b7280">prop type erased here, once</text>
+
+  <path d="M280 180 L326 180" stroke="#374151" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- registry -->
+  <rect x="328" y="92" width="252" height="176" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="344" y="116" font-size="13" font-weight="bold" fill="#111827">createPrimitiveRegistry</text>
+  <text x="344" y="134" font-size="11" fill="#4b5563">pure — never calls a primitive</text>
+  <text x="344" y="156" font-size="11" fill="#4b5563">refuses: bad identifier · bad slot</text>
+  <text x="344" y="172" font-size="11" fill="#4b5563">name · duplicate type</text>
+  <rect x="344" y="186" width="220" height="34" rx="5" fill="#ffffff" stroke="#6366f1"/>
+  <text x="354" y="207" font-size="11.5" font-family="monospace" fill="#3730a3">PrimitiveResolver.resolve</text>
+  <rect x="344" y="224" width="220" height="34" rx="5" fill="#ffffff" stroke="#6366f1"/>
+  <text x="354" y="245" font-size="11.5" font-family="monospace" fill="#3730a3">PropsValidator.validateProps</text>
+
+  <text x="592" y="132" font-size="11" fill="#4b5563">Two interfaces, one object.</text>
+  <text x="592" y="148" font-size="11" fill="#4b5563">Separate, so a host that wires</text>
+  <text x="592" y="164" font-size="11" fill="#4b5563">no validator plainly does not</text>
+  <text x="592" y="180" font-size="11" fill="#4b5563">validate — and a narrowed prop</text>
+  <text x="592" y="196" font-size="11" fill="#4b5563">type is only sound when the</text>
+  <text x="592" y="212" font-size="11" fill="#4b5563">object that resolved the</text>
+  <text x="592" y="228" font-size="11" fill="#4b5563">component vetted the props.</text>
+
+  <!-- the ladder -->
+  <text x="32" y="316" font-size="14" font-weight="bold" fill="#111827">What the renderer does with one element node</text>
+  <line x1="32" y1="326" x2="948" y2="326" stroke="#e5e7eb"/>
+
+  <rect x="32" y="342" width="150" height="52" rx="6" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="48" y="366" font-size="11.5" font-family="monospace" fill="#111827">element node</text>
+  <text x="48" y="383" font-size="10.5" fill="#6b7280">type + JSON props</text>
+
+  <path d="M182 368 L228 368" stroke="#374151" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="230" y="342" width="160" height="52" rx="6" fill="#ffffff" stroke="#6366f1"/>
+  <text x="246" y="366" font-size="11.5" font-family="monospace" fill="#3730a3">resolve(type)</text>
+  <text x="246" y="383" font-size="10.5" fill="#6b7280">is it registered?</text>
+
+  <path d="M310 394 L310 434" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <rect x="196" y="436" width="228" height="46" rx="6" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="210" y="456" font-size="11" font-weight="bold" fill="#7f1d1d">unknown-primitive</text>
+  <text x="210" y="472" font-size="10.5" fill="#7f1d1d">node and subtree omitted · §3</text>
+
+  <path d="M390 368 L436 368" stroke="#374151" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="438" y="342" width="176" height="52" rx="6" fill="#ffffff" stroke="#6366f1"/>
+  <text x="454" y="366" font-size="11.5" font-family="monospace" fill="#3730a3">validateProps</text>
+  <text x="454" y="383" font-size="10.5" fill="#6b7280">do they satisfy the schema?</text>
+
+  <path d="M526 394 L526 434" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <rect x="440" y="436" width="228" height="62" rx="6" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="454" y="456" font-size="11" font-weight="bold" fill="#7f1d1d">invalid-props  ← new</text>
+  <text x="454" y="472" font-size="10.5" fill="#7f1d1d">node and subtree omitted,</text>
+  <text x="454" y="487" font-size="10.5" fill="#7f1d1d">one issue per failing path</text>
+
+  <path d="M614 368 L660 368" stroke="#374151" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="662" y="342" width="286" height="52" rx="6" fill="#ecfdf5" stroke="#047857"/>
+  <text x="678" y="366" font-size="11.5" font-weight="bold" fill="#065f46">render, with the tree's props</text>
+  <text x="678" y="383" font-size="10.5" fill="#065f46">never a schema's defaults — the tree is the page</text>
+
+  <path d="M804 394 L804 434" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowAmber)"/>
+  <rect x="690" y="436" width="258" height="62" rx="6" fill="#fffbeb" stroke="#b45309"/>
+  <text x="704" y="456" font-size="11" font-weight="bold" fill="#78350f">props-undeclared  ← new</text>
+  <text x="704" y="472" font-size="10.5" fill="#78350f">validator does not know a type the</text>
+  <text x="704" y="487" font-size="10.5" fill="#78350f">resolver did · renders, unchecked</text>
+
+  <!-- the two other consumers -->
+  <text x="32" y="546" font-size="14" font-weight="bold" fill="#111827">What else reads the registry</text>
+  <line x1="32" y1="556" x2="948" y2="556" stroke="#e5e7eb"/>
+
+  <rect x="32" y="572" width="440" height="104" rx="8" fill="#f5f3ff" stroke="#7c3aed"/>
+  <text x="48" y="594" font-size="12" font-weight="bold" fill="#4c1d95">catalogueOf(registry) → the prompt</text>
+  <text x="48" y="614" font-size="11" font-family="monospace" fill="#111827">- loom.card — a block of… props: elevation?, variant</text>
+  <text x="48" y="632" font-size="11" font-family="monospace" fill="#111827">- loom.page — the page shell. props: title slots: main</text>
+  <text x="48" y="654" font-size="10.5" fill="#4b5563">Bounds what AI may create, and joins the prompt hash — so</text>
+  <text x="48" y="669" font-size="10.5" fill="#4b5563">provenance distinguishes two deployments' registries.</text>
+
+  <rect x="492" y="572" width="456" height="104" rx="8" fill="#f9fafb" stroke="#9ca3af"/>
+  <text x="508" y="594" font-size="12" font-weight="bold" fill="#111827">auditRegistry(registry) → a build-time check</text>
+  <text x="508" y="616" font-size="11" font-family="monospace" fill="#065f46">loom.card:   decorates</text>
+  <text x="508" y="634" font-size="11" font-family="monospace" fill="#7f1d1d">loom.silent: not-decorated  → invisible to the portal</text>
+  <text x="508" y="652" font-size="11" font-family="monospace" fill="#78350f">loom.hooked: not-probeable  → nothing was learned</text>
+  <text x="508" y="670" font-size="10.5" fill="#4b5563">Reports; never blocks. Registration itself calls no primitive.</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrowAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+    </marker>
+  </defs>
+</svg>

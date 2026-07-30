@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { nodeIdSchema, sequentialIdFactory } from "../ids.js"
 import { err, type Result } from "../result.js"
 import { gate } from "../runtime/gate.js"
+import { catalogueOf } from "../sdk/catalogue.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
 import { composeChange } from "../runtime/pipeline.js"
 import { assessChange } from "../runtime/assessment.js"
@@ -17,6 +18,7 @@ import {
   scriptedModelClient,
   FIXED_INSTANT,
 } from "../testing/doubles.js"
+import { testRegistry } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
 import {
   CONFIGURE_CARD_REPLY,
@@ -68,6 +70,41 @@ describe("modelInterpreter — request assembly", () => {
     expect(request?.model).toBe(DEFAULT_INTERPRETER_MODEL)
     expect(request?.effort).toBe(DEFAULT_EFFORT)
     expect(request?.maxTokens).toBeGreaterThan(4096)
+  })
+
+  it("tells the model what this deployment can build with, when a catalogue is configured", async () => {
+    const { tree } = sampleTree()
+    const idFactory = sequentialIdFactory("x")
+    const client = scriptedModelClient(INSERT_NOTE_REPLY)
+    const interpreter = modelInterpreter({
+      client,
+      idFactory,
+      clock: fixedClock(),
+      catalogue: catalogueOf(testRegistry()),
+    })
+
+    const interpreted = await interpreter.interpret(
+      buildIntent(idFactory, { treeId: tree.treeId, baseRevision: tree.revision }),
+      tree
+    )
+
+    expect(client.requests[0]?.userMessage).toContain("Primitives this deployment has registered")
+    expect(client.requests[0]?.userMessage).toContain("- loom.card")
+
+    /**
+     * The catalogue is part of what was asked, so it is part of what the prompt
+     * hash attests to — two deployments with different registries cannot produce
+     * the same provenance for the same utterance.
+     */
+    const withoutCatalogue = await harness(INSERT_NOTE_REPLY).interpreter.interpret(
+      buildIntent(sequentialIdFactory("y"), { treeId: tree.treeId, baseRevision: tree.revision }),
+      tree
+    )
+
+    expect(interpreted.ok && withoutCatalogue.ok).toBe(true)
+    expect(interpreted.ok && interpreted.value.provenance.promptHash).not.toBe(
+      withoutCatalogue.ok && withoutCatalogue.value.provenance.promptHash
+    )
   })
 
   it("honours an overridden model and effort", async () => {

@@ -63,12 +63,20 @@ src/
 │   ├── materialize.ts   # Draft → TreeDelta, minting every new id
 │   ├── interpreter.ts   # The ChangeInterpreter itself
 │   └── anthropic.ts     # Vendor adapter — a separate entry point
-└── render/              # The adaptive renderer — a separate entry point
-    ├── primitive.ts     # What a primitive receives; the resolver seam
-    ├── editable.ts      # Edit-mode decoration, as attributes
-    ├── diagnostics.ts   # What rendering could not honour
-    ├── render.ts        # The tree, projected into React
-    └── request.ts       # Per-request resolution: load, validate, render
+├── render/              # The adaptive renderer — a separate entry point
+│   ├── primitive.ts     # What a primitive receives; the resolver seam
+│   ├── props.ts         # The prop-validation seam
+│   ├── editable.ts      # Edit-mode decoration, as attributes
+│   ├── diagnostics.ts   # What rendering could not honour
+│   ├── render.ts        # The tree, projected into React
+│   └── request.ts       # Per-request resolution: load, validate, render
+├── catalogue.ts         # What a deployment can build with, as data
+└── sdk/                 # The framework SDK — a separate entry point
+    ├── definition.ts    # The registration contract: definePrimitive
+    ├── registry.ts      # The registry: resolver and validator in one object
+    ├── conformance.ts   # Does a primitive spread loom.editable?
+    ├── audit.ts         # The conformance check a host runs
+    └── catalogue.ts     # The registry, projected for consumers outside it
 ```
 
 ## Decisions
@@ -139,6 +147,46 @@ decoration), `props` (the node's props, unspread), and `children`. Rendering is
 pure and total: it has no hooks and no IO, so it runs per request at the edge or
 in a Server Component, and anything it could not render comes back in
 `diagnostics` rather than as a thrown error.
+
+## Registering primitives
+
+A primitive declares what a tree may set on it. The registry is both the
+renderer's resolver and its prop validator, because a component's narrowed prop
+type is only sound when the same object vetted the props:
+
+```ts
+import { catalogueOf, createPrimitiveRegistry, definePrimitive } from "@loom/runtime/sdk"
+
+const card = definePrimitive({
+  type: "loom.card",
+  description: "A bounded block of related content",
+  props: z.object({ variant: z.enum(["outlined", "filled"]), elevation: z.number().optional() }).strict(),
+  component: ({ loom, props, children }) =>
+    <article {...loom.editable} data-variant={props.variant}>{children}</article>,
+})
+
+const registry = createPrimitiveRegistry([card])   // Result — refuses duplicates and bad identifiers
+if (!registry.ok) throw new Error(describeRegistryError(registry.error))
+
+const rendered = await renderRequest(request, {
+  source,
+  resolver: registry.value,
+  validator: registry.value,
+})
+```
+
+A node whose props fail its primitive's schema is omitted with an `invalid-props`
+diagnostic, exactly as an unknown primitive is. Validation is a predicate, never a
+codec: a primitive is handed the tree's props unchanged, so the page is a function
+of the tree and not of which schema version a deployment happens to run.
+
+`catalogueOf(registry)` projects the registry into plain data. Give it to
+`modelInterpreter({ …, catalogue })` and the model is told what it may build
+instead of guessing at type names.
+
+`auditRegistry(registry)` probes every primitive for the edit-mode contract and
+reports which ones would be invisible to the portal. It is a function a host runs
+in a test or a build step — registration itself never calls a primitive.
 
 ## Daily reports
 

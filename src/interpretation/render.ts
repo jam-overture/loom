@@ -1,3 +1,4 @@
+import type { CataloguedPrimitive, PrimitiveCatalogue } from "../catalogue.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
 import { assertNever } from "../result.js"
@@ -52,6 +53,34 @@ const renderNode = (node: LoomNode, depth: number, scopeNodeId?: NodeId): readon
 
 export const renderTree = (tree: LoomTree, scopeNodeId?: NodeId): string =>
   [`tree ${tree.treeId} revision ${tree.revision}`, ...renderNode(tree.root, 0, scopeNodeId)].join("\n")
+
+const renderCataloguedProps = (primitive: CataloguedPrimitive): string => {
+  if (primitive.props === undefined) return " props: not declared"
+  if (primitive.props.length === 0) return " props: none"
+
+  const rendered = primitive.props.map((prop) => (prop.required ? prop.name : `${prop.name}?`))
+
+  return ` props: ${rendered.join(", ")}`
+}
+
+const renderCataloguedSlots = (primitive: CataloguedPrimitive): string =>
+  primitive.slots.length === 0 ? "" : ` slots: ${primitive.slots.join(", ")}`
+
+/**
+ * The catalogue as the model sees it: one line per primitive, in registration
+ * order, so the deployment's own ordering is what the model reads first.
+ *
+ * A trailing `?` marks an optional prop, mirroring how the same fact is written
+ * in TypeScript, which is a notation a model has seen far more of than any
+ * convention invented here.
+ */
+export const renderCatalogue = (catalogue: PrimitiveCatalogue): string =>
+  catalogue
+    .map(
+      (primitive) =>
+        `- ${primitive.type} — ${primitive.description}.${renderCataloguedProps(primitive)}${renderCataloguedSlots(primitive)}`
+    )
+    .join("\n")
 
 const renderPropKeys = (label: string, keys: readonly string[]): string =>
   keys.length === 0 ? "" : ` ${label} ${keys.join(", ")}`
