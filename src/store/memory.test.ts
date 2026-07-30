@@ -8,7 +8,12 @@ import type { TreeDelta } from "../tree/delta.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
 import { memoryTreeStore } from "./memory.js"
-import type { AppendRequest } from "./store.js"
+import {
+  clampListingLimit,
+  DEFAULT_LISTING_LIMIT,
+  MAX_LISTING_LIMIT,
+  type AppendRequest,
+} from "./store.js"
 
 const appendOf = (delta: TreeDelta, proposal = "p_1"): AppendRequest => ({
   proposalId: proposal as ProposalId,
@@ -37,7 +42,6 @@ describe("memoryTreeStore", () => {
     expect((await store.create(tree)).ok).toBe(true)
     expect(await store.head(tree.treeId)).toEqual({ ok: true, value: tree })
     expect(await store.history(tree.treeId)).toEqual({ ok: true, value: [] })
-    expect(store.size()).toBe(1)
   })
 
   it("refuses to create the same tree twice", async () => {
@@ -143,8 +147,107 @@ describe("memoryTreeStore", () => {
     await store.create(first)
     await store.create(second)
 
-    expect(store.size()).toBe(2)
     expect((await store.head(second.treeId)).ok).toBe(true)
     expect(first.treeId).not.toBe(second.treeId)
+  })
+})
+
+const treeNamed = (namespace: string): LoomTree => {
+  const ids = sequentialIdFactory(namespace)
+
+  return createTree(buildElement(ids, { type: "loom.page" }), ids)
+}
+
+/** Ids ascend with the namespace, so insertion order and key order disagree. */
+const storeWith = async (namespaces: readonly string[]) => {
+  const store = memoryTreeStore()
+  for (const namespace of namespaces) await store.create(treeNamed(namespace))
+
+  return store
+}
+
+describe("memoryTreeStore.list", () => {
+  it("orders by tree id rather than by insertion", async () => {
+    const store = await storeWith(["c", "a", "b"])
+
+    const page = await store.list()
+
+    expect(page.ok && page.value.trees.map((listing) => listing.treeId)).toEqual([
+      "t_a1",
+      "t_b1",
+      "t_c1",
+    ])
+  })
+
+  it("reports the revision, which is also the length of the log", async () => {
+    const { tree, ids } = sampleTree()
+    const store = memoryTreeStore()
+    await store.create(tree)
+    await store.append(tree.treeId, appendOf(removalOf(tree, ids.footer)))
+
+    const page = await store.list()
+
+    expect(page.ok && page.value.trees).toEqual([{ treeId: tree.treeId, revision: 1 }])
+  })
+
+  it("is empty with a null cursor when nothing is stored", async () => {
+    const store = memoryTreeStore()
+
+    expect(await store.list()).toEqual({ ok: true, value: { trees: [], cursor: null } })
+  })
+
+  it("hands back a cursor only while there is another page", async () => {
+    const store = await storeWith(["a", "b", "c"])
+
+    const first = await store.list({ limit: 2 })
+
+    expect(first.ok && first.value.trees.map((listing) => listing.treeId)).toEqual(["t_a1", "t_b1"])
+    expect(first.ok && first.value.cursor).toBe("t_b1")
+
+    const cursor = first.ok ? first.value.cursor : null
+    const second = await store.list(cursor === null ? {} : { cursor })
+
+    expect(second.ok && second.value.trees.map((listing) => listing.treeId)).toEqual(["t_c1"])
+    expect(second.ok && second.value.cursor).toBeNull()
+  })
+
+  /** A page that exactly empties the store must not promise another one. */
+  it("does not hand back a cursor when the page ends on the last tree", async () => {
+    const store = await storeWith(["a", "b"])
+
+    const page = await store.list({ limit: 2 })
+
+    expect(page.ok && page.value.cursor).toBeNull()
+  })
+
+  /**
+   * Keyset pagination resumes from the next key rather than from a position, so
+   * a cursor naming a tree that is gone is not an error to report.
+   */
+  it("resumes after a cursor that names no stored tree", async () => {
+    const store = await storeWith(["a", "c"])
+
+    const page = await store.list({ cursor: "t_b1" })
+
+    expect(page.ok && page.value.trees.map((listing) => listing.treeId)).toEqual(["t_c1"])
+  })
+
+  it("clamps a limit the caller should not get, rather than honouring it", async () => {
+    const store = await storeWith(["a", "b", "c"])
+
+    const page = await store.list({ limit: 0 })
+
+    expect(page.ok && page.value.trees).toHaveLength(1)
+  })
+})
+
+describe("clampListingLimit", () => {
+  it("defaults when unasked, caps when asked for too much, and never returns zero", () => {
+    expect(clampListingLimit(undefined)).toBe(DEFAULT_LISTING_LIMIT)
+    expect(clampListingLimit(Number.NaN)).toBe(DEFAULT_LISTING_LIMIT)
+    expect(clampListingLimit(10_000)).toBe(MAX_LISTING_LIMIT)
+    expect(clampListingLimit(0)).toBe(1)
+    expect(clampListingLimit(-5)).toBe(1)
+    expect(clampListingLimit(2.7)).toBe(2)
   })
 })

@@ -2,10 +2,11 @@ import { createElement, useState } from "react"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
+import { primitiveTypeSchema } from "../primitive-type.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { registryOf, testDefinitions } from "../testing/definitions.js"
 
-import { auditRegistry, describeRegistryAudit } from "./audit.js"
+import { auditRegistry, decorationFromAudit, describeRegistryAudit } from "./audit.js"
 import { definePrimitive } from "./definition.js"
 
 const silent = definePrimitive({
@@ -62,5 +63,33 @@ describe("describeRegistryAudit", () => {
     expect(described).toContain("loom.card: spreads loom.editable")
     expect(described).toContain("loom.silent: does not spread loom.editable")
     expect(described).toContain("loom.hooked: could not be probed")
+  })
+})
+
+describe("decorationFromAudit", () => {
+  it("says yes for a primitive the probe watched decorate", () => {
+    const decorates = decorationFromAudit(auditRegistry(registryOf(testDefinitions)))
+
+    expect(decorates(primitiveTypeSchema.parse("loom.card"))).toBe(true)
+  })
+
+  it("says no for one the probe watched ignore its decoration", () => {
+    const decorates = decorationFromAudit(auditRegistry(registryOf([...testDefinitions, silent])))
+
+    expect(decorates(primitiveTypeSchema.parse("loom.silent"))).toBe(false)
+  })
+
+  /** "Could not answer" is not "answered no", and the DOM decides in the end. */
+  it("gives an unprobeable primitive the benefit of the doubt", () => {
+    const decorates = decorationFromAudit(auditRegistry(registryOf([hooked])))
+
+    expect(decorates(primitiveTypeSchema.parse("loom.hooked"))).toBe(true)
+  })
+
+  /** An unregistered type renders as nothing, so its subtree is not in the DOM. */
+  it("says no for a type that was never registered", () => {
+    const decorates = decorationFromAudit(auditRegistry(registryOf(testDefinitions)))
+
+    expect(decorates(primitiveTypeSchema.parse("loom.stranger"))).toBe(false)
   })
 })

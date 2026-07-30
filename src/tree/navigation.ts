@@ -35,20 +35,24 @@ export const findParent = (root: LoomNode, nodeId: NodeId): LoomNode | null => {
 }
 
 /**
- * The chain of ids from the root down to and including `nodeId`, or null when
+ * The chain of nodes from the root down to and including `nodeId`, or null when
  * the node is absent. Paths are derived on demand and never persisted — the id
  * is the stable address, the path is the current position.
  */
-export const pathToNode = (root: LoomNode, nodeId: NodeId): readonly NodeId[] | null => {
-  if (root.id === nodeId) return [root.id]
+export const nodePath = (root: LoomNode, nodeId: NodeId): readonly LoomNode[] | null => {
+  if (root.id === nodeId) return [root]
 
   for (const child of childrenOf(root)) {
-    const childPath = pathToNode(child, nodeId)
-    if (childPath) return [root.id, ...childPath]
+    const childPath = nodePath(child, nodeId)
+    if (childPath) return [root, ...childPath]
   }
 
   return null
 }
+
+/** The same chain as ids, for callers that only need the address. */
+export const pathToNode = (root: LoomNode, nodeId: NodeId): readonly NodeId[] | null =>
+  nodePath(root, nodeId)?.map((node) => node.id) ?? null
 
 export const isDescendantOf = (root: LoomNode, ancestorId: NodeId, nodeId: NodeId): boolean => {
   const ancestor = findNode(root, ancestorId)

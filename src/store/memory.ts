@@ -3,7 +3,16 @@ import { err, ok } from "../result.js"
 import { applyDelta } from "../tree/apply.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import type { AppendRequest, StoredRevision, StoreError, TreeStore } from "./store.js"
+import {
+  clampListingLimit,
+  type AppendRequest,
+  type ListRequest,
+  type StoredRevision,
+  type StoreError,
+  type TreeListing,
+  type TreeListPage,
+  type TreeStore,
+} from "./store.js"
 
 /**
  * A store in memory: the log, the snapshot, and the invariant that ties them.
@@ -20,19 +29,12 @@ type Entry = {
   readonly log: readonly StoredRevision[]
 }
 
-export type MemoryTreeStore = TreeStore & {
-  /** For tests and the dev portal: how many trees are held. */
-  readonly size: () => number
-}
-
-export const memoryTreeStore = (): MemoryTreeStore => {
+export const memoryTreeStore = (): TreeStore => {
   const trees = new Map<string, Entry>()
 
   const entryOf = (treeId: TreeId): Entry | undefined => trees.get(treeId)
 
   return {
-    size: () => trees.size,
-
     create: (tree) =>
       Promise.resolve(
         trees.has(tree.treeId)
@@ -57,6 +59,38 @@ export const memoryTreeStore = (): MemoryTreeStore => {
 
       return Promise.resolve(
         entry ? ok(entry.log) : err<StoreError>({ code: "not-found", treeId })
+      )
+    },
+
+    /**
+     * Keyset pagination over the ids in ascending order. A `Map` iterates in
+     * insertion order, so the sort is not decoration — it is what makes this
+     * implementation obey the ordering the contract promises, and what a store
+     * with a real index would get from the index instead.
+     */
+    list: (request?: ListRequest) => {
+      const limit = clampListingLimit(request?.limit)
+      const cursor = request?.cursor
+
+      const keys = Array.from(trees.keys())
+        .sort()
+        .filter((key) => cursor === undefined || key > cursor)
+
+      const page = keys.slice(0, limit)
+
+      const listings: readonly TreeListing[] = page.flatMap((key) => {
+        const entry = trees.get(key)
+
+        return entry ? [{ treeId: entry.snapshot.treeId, revision: entry.snapshot.revision }] : []
+      })
+
+      const last = page.at(-1)
+
+      return Promise.resolve(
+        ok<TreeListPage>({
+          trees: listings,
+          cursor: last !== undefined && keys.length > page.length ? last : null,
+        })
       )
     },
 

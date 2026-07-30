@@ -59,3 +59,4 @@ leave the existing record standing until someone decides.
 | [0017](0017-every-write-goes-through-one-server-side-path.md) | Every write goes through one server-side path | Accepted | §5 |
 | [0018](0018-the-portal-is-a-consumer-not-an-insider.md) | The portal is a consumer of the framework, not an insider | Accepted | §5 |
 | [0019](0019-the-portal-is-a-review-queue-not-a-design-tool.md) | The portal is a review queue, not a design tool | Accepted | §5 |
+| [0020](0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md) | A store handle is the scope, and a listing is a keyset page | Accepted | §5 |
