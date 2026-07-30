@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 
-import { describeStoreError, type StoreError } from "./store.js"
+import { describeStoreError, type StoreError } from "./errors.js"
 
 const treeId = treeIdSchema.parse("t_1")
 

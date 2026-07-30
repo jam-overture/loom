@@ -3,12 +3,12 @@ import { err, ok } from "../result.js"
 import { applyDelta } from "../tree/apply.js"
 import type { LoomTree } from "../tree/tree.js"
 
+import type { StoreError } from "./errors.js"
 import {
   clampListingLimit,
   type AppendRequest,
   type ListRequest,
   type StoredRevision,
-  type StoreError,
   type TreeListing,
   type TreeListPage,
   type TreeStore,

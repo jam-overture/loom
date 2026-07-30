@@ -11,7 +11,8 @@
     "./react": "./src/render/index.ts",
     "./sdk": "./src/sdk/index.ts",
     "./cli": "./src/cli/index.ts",
-    "./store": "./src/store/index.ts"
+    "./store": "./src/store/index.ts",
+    "./write": "./src/write/index.ts"
   },
   "bin": {
     "loom": "./src/cli/main.ts"

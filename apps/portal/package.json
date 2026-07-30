@@ -12,6 +12,7 @@
     "verify": "pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@loom/runtime": "workspace:*",
     "next": "^16.2.12",
     "react": "^19.2.8",

@@ -1,9 +1,10 @@
 import type { ProposalId, TreeId } from "../ids.js"
 import type { TreeDelta } from "../tree/delta.js"
-import type { TreeError } from "../tree/errors.js"
 import type { LoomTree } from "../tree/tree.js"
 import type { Provenance } from "../runtime/proposal.js"
 import type { Result } from "../result.js"
+
+import type { StoreError } from "./errors.js"
 
 /**
  * Persistence: an append-only log of accepted deltas, and the current tree as a
@@ -41,24 +42,6 @@ export type AppendRequest = {
   readonly provenance: Provenance
   readonly appliedAt: string
 }
-
-export type StoreError =
-  /** No tree under this id — distinct from a tree with an empty history. */
-  | { readonly code: "not-found"; readonly treeId: TreeId }
-  | { readonly code: "already-exists"; readonly treeId: TreeId }
-  /**
-   * The delta names a base revision that is not the current head. This is the
-   * whole of concurrency control: two writers racing at the same base means the
-   * second one is refused rather than silently applied to a tree it never saw.
-   */
-  | {
-      readonly code: "revision-conflict"
-      readonly treeId: TreeId
-      readonly expected: number
-      readonly found: number
-    }
-  | { readonly code: "delta-rejected"; readonly treeId: TreeId; readonly error: TreeError }
-  | { readonly code: "unavailable"; readonly detail: string }
 
 /**
  * What a listing says about a tree without loading it.
@@ -141,18 +124,3 @@ export interface TreeStore {
  * how a test starts describing the interface instead of the behaviour.
  */
 export type TreeReader = Pick<TreeStore, "head" | "history">
-
-export const describeStoreError = (error: StoreError): string => {
-  switch (error.code) {
-    case "not-found":
-      return `no tree stored under ${error.treeId}`
-    case "already-exists":
-      return `${error.treeId} already exists; a tree is created once`
-    case "revision-conflict":
-      return `${error.treeId} moved on: the delta applies to revision ${error.expected}, but head is ${error.found}`
-    case "delta-rejected":
-      return `the delta did not apply to ${error.treeId}: ${error.error.code}`
-    case "unavailable":
-      return `storage is unavailable: ${error.detail}`
-  }
-}
