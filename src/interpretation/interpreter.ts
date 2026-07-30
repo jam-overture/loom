@@ -1,3 +1,4 @@
+import type { PrimitiveCatalogue } from "../catalogue.js"
 import type { IdFactory } from "../ids.js"
 import { assertNever, err, ok, type Result } from "../result.js"
 import type { Clock } from "../runtime/events.js"
@@ -46,6 +47,13 @@ export type ModelInterpreterConfig = {
   readonly maxTokens?: number
   readonly effort?: ModelEffort
   readonly draftDepth?: number
+  /**
+   * What this deployment can build with. Absent means the model is told only
+   * what the tree shows, which is what §2 shipped with; a host that has a §4
+   * registry projects it with `catalogueOf` and the model stops guessing at
+   * primitive names it has no way to know.
+   */
+  readonly catalogue?: PrimitiveCatalogue
 }
 
 const fromClientError = (error: ModelClientError): InterpretationError => {
@@ -168,8 +176,8 @@ export const modelInterpreter = (
   config: ModelInterpreterConfig
 ): ChangeInterpreter & ChangeRepairer => ({
   interpret: (intent: EditIntent, tree: LoomTree) =>
-    propose(config, intent, buildUserMessage(intent, tree)),
+    propose(config, intent, buildUserMessage(intent, tree, config.catalogue)),
 
   repair: (request: RepairRequest, tree: LoomTree) =>
-    propose(config, request.intent, buildRepairMessage(request, tree)),
+    propose(config, request.intent, buildRepairMessage(request, tree, config.catalogue)),
 })
