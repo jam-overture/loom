@@ -9,7 +9,7 @@ import { withRoot } from "../tree/tree.js"
 
 import { memoryTreeStore } from "./memory.js"
 import { auditSnapshot, replayTree } from "./replay.js"
-import type { AppendRequest, StoredRevision, TreeStore } from "./store.js"
+import type { AppendRequest, StoredRevision, TreeReader } from "./store.js"
 
 const provenance = {
   origin: "user-instruction",
@@ -120,12 +120,10 @@ describe("auditSnapshot", () => {
     const { tree, ids } = sampleTree()
     const delta = removalOf(tree.treeId, ids.footer, 0)
 
-    const drifted: TreeStore = {
-      create: () => Promise.resolve(ok(tree)),
+    const drifted: TreeReader = {
       /** Claims revision 1 while still holding the untouched tree. */
       head: () => Promise.resolve(ok(withRoot(tree, tree.root))),
       history: () => Promise.resolve(ok([entryOf(delta, 1)])),
-      append: () => Promise.resolve(ok(tree)),
     }
 
     const audit = await auditSnapshot(drifted, tree.treeId, tree)
@@ -137,11 +135,9 @@ describe("auditSnapshot", () => {
   it("reports an unreplayable log rather than pretending it agrees", async () => {
     const { tree, ids } = sampleTree()
 
-    const gapped: TreeStore = {
-      create: () => Promise.resolve(ok(tree)),
+    const gapped: TreeReader = {
       head: () => Promise.resolve(ok(tree)),
       history: () => Promise.resolve(ok([entryOf(removalOf(tree.treeId, ids.footer, 0), 5)])),
-      append: () => Promise.resolve(ok(tree)),
     }
 
     const audit = await auditSnapshot(gapped, tree.treeId, tree)

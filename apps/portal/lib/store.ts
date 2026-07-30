@@ -1,5 +1,4 @@
-import type { TreeId } from "@loom/runtime"
-import { memoryTreeStore, type MemoryTreeStore } from "@loom/runtime/store"
+import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
 
 import { seedTree } from "./seed"
 
@@ -12,34 +11,25 @@ import { seedTree } from "./seed"
  * would be a lie about persistence, so this says plainly that it is a process
  * store.
  *
- * The seed id is exported because `TreeStore` has no `list` — see the day-11
- * report. Knowing the id of a tree this module created is not privileged access,
- * so it is not the shortcut 0018 warns about; listing trees it did not create is
- * the thing that needs a framework answer.
+ * The store handle is also the scope of what the portal may see (0020) — here
+ * everything, because there is one process and one tenant. A deployment with more
+ * would hand the portal a narrower handle rather than teach the portal about
+ * tenants.
  */
-type Seeded = {
-  readonly store: MemoryTreeStore
-  readonly seedTreeId: TreeId
-}
-
-const build = (): Seeded => {
+const build = (): TreeStore => {
   const store = memoryTreeStore()
-  const tree = seedTree()
 
   /** `already-exists` is ignored by design: a re-evaluated module must not
    *  replace a tree that has since been edited. */
-  void store.create(tree)
+  void store.create(seedTree())
 
-  return { store, seedTreeId: tree.treeId }
+  return store
 }
 
 const CARRIER_KEY = Symbol.for("loom.portal.store")
 
-type Carrier = { [CARRIER_KEY]?: Seeded }
+type Carrier = { [CARRIER_KEY]?: TreeStore }
 
 const carrier = globalThis as unknown as Carrier
 
-const seeded: Seeded = (carrier[CARRIER_KEY] ??= build())
-
-export const portalStore = seeded.store
-export const seedTreeId = seeded.seedTreeId
+export const portalStore: TreeStore = (carrier[CARRIER_KEY] ??= build())

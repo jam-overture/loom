@@ -1,3 +1,4 @@
+import type { DecorationLookup } from "../render/addressing.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 import { probeEditableDecoration, type ConformanceVerdict } from "./conformance.js"
@@ -42,6 +43,32 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
     audits,
     notDecorated: audits.filter((audit) => audit.verdict.outcome === "not-decorated").map((audit) => audit.type),
     notProbeable: audits.filter((audit) => audit.verdict.outcome === "not-probeable").map((audit) => audit.type),
+  }
+}
+
+/**
+ * The audit, as the predicate `addressNode` needs.
+ *
+ * Two judgement calls, both erring the same way — towards claiming a node is
+ * addressable — because the DOM is the final authority and a portal that queries
+ * for a handle can degrade when it misses. Refusing to point at a node that is in
+ * fact there would be the worse failure: it is silent, and it makes a working
+ * primitive look broken.
+ *
+ * - `not-probeable` counts as decorating. The probe said it could not answer,
+ *   which is not the same as answering no.
+ * - a type absent from the audit counts as *not* decorating, and that is not
+ *   erring the other way: an unregistered type renders as nothing at all, so its
+ *   whole subtree is missing from the DOM and delegating to an ancestor is
+ *   exactly right.
+ */
+export const decorationFromAudit = (audit: RegistryAudit): DecorationLookup => {
+  const verdicts = new Map(audit.audits.map((entry) => [entry.type, entry.verdict.outcome]))
+
+  return (type: PrimitiveType) => {
+    const outcome = verdicts.get(type)
+
+    return outcome !== undefined && outcome !== "not-decorated"
   }
 }
 

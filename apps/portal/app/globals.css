@@ -160,6 +160,34 @@
   --text-3xl: var(--size-3xl);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   EDIT MODE — selection over a rendered tree
+   0010 fixed that edit mode decorates and never invents DOM, so both
+   of these have to be expressible as a style on an element that is
+   already there. `data-loom-node` is the runtime's; `data-loom-selected`
+   is the portal's, set on whichever node the current selection
+   addresses.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  .loom-preview [data-loom-node] {
+    cursor: default;
+  }
+
+  /* `:hover` matches every ancestor of the pointer, which outlines the whole
+     chain from the root down. Only the innermost hovered node is the one a
+     click would select, so it is the only one that should say so. */
+  .loom-preview [data-loom-node]:hover:not(:has([data-loom-node]:hover)) {
+    outline: 1px solid var(--node-hover-outline);
+    outline-offset: 1px;
+  }
+
+  .loom-preview [data-loom-selected] {
+    outline: 2px solid var(--node-selected-outline);
+    outline-offset: 2px;
+  }
+}
+
 @layer base {
   body {
     background-color: var(--surface-page);

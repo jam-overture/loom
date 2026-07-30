@@ -4,19 +4,24 @@ import { treeIdSchema } from "@loom/runtime"
 import { renderRequest } from "@loom/runtime/react"
 import { treeSourceFromStore } from "@loom/runtime/store"
 
+import { portalDecoration } from "@/lib/addressing"
+import { outlineRows } from "@/lib/outline"
 import { portalRegistry } from "@/lib/registry"
 import { portalStore } from "@/lib/store"
 
 import { PreviewFrame } from "./_components/preview-frame"
+import { PreviewSurface } from "./_components/preview-surface"
+import { SelectedNode } from "./_components/selected-node"
+import { SelectionProvider } from "./_components/selection-context"
+import { TreeOutline } from "./_components/tree-outline"
 
 /**
- * The preview pane, and the first place §3 renders something a user stored rather
- * than something a fixture supplied.
+ * The preview pane, and the outline that addresses into it.
  *
- * `editMode` is on, so every element carries `data-loom-node` — which is what
- * addressing will read once the write path lands (0010). It costs one boolean
- * test per element when off, so there is no reason to serve an undecorated
- * version of a page nobody is looking at without the portal.
+ * Both are derived from one `renderRequest` rather than from two reads, so the
+ * outline cannot describe a revision the preview is not showing. `editMode` is on,
+ * so every element carries `data-loom-node` — which is what makes the outline's
+ * rows addresses rather than labels.
  */
 const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => {
   const { treeId } = await params
@@ -46,14 +51,27 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
     )
   }
 
+  const rows = outlineRows(rendered.value.tree, portalDecoration)
+
   return (
-    <PreviewFrame
-      treeId={rendered.value.tree.treeId}
-      revision={rendered.value.tree.revision}
-      diagnostics={rendered.value.diagnostics}
-    >
-      {rendered.value.element}
-    </PreviewFrame>
+    <SelectionProvider rows={rows}>
+      <div className="flex flex-col gap-6 p-8 lg:flex-row-reverse lg:items-start">
+        <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">
+          <TreeOutline />
+          <SelectedNode />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <PreviewFrame
+            treeId={rendered.value.tree.treeId}
+            revision={rendered.value.tree.revision}
+            diagnostics={rendered.value.diagnostics}
+          >
+            <PreviewSurface>{rendered.value.element}</PreviewSurface>
+          </PreviewFrame>
+        </div>
+      </div>
+    </SelectionProvider>
   )
 }
 
