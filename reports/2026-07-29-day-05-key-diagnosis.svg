@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="470" viewBox="0 0 940 470" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/>
+    </marker>
+    <marker id="bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b42318"/>
+    </marker>
+  </defs>
+
+  <rect width="940" height="470" fill="#ffffff"/>
+
+  <text x="40" y="40" font-size="20" font-weight="600" fill="#1b1f24">Why the key never reached the test</text>
+  <text x="40" y="63" font-size="13" fill="#6a737d">It was set correctly. It is stripped on the way to every process the agent spawns.</text>
+
+  <!-- BEFORE -->
+  <text x="40" y="103" font-size="13" font-weight="600" fill="#b42318">Before — the reserved name</text>
+
+  <rect x="40" y="116" width="180" height="58" rx="6" fill="#fbfcfd" stroke="#d6dbe1"/>
+  <text x="56" y="139" font-size="12" fill="#1b1f24">Environment config</text>
+  <text x="56" y="159" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#6a737d">ANTHROPIC_API_KEY</text>
+
+  <line x1="224" y1="145" x2="292" y2="145" stroke="#1a7f37" stroke-width="1.4" marker-end="url(#ok)"/>
+  <text x="258" y="137" font-size="10.5" fill="#1a7f37" text-anchor="middle">arrives</text>
+
+  <rect x="296" y="116" width="190" height="58" rx="6" fill="#eaf7ee" stroke="#a6dab6"/>
+  <text x="312" y="139" font-size="12" fill="#1b1f24">Agent process (pid 569)</text>
+  <text x="312" y="159" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#1a7f37">73 vars · key PRESENT</text>
+
+  <line x1="490" y1="145" x2="558" y2="145" stroke="#b42318" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#bad)"/>
+  <text x="524" y="137" font-size="10.5" fill="#b42318" text-anchor="middle">stripped</text>
+
+  <rect x="562" y="116" width="190" height="58" rx="6" fill="#fdeceb" stroke="#f3b5b0"/>
+  <text x="578" y="139" font-size="12" fill="#1b1f24">Tool shell → vitest</text>
+  <text x="578" y="159" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#b42318">129 vars · key ABSENT</text>
+
+  <line x1="756" y1="145" x2="812" y2="145" stroke="#b42318" stroke-width="1.4" marker-end="url(#bad)"/>
+  <rect x="816" y="122" width="86" height="46" rx="6" fill="#fdeceb" stroke="#f3b5b0"/>
+  <text x="859" y="150" font-size="12" fill="#b42318" text-anchor="middle">skipped</text>
+
+  <text x="40" y="199" font-size="11" fill="#6a737d">The shell has *more* variables than the parent (129 vs 73) — not a subset, a targeted removal. The agent</text>
+  <text x="40" y="215" font-size="11" fill="#6a737d">authenticates with that name itself, so it does not pass it to subprocesses. The name is reserved.</text>
+
+  <line x1="40" y1="240" x2="900" y2="240" stroke="#e4e8ec"/>
+
+  <!-- AFTER -->
+  <text x="40" y="272" font-size="13" font-weight="600" fill="#1a7f37">After — a name nothing reserves</text>
+
+  <rect x="40" y="285" width="180" height="58" rx="6" fill="#fbfcfd" stroke="#d6dbe1"/>
+  <text x="56" y="308" font-size="12" fill="#1b1f24">Environment config</text>
+  <text x="56" y="328" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#2f6feb">LOOM_ANTHROPIC_API_KEY</text>
+
+  <line x1="224" y1="314" x2="292" y2="314" stroke="#1a7f37" stroke-width="1.4" marker-end="url(#ok)"/>
+
+  <rect x="296" y="285" width="190" height="58" rx="6" fill="#eaf7ee" stroke="#a6dab6"/>
+  <text x="312" y="308" font-size="12" fill="#1b1f24">Agent process</text>
+  <text x="312" y="328" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#1a7f37">not reserved · kept</text>
+
+  <line x1="490" y1="314" x2="558" y2="314" stroke="#1a7f37" stroke-width="1.4" marker-end="url(#ok)"/>
+  <text x="524" y="306" font-size="10.5" fill="#1a7f37" text-anchor="middle">passes through</text>
+
+  <rect x="562" y="285" width="190" height="58" rx="6" fill="#eaf7ee" stroke="#a6dab6"/>
+  <text x="578" y="308" font-size="12" fill="#1b1f24">Tool shell → vitest</text>
+  <text x="578" y="328" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#1a7f37">key PRESENT</text>
+
+  <line x1="756" y1="314" x2="812" y2="314" stroke="#1a7f37" stroke-width="1.4" marker-end="url(#ok)"/>
+  <rect x="816" y="291" width="86" height="46" rx="6" fill="#eaf7ee" stroke="#a6dab6"/>
+  <text x="859" y="319" font-size="12" fill="#1a7f37" text-anchor="middle">runs</text>
+
+  <!-- proof -->
+  <rect x="40" y="366" width="862" height="80" rx="6" fill="#fbfcfd" stroke="#d6dbe1"/>
+  <text x="56" y="388" font-size="11.5" font-weight="600" fill="#1b1f24">Proven with a deliberately invalid value — the failure is the good news:</text>
+  <text x="56" y="410" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#b42318">→ interpretation failed: interpreter-unavailable — 401 {"type":"authentication_error","message":"invalid x-api-key"}</text>
+  <text x="56" y="432" font-size="11" fill="#6a737d">The test ran instead of skipping, reached api.anthropic.com through the egress proxy, and Anthropic answered. Only a valid value is missing.</text>
+</svg>
