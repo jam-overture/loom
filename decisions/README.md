@@ -50,3 +50,4 @@ leave the existing record standing until someone decides.
 | [0008](0008-the-renderer-is-a-total-pure-projection.md)      | The renderer is a total, pure projection of the tree           | Accepted | §3      |
 | [0009](0009-primitives-receive-props-in-a-bag.md)            | Primitives receive AI-authored props in a bag, never spread    | Accepted | §3 → §4 |
 | [0010](0010-edit-mode-decorates-it-does-not-restructure.md)  | Edit mode decorates; it never invents DOM                      | Accepted | §3 → §5 |
+| [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md)   | The reply schema must fit a compiled-grammar budget            | **Proposed** — ARCHITECTURAL | §2 |
