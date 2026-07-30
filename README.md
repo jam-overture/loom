@@ -217,12 +217,19 @@ Nothing is written unless the whole command can complete: a clash with an existi
 file is reported before the first write, so a refused command leaves the directory
 as it was.
 
-**The `loom` executable needs a build step this package does not have yet.** The
-CLI is library code today — `runCli(argv, nodeFileSystem)` from
-`@loom/runtime/cli`, with `src/cli/main.ts` as the entry point — because Node's
-type stripping will not resolve this repo's `.js` import specifiers to `.ts`
-sources. Either a compile step or a TypeScript loader closes that gap; the
-scaffolding logic itself is complete and tested.
+```bash
+pnpm loom init
+pnpm loom add primitive commerce.product-card
+```
+
+`bin` points at `src/cli/main.ts`, which runs through `tsx` — this package has no
+build step, and Node's own type stripping does not resolve the `.js` import
+specifiers the repo uses to their `.ts` sources. That makes `tsx` a dependency of
+the executable rather than a convenience. When a build step exists, `bin` should
+point at the emitted entry and the shebang should go.
+
+The CLI is usable as library code too: `runCli(argv, nodeFileSystem)` from
+`@loom/runtime/cli`, which is what its tests drive.
 
 ## Daily reports
 
