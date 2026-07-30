@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { isNavItemActive } from "./nav.js"
+import { isNavItemActive } from "./nav"
 
 describe("isNavItemActive", () => {
   it("matches a path against itself", () => {

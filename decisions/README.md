@@ -58,3 +58,4 @@ leave the existing record standing until someone decides.
 | [0016](0016-the-log-is-the-truth-and-the-snapshot-is-a-view.md) | The log is the truth and the snapshot is a materialised view | Accepted | §5 |
 | [0017](0017-every-write-goes-through-one-server-side-path.md) | Every write goes through one server-side path | Accepted | §5 |
 | [0018](0018-the-portal-is-a-consumer-not-an-insider.md) | The portal is a consumer of the framework, not an insider | Accepted | §5 |
+| [0019](0019-the-portal-is-a-review-queue-not-a-design-tool.md) | The portal is a review queue, not a design tool | Accepted | §5 |
