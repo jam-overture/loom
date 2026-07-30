@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* ══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — Silver
+   Every colour, radius and type size is a custom property here.
+   Components reference the semantic utilities generated from these
+   in @theme inline below; never a raw hex, per code-style.md.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ── Surfaces ────────────────────────────────────────────────── */
+    --surface-page: #f2f6f8;
+    --surface-wash: linear-gradient(150deg, #e3f7fbd1 0%, transparent 65%);
+    --surface-base: #ffffff;
+    --surface-sidebar: #ffffff;
+    --surface-topbar: #ffffff;
+    --surface-hover: #eceef2;
+    --surface-active: #e3e6ee;
+    /* The preview pane reads as a document, not a panel — so it sits on a
+       flatter surface than the chrome around it. */
+    --surface-preview: #fbfcfd;
+
+    /* ── Borders ─────────────────────────────────────────────────── */
+    --border-default: rgba(0, 0, 0, 0.2);
+    --border-subtle: rgba(0, 0, 0, 0.13);
+    --border-strong: rgba(0, 0, 0, 0.36);
+
+    /* ── Radii — deliberately tight ──────────────────────────────── */
+    --radius-base: 2px;
+    --radius-medium: 4px;
+    --radius-large: 6px;
+
+    /* ── Text ────────────────────────────────────────────────────── */
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --text-muted: #6e6e6e;
+    --text-placeholder: #b0b0b0;
+    --text-inverse: #ffffff;
+
+    /* ── Navigation ──────────────────────────────────────────────── */
+    --nav-active-bg: #e3e6ee;
+    --nav-active-border: #5b6478;
+    --nav-inactive-text: #6c6c6c;
+
+    /* ── Actions ─────────────────────────────────────────────────── */
+    --action-affirm-bg: #72e3ad;
+    --action-affirm-text: #0d3d26;
+    --action-affirm-border: #5ed49a;
+
+    --action-refuse-bg: #ffb3b3;
+    --action-refuse-text: #7b1f1f;
+    --action-refuse-border: #ff9999;
+
+    --action-neutral-bg: #f0f1f3;
+    --action-neutral-text: #4a4a4a;
+    --action-neutral-border: #e0e1e5;
+
+    /* ── Dispositions ────────────────────────────────────────────────
+       One token pair per `ChangeOutcome` kind in the composition
+       runtime, so a disposition can never be rendered in a colour the
+       runtime has no name for. Add a kind, add a pair.
+       ─────────────────────────────────────────────────────────────── */
+    --outcome-applied-bg: rgba(34, 197, 94, 0.12);
+    --outcome-applied-text: #15803d;
+    --outcome-awaiting-bg: rgba(251, 146, 60, 0.15);
+    --outcome-awaiting-text: #c2410c;
+    --outcome-rejected-bg: rgba(204, 34, 0, 0.1);
+    --outcome-rejected-text: #a11b00;
+    --outcome-uninterpreted-bg: rgba(0, 0, 0, 0.06);
+    --outcome-uninterpreted-text: #6c6c6c;
+    --outcome-inapplicable-bg: rgba(91, 100, 120, 0.12);
+    --outcome-inapplicable-text: #414a5c;
+
+    /* ── Edit mode ───────────────────────────────────────────────────
+       The outline drawn over a `data-loom-node`. 0010 fixed that edit
+       mode decorates and never invents DOM, so selection has to be
+       expressible as a style on a node that is already there.
+       ─────────────────────────────────────────────────────────────── */
+    --node-hover-outline: rgba(91, 100, 120, 0.4);
+    --node-selected-outline: #5b6478;
+    --node-label-bg: #5b6478;
+    --node-label-text: #ffffff;
+
+    /* ── Type — 14px base, dense scale ───────────────────────────── */
+    --size-2xs: 11px;
+    --size-xs: 12px;
+    --size-sm: 13px;
+    --size-base: 14px;
+    --size-md: 15px;
+    --size-lg: 16px;
+    --size-xl: 18px;
+    --size-2xl: 22px;
+    --size-3xl: 28px;
+  }
+}
+
+@theme inline {
+  --color-surface-page: var(--surface-page);
+  --color-surface-base: var(--surface-base);
+  --color-surface-sidebar: var(--surface-sidebar);
+  --color-surface-topbar: var(--surface-topbar);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-surface-preview: var(--surface-preview);
+
+  --color-edge: var(--border-default);
+  --color-edge-subtle: var(--border-subtle);
+  --color-edge-strong: var(--border-strong);
+
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-placeholder: var(--text-placeholder);
+  --color-ink-inverse: var(--text-inverse);
+
+  --color-nav-active: var(--nav-active-bg);
+  --color-nav-edge: var(--nav-active-border);
+  --color-nav-idle: var(--nav-inactive-text);
+
+  --color-affirm: var(--action-affirm-bg);
+  --color-affirm-ink: var(--action-affirm-text);
+  --color-affirm-edge: var(--action-affirm-border);
+  --color-refuse: var(--action-refuse-bg);
+  --color-refuse-ink: var(--action-refuse-text);
+  --color-refuse-edge: var(--action-refuse-border);
+  --color-neutral: var(--action-neutral-bg);
+  --color-neutral-ink: var(--action-neutral-text);
+  --color-neutral-edge: var(--action-neutral-border);
+
+  --color-applied: var(--outcome-applied-bg);
+  --color-applied-ink: var(--outcome-applied-text);
+  --color-awaiting: var(--outcome-awaiting-bg);
+  --color-awaiting-ink: var(--outcome-awaiting-text);
+  --color-rejected: var(--outcome-rejected-bg);
+  --color-rejected-ink: var(--outcome-rejected-text);
+  --color-uninterpreted: var(--outcome-uninterpreted-bg);
+  --color-uninterpreted-ink: var(--outcome-uninterpreted-text);
+  --color-inapplicable: var(--outcome-inapplicable-bg);
+  --color-inapplicable-ink: var(--outcome-inapplicable-text);
+
+  --color-node-hover: var(--node-hover-outline);
+  --color-node-selected: var(--node-selected-outline);
+  --color-node-label: var(--node-label-bg);
+  --color-node-label-ink: var(--node-label-text);
+
+  --radius-DEFAULT: var(--radius-base);
+  --radius-sm: var(--radius-base);
+  --radius-md: var(--radius-medium);
+  --radius-lg: var(--radius-large);
+
+  --text-2xs: var(--size-2xs);
+  --text-xs: var(--size-xs);
+  --text-sm: var(--size-sm);
+  --text-base: var(--size-base);
+  --text-md: var(--size-md);
+  --text-lg: var(--size-lg);
+  --text-xl: var(--size-xl);
+  --text-2xl: var(--size-2xl);
+  --text-3xl: var(--size-3xl);
+}
+
+@layer base {
+  body {
+    background-color: var(--surface-page);
+    background-image: var(--surface-wash);
+    background-repeat: no-repeat;
+    color: var(--text-primary);
+    font-size: var(--size-base);
+    -webkit-tap-highlight-color: transparent;
+  }
+}

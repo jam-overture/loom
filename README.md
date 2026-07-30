@@ -87,6 +87,29 @@ src/
     └── scaffold-fixture/ # `loom init`'s output, committed so it is typechecked
 ```
 
+## The workspace
+
+The repo is a pnpm workspace. `@loom/runtime` is the root package; `apps/portal`
+is the §5 Portal, and it depends on the runtime as `workspace:*` so it can only
+reach the published entry points — a deep import into `src/` does not resolve.
+When the portal needs something the public API does not expose, that is a
+framework gap to close in the framework (see
+[0018](decisions/0018-the-portal-is-a-consumer-not-an-insider.md)).
+
+```
+apps/portal/
+├── app/
+│   ├── globals.css      # The silver design system, as tokens
+│   ├── layout.tsx       # Topbar, rail, and the content column
+│   └── _components/
+│       └── shell/       # Topbar, sidebar, nav items
+└── lib/nav.ts           # Active-section matching, as a pure function
+```
+
+`pnpm verify` at the root runs the runtime's typecheck and tests, then the
+portal's typecheck, tests and build. The build is part of it because prerendering
+is what proves the shell renders.
+
 ## Decisions
 
 `decisions/` holds numbered architectural decision records — what was chosen,
