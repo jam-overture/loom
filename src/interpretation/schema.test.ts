@@ -9,7 +9,12 @@ import {
 } from "../testing/model-replies.js"
 
 import { interpretationReplySchema } from "./draft.js"
-import { DEFAULT_DRAFT_DEPTH, interpretationReplyJsonSchema } from "./schema.js"
+import {
+  DEFAULT_DRAFT_DEPTH,
+  draftSchemaByteSize,
+  GRAMMAR_BUDGET_BYTES,
+  interpretationReplyJsonSchema,
+} from "./schema.js"
 
 const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value)
@@ -52,6 +57,40 @@ describe("interpretationReplyJsonSchema", () => {
     expect(maximumNodeDepth(interpretationReplyJsonSchema(1))).toBe(1)
     expect(maximumNodeDepth(interpretationReplyJsonSchema(3))).toBe(3)
     expect(maximumNodeDepth(interpretationReplyJsonSchema())).toBe(DEFAULT_DRAFT_DEPTH)
+  })
+
+  /**
+   * The offline half of 0014's guard. The live smoke test is the authority on
+   * where the real ceiling sits; this one fails on the commit that pushes the
+   * schema past it, with no key and no network, which is the only way a
+   * regression gets caught before a deploy.
+   */
+  it("stays inside the compiled-grammar budget", () => {
+    expect(draftSchemaByteSize()).toBeLessThanOrEqual(GRAMMAR_BUDGET_BYTES)
+  })
+
+  it("keeps the budget guard below the measured rejection boundary", () => {
+    expect(GRAMMAR_BUDGET_BYTES).toBeLessThan(4136)
+  })
+
+  /** The repetition that broke it: props must cost one production, not a union. */
+  it("spends one string on a node's props rather than a variant per JSON type", () => {
+    const element = (interpretationReplyJsonSchema(2)["anyOf"] as readonly JsonObject[])[0]
+    const operations = ((element?.["properties"] as JsonObject)["operations"] as JsonObject)["items"]
+    const insert = ((operations as JsonObject)["anyOf"] as readonly JsonObject[])[0]
+    const node = (insert?.["properties"] as JsonObject)["node"] as JsonObject
+    const elementNode = (node["anyOf"] as readonly JsonObject[])[0]
+
+    expect((elementNode?.["properties"] as JsonObject)["props"]).toEqual({ type: "string" })
+    expect(JSON.stringify(interpretationReplyJsonSchema())).not.toContain('"const":"json"')
+  })
+
+  it("offers element and text as insertable kinds, and not slot", () => {
+    const serialized = JSON.stringify(interpretationReplyJsonSchema())
+
+    expect(serialized).toContain('"const":"element"')
+    expect(serialized).toContain('"const":"text"')
+    expect(serialized).not.toContain('"const":"slot"')
   })
 
   it("bottoms out at a leaf, so the deepest level cannot hold children", () => {

@@ -5,6 +5,9 @@
  *
  * These stand in for recorded responses: hand-written so the suite is
  * deterministic, offline, and runnable without a key.
+ *
+ * Props are JSON-encoded objects, per 0014 — a string inside the reply, which is
+ * why they read as escaped JSON here.
  */
 
 export const INSERT_NOTE_REPLY = JSON.stringify({
@@ -19,10 +22,7 @@ export const INSERT_NOTE_REPLY = JSON.stringify({
       node: {
         kind: "element",
         type: "loom.note",
-        props: [
-          { key: "tone", value: { kind: "string", string: "quiet" } },
-          { key: "dismissible", value: { kind: "boolean", boolean: false } },
-        ],
+        props: '{"tone":"quiet","dismissible":false}',
         children: [{ kind: "text", value: "Thanks for visiting" }],
       },
     },
@@ -37,10 +37,7 @@ export const CONFIGURE_CARD_REPLY = JSON.stringify({
     {
       op: "configure",
       nodeId: "n_4",
-      set: [
-        { key: "elevation", value: { kind: "number", number: 0 } },
-        { key: "padding", value: { kind: "json", json: '{"x":2,"y":1}' } },
-      ],
+      set: '{"elevation":0,"padding":{"x":2,"y":1}}',
       unset: ["variant"],
     },
   ],
@@ -72,35 +69,40 @@ export const FOREIGN_ID_REPLY = JSON.stringify({
   operations: [{ op: "remove", nodeId: "footer" }],
 })
 
-/** Passes the schema, but carries a prop the runtime cannot decode. */
+/**
+ * Passes the schema, because the schema only says "a string", and fails the
+ * parse. This is the failure mode 0014 accepted in exchange for the grammar
+ * budget, so it is a fixture rather than an impossibility.
+ */
 export const UNDECODABLE_PROP_REPLY = JSON.stringify({
   outcome: "change",
   rationale: "Sets a padding object on the card.",
   confidence: 0.8,
-  operations: [
-    {
-      op: "configure",
-      nodeId: "n_4",
-      set: [{ key: "padding", value: { kind: "json", json: "{x: 2}" } }],
-      unset: [],
-    },
-  ],
+  operations: [{ op: "configure", nodeId: "n_4", set: "{x: 2}", unset: [] }],
 })
 
-/** Passes the schema, but sets one prop twice. */
-export const DUPLICATE_PROP_REPLY = JSON.stringify({
+/** Parseable JSON, but not an object, so it cannot be a prop bag. */
+export const NON_OBJECT_PROPS_REPLY = JSON.stringify({
   outcome: "change",
   rationale: "Sets the variant.",
   confidence: 0.8,
+  operations: [{ op: "configure", nodeId: "n_4", set: '["filled"]', unset: [] }],
+})
+
+/**
+ * Passes the schema and the parse, and proposes a slot — which the reply schema
+ * no longer offers as an insertable kind, so the draft schema must refuse it.
+ */
+export const INSERT_SLOT_REPLY = JSON.stringify({
+  outcome: "change",
+  rationale: "Adds a region for the sidebar.",
+  confidence: 0.7,
   operations: [
     {
-      op: "configure",
-      nodeId: "n_4",
-      set: [
-        { key: "variant", value: { kind: "string", string: "filled" } },
-        { key: "variant", value: { kind: "string", string: "outlined" } },
-      ],
-      unset: [],
+      op: "insert",
+      parentId: "n_7",
+      index: 1,
+      node: { kind: "slot", name: "aside", children: [] },
     },
   ],
 })

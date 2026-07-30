@@ -1,6 +1,6 @@
 # 0004 — The model-facing schema is a projection, not the AST
 
-**Status:** Accepted
+**Status:** Superseded by [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md)
 **Date:** 2026-07-28
 **Section:** §2 — Composition Runtime
 

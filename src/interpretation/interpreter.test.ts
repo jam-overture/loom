@@ -22,9 +22,10 @@ import { testRegistry } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
 import {
   CONFIGURE_CARD_REPLY,
-  DUPLICATE_PROP_REPLY,
   FOREIGN_ID_REPLY,
   INSERT_NOTE_REPLY,
+  INSERT_SLOT_REPLY,
+  NON_OBJECT_PROPS_REPLY,
   NOT_UNDERSTOOD_REPLY,
   NO_CHANGE_REPLY,
   OFF_SCHEMA_REPLY,
@@ -264,19 +265,32 @@ describe("modelInterpreter — answers it cannot use", () => {
     expect(interpreted.ok ? "" : interpreted.error.code).toBe("malformed-proposal")
   })
 
-  it("reports a prop the runtime cannot decode", async () => {
+  it("reports a prop bag the runtime cannot parse", async () => {
     const { interpreter, intent, tree } = harness(UNDECODABLE_PROP_REPLY)
     const interpreted = await interpreter.interpret(intent, tree)
 
     expect(interpreted.ok ? "" : interpreted.error.code).toBe("malformed-proposal")
-    expect(interpreted.ok ? "" : interpreted.error.detail).toContain('prop "padding"')
+    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("not parseable JSON")
   })
 
-  it("reports a prop set twice", async () => {
-    const { interpreter, intent, tree } = harness(DUPLICATE_PROP_REPLY)
+  it("reports a prop bag that parses to something other than an object", async () => {
+    const { interpreter, intent, tree } = harness(NON_OBJECT_PROPS_REPLY)
     const interpreted = await interpreter.interpret(intent, tree)
 
-    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("set twice")
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("malformed-proposal")
+    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("must be a JSON object")
+  })
+
+  /**
+   * The reply schema no longer offers slot as an insertable kind (0014), so a
+   * model that proposes one is off-schema rather than something the runtime has
+   * to decide what to do with.
+   */
+  it("refuses an inserted slot, which is no longer a kind a proposal may introduce", async () => {
+    const { interpreter, intent, tree } = harness(INSERT_SLOT_REPLY)
+    const interpreted = await interpreter.interpret(intent, tree)
+
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("malformed-proposal")
   })
 })
 

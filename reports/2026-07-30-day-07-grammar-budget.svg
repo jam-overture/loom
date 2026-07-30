@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 640" width="980" height="640" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="640" fill="#ffffff"/>
+
+  <text x="32" y="40" font-size="20" font-weight="bold" fill="#111827">The reply schema, before and after the grammar budget</text>
+  <text x="32" y="62" font-size="13" fill="#4b5563">0014 adopted, 0004 superseded. The repetition was the cost — not the depth.</text>
+
+  <!-- BEFORE -->
+  <rect x="32" y="88" width="430" height="300" rx="8" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="48" y="112" font-size="13" font-weight="bold" fill="#7f1d1d">BEFORE — 0004, rejected at 15890 bytes</text>
+  <text x="48" y="130" font-size="11" fill="#7f1d1d">every live call: 400 "compiled grammar is too large"</text>
+
+  <text x="48" y="158" font-size="11.5" font-family="monospace" fill="#111827">insert.node  (depth 4)</text>
+  <text x="64" y="176" font-size="11.5" font-family="monospace" fill="#111827">element | text | slot</text>
+  <text x="64" y="194" font-size="11.5" font-family="monospace" fill="#111827">props: [ {key, value} … ]</text>
+  <rect x="72" y="202" width="330" height="86" rx="5" fill="#ffffff" stroke="#b91c1c"/>
+  <text x="84" y="220" font-size="11" font-family="monospace" fill="#7f1d1d">value: anyOf</text>
+  <text x="96" y="236" font-size="11" font-family="monospace" fill="#111827">{kind:"string",  string}</text>
+  <text x="96" y="250" font-size="11" font-family="monospace" fill="#111827">{kind:"number",  number}</text>
+  <text x="96" y="264" font-size="11" font-family="monospace" fill="#111827">{kind:"boolean", boolean}</text>
+  <text x="96" y="278" font-size="11" font-family="monospace" fill="#111827">{kind:"null"} · {kind:"json", json}</text>
+
+  <text x="48" y="310" font-size="11" fill="#7f1d1d">↑ five variants, repeated for every prop,</text>
+  <text x="48" y="326" font-size="11" fill="#7f1d1d">on every element, at every one of 4 levels</text>
+  <text x="48" y="350" font-size="11" fill="#4b5563">Depth 2 with this union: 5030 bytes — still refused.</text>
+  <text x="48" y="366" font-size="11" fill="#4b5563">Shrinking depth could never have fixed it.</text>
+
+  <!-- arrow -->
+  <path d="M470 238 L516 238" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="474" y="230" font-size="10.5" fill="#4b5563">0014</text>
+
+  <!-- AFTER -->
+  <rect x="524" y="88" width="424" height="300" rx="8" fill="#ecfdf5" stroke="#047857"/>
+  <text x="540" y="112" font-size="13" font-weight="bold" fill="#065f46">AFTER — accepted at 3381 bytes</text>
+  <text x="540" y="130" font-size="11" fill="#065f46">live smoke test passes; 378 tests, none skipped</text>
+
+  <text x="540" y="158" font-size="11.5" font-family="monospace" fill="#111827">insert.node  (depth 4 — unchanged)</text>
+  <text x="556" y="176" font-size="11.5" font-family="monospace" fill="#111827">element | text</text>
+  <rect x="556" y="186" width="330" height="42" rx="5" fill="#ffffff" stroke="#047857"/>
+  <text x="568" y="204" font-size="11" font-family="monospace" fill="#065f46">props: { type: "string" }</text>
+  <text x="568" y="219" font-size="10.5" fill="#4b5563">'{"tone":"quiet","count":2}'</text>
+
+  <text x="540" y="250" font-size="11" fill="#065f46">One production, whatever the props contain.</text>
+
+  <text x="540" y="278" font-size="11.5" font-weight="bold" fill="#111827">What moved, not vanished</text>
+  <text x="540" y="298" font-size="11" fill="#4b5563">parse + is-it-an-object + JSON value space</text>
+  <text x="540" y="313" font-size="11" fill="#4b5563">→ materialize.ts, as malformed-proposal</text>
+  <text x="540" y="331" font-size="11" fill="#4b5563">prop types → §4 registry, per primitive (0011)</text>
+  <text x="540" y="349" font-size="11" fill="#4b5563">which slots exist → §4 catalogue (0013)</text>
+  <text x="540" y="367" font-size="11" fill="#7f1d1d">lost: duplicate-key refusal (JSON.parse collapses it)</text>
+
+  <!-- budget scale -->
+  <text x="32" y="432" font-size="14" font-weight="bold" fill="#111827">The budget, measured</text>
+  <line x1="32" y1="442" x2="948" y2="442" stroke="#e5e7eb"/>
+
+  <line x1="72" y1="500" x2="900" y2="500" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="72" y="524" font-size="10.5" fill="#6b7280">0</text>
+  <text x="880" y="524" font-size="10.5" fill="#6b7280">16 kB</text>
+
+  <!-- accepted band -->
+  <rect x="72" y="486" width="190" height="14" fill="#d1fae5" stroke="#047857"/>
+  <text x="76" y="478" font-size="10.5" fill="#065f46">accepted ≤ 3681</text>
+
+  <!-- rejected band -->
+  <rect x="286" y="486" width="614" height="14" fill="#fee2e2" stroke="#b91c1c"/>
+  <text x="292" y="478" font-size="10.5" fill="#7f1d1d">rejected ≥ 4136</text>
+
+  <!-- markers -->
+  <line x1="247" y1="482" x2="247" y2="512" stroke="#047857" stroke-width="2"/>
+  <text x="196" y="546" font-size="10.5" font-weight="bold" fill="#065f46">3381 now</text>
+
+  <line x1="253" y1="486" x2="253" y2="514" stroke="#374151" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <text x="248" y="562" font-size="10.5" fill="#374151">3500 guard</text>
+
+  <line x1="271" y1="482" x2="271" y2="512" stroke="#b45309" stroke-width="2"/>
+  <text x="288" y="546" font-size="10.5" fill="#78350f">3818 = depth 5, would not fit</text>
+
+  <line x1="890" y1="478" x2="890" y2="512" stroke="#b91c1c" stroke-width="2.5"/>
+  <text x="762" y="566" font-size="10.5" font-weight="bold" fill="#7f1d1d">15890 — what shipped for four days</text>
+
+  <text x="32" y="596" font-size="11" fill="#4b5563">Each level of unrolled nesting costs ~437 bytes, so depth 4 is not a comfortable choice — it is the last one that fits.</text>
+  <text x="32" y="614" font-size="11" fill="#4b5563">The boundary is undocumented and belongs to the service: the offline guard trips early, the live test is the only authority.</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+  </defs>
+</svg>

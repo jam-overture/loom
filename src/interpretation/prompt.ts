@@ -38,7 +38,8 @@ Rules you must follow:
 - Never give an id to a node you are inserting. The runtime assigns it.
 - Operations apply in order, and each one sees the effects of the ones before it.
 - move is a detach followed by an insert, so its index counts positions in the child list the node has already left.
-- Prop values are tagged: {"kind":"string","string":"Home"}, {"kind":"number","number":1}, {"kind":"boolean","boolean":true}, {"kind":"null"}, or {"kind":"json","json":"[1,2]"} for an array or object.
+- props is the node's props as a JSON object, JSON-encoded into a string: "{\"tone\":\"quiet\",\"count\":2}". Use "{}" for no props. configure's set is written the same way. Values are ordinary JSON — strings, numbers, booleans, null, arrays, objects — with no tags or wrappers.
+- You may insert element and text nodes. You cannot insert a slot: a slot is a region a primitive declares, not content an edit adds. Slots already in the tree can be configured, moved into, and inserted into like anything else.
 - Propose the smallest set of operations that satisfies the intent. Do not tidy, restructure, or improve anything you were not asked about.
 - Reuse primitive types already present in the tree unless the intent clearly calls for a new one.
 - confidence is your own estimate that these operations satisfy the intent, from 0 to 1. Report it honestly; a low number is more useful than a wrong high one.
