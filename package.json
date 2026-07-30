@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./anthropic": "./src/interpretation/anthropic.ts",
     "./react": "./src/render/index.ts",
-    "./sdk": "./src/sdk/index.ts"
+    "./sdk": "./src/sdk/index.ts",
+    "./cli": "./src/cli/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

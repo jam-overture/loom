@@ -1,0 +1,141 @@
+import { primitiveTypeSchema } from "../primitive-type.js"
+import { err, ok, type Result } from "../result.js"
+
+import {
+  CONFORMANCE_TEST_MODULE,
+  conformanceTest,
+  namesFor,
+  primitiveModule,
+  REGISTRY_MODULE,
+  registryModule,
+  type PrimitiveNames,
+} from "./templates.js"
+
+/**
+ * What a command would write, decided before anything is written.
+ *
+ * Planning is a pure function of the command and the directory's current
+ * contents, which is what makes the CLI testable without a filesystem and what
+ * makes "refuse to overwrite" reliable: the decision is made once, against a
+ * listing, rather than per-file midway through writing.
+ */
+
+export type CliCommand =
+  | { readonly kind: "init"; readonly directory: string }
+  | { readonly kind: "add-primitive"; readonly directory: string; readonly type: string }
+  | { readonly kind: "help" }
+
+export type CliError =
+  | { readonly code: "unknown-command"; readonly given: string }
+  | { readonly code: "missing-argument"; readonly argument: string }
+  | { readonly code: "unexpected-argument"; readonly given: string }
+  | { readonly code: "invalid-primitive-type"; readonly type: string }
+  | { readonly code: "reserved-primitive-type"; readonly type: string }
+  | { readonly code: "already-registered"; readonly type: string }
+  | { readonly code: "file-exists"; readonly path: string }
+  | { readonly code: "filesystem-failed"; readonly path: string; readonly detail: string }
+
+export type PlannedFile = {
+  readonly path: string
+  readonly contents: string
+}
+
+export type WritePlan = {
+  readonly files: readonly PlannedFile[]
+  /** Lines for the caller to print — what happened, and what to do next. */
+  readonly notes: readonly string[]
+}
+
+export const PRIMITIVES_DIRECTORY = "primitives"
+
+const join = (...segments: readonly string[]): string => segments.join("/")
+
+const basenameOf = (path: string): string => path.slice(path.lastIndexOf("/") + 1)
+
+/**
+ * The primitive modules already in the directory, recovered from their names.
+ *
+ * Anything that is not a `.ts` file, and the two reserved modules, are skipped —
+ * as is a name that is not a valid primitive type, so a stray file cannot make
+ * the generated registry reference a module that will not compile.
+ */
+export const existingPrimitives = (paths: readonly string[]): readonly PrimitiveNames[] =>
+  paths.flatMap((path) => {
+    const basename = basenameOf(path)
+    if (!basename.endsWith(".ts")) return []
+    if (basename === REGISTRY_MODULE || basename === CONFORMANCE_TEST_MODULE) return []
+
+    const type = basename.slice(0, -".ts".length)
+
+    return primitiveTypeSchema.safeParse(type).success ? [namesFor(type)] : []
+  })
+
+const STARTER_TYPE = "loom.page"
+
+const planInit = (directory: string, existing: readonly string[]): Result<WritePlan, CliError> => {
+  const primitives = join(directory, PRIMITIVES_DIRECTORY)
+  const starter = namesFor(STARTER_TYPE)
+
+  const files: readonly PlannedFile[] = [
+    { path: join(primitives, starter.module), contents: primitiveModule(starter) },
+    { path: join(primitives, REGISTRY_MODULE), contents: registryModule([starter]) },
+    { path: join(primitives, CONFORMANCE_TEST_MODULE), contents: conformanceTest() },
+  ]
+
+  /**
+   * `init` refuses if any of its files exist, including the registry it would
+   * otherwise own — re-running it over a populated directory would silently
+   * discard every registration but the starter.
+   */
+  const clash = files.find((file) => existing.includes(file.path))
+  if (clash) return err({ code: "file-exists", path: clash.path })
+
+  return ok({
+    files,
+    notes: [
+      `Scaffolded ${primitives} with one primitive, a generated registry, and a conformance test.`,
+      `Wire the registry into your renderer as both the resolver and the validator, then run the test.`,
+    ],
+  })
+}
+
+/** The type has already been validated by `args.ts`, which is the boundary for it. */
+const planAddPrimitive = (
+  directory: string,
+  type: string,
+  existing: readonly string[]
+): Result<WritePlan, CliError> => {
+  const names = namesFor(type)
+  const primitives = join(directory, PRIMITIVES_DIRECTORY)
+  const modulePath = join(primitives, names.module)
+
+  if (existing.includes(modulePath)) return err({ code: "already-registered", type })
+
+  const registered = [...existingPrimitives(existing), names]
+
+  return ok({
+    files: [
+      { path: modulePath, contents: primitiveModule(names) },
+      { path: join(primitives, REGISTRY_MODULE), contents: registryModule(registered) },
+    ],
+    notes: [
+      `Declared ${type} in ${modulePath}.`,
+      `Regenerated ${join(primitives, REGISTRY_MODULE)} with ${registered.length} primitive${registered.length === 1 ? "" : "s"}.`,
+      `Give it a description and a prop schema — the description is what a model reads when it chooses between primitives.`,
+    ],
+  })
+}
+
+export const planCommand = (
+  command: CliCommand,
+  existing: readonly string[]
+): Result<WritePlan, CliError> => {
+  switch (command.kind) {
+    case "init":
+      return planInit(command.directory, existing)
+    case "add-primitive":
+      return planAddPrimitive(command.directory, command.type, existing)
+    case "help":
+      return ok({ files: [], notes: [] })
+  }
+}
