@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="600" viewBox="0 0 940 600" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="940" height="600" fill="#ffffff"/>
+
+  <text x="40" y="40" font-size="20" font-weight="600" fill="#1b1f24">The compiled-grammar budget</text>
+  <text x="40" y="63" font-size="13" fill="#6a737d">What the API actually accepts, measured. The schema that ships is nearly four times over.</text>
+
+  <!-- axis -->
+  <line x1="270" y1="96" x2="270" y2="470" stroke="#d6dbe1"/>
+  <text x="278" y="92" font-size="11" fill="#6a737d">schema JSON, bytes →</text>
+
+  <!-- threshold band -->
+  <rect x="270" y="272" width="620" height="26" fill="#fff5e0"/>
+  <line x1="270" y1="285" x2="890" y2="285" stroke="#9a6700" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="884" y="266" font-size="11" font-weight="600" fill="#9a6700" text-anchor="end">threshold ≈ 4 kB — undocumented, assume it moves</text>
+
+  <!-- rows: y, label, bytes, accepted, emphasis -->
+  <g font-size="11.5">
+    <!-- REJECTED (above the line) -->
+    <text x="258" y="116" fill="#b42318" font-weight="600" text-anchor="end">depth 4 · tagged · 3 kinds</text>
+    <rect x="270" y="106" width="580" height="14" rx="3" fill="#fdeceb" stroke="#e5726a"/>
+    <text x="858" y="117" fill="#b42318" font-weight="600">15890</text>
+    <text x="278" y="117" font-size="10.5" fill="#b42318" font-weight="600">← THIS IS WHAT SHIPS TODAY</text>
+
+    <text x="258" y="140" fill="#8b949e" text-anchor="end">depth 5 · encoded · 3</text>
+    <rect x="270" y="130" width="508" height="14" rx="3" fill="#fdeceb" stroke="#f3b5b0"/>
+    <text x="858" y="141" fill="#b42318">13904</text>
+
+    <text x="258" y="164" fill="#8b949e" text-anchor="end">depth 3 · tagged · 3</text>
+    <rect x="270" y="154" width="316" height="14" rx="3" fill="#fdeceb" stroke="#f3b5b0"/>
+    <text x="858" y="165" fill="#b42318">8650</text>
+
+    <text x="258" y="188" fill="#8b949e" text-anchor="end">depth 4 · encoded · 3</text>
+    <rect x="270" y="178" width="270" height="14" rx="3" fill="#fdeceb" stroke="#f3b5b0"/>
+    <text x="858" y="189" fill="#b42318">7392</text>
+
+    <text x="258" y="212" fill="#8b949e" text-anchor="end">depth 2 · tagged · 3</text>
+    <rect x="270" y="202" width="184" height="14" rx="3" fill="#fdeceb" stroke="#f3b5b0"/>
+    <text x="858" y="213" fill="#b42318">5030</text>
+
+    <text x="258" y="236" fill="#8b949e" text-anchor="end">depth 3 · tagged · 1</text>
+    <rect x="270" y="226" width="176" height="14" rx="3" fill="#fdeceb" stroke="#f3b5b0"/>
+    <text x="858" y="237" fill="#b42318">4819</text>
+
+    <text x="258" y="260" fill="#8b949e" text-anchor="end">depth 3 · encoded · 3</text>
+    <rect x="270" y="250" width="151" height="14" rx="3" fill="#fdeceb" stroke="#f3b5b0"/>
+    <text x="858" y="261" fill="#b42318">4136</text>
+
+    <!-- ACCEPTED (below the line) -->
+    <text x="258" y="320" fill="#8b949e" text-anchor="end">depth 2 · tagged · 1</text>
+    <rect x="270" y="310" width="134" height="14" rx="3" fill="#eaf7ee" stroke="#a6dab6"/>
+    <text x="858" y="321" fill="#1a7f37">3681</text>
+
+    <text x="258" y="344" fill="#8b949e" text-anchor="end">depth 1 · text leaf only</text>
+    <rect x="270" y="334" width="117" height="14" rx="3" fill="#eaf7ee" stroke="#a6dab6"/>
+    <text x="858" y="345" fill="#1a7f37">3220</text>
+
+    <text x="258" y="368" fill="#1a7f37" font-weight="600" text-anchor="end">depth 4 · encoded · 2 kinds</text>
+    <rect x="270" y="358" width="112" height="14" rx="3" fill="#cdeed8" stroke="#1a7f37"/>
+    <text x="858" y="369" fill="#1a7f37" font-weight="600">3065</text>
+    <text x="392" y="369" font-size="10.5" fill="#1a7f37" font-weight="600">← RECOMMENDED: roomiest accepted shape</text>
+
+    <text x="258" y="392" fill="#8b949e" text-anchor="end">depth 3 · encoded · 2</text>
+    <rect x="270" y="382" width="95" height="14" rx="3" fill="#eaf7ee" stroke="#a6dab6"/>
+    <text x="858" y="393" fill="#1a7f37">2608</text>
+
+    <text x="258" y="416" fill="#8b949e" text-anchor="end">depth 4 · encoded · 1</text>
+    <rect x="270" y="406" width="93" height="14" rx="3" fill="#eaf7ee" stroke="#a6dab6"/>
+    <text x="858" y="417" fill="#1a7f37">2561</text>
+
+    <text x="258" y="440" fill="#8b949e" text-anchor="end">depth 2 · encoded · 3</text>
+    <rect x="270" y="430" width="91" height="14" rx="3" fill="#eaf7ee" stroke="#a6dab6"/>
+    <text x="858" y="441" fill="#1a7f37">2508</text>
+  </g>
+
+  <text x="270" y="466" font-size="10.5" fill="#8b949e">tagged = 0004's five-variant prop union · encoded = props as one JSON string · kinds = node kinds an insert may introduce</text>
+
+  <!-- conclusion boxes -->
+  <rect x="40" y="490" width="424" height="88" rx="6" fill="#fbfcfd" stroke="#d6dbe1"/>
+  <text x="58" y="512" font-size="12" font-weight="600" fill="#1b1f24">Depth alone cannot fix it</text>
+  <text x="58" y="532" font-size="11" fill="#6a737d">Depth 2 with the tagged union is still refused, and depth 2</text>
+  <text x="58" y="548" font-size="11" fill="#6a737d">is barely worth having. The five-variant prop union repeats at</text>
+  <text x="58" y="564" font-size="11" fill="#6a737d">every element at every level — that is where the budget goes.</text>
+
+  <rect x="484" y="490" width="416" height="88" rx="6" fill="#fdeceb" stroke="#f3b5b0"/>
+  <text x="502" y="512" font-size="12" font-weight="600" fill="#b42318">ARCHITECTURAL — not changed unilaterally</text>
+  <text x="502" y="532" font-size="11" fill="#6a737d">The fix contradicts Accepted record 0004 on two specifics, so</text>
+  <text x="502" y="548" font-size="11" fill="#6a737d">0014 is Proposed and 0004 stands untouched. pnpm verify is RED</text>
+  <text x="502" y="564" font-size="11" fill="#6a737d">and stays red: the test is reporting a real defect, not a regression.</text>
+</svg>
