@@ -1,10 +1,10 @@
 import type { DeltaId, IdFactory, TreeId } from "../ids.js"
-import { jsonValueSchema, type JsonObject, type JsonValue } from "../json.js"
+import { jsonObjectSchema, type JsonObject } from "../json.js"
 import { assertNever, err, ok, reduceResult, type Result } from "../result.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import type { LoomNode } from "../tree/node.js"
 
-import type { DraftNode, DraftOperation, DraftProp, DraftPropValue } from "./draft.js"
+import type { DraftNode, DraftOperation } from "./draft.js"
 
 /**
  * The inverse of the projection in `draft.ts`: a validated draft becomes a real
@@ -42,42 +42,38 @@ const parseJson = (text: string): Result<unknown, string> => {
   }
 }
 
-const decodePropValue = (key: string, value: DraftPropValue): Result<JsonValue, string> => {
-  switch (value.kind) {
-    case "string":
-      return ok(value.string)
-    case "number":
-      return ok(value.number)
-    case "boolean":
-      return ok(value.boolean)
-    case "null":
-      return ok(null)
-    case "json": {
-      const parsed = parseJson(value.json)
-      if (!parsed.ok) return err(`prop "${key}": ${parsed.error}`)
-
-      const validated = jsonValueSchema.safeParse(parsed.value)
-
-      return validated.success ? ok(validated.data) : err(`prop "${key}": not a JSON value`)
-    }
-    default:
-      return assertNever(value, "decodePropValue")
-  }
-}
-
 /**
- * Duplicate keys are rejected rather than resolved last-wins: two values for
- * one prop is an ambiguous proposal, and guessing which the model meant would
- * hide that from the Gate and from telemetry.
+ * Props arrive as one JSON-encoded object (0014). This is the whole of the trust
+ * boundary for them: parse it, require an object rather than an array or a
+ * scalar, and validate every value against the JSON value space so nothing
+ * un-serialisable reaches a tree.
+ *
+ * What the old tagged union enforced in the grammar is enforced here instead —
+ * strictly later, and reported as `malformed-proposal` rather than being
+ * unsayable. Prop *meaning* is checked later still, by §4's registry against the
+ * primitive's own declared schema (0011).
+ *
+ * One thing is genuinely lost: a duplicate key. `JSON.parse` collapses
+ * `{"a":1,"a":2}` to the last value before this code sees it, so the "set twice"
+ * refusal the tagged array allowed is not expressible any more. It is a smaller
+ * loss than it looks — duplicate names in JSON have a deterministic outcome in
+ * every parser anyone would use, where two entries in our own array genuinely
+ * had none.
  */
-export const decodeProps = (props: readonly DraftProp[]): Result<JsonObject, string> =>
-  reduceResult<DraftProp, JsonObject, string>(props, {}, (accumulator, prop) => {
-    if (Object.hasOwn(accumulator, prop.key)) return err(`prop "${prop.key}" set twice`)
+export const decodeProps = (encoded: string): Result<JsonObject, string> => {
+  const parsed = parseJson(encoded)
 
-    const value = decodePropValue(prop.key, prop.value)
+  /** Truncated: the reply is model-authored and this sentence ends up in telemetry. */
+  if (!parsed.ok) return err(`props are not parseable JSON: ${encoded.slice(0, 80)}`)
 
-    return value.ok ? ok({ ...accumulator, [prop.key]: value.value }) : value
-  })
+  if (parsed.value === null || typeof parsed.value !== "object" || Array.isArray(parsed.value)) {
+    return err("props must be a JSON object")
+  }
+
+  const validated = jsonObjectSchema.safeParse(parsed.value)
+
+  return validated.success ? ok(validated.data) : err("props contain a value that is not JSON")
+}
 
 const materializeNode = (node: DraftNode, idFactory: IdFactory): Result<LoomNode, string> => {
   switch (node.kind) {
@@ -97,12 +93,6 @@ const materializeNode = (node: DraftNode, idFactory: IdFactory): Result<LoomNode
         props: props.value,
         children: children.value,
       })
-    }
-    case "slot": {
-      const children = collectResults(node.children, (child) => materializeNode(child, idFactory))
-      if (!children.ok) return children
-
-      return ok({ kind: "slot", id: idFactory.nodeId(), name: node.name, children: children.value })
     }
     default:
       return assertNever(node, "materializeNode")

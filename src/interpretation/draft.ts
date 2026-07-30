@@ -1,62 +1,62 @@
 import { z } from "zod"
 
 import { nodeIdSchema } from "../ids.js"
-import { primitiveTypeSchema, slotNameSchema, type PrimitiveType, type SlotName } from "../primitive-type.js"
+import { primitiveTypeSchema, type PrimitiveType } from "../primitive-type.js"
 
 /**
  * What a model is allowed to say.
  *
  * A draft is the tree schema with three things taken away. Inserted nodes carry
  * no `id`, because identity is minted by the runtime and never by the proposer.
- * Prop values are tagged rather than free-form JSON, and nesting is bounded in
- * the emitted JSON Schema, because structured output cannot express an open
- * object or a recursive definition. None of this changes the AST — a draft is a
- * projection of it, and `materializeDelta` is the inverse projection.
+ * Props arrive as one JSON-encoded object rather than a typed structure, and the
+ * node kinds an insert may introduce are element and text only. None of this
+ * changes the AST — a draft is a projection of it, and `materializeDelta` is the
+ * inverse projection.
+ *
+ * The last two are not aesthetic choices. Structured output compiles the emitted
+ * schema into a grammar with a size ceiling, and the typed prop union 0004
+ * specified — repeated at every element at every level — put the schema four
+ * times over that ceiling, so no live call ever succeeded. Measured and adopted
+ * in 0014, which supersedes 0004.
  */
 
 /**
- * Tagged so that every value has exactly one spelling. `json` is the escape
- * hatch for arrays and objects, which a closed schema cannot describe directly.
+ * A JSON-encoded object of props: `{"tone":"quiet","count":2}`.
+ *
+ * A string costs the compiled grammar one production no matter how many props it
+ * carries or how deeply their values nest, which is what buys back the nesting
+ * depth. Nothing is trusted about the contents: `materializeDelta` parses it,
+ * requires an object, and validates every value against the JSON value space, so
+ * a malformed bag is a `malformed-proposal` rather than something that reaches a
+ * tree.
  */
-export const draftPropValueSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("string"), string: z.string() }),
-  z.object({ kind: z.literal("number"), number: z.number().finite() }),
-  z.object({ kind: z.literal("boolean"), boolean: z.boolean() }),
-  z.object({ kind: z.literal("null") }),
-  z.object({ kind: z.literal("json"), json: z.string() }),
-])
-export type DraftPropValue = z.infer<typeof draftPropValueSchema>
-
-export const draftPropSchema = z.object({
-  key: z.string().min(1),
-  value: draftPropValueSchema,
-})
-export type DraftProp = z.infer<typeof draftPropSchema>
+export const draftPropsSchema = z.string()
 
 export type DraftNode =
   | {
       readonly kind: "element"
       readonly type: PrimitiveType
-      readonly props: readonly DraftProp[]
+      readonly props: string
       readonly children: readonly DraftNode[]
     }
   | { readonly kind: "text"; readonly value: string }
-  | { readonly kind: "slot"; readonly name: SlotName; readonly children: readonly DraftNode[] }
 
+/**
+ * `slot` is absent on purpose. A slot is a projection region a primitive
+ * declares, not content an edit adds — §4's catalogue tells a model which slots
+ * a primitive has, and slots already in a tree stay addressable, configurable,
+ * and projectable. Dropping the third variant is also part of what keeps depth 4
+ * affordable.
+ */
 export const draftNodeSchema: z.ZodType<DraftNode, z.ZodTypeDef, unknown> = z.lazy(() =>
   z.discriminatedUnion("kind", [
     z.object({
       kind: z.literal("element"),
       type: primitiveTypeSchema,
-      props: z.array(draftPropSchema).readonly(),
+      props: draftPropsSchema,
       children: z.array(draftNodeSchema).readonly(),
     }),
     z.object({ kind: z.literal("text"), value: z.string() }),
-    z.object({
-      kind: z.literal("slot"),
-      name: slotNameSchema,
-      children: z.array(draftNodeSchema).readonly(),
-    }),
   ])
 )
 
@@ -77,7 +77,7 @@ export const draftOperationSchema = z.discriminatedUnion("op", [
   z.object({
     op: z.literal("configure"),
     nodeId: nodeIdSchema,
-    set: z.array(draftPropSchema).readonly(),
+    set: draftPropsSchema,
     unset: z.array(z.string()).readonly(),
   }),
 ])

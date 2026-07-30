@@ -1,13 +1,17 @@
 # 0014 — The reply schema must fit a compiled-grammar budget
 
-**Status:** Proposed — ARCHITECTURAL, needs review
-**Date:** 2026-07-30
+**Status:** Accepted
+**Date:** 2026-07-30 (proposed), 2026-07-30 (accepted)
 **Section:** §2 — Composition Runtime (interpretation)
+**Supersedes:** [0004](0004-model-facing-schema-is-a-projection.md)
 
-> This record **contradicts specifics of Accepted record
-> [0004](0004-model-facing-schema-is-a-projection.md)**. Per the escalation
-> rule it is written as `Proposed` and 0004 is left standing and unmodified.
-> Nothing in the code has been changed to match it.
+> Written as `Proposed` because it **contradicts specifics of Accepted record
+> [0004](0004-model-facing-schema-is-a-projection.md)** — the tagged prop union
+> and three insertable node kinds. Escalated rather than decided, and approved by
+> the maintainer on 2026-07-30. 0004 is now marked `Superseded by 0014` with its
+> text unchanged; the code was brought into line in the same change that promoted
+> this record. What the implementation learned beyond the proposal is recorded
+> under **As built**, below.
 
 ## Context
 
@@ -129,3 +133,37 @@ on the model not naming ids.
 
 **Raise it with the vendor / wait for the limit to change.** Not a plan. The
 limit is real today and the interpreter is broken today.
+
+## As built
+
+Implemented 2026-07-30. Three deviations from the proposal as written, none of
+them changing what was decided:
+
+**The measured 3065 bytes was optimistic; the honest figure is 3381.** The
+proposal's probe carried fewer `description` strings than the real generator
+does. Descriptions are the dominant remaining cost, because every one of them is
+repeated at every level of the unrolled schema — a helpful sentence on `props`
+cost four copies of itself. They are now terse, and the reason is recorded in
+`schema.ts` where the next person to write one will read it: the system prompt
+explains ids, indices, and the prop encoding at length, to the same model, in the
+same request, so a second explanation inside the schema buys nothing and is
+charged for four times.
+
+**The guard is `GRAMMAR_BUDGET_BYTES = 3500`,** asserted offline against the
+serialised schema, with a second assertion that the guard itself stays below the
+4136-byte boundary where rejections were first observed. Note the proxy is
+conservative in an unquantified way: descriptions almost certainly do not affect
+the *compiled grammar* much, yet the guard counts them. That errs toward tripping
+early, which is the safe direction for a limit nobody outside the service can see.
+
+**Duplicate prop keys are no longer detectable.** `JSON.parse` collapses
+`{"a":1,"a":2}` to the last value before any Loom code sees it, so the "set
+twice" refusal 0004's tagged array allowed cannot be expressed. It is a smaller
+loss than it appears — duplicate names in JSON resolve deterministically in every
+parser anyone would use, where two entries in an array of our own invention
+genuinely had no defined meaning — but it is a capability that existed and now
+does not.
+
+**The live smoke test passes.** 378 tests, none skipped: the first run in the
+project's history where the model-backed interpreter has demonstrably worked
+against a real model rather than against our beliefs about one.
