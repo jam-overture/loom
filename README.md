@@ -71,12 +71,20 @@ src/
 │   ├── render.ts        # The tree, projected into React
 │   └── request.ts       # Per-request resolution: load, validate, render
 ├── catalogue.ts         # What a deployment can build with, as data
-└── sdk/                 # The framework SDK — a separate entry point
-    ├── definition.ts    # The registration contract: definePrimitive
-    ├── registry.ts      # The registry: resolver and validator in one object
-    ├── conformance.ts   # Does a primitive spread loom.editable?
-    ├── audit.ts         # The conformance check a host runs
-    └── catalogue.ts     # The registry, projected for consumers outside it
+├── sdk/                 # The framework SDK — a separate entry point
+│   ├── definition.ts    # The registration contract: definePrimitive
+│   ├── registry.ts      # The registry: resolver and validator in one object
+│   ├── conformance.ts   # Does a primitive spread loom.editable?
+│   ├── audit.ts         # The conformance check a host runs
+│   └── catalogue.ts     # The registry, projected for consumers outside it
+└── cli/                 # Scaffolding — a separate entry point
+    ├── args.ts          # The grammar: two commands, one option
+    ├── templates.ts     # What gets written, as pure functions of a name
+    ├── plan.ts          # What a command would write, decided before writing
+    ├── filesystem.ts    # The one impure seam
+    ├── run.ts           # parse → plan → write
+    ├── main.ts          # The executable entry point
+    └── scaffold-fixture/ # `loom init`'s output, committed so it is typechecked
 ```
 
 ## Decisions
@@ -187,6 +195,34 @@ instead of guessing at type names.
 `auditRegistry(registry)` probes every primitive for the edit-mode contract and
 reports which ones would be invisible to the portal. It is a function a host runs
 in a test or a build step — registration itself never calls a primitive.
+
+## Scaffolding
+
+```
+loom init [--dir <directory>]
+loom add primitive <type> [--dir <directory>]
+```
+
+`init` writes a starter primitive, a generated registry, and a conformance test
+that runs `auditRegistry` — so the check exists from the first commit rather than
+being something to remember later. `add primitive` declares one more and
+regenerates the registry from the directory's contents.
+
+A primitive's module is named after its type verbatim (`commerce.product-card.ts`)
+because that is what lets the registry be regenerated exactly; the registry is a
+generated file and says so. Both are argued in
+[0015](decisions/0015-the-registry-is-generated-and-a-filename-is-a-type.md).
+
+Nothing is written unless the whole command can complete: a clash with an existing
+file is reported before the first write, so a refused command leaves the directory
+as it was.
+
+**The `loom` executable needs a build step this package does not have yet.** The
+CLI is library code today — `runCli(argv, nodeFileSystem)` from
+`@loom/runtime/cli`, with `src/cli/main.ts` as the entry point — because Node's
+type stripping will not resolve this repo's `.js` import specifiers to `.ts`
+sources. Either a compile step or a TypeScript loader closes that gap; the
+scaffolding logic itself is complete and tested.
 
 ## Daily reports
 

@@ -54,3 +54,4 @@ leave the existing record standing until someone decides.
 | [0012](0012-conformance-is-probed-and-reported-not-enforced.md) | Conformance is probed and reported, never enforced by registration | Accepted | §4      |
 | [0013](0013-the-registry-is-what-the-model-is-told-it-may-build.md) | The registry is what the model is told it may build              | Accepted | §4 → §2 |
 | [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md)   | The reply schema must fit a compiled-grammar budget            | Accepted — supersedes 0004 | §2 |
+| [0015](0015-the-registry-is-generated-and-a-filename-is-a-type.md) | The registry is generated from the directory, and a module's name is its type | Accepted | §4 |

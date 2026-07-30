@@ -32,6 +32,13 @@ export const DEFAULT_DRAFT_DEPTH = 4
  * It is a guard rail, not the boundary. The boundary is undocumented, belongs to
  * the service, and can move; only `anthropic.smoke.test.ts` can tell us where it
  * actually is today.
+ *
+ * A second reason this function takes only a depth and reads nothing else: the
+ * service compiles a schema once and caches the compilation for about a day, keyed
+ * by the schema itself. Byte-identical output across every deployment and every
+ * request means that cost is paid once; a schema that varied per deployment or per
+ * request would pay it repeatedly. It is also the second argument against 0013's
+ * rejected alternative of generating a schema per primitive.
  */
 export const GRAMMAR_BUDGET_BYTES = 3500
 

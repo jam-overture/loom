@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 660" width="980" height="660" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="660" fill="#ffffff"/>
+
+  <text x="32" y="40" font-size="20" font-weight="bold" fill="#111827">§4 part 2 — scaffolding, and how the scaffold is proven</text>
+  <text x="32" y="62" font-size="13" fill="#4b5563">parse → plan → write, with nothing written until the whole plan is safe.</text>
+
+  <!-- pipeline -->
+  <rect x="32" y="92" width="200" height="72" rx="7" fill="#f9fafb" stroke="#9ca3af"/>
+  <text x="46" y="114" font-size="12" font-weight="bold" fill="#111827">args.ts — parse</text>
+  <text x="46" y="132" font-size="10.5" fill="#4b5563">grammar, --dir, and</text>
+  <text x="46" y="147" font-size="10.5" fill="#4b5563">is the type well-formed?</text>
+  <text x="46" y="160" font-size="10" fill="#6b7280">no filesystem touched</text>
+
+  <path d="M234 128 L272 128" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="274" y="92" width="210" height="72" rx="7" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="288" y="114" font-size="12" font-weight="bold" fill="#111827">plan.ts — plan</text>
+  <text x="288" y="132" font-size="10.5" fill="#4b5563">does it fit this directory?</text>
+  <text x="288" y="147" font-size="10.5" fill="#4b5563">already declared · would</text>
+  <text x="288" y="160" font-size="10.5" fill="#4b5563">overwrite → refuse</text>
+
+  <path d="M486 128 L524 128" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="526" y="92" width="190" height="72" rx="7" fill="#ecfdf5" stroke="#047857"/>
+  <text x="540" y="114" font-size="12" font-weight="bold" fill="#065f46">run.ts — write</text>
+  <text x="540" y="132" font-size="10.5" fill="#4b5563">every file, or none</text>
+  <text x="540" y="150" font-size="10.5" fill="#4b5563">filesystem.ts is the only</text>
+  <text x="540" y="163" font-size="10.5" fill="#4b5563">impure seam</text>
+
+  <rect x="740" y="92" width="208" height="72" rx="7" fill="#fffbeb" stroke="#b45309"/>
+  <text x="754" y="114" font-size="12" font-weight="bold" fill="#78350f">The safety property</text>
+  <text x="754" y="133" font-size="10.5" fill="#78350f">A refused command writes</text>
+  <text x="754" y="147" font-size="10.5" fill="#78350f">nothing at all — the plan is</text>
+  <text x="754" y="161" font-size="10.5" fill="#78350f">judged before the first write.</text>
+
+  <!-- what init writes -->
+  <text x="32" y="208" font-size="14" font-weight="bold" fill="#111827">What `loom init` writes into &lt;dir&gt;/primitives/</text>
+  <line x1="32" y1="218" x2="948" y2="218" stroke="#e5e7eb"/>
+
+  <rect x="32" y="234" width="290" height="128" rx="7" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="46" y="256" font-size="11.5" font-family="monospace" font-weight="bold" fill="#111827">loom.page.ts</text>
+  <text x="46" y="276" font-size="10.5" fill="#4b5563">definePrimitive({ type, description,</text>
+  <text x="46" y="291" font-size="10.5" fill="#4b5563">props: z.object({}).strict(), slots, … })</text>
+  <text x="46" y="311" font-size="10.5" fill="#065f46">spreads ...loom.editable — the edit-mode</text>
+  <text x="46" y="325" font-size="10.5" fill="#065f46">contract, present from the first commit</text>
+  <text x="46" y="345" font-size="10.5" fill="#4b5563">strict by default: an undeclared prop is</text>
+  <text x="46" y="357" font-size="10.5" fill="#4b5563">refused, not ignored</text>
+
+  <rect x="334" y="234" width="290" height="128" rx="7" fill="#f5f3ff" stroke="#7c3aed"/>
+  <text x="348" y="256" font-size="11.5" font-family="monospace" font-weight="bold" fill="#4c1d95">registry.ts — generated</text>
+  <text x="348" y="276" font-size="10.5" font-family="monospace" fill="#111827">import { loomPage }</text>
+  <text x="348" y="290" font-size="10.5" font-family="monospace" fill="#111827">  from "./loom.page.js"</text>
+  <text x="348" y="310" font-size="10.5" fill="#4b5563">Regenerated from the directory (0015):</text>
+  <text x="348" y="324" font-size="10.5" fill="#4b5563">a module's name IS its type, so the type</text>
+  <text x="348" y="338" font-size="10.5" fill="#4b5563">round-trips exactly. A slug could not.</text>
+  <text x="348" y="357" font-size="10.5" fill="#7f1d1d">throws on a refused registration</text>
+
+  <rect x="636" y="234" width="312" height="128" rx="7" fill="#ecfdf5" stroke="#047857"/>
+  <text x="650" y="256" font-size="11.5" font-family="monospace" font-weight="bold" fill="#065f46">registry.test.ts</text>
+  <text x="650" y="276" font-size="10.5" font-family="monospace" fill="#111827">auditRegistry(registry)</text>
+  <text x="650" y="290" font-size="10.5" font-family="monospace" fill="#111827">expect(notDecorated).toEqual([])</text>
+  <text x="650" y="310" font-size="10.5" fill="#4b5563">0012 made the audit report, not enforce —</text>
+  <text x="650" y="324" font-size="10.5" fill="#4b5563">so it only helps if something runs it.</text>
+  <text x="650" y="343" font-size="10.5" fill="#065f46">Shipping the test is what makes an</text>
+  <text x="650" y="357" font-size="10.5" fill="#065f46">invisible primitive a build failure.</text>
+
+  <!-- proof -->
+  <text x="32" y="406" font-size="14" font-weight="bold" fill="#111827">Why we know the scaffold compiles, rather than believing it</text>
+  <line x1="32" y1="416" x2="948" y2="416" stroke="#e5e7eb"/>
+
+  <rect x="32" y="432" width="240" height="96" rx="7" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="46" y="454" font-size="11.5" font-weight="bold" fill="#7f1d1d">The weak version</text>
+  <text x="46" y="474" font-size="10.5" font-family="monospace" fill="#111827">expect(generated)</text>
+  <text x="46" y="488" font-size="10.5" font-family="monospace" fill="#111827">  .toContain("definePrimitive")</text>
+  <text x="46" y="510" font-size="10.5" fill="#7f1d1d">Proves the template says what</text>
+  <text x="46" y="522" font-size="10.5" fill="#7f1d1d">I meant. Not that it compiles.</text>
+
+  <path d="M280 480 L318 480" stroke="#374151" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="320" y="432" width="628" height="96" rx="7" fill="#ecfdf5" stroke="#047857"/>
+  <text x="334" y="454" font-size="11.5" font-weight="bold" fill="#065f46">What shipped: `loom init`'s exact output, committed as src/cli/scaffold-fixture/</text>
+  <text x="334" y="476" font-size="10.5" fill="#111827">1 · tsc typechecks it with the rest of src/, against the real @loom/runtime/react and /sdk</text>
+  <text x="334" y="492" font-size="10.5" fill="#111827">2 · Vitest RUNS the generated conformance test — it is in our own suite output</text>
+  <text x="334" y="508" font-size="10.5" fill="#111827">3 · a golden test asserts the fixture is byte-identical to what the templates produce today</text>
+  <text x="334" y="523" font-size="10.5" fill="#4b5563">So "the scaffold compiles and its audit passes" is enforced every `pnpm verify` — not claimed here.</text>
+
+  <!-- footer -->
+  <rect x="32" y="552" width="916" height="76" rx="7" fill="#f9fafb" stroke="#9ca3af"/>
+  <text x="46" y="574" font-size="11.5" font-weight="bold" fill="#111827">Still open: there is no `loom` binary yet</text>
+  <text x="46" y="594" font-size="10.5" fill="#4b5563">Node's type stripping will not resolve this repo's `.js` import specifiers to `.ts` sources — verified, not assumed. The</text>
+  <text x="46" y="609" font-size="10.5" fill="#4b5563">scaffolding logic is complete and tested as library code (`runCli` from @loom/runtime/cli, with src/cli/main.ts as the entry).</text>
+  <text x="46" y="624" font-size="10.5" fill="#78350f">Closing it is a packaging decision — a compile step, or a TypeScript loader — so it is a question rather than a guess.</text>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+  </defs>
+</svg>
