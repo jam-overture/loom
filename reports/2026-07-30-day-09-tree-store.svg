@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 720" width="980" height="720" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="720" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#047857"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="20" font-weight="bold" fill="#111827">§5 — the log is the truth, the snapshot is a view</text>
+  <text x="32" y="62" font-size="13" fill="#4b5563">The loop closes: §2 accepts a change, the store keeps it, §3 renders it. Replay is a check, not a dependency.</text>
+
+  <!-- ============ the append path ============ -->
+  <text x="32" y="102" font-size="12" font-weight="bold" fill="#6b7280">ONE APPEND</text>
+
+  <!-- runtime -->
+  <rect x="32" y="116" width="176" height="118" rx="8" fill="#f9fafb" stroke="#9ca3af"/>
+  <text x="48" y="140" font-size="13" font-weight="bold" fill="#111827">composeChange</text>
+  <text x="48" y="158" font-size="11" fill="#6b7280">§2 — Gate said applied</text>
+  <text x="48" y="182" font-size="11.5" font-family="monospace" fill="#111827">proposalId</text>
+  <text x="48" y="199" font-size="11.5" font-family="monospace" fill="#111827">delta</text>
+  <text x="48" y="216" font-size="11.5" font-family="monospace" fill="#111827">provenance</text>
+
+  <path d="M208 175 L252 175" stroke="#374151" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- append: the two checks -->
+  <rect x="254" y="116" width="230" height="118" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="270" y="140" font-size="13" font-weight="bold" fill="#111827">store.append</text>
+  <text x="270" y="158" font-size="11" fill="#4b5563">two checks, in this order</text>
+  <rect x="270" y="168" width="198" height="26" rx="5" fill="#ffffff" stroke="#6366f1"/>
+  <text x="280" y="185" font-size="11" font-family="monospace" fill="#3730a3">1. baseRevision === head</text>
+  <rect x="270" y="198" width="198" height="26" rx="5" fill="#ffffff" stroke="#6366f1"/>
+  <text x="280" y="215" font-size="11" font-family="monospace" fill="#3730a3">2. applyDelta</text>
+
+  <!-- refusals -->
+  <text x="500" y="150" font-size="11" font-family="monospace" fill="#b91c1c">revision-conflict {expected, found}</text>
+  <text x="500" y="166" font-size="10.5" fill="#6b7280">someone else wrote first — retryable</text>
+  <text x="500" y="204" font-size="11" font-family="monospace" fill="#b91c1c">delta-rejected {error}</text>
+  <text x="500" y="220" font-size="10.5" fill="#6b7280">malformed — not retryable</text>
+  <path d="M484 148 L494 148" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <path d="M484 202 L494 202" stroke="#b91c1c" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="500" y="240" font-size="10.5" fill="#6b7280">nothing is written when either refuses</text>
+
+  <path d="M369 234 L369 274" stroke="#374151" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="378" y="258" font-size="10.5" fill="#6b7280">one write</text>
+
+  <!-- ============ what is stored ============ -->
+  <rect x="32" y="278" width="452" height="184" rx="8" fill="#f0fdf4" stroke="#047857"/>
+  <text x="48" y="302" font-size="13" font-weight="bold" fill="#111827">what the store holds, per tree</text>
+
+  <rect x="48" y="316" width="196" height="128" rx="6" fill="#ffffff" stroke="#047857"/>
+  <text x="60" y="336" font-size="12" font-weight="bold" fill="#065f46">log — the truth</text>
+  <text x="60" y="354" font-size="10.5" fill="#6b7280">append-only StoredRevision[]</text>
+  <text x="60" y="376" font-size="11" font-family="monospace" fill="#111827">1  delta · provenance</text>
+  <text x="60" y="393" font-size="11" font-family="monospace" fill="#111827">2  delta · provenance</text>
+  <text x="60" y="410" font-size="11" font-family="monospace" fill="#111827">3  delta · provenance</text>
+  <text x="60" y="433" font-size="10.5" fill="#6b7280">who asked, and what changed</text>
+
+  <rect x="256" y="316" width="212" height="128" rx="6" fill="#ffffff" stroke="#047857"/>
+  <text x="268" y="336" font-size="12" font-weight="bold" fill="#065f46">snapshot — a view</text>
+  <text x="268" y="354" font-size="10.5" fill="#6b7280">the tree at the head revision</text>
+  <text x="268" y="378" font-size="11" font-family="monospace" fill="#111827">LoomTree @ revision 3</text>
+  <text x="268" y="402" font-size="10.5" fill="#6b7280">rebuildable from the log;</text>
+  <text x="268" y="418" font-size="10.5" fill="#6b7280">exists so a render is O(1),</text>
+  <text x="268" y="434" font-size="10.5" fill="#6b7280">not O(history)</text>
+
+  <!-- ============ the audit ============ -->
+  <text x="524" y="290" font-size="12" font-weight="bold" fill="#6b7280">THE REASON FOR KEEPING BOTH</text>
+
+  <rect x="524" y="304" width="424" height="158" rx="8" fill="#fffbeb" stroke="#b45309"/>
+  <text x="540" y="328" font-size="13" font-weight="bold" fill="#111827">auditSnapshot — replay as a check</text>
+  <text x="540" y="348" font-size="11" fill="#4b5563">fold the log from a known seed; compare to the snapshot</text>
+
+  <rect x="540" y="360" width="392" height="24" rx="5" fill="#ffffff" stroke="#047857"/>
+  <text x="550" y="377" font-size="11" font-family="monospace" fill="#065f46">agrees {revision}</text>
+
+  <rect x="540" y="388" width="392" height="24" rx="5" fill="#ffffff" stroke="#b91c1c"/>
+  <text x="550" y="405" font-size="11" font-family="monospace" fill="#991b1b">diverged {revision, replayed}   ← applyDelta drifted</text>
+
+  <rect x="540" y="416" width="392" height="24" rx="5" fill="#ffffff" stroke="#b45309"/>
+  <text x="550" y="433" font-size="11" font-family="monospace" fill="#92400e">unreplayable {mismatch}         ← gap, or a delta refused</text>
+
+  <text x="540" y="454" font-size="10.5" fill="#6b7280">runs in a test or a scheduled job — never on a request path</text>
+
+  <!-- ============ the drift argument ============ -->
+  <rect x="32" y="486" width="452" height="118" rx="8" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="48" y="510" font-size="13" font-weight="bold" fill="#111827">why a log alone was rejected</text>
+  <text x="48" y="530" font-size="11" fill="#4b5563">§1 fixed a dialect: for `move`, `index` counts the post-detach</text>
+  <text x="48" y="546" font-size="11" fill="#4b5563">child list. Every stored delta is written in it.</text>
+  <text x="48" y="568" font-size="11" fill="#991b1b">Under pure event sourcing the fold *is* the read — so a</text>
+  <text x="48" y="584" font-size="11" fill="#991b1b">changed applyDelta is not a bug, it is the new history.</text>
+
+  <!-- ============ the closed loop ============ -->
+  <rect x="524" y="486" width="424" height="118" rx="8" fill="#f9fafb" stroke="#9ca3af"/>
+  <text x="540" y="510" font-size="13" font-weight="bold" fill="#111827">treeSourceFromStore — the seam §3 left open</text>
+  <text x="540" y="530" font-size="11" fill="#4b5563">returns the snapshot as `unknown`, so the render path still</text>
+  <text x="540" y="546" font-size="11" fill="#4b5563">runs parseTree. A store is exactly where a tree that was</text>
+  <text x="540" y="562" font-size="11" fill="#4b5563">valid under an older schema comes back from.</text>
+  <text x="540" y="588" font-size="11" font-family="monospace" fill="#111827">composeChange → append → renderRequest</text>
+
+  <!-- footer -->
+  <line x1="32" y1="630" x2="948" y2="630" stroke="#e5e7eb"/>
+  <text x="32" y="654" font-size="11.5" fill="#4b5563">Decision record 0016 — the log is the truth and the snapshot is a materialised view.</text>
+  <text x="32" y="674" font-size="11.5" fill="#4b5563">`append` is the only writer and must be atomic: a log entry without its snapshot advance is the divergence the audit exists to catch.</text>
+  <text x="32" y="694" font-size="11.5" fill="#4b5563">25 new tests. `pnpm verify` green — 51 files, 451 tests.</text>
+</svg>
