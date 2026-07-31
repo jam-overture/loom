@@ -1,7 +1,7 @@
 {
   "name": "@loom/runtime",
   "version": "0.0.1",
-  "description": "Loom — an AI-powered adaptive UI runtime",
+  "description": "Loom \u2014 an AI-powered adaptive UI runtime",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -12,7 +12,8 @@
     "./sdk": "./src/sdk/index.ts",
     "./cli": "./src/cli/index.ts",
     "./store": "./src/store/index.ts",
-    "./write": "./src/write/index.ts"
+    "./write": "./src/write/index.ts",
+    "./postgres": "./src/store/postgres.ts"
   },
   "bin": {
     "loom": "./src/cli/main.ts"
@@ -30,7 +31,8 @@
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "drizzle-orm": "^0.45.2"
   },
   "peerDependenciesMeta": {
     "@anthropic-ai/sdk": {
@@ -38,19 +40,25 @@
     },
     "react": {
       "optional": true
+    },
+    "drizzle-orm": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
+    "@electric-sql/pglite": "^0.5.4",
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^3.2.7",
+    "postgres": "^3.4.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tsx": "^4.23.1",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "drizzle-orm": "^0.45.2"
   },
   "packageManager": "pnpm@10.31.0"
 }
