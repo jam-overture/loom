@@ -1,7 +1,8 @@
 import { ok, type Result } from "../result.js"
 import type { RenderRequest, TreeSource, TreeSourceError } from "../render/request.js"
 
-import { describeStoreError, type TreeReader } from "./store.js"
+import { describeStoreError } from "./errors.js"
+import type { TreeReader } from "./store.js"
 
 /**
  * The store, as the renderer's `TreeSource`.

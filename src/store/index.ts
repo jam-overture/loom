@@ -1,3 +1,4 @@
+export * from "./errors.js"
 export * from "./memory.js"
 export * from "./replay.js"
 export * from "./source.js"

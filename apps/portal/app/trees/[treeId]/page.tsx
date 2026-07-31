@@ -5,12 +5,16 @@ import { renderRequest } from "@loom/runtime/react"
 import { treeSourceFromStore } from "@loom/runtime/store"
 
 import { portalDecoration } from "@/lib/addressing"
+import { isInterpreterConfigured } from "@/lib/interpreter"
 import { outlineRows } from "@/lib/outline"
 import { portalRegistry } from "@/lib/registry"
 import { portalStore } from "@/lib/store"
+import { portalHolds } from "@/lib/write"
 
 import { PreviewFrame } from "./_components/preview-frame"
 import { PreviewSurface } from "./_components/preview-surface"
+import { PromptBox } from "./_components/prompt-box"
+import { ReviewQueue } from "./_components/review-queue"
 import { SelectedNode } from "./_components/selected-node"
 import { SelectionProvider } from "./_components/selection-context"
 import { TreeOutline } from "./_components/tree-outline"
@@ -52,6 +56,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
   }
 
   const rows = outlineRows(rendered.value.tree, portalDecoration)
+  const holds = await portalHolds.forTree(parsed.data)
 
   return (
     <SelectionProvider rows={rows}>
@@ -61,7 +66,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           <SelectedNode />
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-8">
           <PreviewFrame
             treeId={rendered.value.tree.treeId}
             revision={rendered.value.tree.revision}
@@ -69,6 +74,14 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           >
             <PreviewSurface>{rendered.value.element}</PreviewSurface>
           </PreviewFrame>
+
+          <PromptBox
+            treeId={rendered.value.tree.treeId}
+            revision={rendered.value.tree.revision}
+            configured={isInterpreterConfigured}
+          />
+
+          <ReviewQueue held={holds.ok ? holds.value : []} />
         </div>
       </div>
     </SelectionProvider>

@@ -70,12 +70,29 @@ export const scriptedModelClient = (
   }
 }
 
-/** Returns whatever it was handed, so tests drive the pipeline from a fixed script. */
+export type RecordingInterpreter = ChangeInterpreter & {
+  readonly intents: readonly EditIntent[]
+}
+
+/**
+ * Returns whatever it was handed, so tests drive the pipeline from a fixed
+ * script, and remembers what it was asked — which is how a test asserts that a
+ * write refused before interpretation never spent a model call.
+ */
 export const scriptedInterpreter = (
   script: Result<ProposedChange, InterpretationError>
-): ChangeInterpreter => ({
-  interpret: () => Promise.resolve(script),
-})
+): RecordingInterpreter => {
+  const intents: EditIntent[] = []
+
+  return {
+    interpret: (intent) => {
+      intents.push(intent)
+
+      return Promise.resolve(script)
+    },
+    intents,
+  }
+}
 
 export type RecordingRepairer = ChangeRepairer & {
   readonly requests: readonly RepairRequest[]

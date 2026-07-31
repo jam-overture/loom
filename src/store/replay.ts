@@ -3,7 +3,8 @@ import { err, ok, reduceResult, type Result } from "../result.js"
 import { applyDelta } from "../tree/apply.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import type { StoredRevision, StoreError, TreeReader } from "./store.js"
+import type { StoreError } from "./errors.js"
+import type { StoredRevision, TreeReader } from "./store.js"
 
 /**
  * Replay, and the audit it exists for.
