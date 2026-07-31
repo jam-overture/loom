@@ -110,38 +110,117 @@ Setting it makes the deployment worth protecting. **An unauthenticated prompt bo
 on a public URL is your model spend, available to anyone with the link.** Vercel's
 Deployment Protection is the cheap answer until the portal has real auth.
 
-## What a deployment can and cannot do today
+## The database
+
+The store is Postgres, hosted on Supabase (0022). Setting it up is six steps, and
+two of them are the ones that go wrong.
+
+### 1. A project of its own
+
+A **new** Supabase project, not one shared with anything that has users. The store
+issues `CREATE TABLE`, and this is pre-production alpha software whose schema will
+change.
+
+Save the database password when it is shown — it is displayed once.
+
+### 2. The transaction pooler string
+
+Project → **Connect** → **Transaction pooler**:
+
+```
+postgresql://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/postgres
+```
+
+**Port 6543, not 5432.** Transaction mode pools per transaction, which is what
+serverless needs, and it is why the driver is built with `prepare: false` —
+prepared statements cannot survive across pooled transactions. Session mode (5432)
+would hold a connection per function instance and exhaust the pool.
+
+### 3. `DATABASE_URL`, and the mistake that costs a deployment
+
+Set it in Vercel (Production and Preview) and in `apps/portal/.env.local`.
+
+**The value is the bare URL.** An environment entry is `KEY=value`, so a line that
+reads `DATABASE_URL=DATABASE_URL=postgresql://…` puts the key name *inside* the
+value. This happened twice — once locally, once in Vercel — and cost three failed
+deployments, because `postgres.js` parses the URL when the client is constructed
+and the client is constructed at module scope. It surfaced as:
+
+```
+TypeError: Invalid URL
+Error: Failed to collect page data for /trees
+```
+
+Nothing in that mentions the environment. `lib/connection.ts` now catches it and
+says so by name, but the fastest check is still to look at the value and confirm it
+begins `postgresql://`.
+
+### 4. Create the tables
+
+```bash
+pnpm --filter @loom/portal db:push
+```
+
+Once, from a machine with `.env.local` in place. Idempotent — every statement is
+`IF NOT EXISTS`, so re-running is a no-op.
+
+### 5. Lock the tables down — required
+
+```sql
+ALTER TABLE loom_trees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE loom_revisions ENABLE ROW LEVEL SECURITY;
+```
+
+Supabase exposes everything in the `public` schema through PostgREST using the
+anon key, and that key is public by design. **Without this, anyone with the anon
+key can read and write your trees.**
+
+No policies are needed. That denies PostgREST entirely, while the portal is
+unaffected: it connects as the role that owns the tables, and RLS does not apply
+to a table's owner unless `FORCE ROW LEVEL SECURITY` is set.
+
+### 6. Redeploy, and check the right thing
+
+The tell is on `/trees`: the "No database is configured" note **disappears** when
+`DATABASE_URL` is picked up. The proof is making a change through the prompt box
+and reloading.
+
+### If the password leaks
+
+Rotate it in Project Settings → Database → Reset database password, then update
+Vercel and `.env.local`. The tables survive a rotation; only the credential
+changes. A connection string carries the password in plain text, so treat pasting
+one anywhere — chat, an issue, a log — as a rotation trigger.
+
+## What a deployment can and cannot do
 
 **Works.** The shell, the primitives, the tree listing, the outline, addressing,
 and the preview pane rendering a stored tree. Reads are consistent across
 instances because the seed is deterministic.
 
-**Does not survive, by construction.** Persistence. `memoryTreeStore` lives in a
-server process, and on Vercel there are many short-lived ones.
+**Survives only with a database configured.** Without `DATABASE_URL` the store is
+`memoryTreeStore`, which lives in a server process — and on Vercel there are many
+short-lived ones, so an append lands on the instance that served the request and
+is absent from the next. A change visibly applies and then vanishes, which reads
+as a broken runtime rather than as missing persistence.
 
-**This is now live rather than prospective, because the write path has landed.**
-An append succeeds on the instance that served the request and is absent from the
-next request served by another. A change visibly applies and then vanishes.
+That state is supported rather than broken, and the trees page says which one it
+is in, so the warning disappears once it stops being true. Locally `pnpm dev` is a
+single process and memory persists for as long as it runs.
 
-That failure reads as a broken runtime rather than as missing persistence, which
-is the wrong lesson to take from a demo. So on a shared deployment today, treat
-the prompt box as a demonstration that the loop runs — not as something whose
-results will still be there when you reload.
+A **malformed** connection string is different from an absent one: it throws
+rather than falling back. A build that succeeded and then quietly served a portal
+which forgets every write would be worse than one that refuses.
 
-**A backing store is the prerequisite for the write path being trustworthy on a
-deployment.** Locally, `pnpm dev` is a single process and everything persists for
-as long as it runs.
+## Why Postgres
 
-## The backing store, when it comes
+`append` has to be a transaction (0016): the log entry and the snapshot advance
+land together or not at all, because a log entry without its snapshot advance is
+exactly the divergence `auditSnapshot` exists to detect — and a store must never
+manufacture the fault its own audit is designed to catch.
 
-`TreeStore` was designed for this swap, and `memory.ts` already records the one
-way a real implementation must differ: **`append` has to be a transaction.** A log
-entry without its snapshot advance leaves the two disagreeing, which is precisely
-the divergence `auditSnapshot` exists to detect and precisely what a store must
-never create itself.
-
-That requirement rules out plain KV. Postgres is the fit — Vercel Postgres or Neon
-— with the log as an append-only table, the snapshot as a row per tree, and both
-written in one transaction. It also answers the `TreeStore.list` question as a
-side effect, since listing is a query rather than a contract bolted onto the
-in-memory reference.
+That rules out plain KV, and it is the only requirement the database itself has to
+satisfy. Everything else about the choice — auth, familiarity, RLS — is about what
+surrounds it, which is why 0022 chose a host rather than a dialect. The
+implementation is plain SQL through Drizzle and is named `postgresTreeStore`, so
+moving hosts would not be a rewrite.
