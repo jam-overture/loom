@@ -7,6 +7,16 @@ import { portalStore, seedTreeId } from "@/lib/store"
  * listing of everything stored — it is the tree the portal created, named
  * honestly as such.
  */
+
+/**
+ * This page reads a mutable store, so it must not be prerendered. Next would
+ * otherwise bake the build-time revision into static HTML and serve it forever,
+ * which would be wrong the moment anything writes — and wrong in the most
+ * confusing way, since the preview it links to is dynamic and would disagree
+ * with it.
+ */
+export const dynamic = "force-dynamic"
+
 const TreesPage = async () => {
   const head = await portalStore.head(seedTreeId)
   const log = await portalStore.history(seedTreeId)
@@ -32,6 +42,12 @@ const TreesPage = async () => {
           revision {head.value.revision} · {log.ok ? log.value.length : 0} changes in the log
         </span>
       </Link>
+
+      <p className="text-ink-muted mt-4 max-w-xl text-xs">
+        This deployment keeps its tree in the server process. Nothing is written yet, so
+        there is nothing to lose — but the log will not survive a restart until a backing
+        store lands.
+      </p>
     </div>
   )
 }
