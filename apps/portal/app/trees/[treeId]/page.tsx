@@ -8,7 +8,7 @@ import { portalDecoration } from "@/lib/addressing"
 import { isInterpreterConfigured } from "@/lib/interpreter"
 import { outlineRows } from "@/lib/outline"
 import { portalRegistry } from "@/lib/registry"
-import { portalStore } from "@/lib/store"
+import { ensureSeeded, portalStore } from "@/lib/store"
 import { portalHolds } from "@/lib/write"
 
 import { PreviewFrame } from "./_components/preview-frame"
@@ -32,6 +32,8 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
   const parsed = treeIdSchema.safeParse(treeId)
 
   if (!parsed.success) notFound()
+
+  await ensureSeeded()
 
   const rendered = await renderRequest(
     { treeId: parsed.data, editMode: true },
