@@ -4,6 +4,7 @@ import postgres from "postgres"
 import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
 import { postgresTreeStore } from "@loom/runtime/postgres"
 
+import { resolveConnectionString } from "./connection"
 import { seedTree } from "./seed"
 
 /**
@@ -25,7 +26,7 @@ import { seedTree } from "./seed"
  * everything, because there is one tenant. A deployment with more would hand the
  * portal a narrower handle rather than teach the portal about tenants.
  */
-const connectionString = process.env["DATABASE_URL"] ?? process.env["POSTGRES_URL"]
+const connectionString = resolveConnectionString()
 
 const build = (): TreeStore =>
   connectionString === undefined
