@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite"
 import { drizzle } from "drizzle-orm/pglite"
 import { sql } from "drizzle-orm"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { describeTreeStoreContract, appendOf, removalOf } from "../testing/store-contract.js"
 import { sampleTree } from "../testing/fixtures.js"
@@ -16,6 +16,16 @@ import { loomRevisions, loomTrees } from "./schema.js"
  * real constraint violations, and `pnpm verify` stays green offline, which is the
  * same rule the live model test already follows.
  */
+
+/**
+ * Each test builds a fresh WASM Postgres, which costs seconds rather than
+ * milliseconds and varies with machine load. Vitest's 5s default is tuned for
+ * pure functions and leaves too little headroom here — one suite run failed
+ * intermittently before this was raised. The failing test was not captured, so
+ * this is a mitigation rather than a diagnosis; a recurrence with a name on it is
+ * worth chasing properly.
+ */
+vi.setConfig({ testTimeout: 30_000 })
 
 const freshDatabase = async (): Promise<LoomDatabase> => {
   const db = drizzle(new PGlite())
