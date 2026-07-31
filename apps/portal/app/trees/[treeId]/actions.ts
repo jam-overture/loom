@@ -7,7 +7,7 @@ import { nodeIdSchema, proposalIdSchema, randomIdFactory, systemClock, treeIdSch
 import { commitIntent, confirmHeld, describeHoldError, discardHeld } from "@loom/runtime/write"
 
 import { reportOf, type WriteReport } from "@/lib/outcome"
-import { portalWritePath } from "@/lib/write"
+import { beginWrite } from "@/lib/write"
 
 /**
  * The server side of every change this portal makes.
@@ -59,7 +59,9 @@ export const proposeChange = async (
 
   const { treeId, baseRevision, utterance, scopeNodeId } = parsed.data
 
-  const outcome = await commitIntent(portalWritePath, {
+  const write = beginWrite()
+
+  const outcome = await commitIntent(write.path, {
     intentId: randomIdFactory.intentId(),
     treeId,
     baseRevision,
@@ -69,6 +71,8 @@ export const proposeChange = async (
     ...(scopeNodeId ? { scopeNodeId } : {}),
     observedAt: systemClock.now(),
   })
+
+  await write.finish()
 
   revalidatePath(`/trees/${treeId}`)
 
@@ -86,7 +90,10 @@ export const confirmProposal = async (
 
   if (!parsed.success) return invalid(firstIssue(parsed.error))
 
-  const outcome = await confirmHeld(portalWritePath, parsed.data.proposalId)
+  const write = beginWrite()
+  const outcome = await confirmHeld(write.path, parsed.data.proposalId)
+
+  await write.finish()
 
   /**
    * Only a commit re-renders the page. An answer the Gate refused on its second
@@ -111,7 +118,10 @@ export const discardProposal = async (
 
   if (!parsed.success) return invalid(firstIssue(parsed.error))
 
-  const discarded = await discardHeld(portalWritePath, parsed.data.proposalId)
+  const write = beginWrite()
+  const discarded = await discardHeld(write.path, parsed.data.proposalId)
+
+  await write.finish()
 
   revalidatePath(`/trees/${parsed.data.treeId}`)
 

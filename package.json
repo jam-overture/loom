@@ -13,7 +13,9 @@
     "./cli": "./src/cli/index.ts",
     "./store": "./src/store/index.ts",
     "./write": "./src/write/index.ts",
-    "./postgres": "./src/store/postgres.ts"
+    "./postgres": "./src/store/postgres.ts",
+    "./telemetry": "./src/telemetry/index.ts",
+    "./telemetry/postgres": "./src/telemetry/postgres.ts"
   },
   "bin": {
     "loom": "./src/cli/main.ts"
