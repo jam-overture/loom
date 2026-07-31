@@ -7,21 +7,35 @@ natively; nothing in the repo needs a `vercel.json`.
 
 Import `jam-overture/loom` and set:
 
-| Setting                              | Value          |
-| ------------------------------------ | -------------- |
-| Framework preset                     | Next.js        |
-| Root Directory                       | `apps/portal`  |
-| Include files outside root directory | **on**         |
-| Install / Build / Output commands    | leave as default |
+| Setting                           | Value            |
+| --------------------------------- | ---------------- |
+| Framework preset                  | Next.js          |
+| Root Directory                    | `apps/portal`    |
+| Install / Build / Output commands | leave as default |
 
-"Include files outside root directory" is the only setting that is easy to get
-wrong and fatal to miss. `apps/portal` depends on `@loom/runtime` as
-`workspace:*`, which resolves to the **repository root package** — so an install
-scoped to `apps/portal` alone has nothing to link against.
+That is the whole of it. Vercel reads `packageManager` from the root
+`package.json`, installs with the committed lockfile, and runs the portal's
+`build` script.
 
-Everything else is default. Vercel reads `packageManager` from the root
-`package.json` and installs with the committed lockfile; the portal's `build`
-script is what it runs.
+### The one thing that could break it, and why you do not have to do anything
+
+`apps/portal` depends on `@loom/runtime` as `workspace:*`, which resolves to the
+**repository root package**. An install scoped to `apps/portal` alone would have
+nothing to link against.
+
+Vercel controls that with **"Include source files outside of the Root Directory
+in the Build Step"**, and two things about it are worth knowing, because looking
+for it during the import is a waste of time:
+
+- It is **not on the New Project screen.** It lives in Project Settings → Build &
+  Deployment → Root Directory, which only exists once the project does.
+- It is **on by default** for every project created since August 2020, so a new
+  import already has it.
+
+So: import and deploy. If it were ever off, the build fails at install or compile
+with `Cannot find module '@loom/runtime'` or pnpm's
+`ERR_PNPM_WORKSPACE_PKG_NOT_FOUND` — that error, and nothing else, is what this
+setting causes.
 
 Verified by clean clone → `pnpm install --frozen-lockfile` → `pnpm build`, not by
 reasoning about it.
