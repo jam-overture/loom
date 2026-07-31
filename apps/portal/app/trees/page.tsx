@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
-import { portalStore } from "@/lib/store"
+import { portalStore, storeIsDurable } from "@/lib/store"
 
 /**
  * Every tree the store can see — which is now a question the framework answers,
@@ -59,12 +59,15 @@ const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         </Link>
       )}
 
-      <p className="text-ink-muted text-xs">
-        Trees live in the server process. Locally that lasts as long as `pnpm dev`; on a
-        serverless deployment an accepted change may not be there when you reload, because
-        the next request can be served by a different instance. A backing store is what
-        fixes it.
-      </p>
+      {storeIsDurable ? null : (
+        <p className="text-ink-muted text-xs">
+          No database is configured, so trees live in the server process. Locally that lasts
+          as long as `pnpm dev`; on a serverless deployment an accepted change may not be
+          there when you reload, because the next request can be served by a different
+          instance. Set <span className="font-mono">DATABASE_URL</span> to make writes
+          durable.
+        </p>
+      )}
     </div>
   )
 }

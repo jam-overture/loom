@@ -1,26 +1,43 @@
+import { drizzle } from "drizzle-orm/postgres-js"
+import postgres from "postgres"
+
 import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
+import { postgresTreeStore } from "@loom/runtime/postgres"
 
 import { seedTree } from "./seed"
 
 /**
- * One store per server process, seeded once.
+ * The store: Postgres when one is configured, memory when not.
  *
- * In-memory means the log does not survive a restart, which is the honest state
- * of §5: `TreeStore` exists so this is a swap, and choosing a backing store needs
- * to know where Loom runs. A portal that silently lost its history on reload
- * would be a lie about persistence, so this says plainly that it is a process
- * store.
+ * Both are supported states rather than a real one and a broken one — the same
+ * shape as the interpreter, where absence degrades honestly instead of failing
+ * obscurely. Memory is right for `pnpm dev`, where one process makes the log
+ * durable for as long as you are looking at it. It is wrong for a serverless
+ * deployment, where an append lands on the instance that served the request and is
+ * absent from the next, which is the whole reason 0022 exists.
+ *
+ * `prepare: false` is load-bearing on Supabase: serverless connects through the
+ * transaction-mode pooler, and transaction-mode pooling does not support prepared
+ * statements. Omitting it produces confusing runtime errors rather than a clear
+ * refusal.
  *
  * The store handle is also the scope of what the portal may see (0020) — here
- * everything, because there is one process and one tenant. A deployment with more
- * would hand the portal a narrower handle rather than teach the portal about
- * tenants.
+ * everything, because there is one tenant. A deployment with more would hand the
+ * portal a narrower handle rather than teach the portal about tenants.
  */
-const build = (): TreeStore => {
-  const store = memoryTreeStore()
+const connectionString = process.env["DATABASE_URL"] ?? process.env["POSTGRES_URL"]
 
-  /** `already-exists` is ignored by design: a re-evaluated module must not
-   *  replace a tree that has since been edited. */
+const build = (): TreeStore => {
+  const store =
+    connectionString === undefined
+      ? memoryTreeStore()
+      : postgresTreeStore(drizzle(postgres(connectionString, { prepare: false, max: 1 })))
+
+  /**
+   * `already-exists` is ignored by design: a re-evaluated module, a second
+   * serverless instance, or a restart against a populated database must not
+   * replace a tree that has since been edited.
+   */
   void store.create(seedTree())
 
   return store
@@ -33,3 +50,6 @@ type Carrier = { [CARRIER_KEY]?: TreeStore }
 const carrier = globalThis as unknown as Carrier
 
 export const portalStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
+
+/** Whether writes outlive this process. The trees page states it rather than implying it. */
+export const storeIsDurable = connectionString !== undefined
