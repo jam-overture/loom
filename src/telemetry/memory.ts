@@ -4,6 +4,7 @@ import type { TelemetryRecord } from "./event.js"
 import {
   clampTelemetryLimit,
   cursorSeq,
+  pageCursors,
   type RecordedTelemetry,
   type TelemetryJournal,
   type TelemetryPage,
@@ -42,21 +43,29 @@ export const memoryTelemetryJournal = (): TelemetryJournal => {
 
     read: (request?: TelemetryReadRequest) => {
       const limit = clampTelemetryLimit(request?.limit)
-      const after = cursorSeq(request?.cursor)
+      const from = cursorSeq(request?.cursor)
+      const direction = request?.direction ?? "newer"
 
       const matching = records.filter(
         (record) =>
           (request?.treeId === undefined || record.treeId === request.treeId) &&
-          (after === undefined || record.seq > after)
+          (from === undefined || (direction === "older" ? record.seq < from : record.seq > from))
       )
 
-      const page = matching.slice(0, limit)
-      const last = page.at(-1)
+      /**
+       * `older` takes the page from the far end, which is a slice rather than a
+       * reverse: the records that come back are still in arrival order, because
+       * the contract says a page's order never depends on which end it came from.
+       */
+      const page = direction === "older" ? matching.slice(-limit) : matching.slice(0, limit)
 
       return Promise.resolve(
         ok<TelemetryPage>({
           records: page,
-          cursor: last !== undefined && matching.length > page.length ? String(last.seq) : null,
+          ...pageCursors(page, direction, {
+            beyond: matching.length > page.length,
+            resumed: from !== undefined,
+          }),
         })
       )
     },

@@ -4,6 +4,7 @@ import { useActionState } from "react"
 
 import type { HeldProposal } from "@loom/runtime/write"
 
+import { summariseOperations } from "@/lib/delta-summary"
 import { toneClasses, type WriteReport } from "@/lib/outcome"
 
 import { confirmProposal, discardProposal } from "../actions"
@@ -17,16 +18,6 @@ import { confirmProposal, discardProposal } from "../actions"
  * re-runs the Gate server-side, so the button is permission to proceed, not an
  * override.
  */
-const OPERATION_SUMMARY: Readonly<Record<string, string>> = {
-  insert: "add",
-  remove: "delete",
-  move: "move",
-  configure: "reconfigure",
-}
-
-const summarize = (operations: HeldProposal["proposal"]["delta"]["operations"]): string =>
-  operations.map((operation) => OPERATION_SUMMARY[operation.op] ?? operation.op).join(", ")
-
 export const HeldProposalCard = ({ held }: { readonly held: HeldProposal }) => {
   const [confirmReport, confirm, confirming] = useActionState<WriteReport | null, FormData>(
     confirmProposal,
@@ -65,7 +56,7 @@ export const HeldProposalCard = ({ held }: { readonly held: HeldProposal }) => {
         </div>
         <div className="flex gap-1">
           <dt className="text-ink-muted">changes</dt>
-          <dd className="font-mono">{summarize(held.proposal.delta.operations)}</dd>
+          <dd className="font-mono">{summariseOperations(held.proposal.delta.operations)}</dd>
         </div>
       </dl>
 

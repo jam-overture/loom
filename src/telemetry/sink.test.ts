@@ -34,7 +34,7 @@ const failingJournal = (error: TelemetryError): FailingJournal => {
 
       return Promise.resolve(err(error))
     },
-    read: () => Promise.resolve(ok({ records: [], cursor: null })),
+    read: () => Promise.resolve(ok({ records: [], older: null, newer: null })),
     attempts: () => attempts,
   }
 }
@@ -126,7 +126,7 @@ describe("collectTelemetry", () => {
 
         return Promise.resolve(ok(undefined))
       },
-      read: () => Promise.resolve(ok({ records: [], cursor: null })),
+      read: () => Promise.resolve(ok({ records: [], older: null, newer: null })),
     }
 
     const collector = collectTelemetry(journal)

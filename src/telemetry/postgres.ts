@@ -1,4 +1,4 @@
-import { and, asc, eq, gt } from "drizzle-orm"
+import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
 import { z } from "zod"
 
 import { treeIdSchema } from "../ids.js"
@@ -9,6 +9,7 @@ import { telemetryEventSchema } from "./event.js"
 import {
   clampTelemetryLimit,
   cursorSeq,
+  pageCursors,
   type RecordedTelemetry,
   type TelemetryError,
   type TelemetryJournal,
@@ -70,9 +71,16 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
 
   read: async (request?: TelemetryReadRequest) => {
     const limit = clampTelemetryLimit(request?.limit)
-    const after = cursorSeq(request?.cursor)
+    const from = cursorSeq(request?.cursor)
+    const direction = request?.direction ?? "newer"
 
     try {
+      /**
+       * `older` scans descending so the newest page costs one index seek rather
+       * than a walk from the start of the journal, then the rows are put back in
+       * arrival order — the contract's promise that a page's order never depends
+       * on which end it came from.
+       */
       const rows = await db
         .select({
           seq: loomTelemetry.seq,
@@ -84,14 +92,22 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
         .where(
           and(
             request?.treeId === undefined ? undefined : eq(loomTelemetry.treeId, request.treeId),
-            after === undefined ? undefined : gt(loomTelemetry.seq, after)
+            from === undefined
+              ? undefined
+              : direction === "older"
+                ? lt(loomTelemetry.seq, from)
+                : gt(loomTelemetry.seq, from)
           )
         )
-        .orderBy(asc(loomTelemetry.seq))
+        .orderBy(direction === "older" ? desc(loomTelemetry.seq) : asc(loomTelemetry.seq))
         /** One extra row answers "is there another page" without a count. */
         .limit(limit + 1)
 
-      const parsed = z.array(recordedSchema).safeParse(rows.slice(0, limit))
+      const taken = rows.slice(0, limit)
+      const parsed = z
+        .array(recordedSchema)
+        .safeParse(direction === "older" ? taken.slice().reverse() : taken)
+
       if (!parsed.success) {
         return err<TelemetryError>({
           code: "unavailable",
@@ -102,11 +118,13 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
       }
 
       const page = parsed.data as readonly RecordedTelemetry[]
-      const last = page.at(-1)
 
       return ok<TelemetryPage>({
         records: page,
-        cursor: rows.length > limit && last !== undefined ? String(last.seq) : null,
+        ...pageCursors(page, direction, {
+          beyond: rows.length > limit,
+          resumed: from !== undefined,
+        }),
       })
     } catch (cause) {
       return err(failure(cause, "could not read telemetry"))

@@ -42,18 +42,78 @@ export type RecordedTelemetry = TelemetryRecord & {
   readonly seq: number
 }
 
+/**
+ * Which side of the cursor a page is taken from.
+ *
+ * A journal only grows, so the question asked of it most often is "what
+ * happened recently" — and forward-only paging answers that by reading
+ * everything that ever happened first. `older` starts at the newest record and
+ * walks back, which is one query rather than a walk from the beginning.
+ */
+export type TelemetryDirection = "newer" | "older"
+
 export type TelemetryReadRequest = {
   /** Absent reads every tree the handle can see, which is the scope rule 0020 set. */
   readonly treeId?: TreeId
-  /** The previous page's `cursor`, passed back unread. */
+  /** A cursor from a previous page's `older`/`newer`, passed back unread. */
   readonly cursor?: string
+  /**
+   * Default `newer`, which with no cursor is the oldest page. `older` with no
+   * cursor is the newest page — the read a reader almost always wants first.
+   */
+  readonly direction?: TelemetryDirection
   readonly limit?: number
 }
 
 export type TelemetryPage = {
+  /**
+   * Always ascending by `seq`, whichever end the page was taken from.
+   *
+   * The direction is a property of *which* records a page contains, never of
+   * the order they arrive in. `episodesOf` folds a stream in arrival order, and
+   * a page that sometimes came back reversed would make every consumer
+   * responsible for knowing which — and silently wrong when it guessed.
+   */
   readonly records: readonly RecordedTelemetry[]
-  /** `null` when this was the last page. */
-  readonly cursor: string | null
+  /** Pass back with `direction: "older"`. `null` when this page reaches the oldest record. */
+  readonly older: string | null
+  /**
+   * Pass back with `direction: "newer"`. `null` when this page reaches the
+   * newest record *at the time of the read* — a journal that is still being
+   * written to will have more a moment later.
+   */
+  readonly newer: string | null
+}
+
+/**
+ * The cursors a page reports, given the records it holds and what the read
+ * already knows about the ends.
+ *
+ * Shared by every implementation because "which ends does this page name" is a
+ * property of the contract, not of a backend. `beyond` is what the limit+1
+ * probe found on the side being paged toward; the far side is bounded by the
+ * cursor the caller passed, since a position it named is a position records
+ * exist at.
+ */
+export const pageCursors = (
+  records: readonly RecordedTelemetry[],
+  direction: TelemetryDirection,
+  { beyond, resumed }: { readonly beyond: boolean; readonly resumed: boolean }
+): Pick<TelemetryPage, "older" | "newer"> => {
+  const first = records.at(0)
+  const last = records.at(-1)
+
+  if (first === undefined || last === undefined) return { older: null, newer: null }
+
+  return direction === "older"
+    ? {
+        older: beyond ? String(first.seq) : null,
+        newer: resumed ? String(last.seq) : null,
+      }
+    : {
+        older: resumed ? String(first.seq) : null,
+        newer: beyond ? String(last.seq) : null,
+      }
 }
 
 /**
@@ -70,8 +130,8 @@ export const clampTelemetryLimit = (limit: number | undefined): number =>
 /**
  * Reads a cursor back into the position it names. A cursor is opaque to the
  * caller, so one that is absent or unreadable means the same thing to every
- * implementation — start at the beginning — rather than one refusing what
- * another silently accepts.
+ * implementation — start at the end the direction begins from — rather than one
+ * refusing what another silently accepts.
  */
 export const cursorSeq = (cursor: string | undefined): number | undefined => {
   if (cursor === undefined) return undefined

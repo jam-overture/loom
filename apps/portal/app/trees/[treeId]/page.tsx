@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { treeIdSchema } from "@loom/runtime"
@@ -84,6 +85,10 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           />
 
           <ReviewQueue held={holds.ok ? holds.value : []} />
+
+          <Link href={`/activity?tree=${encodeURIComponent(rendered.value.tree.treeId)}`} className="text-xs">
+            what has been asked of this tree →
+          </Link>
         </div>
       </div>
     </SelectionProvider>

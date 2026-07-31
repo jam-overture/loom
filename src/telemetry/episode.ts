@@ -71,6 +71,19 @@ export type EpisodeResolution =
   /** Nothing in this window settled it — still in flight, or the page ends mid-episode. */
   | { readonly kind: "open" }
 
+export type EpisodeResolutionKind = EpisodeResolution["kind"]
+
+export const EPISODE_RESOLUTION_KINDS: readonly EpisodeResolutionKind[] = [
+  "committed",
+  "refused",
+  "awaiting-answer",
+  "discarded",
+  "not-interpreted",
+  "not-writable",
+  "failed",
+  "open",
+]
+
 export type IntentEpisode = {
   readonly intentId: IntentId
   readonly treeId: TreeId
@@ -390,4 +403,51 @@ export const episodesOf = (records: readonly RecordedTelemetry[]): EpisodeFold =
   })
 
   return { episodes, unattributed }
+}
+
+/**
+ * What a window of episodes adds up to.
+ *
+ * This is the shape of the question 0007 said calibration would eventually need
+ * — how often the Gate refuses, how often it asks, how often a repair rescued a
+ * refusal — asked of one page rather than of all history. It is a second fold
+ * over the first rather than anything the journal stores, for 0016's reason: a
+ * counted total that is kept is a total that can disagree with the records it
+ * was counted from.
+ */
+export type EpisodeTally = {
+  readonly episodes: number
+  readonly proposals: number
+  /** Proposals the Gate would not apply on its own (0002). */
+  readonly held: number
+  /** Proposals made to replace one the Gate refused (0006). */
+  readonly repairs: number
+  /**
+   * Every kind, including the ones that did not happen. A resolution absent from
+   * this map and one that occurred zero times are different claims, and only one
+   * of them is true.
+   */
+  readonly byResolution: Readonly<Record<EpisodeResolutionKind, number>>
+}
+
+const emptyTally = (): Record<EpisodeResolutionKind, number> =>
+  Object.fromEntries(EPISODE_RESOLUTION_KINDS.map((kind) => [kind, 0])) as Record<
+    EpisodeResolutionKind,
+    number
+  >
+
+export const tallyEpisodes = (episodes: readonly IntentEpisode[]): EpisodeTally => {
+  const byResolution = emptyTally()
+  let proposals = 0
+  let held = 0
+  let repairs = 0
+
+  for (const episode of episodes) {
+    byResolution[episode.resolution.kind] += 1
+    proposals += episode.proposals.length
+    held += episode.proposals.filter((proposal) => proposal.held).length
+    repairs += episode.proposals.filter((proposal) => proposal.repairOf !== undefined).length
+  }
+
+  return { episodes: episodes.length, proposals, held, repairs, byResolution }
 }
