@@ -4,6 +4,8 @@ import postgres from "postgres"
 
 import { ensureTreeStoreSchema } from "@loom/runtime/postgres"
 
+import { resolveConnectionString } from "../lib/connection"
+
 /**
  * Creates the store's tables. Run once against a new database.
  *
@@ -21,39 +23,20 @@ const { loadEnvConfig } = nextEnv
 
 loadEnvConfig(process.cwd())
 
-const connectionString = process.env["DATABASE_URL"] ?? process.env["POSTGRES_URL"]
+let connectionString: string | undefined
+
+try {
+  connectionString = resolveConnectionString()
+} catch (cause) {
+  console.error(cause instanceof Error ? cause.message : String(cause))
+  process.exit(1)
+}
 
 if (connectionString === undefined) {
   console.error(
     "db:push needs DATABASE_URL (or POSTGRES_URL).\n" +
       "Put it in apps/portal/.env.local, or pass it inline:\n" +
       "  DATABASE_URL='postgresql://…:6543/postgres' pnpm db:push"
-  )
-  process.exit(1)
-}
-
-/**
- * A connection string that still carries its own key name is the commonest
- * .env.local paste error, and postgres.js reports it as a bare "Invalid URL"
- * from deep inside a URL parser. Naming it here costs three lines and saves
- * reading a stack trace.
- */
-for (const key of ["DATABASE_URL", "POSTGRES_URL"]) {
-  if (connectionString.startsWith(`${key}=`)) {
-    console.error(
-      `${key} contains its own name. A .env.local line is KEY=value, so the value must be\n` +
-        `the bare URL:\n` +
-        `  ${key}=postgresql://user:password@host:6543/postgres`
-    )
-    process.exit(1)
-  }
-}
-
-if (URL.canParse(connectionString) === false) {
-  console.error(
-    "The connection string is not a valid URL. Expected the Supabase transaction\n" +
-      "pooler string, which looks like:\n" +
-      "  postgresql://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/postgres"
   )
   process.exit(1)
 }
