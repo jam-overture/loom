@@ -32,6 +32,32 @@ if (connectionString === undefined) {
   process.exit(1)
 }
 
+/**
+ * A connection string that still carries its own key name is the commonest
+ * .env.local paste error, and postgres.js reports it as a bare "Invalid URL"
+ * from deep inside a URL parser. Naming it here costs three lines and saves
+ * reading a stack trace.
+ */
+for (const key of ["DATABASE_URL", "POSTGRES_URL"]) {
+  if (connectionString.startsWith(`${key}=`)) {
+    console.error(
+      `${key} contains its own name. A .env.local line is KEY=value, so the value must be\n` +
+        `the bare URL:\n` +
+        `  ${key}=postgresql://user:password@host:6543/postgres`
+    )
+    process.exit(1)
+  }
+}
+
+if (URL.canParse(connectionString) === false) {
+  console.error(
+    "The connection string is not a valid URL. Expected the Supabase transaction\n" +
+      "pooler string, which looks like:\n" +
+      "  postgresql://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/postgres"
+  )
+  process.exit(1)
+}
+
 const client = postgres(connectionString, { prepare: false, max: 1 })
 
 try {
