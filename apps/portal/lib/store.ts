@@ -27,29 +27,48 @@ import { seedTree } from "./seed"
  */
 const connectionString = process.env["DATABASE_URL"] ?? process.env["POSTGRES_URL"]
 
-const build = (): TreeStore => {
-  const store =
-    connectionString === undefined
-      ? memoryTreeStore()
-      : postgresTreeStore(drizzle(postgres(connectionString, { prepare: false, max: 1 })))
-
-  /**
-   * `already-exists` is ignored by design: a re-evaluated module, a second
-   * serverless instance, or a restart against a populated database must not
-   * replace a tree that has since been edited.
-   */
-  void store.create(seedTree())
-
-  return store
-}
+const build = (): TreeStore =>
+  connectionString === undefined
+    ? memoryTreeStore()
+    : postgresTreeStore(drizzle(postgres(connectionString, { prepare: false, max: 1 })))
 
 const CARRIER_KEY = Symbol.for("loom.portal.store")
+const SEEDING_KEY = Symbol.for("loom.portal.seeding")
 
-type Carrier = { [CARRIER_KEY]?: TreeStore }
+type Carrier = {
+  [CARRIER_KEY]?: TreeStore
+  [SEEDING_KEY]?: Promise<void>
+}
 
 const carrier = globalThis as unknown as Carrier
 
+/**
+ * Constructing the store is cheap: postgres.js does not connect until the first
+ * query, so nothing here reaches the network.
+ */
 export const portalStore: TreeStore = (carrier[CARRIER_KEY] ??= build())
+
+/**
+ * Seeding is deferred to the first request that needs it, and never happens at
+ * module scope.
+ *
+ * Importing a module must not perform IO. `next build` evaluates route modules
+ * while collecting page data, so a query at import time makes the *build* depend
+ * on the database being reachable and correctly migrated — which is exactly
+ * backwards, since the build is what produces the code that runs the migration's
+ * consumers. A deployment should fail because the app is broken, not because a
+ * table did not exist yet at build time.
+ *
+ * Memoised on the same carrier as the store, so concurrent requests on one
+ * instance share a single attempt and a re-evaluated module does not re-seed.
+ * `already-exists` is ignored by design: a second instance, or a restart against
+ * a populated database, must not replace a tree that has since been edited.
+ */
+export const ensureSeeded = async (): Promise<void> => {
+  carrier[SEEDING_KEY] ??= portalStore.create(seedTree()).then(() => undefined)
+
+  await carrier[SEEDING_KEY]
+}
 
 /** Whether writes outlive this process. The trees page states it rather than implying it. */
 export const storeIsDurable = connectionString !== undefined

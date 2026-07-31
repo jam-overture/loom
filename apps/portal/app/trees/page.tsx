@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
-import { portalStore, storeIsDurable } from "@/lib/store"
+import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
 /**
  * Every tree the store can see — which is now a question the framework answers,
@@ -15,6 +15,7 @@ import { portalStore, storeIsDurable } from "@/lib/store"
  */
 const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: string }> }) => {
   const { after } = await searchParams
+  await ensureSeeded()
   const page = await portalStore.list(after === undefined ? {} : { cursor: after })
 
   if (!page.ok) {
