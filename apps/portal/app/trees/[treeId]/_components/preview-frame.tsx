@@ -21,7 +21,7 @@ export const PreviewFrame = ({
   readonly diagnostics: readonly RenderDiagnostic[]
   readonly children: ReactNode
 }) => (
-  <div className="flex flex-col gap-4 p-8">
+  <div className="flex flex-col gap-4">
     <div className="flex items-baseline gap-3">
       <h1 className="text-2xl tracking-tight">preview</h1>
       <span className="text-ink-muted font-mono text-xs">

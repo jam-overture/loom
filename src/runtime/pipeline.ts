@@ -76,7 +76,7 @@ const applyAssessedChange = (
   tree: LoomTree,
   assessment: ChangeAssessment,
   disposition: Disposition
-): CompositionOutcome => {
+): Extract<CompositionOutcome, { readonly kind: "applied" | "not-applicable" }> => {
   const emit = emitter(runtime, tree)
   const applied = applyDelta(tree, assessment.proposal.delta)
 
@@ -231,6 +231,17 @@ export const composeChange = async (
 }
 
 /**
+ * What confirming can produce. Narrower than `CompositionOutcome` because
+ * confirmation starts from a proposal that already exists: there is nothing left
+ * to interpret, and a change the Gate holds a second time is not offered a third
+ * — it applies or it does not.
+ */
+export type ConfirmationOutcome = Extract<
+  CompositionOutcome,
+  { readonly kind: "applied" | "rejected" | "not-applicable" }
+>
+
+/**
  * Completes a change the Gate held back. The assessment is recomputed against
  * the tree as it stands now rather than trusting the one captured at proposal
  * time, so a confirmation cannot smuggle in a decision made about a different
@@ -241,7 +252,7 @@ export const confirmChange = (
   runtime: CompositionRuntime,
   tree: LoomTree,
   proposal: ProposedChange
-): CompositionOutcome => {
+): ConfirmationOutcome => {
   const emit = emitter(runtime, tree)
 
   const assessed = assessChange(tree, proposal, runtime.policy, runtime.idFactory.deltaId())

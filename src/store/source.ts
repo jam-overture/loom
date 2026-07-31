@@ -1,7 +1,8 @@
 import { ok, type Result } from "../result.js"
 import type { RenderRequest, TreeSource, TreeSourceError } from "../render/request.js"
 
-import { describeStoreError, type TreeStore } from "./store.js"
+import { describeStoreError } from "./errors.js"
+import type { TreeReader } from "./store.js"
 
 /**
  * The store, as the renderer's `TreeSource`.
@@ -16,7 +17,7 @@ import { describeStoreError, type TreeStore } from "./store.js"
  * it an already-parsed `LoomTree` would satisfy the type and skip the check, so
  * this passes the snapshot through the same boundary any other source would.
  */
-export const treeSourceFromStore = (store: TreeStore): TreeSource => ({
+export const treeSourceFromStore = (store: TreeReader): TreeSource => ({
   load: async (request: RenderRequest): Promise<Result<unknown, TreeSourceError>> => {
     const head = await store.head(request.treeId)
 

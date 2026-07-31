@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="700" viewBox="0 0 960 700" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="960" height="700" fill="#ffffff"/>
+
+  <text x="40" y="42" font-size="21" fill="#1a1a1a">Addressing: every node is selectable, not every node is clickable</text>
+  <text x="40" y="66" font-size="13" fill="#6e6e6e">The seed tree has 10 nodes. Edit mode decorates elements and nothing else, so the DOM offers 6 handles.</text>
+  <text x="40" y="84" font-size="13" fill="#6e6e6e">The four that are left over do not disappear from the outline — they delegate, and the portal says so.</text>
+
+  <!-- column headings -->
+  <text x="40" y="118" font-size="11" letter-spacing="1.2" fill="#6e6e6e">THE TREE — WHAT AN OUTLINE ROW NAMES</text>
+  <text x="600" y="118" font-size="11" letter-spacing="1.2" fill="#6e6e6e">THE DOM — WHAT A CLICK CAN LAND ON</text>
+
+  <!-- ── tree rows ─────────────────────────────────────────────── -->
+  <g font-size="12.5">
+    <!-- 0 loom.page -->
+    <rect x="40" y="130" width="380" height="26" rx="3" fill="#ffffff" stroke="#d8dbe0"/>
+    <text x="52" y="147" fill="#b0b0b0">◆</text>
+    <text x="70" y="147" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a1a1a">loom.page</text>
+
+    <!-- 1 loom.heading -->
+    <rect x="54" y="164" width="366" height="26" rx="3" fill="#ffffff" stroke="#d8dbe0"/>
+    <text x="66" y="181" fill="#b0b0b0">◆</text>
+    <text x="84" y="181" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a1a1a">loom.heading</text>
+
+    <!-- 2 text -->
+    <rect x="68" y="198" width="352" height="26" rx="3" fill="#fdf6f0" stroke="#f0d9c4"/>
+    <text x="80" y="215" fill="#b0b0b0">·</text>
+    <text x="98" y="215" fill="#4a4a4a">“Loom”</text>
+    <text x="404" y="215" text-anchor="end" font-size="11" fill="#c2410c">text</text>
+
+    <!-- 3 loom.prose -->
+    <rect x="54" y="232" width="366" height="26" rx="3" fill="#ffffff" stroke="#d8dbe0"/>
+    <text x="66" y="249" fill="#b0b0b0">◆</text>
+    <text x="84" y="249" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a1a1a">loom.prose</text>
+
+    <!-- 4 text -->
+    <rect x="68" y="266" width="352" height="26" rx="3" fill="#fdf6f0" stroke="#f0d9c4"/>
+    <text x="80" y="283" fill="#b0b0b0">·</text>
+    <text x="98" y="283" fill="#4a4a4a">“This page is a stored tree, rendered…”</text>
+    <text x="404" y="283" text-anchor="end" font-size="11" fill="#c2410c">text</text>
+
+    <!-- 5 loom.card -->
+    <rect x="54" y="300" width="366" height="26" rx="3" fill="#ffffff" stroke="#d8dbe0"/>
+    <text x="66" y="317" fill="#b0b0b0">◆</text>
+    <text x="84" y="317" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a1a1a">loom.card</text>
+
+    <!-- 6 loom.heading -->
+    <rect x="68" y="334" width="352" height="26" rx="3" fill="#ffffff" stroke="#d8dbe0"/>
+    <text x="80" y="351" fill="#b0b0b0">◆</text>
+    <text x="98" y="351" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a1a1a">loom.heading</text>
+
+    <!-- 7 text -->
+    <rect x="82" y="368" width="338" height="26" rx="3" fill="#fdf6f0" stroke="#f0d9c4"/>
+    <text x="94" y="385" fill="#b0b0b0">·</text>
+    <text x="112" y="385" fill="#4a4a4a">“Every change is a delta”</text>
+    <text x="404" y="385" text-anchor="end" font-size="11" fill="#c2410c">text</text>
+
+    <!-- 8 loom.prose -->
+    <rect x="68" y="402" width="352" height="26" rx="3" fill="#ffffff" stroke="#d8dbe0"/>
+    <text x="80" y="419" fill="#b0b0b0">◆</text>
+    <text x="98" y="419" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a1a1a">loom.prose</text>
+
+    <!-- 9 text -->
+    <rect x="82" y="436" width="338" height="26" rx="3" fill="#fdf6f0" stroke="#f0d9c4"/>
+    <text x="94" y="453" fill="#b0b0b0">·</text>
+    <text x="112" y="453" fill="#4a4a4a">“Nothing here was written as markup…”</text>
+    <text x="404" y="453" text-anchor="end" font-size="11" fill="#c2410c">text</text>
+  </g>
+
+  <!-- ── DOM handles ───────────────────────────────────────────── -->
+  <g font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <rect x="600" y="130" width="320" height="26" rx="3" fill="#f4f6f8" stroke="#5b6478"/>
+    <text x="612" y="147" fill="#1a1a1a">data-loom-node="n_seed10"</text>
+
+    <rect x="600" y="164" width="320" height="26" rx="3" fill="#f4f6f8" stroke="#5b6478"/>
+    <text x="612" y="181" fill="#1a1a1a">data-loom-node="n_seed2"</text>
+
+    <rect x="600" y="232" width="320" height="26" rx="3" fill="#f4f6f8" stroke="#5b6478"/>
+    <text x="612" y="249" fill="#1a1a1a">data-loom-node="n_seed4"</text>
+
+    <rect x="600" y="300" width="320" height="26" rx="3" fill="#f4f6f8" stroke="#5b6478"/>
+    <text x="612" y="317" fill="#1a1a1a">data-loom-node="n_seed9"</text>
+
+    <rect x="600" y="334" width="320" height="26" rx="3" fill="#f4f6f8" stroke="#5b6478"/>
+    <text x="612" y="351" fill="#1a1a1a">data-loom-node="n_seed6"</text>
+
+    <rect x="600" y="402" width="320" height="26" rx="3" fill="#f4f6f8" stroke="#5b6478"/>
+    <text x="612" y="419" fill="#1a1a1a">data-loom-node="n_seed8"</text>
+  </g>
+
+  <defs>
+    <marker id="solid" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,1 L7,4 L0,7 z" fill="#5b6478"/>
+    </marker>
+    <marker id="dashed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,1 L7,4 L0,7 z" fill="#c2410c"/>
+    </marker>
+  </defs>
+
+  <!-- direct: the node itself is addressable -->
+  <g stroke="#5b6478" stroke-width="1.4" fill="none" marker-end="url(#solid)">
+    <path d="M420,143 L596,143"/>
+    <path d="M420,177 L596,177"/>
+    <path d="M420,245 L596,245"/>
+    <path d="M420,313 L596,313"/>
+    <path d="M420,347 L596,347"/>
+    <path d="M420,415 L596,415"/>
+  </g>
+
+  <!-- delegated: the node renders without an element of its own -->
+  <g stroke="#c2410c" stroke-width="1.4" stroke-dasharray="4 3" fill="none" marker-end="url(#dashed)">
+    <path d="M420,211 C500,211 510,177 596,177"/>
+    <path d="M420,279 C500,279 510,245 596,245"/>
+    <path d="M420,381 C500,381 510,347 596,347"/>
+    <path d="M420,449 C500,449 510,415 596,415"/>
+  </g>
+
+  <text x="470" y="122" font-size="11" fill="#5b6478">addresses</text>
+
+  <!-- ── legend + the second failure mode ──────────────────────── -->
+  <line x1="40" y1="492" x2="920" y2="492" stroke="#e4e6ea"/>
+
+  <g font-size="12.5">
+    <line x1="44" y1="522" x2="84" y2="522" stroke="#5b6478" stroke-width="1.4" marker-end="url(#solid)"/>
+    <text x="96" y="526" fill="#1a1a1a">addressable</text>
+    <text x="196" y="526" fill="#6e6e6e">— the element carries its own handle</text>
+
+    <line x1="44" y1="550" x2="84" y2="550" stroke="#c2410c" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#dashed)"/>
+    <text x="96" y="554" fill="#1a1a1a">delegated</text>
+    <text x="196" y="554" fill="#6e6e6e">— to the nearest decorated ancestor, and the portal names the fallback</text>
+
+    <text x="52" y="582" fill="#b0b0b0">✕</text>
+    <text x="96" y="582" fill="#1a1a1a">unaddressable</text>
+    <text x="196" y="582" fill="#6e6e6e">— nothing on the path to the root is decorated either</text>
+  </g>
+
+  <rect x="40" y="604" width="880" height="66" rx="4" fill="#fbfcfd" stroke="#e4e6ea"/>
+  <text x="56" y="626" font-size="12.5" fill="#1a1a1a">Two reasons a node has no handle, and neither is a bug to fix by wrapping it:</text>
+  <text x="56" y="646" font-size="12.5" fill="#6e6e6e">it renders without an element of its own (text, slot) — or its primitive ignores loom.editable, which 0012 permits and 0010</text>
+  <text x="56" y="663" font-size="12.5" fill="#6e6e6e">forbids papering over. A wrapper would change what `&gt;` and `:nth-child` select, so the UI reviewed is not the UI served.</text>
+</svg>

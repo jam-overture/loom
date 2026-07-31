@@ -1,4 +1,5 @@
 import type { ProposalId, TreeId } from "../ids.js"
+import type { StoreError } from "../store/errors.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
 
@@ -48,6 +49,46 @@ export type RuntimeEvent =
       readonly inverse: TreeDelta
     }
   | { readonly type: "application-failed"; readonly proposalId: ProposalId; readonly error: TreeError }
+  /**
+   * An intent that never reached interpretation, because the tree it named had
+   * already moved on. Narrated rather than silently returned: a rising rate of
+   * this is contention, and it is the one failure a client is expected to
+   * recover from on its own (0017).
+   */
+  | { readonly type: "intent-not-writable"; readonly intent: EditIntent; readonly error: StoreError }
+  /**
+   * The Gate held a change back and custody of it succeeded, so there is
+   * something for a human to answer. Distinct from the `disposition-decided`
+   * that preceded it: one is a judgment, the other is a proposal that still
+   * exists to be confirmed.
+   */
+  | { readonly type: "proposal-held"; readonly proposalId: ProposalId }
+  /**
+   * Custody failed, so a change the Gate was willing to offer is simply gone.
+   * Emitted because the alternative is a change that disappears between two
+   * events that both say things went well.
+   */
+  | { readonly type: "hold-failed"; readonly proposalId: ProposalId; readonly detail: string }
+  /** A human answered a held proposal. The disposition that follows is the Gate's second look. */
+  | { readonly type: "hold-confirmed"; readonly proposalId: ProposalId }
+  /**
+   * A human answered no. The most valuable event in this list for §6: it is the
+   * only one that says a change the Gate was prepared to allow was not wanted,
+   * which is what calibration (0007) has to learn from.
+   */
+  | { readonly type: "hold-discarded"; readonly proposalId: ProposalId }
+  /**
+   * The delta reached the log. `change-applied` says a tree in memory accepted
+   * it; this says the truth (0016) moved.
+   */
+  | { readonly type: "change-committed"; readonly proposalId: ProposalId; readonly revision: number }
+  /**
+   * Accepted, applied in memory, and then not persisted. The gap between
+   * `change-applied` and this is the one place the event stream could lie about
+   * what a tree contains, so it is narrated rather than returned only to the
+   * caller.
+   */
+  | { readonly type: "commit-failed"; readonly proposalId: ProposalId; readonly error: StoreError }
 
 export type RuntimeEventEnvelope = {
   readonly treeId: TreeId
