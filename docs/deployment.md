@@ -26,36 +26,46 @@ script is what it runs.
 Verified by clean clone → `pnpm install --frozen-lockfile` → `pnpm build`, not by
 reasoning about it.
 
-## No environment variables yet
+## Environment
 
-The portal makes no model calls, so it needs no secrets. When the write path lands
-(0017), `ANTHROPIC_API_KEY` goes in Vercel's environment as a **server-side**
-variable — never one prefixed `NEXT_PUBLIC_`. 0017 exists partly to keep that key
-off the client, and a public prefix would undo it in one keystroke.
+The write path (#18) calls a real model, so the portal now needs one secret:
 
-At that point the deployment also becomes worth protecting: an unauthenticated
-prompt box on a public URL is someone else's model spend. Vercel's Deployment
-Protection is the cheap answer until the portal has real auth.
+| Variable                 | Scope       | Notes                                    |
+| ------------------------ | ----------- | ---------------------------------------- |
+| `LOOM_ANTHROPIC_API_KEY` | Server-side | Falls back to `ANTHROPIC_API_KEY`        |
+
+**Never prefix it `NEXT_PUBLIC_`.** 0017 exists partly to keep that key off the
+client, and a public prefix would undo the whole record in one keystroke.
+
+Leaving it unset is a supported state rather than a broken one: the interpreter
+reports `interpreter-unavailable` and the prompt box says so. A deployment with no
+key is a perfectly good way to look at the read path.
+
+Setting it makes the deployment worth protecting. **An unauthenticated prompt box
+on a public URL is your model spend, available to anyone with the link.** Vercel's
+Deployment Protection is the cheap answer until the portal has real auth.
 
 ## What a deployment can and cannot do today
 
-**Works.** The shell, the primitives, and the preview pane rendering a stored
-tree. The seed is deterministic — `t_seed1` at revision 0 — so every serverless
-instance produces an identical tree and reads are consistent no matter which
-instance answers.
+**Works.** The shell, the primitives, the tree listing, the outline, addressing,
+and the preview pane rendering a stored tree. Reads are consistent across
+instances because the seed is deterministic.
 
-**Does not work, by construction.** Persistence. `memoryTreeStore` lives in a
-server process, and on Vercel there are many short-lived processes. Today that is
-invisible, because nothing writes.
+**Does not survive, by construction.** Persistence. `memoryTreeStore` lives in a
+server process, and on Vercel there are many short-lived ones.
 
-**It stops being invisible the moment the write path lands.** An append would
-succeed on one instance and be absent from the next request served by another —
-a change that visibly applies and then vanishes. That is worse than not deploying,
-because it looks like the runtime is broken rather than like persistence is
-missing.
+**This is now live rather than prospective, because the write path has landed.**
+An append succeeds on the instance that served the request and is absent from the
+next request served by another. A change visibly applies and then vanishes.
 
-So: **a backing store is a prerequisite for deploying the write path**, not a
-follow-up to it.
+That failure reads as a broken runtime rather than as missing persistence, which
+is the wrong lesson to take from a demo. So on a shared deployment today, treat
+the prompt box as a demonstration that the loop runs — not as something whose
+results will still be there when you reload.
+
+**A backing store is the prerequisite for the write path being trustworthy on a
+deployment.** Locally, `pnpm dev` is a single process and everything persists for
+as long as it runs.
 
 ## The backing store, when it comes
 
