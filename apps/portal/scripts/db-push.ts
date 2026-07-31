@@ -3,11 +3,13 @@ import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
 import { ensureTreeStoreSchema } from "@loom/runtime/postgres"
+import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
 
 import { resolveConnectionString } from "../lib/connection"
 
 /**
- * Creates the store's tables. Run once against a new database.
+ * Creates the tables the portal needs — the store's, and the telemetry journal's.
+ * Run once against a new database.
  *
  * Deliberately a script rather than something the app does on boot: DDL issued by
  * several serverless instances starting at once is a race, and a migration that
@@ -44,8 +46,10 @@ if (connectionString === undefined) {
 const client = postgres(connectionString, { prepare: false, max: 1 })
 
 try {
-  await ensureTreeStoreSchema(drizzle(client))
-  console.log("loom: loom_trees and loom_revisions are present")
+  const db = drizzle(client)
+  await ensureTreeStoreSchema(db)
+  await ensureTelemetrySchema(db)
+  console.log("loom: loom_trees, loom_revisions and loom_telemetry are present")
 } finally {
   await client.end()
 }

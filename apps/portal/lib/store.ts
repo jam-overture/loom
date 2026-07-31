@@ -1,10 +1,7 @@
-import { drizzle } from "drizzle-orm/postgres-js"
-import postgres from "postgres"
-
 import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
 import { postgresTreeStore } from "@loom/runtime/postgres"
 
-import { resolveConnectionString } from "./connection"
+import { portalDatabase } from "./database"
 import { seedTree } from "./seed"
 
 /**
@@ -17,21 +14,15 @@ import { seedTree } from "./seed"
  * deployment, where an append lands on the instance that served the request and is
  * absent from the next, which is the whole reason 0022 exists.
  *
- * `prepare: false` is load-bearing on Supabase: serverless connects through the
- * transaction-mode pooler, and transaction-mode pooling does not support prepared
- * statements. Omitting it produces confusing runtime errors rather than a clear
- * refusal.
+ * The connection itself belongs to `database.ts`, which the telemetry journal
+ * shares: two contracts, one handle, one pool.
  *
  * The store handle is also the scope of what the portal may see (0020) — here
  * everything, because there is one tenant. A deployment with more would hand the
  * portal a narrower handle rather than teach the portal about tenants.
  */
-const connectionString = resolveConnectionString()
-
 const build = (): TreeStore =>
-  connectionString === undefined
-    ? memoryTreeStore()
-    : postgresTreeStore(drizzle(postgres(connectionString, { prepare: false, max: 1 })))
+  portalDatabase === undefined ? memoryTreeStore() : postgresTreeStore(portalDatabase)
 
 const CARRIER_KEY = Symbol.for("loom.portal.store")
 const SEEDING_KEY = Symbol.for("loom.portal.seeding")
@@ -71,5 +62,4 @@ export const ensureSeeded = async (): Promise<void> => {
   await carrier[SEEDING_KEY]
 }
 
-/** Whether writes outlive this process. The trees page states it rather than implying it. */
-export const storeIsDurable = connectionString !== undefined
+export { storeIsDurable } from "./database"

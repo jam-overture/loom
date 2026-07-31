@@ -1,4 +1,5 @@
 import type { ProposalId, TreeId } from "../ids.js"
+import { clampLimit } from "../paging.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
 import type { Provenance } from "../runtime/proposal.js"
@@ -79,13 +80,11 @@ export const MAX_LISTING_LIMIT = 200
 
 /**
  * Every implementation clamps the same way, so a caller cannot ask a store for
- * everything it holds by omitting a limit or naming a large one.
+ * everything it holds by omitting a limit or naming a large one. The rule is
+ * shared with every other listing in Loom; only the bounds are this one's.
  */
-export const clampListingLimit = (limit: number | undefined): number => {
-  if (limit === undefined || !Number.isFinite(limit)) return DEFAULT_LISTING_LIMIT
-
-  return Math.min(MAX_LISTING_LIMIT, Math.max(1, Math.floor(limit)))
-}
+export const clampListingLimit = (limit: number | undefined): number =>
+  clampLimit(limit, { fallback: DEFAULT_LISTING_LIMIT, max: MAX_LISTING_LIMIT })
 
 /**
  * Three reads and two writes. `head` is the O(1) read §3 needs; `history` is the
