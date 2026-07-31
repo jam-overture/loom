@@ -15,10 +15,14 @@ const strokeProps = {
 } as const
 
 /**
- * Four sections, each one a thing the runtime already produces: the stored trees,
- * the registry a model may build from (0013), the delta log (0016), and the
- * snapshot audit. Nothing here is aspirational — a section with no data behind it
- * would be a promise in a nav bar.
+ * Five sections, each one a thing the runtime already produces: the stored trees,
+ * the registry a model may build from (0013), what was asked and what became of
+ * it (0023), the delta log (0016), and the snapshot audit.
+ *
+ * `activity` is the only one of the last three with a route behind it today.
+ * `history` and `audit` name data the runtime holds and no page yet reads —
+ * which makes them links to a 404, and a decision the maintainer has been asked
+ * to make: remove them until built, or mark them unbuilt in place.
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
@@ -48,6 +52,15 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
     },
   ],
   [
+    {
+      label: "activity",
+      href: "/activity",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M3 12h4l2.5-6 4 12 2.5-6h5" />
+        </svg>
+      ),
+    },
     {
       label: "history",
       href: "/history",

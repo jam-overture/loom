@@ -88,7 +88,8 @@ export const describeTelemetryJournalContract = (
       const page = await journal.read()
 
       expect(page.ok && typesOf(page.value.records)).toEqual(typesOf(episode))
-      expect(page.ok && page.value.cursor).toBeNull()
+      expect(page.ok && page.value.older).toBeNull()
+      expect(page.ok && page.value.newer).toBeNull()
     })
 
     /** A journal makes no claim that a tree exists, so nothing here is `not-found`. */
@@ -97,7 +98,7 @@ export const describeTelemetryJournalContract = (
 
       expect(await journal.read({ treeId: treeIdSchema.parse("t_absent") })).toEqual({
         ok: true,
-        value: { records: [], cursor: null },
+        value: { records: [], older: null, newer: null },
       })
     })
 
@@ -105,7 +106,10 @@ export const describeTelemetryJournalContract = (
       const journal = await freshJournal()
 
       expect(await journal.record([])).toEqual({ ok: true, value: undefined })
-      expect(await journal.read()).toEqual({ ok: true, value: { records: [], cursor: null } })
+      expect(await journal.read()).toEqual({
+        ok: true,
+        value: { records: [], older: null, newer: null },
+      })
     })
 
     it("survives the round trip with the proposal intact", async () => {
@@ -156,11 +160,11 @@ export const describeTelemetryJournalContract = (
 
         const first = await journal.read({ limit: 2 })
         expect(first.ok && first.value.records).toHaveLength(2)
-        expect(first.ok && first.value.cursor).not.toBeNull()
+        expect(first.ok && first.value.newer).not.toBeNull()
 
         const second = await journal.read({
           limit: 2,
-          ...(first.ok && first.value.cursor ? { cursor: first.value.cursor } : {}),
+          ...(first.ok && first.value.newer ? { cursor: first.value.newer } : {}),
         })
 
         expect(second.ok && second.value.records).toHaveLength(2)
@@ -177,7 +181,7 @@ export const describeTelemetryJournalContract = (
         const page = await journal.read({ limit: 2 })
 
         expect(page.ok && page.value.records).toHaveLength(2)
-        expect(page.ok && page.value.cursor).toBeNull()
+        expect(page.ok && page.value.newer).toBeNull()
       })
 
       it("clamps a limit rather than honouring it", async () => {
@@ -210,7 +214,101 @@ export const describeTelemetryJournalContract = (
         const last = all.ok ? all.value.records.at(-1) : undefined
         const past = await journal.read({ cursor: String(last?.seq ?? 0) })
 
-        expect(past).toEqual({ ok: true, value: { records: [], cursor: null } })
+        expect(past).toEqual({ ok: true, value: { records: [], older: null, newer: null } })
+      })
+    })
+
+    /**
+     * The direction a page is taken from, which is the difference between "what
+     * happened recently" costing one read and costing every read.
+     */
+    describe("paging backwards", () => {
+      const seqsOf = (page: Awaited<ReturnType<TelemetryJournal["read"]>>): readonly number[] =>
+        page.ok ? page.value.records.map((record) => record.seq) : []
+
+      it("reads the newest page when asked for older with no cursor", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_newest")
+        await journal.record(recordsFor(treeId, 5))
+
+        const all = await journal.read()
+        const newest = await journal.read({ direction: "older", limit: 2 })
+
+        expect(seqsOf(newest)).toEqual(seqsOf(all).slice(-2))
+      })
+
+      /** Ascending whichever end it came from, so a fold never has to ask which. */
+      it("returns a backwards page in arrival order", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_order")
+        await journal.record(recordsFor(treeId, 4))
+
+        const page = await journal.read({ direction: "older", limit: 3 })
+        const seqs = seqsOf(page)
+
+        expect(seqs).toHaveLength(3)
+        expect(seqs.every((seq, index) => index === 0 || seq > (seqs[index - 1] ?? 0))).toBe(true)
+      })
+
+      it("walks back through the whole journal one page at a time", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_walk")
+        await journal.record(recordsFor(treeId, 5))
+
+        const seen: number[] = []
+        let cursor: string | null | undefined
+
+        for (let read = 0; read < 4; read += 1) {
+          const page = await journal.read({
+            direction: "older",
+            limit: 2,
+            ...(cursor ? { cursor } : {}),
+          })
+
+          seen.unshift(...seqsOf(page))
+          cursor = page.ok ? page.value.older : null
+          if (cursor === null) break
+        }
+
+        expect(seen).toEqual(seqsOf(await journal.read()))
+        expect(cursor).toBeNull()
+      })
+
+      it("names the newer end once a backwards page has resumed", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_both")
+        await journal.record(recordsFor(treeId, 5))
+
+        const newest = await journal.read({ direction: "older", limit: 2 })
+        expect(newest.ok && newest.value.newer).toBeNull()
+
+        const older = await journal.read({
+          direction: "older",
+          limit: 2,
+          ...(newest.ok && newest.value.older ? { cursor: newest.value.older } : {}),
+        })
+
+        expect(older.ok && older.value.newer).not.toBeNull()
+
+        const back = await journal.read({
+          limit: 2,
+          ...(older.ok && older.value.newer ? { cursor: older.value.newer } : {}),
+        })
+
+        expect(seqsOf(back)).toEqual(seqsOf(newest))
+      })
+
+      it("keeps trees apart when reading backwards", async () => {
+        const journal = await freshJournal()
+        const mine = treeIdSchema.parse("t_mineback")
+        const yours = treeIdSchema.parse("t_yoursback")
+
+        await journal.record([...recordsFor(mine, 3), ...recordsFor(yours, 2)])
+
+        const page = await journal.read({ treeId: mine, direction: "older", limit: 2 })
+
+        expect(page.ok && page.value.records.every((record) => record.treeId === mine)).toBe(true)
+        expect(page.ok && page.value.records).toHaveLength(2)
       })
     })
   })

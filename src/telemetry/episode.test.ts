@@ -13,7 +13,12 @@ import type { TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
 import { commitIntent, confirmHeld, discardHeld, memoryHoldStore, type WritePath } from "../write/index.js"
 
-import { episodesOf, type EpisodeFold } from "./episode.js"
+import {
+  EPISODE_RESOLUTION_KINDS,
+  episodesOf,
+  tallyEpisodes,
+  type EpisodeFold,
+} from "./episode.js"
 import type { TelemetryJournal } from "./journal.js"
 import { memoryTelemetryJournal } from "./memory.js"
 import { collectTelemetry, type TelemetryCollector } from "./sink.js"
@@ -270,5 +275,90 @@ describe("episodesOf", () => {
 
   it("folds nothing into nothing", () => {
     expect(episodesOf([])).toEqual({ episodes: [], unattributed: [] })
+  })
+})
+
+/**
+ * The tally is folded from episodes the runtime actually produced, for the same
+ * reason the fold itself is: a count assembled from hand-written records would
+ * agree with itself no matter what the pipeline stopped narrating.
+ */
+describe("tallyEpisodes", () => {
+  it("counts nothing as every resolution at zero", () => {
+    const tally = tallyEpisodes([])
+
+    expect(tally).toEqual({
+      episodes: 0,
+      proposals: 0,
+      held: 0,
+      repairs: 0,
+      byResolution: {
+        committed: 0,
+        refused: 0,
+        "awaiting-answer": 0,
+        discarded: 0,
+        "not-interpreted": 0,
+        "not-writable": 0,
+        failed: 0,
+        open: 0,
+      },
+    })
+  })
+
+  /** Absent and zero are different claims, and a view that omits one lies about the other. */
+  it("names every resolution, including the ones that did not happen", () => {
+    expect(Object.keys(tallyEpisodes([]).byResolution).sort()).toEqual(
+      [...EPISODE_RESOLUTION_KINDS].sort()
+    )
+  })
+
+  it("counts a committed episode and its proposal", async () => {
+    const harness = await harnessWith({ script: proposalScript(0.9) })
+    await commitIntent(harness.path, harness.intent)
+
+    const tally = tallyEpisodes((await harness.fold()).episodes)
+
+    expect(tally.episodes).toBe(1)
+    expect(tally.proposals).toBe(1)
+    expect(tally.held).toBe(0)
+    expect(tally.repairs).toBe(0)
+    expect(tally.byResolution.committed).toBe(1)
+  })
+
+  it("counts a held proposal as held while it is still awaiting an answer", async () => {
+    const harness = await harnessWith({ script: proposalScript(0.5) })
+    await commitIntent(harness.path, harness.intent)
+
+    const tally = tallyEpisodes((await harness.fold()).episodes)
+
+    expect(tally.held).toBe(1)
+    expect(tally.byResolution["awaiting-answer"]).toBe(1)
+    expect(tally.byResolution.committed).toBe(0)
+  })
+
+  /** 0006: a repair is a second proposal on one intent, not a second episode. */
+  it("counts a repaired refusal as one episode with two proposals", async () => {
+    const harness = await harnessWith({
+      script: proposalScript(0.1),
+      repairer: (tree, ids, intent) =>
+        scriptedRepairer(
+          ok(
+            buildProposal(ids, {
+              intentId: intent.intentId,
+              delta: removalDelta(tree, ids, sampleTree().ids.footer),
+              confidence: 0.95,
+            })
+          )
+        ),
+    })
+    await commitIntent(harness.path, harness.intent)
+
+    const tally = tallyEpisodes((await harness.fold()).episodes)
+
+    expect(tally.episodes).toBe(1)
+    expect(tally.proposals).toBe(2)
+    expect(tally.repairs).toBe(1)
+    expect(tally.byResolution.committed).toBe(1)
+    expect(tally.byResolution.refused).toBe(0)
   })
 })
