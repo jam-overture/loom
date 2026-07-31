@@ -13,28 +13,50 @@ Import `jam-overture/loom` and set:
 | Root Directory                    | `apps/portal`    |
 | Install / Build / Output commands | leave as default |
 
-That is the whole of it. Vercel reads `packageManager` from the root
-`package.json`, installs with the committed lockfile, and runs the portal's
-`build` script.
+Vercel reads `packageManager` from the root `package.json`, installs with the
+committed lockfile, and runs the portal's `build` script.
 
-### The one thing that could break it, and why you do not have to do anything
+### Root Directory is the one that bites, and it fails silently
+
+**Setting it during the import is not enough — verify it after.** On the New
+Project screen the field shows `apps/portal` as **greyed placeholder text**, which
+looks identical to a value that has been set. Vercel's default is an empty Root
+Directory, meaning the repository root.
+
+That default fails in the worst possible way: **it does not error.** The repo root
+is `@loom/runtime`, which has no framework and no `build` script, so Vercel finds
+nothing to do, produces an empty output, and reports a green deployment. Every
+path then returns `404: NOT_FOUND` from the edge.
+
+The tell is in the build log, and it is unmistakable:
+
+```
+Running "vercel build"
+Build Completed in /vercel/output [160ms]
+Skipping cache upload because no files were prepared
+```
+
+**No install step, and a build measured in milliseconds.** A real build installs
+dependencies and prints a Next.js route table, and takes minutes.
+
+To fix or confirm: **Settings → Build and Deployment → Root Directory** → Edit →
+`apps/portal` → Save, then redeploy. That section only exists once the project
+does, which is why it cannot be fully settled during the import.
+
+### The workspace link, which you do not have to do anything about
 
 `apps/portal` depends on `@loom/runtime` as `workspace:*`, which resolves to the
 **repository root package**. An install scoped to `apps/portal` alone would have
 nothing to link against.
 
 Vercel controls that with **"Include source files outside of the Root Directory
-in the Build Step"**, and two things about it are worth knowing, because looking
-for it during the import is a waste of time:
+in the Build Step"**, in the same settings section as Root Directory above. It is
+**on by default** for every project created since August 2020, so a new import
+already has it — do not go looking for it during the import.
 
-- It is **not on the New Project screen.** It lives in Project Settings → Build &
-  Deployment → Root Directory, which only exists once the project does.
-- It is **on by default** for every project created since August 2020, so a new
-  import already has it.
-
-So: import and deploy. If it were ever off, the build fails at install or compile
-with `Cannot find module '@loom/runtime'` or pnpm's
-`ERR_PNPM_WORKSPACE_PKG_NOT_FOUND` — that error, and nothing else, is what this
+Unlike Root Directory, this one fails loudly: the build stops at install or
+compile with `Cannot find module '@loom/runtime'` or pnpm's
+`ERR_PNPM_WORKSPACE_PKG_NOT_FOUND`. That error, and nothing else, is what this
 setting causes.
 
 Verified by clean clone → `pnpm install --frozen-lockfile` → `pnpm build`, not by
