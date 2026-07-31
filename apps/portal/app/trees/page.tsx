@@ -58,6 +58,13 @@ const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
           next page →
         </Link>
       )}
+
+      <p className="text-ink-muted text-xs">
+        Trees live in the server process. Locally that lasts as long as `pnpm dev`; on a
+        serverless deployment an accepted change may not be there when you reload, because
+        the next request can be served by a different instance. A backing store is what
+        fixes it.
+      </p>
     </div>
   )
 }

@@ -115,6 +115,12 @@ apps/portal/
 portal's typecheck, tests and build. The build is part of it because prerendering
 is what proves the shell renders.
 
+## Deploying
+
+The portal deploys to Vercel from `apps/portal`. Settings, and what a deployment
+can and cannot do before a backing store lands, are in
+[`docs/deployment.md`](docs/deployment.md).
+
 ## Decisions
 
 `decisions/` holds numbered architectural decision records — what was chosen,
