@@ -1,17 +1,27 @@
 # Deploying the portal
 
-The portal is a Next.js app inside a pnpm workspace. Vercel handles that layout
-natively; nothing in the repo needs a `vercel.json`.
+The portal is a Next.js app inside a pnpm workspace. `apps/portal/vercel.json`
+pins the one setting that must not drift:
+
+```json
+{ "framework": "nextjs" }
+```
+
+That is deliberate. Everything else Vercel infers correctly, but the framework
+preset is decided **once, at project creation, by detection** — and if detection
+runs against the wrong directory it silently saves "Other" and never
+re-evaluates. Pinning it in the repo makes the deployment describe itself instead
+of depending on dashboard state nobody can review.
 
 ## Vercel settings
 
 Import `jam-overture/loom` and set:
 
-| Setting                           | Value            |
-| --------------------------------- | ---------------- |
-| Framework preset                  | Next.js          |
-| Root Directory                    | `apps/portal`    |
-| Install / Build / Output commands | leave as default |
+| Setting                           | Value                        |
+| --------------------------------- | ---------------------------- |
+| Root Directory                    | `apps/portal` — **verify it, see below** |
+| Framework preset                  | pinned by `vercel.json`      |
+| Install / Build / Output commands | leave as default             |
 
 Vercel reads `packageManager` from the root `package.json`, installs with the
 committed lockfile, and runs the portal's `build` script.
@@ -42,6 +52,25 @@ dependencies and prints a Next.js route table, and takes minutes.
 To fix or confirm: **Settings → Build and Deployment → Root Directory** → Edit →
 `apps/portal` → Save, then redeploy. That section only exists once the project
 does, which is why it cannot be fully settled during the import.
+
+### Its aftershock: the framework preset
+
+Fixing Root Directory does not undo what the wrong one caused. Detection runs
+**once, at project creation**, so a project first created against the repo root
+saved its preset as "Other" and kept it. The build then succeeds in full — install,
+compile, TypeScript, route table — and fails on the last line:
+
+```
+Error: No Output Directory named "public" found after the Build completed.
+```
+
+"Other" means static site, and a static site is expected to leave a `public`
+directory behind. Next.js leaves `.next`.
+
+`apps/portal/vercel.json` pins `"framework": "nextjs"`, which overrides the
+dashboard, so this is fixed from the repo and stays fixed. Setting the preset by
+hand in **Settings → Build and Deployment → Framework Preset** works too, but it
+lives where nobody reviews it.
 
 ### The workspace link, which you do not have to do anything about
 
