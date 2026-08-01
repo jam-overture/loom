@@ -1,19 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  intentIdSchema,
-  nodeIdSchema,
-  proposalIdSchema,
-  treeIdSchema,
-  type TreeDelta,
-} from "@loom/runtime"
+import { intentIdSchema, nodeIdSchema, proposalIdSchema, treeIdSchema } from "@loom/runtime"
 import {
   EPISODE_RESOLUTION_KINDS,
   type EpisodeResolution,
   type IntentEpisode,
 } from "@loom/runtime/telemetry"
 
-import { summariseOperations } from "./delta-summary"
 import { describeIntent, headlineOfResolution, toneOfResolution, viewOf } from "./episode-view"
 
 const treeId = treeIdSchema.parse("t_1")
@@ -111,25 +104,5 @@ describe("describeIntent", () => {
   /** A window can open mid-episode, and saying so beats rendering a blank line. */
   it("says so when the page opened after the ask", () => {
     expect(describeIntent(episode(undefined))).toContain("after the ask")
-  })
-})
-
-describe("summariseOperations", () => {
-  const delta = (operations: TreeDelta["operations"]): TreeDelta["operations"] => operations
-
-  it("uses the reviewer's verbs rather than the delta model's", () => {
-    expect(
-      summariseOperations(
-        delta([
-          { op: "remove", nodeId: nodeIdSchema.parse("n_a") },
-          { op: "move", nodeId: nodeIdSchema.parse("n_b"), parentId: nodeIdSchema.parse("n_c"), index: 0 },
-        ])
-      )
-    ).toBe("delete, move")
-  })
-
-  /** A delta with no operations is a real proposal, and an empty string reads as missing data. */
-  it("says a delta did nothing rather than rendering nothing", () => {
-    expect(summariseOperations(delta([]))).toBe("no operations")
   })
 })

@@ -4,15 +4,15 @@ import { isNavItemActive } from "./nav"
 
 describe("isNavItemActive", () => {
   it("matches a path against itself", () => {
-    expect(isNavItemActive("/primitives", "/primitives")).toBe(true)
+    expect(isNavItemActive("/history", "/history")).toBe(true)
   })
 
   it("matches a child route against its section", () => {
-    expect(isNavItemActive("/primitives/loom.card", "/primitives")).toBe(true)
+    expect(isNavItemActive("/trees/t_abc", "/trees")).toBe(true)
   })
 
   it("does not match a different section", () => {
-    expect(isNavItemActive("/audit", "/primitives")).toBe(false)
+    expect(isNavItemActive("/history", "/activity")).toBe(false)
   })
 
   /**
@@ -21,13 +21,13 @@ describe("isNavItemActive", () => {
    * wrong nav item, and nothing catches it until two routes collide.
    */
   it("does not match a route that merely shares a prefix", () => {
-    expect(isNavItemActive("/primitives-archive", "/primitives")).toBe(false)
-    expect(isNavItemActive("/auditorium", "/audit")).toBe(false)
+    expect(isNavItemActive("/trees-archive", "/trees")).toBe(false)
+    expect(isNavItemActive("/historian", "/history")).toBe(false)
   })
 
   it("treats the root as exact so it does not claim every path", () => {
     expect(isNavItemActive("/", "/")).toBe(true)
-    expect(isNavItemActive("/primitives", "/")).toBe(false)
+    expect(isNavItemActive("/history", "/")).toBe(false)
   })
 
   it("matches a tree's own route against the root section it belongs to", () => {

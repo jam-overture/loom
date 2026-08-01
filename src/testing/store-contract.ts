@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, treeIdSchema, type ProposalId } from "../ids.js"
-import type { AppendRequest, TreeStore } from "../store/store.js"
+import { sequentialIdFactory, treeIdSchema, type NodeId, type ProposalId } from "../ids.js"
+import type { Result } from "../result.js"
+import type { StoreError } from "../store/errors.js"
+import type { AppendRequest, RevisionPage, TreeStore } from "../store/store.js"
 import { buildElement } from "../tree/builders.js"
 import type { TreeDelta } from "../tree/delta.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
@@ -46,11 +48,43 @@ export const removalOf = (
   operations: [{ op: "remove", nodeId: nodeId as never }],
 })
 
+/** A tree that exists and has never been changed — not the same as no tree. */
+const EMPTY_LOG: RevisionPage = { revisions: [], older: null, newer: null }
+
 export const treeNamed = (namespace: string): LoomTree => {
   const ids = sequentialIdFactory(namespace)
 
   return createTree(buildElement(ids, { type: "loom.page" }), ids)
 }
+
+/**
+ * A delta that reconfigures one node, so a test can append as many as it likes
+ * to the same tree. Removals run out of nodes; reconfiguring a title does not.
+ */
+const retitle = (tree: LoomTree, nodeId: NodeId, baseRevision: number, title: string): TreeDelta => ({
+  deltaId: sequentialIdFactory("s").deltaId(),
+  treeId: tree.treeId,
+  baseRevision,
+  operations: [{ op: "configure", nodeId, set: { title }, unset: [] }],
+})
+
+/** A tree with `count` entries in its log, appended one at a time from revision 0. */
+const treeWithLog = async (store: TreeStore, count: number): Promise<LoomTree> => {
+  const { tree, ids } = sampleTree()
+  await store.create(tree)
+
+  for (const revision of Array.from({ length: count }, (_, index) => index)) {
+    await store.append(
+      tree.treeId,
+      appendOf(retitle(tree, ids.page, revision, `title ${revision + 1}`), `p_${revision + 1}`)
+    )
+  }
+
+  return tree
+}
+
+const revisionNumbers = (page: Result<RevisionPage, StoreError>): readonly number[] =>
+  page.ok ? page.value.revisions.map((stored) => stored.revision) : []
 
 /**
  * `makeStore` returns a store with nothing in it. Each test gets its own, so the
@@ -69,7 +103,7 @@ export const describeTreeStoreContract = (
 
       expect((await store.create(tree)).ok).toBe(true)
       expect(await store.head(tree.treeId)).toEqual({ ok: true, value: tree })
-      expect(await store.history(tree.treeId)).toEqual({ ok: true, value: [] })
+      expect(await store.revisions(tree.treeId)).toEqual({ ok: true, value: EMPTY_LOG })
     })
 
     it("refuses to create the same tree twice", async () => {
@@ -91,7 +125,7 @@ export const describeTreeStoreContract = (
         ok: false,
         error: { code: "not-found", treeId: absent },
       })
-      expect(await store.history(absent)).toEqual({
+      expect(await store.revisions(absent)).toEqual({
         ok: false,
         error: { code: "not-found", treeId: absent },
       })
@@ -106,13 +140,13 @@ export const describeTreeStoreContract = (
       expect(appended.ok && appended.value.revision).toBe(1)
 
       const head = await store.head(tree.treeId)
-      const log = await store.history(tree.treeId)
+      const log = await store.revisions(tree.treeId)
 
       expect(head.ok && head.value.revision).toBe(1)
-      expect(log.ok && log.value).toHaveLength(1)
-      expect(log.ok && log.value[0]?.revision).toBe(1)
-      expect(log.ok && log.value[0]?.provenance.interpreter).toBe("scripted")
-      expect(log.ok && log.value[0]?.appliedAt).toBe(FIXED_INSTANT)
+      expect(log.ok && log.value.revisions).toHaveLength(1)
+      expect(log.ok && log.value.revisions[0]?.revision).toBe(1)
+      expect(log.ok && log.value.revisions[0]?.provenance.interpreter).toBe("scripted")
+      expect(log.ok && log.value.revisions[0]?.appliedAt).toBe(FIXED_INSTANT)
     })
 
     /** The whole of concurrency control, stated once for every implementation. */
@@ -148,7 +182,7 @@ export const describeTreeStoreContract = (
       await store.append(tree.treeId, appendOf(removalOf(tree, "n_999")))
 
       expect(await store.head(tree.treeId)).toEqual({ ok: true, value: tree })
-      expect(await store.history(tree.treeId)).toEqual({ ok: true, value: [] })
+      expect(await store.revisions(tree.treeId)).toEqual({ ok: true, value: EMPTY_LOG })
     })
 
     it("refuses to append to a tree it does not have", async () => {
@@ -253,6 +287,123 @@ export const describeTreeStoreContract = (
         const page = await store.list({ limit: 0 })
 
         expect(page.ok && page.value.trees).toHaveLength(1)
+      })
+    })
+
+    /**
+     * The log is read a page at a time, from either end (0026). These are the
+     * same promises 0025 made about the telemetry journal, asserted here for the
+     * log because the two are separate contracts that happen to agree.
+     */
+    describe("revisions", () => {
+      it("reads forward from the oldest entry by default", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 5)
+
+        expect(revisionNumbers(await store.revisions(tree.treeId, { limit: 3 }))).toEqual([1, 2, 3])
+      })
+
+      it("reads the newest entries when asked for the older end", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 5)
+
+        expect(
+          revisionNumbers(await store.revisions(tree.treeId, { direction: "older", limit: 2 }))
+        ).toEqual([4, 5])
+      })
+
+      /**
+       * The whole reason a direction exists: a page taken from the newest end
+       * still arrives in applied order, so `replayTree` and every reader can fold
+       * it without knowing which end it came from.
+       */
+      it("returns a backwards page in applied order", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 4)
+
+        const page = await store.revisions(tree.treeId, { direction: "older", limit: 3 })
+
+        expect(revisionNumbers(page)).toEqual([2, 3, 4])
+      })
+
+      it("names both ends of a page, and only the ends that exist", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 3)
+
+        const newest = await store.revisions(tree.treeId, { direction: "older", limit: 2 })
+        expect(newest.ok && newest.value.older).toBe("2")
+        expect(newest.ok && newest.value.newer).toBeNull()
+
+        const oldest = await store.revisions(tree.treeId, { limit: 2 })
+        expect(oldest.ok && oldest.value.older).toBeNull()
+        expect(oldest.ok && oldest.value.newer).toBe("2")
+      })
+
+      it("walks a whole log backwards and reassembles it", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 5)
+
+        const first = await store.revisions(tree.treeId, { direction: "older", limit: 2 })
+        const firstCursor = first.ok ? first.value.older : null
+        const second = await store.revisions(tree.treeId, {
+          direction: "older",
+          limit: 2,
+          ...(firstCursor === null ? {} : { cursor: firstCursor }),
+        })
+        const secondCursor = second.ok ? second.value.older : null
+        const third = await store.revisions(tree.treeId, {
+          direction: "older",
+          limit: 2,
+          ...(secondCursor === null ? {} : { cursor: secondCursor }),
+        })
+
+        expect([
+          ...revisionNumbers(third),
+          ...revisionNumbers(second),
+          ...revisionNumbers(first),
+        ]).toEqual([1, 2, 3, 4, 5])
+        expect(third.ok && third.value.older).toBeNull()
+      })
+
+      /** A resumed page names the end it came from, so paging is reversible. */
+      it("names the newer end of a resumed backwards page", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 4)
+
+        const first = await store.revisions(tree.treeId, { direction: "older", limit: 2 })
+        const cursor = first.ok ? first.value.older : null
+        const second = await store.revisions(tree.treeId, {
+          direction: "older",
+          limit: 2,
+          ...(cursor === null ? {} : { cursor }),
+        })
+
+        expect(revisionNumbers(second)).toEqual([1, 2])
+        expect(second.ok && second.value.newer).toBe("2")
+
+        const back = await store.revisions(tree.treeId, {
+          limit: 2,
+          ...(second.ok && second.value.newer !== null ? { cursor: second.value.newer } : {}),
+        })
+
+        expect(revisionNumbers(back)).toEqual(revisionNumbers(first))
+      })
+
+      it("clamps a limit the caller should not get, rather than honouring it", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 3)
+
+        expect(revisionNumbers(await store.revisions(tree.treeId, { limit: 0 }))).toHaveLength(1)
+      })
+
+      it("keeps one tree's log out of another's", async () => {
+        const store = await freshStore()
+        const mine = await treeWithLog(store, 2)
+        const other = treeNamed("o")
+        await store.create(other)
+
+        expect(revisionNumbers(await store.revisions(mine.treeId))).toEqual([1, 2])
+        expect(revisionNumbers(await store.revisions(other.treeId))).toEqual([])
       })
     })
   })

@@ -117,12 +117,12 @@ describe("commitIntent on a change the Gate accepts", () => {
     const { path, intent, tree, proposal } = await harnessFor()
     await commitIntent(path, intent)
 
-    const history = await path.store.history(tree.treeId)
+    const history = await path.store.revisions(tree.treeId)
     if (!history.ok) throw new Error("expected a history")
 
-    expect(history.value).toHaveLength(1)
-    expect(history.value[0]?.proposalId).toBe(proposal.proposalId)
-    expect(history.value[0]?.provenance).toEqual(proposal.provenance)
+    expect(history.value.revisions).toHaveLength(1)
+    expect(history.value.revisions[0]?.proposalId).toBe(proposal.proposalId)
+    expect(history.value.revisions[0]?.provenance).toEqual(proposal.provenance)
   })
 
   /**
@@ -225,8 +225,8 @@ describe("commitIntent when nothing should be written", () => {
 
     expect(outcome.kind).toBe("refused")
 
-    const history = await path.store.history(tree.treeId)
-    expect(history.ok && history.value).toHaveLength(0)
+    const history = await path.store.revisions(tree.treeId)
+    expect(history.ok && history.value.revisions).toHaveLength(0)
   })
 
   it("passes an interpretation failure through without touching the store", async () => {
@@ -243,8 +243,8 @@ describe("commitIntent when nothing should be written", () => {
 
     expect(outcome.kind).toBe("not-interpreted")
 
-    const history = await failing.store.history(tree.treeId)
-    expect(history.ok && history.value).toHaveLength(0)
+    const history = await failing.store.revisions(tree.treeId)
+    expect(history.ok && history.value.revisions).toHaveLength(0)
   })
 
   /**

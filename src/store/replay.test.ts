@@ -9,7 +9,7 @@ import { withRoot } from "../tree/tree.js"
 
 import { memoryTreeStore } from "./memory.js"
 import { auditSnapshot, replayTree } from "./replay.js"
-import type { AppendRequest, StoredRevision, TreeReader } from "./store.js"
+import type { AppendRequest, RevisionPage, StoredRevision, TreeReader } from "./store.js"
 
 const provenance = {
   origin: "user-instruction",
@@ -32,6 +32,13 @@ const removalOf = (treeId: TreeId, nodeId: string, baseRevision: number): TreeDe
   operations: [{ op: "remove", nodeId: nodeId as never }],
 })
 
+/** A whole log in one page: both ends reached, so the fold stops after it. */
+const onePage = (revisions: readonly StoredRevision[]): RevisionPage => ({
+  revisions,
+  older: null,
+  newer: null,
+})
+
 const entryOf = (delta: TreeDelta, revision: number): StoredRevision => ({
   treeId: delta.treeId,
   revision,
@@ -50,10 +57,10 @@ describe("replayTree", () => {
     await store.append(tree.treeId, appendOf(removalOf(tree.treeId, ids.header, 1)))
 
     const head = await store.head(tree.treeId)
-    const log = await store.history(tree.treeId)
+    const log = await store.revisions(tree.treeId)
     if (!head.ok || !log.ok) throw new Error("expected the store to answer")
 
-    const replayed = replayTree(tree, log.value)
+    const replayed = replayTree(tree, log.value.revisions)
 
     expect(replayed.ok && replayed.value).toEqual(head.value)
   })
@@ -123,7 +130,7 @@ describe("auditSnapshot", () => {
     const drifted: TreeReader = {
       /** Claims revision 1 while still holding the untouched tree. */
       head: () => Promise.resolve(ok(withRoot(tree, tree.root))),
-      history: () => Promise.resolve(ok([entryOf(delta, 1)])),
+      revisions: () => Promise.resolve(ok(onePage([entryOf(delta, 1)]))),
     }
 
     const audit = await auditSnapshot(drifted, tree.treeId, tree)
@@ -137,12 +144,47 @@ describe("auditSnapshot", () => {
 
     const gapped: TreeReader = {
       head: () => Promise.resolve(ok(tree)),
-      history: () => Promise.resolve(ok([entryOf(removalOf(tree.treeId, ids.footer, 0), 5)])),
+      revisions: () =>
+        Promise.resolve(ok(onePage([entryOf(removalOf(tree.treeId, ids.footer, 0), 5)]))),
     }
 
     const audit = await auditSnapshot(gapped, tree.treeId, tree)
 
     expect(audit.ok && audit.value.outcome).toBe("unreplayable")
+  })
+
+  /**
+   * The log is read a page at a time (0026), and an audit is the one caller that
+   * needs all of it. A fold that stopped at the first page would report agreement
+   * on a tree it had only half replayed — which is the one wrong answer an audit
+   * must never give.
+   */
+  it("follows the log across pages rather than auditing only the first", async () => {
+    const { tree, ids } = sampleTree()
+    const store = memoryTreeStore()
+    await store.create(tree)
+    await store.append(tree.treeId, appendOf(removalOf(tree.treeId, ids.footer, 0)))
+    await store.append(tree.treeId, appendOf(removalOf(tree.treeId, ids.header, 1)))
+
+    const head = await store.head(tree.treeId)
+    if (!head.ok) throw new Error("expected the store to answer")
+
+    const asked: string[] = []
+    const paged: TreeReader = {
+      head: () => Promise.resolve(ok(head.value)),
+      revisions: async (treeId, request) => {
+        asked.push(request?.cursor ?? "start")
+
+        /** One entry per page, so following `newer` is the only way to see both. */
+        return await store.revisions(treeId, { ...request, limit: 1 })
+      },
+    }
+
+    expect(await auditSnapshot(paged, tree.treeId, tree)).toEqual({
+      ok: true,
+      value: { outcome: "agrees", revision: 2 },
+    })
+    expect(asked).toEqual(["start", "1"])
   })
 
   it("passes a store failure through rather than reporting agreement", async () => {
