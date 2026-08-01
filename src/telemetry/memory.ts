@@ -1,10 +1,9 @@
+import { cursorPosition, pageEnds } from "../paging.js"
 import { ok } from "../result.js"
 
 import type { TelemetryRecord } from "./event.js"
 import {
   clampTelemetryLimit,
-  cursorSeq,
-  pageCursors,
   type RecordedTelemetry,
   type TelemetryJournal,
   type TelemetryPage,
@@ -43,7 +42,7 @@ export const memoryTelemetryJournal = (): TelemetryJournal => {
 
     read: (request?: TelemetryReadRequest) => {
       const limit = clampTelemetryLimit(request?.limit)
-      const from = cursorSeq(request?.cursor)
+      const from = cursorPosition(request?.cursor)
       const direction = request?.direction ?? "newer"
 
       const matching = records.filter(
@@ -62,7 +61,7 @@ export const memoryTelemetryJournal = (): TelemetryJournal => {
       return Promise.resolve(
         ok<TelemetryPage>({
           records: page,
-          ...pageCursors(page, direction, {
+          ...pageEnds(page.map((record) => record.seq), direction, {
             beyond: matching.length > page.length,
             resumed: from !== undefined,
           }),

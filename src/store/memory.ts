@@ -1,4 +1,5 @@
 import type { TreeId } from "../ids.js"
+import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
 import { applyDelta } from "../tree/apply.js"
 import type { LoomTree } from "../tree/tree.js"
@@ -6,8 +7,11 @@ import type { LoomTree } from "../tree/tree.js"
 import type { StoreError } from "./errors.js"
 import {
   clampListingLimit,
+  clampRevisionLimit,
   type AppendRequest,
   type ListRequest,
+  type RevisionPage,
+  type RevisionReadRequest,
   type StoredRevision,
   type TreeListing,
   type TreeListPage,
@@ -54,11 +58,35 @@ export const memoryTreeStore = (): TreeStore => {
       )
     },
 
-    history: (treeId) => {
+    revisions: (treeId, request?: RevisionReadRequest) => {
       const entry = entryOf(treeId)
+      if (!entry) return Promise.resolve(err<StoreError>({ code: "not-found", treeId }))
+
+      const limit = clampRevisionLimit(request?.limit)
+      const from = cursorPosition(request?.cursor)
+      const direction = request?.direction ?? "newer"
+
+      const matching = entry.log.filter(
+        (stored) =>
+          from === undefined ||
+          (direction === "older" ? stored.revision < from : stored.revision > from)
+      )
+
+      /**
+       * `older` takes the page from the far end, which is a slice rather than a
+       * reverse: the entries that come back are still in applied order, because
+       * the contract says a page's order never depends on which end it came from.
+       */
+      const page = direction === "older" ? matching.slice(-limit) : matching.slice(0, limit)
 
       return Promise.resolve(
-        entry ? ok(entry.log) : err<StoreError>({ code: "not-found", treeId })
+        ok<RevisionPage>({
+          revisions: page,
+          ...pageEnds(page.map((stored) => stored.revision), direction, {
+            beyond: matching.length > page.length,
+            resumed: from !== undefined,
+          }),
+        })
       )
     },
 

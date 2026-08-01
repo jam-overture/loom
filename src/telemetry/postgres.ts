@@ -2,14 +2,13 @@ import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
 import { z } from "zod"
 
 import { treeIdSchema } from "../ids.js"
+import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
 import { telemetryEventSchema } from "./event.js"
 import {
   clampTelemetryLimit,
-  cursorSeq,
-  pageCursors,
   type RecordedTelemetry,
   type TelemetryError,
   type TelemetryJournal,
@@ -71,7 +70,7 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
 
   read: async (request?: TelemetryReadRequest) => {
     const limit = clampTelemetryLimit(request?.limit)
-    const from = cursorSeq(request?.cursor)
+    const from = cursorPosition(request?.cursor)
     const direction = request?.direction ?? "newer"
 
     try {
@@ -121,7 +120,7 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
 
       return ok<TelemetryPage>({
         records: page,
-        ...pageCursors(page, direction, {
+        ...pageEnds(page.map((record) => record.seq), direction, {
           beyond: rows.length > limit,
           resumed: from !== undefined,
         }),

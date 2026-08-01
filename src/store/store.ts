@@ -1,5 +1,5 @@
 import type { ProposalId, TreeId } from "../ids.js"
-import { clampLimit } from "../paging.js"
+import { clampLimit, type PageDirection, type PageEnds } from "../paging.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
 import type { Provenance } from "../runtime/proposal.js"
@@ -75,8 +75,53 @@ export type TreeListPage = {
   readonly cursor: string | null
 }
 
+/**
+ * How a log is read: a page taken from one end of it, never the whole thing.
+ *
+ * A revision log grows once per accepted delta and is never compacted, so a read
+ * that returns all of it costs more the longer a tree has been edited — fastest
+ * exactly when the log is most worth reading. 0025 settled this shape for the
+ * telemetry journal; a revision log is the same kind of sequence and reads the
+ * same way, so the vocabulary is shared rather than reinvented.
+ */
+export type RevisionReadRequest = {
+  /** A cursor from a previous page's `older`/`newer`, passed back unread. */
+  readonly cursor?: string
+  /**
+   * Default `newer`, which with no cursor is the oldest page — the read a fold
+   * wants, and the one `auditSnapshot` takes. `older` with no cursor is the
+   * newest page, which is what a reader looking at a tree asks for.
+   */
+  readonly direction?: PageDirection
+  readonly limit?: number
+}
+
+export type RevisionPage = PageEnds & {
+  /**
+   * Always ascending by `revision`, whichever end the page was taken from.
+   *
+   * A log is folded by `replayTree` in the order the entries were applied, and a
+   * page that sometimes came back reversed would make every consumer responsible
+   * for knowing which — and silently wrong when it guessed.
+   */
+  readonly revisions: readonly StoredRevision[]
+}
+
 export const DEFAULT_LISTING_LIMIT = 50
 export const MAX_LISTING_LIMIT = 200
+
+/**
+ * Larger than a tree listing's page and smaller than the journal's. A revision
+ * carries a whole delta and its provenance, so a page of these is heavier than a
+ * page of listings; but unlike telemetry records, one entry is one complete
+ * thing to read, so a page never splits something that has to be folded back
+ * together.
+ */
+export const DEFAULT_REVISION_LIMIT = 100
+export const MAX_REVISION_LIMIT = 500
+
+export const clampRevisionLimit = (limit: number | undefined): number =>
+  clampLimit(limit, { fallback: DEFAULT_REVISION_LIMIT, max: MAX_REVISION_LIMIT })
 
 /**
  * Every implementation clamps the same way, so a caller cannot ask a store for
@@ -87,16 +132,20 @@ export const clampListingLimit = (limit: number | undefined): number =>
   clampLimit(limit, { fallback: DEFAULT_LISTING_LIMIT, max: MAX_LISTING_LIMIT })
 
 /**
- * Three reads and two writes. `head` is the O(1) read §3 needs; `history` is the
- * one §6 and the portal's provenance view need; `list` is how a consumer finds a
- * tree it did not create; `append` is the only way a tree ever changes, so
- * nothing can advance a revision without leaving a record of why.
+ * Three reads and two writes. `head` is the O(1) read §3 needs; `revisions` is
+ * the one §6 and the portal's provenance view need; `list` is how a consumer
+ * finds a tree it did not create; `append` is the only way a tree ever changes,
+ * so nothing can advance a revision without leaving a record of why.
  *
- * `list` takes no scope argument because `head` and `history` take none either: a
- * store handle *is* the scope it can see. A tenant gets a handle narrowed to its
- * own trees, which is a decision the host makes once when it builds the store
- * rather than one every caller has to remember to pass — and it means listing
- * cannot reach further than reading already could.
+ * Every read is bounded. `head` is one tree, and the other two are pages with a
+ * clamped limit — so no caller can ask a store for everything it holds, whether
+ * by naming a large limit or by naming none.
+ *
+ * `list` takes no scope argument because `head` and `revisions` take none
+ * either: a store handle *is* the scope it can see. A tenant gets a handle
+ * narrowed to its own trees, which is a decision the host makes once when it
+ * builds the store rather than one every caller has to remember to pass — and it
+ * means listing cannot reach further than reading already could.
  *
  * **Pages are ordered by `treeId`, ascending.** Not by recency, however much a
  * portal would prefer it: ordering has to be total and stable for a cursor to
@@ -106,7 +155,10 @@ export const clampListingLimit = (limit: number | undefined): number =>
 export interface TreeStore {
   readonly create: (tree: LoomTree) => Promise<Result<LoomTree, StoreError>>
   readonly head: (treeId: TreeId) => Promise<Result<LoomTree, StoreError>>
-  readonly history: (treeId: TreeId) => Promise<Result<readonly StoredRevision[], StoreError>>
+  readonly revisions: (
+    treeId: TreeId,
+    request?: RevisionReadRequest
+  ) => Promise<Result<RevisionPage, StoreError>>
   readonly list: (request?: ListRequest) => Promise<Result<TreeListPage, StoreError>>
   readonly append: (
     treeId: TreeId,
@@ -122,4 +174,4 @@ export interface TreeStore {
  * also makes every stub grow a method the code under test never calls, which is
  * how a test starts describing the interface instead of the behaviour.
  */
-export type TreeReader = Pick<TreeStore, "head" | "history">
+export type TreeReader = Pick<TreeStore, "head" | "revisions">

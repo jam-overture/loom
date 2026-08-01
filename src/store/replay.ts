@@ -42,6 +42,35 @@ export const replayTree = (
       : err({ code: "delta-rejected", revision: entry.revision, detail: applied.error.code })
   })
 
+/**
+ * Folds a whole log by walking it forward one page at a time.
+ *
+ * The log is read in pages (0026), so the only caller that legitimately needs
+ * all of it walks it here rather than every caller being handed an unbounded
+ * read. Each page is folded into the tree the previous one produced, which is
+ * the same fold `replayTree` performs — a page boundary is not a semantic
+ * boundary, it is just where the read stopped.
+ *
+ * `newer` is the contract's "there is more forward of here", so following it
+ * until it is `null` visits every entry exactly once.
+ */
+const foldLog = async (
+  store: TreeReader,
+  treeId: TreeId,
+  tree: LoomTree,
+  cursor?: string
+): Promise<Result<Result<LoomTree, ReplayMismatch>, StoreError>> => {
+  const page = await store.revisions(treeId, cursor === undefined ? {} : { cursor })
+  if (!page.ok) return page
+
+  const folded = replayTree(tree, page.value.revisions)
+  if (!folded.ok) return ok(folded)
+
+  return page.value.newer === null
+    ? ok(folded)
+    : await foldLog(store, treeId, folded.value, page.value.newer)
+}
+
 export type SnapshotAudit =
   | { readonly outcome: "agrees"; readonly revision: number }
   /** The fold produced a different tree — the drift this whole module exists for. */
@@ -67,10 +96,10 @@ export const auditSnapshot = async (
   const head = await store.head(treeId)
   if (!head.ok) return head
 
-  const history = await store.history(treeId)
-  if (!history.ok) return history
+  const folded = await foldLog(store, treeId, seed)
+  if (!folded.ok) return folded
 
-  const replayed = replayTree(seed, history.value)
+  const replayed = folded.value
   if (!replayed.ok) return ok({ outcome: "unreplayable", mismatch: replayed.error })
 
   const agrees = JSON.stringify(replayed.value) === JSON.stringify(head.value)
