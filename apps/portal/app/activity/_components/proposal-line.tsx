@@ -1,6 +1,7 @@
 import type { ProposalEpisode } from "@loom/runtime/telemetry"
 
 import { summariseOperations } from "@/lib/delta-summary"
+import { describeAnswer } from "@/lib/episode-view"
 
 /**
  * One proposal inside an episode.
@@ -10,7 +11,10 @@ import { summariseOperations } from "@/lib/delta-summary"
  * the revision log holds nothing, so this line is the only surviving account of
  * what the model actually wanted to do.
  */
-export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode }) => (
+export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode }) => {
+  const answer = describeAnswer(proposal)
+
+  return (
   <li className="border-edge-subtle flex flex-col gap-1.5 border-l-2 pl-3">
     <p className="text-xs">{proposal.rationale}</p>
 
@@ -48,6 +52,17 @@ export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode 
       </p>
     )}
 
+    {/*
+      * Shown apart from provenance, and never folded into it. The Gate held this
+      * change to put a second person in the way of it (0027), and a line that
+      * read as one name would undo the reason it was held.
+      */}
+    {answer !== null && (
+      <p className="text-ink-muted text-2xs">
+        answered — <span className="font-mono">{answer}</span>
+      </p>
+    )}
+
     {proposal.repairOf && (
       <p className="text-ink-muted text-2xs">
         a repair of <span className="font-mono">{proposal.repairOf}</span>
@@ -60,4 +75,5 @@ export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode 
       </p>
     )}
   </li>
-)
+  )
+}

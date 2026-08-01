@@ -24,6 +24,24 @@ describe("editIntentSchema", () => {
     expect(parsed.success && parsed.data.scopeNodeId).toBe("n_scoped")
   })
 
+  /**
+   * Optional because a `system-signal` has no one to name — not so a host may
+   * skip it for a human ask (0027).
+   */
+  it("accepts an actor, and does not require one", () => {
+    const intent = buildIntent(spare, { treeId, baseRevision: 0, actor: "reviewer:ana" })
+
+    expect(editIntentSchema.safeParse(intent).success).toBe(true)
+    expect(editIntentSchema.safeParse({ ...intent, actor: undefined }).success).toBe(true)
+  })
+
+  /** An empty actor is a host that meant to name someone and did not. */
+  it("rejects an empty actor rather than treating it as absent", () => {
+    const intent = buildIntent(spare, { treeId, baseRevision: 0 })
+
+    expect(editIntentSchema.safeParse({ ...intent, actor: "" }).success).toBe(false)
+  })
+
   it("rejects an empty utterance, which nothing could interpret", () => {
     const intent = buildIntent(spare, { treeId, baseRevision: 0 })
 

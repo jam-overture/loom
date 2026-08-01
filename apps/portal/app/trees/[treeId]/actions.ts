@@ -6,6 +6,7 @@ import { z } from "zod"
 import { nodeIdSchema, proposalIdSchema, randomIdFactory, systemClock, treeIdSchema } from "@loom/runtime"
 import { commitIntent, confirmHeld, describeHoldError, discardHeld } from "@loom/runtime/write"
 
+import { requireActor } from "@/lib/auth/identity"
 import { reportOf, type WriteReport } from "@/lib/outcome"
 import { beginWrite } from "@/lib/write"
 
@@ -21,6 +22,10 @@ import { beginWrite } from "@/lib/write"
  * The form asserts which revision it was looking at. That is not client
  * authority: it is the client saying what it saw, so the server can refuse a
  * write aimed at a tree that has moved.
+ *
+ * The actor is the opposite: it is never in the form at all. It comes from the
+ * session, server-side, in every one of these three (0027) — a form field
+ * naming who is asking is a form field anyone can edit.
  */
 
 const proposeInputSchema = z.object({
@@ -59,6 +64,7 @@ export const proposeChange = async (
 
   const { treeId, baseRevision, utterance, scopeNodeId } = parsed.data
 
+  const actor = await requireActor(`/trees/${treeId}`)
   const write = beginWrite()
 
   const outcome = await commitIntent(write.path, {
@@ -67,6 +73,7 @@ export const proposeChange = async (
     baseRevision,
     /** A sentence someone typed, so the model interpreted it — 0017's own words. */
     origin: "user-instruction",
+    actor,
     utterance,
     ...(scopeNodeId ? { scopeNodeId } : {}),
     observedAt: systemClock.now(),
@@ -90,8 +97,9 @@ export const confirmProposal = async (
 
   if (!parsed.success) return invalid(firstIssue(parsed.error))
 
+  const actor = await requireActor(`/trees/${parsed.data.treeId}`)
   const write = beginWrite()
-  const outcome = await confirmHeld(write.path, parsed.data.proposalId)
+  const outcome = await confirmHeld(write.path, { proposalId: parsed.data.proposalId, actor })
 
   await write.finish()
 
@@ -118,8 +126,9 @@ export const discardProposal = async (
 
   if (!parsed.success) return invalid(firstIssue(parsed.error))
 
+  const actor = await requireActor(`/trees/${parsed.data.treeId}`)
   const write = beginWrite()
-  const discarded = await discardHeld(write.path, parsed.data.proposalId)
+  const discarded = await discardHeld(write.path, { proposalId: parsed.data.proposalId, actor })
 
   await write.finish()
 

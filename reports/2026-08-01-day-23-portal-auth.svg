@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="700" viewBox="0 0 1080 700" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="700" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" fill="#111827">Where an actor comes from, and where it ends up</text>
+  <text x="40" y="70" font-size="13" fill="#6b7280">0027 — identity is server-derived; the ask and the answer are attributed separately</text>
+
+  <!-- ================= browser column ================= -->
+  <rect x="40" y="96" width="250" height="470" rx="8" fill="#fdfdfe" stroke="#e5e7eb"/>
+  <text x="56" y="120" font-size="12" fill="#9ca3af" font-family="ui-monospace, monospace">browser</text>
+
+  <rect x="58" y="136" width="214" height="72" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="72" y="158" font-size="13" fill="#1e293b">/sign-in</text>
+  <text x="72" y="177" font-size="11.5" fill="#475569">pastes an access key</text>
+  <text x="72" y="194" font-size="11.5" fill="#64748b" font-style="italic">no name field — the key is</text>
+  <text x="72" y="209" font-size="11.5" fill="#64748b" font-style="italic">the identity</text>
+
+  <rect x="58" y="240" width="214" height="82" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="72" y="262" font-size="13" fill="#1e293b">prompt box</text>
+  <text x="72" y="281" font-size="11.5" fill="#475569">utterance + baseRevision</text>
+  <text x="72" y="303" font-size="11.5" fill="#b91c1c">no actor is posted</text>
+
+  <rect x="58" y="354" width="214" height="70" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="72" y="376" font-size="13" fill="#1e293b">review queue</text>
+  <text x="72" y="395" font-size="11.5" fill="#475569">apply / discard</text>
+  <text x="72" y="415" font-size="11.5" fill="#b91c1c">names a proposalId only</text>
+
+  <rect x="58" y="456" width="214" height="88" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="72" y="478" font-size="12.5" fill="#991b1b">anything else</text>
+  <text x="72" y="497" font-size="11.5" fill="#7f1d1d">no session, or a cookie</text>
+  <text x="72" y="513" font-size="11.5" fill="#7f1d1d">whose signature fails</text>
+  <text x="72" y="534" font-size="11.5" fill="#7f1d1d" font-weight="600">→ back to /sign-in</text>
+
+  <!-- ================= server column ================= -->
+  <rect x="330" y="96" width="290" height="470" rx="8" fill="#fdfdfe" stroke="#e5e7eb"/>
+  <text x="346" y="120" font-size="12" fill="#9ca3af" font-family="ui-monospace, monospace">server</text>
+
+  <rect x="348" y="136" width="254" height="76" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="362" y="158" font-size="13" fill="#065f46">roster · authenticate()</text>
+  <text x="362" y="177" font-size="11.5" fill="#047857">constant-time over every entry</text>
+  <text x="362" y="197" font-size="11.5" fill="#047857">mints a signed session cookie</text>
+
+  <rect x="348" y="232" width="254" height="66" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="362" y="254" font-size="13" fill="#065f46">proxy guard</text>
+  <text x="362" y="273" font-size="11.5" fill="#047857">verifies the signature —</text>
+  <text x="362" y="289" font-size="11.5" fill="#047857">presence is not proof</text>
+
+  <rect x="348" y="318" width="254" height="76" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="362" y="340" font-size="13" fill="#065f46">requireActor()</text>
+  <text x="362" y="359" font-size="11.5" fill="#047857">the only source of an actor</text>
+  <text x="362" y="379" font-size="11.5" fill="#047857">in every page and action</text>
+
+  <rect x="348" y="414" width="254" height="60" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="362" y="436" font-size="12.5" fill="#1e293b">EditIntent.actor</text>
+  <text x="362" y="456" font-size="11.5" fill="#475569">travels beside origin</text>
+
+  <rect x="348" y="490" width="254" height="60" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="362" y="512" font-size="12.5" fill="#1e293b">ProposalAnswer.actor</text>
+  <text x="362" y="532" font-size="11.5" fill="#475569">who said yes, or no</text>
+
+  <!-- arrows browser -> server -->
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <line x1="272" y1="172" x2="344" y2="172" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="272" y1="281" x2="344" y2="350" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="272" y1="389" x2="344" y2="360" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="475" y1="394" x2="475" y2="410" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="475" y1="474" x2="475" y2="486" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- ================= record column ================= -->
+  <rect x="660" y="96" width="380" height="470" rx="8" fill="#fdfdfe" stroke="#e5e7eb"/>
+  <text x="676" y="120" font-size="12" fill="#9ca3af" font-family="ui-monospace, monospace">what is kept</text>
+
+  <rect x="678" y="140" width="344" height="150" rx="6" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="694" y="163" font-size="13" fill="#92400e">the revision log — who asked</text>
+  <text x="694" y="187" font-size="11.5" fill="#78350f" font-family="ui-monospace, monospace">provenance.origin   user-instruction</text>
+  <text x="694" y="207" font-size="11.5" fill="#78350f" font-family="ui-monospace, monospace">provenance.actor    ana@loom.local</text>
+  <text x="694" y="227" font-size="11.5" fill="#78350f" font-family="ui-monospace, monospace">interpreter         claude-opus-5</text>
+  <text x="694" y="247" font-size="11.5" fill="#78350f" font-family="ui-monospace, monospace">confidence          0.55</text>
+  <text x="694" y="273" font-size="11.5" fill="#a16207">copied from the ask, never read off the reply</text>
+
+  <rect x="678" y="310" width="344" height="130" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="694" y="333" font-size="13" fill="#1e40af">the journal — who answered</text>
+  <text x="694" y="357" font-size="11.5" fill="#1e3a8a" font-family="ui-monospace, monospace">hold-confirmed.actor  ana@loom.local</text>
+  <text x="694" y="377" font-size="11.5" fill="#1e3a8a" font-family="ui-monospace, monospace">episode.answeredBy    ana@loom.local</text>
+  <text x="694" y="403" font-size="11.5" fill="#1d4ed8">a hold exists to put a second person in the</text>
+  <text x="694" y="419" font-size="11.5" fill="#1d4ed8">way of a change — so it is recorded apart</text>
+
+  <rect x="678" y="460" width="344" height="88" rx="6" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="694" y="483" font-size="12.5" fill="#374151">the cost, recorded in 0027</text>
+  <text x="694" y="505" font-size="11.5" fill="#6b7280">"who approved this revision" needs both.</text>
+  <text x="694" y="523" font-size="11.5" fill="#6b7280">A deployment that loses its journal keeps</text>
+  <text x="694" y="539" font-size="11.5" fill="#6b7280">the change and loses who allowed it.</text>
+
+  <line x1="606" y1="444" x2="672" y2="230" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="606" y1="520" x2="672" y2="370" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- footer -->
+  <rect x="40" y="596" width="1000" height="72" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="60" y="620" font-size="12.5" fill="#374151">Absence fails closed. No session secret, or no roster, and nobody signs in — the sign-in page names the variable that is missing.</text>
+  <text x="60" y="641" font-size="12.5" fill="#6b7280">Everywhere else in this portal absent configuration degrades, because those degradations announce themselves. Open access does not:</text>
+  <text x="60" y="659" font-size="12.5" fill="#6b7280">it looks exactly like a portal that is working correctly.</text>
+</svg>

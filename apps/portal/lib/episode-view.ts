@@ -2,6 +2,7 @@ import type {
   EpisodeResolution,
   EpisodeResolutionKind,
   IntentEpisode,
+  ProposalEpisode,
 } from "@loom/runtime/telemetry"
 
 import type { OutcomeTone } from "./outcome"
@@ -90,13 +91,34 @@ export const viewOf = (resolution: EpisodeResolution): EpisodeView => ({
  * 0023 keeps the utterance out of the journal on purpose, so this describes the
  * ask by its shape — where it was aimed and how long it was. A view that printed
  * nothing here would make the absence look like a bug rather than a decision.
+ *
+ * Who asked leads when there is a who. An origin is a category and an actor is a
+ * person, and the question a reader brings to this page is the second one — but
+ * the origin stays alongside it, because `developer` and `user-instruction` are
+ * different acts by the same person (0017).
  */
 export const describeIntent = (episode: IntentEpisode): string => {
   const { intent } = episode
   if (intent === undefined) return "this page opened after the ask was recorded"
 
+  const who = intent.actor === undefined ? intent.origin : `${intent.actor} · ${intent.origin}`
   const scope = intent.scopeNodeId === undefined ? "the whole tree" : intent.scopeNodeId
   const characters = intent.utteranceLength === 1 ? "character" : "characters"
 
-  return `${intent.origin} · ${scope} · revision ${intent.baseRevision} · ${intent.utteranceLength} ${characters}`
+  return `${who} · ${scope} · revision ${intent.baseRevision} · ${intent.utteranceLength} ${characters}`
+}
+
+/**
+ * How a proposal was answered, and by whom.
+ *
+ * `null` when nobody has answered — which is not the same as an answer with no
+ * name on it, and the two must not render the same way. A hold nobody has
+ * reached yet is a queue; a hold answered anonymously is a gap in the record.
+ */
+export const describeAnswer = (proposal: ProposalEpisode): string | null => {
+  if (proposal.answer === undefined) return null
+
+  return proposal.answeredBy === undefined
+    ? `${proposal.answer} by nobody recorded`
+    : `${proposal.answer} by ${proposal.answeredBy}`
 }

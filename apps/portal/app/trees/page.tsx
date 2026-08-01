@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { requireActor } from "@/lib/auth/identity"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
 /**
@@ -15,6 +16,7 @@ import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
  */
 const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: string }> }) => {
   const { after } = await searchParams
+  await requireActor("/trees")
   await ensureSeeded()
   const page = await portalStore.list(after === undefined ? {} : { cursor: after })
 

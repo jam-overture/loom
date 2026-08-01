@@ -147,7 +147,7 @@ describe("episodesOf", () => {
     const proposalId = held.kind === "held" ? held.held.proposalId : undefined
     if (!proposalId) throw new Error("the fixture must be held")
 
-    await confirmHeld(harness.path, proposalId)
+    await confirmHeld(harness.path, { proposalId })
 
     const { episodes } = await harness.fold()
 
@@ -162,12 +162,32 @@ describe("episodesOf", () => {
     const proposalId = held.kind === "held" ? held.held.proposalId : undefined
     if (!proposalId) throw new Error("the fixture must be held")
 
-    await discardHeld(harness.path, proposalId)
+    await discardHeld(harness.path, { proposalId })
 
     const { episodes } = await harness.fold()
 
     expect(episodes[0]?.proposals[0]?.answer).toBe("discarded")
     expect(episodes[0]?.resolution).toEqual({ kind: "discarded", proposalId })
+  })
+
+  /**
+   * The asker and the answerer are two people, and a fold that showed only the
+   * first would make a hold look like a change somebody waved through their own
+   * ask (0027).
+   */
+  it("keeps who asked and who answered apart", async () => {
+    const harness = await harnessWith({ script: proposalScript(0.5) })
+    const held = await commitIntent(harness.path, harness.intent)
+    const proposalId = held.kind === "held" ? held.held.proposalId : undefined
+    if (!proposalId) throw new Error("the fixture must be held")
+
+    await confirmHeld(harness.path, { proposalId, actor: "reviewer:bo" })
+
+    const { episodes } = await harness.fold()
+    const [proposal] = episodes[0]?.proposals ?? []
+
+    expect(proposal?.answeredBy).toBe("reviewer:bo")
+    expect(proposal?.provenance.actor).toBeUndefined()
   })
 
   /** 0006: both halves of a refusal-then-repair are in the record, and linked. */

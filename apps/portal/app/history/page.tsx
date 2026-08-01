@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
+import { requireActor } from "@/lib/auth/identity"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
 import { RevisionRow } from "./_components/revision-row"
@@ -27,6 +28,7 @@ const HistoryPage = async ({
   searchParams: Promise<{ tree?: string; older?: string }>
 }) => {
   const { tree, older } = await searchParams
+  await requireActor("/history")
   await ensureSeeded()
 
   if (tree === undefined) {

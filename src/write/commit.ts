@@ -35,6 +35,20 @@ export type WritePath = {
   readonly runtime: CompositionRuntime
 }
 
+/**
+ * Answering a held proposal names the proposal and whoever answered it.
+ *
+ * The two travel together rather than the actor being an optional trailing
+ * argument, because an answer with no one attached is a decision nobody made —
+ * and a parameter that is easy to leave off is one that will be (0027). A host
+ * with no identities to name omits it deliberately; it cannot omit it by
+ * forgetting there was a second argument.
+ */
+export type ProposalAnswer = {
+  readonly proposalId: ProposalId
+  readonly actor?: string
+}
+
 export type WriteOutcome =
   | {
       readonly kind: "committed"
@@ -230,8 +244,9 @@ export const commitIntent = async (path: WritePath, intent: EditIntent): Promise
  */
 export const confirmHeld = async (
   path: WritePath,
-  proposalId: ProposalId
+  answer: ProposalAnswer
 ): Promise<WriteOutcome> => {
+  const { proposalId } = answer
   const found = await path.holds.get(proposalId)
   if (!found.ok) return { kind: "not-answerable", error: found.error }
 
@@ -260,7 +275,11 @@ export const confirmHeld = async (
   const released = await path.holds.release(proposalId)
   if (!released.ok) return { kind: "not-answerable", error: released.error }
 
-  narrate({ type: "hold-confirmed", proposalId })
+  narrate({
+    type: "hold-confirmed",
+    proposalId,
+    ...(answer.actor === undefined ? {} : { actor: answer.actor }),
+  })
 
   const outcome = confirmChange(path.runtime, head.value, proposal)
 
@@ -284,16 +303,20 @@ export const confirmHeld = async (
  */
 export const discardHeld = async (
   path: WritePath,
-  proposalId: ProposalId
+  answer: ProposalAnswer
 ): Promise<Result<HeldProposal, HoldError>> => {
-  const released = await path.holds.release(proposalId)
+  const released = await path.holds.release(answer.proposalId)
   if (!released.ok) return released
 
   narrator(
     path.runtime.events,
     path.runtime.clock,
     released.value.treeId
-  )({ type: "hold-discarded", proposalId })
+  )({
+    type: "hold-discarded",
+    proposalId: answer.proposalId,
+    ...(answer.actor === undefined ? {} : { actor: answer.actor }),
+  })
 
   return released
 }
