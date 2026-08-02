@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest"
 
-import { intentIdSchema, nodeIdSchema, proposalIdSchema, treeIdSchema } from "@loom/runtime"
+import { deltaIdSchema, intentIdSchema, nodeIdSchema, proposalIdSchema, treeIdSchema } from "@loom/runtime"
 import {
   EPISODE_RESOLUTION_KINDS,
   type EpisodeResolution,
   type IntentEpisode,
+  type ProposalEpisode,
 } from "@loom/runtime/telemetry"
 
-import { describeIntent, headlineOfResolution, toneOfResolution, viewOf } from "./episode-view"
+import {
+  describeAnswer,
+  describeIntent,
+  headlineOfResolution,
+  toneOfResolution,
+  viewOf,
+} from "./episode-view"
 
 const treeId = treeIdSchema.parse("t_1")
 const intentId = intentIdSchema.parse("i_1")
@@ -101,8 +108,86 @@ describe("describeIntent", () => {
     ).toContain(scopeNodeId)
   })
 
+
+  /**
+   * Who asked is the question a reader brings to this page; the origin is a
+   * category and stays alongside it, because `developer` and `user-instruction`
+   * are different acts by the same person (0017).
+   */
+  it("leads with who asked, and keeps the origin beside it", () => {
+    const described = describeIntent(
+      episode({
+        intentId,
+        origin: "user-instruction",
+        actor: "ana@loom.local",
+        baseRevision: 0,
+        utteranceLength: 12,
+        observedAt: "2026-07-31T00:00:00.000Z",
+      })
+    )
+
+    expect(described.startsWith("ana@loom.local · user-instruction")).toBe(true)
+  })
+
+  /** Everything written before identity existed has no actor, and still reads. */
+  it("falls back to the origin alone when nobody was named", () => {
+    const described = describeIntent(
+      episode({
+        intentId,
+        origin: "system-signal",
+        baseRevision: 0,
+        utteranceLength: 12,
+        observedAt: "2026-07-31T00:00:00.000Z",
+      })
+    )
+
+    expect(described.startsWith("system-signal ·")).toBe(true)
+  })
+
   /** A window can open mid-episode, and saying so beats rendering a blank line. */
   it("says so when the page opened after the ask", () => {
     expect(describeIntent(episode(undefined))).toContain("after the ask")
+  })
+})
+
+const answered = (
+  answer: ProposalEpisode["answer"],
+  answeredBy?: string
+): ProposalEpisode => ({
+  proposalId,
+  provenance: {
+    origin: "user-instruction",
+    interpreter: "claude-test-1",
+    confidence: 0.5,
+    interpretedAt: "2026-07-31T00:00:00.000Z",
+  },
+  rationale: "because",
+  delta: { deltaId: deltaIdSchema.parse("d_1"), treeId, baseRevision: 0, operations: [] },
+  proposedAt: "2026-07-31T00:00:00.000Z",
+  held: true,
+  repairRequested: false,
+  ...(answer === undefined ? {} : { answer }),
+  ...(answeredBy === undefined ? {} : { answeredBy }),
+})
+
+describe("describeAnswer", () => {
+  it("names who answered, and how", () => {
+    expect(describeAnswer(answered("confirmed", "ana@loom.local"))).toBe(
+      "confirmed by ana@loom.local"
+    )
+    expect(describeAnswer(answered("discarded", "bo@loom.local"))).toBe("discarded by bo@loom.local")
+  })
+
+  /**
+   * Nobody has answered yet, which is a queue. Distinct from an answer with no
+   * name on it, which is a gap in the record — rendering them the same way would
+   * make the second invisible.
+   */
+  it("says nothing when nobody has answered", () => {
+    expect(describeAnswer(answered(undefined))).toBeNull()
+  })
+
+  it("says the answer was unattributed rather than pretending it was not answered", () => {
+    expect(describeAnswer(answered("confirmed"))).toBe("confirmed by nobody recorded")
   })
 })

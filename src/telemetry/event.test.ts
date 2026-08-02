@@ -73,8 +73,8 @@ const everyEvent: readonly RuntimeEvent[] = [
   },
   { type: "proposal-held", proposalId: proposal.proposalId },
   { type: "hold-failed", proposalId: proposal.proposalId, detail: "custody store refused" },
-  { type: "hold-confirmed", proposalId: proposal.proposalId },
-  { type: "hold-discarded", proposalId: proposal.proposalId },
+  { type: "hold-confirmed", proposalId: proposal.proposalId, actor: "reviewer:ana" },
+  { type: "hold-discarded", proposalId: proposal.proposalId, actor: "reviewer:bo" },
   { type: "change-committed", proposalId: proposal.proposalId, revision: 1 },
   {
     type: "commit-failed",
@@ -119,6 +119,41 @@ describe("recordOf", () => {
         utteranceLength: "make it quieter".length,
         observedAt: FIXED_INSTANT,
       },
+    })
+  })
+
+  /**
+   * An identity is an identifier a query groups by, not content someone typed —
+   * which is the line 0023 drew, and the utterance is on the other side of it.
+   */
+  it("keeps who asked, alongside the origin it belongs to", () => {
+    const attributed = buildIntent(ids, {
+      treeId: tree.treeId,
+      baseRevision: 0,
+      actor: "reviewer:ana",
+    })
+    const record = recordOf(envelopeOf({ type: "intent-received", intent: attributed }))
+
+    expect(record.event.type === "intent-received" && record.event.intent.actor).toBe("reviewer:ana")
+  })
+
+  it("keeps who answered a held proposal", () => {
+    const confirmed = recordOf(
+      envelopeOf({ type: "hold-confirmed", proposalId: proposal.proposalId, actor: "reviewer:ana" })
+    )
+    const discarded = recordOf(
+      envelopeOf({ type: "hold-discarded", proposalId: proposal.proposalId, actor: "reviewer:bo" })
+    )
+
+    expect(confirmed.event).toEqual({
+      type: "hold-confirmed",
+      proposalId: proposal.proposalId,
+      actor: "reviewer:ana",
+    })
+    expect(discarded.event).toEqual({
+      type: "hold-discarded",
+      proposalId: proposal.proposalId,
+      actor: "reviewer:bo",
     })
   })
 

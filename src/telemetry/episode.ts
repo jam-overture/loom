@@ -53,6 +53,12 @@ export type ProposalEpisode = {
   /** A refusal that was handed back for one more attempt. */
   readonly repairRequested: boolean
   readonly answer?: EpisodeAnswer
+  /**
+   * Who answered. Distinct from `provenance.actor`, which is who asked — a hold
+   * exists to put a second person in the way of a change, and an episode that
+   * showed only the asker would make the two look like one.
+   */
+  readonly answeredBy?: string
   /** Applied in memory. Present without `committedRevision` means it did not persist. */
   readonly appliedRevision?: number
   readonly committedRevision?: number
@@ -117,6 +123,7 @@ type ProposalDraft = {
   held: boolean
   repairRequested: boolean
   answer: EpisodeAnswer | undefined
+  answeredBy: string | undefined
   appliedRevision: number | undefined
   committedRevision: number | undefined
   failure: EpisodeFailure | undefined
@@ -149,6 +156,7 @@ const materialiseProposal = (draft: ProposalDraft): ProposalEpisode => ({
   held: draft.held,
   repairRequested: draft.repairRequested,
   ...(draft.answer === undefined ? {} : { answer: draft.answer }),
+  ...(draft.answeredBy === undefined ? {} : { answeredBy: draft.answeredBy }),
   ...(draft.appliedRevision === undefined ? {} : { appliedRevision: draft.appliedRevision }),
   ...(draft.committedRevision === undefined ? {} : { committedRevision: draft.committedRevision }),
   ...(draft.failure === undefined ? {} : { failure: draft.failure }),
@@ -281,6 +289,7 @@ export const episodesOf = (records: readonly RecordedTelemetry[]): EpisodeFold =
           held: false,
           repairRequested: false,
           answer: undefined,
+          answeredBy: undefined,
           appliedRevision: undefined,
           committedRevision: undefined,
           failure: undefined,
@@ -343,12 +352,14 @@ export const episodesOf = (records: readonly RecordedTelemetry[]): EpisodeFold =
       case "hold-confirmed":
         withProposal(event.proposalId, record, (draft) => {
           draft.answer = "confirmed"
+          draft.answeredBy = event.actor
         })
         break
 
       case "hold-discarded":
         withProposal(event.proposalId, record, (draft) => {
           draft.answer = "discarded"
+          draft.answeredBy = event.actor
           settle(draft, occurredAt)
         })
         break

@@ -6,6 +6,7 @@ import { renderRequest } from "@loom/runtime/react"
 import { treeSourceFromStore } from "@loom/runtime/store"
 
 import { portalDecoration } from "@/lib/addressing"
+import { requireActor } from "@/lib/auth/identity"
 import { isInterpreterConfigured } from "@/lib/interpreter"
 import { outlineRows } from "@/lib/outline"
 import { portalRegistry } from "@/lib/registry"
@@ -34,6 +35,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
 
   if (!parsed.success) notFound()
 
+  await requireActor(`/trees/${parsed.data}`)
   await ensureSeeded()
 
   const rendered = await renderRequest(

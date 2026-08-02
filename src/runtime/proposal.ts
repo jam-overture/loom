@@ -13,7 +13,11 @@ import { intentOriginSchema, type IntentOrigin } from "./intent.js"
  */
 export const provenanceSchema = z.object({
   origin: intentOriginSchema,
-  /** The user or system component that raised the intent. */
+  /**
+   * The user or system component that raised the intent, carried from
+   * `EditIntent.actor`. Opaque to the runtime: a host decides what an identity
+   * looks like, and nothing here parses it (0027).
+   */
   actor: z.string().min(1).optional(),
   /** Identifies what produced the delta — a model id, or a named component. */
   interpreter: z.string().min(1),

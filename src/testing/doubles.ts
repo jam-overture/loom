@@ -123,6 +123,7 @@ export type IntentDraft = {
   readonly baseRevision: number
   readonly utterance?: string
   readonly origin?: IntentOrigin
+  readonly actor?: string
 }
 
 export const buildIntent = (idFactory: IdFactory, draft: IntentDraft): EditIntent => ({
@@ -130,6 +131,7 @@ export const buildIntent = (idFactory: IdFactory, draft: IntentDraft): EditInten
   treeId: draft.treeId,
   baseRevision: draft.baseRevision,
   origin: draft.origin ?? "user-instruction",
+  ...(draft.actor === undefined ? {} : { actor: draft.actor }),
   utterance: draft.utterance ?? "make it better",
   observedAt: FIXED_INSTANT,
 })
@@ -139,6 +141,7 @@ export type ProposalDraft = {
   readonly delta: TreeDelta
   readonly rationale?: string
   readonly origin?: IntentOrigin
+  readonly actor?: string
   readonly confidence?: number
 }
 
@@ -149,6 +152,7 @@ export const buildProposal = (idFactory: IdFactory, draft: ProposalDraft): Propo
   rationale: draft.rationale ?? "satisfies the intent",
   provenance: {
     origin: draft.origin ?? "user-instruction",
+    ...(draft.actor === undefined ? {} : { actor: draft.actor }),
     interpreter: "scripted",
     confidence: draft.confidence ?? 0.9,
     interpretedAt: FIXED_INSTANT,

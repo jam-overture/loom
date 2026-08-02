@@ -159,6 +159,8 @@ const propose = async (
     rationale: reply.value.rationale,
     provenance: {
       origin: intent.origin,
+      /** Copied from the ask, never inferred from the reply: the model does not name who asked. */
+      ...(intent.actor === undefined ? {} : { actor: intent.actor }),
       interpreter: completion.value.servedBy,
       promptHash: await hashPrompt(INTERPRETER_SYSTEM_PROMPT, userMessage),
       confidence: reply.value.confidence,

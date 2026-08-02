@@ -93,22 +93,60 @@ reasoning about it.
 
 ## Environment
 
-The write path (#18) calls a real model, so the portal now needs one secret:
+`apps/portal/.env.example` is the full list with the commentary. Four variables,
+two of which are required:
 
-| Variable                 | Scope       | Notes                                    |
-| ------------------------ | ----------- | ---------------------------------------- |
-| `LOOM_ANTHROPIC_API_KEY` | Server-side | Falls back to `ANTHROPIC_API_KEY`        |
+| Variable                     | Required | Notes                                       |
+| ---------------------------- | -------- | ------------------------------------------- |
+| `LOOM_PORTAL_SESSION_SECRET` | **yes**  | Signs sessions. ≥ 32 chars                  |
+| `LOOM_PORTAL_REVIEWERS`      | **yes**  | `actor:key` pairs. Keys ≥ 24 chars          |
+| `LOOM_ANTHROPIC_API_KEY`     | no       | Falls back to `ANTHROPIC_API_KEY`           |
+| `DATABASE_URL`               | no       | Absent means memory — see below             |
 
-**Never prefix it `NEXT_PUBLIC_`.** 0017 exists partly to keep that key off the
-client, and a public prefix would undo the whole record in one keystroke.
+**Never prefix any of them `NEXT_PUBLIC_`.** 0017 exists partly to keep the model
+key off the client, and a public prefix would undo the whole record in one
+keystroke. The same goes double for the session secret, which signs identity.
 
-Leaving it unset is a supported state rather than a broken one: the interpreter
-reports `interpreter-unavailable` and the prompt box says so. A deployment with no
-key is a perfectly good way to look at the read path.
+Leaving the model key unset is a supported state rather than a broken one: the
+interpreter reports `interpreter-unavailable` and the prompt box says so. A
+deployment with no key is a perfectly good way to look at the read path.
 
-Setting it makes the deployment worth protecting. **An unauthenticated prompt box
-on a public URL is your model spend, available to anyone with the link.** Vercel's
-Deployment Protection is the cheap answer until the portal has real auth.
+## Identity — required, and it fails closed
+
+Every change is recorded against whoever asked for it (0027), so the portal will
+not show a tree to someone it cannot name.
+
+```bash
+openssl rand -hex 32   # LOOM_PORTAL_SESSION_SECRET
+openssl rand -hex 24   # one key per reviewer
+```
+
+```
+LOOM_PORTAL_REVIEWERS=ana@example.com:2f4c…,bo@example.com:9ab1…
+```
+
+The key **is** the identity. A reviewer pastes a key at `/sign-in` and the roster
+says who that is — there is no name field, because a name that can be typed is a
+name anyone can type. The actor lands in `Provenance.actor` and is what
+`/history` and `/activity` show, so pick something a reader will recognise.
+
+**Set both, or the portal admits nobody.** This is the one place where absent
+configuration does not degrade gracefully, and that is deliberate: an empty
+`DATABASE_URL` announces itself the moment a write vanishes, whereas a portal
+that fell back to open access would look exactly like one that is working. The
+sign-in page names whichever variable is missing.
+
+Consequences worth knowing before you rely on it:
+
+- **Adding or removing a reviewer is a redeploy.** The roster is configuration.
+- **Rotating the session secret signs everyone out.** It is the only way to
+  invalidate an outstanding session; there is no per-session revocation.
+- **A leaked key is a leaked identity** until you rotate that key. Treat pasting
+  one anywhere as a rotation trigger, exactly like the database password.
+- **Sessions last twelve hours** and do not renew themselves by being used.
+- **Nothing rate-limits sign-in.** The keys are long and compared in constant
+  time, but a determined guesser is not slowed down. Vercel's Deployment
+  Protection in front of this is still worth having.
 
 ## The database
 

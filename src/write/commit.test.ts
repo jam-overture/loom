@@ -278,7 +278,7 @@ describe("confirmHeld", () => {
   it("applies the change a human said yes to", async () => {
     const { path, held, bodyId } = await heldHarness()
 
-    const outcome = await confirmHeld(path, held.proposalId)
+    const outcome = await confirmHeld(path, { proposalId: held.proposalId })
     if (outcome.kind !== "committed") throw new Error(`unexpected ${outcome.kind}`)
 
     const body = findNode(outcome.tree.root, bodyId)
@@ -288,19 +288,46 @@ describe("confirmHeld", () => {
 
   it("narrates the human answer before the Gate's second look", async () => {
     const { path, held, events } = await heldHarness()
-    await confirmHeld(path, held.proposalId)
+    await confirmHeld(path, { proposalId: held.proposalId })
 
     const types = events.types()
     expect(types).toContain("hold-confirmed")
     expect(types.lastIndexOf("disposition-decided")).toBeGreaterThan(types.indexOf("hold-confirmed"))
   })
 
+  /**
+   * A hold exists to put a second person in the way of a change, so the record
+   * of who that was is the whole point of holding it (0027). Provenance names
+   * the asker and cannot answer this.
+   */
+  it("names who answered, which is not who asked", async () => {
+    const { path, held, events } = await heldHarness()
+    await confirmHeld(path, { proposalId: held.proposalId, actor: "reviewer:ana" })
+
+    const confirmed = events.envelopes.find(
+      (envelope) => envelope.event.type === "hold-confirmed"
+    )?.event
+
+    expect(confirmed?.type === "hold-confirmed" && confirmed.actor).toBe("reviewer:ana")
+  })
+
+  it("leaves the answer unattributed when the host names nobody", async () => {
+    const { path, held, events } = await heldHarness()
+    await confirmHeld(path, { proposalId: held.proposalId })
+
+    const confirmed = events.envelopes.find(
+      (envelope) => envelope.event.type === "hold-confirmed"
+    )?.event
+
+    expect(confirmed && "actor" in confirmed).toBe(false)
+  })
+
   /** Custody is a take, so the second click has nothing to answer. */
   it("cannot be answered twice", async () => {
     const { path, held } = await heldHarness()
-    await confirmHeld(path, held.proposalId)
+    await confirmHeld(path, { proposalId: held.proposalId })
 
-    const again = await confirmHeld(path, held.proposalId)
+    const again = await confirmHeld(path, { proposalId: held.proposalId })
     if (again.kind !== "not-answerable") throw new Error(`unexpected ${again.kind}`)
 
     expect(again.error.code).toBe("not-held")
@@ -309,7 +336,7 @@ describe("confirmHeld", () => {
   it("reports an id that was never held rather than inventing a proposal", async () => {
     const { path } = await harnessFor()
 
-    const outcome = await confirmHeld(path, "p_nothing" as ProposalId)
+    const outcome = await confirmHeld(path, { proposalId: "p_nothing" as ProposalId })
 
     expect(outcome.kind).toBe("not-answerable")
   })
@@ -330,7 +357,7 @@ describe("confirmHeld", () => {
       appliedAt: "2026-07-30T00:00:00.000Z",
     })
 
-    const outcome = await confirmHeld(path, held.proposalId)
+    const outcome = await confirmHeld(path, { proposalId: held.proposalId })
     if (outcome.kind !== "not-written") throw new Error(`unexpected ${outcome.kind}`)
     if (outcome.error.code !== "revision-conflict") throw new Error(outcome.error.code)
 
@@ -352,7 +379,7 @@ describe("confirmHeld", () => {
       },
     }
 
-    const outcome = await confirmHeld(stricter, held.proposalId)
+    const outcome = await confirmHeld(stricter, { proposalId: held.proposalId })
 
     expect(outcome.kind).toBe("refused")
   })
@@ -364,7 +391,7 @@ describe("discardHeld", () => {
     const committed = await commitIntent(harness.path, harness.intent)
     if (committed.kind !== "held") throw new Error(`unexpected ${committed.kind}`)
 
-    const discarded = await discardHeld(harness.path, committed.held.proposalId)
+    const discarded = await discardHeld(harness.path, { proposalId: committed.held.proposalId })
     if (!discarded.ok) throw new Error("expected the proposal to be discarded")
 
     expect(discarded.value.proposalId).toBe(committed.held.proposalId)
@@ -377,9 +404,31 @@ describe("discardHeld", () => {
     const committed = await commitIntent(harness.path, harness.intent)
     if (committed.kind !== "held") throw new Error(`unexpected ${committed.kind}`)
 
-    await discardHeld(harness.path, committed.held.proposalId)
+    await discardHeld(harness.path, { proposalId: committed.held.proposalId })
 
     expect(harness.events.types()).toContain("hold-discarded")
+  })
+
+  /**
+   * A refusal is only evidence about the Gate's calibration if it says which
+   * reviewer refused: two reviewers disagreeing is a different fact from one
+   * reviewer refusing twice, and an unattributed stream cannot tell them apart.
+   */
+  it("names the reviewer who said no", async () => {
+    const harness = await harnessFor({ confidence: 0.5 })
+    const committed = await commitIntent(harness.path, harness.intent)
+    if (committed.kind !== "held") throw new Error(`unexpected ${committed.kind}`)
+
+    await discardHeld(harness.path, {
+      proposalId: committed.held.proposalId,
+      actor: "reviewer:bo",
+    })
+
+    const discarded = harness.events.envelopes.find(
+      (envelope) => envelope.event.type === "hold-discarded"
+    )?.event
+
+    expect(discarded?.type === "hold-discarded" && discarded.actor).toBe("reviewer:bo")
   })
 
   it("leaves the tree exactly as it was", async () => {
@@ -387,7 +436,7 @@ describe("discardHeld", () => {
     const committed = await commitIntent(harness.path, harness.intent)
     if (committed.kind !== "held") throw new Error(`unexpected ${committed.kind}`)
 
-    await discardHeld(harness.path, committed.held.proposalId)
+    await discardHeld(harness.path, { proposalId: committed.held.proposalId })
 
     const head = await harness.path.store.head(harness.tree.treeId)
     expect(head.ok && head.value.revision).toBe(0)
@@ -396,7 +445,7 @@ describe("discardHeld", () => {
   it("reports an unknown id rather than pretending to discard", async () => {
     const { path } = await harnessFor()
 
-    const discarded = await discardHeld(path, "p_nothing" as ProposalId)
+    const discarded = await discardHeld(path, { proposalId: "p_nothing" as ProposalId })
 
     expect(discarded.ok).toBe(false)
   })

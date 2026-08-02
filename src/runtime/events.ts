@@ -72,14 +72,23 @@ export type RuntimeEvent =
    * events that both say things went well.
    */
   | { readonly type: "hold-failed"; readonly proposalId: ProposalId; readonly detail: string }
-  /** A human answered a held proposal. The disposition that follows is the Gate's second look. */
-  | { readonly type: "hold-confirmed"; readonly proposalId: ProposalId }
+  /**
+   * A human answered a held proposal. The disposition that follows is the Gate's
+   * second look.
+   *
+   * `actor` is who answered, which is not who asked: a hold exists precisely
+   * because the Gate wanted a second person, and provenance records only the
+   * first. This event is the only place the approval is attributed (0027), so a
+   * host that drops it keeps the change and loses who allowed it.
+   */
+  | { readonly type: "hold-confirmed"; readonly proposalId: ProposalId; readonly actor?: string }
   /**
    * A human answered no. The most valuable event in this list for §6: it is the
    * only one that says a change the Gate was prepared to allow was not wanted,
-   * which is what calibration (0007) has to learn from.
+   * which is what calibration (0007) has to learn from — and a refusal is only
+   * evidence about a reviewer if it says which one.
    */
-  | { readonly type: "hold-discarded"; readonly proposalId: ProposalId }
+  | { readonly type: "hold-discarded"; readonly proposalId: ProposalId; readonly actor?: string }
   /**
    * The delta reached the log. `change-applied` says a tree in memory accepted
    * it; this says the truth (0016) moved.

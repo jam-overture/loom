@@ -70,10 +70,15 @@ export type TelemetryFailure = {
  * The intent, minus what was said. Origin, scope and the revision it was aimed
  * at are what an analysis needs; `utteranceLength` keeps "a one-word ask" and
  * "three paragraphs" distinguishable without storing either.
+ *
+ * `actor` is kept for the same reason `origin` is: it is an identifier a query
+ * groups by, not content someone typed. The rule 0023 set is about the
+ * utterance, and an identity is on the other side of it.
  */
 export const intentSummarySchema = z.object({
   intentId: intentIdSchema,
   origin: intentOriginSchema,
+  actor: z.string().min(1).optional(),
   baseRevision: z.number().int().nonnegative(),
   scopeNodeId: nodeIdSchema.optional(),
   utteranceLength: z.number().int().nonnegative(),
@@ -83,6 +88,7 @@ export const intentSummarySchema = z.object({
 export type IntentSummary = {
   readonly intentId: IntentId
   readonly origin: IntentOrigin
+  readonly actor?: string
   readonly baseRevision: number
   readonly scopeNodeId?: NodeId
   readonly utteranceLength: number
@@ -176,8 +182,16 @@ export const telemetryEventSchema = z.discriminatedUnion("type", [
     proposalId: proposalIdSchema,
     failure: telemetryFailureSchema,
   }),
-  z.object({ type: z.literal("hold-confirmed"), proposalId: proposalIdSchema }),
-  z.object({ type: z.literal("hold-discarded"), proposalId: proposalIdSchema }),
+  z.object({
+    type: z.literal("hold-confirmed"),
+    proposalId: proposalIdSchema,
+    actor: z.string().min(1).optional(),
+  }),
+  z.object({
+    type: z.literal("hold-discarded"),
+    proposalId: proposalIdSchema,
+    actor: z.string().min(1).optional(),
+  }),
   z.object({
     type: z.literal("change-committed"),
     proposalId: proposalIdSchema,
@@ -236,8 +250,8 @@ export type TelemetryEvent =
       readonly proposalId: ProposalId
       readonly failure: TelemetryFailure
     }
-  | { readonly type: "hold-confirmed"; readonly proposalId: ProposalId }
-  | { readonly type: "hold-discarded"; readonly proposalId: ProposalId }
+  | { readonly type: "hold-confirmed"; readonly proposalId: ProposalId; readonly actor?: string }
+  | { readonly type: "hold-discarded"; readonly proposalId: ProposalId; readonly actor?: string }
   | { readonly type: "change-committed"; readonly proposalId: ProposalId; readonly revision: number }
   | {
       readonly type: "commit-failed"
@@ -260,6 +274,7 @@ export type TelemetryRecord = {
 const summariseIntent = (intent: EditIntent): IntentSummary => ({
   intentId: intent.intentId,
   origin: intent.origin,
+  ...(intent.actor === undefined ? {} : { actor: intent.actor }),
   baseRevision: intent.baseRevision,
   ...(intent.scopeNodeId ? { scopeNodeId: intent.scopeNodeId } : {}),
   utteranceLength: intent.utterance.length,
@@ -361,10 +376,18 @@ const narrowEvent = (event: RuntimeEvent): TelemetryEvent => {
       }
 
     case "hold-confirmed":
-      return { type: "hold-confirmed", proposalId: event.proposalId }
+      return {
+        type: "hold-confirmed",
+        proposalId: event.proposalId,
+        ...(event.actor === undefined ? {} : { actor: event.actor }),
+      }
 
     case "hold-discarded":
-      return { type: "hold-discarded", proposalId: event.proposalId }
+      return {
+        type: "hold-discarded",
+        proposalId: event.proposalId,
+        ...(event.actor === undefined ? {} : { actor: event.actor }),
+      }
 
     case "change-committed":
       return { type: "change-committed", proposalId: event.proposalId, revision: event.revision }

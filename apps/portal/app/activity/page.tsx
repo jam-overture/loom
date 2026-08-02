@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeTelemetryError, episodesOf, tallyEpisodes } from "@loom/runtime/telemetry"
 
+import { requireActor } from "@/lib/auth/identity"
 import { portalTelemetry } from "@/lib/telemetry"
 import { storeIsDurable } from "@/lib/store"
 
@@ -29,6 +30,7 @@ const ActivityPage = async ({
   searchParams: Promise<{ tree?: string; older?: string }>
 }) => {
   const { tree, older } = await searchParams
+  await requireActor("/activity")
 
   const scope = tree === undefined ? undefined : treeIdSchema.safeParse(tree)
   if (scope && !scope.success) notFound()

@@ -177,6 +177,39 @@ describe("modelInterpreter — a proposal it understood", () => {
     expect(JSON.stringify(interpreted.value.provenance)).not.toContain("footer")
   })
 
+  /**
+   * The actor is copied from the ask, never read off the reply. A model that
+   * claimed an identity would be authoring the one field the audit trail exists
+   * to trust (0027).
+   */
+  it("carries the intent's actor into provenance", async () => {
+    const { tree } = sampleTree()
+    const idFactory = sequentialIdFactory("x")
+    const interpreter = modelInterpreter({
+      client: scriptedModelClient(INSERT_NOTE_REPLY),
+      idFactory,
+      clock: fixedClock(),
+    })
+
+    const interpreted = await interpreter.interpret(
+      buildIntent(idFactory, {
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        actor: "reviewer:ana",
+      }),
+      tree
+    )
+
+    expect(interpreted.ok && interpreted.value.provenance.actor).toBe("reviewer:ana")
+  })
+
+  it("leaves the actor absent when the intent named none", async () => {
+    const { interpreter, intent, tree } = harness(INSERT_NOTE_REPLY)
+    const interpreted = await interpreter.interpret(intent, tree)
+
+    expect(interpreted.ok && "actor" in interpreted.value.provenance).toBe(false)
+  })
+
   it("attributes the proposal to the intent that caused it", async () => {
     const { interpreter, intent, tree } = harness(INSERT_NOTE_REPLY)
     const interpreted = await interpreter.interpret(intent, tree)
