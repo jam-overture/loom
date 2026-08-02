@@ -4,21 +4,51 @@
   "description": "Loom \u2014 an AI-powered adaptive UI runtime",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "exports": {
-    ".": "./src/index.ts",
-    "./anthropic": "./src/interpretation/anthropic.ts",
-    "./react": "./src/render/index.ts",
-    "./sdk": "./src/sdk/index.ts",
-    "./cli": "./src/cli/index.ts",
-    "./store": "./src/store/index.ts",
-    "./write": "./src/write/index.ts",
-    "./postgres": "./src/store/postgres.ts",
-    "./telemetry": "./src/telemetry/index.ts",
-    "./telemetry/postgres": "./src/telemetry/postgres.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./anthropic": {
+      "types": "./dist/interpretation/anthropic.d.ts",
+      "default": "./dist/interpretation/anthropic.js"
+    },
+    "./react": {
+      "types": "./dist/render/index.d.ts",
+      "default": "./dist/render/index.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk/index.d.ts",
+      "default": "./dist/sdk/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "default": "./dist/cli/index.js"
+    },
+    "./store": {
+      "types": "./dist/store/index.d.ts",
+      "default": "./dist/store/index.js"
+    },
+    "./write": {
+      "types": "./dist/write/index.d.ts",
+      "default": "./dist/write/index.js"
+    },
+    "./postgres": {
+      "types": "./dist/store/postgres.d.ts",
+      "default": "./dist/store/postgres.js"
+    },
+    "./telemetry": {
+      "types": "./dist/telemetry/index.d.ts",
+      "default": "./dist/telemetry/index.js"
+    },
+    "./telemetry/postgres": {
+      "types": "./dist/telemetry/postgres.d.ts",
+      "default": "./dist/telemetry/postgres.js"
+    }
   },
   "bin": {
-    "loom": "./src/cli/main.ts"
+    "loom": "./dist/cli/main.js"
   },
   "scripts": {
     "loom": "tsx src/cli/main.ts",
@@ -26,7 +56,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "pnpm typecheck && pnpm test && pnpm --filter @loom/portal verify"
+    "verify": "pnpm typecheck && pnpm build && pnpm test && pnpm --filter @loom/portal verify",
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "zod": "^3.24.1"
@@ -62,5 +94,9 @@
     "vitest": "^3.0.5",
     "drizzle-orm": "^0.45.2"
   },
-  "packageManager": "pnpm@10.31.0"
+  "packageManager": "pnpm@10.31.0",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
 }

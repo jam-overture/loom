@@ -111,9 +111,15 @@ apps/portal/
 └── lib/nav.ts           # Active-section matching, as a pure function
 ```
 
-`pnpm verify` at the root runs the runtime's typecheck and tests, then the
-portal's typecheck, tests and build. The build is part of it because prerendering
-is what proves the shell renders.
+`pnpm verify` at the root runs the runtime's typecheck and tests, compiles the
+runtime, then runs the portal's typecheck, tests and build. The portal's build is
+part of it because prerendering is what proves the shell renders.
+
+The runtime compiles to `dist/` and every entry point resolves there (0030), so
+the portal consumes it as an ordinary Node package rather than as TypeScript
+source. `apps/portal` builds the runtime before its own typecheck and build,
+because a clean clone has no `dist` and a build order that is not written down is
+one that fails somewhere else.
 
 ## Deploying
 
