@@ -155,6 +155,12 @@ export const memoryTreeStore = (): TreeStore => {
         delta: request.delta,
         provenance: request.provenance,
         appliedAt: request.appliedAt,
+        /**
+         * Omitted rather than stored as `undefined`, so an entry nobody had to
+         * approve has no key at all — the same shape a Postgres row with a null
+         * column parses back to.
+         */
+        ...(request.answeredBy === undefined ? {} : { answeredBy: request.answeredBy }),
       }
 
       /** One write, so the log and the snapshot cannot be seen disagreeing. */

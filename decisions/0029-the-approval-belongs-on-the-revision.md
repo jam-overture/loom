@@ -1,9 +1,14 @@
 # 0029. The approval belongs on the revision, not only in the journal
 
-**Status:** Proposed — ARCHITECTURAL, needs review. Contradicts 0027; nothing has
-been built against it.
+**Status:** Accepted — partially supersedes 0027
 **Date:** 2026-08-02
 **Section:** §5 → §6
+
+> Raised as `Proposed` on PR #34 because acting on it contradicts a sentence in
+> an Accepted record. The maintainer answered on #34 — "let's just keep going
+> with your suggestions" — against a comment whose first item was this record and
+> its recommendation. Accepted on that basis and built; 0027's text is unchanged,
+> and only its status line records the partial supersession.
 
 ## Context
 
@@ -27,7 +32,7 @@ without the journal." That condition is now met, which is why this record exists
 It is `Proposed` and not `Accepted` because acting on it would contradict a
 sentence in an Accepted record, and that is an escalation rather than a refactor.
 
-## Decision (proposed, not in force)
+## Decision
 
 **`StoredRevision` gains an optional `answeredBy`, set when the revision was
 produced by confirming a held proposal, so the log alone answers who allowed a
@@ -45,7 +50,7 @@ change.**
   to share with an event.
 - `/history` shows the approver beside the asker. It currently cannot.
 
-## Consequences if accepted
+## Consequences
 
 - Two stores hold the same actor string for a confirmed change, and they can
   disagree — a bug in one write would be invisible until someone compared them.
@@ -55,9 +60,24 @@ change.**
   Nothing outside this repo implements `TreeStore` yet, which is the reason to do
   it now if it is going to be done at all.
 - The Postgres migration is additive and nullable, so it is safe against a
-  deployed database.
-- 0027 would be marked `Superseded by 0029` in the part that places the approval
-  in the journal only. Its identity decisions stand.
+  deployed database — but it is not free. `CREATE TABLE IF NOT EXISTS` leaves an
+  existing table alone, columns and all, so the DDL gained an
+  `ALTER TABLE … ADD COLUMN IF NOT EXISTS` beside it and **a deployed database
+  needs `db:push` re-run.** A deployment that skips it keeps working and silently
+  fails every confirmation, which is why there is a test that starts from the
+  pre-0029 table rather than a fresh one.
+- **An absent `answeredBy` is ambiguous, and stays that way.** It means either a
+  change nobody had to approve or one approved by a host that named nobody, and
+  the revision cannot distinguish them — only the journal can. `/history`
+  therefore shows an approver when there is one and says nothing when there is
+  not, rather than rendering "allowed by nobody" and asserting one of the two.
+- 0027 keeps its identity decisions and is marked
+  `Accepted — partially superseded by 0029`. A bare `Superseded by` would be
+  wrong: only the sentence placing the approval in the journal *alone* is
+  replaced, and the record's other two decisions are untouched and still in
+  force. That status string is a deviation from the three the index documents,
+  and it is deliberate — the alternative was retiring a record that is mostly
+  still true.
 
 ## Alternatives considered
 

@@ -204,6 +204,14 @@ Once, from a machine with `.env.local` in place. Idempotent — every statement 
 and `loom_revisions` for the store, and `loom_telemetry` for the journal §6
 records into.
 
+**Re-run it whenever the schema changes, not only on a new database.**
+`CREATE TABLE IF NOT EXISTS` leaves an existing table alone, columns and all, so
+a column added after a deployment reaches it only through the `ALTER TABLE …
+ADD COLUMN IF NOT EXISTS` beside it. A deployment that skips the re-run keeps
+serving and fails the write that needed the column. So far that is
+`loom_revisions.answered_by` (0029), which every confirmation of a held proposal
+writes.
+
 ### 5. Lock the tables down — required
 
 ```sql

@@ -35,6 +35,20 @@ export type StoredRevision = {
   readonly provenance: Provenance
   /** When the runtime applied it, which is not when the model produced it. */
   readonly appliedAt: string
+  /**
+   * Who allowed it, when a human had to (0029).
+   *
+   * Distinct from `provenance.actor`, which is who *asked*. A hold exists to put
+   * a second person in the way of a change, so recording only the asker would
+   * make every confirmed change look like somebody waving through their own
+   * request.
+   *
+   * Absent on a change nobody had to allow — one the Gate accepted outright —
+   * and absent on everything written before 0029, which nobody can prove the
+   * approver of. It is never back-filled: the log is append-only (0016), and a
+   * fact nobody observed does not belong in it.
+   */
+  readonly answeredBy?: string
 }
 
 export type AppendRequest = {
@@ -42,6 +56,8 @@ export type AppendRequest = {
   readonly delta: TreeDelta
   readonly provenance: Provenance
   readonly appliedAt: string
+  /** Set only by the confirmation path; see `StoredRevision.answeredBy`. */
+  readonly answeredBy?: string
 }
 
 /**

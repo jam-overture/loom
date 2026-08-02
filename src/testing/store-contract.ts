@@ -149,6 +149,32 @@ export const describeTreeStoreContract = (
       expect(log.ok && log.value.revisions[0]?.appliedAt).toBe(FIXED_INSTANT)
     })
 
+    /**
+     * 0029. Both stores have to agree on the *absence* as well as the value: a
+     * null column and an absent key must read back the same, or the two
+     * implementations differ on what an unapproved change looks like.
+     */
+    it("keeps who allowed a change, and keeps it absent when nobody had to", async () => {
+      const { tree, ids } = sampleTree()
+      const store = await freshStore()
+      await store.create(tree)
+
+      await store.append(tree.treeId, appendOf(removalOf(tree, ids.footer)))
+      await store.append(tree.treeId, {
+        ...appendOf(removalOf(tree, ids.header, 1), "p_2"),
+        answeredBy: "reviewer:ana",
+      })
+
+      const log = await store.revisions(tree.treeId)
+      if (!log.ok) throw new Error("expected a log")
+
+      expect(log.value.revisions.map((stored) => stored.answeredBy)).toEqual([
+        undefined,
+        "reviewer:ana",
+      ])
+      expect("answeredBy" in (log.value.revisions[0] ?? {})).toBe(false)
+    })
+
     /** The whole of concurrency control, stated once for every implementation. */
     it("refuses a delta whose base revision is not the head, and says which is which", async () => {
       const { tree, ids } = sampleTree()

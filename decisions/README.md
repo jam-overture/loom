@@ -25,6 +25,11 @@ rejected options are the part a future reader cannot reconstruct.
 
 `Status` is one of `Proposed`, `Accepted`, or `Superseded by NNNN`.
 
+A record that answered several questions at once can be replaced in part. Then
+the status is `Accepted — partially superseded by NNNN`, and the replacement says
+which part it takes over. Retiring a record that is mostly still in force would
+lose more than it clarified. 0027 is the first of these.
+
 ## Changing direction
 
 **Never edit a record to reflect a change of direction.** Mark the old one
@@ -66,7 +71,7 @@ leave the existing record standing until someone decides.
 | [0024](0024-emission-never-does-io-and-the-host-flushes-once.md) | Emission never does IO, and the host flushes once | Accepted | §6 |
 | [0025](0025-a-journal-page-is-taken-from-an-end-and-names-both.md) | A journal page is taken from an end, and names both of its ends | Accepted | §6 |
 | [0026](0026-the-revision-log-is-read-a-page-at-a-time.md) | The revision log is read a page at a time, from either end | Accepted | §5 |
-| [0027](0027-identity-is-server-derived-and-absence-fails-closed.md) | Identity is server-derived, and its absence fails closed | Accepted | §5 → §2, §6 |
+| [0027](0027-identity-is-server-derived-and-absence-fails-closed.md) | Identity is server-derived, and its absence fails closed | Accepted — partially superseded by 0029 | §5 → §2, §6 |
 | [0028](0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) | A tree is auditable only if its host can reproduce the seed | Accepted | §5 → §1 |
-| [0029](0029-the-approval-belongs-on-the-revision.md) | The approval belongs on the revision, not only in the journal | Proposed — needs review | §5 → §6 |
+| [0029](0029-the-approval-belongs-on-the-revision.md) | The approval belongs on the revision, not only in the journal | Accepted — partially supersedes 0027 | §5 → §6 |
 | [0030](0030-the-package-ships-compiled-output.md) | The package ships compiled output | Accepted | §4 → §5 |
