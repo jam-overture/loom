@@ -1,5 +1,6 @@
 import { catalogueOf } from "@loom/runtime/sdk"
 
+import { requireActor } from "@/lib/auth/identity"
 import { portalRegistry } from "@/lib/registry"
 
 import { PrimitiveCard } from "./_components/primitive-card"
@@ -12,7 +13,9 @@ import { PrimitiveCard } from "./_components/primitive-card"
  * and not in a proposal's options, or the reverse, would mean the catalogue had
  * stopped describing the registry.
  */
-const PrimitivesPage = () => {
+const PrimitivesPage = async () => {
+  await requireActor("/primitives")
+
   const catalogue = catalogueOf(portalRegistry)
 
   return (
