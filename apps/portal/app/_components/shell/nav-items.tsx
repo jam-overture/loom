@@ -15,10 +15,18 @@ const strokeProps = {
 } as const
 
 /**
- * Four sections, each one a thing the runtime already produces: the stored trees,
- * the registry a model may build from (0013), the delta log (0016), and the
- * snapshot audit. Nothing here is aspirational — a section with no data behind it
- * would be a promise in a nav bar.
+ * Only sections that exist.
+ *
+ * This list previously carried `history` and `audit`, which had no routes behind
+ * them — three of four items led to 404s on a deployed portal. The comment here
+ * said "a section with no data behind it would be a promise in a nav bar" while
+ * being exactly that, which is the useful lesson: a nav item is a claim, and the
+ * claim is cheap to make and invisible to break.
+ *
+ * Both belong in the portal eventually, and neither belongs *here*. A tree's log
+ * is per-tree, so history is a view inside `/trees/[treeId]` rather than a
+ * top-level section. `auditSnapshot` needs a seed to fold from, and only a tree
+ * whose revision 0 is still known can be audited at all (0016).
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
@@ -46,27 +54,5 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
         </svg>
       ),
     },
-  ],
-  [
-    {
-      label: "history",
-      href: "/history",
-      icon: (
-        <svg {...strokeProps}>
-          <circle cx="12" cy="12" r="9" />
-          <polyline points="12 7 12 12 16 14" />
-        </svg>
-      ),
-    },
-    {
-      label: "audit",
-      href: "/audit",
-      icon: (
-        <svg {...strokeProps}>
-          <path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6z" />
-          <polyline points="9 12 11.5 14.5 16 10" />
-        </svg>
-      ),
-    },
-  ],
+  ]
 ]
