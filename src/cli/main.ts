@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 import { nodeFileSystem } from "./filesystem.js"
 import { describeCliError, runCli } from "./run.js"
 

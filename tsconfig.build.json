@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    /**
+     * `bundler` resolution is right for source a bundler consumes, but it
+     * permits extensionless relative imports that Node's ESM loader refuses.
+     * Emitting for Node means resolving the way Node will: every relative
+     * specifier already carries `.js`, which is exactly what NodeNext wants and
+     * what made this convention correct all along.
+     */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/testing/**", "src/cli/scaffold-fixture/**"]
+}
