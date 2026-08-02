@@ -13,6 +13,12 @@ import { describeOperation } from "@/lib/delta-summary"
  * makes 0001's claim real: a stored tree can say what it is, but only a log can
  * say who changed it, when, and why — and a view that dropped the interpreter or
  * the confidence would be keeping the record without showing it.
+ *
+ * "Allowed by" appears only when there is one, and its absence is deliberately
+ * silent. A revision with no `answeredBy` is either a change nobody had to
+ * approve or one approved by a host that named nobody, and the revision cannot
+ * tell those apart — only the journal can (0029). Rendering "allowed by nobody"
+ * would state one of the two as fact.
  */
 export const RevisionRow = ({ stored }: { readonly stored: StoredRevision }) => (
   <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-4">
@@ -44,6 +50,12 @@ export const RevisionRow = ({ stored }: { readonly stored: StoredRevision }) => 
         <dt className="text-ink-muted">asked by</dt>
         <dd className="font-mono">{stored.provenance.actor ?? stored.provenance.origin}</dd>
       </div>
+      {stored.answeredBy === undefined ? null : (
+        <div className="flex gap-1">
+          <dt className="text-ink-muted">allowed by</dt>
+          <dd className="font-mono">{stored.answeredBy}</dd>
+        </div>
+      )}
       <div className="flex gap-1">
         <dt className="text-ink-muted">interpreted by</dt>
         <dd className="font-mono">{stored.provenance.interpreter}</dd>

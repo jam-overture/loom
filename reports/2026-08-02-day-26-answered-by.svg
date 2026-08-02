@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="620" viewBox="0 0 960 620" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6472" />
+    </marker>
+    <marker id="a-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a4423a" />
+    </marker>
+  </defs>
+
+  <rect width="960" height="620" fill="#ffffff" />
+
+  <text x="40" y="46" font-size="21" fill="#14181f">Who allowed this change?</text>
+  <text x="40" y="70" font-size="13" fill="#5b6472">day 26 — the answer used to need two stores. Now the log alone can give it.</text>
+  <line x1="40" y1="86" x2="920" y2="86" stroke="#e3e6ea" stroke-width="1" />
+
+  <!-- before -->
+  <text x="40" y="120" font-size="11" fill="#8a94a2" letter-spacing="0.08em">BEFORE — 0027</text>
+
+  <rect x="40" y="136" width="400" height="150" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="56" y="160" font-size="12" fill="#14181f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom_revisions</text>
+  <text x="56" y="182" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">revision, proposal_id, delta</text>
+  <text x="56" y="200" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">provenance.actor  ← who asked</text>
+  <text x="56" y="218" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">applied_at</text>
+  <line x1="56" y1="232" x2="424" y2="232" stroke="#e3e6ea" />
+  <text x="56" y="252" font-size="11" fill="#8d3a33">who allowed it: not here.</text>
+  <text x="56" y="270" font-size="11" fill="#8d3a33">Lose the journal and the change survives without its approver.</text>
+
+  <rect x="480" y="136" width="440" height="150" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="496" y="160" font-size="12" fill="#14181f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom_telemetry</text>
+  <text x="496" y="182" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">{ type: "hold-confirmed", actor }  ← who allowed</text>
+  <line x1="496" y1="200" x2="904" y2="200" stroke="#e3e6ea" />
+  <text x="496" y="220" font-size="11" fill="#5b6472">Observability, with its own durability story and, one day,</text>
+  <text x="496" y="236" font-size="11" fill="#5b6472">its own retention policy — which would quietly become a</text>
+  <text x="496" y="252" font-size="11" fill="#5b6472">policy on how long approvals are remembered.</text>
+
+  <path d="M 240 286 V 320 H 320" fill="none" stroke="#a4423a" marker-end="url(#a-bad)" />
+  <path d="M 700 286 V 320 H 620" fill="none" stroke="#a4423a" marker-end="url(#a-bad)" />
+  <rect x="322" y="300" width="296" height="40" rx="6" fill="#fbf1f0" stroke="#d9a49f" />
+  <text x="338" y="325" font-size="12" fill="#7a2b25">&#8220;who approved this?&#8221; needed both stores</text>
+
+  <!-- after -->
+  <line x1="40" y1="368" x2="920" y2="368" stroke="#e3e6ea" stroke-width="1" />
+  <text x="40" y="398" font-size="11" fill="#8a94a2" letter-spacing="0.08em">AFTER — 0029</text>
+
+  <rect x="40" y="414" width="400" height="150" rx="6" fill="#f7f8fa" stroke="#9fb0c6" />
+  <text x="56" y="438" font-size="12" fill="#14181f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom_revisions</text>
+  <text x="56" y="460" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">revision, proposal_id, delta</text>
+  <text x="56" y="478" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">provenance.actor  ← who asked</text>
+  <text x="56" y="496" font-size="11" fill="#14181f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">answered_by       ← who allowed  (new, nullable)</text>
+  <text x="56" y="514" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">applied_at</text>
+  <line x1="56" y1="528" x2="424" y2="528" stroke="#e3e6ea" />
+  <text x="56" y="548" font-size="11" fill="#3c6b4e">The log alone answers it. /history shows both names.</text>
+
+  <rect x="480" y="414" width="440" height="150" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="496" y="438" font-size="12" fill="#14181f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom_telemetry</text>
+  <text x="496" y="460" font-size="11" fill="#5b6472" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">{ type: "hold-confirmed", actor }  ← unchanged</text>
+  <line x1="496" y1="478" x2="904" y2="478" stroke="#e3e6ea" />
+  <text x="496" y="498" font-size="11" fill="#5b6472">Kept, not moved. One field duplicated on purpose: 0023 still</text>
+  <text x="496" y="514" font-size="11" fill="#5b6472">holds, because the log is recording a fact about its own entry.</text>
+  <text x="496" y="534" font-size="11" fill="#5b6472">Both writes read one ProposalAnswer, so they cannot disagree.</text>
+  <text x="496" y="552" font-size="11" fill="#8d3a33">Absent answered_by stays ambiguous — only this store knows why.</text>
+
+  <path d="M 240 300 V 414" fill="none" stroke="#5b6472" stroke-dasharray="3 3" marker-end="url(#a)" opacity="0.35" />
+
+  <text x="40" y="596" font-size="11" fill="#8a94a2">CREATE TABLE IF NOT EXISTS leaves an existing table alone, so the column reaches a deployed database only through the ALTER beside it — re-run db:push.</text>
+</svg>

@@ -124,6 +124,23 @@ const readWritableHead = async (
 }
 
 /**
+ * What a commit is, apart from the path it takes: the change, the verdict, the
+ * way back, and — when a human had to allow it — who did.
+ *
+ * Grouped rather than trailing `persist`'s parameter list, for the reason 0027
+ * gave for `ProposalAnswer`: an approver that can be left off the end is one
+ * that will be, and the whole point of recording it is that it is not optional
+ * when there is one.
+ */
+type Commit = {
+  readonly proposal: ProposedChange
+  readonly disposition: Disposition
+  readonly inverse: TreeDelta
+  /** Absent on a change the Gate accepted outright — nobody had to allow it. */
+  readonly answeredBy?: string
+}
+
+/**
  * Persists a change the Gate accepted and the tree took.
  *
  * The tree returned is the store's, not the one the pipeline applied in memory:
@@ -133,15 +150,16 @@ const persist = async (
   path: WritePath,
   narrate: Narrator,
   intent: EditIntent,
-  proposal: ProposedChange,
-  disposition: Disposition,
-  inverse: TreeDelta
+  commit: Commit
 ): Promise<WriteOutcome> => {
+  const { proposal, disposition, inverse } = commit
+
   const appended = await path.store.append(intent.treeId, {
     proposalId: proposal.proposalId,
     delta: proposal.delta,
     provenance: proposal.provenance,
     appliedAt: path.runtime.clock.now(),
+    ...(commit.answeredBy === undefined ? {} : { answeredBy: commit.answeredBy }),
   })
 
   if (!appended.ok) {
@@ -205,14 +223,11 @@ export const commitIntent = async (path: WritePath, intent: EditIntent): Promise
 
   switch (outcome.kind) {
     case "applied":
-      return persist(
-        path,
-        narrate,
-        intent,
-        outcome.assessment.proposal,
-        outcome.disposition,
-        outcome.inverse
-      )
+      return persist(path, narrate, intent, {
+        proposal: outcome.assessment.proposal,
+        disposition: outcome.disposition,
+        inverse: outcome.inverse,
+      })
     case "awaiting-confirmation":
       return takeIntoCustody(
         path,
@@ -285,7 +300,17 @@ export const confirmHeld = async (
 
   switch (outcome.kind) {
     case "applied":
-      return persist(path, narrate, intent, proposal, outcome.disposition, outcome.inverse)
+      /**
+       * The one place `answeredBy` is set. It is the same actor the
+       * `hold-confirmed` event carries, taken from the same `ProposalAnswer`, so
+       * the two records cannot disagree about who allowed this (0029).
+       */
+      return persist(path, narrate, intent, {
+        proposal,
+        disposition: outcome.disposition,
+        inverse: outcome.inverse,
+        ...(answer.actor === undefined ? {} : { answeredBy: answer.actor }),
+      })
     case "rejected":
       return { kind: "refused", proposal, disposition: outcome.disposition }
     case "not-applicable":

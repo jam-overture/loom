@@ -1,6 +1,6 @@
 # 0027. Identity is server-derived, and its absence fails closed
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by 0029
 **Date:** 2026-08-01
 **Section:** §5 → §2, §6
 

@@ -70,7 +70,30 @@ const storedRevisionSchema = z.object({
   delta: treeDeltaSchema,
   provenance: provenanceSchema,
   appliedAt: z.string().datetime(),
+  /** Null on every row written before 0029, and on every change nobody had to allow. */
+  answeredBy: z.string().nullable().optional(),
 })
+
+/**
+ * A null column and an absent key have to produce the same entry, or a revision
+ * nobody approved would compare unequal between this store and the in-memory
+ * one — and the contract suite both are checked against would be measuring the
+ * backing store rather than the behaviour.
+ */
+const toStoredRevision = (row: z.infer<typeof storedRevisionSchema>): StoredRevision => {
+  const { answeredBy, ...rest } = row
+
+  /**
+   * Zod infers an optional field as `T | undefined`, and
+   * `exactOptionalPropertyTypes` distinguishes that from an absent key — so a
+   * parsed `Provenance` needs asserting even though it validated. The assertion
+   * is about the shape of optionality, never about whether the data is valid:
+   * the schema above established that.
+   */
+  const entry = rest as Omit<StoredRevision, "answeredBy">
+
+  return answeredBy === null || answeredBy === undefined ? entry : { ...entry, answeredBy }
+}
 
 const UNIQUE_VIOLATION = "23505"
 
@@ -188,7 +211,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           })
         }
 
-        const page = parsed.data as readonly StoredRevision[]
+        const page: readonly StoredRevision[] = parsed.data.map(toStoredRevision)
 
         return ok<RevisionPage>({
           revisions: page,
@@ -275,6 +298,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
             delta: request.delta,
             provenance: request.provenance,
             appliedAt: request.appliedAt,
+            answeredBy: request.answeredBy ?? null,
           })
 
           await tx
