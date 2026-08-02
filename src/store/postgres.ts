@@ -1,7 +1,8 @@
-import { and, asc, eq, gt } from "drizzle-orm"
+import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
 import { z } from "zod"
 
 import { proposalIdSchema, treeIdSchema, type TreeId } from "../ids.js"
+import { cursorPosition, pageEnds } from "../paging.js"
 import { provenanceSchema } from "../runtime/proposal.js"
 import { treeDeltaSchema } from "../tree/delta.js"
 import { err, ok, type Result } from "../result.js"
@@ -13,8 +14,11 @@ import type { StoreError } from "./errors.js"
 import { loomRevisions, loomTrees } from "./schema.js"
 import {
   clampListingLimit,
+  clampRevisionLimit,
   type AppendRequest,
   type ListRequest,
+  type RevisionPage,
+  type RevisionReadRequest,
   type StoredRevision,
   type TreeListPage,
   type TreeStore,
@@ -132,7 +136,11 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
       }
     },
 
-    history: async (treeId) => {
+    revisions: async (treeId, request?: RevisionReadRequest) => {
+      const limit = clampRevisionLimit(request?.limit)
+      const from = cursorPosition(request?.cursor)
+      const direction = request?.direction ?? "newer"
+
       try {
         const present = await db
           .select({ treeId: loomTrees.treeId })
@@ -143,20 +151,52 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
         /** "No tree" and "a tree with no changes" are different answers. */
         if (present[0] === undefined) return err<StoreError>({ code: "not-found", treeId })
 
+        /**
+         * `older` scans descending so the newest page costs one seek on the
+         * primary key rather than a walk from the start of the log, then the rows
+         * are put back in applied order — the contract's promise that a page's
+         * order never depends on which end it came from.
+         */
         const rows = await db
           .select()
           .from(loomRevisions)
-          .where(eq(loomRevisions.treeId, treeId))
-          .orderBy(asc(loomRevisions.revision))
+          .where(
+            and(
+              eq(loomRevisions.treeId, treeId),
+              from === undefined
+                ? undefined
+                : direction === "older"
+                  ? lt(loomRevisions.revision, from)
+                  : gt(loomRevisions.revision, from)
+            )
+          )
+          .orderBy(
+            direction === "older" ? desc(loomRevisions.revision) : asc(loomRevisions.revision)
+          )
+          /** One extra row answers "is there another page" without a count. */
+          .limit(limit + 1)
 
-        const parsed = z.array(storedRevisionSchema).safeParse(rows)
+        const taken = rows.slice(0, limit)
+        const parsed = z
+          .array(storedRevisionSchema)
+          .safeParse(direction === "older" ? taken.slice().reverse() : taken)
 
-        return parsed.success
-          ? ok(parsed.data as readonly StoredRevision[])
-          : err<StoreError>({
-              code: "unavailable",
-              detail: `the log of ${treeId} did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
-            })
+        if (!parsed.success) {
+          return err<StoreError>({
+            code: "unavailable",
+            detail: `the log of ${treeId} did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
+          })
+        }
+
+        const page = parsed.data as readonly StoredRevision[]
+
+        return ok<RevisionPage>({
+          revisions: page,
+          ...pageEnds(page.map((stored) => stored.revision), direction, {
+            beyond: rows.length > limit,
+            resumed: from !== undefined,
+          }),
+        })
       } catch (cause) {
         return err(failure(cause, `could not read the history of ${treeId}`))
       }

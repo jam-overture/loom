@@ -15,18 +15,18 @@ const strokeProps = {
 } as const
 
 /**
- * Only sections that exist.
+ * Three sections, each one a route that exists: the stored trees, what the
+ * runtime was asked to do and what became of it (0023), and what was accepted
+ * into a tree (0016).
  *
- * This list previously carried `history` and `audit`, which had no routes behind
- * them — three of four items led to 404s on a deployed portal. The comment here
- * said "a section with no data behind it would be a promise in a nav bar" while
- * being exactly that, which is the useful lesson: a nav item is a claim, and the
- * claim is cheap to make and invisible to break.
+ * `audit` was here from day 10 with no route behind it, and a nav is a claim about
+ * what a thing can do. It comes back the day its page does: `auditSnapshot` needs
+ * a seed to fold from, so only a tree whose revision 0 is still known can be
+ * audited at all (0016), and a page claiming otherwise would overstate the
+ * runtime.
  *
- * Both belong in the portal eventually, and neither belongs *here*. A tree's log
- * is per-tree, so history is a view inside `/trees/[treeId]` rather than a
- * top-level section. `auditSnapshot` needs a seed to fold from, and only a tree
- * whose revision 0 is still known can be audited at all (0016).
+ * `primitives` came back when its page did — the catalogue a model is told it may
+ * build from (0013).
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
@@ -54,5 +54,26 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
         </svg>
       ),
     },
-  ]
+  ],
+  [
+    {
+      label: "activity",
+      href: "/activity",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M3 12h4l2.5-6 4 12 2.5-6h5" />
+        </svg>
+      ),
+    },
+    {
+      label: "history",
+      href: "/history",
+      icon: (
+        <svg {...strokeProps}>
+          <circle cx="12" cy="12" r="9" />
+          <polyline points="12 7 12 12 16 14" />
+        </svg>
+      ),
+    },
+  ],
 ]

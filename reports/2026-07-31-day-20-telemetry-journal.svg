@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="800" viewBox="0 0 980 800" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#414a5c"/>
+    </marker>
+    <marker id="arrow-drop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a11b00"/>
+    </marker>
+  </defs>
+
+  <rect width="980" height="800" fill="#ffffff"/>
+
+  <text x="40" y="42" font-size="21" fill="#1a1a1a">The telemetry journal</text>
+  <text x="40" y="65" font-size="13" fill="#6e6e6e">§6 — the runtime already narrated itself. This is where the narration survives the request.</text>
+
+  <!-- ── stage 1: emission ── -->
+  <rect x="40" y="96" width="252" height="238" rx="6" fill="#f7f8fa" stroke="#d8dae1"/>
+  <text x="56" y="120" font-size="13" fill="#1a1a1a">1 · the runtime narrates</text>
+  <text x="56" y="139" font-size="11" fill="#6e6e6e">composeChange · commitIntent</text>
+
+  <g font-size="11.5" fill="#31384a">
+    <rect x="56" y="152" width="220" height="22" rx="3" fill="#eef0f4" stroke="#dfe1e7"/>
+    <text x="66" y="167">intent-received</text>
+    <rect x="56" y="178" width="220" height="22" rx="3" fill="#eef0f4" stroke="#dfe1e7"/>
+    <text x="66" y="193">change-proposed</text>
+    <rect x="56" y="204" width="220" height="22" rx="3" fill="#eef0f4" stroke="#dfe1e7"/>
+    <text x="66" y="219">change-assessed</text>
+    <rect x="56" y="230" width="220" height="22" rx="3" fill="#eef0f4" stroke="#dfe1e7"/>
+    <text x="66" y="245">disposition-decided</text>
+    <rect x="56" y="256" width="220" height="22" rx="3" fill="#eef0f4" stroke="#dfe1e7"/>
+    <text x="66" y="271">change-applied</text>
+    <rect x="56" y="282" width="220" height="22" rx="3" fill="#eef0f4" stroke="#dfe1e7"/>
+    <text x="66" y="297">change-committed</text>
+  </g>
+  <text x="56" y="322" font-size="10.5" fill="#6e6e6e">17 variants · emit() is synchronous, always</text>
+
+  <!-- ── stage 2: narrowing ── -->
+  <line x1="292" y1="215" x2="356" y2="215" stroke="#414a5c" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="324" y="207" font-size="10.5" fill="#6e6e6e" text-anchor="middle">recordOf</text>
+
+  <rect x="356" y="96" width="256" height="238" rx="6" fill="#eef2ec" stroke="#93a888"/>
+  <text x="372" y="120" font-size="13" fill="#1a1a1a">2 · narrowed (0023)</text>
+  <text x="372" y="139" font-size="11" fill="#5d6b56">payloads change · membership never does</text>
+
+  <g font-size="11.5">
+    <text x="372" y="166" fill="#2f5233">kept</text>
+    <text x="372" y="185" fill="#31384a">· the proposal, whole — delta included</text>
+    <text x="372" y="203" fill="#31384a">· provenance, confidence, disposition</text>
+    <text x="372" y="221" fill="#31384a">· stakes, reversibility, the counts</text>
+    <text x="372" y="239" fill="#31384a">· every failure, as code + sentence</text>
+
+    <text x="372" y="270" fill="#a11b00">dropped</text>
+    <text x="372" y="289" fill="#31384a">· the utterance (length only)</text>
+    <text x="372" y="307" fill="#31384a">· the inverse delta — the log has it</text>
+    <text x="372" y="325" fill="#31384a">· the assessment's node-id list</text>
+  </g>
+
+  <!-- dropped arrows -->
+  <line x1="624" y1="289" x2="676" y2="289" stroke="#a11b00" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow-drop)"/>
+  <text x="684" y="285" font-size="10.5" fill="#a11b00">never stored</text>
+  <text x="684" y="299" font-size="10.5" fill="#6e6e6e">content, or a second copy</text>
+
+  <!-- ── stage 3: collector ── -->
+  <line x1="166" y1="334" x2="166" y2="380" stroke="#414a5c" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="40" y="380" width="572" height="120" rx="6" fill="#f7f8fa" stroke="#d8dae1"/>
+  <text x="56" y="404" font-size="13" fill="#1a1a1a">3 · collected in the request (0024)</text>
+  <text x="56" y="423" font-size="11" fill="#6e6e6e">collectTelemetry — a list, not a connection. Emission does no IO, ever.</text>
+
+  <g font-size="11">
+    <rect x="56" y="437" width="128" height="26" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="120" y="454" text-anchor="middle" fill="#31384a">buffer ≤ 1000</text>
+    <rect x="196" y="437" width="150" height="26" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="271" y="454" text-anchor="middle" fill="#31384a">flush() — one batch</text>
+    <rect x="358" y="437" width="238" height="26" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="477" y="454" text-anchor="middle" fill="#31384a">a failed batch is dropped, not queued</text>
+  </g>
+  <text x="56" y="483" font-size="10.5" fill="#6e6e6e">A sink can never fail a change the Gate accepted — so it does nothing that could.</text>
+
+  <!-- ── stage 4: journal ── -->
+  <line x1="612" y1="440" x2="668" y2="440" stroke="#414a5c" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="640" y="432" font-size="10.5" fill="#6e6e6e" text-anchor="middle">record</text>
+
+  <rect x="668" y="380" width="272" height="120" rx="6" fill="#e9edf5" stroke="#5b6478"/>
+  <text x="684" y="404" font-size="13" fill="#1a1a1a">4 · TelemetryJournal</text>
+  <text x="684" y="423" font-size="11" fill="#5b6478">one contract · two implementations</text>
+  <g font-size="11">
+    <rect x="684" y="437" width="112" height="26" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="740" y="454" text-anchor="middle" fill="#31384a">memory</text>
+    <rect x="808" y="437" width="116" height="26" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="866" y="454" text-anchor="middle" fill="#31384a">Postgres</text>
+  </g>
+  <text x="684" y="483" font-size="10.5" fill="#6e6e6e">one suite runs against both · seq is arrival, not the clock</text>
+
+  <!-- ── stage 5: fold ── -->
+  <line x1="804" y1="500" x2="804" y2="546" stroke="#414a5c" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="812" y="527" font-size="10.5" fill="#6e6e6e">episodesOf — derived, never stored</text>
+
+  <rect x="40" y="546" width="900" height="212" rx="6" fill="#f7f8fa" stroke="#d8dae1"/>
+  <text x="56" y="570" font-size="13" fill="#1a1a1a">5 · one episode per intent — what §6 was built to answer</text>
+
+  <!-- episode chain -->
+  <g font-size="11.5">
+    <rect x="56" y="588" width="150" height="52" rx="4" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="131" y="608" text-anchor="middle" fill="#1a1a1a">intent</text>
+    <text x="131" y="626" text-anchor="middle" fill="#6e6e6e">origin · scope · length</text>
+
+    <line x1="206" y1="614" x2="248" y2="614" stroke="#414a5c" stroke-width="1.3" marker-end="url(#arrow)"/>
+
+    <rect x="248" y="588" width="176" height="52" rx="4" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="336" y="608" text-anchor="middle" fill="#1a1a1a">proposal · refused</text>
+    <text x="336" y="626" text-anchor="middle" fill="#6e6e6e">confidence 0.1 · delta kept</text>
+
+    <line x1="424" y1="614" x2="466" y2="614" stroke="#414a5c" stroke-width="1.3" marker-end="url(#arrow)"/>
+    <text x="445" y="606" font-size="10" fill="#6e6e6e" text-anchor="middle">repairOf</text>
+
+    <rect x="466" y="588" width="176" height="52" rx="4" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="554" y="608" text-anchor="middle" fill="#1a1a1a">proposal · repaired</text>
+    <text x="554" y="626" text-anchor="middle" fill="#6e6e6e">accepted · applied at r1</text>
+
+    <line x1="642" y1="614" x2="684" y2="614" stroke="#414a5c" stroke-width="1.3" marker-end="url(#arrow)"/>
+
+    <rect x="684" y="588" width="240" height="52" rx="4" fill="#e9edf5" stroke="#5b6478"/>
+    <text x="804" y="608" text-anchor="middle" fill="#1a1a1a">resolution: committed</text>
+    <text x="804" y="626" text-anchor="middle" fill="#6e6e6e">revision 1</text>
+  </g>
+
+  <text x="56" y="668" font-size="11.5" fill="#31384a">Every other ending is recorded the same way, including the ones that never reach the log:</text>
+  <g font-size="11" fill="#31384a">
+    <rect x="56" y="682" width="128" height="24" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="120" y="698" text-anchor="middle">refused</text>
+    <rect x="196" y="682" width="150" height="24" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="271" y="698" text-anchor="middle">awaiting-answer</text>
+    <rect x="358" y="682" width="128" height="24" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="422" y="698" text-anchor="middle">discarded</text>
+    <rect x="498" y="682" width="150" height="24" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="573" y="698" text-anchor="middle">not-interpreted</text>
+    <rect x="660" y="682" width="128" height="24" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="724" y="698" text-anchor="middle">not-writable</text>
+    <rect x="800" y="682" width="124" height="24" rx="3" fill="#ffffff" stroke="#c9ccd4"/>
+    <text x="862" y="698" text-anchor="middle">failed</text>
+  </g>
+
+  <text x="56" y="730" font-size="11" fill="#6e6e6e">A page that opens mid-episode returns its orphans as `unattributed` — a partial fold, never a wrong one.</text>
+  <text x="56" y="748" font-size="11" fill="#6e6e6e">"discarded" is the only event that says the Gate was willing and a human was not. Nothing else can teach 0007 calibration.</text>
+</svg>

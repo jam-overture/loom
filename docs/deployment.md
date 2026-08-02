@@ -162,14 +162,20 @@ pnpm --filter @loom/portal db:push
 ```
 
 Once, from a machine with `.env.local` in place. Idempotent — every statement is
-`IF NOT EXISTS`, so re-running is a no-op.
+`IF NOT EXISTS`, so re-running is a no-op. It creates three tables: `loom_trees`
+and `loom_revisions` for the store, and `loom_telemetry` for the journal §6
+records into.
 
 ### 5. Lock the tables down — required
 
 ```sql
 ALTER TABLE loom_trees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loom_revisions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE loom_telemetry ENABLE ROW LEVEL SECURITY;
 ```
+
+Every table `db:push` creates needs this, including any added later — a new table
+is exposed the moment it exists.
 
 Supabase exposes everything in the `public` schema through PostgREST using the
 anon key, and that key is public by design. **Without this, anyone with the anon

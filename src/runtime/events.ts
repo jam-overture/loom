@@ -15,8 +15,11 @@ import type { ProposedChange } from "./proposal.js"
  * Every stage emits, including the ones that fail, because the telemetry
  * pipeline needs the rejected and unconfirmed changes as much as the applied
  * ones — a Gate that refuses the right things is only demonstrable if refusals
- * are recorded. Emission happens from day one even though nothing consumes it
- * yet.
+ * are recorded.
+ *
+ * These events are the runtime talking to itself within one request, so they
+ * carry whole assessments and whole inverse deltas. What survives the request is
+ * a narrowing of them (0023), which `src/telemetry` owns.
  */
 
 export type RuntimeEvent =

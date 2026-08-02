@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" width="960" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>The revision log becomes a page — day 22, decision 0026</title>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569" />
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="660" fill="#ffffff" />
+
+  <text x="40" y="46" font-size="21" fill="#0f172a">The revision log becomes a page</text>
+  <text x="40" y="70" font-size="13" fill="#64748b">§5 · decision 0026 — a read names the end it starts from, and every read in the store is now bounded</text>
+
+  <!-- BEFORE -->
+  <rect x="40" y="96" width="410" height="216" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text x="60" y="124" font-size="12" fill="#94a3b8" letter-spacing="1.2">BEFORE</text>
+  <text x="60" y="150" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#0f172a">history(treeId)</text>
+  <text x="60" y="170" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#64748b">  → readonly StoredRevision[]</text>
+
+  <g>
+    <rect x="60" y="192" width="42" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" />
+    <text x="81" y="214" font-size="12" text-anchor="middle" fill="#3730a3">1</text>
+    <rect x="106" y="192" width="42" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" />
+    <text x="127" y="214" font-size="12" text-anchor="middle" fill="#3730a3">2</text>
+    <rect x="152" y="192" width="42" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" />
+    <text x="173" y="214" font-size="12" text-anchor="middle" fill="#3730a3">3</text>
+    <text x="212" y="214" font-size="13" fill="#6366f1">· · ·</text>
+    <rect x="248" y="192" width="52" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" />
+    <text x="274" y="214" font-size="12" text-anchor="middle" fill="#3730a3">n−1</text>
+    <rect x="304" y="192" width="42" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc" />
+    <text x="325" y="214" font-size="12" text-anchor="middle" fill="#3730a3">n</text>
+  </g>
+
+  <text x="60" y="256" font-size="12" fill="#475569">Every entry, every read. No limit the caller could name,</text>
+  <text x="60" y="274" font-size="12" fill="#475569">and none the store imposed.</text>
+  <text x="60" y="296" font-size="12" fill="#b45309">Cost grows with the tree's age — fastest exactly when</text>
+  <text x="60" y="314" font-size="12" fill="#b45309">the log is most worth reading.</text>
+
+  <!-- AFTER -->
+  <rect x="510" y="96" width="410" height="216" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text x="530" y="124" font-size="12" fill="#94a3b8" letter-spacing="1.2">AFTER</text>
+  <text x="530" y="150" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#0f172a">revisions(treeId, { direction: "older" })</text>
+  <text x="530" y="170" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#64748b">  → RevisionPage</text>
+
+  <g>
+    <rect x="530" y="192" width="42" height="34" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-dasharray="3 3" />
+    <text x="551" y="214" font-size="12" text-anchor="middle" fill="#94a3b8">1</text>
+    <rect x="576" y="192" width="42" height="34" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-dasharray="3 3" />
+    <text x="597" y="214" font-size="12" text-anchor="middle" fill="#94a3b8">2</text>
+    <text x="636" y="214" font-size="13" fill="#cbd5e1">· · ·</text>
+    <rect x="672" y="192" width="52" height="34" rx="4" fill="#dcfce7" stroke="#4ade80" />
+    <text x="698" y="214" font-size="12" text-anchor="middle" fill="#166534">n−2</text>
+    <rect x="728" y="192" width="52" height="34" rx="4" fill="#dcfce7" stroke="#4ade80" />
+    <text x="754" y="214" font-size="12" text-anchor="middle" fill="#166534">n−1</text>
+    <rect x="784" y="192" width="42" height="34" rx="4" fill="#dcfce7" stroke="#4ade80" />
+    <text x="805" y="214" font-size="12" text-anchor="middle" fill="#166534">n</text>
+  </g>
+
+  <line x1="672" y1="240" x2="606" y2="240" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)" />
+  <text x="600" y="244" font-size="11" text-anchor="end" fill="#475569" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">older: "n−3"</text>
+  <text x="836" y="216" font-size="11" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">newer: null</text>
+
+  <text x="530" y="272" font-size="12" fill="#475569">One seek on (tree_id, revision), whatever the log's length.</text>
+  <text x="530" y="292" font-size="12" fill="#166534">The page arrives ascending whichever end it came from —</text>
+  <text x="530" y="310" font-size="12" fill="#166534">direction is which entries, never what order they arrive in.</text>
+
+  <!-- THE FOLD -->
+  <text x="40" y="368" font-size="15" fill="#0f172a">The one caller that needs all of it now walks it</text>
+  <text x="40" y="390" font-size="12" fill="#64748b">auditSnapshot follows `newer` until it is null, folding each page into the tree the previous one produced.</text>
+
+  <rect x="40" y="410" width="120" height="72" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+  <text x="100" y="437" font-size="12" text-anchor="middle" fill="#0f172a">seed</text>
+  <text x="100" y="455" font-size="11" text-anchor="middle" fill="#94a3b8">revision 0</text>
+  <text x="100" y="472" font-size="11" text-anchor="middle" fill="#94a3b8">supplied by caller</text>
+
+  <line x1="164" y1="446" x2="204" y2="446" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)" />
+
+  <rect x="208" y="410" width="150" height="72" rx="6" fill="#eff6ff" stroke="#93c5fd" />
+  <text x="283" y="434" font-size="12" text-anchor="middle" fill="#1e3a8a">page 1</text>
+  <text x="283" y="452" font-size="11" text-anchor="middle" fill="#1d4ed8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">revisions 1…100</text>
+  <text x="283" y="470" font-size="11" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">newer: "100"</text>
+
+  <line x1="362" y1="446" x2="402" y2="446" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)" />
+
+  <rect x="406" y="410" width="150" height="72" rx="6" fill="#eff6ff" stroke="#93c5fd" />
+  <text x="481" y="434" font-size="12" text-anchor="middle" fill="#1e3a8a">page 2</text>
+  <text x="481" y="452" font-size="11" text-anchor="middle" fill="#1d4ed8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">revisions 101…160</text>
+  <text x="481" y="470" font-size="11" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">newer: null</text>
+
+  <line x1="560" y1="446" x2="600" y2="446" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)" />
+
+  <rect x="604" y="410" width="150" height="72" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+  <text x="679" y="437" font-size="12" text-anchor="middle" fill="#0f172a">replayed tree</text>
+  <text x="679" y="455" font-size="11" text-anchor="middle" fill="#94a3b8">revision 160</text>
+
+  <line x1="758" y1="446" x2="798" y2="446" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow-muted)" />
+
+  <rect x="802" y="410" width="118" height="72" rx="6" fill="#f8fafc" stroke="#cbd5e1" />
+  <text x="861" y="437" font-size="12" text-anchor="middle" fill="#0f172a">head</text>
+  <text x="861" y="455" font-size="11" text-anchor="middle" fill="#94a3b8">agrees /</text>
+  <text x="861" y="471" font-size="11" text-anchor="middle" fill="#94a3b8">diverged</text>
+
+  <!-- THE READER -->
+  <text x="40" y="536" font-size="15" fill="#0f172a">And the reader it was built for</text>
+
+  <rect x="40" y="552" width="880" height="76" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+  <text x="60" y="578" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#0f172a">/history?tree=…</text>
+  <text x="60" y="600" font-size="12" fill="#475569">the newest page of what was accepted: revision, operations by node, and the provenance that put it there</text>
+  <text x="60" y="618" font-size="12" fill="#64748b">/activity answers what the runtime was <tspan font-style="italic">asked</tspan> to do — a refused proposal appears there and never here</text>
+</svg>

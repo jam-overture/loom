@@ -118,9 +118,9 @@ describe("treeSourceFromStore", () => {
     expect(rendered.ok && rendered.value.tree.revision).toBe(1)
 
     /** The log kept who asked and what interpreted it, not just the new shape. */
-    const log = await store.history(tree.treeId)
-    expect(log.ok && log.value[0]?.provenance.origin).toBe("user-instruction")
-    expect(log.ok && log.value[0]?.proposalId).toBe(proposal.proposalId)
+    const log = await store.revisions(tree.treeId)
+    expect(log.ok && log.value.revisions[0]?.provenance.origin).toBe("user-instruction")
+    expect(log.ok && log.value.revisions[0]?.proposalId).toBe(proposal.proposalId)
 
     /** And the snapshot the renderer read is still what the log produces. */
     expect(await auditSnapshot(store, tree.treeId, tree)).toEqual({
