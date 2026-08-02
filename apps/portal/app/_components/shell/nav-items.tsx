@@ -15,18 +15,15 @@ const strokeProps = {
 } as const
 
 /**
- * Three sections, each one a route that exists: the stored trees, what the
- * runtime was asked to do and what became of it (0023), and what was accepted
- * into a tree (0016).
+ * Two groups. What the runtime holds — the stored trees, and the catalogue a
+ * model is told it may build from (0013). Then the record of how they got that
+ * way: what the runtime was asked to do and what became of it (0023), what was
+ * accepted into a tree (0016), and whether the second still produces the first.
  *
- * `audit` was here from day 10 with no route behind it, and a nav is a claim about
- * what a thing can do. It comes back the day its page does: `auditSnapshot` needs
- * a seed to fold from, so only a tree whose revision 0 is still known can be
- * audited at all (0016), and a page claiming otherwise would overstate the
- * runtime.
- *
- * `primitives` came back when its page did — the catalogue a model is told it may
- * build from (0013).
+ * `audit` was here from day 10 with no route behind it, and a nav is a claim
+ * about what a thing can do. It comes back now that its page does — and the page
+ * keeps the claim honest, because a tree whose seed this host cannot reproduce
+ * is listed as unauditable rather than quietly passing (0028).
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
@@ -72,6 +69,17 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
         <svg {...strokeProps}>
           <circle cx="12" cy="12" r="9" />
           <polyline points="12 7 12 12 16 14" />
+        </svg>
+      ),
+    },
+    {
+      label: "audit",
+      href: "/audit",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h6" />
+          <path d="M8 9h8M8 13h5" />
+          <polyline points="15 18 17 20 21 16" />
         </svg>
       ),
     },

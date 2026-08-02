@@ -34,7 +34,7 @@ describe("NAV_GROUPS", () => {
 
   /** Guards the guard: a broken href must actually be detected as broken. */
   it("detects a route that does not exist", () => {
-    expect(routeExists("/audit")).toBe(false)
+    expect(routeExists("/nowhere")).toBe(false)
     expect(routeExists("/trees")).toBe(true)
   })
 })

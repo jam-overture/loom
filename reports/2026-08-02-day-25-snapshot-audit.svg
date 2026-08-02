@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6472" />
+    </marker>
+    <marker id="arrow-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a4423a" />
+    </marker>
+    <marker id="arrow-good" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f6b46" />
+    </marker>
+  </defs>
+
+  <rect width="960" height="640" fill="#ffffff" />
+
+  <text x="40" y="46" font-size="21" fill="#14181f">Is the log still the truth?</text>
+  <text x="40" y="70" font-size="13" fill="#5b6472">day 25 — /audit folds a tree&#8217;s whole log from its seed and says how it differs from the tree being served</text>
+  <line x1="40" y1="86" x2="920" y2="86" stroke="#e3e6ea" stroke-width="1" />
+
+  <!-- inputs -->
+  <text x="40" y="120" font-size="11" fill="#8a94a2" letter-spacing="0.08em">WHAT THE AUDIT NEEDS</text>
+
+  <rect x="40" y="134" width="210" height="70" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="56" y="158" font-size="13" fill="#14181f">seed — revision 0</text>
+  <text x="56" y="177" font-size="11" fill="#5b6472">from the host, re-derived</text>
+  <text x="56" y="192" font-size="11" fill="#5b6472">from source. Not stored.</text>
+
+  <rect x="40" y="222" width="210" height="70" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="56" y="246" font-size="13" fill="#14181f">the log — revisions 1..n</text>
+  <text x="56" y="265" font-size="11" fill="#5b6472">read a page at a time (0026),</text>
+  <text x="56" y="280" font-size="11" fill="#5b6472">folded forward one page each.</text>
+
+  <rect x="40" y="310" width="210" height="70" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="56" y="334" font-size="13" fill="#14181f">the snapshot — head</text>
+  <text x="56" y="353" font-size="11" fill="#5b6472">what readers are actually</text>
+  <text x="56" y="368" font-size="11" fill="#5b6472">being served today.</text>
+
+  <!-- fold -->
+  <path d="M 250 169 H 300 V 250 H 336" fill="none" stroke="#5b6472" marker-end="url(#arrow)" />
+  <path d="M 250 257 H 336" fill="none" stroke="#5b6472" marker-end="url(#arrow)" />
+
+  <rect x="340" y="222" width="150" height="70" rx="6" fill="#eef2f7" stroke="#9fb0c6" />
+  <text x="356" y="248" font-size="13" fill="#14181f">replayTree</text>
+  <text x="356" y="267" font-size="11" fill="#5b6472">applyDelta, in order,</text>
+  <text x="356" y="282" font-size="11" fill="#5b6472">from the seed.</text>
+
+  <path d="M 490 257 H 556" fill="none" stroke="#5b6472" marker-end="url(#arrow)" />
+  <path d="M 250 345 H 520 V 300 H 556" fill="none" stroke="#5b6472" marker-end="url(#arrow)" />
+
+  <rect x="560" y="222" width="160" height="86" rx="6" fill="#eef2f7" stroke="#9fb0c6" />
+  <text x="576" y="248" font-size="13" fill="#14181f">compareTrees</text>
+  <text x="576" y="267" font-size="11" fill="#5b6472">joined on node id, so a</text>
+  <text x="576" y="282" font-size="11" fill="#5b6472">moved card is one entry,</text>
+  <text x="576" y="297" font-size="11" fill="#5b6472">not a subtree twice.</text>
+
+  <!-- verdicts -->
+  <text x="760" y="120" font-size="11" fill="#8a94a2" letter-spacing="0.08em">VERDICT</text>
+
+  <path d="M 720 250 H 748 V 165 H 764" fill="none" stroke="#2f6b46" marker-end="url(#arrow-good)" />
+  <rect x="768" y="134" width="152" height="62" rx="6" fill="#f0f7f2" stroke="#8fbfa2" />
+  <text x="784" y="158" font-size="13" fill="#1d4a30">agrees</text>
+  <text x="784" y="177" font-size="11" fill="#3c6b4e">the log still produces</text>
+  <text x="784" y="190" font-size="11" fill="#3c6b4e">the served tree.</text>
+
+  <path d="M 720 265 H 764" fill="none" stroke="#a4423a" marker-end="url(#arrow-bad)" />
+  <rect x="768" y="216" width="152" height="94" rx="6" fill="#fbf1f0" stroke="#d9a49f" />
+  <text x="784" y="240" font-size="13" fill="#7a2b25">diverged</text>
+  <text x="784" y="259" font-size="11" fill="#8d3a33">and here is every node</text>
+  <text x="784" y="272" font-size="11" fill="#8d3a33">that disagrees: missing,</text>
+  <text x="784" y="285" font-size="11" fill="#8d3a33">extra, or changed in</text>
+  <text x="784" y="298" font-size="11" fill="#8d3a33">kind/type/props/text/place.</text>
+
+  <path d="M 490 292 V 356 H 764" fill="none" stroke="#a4423a" marker-end="url(#arrow-bad)" />
+  <rect x="768" y="326" width="152" height="76" rx="6" fill="#fbf1f0" stroke="#d9a49f" />
+  <text x="784" y="350" font-size="13" fill="#7a2b25">unreplayable</text>
+  <text x="784" y="369" font-size="11" fill="#8d3a33">the fold stopped. There is</text>
+  <text x="784" y="382" font-size="11" fill="#8d3a33">no second answer — so this</text>
+  <text x="784" y="395" font-size="11" fill="#8d3a33">says nothing about the tree.</text>
+
+  <!-- the refusal -->
+  <line x1="40" y1="440" x2="920" y2="440" stroke="#e3e6ea" stroke-width="1" />
+  <text x="40" y="470" font-size="11" fill="#8a94a2" letter-spacing="0.08em">AND THE CASE THAT IS NOT AUDITED AT ALL (0028)</text>
+
+  <rect x="40" y="486" width="210" height="62" rx="6" fill="#f7f8fa" stroke="#cfd5dd" stroke-dasharray="4 3" />
+  <text x="56" y="510" font-size="13" fill="#14181f">no seed known</text>
+  <text x="56" y="529" font-size="11" fill="#5b6472">this host cannot reproduce</text>
+  <text x="56" y="542" font-size="11" fill="#5b6472">the tree&#8217;s original shape.</text>
+
+  <path d="M 250 517 H 336" fill="none" stroke="#5b6472" marker-end="url(#arrow)" />
+  <rect x="340" y="486" width="230" height="62" rx="6" fill="#f7f8fa" stroke="#cfd5dd" />
+  <text x="356" y="510" font-size="13" fill="#14181f">listed, and marked unauditable</text>
+  <text x="356" y="529" font-size="11" fill="#5b6472">not hidden — a page showing only</text>
+  <text x="356" y="542" font-size="11" fill="#5b6472">the trees that pass looks like a pass.</text>
+
+  <path d="M 570 517 H 656" fill="none" stroke="#a4423a" stroke-dasharray="4 3" marker-end="url(#arrow-bad)" />
+  <rect x="660" y="486" width="260" height="62" rx="6" fill="#fbf1f0" stroke="#d9a49f" stroke-dasharray="4 3" />
+  <text x="676" y="510" font-size="13" fill="#7a2b25">what it refuses to do instead</text>
+  <text x="676" y="529" font-size="11" fill="#8d3a33">fold from the snapshot. It would compare</text>
+  <text x="676" y="542" font-size="11" fill="#8d3a33">the tree with itself and agree every time.</text>
+
+  <text x="40" y="596" font-size="11" fill="#8a94a2">The fold is unbounded in the length of the log — the cost 0016 introduced the snapshot to keep off the request path.</text>
+  <text x="40" y="614" font-size="11" fill="#8a94a2">So it runs when a reviewer names a tree, and never as a side effect of opening a page.</text>
+</svg>
