@@ -73,8 +73,22 @@ const foldLog = async (
 
 export type SnapshotAudit =
   | { readonly outcome: "agrees"; readonly revision: number }
-  /** The fold produced a different tree — the drift this whole module exists for. */
-  | { readonly outcome: "diverged"; readonly revision: number; readonly replayed: LoomTree }
+  /**
+   * The fold produced a different tree — the drift this whole module exists for.
+   *
+   * Both sides are reported, not only the replayed one. The audit read the
+   * snapshot to reach this verdict, and a caller that had to read it again to
+   * find out *how* they differ would be comparing against a head that may have
+   * moved since — so it could describe a divergence that was never the one
+   * observed. `compareTrees(stored, replayed)` turns these two into something an
+   * operator can act on.
+   */
+  | {
+      readonly outcome: "diverged"
+      readonly revision: number
+      readonly stored: LoomTree
+      readonly replayed: LoomTree
+    }
   | { readonly outcome: "unreplayable"; readonly mismatch: ReplayMismatch }
 
 /**
@@ -107,6 +121,11 @@ export const auditSnapshot = async (
   return ok(
     agrees
       ? { outcome: "agrees", revision: head.value.revision }
-      : { outcome: "diverged", revision: head.value.revision, replayed: replayed.value }
+      : {
+          outcome: "diverged",
+          revision: head.value.revision,
+          stored: head.value,
+          replayed: replayed.value,
+        }
   )
 }

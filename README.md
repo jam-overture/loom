@@ -115,7 +115,7 @@ apps/portal/
 runtime, then runs the portal's typecheck, tests and build. The portal's build is
 part of it because prerendering is what proves the shell renders.
 
-The runtime compiles to `dist/` and every entry point resolves there (0028), so
+The runtime compiles to `dist/` and every entry point resolves there (0030), so
 the portal consumes it as an ordinary Node package rather than as TypeScript
 source. `apps/portal` builds the runtime before its own typecheck and build,
 because a clean clone has no `dist` and a build order that is not written down is

@@ -4,6 +4,7 @@ import { sequentialIdFactory, type ProposalId, type TreeId } from "../ids.js"
 import { ok } from "../result.js"
 import { FIXED_INSTANT } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
+import { compareTrees } from "../tree/compare.js"
 import type { TreeDelta } from "../tree/delta.js"
 import { withRoot } from "../tree/tree.js"
 
@@ -137,6 +138,29 @@ describe("auditSnapshot", () => {
 
     expect(audit.ok && audit.value.outcome).toBe("diverged")
     expect(audit.ok && audit.value.outcome === "diverged" && audit.value.revision).toBe(1)
+  })
+
+  /**
+   * A verdict of "diverged" is not actionable on its own. The audit reports both
+   * trees it compared so the caller can say how they differ without re-reading a
+   * head that may have moved on since.
+   */
+  it("reports both trees it compared, so the divergence can be described", async () => {
+    const { tree, ids } = sampleTree()
+    const delta = removalOf(tree.treeId, ids.footer, 0)
+
+    const drifted: TreeReader = {
+      head: () => Promise.resolve(ok(withRoot(tree, tree.root))),
+      revisions: () => Promise.resolve(ok(onePage([entryOf(delta, 1)]))),
+    }
+
+    const audit = await auditSnapshot(drifted, tree.treeId, tree)
+    if (!audit.ok || audit.value.outcome !== "diverged") throw new Error("expected divergence")
+
+    expect(audit.value.stored.root).toEqual(tree.root)
+    expect(compareTrees(audit.value.stored, audit.value.replayed)).toEqual([
+      { code: "missing", nodeId: ids.footer, label: "loom.footer" },
+    ])
   })
 
   it("reports an unreplayable log rather than pretending it agrees", async () => {

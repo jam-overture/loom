@@ -1,5 +1,6 @@
 export * from "./apply.js"
 export * from "./builders.js"
+export * from "./compare.js"
 export * from "./configuration.js"
 export * from "./delta.js"
 export * from "./errors.js"

@@ -1,4 +1,4 @@
-# 0028. The package ships compiled output
+# 0030. The package ships compiled output
 
 **Status:** Accepted
 **Date:** 2026-08-02
