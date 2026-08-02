@@ -126,6 +126,21 @@ describe("commitIntent on a change the Gate accepts", () => {
   })
 
   /**
+   * A change the Gate accepted outright had no second person in the way of it,
+   * so there is nobody to name. An `answeredBy` here would read as an approval
+   * that never happened (0029).
+   */
+  it("records no approver on a change nobody had to allow", async () => {
+    const { path, intent, tree } = await harnessFor()
+    await commitIntent(path, intent)
+
+    const history = await path.store.revisions(tree.treeId)
+    if (!history.ok) throw new Error("expected a history")
+
+    expect(history.value.revisions[0] && "answeredBy" in history.value.revisions[0]).toBe(false)
+  })
+
+  /**
    * `change-applied` is about a tree in memory; `change-committed` is about the
    * log. Both, in that order, or the stream cannot distinguish "accepted" from
    * "persisted".
@@ -320,6 +335,48 @@ describe("confirmHeld", () => {
     )?.event
 
     expect(confirmed && "actor" in confirmed).toBe(false)
+  })
+
+  /**
+   * 0029: the same actor lands on the revision, so the log alone answers "who
+   * allowed this". Before it, that question needed the journal as well, and a
+   * deployment that lost its journal kept the change and lost the approver.
+   */
+  it("records who allowed it on the revision, not only in the journal", async () => {
+    const { path, held, intent } = await heldHarness()
+    await confirmHeld(path, { proposalId: held.proposalId, actor: "reviewer:ana" })
+
+    const log = await path.store.revisions(intent.treeId)
+    if (!log.ok) throw new Error("the store refused the read")
+
+    expect(log.value.revisions.map((stored) => stored.answeredBy)).toEqual(["reviewer:ana"])
+  })
+
+  /** One source, two writes — the event and the revision cannot disagree. */
+  it("puts the same actor on the revision as on the event", async () => {
+    const { path, held, intent, events } = await heldHarness()
+    await confirmHeld(path, { proposalId: held.proposalId, actor: "reviewer:bo" })
+
+    const log = await path.store.revisions(intent.treeId)
+    if (!log.ok) throw new Error("the store refused the read")
+
+    const confirmed = events.envelopes.find(
+      (envelope) => envelope.event.type === "hold-confirmed"
+    )?.event
+
+    expect(log.value.revisions[0]?.answeredBy).toBe(
+      confirmed?.type === "hold-confirmed" ? confirmed.actor : undefined
+    )
+  })
+
+  it("leaves the revision unattributed when the host names nobody", async () => {
+    const { path, held, intent } = await heldHarness()
+    await confirmHeld(path, { proposalId: held.proposalId })
+
+    const log = await path.store.revisions(intent.treeId)
+    if (!log.ok) throw new Error("the store refused the read")
+
+    expect(log.value.revisions[0] && "answeredBy" in log.value.revisions[0]).toBe(false)
   })
 
   /** Custody is a take, so the second click has nothing to answer. */

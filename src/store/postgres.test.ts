@@ -36,6 +36,68 @@ const freshDatabase = async (): Promise<LoomDatabase> => {
 
 describeTreeStoreContract("postgresTreeStore", async () => postgresTreeStore(await freshDatabase()))
 
+/**
+ * The shape `loom_revisions` had before 0029, verbatim. A deployed database is
+ * already sitting on this, and `CREATE TABLE IF NOT EXISTS` leaves an existing
+ * table alone — columns and all — so the migration's only effect on a real
+ * deployment is the `ALTER` that follows it. That is the statement worth a test:
+ * a fresh database would pass whether or not it existed.
+ */
+const PRE_0029_REVISIONS = `CREATE TABLE loom_revisions (
+  tree_id text NOT NULL,
+  revision integer NOT NULL,
+  proposal_id text NOT NULL,
+  delta jsonb NOT NULL,
+  provenance jsonb NOT NULL,
+  applied_at text NOT NULL,
+  PRIMARY KEY (tree_id, revision)
+)`
+
+describe("ensureTreeStoreSchema on a database that predates 0029", () => {
+  it("adds answered_by to a table that was created without it", async () => {
+    const db = drizzle(new PGlite())
+    await db.execute(sql.raw(PRE_0029_REVISIONS))
+
+    await ensureTreeStoreSchema(db)
+
+    const store = postgresTreeStore(db)
+    const { tree, ids } = sampleTree()
+    await store.create(tree)
+    await store.append(tree.treeId, {
+      ...appendOf(removalOf(tree, ids.footer)),
+      answeredBy: "reviewer:ana",
+    })
+
+    const log = await store.revisions(tree.treeId)
+    expect(log.ok && log.value.revisions[0]?.answeredBy).toBe("reviewer:ana")
+  })
+
+  it("leaves rows written before the column existed unattributed rather than failing to read them", async () => {
+    const db = drizzle(new PGlite())
+    await db.execute(sql.raw(PRE_0029_REVISIONS))
+    await ensureTreeStoreSchema(db)
+
+    const store = postgresTreeStore(db)
+    const { tree, ids } = sampleTree()
+    await store.create(tree)
+    /** Written through the pre-0029 path: the column exists and stays null. */
+    await store.append(tree.treeId, appendOf(removalOf(tree, ids.footer)))
+
+    const log = await store.revisions(tree.treeId)
+    if (!log.ok) throw new Error("expected a log")
+
+    expect("answeredBy" in (log.value.revisions[0] ?? {})).toBe(false)
+  })
+
+  it("is a no-op run twice, so a redeploy does not need to know whether it ran", async () => {
+    const db = drizzle(new PGlite())
+    await db.execute(sql.raw(PRE_0029_REVISIONS))
+
+    await ensureTreeStoreSchema(db)
+    await expect(ensureTreeStoreSchema(db)).resolves.toBeUndefined()
+  })
+})
+
 describe("postgresTreeStore — Postgres specifics", () => {
   it("writes the log entry and the snapshot in the same transaction", async () => {
     const db = await freshDatabase()

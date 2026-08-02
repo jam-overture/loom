@@ -44,6 +44,12 @@ export const loomRevisions = pgTable(
     provenance: jsonb("provenance").notNull(),
     /** When the runtime applied it, which is not when the row was written. */
     appliedAt: text("applied_at").notNull(),
+    /**
+     * Who allowed it, when a human had to (0029). Nullable, and null on every
+     * row written before that record: the log is append-only, so an approver
+     * nobody observed stays unrecorded rather than being invented.
+     */
+    answeredBy: text("answered_by"),
   },
   (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
 )

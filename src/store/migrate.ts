@@ -30,8 +30,16 @@ export const TREE_STORE_DDL: readonly string[] = [
     delta jsonb NOT NULL,
     provenance jsonb NOT NULL,
     applied_at text NOT NULL,
+    answered_by text,
     PRIMARY KEY (tree_id, revision)
   )`,
+  /**
+   * For a database that already has the table: `CREATE TABLE IF NOT EXISTS`
+   * silently leaves an existing table alone, columns and all, so a column added
+   * after the first deployment needs its own statement or it only ever appears
+   * on new databases. `IF NOT EXISTS` keeps it a no-op everywhere else.
+   */
+  `ALTER TABLE loom_revisions ADD COLUMN IF NOT EXISTS answered_by text`,
 ]
 
 /**
