@@ -1,6 +1,6 @@
 import type { DeltaId, NodeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
-import { assertNever, err, ok, type Result } from "../result.js"
+import { assertNever, err, mapResult, ok, type Result } from "../result.js"
 
 import { applyOperation } from "./apply.js"
 import { configurationOf } from "./configuration.js"
@@ -99,15 +99,20 @@ export const invertOperation = (
 }
 
 /**
- * The delta that undoes `delta`, targeting the revision `delta` produces. Fails
- * for the same reasons applying `delta` would fail, so a successful inversion
- * also proves the original delta is applicable.
+ * The operations that undo `delta`, without deciding which revision they apply
+ * to. Fails for the same reasons applying `delta` would fail, so a successful
+ * inversion also proves the original delta is applicable.
+ *
+ * Separate from `invertDelta` because an undo is not always applied where it
+ * was computed: reverting a revision from the log inverts against the tree that
+ * revision observed, then applies the result at head. Only the operations
+ * survive that journey — the id and the base revision belong to whichever delta
+ * eventually carries them.
  */
-export const invertDelta = (
+export const invertOperations = (
   tree: LoomTree,
-  delta: TreeDelta,
-  inverseDeltaId: DeltaId
-): Result<TreeDelta, TreeError> => {
+  delta: TreeDelta
+): Result<readonly TreeOperation[], TreeError> => {
   let state: LoomNode = tree.root
   const inverted: TreeOperation[] = []
 
@@ -122,10 +127,20 @@ export const invertDelta = (
     state = advanced.value
   }
 
-  return ok({
+  return ok(inverted)
+}
+
+/**
+ * The delta that undoes `delta`, targeting the revision `delta` produces.
+ */
+export const invertDelta = (
+  tree: LoomTree,
+  delta: TreeDelta,
+  inverseDeltaId: DeltaId
+): Result<TreeDelta, TreeError> =>
+  mapResult(invertOperations(tree, delta), (operations) => ({
     deltaId: inverseDeltaId,
     treeId: tree.treeId,
     baseRevision: tree.revision + 1,
-    operations: inverted,
-  })
-}
+    operations,
+  }))

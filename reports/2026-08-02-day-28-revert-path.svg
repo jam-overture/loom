@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#444"/>
+    </marker>
+    <marker id="arrowLight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+
+  <rect width="980" height="700" fill="#ffffff"/>
+
+  <text x="32" y="42" font-size="21" font-weight="600" fill="#111">Undoing revision 2 — the log only grows</text>
+  <text x="32" y="64" font-size="13" fill="#666">0032: a revert is planned from the log, then proposed, gated and appended like any other change.</text>
+
+  <!-- ============ the log ============ -->
+  <text x="32" y="104" font-size="13" font-weight="600" fill="#333">The log</text>
+
+  <rect x="32" y="118" width="96" height="46" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="80" y="140" font-size="13" text-anchor="middle" fill="#333">rev 0</text>
+  <text x="80" y="156" font-size="10.5" text-anchor="middle" fill="#888">seed</text>
+
+  <rect x="160" y="118" width="96" height="46" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="208" y="140" font-size="13" text-anchor="middle" fill="#333">rev 1</text>
+  <text x="208" y="156" font-size="10.5" text-anchor="middle" fill="#888">configure</text>
+
+  <rect x="288" y="118" width="96" height="46" rx="5" fill="#fdf2e2" stroke="#c98a1e" stroke-width="2"/>
+  <text x="336" y="140" font-size="13" font-weight="600" text-anchor="middle" fill="#8a5a06">rev 2</text>
+  <text x="336" y="156" font-size="10.5" text-anchor="middle" fill="#8a5a06">remove card</text>
+
+  <rect x="416" y="118" width="96" height="46" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="464" y="140" font-size="13" text-anchor="middle" fill="#333">rev 3</text>
+  <text x="464" y="156" font-size="10.5" text-anchor="middle" fill="#888">configure</text>
+
+  <rect x="544" y="118" width="96" height="46" rx="5" fill="#eef4ee" stroke="#5b8f5b" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="592" y="140" font-size="13" font-weight="600" text-anchor="middle" fill="#2f5c2f">rev 4</text>
+  <text x="592" y="156" font-size="10.5" text-anchor="middle" fill="#2f5c2f">the undo</text>
+
+  <line x1="128" y1="141" x2="158" y2="141" stroke="#8a8a8a" marker-end="url(#arrowLight)"/>
+  <line x1="256" y1="141" x2="286" y2="141" stroke="#8a8a8a" marker-end="url(#arrowLight)"/>
+  <line x1="384" y1="141" x2="414" y2="141" stroke="#8a8a8a" marker-end="url(#arrowLight)"/>
+  <line x1="512" y1="141" x2="542" y2="141" stroke="#8a8a8a" marker-end="url(#arrowLight)"/>
+
+  <text x="672" y="137" font-size="11.5" fill="#666">head was 3.</text>
+  <text x="672" y="153" font-size="11.5" fill="#666">Nothing is deleted; rev 2 stays.</text>
+
+  <!-- ============ planRevert ============ -->
+  <text x="32" y="216" font-size="13" font-weight="600" fill="#333">planRevert — one forward pass over the log</text>
+  <rect x="32" y="228" width="608" height="146" rx="6" fill="#fafafa" stroke="#ddd"/>
+
+  <rect x="52" y="248" width="164" height="50" rx="5" fill="#ffffff" stroke="#bbb"/>
+  <text x="134" y="268" font-size="12" text-anchor="middle" fill="#333">1. replay 0 → 1</text>
+  <text x="134" y="285" font-size="10.5" text-anchor="middle" fill="#888">the tree rev 2 observed</text>
+
+  <rect x="236" y="248" width="164" height="50" rx="5" fill="#ffffff" stroke="#bbb"/>
+  <text x="318" y="268" font-size="12" text-anchor="middle" fill="#333">2. invert rev 2</text>
+  <text x="318" y="285" font-size="10.5" text-anchor="middle" fill="#888">insert card, with subtree</text>
+
+  <rect x="420" y="248" width="200" height="50" rx="5" fill="#ffffff" stroke="#bbb"/>
+  <text x="520" y="268" font-size="12" text-anchor="middle" fill="#333">3. walk 3 → head</text>
+  <text x="520" y="285" font-size="10.5" text-anchor="middle" fill="#888">does anything name those nodes?</text>
+
+  <line x1="216" y1="273" x2="234" y2="273" stroke="#444" marker-end="url(#arrow)"/>
+  <line x1="400" y1="273" x2="418" y2="273" stroke="#444" marker-end="url(#arrow)"/>
+
+  <text x="52" y="326" font-size="11.5" fill="#555">Returns operations, or an obstacle that names itself:</text>
+  <text x="52" y="346" font-size="11.5" fill="#8a5a06">contested (which revisions, which nodes) · out-of-range · unreplayable · uninvertible</text>
+  <text x="52" y="364" font-size="11.5" fill="#666">Nothing is decided here. A contested revert is not proposed at all.</text>
+
+  <!-- ============ the pipeline ============ -->
+  <text x="32" y="416" font-size="13" font-weight="600" fill="#333">…then the ordinary pipeline, with no branch for &#8220;this is a revert&#8221;</text>
+
+  <rect x="32" y="430" width="908" height="140" rx="6" fill="#f6f8fa" stroke="#c8d4de"/>
+
+  <rect x="52" y="456" width="150" height="52" rx="5" fill="#eaf1f8" stroke="#4a7ba7" stroke-width="2"/>
+  <text x="127" y="477" font-size="12" font-weight="600" text-anchor="middle" fill="#22496e">revertInterpreter</text>
+  <text x="127" y="494" font-size="10.5" text-anchor="middle" fill="#3d6890">ChangeInterpreter</text>
+
+  <rect x="230" y="456" width="118" height="52" rx="5" fill="#ffffff" stroke="#9fb4c6"/>
+  <text x="289" y="477" font-size="12" text-anchor="middle" fill="#333">assess</text>
+  <text x="289" y="494" font-size="10.5" text-anchor="middle" fill="#888">stakes + reversibility</text>
+
+  <rect x="376" y="456" width="118" height="52" rx="5" fill="#ffffff" stroke="#9fb4c6"/>
+  <text x="435" y="477" font-size="12" text-anchor="middle" fill="#333">Gate</text>
+  <text x="435" y="494" font-size="10.5" text-anchor="middle" fill="#888">may refuse or hold</text>
+
+  <rect x="522" y="456" width="118" height="52" rx="5" fill="#ffffff" stroke="#9fb4c6"/>
+  <text x="581" y="477" font-size="12" text-anchor="middle" fill="#333">apply</text>
+  <text x="581" y="494" font-size="10.5" text-anchor="middle" fill="#888">applyDelta at head</text>
+
+  <rect x="668" y="456" width="118" height="52" rx="5" fill="#ffffff" stroke="#9fb4c6"/>
+  <text x="727" y="477" font-size="12" text-anchor="middle" fill="#333">append</text>
+  <text x="727" y="494" font-size="10.5" text-anchor="middle" fill="#888">store.append</text>
+
+  <rect x="814" y="456" width="106" height="52" rx="5" fill="#eef4ee" stroke="#5b8f5b" stroke-width="2"/>
+  <text x="867" y="483" font-size="12.5" font-weight="600" text-anchor="middle" fill="#2f5c2f">rev 4</text>
+  <text x="867" y="499" font-size="10.5" text-anchor="middle" fill="#2f5c2f">committed</text>
+
+  <line x1="202" y1="482" x2="228" y2="482" stroke="#444" marker-end="url(#arrow)"/>
+  <line x1="348" y1="482" x2="374" y2="482" stroke="#444" marker-end="url(#arrow)"/>
+  <line x1="494" y1="482" x2="520" y2="482" stroke="#444" marker-end="url(#arrow)"/>
+  <line x1="640" y1="482" x2="666" y2="482" stroke="#444" marker-end="url(#arrow)"/>
+  <line x1="786" y1="482" x2="812" y2="482" stroke="#444" marker-end="url(#arrow)"/>
+
+  <text x="52" y="538" font-size="11.5" fill="#555">provenance.interpreter = loom/revert · confidence = 1 (computed, not guessed) · origin and actor are the caller&#8217;s</text>
+  <text x="52" y="556" font-size="11.5" fill="#555">No repairer: there is no smaller version of an undo. A refused revert stays refused.</text>
+
+  <line x1="336" y1="374" x2="336" y2="410" stroke="#8a8a8a" stroke-dasharray="4 3"/>
+  <line x1="127" y1="410" x2="127" y2="454" stroke="#8a8a8a" stroke-dasharray="4 3" marker-end="url(#arrowLight)"/>
+  <line x1="127" y1="410" x2="336" y2="410" stroke="#8a8a8a" stroke-dasharray="4 3"/>
+  <text x="346" y="404" font-size="10.5" fill="#888">a plan, not a decision</text>
+
+  <!-- ============ what it is not ============ -->
+  <text x="32" y="614" font-size="13" font-weight="600" fill="#333">What was rejected</text>
+  <text x="32" y="636" font-size="11.5" fill="#666"><tspan fill="#a33">✕</tspan> rewind the log — makes undo the one operation that edits the record every other claim rests on</text>
+  <text x="32" y="656" font-size="11.5" fill="#666"><tspan fill="#a33">✕</tspan> apply the inverse straight to the store — restoring a checkout is a checkout going live, whatever it is called</text>
+  <text x="32" y="676" font-size="11.5" fill="#666"><tspan fill="#a33">✕</tspan> store the inverse on the revision — a derived value beside what it derives from, and nothing checking</text>
+</svg>
