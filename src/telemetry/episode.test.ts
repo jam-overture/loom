@@ -1,111 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, type IdFactory } from "../ids.js"
-import { err, ok, type Result } from "../result.js"
-import type { EditIntent } from "../runtime/intent.js"
-import type { ChangeRepairer, InterpretationError } from "../runtime/interpreter.js"
-import { defaultGatePolicy } from "../runtime/policy.js"
-import type { ProposedChange } from "../runtime/proposal.js"
-import { memoryTreeStore } from "../store/memory.js"
-import { buildIntent, buildProposal, fixedClock, scriptedInterpreter, scriptedRepairer } from "../testing/doubles.js"
+import { err, ok } from "../result.js"
+import { buildProposal, scriptedRepairer } from "../testing/doubles.js"
+import { harnessWith, proposalScript, removalDelta } from "../testing/episode-harness.js"
 import { sampleTree } from "../testing/fixtures.js"
-import type { TreeDelta } from "../tree/delta.js"
-import type { LoomTree } from "../tree/tree.js"
-import { commitIntent, confirmHeld, discardHeld, memoryHoldStore, type WritePath } from "../write/index.js"
+import { commitIntent, confirmHeld, discardHeld } from "../write/index.js"
 
-import {
-  EPISODE_RESOLUTION_KINDS,
-  episodesOf,
-  tallyEpisodes,
-  type EpisodeFold,
-} from "./episode.js"
-import type { TelemetryJournal } from "./journal.js"
-import { memoryTelemetryJournal } from "./memory.js"
-import { collectTelemetry, type TelemetryCollector } from "./sink.js"
-
-/**
- * The fold is exercised through the real runtime rather than hand-written
- * records. What §6 is for is answering "what happened to that change", and a
- * test that assembled the records itself would be answering its own question —
- * it would keep passing after the pipeline stopped narrating a stage.
- */
-
-type Harness = {
-  readonly path: WritePath
-  readonly journal: TelemetryJournal
-  readonly collector: TelemetryCollector
-  readonly tree: LoomTree
-  readonly ids: IdFactory
-  readonly intent: EditIntent
-  readonly fold: () => Promise<EpisodeFold>
-}
-
-const removalDelta = (tree: LoomTree, ids: IdFactory, nodeId: string): TreeDelta => ({
-  deltaId: ids.deltaId(),
-  treeId: tree.treeId,
-  baseRevision: 0,
-  operations: [{ op: "remove", nodeId: nodeId as never }],
-})
-
-const harnessWith = async (options: {
-  readonly script: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>
-  readonly repairer?: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => ChangeRepairer
-  readonly baseRevision?: number
-}): Promise<Harness> => {
-  const { tree } = sampleTree()
-  const ids = sequentialIdFactory("h")
-  const store = memoryTreeStore()
-  await store.create(tree)
-
-  const journal = memoryTelemetryJournal()
-  const collector = collectTelemetry(journal)
-
-  const intent = buildIntent(ids, {
-    treeId: tree.treeId,
-    baseRevision: options.baseRevision ?? 0,
-  })
-
-  const repairer = options.repairer?.(tree, ids, intent)
-
-  const path: WritePath = {
-    store,
-    holds: memoryHoldStore(),
-    runtime: {
-      interpreter: scriptedInterpreter(options.script(tree, ids, intent)),
-      policy: defaultGatePolicy,
-      events: collector.sink,
-      clock: fixedClock(),
-      idFactory: ids,
-      ...(repairer ? { repairer } : {}),
-    },
-  }
-
-  return {
-    path,
-    journal,
-    collector,
-    tree,
-    ids,
-    intent,
-    fold: async () => {
-      await collector.flush()
-      const page = await journal.read()
-
-      return episodesOf(page.ok ? page.value.records : [])
-    },
-  }
-}
-
-const proposalScript =
-  (confidence: number) =>
-  (tree: LoomTree, ids: IdFactory, intent: EditIntent): Result<ProposedChange, InterpretationError> =>
-    ok(
-      buildProposal(ids, {
-        intentId: intent.intentId,
-        delta: removalDelta(tree, ids, sampleTree().ids.footer),
-        confidence,
-      })
-    )
+import { EPISODE_RESOLUTION_KINDS, episodesOf, tallyEpisodes } from "./episode.js"
 
 describe("episodesOf", () => {
   it("folds an accepted change into one episode that ends committed", async () => {
