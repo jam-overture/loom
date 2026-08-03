@@ -1,5 +1,6 @@
 export * from "./errors.js"
 export * from "./memory.js"
 export * from "./replay.js"
+export * from "./revert.js"
 export * from "./source.js"
 export * from "./store.js"
