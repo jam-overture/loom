@@ -126,7 +126,7 @@ const revertingRuntime = (
   interpreter: ChangeInterpreter
 ): CompositionRuntime => ({
   interpreter,
-  policy: runtime.policy,
+  policySource: runtime.policySource,
   events: runtime.events,
   clock: runtime.clock,
   idFactory: runtime.idFactory,

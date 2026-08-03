@@ -4,6 +4,7 @@ import { nodeIdSchema, sequentialIdFactory } from "../ids.js"
 import { err, type Result } from "../result.js"
 import { gate } from "../runtime/gate.js"
 import { catalogueOf } from "../sdk/catalogue.js"
+import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
 import { composeChange } from "../runtime/pipeline.js"
 import { assessChange } from "../runtime/assessment.js"
@@ -364,7 +365,7 @@ describe("modelInterpreter — through the composition runtime", () => {
         idFactory,
         clock: fixedClock(),
       }),
-      policy: defaultGatePolicy,
+      policySource: fixedPolicy(defaultGatePolicy),
       events,
       clock: fixedClock(),
       idFactory,
@@ -379,6 +380,7 @@ describe("modelInterpreter — through the composition runtime", () => {
     expect(outcome.kind).toBe("applied")
     expect(events.types()).toEqual([
       "intent-received",
+      "policy-resolved",
       "change-proposed",
       "change-assessed",
       "disposition-decided",
@@ -398,7 +400,7 @@ describe("modelInterpreter — through the composition runtime", () => {
           idFactory,
           clock: fixedClock(),
         }),
-        policy: defaultGatePolicy,
+        policySource: fixedPolicy(defaultGatePolicy),
         events,
         clock: fixedClock(),
         idFactory,
@@ -408,7 +410,11 @@ describe("modelInterpreter — through the composition runtime", () => {
     )
 
     expect(outcome.kind).toBe("not-interpreted")
-    expect(events.types()).toEqual(["intent-received", "interpretation-failed"])
+    expect(events.types()).toEqual([
+      "intent-received",
+      "policy-resolved",
+      "interpretation-failed",
+    ])
   })
 
   it("lets the Gate judge a model proposal on the same terms as any other", async () => {
@@ -443,6 +449,7 @@ describe("modelInterpreter — repairing a refusal", () => {
       stakes: "critical",
       reversible: true,
       confidence: 0.9,
+      policyId: "default",
     },
   })
 

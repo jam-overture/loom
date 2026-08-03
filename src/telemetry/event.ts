@@ -135,6 +135,11 @@ export type AssessmentSummary = {
 export const telemetryEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("intent-received"), intent: intentSummarySchema }),
   z.object({
+    type: z.literal("policy-resolved"),
+    intentId: intentIdSchema,
+    policyId: z.string().min(1),
+  }),
+  z.object({
     type: z.literal("interpretation-failed"),
     intentId: intentIdSchema,
     failure: telemetryFailureSchema,
@@ -206,6 +211,7 @@ export const telemetryEventSchema = z.discriminatedUnion("type", [
 
 export type TelemetryEvent =
   | { readonly type: "intent-received"; readonly intent: IntentSummary }
+  | { readonly type: "policy-resolved"; readonly intentId: IntentId; readonly policyId: string }
   | {
       readonly type: "interpretation-failed"
       readonly intentId: IntentId
@@ -305,6 +311,19 @@ const narrowEvent = (event: RuntimeEvent): TelemetryEvent => {
   switch (event.type) {
     case "intent-received":
       return { type: "intent-received", intent: summariseIntent(event.intent) }
+
+    /**
+     * The name crosses; the values do not. A policy is host configuration that
+     * changes rarely and is versioned where the host keeps it, so copying it
+     * onto every change would store one document a million times to answer a
+     * question the name already answers.
+     *
+     * That is only true while a name identifies content, which is the contract
+     * `GatePolicy.policyId` states: a host that edits a policy renames it, or
+     * the records that name it are describing something that no longer exists.
+     */
+    case "policy-resolved":
+      return { type: "policy-resolved", intentId: event.intentId, policyId: event.policy.policyId }
 
     case "interpretation-failed":
       return {
@@ -437,6 +456,7 @@ export const proposalIdOf = (event: TelemetryEvent): ProposalId | undefined => {
     case "commit-failed":
       return event.proposalId
     case "intent-received":
+    case "policy-resolved":
     case "interpretation-failed":
     case "intent-not-writable":
       return undefined
@@ -450,6 +470,7 @@ export const intentIdOf = (event: TelemetryEvent): IntentId | undefined => {
   switch (event.type) {
     case "intent-received":
       return event.intent.intentId
+    case "policy-resolved":
     case "interpretation-failed":
     case "intent-not-writable":
       return event.intentId

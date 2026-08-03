@@ -51,6 +51,7 @@ src/
 │   ├── stakes.ts        # How much damage, as named factors
 │   ├── reversibility.ts # Whether it can be taken back, via the inverse
 │   ├── policy.ts        # GatePolicy — the knobs, host and structural
+│   ├── policy-source.ts # Which policy judges a given change
 │   ├── gate.ts          # The pure decision function
 │   ├── events.ts        # RuntimeEvent, EventSink, Clock
 │   └── pipeline.ts      # composeChange / confirmChange

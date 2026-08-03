@@ -90,3 +90,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0030](0030-the-package-ships-compiled-output.md) | The package ships compiled output | Accepted | §4 → §5 |
 | [0031](0031-calibration-is-a-reader-not-a-controller.md) | Calibration is a reader, not a controller | Accepted | §6 → §2 |
 | [0032](0032-an-undo-is-a-proposal-not-a-rewind.md) | An undo is a proposal, not a rewind | Accepted | §2 → §5 |
+| [0033](0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md) | The policy is resolved per change, and named on the verdict | Accepted | §2 → §6 |

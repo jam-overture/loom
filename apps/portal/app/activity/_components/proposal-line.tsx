@@ -48,7 +48,8 @@ export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode 
     {proposal.disposition && (
       <p className="text-ink-muted text-2xs">
         <span className="font-mono">{proposal.disposition.kind}</span> —{" "}
-        {proposal.disposition.reason.detail}
+        {proposal.disposition.reason.detail}{" "}
+        <span className="font-mono">({proposal.disposition.policyId})</span>
       </p>
     )}
 

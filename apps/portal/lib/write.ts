@@ -1,4 +1,4 @@
-import { defaultGatePolicy, randomIdFactory, systemClock } from "@loom/runtime"
+import { defaultGatePolicy, fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
 import { collectTelemetry } from "@loom/runtime/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
 
@@ -49,7 +49,7 @@ export const beginWrite = (): PortalWrite => {
       holds: portalHolds,
       runtime: {
         interpreter: portalInterpreter,
-        policy: defaultGatePolicy,
+        policySource: fixedPolicy(defaultGatePolicy),
         events: collector.sink,
         clock: systemClock,
         idFactory: randomIdFactory,

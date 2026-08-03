@@ -53,6 +53,7 @@ export const sampleEpisode = (namespace = "j"): readonly TelemetryRecord[] => {
         stakes: "low",
         reversible: true,
         confidence: 0.9,
+        policyId: "default",
       },
     }),
     envelope({ type: "change-committed", proposalId: proposal.proposalId, revision: 1 }),

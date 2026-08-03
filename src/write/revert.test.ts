@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type NodeId } from "../ids.js"
 import type { Provenance } from "../runtime/proposal.js"
+import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "../runtime/policy.js"
 import { memoryTreeStore } from "../store/memory.js"
 import { planRevert } from "../store/revert.js"
@@ -73,7 +74,7 @@ const harnessFor = async (policy: GatePolicy = defaultGatePolicy): Promise<Harne
       runtime: {
         /** Never called: every test here goes through the revert interpreter. */
         interpreter: { interpret: () => Promise.reject(new Error("interpreted a revert")) },
-        policy,
+        policySource: fixedPolicy(policy),
         events,
         clock: fixedClock(),
         idFactory: spare,
@@ -172,6 +173,7 @@ describe("revertRevision applies an undo through the pipeline", () => {
 
     expect(harness.events.types()).toEqual([
       "intent-received",
+      "policy-resolved",
       "change-proposed",
       "change-assessed",
       "disposition-decided",

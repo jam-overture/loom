@@ -2,6 +2,7 @@ import { sequentialIdFactory, type IdFactory } from "../ids.js"
 import { ok, type Result } from "../result.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { ChangeRepairer, InterpretationError } from "../runtime/interpreter.js"
+import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { memoryTreeStore } from "../store/memory.js"
@@ -73,7 +74,7 @@ export const harnessWith = async (options: {
     holds: memoryHoldStore(),
     runtime: {
       interpreter: scriptedInterpreter(options.script(tree, ids, intent)),
-      policy: defaultGatePolicy,
+      policySource: fixedPolicy(defaultGatePolicy),
       events: collector.sink,
       clock: fixedClock(),
       idFactory: ids,

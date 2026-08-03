@@ -10,6 +10,7 @@ import type { Clock, EventSink, RuntimeEvent } from "./events.js"
 import { gate } from "./gate.js"
 import type { EditIntent } from "./intent.js"
 import type { ChangeInterpreter, ChangeRepairer, InterpretationError } from "./interpreter.js"
+import type { PolicySource } from "./policy-source.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 
@@ -25,7 +26,12 @@ import type { ProposedChange } from "./proposal.js"
 
 export type CompositionRuntime = {
   readonly interpreter: ChangeInterpreter
-  readonly policy: GatePolicy
+  /**
+   * Which policy judges a given change. A source rather than a policy, because
+   * one runtime may serve trees that do not deserve the same latitude; a host
+   * with one policy says so with `fixedPolicy`.
+   */
+  readonly policySource: PolicySource
   readonly events: EventSink
   readonly clock: Clock
   readonly idFactory: IdFactory
@@ -138,12 +144,13 @@ type Judgement =
 const judgeProposal = (
   runtime: CompositionRuntime,
   tree: LoomTree,
-  proposal: ProposedChange
+  proposal: ProposedChange,
+  policy: GatePolicy
 ): Judgement => {
   const emit = emitter(runtime, tree)
   emit({ type: "change-proposed", proposal })
 
-  const assessed = assessChange(tree, proposal, runtime.policy, runtime.idFactory.deltaId())
+  const assessed = assessChange(tree, proposal, policy, runtime.idFactory.deltaId())
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })
 
@@ -153,7 +160,7 @@ const judgeProposal = (
   const assessment = assessed.value
   emit({ type: "change-assessed", assessment })
 
-  const disposition = gate(assessment, runtime.policy)
+  const disposition = gate(assessment, policy)
   emit({ type: "disposition-decided", proposalId: proposal.proposalId, disposition })
 
   return { kind: "judged", assessment, disposition }
@@ -174,6 +181,7 @@ const attemptRepair = async (
   runtime: CompositionRuntime,
   tree: LoomTree,
   intent: EditIntent,
+  policy: GatePolicy,
   repairer: ChangeRepairer,
   refusal: { readonly assessment: ChangeAssessment; readonly disposition: Disposition }
 ): Promise<CompositionOutcome> => {
@@ -194,10 +202,12 @@ const attemptRepair = async (
     return { kind: "rejected", assessment: refusal.assessment, disposition }
   }
 
-  const judged = judgeProposal(runtime, tree, {
-    ...repaired.value,
-    repairOf: refused.proposalId,
-  })
+  const judged = judgeProposal(
+    runtime,
+    tree,
+    { ...repaired.value, repairOf: refused.proposalId },
+    policy
+  )
 
   return judged.kind === "not-applicable"
     ? judged
@@ -212,6 +222,15 @@ export const composeChange = async (
   const emit = emitter(runtime, tree)
   emit({ type: "intent-received", intent })
 
+  /**
+   * Resolved once, before interpretation, and used for every judgment this
+   * intent produces — including a repair's. Resolving again per proposal would
+   * let a repair be judged by a different policy than the proposal it replaces,
+   * which is the one comparison 0006 exists to make.
+   */
+  const policy = runtime.policySource.resolve({ tree, intent })
+  emit({ type: "policy-resolved", intentId: intent.intentId, policy })
+
   const interpreted = await runtime.interpreter.interpret(intent, tree)
   if (!interpreted.ok) {
     emit({ type: "interpretation-failed", intent, error: interpreted.error })
@@ -219,12 +238,12 @@ export const composeChange = async (
     return { kind: "not-interpreted", error: interpreted.error }
   }
 
-  const judged = judgeProposal(runtime, tree, interpreted.value)
+  const judged = judgeProposal(runtime, tree, interpreted.value, policy)
   if (judged.kind === "not-applicable") return judged
 
   const { repairer } = runtime
   if (judged.disposition.kind === "rejected" && repairer) {
-    return attemptRepair(runtime, tree, intent, repairer, judged)
+    return attemptRepair(runtime, tree, intent, policy, repairer, judged)
   }
 
   return dispositionOutcome(runtime, tree, judged.assessment, judged.disposition)
@@ -251,11 +270,22 @@ export type ConfirmationOutcome = Extract<
 export const confirmChange = (
   runtime: CompositionRuntime,
   tree: LoomTree,
-  proposal: ProposedChange
+  proposal: ProposedChange,
+  intent: EditIntent
 ): ConfirmationOutcome => {
   const emit = emitter(runtime, tree)
 
-  const assessed = assessChange(tree, proposal, runtime.policy, runtime.idFactory.deltaId())
+  /**
+   * Resolved again rather than carried over from the hold, for the same reason
+   * the assessment is recomputed: the second look is a look at things as they
+   * are now. A host that narrowed a policy while a proposal sat in the queue
+   * meant that for the queue too, and the disposition records which one
+   * actually decided.
+   */
+  const policy = runtime.policySource.resolve({ tree, intent })
+  emit({ type: "policy-resolved", intentId: intent.intentId, policy })
+
+  const assessed = assessChange(tree, proposal, policy, runtime.idFactory.deltaId())
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })
 
@@ -265,7 +295,7 @@ export const confirmChange = (
   const assessment = assessed.value
   emit({ type: "change-assessed", assessment })
 
-  const disposition = gate(assessment, runtime.policy)
+  const disposition = gate(assessment, policy)
   emit({ type: "disposition-decided", proposalId: proposal.proposalId, disposition })
 
   if (disposition.kind === "rejected") {

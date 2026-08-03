@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="760" viewBox="0 0 980 760" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#444"/>
+    </marker>
+    <marker id="arrowLight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8a8a"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f6fa8"/>
+    </marker>
+  </defs>
+
+  <rect width="980" height="760" fill="#ffffff"/>
+
+  <text x="32" y="42" font-size="21" font-weight="600" fill="#111">Where the policy enters, and what the verdict remembers</text>
+  <text x="32" y="64" font-size="13" fill="#666">0033: resolved once per intent, before interpretation — and stamped onto every disposition the Gate returns.</text>
+
+  <!-- ================= BEFORE ================= -->
+  <text x="32" y="108" font-size="13" font-weight="600" fill="#333">Before — one policy for the life of the runtime</text>
+
+  <rect x="32" y="124" width="150" height="52" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="107" y="147" font-size="12.5" text-anchor="middle" fill="#333">CompositionRuntime</text>
+  <text x="107" y="164" font-size="10.5" text-anchor="middle" font-family="monospace" fill="#888">policy: GatePolicy</text>
+
+  <line x1="182" y1="150" x2="238" y2="150" stroke="#8a8a8a" marker-end="url(#arrowLight)"/>
+
+  <rect x="240" y="124" width="104" height="52" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="292" y="154" font-size="12.5" text-anchor="middle" fill="#333">gate()</text>
+
+  <line x1="344" y1="150" x2="400" y2="150" stroke="#8a8a8a" marker-end="url(#arrowLight)"/>
+
+  <rect x="402" y="118" width="196" height="64" rx="5" fill="#f9f9f9" stroke="#bbb"/>
+  <text x="500" y="140" font-size="12.5" text-anchor="middle" fill="#333">Disposition</text>
+  <text x="500" y="157" font-size="10.5" text-anchor="middle" font-family="monospace" fill="#888">kind · stakes · reversible</text>
+  <text x="500" y="172" font-size="10.5" text-anchor="middle" font-family="monospace" fill="#888">confidence</text>
+
+  <text x="626" y="140" font-size="11.5" fill="#a03535">two tenants share one gate setting;</text>
+  <text x="626" y="157" font-size="11.5" fill="#a03535">a stored verdict cannot say which.</text>
+
+  <line x1="32" y1="212" x2="948" y2="212" stroke="#e2e2e2"/>
+
+  <!-- ================= AFTER ================= -->
+  <text x="32" y="248" font-size="13" font-weight="600" fill="#333">After — resolved from the ask, before anything is interpreted</text>
+
+  <!-- lane labels -->
+  <text x="32" y="292" font-size="10.5" font-weight="600" fill="#999">1. THE ASK</text>
+  <text x="32" y="404" font-size="10.5" font-weight="600" fill="#999">2. RESOLVE</text>
+  <text x="32" y="516" font-size="10.5" font-weight="600" fill="#999">3. INTERPRET</text>
+  <text x="32" y="628" font-size="10.5" font-weight="600" fill="#999">4. JUDGE</text>
+
+  <!-- 1. intent + tree -->
+  <rect x="150" y="266" width="150" height="46" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="225" y="288" font-size="12.5" text-anchor="middle" fill="#333">EditIntent</text>
+  <text x="225" y="304" font-size="10.5" text-anchor="middle" fill="#888">who asked, of what</text>
+
+  <rect x="320" y="266" width="150" height="46" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="395" y="288" font-size="12.5" text-anchor="middle" fill="#333">LoomTree</text>
+  <text x="395" y="304" font-size="10.5" text-anchor="middle" fill="#888">at head</text>
+
+  <line x1="225" y1="312" x2="225" y2="368" stroke="#2f6fa8" marker-end="url(#arrowBlue)"/>
+  <line x1="395" y1="312" x2="290" y2="368" stroke="#2f6fa8" marker-end="url(#arrowBlue)"/>
+
+  <!-- 2. policy source -->
+  <rect x="150" y="370" width="320" height="60" rx="5" fill="#eaf2f9" stroke="#2f6fa8" stroke-width="2"/>
+  <text x="310" y="392" font-size="12.5" font-weight="600" text-anchor="middle" fill="#1d4f7c">PolicySource.resolve({ tree, intent })</text>
+  <text x="310" y="410" font-size="10.5" text-anchor="middle" fill="#2f6fa8">synchronous · pure · never sees the proposal</text>
+  <text x="310" y="424" font-size="10.5" text-anchor="middle" font-family="monospace" fill="#2f6fa8">→ GatePolicy { policyId: "storefront", … }</text>
+
+  <!-- emitted event -->
+  <line x1="470" y1="400" x2="546" y2="400" stroke="#2f6fa8" marker-end="url(#arrowBlue)"/>
+  <rect x="548" y="376" width="230" height="48" rx="5" fill="#ffffff" stroke="#2f6fa8" stroke-dasharray="4 3"/>
+  <text x="663" y="396" font-size="11.5" text-anchor="middle" font-family="monospace" fill="#1d4f7c">policy-resolved</text>
+  <text x="663" y="412" font-size="10" text-anchor="middle" fill="#2f6fa8">whole policy in-request · name stored</text>
+
+  <!-- 3. interpret -->
+  <line x1="310" y1="430" x2="310" y2="480" stroke="#444" marker-end="url(#arrow)"/>
+  <rect x="150" y="482" width="320" height="52" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="310" y="504" font-size="12.5" text-anchor="middle" fill="#333">ChangeInterpreter → ProposedChange</text>
+  <text x="310" y="521" font-size="10.5" text-anchor="middle" fill="#888">the policy is already fixed by the time this runs</text>
+
+  <!-- one-way barrier note -->
+  <path d="M 490 508 L 810 508" stroke="#a03535" stroke-dasharray="5 4"/>
+  <text x="812" y="500" font-size="11" fill="#a03535">the proposal never</text>
+  <text x="812" y="515" font-size="11" fill="#a03535">reaches the source</text>
+  <path d="M 640 500 L 640 440" stroke="#a03535" stroke-dasharray="5 4"/>
+  <circle cx="640" cy="470" r="9" fill="#ffffff" stroke="#a03535" stroke-width="1.5"/>
+  <line x1="634" y1="464" x2="646" y2="476" stroke="#a03535" stroke-width="1.5"/>
+  <line x1="646" y1="464" x2="634" y2="476" stroke="#a03535" stroke-width="1.5"/>
+
+  <!-- 4. gate -->
+  <line x1="310" y1="534" x2="310" y2="592" stroke="#444" marker-end="url(#arrow)"/>
+  <rect x="150" y="594" width="320" height="52" rx="5" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="310" y="616" font-size="12.5" text-anchor="middle" font-family="monospace" fill="#333">gate(assessment, policy)</text>
+  <text x="310" y="633" font-size="10.5" text-anchor="middle" fill="#888">still a pure function of exactly two things (0002)</text>
+
+  <line x1="470" y1="620" x2="546" y2="620" stroke="#444" marker-end="url(#arrow)"/>
+
+  <rect x="548" y="586" width="230" height="82" rx="5" fill="#eef4ee" stroke="#5b8f5b" stroke-width="2"/>
+  <text x="663" y="608" font-size="12.5" text-anchor="middle" fill="#2f5c2f">Disposition</text>
+  <text x="663" y="625" font-size="10.5" text-anchor="middle" font-family="monospace" fill="#4a7a4a">kind · stakes · reversible</text>
+  <text x="663" y="640" font-size="10.5" text-anchor="middle" font-family="monospace" fill="#4a7a4a">confidence</text>
+  <text x="663" y="658" font-size="11" text-anchor="middle" font-family="monospace" font-weight="600" fill="#2f5c2f">policyId: "storefront"</text>
+
+  <text x="800" y="612" font-size="11.5" fill="#555">stamped inside gate(),</text>
+  <text x="800" y="628" font-size="11.5" fill="#555">never by the caller</text>
+
+  <!-- repair / confirm note -->
+  <rect x="32" y="690" width="916" height="48" rx="5" fill="#fafafa" stroke="#ddd"/>
+  <text x="48" y="710" font-size="11.5" fill="#555"><tspan font-weight="600">Resolved once per intent.</tspan> A repair (0006) is judged by the same policy as the proposal it replaces — resolving twice would let the second attempt meet an easier bar.</text>
+  <text x="48" y="728" font-size="11.5" fill="#555"><tspan font-weight="600">confirmChange resolves again.</tspan> The second look is a look at things as they stand now, the same rule the recomputed assessment already follows.</text>
+</svg>

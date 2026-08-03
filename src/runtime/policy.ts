@@ -16,6 +16,19 @@ import { stakeLevelSchema, type StakeLevel } from "./stake-level.js"
  */
 
 export const gatePolicySchema = z.object({
+  /**
+   * What a disposition says when asked which policy judged the change.
+   *
+   * Host-declared rather than runtime-minted, like `Provenance.interpreter`:
+   * the runtime cannot know what distinguishes a host's two policies, and a
+   * name the host chose is one it can find again in its own configuration.
+   *
+   * The contract that makes it worth recording: **a name identifies content**.
+   * A host that changes what a policy contains gives it a new name, because
+   * every disposition already written under the old one claims to have been
+   * judged by what that name meant then.
+   */
+  policyId: z.string().min(1).default("default"),
   /** Touching one of these elevates the change. Host vocabulary. */
   protectedPrimitiveTypes: z.array(primitiveTypeSchema).default([]),
   /**
@@ -61,6 +74,7 @@ export const gatePolicySchema = z.object({
 })
 
 export type GatePolicy = {
+  readonly policyId: string
   readonly protectedPrimitiveTypes: readonly PrimitiveType[]
   readonly outOfTreeEffectTypes: readonly PrimitiveType[]
   readonly protectedPropKeys: readonly string[]

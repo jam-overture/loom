@@ -21,6 +21,7 @@ type GateRule = (assessment: ChangeAssessment, policy: GatePolicy) => Dispositio
 
 const decide = (
   assessment: ChangeAssessment,
+  policy: GatePolicy,
   kind: Disposition["kind"],
   reason: DispositionReason
 ): Disposition => ({
@@ -29,6 +30,13 @@ const decide = (
   stakes: assessment.stakes.level,
   reversible: assessment.reversibility.reversible,
   confidence: assessment.proposal.provenance.confidence,
+  /**
+   * The one place a judgment is attributed to the policy that made it. Stamped
+   * here rather than by the caller because the caller could stamp a different
+   * one than the rules consulted, and a disposition naming a policy it was not
+   * decided under is worse than one naming none.
+   */
+  policyId: policy.policyId,
 })
 
 /** Too unsure to act on at all — asking the user to confirm a guess is noise. */
@@ -36,7 +44,7 @@ const rejectBelowConfidenceFloor: GateRule = (assessment, policy) => {
   const { confidence } = assessment.proposal.provenance
   if (confidence >= policy.confidenceFloor) return null
 
-  return decide(assessment, "rejected", {
+  return decide(assessment, policy, "rejected", {
     code: "confidence-below-floor",
     detail: `interpreter confidence ${confidence} is below the floor of ${policy.confidenceFloor}`,
   })
@@ -48,19 +56,19 @@ const rejectAtRefusalFloor: GateRule = (assessment, policy) => {
 
   const detail = assessment.stakes.factors.map((factor) => factor.detail).join("; ")
 
-  return decide(assessment, "rejected", {
+  return decide(assessment, policy, "rejected", {
     code: "stakes-at-refusal-floor",
     detail: detail || `stakes reached ${policy.refusalFloor}`,
   })
 }
 
 /** Undo would not undo reality, so a human decides — regardless of how small it looks. */
-const confirmIrreversible: GateRule = (assessment) => {
+const confirmIrreversible: GateRule = (assessment, policy) => {
   if (assessment.reversibility.reversible) return null
 
   const detail = assessment.reversibility.reasons.map((reason) => reason.code).join("; ")
 
-  return decide(assessment, "requires-confirmation", {
+  return decide(assessment, policy, "requires-confirmation", {
     code: "irreversible",
     detail: `cannot be undone cleanly: ${detail}`,
   })
@@ -72,7 +80,7 @@ const confirmAboveCeiling: GateRule = (assessment, policy) => {
 
   const detail = assessment.stakes.factors.map((factor) => factor.detail).join("; ")
 
-  return decide(assessment, "requires-confirmation", {
+  return decide(assessment, policy, "requires-confirmation", {
     code: "stakes-above-ceiling",
     detail:
       detail ||
@@ -84,15 +92,15 @@ const confirmBelowMinimumConfidence: GateRule = (assessment, policy) => {
   const { confidence } = assessment.proposal.provenance
   if (confidence >= policy.minimumConfidence) return null
 
-  return decide(assessment, "requires-confirmation", {
+  return decide(assessment, policy, "requires-confirmation", {
     code: "confidence-below-minimum",
     detail: `interpreter confidence ${confidence} is below ${policy.minimumConfidence}`,
   })
 }
 
 /** Nothing objected, so the change goes through. */
-const accept = (assessment: ChangeAssessment): Disposition =>
-  decide(assessment, "accepted", {
+const accept = (assessment: ChangeAssessment, policy: GatePolicy): Disposition =>
+  decide(assessment, policy, "accepted", {
     code: "within-policy",
     detail: "reversible, within the stakes ceiling, and confidently interpreted",
   })
@@ -111,5 +119,5 @@ export const gate = (assessment: ChangeAssessment, policy: GatePolicy): Disposit
     if (escalation) return escalation
   }
 
-  return accept(assessment)
+  return accept(assessment, policy)
 }

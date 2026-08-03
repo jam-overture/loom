@@ -92,6 +92,7 @@ describe("the catalogue block", () => {
         stakes: "critical",
         reversible: true,
         confidence: 0.9,
+        policyId: "default",
       },
     }
 
@@ -154,6 +155,7 @@ describe("buildRepairMessage", () => {
         stakes: "critical",
         reversible: true,
         confidence: 0.9,
+        policyId: "default",
       },
     }
 
