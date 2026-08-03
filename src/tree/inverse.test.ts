@@ -6,7 +6,7 @@ import { sampleTree } from "../testing/fixtures.js"
 import { applyDelta } from "./apply.js"
 import { buildElement, buildText } from "./builders.js"
 import type { TreeDelta, TreeOperation } from "./delta.js"
-import { invertDelta } from "./inverse.js"
+import { invertDelta, invertOperations } from "./inverse.js"
 import { findNode } from "./navigation.js"
 import type { LoomTree } from "./tree.js"
 
@@ -193,5 +193,37 @@ describe("invertDelta failures", () => {
 
     const inverse = invertDelta(tree, delta, spare.deltaId())
     expect(!inverse.ok && inverse.error.code).toBe("root-not-detachable")
+  })
+})
+
+describe("invertOperations", () => {
+  /**
+   * The two share a walk, and the wrapper is what decides where the undo lands.
+   * Reverting a revision from the log needs the operations without that
+   * decision, so the split has to leave the operations identical.
+   */
+  it("returns exactly the operations invertDelta wraps", () => {
+    const { tree, ids } = sampleTree()
+    const delta = deltaOf(tree.treeId, tree.revision, [
+      { op: "remove", nodeId: ids.card },
+      { op: "configure", nodeId: ids.page, set: { title: "Away" }, unset: [] },
+    ])
+
+    const operations = invertOperations(tree, delta)
+    const inverse = invertDelta(tree, delta, spare.deltaId())
+
+    expect(operations.ok && inverse.ok && operations.value).toEqual(
+      inverse.ok ? inverse.value.operations : undefined
+    )
+  })
+
+  it("fails for the same reason the wrapper does", () => {
+    const { tree } = sampleTree()
+    const delta = deltaOf(tree.treeId, tree.revision, [
+      { op: "configure", nodeId: spare.nodeId(), set: { a: 1 }, unset: [] },
+    ])
+
+    const operations = invertOperations(tree, delta)
+    expect(!operations.ok && operations.error.code).toBe("node-not-found")
   })
 })
