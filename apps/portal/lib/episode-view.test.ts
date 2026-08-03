@@ -158,6 +158,7 @@ const answered = (
   provenance: {
     origin: "user-instruction",
     interpreter: "claude-test-1",
+    authoredBy: "model",
     confidence: 0.5,
     interpretedAt: "2026-07-31T00:00:00.000Z",
   },

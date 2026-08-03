@@ -204,6 +204,35 @@ const attemptRepair = async (
     : dispositionOutcome(runtime, tree, judged.assessment, judged.disposition)
 }
 
+/**
+ * Composes from a proposal the caller already holds, skipping interpretation.
+ *
+ * A revert is what this exists for: the change is computed rather than
+ * inferred, so there is nothing for a model to say. Everything after that point
+ * is deliberately identical — the same Gate, the same policy, the same events —
+ * because a change that skipped judgment on the grounds of being "only an undo"
+ * would be the one unreviewed write in a system whose entire claim is that
+ * there are none.
+ *
+ * No repair attempt. 0006 gives a refused proposal one more try *from the
+ * interpreter*, and there is no interpreter here; a refused computed change is
+ * the answer, not the first half of a negotiation.
+ */
+export const composeProposal = (
+  runtime: CompositionRuntime,
+  tree: LoomTree,
+  intent: EditIntent,
+  proposal: ProposedChange
+): CompositionOutcome => {
+  emitter(runtime, tree)({ type: "intent-received", intent })
+
+  const judged = judgeProposal(runtime, tree, proposal)
+
+  return judged.kind === "not-applicable"
+    ? judged
+    : dispositionOutcome(runtime, tree, judged.assessment, judged.disposition)
+}
+
 export const composeChange = async (
   runtime: CompositionRuntime,
   tree: LoomTree,

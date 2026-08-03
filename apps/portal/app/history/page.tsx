@@ -63,6 +63,14 @@ const HistoryPage = async ({
   const newestFirst = [...page.value.revisions].reverse()
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
+  /**
+   * Only the newest page can hold the latest revision, and only when it was
+   * taken from the newest end. Paging back must not offer undo on whatever
+   * happens to sit at the top of an older page (0032).
+   */
+  const head = await portalStore.head(scope.data)
+  const latestRevision = head.ok ? head.value.revision : undefined
+
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -85,7 +93,11 @@ const HistoryPage = async ({
       ) : (
         <ul className="flex flex-col gap-3">
           {newestFirst.map((stored) => (
-            <RevisionRow key={stored.revision} stored={stored} />
+            <RevisionRow
+              key={stored.revision}
+              stored={stored}
+              isLatest={stored.revision === latestRevision}
+            />
           ))}
         </ul>
       )}

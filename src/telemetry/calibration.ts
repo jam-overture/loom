@@ -74,6 +74,13 @@ export type CalibrationReport = {
    * changed without saying so.
    */
   readonly unattributed: number
+  /**
+   * Proposals the runtime authored rather than a model — a revert, say. Out of
+   * scope rather than unjudged: they carry a confidence because every proposal
+   * does, but nobody graded it, so scoring them would measure the constant the
+   * runtime happened to stamp.
+   */
+  readonly runtimeAuthored: number
 }
 
 type Tally = { judged: number; survived: number; confidenceSum: number }
@@ -131,8 +138,15 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
     if (verdict === "survived") tally.survived += 1
   }
 
+  let runtimeAuthored = 0
+
   for (const episode of fold.episodes) {
     for (const proposal of episode.proposals) {
+      if (proposal.provenance.authoredBy !== "model") {
+        runtimeAuthored += 1
+        continue
+      }
+
       const verdict = verdictOf(proposal)
 
       if (verdict !== "survived" && verdict !== "rejected") {
@@ -154,5 +168,6 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
     })),
     unjudged,
     unattributed: fold.unattributed.length,
+    runtimeAuthored,
   }
 }

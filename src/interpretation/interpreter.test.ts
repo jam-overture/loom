@@ -170,6 +170,8 @@ describe("modelInterpreter — a proposal it understood", () => {
     expect(interpreted.value.provenance).toEqual({
       origin: "user-instruction",
       interpreter: "claude-test-1",
+      /** A model wrote this one, which is what keeps it in calibration's denominators (0032). */
+      authoredBy: "model",
       promptHash: expect.stringMatching(/^[0-9a-f]{64}$/),
       confidence: 0.86,
       interpretedAt: FIXED_INSTANT,

@@ -4,15 +4,28 @@ import type { Disposition } from "../runtime/disposition.js"
 import type { Clock, EventSink, RuntimeEvent } from "../runtime/events.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { InterpretationError } from "../runtime/interpreter.js"
-import { composeChange, confirmChange, type CompositionRuntime } from "../runtime/pipeline.js"
+import {
+  composeChange,
+  composeProposal,
+  confirmChange,
+  type CompositionOutcome,
+  type CompositionRuntime,
+} from "../runtime/pipeline.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { describeStoreError, type StoreError } from "../store/errors.js"
+import { replayBefore } from "../store/replay.js"
 import type { TreeStore } from "../store/store.js"
 import type { TreeDelta } from "../tree/delta.js"
 import { describeTreeError, type TreeError } from "../tree/errors.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { describeHoldError, type HeldProposal, type HoldError, type HoldStore } from "./held.js"
+import {
+  revertIntent,
+  revertProposal,
+  type RevertRefusal,
+  type RevertRequest,
+} from "./revert.js"
 
 /**
  * The one write path (0017).
@@ -209,18 +222,18 @@ const takeIntoCustody = async (
   return { kind: "held", held: held.value }
 }
 
-export const commitIntent = async (path: WritePath, intent: EditIntent): Promise<WriteOutcome> => {
-  const narrate = narrator(path.runtime.events, path.runtime.clock, intent.treeId)
-
-  const head = await readWritableHead(path, intent)
-  if (!head.ok) {
-    narrate({ type: "intent-not-writable", intent, error: head.error })
-
-    return { kind: "not-written", error: head.error }
-  }
-
-  const outcome = await composeChange(path.runtime, head.value, intent)
-
+/**
+ * Turns what the pipeline decided into what the caller gets, and writes when it
+ * has to. Shared by every entry point so that a change is persisted, held or
+ * refused by the same code whoever proposed it — a second copy of this switch
+ * is how one kind of write would eventually skip a step the other took.
+ */
+const settle = async (
+  path: WritePath,
+  narrate: Narrator,
+  intent: EditIntent,
+  outcome: CompositionOutcome
+): Promise<WriteOutcome> => {
   switch (outcome.kind) {
     case "applied":
       return persist(path, narrate, intent, {
@@ -243,6 +256,19 @@ export const commitIntent = async (path: WritePath, intent: EditIntent): Promise
     case "not-applicable":
       return { kind: "not-applicable", proposal: outcome.proposal, error: outcome.error }
   }
+}
+
+export const commitIntent = async (path: WritePath, intent: EditIntent): Promise<WriteOutcome> => {
+  const narrate = narrator(path.runtime.events, path.runtime.clock, intent.treeId)
+
+  const head = await readWritableHead(path, intent)
+  if (!head.ok) {
+    narrate({ type: "intent-not-writable", intent, error: head.error })
+
+    return { kind: "not-written", error: head.error }
+  }
+
+  return settle(path, narrate, intent, await composeChange(path.runtime, head.value, intent))
 }
 
 /**
@@ -344,4 +370,63 @@ export const discardHeld = async (
   })
 
   return released
+}
+
+/**
+ * Undoes the latest revision by proposing its inverse (0032).
+ *
+ * The seed is a parameter for the reason `auditSnapshot` takes one: the inverse
+ * of a change is a function of the state that change observed, and reaching
+ * that state means replaying the log from a revision 0 the host has to be able
+ * to reproduce. A tree nobody can audit is a tree nobody can undo, and saying
+ * so is better than assembling an inverse out of the tree it is meant to undo.
+ *
+ * Everything after the proposal is the ordinary write path — the same Gate, the
+ * same custody, the same append. An undo of a high-stakes change is held for a
+ * human exactly as the change was, because "it is only putting things back" is
+ * a claim about intent, and the Gate judges deltas.
+ */
+export const revertRevision = async (
+  path: WritePath,
+  request: RevertRequest,
+  seed: LoomTree
+): Promise<WriteOutcome | { readonly kind: "not-revertible"; readonly refusal: RevertRefusal }> => {
+  const head = await path.store.head(request.treeId)
+  if (!head.ok) return { kind: "not-written", error: head.error }
+
+  if (head.value.revision !== request.revision) {
+    return {
+      kind: "not-revertible",
+      refusal: {
+        code: "not-the-latest-revision",
+        requested: request.revision,
+        head: head.value.revision,
+      },
+    }
+  }
+
+  const point = await replayBefore(path.store, request.treeId, seed, request.revision)
+  if (!point.ok) {
+    return point.error.code === "no-such-revision"
+      ? { kind: "not-revertible", refusal: point.error }
+      : { kind: "not-written", error: point.error }
+  }
+  if (!point.value.ok) {
+    return { kind: "not-revertible", refusal: { code: "unreplayable", mismatch: point.value.error } }
+  }
+
+  const { runtime } = path
+  const intent = revertIntent(runtime.idFactory, runtime.clock, request, head.value.revision)
+  const proposed = revertProposal(
+    runtime.idFactory,
+    runtime.clock,
+    intent,
+    point.value.value.tree,
+    point.value.value.entry
+  )
+  if (!proposed.ok) return { kind: "not-revertible", refusal: proposed.error }
+
+  const narrate = narrator(runtime.events, runtime.clock, request.treeId)
+
+  return settle(path, narrate, intent, composeProposal(runtime, head.value, intent, proposed.value))
 }

@@ -76,3 +76,4 @@ leave the existing record standing until someone decides.
 | [0029](0029-the-approval-belongs-on-the-revision.md) | The approval belongs on the revision, not only in the journal | Accepted — partially supersedes 0027 | §5 → §6 |
 | [0030](0030-the-package-ships-compiled-output.md) | The package ships compiled output | Accepted | §4 → §5 |
 | [0031](0031-calibration-is-a-reader-not-a-controller.md) | Calibration is a reader, not a controller | Accepted | §6 → §2 |
+| [0032](0032-an-undo-is-a-proposal-and-the-log-only-grows.md) | An undo is a proposal, and the log only grows | Accepted | §5 → §2 |

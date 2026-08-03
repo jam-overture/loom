@@ -71,6 +71,60 @@ const foldLog = async (
     : await foldLog(store, treeId, folded.value, page.value.newer)
 }
 
+/** A point in the log: the entry, and the tree it was applied to. */
+export type ReplayedPoint = {
+  readonly tree: LoomTree
+  readonly entry: StoredRevision
+}
+
+export type MissingRevision = { readonly code: "no-such-revision"; readonly revision: number }
+
+/**
+ * Walks the log to just before `revision` and stops there, returning the tree
+ * that entry saw and the entry itself.
+ *
+ * This is what inverting a committed change needs, and it needs it because an
+ * inverse is a function of the state its delta observed: the inverse of
+ * "remove this card" has to carry the card, and the card only exists on the
+ * near side of the removal. The stored snapshot is the far side.
+ *
+ * Same seed argument, and the same limitation, as `auditSnapshot` — a host that
+ * cannot reproduce revision 0 cannot replay, so it cannot undo either. Better a
+ * refusal that says so than an inverse assembled from the tree it is meant to
+ * be undoing.
+ */
+export const replayBefore = async (
+  store: TreeReader,
+  treeId: TreeId,
+  seed: LoomTree,
+  revision: number
+): Promise<Result<Result<ReplayedPoint, ReplayMismatch>, StoreError | MissingRevision>> => {
+  if (revision <= seed.revision) return err({ code: "no-such-revision", revision })
+
+  let tree = seed
+  let cursor: string | undefined
+
+  for (;;) {
+    const page = await store.revisions(treeId, cursor === undefined ? {} : { cursor })
+    if (!page.ok) return page
+
+    const before = page.value.revisions.filter((entry) => entry.revision < revision)
+    const folded = replayTree(tree, before)
+    if (!folded.ok) return ok(folded)
+    tree = folded.value
+
+    const entry = page.value.revisions.find((candidate) => candidate.revision === revision)
+    if (entry) {
+      return tree.revision === revision - 1
+        ? ok(ok({ tree, entry }))
+        : ok(err({ code: "revision-gap", expected: revision - 1, found: tree.revision }))
+    }
+
+    if (page.value.newer === null) return err({ code: "no-such-revision", revision })
+    cursor = page.value.newer
+  }
+}
+
 export type SnapshotAudit =
   | { readonly outcome: "agrees"; readonly revision: number }
   /**
