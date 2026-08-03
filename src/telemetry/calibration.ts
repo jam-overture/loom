@@ -74,6 +74,14 @@ export type CalibrationReport = {
    * changed without saying so.
    */
   readonly unattributed: number
+  /**
+   * Proposals the runtime authored rather than a model — the inverse behind a
+   * revert, say. Segmented rather than dropped: they carry a confidence because
+   * every proposal does, but nobody graded it, so scoring them would measure the
+   * constant the runtime stamps. Reporting the count keeps that visible instead
+   * of leaving a reader to wonder where the undos went.
+   */
+  readonly runtimeAuthored: number
 }
 
 type Tally = { judged: number; survived: number; confidenceSum: number }
@@ -131,8 +139,15 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
     if (verdict === "survived") tally.survived += 1
   }
 
+  let runtimeAuthored = 0
+
   for (const episode of fold.episodes) {
     for (const proposal of episode.proposals) {
+      if (proposal.provenance.authoredBy !== "model") {
+        runtimeAuthored += 1
+        continue
+      }
+
       const verdict = verdictOf(proposal)
 
       if (verdict !== "survived" && verdict !== "rejected") {
@@ -154,5 +169,6 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
     })),
     unjudged,
     unattributed: fold.unattributed.length,
+    runtimeAuthored,
   }
 }

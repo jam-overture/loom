@@ -11,6 +11,20 @@ import { intentOriginSchema, type IntentOrigin } from "./intent.js"
  * delta, and how sure that interpreter was. Telemetry consumes exactly this
  * record alongside the disposition and the eventual outcome.
  */
+
+/**
+ * Who wrote the delta, as opposed to which component carried it.
+ *
+ * `interpreter` names the thing; this names its kind, and the difference is
+ * load-bearing. `confidence` is a self-grade, and only a model grades itself —
+ * a delta the runtime computed, such as the inverse behind a revert, has no
+ * opinion to be right or wrong about. Calibration (0031) measures self-grades,
+ * so it has to tell the two apart by type rather than by recognising a magic
+ * interpreter name.
+ */
+export const authorKindSchema = z.enum(["model", "runtime"])
+export type AuthorKind = z.infer<typeof authorKindSchema>
+
 export const provenanceSchema = z.object({
   origin: intentOriginSchema,
   /**
@@ -21,6 +35,12 @@ export const provenanceSchema = z.object({
   actor: z.string().min(1).optional(),
   /** Identifies what produced the delta — a model id, or a named component. */
   interpreter: z.string().min(1),
+  /**
+   * Defaulted rather than required, because every provenance written before
+   * this field existed was a model's. Absence means "recorded before the
+   * runtime authored anything", and that reading stays true forever.
+   */
+  authoredBy: authorKindSchema.default("model"),
   /** Hash rather than the prompt itself, so provenance carries no user content. */
   promptHash: z.string().min(1).optional(),
   confidence: z.number().min(0).max(1),
@@ -31,6 +51,7 @@ export type Provenance = {
   readonly origin: IntentOrigin
   readonly actor?: string
   readonly interpreter: string
+  readonly authoredBy: AuthorKind
   readonly promptHash?: string
   readonly confidence: number
   readonly interpretedAt: string

@@ -162,6 +162,7 @@ const propose = async (
       /** Copied from the ask, never inferred from the reply: the model does not name who asked. */
       ...(intent.actor === undefined ? {} : { actor: intent.actor }),
       interpreter: completion.value.servedBy,
+      authoredBy: "model",
       promptHash: await hashPrompt(INTERPRETER_SYSTEM_PROMPT, userMessage),
       confidence: reply.value.confidence,
       interpretedAt: config.clock.now(),

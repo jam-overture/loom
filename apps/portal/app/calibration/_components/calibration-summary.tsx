@@ -11,6 +11,11 @@ import { toneClasses } from "@/lib/outcome"
  * rate over four claims when ninety are still waiting on a human is a different
  * statement from the same rate over ninety-four, and only showing both makes the
  * difference visible.
+ *
+ * Undos are in that list for the same reason. A revert is proposed with a
+ * confidence of 1 by an interpreter that cannot be wrong (0032), so it is
+ * segmented out of the score — and a reader who could not see how many were
+ * removed would be trusting a denominator that changed without saying so.
  */
 export const CalibrationSummary = ({ report }: { readonly report: CalibrationReport }) => {
   const reading = readGap(report.overall)
@@ -34,6 +39,10 @@ export const CalibrationSummary = ({ report }: { readonly report: CalibrationRep
         <div className="flex gap-1">
           <dt className="text-ink-muted">mean claim</dt>
           <dd className="font-mono">{formatRate(report.overall.meanConfidence)}</dd>
+        </div>
+        <div className="flex gap-1">
+          <dt className="text-ink-muted">undos (not scored)</dt>
+          <dd className="font-mono">{report.runtimeAuthored}</dd>
         </div>
         {UNJUDGED_REASONS.map((reason) => (
           <div key={reason} className="flex gap-1">

@@ -46,10 +46,10 @@ const rationaleFor = (plan: RevertablePlan): string =>
  * the same terms as an AI-authored change.
  *
  * `confidence` is 1 because the inverse is computed, not guessed. That is the
- * honest self-grade (0007) and it does mean a deployment that reverts often
- * will see a well-calibrated top band it did not earn from its model — see the
- * report; segmenting calibration by interpreter is the fix, and it belongs to
- * §6.
+ * honest self-grade (0007), and it is also why `authoredBy` is `runtime`: a 1
+ * nobody graded is not a claim, and calibration (0031) segments these out of its
+ * score rather than letting every undo walk the top band toward a perfect record
+ * the model never earned.
  */
 export const revertInterpreter = (
   plan: RevertablePlan,
@@ -80,6 +80,8 @@ export const revertInterpreter = (
               origin: intent.origin,
               ...(intent.actor === undefined ? {} : { actor: intent.actor }),
               interpreter: REVERT_INTERPRETER,
+              /** Computed, not inferred — so calibration leaves it out (0031). */
+              authoredBy: "runtime",
               confidence: 1,
               interpretedAt: clock.now(),
             },

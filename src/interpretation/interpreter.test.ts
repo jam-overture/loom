@@ -170,6 +170,7 @@ describe("modelInterpreter — a proposal it understood", () => {
     expect(interpreted.value.provenance).toEqual({
       origin: "user-instruction",
       interpreter: "claude-test-1",
+      authoredBy: "model",
       promptHash: expect.stringMatching(/^[0-9a-f]{64}$/),
       confidence: 0.86,
       interpretedAt: FIXED_INSTANT,
