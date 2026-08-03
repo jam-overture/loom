@@ -41,28 +41,41 @@ A change that contradicts an `Accepted` record is an escalation, not a
 refactor: write the replacement with status `Proposed`, flag it for review, and
 leave the existing record standing until someone decides.
 
+## The index below is generated
+
+Write the record, then run `pnpm decisions:index`. Do not edit the table by
+hand — it is rebuilt from the `**Status:**` and `**Section:**` lines of the
+files themselves, and an edit here is overwritten on the next run.
+
+`pnpm verify` fails if the committed table has drifted, if two records claim the
+same number, if a number is missing, or if a status names a record that does not
+exist. That last set is not hypothetical: two concurrent sessions each wrote an
+`0032` on the same day, and nothing noticed until their branches met.
+
+Everything above this line is prose a person wrote, and stays that way.
+
 ## Index
 
-| #                                                            | Title                                                        | Status   | Section |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | -------- | ------- |
-| [0001](0001-tree-and-delta-as-the-unit-of-change.md)         | The tree and the delta are the unit of AI-authored change     | Accepted | §1      |
-| [0002](0002-gate-is-a-pure-function-of-two-axes.md)          | The Gate is a pure function of two independent axes           | Accepted | §2      |
-| [0003](0003-ai-drafts-the-runtime-names.md)                  | AI drafts a change; the runtime names what it creates         | Accepted | §2      |
-| [0004](0004-model-facing-schema-is-a-projection.md)          | The model-facing schema is a projection, not the AST          | Superseded by 0014 | §2      |
-| [0005](0005-model-access-is-an-optional-adapter.md)          | Model access is a narrow seam with an optional adapter        | Accepted | §2      |
-| [0006](0006-one-repair-attempt-and-both-halves-recorded.md)  | A refused proposal gets exactly one repair attempt            | Accepted | §2      |
-| [0007](0007-confidence-is-self-graded-and-must-be-calibrated.md) | Confidence is self-graded, trusted on purpose, and must be calibrated | Accepted | §2 → §6 |
-| [0008](0008-the-renderer-is-a-total-pure-projection.md)      | The renderer is a total, pure projection of the tree           | Accepted | §3      |
-| [0009](0009-primitives-receive-props-in-a-bag.md)            | Primitives receive AI-authored props in a bag, never spread    | Accepted | §3 → §4 |
-| [0010](0010-edit-mode-decorates-it-does-not-restructure.md)  | Edit mode decorates; it never invents DOM                      | Accepted | §3 → §5 |
-| [0011](0011-a-primitive-declares-its-props-and-the-seam-enforces-them.md) | A primitive declares its props, and the render seam enforces them | Accepted | §4      |
-| [0012](0012-conformance-is-probed-and-reported-not-enforced.md) | Conformance is probed and reported, never enforced by registration | Accepted | §4      |
-| [0013](0013-the-registry-is-what-the-model-is-told-it-may-build.md) | The registry is what the model is told it may build              | Accepted | §4 → §2 |
-| [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md)   | The reply schema must fit a compiled-grammar budget            | Accepted — supersedes 0004 | §2 |
-| [0015](0015-the-registry-is-generated-and-a-filename-is-a-type.md) | The registry is generated from the directory, and a module's name is its type | Accepted | §4 |
+| # | Title | Status | Section |
+| --- | --- | --- | --- |
+| [0001](0001-tree-and-delta-as-the-unit-of-change.md) | The tree and the delta are the unit of AI-authored change | Accepted | §1 |
+| [0002](0002-gate-is-a-pure-function-of-two-axes.md) | The Gate is a pure function of two independent axes | Accepted | §2 |
+| [0003](0003-ai-drafts-the-runtime-names.md) | AI drafts a change; the runtime names what it creates | Accepted | §2 |
+| [0004](0004-model-facing-schema-is-a-projection.md) | The model-facing schema is a projection, not the AST | Superseded by [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md) | §2 |
+| [0005](0005-model-access-is-an-optional-adapter.md) | Model access is a narrow seam with an optional adapter | Accepted | §2 |
+| [0006](0006-one-repair-attempt-and-both-halves-recorded.md) | A refused proposal gets exactly one repair attempt, and both halves are recorded | Accepted | §2 |
+| [0007](0007-confidence-is-self-graded-and-must-be-calibrated.md) | Confidence is self-graded, trusted on purpose, and must be calibrated | Accepted | §2, binding on §6 |
+| [0008](0008-the-renderer-is-a-total-pure-projection.md) | The renderer is a total, pure projection of the tree | Accepted | §3 |
+| [0009](0009-primitives-receive-props-in-a-bag.md) | Primitives receive AI-authored props in a bag, never spread | Accepted | §3 → §4 |
+| [0010](0010-edit-mode-decorates-it-does-not-restructure.md) | Edit mode decorates; it never invents DOM | Accepted | §3 → §5 |
+| [0011](0011-a-primitive-declares-its-props-and-the-seam-enforces-them.md) | A primitive declares its props, and the render seam enforces them | Accepted | §4 |
+| [0012](0012-conformance-is-probed-and-reported-not-enforced.md) | Conformance is probed and reported, never enforced by registration | Accepted | §4 |
+| [0013](0013-the-registry-is-what-the-model-is-told-it-may-build.md) | The registry is what the model is told it may build | Accepted | §4 → §2 |
+| [0014](0014-the-reply-schema-must-fit-a-grammar-budget.md) | The reply schema must fit a compiled-grammar budget | Accepted — supersedes 0004 | §2 (interpretation) |
+| [0015](0015-the-registry-is-generated-and-a-filename-is-a-type.md) | The registry is generated from the directory, and a module's name is its type | Accepted | §4 (CLI) |
 | [0016](0016-the-log-is-the-truth-and-the-snapshot-is-a-view.md) | The log is the truth and the snapshot is a materialised view | Accepted | §5 |
 | [0017](0017-every-write-goes-through-one-server-side-path.md) | Every write goes through one server-side path | Accepted | §5 |
-| [0018](0018-the-portal-is-a-consumer-not-an-insider.md) | The portal is a consumer of the framework, not an insider | Accepted | §5 |
+| [0018](0018-the-portal-is-a-consumer-not-an-insider.md) | The portal is a consumer, not an insider | Accepted | §5 |
 | [0019](0019-the-portal-is-a-review-queue-not-a-design-tool.md) | The portal is a review queue, not a design tool | Accepted | §5 |
 | [0020](0020-a-store-handle-is-the-scope-and-a-listing-is-a-page.md) | A store handle is the scope, and a listing is a keyset page | Accepted | §5 |
 | [0021](0021-a-held-proposal-stays-server-side-and-answers-are-by-id.md) | A held proposal stays server-side, and an answer names its id | Accepted | §5 |

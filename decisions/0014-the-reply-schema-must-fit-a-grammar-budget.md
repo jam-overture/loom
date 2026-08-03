@@ -1,6 +1,6 @@
 # 0014 — The reply schema must fit a compiled-grammar budget
 
-**Status:** Accepted
+**Status:** Accepted — supersedes 0004
 **Date:** 2026-07-30 (proposed), 2026-07-30 (accepted)
 **Section:** §2 — Composition Runtime (interpretation)
 **Supersedes:** [0004](0004-model-facing-schema-is-a-projection.md)
