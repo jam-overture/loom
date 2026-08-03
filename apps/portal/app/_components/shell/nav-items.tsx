@@ -18,7 +18,8 @@ const strokeProps = {
  * Two groups. What the runtime holds — the stored trees, and the catalogue a
  * model is told it may build from (0013). Then the record of how they got that
  * way: what the runtime was asked to do and what became of it (0023), what was
- * accepted into a tree (0016), and whether the second still produces the first.
+ * accepted into a tree (0016), whether the model's own confidence has been worth
+ * anything (0031), and whether the log still produces the snapshot.
  *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
  * about what a thing can do. It comes back now that its page does — and the page
@@ -69,6 +70,16 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
         <svg {...strokeProps}>
           <circle cx="12" cy="12" r="9" />
           <polyline points="12 7 12 12 16 14" />
+        </svg>
+      ),
+    },
+    {
+      label: "calibration",
+      href: "/calibration",
+      icon: (
+        <svg {...strokeProps}>
+          <line x1="4" y1="20" x2="20" y2="4" />
+          <path d="M4 16h4v4H4zM10 12h4v8h-4zM16 6h4v14h-4z" />
         </svg>
       ),
     },
