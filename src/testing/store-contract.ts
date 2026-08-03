@@ -31,6 +31,7 @@ export const appendOf = (delta: TreeDelta, proposal = "p_1"): AppendRequest => (
   provenance: {
     origin: "user-instruction",
     interpreter: "scripted",
+    authoredBy: "model",
     confidence: 0.9,
     interpretedAt: FIXED_INSTANT,
   },

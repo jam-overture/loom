@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { harnessWith, proposalScript } from "../testing/episode-harness.js"
-import { commitIntent, discardHeld } from "../write/index.js"
+import { commitIntent, discardHeld, revertRevision } from "../write/index.js"
 
 import { calibrationOf, verdictOf, type CalibrationReport } from "./calibration.js"
 import type { EpisodeFold, ProposalEpisode } from "./episode.js"
@@ -148,6 +148,38 @@ describe("calibrationOf", () => {
    * them, and a report that swallowed the count would be quoting a rate over a
    * denominator it had quietly changed.
    */
+  /**
+   * The interaction 0032 created, driven through the real revert path rather
+   * than over a hand-built episode. A revert is proposed with `confidence: 1` by
+   * an interpreter that cannot be wrong and always survives, so scoring it would
+   * walk the top band toward a perfect record that measures arithmetic rather
+   * than judgment. It is segmented rather than dropped, because a reader who
+   * cannot see where the undos went is being asked to trust a denominator that
+   * changed silently.
+   */
+  it("keeps a change the runtime authored out of the score, and says how many", async () => {
+    const harness = await harnessWith({ script: proposalScript(0.9) })
+    await commitIntent(harness.path, harness.intent)
+
+    const beforeUndo = calibrationOf(await harness.fold())
+
+    const undone = await revertRevision(harness.path, {
+      treeId: harness.tree.treeId,
+      revision: 1,
+      seed: harness.tree,
+      origin: "user-instruction",
+    })
+    expect(undone.kind).toBe("committed")
+
+    const afterUndo = calibrationOf(await harness.fold())
+
+    /** The undo committed, and moved not one number in the score. */
+    expect(afterUndo.overall).toEqual(beforeUndo.overall)
+    expect(bucketAt(afterUndo, 9).judged).toBe(bucketAt(beforeUndo, 9).judged)
+    expect(afterUndo.runtimeAuthored).toBe(1)
+    expect(beforeUndo.runtimeAuthored).toBe(0)
+  })
+
   it("carries the fold's unattributed records through to the report", async () => {
     const real = await runAt(0.9)
 

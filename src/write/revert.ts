@@ -80,6 +80,8 @@ export const revertInterpreter = (
               origin: intent.origin,
               ...(intent.actor === undefined ? {} : { actor: intent.actor }),
               interpreter: REVERT_INTERPRETER,
+              /** Computed, not inferred — so calibration leaves it out (0031). */
+              authoredBy: "runtime",
               confidence: 1,
               interpretedAt: clock.now(),
             },

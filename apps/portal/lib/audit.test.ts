@@ -23,6 +23,7 @@ import { seedFor } from "./seeds"
 const PROVENANCE = {
   origin: "user-instruction",
   interpreter: "scripted",
+  authoredBy: "model",
   confidence: 0.9,
   interpretedAt: "2026-08-02T00:00:00.000Z",
 } as const

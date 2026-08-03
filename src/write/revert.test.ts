@@ -33,6 +33,7 @@ const spare = sequentialIdFactory("rev")
 const provenance: Provenance = {
   origin: "user-instruction",
   interpreter: "test",
+  authoredBy: "model",
   confidence: 0.9,
   interpretedAt: FIXED_INSTANT,
 }

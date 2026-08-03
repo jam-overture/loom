@@ -2,6 +2,8 @@ import type { StoredRevision } from "@loom/runtime/store"
 
 import { describeOperation } from "@/lib/delta-summary"
 
+import { UndoButton } from "./undo-button"
+
 /**
  * One accepted change: what it did to the tree, and who it came from.
  *
@@ -19,6 +21,11 @@ import { describeOperation } from "@/lib/delta-summary"
  * approve or one approved by a host that named nobody, and the revision cannot
  * tell those apart — only the journal can (0029). Rendering "allowed by nobody"
  * would state one of the two as fact.
+ *
+ * Undo is offered on every revision, not only the newest, because the runtime
+ * genuinely supports both (0032) — and where it does not, `planRevert` says why.
+ * A revision something later built on comes back `contested`, naming what
+ * contests it, which is a better answer than a button that was never shown.
  */
 export const RevisionRow = ({ stored }: { readonly stored: StoredRevision }) => (
   <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-4">
@@ -69,5 +76,7 @@ export const RevisionRow = ({ stored }: { readonly stored: StoredRevision }) => 
         <dd className="font-mono">{stored.proposalId}</dd>
       </div>
     </dl>
+
+    <UndoButton treeId={stored.treeId} revision={stored.revision} />
   </li>
 )

@@ -14,7 +14,7 @@ import type {
   InterpretationError,
   RepairRequest,
 } from "../runtime/interpreter.js"
-import type { ProposedChange } from "../runtime/proposal.js"
+import type { AuthorKind, ProposedChange } from "../runtime/proposal.js"
 import type { TreeDelta } from "../tree/delta.js"
 
 /**
@@ -142,6 +142,7 @@ export type ProposalDraft = {
   readonly rationale?: string
   readonly origin?: IntentOrigin
   readonly actor?: string
+  readonly authoredBy?: AuthorKind
   readonly confidence?: number
 }
 
@@ -154,6 +155,7 @@ export const buildProposal = (idFactory: IdFactory, draft: ProposalDraft): Propo
     origin: draft.origin ?? "user-instruction",
     ...(draft.actor === undefined ? {} : { actor: draft.actor }),
     interpreter: "scripted",
+    authoredBy: draft.authoredBy ?? "model",
     confidence: draft.confidence ?? 0.9,
     interpretedAt: FIXED_INSTANT,
   },
