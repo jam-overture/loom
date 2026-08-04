@@ -1,6 +1,6 @@
 # 0032. An undo is a proposal, not a rewind
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by 0035
 **Date:** 2026-08-02
 **Section:** §2 → §5
 

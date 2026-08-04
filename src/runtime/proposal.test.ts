@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory } from "../ids.js"
+import { nodeIdSchema, sequentialIdFactory } from "../ids.js"
 import { buildProposal, FIXED_INSTANT } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 import type { TreeDelta } from "../tree/delta.js"
@@ -102,5 +102,40 @@ describe("proposedChangeSchema", () => {
     const proposal = proposalFixture()
 
     expect(proposedChangeSchema.safeParse({ ...proposal, rationale: "" }).success).toBe(false)
+  })
+})
+
+/**
+ * A held proposal is stored and re-judged when someone answers it (0021), so a
+ * declaration that did not survive the round trip would be a hold whose reason
+ * evaporated between the asking and the answering.
+ */
+describe("declared discards", () => {
+  const node = nodeIdSchema.parse("n_body")
+
+  it("round-trips through JSON with the declaration intact", () => {
+    const proposal = { ...proposalFixture(), discards: [{ revision: 3, nodeIds: [node] }] }
+    const parsed = proposedChangeSchema.safeParse(JSON.parse(JSON.stringify(proposal)))
+
+    expect(parsed.success && parsed.data).toEqual(proposal)
+  })
+
+  /** Absence means "nobody consulted a log", which every model proposal ever written is. */
+  it("parses a proposal that declares nothing, and leaves the field absent", () => {
+    const parsed = proposedChangeSchema.safeParse(proposalFixture())
+
+    expect(parsed.success && "discards" in parsed.data).toBe(false)
+  })
+
+  it("refuses an entry that names no node, which would claim damage it cannot point at", () => {
+    const proposal = { ...proposalFixture(), discards: [{ revision: 3, nodeIds: [] }] }
+
+    expect(proposedChangeSchema.safeParse(proposal).success).toBe(false)
+  })
+
+  it("refuses revision 0, which is a seed rather than work someone did", () => {
+    const proposal = { ...proposalFixture(), discards: [{ revision: 0, nodeIds: [node] }] }
+
+    expect(proposedChangeSchema.safeParse(proposal).success).toBe(false)
   })
 })

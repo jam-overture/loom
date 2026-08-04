@@ -38,6 +38,7 @@ import { applyDelta } from "../tree/apply.js"
 import type { ModelClientError, ModelCompletion } from "./client.js"
 import { DEFAULT_EFFORT, DEFAULT_INTERPRETER_MODEL, modelInterpreter } from "./interpreter.js"
 import { INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
+import { interpretationReplyJsonSchema } from "./schema.js"
 
 const harness = (reply: string | Result<ModelCompletion, ModelClientError>) => {
   const { tree, ids } = sampleTree()
@@ -248,6 +249,27 @@ describe("modelInterpreter — a proposal it understood", () => {
     const applied = applyDelta(movedTree, interpreted.value.delta)
     expect(applied.ok).toBe(false)
     expect(applied.ok ? "" : applied.error.code).toBe("revision-mismatch")
+  })
+})
+
+/**
+ * `discards` raises stakes and can only ever make the Gate stricter (0035), so
+ * it is safe to accept as a declaration — but only from something that computed
+ * it from a log. A model has no log, so the guarantee is structural: the reply
+ * grammar has no production for it and this interpreter never writes the field.
+ */
+describe("modelInterpreter — what a model may not declare", () => {
+  it("never sets discards on a proposal, whatever the reply said", async () => {
+    const { interpreter, intent, tree } = harness(INSERT_NOTE_REPLY)
+
+    const proposal = await interpreter.interpret(intent, tree)
+    if (!proposal.ok) throw new Error("expected a proposal")
+
+    expect(proposal.value.discards).toBeUndefined()
+  })
+
+  it("does not offer the field in the schema the reply is constrained to", () => {
+    expect(JSON.stringify(interpretationReplyJsonSchema())).not.toContain("discard")
   })
 })
 

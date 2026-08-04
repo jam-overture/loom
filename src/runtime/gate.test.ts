@@ -8,6 +8,7 @@ import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { assessChange, type ChangeAssessment } from "./assessment.js"
 import { gate } from "./gate.js"
 import type { IntentOrigin } from "./intent.js"
+import type { DiscardedWork } from "./proposal.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 
 const spare = sequentialIdFactory("gate")
@@ -17,6 +18,8 @@ type Scenario = {
   readonly policy?: GatePolicy
   readonly origin?: IntentOrigin
   readonly confidence?: number
+  /** What the proposal declares it writes over — only an in-runtime interpreter sets this. */
+  readonly discards?: (ids: SampleTree["ids"]) => readonly DiscardedWork[]
 }
 
 const assessmentFor = (scenario: Scenario): ChangeAssessment => {
@@ -29,12 +32,15 @@ const assessmentFor = (scenario: Scenario): ChangeAssessment => {
     operations: scenario.build(ids),
   }
 
-  const proposal = buildProposal(spare, {
+  const declared = buildProposal(spare, {
     intentId: spare.intentId(),
     delta,
     ...(scenario.origin ? { origin: scenario.origin } : {}),
     ...(scenario.confidence === undefined ? {} : { confidence: scenario.confidence }),
   })
+
+  const proposal =
+    scenario.discards === undefined ? declared : { ...declared, discards: scenario.discards(ids) }
 
   const assessed = assessChange(tree, proposal, scenario.policy ?? defaultGatePolicy, spare.deltaId())
   if (!assessed.ok) throw new Error(assessed.error.code)
@@ -161,6 +167,73 @@ describe("reversibility rules", () => {
   })
 })
 
+/**
+ * A change can write over work already in the log without its delta showing it
+ * (0035). The declaration reaches the Gate as a stakes factor; these are the
+ * rules that make the declaration mean something.
+ */
+describe("discarded work", () => {
+  const overOneRevision = (ids: SampleTree["ids"]): readonly DiscardedWork[] => [
+    { revision: 4, nodeIds: [ids.body] },
+  ]
+
+  it("holds a change that discards later work, and says so", () => {
+    const disposition = decide({ build: tweak, discards: overOneRevision })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("discards-later-work")
+    expect(disposition.reason.detail).toContain("revision 4")
+    expect(disposition.stakes).toBe("high")
+  })
+
+  /**
+   * The rule this one exists for. A `high` factor is above the `medium` ceiling
+   * a user instruction gets and *at* the one a developer gets, so the ceiling
+   * alone would auto-apply exactly the same change for the wider origin.
+   */
+  it("holds it for an origin whose ceiling would otherwise allow it", () => {
+    const disposition = decide({ build: tweak, origin: "developer", discards: overOneRevision })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("discards-later-work")
+  })
+
+  it("holds it for a policy that trusts every origin completely", () => {
+    const trusting = gatePolicySchema.parse({
+      autoApplyCeiling: { developer: "critical", "user-instruction": "critical" },
+    })
+
+    const disposition = decide({
+      build: tweak,
+      policy: trusting,
+      origin: "developer",
+      discards: overOneRevision,
+    })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+  })
+
+  it("leaves a change that declares nothing exactly where it was", () => {
+    expect(decide({ build: tweak }).kind).toBe("accepted")
+  })
+
+  /** The floor stays sovereign: a host may declare this much damage refusable. */
+  it("refuses rather than holds when the host's floor reaches it", () => {
+    const strict = gatePolicySchema.parse({ refusalFloor: "high" })
+    const disposition = decide({ build: tweak, policy: strict, discards: overOneRevision })
+
+    expect(disposition.kind).toBe("rejected")
+    expect(disposition.reason.code).toBe("stakes-at-refusal-floor")
+    expect(disposition.reason.detail).toContain("discards work from revision 4")
+  })
+
+  it("is refused outright when the interpreter was barely guessing", () => {
+    const disposition = decide({ build: tweak, confidence: 0.1, discards: overOneRevision })
+
+    expect(disposition.reason.code).toBe("confidence-below-floor")
+  })
+})
+
 describe("rule precedence", () => {
   it("refuses rather than asks when both would fire", () => {
     const policy = gatePolicySchema.parse({ protectedPrimitiveTypes: ["loom.card"] })
@@ -182,6 +255,22 @@ describe("rule precedence", () => {
       origin: "system-signal",
     })
 
+    expect(disposition.reason.code).toBe("irreversible")
+  })
+
+  /**
+   * Both hold, so the order only chooses the wording — and "this cannot be
+   * undone" is the graver of the two things to tell someone.
+   */
+  it("reports irreversibility ahead of discarded work", () => {
+    const policy = gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.card"] })
+    const disposition = decide({
+      build: (ids) => [{ op: "configure", nodeId: ids.card, set: { variant: "x" }, unset: [] }],
+      policy,
+      discards: (ids) => [{ revision: 4, nodeIds: [ids.card] }],
+    })
+
+    expect(disposition.kind).toBe("requires-confirmation")
     expect(disposition.reason.code).toBe("irreversible")
   })
 })

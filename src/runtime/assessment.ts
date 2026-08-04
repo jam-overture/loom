@@ -17,6 +17,10 @@ import { assessStakes, type StakeAssessment } from "./stakes.js"
  * A failure here means the delta does not apply at all — a malformed proposal
  * rather than a rejected one. That distinction matters downstream: an
  * inapplicable proposal is an interpreter bug, not a policy decision.
+ *
+ * This is also where a proposal's own declaration about what it writes over is
+ * folded into the damage estimate (0035), so the Gate keeps seeing two axes and
+ * a policy rather than growing a third input.
  */
 
 export type ChangeAssessment = {
@@ -38,7 +42,7 @@ export const assessChange = (
       (reversibility) => ({
         proposal,
         analysis,
-        stakes: assessStakes(analysis, policy),
+        stakes: assessStakes({ analysis, discards: proposal.discards ?? [] }, policy),
         reversibility,
       })
     )

@@ -174,17 +174,22 @@ describe("planRevert produces an undo", () => {
   })
 })
 
-describe("planRevert refuses an undo that would discard later work", () => {
+/**
+ * A plan reports what the undo would write over; it does not refuse it (0035).
+ * The operations come back either way, because the Gate is what weighs the cost.
+ */
+describe("planRevert reports the work an undo would discard", () => {
   it("names the revisions that built on the one being undone", async () => {
     const history = await historyOf()
     await history.append(setValue(history.ids.body, "second"))
     await history.append(setValue(history.ids.body, "third"))
 
     const plan = await planOf(history.store, history.seed, 1)
-    if (plan.outcome !== "contested") throw new Error(plan.outcome)
+    if (plan.outcome !== "revertable") throw new Error(plan.outcome)
 
-    expect(plan.contestedBy).toEqual([{ revision: 2, nodeIds: [history.ids.body] }])
-    expect(describeRevertPlan(plan)).toContain("built on by 2")
+    expect(plan.discards).toEqual([{ revision: 2, nodeIds: [history.ids.body] }])
+    expect(plan.operations.length).toBeGreaterThan(0)
+    expect(describeRevertPlan(plan)).toContain("discarding what revision 2 did")
   })
 
   /**
@@ -203,9 +208,9 @@ describe("planRevert refuses an undo that would discard later work", () => {
     await history.append(setValue(caption.id, "Half price"))
 
     const plan = await planOf(history.store, history.seed, 1)
-    if (plan.outcome !== "contested") throw new Error(plan.outcome)
+    if (plan.outcome !== "revertable") throw new Error(plan.outcome)
 
-    expect(plan.contestedBy).toEqual([{ revision: 2, nodeIds: [caption.id] }])
+    expect(plan.discards).toEqual([{ revision: 2, nodeIds: [caption.id] }])
   })
 
   it("does not count a later change to an untouched node", async () => {
@@ -213,7 +218,24 @@ describe("planRevert refuses an undo that would discard later work", () => {
     await history.append(setValue(history.ids.body, "second"))
     await history.append(setValue(history.ids.headline, "third"))
 
-    expect((await planOf(history.store, history.seed, 1)).outcome).toBe("revertable")
+    const plan = await planOf(history.store, history.seed, 1)
+    if (plan.outcome !== "revertable") throw new Error(plan.outcome)
+
+    expect(plan.discards).toEqual([])
+    expect(describeRevertPlan(plan)).toBe("revision 1 can be undone at head 2")
+  })
+
+  it("names every revision that reached the same nodes, not only the first", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+    await history.append(setValue(history.ids.body, "third"))
+    await history.append(setValue(history.ids.body, "fourth"))
+
+    const plan = await planOf(history.store, history.seed, 1)
+    if (plan.outcome !== "revertable") throw new Error(plan.outcome)
+
+    expect(plan.discards.map((discarded) => discarded.revision)).toEqual([2, 3])
+    expect(describeRevertPlan(plan)).toContain("revisions 2, 3")
   })
 })
 

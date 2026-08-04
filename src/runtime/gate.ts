@@ -2,6 +2,7 @@ import type { ChangeAssessment } from "./assessment.js"
 import type { Disposition, DispositionReason } from "./disposition.js"
 import { ceilingFor, type GatePolicy } from "./policy.js"
 import { isAbove, isAtLeast } from "./stake-level.js"
+import { stakeFactor } from "./stakes.js"
 
 /**
  * The Gate.
@@ -14,7 +15,10 @@ import { isAbove, isAtLeast } from "./stake-level.js"
  * The decision is a short ordered list of rules; the first one that fires wins.
  * Order encodes precedence: a refusal outranks a request for confirmation, and
  * an irreversible change is escalated before the ordinary stakes ceiling gets a
- * say, so "small but permanent" is never silently auto-applied.
+ * say, so "small but permanent" is never silently auto-applied. A change that
+ * discards work already in the log is escalated there too, and for the same
+ * reason: the ceiling is per origin, and neither of those two properties should
+ * depend on who asked (0035).
  */
 
 type GateRule = (assessment: ChangeAssessment, policy: GatePolicy) => Disposition | null
@@ -74,6 +78,29 @@ const confirmIrreversible: GateRule = (assessment, policy) => {
   })
 }
 
+/**
+ * A change that writes over work already in the log is never applied without a
+ * person, whatever latitude its origin has.
+ *
+ * This is a rule rather than a level, because a level cannot say "never
+ * auto-apply": the ceilings are per origin (0002), so a `high` factor is a hold
+ * for one origin and an auto-apply for another. The thing that must not happen —
+ * work discarded with nobody in the loop — does not depend on who asked.
+ *
+ * It sits below the refusal floor deliberately. A host that has declared this
+ * much damage refusable gets a refusal; the floor stays sovereign over the
+ * escalations.
+ */
+const confirmDiscardsLaterWork: GateRule = (assessment, policy) => {
+  const factor = stakeFactor(assessment.stakes, "discards-later-work")
+  if (!factor) return null
+
+  return decide(assessment, policy, "requires-confirmation", {
+    code: "discards-later-work",
+    detail: factor.detail,
+  })
+}
+
 const confirmAboveCeiling: GateRule = (assessment, policy) => {
   const ceiling = ceilingFor(policy, assessment.proposal.provenance.origin)
   if (!isAbove(assessment.stakes.level, ceiling)) return null
@@ -109,6 +136,7 @@ const ESCALATION_RULES: readonly GateRule[] = [
   rejectBelowConfidenceFloor,
   rejectAtRefusalFloor,
   confirmIrreversible,
+  confirmDiscardsLaterWork,
   confirmAboveCeiling,
   confirmBelowMinimumConfidence,
 ]

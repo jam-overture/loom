@@ -24,8 +24,9 @@ import { UndoButton } from "./undo-button"
  *
  * Undo is offered on every revision, not only the newest, because the runtime
  * genuinely supports both (0032) — and where it does not, `planRevert` says why.
- * A revision something later built on comes back `contested`, naming what
- * contests it, which is a better answer than a button that was never shown.
+ * A revision something later built on is offered too: it comes back held rather
+ * than applied, naming the revisions it would write over (0035), which is a
+ * better answer than a button that was never shown.
  */
 export const RevisionRow = ({ stored }: { readonly stored: StoredRevision }) => (
   <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-4">

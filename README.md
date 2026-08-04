@@ -19,10 +19,14 @@ pure function, attributable in telemetry, and reversible.
 1. **Tree schema** — the AST, the NodeId scheme, `TreeDelta`
 2. **Composition Runtime** — `EditIntent → ProposedChange → Gate → Disposition → Apply`
 3. **Adaptive Renderer** — edge/RSC resolver, tree → React, per request
-4. **Framework SDK** — primitive registration contract, CLI scaffolding ← current
+4. **Framework SDK** — primitive registration contract, CLI scaffolding
 5. **Portal** — a thin UI over the persisted tree
 6. **Telemetry** — proposal, provenance, disposition, and outcome, captured from day one
-7. **Marketplace** — last
+7. **Marketplace** — last, and not started
+
+Sections 1–6 are built and run end to end. What is still open in each is tracked
+in the latest report in [`reports/`](reports/) rather than here, because a marker
+in a README is a thing that goes stale quietly.
 
 ## Layout
 
