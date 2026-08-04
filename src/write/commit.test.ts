@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { nodeIdSchema, sequentialIdFactory, treeIdSchema, type ProposalId } from "../ids.js"
 import { err, ok } from "../result.js"
 import type { EditIntent } from "../runtime/intent.js"
+import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy, gatePolicySchema } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import type { StoreError } from "../store/errors.js"
@@ -74,7 +75,7 @@ const harnessFor = async (options?: {
       holds: memoryHoldStore(),
       runtime: {
         interpreter,
-        policy: defaultGatePolicy,
+        policySource: fixedPolicy(defaultGatePolicy),
         events,
         clock: fixedClock(),
         idFactory: spare,
@@ -432,7 +433,9 @@ describe("confirmHeld", () => {
       ...path,
       runtime: {
         ...path.runtime,
-        policy: gatePolicySchema.parse({ minimumConfidence: 0.9, confidenceFloor: 0.8 }),
+        policySource: fixedPolicy(
+          gatePolicySchema.parse({ minimumConfidence: 0.9, confidenceFloor: 0.8 })
+        ),
       },
     }
 
@@ -538,5 +541,92 @@ describe("describeWriteOutcome", () => {
     }
 
     expect(new Set(outcomes.map((outcome) => outcome.kind)).size).toBe(outcomes.length)
+  })
+})
+
+/**
+ * The reason the seam exists: one process, one write path, and two trees that
+ * do not deserve the same latitude. Before this, a host wanting that had to
+ * build a second runtime and keep every construction site in step.
+ */
+describe("commitIntent under a policy chosen per change", () => {
+  const strict = gatePolicySchema.parse({ policyId: "storefront", minimumConfidence: 0.9 })
+  const relaxed = gatePolicySchema.parse({ policyId: "sandbox", minimumConfidence: 0.5 })
+
+  const twoTreeHarness = async (): Promise<{
+    readonly path: WritePath
+    readonly intentFor: (tree: LoomTree) => EditIntent
+    readonly guarded: LoomTree
+    readonly sandbox: LoomTree
+  }> => {
+    const { tree, ids } = sampleTree()
+    const guarded = tree
+    const sandbox: LoomTree = { ...tree, treeId: spare.treeId() }
+
+    const store = memoryTreeStore()
+    await store.create(guarded)
+    await store.create(sandbox)
+
+    /** Built from the tree it is handed, so one interpreter serves both. */
+    const interpreter = {
+      interpret: (intent: EditIntent, subject: LoomTree) =>
+        Promise.resolve(
+          ok(
+            buildProposal(spare, {
+              intentId: intent.intentId,
+              confidence: 0.8,
+              delta: {
+                deltaId: spare.deltaId(),
+                treeId: subject.treeId,
+                baseRevision: subject.revision,
+                operations: [
+                  { op: "configure", nodeId: ids.body, set: { value: "Rewritten" }, unset: [] },
+                ],
+              },
+            })
+          )
+        ),
+    }
+
+    return {
+      path: {
+        store,
+        holds: memoryHoldStore(),
+        runtime: {
+          interpreter,
+          policySource: {
+            resolve: ({ tree: subject }) =>
+              subject.treeId === guarded.treeId ? strict : relaxed,
+          },
+          events: collectingEventSink(),
+          clock: fixedClock(),
+          idFactory: spare,
+        },
+      },
+      intentFor: (subject) =>
+        buildIntent(spare, { treeId: subject.treeId, baseRevision: subject.revision }),
+      guarded,
+      sandbox,
+    }
+  }
+
+  it("holds the same change on one tree and commits it on the other", async () => {
+    const { path, intentFor, guarded, sandbox } = await twoTreeHarness()
+
+    const held = await commitIntent(path, intentFor(guarded))
+    const committed = await commitIntent(path, intentFor(sandbox))
+
+    expect(held.kind).toBe("held")
+    expect(committed.kind).toBe("committed")
+  })
+
+  it("records which policy judged each of them", async () => {
+    const { path, intentFor, guarded, sandbox } = await twoTreeHarness()
+
+    const held = await commitIntent(path, intentFor(guarded))
+    const committed = await commitIntent(path, intentFor(sandbox))
+
+    expect(held.kind === "held" && held.held.disposition.policyId).toBe("storefront")
+    expect(committed.kind === "committed" && committed.disposition.policyId).toBe("sandbox")
   })
 })

@@ -186,6 +186,42 @@ describe("rule precedence", () => {
   })
 })
 
+/**
+ * A disposition that cannot say what it was decided under is a verdict with no
+ * standard behind it — reproducible only if the reader already knows which
+ * policy was in force, which is exactly what they are asking.
+ */
+describe("attribution", () => {
+  it("names the policy on every verdict it can reach", () => {
+    const named = gatePolicySchema.parse({
+      policyId: "storefront",
+      protectedPrimitiveTypes: ["loom.card"],
+      refusalFloor: "high",
+      minimumConfidence: 0.9,
+    })
+
+    const verdicts = [
+      decide({ build: tweak, policy: named }),
+      decide({ build: tweak, policy: named, confidence: 0.5 }),
+      decide({ build: (ids) => [{ op: "remove", nodeId: ids.card }], policy: named }),
+    ]
+
+    expect(verdicts.map((verdict) => verdict.kind)).toEqual([
+      "accepted",
+      "requires-confirmation",
+      "rejected",
+    ])
+    expect(verdicts.every((verdict) => verdict.policyId === "storefront")).toBe(true)
+  })
+
+  it("names the policy that decided, not the one the assessment was made under", () => {
+    const assessment = assessmentFor({ build: tweak })
+    const other = gatePolicySchema.parse({ policyId: "elsewhere" })
+
+    expect(gate(assessment, other).policyId).toBe("elsewhere")
+  })
+})
+
 describe("purity", () => {
   it("returns the same disposition for the same inputs", () => {
     const assessment = assessmentFor({ build: tweak })

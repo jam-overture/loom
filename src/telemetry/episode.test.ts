@@ -31,6 +31,20 @@ describe("episodesOf", () => {
     expect(episode?.proposals[0]?.settledAt).toBeDefined()
   })
 
+  /**
+   * Which policy was in force is a fact about the ask, so it survives even for
+   * an intent that never produced a judgment to hang it on.
+   */
+  it("says which policy the intent was judged under", async () => {
+    const harness = await harnessWith({ script: proposalScript(0.9) })
+    await commitIntent(harness.path, harness.intent)
+
+    const { episodes } = await harness.fold()
+
+    expect(episodes[0]?.policyId).toBe("default")
+    expect(episodes[0]?.proposals[0]?.disposition?.policyId).toBe("default")
+  })
+
   it("reports a change the Gate held as awaiting an answer", async () => {
     const harness = await harnessWith({ script: proposalScript(0.5) })
     await commitIntent(harness.path, harness.intent)
@@ -187,11 +201,13 @@ describe("episodesOf", () => {
 
     const page = await harness.journal.read()
     const records = page.ok ? page.value.records : []
-    const { episodes, unattributed } = episodesOf(records.slice(2))
+    const opened = records.findIndex((record) => record.event.type === "change-proposed") + 1
+    const midEpisode = records.slice(opened)
+    const { episodes, unattributed } = episodesOf(midEpisode)
 
-    expect(records.length).toBeGreaterThan(2)
+    expect(midEpisode.length).toBeGreaterThan(0)
     expect(episodes).toEqual([])
-    expect(unattributed).toHaveLength(records.length - 2)
+    expect(unattributed).toHaveLength(midEpisode.length)
   })
 
   it("folds nothing into nothing", () => {

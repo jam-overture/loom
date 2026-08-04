@@ -3,13 +3,19 @@ import { describe, expect, it } from "vitest"
 import { sequentialIdFactory, type ProposalId } from "../ids.js"
 import { assessChange } from "../runtime/assessment.js"
 import type { RuntimeEvent } from "../runtime/events.js"
-import { defaultGatePolicy } from "../runtime/policy.js"
+import { defaultGatePolicy, gatePolicySchema } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { buildIntent, buildProposal, FIXED_INSTANT } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 import type { TreeDelta } from "../tree/delta.js"
 
-import { recordOf, telemetryRecordSchema, intentIdOf, proposalIdOf } from "./event.js"
+import {
+  recordOf,
+  telemetryEventSchema,
+  telemetryRecordSchema,
+  intentIdOf,
+  proposalIdOf,
+} from "./event.js"
 
 const ids = sequentialIdFactory("e")
 const { tree, ids: nodes } = sampleTree()
@@ -35,6 +41,7 @@ const disposition = {
   stakes: "low",
   reversible: true,
   confidence: 0.9,
+  policyId: "storefront",
 } as const
 
 const otherProposal = "p_other" as ProposalId
@@ -45,6 +52,7 @@ const otherProposal = "p_other" as ProposalId
  */
 const everyEvent: readonly RuntimeEvent[] = [
   { type: "intent-received", intent },
+  { type: "policy-resolved", intentId: intent.intentId, policy: defaultGatePolicy },
   { type: "interpretation-failed", intent, error: { code: "not-understood", detail: "no idea" } },
   { type: "change-proposed", proposal },
   { type: "assessment-failed", proposal, error: { code: "node-not-found", nodeId: nodes.footer } },
@@ -90,6 +98,18 @@ const envelopeOf = (event: RuntimeEvent) => ({
 })
 
 describe("recordOf", () => {
+  /**
+   * `everyEvent` is only evidence about membership if it is actually every one.
+   * Enumerating the stored union and comparing keeps a new `RuntimeEvent` from
+   * being narrowed correctly and then never exercised, which is the failure a
+   * hand-maintained fixture list invites.
+   */
+  it("is exercised against every event the journal can store", () => {
+    const stored = telemetryEventSchema.options.map((option) => option.shape.type.value)
+
+    expect(new Set(everyEvent.map((event) => event.type))).toEqual(new Set(stored))
+  })
+
   it("narrows every runtime event without dropping any of them", () => {
     const narrowed = everyEvent.map((event) => recordOf(envelopeOf(event)).event.type)
 
@@ -155,6 +175,26 @@ describe("recordOf", () => {
       proposalId: proposal.proposalId,
       actor: "reviewer:bo",
     })
+  })
+
+  /**
+   * A policy is host configuration, versioned where the host keeps it. Copying
+   * its values onto every change would store one document a million times to
+   * answer a question the name already answers — provided the name identifies
+   * the content, which is what `GatePolicy.policyId` asks of a host.
+   */
+  it("keeps the name of the policy in force and drops its values", () => {
+    const policy = gatePolicySchema.parse({ policyId: "storefront", minimumConfidence: 0.93 })
+    const record = recordOf(
+      envelopeOf({ type: "policy-resolved", intentId: intent.intentId, policy })
+    )
+
+    expect(record.event).toEqual({
+      type: "policy-resolved",
+      intentId: intent.intentId,
+      policyId: "storefront",
+    })
+    expect(JSON.stringify(record)).not.toContain("0.93")
   })
 
   it("keeps a proposal whole, because a refused change is recorded nowhere else", () => {

@@ -58,6 +58,15 @@ export const HeldProposalCard = ({ held }: { readonly held: HeldProposal }) => {
           <dt className="text-ink-muted">changes</dt>
           <dd className="font-mono">{summariseOperations(held.proposal.delta.operations)}</dd>
         </div>
+        {/*
+          * Under which standard, not only for which reason. A reviewer answering
+          * a hold is being asked to overrule a policy, and one they cannot name
+          * is one they cannot go and read.
+          */}
+        <div className="flex gap-1">
+          <dt className="text-ink-muted">policy</dt>
+          <dd className="font-mono">{held.disposition.policyId}</dd>
+        </div>
       </dl>
 
       <p className="bg-awaiting text-awaiting-ink rounded-sm p-2 text-2xs">

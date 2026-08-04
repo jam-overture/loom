@@ -296,7 +296,7 @@ export const confirmHeld = async (
     ...(answer.actor === undefined ? {} : { actor: answer.actor }),
   })
 
-  const outcome = confirmChange(path.runtime, head.value, proposal)
+  const outcome = confirmChange(path.runtime, head.value, proposal, intent)
 
   switch (outcome.kind) {
     case "applied":

@@ -1,4 +1,4 @@
-import type { ProposalId, TreeId } from "../ids.js"
+import type { IntentId, ProposalId, TreeId } from "../ids.js"
 import type { StoreError } from "../store/errors.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
@@ -7,6 +7,7 @@ import type { ChangeAssessment } from "./assessment.js"
 import type { Disposition, DispositionReason } from "./disposition.js"
 import type { EditIntent } from "./intent.js"
 import type { InterpretationError } from "./interpreter.js"
+import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 
 /**
@@ -24,6 +25,17 @@ import type { ProposedChange } from "./proposal.js"
 
 export type RuntimeEvent =
   | { readonly type: "intent-received"; readonly intent: EditIntent }
+  /**
+   * Which policy this intent will be judged under, settled before anything is
+   * interpreted. Emitted even for an intent that never reaches a disposition,
+   * because "which policy was in force" is a question about the ask rather than
+   * about the answer — and an interpretation failure under a strict policy and
+   * one under a lax policy are not the same event.
+   *
+   * It carries the whole policy: within a request the next stage needs the
+   * values, not the name. What survives is narrower (0023).
+   */
+  | { readonly type: "policy-resolved"; readonly intentId: IntentId; readonly policy: GatePolicy }
   | { readonly type: "interpretation-failed"; readonly intent: EditIntent; readonly error: InterpretationError }
   | { readonly type: "change-proposed"; readonly proposal: ProposedChange }
   | { readonly type: "assessment-failed"; readonly proposal: ProposedChange; readonly error: TreeError }

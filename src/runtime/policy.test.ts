@@ -52,3 +52,17 @@ describe("gatePolicySchema", () => {
     expect(gatePolicySchema.safeParse({ protectedPrimitiveTypes: ["Checkout"] }).success).toBe(false)
   })
 })
+
+describe("gatePolicySchema — policyId", () => {
+  it("names the default policy, so a disposition under it is not anonymous", () => {
+    expect(defaultGatePolicy.policyId).toBe("default")
+  })
+
+  it("keeps the name a host declared", () => {
+    expect(gatePolicySchema.parse({ policyId: "storefront" }).policyId).toBe("storefront")
+  })
+
+  it("rejects an empty name, which would attribute a judgment to nothing", () => {
+    expect(gatePolicySchema.safeParse({ policyId: "" }).success).toBe(false)
+  })
+})

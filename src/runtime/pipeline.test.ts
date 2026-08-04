@@ -19,6 +19,7 @@ import type { LoomTree } from "../tree/tree.js"
 import type { IntentOrigin } from "./intent.js"
 import type { InterpretationError } from "./interpreter.js"
 import { composeChange, confirmChange, type CompositionRuntime } from "./pipeline.js"
+import { fixedPolicy, type PolicyContext, type PolicySource } from "./policy-source.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 
@@ -35,6 +36,7 @@ type Harness = {
 const harnessFor = (options: {
   readonly build: (ids: SampleTree["ids"]) => TreeOperation[]
   readonly policy?: GatePolicy
+  readonly policySource?: PolicySource
   readonly origin?: IntentOrigin
   readonly confidence?: number
 }): Harness => {
@@ -60,7 +62,7 @@ const harnessFor = (options: {
   return {
     runtime: {
       interpreter: scriptedInterpreter(ok(proposal)),
-      policy: options.policy ?? defaultGatePolicy,
+      policySource: options.policySource ?? fixedPolicy(options.policy ?? defaultGatePolicy),
       events,
       clock: fixedClock(),
       idFactory: spare,
@@ -116,6 +118,7 @@ describe("composeChange on an accepted change", () => {
 
     expect(events.types()).toEqual([
       "intent-received",
+      "policy-resolved",
       "change-proposed",
       "change-assessed",
       "disposition-decided",
@@ -170,7 +173,7 @@ describe("composeChange when interpretation fails", () => {
     const events = collectingEventSink()
     const runtime: CompositionRuntime = {
       interpreter: scriptedInterpreter(err({ code: "not-understood", detail: "no idea" })),
-      policy: defaultGatePolicy,
+      policySource: fixedPolicy(defaultGatePolicy),
       events,
       clock: fixedClock(),
       idFactory: spare,
@@ -180,7 +183,11 @@ describe("composeChange when interpretation fails", () => {
     if (outcome.kind !== "not-interpreted") throw new Error(`unexpected ${outcome.kind}`)
 
     expect(outcome.error.code).toBe("not-understood")
-    expect(events.types()).toEqual(["intent-received", "interpretation-failed"])
+    expect(events.types()).toEqual([
+      "intent-received",
+      "policy-resolved",
+      "interpretation-failed",
+    ])
   })
 })
 
@@ -196,6 +203,7 @@ describe("composeChange when the proposal does not apply", () => {
     expect(outcome.error.code).toBe("node-not-found")
     expect(events.types()).toEqual([
       "intent-received",
+      "policy-resolved",
       "change-proposed",
       "assessment-failed",
     ])
@@ -209,7 +217,7 @@ describe("confirmChange", () => {
     const held = await composeChange(runtime, tree, intentFor(tree))
     expect(held.kind).toBe("awaiting-confirmation")
 
-    const outcome = confirmChange(runtime, tree, proposal)
+    const outcome = confirmChange(runtime, tree, proposal, intentFor(tree))
     if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
 
     const body = findNode(outcome.tree.root, ids.body)
@@ -223,7 +231,7 @@ describe("confirmChange", () => {
       policy,
     })
 
-    expect(confirmChange(runtime, tree, proposal).kind).toBe("rejected")
+    expect(confirmChange(runtime, tree, proposal, intentFor(tree)).kind).toBe("rejected")
   })
 
   it("reports an inapplicable proposal instead of assessing it", () => {
@@ -231,18 +239,18 @@ describe("confirmChange", () => {
       build: () => [{ op: "remove", nodeId: spare.nodeId() }],
     })
 
-    const outcome = confirmChange(runtime, tree, proposal)
+    const outcome = confirmChange(runtime, tree, proposal, intentFor(tree))
     if (outcome.kind !== "not-applicable") throw new Error(`unexpected ${outcome.kind}`)
 
     expect(outcome.error.code).toBe("node-not-found")
-    expect(events.types()).toEqual(["assessment-failed"])
+    expect(events.types()).toEqual(["policy-resolved", "assessment-failed"])
   })
 
   it("rejects a confirmation that arrives after the tree has moved on", () => {
     const { runtime, tree, proposal } = harnessFor({ build: tweak, confidence: 0.5 })
 
     const moved = { ...tree, revision: tree.revision + 1 }
-    const outcome = confirmChange(runtime, moved, proposal)
+    const outcome = confirmChange(runtime, moved, proposal, intentFor(moved))
     if (outcome.kind !== "not-applicable") throw new Error(`unexpected ${outcome.kind}`)
 
     expect(outcome.error.code).toBe("revision-mismatch")
@@ -302,6 +310,7 @@ describe("composeChange when a refusal is repaired", () => {
 
     expect(events.types()).toEqual([
       "intent-received",
+      "policy-resolved",
       "change-proposed",
       "change-assessed",
       "disposition-decided",
@@ -425,5 +434,138 @@ describe("composeChange when a refusal is repaired", () => {
     const outcome = await composeChange(runtime, tree, intentFor(tree))
 
     expect(outcome.kind).toBe("not-applicable")
+  })
+})
+
+/**
+ * The policy is chosen for the ask, not for the answer. Everything here is
+ * about *when* it is resolved and *what* the source is allowed to have seen,
+ * because those are the properties that keep the Gate's verdict meaningful.
+ */
+describe("the policy a change is judged under", () => {
+  const recordingSource = (policy: GatePolicy) => {
+    const seen: PolicyContext[] = []
+
+    return {
+      seen,
+      source: {
+        resolve: (context: PolicyContext) => {
+          seen.push(context)
+
+          return policy
+        },
+      },
+    }
+  }
+
+  it("names the policy that decided, on the disposition itself", async () => {
+    const policy = gatePolicySchema.parse({ policyId: "storefront" })
+    const { runtime, tree } = harnessFor({ build: tweak, policy })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.policyId).toBe("storefront")
+  })
+
+  it("narrates the resolution before anything is interpreted", async () => {
+    const policy = gatePolicySchema.parse({ policyId: "storefront" })
+    const { runtime, events, tree } = harnessFor({ build: tweak, policy })
+    const intent = intentFor(tree)
+
+    await composeChange(runtime, tree, intent)
+
+    expect(events.types().indexOf("policy-resolved")).toBeLessThan(
+      events.types().indexOf("change-proposed")
+    )
+    expect(events.envelopes[0]?.event.type).toBe("intent-received")
+    expect(events.envelopes[1]?.event).toEqual({
+      type: "policy-resolved",
+      intentId: intent.intentId,
+      policy,
+    })
+  })
+
+  /**
+   * The context is the tree and the ask, and nothing else. A source that could
+   * see what the model proposed could pick a lenient policy in answer to a
+   * change the strict one would have refused.
+   */
+  it("shows the source the ask and the tree, and never the proposal", async () => {
+    const { seen, source } = recordingSource(defaultGatePolicy)
+    const { runtime, tree } = harnessFor({ build: tweak, policySource: source })
+    const intent = intentFor(tree)
+
+    await composeChange(runtime, tree, intent)
+
+    expect(seen).toHaveLength(1)
+    expect(Object.keys(seen[0] ?? {}).sort()).toEqual(["intent", "tree"])
+    expect(seen[0]?.intent.intentId).toBe(intent.intentId)
+    expect(seen[0]?.tree.treeId).toBe(tree.treeId)
+  })
+
+  /**
+   * 0006's whole point is that the repair is comparable to what it replaced.
+   * Resolving twice would let a host's source hand the second attempt an easier
+   * bar and make the repair look like it earned its acceptance.
+   */
+  it("judges a repair under the same policy as the proposal it replaces", async () => {
+    const { seen, source } = recordingSource(gatePolicySchema.parse({ policyId: "storefront" }))
+    const base = harnessFor({ build: tweak, confidence: 0.05, policySource: source })
+    const repair = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: base.tree.treeId,
+        baseRevision: base.tree.revision,
+        operations: tweak(base.ids),
+      },
+      confidence: 0.95,
+    })
+    const runtime = { ...base.runtime, repairer: scriptedRepairer(ok(repair)) }
+
+    await composeChange(runtime, base.tree, intentFor(base.tree))
+
+    const decided = base.events.envelopes.flatMap((envelope) =>
+      envelope.event.type === "disposition-decided" ? [envelope.event.disposition] : []
+    )
+
+    expect(seen).toHaveLength(1)
+    expect(decided).toHaveLength(2)
+    expect(decided.map((disposition) => disposition.policyId)).toEqual(["storefront", "storefront"])
+  })
+
+  /**
+   * The second look is a look at things as they are now — the same rule the
+   * assessment already follows. A host that tightened its policy while the
+   * proposal sat in the queue meant that for the queue too.
+   */
+  it("resolves again when a held proposal is confirmed", async () => {
+    const { runtime, tree, proposal } = harnessFor({
+      build: (ids) => [{ op: "remove", nodeId: ids.card }],
+      policySource: {
+        resolve: ({ intent }: PolicyContext) =>
+          intent.origin === "developer"
+            ? gatePolicySchema.parse({ policyId: "lenient" })
+            : gatePolicySchema.parse({
+                policyId: "locked-down",
+                protectedPrimitiveTypes: ["loom.card"],
+              }),
+      },
+    })
+
+    const lenient = buildIntent(spare, {
+      treeId: tree.treeId,
+      baseRevision: tree.revision,
+      origin: "developer",
+    })
+
+    const held = confirmChange(runtime, tree, proposal, lenient)
+    expect(held.kind).toBe("applied")
+    expect(held.kind === "applied" && held.disposition.policyId).toBe("lenient")
+
+    const locked = confirmChange(runtime, tree, proposal, intentFor(tree))
+    expect(locked.kind).toBe("rejected")
+    expect(locked.kind === "rejected" && locked.disposition.policyId).toBe("locked-down")
   })
 })

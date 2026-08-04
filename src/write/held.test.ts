@@ -42,6 +42,7 @@ const heldProposal = (options?: {
       stakes: "medium",
       reversible: true,
       confidence: 0.5,
+      policyId: "default",
     },
     heldAt: options?.heldAt ?? FIXED_INSTANT,
   }

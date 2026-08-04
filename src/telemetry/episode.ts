@@ -95,6 +95,17 @@ export type IntentEpisode = {
   readonly treeId: TreeId
   /** Absent when the window opened after the intent was received. */
   readonly intent?: IntentSummary
+  /**
+   * The policy this intent was last resolved to be judged under. Absent when
+   * the window opened after resolution, or when the records predate it.
+   *
+   * "Last" matters for a proposal that was held and later confirmed: the Gate
+   * resolves again on the second look, so a host that narrowed its policy in
+   * between shows two resolutions and this keeps the one that decided the
+   * outcome. Each proposal's disposition carries the policy that judged that
+   * proposal, which is the finer-grained truth.
+   */
+  readonly policyId?: string
   readonly startedAt: string
   readonly proposals: readonly ProposalEpisode[]
   readonly resolution: EpisodeResolution
@@ -134,6 +145,7 @@ type IntentDraft = {
   readonly intentId: IntentId
   treeId: TreeId
   intent: IntentSummary | undefined
+  policyId: string | undefined
   startedAt: string
   failure: EpisodeFailure | undefined
   failureKind: "not-interpreted" | "not-writable" | undefined
@@ -215,6 +227,7 @@ export const episodesOf = (records: readonly RecordedTelemetry[]): EpisodeFold =
       intentId,
       treeId: record.treeId,
       intent: undefined,
+      policyId: undefined,
       startedAt: record.occurredAt,
       failure: undefined,
       failureKind: undefined,
@@ -253,6 +266,11 @@ export const episodesOf = (records: readonly RecordedTelemetry[]): EpisodeFold =
         const draft = intentDraft(event.intent.intentId, record)
         draft.intent = event.intent
         draft.startedAt = occurredAt
+        break
+      }
+
+      case "policy-resolved": {
+        intentDraft(event.intentId, record).policyId = event.policyId
         break
       }
 
@@ -407,6 +425,7 @@ export const episodesOf = (records: readonly RecordedTelemetry[]): EpisodeFold =
       intentId: draft.intentId,
       treeId: draft.treeId,
       ...(draft.intent === undefined ? {} : { intent: draft.intent }),
+      ...(draft.policyId === undefined ? {} : { policyId: draft.policyId }),
       startedAt: draft.startedAt,
       proposals: owned,
       resolution: resolutionOf(draft, owned),

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { sequentialIdFactory, treeIdSchema } from "../ids.js"
 import { renderRequest } from "../render/request.js"
 import { composeChange, type CompositionRuntime } from "../runtime/pipeline.js"
+import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
 import { buildIntent, buildProposal, collectingEventSink, fixedClock, scriptedInterpreter } from "../testing/doubles.js"
 import { registryOf, testDefinitions } from "../testing/definitions.js"
@@ -89,7 +90,7 @@ describe("treeSourceFromStore", () => {
 
     const runtime: CompositionRuntime = {
       interpreter: scriptedInterpreter({ ok: true, value: proposal }),
-      policy: defaultGatePolicy,
+      policySource: fixedPolicy(defaultGatePolicy),
       events: collectingEventSink(),
       clock: fixedClock(),
       idFactory,
