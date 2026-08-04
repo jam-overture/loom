@@ -40,6 +40,17 @@ export const describeTelemetryError = (error: TelemetryError): string =>
  */
 export type RecordedTelemetry = TelemetryRecord & {
   readonly seq: number
+  /**
+   * When the journal learned of the record, which is not `occurredAt`.
+   *
+   * Both are here because they answer different questions and only one of them
+   * the journal can vouch for. `occurredAt` is what the host said, and a host
+   * that sets it wrongly — a skewed serverless clock, a replayed batch — is
+   * describing its own timeline. `recordedAt` is stamped on arrival, so it is
+   * the only timestamp retention may be measured against: an age a writer can
+   * choose is an age a writer can dodge.
+   */
+  readonly recordedAt: string
 }
 
 export type TelemetryReadRequest = {
@@ -79,7 +90,25 @@ export const clampTelemetryLimit = (limit: number | undefined): number =>
   clampLimit(limit, { fallback: DEFAULT_TELEMETRY_LIMIT, max: MAX_TELEMETRY_LIMIT })
 
 /**
- * Two operations, and the asymmetry is deliberate: writes arrive in batches
+ * What a journal is asked to forget, expressed as a position rather than a rule.
+ *
+ * Every record below `before` goes; nothing else is touched. A journal is not
+ * told about ages, policies, or episodes — deciding *what* may be forgotten is
+ * `retention.ts`'s job, and it makes that decision by reading the journal
+ * through the same paged contract everyone else uses. This half only knows how
+ * to drop a prefix, which is why both implementations of it fit in four lines
+ * and cannot disagree about anything more interesting than that.
+ */
+export type ForgetRequest = {
+  readonly before: number
+}
+
+export type ForgetOutcome = {
+  readonly removed: number
+}
+
+/**
+ * Three operations, and the asymmetry is deliberate: writes arrive in batches
  * because a request narrates several stages and should pay for one round trip
  * (0024), while reads are paged because a journal only grows.
  *
@@ -87,6 +116,11 @@ export const clampTelemetryLimit = (limit: number | undefined): number =>
  * can make the batch atomic. Half a request's narration is worse than none of
  * it: an episode missing its disposition reads as a change that was proposed
  * and never judged, which is a fault report rather than a gap.
+ *
+ * `forget` is the only destructive operation anywhere in Loom's storage, and it
+ * is on the journal rather than the store for the reason 0016 gives: telemetry
+ * is narrowed from a log that keeps the truth, so forgetting it loses history
+ * and never loses a tree.
  */
 export interface TelemetryJournal {
   readonly record: (
@@ -95,4 +129,7 @@ export interface TelemetryJournal {
   readonly read: (
     request?: TelemetryReadRequest
   ) => Promise<Result<TelemetryPage, TelemetryError>>
+  readonly forget: (
+    request: ForgetRequest
+  ) => Promise<Result<ForgetOutcome, TelemetryError>>
 }

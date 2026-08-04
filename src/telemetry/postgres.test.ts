@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest"
 import { treeIdSchema } from "../ids.js"
 import type { LoomDatabase } from "../store/database.js"
 import { describeTelemetryJournalContract, sampleEpisode } from "../testing/journal-contract.js"
+import { rowSecurityOn } from "../testing/row-security.js"
 import { FIXED_INSTANT } from "../testing/doubles.js"
 
 import { ensureTelemetrySchema } from "./migrate.js"
@@ -82,5 +83,68 @@ describe("postgresTelemetryJournal — Postgres specifics", () => {
 
     expect(written.ok).toBe(false)
     expect(written.ok ? "" : written.error.code).toBe("unavailable")
+  })
+
+  it("reports a failed deletion rather than throwing at the caller", async () => {
+    const db = await freshDatabase()
+    const journal = postgresTelemetryJournal(db)
+    await db.execute(sql.raw("DROP TABLE loom_telemetry"))
+
+    const forgotten = await journal.forget({ before: 10 })
+
+    expect(forgotten.ok).toBe(false)
+    expect(forgotten.ok ? "" : forgotten.error.code).toBe("unavailable")
+  })
+
+  it("stamps recorded_at itself rather than taking it from the writer", async () => {
+    const db = await freshDatabase()
+    const journal = postgresTelemetryJournal(db)
+    await journal.record(sampleEpisode())
+
+    const page = await journal.read()
+    const stamps = page.ok ? page.value.records.map((record) => record.recordedAt) : []
+
+    expect(stamps).toHaveLength(4)
+    expect(stamps.every((stamp) => stamp !== FIXED_INSTANT)).toBe(true)
+    expect(stamps.every((stamp) => stamp.endsWith("Z"))).toBe(true)
+  })
+})
+
+/**
+ * The table is exposed to a public REST key the moment it exists on the host
+ * 0022 chose, so the lock is part of creating it rather than a step someone
+ * remembers.
+ */
+describe("ensureTelemetrySchema", () => {
+  it("leaves row level security enabled on the journal", async () => {
+    const db = await freshDatabase()
+
+    expect(await rowSecurityOn(db, "loom_telemetry")).toBe(true)
+  })
+
+  it("is a no-op run twice, so a redeploy does not need to know whether it ran", async () => {
+    const db = await freshDatabase()
+    await ensureTelemetrySchema(db)
+
+    expect(await rowSecurityOn(db, "loom_telemetry")).toBe(true)
+  })
+
+  /** A table created before the statement existed is locked by the next push. */
+  it("locks a journal that was created without it", async () => {
+    const db = drizzle(new PGlite())
+    await db.execute(
+      sql.raw(`CREATE TABLE loom_telemetry (
+        seq bigserial PRIMARY KEY,
+        tree_id text NOT NULL,
+        occurred_at text NOT NULL,
+        event jsonb NOT NULL,
+        recorded_at timestamptz NOT NULL DEFAULT now()
+      )`)
+    )
+    expect(await rowSecurityOn(db, "loom_telemetry")).toBe(false)
+
+    await ensureTelemetrySchema(db)
+
+    expect(await rowSecurityOn(db, "loom_telemetry")).toBe(true)
   })
 })

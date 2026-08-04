@@ -139,6 +139,25 @@ export const describeTelemetryJournalContract = (
       expect(page.ok && page.value.records.every((record) => record.treeId === yours)).toBe(true)
     })
 
+    /**
+     * Retention measures age against this, so an implementation that left it to
+     * the writer would let a writer decide how long its own records live.
+     */
+    it("stamps an arrival instant the writer never supplied", async () => {
+      const journal = await freshJournal()
+      const before = new Date().toISOString()
+      await journal.record(sampleEpisode())
+
+      const page = await journal.read()
+      const stamps = page.ok ? page.value.records.map((record) => record.recordedAt) : []
+
+      expect(stamps).toHaveLength(4)
+      expect(stamps.every((stamp) => stamp >= before)).toBe(true)
+      expect(stamps.every((stamp) => Number.isFinite(Date.parse(stamp)))).toBe(true)
+      /** `occurredAt` is the host's fixture instant, years apart from arrival. */
+      expect(stamps.every((stamp) => stamp !== FIXED_INSTANT)).toBe(true)
+    })
+
     it("increases seq across separate batches", async () => {
       const journal = await freshJournal()
       const treeId = treeIdSchema.parse("t_seq")
@@ -216,6 +235,124 @@ export const describeTelemetryJournalContract = (
         const past = await journal.read({ cursor: String(last?.seq ?? 0) })
 
         expect(past).toEqual({ ok: true, value: { records: [], older: null, newer: null } })
+      })
+    })
+
+    /**
+     * The destructive half. Every rule about *what* may go lives in
+     * `retention.ts`; what a journal owes is that a position means the same
+     * thing to both implementations, and that a prune never reshuffles what
+     * survives it.
+     */
+    describe("forgetting", () => {
+      const seqsAfter = async (journal: TelemetryJournal): Promise<readonly number[]> => {
+        const page = await journal.read()
+
+        return page.ok ? page.value.records.map((record) => record.seq) : []
+      }
+
+      it("drops the records below a position and keeps the rest", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_forget")
+        await journal.record(recordsFor(treeId, 4))
+
+        const all = await seqsAfter(journal)
+        const cut = all[2] ?? 0
+
+        expect(await journal.forget({ before: cut })).toEqual({
+          ok: true,
+          value: { removed: 2 },
+        })
+        expect(await seqsAfter(journal)).toEqual(all.slice(2))
+      })
+
+      it("forgets nothing when the position is at or below the oldest record", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_nofor")
+        await journal.record(recordsFor(treeId, 3))
+
+        const all = await seqsAfter(journal)
+
+        expect(await journal.forget({ before: all[0] ?? 0 })).toEqual({
+          ok: true,
+          value: { removed: 0 },
+        })
+        expect(await seqsAfter(journal)).toEqual(all)
+      })
+
+      it("forgets across every tree it holds, because a position is journal-wide", async () => {
+        const journal = await freshJournal()
+        const mine = treeIdSchema.parse("t_fmine")
+        const yours = treeIdSchema.parse("t_fyours")
+        await journal.record([...recordsFor(mine, 2), ...recordsFor(yours, 2)])
+
+        const all = await seqsAfter(journal)
+        const forgotten = await journal.forget({ before: all[3] ?? 0 })
+
+        expect(forgotten).toEqual({ ok: true, value: { removed: 3 } })
+        expect(await journal.read({ treeId: mine })).toMatchObject({
+          ok: true,
+          value: { records: [] },
+        })
+      })
+
+      /** Idempotent, so a retention run that repeats after a timeout is harmless. */
+      it("is a no-op the second time", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_twice")
+        await journal.record(recordsFor(treeId, 3))
+
+        const all = await seqsAfter(journal)
+        await journal.forget({ before: all[1] ?? 0 })
+
+        expect(await journal.forget({ before: all[1] ?? 0 })).toEqual({
+          ok: true,
+          value: { removed: 0 },
+        })
+        expect(await seqsAfter(journal)).toEqual(all.slice(1))
+      })
+
+      /**
+       * A forgotten position is never handed out again. A reader holding a
+       * cursor across a prune would otherwise resume inside records it has
+       * already read, and think the journal had gone backwards.
+       */
+      it("does not reuse the positions it forgot", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_reuse")
+        await journal.record(recordsFor(treeId, 3))
+
+        const all = await seqsAfter(journal)
+        await journal.forget({ before: (all.at(-1) ?? 0) + 1 })
+        await journal.record(recordsFor(treeId, 1))
+
+        const after = await seqsAfter(journal)
+
+        expect(after).toHaveLength(1)
+        expect(after[0]).toBeGreaterThan(all.at(-1) ?? 0)
+      })
+
+      it("empties a journal asked to forget everything", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_empty")
+        await journal.record(recordsFor(treeId, 3))
+
+        const all = await seqsAfter(journal)
+
+        expect(await journal.forget({ before: (all.at(-1) ?? 0) + 1 })).toEqual({
+          ok: true,
+          value: { removed: 3 },
+        })
+        expect(await journal.read()).toEqual({
+          ok: true,
+          value: { records: [], older: null, newer: null },
+        })
+      })
+
+      it("accepts a position an empty journal has nothing below", async () => {
+        const journal = await freshJournal()
+
+        expect(await journal.forget({ before: 1 })).toEqual({ ok: true, value: { removed: 0 } })
       })
     })
 

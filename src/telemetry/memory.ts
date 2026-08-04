@@ -1,9 +1,11 @@
 import { cursorPosition, pageEnds } from "../paging.js"
 import { ok } from "../result.js"
+import { systemClock, type Clock } from "../runtime/events.js"
 
 import type { TelemetryRecord } from "./event.js"
 import {
   clampTelemetryLimit,
+  type ForgetOutcome,
   type RecordedTelemetry,
   type TelemetryJournal,
   type TelemetryPage,
@@ -19,14 +21,19 @@ import {
  * implementation is checked against, and `journal-contract.ts` runs the same
  * suite over both so a disagreement is a test failure rather than a surprise in
  * production.
+ *
+ * The clock is a parameter for the same reason it is one everywhere else: a
+ * `recordedAt` this journal read off the wall clock would make every retention
+ * test a race against real time.
  */
-export const memoryTelemetryJournal = (): TelemetryJournal => {
-  const records: RecordedTelemetry[] = []
+export const memoryTelemetryJournal = (clock: Clock = systemClock): TelemetryJournal => {
+  let records: RecordedTelemetry[] = []
   let nextSeq = 1
 
   const positioned = (record: TelemetryRecord): RecordedTelemetry => ({
     ...record,
     seq: nextSeq++,
+    recordedAt: clock.now(),
   })
 
   return {
@@ -67,6 +74,19 @@ export const memoryTelemetryJournal = (): TelemetryJournal => {
           }),
         })
       )
+    },
+
+    /**
+     * `nextSeq` is deliberately not rewound. A forgotten position must never be
+     * handed out again: a cursor a reader is holding across a prune would
+     * otherwise resume in the middle of records it has already seen.
+     */
+    forget: ({ before }) => {
+      const kept = records.filter((record) => record.seq >= before)
+      const removed = records.length - kept.length
+      records = kept
+
+      return Promise.resolve(ok<ForgetOutcome>({ removed }))
     },
   }
 }
