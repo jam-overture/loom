@@ -296,7 +296,7 @@ Write, rate 1–5, then reveal.
 - **In 2 days:** Self-check 1 and 3, closed book.
 - **In 1 week:** From memory, write the four operations with their exact
   arguments. Then check against [`src/tree/delta.ts`](../src/tree/delta.ts).
-- **In 1 month:** Redo the "Do it" exercises without looking at the predictions.
+- **In 1 month:** Redo the "Try it" exercises without looking at the predictions.
 - See [`review-schedule.md`](review-schedule.md).
 
 ---
@@ -305,7 +305,7 @@ Write, rate 1–5, then reveal.
 
 - [`decisions/0001`](../decisions/0001-tree-and-delta-as-the-unit-of-change.md)
 - [`src/tree/delta.test.ts`](../src/tree/delta.test.ts) and [`apply.test.ts`](../src/tree/apply.test.ts) — the tests are the specification
-- Next: 04 — Identity: the id that never moves *(not yet written)*
+- Next: [04 — Identity: the id that never moves](04-identity.md)
 
 ---
 
