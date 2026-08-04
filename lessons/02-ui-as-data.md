@@ -7,6 +7,33 @@ exactly three node kinds, and explain why there is no `if` in the AST.
 
 ---
 
+## Warm-up
+
+Closed book, from lesson 01. Two minutes.
+
+1. Name the four questions a text diff cannot answer.
+2. What does Loom trade away, and what does it get for it?
+3. Why was "let the model emit a whole replacement tree" rejected, given it is
+   structured data?
+
+Do not look back until you have written something for all three.
+
+---
+
+## Predict
+
+Before reading on, in writing:
+
+> React has dozens of node types. Loom has three.
+>
+> 1. If you were designing this AST, list the node kinds you would include.
+> 2. For each one you listed, what would it cost to have it? (Hint: think about
+>    every function that must walk the tree.)
+> 3. Where would you put the *text* of a heading — in the node, or in a prop?
+>    Argue for one.
+
+---
+
 ## The problem
 
 Lesson 01 said "the UI is a tree". Fine — but React trees have dozens of node
@@ -192,7 +219,26 @@ prop that cannot cross any of the system's boundaries.
 
 ---
 
-## Check yourself
+## Explain it back
+
+Closed book.
+
+1. Explain the three node kinds to someone who knows React, in three sentences —
+   one per kind. Say what each is *for*, not what fields it has.
+
+2. **Connect it back:** in lesson 01 you learned Loom's thesis. Now explain how
+   the absence of a conditional node *follows from* that thesis. If you can
+   derive one from the other, you have the model; if it feels like two separate
+   facts, reread only the "no conditional node" section.
+
+3. Where else have you seen "make the common thing addressable" pay off? Database
+   surrogate keys, stable DOM ids, anything. What did it buy there?
+
+---
+
+## Self-check
+
+Write, rate your confidence 1–5, then reveal.
 
 1. Why is `slot` a distinct kind rather than an element with `type: "slot"`?
 
@@ -203,6 +249,25 @@ prop that cannot cross any of the system's boundaries.
    to logged-in users?
 
 4. What does making text a node buy you that a `text` prop does not?
+
+---
+
+## Reflect
+
+- Compare your Predict Q1 list against the actual three. What did you include
+  that Loom does not have, and can you now say what it would have cost?
+- Predict Q3 asked where heading text lives. Did your argument survive?
+- The id ordering in the fixture surprises most people. What did you assume an
+  id told you, and where did that assumption come from?
+
+---
+
+## Come back to this
+
+- **In 2 days:** Self-check 3 and 4, closed book.
+- **In 1 week:** Explain it back Q2 — derive the missing conditional node from
+  lesson 01's thesis, out loud.
+- See [`review-schedule.md`](review-schedule.md).
 
 ---
 

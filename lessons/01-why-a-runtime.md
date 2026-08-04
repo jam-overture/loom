@@ -8,6 +8,26 @@ system exists to protect it.
 
 ---
 
+## Predict
+
+**Answer these in writing before reading on.** You are not expected to get them
+right — attempting and missing is what makes the explanation stick. Give it two
+minutes, not twenty.
+
+> You are building a product page. A user types: *"Move the reviews above the
+> fold and make the buy button louder."* You wire up a model that reads
+> `ProductPage.tsx` and writes a new version.
+>
+> 1. Your CTO asks you to enforce one rule: *AI may rearrange the page, but must
+>    never touch checkout.* How would you implement that check?
+> 2. Three weeks and two hundred AI-authored changes later, conversion has
+>    dropped. How do you find which change did it?
+> 3. Having found it, how do you undo **just that one**?
+
+Keep what you wrote. You will compare against it at the end.
+
+---
+
 ## The problem
 
 You have a product page. A user says:
@@ -143,9 +163,32 @@ accepted going in.
 
 ---
 
-## Check yourself
+## Explain it back
 
-Cover the answers.
+Closed book. Do not scroll up.
+
+1. Explain to a colleague, in **four sentences or fewer**, why Loom does not let
+   AI write code. No jargon from this lesson — if you use the word "delta", define
+   it in the same breath.
+
+2. Think of a system you have worked on where an automated process changed
+   something and you later could not tell what or why. Which of the four
+   questions failed there? Would Loom's trade have helped, or was your problem
+   somewhere else entirely?
+
+3. Now argue the **other side**: describe a product where a code generator is
+   genuinely the better choice, and say what makes it different.
+
+Question 3 is not a rhetorical exercise. If you cannot argue against a design,
+you do not yet understand what it costs.
+
+---
+
+## Self-check
+
+For each question: write your answer, **then rate your confidence 1–5**, *then*
+reveal. The gap between your rating and your accuracy is the thing worth
+watching — most people are overconfident on 1 and underconfident on 3.
 
 1. A colleague says: "We could get the same safety by having the model emit code
    and then running a linter that forbids touching checkout files." What is wrong
@@ -158,6 +201,27 @@ Cover the answers.
    given that both are structured data?
 
 4. What single property does the rest of the system exist to protect?
+
+---
+
+## Reflect
+
+Compare what you wrote in **Predict** against the lesson.
+
+- Which of the three did you get closest to? Which did you not see at all?
+- Your answer to Predict Q1 was probably some form of "check the file paths" or
+  "check the diff". What did you assume was available to check, and why was it
+  not?
+- What is one thing you now think is true that you did not think an hour ago?
+
+---
+
+## Come back to this
+
+- **In 2 days:** Self-check questions 1 and 4, closed book.
+- **In 1 week:** Explain it back, question 1 — the four-sentence version, out
+  loud, without rereading.
+- See [`review-schedule.md`](review-schedule.md).
 
 ---
 

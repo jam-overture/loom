@@ -8,6 +8,36 @@ half-applied delta is worse than a rejected one.
 
 ---
 
+## Warm-up
+
+Closed book. Interleaved from both prior lessons — expect the mixing to feel
+harder than a single-topic review. That difficulty is the point.
+
+1. Why is text a node rather than a prop? (L02)
+2. What single property does the rest of the system exist to protect? (L01)
+3. Sketch the fixture tree from memory — seven nodes, kinds and nesting. Ids not
+   required. (L02)
+4. Why can't props hold a function? (L02)
+
+---
+
+## Predict
+
+In writing, before reading on:
+
+> You must design the vocabulary for "a change to a tree."
+>
+> 1. List the operations you would include. Be specific about their arguments.
+> 2. A delta contains five operations and the third one is invalid. What should
+>    happen to the other four? Argue for your answer.
+> 3. Interpretation takes three seconds. In that time, someone else changed the
+>    tree. What should happen to the proposal that was being interpreted?
+
+Question 2 is the one to sit with. Both answers are defensible until you work out
+what the loser costs.
+
+---
+
 ## The problem
 
 You have a tree. Something wants to change it. What is the smallest honest
@@ -212,7 +242,29 @@ produces off-by-one bugs in every editor built on top.
 
 ---
 
-## Check yourself
+## Explain it back
+
+Closed book.
+
+1. Explain atomicity to a sceptical engineer who says "surely applying 3 of 4
+   operations is better than losing all the work." Do not appeal to convention —
+   name the concrete thing that breaks.
+
+2. **Connect it back:** lesson 01 said a change must be attributable and
+   reversible. Show how *each* of the three properties in this lesson — ordered,
+   atomic, revision-bound — is required by that. If one of them feels unmotivated,
+   that is where to look again.
+
+3. `configure` handles three node kinds through one "settable surface". Name
+   another design where one operation was made to span several types by finding
+   the right abstraction over them. What happened to the ones that instead grew
+   an operation per type?
+
+---
+
+## Self-check
+
+Write, rate 1–5, then reveal.
 
 1. Why does a delta name `baseRevision` rather than just applying to whatever
    tree it is handed?
@@ -224,6 +276,28 @@ produces off-by-one bugs in every editor built on top.
 
 4. `configure` on a text node with `set: { colour: "red" }` is refused. Why —
    and where would that colour actually live?
+
+---
+
+## Reflect
+
+- Predict Q1: how many operations did you list? If more than four, which of yours
+  does the settable surface absorb? If fewer, what can you not express?
+- Predict Q2: did you argue for partial application? What changed your mind, or
+  what still bothers you about all-or-nothing?
+- The `move` index convention catches nearly everyone. Did you predict 2 or 3?
+  What does that tell you about which mental model you were using — detach-then-
+  insert, or shift-in-place?
+
+---
+
+## Come back to this
+
+- **In 2 days:** Self-check 1 and 3, closed book.
+- **In 1 week:** From memory, write the four operations with their exact
+  arguments. Then check against [`src/tree/delta.ts`](../src/tree/delta.ts).
+- **In 1 month:** Redo the "Do it" exercises without looking at the predictions.
+- See [`review-schedule.md`](review-schedule.md).
 
 ---
 
