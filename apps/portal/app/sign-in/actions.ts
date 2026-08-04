@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
-import { signIn, signOut } from "@/lib/auth/identity"
+import { describeSignInProblem, signIn, signOut } from "@/lib/auth/identity"
 import { safeReturnPath, SIGN_IN_PATH } from "@/lib/auth/paths"
 
 /**
@@ -32,19 +32,7 @@ export const submitKey = async (
 
   const attempt = await signIn(parsed.data)
 
-  if (!attempt.ok) {
-    return {
-      detail:
-        attempt.error.code === "not-configured"
-          ? attempt.error.detail
-          : /**
-             * One message for a wrong key, whoever it did or did not belong to.
-             * Saying "no such reviewer" would turn the form into a way to
-             * enumerate the roster.
-             */
-            "That key was not recognised.",
-    }
-  }
+  if (!attempt.ok) return { detail: describeSignInProblem(attempt.error) }
 
   redirect(safeReturnPath(form.get("from")?.toString()))
 }

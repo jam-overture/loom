@@ -5,11 +5,12 @@ import postgres from "postgres"
 import { ensureTreeStoreSchema } from "@loom/runtime/postgres"
 import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
 
+import { ensureSignInAttemptsSchema } from "../lib/auth/attempts-postgres"
 import { resolveConnectionString } from "../lib/connection"
 
 /**
- * Creates the tables the portal needs — the store's, and the telemetry journal's.
- * Run once against a new database.
+ * Creates the tables the portal needs — the store's, the telemetry journal's, and
+ * its own sign-in attempt log. Run once against a new database.
  *
  * Deliberately a script rather than something the app does on boot: DDL issued by
  * several serverless instances starting at once is a race, and a migration that
@@ -49,7 +50,11 @@ try {
   const db = drizzle(client)
   await ensureTreeStoreSchema(db)
   await ensureTelemetrySchema(db)
-  console.log("loom: loom_trees, loom_revisions and loom_telemetry are present")
+  /** The portal's own table, not the runtime's — see `lib/auth/attempts-postgres.ts`. */
+  await ensureSignInAttemptsSchema(db)
+  console.log(
+    "loom: loom_trees, loom_revisions, loom_telemetry and loom_signin_attempts are present"
+  )
 } finally {
   await client.end()
 }

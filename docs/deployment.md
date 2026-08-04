@@ -93,15 +93,16 @@ reasoning about it.
 
 ## Environment
 
-`apps/portal/.env.example` is the full list with the commentary. Four variables,
+`apps/portal/.env.example` is the full list with the commentary. Five variables,
 two of which are required:
 
-| Variable                     | Required | Notes                                       |
-| ---------------------------- | -------- | ------------------------------------------- |
-| `LOOM_PORTAL_SESSION_SECRET` | **yes**  | Signs sessions. ≥ 32 chars                  |
-| `LOOM_PORTAL_REVIEWERS`      | **yes**  | `actor:key` pairs. Keys ≥ 24 chars          |
-| `LOOM_ANTHROPIC_API_KEY`     | no       | Falls back to `ANTHROPIC_API_KEY`           |
-| `DATABASE_URL`               | no       | Absent means memory — see below             |
+| Variable                         | Required | Notes                                   |
+| -------------------------------- | -------- | --------------------------------------- |
+| `LOOM_PORTAL_SESSION_SECRET`     | **yes**  | Signs sessions. ≥ 32 chars              |
+| `LOOM_PORTAL_REVIEWERS`          | **yes**  | `actor:key` pairs. Keys ≥ 24 chars      |
+| `LOOM_ANTHROPIC_API_KEY`         | no       | Falls back to `ANTHROPIC_API_KEY`       |
+| `DATABASE_URL`                   | no       | Absent means memory — see below         |
+| `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
 
 **Never prefix any of them `NEXT_PUBLIC_`.** 0017 exists partly to keep the model
 key off the client, and a public prefix would undo the whole record in one
@@ -144,9 +145,34 @@ Consequences worth knowing before you rely on it:
 - **A leaked key is a leaked identity** until you rotate that key. Treat pasting
   one anywhere as a rotation trigger, exactly like the database password.
 - **Sessions last twelve hours** and do not renew themselves by being used.
-- **Nothing rate-limits sign-in.** The keys are long and compared in constant
-  time, but a determined guesser is not slowed down. Vercel's Deployment
-  Protection in front of this is still worth having.
+
+### The sign-in throttle
+
+Five failures from one caller inside an hour, and the sixth is refused for a
+minute — doubling to a quarter of an hour, and forgotten after an hour of
+silence (0034). A correct key clears the count, so a reviewer who mistypes and
+then gets it right starts clean.
+
+Two things to know before you rely on it:
+
+- **It needs `DATABASE_URL` to be worth much.** Without one the count lives in a
+  server process, and a serverless deployment has many — so a caller is counted
+  once per instance rather than once. It is a real throttle on `pnpm dev` and a
+  soft one in production.
+- **It counts by forwarded-for address**, read from the right by
+  `LOOM_PORTAL_TRUSTED_PROXY_HOPS` — 1 on Vercel, which is the default. Put a
+  CDN or WAF in front and it becomes 2, and getting it wrong in the *high*
+  direction is the one that matters: the app would then read an entry the caller
+  wrote, and a caller who picks their own address is not throttled at all.
+
+What it stores is a keyed digest of the address, never the address, so the table
+cannot be read as a visitor log. Rotating `LOOM_PORTAL_SESSION_SECRET` therefore
+clears every outstanding lockout as well as every session.
+
+A caller who rotates addresses evades it, which is why the deliberate
+non-decision in 0034 is worth knowing: there is no global cap, because a global
+cap is a lockout of every reviewer that any anonymous caller could trigger.
+Vercel's Deployment Protection in front of this is still worth having.
 
 ## The database
 
@@ -200,17 +226,27 @@ pnpm --filter @loom/portal db:push
 ```
 
 Once, from a machine with `.env.local` in place. Idempotent — every statement is
-`IF NOT EXISTS`, so re-running is a no-op. It creates three tables: `loom_trees`
-and `loom_revisions` for the store, and `loom_telemetry` for the journal §6
-records into.
+`IF NOT EXISTS`, so re-running is a no-op. It creates four tables: `loom_trees`
+and `loom_revisions` for the store, `loom_telemetry` for the journal §6 records
+into, and `loom_signin_attempts` for the sign-in throttle. The last of those
+belongs to the portal rather than to `@loom/runtime` — the runtime takes an
+actor and never asks how a host established one.
 
 **Re-run it whenever the schema changes, not only on a new database.**
 `CREATE TABLE IF NOT EXISTS` leaves an existing table alone, columns and all, so
 a column added after a deployment reaches it only through the `ALTER TABLE …
 ADD COLUMN IF NOT EXISTS` beside it. A deployment that skips the re-run keeps
-serving and fails the write that needed the column. So far that is
-`loom_revisions.answered_by` (0029), which every confirmation of a held proposal
-writes.
+serving and fails the write that needed the column.
+
+Two so far, and the second one is the one to get right:
+
+- `loom_revisions.answered_by` (0029), which every confirmation of a held
+  proposal writes.
+- `loom_signin_attempts` (0034). **Miss this one and nobody can sign in.** The
+  throttle fails closed by design — an attempt it cannot count is refused rather
+  than allowed uncounted — so a database configured without this table admits no
+  reviewer at all. The sign-in page says as much and names `db:push`; running it
+  fixes it in seconds.
 
 ### 5. Lock the tables down — required
 
@@ -218,6 +254,7 @@ writes.
 ALTER TABLE loom_trees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loom_revisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loom_telemetry ENABLE ROW LEVEL SECURITY;
+ALTER TABLE loom_signin_attempts ENABLE ROW LEVEL SECURITY;
 ```
 
 Every table `db:push` creates needs this, including any added later — a new table
