@@ -42,6 +42,12 @@ export const SIGN_IN_ATTEMPTS_DDL: readonly string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS loom_signin_attempts_last_idx
      ON loom_signin_attempts (last_failure_at)`,
+  /**
+   * The same rule the runtime's DDL now applies to its own tables, and this one
+   * has the least excuse to be exempt: it sits behind a form anyone on the
+   * internet can reach.
+   */
+  `ALTER TABLE loom_signin_attempts ENABLE ROW LEVEL SECURITY`,
 ]
 
 export const ensureSignInAttemptsSchema = async (db: LoomDatabase): Promise<void> => {

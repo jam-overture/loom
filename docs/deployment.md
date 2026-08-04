@@ -248,31 +248,69 @@ Two so far, and the second one is the one to get right:
   reviewer at all. The sign-in page says as much and names `db:push`; running it
   fixes it in seconds.
 
-### 5. Lock the tables down — required
+### 5. The tables are locked down for you
+
+`db:push` runs `ALTER TABLE … ENABLE ROW LEVEL SECURITY` on every table it
+creates, so there is nothing to do here and no window in which a new table is
+exposed. It was a manual step until 0036; if you have a database that predates
+that, re-running `db:push` locks it.
+
+Why it matters: Supabase exposes everything in the `public` schema through
+PostgREST using the anon key, and that key is public by design. Without RLS,
+anyone with the anon key can read and write your trees.
+
+No policies accompany it, deliberately. RLS with no policy denies every role
+except the table's owner, and the owner is who the portal connects as — Loom
+reaches Postgres over plain SQL and never over PostgREST (0022), so the effect is
+to close a door Loom does not use.
+
+**If you connect as a role that does not own the tables, every query will be
+denied** and the portal will report the database as unavailable. That is outside
+the arrangement 0022 describes; grant that role a policy, or connect as the
+owner.
+
+To check it took:
 
 ```sql
-ALTER TABLE loom_trees ENABLE ROW LEVEL SECURITY;
-ALTER TABLE loom_revisions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE loom_telemetry ENABLE ROW LEVEL SECURITY;
-ALTER TABLE loom_signin_attempts ENABLE ROW LEVEL SECURITY;
+SELECT relname, relrowsecurity FROM pg_class
+WHERE relname LIKE 'loom\_%';
 ```
-
-Every table `db:push` creates needs this, including any added later — a new table
-is exposed the moment it exists.
-
-Supabase exposes everything in the `public` schema through PostgREST using the
-anon key, and that key is public by design. **Without this, anyone with the anon
-key can read and write your trees.**
-
-No policies are needed. That denies PostgREST entirely, while the portal is
-unaffected: it connects as the role that owns the tables, and RLS does not apply
-to a table's owner unless `FORCE ROW LEVEL SECURITY` is set.
 
 ### 6. Redeploy, and check the right thing
 
 The tell is on `/trees`: the "No database is configured" note **disappears** when
 `DATABASE_URL` is picked up. The proof is making a change through the prompt box
 and reloading.
+
+### 7. Telemetry retention — optional, and nothing runs it for you
+
+The journal only grows. Nothing in Loom deletes from it on its own, because when
+to forget is your decision and a framework that made it on a timer it chose would
+be deciding for you (0037).
+
+```bash
+pnpm --filter @loom/portal telemetry:prune
+```
+
+Defaults to a **90-day** horizon; set `LOOM_TELEMETRY_MAX_AGE_MS` to change it.
+Ages below one hour are refused — the most likely way to write one is a units
+mistake, and the cost of that mistake is an empty journal.
+
+Safe to run on a schedule, safe to run twice, and safe to interrupt. It is
+incremental: a journal far past its horizon is caught up over several runs rather
+than in one long transaction. It never splits an episode, so a proposal still
+waiting on someone's answer survives however old it is — and the run says so:
+
+```
+loom: forgot 1284 telemetry records, keeping 7 older records for 1 unfinished episode
+```
+
+A large "keeping …" that does not shrink means something very old is still held
+awaiting an answer. `/activity` is where to find it.
+
+This deletes the *account* of what happened — proposals, dispositions, rationales.
+It cannot touch a tree or a revision: those live in `loom_trees` and
+`loom_revisions`, which this never reads (0016, 0023).
 
 ### If the password leaks
 
