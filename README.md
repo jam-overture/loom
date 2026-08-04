@@ -116,9 +116,17 @@ apps/portal/
 └── lib/nav.ts           # Active-section matching, as a pure function
 ```
 
-`pnpm verify` at the root runs the runtime's typecheck and tests, compiles the
-runtime, then runs the portal's typecheck, tests and build. The portal's build is
-part of it because prerendering is what proves the shell renders.
+`pnpm verify` at the root compiles the runtime, typechecks it, runs its tests,
+then runs the portal's typecheck, tests and build. The portal's build is part of
+it because prerendering is what proves the shell renders.
+
+**The build comes first, and that order is load-bearing.** `src/cli/scaffold-fixture/`
+is checked-in scaffold output, and it imports `@loom/runtime/react` and
+`@loom/runtime/sdk` the way a consumer does — through the `exports` map, which
+points at `dist/`. Typechecking before the build fails on a clean clone with four
+`TS2307`s, so the build has to have run. Keeping it in this order rather than
+mapping those specifiers back to `src/` means the typecheck also proves the
+`exports` map resolves, which is the thing a consumer actually depends on.
 
 The runtime compiles to `dist/` and every entry point resolves there (0030), so
 the portal consumes it as an ordinary Node package rather than as TypeScript
