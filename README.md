@@ -128,10 +128,24 @@ The portal deploys to Vercel from `apps/portal`. Settings, and what a deployment
 can and cannot do before a backing store lands, are in
 [`docs/deployment.md`](docs/deployment.md).
 
+## Learning Loom
+
+`lessons/` is a course on the ideas rather than the API. Each lesson starts from
+a problem, shows why the obvious solution fails, and only then shows what Loom
+does instead — with exercises you run. [Start with the syllabus](lessons/README.md).
+
+New to the codebase? Read [lesson 01](lessons/01-why-a-runtime.md) before
+anything else; it is the thesis the rest of the system defends.
+
 ## Decisions
 
 `decisions/` holds numbered architectural decision records — what was chosen,
 what was rejected, and why. [Start with the index](decisions/README.md).
+
+Decision records and lessons answer different questions. A record says *what we
+decided and what we rejected*; it is written for someone deciding whether to
+change it. A lesson says *why this is the right shape and how to think in it*;
+it is written for someone learning. Neither substitutes for the other.
 
 ## Commands
 

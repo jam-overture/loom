@@ -1,0 +1,135 @@
+# Lessons
+
+A course on Loom — the ideas, not the API surface.
+
+The decision records say *what was decided*. The reports say *what happened on a
+given day*. Neither is written to teach. These lessons are.
+
+## How these are built, and why it will feel harder than it should
+
+These lessons follow the findings in *Make It Stick* (Brown, Roediger &
+McDaniel). That has real consequences for how they read, and the most important
+one is this:
+
+> **Rereading a clear explanation is the most popular study method and one of the
+> least effective.** It produces fluency — the text feels familiar, so you feel
+> like you know it — without producing durable memory. The feeling of ease is the
+> problem, not the evidence.
+
+So these lessons deliberately make things harder in specific ways. Each is a
+*desirable difficulty*: it slows you down now and is why you still have it in six
+months.
+
+| Principle | What you'll notice | Why |
+| --- | --- | --- |
+| **Generation** | Every lesson asks you to answer *before* it explains | Attempting and failing first primes the explanation. Being wrong is the mechanism, not a waste of time. |
+| **Retrieval practice** | Frequent recall from memory, closed-book | Retrieving strengthens memory far more than re-reading. Every act of recall reconsolidates. |
+| **Spacing** | Lessons revisit older material after a delay | Some forgetting between sessions is what makes the next retrieval effortful, and effortful retrieval is what sticks. |
+| **Interleaving** | Warm-ups mix topics rather than drilling one | Mixed practice is slower and feels worse, and produces better discrimination between concepts. |
+| **Elaboration** | Prompts to restate in your own words and link to your own experience | Connecting new material to existing knowledge is what makes it retrievable later. |
+| **Calibration** | Rate your confidence *before* revealing each answer | Your sense of what you know is unreliable. Calibrating it against feedback is the fix. |
+| **Reflection** | End-of-lesson review questions | Reflection is retrieval plus elaboration; it is where the mental model consolidates. |
+
+**Two rules that matter more than anything else here:**
+
+1. **Write your answers down before revealing them.** Thinking "I know roughly
+   what this is" is the fluency illusion talking. Writing forces actual
+   retrieval.
+2. **Do not reread a lesson you found hard.** Do the retrieval questions again
+   instead, from memory, and only then look back at the part you missed.
+
+## Lesson structure
+
+| Section | What it is for |
+| --- | --- |
+| **Warm-up** | Closed-book recall from *earlier* lessons. Interleaved on purpose. |
+| **Predict** | A question you attempt before any instruction. Expect to be wrong. |
+| **The problem** | The concrete situation the idea exists to solve. |
+| **The idea** | The explanation — read only after you have attempted Predict. |
+| **In the code** | Where it actually lives. |
+| **Do it** | Run something. Predict each output first, in writing. |
+| **It could have been otherwise** | Rejected alternatives and their cost. |
+| **Explain it back** | Elaboration prompts. Say it in your own words. |
+| **Self-check** | Retrieval, with a confidence rating before each answer. |
+| **Reflect** | What surprised you; what you'd now do differently. |
+| **Come back to this** | When to revisit, per the review schedule. |
+
+Running the exercises: put the snippet in `src/scratch.test.ts` and run
+
+```bash
+pnpm vitest run src/scratch.test.ts
+```
+
+That file is gitignored, so scribble freely. Every exercise in these lessons was
+executed before it was written down.
+
+## The spaced review schedule
+
+[`review-schedule.md`](review-schedule.md) is the spacing machinery: cumulative,
+interleaved retrieval sets to do at 2 days, 1 week, and 1 month after a lesson.
+
+It is the highest-value part of this course and the easiest to skip. Ten minutes
+of closed-book recall a week after a lesson will do more for you than rereading
+all four parts.
+
+## The one-paragraph version
+
+Read this *after* lesson 01, not before — it is a summary, and summaries are
+for consolidating something you have already worked through.
+
+<details>
+<summary>Reveal</summary>
+
+Loom exists because **AI that writes UI code produces changes nobody can review,
+gate, attribute, or undo.** So Loom narrows what AI may produce down to a
+`TreeDelta` — a short, ordered list of discrete operations against a validated
+tree. Everything else in the system follows from protecting that one property.
+
+</details>
+
+## Syllabus
+
+### Part I — Foundations
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| [01](01-why-a-runtime.md) | Why a runtime, not a code generator | The thesis. What breaks when AI writes code, and what Loom trades away to fix it. |
+| [02](02-ui-as-data.md) | UI as data: the tree | Why three node kinds and no more; why text is a node; why there is no `if` in the AST. |
+| [03](03-change-as-data.md) | Change as data: the delta | The four operations, why exactly four, and why atomicity is not optional. |
+| 04 | Identity: the id that never moves | Why position is derived and identity is minted; what breaks without it. |
+
+### Part II — Making change safe
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| 05 | Purity at the seams | Why nothing throws, why the clock is injected, and why that is what makes an audit trail real. |
+| 06 | Undo as computation | Inverse deltas. Why undo is a delta and not a snapshot. |
+| 07 | Measuring a change | What analysis extracts, and why measurement is separated from judgment. |
+| 08 | Two axes: stakes and reversibility | The distinction that a test caught us getting wrong. |
+| 09 | The Gate | A rule ladder, not a score. Why order encodes precedence. |
+| 10 | The pipeline | Intent → proposal → assessment → disposition → apply. |
+
+### Part III — Talking to a model
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| 11 | The model seam | Where non-determinism enters, and how it is contained. |
+| 12 | Projection | Why the model is not shown the AST, and what it is shown instead. |
+| 13 | Refusal and repair | One attempt, both halves recorded, and why that is not a loophole. |
+
+### Part IV — Making it real
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| 14 | Rendering | The tree as a total, pure projection. |
+| 15 | Primitives and the registry | What a primitive promises, and what the model is told it may build. |
+| 16 | Persistence | The log is the truth; the snapshot is a view you can rebuild. |
+| 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |
+
+Unlinked lessons are not written yet. They arrive as the routine reaches them.
+
+## Pacing
+
+One lesson per sitting, then stop. Two lessons back to back is massed practice —
+it feels efficient and is the weakest way to spend the time. The gap between
+sittings is doing work.
