@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 560" width="940" height="560" font-family="Georgia, 'Times New Roman', serif">
+  <rect width="940" height="560" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" fill="#1a1a1a">Where the cut lands</text>
+  <text x="40" y="70" font-size="13.5" fill="#5a5a5a" font-style="italic">Forgetting is a prefix, and an episode is never cut in half. The horizon says what is old; the episodes say where the knife may go.</text>
+
+  <!-- ================= episode brackets ================= -->
+  <g stroke="#8a8a8a" stroke-width="1" fill="none">
+    <path d="M 70 214 L 70 206 L 264 206 L 264 214"/>
+    <path d="M 270 214 L 270 206 L 414 206 L 414 214"/>
+    <path d="M 420 214 L 420 206 L 614 206 L 614 214"/>
+    <path d="M 620 214 L 620 206 L 814 206 L 814 214"/>
+  </g>
+
+  <g font-size="12.5" text-anchor="middle">
+    <text x="167" y="196" fill="#3a3a3a">episode A · committed</text>
+    <text x="342" y="196" fill="#8a5a00" font-weight="bold">episode B · awaiting answer</text>
+    <text x="517" y="196" fill="#3a3a3a">episode C · committed</text>
+    <text x="717" y="196" fill="#3a3a3a">episode D · committed</text>
+  </g>
+
+  <!-- ================= records ================= -->
+  <g>
+    <!-- forgotten: episode A -->
+    <g fill="#efefef" stroke="#b8b8b8" stroke-width="1">
+      <rect x="70"  y="230" width="44" height="46" rx="4"/>
+      <rect x="120" y="230" width="44" height="46" rx="4"/>
+      <rect x="170" y="230" width="44" height="46" rx="4"/>
+      <rect x="220" y="230" width="44" height="46" rx="4"/>
+    </g>
+    <!-- kept, unsettled: episode B -->
+    <g fill="#fdf3dd" stroke="#c9971f" stroke-width="1.6">
+      <rect x="270" y="230" width="44" height="46" rx="4"/>
+      <rect x="320" y="230" width="44" height="46" rx="4"/>
+      <rect x="370" y="230" width="44" height="46" rx="4"/>
+    </g>
+    <!-- kept, stranded behind: episode C -->
+    <g fill="#eef1f6" stroke="#8d9bb5" stroke-width="1">
+      <rect x="420" y="230" width="44" height="46" rx="4"/>
+      <rect x="470" y="230" width="44" height="46" rx="4"/>
+      <rect x="520" y="230" width="44" height="46" rx="4"/>
+      <rect x="570" y="230" width="44" height="46" rx="4"/>
+    </g>
+    <!-- young: episode D -->
+    <g fill="#eaf4ec" stroke="#5f9070" stroke-width="1">
+      <rect x="620" y="230" width="44" height="46" rx="4"/>
+      <rect x="670" y="230" width="44" height="46" rx="4"/>
+      <rect x="720" y="230" width="44" height="46" rx="4"/>
+      <rect x="770" y="230" width="44" height="46" rx="4"/>
+    </g>
+  </g>
+
+  <g font-size="12.5" fill="#4a4a4a" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+    <text x="92"  y="259">1</text>
+    <text x="142" y="259">2</text>
+    <text x="192" y="259">3</text>
+    <text x="242" y="259">4</text>
+    <text x="292" y="259">5</text>
+    <text x="342" y="259">6</text>
+    <text x="392" y="259">7</text>
+    <text x="442" y="259">8</text>
+    <text x="492" y="259">9</text>
+    <text x="542" y="259">10</text>
+    <text x="592" y="259">11</text>
+    <text x="642" y="259">12</text>
+    <text x="692" y="259">13</text>
+    <text x="742" y="259">14</text>
+    <text x="792" y="259">15</text>
+  </g>
+
+  <text x="40" y="259" font-size="12.5" fill="#6a6a6a" text-anchor="end">seq</text>
+  <text x="836" y="259" font-size="12.5" fill="#6a6a6a">→ newer</text>
+
+  <!-- ================= the horizon ================= -->
+  <line x1="617" y1="176" x2="617" y2="330" stroke="#5f9070" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <text x="623" y="172" font-size="12.5" fill="#3f6b50">the horizon — now minus maxAgeMs</text>
+  <text x="623" y="322" font-size="12" fill="#3f6b50" font-style="italic">younger than the policy: never a candidate</text>
+
+  <!-- ================= the cut ================= -->
+  <line x1="267" y1="176" x2="267" y2="360" stroke="#b03030" stroke-width="2"/>
+  <path d="M 267 360 L 262 350 L 272 350 Z" fill="#b03030"/>
+  <text x="261" y="172" font-size="13" fill="#b03030" text-anchor="end" font-weight="bold">forget({ before: 5 })</text>
+
+  <!-- ================= zone braces ================= -->
+  <g stroke="#8a8a8a" stroke-width="1" fill="none">
+    <path d="M 70 292 L 70 300 L 264 300 L 264 292"/>
+    <path d="M 270 292 L 270 300 L 414 300 L 414 292"/>
+    <path d="M 420 292 L 420 300 L 614 300 L 614 292"/>
+  </g>
+
+  <g font-size="12.5" text-anchor="middle">
+    <text x="167" y="317" fill="#7a7a7a">forgets: 4</text>
+    <text x="342" y="317" fill="#8a5a00">keptUnsettled: 3</text>
+    <text x="517" y="317" fill="#4a5a75">keptBehind: 4</text>
+  </g>
+
+  <!-- ================= the reasoning ================= -->
+  <line x1="40" y1="374" x2="900" y2="374" stroke="#dcdcdc" stroke-width="1"/>
+
+  <g font-size="13.5" fill="#2a2a2a">
+    <text x="40" y="402"><tspan font-weight="bold">A</tspan> is old and finished, so it goes. Nothing that survives refers to it.</text>
+    <text x="40" y="428"><tspan font-weight="bold" fill="#8a5a00">B</tspan> is just as old, and someone still owes it an answer. A held proposal is never forgotten, however old.</text>
+    <text x="40" y="454"><tspan font-weight="bold">C</tspan> is old and finished too — but it sits behind B, and forgetting it would punch a hole. It waits for B.</text>
+    <text x="40" y="480"><tspan font-weight="bold">D</tspan> is younger than the horizon and was never a candidate.</text>
+  </g>
+
+  <text x="40" y="518" font-size="12.5" fill="#5a5a5a" font-style="italic">Age is measured against recordedAt — stamped on arrival, never supplied by the writer. An age a writer can choose is an age a writer can dodge.</text>
+  <text x="40" y="540" font-size="12.5" fill="#5a5a5a" font-style="italic">The journal only knows how to drop a prefix. Which prefix is a pure function of the records, and when it runs is the host's to decide. — 0037</text>
+</svg>
