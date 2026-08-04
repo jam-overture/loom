@@ -15,6 +15,7 @@ export const dispositionReasonCodeSchema = z.enum([
   "confidence-below-floor",
   "stakes-at-refusal-floor",
   "irreversible",
+  "discards-later-work",
   "stakes-above-ceiling",
   "confidence-below-minimum",
   "within-policy",

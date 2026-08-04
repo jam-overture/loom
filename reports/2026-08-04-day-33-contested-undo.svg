@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 800" width="1060" height="800" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280" />
+    </marker>
+    <marker id="arrowFaint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0b4bb" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1060" height="800" fill="#ffffff" />
+
+  <text x="32" y="44" font-size="23" font-weight="600" fill="#16181d">A contested undo is offered, not refused</text>
+  <text x="32" y="70" font-size="14" fill="#5b6068">day 33 · §2 Composition Runtime · decision 0035, which partially supersedes 0032</text>
+  <text x="32" y="92" font-size="13" fill="#5b6068">The log: revision 1 set the body text, revision 2 set it again. Someone asks to undo revision 1.</text>
+
+  <line x1="32" y1="112" x2="1028" y2="112" stroke="#e3e5e9" stroke-width="1" />
+
+  <!-- BEFORE -->
+  <text x="32" y="142" font-size="13" font-weight="600" fill="#8a4b4b" letter-spacing="0.6">BEFORE — 0032</text>
+  <text x="32" y="162" font-size="12" fill="#7c8189">the runtime decided for you</text>
+
+  <rect x="32" y="180" width="440" height="52" rx="6" fill="#f6f7f9" stroke="#d6d9de" />
+  <text x="52" y="204" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">planRevert(reader, target)</text>
+  <text x="52" y="222" font-size="11.5" fill="#6b7280">replays the log, inverts revision 1, then walks what came after</text>
+
+  <line x1="252" y1="232" x2="252" y2="262" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="32" y="262" width="440" height="52" rx="6" fill="#fbf3f3" stroke="#e0c3c3" />
+  <text x="52" y="286" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">outcome: "contested"</text>
+  <text x="52" y="304" font-size="11.5" fill="#6b7280">revision 2 named n_body too — the operations are computed, then thrown away</text>
+
+  <line x1="252" y1="314" x2="252" y2="344" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="32" y="344" width="440" height="52" rx="6" fill="#fbf3f3" stroke="#e0c3c3" />
+  <text x="52" y="368" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">{ kind: "not-revertable" }</text>
+  <text x="52" y="386" font-size="11.5" fill="#6b7280">no intent, no proposal, no assessment, no disposition, no event</text>
+
+  <line x1="252" y1="396" x2="252" y2="426" stroke="#b0b4bb" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrowFaint)" />
+
+  <rect x="32" y="426" width="440" height="72" rx="6" fill="#ffffff" stroke="#d6d9de" stroke-dasharray="5 4" />
+  <text x="52" y="450" font-size="12.5" fill="#16181d">The Gate never saw it.</text>
+  <text x="52" y="470" font-size="11.5" fill="#6b7280">Nobody was asked whether the rollback was worth what it cost —</text>
+  <text x="52" y="487" font-size="11.5" fill="#6b7280">the runtime answered on their behalf, and the answer was always no.</text>
+
+  <!-- AFTER -->
+  <text x="588" y="142" font-size="13" font-weight="600" fill="#3f6b52" letter-spacing="0.6">AFTER — 0035</text>
+  <text x="588" y="162" font-size="12" fill="#7c8189">the cost is declared, weighed, and put to a person</text>
+
+  <rect x="588" y="180" width="440" height="52" rx="6" fill="#f6f7f9" stroke="#d6d9de" />
+  <text x="608" y="204" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">planRevert(reader, target)</text>
+  <text x="608" y="222" font-size="11.5" fill="#6b7280">same walk, same one pass over the log</text>
+
+  <line x1="808" y1="232" x2="808" y2="258" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="588" y="258" width="440" height="56" rx="6" fill="#f2f6f3" stroke="#c3d5c9" />
+  <text x="608" y="281" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">outcome: "revertable"</text>
+  <text x="608" y="299" font-size="11.5" font-family="ui-monospace, Menlo, monospace" fill="#5b6068">operations · discards: [{ revision: 2, nodeIds: [n_body] }]</text>
+
+  <line x1="808" y1="314" x2="808" y2="340" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="588" y="340" width="440" height="56" rx="6" fill="#f6f7f9" stroke="#d6d9de" />
+  <text x="608" y="363" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">revertInterpreter → ProposedChange.discards</text>
+  <text x="608" y="381" font-size="11.5" fill="#6b7280">the only writer of the field: it computed the delta from a log, so it may say so</text>
+
+  <line x1="808" y1="396" x2="808" y2="422" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="588" y="422" width="440" height="56" rx="6" fill="#f6f7f9" stroke="#d6d9de" />
+  <text x="608" y="445" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">assessStakes → factor "discards-later-work" · high</text>
+  <text x="608" y="463" font-size="11.5" fill="#6b7280">damage, on the axis that already measures damage — reversibility unchanged</text>
+
+  <line x1="808" y1="478" x2="808" y2="504" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="588" y="504" width="440" height="56" rx="6" fill="#fdf8ee" stroke="#e2d3b4" />
+  <text x="608" y="527" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#16181d">gate → requires-confirmation</text>
+  <text x="608" y="545" font-size="11.5" fill="#6b7280">rule 4 of 6: under the refusal floor, over every origin's ceiling</text>
+
+  <line x1="808" y1="560" x2="808" y2="586" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="588" y="586" width="440" height="56" rx="6" fill="#fdf8ee" stroke="#e2d3b4" />
+  <text x="608" y="609" font-size="12.5" fill="#16181d">held, in the tree's review queue</text>
+  <text x="608" y="627" font-size="11.5" font-style="italic" fill="#6b7280">“discards work from revision 2 at 1 node”</text>
+
+  <line x1="808" y1="642" x2="808" y2="668" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)" />
+
+  <rect x="588" y="668" width="440" height="56" rx="6" fill="#f2f6f3" stroke="#c3d5c9" />
+  <text x="608" y="691" font-size="12.5" fill="#16181d">a person answers yes → revision 3, answeredBy recorded</text>
+  <text x="608" y="709" font-size="11.5" fill="#6b7280">or no, and the tree is untouched</text>
+
+  <!-- log strip -->
+  <line x1="32" y1="748" x2="1028" y2="748" stroke="#e3e5e9" stroke-width="1" />
+  <text x="32" y="776" font-size="12.5" fill="#5b6068">
+    <tspan font-family="ui-monospace, Menlo, monospace" fill="#16181d">log [1, 2, 3]</tspan>
+    <tspan> — revision 2 is still in it, so what the undo wrote over can be restored by undoing the undo.</tspan>
+  </text>
+  <text x="32" y="795" font-size="12.5" fill="#5b6068">That is precisely why discarded work is a stake and not an irreversibility.</text>
+</svg>

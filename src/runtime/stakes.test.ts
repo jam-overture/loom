@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest"
 
+import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 
 import type { ChangeAnalysis } from "./analysis.js"
 import { defaultGatePolicy, gatePolicySchema } from "./policy.js"
-import { assessStakes } from "./stakes.js"
+import type { DiscardedWork } from "./proposal.js"
+import { assessStakes, stakeFactor, type StakeAssessment } from "./stakes.js"
 
 const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => ({
   operationCount: 1,
@@ -20,12 +22,19 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   ...overrides,
 })
 
+/**
+ * The shape-only case: a delta assessed with nothing declared about what it
+ * writes over, which is every proposal a model makes.
+ */
+const stakesOf = (analysis: ChangeAnalysis, policy = defaultGatePolicy): StakeAssessment =>
+  assessStakes({ analysis, discards: [] }, policy)
+
 const codesOf = (analysis: ChangeAnalysis, policy = defaultGatePolicy) =>
-  assessStakes(analysis, policy).factors.map((factor) => factor.code)
+  stakesOf(analysis, policy).factors.map((factor) => factor.code)
 
 describe("assessStakes baseline", () => {
   it("treats an ordinary deep prop tweak as low stakes with no factors", () => {
-    const assessment = assessStakes(analysisOf(), defaultGatePolicy)
+    const assessment = stakesOf(analysisOf(), defaultGatePolicy)
 
     expect(assessment.level).toBe("low")
     expect(assessment.factors).toEqual([])
@@ -34,7 +43,7 @@ describe("assessStakes baseline", () => {
 
 describe("structural factors", () => {
   it("escalates a removal past the medium threshold", () => {
-    const assessment = assessStakes(analysisOf({ removedNodeCount: 3 }), defaultGatePolicy)
+    const assessment = stakesOf(analysisOf({ removedNodeCount: 3 }), defaultGatePolicy)
 
     expect(assessment.level).toBe("medium")
     expect(assessment.factors[0]?.code).toBe("large-removal")
@@ -42,7 +51,7 @@ describe("structural factors", () => {
   })
 
   it("escalates a removal past the high threshold", () => {
-    expect(assessStakes(analysisOf({ removedNodeCount: 12 }), defaultGatePolicy).level).toBe("high")
+    expect(stakesOf(analysisOf({ removedNodeCount: 12 }), defaultGatePolicy).level).toBe("high")
   })
 
   it("leaves a small removal alone", () => {
@@ -82,12 +91,12 @@ describe("vocabulary factors", () => {
       touchedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
     })
 
-    expect(assessStakes(analysis, policy).level).toBe("high")
+    expect(stakesOf(analysis, policy).level).toBe("high")
   })
 
   it("escalates a configured protected prop key to high", () => {
     const analysis = analysisOf({ configuredPropKeys: ["href"] })
-    const assessment = assessStakes(analysis, policy)
+    const assessment = stakesOf(analysis, policy)
 
     expect(assessment.level).toBe("high")
     expect(assessment.factors[0]?.detail).toContain("href")
@@ -100,7 +109,7 @@ describe("vocabulary factors", () => {
       removedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
     })
 
-    expect(assessStakes(analysis, policy).level).toBe("critical")
+    expect(stakesOf(analysis, policy).level).toBe("critical")
   })
 
   it("does not raise stakes for an out-of-tree-effect type, which is a reversibility concern", () => {
@@ -108,7 +117,7 @@ describe("vocabulary factors", () => {
       touchedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.checkout")],
     })
 
-    expect(assessStakes(analysis, policy).level).toBe("low")
+    expect(stakesOf(analysis, policy).level).toBe("low")
   })
 
   it("ignores primitives the host has not declared", () => {
@@ -116,7 +125,68 @@ describe("vocabulary factors", () => {
       touchedPrimitiveTypes: [primitiveTypeSchema.parse("layout.stack")],
     })
 
-    expect(assessStakes(analysis, policy).level).toBe("low")
+    expect(stakesOf(analysis, policy).level).toBe("low")
+  })
+})
+
+describe("declared discards", () => {
+  const node = nodeIdSchema.parse("n_body")
+  const other = nodeIdSchema.parse("n_headline")
+
+  const withDiscards = (discards: readonly DiscardedWork[]): StakeAssessment =>
+    assessStakes({ analysis: analysisOf(), discards }, defaultGatePolicy)
+
+  it("raises an otherwise unremarkable change to high", () => {
+    const assessment = withDiscards([{ revision: 4, nodeIds: [node] }])
+
+    expect(assessment.level).toBe("high")
+    expect(assessment.factors.map((factor) => factor.code)).toEqual(["discards-later-work"])
+  })
+
+  /**
+   * `high` and not `critical` on purpose: critical is where the refusal floor
+   * sits, and this is a change a person should get to decide about.
+   */
+  it("stays below the default refusal floor", () => {
+    expect(withDiscards([{ revision: 4, nodeIds: [node] }]).level).not.toBe("critical")
+  })
+
+  it("names every revision and counts the distinct nodes", () => {
+    const assessment = withDiscards([
+      { revision: 4, nodeIds: [node] },
+      { revision: 6, nodeIds: [node, other] },
+    ])
+
+    expect(stakeFactor(assessment, "discards-later-work")?.detail).toBe(
+      "discards work from revisions 4, 6 at 2 nodes"
+    )
+  })
+
+  it("reads as singular for one revision at one node", () => {
+    expect(
+      stakeFactor(withDiscards([{ revision: 4, nodeIds: [node] }]), "discards-later-work")?.detail
+    ).toBe("discards work from revision 4 at 1 node")
+  })
+
+  /** Nothing declared is the ordinary case, and it must cost nothing. */
+  it("adds no factor when nothing was declared", () => {
+    expect(withDiscards([]).factors).toEqual([])
+    expect(stakeFactor(withDiscards([]), "discards-later-work")).toBeUndefined()
+  })
+
+  it("is host-independent, so no vocabulary knob suppresses it", () => {
+    const permissive = gatePolicySchema.parse({
+      protectedPrimitiveTypes: [],
+      removalThresholds: { medium: 100, high: 200 },
+      breadthThreshold: 100,
+    })
+
+    expect(
+      assessStakes(
+        { analysis: analysisOf(), discards: [{ revision: 2, nodeIds: [node] }] },
+        permissive
+      ).level
+    ).toBe("high")
   })
 })
 
@@ -130,7 +200,7 @@ describe("factor aggregation", () => {
       touchedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
     })
 
-    const assessment = assessStakes(analysis, policy)
+    const assessment = stakesOf(analysis, policy)
 
     expect(assessment.level).toBe("high")
     expect(assessment.factors.map((factor) => factor.code)).toEqual([
@@ -144,8 +214,8 @@ describe("factor aggregation", () => {
     const policy = gatePolicySchema.parse({ protectedPrimitiveTypes: ["commerce.cart"] })
     const cart = primitiveTypeSchema.parse("commerce.cart")
 
-    const touched = assessStakes(analysisOf({ touchedPrimitiveTypes: [cart] }), policy)
-    const removed = assessStakes(
+    const touched = stakesOf(analysisOf({ touchedPrimitiveTypes: [cart] }), policy)
+    const removed = stakesOf(
       analysisOf({ touchedPrimitiveTypes: [cart], removedPrimitiveTypes: [cart] }),
       policy
     )

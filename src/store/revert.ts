@@ -1,5 +1,6 @@
 import type { NodeId, TreeId } from "../ids.js"
 import { err, ok, reduceResult, type Result } from "../result.js"
+import type { DiscardedWork } from "../runtime/proposal.js"
 import { applyDelta } from "../tree/apply.js"
 import type { TreeOperation } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
@@ -27,15 +28,9 @@ import type { StoredRevision, TreeReader } from "./store.js"
  * is only recoverable by replaying the entries before it.
  *
  * This module decides nothing about whether the revert *should* happen. It
- * produces the operations and the obstacles; the Gate judges, as it does for any
- * other change.
+ * produces the operations, the obstacles, and what the undo would write over;
+ * the Gate judges, as it does for any other change.
  */
-
-/** A revision after the target that names a node the undo would touch. */
-export type ContestedRevision = {
-  readonly revision: number
-  readonly nodeIds: readonly NodeId[]
-}
 
 export type RevertPlan =
   | {
@@ -48,16 +43,17 @@ export type RevertPlan =
       readonly operations: readonly TreeOperation[]
       /** The head these operations were planned against. */
       readonly headRevision: number
-    }
-  /**
-   * A later revision names a node the undo would touch, so applying the undo
-   * would discard work done after the thing being undone — and would do it
-   * silently, because the Gate sees a delta rather than the history behind it.
-   */
-  | {
-      readonly outcome: "contested"
-      readonly target: StoredRevision
-      readonly contestedBy: readonly ContestedRevision[]
+      /**
+       * Revisions after the target that named a node this undo touches, so
+       * applying it writes over what they did. Empty for a clean undo.
+       *
+       * A property of the plan rather than a verdict about it (0035): the Gate
+       * decides what a contested undo is worth, and it decides it from this,
+       * carried on the proposal. It travels with the plan because the delta
+       * cannot show it — undoing revision 1 looks identical whether or not
+       * anyone built on it.
+       */
+      readonly discards: readonly DiscardedWork[]
     }
   /** The revision is outside the span this reader and this seed can reach. */
   | {
@@ -81,11 +77,13 @@ export type UnrevertablePlan = Exclude<RevertPlan, { readonly outcome: "revertab
 export const describeRevertPlan = (plan: RevertPlan): string => {
   switch (plan.outcome) {
     case "revertable":
-      return `revision ${plan.target.revision} can be undone at head ${plan.headRevision}`
-    case "contested":
-      return `revision ${plan.target.revision} was built on by ${plan.contestedBy
-        .map((contest) => contest.revision)
-        .join(", ")}; undoing it would discard their changes`
+      return plan.discards.length === 0
+        ? `revision ${plan.target.revision} can be undone at head ${plan.headRevision}`
+        : `revision ${plan.target.revision} can be undone at head ${
+            plan.headRevision
+          }, discarding what revision${plan.discards.length === 1 ? "" : "s"} ${plan.discards
+            .map((discarded) => discarded.revision)
+            .join(", ")} did to the nodes it touches`
     case "out-of-range":
       return `revision ${plan.revision} is outside ${plan.earliest}–${plan.headRevision}`
     case "unreplayable":
@@ -117,7 +115,7 @@ type Scan =
       readonly target: StoredRevision
       readonly operations: readonly TreeOperation[]
       readonly named: ReadonlySet<NodeId>
-      readonly contestedBy: readonly ContestedRevision[]
+      readonly discards: readonly DiscardedWork[]
     }
 
 type ScanObstacle = Extract<
@@ -153,11 +151,11 @@ const reachTarget = (
     target: entry,
     operations: inverted.value,
     named: reachOf(entry, inverted.value),
-    contestedBy: [],
+    discards: [],
   })
 }
 
-const noteContest = (
+const noteDiscard = (
   scan: Extract<Scan, { readonly phase: "trailing" }>,
   entry: StoredRevision
 ): Scan => {
@@ -166,10 +164,10 @@ const noteContest = (
   return {
     ...scan,
     nextRevision: entry.revision + 1,
-    contestedBy:
+    discards:
       overlap.length === 0
-        ? scan.contestedBy
-        : [...scan.contestedBy, { revision: entry.revision, nodeIds: overlap }],
+        ? scan.discards
+        : [...scan.discards, { revision: entry.revision, nodeIds: overlap }],
   }
 }
 
@@ -185,7 +183,7 @@ const stepScan = (
     })
   }
 
-  if (scan.phase === "trailing") return ok(noteContest(scan, entry))
+  if (scan.phase === "trailing") return ok(noteDiscard(scan, entry))
   if (entry.revision === revision) return reachTarget(scan, entry)
 
   const applied = applyDelta(scan.tree, entry.delta)
@@ -274,14 +272,11 @@ export const planRevert = async (
     })
   }
 
-  return ok(
-    scan.contestedBy.length > 0
-      ? { outcome: "contested", target: scan.target, contestedBy: scan.contestedBy }
-      : {
-          outcome: "revertable",
-          target: scan.target,
-          operations: scan.operations,
-          headRevision,
-        }
-  )
+  return ok({
+    outcome: "revertable",
+    target: scan.target,
+    operations: scan.operations,
+    headRevision,
+    discards: scan.discards,
+  })
 }

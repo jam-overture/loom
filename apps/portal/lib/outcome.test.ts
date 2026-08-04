@@ -13,9 +13,9 @@ import {
   type ProposedChange,
   type TreeDelta,
 } from "@loom/runtime"
-import type { WriteOutcome } from "@loom/runtime/write"
+import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
 
-import { reportOf, toneClasses, type OutcomeTone } from "./outcome"
+import { reportOf, revertReportOf, toneClasses, type OutcomeTone } from "./outcome"
 
 const treeId = treeIdSchema.parse("t_1")
 const proposalId = proposalIdSchema.parse("p_1")
@@ -159,6 +159,41 @@ describe("reportOf", () => {
     const { detail } = reportOf(conflict)
     expect(detail).toContain("2")
     expect(detail).toContain("3")
+  })
+})
+
+/**
+ * Undo is offered from `/history`, and an undo that would write over later work
+ * is held rather than refused (0035) — so this mapping is what tells a reviewer
+ * the change is waiting and where to answer it.
+ */
+describe("revertReportOf", () => {
+  const held = everyOutcome.find((outcome) => outcome.kind === "held")
+  const committed = everyOutcome.find((outcome) => outcome.kind === "committed")
+  if (!held || !committed) throw new Error("expected both outcomes in the sample")
+
+  const unrevertable: RevertOutcome = {
+    kind: "not-revertable",
+    plan: { outcome: "out-of-range", revision: 7, earliest: 1, headRevision: 3 },
+  }
+
+  it("sends a reviewer to the queue when the Gate held the undo", () => {
+    const report = revertReportOf(held)
+
+    expect(report.tone).toBe("awaiting")
+    expect(report.detail).toContain("review queue")
+  })
+
+  it("reads a plan that produced no undo as inapplicable, not as a refusal", () => {
+    const report = revertReportOf(unrevertable)
+
+    expect(report.tone).toBe("inapplicable")
+    expect(report.headline).toBe("cannot undo")
+    expect(report.detail).toContain("7")
+  })
+
+  it("says nothing extra about an undo that simply applied", () => {
+    expect(revertReportOf(committed)).toEqual(reportOf(committed))
   })
 })
 

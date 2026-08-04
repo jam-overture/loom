@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { treeIdSchema } from "@loom/runtime"
-import { describeRevertOutcome, revertRevision } from "@loom/runtime/write"
+import { revertRevision } from "@loom/runtime/write"
 
 import { requireActor } from "@/lib/auth/identity"
-import { reportOf, type WriteReport } from "@/lib/outcome"
+import { revertReportOf, type WriteReport } from "@/lib/outcome"
 import { seedFor } from "@/lib/seeds"
 import { beginWrite } from "@/lib/write"
 
@@ -78,15 +78,18 @@ export const undoRevision = async (
 
   /**
    * A refusal has to stay on screen long enough to be read, so only a commit
-   * revalidates — the same rule `confirmProposal` follows, and for the same
-   * reason: re-rendering would take the row away and the reason with it.
+   * revalidates *this* page — the same rule `confirmProposal` follows, and for
+   * the same reason: re-rendering would take the row away and the reason with
+   * it.
+   *
+   * The tree's page is revalidated for a hold as well, because a held undo puts
+   * a card in its review queue (0035) and that queue is where the reviewer is
+   * being sent.
    */
-  if (outcome.kind === "committed") {
-    revalidatePath("/history")
+  if (outcome.kind === "committed") revalidatePath("/history")
+  if (outcome.kind === "committed" || outcome.kind === "held") {
     revalidatePath(`/trees/${treeId}`)
   }
 
-  return outcome.kind === "not-revertable"
-    ? refused("cannot undo", describeRevertOutcome(outcome))
-    : reportOf(outcome)
+  return revertReportOf(outcome)
 }

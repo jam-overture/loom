@@ -1,4 +1,9 @@
-import { describeWriteOutcome, type WriteOutcome } from "@loom/runtime/write"
+import {
+  describeRevertOutcome,
+  describeWriteOutcome,
+  type RevertOutcome,
+  type WriteOutcome,
+} from "@loom/runtime/write"
 
 /**
  * A write's outcome, as something a page can render.
@@ -60,6 +65,36 @@ export const reportOf = (outcome: WriteOutcome): WriteReport => ({
   headline: headlineOf(outcome.kind),
   detail: describeWriteOutcome(outcome),
 })
+
+/**
+ * An undo's outcome, as something the history page can render.
+ *
+ * Two things differ from an ordinary write. A plan that produced no undo at all
+ * is not a write outcome, so it reads as inapplicable rather than as a refusal —
+ * the runtime did not decline this, it could not compute it.
+ *
+ * And a held undo is answered somewhere else. Undo is offered on `/history`,
+ * every hold queues on the tree's own page (0019), and a reviewer told "waiting
+ * on you" with nowhere named would have to go and find it. An undo that
+ * discards later work is now the common way to reach that state (0035), so the
+ * pointer is part of the answer rather than a nicety.
+ */
+export const revertReportOf = (outcome: RevertOutcome): WriteReport => {
+  if (outcome.kind === "not-revertable") {
+    return {
+      tone: "inapplicable",
+      headline: "cannot undo",
+      detail: describeRevertOutcome(outcome),
+    }
+  }
+
+  return outcome.kind === "held"
+    ? {
+        ...reportOf(outcome),
+        detail: `${describeWriteOutcome(outcome)} Answer it in this tree's review queue.`,
+      }
+    : reportOf(outcome)
+}
 
 const TONE_CLASSES: Readonly<Record<OutcomeTone, string>> = {
   applied: "bg-applied text-applied-ink",

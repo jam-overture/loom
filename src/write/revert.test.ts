@@ -19,7 +19,7 @@ import type { TreeOperation } from "../tree/delta.js"
 import { findNode } from "../tree/navigation.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { confirmHeld, type WritePath } from "./commit.js"
+import { confirmHeld, discardHeld, type WritePath } from "./commit.js"
 import { memoryHoldStore } from "./held.js"
 import {
   describeRevertOutcome,
@@ -334,11 +334,23 @@ describe("revertRevision is judged, not privileged", () => {
   })
 })
 
-describe("revertRevision refuses to plan what it cannot plan", () => {
-  it("proposes nothing when a later revision built on the target", async () => {
+/**
+ * An undo that writes over later work is offered to a person rather than
+ * refused on their behalf (0035). These tests are the whole path: the plan
+ * declares what would be lost, the Gate holds it, and answering it applies —
+ * with the discarded work recoverable, because the log still has it.
+ */
+describe("revertRevision offers an undo that discards later work", () => {
+  const contestedHarness = async (): Promise<Harness> => {
     const harness = await harnessFor()
     await harness.append(setValue(harness.ids.body, "second"))
     await harness.append(setValue(harness.ids.body, "third"))
+
+    return harness
+  }
+
+  it("holds it for confirmation rather than applying it", async () => {
+    const harness = await contestedHarness()
 
     const outcome = await revertRevision(harness.path, {
       treeId: harness.seed.treeId,
@@ -347,14 +359,143 @@ describe("revertRevision refuses to plan what it cannot plan", () => {
       origin: "user-instruction",
     })
 
-    if (outcome.kind !== "not-revertable") throw new Error(outcome.kind)
+    if (outcome.kind !== "held") throw new Error(describeRevertOutcome(outcome))
 
-    expect(outcome.plan.outcome).toBe("contested")
-    expect(describeRevertOutcome(outcome)).toContain("built on by 2")
-    /** Nothing was proposed, so nothing was narrated. */
-    expect(harness.events.types()).toEqual([])
+    expect(outcome.held.disposition.reason.code).toBe("discards-later-work")
+    expect(outcome.held.disposition.stakes).toBe("high")
+    /** Nothing landed: the tree is where it was. */
+    expect((await harness.head()).revision).toBe(2)
+    expect(textOf(await harness.head(), harness.ids.body)).toBe("third")
   })
 
+  it("declares the revisions it would write over on the proposal itself", async () => {
+    const harness = await contestedHarness()
+
+    const outcome = await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    if (outcome.kind !== "held") throw new Error(describeRevertOutcome(outcome))
+
+    expect(outcome.held.proposal.discards).toEqual([
+      { revision: 2, nodeIds: [harness.ids.body] },
+    ])
+    expect(outcome.held.proposal.rationale).toContain("Revision 2 changed nodes this undo touches")
+  })
+
+  /** A hold a person never answers must leave no trace on the tree. */
+  it("holds it for the widest origin a policy can give", async () => {
+    const harness = await contestedHarness()
+
+    const outcome = await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "developer",
+    })
+
+    if (outcome.kind !== "held") throw new Error(describeRevertOutcome(outcome))
+    expect(outcome.held.disposition.reason.code).toBe("discards-later-work")
+  })
+
+  it("applies it once a person answers, and the discarded work stays in the log", async () => {
+    const harness = await contestedHarness()
+
+    const held = await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    if (held.kind !== "held") throw new Error(describeRevertOutcome(held))
+
+    const confirmed = await confirmHeld(harness.path, {
+      proposalId: held.held.proposalId,
+      actor: "reviewer",
+    })
+
+    if (confirmed.kind !== "committed") throw new Error(confirmed.kind)
+
+    /** The undo landed, so revision 2's text is gone from the tree… */
+    expect(confirmed.tree.revision).toBe(3)
+    expect(textOf(confirmed.tree, harness.ids.body)).toBe("Body copy")
+
+    /** …and still in the log, which is why this is stakes and not irreversibility. */
+    const page = await harness.path.store.revisions(harness.seed.treeId)
+    if (!page.ok) throw new Error(page.error.code)
+
+    expect(page.value.revisions.map((entry) => entry.revision)).toEqual([1, 2, 3])
+    expect(page.value.revisions[2]?.answeredBy).toBe("reviewer")
+  })
+
+  it("leaves the tree alone when the person says no", async () => {
+    const harness = await contestedHarness()
+
+    const held = await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    if (held.kind !== "held") throw new Error(describeRevertOutcome(held))
+
+    const discarded = await discardHeld(harness.path, {
+      proposalId: held.held.proposalId,
+      actor: "reviewer",
+    })
+
+    expect(discarded.ok).toBe(true)
+    expect((await harness.head()).revision).toBe(2)
+    expect(textOf(await harness.head(), harness.ids.body)).toBe("third")
+  })
+
+  it("narrates it as a held change, not as a plan that failed", async () => {
+    const harness = await contestedHarness()
+
+    await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    expect(harness.events.types()).toEqual([
+      "intent-received",
+      "policy-resolved",
+      "change-proposed",
+      "change-assessed",
+      "disposition-decided",
+      "proposal-held",
+    ])
+  })
+
+  /**
+   * A clean undo must not pay for this. Absence of the field is what tells a
+   * later reader nobody consulted a log, so a clean plan declares nothing.
+   */
+  it("declares nothing when no later revision touched the same nodes", async () => {
+    const harness = await harnessFor()
+    await harness.append(setValue(harness.ids.body, "second"))
+    await harness.append(setValue(harness.ids.headline, "elsewhere"))
+
+    const outcome = await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    if (outcome.kind !== "committed") throw new Error(describeRevertOutcome(outcome))
+    expect(outcome.proposal.discards).toBeUndefined()
+  })
+})
+
+describe("revertRevision refuses to plan what it cannot plan", () => {
   it("proposes nothing for a revision that is not in the log", async () => {
     const harness = await harnessFor()
 

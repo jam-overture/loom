@@ -1,6 +1,13 @@
 import { z } from "zod"
 
-import { intentIdSchema, proposalIdSchema, type IntentId, type ProposalId } from "../ids.js"
+import {
+  intentIdSchema,
+  nodeIdSchema,
+  proposalIdSchema,
+  type IntentId,
+  type NodeId,
+  type ProposalId,
+} from "../ids.js"
 import { treeDeltaSchema, type TreeDelta } from "../tree/delta.js"
 
 import { intentOriginSchema, type IntentOrigin } from "./intent.js"
@@ -58,6 +65,32 @@ export type Provenance = {
 }
 
 /**
+ * Work a change would take out of the current tree that its own delta does not
+ * show: a revision already in the log, and which of the nodes it named this
+ * change writes over.
+ *
+ * The delta is self-contained by construction (0001), which is what makes it
+ * individually reviewable — and is also why it cannot express this. "Set this
+ * text back to what it was" and "set this text back to what it was, discarding
+ * what two people wrote afterwards" are the same four operations. Only something
+ * holding the log can tell them apart, so whatever computed the delta from a log
+ * says so here.
+ *
+ * Nothing is lost from the record when this is applied. The discarded revisions
+ * stay in the log and the tree they made can be restored by undoing the undo,
+ * which is why this raises stakes rather than making a change irreversible.
+ */
+export const discardedWorkSchema = z.object({
+  revision: z.number().int().positive(),
+  nodeIds: z.array(nodeIdSchema).min(1),
+})
+
+export type DiscardedWork = {
+  readonly revision: number
+  readonly nodeIds: readonly NodeId[]
+}
+
+/**
  * The unit the Gate reviews: a concrete delta, why the interpreter believes it
  * satisfies the intent, and where it came from. A proposal is inert — nothing
  * has touched the tree yet.
@@ -74,6 +107,13 @@ export const proposedChangeSchema = z.object({
    * after a refusal cannot present itself as an unrelated first attempt.
    */
   repairOf: proposalIdSchema.optional(),
+  /**
+   * Optional and absent by default: a proposal that declares nothing is one
+   * whose author had no log to consult, which is every proposal a model makes.
+   * Absence therefore means "not declared" rather than "nothing discarded", and
+   * that reading stays true forever (0035).
+   */
+  discards: z.array(discardedWorkSchema).optional(),
 })
 
 export type ProposedChange = {
@@ -83,4 +123,11 @@ export type ProposedChange = {
   readonly rationale: string
   readonly provenance: Provenance
   readonly repairOf?: ProposalId
+  /**
+   * Only ever set by an interpreter that computed the delta from a log. It can
+   * make the Gate stricter and never more permissive, which is what makes it
+   * safe to accept as a declaration rather than a computation the Gate repeats
+   * (0035).
+   */
+  readonly discards?: readonly DiscardedWork[]
 }

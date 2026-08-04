@@ -26,6 +26,12 @@ import { commitIntent, describeWriteOutcome, type WriteOutcome, type WritePath }
  * The alternative — rewinding the log, or applying the inverse straight to the
  * store — would make undo the one operation that changes a tree without being
  * judged, and the log the one record with a hole in it (0032).
+ *
+ * An undo whose target was built on afterwards is offered rather than refused
+ * (0035). What made it refusable was that the Gate could not see the difference
+ * between a clean undo and one that writes over later work; now the plan says so
+ * and the proposal carries the declaration, so the Gate holds it for a person
+ * instead of the runtime deciding on their behalf that they may not have it.
  */
 
 /** What produced the delta, for `Provenance.interpreter`. Not a model. */
@@ -33,8 +39,24 @@ export const REVERT_INTERPRETER = "loom/revert"
 
 export type RevertablePlan = Extract<RevertPlan, { readonly outcome: "revertable" }>
 
-const rationaleFor = (plan: RevertablePlan): string =>
-  `Undoes revision ${plan.target.revision}, applied ${plan.target.appliedAt} from proposal ${plan.target.proposalId}.`
+/**
+ * What the undo is for, and — when there is one — what it costs.
+ *
+ * The cost is spelled out in the rationale as well as declared in `discards`,
+ * because the two are read by different readers: the Gate reads the declaration,
+ * and the person answering the hold reads this (0019 — the portal shows a
+ * reviewer the reason, not a verdict).
+ */
+const rationaleFor = (plan: RevertablePlan): string => {
+  const undoes = `Undoes revision ${plan.target.revision}, applied ${plan.target.appliedAt} from proposal ${plan.target.proposalId}.`
+  if (plan.discards.length === 0) return undoes
+
+  const revisions = plan.discards.map((discarded) => discarded.revision).join(", ")
+
+  return `${undoes} Revision${
+    plan.discards.length === 1 ? "" : "s"
+  } ${revisions} changed nodes this undo touches, and applying it writes over what they did.`
+}
 
 /**
  * An interpreter that has nothing to interpret.
@@ -76,6 +98,12 @@ export const revertInterpreter = (
               operations: plan.operations,
             },
             rationale: rationaleFor(plan),
+            /**
+             * Declared only when there is something to declare, so absence keeps
+             * meaning "nobody looked at a log" rather than "a log was checked
+             * and was clean" (0035).
+             */
+            ...(plan.discards.length === 0 ? {} : { discards: plan.discards }),
             provenance: {
               origin: intent.origin,
               ...(intent.actor === undefined ? {} : { actor: intent.actor }),
@@ -105,7 +133,12 @@ export type RevertRequest = {
 
 export type RevertOutcome =
   | WriteOutcome
-  /** Nothing was proposed: the log says this revision cannot be undone as asked. */
+  /**
+   * Nothing was proposed, because no undo could be computed: the revision is
+   * outside the span the seed reaches, the log does not replay, or the delta does
+   * not invert. Work the undo would write over is not one of these — that is a
+   * proposal the Gate holds, not a plan that failed (0035).
+   */
   | { readonly kind: "not-revertable"; readonly plan: UnrevertablePlan }
 
 export const describeRevertOutcome = (outcome: RevertOutcome): string =>
