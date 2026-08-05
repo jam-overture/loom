@@ -190,6 +190,7 @@ describe("calibrationOf", () => {
           seq: 1,
           treeId: real.episodes[0]?.treeId ?? ("t_missing" as never),
           occurredAt: "2026-08-02T00:00:00.000Z",
+          recordedAt: "2026-08-02T00:00:00.000Z",
           event: { type: "change-applied", proposalId: "p_missing" as never, revision: 1 },
         },
       ],

@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm"
 import { describe, expect, it, vi } from "vitest"
 
 import { describeTreeStoreContract, appendOf, removalOf } from "../testing/store-contract.js"
+import { rowSecurityOn } from "../testing/row-security.js"
 import { sampleTree } from "../testing/fixtures.js"
 
 import { ensureTreeStoreSchema } from "./migrate.js"
@@ -95,6 +96,57 @@ describe("ensureTreeStoreSchema on a database that predates 0029", () => {
 
     await ensureTreeStoreSchema(db)
     await expect(ensureTreeStoreSchema(db)).resolves.toBeUndefined()
+  })
+})
+
+/**
+ * On the host 0022 chose, a table in the `public` schema is readable through a
+ * key that is public by design from the moment it exists. Locking it is part of
+ * creating it, so there is no window and nothing for a deployment document to
+ * be remembered about.
+ */
+describe("ensureTreeStoreSchema locks the tables it creates", () => {
+  it("enables row level security on both", async () => {
+    const db = await freshDatabase()
+
+    expect(await rowSecurityOn(db, "loom_trees")).toBe(true)
+    expect(await rowSecurityOn(db, "loom_revisions")).toBe(true)
+  })
+
+  /** A database deployed before the statement existed is locked by the next push. */
+  it("locks tables that were created without it", async () => {
+    const db = drizzle(new PGlite())
+    await db.execute(sql.raw(PRE_0029_REVISIONS))
+    expect(await rowSecurityOn(db, "loom_revisions")).toBe(false)
+
+    await ensureTreeStoreSchema(db)
+
+    expect(await rowSecurityOn(db, "loom_revisions")).toBe(true)
+  })
+
+  /** Enabling it twice is not an error, so the whole DDL stays idempotent. */
+  it("stays enabled when the schema is pushed again", async () => {
+    const db = await freshDatabase()
+    await ensureTreeStoreSchema(db)
+
+    expect(await rowSecurityOn(db, "loom_trees")).toBe(true)
+  })
+
+  /**
+   * The reason no policies accompany it: Loom connects as the table's owner
+   * (0022 put the runtime on plain SQL, never on the REST layer), and RLS does
+   * not apply to an owner unless `FORCE ROW LEVEL SECURITY` is set. If that
+   * stopped being true, every read in this file would fail — this states the
+   * assumption so the failure would have a name.
+   */
+  it("does not stand between the owner and its own tables", async () => {
+    const db = await freshDatabase()
+    const store = postgresTreeStore(db)
+    const { tree } = sampleTree()
+
+    await store.create(tree)
+
+    expect(await store.head(tree.treeId)).toMatchObject({ ok: true })
   })
 })
 

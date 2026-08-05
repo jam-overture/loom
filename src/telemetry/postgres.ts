@@ -9,6 +9,7 @@ import type { LoomDatabase } from "../store/database.js"
 import { telemetryEventSchema } from "./event.js"
 import {
   clampTelemetryLimit,
+  type ForgetOutcome,
   type RecordedTelemetry,
   type TelemetryError,
   type TelemetryJournal,
@@ -41,6 +42,18 @@ const recordedSchema = z.object({
   seq: z.number().int().nonnegative(),
   treeId: treeIdSchema,
   occurredAt: z.string().datetime(),
+  /**
+   * A driver hands back `timestamptz` as a `Date`, and everything above this
+   * boundary speaks ISO strings. Normalising here rather than at each reader
+   * keeps "an instant is a string" true for the whole codebase; accepting a
+   * string as well means a driver configured to return one is not a parse
+   * failure at 3am.
+   */
+  recordedAt: z
+    .union([z.date(), z.string()])
+    .transform((value) => (value instanceof Date ? value : new Date(value)))
+    .refine((value) => Number.isFinite(value.getTime()), "recorded_at is not an instant")
+    .transform((value) => value.toISOString()),
   event: telemetryEventSchema,
 })
 
@@ -85,6 +98,7 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
           seq: loomTelemetry.seq,
           treeId: loomTelemetry.treeId,
           occurredAt: loomTelemetry.occurredAt,
+          recordedAt: loomTelemetry.recordedAt,
           event: loomTelemetry.event,
         })
         .from(loomTelemetry)
@@ -127,6 +141,29 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
       })
     } catch (cause) {
       return err(failure(cause, "could not read telemetry"))
+    }
+  },
+
+  /**
+   * One statement, and the count comes from the rows it returns rather than
+   * from a driver-specific `rowCount` field — the two drivers this runs on
+   * report that differently, and a number that means something else under
+   * PGlite than under postgres.js is worse than no number.
+   *
+   * Returning only `seq` keeps the payload to one integer per row, and the
+   * caller has already bounded how many rows there can be: `applyRetention`
+   * derives `before` from a scan it capped itself.
+   */
+  forget: async ({ before }) => {
+    try {
+      const removed = await db
+        .delete(loomTelemetry)
+        .where(lt(loomTelemetry.seq, before))
+        .returning({ seq: loomTelemetry.seq })
+
+      return ok<ForgetOutcome>({ removed: removed.length })
+    } catch (cause) {
+      return err(failure(cause, `could not forget telemetry below ${before}`))
     }
   },
 })
