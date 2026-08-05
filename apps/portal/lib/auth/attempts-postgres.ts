@@ -1,4 +1,4 @@
-import { and, eq, gte, lt, ne, sql } from "drizzle-orm"
+import { and, desc, eq, gte, lt, ne, sql } from "drizzle-orm"
 import { bigint, integer, pgTable, text } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
@@ -65,6 +65,19 @@ const rowSchema = z.object({
   failures: z.number().int().positive(),
   firstFailureAt: z.number().int().nonnegative(),
   lastFailureAt: z.number().int().nonnegative(),
+})
+
+/**
+ * Coerced rather than trusted to be numbers. `count` and `sum` come back as
+ * `bigint`, which a Postgres driver hands over as a string to avoid losing
+ * precision it cannot represent — so a schema that demanded a number here would
+ * reject every survey against real Postgres while passing against a fake.
+ */
+const totalsSchema = z.object({
+  subjects: z.coerce.number().int().nonnegative(),
+  failures: z.coerce.number().int().nonnegative(),
+  earliestFailureAt: z.coerce.number().int().nonnegative().nullable(),
+  latestFailureAt: z.coerce.number().int().nonnegative().nullable(),
 })
 
 const failure = (cause: unknown, detail: string): AttemptLogError => ({
@@ -174,6 +187,61 @@ export const postgresAttemptLog = (db: LoomDatabase): AttemptLog => ({
       return ok(undefined)
     } catch (cause) {
       return err(failure(cause, "could not clear sign-in attempts"))
+    }
+  },
+
+  /**
+   * Two statements: the totals over every live row, and the newest rows up to
+   * the cap. The aggregate is a full scan of a table the sweep keeps small, and
+   * it runs when an operator opens a page rather than on any request path.
+   *
+   * Neither statement selects `subject`, and that is the enforcement rather than
+   * a convention the caller is trusted with (0039). A column that is never read
+   * cannot be leaked by a caller that forgets to drop it.
+   */
+  survey: async (cutoff, limit) => {
+    const live = gte(loomSignInAttempts.lastFailureAt, cutoff)
+
+    try {
+      const [totals] = await db
+        .select({
+          subjects: sql<unknown>`count(*)`,
+          failures: sql<unknown>`coalesce(sum(${loomSignInAttempts.failures}), 0)`,
+          earliestFailureAt: sql<unknown>`min(${loomSignInAttempts.firstFailureAt})`,
+          latestFailureAt: sql<unknown>`max(${loomSignInAttempts.lastFailureAt})`,
+        })
+        .from(loomSignInAttempts)
+        .where(live)
+
+      const parsedTotals = totalsSchema.safeParse(totals)
+      if (!parsedTotals.success) {
+        return err<AttemptLogError>({
+          code: "unavailable",
+          detail: "the sign-in attempt totals did not parse",
+        })
+      }
+
+      const rows = await db
+        .select({
+          failures: loomSignInAttempts.failures,
+          firstFailureAt: loomSignInAttempts.firstFailureAt,
+          lastFailureAt: loomSignInAttempts.lastFailureAt,
+        })
+        .from(loomSignInAttempts)
+        .where(live)
+        .orderBy(desc(loomSignInAttempts.lastFailureAt))
+        .limit(Math.max(0, limit))
+
+      const parsedRows = z.array(rowSchema).safeParse(rows)
+
+      return parsedRows.success
+        ? ok({ ...parsedTotals.data, records: parsedRows.data })
+        : err<AttemptLogError>({
+            code: "unavailable",
+            detail: "a stored sign-in attempt did not parse",
+          })
+    } catch (cause) {
+      return err(failure(cause, "could not read sign-in attempts"))
     }
   },
 })

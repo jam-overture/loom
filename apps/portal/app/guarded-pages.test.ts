@@ -52,4 +52,22 @@ describe("every page", () => {
   it("exempts only the sign-in page and the root redirect", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual(["page.tsx", "sign-in/page.tsx"])
   })
+
+  /**
+   * The other half of the same problem, and the half that fails silently.
+   *
+   * A guarded page has no cookie during `next build`, so `requireActor`
+   * redirects, and Next keeps that redirect as the page's prerendered output —
+   * served, with a stale time, to a reviewer the proxy has already let through.
+   * `/primitives` shipped in that state and nothing noticed, because a page that
+   * renders correctly in `pnpm dev` gives no sign of it.
+   *
+   * Declared once in the root layout and asserted here, since the alternative is
+   * remembering it per page and finding out from a deployment.
+   */
+  it("is rendered per request, declared for the whole segment in the layout", () => {
+    const layout = readFileSync(join(APP, "layout.tsx"), "utf8")
+
+    expect(layout).toContain('export const dynamic = "force-dynamic"')
+  })
 })

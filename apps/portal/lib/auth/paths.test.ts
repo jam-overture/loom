@@ -20,6 +20,16 @@ describe("isPublicPath", () => {
   it("does not let a path that merely starts with the same letters through", () => {
     expect(isPublicPath("/sign-inbox")).toBe(false)
   })
+
+  /**
+   * No longer hypothetical: `/sign-ins` is a real operator page one character
+   * away from the one route that needs no session, and it reports on the state
+   * of the throttle. The rule above is what keeps them apart, so the real
+   * neighbour is named here rather than left to a generic case.
+   */
+  it("keeps the sign-in report behind a session, next door though it is", () => {
+    expect(isPublicPath("/sign-ins")).toBe(false)
+  })
 })
 
 describe("safeReturnPath", () => {

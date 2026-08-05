@@ -126,6 +126,36 @@ describe("postgresAttemptLog — Postgres specifics", () => {
     expect(counted.ok).toBe(false)
   })
 
+  it("reports a failed survey rather than an empty one", async () => {
+    const db = await freshDatabase()
+    const log = postgresAttemptLog(db)
+    await db.execute(sql.raw("DROP TABLE loom_signin_attempts"))
+
+    const surveyed = await log.survey(0, 10)
+
+    expect(surveyed.ok).toBe(false)
+  })
+
+  /**
+   * `count` and `sum` are `bigint`, which a driver hands over as a string rather
+   * than lose precision. Everything downstream does arithmetic on these, and a
+   * survey that answered `"3"` where a page expected `3` would render "30" for
+   * two subjects and one — so the coercion is held down here rather than
+   * inferred from a passing assertion elsewhere.
+   */
+  it("answers with numbers, not with the strings a bigint aggregate arrives as", async () => {
+    const db = await freshDatabase()
+    const log = postgresAttemptLog(db)
+    await log.penalise("a", T0, 0)
+    await log.penalise("b", T0 + 1, 0)
+
+    const surveyed = await log.survey(0, 10)
+
+    expect(surveyed.ok && typeof surveyed.value.subjects).toBe("number")
+    expect(surveyed.ok && typeof surveyed.value.failures).toBe("number")
+    expect(surveyed.ok && typeof surveyed.value.latestFailureAt).toBe("number")
+  })
+
   it("reports a stored attempt that no longer makes sense rather than acting on it", async () => {
     const db = await freshDatabase()
     await db.execute(

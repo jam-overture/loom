@@ -31,3 +31,12 @@ const carrier = globalThis as unknown as Carrier
 
 export const portalAttemptLog: AttemptLog = (carrier[CARRIER_KEY] ??=
   portalDatabase === undefined ? memoryAttemptLog() : postgresAttemptLog(portalDatabase))
+
+/**
+ * Whether the counting outlives this process — and, on a serverless host,
+ * whether it is shared across instances at all. `/sign-ins` states it rather
+ * than implying it: a page reporting "nobody is locked out" over a per-instance
+ * map is reporting on one instance's memory, and an operator has to be told
+ * which of the two they are reading.
+ */
+export const attemptLogIsDurable = portalDatabase !== undefined

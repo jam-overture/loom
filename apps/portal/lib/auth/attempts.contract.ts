@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type { AttemptLog } from "./attempts"
+import type { AttemptLog, AttemptSurvey } from "./attempts"
 import type { AttemptRecord } from "./throttle"
 
 /**
@@ -24,6 +24,14 @@ const unwrap = async (
   operation: Promise<{ readonly ok: true; readonly value: AttemptRecord | null } | { readonly ok: false }>
 ): Promise<AttemptRecord | null> => {
   const result = await operation
+
+  if (!result.ok) throw new Error("the attempt log failed during a contract test")
+
+  return result.value
+}
+
+const surveyed = async (log: AttemptLog, cutoff: number, limit: number): Promise<AttemptSurvey> => {
+  const result = await log.survey(cutoff, limit)
 
   if (!result.ok) throw new Error("the attempt log failed during a contract test")
 
@@ -139,6 +147,120 @@ export const describeAttemptLogContract = (
       )
 
       expect((await unwrap(log.recall("a", FORGETS_NOTHING)))?.failures).toBe(8)
+    })
+
+    /**
+     * The survey half. Same argument as above and then some: the Postgres
+     * implementation computes its totals in SQL and the memory one in
+     * JavaScript, so nothing but this suite makes them agree on what "live"
+     * means, on what an empty table reports, or on which rows a cap keeps.
+     */
+    describe("survey", () => {
+      it("reports nothing over an empty log, rather than reporting no dates as zero", async () => {
+        const log = await build()
+
+        expect(await surveyed(log, FORGETS_NOTHING, 10)).toEqual({
+          subjects: 0,
+          failures: 0,
+          earliestFailureAt: null,
+          latestFailureAt: null,
+          records: [],
+        })
+      })
+
+      it("counts subjects and failures separately", async () => {
+        const log = await build()
+        await log.penalise("a", T0, FORGETS_NOTHING)
+        await log.penalise("a", T0 + 1, FORGETS_NOTHING)
+        await log.penalise("b", T0 + 2, FORGETS_NOTHING)
+
+        const survey = await surveyed(log, FORGETS_NOTHING, 10)
+
+        expect(survey.subjects).toBe(2)
+        expect(survey.failures).toBe(3)
+      })
+
+      it("spans from the earliest first failure to the latest last one", async () => {
+        const log = await build()
+        await log.penalise("a", T0, FORGETS_NOTHING)
+        await log.penalise("a", T0 + 900, FORGETS_NOTHING)
+        await log.penalise("b", T0 + 400, FORGETS_NOTHING)
+
+        const survey = await surveyed(log, FORGETS_NOTHING, 10)
+
+        expect(survey.earliestFailureAt).toBe(T0)
+        expect(survey.latestFailureAt).toBe(T0 + 900)
+      })
+
+      it("leaves out a record the cutoff has forgotten, totals included", async () => {
+        const log = await build()
+        await log.penalise("old", T0, FORGETS_NOTHING)
+        await log.penalise("new", T0 + 5_000, FORGETS_NOTHING)
+
+        const survey = await surveyed(log, T0 + 1_000, 10)
+
+        expect(survey.subjects).toBe(1)
+        expect(survey.failures).toBe(1)
+        expect(survey.latestFailureAt).toBe(T0 + 5_000)
+      })
+
+      it("leaves out a subject that was forgiven", async () => {
+        const log = await build()
+        await log.penalise("a", T0, FORGETS_NOTHING)
+        await log.forgive("a")
+
+        expect((await surveyed(log, FORGETS_NOTHING, 10)).subjects).toBe(0)
+      })
+
+      it("returns the records newest first", async () => {
+        const log = await build()
+        await log.penalise("a", T0 + 100, FORGETS_NOTHING)
+        await log.penalise("b", T0 + 300, FORGETS_NOTHING)
+        await log.penalise("c", T0 + 200, FORGETS_NOTHING)
+
+        expect(
+          (await surveyed(log, FORGETS_NOTHING, 10)).records.map((record) => record.lastFailureAt)
+        ).toEqual([T0 + 300, T0 + 200, T0 + 100])
+      })
+
+      /**
+       * The cap is on the sample and never on the totals — an operator reading
+       * "2 subjects" off a page that fetched one row would be reading their own
+       * page size back to themselves.
+       */
+      it("caps the records without capping the totals", async () => {
+        const log = await build()
+        await log.penalise("a", T0 + 1, FORGETS_NOTHING)
+        await log.penalise("b", T0 + 2, FORGETS_NOTHING)
+        await log.penalise("c", T0 + 3, FORGETS_NOTHING)
+
+        const survey = await surveyed(log, FORGETS_NOTHING, 2)
+
+        expect(survey.subjects).toBe(3)
+        expect(survey.records).toHaveLength(2)
+      })
+
+      /** The cap keeps the newest, because those are the ones a lockout can still be running on. */
+      it("keeps the newest records when it caps", async () => {
+        const log = await build()
+        await log.penalise("a", T0 + 1, FORGETS_NOTHING)
+        await log.penalise("b", T0 + 2, FORGETS_NOTHING)
+        await log.penalise("c", T0 + 3, FORGETS_NOTHING)
+
+        expect(
+          (await surveyed(log, FORGETS_NOTHING, 1)).records.map((record) => record.lastFailureAt)
+        ).toEqual([T0 + 3])
+      })
+
+      it("carries each subject's own count into its record", async () => {
+        const log = await build()
+        await log.penalise("a", T0, FORGETS_NOTHING)
+        await log.penalise("a", T0 + 1, FORGETS_NOTHING)
+
+        expect((await surveyed(log, FORGETS_NOTHING, 10)).records).toEqual([
+          { failures: 2, firstFailureAt: T0, lastFailureAt: T0 + 1 },
+        ])
+      })
     })
   })
 }

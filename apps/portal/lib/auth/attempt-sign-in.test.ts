@@ -24,7 +24,7 @@ const brokenAttemptLog = (): AttemptLog => {
   const failure = async (): Promise<Result<never, AttemptLogError>> =>
     err({ code: "unavailable", detail: "the log is down" })
 
-  return { recall: failure, penalise: failure, forgive: failure }
+  return { recall: failure, penalise: failure, forgive: failure, survey: failure }
 }
 
 const wrongKey = () => null
