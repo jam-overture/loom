@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, type ProposalId, type TreeId } from "../ids.js"
+import { sequentialIdFactory, type NodeId, type ProposalId, type TreeId } from "../ids.js"
 import { ok } from "../result.js"
 import { FIXED_INSTANT } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { compareTrees } from "../tree/compare.js"
-import type { TreeDelta } from "../tree/delta.js"
+import { buildText } from "../tree/builders.js"
+import type { TreeDelta, TreeOperation } from "../tree/delta.js"
+import { findNode } from "../tree/navigation.js"
 import { withRoot } from "../tree/tree.js"
 
 import { memoryTreeStore } from "./memory.js"
@@ -27,12 +29,19 @@ const appendOf = (delta: TreeDelta): AppendRequest => ({
   appliedAt: FIXED_INSTANT,
 })
 
-const removalOf = (treeId: TreeId, nodeId: string, baseRevision: number): TreeDelta => ({
+const deltaOf = (
+  treeId: TreeId,
+  baseRevision: number,
+  operations: readonly TreeOperation[]
+): TreeDelta => ({
   deltaId: sequentialIdFactory("r").deltaId(),
   treeId,
   baseRevision,
-  operations: [{ op: "remove", nodeId: nodeId as never }],
+  operations,
 })
+
+const removalOf = (treeId: TreeId, nodeId: string, baseRevision: number): TreeDelta =>
+  deltaOf(treeId, baseRevision, [{ op: "remove", nodeId: nodeId as NodeId }])
 
 /** A whole log in one page: both ends reached, so the fold stops after it. */
 const onePage = (revisions: readonly StoredRevision[]): RevisionPage => ({
@@ -64,13 +73,15 @@ describe("replayTree", () => {
 
     const replayed = replayTree(tree, log.value.revisions)
 
-    expect(replayed.ok && replayed.value).toEqual(head.value)
+    expect(replayed.ok && replayed.value.tree).toEqual(head.value)
   })
 
   it("replays an empty log to the seed itself", () => {
     const { tree } = sampleTree()
 
-    expect(replayTree(tree, [])).toEqual({ ok: true, value: tree })
+    const replayed = replayTree(tree, [])
+
+    expect(replayed.ok && replayed.value.tree).toEqual(tree)
   })
 
   /** A gap or a repeat means the log is not the history it claims to be. */
@@ -105,7 +116,7 @@ describe("auditSnapshot", () => {
 
     expect(await auditSnapshot(store, tree.treeId, tree)).toEqual({
       ok: true,
-      value: { outcome: "agrees", revision: 1 },
+      value: { outcome: "agrees", revision: 1, idReturns: [] },
     })
   })
 
@@ -116,7 +127,7 @@ describe("auditSnapshot", () => {
 
     expect(await auditSnapshot(store, tree.treeId, tree)).toEqual({
       ok: true,
-      value: { outcome: "agrees", revision: 0 },
+      value: { outcome: "agrees", revision: 0, idReturns: [] },
     })
   })
 
@@ -207,7 +218,7 @@ describe("auditSnapshot", () => {
 
     expect(await auditSnapshot(paged, tree.treeId, tree)).toEqual({
       ok: true,
-      value: { outcome: "agrees", revision: 2 },
+      value: { outcome: "agrees", revision: 2, idReturns: [] },
     })
     expect(asked).toEqual(["start", "1"])
   })
@@ -220,5 +231,143 @@ describe("auditSnapshot", () => {
 
     expect(audit.ok).toBe(false)
     expect(audit.ok ? "" : audit.error.code).toBe("not-found")
+  })
+})
+
+/**
+ * An audit answers two questions that can disagree. "Does the log still produce
+ * the snapshot" is about drift; "does an id still name one node" is about
+ * whether the log can be read by id at all (0038). A tree can pass the first and
+ * fail the second, so the second is reported alongside the verdict rather than
+ * folded into it.
+ */
+describe("auditSnapshot and id identity", () => {
+  const spare = sequentialIdFactory("audit")
+
+  it("reports an id that came back as a different node, while still agreeing", async () => {
+    const { tree, ids } = sampleTree()
+    const store = memoryTreeStore()
+    await store.create(tree)
+    await store.append(tree.treeId, appendOf(removalOf(tree.treeId, ids.footer, 0)))
+
+    const impostor = { ...buildText(spare, "Sale"), id: ids.footer }
+    await store.append(
+      tree.treeId,
+      appendOf(
+        deltaOf(tree.treeId, 1, [{ op: "insert", parentId: ids.page, index: 0, node: impostor }])
+      )
+    )
+
+    const audit = await auditSnapshot(store, tree.treeId, tree)
+    if (!audit.ok || audit.value.outcome !== "agrees") throw new Error("expected agreement")
+
+    expect(audit.value.idReturns).toEqual([
+      {
+        code: "recycled",
+        nodeId: ids.footer,
+        leftAs: "loom.footer",
+        returnedAs: "text",
+        leftAt: 1,
+        returnedAt: 2,
+      },
+    ])
+  })
+
+  /** An undo is not a fault, and an audit that called it one would cry wolf. */
+  it("reports a removal that was taken back as a restoration", async () => {
+    const { tree, ids } = sampleTree()
+    const footer = findNode(tree.root, ids.footer)
+    if (!footer) throw new Error("fixture missing footer")
+
+    const store = memoryTreeStore()
+    await store.create(tree)
+    await store.append(tree.treeId, appendOf(removalOf(tree.treeId, ids.footer, 0)))
+    await store.append(
+      tree.treeId,
+      appendOf(
+        deltaOf(tree.treeId, 1, [{ op: "insert", parentId: ids.page, index: 2, node: footer }])
+      )
+    )
+
+    const audit = await auditSnapshot(store, tree.treeId, tree)
+    if (!audit.ok || audit.value.outcome !== "agrees") throw new Error("expected agreement")
+
+    expect(audit.value.idReturns).toEqual([
+      { code: "restored", nodeId: ids.footer, label: "loom.footer", leftAt: 1, returnedAt: 2 },
+    ])
+  })
+
+  /** Paging is where a second pass would go wrong: the fold carries it along. */
+  it("sees a return whose two halves fall in different pages", async () => {
+    const { tree, ids } = sampleTree()
+    const footer = findNode(tree.root, ids.footer)
+    if (!footer) throw new Error("fixture missing footer")
+
+    const store = memoryTreeStore()
+    await store.create(tree)
+    await store.append(tree.treeId, appendOf(removalOf(tree.treeId, ids.footer, 0)))
+    await store.append(
+      tree.treeId,
+      appendOf(
+        deltaOf(tree.treeId, 1, [{ op: "insert", parentId: ids.page, index: 2, node: footer }])
+      )
+    )
+
+    const head = await store.head(tree.treeId)
+    if (!head.ok) throw new Error("expected the store to answer")
+
+    const paged: TreeReader = {
+      head: () => Promise.resolve(ok(head.value)),
+      revisions: async (treeId, request) => await store.revisions(treeId, { ...request, limit: 1 }),
+    }
+
+    const audit = await auditSnapshot(paged, tree.treeId, tree)
+    if (!audit.ok || audit.value.outcome !== "agrees") throw new Error("expected agreement")
+
+    expect(audit.value.idReturns.map((found) => found.code)).toEqual(["restored"])
+  })
+
+  it("reports a diverged tree's id returns too", async () => {
+    const { tree, ids } = sampleTree()
+    const impostor = { ...buildText(spare, "Sale"), id: ids.footer }
+
+    const drifted: TreeReader = {
+      /** Claims revision 2 while still holding the untouched tree. */
+      head: () => Promise.resolve(ok({ ...tree, revision: 2 })),
+      revisions: () =>
+        Promise.resolve(
+          ok(
+            onePage([
+              entryOf(removalOf(tree.treeId, ids.footer, 0), 1),
+              entryOf(
+                deltaOf(tree.treeId, 1, [
+                  { op: "insert", parentId: ids.page, index: 0, node: impostor },
+                ]),
+                2
+              ),
+            ])
+          )
+        ),
+    }
+
+    const audit = await auditSnapshot(drifted, tree.treeId, tree)
+    if (!audit.ok || audit.value.outcome !== "diverged") throw new Error("expected divergence")
+
+    expect(audit.value.idReturns.map((found) => found.code)).toEqual(["recycled"])
+  })
+
+  it("says nothing about ids when the log cannot be replayed at all", async () => {
+    const { tree, ids } = sampleTree()
+
+    const gapped: TreeReader = {
+      head: () => Promise.resolve(ok(tree)),
+      revisions: () =>
+        Promise.resolve(ok(onePage([entryOf(removalOf(tree.treeId, ids.footer, 0), 5)]))),
+    }
+
+    const audit = await auditSnapshot(gapped, tree.treeId, tree)
+
+    expect(audit.ok && audit.value.outcome).toBe("unreplayable")
+    expect(audit.ok && "idReturns" in audit.value).toBe(false)
   })
 })

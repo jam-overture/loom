@@ -290,3 +290,124 @@ describe("applyDelta", () => {
     expect(childrenOf(second.value.root).map((child) => child.id)).toEqual([ids.main])
   })
 })
+
+/**
+ * Uniqueness over the live tree is not enough to keep an id naming one node
+ * (0038). A `remove` takes an id out of the tree, and everything downstream of
+ * a delta then joins on an address two different nodes have worn.
+ */
+describe("a retired id inside one delta", () => {
+  it("refuses a different node arriving at an id the same delta removed", () => {
+    const { tree, ids } = sampleTree()
+    const impostor = { ...buildText(spare, "Sale"), id: ids.footer }
+
+    const result = applyDelta(
+      tree,
+      deltaOf(tree.treeId, 0, [
+        { op: "remove", nodeId: ids.footer },
+        { op: "insert", parentId: ids.page, index: 0, node: impostor },
+      ])
+    )
+
+    expect(!result.ok && result.error.code).toBe("recycled-node-id")
+    expect(!result.ok && result.error.code === "recycled-node-id" && result.error.nodeId).toBe(
+      ids.footer
+    )
+  })
+
+  /** Undo re-inserts the exact subtree it removed, and must stay expressible. */
+  it("accepts the node that left coming back unchanged", () => {
+    const { tree, ids } = sampleTree()
+    const footer = findNode(tree.root, ids.footer)
+    if (!footer) throw new Error("fixture missing footer")
+
+    const result = applyDelta(
+      tree,
+      deltaOf(tree.treeId, 0, [
+        { op: "remove", nodeId: ids.footer },
+        { op: "insert", parentId: ids.page, index: 0, node: footer },
+      ])
+    )
+
+    expect(result.ok && childrenOf(result.value.root).map((child) => child.id)).toEqual([
+      ids.footer,
+      ids.header,
+      ids.main,
+    ])
+  })
+
+  /** A `remove` names one id and retires every id it takes with it. */
+  it("refuses a fresh node at the id of a removed subtree's child", () => {
+    const { tree, ids } = sampleTree()
+    const impostor = { ...buildText(spare, "Different"), id: ids.body }
+
+    const result = applyDelta(
+      tree,
+      deltaOf(tree.treeId, 0, [
+        { op: "remove", nodeId: ids.card },
+        { op: "insert", parentId: ids.page, index: 0, node: impostor },
+      ])
+    )
+
+    expect(!result.ok && result.error.code).toBe("recycled-node-id")
+  })
+
+  /** A move never takes an id out of the tree, so it retires nothing. */
+  it("does not treat a moved node's id as retired", () => {
+    const { tree, ids } = sampleTree()
+    const banner = buildElement(spare, { type: "loom.banner" })
+
+    const result = applyDelta(
+      tree,
+      deltaOf(tree.treeId, 0, [
+        { op: "move", nodeId: ids.footer, parentId: ids.main, index: 0 },
+        { op: "insert", parentId: ids.page, index: 0, node: banner },
+      ])
+    )
+
+    expect(result.ok).toBe(true)
+  })
+
+  /**
+   * The deliberate limit. Enforcing this across a log would mean the tree
+   * carrying the ids it has retired, which is a schema change nobody has agreed
+   * to; `auditSnapshot` reports it instead (0038).
+   */
+  it("accepts a recycled id when the removal was in an earlier delta", () => {
+    const { tree, ids } = sampleTree()
+    const removed = applyDelta(
+      tree,
+      deltaOf(tree.treeId, 0, [{ op: "remove", nodeId: ids.footer }])
+    )
+    if (!removed.ok) throw new Error(removed.error.code)
+
+    const impostor = { ...buildText(spare, "Sale"), id: ids.footer }
+    const result = applyDelta(
+      removed.value,
+      deltaOf(tree.treeId, 1, [{ op: "insert", parentId: ids.page, index: 0, node: impostor }])
+    )
+
+    expect(result.ok).toBe(true)
+  })
+
+  /**
+   * Inverting a delta walks operations one at a time against the tree each one
+   * observed, so an operation applied on its own has retired nothing. Undo must
+   * never be stricter than the change it undoes.
+   */
+  it("does not fire for an operation applied outside a delta", () => {
+    const { tree, ids } = sampleTree()
+    const removed = applyOperation(tree.root, { op: "remove", nodeId: ids.footer })
+    if (!removed.ok) throw new Error(removed.error.code)
+
+    const impostor = { ...buildText(spare, "Sale"), id: ids.footer }
+    const result = applyOperation(removed.value, {
+      op: "insert",
+      parentId: ids.page,
+      index: 0,
+      node: impostor,
+    })
+
+    expect(result.ok).toBe(true)
+  })
+})

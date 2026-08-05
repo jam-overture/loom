@@ -95,3 +95,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0035](0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) | Discarded work is a stake, and only the runtime may declare it | Accepted — partially supersedes 0032 | §2 → §5 |
 | [0036](0036-a-table-loom-creates-is-locked-when-it-is-created.md) | A table Loom creates is locked when it is created | Accepted | §5 → §6 |
 | [0037](0037-the-journal-may-forget-and-only-a-whole-episode-at-a-time.md) | The journal may forget, and only a whole episode at a time | Accepted | §6 |
+| [0038](0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) | An id names one node, and a return is not a reuse | Accepted | §1 → §5 |

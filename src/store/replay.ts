@@ -1,6 +1,7 @@
 import type { TreeId } from "../ids.js"
 import { err, ok, reduceResult, type Result } from "../result.js"
 import { applyDelta } from "../tree/apply.js"
+import { idReturnsIn, seedIdHistory, trackIds, type IdHistory, type IdReturn } from "../tree/identity.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import type { StoreError } from "./errors.js"
@@ -26,21 +27,53 @@ export type ReplayMismatch =
   /** A gap or a repeat in the log: revisions must be consecutive from the seed. */
   | { readonly code: "revision-gap"; readonly expected: number; readonly found: number }
 
+/**
+ * A fold, and what the fold saw on the way past.
+ *
+ * The id history rides along rather than being computed by a second pass. It is
+ * derived from consecutive states (0038) and this is the only place that
+ * produces them all, so folding twice would mean reading a whole log twice to
+ * learn something the first read already went past.
+ */
+export type ReplayedTree = {
+  readonly tree: LoomTree
+  readonly idHistory: IdHistory
+}
+
+const replayFrom = (
+  from: ReplayedTree,
+  entries: readonly StoredRevision[]
+): Result<ReplayedTree, ReplayMismatch> =>
+  reduceResult<StoredRevision, ReplayedTree, ReplayMismatch>(entries, from, (replayed, entry) => {
+    if (entry.revision !== replayed.tree.revision + 1) {
+      return err({
+        code: "revision-gap",
+        expected: replayed.tree.revision + 1,
+        found: entry.revision,
+      })
+    }
+
+    const applied = applyDelta(replayed.tree, entry.delta)
+
+    return applied.ok
+      ? ok({
+          tree: applied.value,
+          idHistory: trackIds(replayed.idHistory, replayed.tree, applied.value),
+        })
+      : err({ code: "delta-rejected", revision: entry.revision, detail: applied.error.code })
+  })
+
+/** A whole log, from a seed the caller can prove is revision 0 (0028). */
 export const replayTree = (
   seed: LoomTree,
   entries: readonly StoredRevision[]
-): Result<LoomTree, ReplayMismatch> =>
-  reduceResult<StoredRevision, LoomTree, ReplayMismatch>(entries, seed, (tree, entry) => {
-    if (entry.revision !== tree.revision + 1) {
-      return err({ code: "revision-gap", expected: tree.revision + 1, found: entry.revision })
-    }
+): Result<ReplayedTree, ReplayMismatch> =>
+  replayFrom(seedReplay(seed), entries)
 
-    const applied = applyDelta(tree, entry.delta)
-
-    return applied.ok
-      ? ok(applied.value)
-      : err({ code: "delta-rejected", revision: entry.revision, detail: applied.error.code })
-  })
+const seedReplay = (seed: LoomTree): ReplayedTree => ({
+  tree: seed,
+  idHistory: seedIdHistory(seed),
+})
 
 /**
  * Folds a whole log by walking it forward one page at a time.
@@ -57,13 +90,13 @@ export const replayTree = (
 const foldLog = async (
   store: TreeReader,
   treeId: TreeId,
-  tree: LoomTree,
+  from: ReplayedTree,
   cursor?: string
-): Promise<Result<Result<LoomTree, ReplayMismatch>, StoreError>> => {
+): Promise<Result<Result<ReplayedTree, ReplayMismatch>, StoreError>> => {
   const page = await store.revisions(treeId, cursor === undefined ? {} : { cursor })
   if (!page.ok) return page
 
-  const folded = replayTree(tree, page.value.revisions)
+  const folded = replayFrom(from, page.value.revisions)
   if (!folded.ok) return ok(folded)
 
   return page.value.newer === null
@@ -71,8 +104,19 @@ const foldLog = async (
     : await foldLog(store, treeId, folded.value, page.value.newer)
 }
 
+/**
+ * What the fold noticed about ids on the way, whatever the verdict turned out
+ * to be.
+ *
+ * Carried on both replayable outcomes rather than folded into the verdict,
+ * because it answers a different question. "Agrees" is about whether the
+ * snapshot still matches the log; a recycled id is about whether the log can be
+ * read by id at all (0038). A tree can pass the first and fail the second, and
+ * an audit that collapsed them would have to call one of those two things by the
+ * other's name.
+ */
 export type SnapshotAudit =
-  | { readonly outcome: "agrees"; readonly revision: number }
+  | { readonly outcome: "agrees"; readonly revision: number; readonly idReturns: readonly IdReturn[] }
   /**
    * The fold produced a different tree — the drift this whole module exists for.
    *
@@ -88,6 +132,7 @@ export type SnapshotAudit =
       readonly revision: number
       readonly stored: LoomTree
       readonly replayed: LoomTree
+      readonly idReturns: readonly IdReturn[]
     }
   | { readonly outcome: "unreplayable"; readonly mismatch: ReplayMismatch }
 
@@ -110,22 +155,24 @@ export const auditSnapshot = async (
   const head = await store.head(treeId)
   if (!head.ok) return head
 
-  const folded = await foldLog(store, treeId, seed)
+  const folded = await foldLog(store, treeId, seedReplay(seed))
   if (!folded.ok) return folded
 
   const replayed = folded.value
   if (!replayed.ok) return ok({ outcome: "unreplayable", mismatch: replayed.error })
 
-  const agrees = JSON.stringify(replayed.value) === JSON.stringify(head.value)
+  const idReturns = idReturnsIn(replayed.value.idHistory)
+  const agrees = JSON.stringify(replayed.value.tree) === JSON.stringify(head.value)
 
   return ok(
     agrees
-      ? { outcome: "agrees", revision: head.value.revision }
+      ? { outcome: "agrees", revision: head.value.revision, idReturns }
       : {
           outcome: "diverged",
           revision: head.value.revision,
           stored: head.value,
-          replayed: replayed.value,
+          replayed: replayed.value.tree,
+          idReturns,
         }
   )
 }

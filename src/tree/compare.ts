@@ -1,7 +1,6 @@
 import type { NodeId } from "../ids.js"
-import { assertNever } from "../result.js"
 
-import type { LoomNode } from "./node.js"
+import { nodeLabel, type LoomNode } from "./node.js"
 import { outlineTree } from "./outline.js"
 import type { LoomTree } from "./tree.js"
 
@@ -20,14 +19,25 @@ import type { LoomTree } from "./tree.js"
  * produced a card the snapshot does not have, at `node-7`" is.
  *
  * Node ids are the join key, which is what makes this comparison meaningful
- * rather than a structural guess: ids are minted once by the runtime (0003) and
- * an accepted delta never re-mints them, so the same id on both sides is the
- * same node in two states, and an id on one side only is a node one side lost
- * or invented.
+ * rather than a structural guess: ids are minted once by the runtime (0003), so
+ * the same id on both sides is the same node in two states, and an id on one
+ * side only is a node one side lost or invented.
+ *
+ * That the join key holds is a claim about the log rather than about these two
+ * trees, and `identity.ts` is what checks it (0038). Comparing two folds of one
+ * log is the case this was written for and is safe regardless — both sides read
+ * the same id the same way.
  */
 
-/** What differs about a node both trees have. Ordered as listed. */
-export type NodeFacet = "kind" | "type" | "props" | "text" | "parent" | "position"
+/**
+ * What differs about a node both trees have. Ordered as listed.
+ *
+ * `type` is an element's primitive and `name` is a slot's name. They were one
+ * facet until an operator reading `/audit` was told a renamed slot differed in
+ * "which primitive it is", which is a sentence about a node kind that has no
+ * primitive.
+ */
+export type NodeFacet = "kind" | "type" | "name" | "props" | "text" | "parent" | "position"
 
 export type TreeDifference =
   /** Present in the base tree, absent from the compared one. */
@@ -41,24 +51,6 @@ export type TreeDifference =
       /** Never empty — an unchanged node produces no difference at all. */
       readonly facets: readonly NodeFacet[]
     }
-
-/**
- * A node's own name, which is the only thing a reader can recognise it by. Ids
- * are minted and carry no meaning; a difference that named only ids would be
- * true and unreadable.
- */
-const labelOf = (node: LoomNode): string => {
-  switch (node.kind) {
-    case "element":
-      return node.type
-    case "slot":
-      return node.name
-    case "text":
-      return "text"
-    default:
-      return assertNever(node, "labelOf")
-  }
-}
 
 /**
  * Props are compared by their serialisation rather than key by key.
@@ -83,7 +75,7 @@ const facetsOf = (base: LoomNode, compared: LoomNode): readonly NodeFacet[] => {
   }
 
   if (base.kind === "slot" && compared.kind === "slot") {
-    return base.name === compared.name ? [] : ["type"]
+    return base.name === compared.name ? [] : ["name"]
   }
 
   if (base.kind === "text" && compared.kind === "text") {
@@ -116,7 +108,7 @@ const differenceFor = (base: Placed, compared: Placed): TreeDifference | undefin
 
   return facets.length === 0
     ? undefined
-    : { code: "changed", nodeId: base.node.id, label: labelOf(base.node), facets }
+    : { code: "changed", nodeId: base.node.id, label: nodeLabel(base.node), facets }
 }
 
 /**
@@ -137,7 +129,7 @@ export const compareTrees = (base: LoomTree, compared: LoomTree): readonly TreeD
 
   const fromBase = Array.from(left.entries()).flatMap<TreeDifference>(([nodeId, placed]) => {
     const other = right.get(nodeId)
-    if (other === undefined) return [{ code: "missing", nodeId, label: labelOf(placed.node) }]
+    if (other === undefined) return [{ code: "missing", nodeId, label: nodeLabel(placed.node) }]
 
     const difference = differenceFor(placed, other)
 
@@ -149,7 +141,7 @@ export const compareTrees = (base: LoomTree, compared: LoomTree): readonly TreeD
     .map<TreeDifference>(([nodeId, placed]) => ({
       code: "extra",
       nodeId,
-      label: labelOf(placed.node),
+      label: nodeLabel(placed.node),
     }))
 
   return [...fromBase, ...onlyCompared]

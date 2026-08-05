@@ -1,4 +1,10 @@
-import { assertNever, compareTrees, type NodeFacet, type TreeDifference } from "@loom/runtime"
+import {
+  assertNever,
+  compareTrees,
+  type IdReturn,
+  type NodeFacet,
+  type TreeDifference,
+} from "@loom/runtime"
 import type { ReplayMismatch, SnapshotAudit } from "@loom/runtime/store"
 
 import type { OutcomeTone } from "./outcome"
@@ -31,6 +37,21 @@ export type AuditReport = {
    * list of problems rather than the start of a long one.
    */
   readonly omitted: number
+  /**
+   * Ids that stopped naming one node, which is a separate finding from the
+   * verdict and not a milder version of it (0038). The verdict answers whether
+   * the log still produces the snapshot; this answers whether the log can be
+   * read by id. A tree can pass the first and fail the second, so this is
+   * reported even under "agrees".
+   */
+  readonly recycled: readonly IdReturn[]
+  readonly recyclingOmitted: number
+  /**
+   * Removals that were taken back. Counted rather than listed: an undo is the
+   * expected shape of a working review queue, and a page that listed each one
+   * beside a fault would read as a list of faults.
+   */
+  readonly restored: number
 }
 
 /**
@@ -61,6 +82,7 @@ export const toneOfAudit = (tone: AuditTone): OutcomeTone => AUDIT_TONES[tone]
 const FACET_WORDS: Readonly<Record<NodeFacet, string>> = {
   kind: "what kind of node it is",
   type: "which primitive it is",
+  name: "which slot it is",
   props: "its props",
   text: "its text",
   parent: "which node it sits inside",
@@ -102,6 +124,37 @@ export const describeMismatch = (mismatch: ReplayMismatch): string => {
 const changeCount = (revision: number): string =>
   `${revision} accepted ${revision === 1 ? "change" : "changes"}`
 
+/**
+ * A recycled id is only worth reading if it says which two nodes are involved,
+ * because the question a reviewer has is "which of these is the one I am looking
+ * at" and the id alone cannot answer it.
+ */
+export const describeRecycling = (found: IdReturn): string =>
+  found.code === "recycled"
+    ? `was a ${found.leftAs} until revision ${found.leftAt}, and a ${found.returnedAs} from revision ${found.returnedAt}`
+    : `was removed at revision ${found.leftAt} and put back at revision ${found.returnedAt}`
+
+/** Long enough to see the shape of the problem, short enough to read. */
+export const RECYCLING_LIMIT = 10
+
+type IdentityFindings = {
+  readonly recycled: readonly IdReturn[]
+  readonly recyclingOmitted: number
+  readonly restored: number
+}
+
+const identityFindings = (idReturns: readonly IdReturn[]): IdentityFindings => {
+  const recycled = idReturns.filter((found) => found.code === "recycled")
+
+  return {
+    recycled: recycled.slice(0, RECYCLING_LIMIT),
+    recyclingOmitted: Math.max(recycled.length - RECYCLING_LIMIT, 0),
+    restored: idReturns.length - recycled.length,
+  }
+}
+
+const NO_FINDINGS: IdentityFindings = { recycled: [], recyclingOmitted: 0, restored: 0 }
+
 export const describeAudit = (audit: SnapshotAudit): AuditReport => {
   switch (audit.outcome) {
     case "agrees":
@@ -111,6 +164,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         detail: `Folding ${changeCount(audit.revision)} from the seed reproduces the snapshot exactly, so the record of what happened and the thing readers see are still the same tree.`,
         differences: [],
         omitted: 0,
+        ...identityFindings(audit.idReturns),
       }
 
     case "diverged": {
@@ -122,6 +176,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         detail: `Folding ${changeCount(audit.revision)} from the seed produced a different tree. The snapshot is what readers get; the log is what the runtime claims happened. One of them is wrong, and until that is settled the history of this tree cannot be trusted to explain it.`,
         differences: found.slice(0, DIFFERENCE_LIMIT),
         omitted: Math.max(found.length - DIFFERENCE_LIMIT, 0),
+        ...identityFindings(audit.idReturns),
       }
     }
 
@@ -137,6 +192,8 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         detail: `The fold stopped before it finished, so there is no replayed tree to compare against — ${describeMismatch(audit.mismatch)}. This says nothing about whether the served tree is correct; it says the log can no longer be used to check it.`,
         differences: [],
         omitted: 0,
+        /** A fold that stopped saw part of the log, and part of a history is not one. */
+        ...NO_FINDINGS,
       }
 
     default:

@@ -1,4 +1,9 @@
-import { describeDifference, toneOfAudit, type AuditReport } from "@/lib/audit-view"
+import {
+  describeDifference,
+  describeRecycling,
+  toneOfAudit,
+  type AuditReport,
+} from "@/lib/audit-view"
 import { toneClasses } from "@/lib/outcome"
 
 /**
@@ -39,6 +44,46 @@ export const AuditVerdict = ({ report }: { readonly report: AuditReport }) => (
       <p className="text-ink-muted text-xs">
         {report.omitted} further {report.omitted === 1 ? "node differs" : "nodes differ"} and{" "}
         {report.omitted === 1 ? "is" : "are"} not listed here.
+      </p>
+    )}
+
+    {report.recycled.length === 0 ? null : (
+      <div className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-md border p-4">
+        <div className="flex flex-wrap items-baseline gap-3">
+          <span className={`text-2xs rounded-sm px-2 py-1 ${toneClasses("rejected")}`}>
+            recycled ids
+          </span>
+          <p className="text-sm">
+            {report.recycled.length === 1 ? "An id names" : "Some ids name"} more than one node.
+          </p>
+        </div>
+        <p className="text-ink-muted text-xs">
+          The log still produces what is being served, and that is a separate question from this
+          one. An id is how every other reading of this tree joins its history together, so from
+          the revision named below, anything that follows one of these ids is following two
+          different nodes without being able to tell.
+        </p>
+        <ul className="flex flex-col gap-2">
+          {report.recycled.map((found) => (
+            <li key={`${found.nodeId}-${found.returnedAt}`} className="text-xs">
+              <span className="text-ink-muted font-mono">{found.nodeId}</span>
+              <span className="text-ink-muted mt-1 block">{describeRecycling(found)}</span>
+            </li>
+          ))}
+        </ul>
+        {report.recyclingOmitted === 0 ? null : (
+          <p className="text-ink-muted text-xs">
+            {report.recyclingOmitted} further{" "}
+            {report.recyclingOmitted === 1 ? "id is" : "ids are"} not listed here.
+          </p>
+        )}
+      </div>
+    )}
+
+    {report.restored === 0 ? null : (
+      <p className="text-ink-muted text-xs">
+        {report.restored} {report.restored === 1 ? "node was" : "nodes were"} removed and put back
+        unchanged, which is what taking a removal back looks like and is not a fault.
       </p>
     )}
   </div>

@@ -118,14 +118,14 @@ describe("compareTrees", () => {
     ])
   })
 
-  it("names a renamed slot on the type facet, since a slot's name is what it is", () => {
+  it("names a renamed slot on the name facet, since a slot has no primitive", () => {
     const { tree, heading, card, body } = sample()
     const footer = buildSlot(sequentialIdFactory("other"), "footer")
     const renamed: SlotNode = { ...body, name: footer.name }
     const compared = withChildren(tree, [heading, { ...card, children: [renamed] }])
 
     expect(compareTrees(tree, compared)).toEqual([
-      { code: "changed", nodeId: body.id, label: "body", facets: ["type"] },
+      { code: "changed", nodeId: body.id, label: "body", facets: ["name"] },
     ])
   })
 

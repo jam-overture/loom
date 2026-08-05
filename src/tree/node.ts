@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { nodeIdSchema, type NodeId } from "../ids.js"
 import { jsonObjectSchema, type JsonObject } from "../json.js"
+import { assertNever } from "../result.js"
 import { primitiveTypeSchema, slotNameSchema, type PrimitiveType, type SlotName } from "../primitive-type.js"
 
 /**
@@ -80,6 +81,24 @@ export const isContainerNode = (node: LoomNode): node is ElementNode | SlotNode 
 
 export const childrenOf = (node: LoomNode): readonly LoomNode[] =>
   isContainerNode(node) ? node.children : []
+
+/**
+ * The node's own name, which is the only thing a reader recognises it by. Ids
+ * are minted and carry no meaning, so anything reported to a person names the
+ * node as well as addressing it.
+ */
+export const nodeLabel = (node: LoomNode): string => {
+  switch (node.kind) {
+    case "element":
+      return node.type
+    case "slot":
+      return node.name
+    case "text":
+      return "text"
+    default:
+      return assertNever(node, "nodeLabel")
+  }
+}
 
 export const withChildren = <TNode extends ElementNode | SlotNode>(
   node: TNode,

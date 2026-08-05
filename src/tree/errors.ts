@@ -10,6 +10,8 @@ import type { NodeKind } from "./node.js"
 export type TreeError =
   | { readonly code: "node-not-found"; readonly nodeId: NodeId }
   | { readonly code: "duplicate-node-id"; readonly nodeId: NodeId }
+  /** An id this delta removed, re-inserted as a different node (0038). */
+  | { readonly code: "recycled-node-id"; readonly nodeId: NodeId }
   | { readonly code: "not-a-container"; readonly nodeId: NodeId; readonly nodeKind: NodeKind }
   | {
       readonly code: "index-out-of-range"
@@ -42,6 +44,8 @@ export const describeTreeError = (error: TreeError): string => {
       return `No node ${error.nodeId} in this tree.`
     case "duplicate-node-id":
       return `Node id ${error.nodeId} already exists in this tree.`
+    case "recycled-node-id":
+      return `Node id ${error.nodeId} was removed earlier in this delta and cannot come back as a different node.`
     case "not-a-container":
       return `Node ${error.nodeId} is a ${error.nodeKind} node and cannot hold children.`
     case "index-out-of-range":
