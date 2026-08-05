@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 760" width="980" height="760" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="980" height="760" fill="#ffffff"/>
+
+  <text x="32" y="42" font-size="21" fill="#111827">Counted, never enumerated — what crosses the attempt log's seam</text>
+  <text x="32" y="66" font-size="13" fill="#6b7280">0039. The table can say how many and how recently. It cannot say who, and neither can anything downstream of it.</text>
+
+  <!-- ============ THE TABLE ============ -->
+  <rect x="32" y="96" width="300" height="292" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="50" y="122" font-size="14" fill="#111827">loom_signin_attempts</text>
+  <text x="50" y="141" font-size="11" fill="#6b7280">one row per subject, swept when a new one arrives</text>
+
+  <text x="50" y="170" font-size="10" fill="#9ca3af">subject (HMAC)</text>
+  <text x="196" y="170" font-size="10" fill="#9ca3af">fails</text>
+  <text x="240" y="170" font-size="10" fill="#9ca3af">last failure</text>
+
+  <rect x="50" y="178" width="264" height="26" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="58" y="196" font-size="11" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">3f9a…c2</text>
+  <text x="200" y="196" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">7</text>
+  <text x="240" y="196" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">30s ago</text>
+
+  <rect x="50" y="210" width="264" height="26" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="58" y="228" font-size="11" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">81b0…4e</text>
+  <text x="200" y="228" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">5</text>
+  <text x="240" y="228" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">2m ago</text>
+
+  <rect x="50" y="242" width="264" height="26" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="58" y="260" font-size="11" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">c7d1…90</text>
+  <text x="200" y="260" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">2</text>
+  <text x="240" y="260" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">11m ago</text>
+
+  <rect x="50" y="274" width="264" height="26" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="58" y="292" font-size="11" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">0a44…17</text>
+  <text x="200" y="292" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">1</text>
+  <text x="240" y="292" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">40m ago</text>
+
+  <rect x="50" y="314" width="264" height="54" rx="6" fill="#fffbeb" stroke="#fde047"/>
+  <text x="60" y="334" font-size="11" fill="#713f12">the digest is keyed with the session secret</text>
+  <text x="60" y="352" font-size="11" fill="#713f12">(subject.ts) — two attempts, same place;</text>
+  <text x="60" y="364" font-size="11" fill="#713f12">never which place</text>
+
+  <!-- ============ THE SEAM ============ -->
+  <line x1="392" y1="96" x2="392" y2="700" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="402" y="116" font-size="13" fill="#334155">survey(cutoff, limit)</text>
+
+  <!-- crosses -->
+  <path d="M 336 200 L 384 200" stroke="#16a34a" stroke-width="2" marker-end="url(#go)"/>
+  <path d="M 336 250 L 384 250" stroke="#16a34a" stroke-width="2" marker-end="url(#go)"/>
+
+  <!-- does not cross -->
+  <path d="M 336 292 L 372 292" stroke="#dc2626" stroke-width="2"/>
+  <line x1="374" y1="284" x2="386" y2="300" stroke="#dc2626" stroke-width="2"/>
+  <line x1="386" y1="284" x2="374" y2="300" stroke="#dc2626" stroke-width="2"/>
+  <text x="52" y="412" font-size="11" fill="#991b1b">subject never crosses — the statement does not select it</text>
+
+  <!-- ============ WHAT ARRIVES ============ -->
+  <rect x="420" y="140" width="248" height="94" rx="8" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="436" y="164" font-size="13" fill="#166534">totals — exact, over every live row</text>
+  <text x="436" y="186" font-size="11" fill="#15803d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">subjects 4   failures 15</text>
+  <text x="436" y="204" font-size="11" fill="#15803d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">earliest 52m ago</text>
+  <text x="436" y="222" font-size="11" fill="#15803d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">latest   30s ago</text>
+
+  <rect x="420" y="246" width="248" height="104" rx="8" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="436" y="270" font-size="13" fill="#166534">records — capped, newest first</text>
+  <text x="436" y="292" font-size="11" fill="#15803d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">{ failures, firstFailureAt,</text>
+  <text x="436" y="310" font-size="11" fill="#15803d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">  lastFailureAt }</text>
+  <text x="436" y="334" font-size="11" fill="#166534">no identity of any kind, by construction</text>
+
+  <!-- ============ THE ARITHMETIC ============ -->
+  <path d="M 668 298 L 712 298" stroke="#334155" stroke-width="2" marker-end="url(#dark)"/>
+
+  <rect x="720" y="140" width="228" height="210" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="736" y="164" font-size="13" fill="#1e40af">readPressure — pure, takes now</text>
+  <text x="736" y="188" font-size="11" fill="#1d4ed8">runs the same assess() the sign-in</text>
+  <text x="736" y="204" font-size="11" fill="#1d4ed8">path runs, so the page cannot</text>
+  <text x="736" y="220" font-size="11" fill="#1d4ed8">disagree with the door</text>
+
+  <rect x="736" y="236" width="196" height="98" rx="6" fill="#ffffff" stroke="#bfdbfe"/>
+  <text x="748" y="258" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">locked        2</text>
+  <text x="748" y="276" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">lockedIsExact true</text>
+  <text x="748" y="294" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">longestWait   3m 30s</text>
+  <text x="748" y="312" font-size="11" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">counted       4</text>
+  <text x="748" y="328" font-size="10" fill="#6b7280">lockoutFor() is never restated in SQL</text>
+
+  <!-- ============ THE PAGE ============ -->
+  <path d="M 834 350 L 834 396" stroke="#334155" stroke-width="2" marker-end="url(#dark)"/>
+  <rect x="640" y="404" width="308" height="86" rx="8" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="656" y="428" font-size="12" fill="#991b1b">/sign-ins</text>
+  <text x="656" y="450" font-size="13" fill="#111827">2 of 4 callers are locked out right now.</text>
+  <text x="656" y="470" font-size="11" fill="#6b7280">longest wait 4 minutes · most recent less than a</text>
+  <text x="656" y="484" font-size="11" fill="#6b7280">minute ago · nothing to click</text>
+
+  <!-- ============ THE CAP RULE ============ -->
+  <rect x="32" y="524" width="916" height="176" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="52" y="550" font-size="14" fill="#111827">When the cap drops rows, is "locked" still a number?</text>
+  <text x="52" y="570" font-size="12" fill="#6b7280">Records arrive newest first, so a cap drops the oldest — and a row past maxLockoutMs cannot be serving a lockout.</text>
+
+  <!-- timeline -->
+  <line x1="72" y1="626" x2="700" y2="626" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="72" y="648" font-size="10" fill="#9ca3af">older</text>
+  <text x="672" y="648" font-size="10" fill="#9ca3af">now</text>
+
+  <line x1="380" y1="606" x2="380" y2="646" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="300" y="600" font-size="11" fill="#b45309">now − maxLockoutMs (the horizon)</text>
+
+  <circle cx="640" cy="626" r="6" fill="#dc2626"/>
+  <circle cx="580" cy="626" r="6" fill="#dc2626"/>
+  <circle cx="470" cy="626" r="6" fill="#94a3b8"/>
+  <circle cx="300" cy="626" r="6" fill="#cbd5e1"/>
+  <circle cx="180" cy="626" r="6" fill="#cbd5e1"/>
+  <text x="470" y="668" font-size="10" fill="#6b7280">oldest row the cap kept</text>
+
+  <rect x="724" y="586" width="212" height="46" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="738" y="606" font-size="11" fill="#166534">kept a row past the horizon →</text>
+  <text x="738" y="622" font-size="11" fill="#166534">everything dropped is older → exact</text>
+
+  <rect x="724" y="640" width="212" height="46" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="738" y="660" font-size="11" fill="#991b1b">cap ended inside the horizon →</text>
+  <text x="738" y="676" font-size="11" fill="#991b1b">the page says "at least N"</text>
+
+  <text x="52" y="690" font-size="11" fill="#6b7280">Grey rows are outside any possible lockout. Red rows are still serving one. The number an operator acts on never silently becomes a page size.</text>
+
+  <defs>
+    <marker id="go" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/>
+    </marker>
+    <marker id="dark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+</svg>
