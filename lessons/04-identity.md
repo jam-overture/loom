@@ -152,6 +152,53 @@ is a well-defined thing. That is not a small property. It is what lets
 `compareTrees` report a moved card as *one node that changed position* rather
 than as a subtree that vanished and an identical subtree that appeared.
 
+### An id may come back — but only as itself
+
+The `remove` row hides a question. If an id is *retired* rather than destroyed,
+what stops the next `insert` from minting a fresh node onto it?
+
+Try the obvious rule first: **an id, once retired, may never appear again.** It
+is one line, it is cheap to check, and it is wrong. The inverse of a `remove` is
+an `insert` carrying the exact node that was removed — that is what an undo *is*.
+A rule forbidding an id from returning would make removal the one change nobody
+can take back, and would flag every undo in the system as a fault.
+
+So the question is never *did this id come back*. It is **did it come back as the
+node that left**:
+
+- The node that left, returning unchanged, is a **restoration**. That is the
+  shape of an undo. It is a fact about the tree's history, not a fault.
+- A different node at that address is a **recycling**. One id, two nodes, and
+  every reader that joins by id across the log is now following two things while
+  calling them one.
+
+That distinction needs "the same node" defined precisely enough to check, and
+`nodeFingerprint` is that definition: kind, type or slot name or text, props,
+**ids**, children, recursively. The ids are in there deliberately. A card
+rebuilt with fresh children under the old card's id *resembles* what left, but a
+new node wearing an old address is exactly the case worth catching.
+
+Now the part to be exact about, because the two halves are not the same strength:
+
+- **Within one delta it is enforced.** `applyDelta` carries the ids the delta has
+  already removed and the shape they had when they went; an insert that puts a
+  different node on one is refused with `recycled-node-id`, and the delta is
+  discarded whole like any other refusal. A `remove` retires *every* id in the
+  subtree it takes, not only the one it named — each of those is an address
+  something could reuse.
+- **Across deltas it is not.** Nothing in a `LoomTree` records the ids it has
+  retired, so revision 2 has no memory of what revision 1 removed. The fold that
+  replays a log notices afterwards, and the audit reports it.
+
+Resist reading that asymmetry as an unfinished job. Closing it means the tree
+carrying its retired ids forever — a set that grows without bound in the length
+of the log, for a collision the runtime's own minting cannot produce. Detection
+after the fact was chosen over enforcement, in the one place where the cost of
+enforcing is unbounded and the cost of detecting is a report someone reads. That
+trade is [0038](../decisions/0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md)'s,
+and whether it stays that way is still open — so hold this section more loosely
+than the rest of the lesson.
+
 ### The proposer does not get to name things
 
 A model never mints an id. It emits a **draft**: the same four operations, but
@@ -181,6 +228,8 @@ Lesson 05 is about why that matters far more than it looks.
 | Deriving position on demand | [`src/tree/navigation.ts`](../src/tree/navigation.ts) — `nodePath`, `pathToNode` |
 | Uniqueness as an invariant | [`src/tree/tree.ts`](../src/tree/tree.ts) — `validateTreeInvariants` |
 | Uniqueness on the way in | [`src/tree/apply.ts`](../src/tree/apply.ts) — `rejectIdCollisions` |
+| An id that comes back | [`src/tree/apply.ts`](../src/tree/apply.ts) — `rejectRecycling`, `retire` |
+| Restoration versus recycling | [`src/tree/identity.ts`](../src/tree/identity.ts) — `nodeFingerprint`, `idReturnsIn` |
 | Who names a model's nodes | [`src/interpretation/materialize.ts`](../src/interpretation/materialize.ts) |
 | Ids as a join key | [`src/tree/compare.ts`](../src/tree/compare.ts) |
 
@@ -308,16 +357,17 @@ it("compares a rebuild", () => {
 })
 ```
 
-Finally, one that is not in any decision record. Predict it, then run it, and
-then decide whether you think the result is correct:
+Finally, an id that leaves and comes back. Three deltas, and they do not all go
+the same way — write down a prediction for each **before** running any of them,
+because the interesting part is which one you get wrong:
 
 ```ts
-it("reuses the id of a node removed in the same delta", () => {
+it("puts a different node at an id this delta removed", () => {
   const { tree, ids } = sampleTree()
   const recycler = sequentialIdFactory()
   let impostor = buildText(recycler, "not the card")
   for (let i = 0; i < 3; i += 1) impostor = buildText(recycler, "not the card")
-  console.log(impostor.id, ids.card)
+  console.log(impostor.id, ids.card)          // the impostor is minted onto n_4
 
   const result = applyDelta(tree, {
     deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 0,
@@ -326,10 +376,114 @@ it("reuses the id of a node removed in the same delta", () => {
       { op: "insert", parentId: ids.main, index: 0, node: impostor },
     ],
   })
-  console.log(result.ok)
-  console.log(JSON.stringify(result.ok && findNode(result.value.root, ids.card)))
-  // Q5: does this succeed? Should it? Say what you would have to know about
-  //     the id factory to be comfortable with the answer.
+  console.log(result.ok, result.ok ? null : result.error)
+})
+
+it("removes a node and puts the same node back", () => {
+  const { tree, ids } = sampleTree()
+  const card = findNode(tree.root, ids.card)
+  if (!card) throw new Error("no card")
+
+  const result = applyDelta(tree, {
+    deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 0,
+    operations: [
+      { op: "remove", nodeId: ids.card },
+      { op: "insert", parentId: ids.header, index: 1, node: card },
+    ],
+  })
+  console.log(result.ok, result.ok ? null : result.error)
+})
+
+it("puts back a card rebuilt to look identical", () => {
+  const { tree, ids } = sampleTree()
+  const rebuild = sequentialIdFactory("z")
+  const body = buildText(rebuild, "Body copy")
+  const lookalike = {
+    ...buildElement(rebuild, {
+      type: "loom.card",
+      props: { variant: "outlined", elevation: 1 },
+      children: [body],
+    }),
+    id: ids.card,                             // same id, same props, same text
+  }
+  console.log(lookalike.id, lookalike.children.map((child) => child.id))
+
+  const result = applyDelta(tree, {
+    deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 0,
+    operations: [
+      { op: "remove", nodeId: ids.card },
+      { op: "insert", parentId: ids.main, index: 0, node: lookalike },
+    ],
+  })
+  console.log(result.ok, result.ok ? null : result.error)
+  // Q5: three deltas, and they do not all go the same way. State the rule that
+  //     explains all three in one sentence. Then say what the third one would
+  //     have to change to be allowed.
+})
+```
+
+Now take the first of those three and split it across two deltas instead of one
+— the same two operations, in the same order, against the same tree:
+
+```ts
+import { idReturnsIn, seedIdHistory, trackIds } from "./tree/identity.js"
+
+it("splits the same recycling across two deltas", () => {
+  const { tree, ids } = sampleTree()
+  const recycler = sequentialIdFactory()
+  let impostor = buildText(recycler, "not the card")
+  for (let i = 0; i < 3; i += 1) impostor = buildText(recycler, "not the card")
+
+  const first = applyDelta(tree, {
+    deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 0,
+    operations: [{ op: "remove", nodeId: ids.card }],
+  })
+  if (!first.ok) throw new Error(first.error.code)
+
+  const second = applyDelta(first.value, {
+    deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 1,
+    operations: [{ op: "insert", parentId: ids.main, index: 0, node: impostor }],
+  })
+  console.log(second.ok, second.ok ? null : second.error)
+  if (!second.ok) throw new Error("expected this to be accepted")
+  console.log(JSON.stringify(findNode(second.value.root, ids.card)))
+
+  let history = seedIdHistory(tree)
+  history = trackIds(history, tree, first.value)
+  history = trackIds(history, first.value, second.value)
+  console.log(JSON.stringify(idReturnsIn(history)))
+  // Q6: same operations, same order — why does splitting them across two
+  //     deltas change the answer? And what does the last line buy you that
+  //     the refusal in Q5 does not?
+})
+```
+
+And the shape an undo makes, for contrast — remove the card, then put the real
+one back a revision later:
+
+```ts
+it("removes a node and restores it a revision later", () => {
+  const { tree, ids } = sampleTree()
+  const card = findNode(tree.root, ids.card)
+  if (!card) throw new Error("no card")
+
+  const first = applyDelta(tree, {
+    deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 0,
+    operations: [{ op: "remove", nodeId: ids.card }],
+  })
+  if (!first.ok) throw new Error(first.error.code)
+
+  const second = applyDelta(first.value, {
+    deltaId: spare.deltaId(), treeId: tree.treeId, baseRevision: 1,
+    operations: [{ op: "insert", parentId: ids.main, index: 0, node: card }],
+  })
+  if (!second.ok) throw new Error(second.error.code)
+
+  let history = seedIdHistory(tree)
+  history = trackIds(history, tree, first.value)
+  history = trackIds(history, first.value, second.value)
+  console.log(JSON.stringify(idReturnsIn(history)))
+  // Q7: you removed one card. Count the entries before you run it.
 })
 ```
 
@@ -411,6 +565,10 @@ ones that quietly break your model later.
    if a move re-minted the id, and why does that difference matter to whoever is
    reading an audit report?
 
+5. "An id, once retired, may never appear again" is a rule Loom does not have.
+   Say what it would break. Then give the rule Loom has instead, and say what has
+   to be defined before that rule can be checked at all.
+
 ---
 
 ## Reflect
@@ -422,6 +580,12 @@ ones that quietly break your model later.
 - Predict Q3 asked whether a deleted-and-recreated card is the same node. Loom
   answers no, and the "compares a rebuild" exercise shows you what that answer
   buys and what it costs. Do you still agree with the answer you wrote?
+- Predict Q3 also asked **who gets to decide that**, and you now have the actual
+  answer: `nodeFingerprint`, a function of about fifteen lines. Compare it
+  against what you wrote. Most people name a person or a policy; the thing that
+  decides is a definition, and everything downstream — whether your flag is still
+  valid, whether the audit calls it a restoration or a recycling — is that
+  definition being applied.
 - Lesson 02 told you an id says nothing about position and deferred the reason
   to this lesson. Was the reason the one you had guessed?
 
@@ -433,7 +597,8 @@ ones that quietly break your model later.
 - **In 1 week:** Explain it back Q2 — derive stable identity from lesson 03's
   ordering guarantee, out loud, with no notes.
 - **In 1 month:** Redo the "resolves a positional address" exercise from memory:
-  write the two outputs before running it.
+  write the two outputs before running it. Then Q5's three deltas — predict all
+  three verdicts before running any.
 - See [`review-schedule.md`](review-schedule.md).
 
 ---
@@ -443,6 +608,7 @@ ones that quietly break your model later.
 - [`decisions/0001`](../decisions/0001-tree-and-delta-as-the-unit-of-change.md) — identity is stable, paths are derived
 - [`decisions/0003`](../decisions/0003-ai-drafts-the-runtime-names.md) — the runtime names what AI creates
 - [`decisions/0028`](../decisions/0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) — where the join key earns its keep
+- [`decisions/0038`](../decisions/0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) — a return is not a reuse, and where that is enforced
 - [`src/tree/navigation.test.ts`](../src/tree/navigation.test.ts) — the tests are the specification
 - Next: 05 — Purity at the seams *(not yet written)*
 
@@ -510,22 +676,77 @@ question that was asked. The rebuild really did destroy identity — that is the
 cost of expressing a move as a remove plus an insert, and it is why `move` is one
 of the four operations instead of sugar over the other two.
 
-**Q5** It succeeds. `n_4` was a `loom.card` at revision 0 and is
-`{"kind":"text","id":"n_4","value":"not the card"}` at revision 1 — same id,
-different node, no complaint.
+**Q5** Refused, accepted, refused.
 
-`rejectIdCollisions` compares the incoming subtree against the ids in the tree
-*as it stands at that moment*, and by the time the insert runs, the remove has
-already taken `n_4` out. So uniqueness is enforced over the live tree, not over
-the tree's history. Two revisions can use one id for two different nodes.
+```
+n_4 n_4
+false { code: 'recycled-node-id', nodeId: 'n_4' }     a different node at n_4
 
-Whether that should worry you depends entirely on the id factory. With
-`randomIdFactory` — 20 random base36 characters — recycling is not something
-that happens by accident; you would have to construct it, as this exercise did.
-With a sequential factory it is a few lines away. So the guarantee "the same id
-means the same node" is airtight *within* a revision, and rests on the minting
-strategy *across* revisions. That is worth knowing before you rely on ids as a
-join key over a long log, which is exactly what an audit does.
+true null                                             the card itself, moved
+
+n_4 [ 'n_z1' ]
+false { code: 'recycled-node-id', nodeId: 'n_4' }     a look-alike is not it
+```
+
+One sentence covers all three: **an id this delta retired may come back, but only
+as the node that left.** The first insert puts a text node on `n_4`, the third
+puts a card with a different child on it, and neither is what left. The second
+puts back the exact node — which is why it is allowed, and is the reason the rule
+could not simply be "an id may not return".
+
+The third is the one worth having got wrong. Same id, same type, same props, same
+text, and a reader looking at the rendered page could not tell it from the
+original — but its child was minted as `n_z1` where the original's was `n_3`, so
+the fingerprints differ and the insert is refused. To be allowed it would have to
+carry the original child, `n_3`, with the original text — at which point it is
+not a rebuilt look-alike, it is the card.
+
+> This exercise used to have a different answer. When lesson 04 was first
+> written, this delta was **accepted** — and the lesson said so, flagged it as an
+> open edge, and asked you whether you thought the result was correct. It was
+> not, the gap was recorded, and the runtime now closes it. That is worth knowing
+> about a course written against live code: the exercise you ran is the check.
+
+**Q6** Accepted, and this is the limit of the rule:
+
+```
+true null
+{"kind":"text","id":"n_4","value":"not the card"}
+
+[{"code":"recycled","nodeId":"n_4","leftAs":"loom.card",
+  "returnedAs":"text","leftAt":1,"returnedAt":2}]
+```
+
+Same two operations, same order, same tree — and splitting them across a revision
+boundary changes the answer, because the set of retired ids lives for the length
+of one `applyDelta` call and nothing else. A `LoomTree` does not record what it
+has lost. Revision 2 cannot know that revision 1 removed a card from `n_4`, so it
+has nothing to refuse on.
+
+What the last line buys you is the difference between a rule and a report. The
+refusal in Q5 means the bad tree never existed. Here the bad tree exists — `n_4`
+is a card at revision 1 and a text node at revision 2 — and `idReturnsIn` says so
+afterwards, in the words a reader needs: *what it left as, what it came back as,
+and the two revisions to look at.* That is strictly weaker, and it is the trade
+0038 made rather than have every tree carry every id it has ever retired.
+
+**Q7** Two entries, not one:
+
+```
+[{"code":"restored","nodeId":"n_3","label":"text","leftAt":1,"returnedAt":2},
+ {"code":"restored","nodeId":"n_4","label":"loom.card","leftAt":1,"returnedAt":2}]
+```
+
+If you predicted one, you counted the operation rather than the tree. Removing
+the card retired `n_4` *and* `n_3`, the body text inside it, because both left
+and both are addresses something could later reuse. Putting the card back
+returned both. A twenty-node card taken out and put back produces twenty
+restorations — which is exactly why they are counted rather than listed on the
+audit page, where a list of twenty would read as a list of twenty faults.
+
+And note the code is `restored`, not `recycled`: the fingerprint that came back
+matched the one that left. Under a rule of "an id may never return", this — an
+ordinary undo — would have been the alarm.
 
 **1** Only `insert`. `move` and `configure` preserve identity because they act on
 a node that already exists — re-minting would make them indistinguishable from a
@@ -558,3 +779,21 @@ and would have to reconstruct the move by eye from two lists. The audit exists
 to turn "these two trees disagree" into something someone can act on; a report
 that describes every move as a deletion and a creation has given back most of
 what it was for.
+
+**5** It would break undo. The inverse of a `remove` is an `insert` carrying the
+exact node that was removed, so a rule that forbade an id from ever returning
+would make removal the one change that cannot be taken back — and undo is a
+first-class operation the portal offers on every revision. The detector would
+also fire on every undo in the system, which is noise over the workflow Loom most
+wants people to use.
+
+The rule instead is that an id this delta retired may return **only as the node
+that left**: a matching return is a restoration, a differing one is a recycling.
+Checking it needs "the same node" defined, and that is `nodeFingerprint` — kind,
+type or slot name or text, props, ids, children, recursively. Without that
+definition the rule is a sentence, not a check, and the ids inside it are what
+stops a rebuilt look-alike passing as the original.
+
+If you also said *where* it is checked — enforced within a delta, only reported
+across them — give yourself the extra credit. That boundary is the part most
+likely to move.
