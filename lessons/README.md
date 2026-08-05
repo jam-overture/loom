@@ -47,7 +47,7 @@ months.
 | **The problem** | The concrete situation the idea exists to solve. |
 | **The idea** | The explanation — read only after you have attempted Predict. |
 | **In the code** | Where it actually lives. |
-| **Do it** | Run something. Predict each output first, in writing. |
+| **Try it** | Run something. Predict each output first, in writing. |
 | **It could have been otherwise** | Rejected alternatives and their cost. |
 | **Explain it back** | Elaboration prompts. Say it in your own words. |
 | **Self-check** | Retrieval, with a confidence rating before each answer. |
@@ -96,7 +96,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [01](01-why-a-runtime.md) | Why a runtime, not a code generator | The thesis. What breaks when AI writes code, and what Loom trades away to fix it. |
 | [02](02-ui-as-data.md) | UI as data: the tree | Why three node kinds and no more; why text is a node; why there is no `if` in the AST. |
 | [03](03-change-as-data.md) | Change as data: the delta | The four operations, why exactly four, and why atomicity is not optional. |
-| 04 | Identity: the id that never moves | Why position is derived and identity is minted; what breaks without it. |
+| [04](04-identity.md) | Identity: the id that never moves | Why position is derived and identity is minted; what breaks without it. |
 
 ### Part II — Making change safe
 

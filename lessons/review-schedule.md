@@ -57,13 +57,32 @@ Interleaved with 01–02.
 5. Loom cannot build a carousel unless one is registered. Bug, limitation, or the
    point? *(01)*
 
+## Set D — two days after lesson 04
+
+Interleaved with 01–03. Six questions from four lessons; the mixing is the
+exercise, not an accident of scheduling.
+
+1. Which of the four operations mints a node id, and why exactly that set?
+2. You stored a positional address for a node. Someone inserts a sibling above
+   it. What does your address resolve to now, and — the part that matters —
+   what do you *observe* when it happens?
+3. Why is a half-applied delta worse than a rejected one? *(03)*
+4. Text is a node rather than a prop. Say what that decision and this lesson's
+   have in common. *(02)*
+5. Give the reason a model may not name the nodes it inserts, without using the
+   word "trust".
+6. What single property does the rest of the system exist to protect? *(01)*
+
 ---
 
-## Set D — one week after Part I
+## Set E — one week after Part I
 
 The consolidation set. Do this one out loud, to a person or a recording — spoken
 explanation is retrieval plus elaboration, and it exposes gaps that written
 notes let you skate over.
+
+Part I ends at lesson 04, so this set and Set F are now live rather than
+aspirational: one week after you finish 04, do this one.
 
 1. Explain Loom's thesis in four sentences, defining any jargon as you use it.
 2. Derive the three node kinds from the thesis. Why not four? Why not two?
@@ -71,26 +90,29 @@ notes let you skate over.
 4. A colleague proposes adding a `replaceSubtree` operation "for efficiency."
    Argue against it using only what you know, then argue *for* it as strongly as
    you can.
-5. Write the fixture tree from memory, then a delta that moves the card into the
-   header, then say what its inverse would have to contain.
+5. Derive stable identity from the delta's ordering guarantee — show that
+   "each operation sees the last one's effect" is unwritable without it.
+6. Write the fixture tree from memory, then a delta that moves the card into the
+   header, then say what its inverse would have to contain — including which
+   ids appear in it, and why they are the ones they are.
 
-Question 5 reaches into lesson 06, which you have not read. Attempt it anyway —
+Question 6 reaches into lesson 06, which you have not read. Attempt it anyway —
 generation before instruction is the point, and it will make lesson 06 land
 harder.
 
 ---
 
-## Set E — one month after Part I
+## Set F — one month after Part I
 
 Closed book, no notes, 20 minutes. This is the one that tells you whether it
 stuck.
 
-1. Rebuild the whole argument from scratch: problem, thesis, tree, delta. Write
-   it as if for a new engineer.
+1. Rebuild the whole argument from scratch: problem, thesis, tree, delta,
+   identity. Write it as if for a new engineer.
 2. What is the weakest point in the design as you understand it? Where would you
    push?
-3. Redo the "Do it" exercises in lesson 03 from memory — predict every output
-   before running.
+3. Redo the "Try it" exercises in lessons 03 and 04 from memory — predict every
+   output before running.
 
 Then read your Predict answers from lesson 01. The gap between those and what
 you can now write is the actual measure of the course.
@@ -108,5 +130,6 @@ you already know.
 | A | 2 days after L01 | | |
 | B | 2 days after L02 | | |
 | C | 2 days after L03 | | |
-| D | 1 week after Part I | | |
-| E | 1 month after Part I | | |
+| D | 2 days after L04 | | |
+| E | 1 week after Part I | | |
+| F | 1 month after Part I | | |

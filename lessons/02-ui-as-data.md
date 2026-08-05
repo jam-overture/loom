@@ -65,13 +65,13 @@ A tree of these, plus a revision number, is a `LoomTree`. Here is the fixture
 used throughout the test suite:
 
 ```
-element loom.page          n_7   props { title: "Home" }
-├── element loom.header    n_2
-│   └── text "Welcome"     n_1
-├── slot main              n_5
-│   └── element loom.card  n_4   props { variant: "outlined", elevation: 1 }
-│       └── text "Body"    n_3
-└── element loom.footer    n_6
+element loom.page             n_7   props { title: "Home" }
+├── element loom.header       n_2
+│   └── text "Welcome"        n_1
+├── slot main                 n_5
+│   └── element loom.card     n_4   props { variant: "outlined", elevation: 1 }
+│       └── text "Body copy"  n_3
+└── element loom.footer       n_6
 ```
 
 Two things about this are worth slowing down on.
