@@ -10,6 +10,7 @@ const treeId = treeIdSchema.parse("t_1")
 const everyError: readonly TreeError[] = [
   { code: "node-not-found", nodeId },
   { code: "duplicate-node-id", nodeId },
+  { code: "recycled-node-id", nodeId },
   { code: "not-a-container", nodeId, nodeKind: "text" },
   { code: "index-out-of-range", parentId: nodeId, index: 4, childCount: 2 },
   { code: "move-into-self", nodeId },

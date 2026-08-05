@@ -1,10 +1,12 @@
+import type { NodeId } from "../ids.js"
 import { assertNever, err, flatMapResult, mapResult, ok, reduceResult, type Result } from "../result.js"
 
 import { configureNode } from "./configuration.js"
 import type { TreeDelta, TreeOperation } from "./delta.js"
 import type { TreeError } from "./errors.js"
+import { nodeFingerprint } from "./identity.js"
 import { detachNode, insertChild, replaceNode } from "./mutation.js"
-import { collectNodeIds, duplicateNodeIds, isDescendantOf } from "./navigation.js"
+import { collectNodeIds, duplicateNodeIds, isDescendantOf, walkTree } from "./navigation.js"
 import type { ElementNode, LoomNode } from "./node.js"
 import { withRoot, type LoomTree } from "./tree.js"
 
@@ -14,6 +16,26 @@ import { withRoot, type LoomTree } from "./tree.js"
  * wraps this function with those concerns so that the structural rules stay
  * testable in isolation.
  */
+
+/**
+ * The tree as the delta has left it so far, plus the ids this delta has already
+ * removed and the shape they had when they went.
+ *
+ * Id uniqueness on its own is not enough to keep an id meaning one node (0038).
+ * A `remove` takes an id out of the live tree, so a later `insert` in the same
+ * delta can mint a fresh node onto it and pass every check. The retired set is
+ * what closes that within one delta; across a log it is the audit's job, because
+ * enforcing it there would need state the tree does not carry.
+ */
+type Applying = {
+  readonly root: LoomNode
+  readonly retired: ReadonlyMap<NodeId, string>
+}
+
+const withRetired = (
+  applied: Result<LoomNode, TreeError>,
+  retired: ReadonlyMap<NodeId, string>
+): Result<Applying, TreeError> => mapResult(applied, (root) => ({ root, retired }))
 
 const rejectIdCollisions = (root: LoomNode, incoming: LoomNode): Result<LoomNode, TreeError> => {
   const [internalDuplicate] = duplicateNodeIds(incoming)
@@ -26,19 +48,54 @@ const rejectIdCollisions = (root: LoomNode, incoming: LoomNode): Result<LoomNode
   return ok(incoming)
 }
 
+/**
+ * An id this delta retired may come back, but only as the node that left. That
+ * is what an undo of a `remove` does — it re-inserts the exact subtree — and
+ * refusing it would refuse taking a removal back.
+ */
+const rejectRecycling = (
+  retired: ReadonlyMap<NodeId, string>,
+  incoming: LoomNode
+): Result<LoomNode, TreeError> => {
+  const recycled = Array.from(walkTree(incoming)).find((node) => {
+    const departed = retired.get(node.id)
+
+    return departed !== undefined && departed !== nodeFingerprint(node)
+  })
+
+  return recycled ? err({ code: "recycled-node-id", nodeId: recycled.id }) : ok(incoming)
+}
+
 const applyInsert = (
-  root: LoomNode,
+  state: Applying,
   operation: Extract<TreeOperation, { op: "insert" }>
-): Result<LoomNode, TreeError> =>
-  flatMapResult(rejectIdCollisions(root, operation.node), (node) =>
-    insertChild(root, operation.parentId, operation.index, node)
+): Result<Applying, TreeError> =>
+  withRetired(
+    flatMapResult(rejectRecycling(state.retired, operation.node), (node) =>
+      flatMapResult(rejectIdCollisions(state.root, node), (checked) =>
+        insertChild(state.root, operation.parentId, operation.index, checked)
+      )
+    ),
+    state.retired
   )
 
+const retire = (
+  retired: ReadonlyMap<NodeId, string>,
+  detached: LoomNode
+): ReadonlyMap<NodeId, string> =>
+  new Map([
+    ...retired,
+    ...Array.from(walkTree(detached), (node) => [node.id, nodeFingerprint(node)] as const),
+  ])
+
 const applyRemove = (
-  root: LoomNode,
+  state: Applying,
   operation: Extract<TreeOperation, { op: "remove" }>
-): Result<LoomNode, TreeError> =>
-  mapResult(detachNode(root, operation.nodeId), (detached) => detached.root)
+): Result<Applying, TreeError> =>
+  mapResult(detachNode(state.root, operation.nodeId), (detached) => ({
+    root: detached.root,
+    retired: retire(state.retired, detached.detached),
+  }))
 
 /**
  * A move is a detach followed by an insert, so `index` is interpreted against
@@ -79,23 +136,36 @@ const applyConfigure = (
     configureNode(node, { set: operation.set, unset: operation.unset })
   )
 
+const advance = (state: Applying, operation: TreeOperation): Result<Applying, TreeError> => {
+  switch (operation.op) {
+    case "insert":
+      return applyInsert(state, operation)
+    case "remove":
+      return applyRemove(state, operation)
+    case "move":
+      return withRetired(applyMove(state.root, operation), state.retired)
+    case "configure":
+      return withRetired(applyConfigure(state.root, operation), state.retired)
+    default:
+      return assertNever(operation, "advance")
+  }
+}
+
+const NOTHING_RETIRED: ReadonlyMap<NodeId, string> = new Map()
+
+/**
+ * One operation against one tree, with no delta around it.
+ *
+ * An operation applied on its own has retired nothing, so the recycling rule
+ * cannot fire here — it is a rule about what a *delta* may do to an id it
+ * removed. `invertOperations` walks operations this way, and inverting a delta
+ * must never be stricter than applying one.
+ */
 export const applyOperation = (
   root: LoomNode,
   operation: TreeOperation
-): Result<LoomNode, TreeError> => {
-  switch (operation.op) {
-    case "insert":
-      return applyInsert(root, operation)
-    case "remove":
-      return applyRemove(root, operation)
-    case "move":
-      return applyMove(root, operation)
-    case "configure":
-      return applyConfigure(root, operation)
-    default:
-      return assertNever(operation, "applyOperation")
-  }
-}
+): Result<LoomNode, TreeError> =>
+  mapResult(advance({ root, retired: NOTHING_RETIRED }, operation), (state) => state.root)
 
 /**
  * The root cannot be removed or moved, and `configure` never changes a node's
@@ -116,7 +186,17 @@ export const applyDelta = (tree: LoomTree, delta: TreeDelta): Result<LoomTree, T
     return err({ code: "revision-mismatch", expected: delta.baseRevision, actual: tree.revision })
   }
 
-  const applied = reduceResult(delta.operations, tree.root as LoomNode, applyOperation)
+  const applied = reduceResult<TreeOperation, Applying, TreeError>(
+    delta.operations,
+    { root: tree.root, retired: NOTHING_RETIRED },
+    advance
+  )
 
-  return mapResult(flatMapResult(applied, requireElementRoot), (root) => withRoot(tree, root))
+  return mapResult(
+    flatMapResult(
+      mapResult(applied, (state) => state.root),
+      requireElementRoot
+    ),
+    (root) => withRoot(tree, root)
+  )
 }

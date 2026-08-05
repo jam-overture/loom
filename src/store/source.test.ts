@@ -126,7 +126,7 @@ describe("treeSourceFromStore", () => {
     /** And the snapshot the renderer read is still what the log produces. */
     expect(await auditSnapshot(store, tree.treeId, tree)).toEqual({
       ok: true,
-      value: { outcome: "agrees", revision: 1 },
+      value: { outcome: "agrees", revision: 1, idReturns: [] },
     })
   })
 })

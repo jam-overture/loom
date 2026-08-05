@@ -9,6 +9,11 @@ import { z } from "zod"
  * provenance, telemetry, the editable decorator) addresses nodes by id, so id
  * stability is what makes an edit to a live tree meaningful over time.
  *
+ * Stability is not the same as uniqueness over time. A node that is removed
+ * takes its id out of the live tree, and what stops that id being minted again
+ * for a different node is `tree/identity.ts`, not this module — enforced within
+ * a delta and reported by the audit across a log (0038).
+ *
  * Ids are opaque strings with a one-character kind prefix. The prefix is a
  * debugging affordance and a cheap guard against passing a DeltaId where a
  * NodeId belongs; the brand types are the real enforcement.

@@ -5,7 +5,9 @@ import {
   buildText,
   createTree,
   sequentialIdFactory,
+  type IdReturn,
   type LoomTree,
+  type NodeId,
 } from "@loom/runtime"
 
 import {
@@ -13,7 +15,9 @@ import {
   describeDifference,
   describeFacets,
   describeMismatch,
+  describeRecycling,
   DIFFERENCE_LIMIT,
+  RECYCLING_LIMIT,
 } from "./audit-view"
 
 const pageOf = (labels: readonly string[]): LoomTree => {
@@ -39,7 +43,7 @@ const drifted = (count: number) => {
 
 describe("describeAudit", () => {
   it("says the log still produces the tree, and counts what it folded", () => {
-    const report = describeAudit({ outcome: "agrees", revision: 4 })
+    const report = describeAudit({ outcome: "agrees", revision: 4, idReturns: [] })
 
     expect(report.tone).toBe("agrees")
     expect(report.detail).toContain("4 accepted changes")
@@ -48,18 +52,18 @@ describe("describeAudit", () => {
   })
 
   it("says one change in the singular, because a report that reads wrong reads as broken", () => {
-    expect(describeAudit({ outcome: "agrees", revision: 1 }).detail).toContain("1 accepted change")
-    expect(describeAudit({ outcome: "agrees", revision: 1 }).detail).not.toContain("changes")
+    expect(describeAudit({ outcome: "agrees", revision: 1, idReturns: [] }).detail).toContain("1 accepted change")
+    expect(describeAudit({ outcome: "agrees", revision: 1, idReturns: [] }).detail).not.toContain("changes")
   })
 
   it("describes a tree that has never been changed without pretending it was", () => {
-    expect(describeAudit({ outcome: "agrees", revision: 0 }).detail).toContain("0 accepted changes")
+    expect(describeAudit({ outcome: "agrees", revision: 0, idReturns: [] }).detail).toContain("0 accepted changes")
   })
 
   it("lists what actually differs when the two disagree", () => {
     const { stored, replayed } = drifted(2)
 
-    const report = describeAudit({ outcome: "diverged", revision: 2, stored, replayed })
+    const report = describeAudit({ outcome: "diverged", revision: 2, stored, replayed, idReturns: [] })
 
     expect(report.tone).toBe("diverged")
     expect(report.differences.map((difference) => difference.code)).toEqual([
@@ -74,7 +78,7 @@ describe("describeAudit", () => {
   it("caps a long list of differences and says how many it did not show", () => {
     const { stored, replayed } = drifted(DIFFERENCE_LIMIT + 5)
 
-    const report = describeAudit({ outcome: "diverged", revision: 9, stored, replayed })
+    const report = describeAudit({ outcome: "diverged", revision: 9, stored, replayed, idReturns: [] })
 
     expect(report.differences).toHaveLength(DIFFERENCE_LIMIT)
     /** Two nodes per line — the prose element and its text. */
@@ -84,7 +88,7 @@ describe("describeAudit", () => {
   it("reports no differences at all when the two trees are somehow identical", () => {
     const stored = pageOf(["one"])
 
-    const report = describeAudit({ outcome: "diverged", revision: 1, stored, replayed: stored })
+    const report = describeAudit({ outcome: "diverged", revision: 1, stored, replayed: stored, idReturns: [] })
 
     expect(report.tone).toBe("diverged")
     expect(report.differences).toEqual([])
@@ -150,6 +154,106 @@ describe("describeFacets", () => {
   it("says every facet in words rather than schema names", () => {
     expect(describeFacets(["kind", "type", "text", "parent"])).toBe(
       "what kind of node it is, which primitive it is, its text, which node it sits inside"
+    )
+  })
+})
+
+const recyclingOf = (nodeId: string, returnedAt: number): IdReturn => ({
+  code: "recycled",
+  nodeId: nodeId as NodeId,
+  leftAs: "loom.card",
+  returnedAs: "text",
+  leftAt: 1,
+  returnedAt,
+})
+
+const restorationOf = (nodeId: string): IdReturn => ({
+  code: "restored",
+  nodeId: nodeId as NodeId,
+  label: "loom.card",
+  leftAt: 1,
+  returnedAt: 2,
+})
+
+/**
+ * Recycling is a second finding rather than a second verdict (0038): the log can
+ * still produce the snapshot while an id has stopped naming one node, and a page
+ * that folded the two together would have to call one of them by the other's
+ * name.
+ */
+describe("describeAudit and id identity", () => {
+  it("reports a recycled id under a verdict that still agrees", () => {
+    const report = describeAudit({
+      outcome: "agrees",
+      revision: 4,
+      idReturns: [recyclingOf("n_4", 3)],
+    })
+
+    expect(report.tone).toBe("agrees")
+    expect(report.recycled).toHaveLength(1)
+    expect(report.restored).toBe(0)
+  })
+
+  it("counts a restoration rather than listing it beside a fault", () => {
+    const report = describeAudit({
+      outcome: "agrees",
+      revision: 4,
+      idReturns: [restorationOf("n_4"), restorationOf("n_5")],
+    })
+
+    expect(report.recycled).toEqual([])
+    expect(report.restored).toBe(2)
+  })
+
+  it("reports recycled ids on a diverged tree as well", () => {
+    const { stored, replayed } = drifted(1)
+
+    const report = describeAudit({
+      outcome: "diverged",
+      revision: 3,
+      stored,
+      replayed,
+      idReturns: [recyclingOf("n_4", 3)],
+    })
+
+    expect(report.tone).toBe("diverged")
+    expect(report.recycled).toHaveLength(1)
+  })
+
+  it("caps a long list of recycled ids and says how many it did not show", () => {
+    const idReturns = Array.from({ length: RECYCLING_LIMIT + 3 }, (_, index) =>
+      recyclingOf(`n_${index}`, index + 2)
+    )
+
+    const report = describeAudit({ outcome: "agrees", revision: 20, idReturns })
+
+    expect(report.recycled).toHaveLength(RECYCLING_LIMIT)
+    expect(report.recyclingOmitted).toBe(3)
+  })
+
+  /** A fold that stopped saw part of the log, and part of a history is not one. */
+  it("claims nothing about ids when the log could not be replayed", () => {
+    const report = describeAudit({
+      outcome: "unreplayable",
+      mismatch: { code: "revision-gap", expected: 3, found: 7 },
+    })
+
+    expect(report.recycled).toEqual([])
+    expect(report.recyclingOmitted).toBe(0)
+    expect(report.restored).toBe(0)
+  })
+})
+
+describe("describeRecycling", () => {
+  it("names both nodes and the revision the id changed hands", () => {
+    expect(describeRecycling(recyclingOf("n_4", 9))).toBe(
+      "was a loom.card until revision 1, and a text from revision 9"
+    )
+  })
+
+  it("describes a restoration as the round trip it is", () => {
+    expect(describeRecycling(restorationOf("n_4"))).toBe(
+      "was removed at revision 1 and put back at revision 2"
     )
   })
 })

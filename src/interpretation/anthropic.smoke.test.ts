@@ -36,10 +36,27 @@ import { modelInterpreter } from "./interpreter.js"
  */
 const liveApiKey = process.env["LOOM_ANTHROPIC_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"]
 
+/**
+ * A provider that declines to answer has told us nothing, and a test that
+ * cannot observe anything must not report a verdict. An overloaded API (529) or
+ * a rate limit (429) is the same kind of fact as a missing key: the network was
+ * not available to this session.
+ *
+ * Deliberately narrow. `interpreter-unavailable` also covers the SDK throwing on
+ * a request the API *rejected* — a 400 means we assembled something invalid,
+ * which is the defect this test exists to catch and must stay a failure. So the
+ * status is read rather than the code, and only the statuses that mean "ask
+ * again later" are skipped.
+ */
+const ASK_AGAIN_LATER = /^(429|5\d\d)\b/
+
+const isUnreachable = (code: string, detail: string): boolean =>
+  code === "interpreter-unavailable" && ASK_AGAIN_LATER.test(detail)
+
 describe.skipIf(!liveApiKey)("modelInterpreter against the live API", () => {
   it(
     "turns a plain instruction into a delta that applies",
-    async () => {
+    async (context) => {
       const { tree } = sampleTree()
       const anthropic = new Anthropic({ apiKey: liveApiKey })
       const interpreter = modelInterpreter({
@@ -56,6 +73,10 @@ describe.skipIf(!liveApiKey)("modelInterpreter against the live API", () => {
 
       const interpreted = await interpreter.interpret(intent, tree)
       if (!interpreted.ok) {
+        if (isUnreachable(interpreted.error.code, interpreted.error.detail)) {
+          context.skip(`the API was not reachable: ${interpreted.error.detail.slice(0, 80)}`)
+        }
+
         throw new Error(`interpretation failed: ${interpreted.error.code} — ${interpreted.error.detail}`)
       }
 
