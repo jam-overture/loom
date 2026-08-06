@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" width="980" height="620" font-family="Georgia, 'Times New Roman', serif">
+  <rect width="980" height="620" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="23" fill="#111827">One code became three, and each one names who must act</text>
+  <text x="40" y="72" font-size="13" fill="#6b7280" font-family="ui-monospace, 'SF Mono', Menlo, monospace">day 37 · §2 · ModelClientError · decision 0040</text>
+
+  <line x1="490" y1="100" x2="490" y2="520" stroke="#e5e7eb" stroke-width="1"/>
+
+  <text x="40" y="124" font-size="12" fill="#9ca3af" letter-spacing="2">BEFORE</text>
+  <text x="520" y="124" font-size="12" fill="#9ca3af" letter-spacing="2">AFTER</text>
+
+  <!-- what the SDK throws -->
+  <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12" fill="#374151">
+    <rect x="40" y="150" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="54" y="171">400 invalid_request</text>
+    <rect x="40" y="196" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="54" y="217">401 authentication</text>
+    <rect x="40" y="242" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="54" y="263">429 rate_limit</text>
+    <rect x="40" y="288" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="54" y="309">529 overloaded</text>
+    <rect x="40" y="334" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="54" y="355">socket hang up</text>
+
+    <rect x="520" y="150" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="534" y="171">400 invalid_request</text>
+    <rect x="520" y="196" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="534" y="217">401 authentication</text>
+    <rect x="520" y="242" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="534" y="263">429 rate_limit</text>
+    <rect x="520" y="288" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="534" y="309">529 overloaded</text>
+    <rect x="520" y="334" width="170" height="32" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="534" y="355">socket hang up</text>
+  </g>
+
+  <defs>
+    <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="tip-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="tip-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+    </marker>
+    <marker id="tip-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#15803d"/>
+    </marker>
+  </defs>
+
+  <!-- before: everything funnels into one code -->
+  <g fill="none" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#tip)">
+    <path d="M 210 166 C 250 166, 250 242, 288 242"/>
+    <path d="M 210 212 C 250 212, 250 242, 288 242"/>
+    <path d="M 210 258 C 250 258, 250 242, 288 242"/>
+    <path d="M 210 304 C 250 304, 250 242, 288 242"/>
+    <path d="M 210 350 C 250 350, 250 242, 288 242"/>
+  </g>
+
+  <rect x="290" y="220" width="160" height="44" rx="5" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="370" y="248" font-size="16" fill="#111827" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, monospace">unavailable</text>
+  <text x="370" y="288" font-size="14" fill="#4b5563" text-anchor="middle" font-style="italic">“ask again later”</text>
+
+  <text x="370" y="326" font-size="12.5" fill="#b91c1c" text-anchor="middle">…which is false for the first two.</text>
+  <text x="370" y="346" font-size="12.5" fill="#b91c1c" text-anchor="middle">No wait clears a 400, and no wait</text>
+  <text x="370" y="364" font-size="12.5" fill="#b91c1c" text-anchor="middle">issues a key. The host was told to</text>
+  <text x="370" y="382" font-size="12.5" fill="#b91c1c" text-anchor="middle">retry work that could not succeed.</text>
+
+  <!-- after: three codes, three actors -->
+  <path d="M 690 166 C 730 166, 730 172, 768 172" fill="none" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#tip-blue)"/>
+  <path d="M 690 212 C 730 212, 730 254, 768 254" fill="none" stroke="#b45309" stroke-width="1.6" marker-end="url(#tip-amber)"/>
+  <g fill="none" stroke="#15803d" stroke-width="1.6" marker-end="url(#tip-green)">
+    <path d="M 690 258 C 730 258, 730 336, 768 336"/>
+    <path d="M 690 304 C 730 304, 730 336, 768 336"/>
+    <path d="M 690 350 C 730 350, 730 336, 768 336"/>
+  </g>
+
+  <rect x="770" y="150" width="180" height="44" rx="5" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.4"/>
+  <text x="784" y="178" font-size="15" fill="#1e3a8a" font-family="ui-monospace, 'SF Mono', Menlo, monospace">rejected</text>
+  <text x="770" y="212" font-size="12" fill="#1d4ed8">Loom must change the request.</text>
+  <text x="770" y="228" font-size="12" fill="#6b7280">Unchanged, it fails identically.</text>
+
+  <rect x="770" y="232" width="180" height="44" rx="5" fill="#fffbeb" stroke="#b45309" stroke-width="1.4"/>
+  <text x="784" y="260" font-size="15" fill="#7c2d12" font-family="ui-monospace, 'SF Mono', Menlo, monospace">misconfigured</text>
+  <text x="770" y="294" font-size="12" fill="#b45309">An operator must act.</text>
+  <text x="770" y="310" font-size="12" fill="#6b7280">Waiting never fixes a missing key.</text>
+
+  <rect x="770" y="314" width="180" height="44" rx="5" fill="#f0fdf4" stroke="#15803d" stroke-width="1.4"/>
+  <text x="784" y="342" font-size="15" fill="#14532d" font-family="ui-monospace, 'SF Mono', Menlo, monospace">unavailable</text>
+  <text x="770" y="376" font-size="12" fill="#15803d">Nobody must act.</text>
+  <text x="770" y="392" font-size="12" fill="#6b7280">The same request may work later.</text>
+
+  <!-- the rule -->
+  <line x1="40" y1="440" x2="940" y2="440" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="40" y="470" font-size="13.5" fill="#374151">Only a status positively recognised as <tspan font-style="italic">this side’s</tspan> fault becomes <tspan font-family="ui-monospace, Menlo, monospace" fill="#1e3a8a">rejected</tspan> or <tspan font-family="ui-monospace, Menlo, monospace" fill="#7c2d12">misconfigured</tspan>. An unrecognised status,</text>
+  <text x="40" y="492" font-size="13.5" fill="#374151">a status that is not a number, and a throw that never got a response all stay <tspan font-family="ui-monospace, Menlo, monospace" fill="#14532d">unavailable</tspan> — the code that claims least.</text>
+  <text x="40" y="514" font-size="13.5" fill="#6b7280">Guessing “retryable” for something permanent costs one wasted attempt. Guessing “permanent” for something transient</text>
+  <text x="40" y="536" font-size="13.5" fill="#6b7280">abandons work that would have succeeded.</text>
+
+  <text x="40" y="576" font-size="12.5" fill="#111827" font-family="ui-monospace, Menlo, monospace">interpretationFault(error) → asker · model · provider · deployment · runtime</text>
+  <text x="40" y="596" font-size="12.5" fill="#6b7280">Seven codes, five actors. No <tspan font-style="italic">retryable</tspan> boolean: retrying is the host’s policy, and the seam knows less than the host does.</text>
+</svg>
