@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { nodeIdSchema, sequentialIdFactory, treeIdSchema, type ProposalId } from "../ids.js"
 import { err, ok } from "../result.js"
 import type { EditIntent } from "../runtime/intent.js"
+import type { InterpretationError } from "../runtime/interpreter.js"
 import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy, gatePolicySchema } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
@@ -541,6 +542,31 @@ describe("describeWriteOutcome", () => {
     }
 
     expect(new Set(outcomes.map((outcome) => outcome.kind)).size).toBe(outcomes.length)
+  })
+
+  /**
+   * An uninterpreted write is the one outcome whose *cause* decides what the
+   * reader should do about it, so the sentence has to distinguish them. Before
+   * day 37 all three read as the bare detail the model client happened to carry.
+   */
+  it("says which kind of uninterpreted a write was, not just that it was", () => {
+    const sentenceFor = (error: InterpretationError): string =>
+      describeWriteOutcome({ kind: "not-interpreted", error })
+
+    const misconfigured = sentenceFor({
+      code: "interpreter-misconfigured",
+      detail: "no model is configured",
+    })
+    const unavailable = sentenceFor({ code: "interpreter-unavailable", detail: "529 overloaded" })
+    const rejected = sentenceFor({
+      code: "interpreter-request-rejected",
+      detail: "400 invalid_request_error",
+    })
+
+    expect(misconfigured).toContain("operator")
+    expect(unavailable).toContain("later")
+    expect(rejected).toContain("unchanged")
+    expect(new Set([misconfigured, unavailable, rejected]).size).toBe(3)
   })
 })
 

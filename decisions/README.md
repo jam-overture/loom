@@ -97,3 +97,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0037](0037-the-journal-may-forget-and-only-a-whole-episode-at-a-time.md) | The journal may forget, and only a whole episode at a time | Accepted | §6 |
 | [0038](0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) | An id names one node, and a return is not a reuse | Accepted | §1 → §5 |
 | [0039](0039-the-attempt-log-is-counted-never-enumerated.md) | The attempt log is counted, never enumerated | Accepted | §5 |
+| [0040](0040-a-failure-names-the-actor-who-must-clear-it.md) | A failure names the actor who must clear it | Accepted | §2 → §5 |

@@ -145,6 +145,27 @@ describe("reportOf", () => {
     expect(reportOf(refused).tone).not.toBe(reportOf(uninterpreted).tone)
   })
 
+  /**
+   * The three uninterpreted causes share a tone and a headline, because to a
+   * reviewer they are the same event: nothing was proposed. What they must not
+   * share is the sentence — one clears itself, one needs an operator, and one
+   * needs a change to Loom.
+   */
+  it("distinguishes an outage from a misconfiguration in the detail, not the tone", () => {
+    const reports = (
+      [
+        { code: "interpreter-unavailable", detail: "529 overloaded" },
+        { code: "interpreter-misconfigured", detail: "no model is configured" },
+        { code: "interpreter-request-rejected", detail: "400 invalid_request_error" },
+      ] as const
+    ).map((error) => reportOf({ kind: "not-interpreted", error }))
+
+    expect(new Set(reports.map((report) => report.tone))).toEqual(new Set(["uninterpreted"]))
+    expect(new Set(reports.map((report) => report.headline))).toEqual(new Set(["not interpreted"]))
+    expect(new Set(reports.map((report) => report.detail)).size).toBe(3)
+    expect(reports[1]?.detail).toContain("operator")
+  })
+
   it("reports a write as applied only when it reached the log", () => {
     const applied = everyOutcome.filter((outcome) => reportOf(outcome).tone === "applied")
 
