@@ -444,7 +444,7 @@ ones that quietly break your model later.
 - [`decisions/0003`](../decisions/0003-ai-drafts-the-runtime-names.md) — the runtime names what AI creates
 - [`decisions/0028`](../decisions/0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) — where the join key earns its keep
 - [`src/tree/navigation.test.ts`](../src/tree/navigation.test.ts) — the tests are the specification
-- Next: 05 — Purity at the seams *(not yet written)*
+- Next: [05 — Purity at the seams](05-purity-at-the-seams.md)
 
 ---
 
