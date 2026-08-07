@@ -99,3 +99,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0039](0039-the-attempt-log-is-counted-never-enumerated.md) | The attempt log is counted, never enumerated | Accepted | §5 |
 | [0040](0040-a-failure-names-the-actor-who-must-clear-it.md) | A failure names the actor who must clear it | Accepted | §2 → §5 |
 | [0041](0041-authorship-is-derived-from-the-log-not-carried-on-a-node.md) | Authorship is derived from the log, not carried on a node | Accepted | §1 → §5 |
+| [0042](0042-a-sink-observes-and-the-runtime-contains-it.md) | A sink observes, and the runtime contains it | Accepted | §2 |

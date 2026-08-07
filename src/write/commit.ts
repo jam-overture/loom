@@ -1,9 +1,9 @@
 import type { ProposalId } from "../ids.js"
 import { err, ok, type Result } from "../result.js"
 import type { Disposition } from "../runtime/disposition.js"
-import type { Clock, EventSink, RuntimeEvent } from "../runtime/events.js"
 import type { EditIntent } from "../runtime/intent.js"
 import { describeInterpretationError, type InterpretationError } from "../runtime/interpreter.js"
+import { narrator, type Narrator } from "../runtime/narration.js"
 import { composeChange, confirmChange, type CompositionRuntime } from "../runtime/pipeline.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { describeStoreError, type StoreError } from "../store/errors.js"
@@ -88,13 +88,6 @@ export const describeWriteOutcome = (outcome: WriteOutcome): string => {
       return describeHoldError(outcome.error)
   }
 }
-
-type Narrator = (event: RuntimeEvent) => void
-
-const narrator =
-  (events: EventSink, clock: Clock, treeId: LoomTree["treeId"]): Narrator =>
-  (event) =>
-    events.emit({ treeId, occurredAt: clock.now(), event })
 
 /**
  * Reads head and refuses an intent that names a revision head has moved past.
