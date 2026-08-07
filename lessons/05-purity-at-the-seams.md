@@ -590,7 +590,7 @@ ones that quietly break your model later.
 - [`decisions/0024`](../decisions/0024-emission-never-does-io-and-the-host-flushes-once.md) — emission does no IO, and what a failing batch costs
 - [`decisions/0028`](../decisions/0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) — what an audit needs from the host
 - [`src/result.test.ts`](../src/result.test.ts) — the tests are the specification
-- Next: 06 — Undo as computation *(not yet written)*
+- Next: [06 — Undo as computation](06-undo-as-computation.md)
 
 ---
 

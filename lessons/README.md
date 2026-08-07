@@ -103,7 +103,7 @@ tree. Everything else in the system follows from protecting that one property.
 | # | Lesson | You'll understand |
 | --- | --- | --- |
 | [05](05-purity-at-the-seams.md) | Purity at the seams | Why nothing throws, why the clock is injected, and why that is what makes an audit trail real. |
-| 06 | Undo as computation | Inverse deltas. Why undo is a delta and not a snapshot. |
+| [06](06-undo-as-computation.md) | Undo as computation | Inverse deltas. Why undo is a delta and not a snapshot. |
 | 07 | Measuring a change | What analysis extracts, and why measurement is separated from judgment. |
 | 08 | Two axes: stakes and reversibility | The distinction that a test caught us getting wrong. |
 | 09 | The Gate | A rule ladder, not a score. Why order encodes precedence. |

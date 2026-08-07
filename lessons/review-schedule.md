@@ -151,6 +151,38 @@ this pair gets half-learned.
 
 ---
 
+## Set H — two days after lesson 06
+
+Interleaved with 01–05, and deliberately front-loaded with two questions that
+need material from two lessons at once. Those are the ones that tell you whether
+you have a model or a pile of facts.
+
+1. A `move` sends the first of three siblings to the end of the same parent.
+   Give the index the operation carries *(03)*, then give the index its inverse
+   carries. The inverse's index is found by looking the node up in a child list
+   that still contains it, and then used against a list that will not. Say why
+   that is nevertheless always the right number.
+2. Undoing a `remove` costs something undoing an `insert` does not. Say what,
+   then name the two things — and it is exactly two — that can make a change
+   irreversible, and say which of them that cost is responsible for.
+3. Name the property that puts a field on `CompositionRuntime`. Apply it to
+   `invertDelta` and say what the answer means for re-running a Gate decision
+   from last Tuesday. *(05)*
+4. Undoing revision 3 produces revision 4. Give the argument, then give the
+   strongest argument against it that you can.
+5. Why is text a node rather than a prop? *(02)*
+6. An inversion succeeded. Name something it has proved about the original
+   delta, other than that the delta can be undone.
+7. A node was removed and rebuilt identically, then forced onto the original's
+   id. Same node? *(04)*
+
+Question 1 is the one to be slowest on. Both numbers are correct and they are
+usually not equal, and the third part is the one that separates knowing the rule
+from knowing why it holds — which is the state in which people write naive
+inversions.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -166,3 +198,4 @@ you already know.
 | E | 1 week after Part I | | |
 | F | 1 month after Part I | | |
 | G | 2 days after L05 | | |
+| H | 2 days after L06 | | |
