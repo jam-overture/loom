@@ -423,6 +423,108 @@ export const describeTreeStoreContract = (
         expect(revisionNumbers(await store.revisions(tree.treeId, { limit: 0 }))).toHaveLength(1)
       })
 
+      /**
+       * A revision a caller names is a position it may open at (0043). The
+       * property that distinguishes it from a cursor is inclusion: a reader sent
+       * to revision 3 is there to read revision 3.
+       */
+      describe("opening at a named revision", () => {
+        it("includes the revision it was pointed at, at the newest end", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 6)
+
+          expect(
+            revisionNumbers(await store.revisions(tree.treeId, { at: 4, direction: "older", limit: 3 }))
+          ).toEqual([2, 3, 4])
+        })
+
+        it("includes it at the oldest end when reading forward", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 6)
+
+          expect(revisionNumbers(await store.revisions(tree.treeId, { at: 4, limit: 3 }))).toEqual([
+            4, 5, 6,
+          ])
+        })
+
+        it("names the end the anchor leaves entries on", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 6)
+
+          const page = await store.revisions(tree.treeId, { at: 4, direction: "older", limit: 2 })
+
+          expect(revisionNumbers(page)).toEqual([3, 4])
+          expect(page.ok && page.value.older).toBe("3")
+          expect(page.ok && page.value.newer).toBe("4")
+        })
+
+        /**
+         * The case a cursor cannot produce and an anchor can: the newest entry.
+         * `resumed` is true for any cursor, because a cursor came from a page —
+         * an anchor is inside its own page, so claiming a newer end here would
+         * offer a reader a page that does not exist.
+         */
+        it("claims no newer end when pointed at the newest entry", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 3)
+
+          const page = await store.revisions(tree.treeId, { at: 3, direction: "older", limit: 2 })
+
+          expect(revisionNumbers(page)).toEqual([2, 3])
+          expect(page.ok && page.value.newer).toBeNull()
+        })
+
+        it("claims no older end when pointed forward at the first entry", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 3)
+
+          const page = await store.revisions(tree.treeId, { at: 1, limit: 2 })
+
+          expect(revisionNumbers(page)).toEqual([1, 2])
+          expect(page.ok && page.value.older).toBeNull()
+        })
+
+        /**
+         * A revision no entry holds is a stale link, not a broken store. Reading
+         * older from beyond the end is the newest page, and reading older from
+         * before the start is empty — both are what the position means.
+         */
+        it("answers a revision the log does not hold with the entries on that side", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 3)
+
+          const beyond = await store.revisions(tree.treeId, {
+            at: 99,
+            direction: "older",
+            limit: 2,
+          })
+          expect(revisionNumbers(beyond)).toEqual([2, 3])
+          expect(beyond.ok && beyond.value.newer).toBeNull()
+
+          const before = await store.revisions(tree.treeId, { at: 0, direction: "older" })
+          expect(revisionNumbers(before)).toEqual([])
+        })
+
+        /** The page a cursor would have produced, reached without holding one. */
+        it("agrees with the cursor that names the same position", async () => {
+          const store = await freshStore()
+          const tree = await treeWithLog(store, 6)
+
+          const anchored = await store.revisions(tree.treeId, {
+            at: 4,
+            direction: "older",
+            limit: 2,
+          })
+          const cursored = await store.revisions(tree.treeId, {
+            cursor: "5",
+            direction: "older",
+            limit: 2,
+          })
+
+          expect(revisionNumbers(anchored)).toEqual(revisionNumbers(cursored))
+        })
+      })
+
       it("keeps one tree's log out of another's", async () => {
         const store = await freshStore()
         const mine = await treeWithLog(store, 2)

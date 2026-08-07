@@ -6,6 +6,8 @@ import type { LoomTree } from "../tree/tree.js"
 
 import type { StoreError } from "./errors.js"
 import {
+  anchorBound,
+  anchorResumes,
   clampListingLimit,
   clampRevisionLimit,
   type AppendRequest,
@@ -63,8 +65,15 @@ export const memoryTreeStore = (): TreeStore => {
       if (!entry) return Promise.resolve(err<StoreError>({ code: "not-found", treeId }))
 
       const limit = clampRevisionLimit(request?.limit)
-      const from = cursorPosition(request?.cursor)
       const direction = request?.direction ?? "newer"
+      const at = request?.at
+
+      /**
+       * An anchor and a cursor arrive as the same exclusive bound, so the filter
+       * below never learns which one it was reading — only `resumed` does, and
+       * only because an anchor sits inside its own page.
+       */
+      const from = at === undefined ? cursorPosition(request?.cursor) : anchorBound(at, direction)
 
       const matching = entry.log.filter(
         (stored) =>
@@ -84,7 +93,10 @@ export const memoryTreeStore = (): TreeStore => {
           revisions: page,
           ...pageEnds(page.map((stored) => stored.revision), direction, {
             beyond: matching.length > page.length,
-            resumed: from !== undefined,
+            resumed:
+              at === undefined
+                ? from !== undefined
+                : anchorResumes(at, direction, entry.snapshot.revision),
           }),
         })
       )

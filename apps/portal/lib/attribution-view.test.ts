@@ -59,11 +59,22 @@ describe("creditFor", () => {
   it("names who asked and who wrote it", () => {
     const credit = creditFor(placedBy({ effect: "placed", named: true, entry: entryAt(4, "alice") }))
 
-    expect(credit.placed).toContain("added at revision 4")
-    expect(credit.placed).toContain("alice asked")
-    expect(credit.placed).toContain("the model wrote it")
+    expect(credit.placed).toBe("added")
+    expect(credit.by).toContain("alice asked")
+    expect(credit.by).toContain("the model wrote it")
     expect(credit.revision).toBe(4)
     expect(credit.partial).toBe(false)
+  })
+
+  /**
+   * The revision has to survive as a number, not as text inside a sentence — it
+   * is what the credit links to (0043), and a reader cannot click a substring.
+   */
+  it("keeps the revision out of the words so it can be linked", () => {
+    const credit = creditFor(placedBy({ effect: "placed", named: true, entry: entryAt(4, "alice") }))
+
+    expect(credit.placed).not.toContain("4")
+    expect(credit.by).not.toContain("revision")
   })
 
   it("says the runtime wrote it when the runtime did", () => {
@@ -75,8 +86,8 @@ describe("creditFor", () => {
       })
     )
 
-    expect(credit.placed).toContain("the runtime wrote it")
-    expect(credit.placed).not.toContain("the model wrote it")
+    expect(credit.by).toContain("the runtime wrote it")
+    expect(credit.by).not.toContain("the model wrote it")
   })
 
   it("names the approver separately from the asker", () => {
@@ -84,14 +95,14 @@ describe("creditFor", () => {
       placedBy({ effect: "placed", named: true, entry: entryAt(4, "alice", { answeredBy: "bob" }) })
     )
 
-    expect(credit.placed).toContain("alice asked")
-    expect(credit.placed).toContain("allowed by bob")
+    expect(credit.by).toContain("alice asked")
+    expect(credit.by).toContain("allowed by bob")
   })
 
   it("says nothing about an approver when nobody had to allow it", () => {
     const credit = creditFor(placedBy({ effect: "placed", named: true, entry: entryAt(4, "alice") }))
 
-    expect(credit.placed).not.toContain("allowed by")
+    expect(credit.by).not.toContain("allowed by")
   })
 
   it("distinguishes a node that was carried in from one that was asked for", () => {
@@ -99,8 +110,7 @@ describe("creditFor", () => {
       placedBy({ effect: "placed", named: false, entry: entryAt(4, "alice") })
     )
 
-    expect(carried.placed).toContain("brought in as part of a larger change")
-    expect(carried.placed).not.toContain("added at revision")
+    expect(carried.placed).toBe("brought in as part of a larger change")
   })
 
   it("does not invent an actor when the log recorded none", () => {
@@ -108,13 +118,14 @@ describe("creditFor", () => {
       placedBy({ effect: "placed", named: true, entry: entryAt(4, undefined) })
     )
 
-    expect(credit.placed).toContain("someone unrecorded asked")
+    expect(credit.by).toContain("someone unrecorded asked")
   })
 
   it("credits a seeded node to no revision, and links nowhere", () => {
     const credit = creditFor({ outcome: "seeded", nodeId: "n_1" as NodeId, since: [] })
 
     expect(credit.placed).toContain("from the start")
+    expect(credit.by).toBeNull()
     expect(credit.revision).toBeNull()
     expect(credit.partial).toBe(false)
   })
@@ -125,14 +136,18 @@ describe("creditFor", () => {
     expect(credit.partial).toBe(true)
     expect(credit.placed).toContain("further back")
     expect(credit.placed).not.toContain("from the start")
+    expect(credit.by).toBeNull()
     expect(credit.revision).toBeNull()
   })
 
   it("has nothing to say about a node nothing has touched", () => {
-    expect(creditFor(placedBy({ effect: "placed", named: true, entry: entryAt(1, "alice") })).since).toBeNull()
+    const credit = creditFor(placedBy({ effect: "placed", named: true, entry: entryAt(1, "alice") }))
+
+    expect(credit.since).toEqual([])
+    expect(credit.omitted).toBe(0)
   })
 
-  it("lists what has touched it since, with the verb and the actor", () => {
+  it("lists what has touched it since, with the verb, the actor and the revision", () => {
     const credit = creditFor(
       placedBy({ effect: "placed", named: true, entry: entryAt(1, "alice") }, [
         changeAt(2, "bob", "configured"),
@@ -140,9 +155,11 @@ describe("creditFor", () => {
       ])
     )
 
-    expect(credit.since).toBe(
-      "since: configured by bob at revision 2, moved by carol at revision 3"
-    )
+    expect(credit.since).toEqual([
+      { text: "configured by bob", revision: 2 },
+      { text: "moved by carol", revision: 3 },
+    ])
+    expect(credit.omitted).toBe(0)
   })
 
   it("keeps the most recent touches and counts the rest", () => {
@@ -152,10 +169,13 @@ describe("creditFor", () => {
 
     const credit = creditFor(placedBy({ effect: "placed", named: true, entry: entryAt(1, "a") }, many))
 
-    expect(credit.since).toContain("and 2 earlier")
+    expect(credit.since).toHaveLength(TOUCH_LIMIT)
+    expect(credit.omitted).toBe(2)
     /** The newest survive the cap — the oldest is the one dropped. */
-    expect(credit.since).not.toContain("actor-0")
-    expect(credit.since).toContain(`actor-${TOUCH_LIMIT + 1}`)
+    expect(credit.since.map((touch) => touch.text)).not.toContain("configured by actor-0")
+    expect(credit.since.map((touch) => touch.text)).toContain(
+      `configured by actor-${TOUCH_LIMIT + 1}`
+    )
   })
 
   it("reports touches on a node whose placement was never found", () => {
@@ -166,7 +186,7 @@ describe("creditFor", () => {
     })
 
     expect(credit.partial).toBe(true)
-    expect(credit.since).toContain("configured by bob at revision 12")
+    expect(credit.since).toEqual([{ text: "configured by bob", revision: 12 }])
   })
 })
 

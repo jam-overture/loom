@@ -13,6 +13,8 @@ import type { LoomDatabase } from "./database.js"
 import type { StoreError } from "./errors.js"
 import { loomRevisions, loomTrees } from "./schema.js"
 import {
+  anchorBound,
+  anchorResumes,
   clampListingLimit,
   clampRevisionLimit,
   type AppendRequest,
@@ -161,18 +163,22 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
 
     revisions: async (treeId, request?: RevisionReadRequest) => {
       const limit = clampRevisionLimit(request?.limit)
-      const from = cursorPosition(request?.cursor)
       const direction = request?.direction ?? "newer"
+      const at = request?.at
+
+      /** An anchor and a cursor reach the query below as the same bound. */
+      const from = at === undefined ? cursorPosition(request?.cursor) : anchorBound(at, direction)
 
       try {
         const present = await db
-          .select({ treeId: loomTrees.treeId })
+          .select({ treeId: loomTrees.treeId, revision: loomTrees.revision })
           .from(loomTrees)
           .where(eq(loomTrees.treeId, treeId))
           .limit(1)
 
         /** "No tree" and "a tree with no changes" are different answers. */
-        if (present[0] === undefined) return err<StoreError>({ code: "not-found", treeId })
+        const head = present[0]
+        if (head === undefined) return err<StoreError>({ code: "not-found", treeId })
 
         /**
          * `older` scans descending so the newest page costs one seek on the
@@ -217,7 +223,8 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           revisions: page,
           ...pageEnds(page.map((stored) => stored.revision), direction, {
             beyond: rows.length > limit,
-            resumed: from !== undefined,
+            resumed:
+              at === undefined ? from !== undefined : anchorResumes(at, direction, head.revision),
           }),
         })
       } catch (cause) {

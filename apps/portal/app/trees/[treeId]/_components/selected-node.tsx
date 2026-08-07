@@ -1,5 +1,6 @@
 "use client"
 
+import type { TreeId } from "@loom/runtime"
 import { addressedNodeId, describeAddressing } from "@loom/runtime/react"
 
 import type { NodeCredit } from "@/lib/attribution-view"
@@ -20,7 +21,13 @@ import { useSelection } from "./selection-context"
  * the outline feel like it was loading something; the whole tree's attribution is
  * one bounded read on the page the reviewer already waited for.
  */
-export const SelectedNode = ({ credits }: { readonly credits: Record<string, NodeCredit> }) => {
+export const SelectedNode = ({
+  credits,
+  treeId,
+}: {
+  readonly credits: Record<string, NodeCredit>
+  readonly treeId: TreeId
+}) => {
   const { selected } = useSelection()
 
   if (!selected) {
@@ -53,7 +60,7 @@ export const SelectedNode = ({ credits }: { readonly credits: Record<string, Nod
           {describeAddressing(selected.addressing)}
         </p>
       )}
-      <NodeCreditLine credit={credits[selected.nodeId]} />
+      <NodeCreditLine credit={credits[selected.nodeId]} treeId={treeId} />
     </dl>
   )
 }

@@ -5,6 +5,7 @@ import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
 import { requireActor } from "@/lib/auth/identity"
+import { historyStart, parseRevisionParam } from "@/lib/history-link"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
 import { RevisionRow } from "./_components/revision-row"
@@ -21,13 +22,18 @@ import { TreeChooser } from "./_components/tree-chooser"
  * The page is taken from the newest end (0026). A log only grows, and "what
  * changed lately" is the question — paging forward from revision 1 would answer
  * it only after reading every change ever accepted.
+ *
+ * Unless somebody arrives with a revision in mind. `?at=` opens the page holding
+ * that one and marks it (0043), which is how a node's attribution reaches the
+ * change that placed it — the alternative was a reviewer reading a number off
+ * one page and paging back through this one until it appeared.
  */
 const HistoryPage = async ({
   searchParams,
 }: {
-  searchParams: Promise<{ tree?: string; older?: string }>
+  searchParams: Promise<{ tree?: string; older?: string; at?: string }>
 }) => {
-  const { tree, older } = await searchParams
+  const { tree, older, at } = await searchParams
   await requireActor("/history")
   await ensureSeeded()
 
@@ -43,9 +49,12 @@ const HistoryPage = async ({
   const scope = treeIdSchema.safeParse(tree)
   if (!scope.success) notFound()
 
+  /** Where a link sent the reader, and what to mark once they are here. */
+  const anchor = parseRevisionParam(at)
+
   const page = await portalStore.revisions(scope.data, {
     direction: "older",
-    ...(older === undefined ? {} : { cursor: older }),
+    ...historyStart(older, anchor),
   })
 
   if (!page.ok) {
@@ -63,6 +72,15 @@ const HistoryPage = async ({
   const newestFirst = [...page.value.revisions].reverse()
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
+  /**
+   * A link naming a revision this log does not hold is a stale link, and the
+   * store answers it with the entries on that side rather than an error. Saying
+   * so is the difference between landing somewhere unexpected and being told
+   * why — the page would otherwise look exactly like an ordinary visit.
+   */
+  const anchorMissing =
+    anchor !== undefined && !newestFirst.some((stored) => stored.revision === anchor)
+
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -77,6 +95,15 @@ const HistoryPage = async ({
         </div>
       </div>
 
+      {anchorMissing && (
+        <p className="text-ink-muted text-sm">
+          Nothing on this page is revision {anchor}
+          {older === undefined
+            ? " — this log has not reached it, or has not kept it."
+            : ", which is further along than this page."}
+        </p>
+      )}
+
       {newestFirst.length === 0 ? (
         <p className="text-ink-muted text-sm">
           This tree has never been changed. It is at revision 0 — the shape it was created
@@ -85,7 +112,11 @@ const HistoryPage = async ({
       ) : (
         <ul className="flex flex-col gap-3">
           {newestFirst.map((stored) => (
-            <RevisionRow key={stored.revision} stored={stored} />
+            <RevisionRow
+              key={stored.revision}
+              stored={stored}
+              anchored={stored.revision === anchor}
+            />
           ))}
         </ul>
       )}
@@ -99,7 +130,7 @@ const HistoryPage = async ({
             ← earlier
           </Link>
         )}
-        {older !== undefined && (
+        {(older !== undefined || anchor !== undefined) && (
           <Link href={`/history?${scopeQuery}`} className="text-xs">
             latest →
           </Link>

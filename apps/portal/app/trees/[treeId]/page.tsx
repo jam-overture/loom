@@ -78,7 +78,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
       <div className="flex flex-col gap-6 p-8 lg:flex-row-reverse lg:items-start">
         <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">
           <TreeOutline />
-          <SelectedNode credits={credits} />
+          <SelectedNode credits={credits} treeId={rendered.value.tree.treeId} />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-8">
