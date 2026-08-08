@@ -41,8 +41,18 @@ const irreversibilityReasons = (
   analysis: ChangeAnalysis,
   policy: GatePolicy
 ): readonly IrreversibilityReason[] => {
-  const outOfTree = analysis.touchedPrimitiveTypes.filter((type) =>
-    policy.outOfTreeEffectTypes.includes(type)
+  /**
+   * Relocated types count here as well as touched ones. Whether moving a live
+   * payment flow fires anything outside the tree is genuinely open, and
+   * phrasing must not decide it: before 0044 a move that named the checkout was
+   * irreversible and one that named its parent was not. Where
+   * phrasing-independence forces a single answer, this takes the conservative
+   * one — a change wrongly called irreversible is offered for confirmation, and
+   * one wrongly called reversible is applied.
+   */
+  const outOfTree = [...analysis.touchedPrimitiveTypes, ...analysis.relocatedPrimitiveTypes].filter(
+    (type, index, types) =>
+      types.indexOf(type) === index && policy.outOfTreeEffectTypes.includes(type)
   )
 
   const overBudget = analysis.removedNodeCount > policy.inverseRetentionBudget

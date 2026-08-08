@@ -48,6 +48,10 @@ import { describeTreeError } from "../tree/errors.js"
  * The event names mirror `RuntimeEvent` one for one. A stage the runtime
  * narrates but telemetry silently discarded would be a stage nobody could prove
  * ran, so narrowing changes payloads and never membership.
+ *
+ * A field added after records exist is **optional and never defaulted** (0045).
+ * A record written before a field existed did not decline to say it — it could
+ * not, and a default would put a number in its mouth.
  */
 
 /**
@@ -111,6 +115,14 @@ export const assessmentSummarySchema = z.object({
   movedNodeCount: z.number().int().nonnegative(),
   configuredNodeCount: z.number().int().nonnegative(),
   touchedPrimitiveTypes: z.array(primitiveTypeSchema),
+  /**
+   * Bounded, non-identifying, a subset of the touched types, and the input to
+   * the only `critical` stake factor. A corpus that cannot group by "the Gate
+   * saw this type destroyed" cannot ask the question the factor exists for.
+   */
+  removedPrimitiveTypes: z.array(primitiveTypeSchema).optional(),
+  relocatedPrimitiveTypes: z.array(primitiveTypeSchema).optional(),
+  relocatedNodeCount: z.number().int().nonnegative().optional(),
   shallowestAffectedDepth: z.number().int().nonnegative(),
   /** Nodes the inverse would have to carry — the content a removal destroyed. */
   retainedNodeCount: z.number().int().nonnegative(),
@@ -127,6 +139,10 @@ export type AssessmentSummary = {
   readonly movedNodeCount: number
   readonly configuredNodeCount: number
   readonly touchedPrimitiveTypes: readonly PrimitiveType[]
+  /** Absent on a record written before the field existed, never defaulted (0045). */
+  readonly removedPrimitiveTypes?: readonly PrimitiveType[]
+  readonly relocatedPrimitiveTypes?: readonly PrimitiveType[]
+  readonly relocatedNodeCount?: number
   readonly shallowestAffectedDepth: number
   readonly retainedNodeCount: number
   readonly irreversibilityReasons: readonly string[]
@@ -297,6 +313,9 @@ const summariseAssessment = (assessment: ChangeAssessment): AssessmentSummary =>
   movedNodeCount: assessment.analysis.movedNodeCount,
   configuredNodeCount: assessment.analysis.configuredNodeCount,
   touchedPrimitiveTypes: assessment.analysis.touchedPrimitiveTypes,
+  removedPrimitiveTypes: assessment.analysis.removedPrimitiveTypes,
+  relocatedPrimitiveTypes: assessment.analysis.relocatedPrimitiveTypes,
+  relocatedNodeCount: assessment.analysis.relocatedNodeCount,
   shallowestAffectedDepth: assessment.analysis.shallowestAffectedDepth,
   retainedNodeCount: assessment.reversibility.retainedNodeCount,
   irreversibilityReasons: assessment.reversibility.reasons.map((reason) => reason.code),
