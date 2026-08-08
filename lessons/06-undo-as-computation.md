@@ -631,7 +631,7 @@ quietly break your model later.
 - [`decisions/0035`](../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) — what happens when an undo would write over later work
 - [`decisions/0028`](../decisions/0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) — why a revert needs a seed
 - [`decisions/0038`](../decisions/0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) — the recycling rule exercise E runs into, and why undo is its motivating case
-- Next: 07 — Measuring a change *(not yet written)*
+- Next: [07 — Measuring a change](07-measuring-a-change.md)
 
 ---
 
