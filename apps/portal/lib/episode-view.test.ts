@@ -42,14 +42,38 @@ describe("viewOf", () => {
     }
   })
 
-  it("names the revision a committed episode produced", () => {
+  /**
+   * The revision is handed over as a number rather than a sentence, so the card
+   * can link it (0043) — an applied ask and the change it became are the two
+   * halves of one question, and the reviewer should not have to retype the join.
+   */
+  it("names the revision a committed episode produced, and keeps it a number", () => {
     const resolution: EpisodeResolution = { kind: "committed", proposalId, revision: 7 }
 
     expect(viewOf(resolution)).toEqual({
       tone: "applied",
       headline: "applied",
-      detail: "revision 7",
+      detail: "",
+      revision: 7,
     })
+  })
+
+  /**
+   * Every other outcome produced no revision, and must not invent one — a card
+   * that linked somewhere for a change that never happened would offer a
+   * reviewer a page that cannot exist.
+   */
+  it("names no revision for an outcome that produced none", () => {
+    expect(viewOf({ kind: "refused", proposalId }).revision).toBeNull()
+    expect(viewOf({ kind: "awaiting-answer", proposalId }).revision).toBeNull()
+    expect(viewOf({ kind: "open" }).revision).toBeNull()
+    expect(
+      viewOf({
+        kind: "failed",
+        proposalId,
+        failure: { stage: "commit", code: "conflict", detail: "the base revision moved" },
+      }).revision
+    ).toBeNull()
   })
 
   /** "You may not" and "a stage broke" are different answers, so they read differently. */
@@ -85,10 +109,10 @@ describe("describeIntent", () => {
       })
     )
 
-    expect(described).toContain("user-instruction")
-    expect(described).toContain("revision 3")
-    expect(described).toContain("24 characters")
-    expect(described).toContain("the whole tree")
+    expect(described.before).toContain("user-instruction")
+    expect(described.before).toContain("the whole tree")
+    expect(described.revision).toBe(3)
+    expect(described.after).toContain("24 characters")
   })
 
   it("names the node an ask was scoped to", () => {
@@ -105,7 +129,7 @@ describe("describeIntent", () => {
           observedAt: "2026-07-31T00:00:00.000Z",
         })
       )
-    ).toContain(scopeNodeId)
+    ).toMatchObject({ before: expect.stringContaining(scopeNodeId) })
   })
 
 
@@ -126,7 +150,7 @@ describe("describeIntent", () => {
       })
     )
 
-    expect(described.startsWith("ana@loom.local · user-instruction")).toBe(true)
+    expect(described.before.startsWith("ana@loom.local · user-instruction")).toBe(true)
   })
 
   /** Everything written before identity existed has no actor, and still reads. */
@@ -141,12 +165,42 @@ describe("describeIntent", () => {
       })
     )
 
-    expect(described.startsWith("system-signal ·")).toBe(true)
+    expect(described.before.startsWith("system-signal ·")).toBe(true)
   })
 
   /** A window can open mid-episode, and saying so beats rendering a blank line. */
   it("says so when the page opened after the ask", () => {
-    expect(describeIntent(episode(undefined))).toContain("after the ask")
+    expect(describeIntent(episode(undefined)).before).toContain("after the ask")
+  })
+
+  /**
+   * Nothing placed the ask, so there is no position to offer. A line that fell
+   * back to revision 0 would send a reader to a page the log cannot hold.
+   */
+  it("names no revision when the ask itself was not recorded", () => {
+    expect(describeIntent(episode(undefined)).revision).toBeNull()
+  })
+
+  /**
+   * The parts are joined by JSX with the revision between them, so they have to
+   * read as one line when they are — the separators live on the parts, not on
+   * the component that assembles them.
+   */
+  it("reads as one line once the revision is put back between the parts", () => {
+    const described = describeIntent(
+      episode({
+        intentId,
+        origin: "user-instruction",
+        actor: "ana@loom.local",
+        baseRevision: 3,
+        utteranceLength: 24,
+        observedAt: "2026-07-31T00:00:00.000Z",
+      })
+    )
+
+    expect(`${described.before}revision ${described.revision}${described.after}`).toBe(
+      "ana@loom.local · user-instruction · the whole tree · revision 3 · 24 characters"
+    )
   })
 })
 

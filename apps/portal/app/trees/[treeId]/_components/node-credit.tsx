@@ -1,9 +1,7 @@
-import Link from "next/link"
-
 import type { TreeId } from "@loom/runtime"
 
+import { RevisionLink } from "@/app/_components/revision-link"
 import type { NodeCredit } from "@/lib/attribution-view"
-import { revisionHref } from "@/lib/history-link"
 
 /**
  * Who put the selected node here, and where to go to read the change itself.
@@ -21,18 +19,6 @@ import { revisionHref } from "@/lib/history-link"
  * cases that produce one: a node the seed carried was placed by nobody, and a
  * node the walk did not reach was placed by somebody this page cannot name.
  */
-
-const RevisionLink = ({
-  treeId,
-  revision,
-}: {
-  readonly treeId: TreeId
-  readonly revision: number
-}) => (
-  <Link href={revisionHref(treeId, revision)} className="font-mono">
-    revision {revision}
-  </Link>
-)
 
 export const NodeCreditLine = ({
   credit,

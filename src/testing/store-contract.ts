@@ -416,6 +416,96 @@ export const describeTreeStoreContract = (
         expect(revisionNumbers(back)).toEqual(revisionNumbers(first))
       })
 
+      /**
+       * Reversibility is not one step. A reader who has walked to the oldest end
+       * of a long log walks back out of it the same way they came in, and every
+       * page on the way has to name the end they are still moving toward — not
+       * only the first one, which is the only case a single step ever exercises.
+       */
+      it("walks a whole log forwards again and reassembles it", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 5)
+
+        const oldest = await store.revisions(tree.treeId, { direction: "newer", limit: 2 })
+        const firstCursor = oldest.ok ? oldest.value.newer : null
+        const second = await store.revisions(tree.treeId, {
+          direction: "newer",
+          limit: 2,
+          ...(firstCursor === null ? {} : { cursor: firstCursor }),
+        })
+        const secondCursor = second.ok ? second.value.newer : null
+        const third = await store.revisions(tree.treeId, {
+          direction: "newer",
+          limit: 2,
+          ...(secondCursor === null ? {} : { cursor: secondCursor }),
+        })
+
+        expect([
+          ...revisionNumbers(oldest),
+          ...revisionNumbers(second),
+          ...revisionNumbers(third),
+        ]).toEqual([1, 2, 3, 4, 5])
+        expect(third.ok && third.value.newer).toBeNull()
+      })
+
+      /**
+       * A page reached by moving forwards has entries behind it by construction —
+       * the cursor it resumed from came off one. A reader who steps forward and
+       * then changes their mind must not find the way back missing.
+       */
+      it("names the older end of a resumed forwards page", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 4)
+
+        const oldest = await store.revisions(tree.treeId, { direction: "newer", limit: 2 })
+        const cursor = oldest.ok ? oldest.value.newer : null
+        const forward = await store.revisions(tree.treeId, {
+          direction: "newer",
+          limit: 2,
+          ...(cursor === null ? {} : { cursor }),
+        })
+
+        expect(revisionNumbers(forward)).toEqual([3, 4])
+        expect(forward.ok && forward.value.older).toBe("3")
+
+        const back = await store.revisions(tree.treeId, {
+          direction: "older",
+          limit: 2,
+          ...(forward.ok && forward.value.older !== null ? { cursor: forward.value.older } : {}),
+        })
+
+        expect(revisionNumbers(back)).toEqual(revisionNumbers(oldest))
+      })
+
+      /**
+       * The step a reader takes after arriving at a revision a link named. The
+       * anchored page is not an end of the log, so it has entries on both sides,
+       * and the cursor it reports for its newer end has to resume like any other.
+       */
+      it("steps forward from an anchored page", async () => {
+        const store = await freshStore()
+        const tree = await treeWithLog(store, 5)
+
+        const anchored = await store.revisions(tree.treeId, {
+          direction: "older",
+          limit: 2,
+          at: 3,
+        })
+
+        expect(revisionNumbers(anchored)).toEqual([2, 3])
+
+        const cursor = anchored.ok ? anchored.value.newer : null
+        expect(cursor).not.toBeNull()
+
+        const forward = await store.revisions(tree.treeId, {
+          direction: "newer",
+          limit: 2,
+          ...(cursor === null ? {} : { cursor }),
+        })
+
+        expect(revisionNumbers(forward)).toEqual([4, 5])
+      })
+
       it("clamps a limit the caller should not get, rather than honouring it", async () => {
         const store = await freshStore()
         const tree = await treeWithLog(store, 3)

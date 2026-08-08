@@ -16,6 +16,8 @@ import {
   describeFacets,
   describeMismatch,
   describeRecycling,
+  stoppedAt,
+  type RecyclingAccount,
   DIFFERENCE_LIMIT,
   RECYCLING_LIMIT,
 } from "./audit-view"
@@ -242,18 +244,64 @@ describe("describeAudit and id identity", () => {
     expect(report.recyclingOmitted).toBe(0)
     expect(report.restored).toBe(0)
   })
+
+  /**
+   * The one place an unreplayable verdict can send anybody. Everything else it
+   * says is about what could not be established.
+   */
+  it("names the revision the fold stopped at, and only when it stopped", () => {
+    const stopped = describeAudit({
+      outcome: "unreplayable",
+      mismatch: { code: "revision-gap", expected: 3, found: 7 },
+    })
+
+    expect(stopped.stoppedAt).toBe(7)
+    expect(describeAudit({ outcome: "agrees", revision: 2, idReturns: [] }).stoppedAt).toBeNull()
+  })
 })
+
+/** The parts as JSX joins them, with each revision put back where it belongs. */
+const joinRecycling = (account: RecyclingAccount): string =>
+  `${account.opening} revision ${account.leftAt}${account.middle} revision ${account.returnedAt}`
 
 describe("describeRecycling", () => {
   it("names both nodes and the revision the id changed hands", () => {
-    expect(describeRecycling(recyclingOf("n_4", 9))).toBe(
+    expect(joinRecycling(describeRecycling(recyclingOf("n_4", 9)))).toBe(
       "was a loom.card until revision 1, and a text from revision 9"
     )
   })
 
   it("describes a restoration as the round trip it is", () => {
-    expect(describeRecycling(restorationOf("n_4"))).toBe(
+    expect(joinRecycling(describeRecycling(restorationOf("n_4")))).toBe(
       "was removed at revision 1 and put back at revision 2"
     )
+  })
+
+  /**
+   * Both revisions are handed over as numbers so both can be linked (0043).
+   * A finding that named the two changes which made an id ambiguous and then
+   * made the reviewer retype them would be the odd thing to ship.
+   */
+  it("keeps both revisions out of the words", () => {
+    const account = describeRecycling(recyclingOf("n_4", 9))
+
+    expect(account).toMatchObject({ leftAt: 1, returnedAt: 9 })
+    expect(account.opening).not.toContain("1")
+    expect(account.middle).not.toContain("9")
+  })
+})
+
+describe("stoppedAt", () => {
+  it("stops at the delta that would not apply", () => {
+    expect(stoppedAt({ code: "delta-rejected", revision: 12, detail: "unknown-node" })).toBe(12)
+  })
+
+  /**
+   * The expected revision is the hole in the log — no entry holds it, so it is
+   * a description of absence rather than a place. The found one is the entry
+   * the fold actually read, and the only one of the two worth a link.
+   */
+  it("stops at the revision found in a gap, never the one expected", () => {
+    expect(stoppedAt({ code: "revision-gap", expected: 3, found: 7 })).toBe(7)
   })
 })

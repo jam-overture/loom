@@ -5,7 +5,12 @@ import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
 import { requireActor } from "@/lib/auth/identity"
-import { historyStart, parseRevisionParam } from "@/lib/history-link"
+import {
+  describeStaleAnchor,
+  historyPageHref,
+  historyRead,
+  parseRevisionParam,
+} from "@/lib/history-link"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
 import { RevisionRow } from "./_components/revision-row"
@@ -27,13 +32,19 @@ import { TreeChooser } from "./_components/tree-chooser"
  * that one and marks it (0043), which is how a node's attribution reaches the
  * change that placed it — the alternative was a reviewer reading a number off
  * one page and paging back through this one until it appeared.
+ *
+ * From there the log reads both ways. A reader who arrived at revision 4 is not
+ * asking about revision 4 alone; they are asking what happened around it, and
+ * half of "around" is what came after. The store has named its `newer` end since
+ * 0025 and nothing has ever read it, so until now the only way forward was back
+ * to the newest page and a fresh descent.
  */
 const HistoryPage = async ({
   searchParams,
 }: {
-  searchParams: Promise<{ tree?: string; older?: string; at?: string }>
+  searchParams: Promise<{ tree?: string; older?: string; newer?: string; at?: string }>
 }) => {
-  const { tree, older, at } = await searchParams
+  const { tree, older, newer, at } = await searchParams
   await requireActor("/history")
   await ensureSeeded()
 
@@ -52,10 +63,7 @@ const HistoryPage = async ({
   /** Where a link sent the reader, and what to mark once they are here. */
   const anchor = parseRevisionParam(at)
 
-  const page = await portalStore.revisions(scope.data, {
-    direction: "older",
-    ...historyStart(older, anchor),
-  })
+  const page = await portalStore.revisions(scope.data, historyRead({ older, newer, at: anchor }))
 
   if (!page.ok) {
     /** A log nobody can name is a wrong URL, not a broken store. */
@@ -78,8 +86,10 @@ const HistoryPage = async ({
    * so is the difference between landing somewhere unexpected and being told
    * why — the page would otherwise look exactly like an ordinary visit.
    */
-  const anchorMissing =
+  const staleAnchor =
     anchor !== undefined && !newestFirst.some((stored) => stored.revision === anchor)
+      ? describeStaleAnchor(anchor, { older, newer })
+      : undefined
 
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
@@ -95,14 +105,7 @@ const HistoryPage = async ({
         </div>
       </div>
 
-      {anchorMissing && (
-        <p className="text-ink-muted text-sm">
-          Nothing on this page is revision {anchor}
-          {older === undefined
-            ? " — this log has not reached it, or has not kept it."
-            : ", which is further along than this page."}
-        </p>
-      )}
+      {staleAnchor && <p className="text-ink-muted text-sm">{staleAnchor}</p>}
 
       {newestFirst.length === 0 ? (
         <p className="text-ink-muted text-sm">
@@ -121,17 +124,27 @@ const HistoryPage = async ({
         </ul>
       )}
 
+      {/*
+       * Both ends, whenever the page has them. A log read only backwards makes
+       * "what happened after this" a question you answer by starting again from
+       * the newest page, which is the same journey `?at=` was added to remove.
+       *
+       * "latest" stays alongside them rather than being implied by "later": a
+       * reader deep in a long log wants the end, not thirty steps toward it.
+       */}
       <div className="flex gap-4">
         {page.value.older !== null && (
-          <Link
-            href={`/history?${scopeQuery}&older=${encodeURIComponent(page.value.older)}`}
-            className="text-xs"
-          >
+          <Link href={historyPageHref(scope.data, { older: page.value.older })} className="text-xs">
             ← earlier
           </Link>
         )}
-        {(older !== undefined || anchor !== undefined) && (
-          <Link href={`/history?${scopeQuery}`} className="text-xs">
+        {page.value.newer !== null && (
+          <Link href={historyPageHref(scope.data, { newer: page.value.newer })} className="text-xs">
+            later →
+          </Link>
+        )}
+        {(older !== undefined || newer !== undefined || anchor !== undefined) && (
+          <Link href={historyPageHref(scope.data)} className="text-xs">
             latest →
           </Link>
         )}
