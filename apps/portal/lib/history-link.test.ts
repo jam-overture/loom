@@ -3,9 +3,12 @@ import { describe, expect, it } from "vitest"
 import type { TreeId } from "@loom/runtime"
 
 import {
-  describeStaleAnchor,
+  anchorOf,
+  describeAnchorMiss,
+  echoOf,
   historyPageHref,
   historyRead,
+  isReachableRevision,
   parseRevisionParam,
   revisionAnchorId,
   revisionHref,
@@ -31,15 +34,31 @@ describe("revisionHref", () => {
   })
 })
 
+describe("isReachableRevision", () => {
+  it("says a revision an entry produced is somewhere to go", () => {
+    expect(isReachableRevision(1)).toBe(true)
+    expect(isReachableRevision(12)).toBe(true)
+  })
+
+  /**
+   * A tree is created at revision 0 and no log entry produces it, so a link to
+   * it lands on a page that cannot hold it. The number is still worth showing —
+   * it says the tree is unchanged — it is just not a destination.
+   */
+  it("says the shape a tree was created with is not", () => {
+    expect(isReachableRevision(0)).toBe(false)
+  })
+})
+
 describe("parseRevisionParam", () => {
   it("reads a revision a link put there", () => {
-    expect(parseRevisionParam("4")).toBe(4)
+    expect(parseRevisionParam("4")).toEqual({ kind: "named", revision: 4 })
   })
 
   it("treats an absent or empty parameter as no anchor at all", () => {
-    expect(parseRevisionParam(undefined)).toBeUndefined()
-    expect(parseRevisionParam("")).toBeUndefined()
-    expect(parseRevisionParam("   ")).toBeUndefined()
+    expect(parseRevisionParam(undefined)).toEqual({ kind: "absent" })
+    expect(parseRevisionParam("")).toEqual({ kind: "absent" })
+    expect(parseRevisionParam("   ")).toEqual({ kind: "absent" })
   })
 
   /**
@@ -49,11 +68,66 @@ describe("parseRevisionParam", () => {
    * come back as a page nobody asked for.
    */
   it("refuses anything that is not a revision a log entry could have", () => {
-    expect(parseRevisionParam("0")).toBeUndefined()
-    expect(parseRevisionParam("-2")).toBeUndefined()
-    expect(parseRevisionParam("3.5")).toBeUndefined()
-    expect(parseRevisionParam("four")).toBeUndefined()
-    expect(parseRevisionParam("1e400")).toBeUndefined()
+    for (const refused of ["0", "-2", "3.5", "four", "1e400"]) {
+      expect(anchorOf(parseRevisionParam(refused))).toBeUndefined()
+    }
+  })
+
+  /**
+   * The refusal is now reported rather than swallowed. A reader who typed
+   * `elevn` and got the newest page with nothing said would have no way to tell
+   * their typo from an ordinary visit, which is the whole reason this parse
+   * stopped answering `undefined` twice over.
+   */
+  it("distinguishes a value it refused from no value at all", () => {
+    expect(parseRevisionParam("four")).toEqual({ kind: "malformed", typed: "four" })
+    expect(parseRevisionParam("0")).toEqual({ kind: "malformed", typed: "0" })
+  })
+
+  it("reports the refused value without the whitespace around it", () => {
+    expect(parseRevisionParam("  four  ")).toEqual({ kind: "malformed", typed: "four" })
+  })
+
+  /**
+   * The refused value is echoed back into an input on a page anybody can be
+   * linked to, so its length is settled here rather than trusted by each view.
+   */
+  it("bounds a refused value rather than echoing a whole query string", () => {
+    const param = parseRevisionParam("x".repeat(500))
+
+    expect(param.kind).toBe("malformed")
+    expect(param.kind === "malformed" && param.typed.length).toBeLessThanOrEqual(24)
+  })
+})
+
+describe("anchorOf", () => {
+  it("gives the revision a parameter named", () => {
+    expect(anchorOf({ kind: "named", revision: 7 })).toBe(7)
+  })
+
+  /** Neither of the other two is a position, and the read must not be given one. */
+  it("gives nothing for a parameter that named no position", () => {
+    expect(anchorOf({ kind: "absent" })).toBeUndefined()
+    expect(anchorOf({ kind: "malformed", typed: "four" })).toBeUndefined()
+  })
+})
+
+describe("echoOf", () => {
+  it("shows a revision back as the number it was read as", () => {
+    expect(echoOf(parseRevisionParam("  4 "))).toBe("4")
+  })
+
+  it("shows a refused value back so it can be seen and corrected", () => {
+    expect(echoOf(parseRevisionParam("four"))).toBe("four")
+  })
+
+  it("leaves the box empty when nothing was asked for", () => {
+    expect(echoOf(parseRevisionParam(undefined))).toBeUndefined()
+  })
+
+  /** What comes back is what the parse kept, never the parameter as written. */
+  it("never echoes more than the parse was willing to keep", () => {
+    expect(echoOf(parseRevisionParam("y".repeat(500)))?.length).toBeLessThanOrEqual(24)
   })
 })
 
@@ -135,26 +209,81 @@ describe("historyPageHref", () => {
   })
 })
 
-describe("describeStaleAnchor", () => {
-  /** A link that aged: the log never reached the revision, or no longer keeps it. */
-  it("says a log does not hold the revision when nobody has paged", () => {
-    expect(describeStaleAnchor(9, { older: undefined, newer: undefined })).toBe(
-      "Nothing on this page is revision 9 — this log has not reached it, or has not kept it."
-    )
+describe("describeAnchorMiss", () => {
+  /** A reader who arrived somewhere unpaged, with the revision they asked for showing. */
+  const ARRIVED = { older: undefined, newer: undefined, onPage: true, newestOnPage: 12 } as const
+
+  it("says nothing when the revision asked for is on the page", () => {
+    expect(describeAnchorMiss({ kind: "named", revision: 9 }, ARRIVED)).toBeUndefined()
+  })
+
+  it("says nothing when nobody asked for a revision", () => {
+    expect(describeAnchorMiss({ kind: "absent" }, { ...ARRIVED, onPage: false })).toBeUndefined()
+  })
+
+  /**
+   * The case the box added. A typed value that is not a revision never reached
+   * the store, so the page it lands on is the one an ordinary visit produces —
+   * and without this sentence that is all a reader who mistyped would get.
+   */
+  it("says a typed value was not a revision, and shows it back", () => {
+    const said = describeAnchorMiss({ kind: "malformed", typed: "elevn" }, ARRIVED)
+
+    expect(said).toContain("“elevn”")
+    expect(said).toContain("whole number from 1 up")
+  })
+
+  /** A number from the future. The log's own end is the fact that answers it. */
+  it("says how far the log actually reaches when the revision is beyond it", () => {
+    expect(
+      describeAnchorMiss({ kind: "named", revision: 900 }, { ...ARRIVED, onPage: false })
+    ).toBe("Nothing on this page is revision 900 — this log reaches revision 12.")
+  })
+
+  it("says a log has nothing in it rather than naming an end it has not got", () => {
+    expect(
+      describeAnchorMiss(
+        { kind: "named", revision: 9 },
+        { ...ARRIVED, onPage: false, newestOnPage: undefined }
+      )
+    ).toContain("no accepted changes yet")
   })
 
   /**
    * A reader who paged has left the anchor behind, and which way they went is
    * the difference between "it is ahead of you" and "it is behind you". The same
    * sentence for both would send half of them the wrong way.
+   *
+   * A cursor also means the newest row on the page is not the log's end, so the
+   * sentence that names an end must not be reachable from here.
    */
   it("says which way the anchor went once a reader has paged", () => {
-    expect(describeStaleAnchor(9, { older: "4", newer: undefined })).toContain("further along")
-    expect(describeStaleAnchor(9, { older: undefined, newer: "4" })).toContain("further back")
+    const paged = { onPage: false, newestOnPage: 12 } as const
+
+    const back = describeAnchorMiss(
+      { kind: "named", revision: 900 },
+      { ...paged, older: "4", newer: undefined }
+    )
+    const along = describeAnchorMiss(
+      { kind: "named", revision: 900 },
+      { ...paged, older: undefined, newer: "4" }
+    )
+
+    expect(back).toContain("further along")
+    expect(along).toContain("further back")
+    expect(back).not.toContain("reaches revision")
+    expect(along).not.toContain("reaches revision")
   })
 
-  it("names the revision that was asked for in every case", () => {
-    expect(describeStaleAnchor(9, { older: "4", newer: undefined })).toContain("revision 9")
-    expect(describeStaleAnchor(9, { older: undefined, newer: "4" })).toContain("revision 9")
+  it("names the revision that was asked for in every miss", () => {
+    const misses = [
+      describeAnchorMiss(
+        { kind: "named", revision: 9 },
+        { ...ARRIVED, onPage: false, older: "4" }
+      ),
+      describeAnchorMiss({ kind: "named", revision: 9 }, { ...ARRIVED, onPage: false }),
+    ]
+
+    for (const said of misses) expect(said).toContain("revision 9")
   })
 })

@@ -6,13 +6,16 @@ import { describeStoreError } from "@loom/runtime/store"
 
 import { requireActor } from "@/lib/auth/identity"
 import {
-  describeStaleAnchor,
+  anchorOf,
+  describeAnchorMiss,
+  echoOf,
   historyPageHref,
   historyRead,
   parseRevisionParam,
 } from "@/lib/history-link"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
+import { RevisionBox } from "./_components/revision-box"
 import { RevisionRow } from "./_components/revision-row"
 import { TreeChooser } from "./_components/tree-chooser"
 
@@ -32,6 +35,12 @@ import { TreeChooser } from "./_components/tree-chooser"
  * that one and marks it (0043), which is how a node's attribution reaches the
  * change that placed it — the alternative was a reviewer reading a number off
  * one page and paging back through this one until it appeared.
+ *
+ * A revision travels further than the links that carry it, though. It turns up
+ * in a report, in a message, in a screenshot of somewhere else in the portal, and
+ * a reader holding one had no way to act on it but to edit the URL. The box
+ * writes the same parameter a link does, so there is one way in and one thing to
+ * explain when it misses.
  *
  * From there the log reads both ways. A reader who arrived at revision 4 is not
  * asking about revision 4 alone; they are asking what happened around it, and
@@ -60,8 +69,9 @@ const HistoryPage = async ({
   const scope = treeIdSchema.safeParse(tree)
   if (!scope.success) notFound()
 
-  /** Where a link sent the reader, and what to mark once they are here. */
-  const anchor = parseRevisionParam(at)
+  /** Where a link sent the reader or a reader asked to go, and what to mark on arrival. */
+  const named = parseRevisionParam(at)
+  const anchor = anchorOf(named)
 
   const page = await portalStore.revisions(scope.data, historyRead({ older, newer, at: anchor }))
 
@@ -81,15 +91,17 @@ const HistoryPage = async ({
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   /**
-   * A link naming a revision this log does not hold is a stale link, and the
-   * store answers it with the entries on that side rather than an error. Saying
-   * so is the difference between landing somewhere unexpected and being told
-   * why — the page would otherwise look exactly like an ordinary visit.
+   * A revision this log does not hold is not an error to the store — it answers
+   * with the entries on that side of the number instead — so the page lands
+   * looking exactly like an ordinary visit. Saying which of the ways it missed
+   * is the difference between that and being told why.
    */
-  const staleAnchor =
-    anchor !== undefined && !newestFirst.some((stored) => stored.revision === anchor)
-      ? describeStaleAnchor(anchor, { older, newer })
-      : undefined
+  const anchorMiss = describeAnchorMiss(named, {
+    older,
+    newer,
+    onPage: anchor !== undefined && newestFirst.some((stored) => stored.revision === anchor),
+    newestOnPage: newestFirst[0]?.revision,
+  })
 
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
@@ -105,7 +117,9 @@ const HistoryPage = async ({
         </div>
       </div>
 
-      {staleAnchor && <p className="text-ink-muted text-sm">{staleAnchor}</p>}
+      <RevisionBox treeId={scope.data} typed={echoOf(named)} />
+
+      {anchorMiss && <p className="text-ink-muted text-sm">{anchorMiss}</p>}
 
       {newestFirst.length === 0 ? (
         <p className="text-ink-muted text-sm">
