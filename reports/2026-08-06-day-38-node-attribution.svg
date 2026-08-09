@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="620" viewBox="0 0 960 620" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="960" height="620" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="600" fill="#111827">Who put this node here — walked backwards out of the log</text>
+  <text x="40" y="70" font-size="13" fill="#6b7280">The tree stores no authorship. The walk stops at the insert that placed the node, so it reads the newest end of the log and not all of it.</text>
+
+  <!-- ============ the log ============ -->
+  <text x="40" y="112" font-size="12" font-weight="600" fill="#374151" letter-spacing="0.06em">THE LOG — append-only, provenance on every entry</text>
+
+  <!-- revision boxes -->
+  <g font-size="12">
+    <!-- rev 0 seed -->
+    <rect x="40" y="128" width="120" height="66" rx="6" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="100" y="150" text-anchor="middle" font-size="12" font-weight="600" fill="#374151">seed · rev 0</text>
+    <text x="100" y="169" text-anchor="middle" fill="#6b7280">page, header,</text>
+    <text x="100" y="184" text-anchor="middle" fill="#6b7280">main, footer</text>
+
+    <!-- rev 1 -->
+    <rect x="176" y="128" width="120" height="66" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="236" y="150" text-anchor="middle" font-weight="600" fill="#374151">rev 1</text>
+    <text x="236" y="169" text-anchor="middle" fill="#6b7280">insert n_9</text>
+    <text x="236" y="184" text-anchor="middle" fill="#9ca3af">alice</text>
+
+    <!-- rev 2 -->
+    <rect x="312" y="128" width="120" height="66" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="372" y="150" text-anchor="middle" font-weight="600" fill="#374151">rev 2</text>
+    <text x="372" y="169" text-anchor="middle" fill="#6b7280">remove n_9</text>
+    <text x="372" y="184" text-anchor="middle" fill="#9ca3af">bob</text>
+
+    <!-- rev 3 — the placement -->
+    <rect x="448" y="128" width="120" height="66" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="508" y="150" text-anchor="middle" font-weight="600" fill="#065f46">rev 3</text>
+    <text x="508" y="169" text-anchor="middle" fill="#047857">insert n_9</text>
+    <text x="508" y="184" text-anchor="middle" fill="#059669">carol · undo</text>
+
+    <!-- rev 4 -->
+    <rect x="584" y="128" width="120" height="66" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="644" y="150" text-anchor="middle" font-weight="600" fill="#374151">rev 4</text>
+    <text x="644" y="169" text-anchor="middle" fill="#6b7280">configure n_9</text>
+    <text x="644" y="184" text-anchor="middle" fill="#9ca3af">dave</text>
+
+    <!-- rev 5 -->
+    <rect x="720" y="128" width="120" height="66" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+    <text x="780" y="150" text-anchor="middle" font-weight="600" fill="#374151">rev 5 · head</text>
+    <text x="780" y="169" text-anchor="middle" fill="#6b7280">move n_9</text>
+    <text x="780" y="184" text-anchor="middle" fill="#9ca3af">erin</text>
+  </g>
+
+  <!-- forward arrows between revisions -->
+  <g stroke="#d1d5db" stroke-width="1.5" fill="none">
+    <path d="M160 161 L172 161"/>
+    <path d="M296 161 L308 161"/>
+    <path d="M432 161 L444 161"/>
+    <path d="M568 161 L580 161"/>
+    <path d="M704 161 L716 161"/>
+  </g>
+
+  <!-- ============ the walk ============ -->
+  <defs>
+    <marker id="back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <g stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#back)">
+    <path d="M775 210 L649 210"/>
+    <path d="M639 232 L513 232"/>
+  </g>
+
+  <text x="712" y="204" text-anchor="middle" font-size="11.5" fill="#2563eb">1 · touched since</text>
+  <text x="576" y="226" text-anchor="middle" font-size="11.5" fill="#2563eb">2 · touched since</text>
+
+  <circle cx="508" cy="252" r="6" fill="#059669"/>
+  <text x="500" y="257" text-anchor="end" font-size="12" font-weight="600" fill="#065f46">3 · placed — stop here</text>
+
+  <!-- unreached region -->
+  <rect x="40" y="272" width="392" height="30" rx="5" fill="#fafafa" stroke="#e5e7eb" stroke-dasharray="4 3"/>
+  <text x="236" y="292" text-anchor="middle" font-size="12" fill="#9ca3af">never read — a removal is always older than the insert that undid it</text>
+
+  <line x1="40" y1="326" x2="920" y2="326" stroke="#e5e7eb"/>
+
+  <!-- ============ the answer ============ -->
+  <text x="40" y="356" font-size="12" font-weight="600" fill="#374151" letter-spacing="0.06em">WHAT THE SELECTION PANE SAYS</text>
+
+  <rect x="40" y="370" width="500" height="98" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="58" y="394" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#374151">node   n_9</text>
+  <text x="58" y="420" font-size="12.5" fill="#111827">added at revision 3 — carol asked, the runtime wrote it</text>
+  <text x="58" y="442" font-size="12.5" fill="#6b7280">since: configured by dave at revision 4, moved by erin at revision 5</text>
+  <text x="58" y="461" font-size="11.5" fill="#9ca3af">the current tenancy, not the first one — rev 1 is alice's, and it ended</text>
+
+  <!-- three outcomes -->
+  <text x="580" y="356" font-size="12" font-weight="600" fill="#374151" letter-spacing="0.06em">THREE OUTCOMES</text>
+
+  <g font-size="12">
+    <rect x="580" y="370" width="340" height="28" rx="5" fill="#ecfdf5" stroke="#a7f3d0"/>
+    <text x="596" y="389" fill="#065f46"><tspan font-weight="600">placed</tspan> — the walk found the insert</text>
+
+    <rect x="580" y="405" width="340" height="28" rx="5" fill="#f3f4f6" stroke="#d1d5db"/>
+    <text x="596" y="424" fill="#374151"><tspan font-weight="600">seeded</tspan> — reached the log's start, no insert exists</text>
+
+    <rect x="580" y="440" width="340" height="28" rx="5" fill="#fffbeb" stroke="#fcd34d"/>
+    <text x="596" y="459" fill="#92400e"><tspan font-weight="600">undetermined</tspan> — ran out of budget first</text>
+  </g>
+
+  <text x="580" y="490" font-size="11.5" fill="#6b7280">Collapsing the last two would credit the seed with</text>
+  <text x="580" y="507" font-size="11.5" fill="#6b7280">work somebody did, because we stopped looking.</text>
+
+  <line x1="40" y1="530" x2="920" y2="530" stroke="#e5e7eb"/>
+
+  <!-- footer: what did not change -->
+  <text x="40" y="558" font-size="12" font-weight="600" fill="#374151" letter-spacing="0.06em">WHAT DID NOT CHANGE</text>
+  <text x="40" y="580" font-size="12.5" fill="#111827">LoomNode gains no field. No TREE_SCHEMA_VERSION bump, no column, no migration — so every tree ever written is</text>
+  <text x="40" y="599" font-size="12.5" fill="#111827">attributable retroactively, and there is still exactly one copy of who authored what. <tspan fill="#6b7280">(0041)</tspan></text>
+</svg>

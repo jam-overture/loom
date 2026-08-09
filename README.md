@@ -94,6 +94,7 @@ src/
     ├── store.ts         # TreeStore: the contract, and what it may refuse
     ├── memory.ts        # The reference implementation: log plus snapshot
     ├── replay.ts        # Folding the log, and auditing the snapshot against it
+    ├── attribution.ts   # Who placed each node, walked back out of the log
     └── source.ts        # The store as the renderer's TreeSource
 ```
 

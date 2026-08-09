@@ -98,3 +98,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0038](0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) | An id names one node, and a return is not a reuse | Accepted | §1 → §5 |
 | [0039](0039-the-attempt-log-is-counted-never-enumerated.md) | The attempt log is counted, never enumerated | Accepted | §5 |
 | [0040](0040-a-failure-names-the-actor-who-must-clear-it.md) | A failure names the actor who must clear it | Accepted | §2 → §5 |
+| [0041](0041-authorship-is-derived-from-the-log-not-carried-on-a-node.md) | Authorship is derived from the log, not carried on a node | Accepted | §1 → §5 |

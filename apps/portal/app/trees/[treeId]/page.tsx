@@ -3,9 +3,10 @@ import { notFound } from "next/navigation"
 
 import { treeIdSchema } from "@loom/runtime"
 import { renderRequest } from "@loom/runtime/react"
-import { treeSourceFromStore } from "@loom/runtime/store"
+import { attributeTree, treeSourceFromStore } from "@loom/runtime/store"
 
 import { portalDecoration } from "@/lib/addressing"
+import { nodeCredits } from "@/lib/attribution-view"
 import { requireActor } from "@/lib/auth/identity"
 import { isInterpreterConfigured } from "@/lib/interpreter"
 import { outlineRows } from "@/lib/outline"
@@ -63,12 +64,21 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
   const rows = outlineRows(rendered.value.tree, portalDecoration)
   const holds = await portalHolds.forTree(parsed.data)
 
+  /**
+   * Attributed from the tree that was rendered, not from a fresh `head` read: a
+   * revision that landed in between would credit nodes this page is not showing.
+   * A read failure costs the credits and nothing else — a reviewer who cannot be
+   * told who placed a node can still see the node.
+   */
+  const attribution = await attributeTree(portalStore, rendered.value.tree)
+  const credits = attribution.ok ? nodeCredits(attribution.value) : {}
+
   return (
     <SelectionProvider rows={rows}>
       <div className="flex flex-col gap-6 p-8 lg:flex-row-reverse lg:items-start">
         <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">
           <TreeOutline />
-          <SelectedNode />
+          <SelectedNode credits={credits} />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-8">
