@@ -215,6 +215,40 @@ the place to make it.
 
 ---
 
+## Set J — two days after lesson 08
+
+Interleaved with 01–07. This set is built around a single failure mode:
+**assuming that two things which read the same input must be the same thing.**
+Four of the seven questions are that shape in different costumes, and they are
+deliberately not adjacent.
+
+1. Give the test for whether two axes are really two, then apply it to `stakes`
+   and `reversibility` and name the two `ChangeAnalysis` fields they both read.
+2. A delta removes 2 nodes. Write down a policy under which its stakes are `low`
+   and it is irreversible, and a second policy under which its stakes are
+   `medium` and it is reversible. Actual field names and values.
+3. `nodePath` is recomputed on every call and nothing caches it; lesson 07
+   rejected recording the whole `ChangeAnalysis` on the disposition. State the
+   one argument both of those are, then find the place in lesson 08's material
+   where the system does the thing that argument forbids, and say why it is
+   tolerable there. *(04, 07)*
+4. Name the two irreversibility reasons and say which of the two the log's
+   only-ever-growing property is relevant to. *(06)*
+5. A change comes back `reversible: false`. What is in `inverse`? Then: a change
+   comes back `ok: false` from `analyzeDelta`. What is in the journal, and why is
+   it not a refusal? *(05, 07)*
+6. Three of the four operations have small inverses and one does not. Name it,
+   then name the policy knob that exists because of it, then say what unit that
+   knob counts and one thing it therefore cannot see. *(06)*
+7. Why is text a node rather than a prop? *(02)*
+
+Question 3 is the one to do slowly. The two halves are five lessons apart, they
+are the same argument — *a derived value stored next to what it derives from is a
+second source of truth* — and if that connection is not there yet, this set is
+where to build it rather than in a month.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -232,3 +266,4 @@ you already know.
 | G | 2 days after L05 | | |
 | H | 2 days after L06 | | |
 | I | 2 days after L07 | | |
+| J | 2 days after L08 | | |
