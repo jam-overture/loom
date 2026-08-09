@@ -103,3 +103,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0043](0043-a-revision-is-a-position-a-caller-may-name.md) | A revision is a position a caller may name | Accepted | §5 → §1 |
 | [0044](0044-a-move-relocates-a-subtree-and-the-analysis-measures-the-subtree.md) | A move relocates a subtree, and the analysis measures the subtree, not the phrasing | Accepted | §2 |
 | [0045](0045-a-telemetry-field-added-later-is-optional-forever.md) | A telemetry field added later is optional, and never defaulted | Accepted | §6 |
+| [0046](0046-a-render-test-crosses-no-boundary-the-framework-would-not.md) | A render test crosses no boundary the framework would not | Accepted | §5 |
