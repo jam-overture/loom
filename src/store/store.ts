@@ -100,9 +100,40 @@ export type TreeListPage = {
  * telemetry journal; a revision log is the same kind of sequence and reads the
  * same way, so the vocabulary is shared rather than reinvented.
  */
-export type RevisionReadRequest = {
-  /** A cursor from a previous page's `older`/`newer`, passed back unread. */
-  readonly cursor?: string
+/**
+ * Where a read begins. Two kinds of position, and they are not interchangeable.
+ *
+ * A `cursor` is the store's word: opaque, exclusive, and only meaningful because
+ * a page handed it back. An `at` is the caller's word: a revision number, which
+ * is public, stable, and already the entry's identity — so a caller holding one
+ * can name it without having read the page it falls on.
+ *
+ * They are mutually exclusive in the type rather than by convention, because the
+ * only alternative is a precedence rule, and a request that quietly ignores half
+ * of what it was asked is the failure mode this contract avoids everywhere else.
+ */
+export type RevisionStart =
+  | {
+      /** A cursor from a previous page's `older`/`newer`, passed back unread. */
+      readonly cursor?: string
+      readonly at?: never
+    }
+  | {
+      /**
+       * A revision to open at. **Inclusive** — the page contains it — which is
+       * the difference that matters: a caller naming this has been sent to a
+       * change and wants to see it, not to resume beside it.
+       *
+       * `direction` still says which way the rest of the page runs: `older`
+       * puts the named revision at the newest end of the page, `newer` at the
+       * oldest. A revision no entry holds is not an error; the page is whatever
+       * falls on the named side of it, which may be empty.
+       */
+      readonly at?: number
+      readonly cursor?: never
+    }
+
+export type RevisionReadRequest = RevisionStart & {
   /**
    * Default `newer`, which with no cursor is the oldest page — the read a fold
    * wants, and the one `auditSnapshot` takes. `older` with no cursor is the
@@ -138,6 +169,46 @@ export const MAX_REVISION_LIMIT = 500
 
 export const clampRevisionLimit = (limit: number | undefined): number =>
   clampLimit(limit, { fallback: DEFAULT_REVISION_LIMIT, max: MAX_REVISION_LIMIT })
+
+/**
+ * The revision the first log entry produces. A tree is created at revision 0 and
+ * nothing in the log corresponds to that, so 1 is the oldest position a read can
+ * reach — and revisions are dense from there, one per accepted delta (0026).
+ */
+export const FIRST_REVISION = 1
+
+/**
+ * An inclusive revision anchor, as the exclusive bound both implementations
+ * already page from.
+ *
+ * Density is what makes this exact rather than approximate: revisions are
+ * consecutive integers, so the position just outside `at` is `at ± 1` and no
+ * entry can hide between them. Shared rather than written twice, for the reason
+ * `pageEnds` is — it is the part most likely to drift between two backends and
+ * least likely to be noticed when it does.
+ */
+export const anchorBound = (at: number, direction: PageDirection): number =>
+  direction === "older" ? Math.floor(at) + 1 : Math.ceil(at) - 1
+
+/**
+ * Whether an anchored page leaves entries on the side it pages away from — the
+ * `resumed` a cursor gets for free and an anchor does not.
+ *
+ * A cursor came from a page, so entries exist at the position it names and the
+ * far side is bounded by definition. An anchor is *inside* the page it produces,
+ * so the far side has to be established rather than assumed: paging `older` from
+ * revision 5 leaves entries newer than 5 only if the log has gone past it, and
+ * paging `newer` leaves entries older only if 5 is not the first.
+ *
+ * Both answers come from what the store already knows — the head revision it
+ * looked up to answer `not-found`, and the density that makes `FIRST_REVISION`
+ * the floor — so neither costs a read.
+ */
+export const anchorResumes = (
+  at: number,
+  direction: PageDirection,
+  headRevision: number
+): boolean => (direction === "older" ? at < headRevision : at > FIRST_REVISION)
 
 /**
  * Every implementation clamps the same way, so a caller cannot ask a store for

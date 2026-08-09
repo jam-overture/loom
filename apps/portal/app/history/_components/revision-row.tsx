@@ -1,6 +1,7 @@
 import type { StoredRevision } from "@loom/runtime/store"
 
 import { describeOperation } from "@/lib/delta-summary"
+import { revisionAnchorId } from "@/lib/history-link"
 
 import { UndoButton } from "./undo-button"
 
@@ -22,14 +23,31 @@ import { UndoButton } from "./undo-button"
  * tell those apart — only the journal can (0029). Rendering "allowed by nobody"
  * would state one of the two as fact.
  *
+ * The row carries the id a credit's link points at, and marks itself when it is
+ * the one that was asked for. A reader arriving from a node's attribution has a
+ * revision in mind; a page that scrolled to it and then looked like every other
+ * row would make them count backwards to check they were in the right place.
+ *
  * Undo is offered on every revision, not only the newest, because the runtime
  * genuinely supports both (0032) — and where it does not, `planRevert` says why.
  * A revision something later built on is offered too: it comes back held rather
  * than applied, naming the revisions it would write over (0035), which is a
  * better answer than a button that was never shown.
  */
-export const RevisionRow = ({ stored }: { readonly stored: StoredRevision }) => (
-  <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-4">
+export const RevisionRow = ({
+  stored,
+  anchored = false,
+}: {
+  readonly stored: StoredRevision
+  /** True when this is the revision a link sent the reader here to read (0043). */
+  readonly anchored?: boolean
+}) => (
+  <li
+    id={revisionAnchorId(stored.revision)}
+    className={`flex scroll-mt-8 flex-col gap-3 rounded-md border p-4 ${
+      anchored ? "border-edge-strong bg-surface-active" : "border-edge-subtle bg-surface-base"
+    }`}
+  >
     <div className="flex flex-wrap items-baseline justify-between gap-2">
       <span className="font-mono text-sm">revision {stored.revision}</span>
       <time className="text-ink-muted font-mono text-2xs" dateTime={stored.appliedAt}>

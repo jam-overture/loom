@@ -9,22 +9,46 @@ import type { NodeChange, NodeAttribution, NodeTouch, TreeAttribution } from "@l
  * pointing at a heading wants one line saying who asked for it and one saying
  * what has happened to it since.
  *
+ * Phrases rather than whole sentences, because a revision is a place a reviewer
+ * can go (0043) and the number has to survive as a number to become a link. The
+ * words are still assembled here — the joining left to JSX is punctuation.
+ *
  * Pure, no React, and flat — the same two constraints `outline.ts` works under,
  * and for the same two reasons. The wording is the part worth testing, and this
  * crosses into a Client Component, so a credit may not carry a `StoredRevision`
  * with a whole delta hanging off it down the wire.
  */
 
+/**
+ * One later change to the node, as the two parts a reader needs separately.
+ *
+ * The revision is not folded into the text for the reason the placement's is
+ * not: a revision is somewhere a reviewer can go (0043), and a sentence with the
+ * number buried in it is a sentence they have to retype into a URL.
+ */
+export type CreditTouch = {
+  /** "configured by bob" — everything except the revision it happened at. */
+  readonly text: string
+  readonly revision: number
+}
+
 export type NodeCredit = {
-  /** Who asked, who wrote it, and when — the headline. */
+  /**
+   * What the placing revision did — or, when nothing placed it, the whole
+   * account, since there is no revision to hang the rest of a sentence off.
+   */
   readonly placed: string
+  /** Who asked, who wrote it, and who allowed it. Null when nothing placed it. */
+  readonly by: string | null
   /**
    * The revision that placed it, or null when nothing did. Separate from the
    * sentence because it is the only part of a credit that links anywhere.
    */
   readonly revision: number | null
-  /** What has touched it since, or null when nothing has. */
-  readonly since: string | null
+  /** What has touched it since, oldest first. Empty when nothing has. */
+  readonly since: readonly CreditTouch[]
+  /** Touches older than the ones listed, counted rather than named. */
+  readonly omitted: number
   /**
    * Set when the walk stopped before it found a placement. The credit above is
    * still true; it is just not the whole story, and a page that did not say so
@@ -53,13 +77,11 @@ const askedBy = (actor: string | undefined): string => actor ?? ANONYMOUS
 const placedPhrase = (touch: NodeTouch): string =>
   touch.named ? "added" : "brought in as part of a larger change"
 
-const placedSentence = (touch: NodeTouch): string => {
-  const { provenance, revision, answeredBy } = touch.entry
+const placedBy = (touch: NodeTouch): string => {
+  const { provenance, answeredBy } = touch.entry
   const allowed = answeredBy === undefined ? "" : `, allowed by ${answeredBy}`
 
-  return `${placedPhrase(touch)} at revision ${revision} — ${askedBy(provenance.actor)} asked, ${wroteIt(
-    provenance.authoredBy
-  )}${allowed}`
+  return `${askedBy(provenance.actor)} asked, ${wroteIt(provenance.authoredBy)}${allowed}`
 }
 
 const effectVerb = (effect: NodeChange): string => {
@@ -82,41 +104,42 @@ const effectVerb = (effect: NodeChange): string => {
  */
 export const TOUCH_LIMIT = 3
 
-const sinceSentence = (touches: readonly NodeTouch<NodeChange>[]): string | null => {
-  if (touches.length === 0) return null
-
-  const shown = touches.slice(-TOUCH_LIMIT)
-  const omitted = touches.length - shown.length
-  const listed = shown
-    .map((touch) => `${effectVerb(touch.effect)} by ${askedBy(touch.entry.provenance.actor)} at revision ${touch.entry.revision}`)
-    .join(", ")
-
-  return omitted === 0 ? `since: ${listed}` : `since: ${listed} (and ${omitted} earlier)`
-}
+const shownTouches = (touches: readonly NodeTouch<NodeChange>[]): readonly CreditTouch[] =>
+  touches.slice(-TOUCH_LIMIT).map((touch) => ({
+    text: `${effectVerb(touch.effect)} by ${askedBy(touch.entry.provenance.actor)}`,
+    revision: touch.entry.revision,
+  }))
 
 export const creditFor = (attribution: NodeAttribution): NodeCredit => {
-  const since = sinceSentence(attribution.since)
+  const since = shownTouches(attribution.since)
+  const omitted = attribution.since.length - since.length
 
   switch (attribution.outcome) {
     case "placed":
       return {
-        placed: placedSentence(attribution.placed),
+        placed: placedPhrase(attribution.placed),
+        by: placedBy(attribution.placed),
         revision: attribution.placed.entry.revision,
         since,
+        omitted,
         partial: false,
       }
     case "seeded":
       return {
         placed: "part of the tree from the start — no revision placed it",
+        by: null,
         revision: null,
         since,
+        omitted,
         partial: false,
       }
     case "undetermined":
       return {
         placed: "placed further back than this page looked",
+        by: null,
         revision: null,
         since,
+        omitted,
         partial: true,
       }
     default:
