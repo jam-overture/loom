@@ -14,9 +14,11 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   removedNodeCount: 0,
   movedNodeCount: 0,
   configuredNodeCount: 1,
+  relocatedNodeCount: 0,
   affectedNodeIds: [],
   touchedPrimitiveTypes: [],
   removedPrimitiveTypes: [],
+  relocatedPrimitiveTypes: [],
   configuredPropKeys: [],
   shallowestAffectedDepth: 5,
   ...overrides,
@@ -110,6 +112,42 @@ describe("vocabulary factors", () => {
     })
 
     expect(stakesOf(analysis, policy).level).toBe("critical")
+  })
+
+  it("escalates a relocated protected primitive to high", () => {
+    const analysis = analysisOf({
+      movedNodeCount: 1,
+      relocatedNodeCount: 3,
+      relocatedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
+    })
+    const assessment = stakesOf(analysis, policy)
+
+    expect(assessment.level).toBe("high")
+    expect(stakeFactor(assessment, "protected-type-relocated")?.detail).toBe(
+      "relocates protected commerce.cart"
+    )
+  })
+
+  it("says relocated rather than touched when a move is all that happened", () => {
+    const analysis = analysisOf({
+      movedNodeCount: 1,
+      relocatedNodeCount: 1,
+      relocatedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
+    })
+
+    expect(codesOf(analysis, policy)).not.toContain("protected-type-touched")
+  })
+
+  it("ranks relocating a protected primitive below destroying one", () => {
+    const cart = primitiveTypeSchema.parse("commerce.cart")
+    const relocated = stakesOf(analysisOf({ relocatedPrimitiveTypes: [cart] }), policy)
+    const removed = stakesOf(
+      analysisOf({ touchedPrimitiveTypes: [cart], removedPrimitiveTypes: [cart] }),
+      policy
+    )
+
+    expect(relocated.level).toBe("high")
+    expect(removed.level).toBe("critical")
   })
 
   it("does not raise stakes for an out-of-tree-effect type, which is a reversibility concern", () => {

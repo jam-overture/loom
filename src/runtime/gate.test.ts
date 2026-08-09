@@ -127,6 +127,24 @@ describe("stakes rules", () => {
     expect(disposition.stakes).toBe("critical")
   })
 
+  it("decides the same relocation the same way however the delta phrased it", () => {
+    const policy = gatePolicySchema.parse({ protectedPrimitiveTypes: ["loom.card"] })
+    const byCard = decide({
+      build: (ids) => [{ op: "move", nodeId: ids.card, parentId: ids.header, index: 0 }],
+      policy,
+      origin: "system-signal",
+    })
+    const bySlot = decide({
+      build: (ids) => [{ op: "move", nodeId: ids.main, parentId: ids.header, index: 0 }],
+      policy,
+      origin: "system-signal",
+    })
+
+    expect(byCard.stakes).toBe("high")
+    expect(bySlot.stakes).toBe("high")
+    expect(bySlot.reason.detail).toContain("relocates protected loom.card")
+  })
+
   it("explains a refusal with the factors that caused it", () => {
     const policy = gatePolicySchema.parse({ protectedPrimitiveTypes: ["loom.card"], refusalFloor: "high" })
     const disposition = decide({
