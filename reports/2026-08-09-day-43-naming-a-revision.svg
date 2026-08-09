@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 700" width="980" height="700" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="980" height="700" fill="#ffffff"/>
+
+  <text x="32" y="40" font-size="20" fill="#1a1a1a">A revision, as somewhere a reader can go</text>
+  <text x="32" y="62" font-size="13" fill="#6e6e6e">day 43 · §5 Portal · one parameter, four answers, and no silent one</text>
+
+  <line x1="32" y1="80" x2="948" y2="80" stroke="#00000021" stroke-width="1"/>
+
+  <!-- WHO HOLDS A REVISION -->
+  <text x="32" y="108" font-size="12" fill="#6e6e6e" letter-spacing="0.5">WHERE A REVISION NUMBER COMES FROM</text>
+
+  <rect x="32" y="122" width="176" height="52" rx="4" fill="#ffffff" stroke="#00000021"/>
+  <text x="44" y="143" font-size="12.5" fill="#1a1a1a">a node's attribution</text>
+  <text x="44" y="161" font-size="11" fill="#6e6e6e">/trees/[treeId] · linked</text>
+
+  <rect x="222" y="122" width="176" height="52" rx="4" fill="#ffffff" stroke="#00000021"/>
+  <text x="234" y="143" font-size="12.5" fill="#1a1a1a">an episode on /activity</text>
+  <text x="234" y="161" font-size="11" fill="#6e6e6e">linked</text>
+
+  <rect x="412" y="122" width="176" height="52" rx="4" fill="#ffffff" stroke="#5b6478" stroke-width="1.5"/>
+  <text x="424" y="143" font-size="12.5" fill="#1a1a1a">the preview header</text>
+  <text x="424" y="161" font-size="11" fill="#15803d">now linked · new</text>
+
+  <rect x="602" y="122" width="346" height="52" rx="4" fill="#ffffff" stroke="#5b6478" stroke-width="1.5"/>
+  <text x="614" y="143" font-size="12.5" fill="#1a1a1a">a report, a message, a screenshot, a colleague</text>
+  <text x="614" y="161" font-size="11" fill="#15803d">no link exists · this is what the box is for</text>
+
+  <!-- four sources, one collector, one parameter -->
+  <path d="M120 174 L120 200" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M310 174 L310 200" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M500 174 L500 200" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M775 174 L775 200" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M120 200 L775 200" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M490 200 L490 224" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M490 226 l-5 -9 l10 0 z" fill="#00000070"/>
+
+  <!-- THE PARAMETER -->
+  <rect x="330" y="226" width="320" height="46" rx="4" fill="#eceef2" stroke="#0000005c"/>
+  <text x="490" y="248" font-size="13" text-anchor="middle" fill="#1a1a1a" font-family="ui-monospace, Menlo, Consolas, monospace">/history?tree=…&amp;at=</text>
+  <text x="490" y="265" font-size="11" text-anchor="middle" fill="#6e6e6e">one parameter — a link writes it, and now a person can too</text>
+
+  <path d="M490 272 L490 300" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M490 302 l-5 -9 l10 0 z" fill="#00000070"/>
+
+  <!-- THE PARSE -->
+  <rect x="330" y="304" width="320" height="40" rx="4" fill="#ffffff" stroke="#5b6478" stroke-width="1.5"/>
+  <text x="490" y="329" font-size="13" text-anchor="middle" fill="#1a1a1a" font-family="ui-monospace, Menlo, Consolas, monospace">parseRevisionParam</text>
+
+  <text x="666" y="320" font-size="11" fill="#6e6e6e">was: number | undefined</text>
+  <text x="666" y="336" font-size="11" fill="#15803d">now: absent | malformed | named</text>
+
+  <!-- THREE BRANCHES -->
+  <path d="M400 344 L400 372 L180 372 L180 400" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M490 344 L490 400" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M580 344 L580 372 L800 372 L800 400" fill="none" stroke="#00000045" stroke-width="1.2"/>
+  <path d="M180 402 l-5 -9 l10 0 z" fill="#00000070"/>
+  <path d="M490 402 l-5 -9 l10 0 z" fill="#00000070"/>
+  <path d="M800 402 l-5 -9 l10 0 z" fill="#00000070"/>
+
+  <rect x="60" y="404" width="240" height="44" rx="4" fill="#ffffff" stroke="#00000021"/>
+  <text x="180" y="424" font-size="12.5" text-anchor="middle" fill="#1a1a1a">absent</text>
+  <text x="180" y="440" font-size="11" text-anchor="middle" fill="#6e6e6e">newest page · nothing to say</text>
+
+  <rect x="370" y="404" width="240" height="44" rx="4" fill="#fb923c26" stroke="#00000021"/>
+  <text x="490" y="424" font-size="12.5" text-anchor="middle" fill="#1a1a1a">malformed</text>
+  <text x="490" y="440" font-size="11" text-anchor="middle" fill="#c2410c">never reaches the store</text>
+
+  <rect x="680" y="404" width="240" height="44" rx="4" fill="#22c55e1f" stroke="#00000021"/>
+  <text x="800" y="424" font-size="12.5" text-anchor="middle" fill="#1a1a1a">named</text>
+  <text x="800" y="440" font-size="11" text-anchor="middle" fill="#15803d">store opens at it (0043)</text>
+
+  <!-- WHAT THE PAGE SAYS -->
+  <line x1="32" y1="478" x2="948" y2="478" stroke="#00000021" stroke-width="1"/>
+  <text x="32" y="502" font-size="12" fill="#6e6e6e" letter-spacing="0.5">WHAT THE PAGE SAYS — FOUR MISSES THAT USED TO LOOK IDENTICAL</text>
+
+  <rect x="32" y="516" width="916" height="148" rx="4" fill="#fbfcfd" stroke="#00000021"/>
+
+  <text x="48" y="538" font-size="11" fill="#6e6e6e">the reader typed</text>
+  <text x="230" y="538" font-size="11" fill="#6e6e6e">before</text>
+  <text x="440" y="538" font-size="11" fill="#6e6e6e">now</text>
+
+  <line x1="48" y1="546" x2="932" y2="546" stroke="#00000021"/>
+
+  <text x="48" y="570" font-size="11.5" fill="#1a1a1a" font-family="ui-monospace, Menlo, Consolas, monospace">elevn</text>
+  <text x="230" y="570" font-size="11.5" fill="#a11b00">newest page, in silence</text>
+  <text x="440" y="570" font-size="11.5" fill="#15803d">“elevn” is not a revision — a whole number from 1 up</text>
+
+  <text x="48" y="592" font-size="11.5" fill="#1a1a1a" font-family="ui-monospace, Menlo, Consolas, monospace">900  (log ends at 12)</text>
+  <text x="230" y="592" font-size="11.5" fill="#c2410c">has not reached it, or not kept it</text>
+  <text x="440" y="592" font-size="11.5" fill="#15803d">nothing here is revision 900 — this log reaches revision 12</text>
+
+  <text x="48" y="614" font-size="11.5" fill="#1a1a1a" font-family="ui-monospace, Menlo, Consolas, monospace">9, then paged away</text>
+  <text x="230" y="614" font-size="11.5" fill="#6e6e6e">further along / further back</text>
+  <text x="440" y="614" font-size="11.5" fill="#6e6e6e">unchanged — and cannot claim an end it has not seen</text>
+
+  <text x="48" y="636" font-size="11.5" fill="#1a1a1a" font-family="ui-monospace, Menlo, Consolas, monospace">9, on an empty log</text>
+  <text x="230" y="636" font-size="11.5" fill="#c2410c">has not reached it, or not kept it</text>
+  <text x="440" y="636" font-size="11.5" fill="#15803d">this log has no accepted changes yet</text>
+
+  <line x1="424" y1="552" x2="424" y2="656" stroke="#00000021"/>
+  <line x1="220" y1="552" x2="220" y2="656" stroke="#00000021"/>
+</svg>

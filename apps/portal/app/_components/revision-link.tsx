@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import type { TreeId } from "@loom/runtime"
 
-import { revisionHref } from "@/lib/history-link"
+import { isReachableRevision, revisionHref } from "@/lib/history-link"
 
 /**
  * A revision, as somewhere to go.
@@ -16,6 +16,13 @@ import { revisionHref } from "@/lib/history-link"
  *
  * Monospaced everywhere, because the number is an identifier rather than a
  * quantity and reads as one beside the ids it sits next to.
+ *
+ * Total over every revision a tree can be at, including revision 0, which is not
+ * one an entry produced. That case only appears now that the preview names a
+ * tree's current revision — a freshly created tree is at 0 — and it is the
+ * component's job rather than each caller's: a rule three callers have to
+ * remember is a rule one of them will forget, and the failure is a link that
+ * lands on a page saying the log has not reached it.
  */
 export const RevisionLink = ({
   treeId,
@@ -23,8 +30,11 @@ export const RevisionLink = ({
 }: {
   readonly treeId: TreeId
   readonly revision: number
-}) => (
-  <Link href={revisionHref(treeId, revision)} className="font-mono">
-    revision {revision}
-  </Link>
-)
+}) =>
+  isReachableRevision(revision) ? (
+    <Link href={revisionHref(treeId, revision)} className="font-mono">
+      revision {revision}
+    </Link>
+  ) : (
+    <span className="font-mono">revision {revision}</span>
+  )
