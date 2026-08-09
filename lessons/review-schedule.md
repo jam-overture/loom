@@ -193,6 +193,38 @@ inversions.
 
 ---
 
+## Set I — two days after lesson 07
+
+Interleaved with 01–06. Half of these are discrimination questions — two things
+that look alike and are not — because that is the shape lesson 07's material
+fails in. Answer them in the order printed.
+
+1. Give the three counting rules — insert, remove, move — and then the one
+   sentence all three follow from. If you can give the rules and not the
+   sentence, you have the surface.
+2. `analyzeDelta` takes a tree and a delta. `assessStakes` takes an analysis and
+   a policy. Neither takes both. Say what that symmetry buys a person reading a
+   year of records, and name what it costs at runtime.
+3. Two failures, both `Result`s, both from the assessment step: a delta naming a
+   node that is not there, and a change the Gate refused. Say which is which in
+   the journal and what a monthly report loses by adding them. *(05)*
+4. Three functions walk a delta forwards, applying as they go. Name them, name
+   the lesson-03 property that forces it, and say what each would get wrong
+   walking backwards. *(03, 06)*
+5. A model may not name the nodes it inserts. Give the reason without the word
+   "trust". *(04)*
+6. Undoing a `remove` costs something undoing an `insert` does not. Say what, and
+   then say which field of `ChangeAnalysis` is the one a retention budget reads.
+   *(06)*
+7. Why is there no conditional node? *(02)*
+
+Question 4 is the spacing payoff and the one to do out loud. You have met that
+loop in three lessons and three files; if you can only name it in the file you
+met it in most recently, the interleaving has not happened yet and this set is
+the place to make it.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -209,3 +241,4 @@ you already know.
 | F | 1 month after Part I | | |
 | G | 2 days after L05 | | |
 | H | 2 days after L06 | | |
+| I | 2 days after L07 | | |
