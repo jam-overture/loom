@@ -125,4 +125,66 @@ describe("anthropicModelClient", () => {
 
     expect(completion.ok ? "" : completion.error.code).toBe("unavailable")
   })
+
+  describe("what a thrown status says about who must act", () => {
+    const thrownAt = (status: number): Error =>
+      Object.assign(new Error(`${status} something the API said`), { status })
+
+    const codeFor = async (thrown: Error): Promise<string> => {
+      const completion = await anthropicModelClient(stub(thrown)).complete(request)
+
+      return completion.ok ? "ok" : completion.error.code
+    }
+
+    it.each([
+      ["a malformed request", 400],
+      ["a model id that does not exist", 404],
+      ["a request past the size ceiling", 413],
+      ["an unprocessable body", 422],
+    ])("reports %s as rejected, because sending it again would fail the same way", async (_, status) => {
+      expect(await codeFor(thrownAt(status))).toBe("rejected")
+    })
+
+    it.each([
+      ["a key the API does not accept", 401],
+      ["an account that cannot pay", 402],
+      ["a key without permission for this model", 403],
+    ])("reports %s as misconfigured, because only an operator clears it", async (_, status) => {
+      expect(await codeFor(thrownAt(status))).toBe("misconfigured")
+    })
+
+    it.each([
+      ["a rate limit that outlasted the SDK's own retries", 429],
+      ["a request timeout", 408],
+      ["a conflict", 409],
+      ["an internal error", 500],
+      ["an overloaded API", 529],
+    ])("reports %s as unavailable, because waiting is the whole remedy", async (_, status) => {
+      expect(await codeFor(thrownAt(status))).toBe("unavailable")
+    })
+
+    it("keeps the message, so an operator still sees what the API said", async () => {
+      const completion = await anthropicModelClient(stub(thrownAt(401))).complete(request)
+
+      expect(completion.ok ? "" : completion.error.detail).toBe("401 something the API said")
+    })
+
+    it("falls back to unavailable for a status it does not recognise", async () => {
+      expect(await codeFor(thrownAt(302))).toBe("unavailable")
+    })
+
+    /**
+     * A status we cannot read is a status we cannot act on. Trusting a string
+     * here would let `"400"` decide that a transient failure is permanent.
+     */
+    it("does not read a status that is not a number", async () => {
+      const mistyped = Object.assign(new Error("weird"), { status: "400" })
+
+      expect(await codeFor(mistyped)).toBe("unavailable")
+    })
+
+    it("stays unavailable when nothing carried a status at all", async () => {
+      expect(await codeFor(new Error("socket hang up"))).toBe("unavailable")
+    })
+  })
 })

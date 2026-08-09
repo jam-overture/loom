@@ -23,9 +23,9 @@ import { portalRegistry } from "./registry"
  * actually reaches a subprocess.
  *
  * With no key, the portal runs and says so. That is deliberate: a seam whose
- * absence shows up as `interpreter-unavailable` in the UI is more honest than a
- * portal that fails to boot, and it keeps every read path — which is most of §5
- * — usable without a model.
+ * absence shows up as `interpreter-misconfigured` in the UI is more honest than
+ * a portal that fails to boot, and it keeps every read path — which is most of
+ * §5 — usable without a model.
  */
 
 const apiKey = process.env["LOOM_ANTHROPIC_API_KEY"] ?? process.env["ANTHROPIC_API_KEY"]
@@ -34,7 +34,7 @@ const unconfigured: ChangeInterpreter = {
   interpret: () =>
     Promise.resolve(
       err({
-        code: "interpreter-unavailable",
+        code: "interpreter-misconfigured",
         detail: "no model is configured; set LOOM_ANTHROPIC_API_KEY to compose changes",
       })
     ),
