@@ -6,10 +6,11 @@ import type { LoomTree } from "../tree/tree.js"
 
 import { assessChange, type ChangeAssessment } from "./assessment.js"
 import type { Disposition } from "./disposition.js"
-import type { Clock, EventSink, RuntimeEvent } from "./events.js"
+import type { Clock, EventSink } from "./events.js"
 import { gate } from "./gate.js"
 import type { EditIntent } from "./intent.js"
 import type { ChangeInterpreter, ChangeRepairer, InterpretationError } from "./interpreter.js"
+import { narrator } from "./narration.js"
 import type { PolicySource } from "./policy-source.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
@@ -69,8 +70,8 @@ export type CompositionOutcome =
       readonly error: TreeError
     }
 
-const emitter = (runtime: CompositionRuntime, tree: LoomTree) => (event: RuntimeEvent) =>
-  runtime.events.emit({ treeId: tree.treeId, occurredAt: runtime.clock.now(), event })
+const emitter = (runtime: CompositionRuntime, tree: LoomTree) =>
+  narrator(runtime.events, runtime.clock, tree.treeId)
 
 /**
  * Applies an already-assessed change. Shared by the auto-apply path and the
