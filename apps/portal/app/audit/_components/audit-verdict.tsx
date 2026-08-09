@@ -1,3 +1,6 @@
+import type { TreeId } from "@loom/runtime"
+
+import { RevisionLink } from "@/app/_components/revision-link"
 import {
   describeDifference,
   describeRecycling,
@@ -15,8 +18,19 @@ import { toneClasses } from "@/lib/outcome"
  *
  * A difference is a node, so it leads with the node's own name and id — the two
  * things needed to go and look at it — and says what is wrong underneath.
+ *
+ * Every revision this page names is a link (0043). An audit is the one page that
+ * is read *because* something is wrong, so the change it points at is the change
+ * a reviewer most needs to open — and it was, until now, the one page that named
+ * revisions and left the reader to find them.
  */
-export const AuditVerdict = ({ report }: { readonly report: AuditReport }) => (
+export const AuditVerdict = ({
+  report,
+  treeId,
+}: {
+  readonly report: AuditReport
+  readonly treeId: TreeId
+}) => (
   <div className="flex flex-col gap-4">
     <div className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-md border p-4">
       <div className="flex flex-wrap items-baseline gap-3">
@@ -26,6 +40,11 @@ export const AuditVerdict = ({ report }: { readonly report: AuditReport }) => (
         <p className="text-sm">{report.headline}</p>
       </div>
       <p className="text-ink-muted text-xs">{report.detail}</p>
+      {report.stoppedAt !== null && (
+        <p className="text-ink-muted text-xs">
+          The fold stopped at <RevisionLink treeId={treeId} revision={report.stoppedAt} />.
+        </p>
+      )}
     </div>
 
     {report.differences.length === 0 ? null : (
@@ -64,12 +83,20 @@ export const AuditVerdict = ({ report }: { readonly report: AuditReport }) => (
           different nodes without being able to tell.
         </p>
         <ul className="flex flex-col gap-2">
-          {report.recycled.map((found) => (
-            <li key={`${found.nodeId}-${found.returnedAt}`} className="text-xs">
-              <span className="text-ink-muted font-mono">{found.nodeId}</span>
-              <span className="text-ink-muted mt-1 block">{describeRecycling(found)}</span>
-            </li>
-          ))}
+          {report.recycled.map((found) => {
+            const account = describeRecycling(found)
+
+            return (
+              <li key={`${found.nodeId}-${found.returnedAt}`} className="text-xs">
+                <span className="text-ink-muted font-mono">{found.nodeId}</span>
+                <span className="text-ink-muted mt-1 block">
+                  {account.opening} <RevisionLink treeId={treeId} revision={account.leftAt} />
+                  {account.middle}{" "}
+                  <RevisionLink treeId={treeId} revision={account.returnedAt} />
+                </span>
+              </li>
+            )
+          })}
         </ul>
         {report.recyclingOmitted === 0 ? null : (
           <p className="text-ink-muted text-xs">

@@ -2,9 +2,19 @@ import { describe, expect, it } from "vitest"
 
 import type { TreeId } from "@loom/runtime"
 
-import { historyStart, parseRevisionParam, revisionAnchorId, revisionHref } from "./history-link"
+import {
+  describeStaleAnchor,
+  historyPageHref,
+  historyRead,
+  parseRevisionParam,
+  revisionAnchorId,
+  revisionHref,
+} from "./history-link"
 
 const TREE = "t_1" as TreeId
+
+/** A read with no parameters at all — the page somebody opens from the nav. */
+const NOTHING_ASKED = { older: undefined, newer: undefined, at: undefined } as const
 
 describe("revisionHref", () => {
   it("names the tree, the revision to open at, and the row to scroll to", () => {
@@ -47,13 +57,13 @@ describe("parseRevisionParam", () => {
   })
 })
 
-describe("historyStart", () => {
+describe("historyRead", () => {
   it("opens at the revision a link named", () => {
-    expect(historyStart(undefined, 4)).toEqual({ at: 4 })
+    expect(historyRead({ ...NOTHING_ASKED, at: 4 })).toEqual({ direction: "older", at: 4 })
   })
 
   it("takes the newest page when nothing named a position", () => {
-    expect(historyStart(undefined, undefined)).toEqual({})
+    expect(historyRead(NOTHING_ASKED)).toEqual({ direction: "older" })
   })
 
   /**
@@ -63,6 +73,88 @@ describe("historyStart", () => {
    * quietly ignore half of what it was asked.
    */
   it("prefers the step the reader took over the link that brought them", () => {
-    expect(historyStart("7", 4)).toEqual({ cursor: "7" })
+    expect(historyRead({ ...NOTHING_ASKED, older: "7", at: 4 })).toEqual({
+      direction: "older",
+      cursor: "7",
+    })
+  })
+
+  /**
+   * A cursor is only meaningful in the direction the page that issued it was
+   * read, so the step carries the direction rather than the page choosing one.
+   */
+  it("runs forward from the end a reader stepped off", () => {
+    expect(historyRead({ ...NOTHING_ASKED, newer: "7" })).toEqual({
+      direction: "newer",
+      cursor: "7",
+    })
+  })
+
+  it("leaves an anchor behind once a reader has stepped forward from it", () => {
+    expect(historyRead({ ...NOTHING_ASKED, newer: "7", at: 4 })).toEqual({
+      direction: "newer",
+      cursor: "7",
+    })
+  })
+
+  /**
+   * Nothing this page renders emits both, so a URL carrying them is hand-made
+   * and one of them has to lose. What must not happen is both reaching the
+   * store, which its own type is shaped to prevent.
+   */
+  it("sends one position when a hand-made URL carries two", () => {
+    expect(historyRead({ ...NOTHING_ASKED, older: "2", newer: "7" })).toEqual({
+      direction: "newer",
+      cursor: "7",
+    })
+  })
+})
+
+describe("historyPageHref", () => {
+  it("names the tree and the end being stepped off", () => {
+    expect(historyPageHref(TREE, { older: "4" })).toBe("/history?tree=t_1&older=4")
+    expect(historyPageHref(TREE, { newer: "4" })).toBe("/history?tree=t_1&newer=4")
+  })
+
+  it("names the tree alone for the newest page", () => {
+    expect(historyPageHref(TREE)).toBe("/history?tree=t_1")
+  })
+
+  /** A cursor is the store's word and may hold anything, including a separator. */
+  it("escapes a cursor rather than pasting it into a query string", () => {
+    expect(historyPageHref(TREE, { older: "4&at=1" })).toBe("/history?tree=t_1&older=4%26at%3D1")
+  })
+
+  /** `historyRead` reads back what this writes, or paging goes nowhere. */
+  it("writes the parameters the read resolves", () => {
+    expect(historyRead({ ...NOTHING_ASKED, older: "4" })).toEqual({
+      direction: "older",
+      cursor: "4",
+    })
+    expect(historyPageHref(TREE, { older: "4" })).toContain("older=4")
+  })
+})
+
+describe("describeStaleAnchor", () => {
+  /** A link that aged: the log never reached the revision, or no longer keeps it. */
+  it("says a log does not hold the revision when nobody has paged", () => {
+    expect(describeStaleAnchor(9, { older: undefined, newer: undefined })).toBe(
+      "Nothing on this page is revision 9 — this log has not reached it, or has not kept it."
+    )
+  })
+
+  /**
+   * A reader who paged has left the anchor behind, and which way they went is
+   * the difference between "it is ahead of you" and "it is behind you". The same
+   * sentence for both would send half of them the wrong way.
+   */
+  it("says which way the anchor went once a reader has paged", () => {
+    expect(describeStaleAnchor(9, { older: "4", newer: undefined })).toContain("further along")
+    expect(describeStaleAnchor(9, { older: undefined, newer: "4" })).toContain("further back")
+  })
+
+  it("names the revision that was asked for in every case", () => {
+    expect(describeStaleAnchor(9, { older: "4", newer: undefined })).toContain("revision 9")
+    expect(describeStaleAnchor(9, { older: undefined, newer: "4" })).toContain("revision 9")
   })
 })
