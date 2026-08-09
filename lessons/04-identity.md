@@ -610,7 +610,7 @@ ones that quietly break your model later.
 - [`decisions/0028`](../decisions/0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) — where the join key earns its keep
 - [`decisions/0038`](../decisions/0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) — a return is not a reuse, and where that is enforced
 - [`src/tree/navigation.test.ts`](../src/tree/navigation.test.ts) — the tests are the specification
-- Next: 05 — Purity at the seams *(not yet written)*
+- Next: [05 — Purity at the seams](05-purity-at-the-seams.md)
 
 ---
 

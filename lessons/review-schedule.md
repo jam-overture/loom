@@ -129,6 +129,38 @@ you can now write is the actual measure of the course.
 
 ---
 
+## Set G — two days after lesson 05
+
+Sets are listed by lesson, not by date. At a normal pace this one falls between
+E and F on the calendar despite sitting after both on the page — go by the
+heading, not by the order.
+
+Interleaved with 01–04. Note that this set is not in lesson order and is not
+meant to be: answering a Part II question, then a lesson 02 question, then a
+question that needs both is the discrimination practice. Working through it
+lesson by lesson would be easier and worth less.
+
+1. `CompositionRuntime` has five required fields. State the property that puts
+   something on that list, then name one thing the pipeline calls that fails the
+   test — and say why including it anyway would cost something.
+2. There is no rollback anywhere in `applyDelta`. Explain why atomicity is free,
+   and name the property from *(03)* you are leaning on to say so.
+3. Why is `slot` a distinct node kind? *(02)*
+4. Loom throws deliberately in two places. Give the rule that distinguishes them,
+   not the two places.
+5. A stale reference under paths resolves; a stale reference under ids does not.
+   Which is more expensive, and why is it the one that looks cheaper? *(04)*
+6. A model may not name the nodes it inserts. Give that reason first, then say
+   what the `IdFactory` being an injected *seam* adds that the rule alone does
+   not. *(04)*
+
+Question 6 is the one to be honest with yourself about. The two halves are
+different arguments — one is about what a proposal can express, the other about
+what a replay can reproduce — and running them together is the most common way
+this pair gets half-learned.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -143,3 +175,4 @@ you already know.
 | D | 2 days after L04 | | |
 | E | 1 week after Part I | | |
 | F | 1 month after Part I | | |
+| G | 2 days after L05 | | |
