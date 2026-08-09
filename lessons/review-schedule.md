@@ -59,7 +59,7 @@ Interleaved with 01–02.
 
 ## Set D — two days after lesson 04
 
-Interleaved with 01–03. Six questions from four lessons; the mixing is the
+Interleaved with 01–03. Eight questions from four lessons; the mixing is the
 exercise, not an accident of scheduling.
 
 1. Which of the four operations mints a node id, and why exactly that set?
@@ -72,6 +72,13 @@ exercise, not an accident of scheduling.
 5. Give the reason a model may not name the nodes it inserts, without using the
    word "trust".
 6. What single property does the rest of the system exist to protect? *(01)*
+7. A delta removes a card and then inserts something at the card's id. Give the
+   two cases and what happens in each. Then say what "the same node" has to
+   mean for that rule to be checkable at all.
+8. The same two operations, split across two deltas, are accepted. Say why —
+   and name what a `LoomTree` would have to carry for them not to be. Is that
+   a gap or a trade? Argue the side you did *not* land on first. *(03 for why
+   the delta boundary is the unit that matters)*
 
 ---
 
@@ -95,6 +102,9 @@ aspirational: one week after you finish 04, do this one.
 6. Write the fixture tree from memory, then a delta that moves the card into the
    header, then say what its inverse would have to contain — including which
    ids appear in it, and why they are the ones they are.
+7. Loom does not have the rule "an id, once retired, may never appear again."
+   Say what it would break, and derive that breakage from question 6's answer
+   rather than from memory of lesson 04.
 
 Question 6 reaches into lesson 06, which you have not read. Attempt it anyway —
 generation before instruction is the point, and it will make lesson 06 land
