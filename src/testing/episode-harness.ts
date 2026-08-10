@@ -3,7 +3,7 @@ import { ok, type Result } from "../result.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { ChangeRepairer, InterpretationError } from "../runtime/interpreter.js"
 import { fixedPolicy } from "../runtime/policy-source.js"
-import { defaultGatePolicy } from "../runtime/policy.js"
+import { defaultGatePolicy, type GatePolicy } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { memoryTreeStore } from "../store/memory.js"
 import { episodesOf, type EpisodeFold } from "../telemetry/episode.js"
@@ -53,6 +53,12 @@ export const harnessWith = async (options: {
   ) => Result<ProposedChange, InterpretationError>
   readonly repairer?: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => ChangeRepairer
   readonly baseRevision?: number
+  /**
+   * The Gate that judges this run. Defaults to the shipped one, which is what
+   * most tests want; a test about attribution needs two hosts that differ, and
+   * a policy is the only thing a disposition names.
+   */
+  readonly policy?: GatePolicy
 }): Promise<EpisodeHarness> => {
   const { tree } = sampleTree()
   const ids = sequentialIdFactory("h")
@@ -74,7 +80,7 @@ export const harnessWith = async (options: {
     holds: memoryHoldStore(),
     runtime: {
       interpreter: scriptedInterpreter(options.script(tree, ids, intent)),
-      policySource: fixedPolicy(defaultGatePolicy),
+      policySource: fixedPolicy(options.policy ?? defaultGatePolicy),
       events: collector.sink,
       clock: fixedClock(),
       idFactory: ids,

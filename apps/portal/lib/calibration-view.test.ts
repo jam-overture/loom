@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 
+import { UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
 import type { CalibrationScore } from "@loom/runtime/telemetry"
 
-import { formatRange, formatRate, NO_VALUE, readGap } from "./calibration-view"
+import { describePolicy, formatRange, formatRate, NO_VALUE, readGap } from "./calibration-view"
 
 const scoreWith = (gap: number | null): CalibrationScore => ({
   judged: gap === null ? 0 : 4,
@@ -52,5 +53,22 @@ describe("readGap", () => {
   it("distinguishes claiming too much from claiming too little", () => {
     expect(readGap(scoreWith(0.3)).tone).toBe("rejected")
     expect(readGap(scoreWith(-0.3)).tone).toBe("awaiting")
+  })
+})
+
+describe("describePolicy", () => {
+  it("shows a host's own policy name, because that is what it can look up", () => {
+    expect(describePolicy("checkout-strict")).toBe("checkout-strict")
+  })
+
+  /**
+   * Two unknowns and two different next moves: one is answered by widening the
+   * window, the other never will be, because the record was written before the
+   * Gate wrote down which policy made it.
+   */
+  it("tells a judgment off the end of the page apart from one that named no policy", () => {
+    expect(describePolicy(null)).toBe("judged before this page begins")
+    expect(describePolicy(UNATTRIBUTED_POLICY_ID)).toBe("judged before policies were named")
+    expect(describePolicy(null)).not.toBe(describePolicy(UNATTRIBUTED_POLICY_ID))
   })
 })

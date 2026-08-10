@@ -1,3 +1,4 @@
+import { UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
 import type { CalibrationScore, UnjudgedReason } from "@loom/runtime/telemetry"
 
 import type { OutcomeTone } from "./outcome"
@@ -64,6 +65,21 @@ export const readGap = (score: CalibrationScore): GapReading => {
         label: "delivered more than it claimed",
         detail: "Changes survived more often than the model said they would.",
       }
+}
+
+/**
+ * Which gate judged a set of claims, in words a reader can act on.
+ *
+ * The two unknowns stay apart, because the reader's next move differs. A page
+ * that never saw the judgment is fixed by widening the window; a judgment that
+ * never named its policy is a record written before the Gate wrote one down, and
+ * no amount of scrolling will produce it.
+ */
+export const describePolicy = (policyId: string | null): string => {
+  if (policyId === null) return "judged before this page begins"
+  if (policyId === UNATTRIBUTED_POLICY_ID) return "judged before policies were named"
+
+  return policyId
 }
 
 export const UNJUDGED_LABELS: Readonly<Record<UnjudgedReason, string>> = {

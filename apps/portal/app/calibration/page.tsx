@@ -10,6 +10,7 @@ import { storeIsDurable } from "@/lib/store"
 
 import { BucketRow } from "./_components/bucket-row"
 import { CalibrationSummary } from "./_components/calibration-summary"
+import { PolicyBreakdown } from "./_components/policy-breakdown"
 
 /**
  * Whether a 0.9 is actually a 0.9.
@@ -70,6 +71,8 @@ const CalibrationPage = async ({
       </p>
 
       <CalibrationSummary report={report} />
+
+      <PolicyBreakdown report={report} />
 
       <table className="w-full border-collapse">
         <thead>

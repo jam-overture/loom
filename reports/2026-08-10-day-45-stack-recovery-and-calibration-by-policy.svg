@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 780" width="960" height="780" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8a8a"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c0392b"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="780" fill="#ffffff"/>
+
+  <!-- ================= PANEL A ================= -->
+  <text x="28" y="36" font-size="17" fill="#1a1a1a">A stack lands top-down. This one landed bottom-up.</text>
+  <text x="28" y="56" font-size="12" fill="#6b6b6b">9 August, 23:18–23:50 UTC. Thirteen PRs merged in the order they were created. Each stacked PR merges its head into its base branch.</text>
+
+  <!-- time axis -->
+  <line x1="196" y1="82" x2="660" y2="82" stroke="#c9c9c9" stroke-width="1"/>
+  <text x="196" y="76" font-size="10" fill="#8a8a8a">23:20</text>
+  <text x="638" y="76" font-size="10" fill="#8a8a8a">23:50</text>
+  <text x="668" y="86" font-size="10" fill="#8a8a8a">merged →</text>
+
+  <!-- the moment main closes -->
+  <line x1="232" y1="92" x2="232" y2="398" stroke="#c0392b" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="240" y="110" font-size="11" fill="#c0392b">main takes day 36 at 23:20 —</text>
+  <text x="240" y="124" font-size="11" fill="#c0392b">every merge to the right of this line flows into a branch, never into main</text>
+
+  <!-- branch rows: label, line, merge arrow down to the branch below -->
+  <!-- day-44 -->
+  <text x="186" y="152" font-size="12" fill="#1a1a1a" text-anchor="end">day-44</text>
+  <line x1="196" y1="148" x2="612" y2="148" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="612" y1="148" x2="612" y2="176" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="620" y="164" font-size="10" fill="#8a8a8a">#62</text>
+
+  <!-- day-43 -->
+  <text x="186" y="184" font-size="12" fill="#1a1a1a" text-anchor="end">day-43</text>
+  <line x1="196" y1="180" x2="572" y2="180" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="572" y1="180" x2="572" y2="208" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="580" y="196" font-size="10" fill="#8a8a8a">#60</text>
+
+  <!-- day-42 -->
+  <text x="186" y="216" font-size="12" fill="#1a1a1a" text-anchor="end">day-42</text>
+  <line x1="196" y1="212" x2="532" y2="212" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="532" y1="212" x2="532" y2="240" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="540" y="228" font-size="10" fill="#8a8a8a">#59</text>
+
+  <!-- day-41 -->
+  <text x="186" y="248" font-size="12" fill="#1a1a1a" text-anchor="end">day-41</text>
+  <line x1="196" y1="244" x2="492" y2="244" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="492" y1="244" x2="492" y2="272" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="500" y="260" font-size="10" fill="#8a8a8a">#57</text>
+
+  <!-- day-40 -->
+  <text x="186" y="280" font-size="12" fill="#1a1a1a" text-anchor="end">day-40</text>
+  <line x1="196" y1="276" x2="452" y2="276" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="452" y1="276" x2="452" y2="304" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="460" y="292" font-size="10" fill="#8a8a8a">#56</text>
+
+  <!-- day-39 -->
+  <text x="186" y="312" font-size="12" fill="#1a1a1a" text-anchor="end">day-39</text>
+  <line x1="196" y1="308" x2="412" y2="308" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="412" y1="308" x2="412" y2="336" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="420" y="324" font-size="10" fill="#8a8a8a">#54</text>
+
+  <!-- day-38 -->
+  <text x="186" y="344" font-size="12" fill="#1a1a1a" text-anchor="end">day-38</text>
+  <line x1="196" y1="340" x2="340" y2="340" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="340" y1="340" x2="340" y2="368" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="348" y="356" font-size="10" fill="#8a8a8a">#53</text>
+
+  <!-- day-37 -->
+  <text x="186" y="376" font-size="12" fill="#1a1a1a" text-anchor="end">day-37</text>
+  <line x1="196" y1="372" x2="280" y2="372" stroke="#8a8a8a" stroke-width="2"/>
+  <line x1="280" y1="372" x2="280" y2="400" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="288" y="388" font-size="10" fill="#8a8a8a">#51</text>
+
+  <!-- day-36 -->
+  <text x="186" y="408" font-size="12" fill="#1a1a1a" text-anchor="end">day-36</text>
+  <line x1="196" y1="404" x2="232" y2="404" stroke="#c0392b" stroke-width="2"/>
+  <line x1="232" y1="404" x2="232" y2="436" stroke="#c0392b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="240" y="424" font-size="10" fill="#c0392b">#50 — first</text>
+
+  <!-- main -->
+  <text x="186" y="444" font-size="12" fill="#1a1a1a" text-anchor="end" font-weight="600">main</text>
+  <line x1="196" y1="440" x2="232" y2="440" stroke="#1a1a1a" stroke-width="2.5"/>
+  <line x1="232" y1="440" x2="700" y2="440" stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="2 4"/>
+  <text x="708" y="444" font-size="11" fill="#6b6b6b">unchanged for five days</text>
+
+  <text x="28" y="478" font-size="12" fill="#1a1a1a">Nothing was lost: the stack is linear, so <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">day-44</tspan> already held every commit from day 37 on. PR #63 is main with that branch merged in.</text>
+
+  <line x1="28" y1="502" x2="932" y2="502" stroke="#e2e2e2" stroke-width="1"/>
+
+  <!-- ================= PANEL B ================= -->
+  <text x="28" y="534" font-size="17" fill="#1a1a1a">A survival rate is not a property of the model.</text>
+  <text x="28" y="554" font-size="12" fill="#6b6b6b">The same delta, proposed at the same confidence, run twice through the real Gate under two policies. Bar = survived. Tick = mean claim.</text>
+
+  <!-- scale -->
+  <line x1="300" y1="576" x2="600" y2="576" stroke="#c9c9c9" stroke-width="1"/>
+  <text x="300" y="570" font-size="10" fill="#8a8a8a">0%</text>
+  <text x="440" y="570" font-size="10" fill="#8a8a8a">50%</text>
+  <text x="580" y="570" font-size="10" fill="#8a8a8a">100%</text>
+
+  <!-- pooled -->
+  <text x="290" y="606" font-size="12" fill="#1a1a1a" text-anchor="end" font-weight="600">pooled</text>
+  <rect x="300" y="592" width="300" height="18" fill="#f2f2f2"/>
+  <rect x="300" y="592" width="150" height="18" fill="#b8b8b8"/>
+  <rect x="569" y="588" width="2" height="26" fill="#1a1a1a"/>
+  <text x="620" y="606" font-size="12" fill="#c0392b">gap +0.40 — “claimed more than it delivered”</text>
+  <text x="620" y="620" font-size="10" fill="#8a8a8a">a verdict on neither gate, that moves when a host edits a policy</text>
+
+  <!-- generous -->
+  <text x="290" y="662" fill="#1a1a1a" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">generous</text>
+  <rect x="300" y="648" width="300" height="18" fill="#f2f2f2"/>
+  <rect x="300" y="648" width="300" height="18" fill="#2d7a4f"/>
+  <rect x="569" y="644" width="2" height="26" fill="#1a1a1a"/>
+  <text x="620" y="662" font-size="12" fill="#2d7a4f">gap −0.10 — “on the mark”</text>
+
+  <!-- strict -->
+  <text x="290" y="706" fill="#1a1a1a" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">strict</text>
+  <rect x="300" y="692" width="300" height="18" fill="#f2f2f2"/>
+  <rect x="569" y="688" width="2" height="26" fill="#1a1a1a"/>
+  <text x="620" y="706" font-size="12" fill="#2b5f9e">gap +0.90 — refused outright</text>
+  <text x="304" y="705" font-size="10" fill="#8a8a8a">0% survived</text>
+
+  <text x="28" y="750" font-size="12" fill="#1a1a1a">0047: a judged claim is attributed to the policy named on its <tspan font-style="italic">disposition</tspan> — never to the intent’s last resolution, which may name a gate that did not decide it.</text>
+  <text x="28" y="768" font-size="11" fill="#6b6b6b">The split is a partition: every judged proposal lands in exactly one segment, so the segments sum to the whole.</text>
+</svg>
