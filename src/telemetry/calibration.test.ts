@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 
+import { UNATTRIBUTED_POLICY_ID } from "../runtime/disposition.js"
+import { defaultGatePolicy, type GatePolicy } from "../runtime/policy.js"
 import { harnessWith, proposalScript } from "../testing/episode-harness.js"
 import { commitIntent, discardHeld, revertRevision } from "../write/index.js"
 
@@ -24,10 +26,60 @@ const runAt = async (
   return harness.fold()
 }
 
+const runUnder = async (confidence: number, policy: GatePolicy): Promise<EpisodeFold> => {
+  const harness = await harnessWith({ script: proposalScript(confidence), policy })
+  await commitIntent(harness.path, harness.intent)
+
+  return harness.fold()
+}
+
+/** Two hosts that disagree about what a 0.9 is worth. */
+const GENEROUS: GatePolicy = { ...defaultGatePolicy, policyId: "generous" }
+const STRICT: GatePolicy = {
+  ...defaultGatePolicy,
+  policyId: "strict",
+  minimumConfidence: 0.99,
+  confidenceFloor: 0.95,
+}
+
 const merged = (...folds: readonly EpisodeFold[]): EpisodeFold => ({
   episodes: folds.flatMap((fold) => fold.episodes),
   unattributed: folds.flatMap((fold) => fold.unattributed),
 })
+
+/**
+ * Rewrites the dispositions a real run produced. Used only to reach the two
+ * states a fixture cannot be driven into — a window that opened after the
+ * judgment, and a record written before the Gate named the policy that made it.
+ */
+const withDispositions = (
+  fold: EpisodeFold,
+  rewrite: (proposal: ProposalEpisode) => ProposalEpisode
+): EpisodeFold => ({
+  ...fold,
+  episodes: fold.episodes.map((episode) => ({
+    ...episode,
+    proposals: episode.proposals.map(rewrite),
+  })),
+})
+
+const forgetDisposition = (proposal: ProposalEpisode): ProposalEpisode => {
+  const { disposition: _unseen, ...rest } = proposal
+
+  return rest
+}
+
+const judgedBy = (policyId: string) => (proposal: ProposalEpisode): ProposalEpisode =>
+  proposal.disposition === undefined
+    ? proposal
+    : { ...proposal, disposition: { ...proposal.disposition, policyId } }
+
+const segmentFor = (report: CalibrationReport, policyId: string | null) => {
+  const segment = report.byPolicy.find((candidate) => candidate.policyId === policyId)
+  if (!segment) throw new Error(`no segment for ${String(policyId)}`)
+
+  return segment
+}
 
 const onlyProposal = (fold: EpisodeFold): ProposalEpisode => {
   const proposal = fold.episodes[0]?.proposals[0]
@@ -197,5 +249,131 @@ describe("calibrationOf", () => {
     })
 
     expect(report.unattributed).toBe(1)
+  })
+})
+
+/**
+ * The reason this split exists, in one fixture: the same claim, at the same
+ * confidence, judged by two hosts that disagree.
+ *
+ * `observedRate` is not a property of the model. Survival is what the Gate
+ * allowed, so a report that pools two policies produces a number that describes
+ * neither of them — and it moves when a host edits its configuration, which is
+ * exactly when a reader would conclude the model had got worse.
+ */
+describe("calibrationOf, by the policy that judged", () => {
+  it("splits one pooled rate into the two gates that produced it", async () => {
+    const report = calibrationOf(merged(await runUnder(0.9, GENEROUS), await runUnder(0.9, STRICT)))
+
+    /** Pooled, the model looks half right and badly overconfident. */
+    expect(report.overall.judged).toBe(2)
+    expect(report.overall.observedRate).toBe(0.5)
+    expect(report.overall.gap).toBeCloseTo(0.4)
+
+    /** Split, neither gate saw anything of the sort. */
+    expect(segmentFor(report, "generous").overall.observedRate).toBe(1)
+    expect(segmentFor(report, "generous").overall.gap).toBeCloseTo(-0.1)
+    expect(segmentFor(report, "strict").overall.observedRate).toBe(0)
+    expect(segmentFor(report, "strict").overall.gap).toBeCloseTo(0.9)
+  })
+
+  it("partitions every judged claim, so the segments sum to the whole", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, GENEROUS),
+        await runUnder(0.2, GENEROUS),
+        await runUnder(0.9, STRICT)
+      )
+    )
+
+    const judged = report.byPolicy.reduce((total, segment) => total + segment.overall.judged, 0)
+    const survived = report.byPolicy.reduce((total, segment) => total + segment.overall.survived, 0)
+
+    expect(judged).toBe(report.overall.judged)
+    expect(survived).toBe(report.overall.survived)
+  })
+
+  it("bands a claim inside its segment the same way the whole report bands it", async () => {
+    const report = calibrationOf(merged(await runUnder(0.9, GENEROUS), await runUnder(0.2, GENEROUS)))
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.buckets).toHaveLength(10)
+    expect(segment.buckets[9]?.judged).toBe(1)
+    expect(segment.buckets[2]?.judged).toBe(1)
+    expect(segment.buckets[9]?.observedRate).toBe(1)
+    expect(segment.buckets[2]?.observedRate).toBe(0)
+  })
+
+  it("names one segment when one policy judged everything", async () => {
+    const report = calibrationOf(merged(await runUnder(0.9, GENEROUS), await runUnder(0.2, GENEROUS)))
+
+    expect(report.byPolicy).toHaveLength(1)
+    expect(report.byPolicy[0]?.policyId).toBe("generous")
+    expect(report.byPolicy[0]?.overall).toEqual(report.overall)
+  })
+
+  it("orders segments by name, with the unrecorded one last", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, STRICT),
+        await runUnder(0.9, GENEROUS),
+        withDispositions(await runUnder(0.9, GENEROUS), forgetDisposition)
+      )
+    )
+
+    expect(report.byPolicy.map((segment) => segment.policyId)).toEqual([
+      "generous",
+      "strict",
+      null,
+    ])
+  })
+
+  /**
+   * Two different unknowns, kept apart. `null` is a gap in the reader — the page
+   * began after the judgment. `UNATTRIBUTED_POLICY_ID` is a gap in the record: a
+   * disposition really was written before the Gate named the policy that made
+   * it. Merging them would let a fixed record keep reading as a short page.
+   */
+  it("keeps a judgment it never saw apart from one that never named its policy", async () => {
+    const report = calibrationOf(
+      merged(
+        withDispositions(await runUnder(0.9, GENEROUS), forgetDisposition),
+        withDispositions(await runUnder(0.9, GENEROUS), judgedBy(UNATTRIBUTED_POLICY_ID))
+      )
+    )
+
+    expect(report.byPolicy).toHaveLength(2)
+    expect(segmentFor(report, null).overall.judged).toBe(1)
+    expect(segmentFor(report, UNATTRIBUTED_POLICY_ID).overall.judged).toBe(1)
+  })
+
+  /**
+   * A held proposal carries a disposition and no verdict. Opening a segment for
+   * it would put a policy on the page with nothing under it — a row claiming a
+   * rate of nothing rather than an absence.
+   */
+  it("opens no segment for a policy that has judged nothing yet", async () => {
+    const report = calibrationOf(await runUnder(0.5, GENEROUS))
+
+    expect(report.unjudged["awaiting-answer"]).toBe(1)
+    expect(report.byPolicy).toEqual([])
+  })
+
+  /** An undo is not the model's claim (0032), so it belongs to no policy's score. */
+  it("leaves a change the runtime authored out of every segment", async () => {
+    const harness = await harnessWith({ script: proposalScript(0.9), policy: GENEROUS })
+    await commitIntent(harness.path, harness.intent)
+    await revertRevision(harness.path, {
+      treeId: harness.tree.treeId,
+      revision: 1,
+      seed: harness.tree,
+      origin: "user-instruction",
+    })
+
+    const report = calibrationOf(await harness.fold())
+
+    expect(report.runtimeAuthored).toBe(1)
+    expect(report.byPolicy).toHaveLength(1)
+    expect(segmentFor(report, "generous").overall.judged).toBe(1)
   })
 })

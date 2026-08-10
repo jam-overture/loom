@@ -62,9 +62,44 @@ export type ConfidenceBucket = CalibrationScore & {
   readonly upper: number
 }
 
+/**
+ * A calibration reading confined to the claims one policy judged.
+ *
+ * The overall report answers "is a 0.9 actually a 0.9". It can only answer that
+ * for one gate at a time, because `observedRate` is not a property of the model
+ * alone: survival is what the Gate and the human between them allowed, and a
+ * host that tightened `minimumConfidence` moves the rate without the model
+ * having changed at all. Pooling two policies produces a number that moved for a
+ * reason the report cannot name.
+ */
+export type PolicyCalibration = {
+  /**
+   * Which policy judged these claims, as its own dispositions named it (0033).
+   *
+   * `null` means this window never saw the judgment — the page opened after the
+   * disposition and before the commit, say. Distinct from the recorded string
+   * `UNATTRIBUTED_POLICY_ID`, which is a judgment that really was made before the
+   * Gate wrote down which policy made it. One is a gap in the reader, the other
+   * is a gap in the record, and merging them would let a fixed record look like a
+   * short page.
+   */
+  readonly policyId: string | null
+  readonly overall: CalibrationScore
+  readonly buckets: readonly ConfidenceBucket[]
+}
+
 export type CalibrationReport = {
   readonly overall: CalibrationScore
   readonly buckets: readonly ConfidenceBucket[]
+  /**
+   * The same claims again, split by the policy that judged each one. Every
+   * judged proposal appears in exactly one segment, so the segments sum to
+   * `overall` — the split is a partition, not a sample.
+   *
+   * Ordered by policy name, with the unrecorded segment last, so a reader
+   * comparing two windows is comparing rows in the same order.
+   */
+  readonly byPolicy: readonly PolicyCalibration[]
   /** Proposals that produced no verdict, by why. Never in a denominator. */
   readonly unjudged: Readonly<Record<UnjudgedReason, number>>
   /**
@@ -118,25 +153,77 @@ const scoreOf = (tally: Tally): CalibrationScore => {
   }
 }
 
-export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
-  const tallies = new Map<number, Tally>()
-  const unjudged: Record<UnjudgedReason, number> = { "awaiting-answer": 0, failed: 0, unsettled: 0 }
-  const overall: Tally = { judged: 0, survived: 0, confidenceSum: 0 }
+/**
+ * A whole and its bands. The overall report and every policy segment are the
+ * same computation over a different set of claims, so they are the same code —
+ * a segment that scored itself differently from the whole would be a difference
+ * nobody chose and no test would think to look for.
+ */
+type Bands = { readonly overall: Tally; readonly byBucket: Map<number, Tally> }
 
-  const tallyFor = (index: number): Tally => {
-    const existing = tallies.get(index)
+const emptyTally = (): Tally => ({ judged: 0, survived: 0, confidenceSum: 0 })
+
+const emptyBands = (): Bands => ({ overall: emptyTally(), byBucket: new Map() })
+
+const bucketTally = (bands: Bands, index: number): Tally => {
+  const existing = bands.byBucket.get(index)
+  if (existing) return existing
+
+  const fresh = emptyTally()
+  bands.byBucket.set(index, fresh)
+
+  return fresh
+}
+
+const addTo = (tally: Tally, confidence: number, verdict: CalibrationVerdict): void => {
+  tally.judged += 1
+  tally.confidenceSum += confidence
+  if (verdict === "survived") tally.survived += 1
+}
+
+const record = (bands: Bands, confidence: number, verdict: CalibrationVerdict): void => {
+  addTo(bands.overall, confidence, verdict)
+  addTo(bucketTally(bands, bucketIndexOf(confidence)), confidence, verdict)
+}
+
+const bucketsOf = (bands: Bands): readonly ConfidenceBucket[] =>
+  BUCKET_LOWER_BOUNDS.map((lower, index) => ({
+    lower,
+    upper: (index + 1) / CALIBRATION_BUCKET_COUNT,
+    ...scoreOf(bands.byBucket.get(index) ?? emptyTally()),
+  }))
+
+/**
+ * Which policy judged this claim, taken from the disposition and from nowhere
+ * else. Its intent also carries a `policyId`, and it is the wrong answer: that
+ * one is the *last* resolution the window saw, so on a proposal that was held
+ * under one policy and confirmed under a narrower one it names the gate that did
+ * not decide this verdict.
+ */
+const judgingPolicyOf = (proposal: ProposalEpisode): string | null =>
+  proposal.disposition?.policyId ?? null
+
+/** By name, with the unrecorded segment last rather than sorted as a value. */
+const byPolicyName = (left: PolicyCalibration, right: PolicyCalibration): number => {
+  if (left.policyId === null) return right.policyId === null ? 0 : 1
+  if (right.policyId === null) return -1
+
+  return left.policyId < right.policyId ? -1 : left.policyId > right.policyId ? 1 : 0
+}
+
+export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
+  const unjudged: Record<UnjudgedReason, number> = { "awaiting-answer": 0, failed: 0, unsettled: 0 }
+  const whole = emptyBands()
+  const byPolicy = new Map<string | null, Bands>()
+
+  const policyBands = (policyId: string | null): Bands => {
+    const existing = byPolicy.get(policyId)
     if (existing) return existing
 
-    const fresh: Tally = { judged: 0, survived: 0, confidenceSum: 0 }
-    tallies.set(index, fresh)
+    const fresh = emptyBands()
+    byPolicy.set(policyId, fresh)
 
     return fresh
-  }
-
-  const count = (tally: Tally, proposal: ProposalEpisode, verdict: CalibrationVerdict): void => {
-    tally.judged += 1
-    tally.confidenceSum += proposal.provenance.confidence
-    if (verdict === "survived") tally.survived += 1
   }
 
   let runtimeAuthored = 0
@@ -155,18 +242,20 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
         continue
       }
 
-      count(tallyFor(bucketIndexOf(proposal.provenance.confidence)), proposal, verdict)
-      count(overall, proposal, verdict)
+      const { confidence } = proposal.provenance
+      record(whole, confidence, verdict)
+      record(policyBands(judgingPolicyOf(proposal)), confidence, verdict)
     }
   }
 
   return {
-    overall: scoreOf(overall),
-    buckets: BUCKET_LOWER_BOUNDS.map((lower, index) => ({
-      lower,
-      upper: (index + 1) / CALIBRATION_BUCKET_COUNT,
-      ...scoreOf(tallies.get(index) ?? { judged: 0, survived: 0, confidenceSum: 0 }),
-    })),
+    overall: scoreOf(whole.overall),
+    buckets: bucketsOf(whole),
+    byPolicy: Array.from(byPolicy, ([policyId, bands]) => ({
+      policyId,
+      overall: scoreOf(bands.overall),
+      buckets: bucketsOf(bands),
+    })).sort(byPolicyName),
     unjudged,
     unattributed: fold.unattributed.length,
     runtimeAuthored,
