@@ -86,6 +86,24 @@ export type PolicyCalibration = {
   readonly policyId: string | null
   readonly overall: CalibrationScore
   readonly buckets: readonly ConfidenceBucket[]
+  /**
+   * The distinct fingerprints the judgments in this segment named, sorted.
+   *
+   * A name is host-declared, and 0033 asked hosts to rename a policy they edit.
+   * More than one fingerprint under one name means that did not happen, and this
+   * row is pooling gates that differ by more than what they are called — the same
+   * error the segments exist to correct, one level down. `rulesetContinuityOf`
+   * reads this list; the list itself is carried so a host can match a digest to
+   * the configuration it is looking at.
+   */
+  readonly fingerprints: readonly string[]
+  /**
+   * Judged claims in this segment whose disposition named no fingerprint. Kept
+   * beside the list rather than folded into it: one fingerprint plus twelve
+   * unfingerprinted judgments is not a segment shown to be constant, and a list
+   * of length one would say it was.
+   */
+  readonly unfingerprinted: number
 }
 
 export type CalibrationReport = {
@@ -211,16 +229,23 @@ const byPolicyName = (left: PolicyCalibration, right: PolicyCalibration): number
   return left.policyId < right.policyId ? -1 : left.policyId > right.policyId ? 1 : 0
 }
 
+/** One gate's claims: how they scored, and which rulesets did the scoring. */
+type Segment = {
+  readonly bands: Bands
+  readonly fingerprints: Set<string>
+  unfingerprinted: number
+}
+
 export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
   const unjudged: Record<UnjudgedReason, number> = { "awaiting-answer": 0, failed: 0, unsettled: 0 }
   const whole = emptyBands()
-  const byPolicy = new Map<string | null, Bands>()
+  const byPolicy = new Map<string | null, Segment>()
 
-  const policyBands = (policyId: string | null): Bands => {
+  const segmentFor = (policyId: string | null): Segment => {
     const existing = byPolicy.get(policyId)
     if (existing) return existing
 
-    const fresh = emptyBands()
+    const fresh: Segment = { bands: emptyBands(), fingerprints: new Set(), unfingerprinted: 0 }
     byPolicy.set(policyId, fresh)
 
     return fresh
@@ -244,17 +269,25 @@ export const calibrationOf = (fold: EpisodeFold): CalibrationReport => {
 
       const { confidence } = proposal.provenance
       record(whole, confidence, verdict)
-      record(policyBands(judgingPolicyOf(proposal)), confidence, verdict)
+
+      const segment = segmentFor(judgingPolicyOf(proposal))
+      record(segment.bands, confidence, verdict)
+
+      const fingerprint = proposal.disposition?.policyFingerprint
+      if (fingerprint === undefined) segment.unfingerprinted += 1
+      else segment.fingerprints.add(fingerprint)
     }
   }
 
   return {
     overall: scoreOf(whole.overall),
     buckets: bucketsOf(whole),
-    byPolicy: Array.from(byPolicy, ([policyId, bands]) => ({
+    byPolicy: Array.from(byPolicy, ([policyId, segment]) => ({
       policyId,
-      overall: scoreOf(bands.overall),
-      buckets: bucketsOf(bands),
+      overall: scoreOf(segment.bands.overall),
+      buckets: bucketsOf(segment.bands),
+      fingerprints: Array.from(segment.fingerprints).sort(),
+      unfingerprinted: segment.unfingerprinted,
     })).sort(byPolicyName),
     unjudged,
     unattributed: fold.unattributed.length,

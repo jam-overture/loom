@@ -57,6 +57,16 @@ export const dispositionSchema = z.object({
    * existed still parses, and reads as the unknown it is.
    */
   policyId: z.string().min(1).default(UNATTRIBUTED_POLICY_ID),
+  /**
+   * What that policy *contained* when it judged this, beside what it was called.
+   *
+   * Optional and never defaulted, unlike `policyId`. A name has an honest
+   * stand-in for the unknown — `unattributed` says "nobody wrote this down" — and
+   * a digest has none: any string here is a claim about the contents of a
+   * policy, and inventing one would be inventing the very fact the field exists
+   * to check.
+   */
+  policyFingerprint: z.string().min(1).optional(),
 })
 
 export type Disposition = {
@@ -66,4 +76,6 @@ export type Disposition = {
   readonly reversible: boolean
   readonly confidence: number
   readonly policyId: string
+  /** Absent on a judgment recorded before the Gate fingerprinted policies. */
+  readonly policyFingerprint?: string
 }

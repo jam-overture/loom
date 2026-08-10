@@ -1,5 +1,10 @@
-import { UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
-import type { CalibrationScore, UnjudgedReason } from "@loom/runtime/telemetry"
+import { rulesetContinuityOf, UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
+import type {
+  CalibrationReport,
+  CalibrationScore,
+  PolicyCalibration,
+  UnjudgedReason,
+} from "@loom/runtime/telemetry"
 
 import type { OutcomeTone } from "./outcome"
 
@@ -81,6 +86,60 @@ export const describePolicy = (policyId: string | null): string => {
 
   return policyId
 }
+
+/**
+ * What the fingerprints under one policy name say about that name (0048).
+ *
+ * Silent when there is nothing a reader would act on: one ruleset, all of it
+ * recorded. A caveat printed on every row every day is a caveat nobody reads on
+ * the day it matters, which is the same reason the breakdown itself is
+ * conditional.
+ */
+export const readRuleset = (segment: PolicyCalibration): GapReading | null => {
+  const continuity = rulesetContinuityOf(segment.fingerprints)
+  const older =
+    segment.unfingerprinted === 0
+      ? ""
+      : ` ${segment.unfingerprinted} of them were judged before rulesets were recorded, so they could have run on anything.`
+
+  if (continuity === "changed") {
+    return {
+      tone: "rejected",
+      label: "the rules changed under this name",
+      detail: `${segment.fingerprints.length} different rulesets judged these claims while calling themselves "${segment.policyId ?? ""}", so this row pools gates that differ by more than their name.${older}`,
+    }
+  }
+
+  if (continuity === "incomparable") {
+    return {
+      tone: "inapplicable",
+      label: "judged under different versions of the policy",
+      detail: `These claims were judged by policies with different sets of knobs — a Loom version changed between them — so whether the values were also edited cannot be read from here.${older}`,
+    }
+  }
+
+  if (older === "") return null
+
+  return {
+    tone: "inapplicable",
+    label: continuity === "unrecorded" ? "no ruleset recorded" : "partly recorded",
+    detail: `This row is not shown to be one ruleset.${older}`,
+  }
+}
+
+/**
+ * Whether the page is pooling gates that should not be pooled — two names, or
+ * one name that stopped meaning one thing. The second case is why this is not
+ * simply a length check: a single segment whose rules changed mid-window is
+ * exactly the failure the fingerprint exists to surface, and it produces one row.
+ */
+export const poolsMoreThanOneGate = (report: CalibrationReport): boolean =>
+  report.byPolicy.length > 1 ||
+  report.byPolicy.some((segment) => {
+    const continuity = rulesetContinuityOf(segment.fingerprints)
+
+    return continuity === "changed" || continuity === "incomparable"
+  })
 
 export const UNJUDGED_LABELS: Readonly<Record<UnjudgedReason, string>> = {
   "awaiting-answer": "waiting on a human",

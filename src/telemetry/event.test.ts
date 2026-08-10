@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { sequentialIdFactory, type ProposalId } from "../ids.js"
 import { assessChange } from "../runtime/assessment.js"
 import type { RuntimeEvent } from "../runtime/events.js"
+import { policyFingerprintOf } from "../runtime/policy-fingerprint.js"
 import { defaultGatePolicy, gatePolicySchema } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
 import { buildIntent, buildProposal, FIXED_INSTANT } from "../testing/doubles.js"
@@ -181,9 +182,11 @@ describe("recordOf", () => {
    * A policy is host configuration, versioned where the host keeps it. Copying
    * its values onto every change would store one document a million times to
    * answer a question the name already answers — provided the name identifies
-   * the content, which is what `GatePolicy.policyId` asks of a host.
+   * the content, which is what `GatePolicy.policyId` asks of a host. The
+   * fingerprint is how a reader checks that it did, at a fixed size and without
+   * carrying a single value across (0048).
    */
-  it("keeps the name of the policy in force and drops its values", () => {
+  it("keeps the name of the policy in force and a digest of its values, never the values", () => {
     const policy = gatePolicySchema.parse({ policyId: "storefront", minimumConfidence: 0.93 })
     const record = recordOf(
       envelopeOf({ type: "policy-resolved", intentId: intent.intentId, policy })
@@ -193,8 +196,22 @@ describe("recordOf", () => {
       type: "policy-resolved",
       intentId: intent.intentId,
       policyId: "storefront",
+      policyFingerprint: policyFingerprintOf(policy),
     })
     expect(JSON.stringify(record)).not.toContain("0.93")
+  })
+
+  it("gives two hosts that edited one policy name two different fingerprints", () => {
+    const fingerprintUnder = (minimumConfidence: number): string | undefined => {
+      const policy = gatePolicySchema.parse({ policyId: "storefront", minimumConfidence })
+      const { event } = recordOf(
+        envelopeOf({ type: "policy-resolved", intentId: intent.intentId, policy })
+      )
+
+      return event.type === "policy-resolved" ? event.policyFingerprint : undefined
+    }
+
+    expect(fingerprintUnder(0.93)).not.toBe(fingerprintUnder(0.6))
   })
 
   it("keeps a proposal whole, because a refused change is recorded nowhere else", () => {
