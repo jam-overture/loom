@@ -23,6 +23,7 @@ import { highestStake, type StakeLevel } from "./stake-level.js"
 export type StakeFactorCode =
   | "protected-type-removed"
   | "protected-type-touched"
+  | "protected-type-relocated"
   | "protected-prop-configured"
   | "large-removal"
   | "broad-change"
@@ -79,6 +80,27 @@ const protectedTypeTouched = ({ analysis }: StakeInput, policy: GatePolicy): Sta
     code: "protected-type-touched",
     level: "high",
     detail: `touches protected ${matches.join(", ")}`,
+  }
+}
+
+/**
+ * Moving a protected primitive ranks with rewriting one, not with destroying
+ * one: the node survives intact and the position is what changed. It is a
+ * separate factor rather than a wider reading of `protected-type-touched`
+ * because the two sentences a reviewer needs are different — one says the card
+ * was rewritten, the other says it is somewhere else now (0044).
+ */
+const protectedTypeRelocated = (
+  { analysis }: StakeInput,
+  policy: GatePolicy
+): StakeFactor | null => {
+  const matches = intersect(analysis.relocatedPrimitiveTypes, policy.protectedPrimitiveTypes)
+  if (matches.length === 0) return null
+
+  return {
+    code: "protected-type-relocated",
+    level: "high",
+    detail: `relocates protected ${matches.join(", ")}`,
   }
 }
 
@@ -170,6 +192,7 @@ const discardsLaterWork = ({ discards }: StakeInput): StakeFactor | null => {
 const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
   protectedTypeRemoved,
   protectedTypeTouched,
+  protectedTypeRelocated,
   protectedProp,
   largeRemoval,
   broadChange,

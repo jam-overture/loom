@@ -5,8 +5,17 @@ import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
 import { requireActor } from "@/lib/auth/identity"
+import {
+  anchorOf,
+  describeAnchorMiss,
+  echoOf,
+  historyPageHref,
+  historyRead,
+  parseRevisionParam,
+} from "@/lib/history-link"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
+import { RevisionBox } from "./_components/revision-box"
 import { RevisionRow } from "./_components/revision-row"
 import { TreeChooser } from "./_components/tree-chooser"
 
@@ -21,13 +30,30 @@ import { TreeChooser } from "./_components/tree-chooser"
  * The page is taken from the newest end (0026). A log only grows, and "what
  * changed lately" is the question — paging forward from revision 1 would answer
  * it only after reading every change ever accepted.
+ *
+ * Unless somebody arrives with a revision in mind. `?at=` opens the page holding
+ * that one and marks it (0043), which is how a node's attribution reaches the
+ * change that placed it — the alternative was a reviewer reading a number off
+ * one page and paging back through this one until it appeared.
+ *
+ * A revision travels further than the links that carry it, though. It turns up
+ * in a report, in a message, in a screenshot of somewhere else in the portal, and
+ * a reader holding one had no way to act on it but to edit the URL. The box
+ * writes the same parameter a link does, so there is one way in and one thing to
+ * explain when it misses.
+ *
+ * From there the log reads both ways. A reader who arrived at revision 4 is not
+ * asking about revision 4 alone; they are asking what happened around it, and
+ * half of "around" is what came after. The store has named its `newer` end since
+ * 0025 and nothing has ever read it, so until now the only way forward was back
+ * to the newest page and a fresh descent.
  */
 const HistoryPage = async ({
   searchParams,
 }: {
-  searchParams: Promise<{ tree?: string; older?: string }>
+  searchParams: Promise<{ tree?: string; older?: string; newer?: string; at?: string }>
 }) => {
-  const { tree, older } = await searchParams
+  const { tree, older, newer, at } = await searchParams
   await requireActor("/history")
   await ensureSeeded()
 
@@ -43,10 +69,11 @@ const HistoryPage = async ({
   const scope = treeIdSchema.safeParse(tree)
   if (!scope.success) notFound()
 
-  const page = await portalStore.revisions(scope.data, {
-    direction: "older",
-    ...(older === undefined ? {} : { cursor: older }),
-  })
+  /** Where a link sent the reader or a reader asked to go, and what to mark on arrival. */
+  const named = parseRevisionParam(at)
+  const anchor = anchorOf(named)
+
+  const page = await portalStore.revisions(scope.data, historyRead({ older, newer, at: anchor }))
 
   if (!page.ok) {
     /** A log nobody can name is a wrong URL, not a broken store. */
@@ -63,6 +90,19 @@ const HistoryPage = async ({
   const newestFirst = [...page.value.revisions].reverse()
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
+  /**
+   * A revision this log does not hold is not an error to the store — it answers
+   * with the entries on that side of the number instead — so the page lands
+   * looking exactly like an ordinary visit. Saying which of the ways it missed
+   * is the difference between that and being told why.
+   */
+  const anchorMiss = describeAnchorMiss(named, {
+    older,
+    newer,
+    onPage: anchor !== undefined && newestFirst.some((stored) => stored.revision === anchor),
+    newestOnPage: newestFirst[0]?.revision,
+  })
+
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -77,6 +117,10 @@ const HistoryPage = async ({
         </div>
       </div>
 
+      <RevisionBox treeId={scope.data} typed={echoOf(named)} />
+
+      {anchorMiss && <p className="text-ink-muted text-sm">{anchorMiss}</p>}
+
       {newestFirst.length === 0 ? (
         <p className="text-ink-muted text-sm">
           This tree has never been changed. It is at revision 0 — the shape it was created
@@ -85,22 +129,36 @@ const HistoryPage = async ({
       ) : (
         <ul className="flex flex-col gap-3">
           {newestFirst.map((stored) => (
-            <RevisionRow key={stored.revision} stored={stored} />
+            <RevisionRow
+              key={stored.revision}
+              stored={stored}
+              anchored={stored.revision === anchor}
+            />
           ))}
         </ul>
       )}
 
+      {/*
+       * Both ends, whenever the page has them. A log read only backwards makes
+       * "what happened after this" a question you answer by starting again from
+       * the newest page, which is the same journey `?at=` was added to remove.
+       *
+       * "latest" stays alongside them rather than being implied by "later": a
+       * reader deep in a long log wants the end, not thirty steps toward it.
+       */}
       <div className="flex gap-4">
         {page.value.older !== null && (
-          <Link
-            href={`/history?${scopeQuery}&older=${encodeURIComponent(page.value.older)}`}
-            className="text-xs"
-          >
+          <Link href={historyPageHref(scope.data, { older: page.value.older })} className="text-xs">
             ← earlier
           </Link>
         )}
-        {older !== undefined && (
-          <Link href={`/history?${scopeQuery}`} className="text-xs">
+        {page.value.newer !== null && (
+          <Link href={historyPageHref(scope.data, { newer: page.value.newer })} className="text-xs">
+            later →
+          </Link>
+        )}
+        {(older !== undefined || newer !== undefined || anchor !== undefined) && (
+          <Link href={historyPageHref(scope.data)} className="text-xs">
             latest →
           </Link>
         )}

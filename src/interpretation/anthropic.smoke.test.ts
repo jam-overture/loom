@@ -3,13 +3,15 @@ import { describe, expect, it } from "vitest"
 
 import { randomIdFactory } from "../ids.js"
 import { systemClock } from "../runtime/events.js"
+import { interpretationFault, type InterpretationError } from "../runtime/interpreter.js"
 import { buildIntent } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { applyDelta } from "../tree/apply.js"
 import { collectNodeIds } from "../tree/navigation.js"
 
 import { anthropicModelClient } from "./anthropic.js"
-import { modelInterpreter } from "./interpreter.js"
+import { DEFAULT_INTERPRETER_MODEL, modelInterpreter } from "./interpreter.js"
+import { interpretationReplyJsonSchema } from "./schema.js"
 
 /**
  * The one test that touches the network.
@@ -42,16 +44,16 @@ const liveApiKey = process.env["LOOM_ANTHROPIC_API_KEY"] ?? process.env["ANTHROP
  * a rate limit (429) is the same kind of fact as a missing key: the network was
  * not available to this session.
  *
- * Deliberately narrow. `interpreter-unavailable` also covers the SDK throwing on
- * a request the API *rejected* — a 400 means we assembled something invalid,
- * which is the defect this test exists to catch and must stay a failure. So the
- * status is read rather than the code, and only the statuses that mean "ask
- * again later" are skipped.
+ * Reading the code is now enough. Until day 37 this had to match a status out of
+ * the message text, because `interpreter-unavailable` also covered a request the
+ * API *rejected* — and a 400 means we assembled something invalid, which is the
+ * defect this test exists to catch and must stay a failure. The client seam
+ * separates those now, so a rejection is `interpreter-request-rejected` and a
+ * bad key is `interpreter-misconfigured`; neither skips, and a key that is
+ * present but refused fails the build rather than passing quietly.
  */
-const ASK_AGAIN_LATER = /^(429|5\d\d)\b/
-
-const isUnreachable = (code: string, detail: string): boolean =>
-  code === "interpreter-unavailable" && ASK_AGAIN_LATER.test(detail)
+const isUnreachable = (error: InterpretationError): boolean =>
+  interpretationFault(error) === "provider"
 
 describe.skipIf(!liveApiKey)("modelInterpreter against the live API", () => {
   it(
@@ -73,7 +75,7 @@ describe.skipIf(!liveApiKey)("modelInterpreter against the live API", () => {
 
       const interpreted = await interpreter.interpret(intent, tree)
       if (!interpreted.ok) {
-        if (isUnreachable(interpreted.error.code, interpreted.error.detail)) {
+        if (isUnreachable(interpreted.error)) {
           context.skip(`the API was not reachable: ${interpreted.error.detail.slice(0, 80)}`)
         }
 
@@ -93,5 +95,39 @@ describe.skipIf(!liveApiKey)("modelInterpreter against the live API", () => {
       expect(JSON.stringify(applied.value.root)).toContain("Thanks for visiting")
     },
     120_000
+  )
+})
+
+/**
+ * The one assumption a fixture cannot check.
+ *
+ * `classifyThrown` reads `status` off whatever the SDK throws. Every offline
+ * test hands it an object shaped the way we believe the SDK shapes its errors —
+ * which is exactly the belief that would be wrong, silently, and would collapse
+ * all three codes back into `unavailable` with no test failing.
+ *
+ * A key the API will not accept costs nothing and is answered immediately, so
+ * this asks the real API the one question stubs cannot. Gated on a key being
+ * present, which is this suite's existing proxy for "this session has network" —
+ * the request deliberately does not use it.
+ */
+describe.skipIf(!liveApiKey)("anthropicModelClient against the live API", () => {
+  it(
+    "reports a key the API rejects as a misconfiguration rather than an outage",
+    async () => {
+      const anthropic = new Anthropic({ apiKey: "sk-ant-not-a-real-key", maxRetries: 0 })
+      const completion = await anthropicModelClient(anthropic.messages).complete({
+        model: DEFAULT_INTERPRETER_MODEL,
+        maxTokens: 16,
+        effort: "low",
+        system: "reply with the word ok",
+        userMessage: "ok",
+        outputSchema: interpretationReplyJsonSchema(),
+      })
+
+      expect(completion.ok).toBe(false)
+      expect(completion.ok ? "" : completion.error.code).toBe("misconfigured")
+    },
+    30_000
   )
 })

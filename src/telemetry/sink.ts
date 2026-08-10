@@ -8,12 +8,16 @@ import type { TelemetryError, TelemetryJournal } from "./journal.js"
  * The seam between a runtime narrating itself and a journal that outlives the
  * request (0024).
  *
- * Emission does no IO. It narrows the envelope and puts it in a list, which is
- * the only thing that satisfies `EventSink`'s standing promise that a sink can
- * never fail a change the Gate already accepted — an awaited write could refuse
- * one, and an un-awaited write on a serverless host is a promise the platform
- * cancels when the response ends. Writing happens once, at `flush`, at a point
- * the host chooses and can await.
+ * Emission does no IO. It narrows the envelope and puts it in a list — an
+ * awaited write would make an accepted change wait on a database, and an
+ * un-awaited write on a serverless host is a promise the platform cancels when
+ * the response ends. Writing happens once, at `flush`, at a point the host
+ * chooses and can await.
+ *
+ * The runtime would contain a throw from here anyway (0042), so this sink does
+ * not buffer in order to stay safe. It does it in order to stay *countable*:
+ * containment loses an event silently, whereas everything this collector cannot
+ * hold or cannot write is counted in `dropped`.
  */
 
 /**

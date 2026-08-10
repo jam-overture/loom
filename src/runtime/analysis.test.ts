@@ -56,6 +56,22 @@ describe("analyzeDelta counts", () => {
     expect(analysis.affectedNodeIds).toEqual([ids.card])
   })
 
+  it("counts every node a move carried, the one it named included", () => {
+    const { analysis } = analyze((ids) => [
+      { op: "move", nodeId: ids.main, parentId: ids.header, index: 0 },
+    ])
+
+    expect(analysis.movedNodeCount).toBe(1)
+    expect(analysis.relocatedNodeCount).toBe(3)
+  })
+
+  it("relocates nothing when the delta moves nothing", () => {
+    const { analysis } = analyze((ids) => [{ op: "remove", nodeId: ids.main }])
+
+    expect(analysis.relocatedNodeCount).toBe(0)
+    expect(analysis.relocatedPrimitiveTypes).toEqual([])
+  })
+
   it("records the prop keys a configure touches, set and unset alike", () => {
     const { analysis } = analyze((ids) => [
       { op: "configure", nodeId: ids.card, set: { variant: "filled" }, unset: ["elevation"] },
@@ -81,6 +97,40 @@ describe("analyzeDelta primitive types", () => {
 
     expect(analysis.removedPrimitiveTypes).toEqual(["loom.card"])
     expect([...analysis.touchedPrimitiveTypes].sort()).toEqual(["loom.card", "loom.footer"])
+  })
+
+  it("answers the same however a relocation is phrased", () => {
+    const bySlot = analyze((ids) => [
+      { op: "move", nodeId: ids.main, parentId: ids.header, index: 0 },
+    ]).analysis
+    const byCard = analyze((ids) => [
+      { op: "move", nodeId: ids.card, parentId: ids.header, index: 0 },
+    ]).analysis
+
+    expect(bySlot.relocatedPrimitiveTypes).toEqual(["loom.card"])
+    expect(byCard.relocatedPrimitiveTypes).toEqual(["loom.card"])
+  })
+
+  it("keeps a moved type out of the touched types, whichever node the move named", () => {
+    const bySlot = analyze((ids) => [
+      { op: "move", nodeId: ids.main, parentId: ids.header, index: 0 },
+    ]).analysis
+    const byCard = analyze((ids) => [
+      { op: "move", nodeId: ids.card, parentId: ids.header, index: 0 },
+    ]).analysis
+
+    expect(bySlot.touchedPrimitiveTypes).toEqual([])
+    expect(byCard.touchedPrimitiveTypes).toEqual([])
+  })
+
+  it("separates a type relocated from one reconfigured in the same delta", () => {
+    const { analysis } = analyze((ids) => [
+      { op: "move", nodeId: ids.card, parentId: ids.header, index: 0 },
+      { op: "configure", nodeId: ids.footer, set: { sticky: true }, unset: [] },
+    ])
+
+    expect(analysis.relocatedPrimitiveTypes).toEqual(["loom.card"])
+    expect(analysis.touchedPrimitiveTypes).toEqual(["loom.footer"])
   })
 
   it("ignores text and slot nodes, which have no primitive type", () => {

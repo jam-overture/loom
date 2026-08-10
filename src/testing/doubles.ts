@@ -18,9 +18,13 @@ import type { AuthorKind, ProposedChange } from "../runtime/proposal.js"
 import type { TreeDelta } from "../tree/delta.js"
 
 /**
- * Test doubles for the runtime's three impure seams — the interpreter, the
- * clock, and the event sink. They live in `src/testing` rather than beside the
- * tests because the renderer and portal will want the same ones.
+ * Test doubles for the impure seams this file owns — the interpreter and its
+ * repairer, the clock, and the event sink. The runtime's other two seams are
+ * doubled where they are defined: `sequentialIdFactory` in `ids.ts` and
+ * `fixedPolicy` in `runtime/policy-source.ts`.
+ *
+ * They live in `src/testing` rather than beside the tests because the renderer
+ * and portal will want the same ones.
  */
 
 export const FIXED_INSTANT = "2026-07-28T00:00:00.000Z"
@@ -37,6 +41,40 @@ export const collectingEventSink = (): CollectingEventSink => {
 
   return {
     emit: (envelope) => {
+      envelopes.push(envelope)
+    },
+    envelopes,
+    types: () => envelopes.map((envelope) => envelope.event.type),
+  }
+}
+
+/**
+ * A sink that fails on the events it was told to fail on and collects the rest,
+ * so a test can assert both halves at once: that the change survived, and that
+ * narration carried on past the failure rather than stopping at it.
+ *
+ * `mode` picks how it fails. A synchronous throw is the obvious shape; an
+ * `async` sink assigned to a `() => void` signature rejects instead, which is
+ * the shape a host reaches by accident (0042).
+ */
+export const failingEventSink = (
+  failOn: readonly string[],
+  mode: "throw" | "reject" = "throw"
+): CollectingEventSink => {
+  const envelopes: RuntimeEventEnvelope[] = []
+
+  const fail = (type: string): void => {
+    const error = new Error(`sink refused ${type}`)
+    if (mode === "throw") throw error
+
+    /** Typed `void`, returns a rejected promise: exactly the accidental case. */
+    return Promise.reject(error) as unknown as void
+  }
+
+  return {
+    emit: (envelope) => {
+      if (failOn.includes(envelope.event.type)) return fail(envelope.event.type)
+
       envelopes.push(envelope)
     },
     envelopes,

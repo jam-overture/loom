@@ -60,6 +60,10 @@ const fromClientError = (error: ModelClientError): InterpretationError => {
   switch (error.code) {
     case "unavailable":
       return { code: "interpreter-unavailable", detail: error.detail }
+    case "rejected":
+      return { code: "interpreter-request-rejected", detail: error.detail }
+    case "misconfigured":
+      return { code: "interpreter-misconfigured", detail: error.detail }
     case "refused":
       return { code: "refused", detail: `model declined to answer: ${error.detail}` }
     case "incomplete":

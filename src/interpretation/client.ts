@@ -31,13 +31,27 @@ export type ModelCompletion = {
 }
 
 /**
- * Three failure modes, kept apart because they mean different things upstream:
- * `unavailable` is "ask again later", `refused` is "this model will not answer
- * this", and `incomplete` is "the answer was cut off mid-sentence" — which is a
- * malformed reply rather than a missing one.
+ * Five failure modes, kept apart because each names a different actor — the one
+ * who would have to do something for the next attempt to go differently.
+ *
+ * - `unavailable` — the service could not answer now. Nobody has to act; the
+ *   same request may succeed later.
+ * - `rejected` — the service refused the request itself. Repeating it unchanged
+ *   fails identically, so what has to change is the request, which is Loom's.
+ * - `misconfigured` — this deployment may not talk to this model at all:
+ *   credentials, entitlement, billing. An operator has to act.
+ * - `refused` — the model would not answer this content.
+ * - `incomplete` — the answer was cut off mid-sentence, which is a malformed
+ *   reply rather than a missing one.
+ *
+ * The first three were one code until day 37. Collapsing them meant a request
+ * the API rejected outright was reported as "ask again later", which is a lie
+ * downstream cannot detect and cannot recover from.
  */
 export type ModelClientError =
   | { readonly code: "unavailable"; readonly detail: string }
+  | { readonly code: "rejected"; readonly detail: string }
+  | { readonly code: "misconfigured"; readonly detail: string }
   | { readonly code: "refused"; readonly detail: string }
   | { readonly code: "incomplete"; readonly detail: string }
 

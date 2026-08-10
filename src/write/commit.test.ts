@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { nodeIdSchema, sequentialIdFactory, treeIdSchema, type ProposalId } from "../ids.js"
 import { err, ok } from "../result.js"
 import type { EditIntent } from "../runtime/intent.js"
+import type { InterpretationError } from "../runtime/interpreter.js"
 import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy, gatePolicySchema } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
@@ -13,6 +14,7 @@ import {
   buildIntent,
   buildProposal,
   collectingEventSink,
+  failingEventSink,
   fixedClock,
   scriptedInterpreter,
   type CollectingEventSink,
@@ -46,6 +48,8 @@ type Harness = {
 const harnessFor = async (options?: {
   readonly confidence?: number
   readonly storeOf?: (store: TreeStore) => TreeStore
+  /** For the containment tests: a sink that refuses some of what it is handed. */
+  readonly sink?: CollectingEventSink
 }): Promise<Harness> => {
   const { tree, ids } = sampleTree()
 
@@ -66,7 +70,7 @@ const harnessFor = async (options?: {
     ...(options?.confidence === undefined ? {} : { confidence: options.confidence }),
   })
 
-  const events = collectingEventSink()
+  const events = options?.sink ?? collectingEventSink()
   const interpreter = scriptedInterpreter(ok(proposal))
 
   return {
@@ -542,6 +546,31 @@ describe("describeWriteOutcome", () => {
 
     expect(new Set(outcomes.map((outcome) => outcome.kind)).size).toBe(outcomes.length)
   })
+
+  /**
+   * An uninterpreted write is the one outcome whose *cause* decides what the
+   * reader should do about it, so the sentence has to distinguish them. Before
+   * day 37 all three read as the bare detail the model client happened to carry.
+   */
+  it("says which kind of uninterpreted a write was, not just that it was", () => {
+    const sentenceFor = (error: InterpretationError): string =>
+      describeWriteOutcome({ kind: "not-interpreted", error })
+
+    const misconfigured = sentenceFor({
+      code: "interpreter-misconfigured",
+      detail: "no model is configured",
+    })
+    const unavailable = sentenceFor({ code: "interpreter-unavailable", detail: "529 overloaded" })
+    const rejected = sentenceFor({
+      code: "interpreter-request-rejected",
+      detail: "400 invalid_request_error",
+    })
+
+    expect(misconfigured).toContain("operator")
+    expect(unavailable).toContain("later")
+    expect(rejected).toContain("unchanged")
+    expect(new Set([misconfigured, unavailable, rejected]).size).toBe(3)
+  })
 })
 
 /**
@@ -628,5 +657,84 @@ describe("commitIntent under a policy chosen per change", () => {
 
     expect(held.kind === "held" && held.held.disposition.policyId).toBe("storefront")
     expect(committed.kind === "committed" && committed.disposition.policyId).toBe("sandbox")
+  })
+})
+
+/**
+ * The same guarantee as the pipeline's, on the path where breaking it is worst:
+ * past `store.append` a change is durable, so a sink that could fail the write
+ * path would make the runtime report an error for something that happened
+ * (0042).
+ */
+describe("commitIntent when the event sink fails", () => {
+  it("reports a commit the sink refused to narrate as committed", async () => {
+    const sink = failingEventSink(["change-committed"])
+    const { path, intent, tree } = await harnessFor({ sink })
+
+    const outcome = await commitIntent(path, intent)
+    expect(outcome.kind).toBe("committed")
+
+    const head = await path.store.head(tree.treeId)
+    expect(head.ok && head.value.revision).toBe(1)
+  })
+
+  /**
+   * The inverse gap: `change-applied` fires before `store.append`, so a throw
+   * here used to abandon the change between the Gate accepting it and the log
+   * receiving it — and emit no `commit-failed`, because the thing that would
+   * emit it is the thing that threw.
+   */
+  it("still writes a change the sink refused to narrate as applied", async () => {
+    const sink = failingEventSink(["change-applied"])
+    const { path, intent, tree, bodyId } = await harnessFor({ sink })
+
+    const outcome = await commitIntent(path, intent)
+    if (outcome.kind !== "committed") throw new Error(`unexpected ${outcome.kind}`)
+
+    const head = await path.store.head(tree.treeId)
+    if (!head.ok) throw new Error("expected the tree to still exist")
+
+    const body = findNode(head.value.root, bodyId)
+    expect(body?.kind === "text" ? body.value : undefined).toBe("Rewritten")
+  })
+
+  it("still takes a proposal into custody when the sink refuses the hold", async () => {
+    const sink = failingEventSink(["proposal-held"])
+    const { path, intent, proposal } = await harnessFor({ confidence: 0.5, sink })
+
+    const outcome = await commitIntent(path, intent)
+    expect(outcome.kind).toBe("held")
+
+    const found = await path.holds.get(proposal.proposalId)
+    expect(found.ok).toBe(true)
+  })
+
+  /**
+   * The approval is attributed in `hold-confirmed` alone (0027), so a sink that
+   * refuses it loses who allowed the change — but it must not also lose the
+   * change, and `answeredBy` reaches the log by a different route.
+   */
+  it("still commits a confirmation whose approval the sink refused", async () => {
+    const sink = failingEventSink(["hold-confirmed"])
+    const { path, intent, tree, proposal } = await harnessFor({ confidence: 0.5, sink })
+    await commitIntent(path, intent)
+
+    const outcome = await confirmHeld(path, { proposalId: proposal.proposalId, actor: "dana" })
+    expect(outcome.kind).toBe("committed")
+
+    const history = await path.store.revisions(tree.treeId)
+    expect(history.ok && history.value.revisions[0]?.answeredBy).toBe("dana")
+  })
+
+  it("still releases a discarded proposal when the sink refuses the discard", async () => {
+    const sink = failingEventSink(["hold-discarded"])
+    const { path, intent, proposal } = await harnessFor({ confidence: 0.5, sink })
+    await commitIntent(path, intent)
+
+    const discarded = await discardHeld(path, { proposalId: proposal.proposalId, actor: "dana" })
+    expect(discarded.ok).toBe(true)
+
+    const found = await path.holds.get(proposal.proposalId)
+    expect(found.ok).toBe(false)
   })
 })

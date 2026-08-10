@@ -6,6 +6,7 @@ import {
   buildIntent,
   buildProposal,
   collectingEventSink,
+  failingEventSink,
   fixedClock,
   scriptedInterpreter,
   scriptedRepairer,
@@ -39,6 +40,8 @@ const harnessFor = (options: {
   readonly policySource?: PolicySource
   readonly origin?: IntentOrigin
   readonly confidence?: number
+  /** For the containment tests: a sink that refuses some of what it is handed. */
+  readonly sink?: CollectingEventSink
 }): Harness => {
   const { tree, ids } = sampleTree()
 
@@ -57,7 +60,7 @@ const harnessFor = (options: {
     ...(options.confidence === undefined ? {} : { confidence: options.confidence }),
   })
 
-  const events = collectingEventSink()
+  const events = options.sink ?? collectingEventSink()
 
   return {
     runtime: {
@@ -567,5 +570,60 @@ describe("the policy a change is judged under", () => {
     const locked = confirmChange(runtime, tree, proposal, intentFor(tree))
     expect(locked.kind).toBe("rejected")
     expect(locked.kind === "rejected" && locked.disposition.policyId).toBe("locked-down")
+  })
+})
+
+/**
+ * The guarantee `EventSink` has carried since §2, tested at the level it is
+ * made rather than at the level it is implemented: not "our sinks happen not to
+ * throw" but "a sink that does throw changes nothing" (0042).
+ */
+describe("composeChange when the event sink fails", () => {
+  it("still applies a change whose narration the sink refused", async () => {
+    const sink = failingEventSink(["change-applied"])
+    const { runtime, tree, ids } = harnessFor({ build: tweak, sink })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    const body = findNode(outcome.tree.root, ids.body)
+    expect(body?.kind === "text" && body.value).toBe("Rewritten")
+  })
+
+  it("still refuses a change the Gate rejected when the sink refuses the disposition", async () => {
+    const sink = failingEventSink(["disposition-decided"])
+    const { runtime, tree } = harnessFor({
+      build: (ids) => [{ op: "remove", nodeId: ids.card }],
+      confidence: 0.1,
+      sink,
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("rejected")
+  })
+
+  it("narrates every stage after the one the sink refused", async () => {
+    const sink = failingEventSink(["change-proposed"])
+    const { runtime, tree } = harnessFor({ build: tweak, sink })
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    expect(sink.types()).toEqual([
+      "intent-received",
+      "policy-resolved",
+      "change-assessed",
+      "disposition-decided",
+      "change-applied",
+    ])
+  })
+
+  it("contains a sink that rejects as well as one that throws", async () => {
+    const sink = failingEventSink(["change-applied"], "reject")
+    const { runtime, tree } = harnessFor({ build: tweak, sink })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("applied")
   })
 })

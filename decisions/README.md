@@ -97,3 +97,10 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0037](0037-the-journal-may-forget-and-only-a-whole-episode-at-a-time.md) | The journal may forget, and only a whole episode at a time | Accepted | §6 |
 | [0038](0038-an-id-names-one-node-and-a-return-is-not-a-reuse.md) | An id names one node, and a return is not a reuse | Accepted | §1 → §5 |
 | [0039](0039-the-attempt-log-is-counted-never-enumerated.md) | The attempt log is counted, never enumerated | Accepted | §5 |
+| [0040](0040-a-failure-names-the-actor-who-must-clear-it.md) | A failure names the actor who must clear it | Accepted | §2 → §5 |
+| [0041](0041-authorship-is-derived-from-the-log-not-carried-on-a-node.md) | Authorship is derived from the log, not carried on a node | Accepted | §1 → §5 |
+| [0042](0042-a-sink-observes-and-the-runtime-contains-it.md) | A sink observes, and the runtime contains it | Accepted | §2 |
+| [0043](0043-a-revision-is-a-position-a-caller-may-name.md) | A revision is a position a caller may name | Accepted | §5 → §1 |
+| [0044](0044-a-move-relocates-a-subtree-and-the-analysis-measures-the-subtree.md) | A move relocates a subtree, and the analysis measures the subtree, not the phrasing | Accepted | §2 |
+| [0045](0045-a-telemetry-field-added-later-is-optional-forever.md) | A telemetry field added later is optional, and never defaulted | Accepted | §6 |
+| [0046](0046-a-render-test-crosses-no-boundary-the-framework-would-not.md) | A render test crosses no boundary the framework would not | Accepted | §5 |
