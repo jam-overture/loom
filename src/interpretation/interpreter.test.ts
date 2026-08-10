@@ -360,6 +360,26 @@ describe("modelInterpreter — client failures", () => {
     expect(interpreted.ok ? "" : interpreted.error.detail).toContain("429")
   })
 
+  it("keeps a request the service rejected apart from one it could not serve", async () => {
+    const { interpreter, intent, tree } = harness(
+      err({ code: "rejected", detail: "400 invalid_request_error" })
+    )
+    const interpreted = await interpreter.interpret(intent, tree)
+
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("interpreter-request-rejected")
+    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("400")
+  })
+
+  it("reports a deployment that cannot reach a model as misconfigured", async () => {
+    const { interpreter, intent, tree } = harness(
+      err({ code: "misconfigured", detail: "401 authentication_error" })
+    )
+    const interpreted = await interpreter.interpret(intent, tree)
+
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("interpreter-misconfigured")
+    expect(interpreted.ok ? "" : interpreted.error.detail).toContain("401")
+  })
+
   it("keeps a declined request apart from an unavailable one", async () => {
     const { interpreter, intent, tree } = harness(err({ code: "refused", detail: "cyber" }))
     const interpreted = await interpreter.interpret(intent, tree)

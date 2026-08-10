@@ -85,6 +85,41 @@ describe("irreversibility", () => {
     expect(reversibility.inverse.operations).toHaveLength(1)
   })
 
+  it("reads a relocated out-of-tree primitive the same way whichever node the move named", () => {
+    const policy = gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.card"] })
+    const byCard = assess(
+      (ids) => [{ op: "move", nodeId: ids.card, parentId: ids.header, index: 0 }],
+      policy
+    )
+    const bySlot = assess(
+      (ids) => [{ op: "move", nodeId: ids.main, parentId: ids.header, index: 0 }],
+      policy
+    )
+
+    expect(byCard.reversibility.reversible).toBe(false)
+    expect(bySlot.reversibility.reversible).toBe(false)
+    expect(bySlot.reversibility.reasons[0]).toEqual({
+      code: "out-of-tree-effect",
+      primitiveTypes: [primitiveTypeSchema.parse("loom.card")],
+    })
+  })
+
+  it("names an out-of-tree type once when it is both touched and relocated", () => {
+    const policy = gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.card"] })
+    const { reversibility } = assess(
+      (ids) => [
+        { op: "move", nodeId: ids.card, parentId: ids.header, index: 0 },
+        { op: "remove", nodeId: ids.card },
+      ],
+      policy
+    )
+
+    expect(reversibility.reasons[0]).toEqual({
+      code: "out-of-tree-effect",
+      primitiveTypes: [primitiveTypeSchema.parse("loom.card")],
+    })
+  })
+
   it("marks a removal beyond the retention budget as irreversible", () => {
     const policy = gatePolicySchema.parse({ inverseRetentionBudget: 2 })
     const { reversibility } = assess((ids) => [{ op: "remove", nodeId: ids.main }], policy)

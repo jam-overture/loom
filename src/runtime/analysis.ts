@@ -21,11 +21,31 @@ export type ChangeAnalysis = {
   readonly operationCount: number
   readonly insertedNodeCount: number
   readonly removedNodeCount: number
+  /** Nodes a move operation named. The subtree each carried is counted separately. */
   readonly movedNodeCount: number
   readonly configuredNodeCount: number
+  /**
+   * Nodes a move carried, the node it named included. A move is the one
+   * operation whose reach is larger than the node it names, and measuring it
+   * that way is what makes the analysis independent of how the delta was
+   * phrased: relocating a slot and relocating the card inside it are the same
+   * physical change described two ways (0044).
+   */
+  readonly relocatedNodeCount: number
   /** Nodes directly touched. A move counts the node, not the subtree riding along. */
   readonly affectedNodeIds: readonly NodeId[]
+  /**
+   * Types this delta created, destroyed, or reconfigured. A move contributes
+   * nothing here whichever node it names — a relocated node is not rewritten,
+   * and `relocatedPrimitiveTypes` is where it is reported instead (0044).
+   */
   readonly touchedPrimitiveTypes: readonly PrimitiveType[]
+  /**
+   * Types carried by a move, in the whole subtree rather than at its root. A
+   * protected primitive travelling across the page is a fact the Gate has to
+   * see, and it is not the same fact as one being rewritten.
+   */
+  readonly relocatedPrimitiveTypes: readonly PrimitiveType[]
   /**
    * Types destroyed outright, a subset of the touched types. Destroying a
    * primitive is a strictly bigger deal than reconfiguring one, so stakes need
@@ -58,11 +78,13 @@ type Tally = {
   inserted: number
   removed: number
   moved: number
+  relocated: number
   configured: number
   shallowest: number
   readonly affected: Set<NodeId>
   readonly types: Set<PrimitiveType>
   readonly removedTypes: Set<PrimitiveType>
+  readonly relocatedTypes: Set<PrimitiveType>
   readonly propKeys: Set<string>
 }
 
@@ -70,11 +92,13 @@ const emptyTally = (): Tally => ({
   inserted: 0,
   removed: 0,
   moved: 0,
+  relocated: 0,
   configured: 0,
   shallowest: Number.POSITIVE_INFINITY,
   affected: new Set(),
   types: new Set(),
   removedTypes: new Set(),
+  relocatedTypes: new Set(),
   propKeys: new Set(),
 })
 
@@ -124,8 +148,9 @@ const tallyOperation = (
       if (destinationDepth === null) return err({ code: "node-not-found", nodeId: operation.parentId })
 
       tally.moved += 1
+      tally.relocated += nodeCount(target)
       tally.affected.add(operation.nodeId)
-      if (target.kind === "element") tally.types.add(target.type)
+      for (const type of elementTypesIn(target)) tally.relocatedTypes.add(type)
       noteDepth(tally, depthOf(root, operation.nodeId))
       noteDepth(tally, destinationDepth + 1)
 
@@ -180,9 +205,11 @@ export const analyzeDelta = (
     removedNodeCount: tally.removed,
     movedNodeCount: tally.moved,
     configuredNodeCount: tally.configured,
+    relocatedNodeCount: tally.relocated,
     affectedNodeIds: Array.from(tally.affected),
     touchedPrimitiveTypes: Array.from(tally.types),
     removedPrimitiveTypes: Array.from(tally.removedTypes),
+    relocatedPrimitiveTypes: Array.from(tally.relocatedTypes),
     configuredPropKeys: Array.from(tally.propKeys),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,
   })

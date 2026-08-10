@@ -228,6 +228,33 @@ describe("recordOf", () => {
     })
   })
 
+  it("retains the types a change destroyed, which drive the only critical factor", () => {
+    const record = recordOf(envelopeOf({ type: "change-assessed", assessment }))
+
+    expect(record.event.type === "change-assessed" && record.event.assessment).toMatchObject({
+      touchedPrimitiveTypes: ["loom.footer"],
+      removedPrimitiveTypes: ["loom.footer"],
+      relocatedPrimitiveTypes: [],
+      relocatedNodeCount: 0,
+    })
+  })
+
+  it("reads a record written before those fields existed rather than defaulting them", () => {
+    const record = recordOf(envelopeOf({ type: "change-assessed", assessment }))
+    const stored = JSON.parse(JSON.stringify(record)) as {
+      event: { assessment: Record<string, unknown> }
+    }
+    delete stored.event.assessment.removedPrimitiveTypes
+    delete stored.event.assessment.relocatedPrimitiveTypes
+    delete stored.event.assessment.relocatedNodeCount
+
+    const parsed = telemetryRecordSchema.parse(stored)
+    if (parsed.event.type !== "change-assessed") throw new Error("the fixture is an assessment")
+
+    expect(parsed.event.assessment.removedPrimitiveTypes).toBeUndefined()
+    expect(parsed.event.assessment.relocatedNodeCount).toBeUndefined()
+  })
+
   it("records a failure as its code and a sentence about it", () => {
     const record = recordOf(
       envelopeOf({

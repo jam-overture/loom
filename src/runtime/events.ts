@@ -121,9 +121,17 @@ export type RuntimeEventEnvelope = {
 }
 
 /**
- * Emission is fire-and-forget: a sink that throws or blocks must not be able to
- * fail a change the Gate already accepted. Hosts that need durability buffer
- * behind this interface.
+ * Emission is fire-and-forget: a sink that throws cannot fail a change the Gate
+ * already accepted.
+ *
+ * That is a guarantee the runtime provides, not an obligation this interface
+ * places on whoever implements it. Every event leaves through `narrator`, which
+ * contains whatever `emit` throws or rejects with (0042) — so a sink may be a
+ * bad citizen, but it cannot be load-bearing. The cost is that a throw is
+ * invisible: the event is lost and nothing says so.
+ *
+ * Hosts that need durability buffer behind this interface and flush once
+ * (0024), which is also how they keep count of what they lost.
  */
 export interface EventSink {
   readonly emit: (envelope: RuntimeEventEnvelope) => void

@@ -47,6 +47,12 @@ export type AuditReport = {
   readonly recycled: readonly IdReturn[]
   readonly recyclingOmitted: number
   /**
+   * The revision the fold stopped at, and null whenever it did not stop. An
+   * entry the log holds either way (see `stoppedAt`), so it is the one place a
+   * reviewer given an unreplayable verdict can actually be sent.
+   */
+  readonly stoppedAt: number | null
+  /**
    * Removals that were taken back. Counted rather than listed: an undo is the
    * expected shape of a working review queue, and a page that listed each one
    * beside a fault would read as a list of faults.
@@ -121,6 +127,27 @@ export const describeMismatch = (mismatch: ReplayMismatch): string => {
   }
 }
 
+/**
+ * The revision the fold stopped at.
+ *
+ * Both mismatches name more than one number and only one of them is a place. A
+ * rejected delta stopped the fold at itself. A gap names the revision that was
+ * *expected* — which by definition no entry holds, so it is a description of
+ * absence — and the one that was found, which is the entry a reviewer can go and
+ * read. Linking the expected one would be offering a reviewer a door into the
+ * hole in the log.
+ */
+export const stoppedAt = (mismatch: ReplayMismatch): number => {
+  switch (mismatch.code) {
+    case "delta-rejected":
+      return mismatch.revision
+    case "revision-gap":
+      return mismatch.found
+    default:
+      return assertNever(mismatch, "stoppedAt")
+  }
+}
+
 const changeCount = (revision: number): string =>
   `${revision} accepted ${revision === 1 ? "change" : "changes"}`
 
@@ -128,11 +155,34 @@ const changeCount = (revision: number): string =>
  * A recycled id is only worth reading if it says which two nodes are involved,
  * because the question a reviewer has is "which of these is the one I am looking
  * at" and the id alone cannot answer it.
+ *
+ * Split around its two revisions rather than returned whole, for the reason a
+ * credit is (0043). These are the two changes that made the id ambiguous, and a
+ * finding that named them without reaching them would leave the reviewer to
+ * retype both. `middle` carries its own leading punctuation, so the parts join
+ * with a single space between each and the revision that follows it.
  */
-export const describeRecycling = (found: IdReturn): string =>
+export type RecyclingAccount = {
+  readonly opening: string
+  readonly leftAt: number
+  readonly middle: string
+  readonly returnedAt: number
+}
+
+export const describeRecycling = (found: IdReturn): RecyclingAccount =>
   found.code === "recycled"
-    ? `was a ${found.leftAs} until revision ${found.leftAt}, and a ${found.returnedAs} from revision ${found.returnedAt}`
-    : `was removed at revision ${found.leftAt} and put back at revision ${found.returnedAt}`
+    ? {
+        opening: `was a ${found.leftAs} until`,
+        leftAt: found.leftAt,
+        middle: `, and a ${found.returnedAs} from`,
+        returnedAt: found.returnedAt,
+      }
+    : {
+        opening: "was removed at",
+        leftAt: found.leftAt,
+        middle: " and put back at",
+        returnedAt: found.returnedAt,
+      }
 
 /** Long enough to see the shape of the problem, short enough to read. */
 export const RECYCLING_LIMIT = 10
@@ -164,6 +214,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         detail: `Folding ${changeCount(audit.revision)} from the seed reproduces the snapshot exactly, so the record of what happened and the thing readers see are still the same tree.`,
         differences: [],
         omitted: 0,
+        stoppedAt: null,
         ...identityFindings(audit.idReturns),
       }
 
@@ -176,6 +227,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         detail: `Folding ${changeCount(audit.revision)} from the seed produced a different tree. The snapshot is what readers get; the log is what the runtime claims happened. One of them is wrong, and until that is settled the history of this tree cannot be trusted to explain it.`,
         differences: found.slice(0, DIFFERENCE_LIMIT),
         omitted: Math.max(found.length - DIFFERENCE_LIMIT, 0),
+        stoppedAt: null,
         ...identityFindings(audit.idReturns),
       }
     }
@@ -192,6 +244,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         detail: `The fold stopped before it finished, so there is no replayed tree to compare against — ${describeMismatch(audit.mismatch)}. This says nothing about whether the served tree is correct; it says the log can no longer be used to check it.`,
         differences: [],
         omitted: 0,
+        stoppedAt: stoppedAt(audit.mismatch),
         /** A fold that stopped saw part of the log, and part of a history is not one. */
         ...NO_FINDINGS,
       }

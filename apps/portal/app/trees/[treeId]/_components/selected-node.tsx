@@ -1,18 +1,33 @@
 "use client"
 
+import type { TreeId } from "@loom/runtime"
 import { addressedNodeId, describeAddressing } from "@loom/runtime/react"
 
+import type { NodeCredit } from "@/lib/attribution-view"
+
+import { NodeCreditLine } from "./node-credit"
 import { useSelection } from "./selection-context"
 
 /**
- * What the current selection actually addresses.
+ * What the current selection actually addresses, and who put it there.
  *
  * This is the pane that keeps 0019's promise about degradation: when a selection
  * falls back to an ancestor, the fallback is stated rather than performed
  * silently. A user scoping an intent to "this text" needs to know the intent will
  * name the heading around it.
+ *
+ * Credits are handed down from the server rather than fetched on selection.
+ * Selection is a click, and a click that costs a round trip to the log would make
+ * the outline feel like it was loading something; the whole tree's attribution is
+ * one bounded read on the page the reviewer already waited for.
  */
-export const SelectedNode = () => {
+export const SelectedNode = ({
+  credits,
+  treeId,
+}: {
+  readonly credits: Record<string, NodeCredit>
+  readonly treeId: TreeId
+}) => {
   const { selected } = useSelection()
 
   if (!selected) {
@@ -45,6 +60,7 @@ export const SelectedNode = () => {
           {describeAddressing(selected.addressing)}
         </p>
       )}
+      <NodeCreditLine credit={credits[selected.nodeId]} treeId={treeId} />
     </dl>
   )
 }

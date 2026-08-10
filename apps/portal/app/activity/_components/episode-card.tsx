@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import type { IntentEpisode } from "@loom/runtime/telemetry"
 
+import { RevisionLink } from "@/app/_components/revision-link"
 import { describeIntent, viewOf } from "@/lib/episode-view"
 import { toneClasses } from "@/lib/outcome"
 
@@ -14,9 +15,16 @@ import { ProposalLine } from "./proposal-line"
  * answer. An episode with no proposals says so rather than rendering an empty
  * list: an ask the model never turned into a change is a real outcome, and the
  * commonest one worth noticing.
+ *
+ * Both revisions an episode names are links (0043): the one the ask was written
+ * against, and the one it became. This page says what the runtime was asked to
+ * do; `/history` says what the tree did about it, and until now the only way
+ * between the two was reading a number off one page and hunting for it on the
+ * other.
  */
 export const EpisodeCard = ({ episode }: { readonly episode: IntentEpisode }) => {
   const view = viewOf(episode.resolution)
+  const intent = describeIntent(episode)
 
   return (
     <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-4">
@@ -24,6 +32,12 @@ export const EpisodeCard = ({ episode }: { readonly episode: IntentEpisode }) =>
         <span className={`rounded-sm px-2 py-1 text-2xs ${toneClasses(view.tone)}`}>
           <strong className="font-medium">{view.headline}</strong>
           {view.detail && <> — {view.detail}</>}
+          {view.revision !== null && (
+            <>
+              {" — "}
+              <RevisionLink treeId={episode.treeId} revision={view.revision} />
+            </>
+          )}
         </span>
 
         <Link href={`/trees/${episode.treeId}`} className="font-mono text-2xs">
@@ -31,7 +45,13 @@ export const EpisodeCard = ({ episode }: { readonly episode: IntentEpisode }) =>
         </Link>
       </div>
 
-      <p className="text-ink-muted font-mono text-2xs">{describeIntent(episode)}</p>
+      <p className="text-ink-muted font-mono text-2xs">
+        {intent.before}
+        {intent.revision !== null && (
+          <RevisionLink treeId={episode.treeId} revision={intent.revision} />
+        )}
+        {intent.after}
+      </p>
 
       {episode.proposals.length === 0 ? (
         <p className="text-ink-muted text-xs">No change was proposed for this ask.</p>

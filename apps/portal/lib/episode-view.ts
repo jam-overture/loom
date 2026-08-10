@@ -19,8 +19,17 @@ import type { OutcomeTone } from "./outcome"
 export type EpisodeView = {
   readonly tone: OutcomeTone
   readonly headline: string
-  /** The sentence under the headline. Empty when the headline says everything. */
+  /**
+   * The sentence under the headline. Empty when the headline says everything,
+   * and empty for a committed ask, whose whole account is the revision below.
+   */
   readonly detail: string
+  /**
+   * The revision the ask produced, and null for every outcome that produced
+   * none. Kept out of `detail` because a revision is somewhere a reviewer can go
+   * (0043), and a number inside a sentence is a number they have to retype.
+   */
+  readonly revision: number | null
 }
 
 /**
@@ -54,7 +63,7 @@ const HEADLINES: Readonly<Record<EpisodeResolution["kind"], string>> = {
 const detailOf = (resolution: EpisodeResolution): string => {
   switch (resolution.kind) {
     case "committed":
-      return `revision ${resolution.revision}`
+      return ""
     case "refused":
       return "the Gate would not apply it, and no repair replaced it"
     case "awaiting-answer":
@@ -83,6 +92,7 @@ export const viewOf = (resolution: EpisodeResolution): EpisodeView => ({
   tone: toneOfResolution(resolution.kind),
   headline: headlineOfResolution(resolution.kind),
   detail: detailOf(resolution),
+  revision: resolution.kind === "committed" ? resolution.revision : null,
 })
 
 /**
@@ -96,16 +106,34 @@ export const viewOf = (resolution: EpisodeResolution): EpisodeView => ({
  * person, and the question a reader brings to this page is the second one — but
  * the origin stays alongside it, because `developer` and `user-instruction` are
  * different acts by the same person (0017).
+ *
+ * Split around the revision rather than returned whole, for the reason a credit
+ * is (0043). The base revision is the state the ask was aimed at, which is as
+ * much a position as the one it produced — a reviewer asking "what was this
+ * written against" is asking to go and look at it.
  */
-export const describeIntent = (episode: IntentEpisode): string => {
+export type IntentLine = {
+  readonly before: string
+  /** The revision the ask was made against, or null when the ask was not recorded. */
+  readonly revision: number | null
+  readonly after: string
+}
+
+export const describeIntent = (episode: IntentEpisode): IntentLine => {
   const { intent } = episode
-  if (intent === undefined) return "this page opened after the ask was recorded"
+  if (intent === undefined) {
+    return { before: "this page opened after the ask was recorded", revision: null, after: "" }
+  }
 
   const who = intent.actor === undefined ? intent.origin : `${intent.actor} · ${intent.origin}`
   const scope = intent.scopeNodeId === undefined ? "the whole tree" : intent.scopeNodeId
   const characters = intent.utteranceLength === 1 ? "character" : "characters"
 
-  return `${who} · ${scope} · revision ${intent.baseRevision} · ${intent.utteranceLength} ${characters}`
+  return {
+    before: `${who} · ${scope} · `,
+    revision: intent.baseRevision,
+    after: ` · ${intent.utteranceLength} ${characters}`,
+  }
 }
 
 /**

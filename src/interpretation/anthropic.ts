@@ -30,6 +30,41 @@ const firstTextBlock = (message: Anthropic.Message): string | undefined =>
 const errorDetail = (cause: unknown): string =>
   cause instanceof Error ? cause.message : "unknown transport failure"
 
+/**
+ * Read structurally rather than with `instanceof`, for the same reason this
+ * module takes `AnthropicMessages` rather than an `Anthropic`: the SDK is an
+ * optional peer, and a stub in a test throws whatever it likes.
+ */
+const statusOf = (cause: unknown): number | undefined => {
+  if (typeof cause !== "object" || cause === null) return undefined
+
+  const { status } = cause as { readonly status?: unknown }
+
+  return typeof status === "number" ? status : undefined
+}
+
+/**
+ * Which of the three "could not answer" codes a thrown error is.
+ *
+ * Only a status we positively recognise as this side's fault becomes `rejected`
+ * or `misconfigured`; everything else — including a transport failure that
+ * never got a response — stays `unavailable`. Guessing wrong in that direction
+ * costs a retry that fails, where guessing wrong the other way tells a host to
+ * stop trying something that would have worked.
+ *
+ * 408, 409 and 429 are the 4xx statuses that mean "later", and the SDK has
+ * already retried them twice by the time one reaches here, so a 429 that
+ * escapes is a rate limit that outlasted the client's own backoff.
+ */
+const classifyThrown = (status: number | undefined): "unavailable" | "rejected" | "misconfigured" => {
+  if (status === undefined) return "unavailable"
+  if (status === 401 || status === 402 || status === 403) return "misconfigured"
+
+  const asksAgainLater = status === 408 || status === 409 || status === 429
+
+  return status >= 400 && status < 500 && !asksAgainLater ? "rejected" : "unavailable"
+}
+
 const toCompletion = (
   message: Anthropic.Message
 ): Result<ModelCompletion, ModelClientError> => {
@@ -65,7 +100,7 @@ export const anthropicModelClient = (messages: AnthropicMessages): ModelClient =
 
       return toCompletion(message)
     } catch (cause) {
-      return err({ code: "unavailable", detail: errorDetail(cause) })
+      return err({ code: classifyThrown(statusOf(cause)), detail: errorDetail(cause) })
     }
   },
 })

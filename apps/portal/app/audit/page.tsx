@@ -79,7 +79,7 @@ const AuditPage = async ({ searchParams }: { searchParams: Promise<{ tree?: stri
       {problem !== undefined && !problem.ok ? (
         <p className="text-ink-muted text-sm">{describeStoreError(problem.error)}</p>
       ) : audit !== undefined && audit.ok ? (
-        <AuditVerdict report={describeAudit(audit.value)} />
+        <AuditVerdict report={describeAudit(audit.value)} treeId={scope.data} />
       ) : (
         <p className="text-ink-muted text-sm">
           This deployment cannot reproduce the shape this tree was created with, so its log
