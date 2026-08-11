@@ -24,6 +24,9 @@ pure function, attributable in telemetry, and reversible.
 6. **Telemetry** — proposal, provenance, disposition, and outcome, captured from day one
 7. **Marketplace** — last, and not started
 
+Sections 4b, 4c and 4d are set out below. They were never in the original
+build order, which is why the routine never reached them.
+
 Sections 1–6 are built and run end to end. What is still open in each is tracked
 in the latest report in [`reports/`](reports/) rather than here, because a marker
 in a README is a thing that goes stale quietly.
@@ -52,18 +55,98 @@ Order, and the reason for it:
 1. **Theme** — done ([0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md)).
    Without it every ported renderer is unstyled. Still to wire: the render root
    must mount the variables.
-2. **Ten primitives, not seventy.** Chosen to cover the *contract* rather than
-   the catalogue: two or three that genuinely nest, so slots are exercised; a
-   few leaves; one with a rich prop schema; one with an enum-driven display
-   mode. Prove the port pattern before industrialising it.
-3. **One real page**, assembled from those and edited through the portal. This
-   is the first end-to-end test of §1–§6 against something not written to pass
-   its own tests, and it is the demo.
-4. **The remaining primitives**, which by then are mechanical — and only then
-   §7, because a marketplace of primitives needs primitives.
+2. **Three primitives to prove the pattern.** Chosen to cover the *contract*,
+   not the catalogue: one that genuinely nests so slots are exercised, one leaf,
+   one with an enum-driven display mode. Prove the port before industrialising
+   it.
+3. **The demo vocabulary — roughly fifteen, and they must be good.** See the
+   quality bar below. This is where the time goes, and it is time worth
+   spending.
+4. **The demo itself**, assembled from them and edited through the portal.
+5. **The remaining primitives**, mechanical by then — and only then §7, because
+   a marketplace of primitives needs primitives.
 
 Refinement inside §1–§6 is **reactive from here**: driven by what the port
 breaks, not run as its own stream.
+
+#### The quality bar
+
+Hermes and [21st.dev](https://21st.dev) are strong at different things, and the
+demo needs both. Hermes has the **content models** — what a services section
+actually needs, worked out over a year. 21st.dev has the **visual standard**:
+animated heroes, considered motion, marketing blocks that look like a real
+product rather than a UI kit. A port that takes the Hermes field lists and
+renders them as unstyled divs clears neither bar.
+
+Nothing marginal ships. A primitive is done when it would not look out of place
+on a real marketing page — motion where motion earns its place, real spacing,
+real type. Where that means writing a better component than Hermes had, write
+it; the content model is the inheritance, not the markup.
+
+One constraint shapes how that works. Props are JSON, so **behaviour lives in
+the registered component, never in the tree**. An animated hero is a primitive
+whose animation is part of its implementation; AI configures its content, its
+variant and its theme, and cannot reach the animation. That is the bargain
+working as intended, and it is worth stating in the docs rather than
+discovering.
+
+#### What the demo has to show
+
+Not "AI changed a page" — everyone shows that, and on its own it is unremarkable.
+The demo shows **the change and the record of it, side by side**:
+
+- the page adapting, live
+- the `ProposedChange` that caused it, with its rationale and provenance
+- the stakes factors and the reversibility verdict, in the language the Gate used
+- the disposition and *which rule fired*, and under which policy
+- the inverse delta, with undo as a real button
+- the revision it produced, and what it replaced
+
+That split view is the thesis made visible, and no code generator can show it.
+It is also already true of the runtime — every field named above exists today;
+what is missing is a surface that puts them next to the page.
+
+### 4c — Documentation site
+
+A `apps/docs` app in the workspace, deployed like the portal, **modelled on
+[nextjs.org/docs](https://nextjs.org/docs)**: persistent left sidebar grouped
+into sections, prose with copy-paste code blocks, callouts, prev/next at the
+foot of every page, search, and light and dark themes.
+
+Structure, following that model:
+
+| Section | Holds |
+| --- | --- |
+| Getting started | Install, first primitive, first tree, first proposal |
+| Building with Loom | Primitives, slots, themes, the registry, the CLI |
+| The runtime | Intents, the Gate, policy, dispositions, undo, telemetry |
+| API reference | Generated per entry point from the published surface |
+| Architecture | Why a tree, why a delta — the thesis, linking to the records |
+
+Two things to get right, because they are the ones a generic docs site misses:
+
+- **The API reference is generated, not written.** The package publishes ten
+  entry points; a hand-maintained reference drifts from them within a week.
+- **`decisions/` and `lessons/` are the source for Architecture**, not
+  duplicated into it. They already exist, they are already accurate, and a
+  second copy of an argument is a second copy to keep true.
+
+Sequenced **after the demo**, deliberately: docs describe a vocabulary, and
+writing them while the vocabulary is still moving buys a rewrite. Worth
+revisiting only if something needs documenting sooner.
+
+*Open, and the maintainer's call:* whether the docs site is itself built on
+Loom. It would be the strongest possible proof, and it would couple the
+documentation's availability to the runtime's stability. Recommend not at
+first — ship it as an ordinary Next.js app, and revisit once the vocabulary has
+settled.
+
+### 4d — Marketing site
+
+Depends on the demo, and cannot start before it. The demo pages are the
+substance; the marketing site is the frame around them. Scope when §4b lands —
+positioning, audience and licensing are all undecided, and none of them are
+engineering questions.
 
 ## Layout
 
