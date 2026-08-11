@@ -1,0 +1,128 @@
+import { z } from "zod"
+
+/**
+ * The theme vocabulary, ported from the Hermes registry (§4b).
+ *
+ * Three orthogonal pieces — colour, type, and shape — because they vary
+ * independently in practice: a host swaps the palette for a dark mode without
+ * touching the typographic ramp, and swaps the ramp for a rebrand without
+ * touching the radii.
+ *
+ * Every piece is *registered and addressed by id*, never inlined. That is the
+ * same bargain the primitive registry makes: a bounded vocabulary a model may
+ * choose from, so "make it warmer" resolves to a named palette a human approved
+ * rather than to seventeen colours a model invented. The alternative — letting a
+ * proposal carry raw hex — would put an unbounded value space inside the one
+ * part of the system that exists to bound what AI may produce.
+ */
+
+const colourSchema = z
+  .string()
+  .regex(/^(#[0-9a-fA-F]{3,8}|rgba?\(.+\)|hsla?\(.+\)|[a-z]+)$/)
+
+/**
+ * Every palette declares every slot. Normalised on purpose: a tree themed with
+ * one palette can be re-themed with any other, because there is no slot a
+ * primitive might read that some palette leaves undefined.
+ */
+export const paletteSlotSchema = z.enum([
+  // Surface tier, bottom-up
+  "bg-canvas",
+  "bg-surface",
+  "bg-surface-muted",
+  "bg-overlay",
+  // Foreground tier
+  "fg-default",
+  "fg-muted",
+  "fg-subtle",
+  "fg-on-accent",
+  // Accent tier
+  "accent",
+  "accent-strong",
+  "accent-subtle",
+  // Brand secondary — reserved even for single-accent palettes, which mirror
+  // their accent into it, so every palette has the same shape.
+  "brand-secondary",
+  "brand-secondary-strong",
+  // Border tier
+  "border-default",
+  "border-strong",
+  "border-subtle",
+  "border-accent",
+])
+export type PaletteSlot = z.infer<typeof paletteSlotSchema>
+
+export const PALETTE_SLOTS = paletteSlotSchema.options
+
+export const themeIdSchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/)
+  .brand<"ThemeId">()
+export type ThemeId = z.infer<typeof themeIdSchema>
+
+export const paletteSchema = z.object({
+  id: themeIdSchema,
+  name: z.string().min(1),
+  description: z.string().min(1),
+  slots: z.record(paletteSlotSchema, colourSchema).refine(
+    (slots) => PALETTE_SLOTS.every((slot) => slots[slot] !== undefined),
+    { message: "a palette must declare every slot" }
+  ),
+})
+export type Palette = z.infer<typeof paletteSchema>
+
+export const fontPackSchema = z.object({
+  id: themeIdSchema,
+  name: z.string().min(1),
+  description: z.string().min(1),
+  headingFamily: z.string().min(1),
+  bodyFamily: z.string().min(1),
+  accentFamily: z.string().min(1).optional(),
+  headingWeight: z.number().int().positive(),
+  bodyWeight: z.number().int().positive(),
+  /** Typographic ramp in px, smallest first. Emitted as `--loom-scale-1…n`. */
+  scaleRamp: z.array(z.number().positive()).min(2),
+})
+export type FontPack = z.infer<typeof fontPackSchema>
+
+export const stylePresetSchema = z.object({
+  id: themeIdSchema,
+  name: z.string().min(1),
+  description: z.string().min(1),
+  radii: z.object({
+    sm: z.number().nonnegative(),
+    md: z.number().nonnegative(),
+    lg: z.number().nonnegative(),
+    full: z.number().nonnegative(),
+  }),
+  /** Spacing steps in px, smallest first. Emitted as `--loom-spacing-1…n`. */
+  spacingScale: z.array(z.number().nonnegative()).min(2),
+  motion: z.object({
+    fast: z.number().nonnegative(),
+    medium: z.number().nonnegative(),
+    slow: z.number().nonnegative(),
+  }),
+  density: z.enum(["compact", "comfortable", "spacious"]),
+})
+export type StylePreset = z.infer<typeof stylePresetSchema>
+
+/**
+ * What a tree carries: three ids, not three documents.
+ *
+ * This is what makes a theme change a `configure` operation on the root like
+ * any other — small enough for a model to emit, bounded by the registry, and
+ * gated, attributed and reversed by exactly the machinery §1–§2 already built
+ * (0048).
+ */
+export const themeSelectionSchema = z.object({
+  palette: themeIdSchema,
+  fontPack: themeIdSchema,
+  stylePreset: themeIdSchema,
+})
+export type ThemeSelection = z.infer<typeof themeSelectionSchema>
+
+export type ResolvedTheme = {
+  readonly palette: Palette
+  readonly fontPack: FontPack
+  readonly stylePreset: StylePreset
+}

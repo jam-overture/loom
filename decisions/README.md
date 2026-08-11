@@ -106,3 +106,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0046](0046-a-render-test-crosses-no-boundary-the-framework-would-not.md) | A render test crosses no boundary the framework would not | Accepted | §5 |
 | [0047](0047-a-verdict-belongs-to-the-gate-that-reached-it.md) | A verdict belongs to the gate that reached it | Accepted | §6 → §2 |
 | [0048](0048-a-name-is-checked-by-a-fingerprint-beside-it.md) | A policy's name is checked by a fingerprint stored beside it | Accepted | §2 → §6 |
+| [0049](0049-a-theme-is-three-ids-in-the-tree.md) | A theme is three registered ids, carried in the tree | Accepted | §4b → §1, §3 |
