@@ -62,6 +62,13 @@ Order, and the reason for it:
 3. **The demo vocabulary — roughly fifteen, and they must be good.** See the
    quality bar below. This is where the time goes, and it is time worth
    spending.
+
+   Choose them so they can build the **marketing site** (§4d), because that is
+   now made of the same primitives: hero, section, feature grid, testimonial,
+   pricing, logo cloud, stats, FAQ, CTA, footer, nav. The demo vocabulary and
+   the marketing vocabulary turned out to be one list, which is a useful
+   accident — every primitive gets used twice, and the marketing site becomes
+   the proof rather than a brochure about it.
 4. **The demo itself**, assembled from them and edited through the portal.
 5. **The remaining primitives**, mechanical by then — and only then §7, because
    a marketplace of primitives needs primitives.
