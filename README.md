@@ -132,21 +132,37 @@ Two things to get right, because they are the ones a generic docs site misses:
   second copy of an argument is a second copy to keep true.
 
 Sequenced **after the demo**, deliberately: docs describe a vocabulary, and
-writing them while the vocabulary is still moving buys a rewrite. Worth
-revisiting only if something needs documenting sooner.
+writing them while the vocabulary is still moving buys a rewrite.
 
-*Open, and the maintainer's call:* whether the docs site is itself built on
-Loom. It would be the strongest possible proof, and it would couple the
-documentation's availability to the runtime's stability. Recommend not at
-first — ship it as an ordinary Next.js app, and revisit once the vocabulary has
-settled.
+#### How much of the docs site is Loom
+
+**Decided:** prose and code blocks are MDX; **every rendered example on the page
+is a real `LoomTree`**, mounted through the runtime, with a working
+"propose a change" box beside it.
+
+The reasoning, because the tempting answer is "all of it". A docs page is
+long-form prose with dozens of code samples, and a tree of text nodes is worse
+than MDX at authoring, diffing and review — the bounded vocabulary that makes
+Loom safe for a marketing page is the wrong instrument for arbitrary prose. It
+would also put the documentation's availability behind the runtime's, which is
+a bad trade for the thing people read when the runtime is confusing them.
+
+Putting the *examples* in Loom dogfoods the part that matters and is a stronger
+demonstration than a tree-shaped paragraph: a reader on the page about slots
+edits a live tree that uses them, and watches the Gate respond. Every example is
+therefore a real registry entry, and an example that cannot render is a failing
+test rather than a stale snippet.
 
 ### 4d — Marketing site
 
-Depends on the demo, and cannot start before it. The demo pages are the
-substance; the marketing site is the frame around them. Scope when §4b lands —
-positioning, audience and licensing are all undecided, and none of them are
-engineering questions.
+**Built entirely in Loom.** This is the one surface where the framework is
+unambiguously the right tool: composed sections, themed, and adapting — which is
+the product rather than a demonstration of it. The demo pages from §4b are the
+substance; the marketing site is the frame, and it is made of the same
+primitives.
+
+It cannot start before the demo exists. Positioning, audience and licensing are
+undecided and are not engineering questions; scope them when §4b lands.
 
 ## Layout
 
