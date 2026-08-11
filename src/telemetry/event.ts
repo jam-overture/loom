@@ -21,6 +21,7 @@ import {
 } from "../runtime/disposition.js"
 import type { RuntimeEvent, RuntimeEventEnvelope } from "../runtime/events.js"
 import { intentOriginSchema, type EditIntent, type IntentOrigin } from "../runtime/intent.js"
+import { policyFingerprintOf } from "../runtime/policy-fingerprint.js"
 import { proposedChangeSchema, type ProposedChange } from "../runtime/proposal.js"
 import { stakeLevelSchema, type StakeLevel } from "../runtime/stake-level.js"
 import { describeStoreError } from "../store/errors.js"
@@ -154,6 +155,7 @@ export const telemetryEventSchema = z.discriminatedUnion("type", [
     type: z.literal("policy-resolved"),
     intentId: intentIdSchema,
     policyId: z.string().min(1),
+    policyFingerprint: z.string().min(1).optional(),
   }),
   z.object({
     type: z.literal("interpretation-failed"),
@@ -227,7 +229,13 @@ export const telemetryEventSchema = z.discriminatedUnion("type", [
 
 export type TelemetryEvent =
   | { readonly type: "intent-received"; readonly intent: IntentSummary }
-  | { readonly type: "policy-resolved"; readonly intentId: IntentId; readonly policyId: string }
+  | {
+      readonly type: "policy-resolved"
+      readonly intentId: IntentId
+      readonly policyId: string
+      /** Absent on a record written before the Gate fingerprinted policies (0045). */
+      readonly policyFingerprint?: string
+    }
   | {
       readonly type: "interpretation-failed"
       readonly intentId: IntentId
@@ -337,12 +345,18 @@ const narrowEvent = (event: RuntimeEvent): TelemetryEvent => {
      * onto every change would store one document a million times to answer a
      * question the name already answers.
      *
-     * That is only true while a name identifies content, which is the contract
-     * `GatePolicy.policyId` states: a host that edits a policy renames it, or
-     * the records that name it are describing something that no longer exists.
+     * The fingerprint is what makes that contract checkable rather than merely
+     * stated (0048). It is a digest, not the document: bounded, and it answers
+     * "did this name keep meaning one thing" without keeping a copy of the
+     * configuration on every change.
      */
     case "policy-resolved":
-      return { type: "policy-resolved", intentId: event.intentId, policyId: event.policy.policyId }
+      return {
+        type: "policy-resolved",
+        intentId: event.intentId,
+        policyId: event.policy.policyId,
+        policyFingerprint: policyFingerprintOf(event.policy),
+      }
 
     case "interpretation-failed":
       return {

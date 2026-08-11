@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { UNATTRIBUTED_POLICY_ID } from "../runtime/disposition.js"
+import { rulesetContinuityOf } from "../runtime/policy-fingerprint.js"
 import { defaultGatePolicy, type GatePolicy } from "../runtime/policy.js"
 import { harnessWith, proposalScript } from "../testing/episode-harness.js"
 import { commitIntent, discardHeld, revertRevision } from "../write/index.js"
@@ -73,6 +74,29 @@ const judgedBy = (policyId: string) => (proposal: ProposalEpisode): ProposalEpis
   proposal.disposition === undefined
     ? proposal
     : { ...proposal, disposition: { ...proposal.disposition, policyId } }
+
+/** A judgment from before the Gate fingerprinted policies. No live run produces one. */
+const forgetFingerprint = (proposal: ProposalEpisode): ProposalEpisode => {
+  if (proposal.disposition === undefined) return proposal
+
+  const { policyFingerprint: _unrecorded, ...disposition } = proposal.disposition
+
+  return { ...proposal, disposition }
+}
+
+/**
+ * A judgment from a version of Loom whose policy had a different set of knobs.
+ * Reachable only by editing the shape half, since this version can produce
+ * exactly one shape.
+ */
+const underPolicyShape = (shape: string) => (proposal: ProposalEpisode): ProposalEpisode => {
+  const fingerprint = proposal.disposition?.policyFingerprint
+  if (proposal.disposition === undefined || fingerprint === undefined) return proposal
+
+  const values = fingerprint.slice(fingerprint.indexOf(":"))
+
+  return { ...proposal, disposition: { ...proposal.disposition, policyFingerprint: `${shape}${values}` } }
+}
 
 const segmentFor = (report: CalibrationReport, policyId: string | null) => {
   const segment = report.byPolicy.find((candidate) => candidate.policyId === policyId)
@@ -375,5 +399,121 @@ describe("calibrationOf, by the policy that judged", () => {
     expect(report.runtimeAuthored).toBe(1)
     expect(report.byPolicy).toHaveLength(1)
     expect(segmentFor(report, "generous").overall.judged).toBe(1)
+  })
+})
+
+/**
+ * The hole 0047 left, and the reason 0048 exists. Segmenting by name is only as
+ * good as the contract that a name identifies content — a host that edits a
+ * policy in place produces one row pooling two gates, which is the exact error
+ * the segments were built to correct, one level down.
+ */
+describe("calibrationOf, by what the policy contained", () => {
+  /** Same name, different rules. Exactly what 0033 asked hosts not to do. */
+  const GENEROUS_EDITED: GatePolicy = { ...GENEROUS, minimumConfidence: 0.5 }
+
+  it("reports one ruleset when a name kept meaning one thing", async () => {
+    const report = calibrationOf(merged(await runUnder(0.9, GENEROUS), await runUnder(0.2, GENEROUS)))
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.fingerprints).toHaveLength(1)
+    expect(segment.unfingerprinted).toBe(0)
+    expect(rulesetContinuityOf(segment.fingerprints)).toBe("single")
+  })
+
+  it("sees two rulesets under one name when a host edited a policy without renaming it", async () => {
+    const report = calibrationOf(
+      merged(await runUnder(0.9, GENEROUS), await runUnder(0.9, GENEROUS_EDITED))
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.overall.judged).toBe(2)
+    expect(segment.fingerprints).toHaveLength(2)
+    expect(rulesetContinuityOf(segment.fingerprints)).toBe("changed")
+  })
+
+  it("does not call a renamed policy an edit", async () => {
+    const renamed: GatePolicy = { ...GENEROUS, policyId: "generous-v2" }
+    const report = calibrationOf(merged(await runUnder(0.9, GENEROUS), await runUnder(0.9, renamed)))
+
+    expect(report.byPolicy.map((segment) => segment.policyId)).toEqual([
+      "generous",
+      "generous-v2",
+    ])
+    expect(segmentFor(report, "generous").fingerprints).toEqual(
+      segmentFor(report, "generous-v2").fingerprints
+    )
+  })
+
+  /** Fingerprints belong to the gate that produced them, like the verdicts do (0047). */
+  it("keeps each gate's rulesets inside that gate's segment", async () => {
+    const report = calibrationOf(merged(await runUnder(0.9, GENEROUS), await runUnder(0.9, STRICT)))
+
+    expect(segmentFor(report, "generous").fingerprints).toHaveLength(1)
+    expect(segmentFor(report, "strict").fingerprints).toHaveLength(1)
+    expect(segmentFor(report, "generous").fingerprints).not.toEqual(
+      segmentFor(report, "strict").fingerprints
+    )
+  })
+
+  /**
+   * The count is beside the list rather than in it. One fingerprint and three
+   * judgments that named none is not a segment shown to be constant, and a list
+   * of length one would say that it was.
+   */
+  it("counts a judgment that named no ruleset without letting it look like agreement", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, GENEROUS),
+        withDispositions(await runUnder(0.9, GENEROUS), forgetFingerprint)
+      )
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.overall.judged).toBe(2)
+    expect(segment.fingerprints).toHaveLength(1)
+    expect(segment.unfingerprinted).toBe(1)
+  })
+
+  it("reads a segment where nothing was fingerprinted as unrecorded, not as agreement", async () => {
+    const report = calibrationOf(
+      withDispositions(await runUnder(0.9, GENEROUS), forgetFingerprint)
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.fingerprints).toEqual([])
+    expect(segment.unfingerprinted).toBe(1)
+    expect(rulesetContinuityOf(segment.fingerprints)).toBe("unrecorded")
+  })
+
+  /**
+   * Two versions of Loom disagreeing about which knobs exist is not evidence that
+   * a host edited anything. Reporting it as a change would make every upgrade
+   * look like a configuration incident.
+   */
+  it("calls judgments from two versions of the policy schema incomparable", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, GENEROUS),
+        withDispositions(await runUnder(0.9, GENEROUS), underPolicyShape("00000000"))
+      )
+    )
+    const segment = segmentFor(report, "generous")
+
+    expect(segment.fingerprints).toHaveLength(2)
+    expect(rulesetContinuityOf(segment.fingerprints)).toBe("incomparable")
+  })
+
+  it("sorts the rulesets, so two readings of one window list them the same way", async () => {
+    const report = calibrationOf(
+      merged(
+        await runUnder(0.9, GENEROUS_EDITED),
+        await runUnder(0.9, GENEROUS),
+        await runUnder(0.2, GENEROUS_EDITED)
+      )
+    )
+    const { fingerprints } = segmentFor(report, "generous")
+
+    expect(fingerprints).toEqual([...fingerprints].sort())
   })
 })

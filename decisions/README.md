@@ -105,3 +105,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0045](0045-a-telemetry-field-added-later-is-optional-forever.md) | A telemetry field added later is optional, and never defaulted | Accepted | §6 |
 | [0046](0046-a-render-test-crosses-no-boundary-the-framework-would-not.md) | A render test crosses no boundary the framework would not | Accepted | §5 |
 | [0047](0047-a-verdict-belongs-to-the-gate-that-reached-it.md) | A verdict belongs to the gate that reached it | Accepted | §6 → §2 |
+| [0048](0048-a-name-is-checked-by-a-fingerprint-beside-it.md) | A policy's name is checked by a fingerprint stored beside it | Accepted | §2 → §6 |

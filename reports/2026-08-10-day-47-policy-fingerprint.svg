@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="700" viewBox="0 0 960 700" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="700" fill="#ffffff"/>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">A name is checked by a fingerprint beside it</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0048 — day 47 — §2 → §6. What the Gate stamps, and what a reader can then tell.</text>
+
+  <!-- ================= before / after ================= -->
+  <text x="32" y="100" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">BEFORE — 0033: a name, and a contract nobody could check</text>
+
+  <rect x="32" y="112" width="200" height="72" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="132" font-size="11.5" fill="#111827">GatePolicy</text>
+  <text x="44" y="150" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="44" y="166" font-size="10.5" fill="#6b7280">minimumConfidence: 0.7</text>
+
+  <path d="M 232 148 L 300 148" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="240" y="141" font-size="9.5" fill="#9ca3af">gate()</text>
+
+  <rect x="300" y="112" width="196" height="72" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="312" y="132" font-size="11.5" fill="#111827">Disposition</text>
+  <text x="312" y="150" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="312" y="168" font-size="10.5" fill="#b45309">(and nothing else about it)</text>
+
+  <!-- the edit -->
+  <rect x="32" y="200" width="200" height="72" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="44" y="220" font-size="11.5" fill="#111827">GatePolicy — edited</text>
+  <text x="44" y="238" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="44" y="254" font-size="10.5" fill="#b91c1c">minimumConfidence: 0.8</text>
+
+  <path d="M 232 236 L 300 236" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="300" y="200" width="196" height="72" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="312" y="220" font-size="11.5" fill="#111827">Disposition</text>
+  <text x="312" y="238" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="312" y="256" font-size="10.5" fill="#b91c1c">indistinguishable</text>
+
+  <path d="M 500 190 L 560 190" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="564" y="140" width="364" height="100" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="578" y="162" font-size="11.5" fill="#111827">/calibration — one row, two gates</text>
+  <text x="578" y="184" font-size="10.5" fill="#374151">checkout · judged 6 · survived 50% · claim 90%</text>
+  <text x="578" y="202" font-size="10.5" fill="#b91c1c">"claimed more than it delivered"</text>
+  <text x="578" y="224" font-size="10" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">A finding about the model, produced by a config edit.</text>
+
+  <line x1="32" y1="298" x2="928" y2="298" stroke="#e5e7eb"/>
+
+  <!-- ================= after ================= -->
+  <text x="32" y="330" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">AFTER — 0048: the Gate also stamps what the policy contained</text>
+
+  <rect x="32" y="344" width="200" height="86" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="364" font-size="11.5" fill="#111827">GatePolicy</text>
+  <text x="44" y="382" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="44" y="398" font-size="10.5" fill="#6b7280">minimumConfidence: 0.7</text>
+  <text x="44" y="418" font-size="10" fill="#9ca3af">…10 more knobs</text>
+
+  <path d="M 232 386 L 296 386" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="228" y="379" font-size="9.5" fill="#9ca3af">policyFingerprintOf</text>
+
+  <rect x="300" y="344" width="196" height="86" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="312" y="364" font-size="11.5" fill="#111827">Disposition</text>
+  <text x="312" y="382" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="312" y="400" font-size="10.5" fill="#15803d">policyFingerprint:</text>
+  <text x="312" y="416" font-size="10.5" fill="#15803d">8deb064d:1e1c8494…</text>
+
+  <rect x="32" y="446" width="200" height="86" rx="6" fill="#fffbeb" stroke="#fcd34d"/>
+  <text x="44" y="466" font-size="11.5" fill="#111827">GatePolicy — edited</text>
+  <text x="44" y="484" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="44" y="500" font-size="10.5" fill="#b45309">minimumConfidence: 0.8</text>
+
+  <path d="M 232 488 L 296 488" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="300" y="446" width="196" height="86" rx="6" fill="#fffbeb" stroke="#fcd34d"/>
+  <text x="312" y="466" font-size="11.5" fill="#111827">Disposition</text>
+  <text x="312" y="484" font-size="10.5" fill="#6b7280">policyId: "checkout"</text>
+  <text x="312" y="502" font-size="10.5" fill="#b45309">policyFingerprint:</text>
+  <text x="312" y="518" font-size="10.5" fill="#b45309">8deb064d:7c02af31…</text>
+
+  <path d="M 500 452 L 560 452" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="564" y="392" width="364" height="122" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="578" y="414" font-size="11.5" fill="#111827">/calibration — the row says so</text>
+  <text x="578" y="436" font-size="10.5" fill="#374151">checkout · judged 6 · survived 50% · claim 90%</text>
+  <text x="578" y="456" font-size="10.5" fill="#b91c1c">the rules changed under this name</text>
+  <text x="578" y="476" font-size="10" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">2 different rulesets judged these claims while</text>
+  <text x="578" y="490" font-size="10" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">calling themselves "checkout".</text>
+  <text x="578" y="506" font-size="10" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">The breakdown appears even for one row.</text>
+
+  <line x1="32" y1="552" x2="928" y2="552" stroke="#e5e7eb"/>
+
+  <!-- ================= the two halves ================= -->
+  <text x="32" y="580" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHY THE FINGERPRINT HAS TWO HALVES</text>
+
+  <rect x="32" y="592" width="180" height="34" rx="4" fill="#eef2ff" stroke="#a5b4fc"/>
+  <text x="44" y="613" font-size="11" fill="#3730a3">8deb064d</text>
+  <text x="220" y="606" font-size="10.5" fill="#374151">shape — which knobs exist. Changes only when a version of Loom</text>
+  <text x="220" y="621" font-size="10.5" fill="#374151">adds or removes a policy field.</text>
+
+  <rect x="32" y="634" width="180" height="34" rx="4" fill="#ecfeff" stroke="#67e8f9"/>
+  <text x="44" y="655" font-size="11" fill="#155e75">1e1c8494…</text>
+  <text x="220" y="648" font-size="10.5" fill="#374151">values — what they are set to. Changes when a host edits its policy.</text>
+  <text x="220" y="663" font-size="10.5" fill="#6b7280">Same shape, different values → <tspan fill="#b91c1c">changed</tspan>. Different shapes → <tspan fill="#6b7280">incomparable</tspan>, never "changed".</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+</svg>

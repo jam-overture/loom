@@ -1,5 +1,6 @@
 import type { ChangeAssessment } from "./assessment.js"
 import type { Disposition, DispositionReason } from "./disposition.js"
+import { policyFingerprintOf } from "./policy-fingerprint.js"
 import { ceilingFor, type GatePolicy } from "./policy.js"
 import { isAbove, isAtLeast } from "./stake-level.js"
 import { stakeFactor } from "./stakes.js"
@@ -41,6 +42,12 @@ const decide = (
    * decided under is worse than one naming none.
    */
   policyId: policy.policyId,
+  /**
+   * And what that policy contained, for the same reason and in the same place. A
+   * name is what a host can look up; a fingerprint is what proves the name still
+   * means what it meant. Neither is trustworthy from the caller.
+   */
+  policyFingerprint: policyFingerprintOf(policy),
 })
 
 /** Too unsure to act on at all — asking the user to confirm a guess is noise. */

@@ -1,7 +1,8 @@
 import type { CalibrationReport } from "@loom/runtime/telemetry"
 
-import { describePolicy, formatRate, readGap } from "@/lib/calibration-view"
-import { toneClasses } from "@/lib/outcome"
+import { poolsMoreThanOneGate } from "@/lib/calibration-view"
+
+import { PolicyRow } from "./policy-row"
 
 /** A policy name is `z.string().min(1)`, so an empty one cannot collide with a real gate. */
 const UNRECORDED_KEY = ""
@@ -15,19 +16,26 @@ const UNRECORDED_KEY = ""
  * when a host edits its configuration, which is the moment a reader is most
  * likely to conclude the model got worse.
  *
- * Absent below one segment on purpose. With a single policy in the window this
- * table restates the headline in smaller type, and a breakdown that is always
- * there is a breakdown nobody reads on the day it matters.
+ * Absent while the page pools nothing on purpose. With a single unchanged policy
+ * in the window this table restates the headline in smaller type, and a
+ * breakdown that is always there is a breakdown nobody reads on the day it
+ * matters.
+ *
+ * "One policy" is a claim about a name, and a name is host-declared. So a single
+ * segment whose rules changed mid-window is still a pooled page, and still gets
+ * the table — with the row's own note saying why it is not the one gate it
+ * appears to be (0048).
  */
 export const PolicyBreakdown =({ report }: { readonly report: CalibrationReport }) => {
-  if (report.byPolicy.length < 2) return null
+  if (!poolsMoreThanOneGate(report)) return null
 
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-sm tracking-tight">by the gate that judged</h2>
       <p className="text-ink-muted text-xs">
-        More than one policy judged the claims on this page, so the headline above pools gates that
-        did not agree. Each row is the same measurement over one of them.
+        {report.byPolicy.length > 1
+          ? "More than one policy judged the claims on this page, so the headline above pools gates that did not agree. Each row is the same measurement over one of them."
+          : "The policy on this page did not hold still, so the headline above pools judgments made under different rules. Each row is the same measurement over one name."}
       </p>
 
       <table className="w-full border-collapse">
@@ -41,27 +49,9 @@ export const PolicyBreakdown =({ report }: { readonly report: CalibrationReport 
           </tr>
         </thead>
         <tbody>
-          {report.byPolicy.map((segment) => {
-            const reading = readGap(segment.overall)
-
-            return (
-              <tr key={segment.policyId ?? UNRECORDED_KEY} className="border-edge-subtle border-t">
-                <td className="py-2 pr-4 font-mono text-2xs">{describePolicy(segment.policyId)}</td>
-                <td className="py-2 pr-4 text-right font-mono text-2xs">{segment.overall.judged}</td>
-                <td className="py-2 pr-4 text-right font-mono text-2xs">
-                  {formatRate(segment.overall.observedRate)}
-                </td>
-                <td className="py-2 pr-4 text-right font-mono text-2xs">
-                  {formatRate(segment.overall.meanConfidence)}
-                </td>
-                <td className="py-2">
-                  <span className={"rounded-sm px-2 py-0.5 text-2xs " + toneClasses(reading.tone)}>
-                    {reading.label}
-                  </span>
-                </td>
-              </tr>
-            )
-          })}
+          {report.byPolicy.map((segment) => (
+            <PolicyRow key={segment.policyId ?? UNRECORDED_KEY} segment={segment} />
+          ))}
         </tbody>
       </table>
     </section>

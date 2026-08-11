@@ -25,15 +25,24 @@ const emptyBuckets = Array.from({ length: CALIBRATION_BUCKET_COUNT }, (_, index)
   ...scoreOf(0, 0, 0),
 }))
 
+/** Shape halves that match, so two of these differ only in what the policy contained. */
+const ONE_RULESET = ["aaaaaaaa:1111111111111111"]
+const TWO_RULESETS = ["aaaaaaaa:1111111111111111", "aaaaaaaa:2222222222222222"]
+const TWO_SCHEMAS = ["aaaaaaaa:1111111111111111", "bbbbbbbb:2222222222222222"]
+
 const segment = (
   policyId: string | null,
   judged: number,
   survived: number,
-  meanConfidence: number
+  meanConfidence: number,
+  rulesets: Partial<Pick<PolicyCalibration, "fingerprints" | "unfingerprinted">> = {}
 ): PolicyCalibration => ({
   policyId,
   overall: scoreOf(judged, survived, meanConfidence),
   buckets: emptyBuckets,
+  fingerprints: ONE_RULESET,
+  unfingerprinted: 0,
+  ...rulesets,
 })
 
 const reportOf = (byPolicy: readonly PolicyCalibration[]): CalibrationReport => ({
@@ -117,5 +126,77 @@ describe("PolicyBreakdown", () => {
     )
 
     expect(names).toEqual(["generous", "strict", "judged before this page begins"])
+  })
+})
+
+/**
+ * A name is host-declared, so "one policy judged this page" is only as good as
+ * the host's discipline about renaming what it edits (0033). When that slipped,
+ * the page has one row and two gates — and staying silent would be the same
+ * pooling error the breakdown exists to correct.
+ */
+describe("PolicyBreakdown, when a policy did not hold still", () => {
+  it("appears for a single segment whose rules changed, where it would otherwise stay hidden", () => {
+    render(
+      <PolicyBreakdown
+        report={reportOf([segment("checkout", 6, 3, 0.8, { fingerprints: TWO_RULESETS })])}
+      />
+    )
+
+    expect(screen.getByText("the rules changed under this name")).toBeInstanceOf(HTMLElement)
+    expect(screen.getByText(/did not hold still/)).toBeInstanceOf(HTMLElement)
+  })
+
+  it("says which name stopped meaning one thing", () => {
+    render(
+      <PolicyBreakdown
+        report={reportOf([
+          segment("checkout", 6, 3, 0.8, { fingerprints: TWO_RULESETS }),
+          segment("marketing", 4, 4, 0.7),
+        ])}
+      />
+    )
+
+    expect(screen.getByText(/2 different rulesets .* "checkout"/)).toBeInstanceOf(HTMLElement)
+  })
+
+  /** An upgrade that changed which knobs exist is not evidence that anyone edited one. */
+  it("does not call a change of Loom version a change of policy", () => {
+    render(
+      <PolicyBreakdown
+        report={reportOf([segment("checkout", 6, 3, 0.8, { fingerprints: TWO_SCHEMAS })])}
+      />
+    )
+
+    expect(screen.getByText("judged under different versions of the policy")).toBeInstanceOf(
+      HTMLElement
+    )
+    expect(screen.queryByText("the rules changed under this name")).toBeNull()
+  })
+
+  it("stays quiet on a row that named one ruleset and recorded all of it", () => {
+    render(
+      <PolicyBreakdown
+        report={reportOf([segment("generous", 4, 4, 0.7), segment("strict", 4, 0, 0.9)])}
+      />
+    )
+
+    expect(document.querySelectorAll("tbody tr")).toHaveLength(2)
+  })
+
+  it("says a row is only partly recorded rather than letting it read as settled", () => {
+    render(
+      <PolicyBreakdown
+        report={reportOf([
+          segment("generous", 4, 4, 0.7, { unfingerprinted: 3 }),
+          segment("strict", 4, 0, 0.9),
+        ])}
+      />
+    )
+
+    expect(screen.getByText("partly recorded")).toBeInstanceOf(HTMLElement)
+    expect(screen.getByText(/3 of them were judged before rulesets were recorded/)).toBeInstanceOf(
+      HTMLElement
+    )
   })
 })

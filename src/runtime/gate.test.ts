@@ -9,6 +9,7 @@ import { assessChange, type ChangeAssessment } from "./assessment.js"
 import { gate } from "./gate.js"
 import type { IntentOrigin } from "./intent.js"
 import type { DiscardedWork } from "./proposal.js"
+import { policyFingerprintOf } from "./policy-fingerprint.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 
 const spare = sequentialIdFactory("gate")
@@ -326,6 +327,46 @@ describe("attribution", () => {
     const other = gatePolicySchema.parse({ policyId: "elsewhere" })
 
     expect(gate(assessment, other).policyId).toBe("elsewhere")
+  })
+
+  /**
+   * The name is what a host can look up; the fingerprint is what proves the name
+   * still means what it meant when the verdict was written (0048). Both are
+   * stamped in the same place, for the same reason: a caller could supply either
+   * one and name a standard the rules did not consult.
+   */
+  it("fingerprints the policy on every verdict it can reach", () => {
+    const named = gatePolicySchema.parse({ policyId: "storefront", refusalFloor: "high" })
+    const expected = policyFingerprintOf(named)
+
+    const verdicts = [
+      decide({ build: tweak, policy: named }),
+      decide({ build: tweak, policy: named, confidence: 0.5 }),
+      decide({ build: (ids) => [{ op: "remove", nodeId: ids.card }], policy: named }),
+    ]
+
+    expect(verdicts.every((verdict) => verdict.policyFingerprint === expected)).toBe(true)
+  })
+
+  it("tells two policies sharing a name apart by what they contain", () => {
+    const assessment = assessmentFor({ build: tweak })
+    const before = gatePolicySchema.parse({ policyId: "storefront", breadthThreshold: 8 })
+    const edited = gatePolicySchema.parse({ policyId: "storefront", breadthThreshold: 40 })
+
+    const [first, second] = [gate(assessment, before), gate(assessment, edited)]
+
+    expect(first.policyId).toBe(second.policyId)
+    expect(first.policyFingerprint).not.toBe(second.policyFingerprint)
+  })
+
+  it("gives one policy under two names the same fingerprint, so a rename is not an edit", () => {
+    const assessment = assessmentFor({ build: tweak })
+    const before = gatePolicySchema.parse({ policyId: "storefront", minimumConfidence: 0.8 })
+    const renamed = gatePolicySchema.parse({ policyId: "storefront-v2", minimumConfidence: 0.8 })
+
+    expect(gate(assessment, renamed).policyFingerprint).toBe(
+      gate(assessment, before).policyFingerprint
+    )
   })
 })
 
