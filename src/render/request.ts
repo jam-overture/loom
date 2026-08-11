@@ -1,6 +1,7 @@
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { err, ok, type Result } from "../result.js"
+import type { ThemeRegistry } from "../theme/registry.js"
 import type { TreeError } from "../tree/errors.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
 
@@ -43,6 +44,8 @@ export type RenderDependencies = {
   readonly source: TreeSource
   readonly resolver: PrimitiveResolver
   readonly validator?: PropsValidator
+  /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */
+  readonly themes?: ThemeRegistry
   readonly slots?: SlotContent
 }
 
@@ -85,6 +88,7 @@ export const renderRequest = async (
     resolver: dependencies.resolver,
     editMode: request.editMode,
     ...(dependencies.validator ? { validator: dependencies.validator } : {}),
+    ...(dependencies.themes ? { themes: dependencies.themes } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
   })
 

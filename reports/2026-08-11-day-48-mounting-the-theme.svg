@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="720" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">The variables reach the page</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0050 — day 48 — §3 → §4b. What 0049 put in the tree, and what now mounts it.</text>
+
+  <!-- ================= the path ================= -->
+  <text x="32" y="100" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">THE PATH — three ids in the tree, custom properties on the page</text>
+
+  <rect x="32" y="112" width="212" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="132" font-size="11.5" fill="#111827">root node props</text>
+  <text x="44" y="152" font-size="10.5" fill="#2563eb">"loom:theme": {</text>
+  <text x="44" y="168" font-size="10.5" fill="#6b7280">  palette: "bold",</text>
+  <text x="44" y="184" font-size="10.5" fill="#6b7280">  fontPack: "bold-sans",</text>
+  <text x="44" y="200" font-size="10.5" fill="#6b7280">  stylePreset: "airy-modern" }</text>
+
+  <path d="M 244 164 L 300 164" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="248" y="157" font-size="9.5" fill="#9ca3af">resolve</text>
+
+  <rect x="300" y="112" width="190" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="312" y="132" font-size="11.5" fill="#111827">ThemeRegistry</text>
+  <text x="312" y="152" font-size="10.5" fill="#6b7280">unknown in, parsed here</text>
+  <text x="312" y="172" font-size="10.5" fill="#374151">→ ResolvedTheme</text>
+  <text x="312" y="194" font-size="10.5" fill="#6b7280">a bounded vocabulary:</text>
+  <text x="312" y="208" font-size="10.5" fill="#6b7280">no hex a model invented</text>
+
+  <path d="M 490 164 L 546 164" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="494" y="157" font-size="9.5" fill="#9ca3af">flatten</text>
+
+  <rect x="546" y="112" width="180" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="558" y="132" font-size="11.5" fill="#111827">loom.theme</text>
+  <text x="558" y="152" font-size="10.5" fill="#6b7280">--loom-bg-canvas</text>
+  <text x="558" y="168" font-size="10.5" fill="#6b7280">--loom-accent</text>
+  <text x="558" y="184" font-size="10.5" fill="#6b7280">--loom-radius-md …</text>
+  <text x="558" y="206" font-size="10.5" fill="#b45309">root node only</text>
+
+  <path d="M 726 164 L 782 164" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="730" y="157" font-size="9.5" fill="#9ca3af">apply</text>
+
+  <rect x="782" y="112" width="146" height="104" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+  <text x="794" y="132" font-size="11.5" fill="#111827">the primitive</text>
+  <text x="794" y="154" font-size="10" fill="#374151">&lt;main</text>
+  <text x="794" y="170" font-size="10" fill="#374151">  {...loom.editable}</text>
+  <text x="794" y="186" font-size="10" fill="#059669">  style={loom.theme}&gt;</text>
+  <text x="794" y="208" font-size="10.5" fill="#6b7280">no wrapper added</text>
+
+  <!-- ================= the namespace ================= -->
+  <text x="32" y="264" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHOSE PROPS — the runtime takes a namespace, so a strict schema still passes</text>
+
+  <rect x="32" y="276" width="252" height="118" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="296" font-size="11.5" fill="#111827">node.props</text>
+  <text x="44" y="318" font-size="10.5" fill="#2563eb">"loom:theme": { … }</text>
+  <text x="44" y="336" font-size="10.5" fill="#374151">"title": "Home"</text>
+  <text x="44" y="368" font-size="10.5" fill="#6b7280">partitioned on the "loom:"</text>
+  <text x="44" y="382" font-size="10.5" fill="#6b7280">prefix, once, at the seam</text>
+
+  <path d="M 284 316 L 344 300" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <path d="M 284 344 L 344 372" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="348" y="276" width="268" height="52" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="360" y="296" font-size="11.5" fill="#111827">the runtime reads</text>
+  <text x="360" y="316" font-size="10.5" fill="#6b7280">"loom:theme" — and nothing else, yet</text>
+
+  <rect x="348" y="344" width="268" height="52" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+  <text x="360" y="364" font-size="11.5" fill="#111827">the validator + the primitive see</text>
+  <text x="360" y="384" font-size="10.5" fill="#6b7280">{ title: "Home" } — .strict() is safe</text>
+
+  <rect x="640" y="276" width="288" height="120" rx="6" fill="#fffbeb" stroke="#fcd34d"/>
+  <text x="652" y="296" font-size="11.5" fill="#111827">why not just declare it?</text>
+  <text x="652" y="318" font-size="10.5" fill="#6b7280">a strict root schema would reject the</text>
+  <text x="652" y="334" font-size="10.5" fill="#6b7280">key → invalid-props → node omitted →</text>
+  <text x="652" y="350" font-size="10.5" fill="#b45309">a re-theme blanks the whole page</text>
+  <text x="652" y="374" font-size="10.5" fill="#6b7280">and the primitive would learn which</text>
+  <text x="652" y="388" font-size="10.5" fill="#6b7280">palette it wears, which 0049 forbids</text>
+
+  <!-- ================= the re-theme ================= -->
+  <text x="32" y="444" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">THE GUARANTEE — one configure on one node, and nothing below it moves</text>
+
+  <rect x="32" y="456" width="430" height="108" rx="6" fill="#fafaf7" stroke="#d1d5db"/>
+  <text x="44" y="476" font-size="11.5" fill="#0a0a0a">palette: "editorial"</text>
+  <rect x="44" y="486" width="406" height="30" rx="4" fill="#ffffff" stroke="#e5e5e5"/>
+  <text x="56" y="506" font-size="10.5" fill="#0a0a0a">--loom-bg-canvas: #fafaf7 · --loom-accent: #4a5b78</text>
+  <text x="44" y="536" font-size="10.5" fill="#6b7280">&lt;main&gt;&lt;article&gt;Body copy&lt;/article&gt;&lt;/main&gt;</text>
+  <text x="44" y="554" font-size="10.5" fill="#6b7280">identical markup, less the style attribute</text>
+
+  <rect x="498" y="456" width="430" height="108" rx="6" fill="#0a0a0a" stroke="#3a3a3a"/>
+  <text x="510" y="476" font-size="11.5" fill="#f5f5f5">palette: "bold"</text>
+  <rect x="510" y="486" width="406" height="30" rx="4" fill="#1a1a1a" stroke="#3a3a3a"/>
+  <text x="522" y="506" font-size="10.5" fill="#ffd400">--loom-bg-canvas: #0a0a0a · --loom-accent: #ffd400</text>
+  <text x="510" y="536" font-size="10.5" fill="#a3a3a3">&lt;main&gt;&lt;article&gt;Body copy&lt;/article&gt;&lt;/main&gt;</text>
+  <text x="510" y="554" font-size="10.5" fill="#a3a3a3">identical markup, less the style attribute</text>
+
+  <!-- ================= diagnostics ================= -->
+  <text x="32" y="606" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">STILL TOTAL — a theme it cannot mount is an unstyled page, never a blank one</text>
+
+  <rect x="32" y="618" width="218" height="66" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="44" y="638" font-size="10.5" fill="#b91c1c">theme-unresolved</text>
+  <text x="44" y="656" font-size="10" fill="#6b7280">an id nobody registered, or</text>
+  <text x="44" y="670" font-size="10" fill="#6b7280">a selection that is not three</text>
+
+  <rect x="262" y="618" width="218" height="66" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="274" y="638" font-size="10.5" fill="#b91c1c">theme-unregistered</text>
+  <text x="274" y="656" font-size="10" fill="#6b7280">the tree names a theme and</text>
+  <text x="274" y="670" font-size="10" fill="#6b7280">the host wired no registry</text>
+
+  <rect x="492" y="618" width="218" height="66" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="504" y="638" font-size="10.5" fill="#b91c1c">theme-misplaced</text>
+  <text x="504" y="656" font-size="10" fill="#6b7280">a selection below the root,</text>
+  <text x="504" y="670" font-size="10" fill="#6b7280">where nothing mounts it</text>
+
+  <rect x="722" y="618" width="206" height="66" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="734" y="638" font-size="10.5" fill="#b91c1c">reserved-prop-unrecognised</text>
+  <text x="734" y="656" font-size="10" fill="#6b7280">a loom: key nothing reads —</text>
+  <text x="734" y="670" font-size="10" fill="#6b7280">dropped, and never silently</text>
+
+  <text x="32" y="706" font-size="10.5" fill="#9ca3af">no fallback theme: a host-supplied default would make the page a function of deployment config as well as of the tree · 1061 runtime + 381 portal tests green</text>
+</svg>

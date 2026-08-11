@@ -11,7 +11,6 @@ import {
   type Palette,
   type ResolvedTheme,
   type StylePreset,
-  type ThemeSelection,
 } from "./theme.js"
 
 /**
@@ -41,7 +40,12 @@ export type ThemeCatalogueEntry = {
 }
 
 export interface ThemeRegistry {
-  readonly resolve: (selection: ThemeSelection) => Result<ResolvedTheme, ThemeError>
+  /**
+   * `unknown` in, because a selection arrives from the tree — storage is a
+   * boundary, and the parse below is the only thing that says a selection is
+   * one. A caller holding a `ThemeSelection` already satisfies it.
+   */
+  readonly resolve: (selection: unknown) => Result<ResolvedTheme, ThemeError>
   /** What a deployment can be themed with, as data a model can be shown. */
   readonly catalogue: () => {
     readonly palettes: readonly ThemeCatalogueEntry[]

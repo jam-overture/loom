@@ -107,3 +107,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0047](0047-a-verdict-belongs-to-the-gate-that-reached-it.md) | A verdict belongs to the gate that reached it | Accepted | §6 → §2 |
 | [0048](0048-a-name-is-checked-by-a-fingerprint-beside-it.md) | A policy's name is checked by a fingerprint stored beside it | Accepted | §2 → §6 |
 | [0049](0049-a-theme-is-three-ids-in-the-tree.md) | A theme is three registered ids, carried in the tree | Accepted | §4b → §1, §3 |
+| [0050](0050-the-runtimes-props-are-namespaced-and-the-root-mounts-the-theme.md) | The runtime's props are namespaced, and the root primitive mounts the theme | Accepted | §3 → §4b |
