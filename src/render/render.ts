@@ -9,7 +9,13 @@ import type { LoomTree } from "../tree/tree.js"
 
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { editableAttributes } from "./editable.js"
-import type { LoomPrimitive, LoomRenderContext, PrimitiveResolver } from "./primitive.js"
+import {
+  NO_SLOTS,
+  type LoomPrimitive,
+  type LoomRenderContext,
+  type PrimitiveResolver,
+  type SlotChildren,
+} from "./primitive.js"
 import type { PropsValidator } from "./props.js"
 import { partitionReservedProps, resolveTheme, themeStyle, THEME_PROP_KEY } from "./theme.js"
 
@@ -82,13 +88,60 @@ const renderChildren = (children: readonly LoomNode[], context: RenderContext): 
 const isRootNode = (node: ElementNode, context: RenderContext): boolean =>
   node.id === context.tree.root.id
 
-const renderContextFor = (node: ElementNode, context: RenderContext): LoomRenderContext => {
+/**
+ * An element's children, split the way its primitive receives them: `slot`
+ * children become named regions, and everything else stays in `children`.
+ *
+ * Only *direct* slot children are routed. A slot nested inside another slot's
+ * fallback renders where it sits, because hoisting it to the nearest element
+ * ancestor would move content out of the region a person put it in — and the
+ * whole point of a region is that the primitive decides where it goes.
+ *
+ * Two slot children sharing a name are both placed there, in tree order. The
+ * alternative — one wins — makes the render a function of child order in a way
+ * nothing else here is.
+ */
+type ElementBody = {
+  readonly children: ReactNode
+  readonly slots: SlotChildren
+}
+
+const renderElementBody = (node: ElementNode, context: RenderContext): ElementBody => {
+  if (!node.children.some((child) => child.kind === "slot")) {
+    return { children: renderChildren(node.children, context), slots: NO_SLOTS }
+  }
+
+  const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
+  const rest: ReactNode[] = []
+
+  for (const child of node.children) {
+    if (child.kind !== "slot") {
+      rest.push(renderNode(child, context))
+      continue
+    }
+
+    const placed = renderNode(child, context)
+    const existing = slots[child.name]
+
+    slots[child.name] =
+      existing === undefined ? placed : [...(Array.isArray(existing) ? existing : [existing]), placed]
+  }
+
+  return { children: rest.length === 0 ? null : rest, slots: Object.freeze(slots) }
+}
+
+const renderContextFor = (
+  node: ElementNode,
+  slots: SlotChildren,
+  context: RenderContext
+): LoomRenderContext => {
   const isRoot = isRootNode(node, context)
   const theme = isRoot ? context.theme : undefined
 
   return {
     nodeId: node.id,
     type: node.type,
+    slots,
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
       : {}),
@@ -159,11 +212,13 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     context.collect({ code: "props-undeclared", nodeId: node.id, type: node.type })
   }
 
+  const body = renderElementBody(node, context)
+
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, context),
+    loom: renderContextFor(node, body.slots, context),
     props,
-    children: renderChildren(node.children, context),
+    children: body.children,
   })
 }
 

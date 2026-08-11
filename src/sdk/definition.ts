@@ -1,4 +1,11 @@
-import { ZodObject, type ZodType, type ZodTypeAny, type ZodTypeDef } from "zod"
+import {
+  ZodEffects,
+  ZodObject,
+  type ZodRawShape,
+  type ZodType,
+  type ZodTypeAny,
+  type ZodTypeDef,
+} from "zod"
 
 import type { CataloguedProp } from "../catalogue.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
@@ -76,14 +83,33 @@ const verdictFor = <TProps extends JsonObjectView>(
  * cannot tell you" and "there are none" are different facts and a model reading
  * the catalogue would act on them differently.
  *
- * Only public Zod surface is used: `instanceof`, `.shape`, and `.isOptional()`.
+ * Only public Zod surface is used: `instanceof`, `.shape`, `.innerType()`, and
+ * `.isOptional()`.
  */
+
+/**
+ * The object schema inside whatever wraps it, or nothing when there is none.
+ *
+ * A cross-field rule — "alt text is required unless the image is decorative" —
+ * is a `.refine()`, and refining an object schema returns a `ZodEffects` around
+ * it rather than another `ZodObject`. Stopping at the wrapper would answer
+ * "I cannot enumerate these props" for exactly the primitives whose props most
+ * need explaining to a model, so the wrapper is unwrapped and the constraint
+ * lives where it always did: in validation, not in the catalogue.
+ */
+const objectSchemaWithin = (schema: ZodTypeAny): ZodObject<ZodRawShape> | undefined => {
+  if (schema instanceof ZodObject) return schema
+  if (schema instanceof ZodEffects) return objectSchemaWithin(schema.innerType() as ZodTypeAny)
+
+  return undefined
+}
 const declaredPropsOf = <TProps extends JsonObjectView>(
   schema: ZodType<TProps, ZodTypeDef, unknown>
 ): readonly CataloguedProp[] | undefined => {
-  if (!(schema instanceof ZodObject)) return undefined
+  const object = objectSchemaWithin(schema)
+  if (!object) return undefined
 
-  const shape: Readonly<Record<string, ZodTypeAny>> = schema.shape
+  const shape: Readonly<Record<string, ZodTypeAny>> = object.shape
 
   return Object.keys(shape)
     .sort()

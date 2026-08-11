@@ -54,6 +54,15 @@ export type PaletteSlot = z.infer<typeof paletteSlotSchema>
 
 export const PALETTE_SLOTS = paletteSlotSchema.options
 
+/**
+ * The type ramp and the spacing scale have a fixed number of steps, for exactly
+ * the reason every palette declares every slot: a primitive reading
+ * `--loom-spacing-7` must get a length from any registered preset, or a
+ * re-theme silently unstyles it. A ramp whose length varied would make "renders
+ * under both palettes" a property of which two you happened to pick.
+ */
+export const RAMP_STEPS = 8
+
 export const themeIdSchema = z
   .string()
   .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/)
@@ -80,8 +89,8 @@ export const fontPackSchema = z.object({
   accentFamily: z.string().min(1).optional(),
   headingWeight: z.number().int().positive(),
   bodyWeight: z.number().int().positive(),
-  /** Typographic ramp in px, smallest first. Emitted as `--loom-scale-1…n`. */
-  scaleRamp: z.array(z.number().positive()).min(2),
+  /** Typographic ramp in px, smallest first. Emitted as `--loom-scale-1…8`. */
+  scaleRamp: z.array(z.number().positive()).length(RAMP_STEPS),
 })
 export type FontPack = z.infer<typeof fontPackSchema>
 
@@ -95,8 +104,8 @@ export const stylePresetSchema = z.object({
     lg: z.number().nonnegative(),
     full: z.number().nonnegative(),
   }),
-  /** Spacing steps in px, smallest first. Emitted as `--loom-spacing-1…n`. */
-  spacingScale: z.array(z.number().nonnegative()).min(2),
+  /** Spacing steps in px, smallest first. Emitted as `--loom-spacing-1…8`. */
+  spacingScale: z.array(z.number().nonnegative()).length(RAMP_STEPS),
   motion: z.object({
     fast: z.number().nonnegative(),
     medium: z.number().nonnegative(),

@@ -3,7 +3,7 @@ import { isValidElement, type ReactNode } from "react"
 import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
-import type { LoomPrimitive, LoomPrimitiveProps } from "../render/primitive.js"
+import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
 import { err, ok, type Result } from "../result.js"
 
 /**
@@ -42,7 +42,7 @@ const PROBE_TYPE = primitiveTypeSchema.parse("loom.probe")
 const PROBE_CHILDREN = "loom-probe-children"
 
 const probeProps = (editable: EditableAttributes): LoomPrimitiveProps => ({
-  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable },
+  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS },
   props: {},
   children: PROBE_CHILDREN,
 })

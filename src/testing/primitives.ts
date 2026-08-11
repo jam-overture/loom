@@ -9,7 +9,11 @@ import { staticPrimitiveResolver, type PrimitiveResolver } from "../render/primi
  *
  * Each one does what a well-behaved primitive does: reads the props it declares
  * out of the bag, spreads `loom.editable` onto its own root element, applies
- * `loom.theme` as its style, and adds no element of its own to carry either.
+ * `loom.theme` as its style, places every region it was handed, and adds no
+ * element of its own to carry any of it.
+ *
+ * A real primitive names the regions it places; these are generic over any tag,
+ * so they place whatever arrived, in tree order.
  */
 
 const hostPrimitive = (tag: string): LoomPrimitive => {
@@ -17,7 +21,8 @@ const hostPrimitive = (tag: string): LoomPrimitive => {
     createElement(
       tag,
       { ...loom.editable, style: loom.theme, "data-props": JSON.stringify(props) },
-      children
+      children,
+      Object.keys(loom.slots).map((name) => loom.slots[name])
     )
 
   Primitive.displayName = `host(${tag})`
