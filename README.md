@@ -28,6 +28,43 @@ Sections 1–6 are built and run end to end. What is still open in each is track
 in the latest report in [`reports/`](reports/) rather than here, because a marker
 in a README is a thing that goes stale quietly.
 
+### 4b — The primitive library ← current
+
+§4 built the contract a primitive registers under. It never built anything to
+register, and an empty registry is the reason nothing downstream can be shown:
+the portal has no interesting tree to review, a marketplace would have nothing
+to list, and no demo exists. The vocabulary is the gap between an architecture
+and a product.
+
+The source is the Hermes predecessor — 70 block definitions with 72 React
+renderers, 54 shapes, 18 layouts, and a theme system of 29 palettes, 22 font
+packs and 10 style presets. It is a **port, not a copy**; four things differ:
+
+| | Hermes | Loom |
+| --- | --- | --- |
+| Prop model | `FieldDef[]` over a custom union | Zod schema per primitive |
+| Composition | leaves in a flat `warp.blocks` list | nesting, via slots and children |
+| Data | `binding` fields resolved from profile + integrations | plain JSON props, no resolution layer |
+| Renderer contract | `{instance, resolvedFields, isOwner, onEdit}` | `{loom, props, children}`, spreading `loom.editable` |
+
+Order, and the reason for it:
+
+1. **Theme** — done ([0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md)).
+   Without it every ported renderer is unstyled. Still to wire: the render root
+   must mount the variables.
+2. **Ten primitives, not seventy.** Chosen to cover the *contract* rather than
+   the catalogue: two or three that genuinely nest, so slots are exercised; a
+   few leaves; one with a rich prop schema; one with an enum-driven display
+   mode. Prove the port pattern before industrialising it.
+3. **One real page**, assembled from those and edited through the portal. This
+   is the first end-to-end test of §1–§6 against something not written to pass
+   its own tests, and it is the demo.
+4. **The remaining primitives**, which by then are mechanical — and only then
+   §7, because a marketplace of primitives needs primitives.
+
+Refinement inside §1–§6 is **reactive from here**: driven by what the port
+breaks, not run as its own stream.
+
 ## Layout
 
 ```
