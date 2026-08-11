@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from "react"
+import type { ComponentType, CSSProperties, ReactNode } from "react"
 
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
@@ -27,6 +27,19 @@ export type LoomRenderContext = {
    * but becomes invisible to the portal.
    */
   readonly editable?: EditableAttributes
+  /**
+   * The tree's theme, flattened into CSS custom properties. Present on the
+   * **root node only**, and only when the tree names a theme the render could
+   * resolve; apply it as `style` on the primitive's own root element.
+   *
+   * It arrives here rather than on a wrapper the renderer emits for the reason
+   * `editable.ts` gives for the same choice: a wrapper changes what `>`,
+   * `:first-child` and `:nth-child` select, and a page that only lays out
+   * correctly when it is unthemed is not a page anyone reviewed. The cost is
+   * that a root primitive which drops it renders unstyled — which is what the
+   * two starter palettes exist to catch.
+   */
+  readonly theme?: CSSProperties
 }
 
 /**

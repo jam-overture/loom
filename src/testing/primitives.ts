@@ -8,13 +8,17 @@ import { staticPrimitiveResolver, type PrimitiveResolver } from "../render/primi
  * real markup rather than a mock's call log.
  *
  * Each one does what a well-behaved primitive does: reads the props it declares
- * out of the bag, spreads `loom.editable` onto its own root element, and adds
- * no element of its own to carry it.
+ * out of the bag, spreads `loom.editable` onto its own root element, applies
+ * `loom.theme` as its style, and adds no element of its own to carry either.
  */
 
 const hostPrimitive = (tag: string): LoomPrimitive => {
   const Primitive = ({ loom, props, children }: LoomPrimitiveProps) =>
-    createElement(tag, { ...loom.editable, "data-props": JSON.stringify(props) }, children)
+    createElement(
+      tag,
+      { ...loom.editable, style: loom.theme, "data-props": JSON.stringify(props) },
+      children
+    )
 
   Primitive.displayName = `host(${tag})`
 

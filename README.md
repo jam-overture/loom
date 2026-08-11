@@ -49,9 +49,11 @@ packs and 10 style presets. It is a **port, not a copy**; four things differ:
 
 Order, and the reason for it:
 
-1. **Theme** — done ([0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md)).
-   Without it every ported renderer is unstyled. Still to wire: the render root
-   must mount the variables.
+1. **Theme** — done ([0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md),
+   [0050](decisions/0050-the-runtimes-props-are-namespaced-and-the-root-mounts-the-theme.md)).
+   Three registered ids on the root node, resolved per render and mounted by the
+   root primitive as CSS custom properties, so a ported renderer reading
+   `var(--loom-accent)` is styled and a re-theme is an ordinary `configure`.
 2. **Ten primitives, not seventy.** Chosen to cover the *contract* rather than
    the catalogue: two or three that genuinely nest, so slots are exercised; a
    few leaves; one with a rich prop schema; one with an enum-driven display
@@ -110,6 +112,7 @@ src/
 │   ├── props.ts         # The prop-validation seam
 │   ├── editable.ts      # Edit-mode decoration, as attributes
 │   ├── diagnostics.ts   # What rendering could not honour
+│   ├── theme.ts         # The reserved prop namespace, and the theme read from it
 │   ├── render.ts        # The tree, projected into React
 │   └── request.ts       # Per-request resolution: load, validate, render
 ├── catalogue.ts         # What a deployment can build with, as data
@@ -255,11 +258,52 @@ const rendered = await renderRequest(
 )
 ```
 
-A primitive receives three props — `loom` (its node id, type, and edit-mode
-decoration), `props` (the node's props, unspread), and `children`. Rendering is
+A primitive receives three props — `loom` (its node id, type, edit-mode
+decoration, and — on the root node only — the mounted theme), `props` (the
+node's props, unspread), and `children`. Rendering is
 pure and total: it has no hooks and no IO, so it runs per request at the edge or
 in a Server Component, and anything it could not render comes back in
 `diagnostics` rather than as a thrown error.
+
+## Wearing a theme
+
+A theme is three registered ids — a palette, a font pack, a style preset —
+carried on the root node under the runtime's reserved prop key, so changing one
+is an ordinary `configure` the Gate weighs like any other change (0049):
+
+```ts
+import { createThemeRegistry } from "@loom/runtime"
+import { THEME_PROP_KEY } from "@loom/runtime/react"
+
+const root = {
+  kind: "element",
+  type: "loom.page",
+  props: { [THEME_PROP_KEY]: { palette: "bold", fontPack: "bold-sans", stylePreset: "airy-modern" } },
+  // …
+}
+
+const rendered = await renderRequest(request, { source, resolver, themes: createThemeRegistry() })
+```
+
+The renderer resolves the selection, flattens it into `--loom-*` custom
+properties, and hands them to the **root** primitive as `loom.theme`. A
+primitive applies it as its `style` and reads colour, type and spacing back out
+through `var(--loom-accent)` and friends, so it never learns which palette it is
+wearing and a re-theme touches no node below the root:
+
+```tsx
+const Page = ({ loom, children }) => (
+  <main {...loom.editable} style={loom.theme}>{children}</main>
+)
+```
+
+Prop keys beginning with `loom:` belong to the runtime: they are read at the
+render seam and never reach a primitive or its schema, so a root primitive can
+declare `.strict()` props and still wear a theme. A theme that cannot be
+resolved renders unstyled with a diagnostic, never a blank page, and there is no
+fallback theme — the page is a function of the tree, not of deployment config.
+Both are argued in
+[0050](decisions/0050-the-runtimes-props-are-namespaced-and-the-root-mounts-the-theme.md).
 
 ## Registering primitives
 

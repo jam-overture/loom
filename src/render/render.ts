@@ -1,6 +1,9 @@
-import { createElement, Fragment, type ReactNode } from "react"
+import { createElement, Fragment, type CSSProperties, type ReactNode } from "react"
 
+import type { JsonObject } from "../json.js"
 import { assertNever } from "../result.js"
+import type { ThemeRegistry } from "../theme/registry.js"
+import type { ResolvedTheme } from "../theme/theme.js"
 import type { ElementNode, LoomNode, SlotNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -8,6 +11,7 @@ import type { RenderDiagnostic } from "./diagnostics.js"
 import { editableAttributes } from "./editable.js"
 import type { LoomPrimitive, LoomRenderContext, PrimitiveResolver } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
+import { partitionReservedProps, resolveTheme, themeStyle, THEME_PROP_KEY } from "./theme.js"
 
 /**
  * The tree, projected into React.
@@ -39,6 +43,12 @@ export type RenderOptions = {
    * object into both is the ordinary case.
    */
   readonly validator?: PropsValidator
+  /**
+   * Absent means the tree's theme is not resolved and nothing is mounted, and
+   * a tree that names one says so in a diagnostic. Supplying a registry is what
+   * bounds the palettes, font packs and style presets a proposal may name (0049).
+   */
+  readonly themes?: ThemeRegistry
   /** Off by default: decoration is opt-in per request, never ambient. */
   readonly editMode?: boolean
   readonly slots?: SlotContent
@@ -47,6 +57,12 @@ export type RenderOptions = {
 export type RenderOutput = {
   readonly element: ReactNode
   readonly diagnostics: readonly RenderDiagnostic[]
+  /**
+   * What the root is wearing, absent when the tree named no theme or the render
+   * could not resolve it. The variables are already mounted; this is here so a
+   * caller can *say* which palette it served without resolving the ids again.
+   */
+  readonly theme?: ResolvedTheme
 }
 
 type RenderContext = {
@@ -55,21 +71,50 @@ type RenderContext = {
   readonly editMode: boolean
   readonly slots: SlotContent
   readonly tree: LoomTree
+  /** Mounted on the root element, and nowhere else. */
+  readonly theme: CSSProperties | undefined
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
 const renderChildren = (children: readonly LoomNode[], context: RenderContext): ReactNode =>
   children.length === 0 ? null : children.map((child) => renderNode(child, context))
 
-const renderContextFor = (node: ElementNode, context: RenderContext): LoomRenderContext => {
-  if (!context.editMode) return { nodeId: node.id, type: node.type }
+const isRootNode = (node: ElementNode, context: RenderContext): boolean =>
+  node.id === context.tree.root.id
 
-  const isRoot = node.id === context.tree.root.id
+const renderContextFor = (node: ElementNode, context: RenderContext): LoomRenderContext => {
+  const isRoot = isRootNode(node, context)
+  const theme = isRoot ? context.theme : undefined
 
   return {
     nodeId: node.id,
     type: node.type,
-    editable: editableAttributes(node, isRoot ? context.tree : undefined),
+    ...(context.editMode
+      ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
+      : {}),
+    ...(theme ? { theme } : {}),
+  }
+}
+
+/**
+ * Reserved keys are removed from every node's props, whether or not anything
+ * reads them here; a key that reaches a primitive is a key that primitive has
+ * to know about. What each one means, though, depends on where it sits, so
+ * anything unread is reported rather than dropped in silence.
+ */
+const reportUnreadReservedProps = (
+  node: ElementNode,
+  reserved: JsonObject,
+  isRoot: boolean,
+  context: RenderContext
+): void => {
+  for (const key of Object.keys(reserved)) {
+    if (key === THEME_PROP_KEY) {
+      if (!isRoot) context.collect({ code: "theme-misplaced", nodeId: node.id })
+      continue
+    }
+
+    context.collect({ code: "reserved-prop-unrecognised", nodeId: node.id, key })
   }
 }
 
@@ -87,6 +132,9 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     return null
   }
 
+  const { props, reserved } = partitionReservedProps(node.props)
+  reportUnreadReservedProps(node, reserved, isRootNode(node, context), context)
+
   /**
    * Props that do not satisfy the primitive's declared schema omit the node the
    * same way an unknown primitive does. Rendering it anyway would hand a
@@ -94,7 +142,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
    * cast into every primitive author's lap; refusing one node and reporting why
    * keeps the failure where the mismatch is.
    */
-  const verdict = context.validator?.validateProps(node.type, node.props)
+  const verdict = context.validator?.validateProps(node.type, props)
 
   if (verdict?.outcome === "invalid") {
     context.collect({
@@ -114,7 +162,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
   return createElement(primitive, {
     key: node.id,
     loom: renderContextFor(node, context),
-    props: node.props,
+    props,
     children: renderChildren(node.children, context),
   })
 }
@@ -146,8 +194,43 @@ const renderNode = (node: LoomNode, context: RenderContext): ReactNode => {
   }
 }
 
+/**
+ * The theme is resolved once, from the root, before the walk begins — a tree
+ * wears one theme and the variables cascade to everything under it, so
+ * resolving per node would be the same answer computed for every node in the
+ * page.
+ */
+const mountedTheme = (
+  tree: LoomTree,
+  registry: ThemeRegistry | undefined,
+  collect: (diagnostic: RenderDiagnostic) => void
+): ResolvedTheme | undefined => {
+  const { reserved } = partitionReservedProps(tree.root.props)
+  const resolution = resolveTheme(reserved, registry)
+
+  switch (resolution.outcome) {
+    case "themed":
+      return resolution.theme
+    case "unthemed":
+      return undefined
+    case "unregistered":
+      collect({ code: "theme-unregistered", nodeId: tree.root.id })
+      return undefined
+    case "unresolved":
+      collect({ code: "theme-unresolved", nodeId: tree.root.id, error: resolution.error })
+      return undefined
+    default:
+      return assertNever(resolution, "mountedTheme")
+  }
+}
+
 export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOutput => {
   const diagnostics: RenderDiagnostic[] = []
+  const collect = (diagnostic: RenderDiagnostic): void => {
+    diagnostics.push(diagnostic)
+  }
+
+  const theme = mountedTheme(tree, options.themes, collect)
 
   const element = renderNode(tree.root, {
     resolver: options.resolver,
@@ -155,10 +238,9 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     editMode: options.editMode ?? false,
     slots: options.slots ?? {},
     tree,
-    collect: (diagnostic) => {
-      diagnostics.push(diagnostic)
-    },
+    theme: theme ? themeStyle(theme) : undefined,
+    collect,
   })
 
-  return { element, diagnostics }
+  return { element, diagnostics, ...(theme ? { theme } : {}) }
 }
