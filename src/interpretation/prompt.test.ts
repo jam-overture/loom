@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, type NodeId } from "../ids.js"
 import { catalogueOf } from "../sdk/catalogue.js"
+import { THEME_PROP_KEY } from "../render/theme.js"
+import { createThemeRegistry } from "../theme/registry.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
 import { testRegistry } from "../testing/definitions.js"
 import { buildIntent, buildProposal } from "../testing/doubles.js"
@@ -97,6 +99,85 @@ describe("the catalogue block", () => {
     }
 
     expect(buildRepairMessage(request, tree, catalogue)).toContain("Primitives this deployment has registered")
+  })
+})
+
+describe("the theme block", () => {
+  const themes = createThemeRegistry().catalogue()
+  const catalogue = catalogueOf(testRegistry())
+
+  it("is absent when the host wired no theme registry", () => {
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue)
+
+    expect(message).not.toContain("Themes this deployment has registered")
+  })
+
+  it("lists every registered id with the sentence its author wrote", () => {
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+
+    for (const palette of themes.palettes) expect(message).toContain(`- ${palette.id} — ${palette.name}.`)
+    for (const pack of themes.fontPacks) expect(message).toContain(`- ${pack.id} —`)
+    for (const preset of themes.stylePresets) expect(message).toContain(`- ${preset.id} —`)
+  })
+
+  /**
+   * The vocabulary without the instruction is decoration: every other rule in
+   * the prompt tells the model to set only props a primitive declares, and the
+   * theme is the one key no primitive declares.
+   */
+  it("says where a theme lives and that all three ids travel together", () => {
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+
+    expect(message).toContain(THEME_PROP_KEY)
+    expect(message).toContain("Give all three every time")
+    expect(message).toContain("never set a colour on a primitive")
+  })
+
+  it("shows the palette hex to nobody", () => {
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+
+    expect(message).not.toMatch(/#[0-9a-fA-F]{6}\b/)
+  })
+
+  it("sits between the primitives and the tree, where a cache can hold it", () => {
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+
+    expect(message.indexOf("Primitives this deployment has registered")).toBeLessThan(
+      message.indexOf("Themes this deployment has registered")
+    )
+    expect(message.indexOf("Themes this deployment has registered")).toBeLessThan(
+      message.indexOf("Current tree:")
+    )
+  })
+
+  it("reaches a repair, so a revision may still re-theme", () => {
+    const { tree } = sampleTree()
+    const intent = intentFor("make it warmer")
+
+    const request: RepairRequest = {
+      intent,
+      refused: buildProposal(sequentialIdFactory("r"), {
+        intentId: intent.intentId,
+        delta: {
+          deltaId: deltaIdSchema.parse("d_r2"),
+          treeId: tree.treeId,
+          baseRevision: tree.revision,
+          operations: [{ op: "remove", nodeId: nodeIdSchema.parse("n_4") }],
+        },
+      }),
+      disposition: {
+        kind: "rejected",
+        reason: { code: "stakes-at-refusal-floor", detail: "destroys a protected primitive" },
+        stakes: "critical",
+        reversible: true,
+        confidence: 0.9,
+        policyId: "default",
+      },
+    }
+
+    expect(buildRepairMessage(request, tree, catalogue, themes)).toContain(
+      "Themes this deployment has registered"
+    )
   })
 })
 

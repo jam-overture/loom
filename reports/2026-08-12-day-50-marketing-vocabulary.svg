@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="812" viewBox="0 0 960 812" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="812" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">The vocabulary a page is actually built from</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0054–0055 — day 50 — §4b step 3. Ten primitives become eighteen, and a marketing page renders.</text>
+
+  <!-- ================= the eight ================= -->
+  <text x="32" y="102" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">EIGHT ADDED — CHOSEN SO THE DEMO LIST AND THE MARKETING LIST ARE ONE LIST</text>
+
+  <rect x="32" y="114" width="286" height="130" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="134" font-size="11" fill="#111827">loom.hero</text>
+  <text x="44" y="154" font-size="10.5" fill="#2563eb">slots: heading · actions · media</text>
+  <text x="44" y="171" font-size="10.5" fill="#6b7280">backdrop: none | aurora | grid | panel</text>
+  <text x="44" y="188" font-size="10.5" fill="#6b7280">staggered entrance, off the motion scale</text>
+  <text x="44" y="212" font-size="10" fill="#15803d">Hermes had eleven hero variants —</text>
+  <text x="44" y="228" font-size="10" fill="#15803d">eleven documents become one enum.</text>
+
+  <rect x="334" y="114" width="286" height="130" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="346" y="134" font-size="11" fill="#111827">two decomposition pairs</text>
+  <text x="346" y="156" font-size="10.5" fill="#6b7280">loom.feature-grid → loom.feature</text>
+  <text x="346" y="173" font-size="10.5" fill="#6b7280">loom.logo-cloud  → loom.logo</text>
+  <text x="346" y="190" font-size="10.5" fill="#6b7280">loom.faq-list    → loom.faq</text>
+  <text x="346" y="214" font-size="10" fill="#15803d">every repeated item is a node it can</text>
+  <text x="346" y="230" font-size="10" fill="#15803d">insert, move, attribute and undo.</text>
+
+  <rect x="636" y="114" width="292" height="130" rx="6" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="648" y="134" font-size="11" fill="#111827">loom.quote</text>
+  <text x="648" y="156" font-size="10.5" fill="#6b7280">quote · author · role · avatar</text>
+  <text x="648" y="173" font-size="10.5" fill="#6b7280">emphasis: card | feature</text>
+  <text x="648" y="197" font-size="10" fill="#374151">Hermes had this twice — a singleton</text>
+  <text x="648" y="213" font-size="10" fill="#374151">and a grid shape. One content model</text>
+  <text x="648" y="229" font-size="10" fill="#374151">at two scales, so one primitive.</text>
+
+  <!-- ================= 0055 ================= -->
+  <text x="32" y="290" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">0055 — MOTION IS A STATIC STYLESHEET THE PRIMITIVE EMITS</text>
+
+  <text x="32" y="312" font-size="10.5" fill="#9ca3af">what a tree may say</text>
+  <rect x="32" y="320" width="230" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="342" font-size="10.5" fill="#111827">loom.hero</text>
+  <text x="44" y="362" font-size="10.5" fill="#2563eb">backdrop: "aurora"</text>
+  <text x="44" y="386" font-size="10" fill="#6b7280">content · variant · theme</text>
+  <text x="44" y="406" font-size="10" fill="#15803d">JSON a model may write</text>
+
+  <path d="M 262 372 L 318 372" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <text x="318" y="312" font-size="10.5" fill="#9ca3af">what it may not</text>
+  <rect x="318" y="320" width="242" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="330" y="342" font-size="10.5" fill="#111827">stylesheet.ts — a constant</text>
+  <text x="330" y="362" font-size="10.5" fill="#6b7280">@keyframes · :hover · [open]</text>
+  <text x="330" y="379" font-size="10.5" fill="#6b7280">prefers-reduced-motion</text>
+  <text x="330" y="403" font-size="10" fill="#b91c1c">no prop reaches it. no duration,</text>
+  <text x="330" y="417" font-size="10" fill="#b91c1c">no easing, no colour in the tree.</text>
+
+  <rect x="576" y="320" width="352" height="104" rx="6" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="588" y="342" font-size="10.5" fill="#374151">every value is var(--loom-…), so it is byte-identical</text>
+  <text x="588" y="359" font-size="10.5" fill="#374151">under both palettes — asserted by test</text>
+  <text x="588" y="381" font-size="10.5" fill="#6b7280">React 19 hoists and dedupes it: four primitives ask,</text>
+  <text x="588" y="398" font-size="10.5" fill="#6b7280">one &lt;style&gt; is emitted</text>
+  <text x="588" y="418" font-size="10" fill="#b45309">the bargain: AI configures, it does not animate</text>
+
+  <!-- ================= 0054 ================= -->
+  <text x="32" y="470" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">0054 — A CONTAINER IS ITS CHILD'S NAME PLUS THE ARRANGEMENT</text>
+
+  <rect x="32" y="482" width="286" height="106" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="502" font-size="11" fill="#111827">three conventions in play</text>
+  <text x="44" y="524" font-size="10.5" fill="#b91c1c">loom.faq / loom.faq-item</text>
+  <text x="44" y="541" font-size="10.5" fill="#b91c1c">loom.pricing-tiers / loom.pricing-tier</text>
+  <text x="44" y="558" font-size="10.5" fill="#b91c1c">loom.stats / loom.stat</text>
+  <text x="44" y="578" font-size="10" fill="#6b7280">a model picks by reading the catalogue</text>
+
+  <path d="M 318 534 L 374 534" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="374" y="482" width="286" height="106" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="386" y="502" font-size="11" fill="#111827">one rule, decided once</text>
+  <text x="386" y="524" font-size="10.5" fill="#15803d">loom.faq-list / loom.faq</text>
+  <text x="386" y="541" font-size="10.5" fill="#15803d">loom.tier-table / loom.tier</text>
+  <text x="386" y="558" font-size="10.5" fill="#15803d">loom.stat-grid / loom.stat</text>
+  <text x="386" y="578" font-size="10" fill="#6b7280">no -item suffix · never a bare plural</text>
+
+  <rect x="676" y="482" width="252" height="106" rx="6" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="688" y="502" font-size="10.5" fill="#374151">discoverable from either half:</text>
+  <text x="688" y="521" font-size="10.5" fill="#6b7280">knows loom.feature exists →</text>
+  <text x="688" y="538" font-size="10.5" fill="#6b7280">guesses loom.feature-grid → right</text>
+  <text x="688" y="562" font-size="10" fill="#15803d">nothing shipped needed renaming</text>
+  <text x="688" y="578" font-size="10" fill="#6b7280">seven pairs named before written</text>
+
+  <!-- ================= the probe ================= -->
+  <text x="32" y="634" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">APPROVED ON #68 — THE AUDIT NOW PROBES WHAT THE CATALOGUE PROMISED</text>
+
+  <rect x="32" y="646" width="440" height="112" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="666" font-size="11" fill="#111827">probeSlotPlacement — one marker per declared slot</text>
+  <text x="44" y="688" font-size="10.5" fill="#6b7280">unplacedSlots — declared a region and dropped it</text>
+  <text x="44" y="705" font-size="10.5" fill="#6b7280">leaves — children never reached the output</text>
+  <text x="44" y="729" font-size="10" fill="#374151">searches every prop, so a region handed onwards is placed</text>
+  <text x="44" y="745" font-size="10" fill="#15803d">18 primitives · 0 unplaced · 6 leaves, asserted by name</text>
+
+  <rect x="488" y="646" width="440" height="112" rx="6" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="500" y="666" font-size="11" fill="#111827">the theme registry reaches the model</text>
+  <text x="500" y="688" font-size="10.5" fill="#6b7280">every palette, font pack and preset — id + description</text>
+  <text x="500" y="705" font-size="10.5" fill="#b91c1c">the hex is not in the prompt</text>
+  <text x="500" y="729" font-size="10" fill="#374151">"loom:theme" is the one key no primitive declares, so the</text>
+  <text x="500" y="745" font-size="10" fill="#374151">block says where it lives and that all three ids travel together</text>
+
+  <text x="32" y="786" font-size="10.5" fill="#9ca3af">pnpm verify green — runtime 1121 passed / portal 381 passed / 29 new · nothing skipped, live smoke test ran</text>
+</svg>

@@ -10,6 +10,7 @@ import type {
   RepairRequest,
 } from "../runtime/interpreter.js"
 import type { ProposedChange } from "../runtime/proposal.js"
+import type { ThemeCatalogue } from "../theme/registry.js"
 import { parseDelta, type TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -54,6 +55,14 @@ export type ModelInterpreterConfig = {
    * primitive names it has no way to know.
    */
   readonly catalogue?: PrimitiveCatalogue
+  /**
+   * What this deployment may be themed with. Absent means the model is shown no
+   * theme vocabulary and cannot re-theme anything: the ids in the tree are the
+   * only ones it knows, so "make it warmer" has nowhere to go but an invented
+   * id that fails to resolve. A host with a §4b theme registry passes
+   * `themes.catalogue()`.
+   */
+  readonly themeCatalogue?: ThemeCatalogue
 }
 
 const fromClientError = (error: ModelClientError): InterpretationError => {
@@ -183,8 +192,12 @@ export const modelInterpreter = (
   config: ModelInterpreterConfig
 ): ChangeInterpreter & ChangeRepairer => ({
   interpret: (intent: EditIntent, tree: LoomTree) =>
-    propose(config, intent, buildUserMessage(intent, tree, config.catalogue)),
+    propose(config, intent, buildUserMessage(intent, tree, config.catalogue, config.themeCatalogue)),
 
   repair: (request: RepairRequest, tree: LoomTree) =>
-    propose(config, request.intent, buildRepairMessage(request, tree, config.catalogue)),
+    propose(
+      config,
+      request.intent,
+      buildRepairMessage(request, tree, config.catalogue, config.themeCatalogue)
+    ),
 })

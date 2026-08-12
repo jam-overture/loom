@@ -126,14 +126,22 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as ten primitives", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(10)
+  it("registers as eighteen primitives, structure first and composed vocabulary after", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(18)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.section",
       "loom.split",
+      "loom.hero",
+      "loom.feature-grid",
+      "loom.feature",
       "loom.stat-grid",
       "loom.stat",
+      "loom.quote",
+      "loom.logo-cloud",
+      "loom.logo",
+      "loom.faq-list",
+      "loom.faq",
       "loom.heading",
       "loom.prose",
       "loom.divider",
@@ -147,6 +155,26 @@ describe("the starter library", () => {
 
     expect(audit.notDecorated).toEqual([])
     expect(audit.notProbeable).toEqual([])
+  })
+
+  it("places every region it declares, so nothing a tree puts in one is dropped", () => {
+    expect(auditRegistry(registry).unplacedSlots).toEqual([])
+  })
+
+  it("agrees with itself about which primitives are leaves", () => {
+    /**
+     * A leaf holds its copy in props and has nowhere to put a child node. The
+     * list is asserted rather than derived so that a primitive quietly losing
+     * its `children` — the failure the probe exists to catch — fails here.
+     */
+    expect(auditRegistry(registry).leaves).toEqual([
+      "loom.feature",
+      "loom.stat",
+      "loom.quote",
+      "loom.logo",
+      "loom.faq",
+      "loom.divider",
+    ])
   })
 
   it("tells a model the props of every primitive, including the refined one", () => {
@@ -217,6 +245,238 @@ describe("a page assembled from the library", () => {
 
     expect(markup.match(/data-loom-node=/g)?.length).toBe(14)
     expect(markup.match(/data-loom-type="loom\.stat"/g)?.length).toBe(3)
+  })
+})
+
+/**
+ * The second fixture: a marketing page, built from the composed vocabulary the
+ * way §4d will build the real one. Between them the two fixtures use every
+ * registered primitive, which the test below asserts rather than trusts.
+ */
+const marketingPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const hero = buildElement(idFactory, {
+    type: "loom.hero",
+    props: { backdrop: "aurora", align: "start", eyebrow: "The AI-native runtime" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 1, balance: true },
+          children: [buildText(idFactory, "Ship interfaces your AI can change and your team can trust")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        children: [buildText(idFactory, "Every change is proposed, gated, attributed and reversible.")],
+      }),
+      buildSlot(idFactory, "actions", [
+        buildElement(idFactory, {
+          type: "loom.action",
+          props: { href: "https://example.com/start", variant: "primary", scale: "large" },
+          children: [buildText(idFactory, "Start building")],
+        }),
+        buildElement(idFactory, {
+          type: "loom.action",
+          props: { href: "https://example.com/docs", variant: "secondary", scale: "large" },
+          children: [buildText(idFactory, "Read the docs")],
+        }),
+      ]),
+      buildSlot(idFactory, "media", [
+        buildElement(idFactory, {
+          type: "loom.media",
+          props: {
+            src: "https://example.com/portal.png",
+            alt: "A proposed change beside the page it changes",
+            aspect: "wide",
+          },
+        }),
+      ]),
+    ],
+  })
+
+  const logos = buildElement(idFactory, {
+    type: "loom.logo-cloud",
+    props: { label: "Trusted by teams at", align: "center" },
+    children: [
+      buildElement(idFactory, { type: "loom.logo", props: { name: "Northwind" } }),
+      buildElement(idFactory, {
+        type: "loom.logo",
+        props: { name: "Meridian", image: "https://example.com/meridian.svg", href: "https://example.com/meridian" },
+      }),
+      buildElement(idFactory, { type: "loom.logo", props: { name: "Halcyon" } }),
+    ],
+  })
+
+  const features = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Why Loom", tone: "canvas" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "A record beside every change")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.feature-grid",
+        props: { columns: "three" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.feature",
+            props: { icon: "◆", title: "Proposed, not written", body: "A model proposes a delta; nothing lands unreviewed." },
+          }),
+          buildElement(idFactory, {
+            type: "loom.feature",
+            props: {
+              icon: "⛨",
+              title: "Gated by policy",
+              body: "Stakes and reversibility decide it, and the rule that fired is on the record.",
+              href: "https://example.com/gate",
+            },
+          }),
+          buildElement(idFactory, {
+            type: "loom.feature",
+            props: { icon: "↺", title: "Reversible", body: "Every delta has an inverse, and undo is a button.", surface: "plain" },
+          }),
+        ],
+      }),
+    ],
+  })
+
+  const proof = buildElement(idFactory, {
+    type: "loom.quote",
+    props: {
+      quote: "We stopped arguing about what the assistant changed. The record answers it.",
+      author: "Ada Whitfield",
+      role: "Head of Platform, Northwind",
+      emphasis: "feature",
+    },
+  })
+
+  const questions = buildElement(idFactory, {
+    type: "loom.faq-list",
+    props: { width: "readable" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.faq",
+        props: { question: "Does the model touch my components?", answer: "No. It configures registered primitives.", open: true },
+      }),
+      buildElement(idFactory, {
+        type: "loom.faq",
+        props: { question: "What happens when a proposal is wrong?", answer: "The Gate refuses it, and says which rule did." },
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [hero, logos, features, proof, questions],
+    }),
+    idFactory
+  )
+}
+
+/**
+ * The library's stylesheet is hoisted ahead of the tree by React, so every
+ * assertion about "the root" has to step over it first. Splitting it out is
+ * also the only way to check the claim that matters about it: one stylesheet
+ * for a page that emits it from four different primitives.
+ */
+const HOISTED_STYLESHEET = /^(<style[^>]*>[\s\S]*?<\/style>)?/
+
+const splitStylesheet = (markup: string): { stylesheet: string; tree: string } => {
+  const [matched] = HOISTED_STYLESHEET.exec(markup) ?? [""]
+
+  return { stylesheet: matched ?? "", tree: markup.slice((matched ?? "").length) }
+}
+
+describe("the composed vocabulary", () => {
+  it("covers every registered primitive across the two fixtures", () => {
+    const used = new Set(
+      [...render(samplePage(EDITORIAL), true).markup.matchAll(/data-loom-type="([^"]+)"/g)]
+        .concat([...render(marketingPage(EDITORIAL), true).markup.matchAll(/data-loom-type="([^"]+)"/g)])
+        .map((match) => match[1])
+    )
+
+    expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
+  })
+
+  it("renders a marketing page with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(marketingPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Ship interfaces your AI can change and your team can trust")
+    expect(markup).toContain("Trusted by teams at")
+    expect(markup).toContain("Proposed, not written")
+    expect(markup).toContain("<blockquote")
+    expect(markup).toContain("<details")
+    expect(markup).toContain("<summary")
+  })
+
+  it("places the hero's three regions, each in its own part of the band", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+
+    const eyebrowAt = markup.indexOf("The AI-native runtime")
+    const headingAt = markup.indexOf("Ship interfaces")
+    const ledeAt = markup.indexOf("Every change is proposed")
+    const actionAt = markup.indexOf("Start building")
+    const mediaAt = markup.indexOf("portal.png")
+
+    expect(eyebrowAt).toBeLessThan(headingAt)
+    expect(headingAt).toBeLessThan(ledeAt)
+    expect(ledeAt).toBeLessThan(actionAt)
+    expect(actionAt).toBeLessThan(mediaAt)
+  })
+
+  it("emits one stylesheet for a page whose primitives each ask for it", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+    const { stylesheet } = splitStylesheet(markup)
+
+    expect(markup.match(/<style/g)?.length).toBe(1)
+    expect(stylesheet).toContain("@keyframes loom-rise")
+    expect(stylesheet).toContain("prefers-reduced-motion")
+  })
+
+  it("keeps the animation out of the tree entirely", () => {
+    const withMotion = render(marketingPage(EDITORIAL)).markup
+
+    /**
+     * The whole bargain in one assertion: the stylesheet is identical under a
+     * different theme and carries no value any prop supplied, so no proposal
+     * can reach the animation by configuring a node.
+     */
+    expect(splitStylesheet(withMotion).stylesheet).toBe(
+      splitStylesheet(render(marketingPage(BOLD)).markup).stylesheet
+    )
+    expect(splitStylesheet(withMotion).stylesheet).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+  })
+
+  it("opens the question a tree marked open, and leaves the others closed", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+
+    expect(markup.match(/<details[^>]*open/g)?.length).toBe(1)
+    expect(markup.match(/<details/g)?.length).toBe(2)
+  })
+
+  it("falls back to a wordmark for a logo with no image, and links the one that has a href", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+
+    expect(markup).toContain("Northwind")
+    expect(markup).toContain('alt="Meridian"')
+    expect(markup).toContain('href="https://example.com/meridian"')
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(marketingPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(marketingPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
   })
 })
 
@@ -372,7 +632,7 @@ describe("createStarterPrimitiveRegistry", () => {
     const built = createStarterPrimitiveRegistry([extra])
 
     expect(built.ok).toBe(true)
-    expect(built.ok && built.value.primitives).toHaveLength(11)
+    expect(built.ok && built.value.primitives).toHaveLength(STARTER_PRIMITIVES.length + 1)
   })
 })
 

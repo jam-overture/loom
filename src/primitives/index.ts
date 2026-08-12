@@ -4,36 +4,56 @@ import type { Result } from "../result.js"
 
 import { loomAction } from "./loom.action.js"
 import { loomDivider } from "./loom.divider.js"
+import { loomFaq } from "./loom.faq.js"
+import { loomFaqList } from "./loom.faq-list.js"
+import { loomFeature } from "./loom.feature.js"
+import { loomFeatureGrid } from "./loom.feature-grid.js"
 import { loomHeading } from "./loom.heading.js"
+import { loomHero } from "./loom.hero.js"
+import { loomLogo } from "./loom.logo.js"
+import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
 import { loomPage } from "./loom.page.js"
 import { loomProse } from "./loom.prose.js"
+import { loomQuote } from "./loom.quote.js"
 import { loomSection } from "./loom.section.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStat } from "./loom.stat.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
 
 /**
- * The starter primitive library — ten primitives chosen to cover the
- * *contract*, not the catalogue.
+ * The starter primitive library, in two layers.
  *
- * Four compose (`page`, `section`, `split`, `stat-grid`), two of them through
- * named slots. Five are leaves. One carries a rich schema with a cross-field
- * rule (`media`), one is driven by an enum that changes what is rendered
- * (`divider`), and one pair demonstrates the decomposition every remaining
- * Hermes list block will follow (`stat-grid` over `stat`).
+ * **The structural ten** came first and were chosen to cover the *contract*
+ * rather than the catalogue: four that compose, two of them through named
+ * slots; five leaves; one rich schema with a cross-field rule (`media`); one
+ * enum that changes what is rendered (`divider`); and one pair showing the
+ * decomposition every Hermes list block follows (`stat-grid` over `stat`).
  *
- * Proving the port pattern on ten is the point: the other sixty are mechanical
- * once these are right, and they would have been sixty repetitions of the wrong
- * shape if they had gone first.
+ * **The composed eight** are the vocabulary a marketing page is actually built
+ * from — hero, features, proof, questions. They exist because a library that
+ * can express any structure and no *page* proves the contract and sells
+ * nothing, and because §4d's marketing site is built from this list rather than
+ * beside it: the demo vocabulary and the marketing vocabulary are one list.
+ *
+ * The ordering is registration order, which is what a model reads first in the
+ * catalogue, so the thing a page starts with is at the top.
  */
 
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPage,
   loomSection,
   loomSplit,
+  loomHero,
+  loomFeatureGrid,
+  loomFeature,
   loomStatGrid,
   loomStat,
+  loomQuote,
+  loomLogoCloud,
+  loomLogo,
+  loomFaqList,
+  loomFaq,
   loomHeading,
   loomProse,
   loomDivider,
@@ -53,13 +73,22 @@ export const createStarterPrimitiveRegistry = (
   createPrimitiveRegistry([...STARTER_PRIMITIVES, ...additional])
 
 export * from "./tokens.js"
+export * from "./stylesheet.js"
 export {
   loomAction,
   loomDivider,
+  loomFaq,
+  loomFaqList,
+  loomFeature,
+  loomFeatureGrid,
   loomHeading,
+  loomHero,
+  loomLogo,
+  loomLogoCloud,
   loomMedia,
   loomPage,
   loomProse,
+  loomQuote,
   loomSection,
   loomSplit,
   loomStat,

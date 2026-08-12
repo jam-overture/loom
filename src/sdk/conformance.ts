@@ -47,6 +47,9 @@ const probeProps = (editable: EditableAttributes): LoomPrimitiveProps => ({
   children: PROBE_CHILDREN,
 })
 
+/** The marker handed to a declared slot, unique per name so a miss names itself. */
+const slotMarker = (name: string): string => `loom-probe-slot:${name}`
+
 /** Whether this element, or anything it returned, carries the probe's decoration. */
 const carriesDecoration = (node: ReactNode, editable: EditableAttributes): boolean => {
   if (Array.isArray(node)) return node.some((child: ReactNode) => carriesDecoration(child, editable))
@@ -114,4 +117,91 @@ export const probeEditableDecoration = (primitive: LoomPrimitive): ConformanceVe
   }
 
   return carriesDecoration(called.value, editable) ? { outcome: "decorates" } : { outcome: "not-decorated" }
+}
+
+/**
+ * The second probe: does a primitive place what it was handed?
+ *
+ * A declared slot is a promise. The catalogue tells a model the region exists,
+ * a proposal puts content there, and a primitive that never reads
+ * `loom.slots.aside` drops it — rendering correctly, reporting nothing, with the
+ * content gone from the page and still present in the tree. That is the same
+ * failure shape as ignoring `loom.editable`, and 0051 made it more likely by
+ * making slots mean something: before, a region nobody placed still appeared
+ * inline in `children`.
+ *
+ * It answers a second question at the same time, because one call can. A
+ * primitive that renders no `children` is a leaf: `loom.stat` holds its value
+ * and label as props, so a text node underneath it has nowhere to go and is
+ * dropped just as silently. The renderer cannot tell a leaf from a container —
+ * the registry records declared slots, not whether a component reads
+ * `children` — but the probe can simply look, which is cheaper than asking
+ * every author to declare it and impossible to get out of step with the code.
+ *
+ * Reported, never enforced, for the reason `audit.ts` gives: a primitive that
+ * deliberately ignores a region under some prop combination is a design choice,
+ * and this probe calls the component once, with no props.
+ */
+
+export type PlacementVerdict =
+  | {
+      readonly outcome: "probed"
+      /** Declared slots whose content did not reach the output. */
+      readonly unplacedSlots: readonly string[]
+      /** Whether the children it was handed reached the output — a container, not a leaf. */
+      readonly rendersChildren: boolean
+    }
+  | { readonly outcome: "not-probeable"; readonly reason: string }
+
+/**
+ * Whether the marker string appears anywhere in what the component returned.
+ *
+ * Every prop is searched, not only `children`: a primitive that hands a region
+ * to another component as `header={loom.slots.header}` has placed it, and the
+ * probe should not call that a drop because the content left through a prop it
+ * did not expect.
+ */
+const containsMarker = (node: unknown, marker: string): boolean => {
+  if (node === marker) return true
+  if (Array.isArray(node)) return node.some((child: unknown) => containsMarker(child, marker))
+  if (!isValidElement(node)) return false
+
+  return Object.values(node.props as Readonly<Record<string, unknown>>).some((value) =>
+    containsMarker(value, marker)
+  )
+}
+
+export const probeSlotPlacement = (
+  primitive: LoomPrimitive,
+  declaredSlots: readonly string[]
+): PlacementVerdict => {
+  const probeable = asProbeable(primitive)
+  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+
+  const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
+  for (const name of declaredSlots) slots[name] = slotMarker(name)
+
+  const called = ((): Result<ReactNode, string> => {
+    try {
+      return ok(
+        probeable.value({
+          loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots },
+          props: {},
+          children: PROBE_CHILDREN,
+        })
+      )
+    } catch (thrown) {
+      return err(thrown instanceof Error ? thrown.message : String(thrown))
+    }
+  })()
+
+  if (!called.ok) {
+    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${called.error}` }
+  }
+
+  return {
+    outcome: "probed",
+    unplacedSlots: declaredSlots.filter((name) => !containsMarker(called.value, slotMarker(name))),
+    rendersChildren: containsMarker(called.value, PROBE_CHILDREN),
+  }
 }

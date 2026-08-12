@@ -27,6 +27,21 @@ const hooked = definePrimitive({
   },
 })
 
+const forgetful = definePrimitive({
+  type: "loom.forgetful",
+  description: "declares a region and never places it",
+  props: z.object({}),
+  slots: ["aside"],
+  component: ({ loom, children }: LoomPrimitiveProps) => createElement("div", { ...loom.editable }, children),
+})
+
+const leaf = definePrimitive({
+  type: "loom.leaf",
+  description: "holds its copy in props, so a child node has nowhere to go",
+  props: z.object({}),
+  component: ({ loom }: LoomPrimitiveProps) => createElement("span", { ...loom.editable }, "fixed"),
+})
+
 describe("auditRegistry", () => {
   it("finds nothing to report for primitives that all decorate", () => {
     const audit = auditRegistry(registryOf(testDefinitions))
@@ -54,6 +69,31 @@ describe("auditRegistry", () => {
 
     expect(audit.audits.map((entry) => entry.type)).toEqual(["loom.hooked", "loom.silent"])
   })
+
+  it("names the primitive that declared a region and dropped it", () => {
+    const audit = auditRegistry(registryOf([forgetful]))
+
+    expect(audit.unplacedSlots).toEqual([{ type: "loom.forgetful", slots: ["aside"] }])
+  })
+
+  it("finds no dropped regions in a library that places what it declares", () => {
+    expect(auditRegistry(registryOf(testDefinitions)).unplacedSlots).toEqual([])
+  })
+
+  /** A leaf is a fact about a primitive, not a fault — reported, never counted as a failure. */
+  it("separates the leaves from the containers without calling either wrong", () => {
+    const audit = auditRegistry(registryOf([leaf, silent]))
+
+    expect(audit.leaves).toEqual(["loom.leaf"])
+    expect(audit.notDecorated).toEqual(["loom.silent"])
+  })
+
+  it("leaves a primitive it could not call out of both lists", () => {
+    const audit = auditRegistry(registryOf([hooked]))
+
+    expect(audit.unplacedSlots).toEqual([])
+    expect(audit.leaves).toEqual([])
+  })
 })
 
 describe("describeRegistryAudit", () => {
@@ -63,6 +103,13 @@ describe("describeRegistryAudit", () => {
     expect(described).toContain("loom.card: spreads loom.editable")
     expect(described).toContain("loom.silent: does not spread loom.editable")
     expect(described).toContain("loom.hooked: could not be probed")
+  })
+
+  it("says which region went missing, and which primitives are leaves", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([forgetful, leaf])))
+
+    expect(described).toContain("declares aside and does not place it")
+    expect(described).toContain("loom.leaf: spreads loom.editable; renders no children (a leaf)")
   })
 })
 

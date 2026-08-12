@@ -1,9 +1,11 @@
 import type { PrimitiveCatalogue } from "../catalogue.js"
+import { THEME_PROP_KEY } from "../render/theme.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
+import type { ThemeCatalogue } from "../theme/registry.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { renderCatalogue, renderDelta, renderTree } from "./render.js"
+import { renderCatalogue, renderDelta, renderThemeCatalogue, renderTree } from "./render.js"
 
 /**
  * Prompt assembly, kept pure so the exact bytes sent to a model are a value a
@@ -67,16 +69,43 @@ Insert only primitives from that list — a type that is not on it has nothing t
 
 `
 
+/**
+ * The theme block, and the one instruction that makes it actionable.
+ *
+ * A model shown three lists of ids and nothing else would have no way to use
+ * them: the theme is not a primitive, not a slot, and not a prop any primitive
+ * declares — it is a reserved key on the root node, and every rule above tells
+ * the model to set only props a primitive declares. So the exception is stated
+ * where the vocabulary is given, or the vocabulary is decoration.
+ *
+ * All three ids are required together because the selection schema requires
+ * all three; a `configure` that set one would fail to resolve and the page
+ * would render unthemed, which is a worse answer than "I did not understand".
+ */
+const themeBlock = (themes: ThemeCatalogue | undefined): string => {
+  const rendered = themes === undefined ? "" : renderThemeCatalogue(themes)
+  if (rendered === "") return ""
+
+  return `Themes this deployment has registered. A theme is three registered ids — one palette, one font pack, one style preset — carried on the root node under the reserved prop "${THEME_PROP_KEY}". It is the one prop that is not declared by a primitive.
+
+${rendered}
+
+To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an object with all three keys: {"${THEME_PROP_KEY}":{"palette":"…","fontPack":"…","stylePreset":"…"}}. Give all three every time, even when only one changes — a selection missing a key does not resolve and the page renders unthemed. Use only ids from the lists above. Colours, fonts and spacing come from the theme; never set a colour on a primitive.
+
+`
+}
+
 export const buildUserMessage = (
   intent: EditIntent,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue
+  catalogue?: PrimitiveCatalogue,
+  themes?: ThemeCatalogue
 ): string => {
   const scopeLine = intent.scopeNodeId
     ? `\nConfine the change to the subtree rooted at ${intent.scopeNodeId}, marked "<- scope" above.`
     : ""
 
-  return `${catalogueBlock(catalogue)}Current tree:
+  return `${catalogueBlock(catalogue)}${themeBlock(themes)}Current tree:
 
 ${renderTree(tree, intent.scopeNodeId)}
 
@@ -86,8 +115,9 @@ Request (${intent.origin}): ${intent.utterance}${scopeLine}`
 export const buildRepairMessage = (
   request: RepairRequest,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue
-): string => `${buildUserMessage(request.intent, tree, catalogue)}
+  catalogue?: PrimitiveCatalogue,
+  themes?: ThemeCatalogue
+): string => `${buildUserMessage(request.intent, tree, catalogue, themes)}
 
 You proposed this, and it was refused:
 

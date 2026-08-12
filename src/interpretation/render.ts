@@ -1,4 +1,5 @@
 import type { CataloguedPrimitive, PrimitiveCatalogue } from "../catalogue.js"
+import type { ThemeCatalogue, ThemeCatalogueEntry } from "../theme/registry.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
 import { assertNever } from "../result.js"
@@ -81,6 +82,29 @@ export const renderCatalogue = (catalogue: PrimitiveCatalogue): string =>
         `- ${primitive.type} — ${primitive.description}.${renderCataloguedProps(primitive)}${renderCataloguedSlots(primitive)}`
     )
     .join("\n")
+
+const renderThemeGroup = (label: string, entries: readonly ThemeCatalogueEntry[]): readonly string[] =>
+  entries.length === 0
+    ? []
+    : [`${label}:`, ...entries.map((entry) => `- ${entry.id} — ${entry.name}. ${entry.description}`)]
+
+/**
+ * The theme vocabulary as the model sees it — three lists of ids with the
+ * sentence their author wrote about each.
+ *
+ * Without it, "make it warmer" resolves against a vocabulary the model was
+ * never shown: the tree carries `palette: "editorial"` and nothing says which
+ * other palettes exist, so the only reachable answers are the one already
+ * mounted and an invented id that fails to resolve. The hex is deliberately not
+ * here. A model choosing between registered palettes by description is the
+ * bargain 0049 struck; a model choosing colours is the thing it rules out.
+ */
+export const renderThemeCatalogue = (catalogue: ThemeCatalogue): string =>
+  [
+    ...renderThemeGroup("Palettes", catalogue.palettes),
+    ...renderThemeGroup("Font packs", catalogue.fontPacks),
+    ...renderThemeGroup("Style presets", catalogue.stylePresets),
+  ].join("\n")
 
 const renderPropKeys = (label: string, keys: readonly string[]): string =>
   keys.length === 0 ? "" : ` ${label} ${keys.join(", ")}`
