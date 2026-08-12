@@ -65,7 +65,24 @@ Order, and the reason for it:
    decomposes. See [the starter library](#the-starter-primitives).
 3. **One real page** ← current, assembled from those and edited through the portal. This
    is the first end-to-end test of §1–§6 against something not written to pass
-   its own tests, and it is the demo.
+   its own tests, and it is the demo. Three things ride along with it, approved
+   on #68 and carried here so the plan holds them rather than a merged thread:
+   - **`auditRegistry` probes for slot placement.** A primitive that declares a
+     region and never reads it drops content silently. The probe knows which
+     names were declared, so it can hand one marker per declared slot and look
+     for each in the output — the same shape as `probeEditableDecoration`, and
+     it protects the contract 0051 just created. The same call can see whether
+     `children` reached the output, which answers separately whether a leaf
+     given children it cannot place should be diagnosed.
+   - **The theme registry joins the catalogue the model is shown.**
+     `themeRegistry.catalogue()` is wired to nothing, so "make it warmer"
+     resolves against a vocabulary the model was never shown. The real page is
+     the first step with an interpreter in front of this library, so it is the
+     first step where the guess can be observed rather than imagined.
+   - **A naming convention for decomposed pairs**, before step 4 decides it
+     sixty times. `loom.stat-grid`/`loom.stat` reads well;
+     `loom.faq`/`loom.faq-item` and `loom.pricing-tiers`/`loom.pricing-tier` do
+     not agree with it or with each other.
 4. **The remaining primitives**, which by then are mechanical — and only then
    §7, because a marketplace of primitives needs primitives.
 
