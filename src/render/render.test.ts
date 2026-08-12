@@ -1,4 +1,4 @@
-import { createElement, type ReactElement } from "react"
+import { createElement, Fragment, type ReactElement, type ReactNode } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
@@ -9,7 +9,7 @@ import { testPrimitiveResolver, testPrimitives } from "../testing/primitives.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
-import { staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
+import { NO_SLOTS, staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 
 const markupOf = (tree: ReturnType<typeof sampleTree>["tree"], editMode = false): string =>
@@ -154,6 +154,118 @@ describe("slots", () => {
     )
 
     expect(markup).toBe('<main data-props="{}">fallback</main>')
+  })
+})
+
+describe("slots as named regions", () => {
+  const regionOf = (
+    tree: ReturnType<typeof sampleTree>["tree"],
+    name: string
+  ): { children: ReactNode; region: ReactNode } => {
+    const element = renderLoomTree(tree, { resolver: testPrimitiveResolver })
+      .element as ReactElement<LoomPrimitiveProps>
+
+    return { children: element.props.children, region: element.props.loom.slots[name] }
+  }
+
+  it("hands a slot child to its primitive as a named region, not as a child", () => {
+    const { tree } = sampleTree()
+
+    const { children, region } = regionOf(tree, "main")
+
+    expect(region).toBeDefined()
+    expect(renderToStaticMarkup(createElement(Fragment, null, region))).toContain("Body copy")
+    expect(renderToStaticMarkup(createElement(Fragment, null, children))).not.toContain("Body copy")
+  })
+
+  it("gives a node with no slot children the same empty map every time", () => {
+    const idFactory = sequentialIdFactory()
+    const root = buildElement(idFactory, {
+      type: "loom.page",
+      children: [buildText(idFactory, "bare")],
+    })
+
+    const element = renderLoomTree(createTree(root, idFactory), {
+      resolver: testPrimitiveResolver,
+    }).element as ReactElement<LoomPrimitiveProps>
+
+    expect(element.props.loom.slots).toBe(NO_SLOTS)
+  })
+
+  it("reads no region off the prototype of the map it hands over", () => {
+    const idFactory = sequentialIdFactory()
+    const root = buildElement(idFactory, {
+      type: "loom.page",
+      children: [buildText(idFactory, "bare")],
+    })
+
+    const element = renderLoomTree(createTree(root, idFactory), {
+      resolver: testPrimitiveResolver,
+    }).element as ReactElement<LoomPrimitiveProps>
+
+    expect(element.props.loom.slots["constructor"]).toBeUndefined()
+  })
+
+  it("places both of two slot children that share a name, in tree order", () => {
+    const idFactory = sequentialIdFactory()
+    const root = buildElement(idFactory, {
+      type: "loom.page",
+      children: [
+        buildSlot(idFactory, "aside", [buildText(idFactory, "first")]),
+        buildSlot(idFactory, "aside", [buildText(idFactory, "second")]),
+      ],
+    })
+
+    const { region } = regionOf(createTree(root, idFactory), "aside")
+
+    expect(renderToStaticMarkup(createElement(Fragment, null, region))).toBe("firstsecond")
+  })
+
+  it("routes the host's projection through the region, not around it", () => {
+    const { tree } = sampleTree()
+
+    const element = renderLoomTree(tree, {
+      resolver: testPrimitiveResolver,
+      slots: { main: createElement("aside", null, "projected") },
+    }).element as ReactElement<LoomPrimitiveProps>
+
+    const region = element.props.loom.slots["main"]
+
+    expect(renderToStaticMarkup(createElement(Fragment, null, region))).toBe(
+      "<aside>projected</aside>"
+    )
+  })
+
+  it("leaves a slot nested inside another slot's fallback where it sits", () => {
+    const idFactory = sequentialIdFactory()
+    const root = buildElement(idFactory, {
+      type: "loom.page",
+      children: [
+        buildSlot(idFactory, "outer", [buildSlot(idFactory, "inner", [buildText(idFactory, "deep")])]),
+      ],
+    })
+
+    const { region } = regionOf(createTree(root, idFactory), "outer")
+
+    expect(renderToStaticMarkup(createElement(Fragment, null, region))).toBe("deep")
+  })
+
+  it("drops a region its primitive does not place", () => {
+    const idFactory = sequentialIdFactory()
+    const root = buildElement(idFactory, {
+      type: "loom.page",
+      children: [buildSlot(idFactory, "aside", [buildText(idFactory, "unplaced")])],
+    })
+
+    const markup = renderToStaticMarkup(
+      renderLoomTree(createTree(root, idFactory), {
+        resolver: staticPrimitiveResolver({
+          "loom.page": ({ children }: LoomPrimitiveProps) => createElement("main", null, children),
+        }),
+      }).element
+    )
+
+    expect(markup).toBe("<main></main>")
   })
 })
 

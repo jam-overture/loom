@@ -54,11 +54,16 @@ Order, and the reason for it:
    Three registered ids on the root node, resolved per render and mounted by the
    root primitive as CSS custom properties, so a ported renderer reading
    `var(--loom-accent)` is styled and a re-theme is an ordinary `configure`.
-2. **Ten primitives, not seventy.** Chosen to cover the *contract* rather than
-   the catalogue: two or three that genuinely nest, so slots are exercised; a
-   few leaves; one with a rich prop schema; one with an enum-driven display
-   mode. Prove the port pattern before industrialising it.
-3. **One real page**, assembled from those and edited through the portal. This
+2. **Ten primitives, not seventy** — done
+   ([0051](decisions/0051-a-slot-is-a-region-the-primitive-places.md),
+   [0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md),
+   [0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)).
+   Chosen to cover the *contract* rather than the catalogue: four that compose,
+   two of them through named slots; five leaves; one with a rich prop schema and
+   a cross-field rule; one driven by an enum that changes what is rendered; and
+   one container/child pair that shows how every remaining Hermes list block
+   decomposes. See [the starter library](#the-starter-primitives).
+3. **One real page** ← current, assembled from those and edited through the portal. This
    is the first end-to-end test of §1–§6 against something not written to pass
    its own tests, and it is the demo.
 4. **The remaining primitives**, which by then are mechanical — and only then
@@ -116,6 +121,11 @@ src/
 │   ├── render.ts        # The tree, projected into React
 │   └── request.ts       # Per-request resolution: load, validate, render
 ├── catalogue.ts         # What a deployment can build with, as data
+├── primitives/          # The starter library — a separate entry point
+│   ├── tokens.ts        # The only way a primitive names a colour or a length
+│   ├── url.ts           # The scheme allowlist every href and src is held to
+│   ├── loom.page.ts     # …and one module per primitive, named for its type
+│   └── index.ts         # The ten, and a registry over them
 ├── sdk/                 # The framework SDK — a separate entry point
 │   ├── definition.ts    # The registration contract: definePrimitive
 │   ├── registry.ts      # The registry: resolver and validator in one object
@@ -259,11 +269,32 @@ const rendered = await renderRequest(
 ```
 
 A primitive receives three props — `loom` (its node id, type, edit-mode
-decoration, and — on the root node only — the mounted theme), `props` (the
-node's props, unspread), and `children`. Rendering is
+decoration, its named regions, and — on the root node only — the mounted theme),
+`props` (the node's props, unspread), and `children`. Rendering is
 pure and total: it has no hooks and no IO, so it runs per request at the edge or
 in a Server Component, and anything it could not render comes back in
 `diagnostics` rather than as a thrown error.
+
+### Named regions
+
+A primitive that treats one part of its contents differently from the rest
+declares a slot, and places it. The element's `slot` children arrive on
+`loom.slots` keyed by name, and are **not** in `children` — so a region is a
+place the primitive chooses, rather than a position in a list that any `move`
+could change (0051):
+
+```tsx
+const Split = ({ loom, children }) => (
+  <div {...loom.editable} style={{ display: "flex", flexWrap: "wrap" }}>
+    <div>{loom.slots.start}{children}</div>
+    <div>{loom.slots.end}</div>
+  </div>
+)
+```
+
+A region the primitive does not place renders nothing. A host still projects
+into a region by name through `renderRequest`'s `slots` option, and what it
+projects reaches the primitive the same way.
 
 ## Wearing a theme
 
@@ -344,6 +375,49 @@ instead of guessing at type names.
 `auditRegistry(registry)` probes every primitive for the edit-mode contract and
 reports which ones would be invisible to the portal. It is a function a host runs
 in a test or a build step — registration itself never calls a primitive.
+
+## The starter primitives
+
+A deployment does not have to start from an empty registry. `@loom/runtime/primitives`
+ships ten, ported from the Hermes predecessor and chosen to cover the primitive
+contract rather than the catalogue:
+
+```ts
+import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
+
+const registry = createStarterPrimitiveRegistry([myOwnPrimitive])   // Result, like any other
+```
+
+| | | |
+| --- | --- | --- |
+| `loom.page` | root, composes | Mounts the theme; one column, at a chosen measure |
+| `loom.section` | composes, slot `heading` | A band of the page, with its heading placed above the content |
+| `loom.split` | composes, slots `start` `end` | Two regions side by side, wrapping to one column with no media query |
+| `loom.stat-grid` | composes | A responsive grid of `loom.stat` children |
+| `loom.stat` | leaf | One figure, its label, and an optional caption |
+| `loom.heading` | leaf | `level` sets both the outline and the size; the text is child nodes |
+| `loom.prose` | leaf | A paragraph; the text is child nodes |
+| `loom.divider` | leaf | Three genuinely different renderings, selected by one enum |
+| `loom.media` | leaf | An image; alt text required unless it says it is decorative |
+| `loom.action` | leaf | A call to action; its destination is scheme-checked |
+
+Every one of them reads colour, type and spacing through `var(--loom-*)` and
+hard-codes none of it, which is what makes a re-theme one `configure` on the
+root. That is enforced by a test: the whole sample page is rendered under both
+starter palettes, and the markup below the root has to be byte-identical and to
+contain no literal colour.
+
+Two rules govern the port, and the remaining sixty follow them:
+
+- **A repeated item is a child node; a fixed field is a prop**
+  ([0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)).
+  Hermes held a stat list in an array field; here the grid is a primitive and
+  each stat is a node, so adding one is an `insert` the Gate weighs, the log
+  attributes and the inverse removes.
+- **A URL is checked against a scheme allowlist, never merely parsed**
+  ([0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)).
+  `z.string().url()` accepts `javascript:alert(1)`, and props in a Loom tree are
+  AI-authored.
 
 ## Scaffolding
 

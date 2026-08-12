@@ -40,7 +40,32 @@ export type LoomRenderContext = {
    * two starter palettes exist to catch.
    */
   readonly theme?: CSSProperties
+  /**
+   * The content of this element's own `slot` children, keyed by slot name — the
+   * named regions the primitive declared and is responsible for placing.
+   *
+   * Always present, empty when the node has no slot children, so a primitive
+   * reads `loom.slots.aside` without first proving the map exists. A slot the
+   * primitive does not place renders nothing: that is what makes a region a
+   * region rather than a position in `children` (0051).
+   */
+  readonly slots: SlotChildren
 }
+
+/**
+ * Rendered slot content, by slot name.
+ *
+ * The map has a null prototype. Slot names are lowercase identifiers and
+ * `constructor`, `toString` and `valueOf` are all valid ones, so an ordinary
+ * object would answer `loom.slots.constructor` with a function off
+ * `Object.prototype` — the same hazard `staticPrimitiveResolver` guards, and
+ * the same fix.
+ */
+export type SlotChildren = Readonly<Record<string, ReactNode>>
+
+export const NO_SLOTS: SlotChildren = Object.freeze(
+  Object.create(null) as Record<string, ReactNode>
+)
 
 /**
  * `TProps` is what a primitive's declared schema accepts. It defaults to the

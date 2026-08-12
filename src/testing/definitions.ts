@@ -25,7 +25,12 @@ const declared = <TProps extends JsonObjectView>(
   slots?: readonly string[]
 ): PrimitiveEntry => {
   const Primitive = ({ loom, props: bag, children }: LoomPrimitiveProps<TProps>) =>
-    createElement(tag, { ...loom.editable, "data-props": JSON.stringify(bag) }, children)
+    createElement(
+      tag,
+      { ...loom.editable, "data-props": JSON.stringify(bag) },
+      children,
+      Object.keys(loom.slots).map((name) => loom.slots[name])
+    )
 
   Primitive.displayName = `declared(${type})`
 

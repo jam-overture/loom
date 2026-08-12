@@ -18,6 +18,10 @@
       "types": "./dist/render/index.d.ts",
       "default": "./dist/render/index.js"
     },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
+      "default": "./dist/primitives/index.js"
+    },
     "./sdk": {
       "types": "./dist/sdk/index.d.ts",
       "default": "./dist/sdk/index.js"

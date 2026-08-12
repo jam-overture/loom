@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="760" viewBox="0 0 960 760" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="760" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">Ten primitives, and a slot that means something</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0051–0053 — day 49 — §4b step 2. The registry is no longer empty.</text>
+
+  <!-- ================= slots ================= -->
+  <text x="32" y="102" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">0051 — A SLOT IS A REGION THE PRIMITIVE PLACES</text>
+
+  <text x="32" y="124" font-size="10.5" fill="#9ca3af">before</text>
+  <rect x="32" y="132" width="196" height="96" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="152" font-size="11" fill="#111827">loom.split</text>
+  <text x="44" y="172" font-size="10.5" fill="#6b7280">children: [</text>
+  <text x="44" y="188" font-size="10.5" fill="#6b7280">  &lt;prose/&gt;, &lt;media/&gt; ]</text>
+  <text x="44" y="212" font-size="10" fill="#b91c1c">"left" = child index 0</text>
+
+  <path d="M 228 180 L 284 180" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <text x="284" y="124" font-size="10.5" fill="#9ca3af">after</text>
+  <rect x="284" y="132" width="216" height="96" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="296" y="152" font-size="11" fill="#111827">loom.split</text>
+  <text x="296" y="172" font-size="10.5" fill="#2563eb">loom.slots.start</text>
+  <text x="296" y="188" font-size="10.5" fill="#2563eb">loom.slots.end</text>
+  <text x="296" y="212" font-size="10" fill="#15803d">a name the schema states</text>
+
+  <rect x="540" y="132" width="388" height="96" rx="6" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="552" y="152" font-size="10.5" fill="#374151">slot children leave `children` and arrive keyed by name</text>
+  <text x="552" y="170" font-size="10.5" fill="#6b7280">direct children only · two of a name are both placed</text>
+  <text x="552" y="188" font-size="10.5" fill="#6b7280">null-prototype map · host projection routes through it</text>
+  <text x="552" y="212" font-size="10" fill="#b45309">cost: a region nobody places renders nothing</text>
+
+  <!-- ================= decomposition ================= -->
+  <text x="32" y="272" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">0052 — A REPEATED ITEM IS A NODE; A FIXED FIELD IS A PROP</text>
+
+  <rect x="32" y="284" width="230" height="120" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="304" font-size="11" fill="#111827">Hermes — one block</text>
+  <text x="44" y="326" font-size="10.5" fill="#6b7280">stats { items: [ …8 ] }</text>
+  <text x="44" y="352" font-size="10" fill="#b91c1c">add one → configure, 9-item value</text>
+  <text x="44" y="368" font-size="10" fill="#b91c1c">inverse restores all nine</text>
+  <text x="44" y="384" font-size="10" fill="#b91c1c">nobody placed the new item</text>
+
+  <path d="M 262 344 L 318 344" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="266" y="337" font-size="9.5" fill="#9ca3af">port</text>
+
+  <rect x="318" y="284" width="230" height="120" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="330" y="304" font-size="11" fill="#111827">Loom — grid over stats</text>
+  <text x="330" y="326" font-size="10.5" fill="#6b7280">loom.stat-grid ▸ loom.stat ×8</text>
+  <text x="330" y="352" font-size="10" fill="#15803d">add one → insert</text>
+  <text x="330" y="368" font-size="10" fill="#15803d">inverse is one remove</text>
+  <text x="330" y="384" font-size="10" fill="#15803d">attributed to whoever proposed it</text>
+
+  <rect x="588" y="284" width="340" height="120" rx="6" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="600" y="304" font-size="10.5" fill="#374151">the rule the remaining sixty are ported against</text>
+  <text x="600" y="326" font-size="10.5" fill="#6b7280">repeated → child node</text>
+  <text x="600" y="344" font-size="10.5" fill="#6b7280">exactly one → prop</text>
+  <text x="600" y="362" font-size="10.5" fill="#6b7280">the block's own prose → text nodes</text>
+  <text x="600" y="384" font-size="10.5" fill="#6b7280">closed-set display mode → still a prop</text>
+
+  <!-- ================= the ten ================= -->
+  <text x="32" y="448" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">THE TEN — chosen to cover the contract, not the catalogue</text>
+
+  <rect x="32" y="460" width="896" height="112" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+
+  <text x="48" y="482" font-size="10" fill="#9ca3af">COMPOSE</text>
+  <text x="48" y="502" font-size="10.5" fill="#111827">loom.page</text>
+  <text x="48" y="520" font-size="10.5" fill="#111827">loom.section</text>
+  <text x="48" y="538" font-size="10.5" fill="#111827">loom.split</text>
+  <text x="48" y="556" font-size="10.5" fill="#111827">loom.stat-grid</text>
+
+  <text x="212" y="482" font-size="10" fill="#9ca3af">LEAVES</text>
+  <text x="212" y="502" font-size="10.5" fill="#111827">loom.stat</text>
+  <text x="212" y="520" font-size="10.5" fill="#111827">loom.heading</text>
+  <text x="212" y="538" font-size="10.5" fill="#111827">loom.prose</text>
+  <text x="212" y="556" font-size="10.5" fill="#111827">loom.divider · loom.media · loom.action</text>
+
+  <line x1="516" y1="474" x2="516" y2="558" stroke="#e5e7eb"/>
+
+  <text x="540" y="482" font-size="10" fill="#9ca3af">WHAT EACH ONE IS THERE TO PROVE</text>
+  <text x="540" y="502" font-size="10.5" fill="#6b7280">section, split — one region and two</text>
+  <text x="540" y="520" font-size="10.5" fill="#6b7280">stat-grid + stat — how a list block decomposes</text>
+  <text x="540" y="538" font-size="10.5" fill="#6b7280">divider — an enum that changes what is rendered</text>
+  <text x="540" y="556" font-size="10.5" fill="#6b7280">media — rich schema, cross-field rule, a URL</text>
+
+  <!-- ================= what the port broke ================= -->
+  <text x="32" y="616" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT THE PORT BROKE — fixed reactively, not sought out</text>
+
+  <rect x="32" y="628" width="290" height="86" rx="6" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="44" y="648" font-size="10.5" fill="#9a3412">slots had no mechanism</text>
+  <text x="44" y="668" font-size="10" fill="#6b7280">declared, catalogued, never delivered</text>
+  <text x="44" y="686" font-size="10" fill="#6b7280">→ loom.slots, and 0051</text>
+  <text x="44" y="704" font-size="10" fill="#9ca3af">§3</text>
+
+  <rect x="335" y="628" width="290" height="86" rx="6" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="347" y="648" font-size="10.5" fill="#9a3412">catalogue blanked on a .refine()</text>
+  <text x="347" y="668" font-size="10" fill="#6b7280">the richest schema, described as "unknown"</text>
+  <text x="347" y="686" font-size="10" fill="#6b7280">→ unwrap ZodEffects in definition.ts</text>
+  <text x="347" y="704" font-size="10" fill="#9ca3af">§4</text>
+
+  <rect x="638" y="628" width="290" height="86" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="650" y="648" font-size="10.5" fill="#b91c1c">z.string().url() accepts javascript:</text>
+  <text x="650" y="668" font-size="10" fill="#6b7280">AI-authored href, faithfully emitted</text>
+  <text x="650" y="686" font-size="10" fill="#6b7280">→ scheme allowlist, and 0053</text>
+  <text x="650" y="704" font-size="10" fill="#9ca3af">§4b</text>
+
+  <text x="32" y="742" font-size="10.5" fill="#9ca3af">pnpm verify green — 1092 runtime tests (82 files), 381 portal tests (34 files), 31 new. Nothing skipped but the keyless live smoke test.</text>
+</svg>
