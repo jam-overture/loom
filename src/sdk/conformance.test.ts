@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { LoomPrimitive, LoomPrimitiveProps } from "../render/primitive.js"
 import { undecoratedPrimitive } from "../testing/primitives.js"
 
-import { probeEditableDecoration } from "./conformance.js"
+import { probeEditableDecoration, probeSlotPlacement } from "./conformance.js"
 
 const decorating = ({ loom, children }: LoomPrimitiveProps) =>
   createElement("section", { ...loom.editable }, children)
@@ -96,5 +96,77 @@ describe("probeEditableDecoration", () => {
       outcome: "not-probeable",
       reason: "not a function component",
     })
+  })
+})
+
+/**
+ * The placement probe's subjects. Each is the smallest component that makes one
+ * distinction: a region reached, a region declared and dropped, a region handed
+ * onwards through a prop, children rendered, children ignored.
+ */
+const placingBothRegions = ({ loom, children }: LoomPrimitiveProps) =>
+  createElement("div", null, loom.slots["start"], children, loom.slots["end"])
+
+const droppingOneRegion = ({ loom, children }: LoomPrimitiveProps) =>
+  createElement("div", null, loom.slots["start"], children)
+
+const handingARegionOnwards = ({ loom }: LoomPrimitiveProps) =>
+  createElement("div", { header: loom.slots["start"] })
+
+const aLeaf = ({ props }: LoomPrimitiveProps) => createElement("span", null, String(props["value"]))
+
+describe("probeSlotPlacement", () => {
+  it("finds nothing unplaced when every declared region reaches the output", () => {
+    expect(probeSlotPlacement(placingBothRegions, ["start", "end"])).toEqual({
+      outcome: "probed",
+      unplacedSlots: [],
+      rendersChildren: true,
+    })
+  })
+
+  it("names the region a primitive promised and dropped", () => {
+    const verdict = probeSlotPlacement(droppingOneRegion, ["start", "end"])
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual(["end"])
+  })
+
+  /** Placed is placed: a region handed to another component has not gone missing. */
+  it("counts a region passed onwards through a prop as placed", () => {
+    const verdict = probeSlotPlacement(handingARegionOnwards, ["start"])
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual([])
+  })
+
+  it("tells a leaf from a container by whether children reached the output", () => {
+    const leaf = probeSlotPlacement(aLeaf, [])
+    const container = probeSlotPlacement(placingBothRegions, [])
+
+    expect(leaf.outcome === "probed" && leaf.rendersChildren).toBe(false)
+    expect(container.outcome === "probed" && container.rendersChildren).toBe(true)
+  })
+
+  it("has nothing to report about a primitive that declares no regions", () => {
+    expect(probeSlotPlacement(decorating, [])).toEqual({
+      outcome: "probed",
+      unplacedSlots: [],
+      rendersChildren: true,
+    })
+  })
+
+  it("declines to judge a primitive it cannot call, rather than calling it a drop", () => {
+    const hooked = probeSlotPlacement(usingAHook, ["start"])
+    const classed = probeSlotPlacement(ClassPrimitive, ["start"])
+
+    expect(hooked.outcome).toBe("not-probeable")
+    expect(classed.outcome).toBe("not-probeable")
+  })
+
+  it("does not read a region off Object.prototype", () => {
+    const readingAnInheritedName = ({ loom }: LoomPrimitiveProps) =>
+      createElement("div", null, loom.slots["constructor"] as ReactNode)
+
+    const verdict = probeSlotPlacement(readingAnInheritedName, ["constructor"])
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual([])
   })
 })

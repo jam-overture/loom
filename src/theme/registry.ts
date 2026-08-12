@@ -39,6 +39,17 @@ export type ThemeCatalogueEntry = {
   readonly description: string
 }
 
+/**
+ * What a deployment may be themed with, as data — the theme half of what
+ * `catalogueOf` projects for primitives, and shown to a model for the same
+ * reason: an id it was never told about is an id it can only guess.
+ */
+export type ThemeCatalogue = {
+  readonly palettes: readonly ThemeCatalogueEntry[]
+  readonly fontPacks: readonly ThemeCatalogueEntry[]
+  readonly stylePresets: readonly ThemeCatalogueEntry[]
+}
+
 export interface ThemeRegistry {
   /**
    * `unknown` in, because a selection arrives from the tree — storage is a
@@ -47,11 +58,7 @@ export interface ThemeRegistry {
    */
   readonly resolve: (selection: unknown) => Result<ResolvedTheme, ThemeError>
   /** What a deployment can be themed with, as data a model can be shown. */
-  readonly catalogue: () => {
-    readonly palettes: readonly ThemeCatalogueEntry[]
-    readonly fontPacks: readonly ThemeCatalogueEntry[]
-    readonly stylePresets: readonly ThemeCatalogueEntry[]
-  }
+  readonly catalogue: () => ThemeCatalogue
 }
 
 const entryOf = (item: { id: string; name: string; description: string }): ThemeCatalogueEntry => ({

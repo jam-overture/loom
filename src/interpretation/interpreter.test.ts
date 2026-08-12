@@ -4,6 +4,7 @@ import { nodeIdSchema, sequentialIdFactory } from "../ids.js"
 import { err, type Result } from "../result.js"
 import { gate } from "../runtime/gate.js"
 import { catalogueOf } from "../sdk/catalogue.js"
+import { createThemeRegistry } from "../theme/registry.js"
 import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
 import { composeChange } from "../runtime/pipeline.js"
@@ -108,6 +109,27 @@ describe("modelInterpreter — request assembly", () => {
     expect(interpreted.ok && interpreted.value.provenance.promptHash).not.toBe(
       withoutCatalogue.ok && withoutCatalogue.value.provenance.promptHash
     )
+  })
+
+  it("tells the model what this deployment can be themed with, when a theme registry is configured", async () => {
+    const { tree } = sampleTree()
+    const idFactory = sequentialIdFactory("x")
+    const client = scriptedModelClient(INSERT_NOTE_REPLY)
+    const interpreter = modelInterpreter({
+      client,
+      idFactory,
+      clock: fixedClock(),
+      catalogue: catalogueOf(testRegistry()),
+      themeCatalogue: createThemeRegistry().catalogue(),
+    })
+
+    await interpreter.interpret(
+      buildIntent(idFactory, { treeId: tree.treeId, baseRevision: tree.revision }),
+      tree
+    )
+
+    expect(client.requests[0]?.userMessage).toContain("Themes this deployment has registered")
+    expect(client.requests[0]?.userMessage).toContain("- editorial —")
   })
 
   it("honours an overridden model and effort", async () => {

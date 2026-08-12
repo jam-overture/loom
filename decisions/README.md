@@ -111,3 +111,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0051](0051-a-slot-is-a-region-the-primitive-places.md) | A slot is a region the primitive places, not content inline in its children | Accepted | §3 → §4b |
 | [0052](0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md) | A repeated item is a node; a fixed field is a prop | Accepted | §4b |
 | [0053](0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md) | A URL in the tree is checked against a scheme allowlist | Accepted | §4b |
+| [0054](0054-a-container-is-its-childs-name-plus-the-arrangement.md) | A container is its child's name plus the arrangement it puts them in | Accepted | §4b |
+| [0055](0055-motion-is-a-static-stylesheet-the-primitive-emits.md) | Motion is a static stylesheet the primitive emits, never a prop in the tree | Accepted | §4b |

@@ -1,7 +1,12 @@
 import type { DecorationLookup } from "../render/addressing.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
-import { probeEditableDecoration, type ConformanceVerdict } from "./conformance.js"
+import {
+  probeEditableDecoration,
+  probeSlotPlacement,
+  type ConformanceVerdict,
+  type PlacementVerdict,
+} from "./conformance.js"
 import type { PrimitiveRegistry } from "./registry.js"
 
 /**
@@ -23,6 +28,13 @@ import type { PrimitiveRegistry } from "./registry.js"
 export type PrimitiveAudit = {
   readonly type: PrimitiveType
   readonly verdict: ConformanceVerdict
+  readonly placement: PlacementVerdict
+}
+
+/** A primitive that declared a region and then did not render it. */
+export type UnplacedSlots = {
+  readonly type: PrimitiveType
+  readonly slots: readonly string[]
 }
 
 export type RegistryAudit = {
@@ -31,18 +43,40 @@ export type RegistryAudit = {
   readonly notDecorated: readonly PrimitiveType[]
   /** The probe could not answer — neither a pass nor a failure. */
   readonly notProbeable: readonly PrimitiveType[]
+  /**
+   * Declared a slot and dropped it. Unlike `notDecorated` this loses content
+   * rather than a handle, so a host with no portal at all still wants it empty.
+   */
+  readonly unplacedSlots: readonly UnplacedSlots[]
+  /**
+   * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and
+   * label as props and has nowhere to put a text node. It is here because it is
+   * the one fact the renderer cannot derive, and a portal that offers "insert
+   * into this node" needs it to avoid offering a place nothing will appear.
+   */
+  readonly leaves: readonly PrimitiveType[]
 }
+
+const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
+  placement.outcome === "probed" ? placement.unplacedSlots : []
 
 export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
   const audits = registry.primitives.map((primitive) => ({
     type: primitive.type,
     verdict: probeEditableDecoration(primitive.component),
+    placement: probeSlotPlacement(primitive.component, primitive.slots),
   }))
 
   return {
     audits,
     notDecorated: audits.filter((audit) => audit.verdict.outcome === "not-decorated").map((audit) => audit.type),
     notProbeable: audits.filter((audit) => audit.verdict.outcome === "not-probeable").map((audit) => audit.type),
+    unplacedSlots: audits
+      .filter((audit) => unplacedIn(audit.placement).length > 0)
+      .map((audit) => ({ type: audit.type, slots: unplacedIn(audit.placement) })),
+    leaves: audits
+      .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
+      .map((audit) => audit.type),
   }
 }
 
@@ -83,6 +117,17 @@ const describeVerdict = (verdict: ConformanceVerdict): string => {
   }
 }
 
+const describePlacement = (placement: PlacementVerdict): string => {
+  if (placement.outcome === "not-probeable") return `placement not probed (${placement.reason})`
+  if (placement.unplacedSlots.length > 0) {
+    return `declares ${placement.unplacedSlots.join(", ")} and does not place ${placement.unplacedSlots.length === 1 ? "it" : "them"}`
+  }
+
+  return placement.rendersChildren ? "renders its children" : "renders no children (a leaf)"
+}
+
 /** One line per primitive, for a CLI or a failing test's message. */
 export const describeRegistryAudit = (audit: RegistryAudit): string =>
-  audit.audits.map((entry) => `${entry.type}: ${describeVerdict(entry.verdict)}`).join("\n")
+  audit.audits
+    .map((entry) => `${entry.type}: ${describeVerdict(entry.verdict)}; ${describePlacement(entry.placement)}`)
+    .join("\n")
