@@ -1,14 +1,24 @@
 import { describe, expect, it } from "vitest"
 
-import { DEFAULT_LANDING, isPublicPath, safeReturnPath, SIGN_IN_PATH } from "./paths"
+import { DEFAULT_LANDING, DEMO_PATH, isPublicPath, safeReturnPath, SIGN_IN_PATH } from "./paths"
 
 describe("isPublicPath", () => {
   it("lets the sign-in page through", () => {
     expect(isPublicPath(SIGN_IN_PATH)).toBe(true)
   })
 
+  /**
+   * The demo is meant to be reachable by someone with no account, and its own
+   * server actions live under the same path — so the whole segment is public,
+   * not only the page.
+   */
+  it("lets the demo and its actions through", () => {
+    expect(isPublicPath(DEMO_PATH)).toBe(true)
+    expect(isPublicPath(`${DEMO_PATH}/anything`)).toBe(true)
+  })
+
   it("does not let anything else through", () => {
-    for (const path of ["/", "/trees", "/trees/t_1", "/activity", "/history"]) {
+    for (const path of ["/", "/trees", "/trees/t_1", "/activity", "/history", "/demos"]) {
       expect(isPublicPath(path), path).toBe(false)
     }
   })

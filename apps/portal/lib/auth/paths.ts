@@ -11,7 +11,19 @@
 
 export const SIGN_IN_PATH = "/sign-in"
 
-const PUBLIC_PATHS: readonly string[] = [SIGN_IN_PATH]
+/**
+ * The demo is the second public path, and it is public by design rather than by
+ * omission: it exists to be looked at by somebody who has not been given an
+ * account, and §4d's marketing site cannot embed a surface behind a sign-in.
+ *
+ * What makes it safe to open is that it shares nothing with the portal but the
+ * deployment. It has its own registry, its own in-memory store, its own policy
+ * and no identity at all, so an anonymous visitor reaches a tree that expires
+ * with the instance and never the one the portal is reviewing.
+ */
+export const DEMO_PATH = "/demo"
+
+const PUBLIC_PATHS: readonly string[] = [SIGN_IN_PATH, DEMO_PATH]
 
 export const isPublicPath = (pathname: string): boolean =>
   PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
