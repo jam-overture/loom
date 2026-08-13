@@ -28,7 +28,7 @@ Sections 1–6 are built and run end to end. What is still open in each is track
 in the latest report in [`reports/`](reports/) rather than here, because a marker
 in a README is a thing that goes stale quietly.
 
-### 4b — The primitive library ← current
+### 4b — The primitive library
 
 §4 built the contract a primitive registers under. It never built anything to
 register, and an empty registry is the reason nothing downstream can be shown:
@@ -63,31 +63,62 @@ Order, and the reason for it:
    a cross-field rule; one driven by an enum that changes what is rendered; and
    one container/child pair that shows how every remaining Hermes list block
    decomposes. See [the starter library](#the-starter-primitives).
-3. **One real page** ← current, assembled from those and edited through the portal. This
-   is the first end-to-end test of §1–§6 against something not written to pass
-   its own tests, and it is the demo. Three things ride along with it, approved
-   on #68 and carried here so the plan holds them rather than a merged thread:
-   - **`auditRegistry` probes for slot placement.** A primitive that declares a
-     region and never reads it drops content silently. The probe knows which
-     names were declared, so it can hand one marker per declared slot and look
-     for each in the output — the same shape as `probeEditableDecoration`, and
-     it protects the contract 0051 just created. The same call can see whether
-     `children` reached the output, which answers separately whether a leaf
-     given children it cannot place should be diagnosed.
-   - **The theme registry joins the catalogue the model is shown.**
-     `themeRegistry.catalogue()` is wired to nothing, so "make it warmer"
-     resolves against a vocabulary the model was never shown. The real page is
-     the first step with an interpreter in front of this library, so it is the
-     first step where the guess can be observed rather than imagined.
-   - **A naming convention for decomposed pairs**, before step 4 decides it
-     sixty times. `loom.stat-grid`/`loom.stat` reads well;
-     `loom.faq`/`loom.faq-item` and `loom.pricing-tiers`/`loom.pricing-tier` do
-     not agree with it or with each other.
-4. **The remaining primitives**, which by then are mechanical — and only then
-   §7, because a marketplace of primitives needs primitives.
+3. **The demo vocabulary, and then the demo** — done. The vocabulary came first
+   (eight composed primitives, taking the library to eighteen) because a page
+   built from `section` + `prose` + `stat-grid` is a layout demo, and what this
+   step has to produce is something that looks like a product. The demo list and
+   the marketing list are one list, so §4d builds the real site from these rather
+   than beside them.
+
+   The demo itself is `/demo`, public, in the portal deployment
+   ([0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)):
+   a real page on the left, and on the right the record of every change to it —
+   the proposal with its rationale and provenance, the stakes factors and the
+   reversibility verdict, which rule fired under which policy, the revision it
+   produced and what it replaced, and an undo that is a proposal like any other.
+   Five scripted changes cover all four delta operations and need no key
+   ([0057](decisions/0057-a-preset-is-a-deterministic-interpreter.md)); free text
+   goes to the model when one is configured. It is the first end-to-end run of
+   §1–§6 against something not written to pass its own tests.
+
+   Three things approved on #68 rode along with the vocabulary and are done:
+   `auditRegistry` probes for slot placement and reports which primitives are
+   leaves; the theme registry joins the catalogue the model is shown; and
+   decomposed pairs have a naming rule
+   ([0054](decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)).
+4. **The remaining primitives**, which by then are mechanical — and they come
+   after §4c and §4d, because a site that shows the runtime is worth more than
+   the fifty-second block. Only then §7, since a marketplace of primitives needs
+   primitives.
 
 Refinement inside §1–§6 is **reactive from here**: driven by what the port
 breaks, not run as its own stream.
+
+### 4c — The documentation site ← current
+
+Modelled on `nextjs.org/docs`. Two decisions are settled and are not worth
+relitigating:
+
+- **MDX for prose and code blocks.** Documentation is prose, and prose is not
+  improved by being a node tree. The tree model earns its keep where a page is
+  *configured* rather than written.
+- **Every rendered example on the page is a real `LoomTree`**, mounted through
+  the runtime with a working propose-a-change box beside it. An example is a
+  registry entry, so an example that cannot render is a failing test rather than
+  a stale snippet — which is only affordable because a demonstrated change is a
+  deterministic interpreter
+  ([0057](decisions/0057-a-preset-is-a-deterministic-interpreter.md)) and needs
+  no key to run.
+
+### 4d — The marketing site
+
+**Built entirely in Loom**: composed sections, themed, adapting. It reuses the
+§4b step 3 primitives — the site is the proof, not a brochure about it — and it
+embeds the demo rather than describing it, which is why the demo is public
+([0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)).
+
+Positioning, audience and licensing are the maintainer's and are not engineering
+questions. They are asked, not invented.
 
 ## Layout
 

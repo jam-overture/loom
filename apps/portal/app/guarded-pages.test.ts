@@ -21,8 +21,16 @@ const APP = join(process.cwd(), "app")
  * `/sign-in` must be reachable without a session or nobody could ever get one,
  * and `/` only redirects — it renders nothing and reads nothing, so an actor
  * would gate a page that has no content to protect.
+ *
+ * `/demo` is the third and the only one that renders anything. It is public
+ * because its whole purpose is to be seen by someone with no account, and it is
+ * safe to be public because it reads nothing this portal protects: its own
+ * registry, its own in-memory store keyed by an opaque cookie, its own policy,
+ * and no identity. An exemption that grew to include a page reading
+ * `portalStore` would be the failure this list exists to make visible, so the
+ * test below asserts that it does not.
  */
-const UNGUARDED_BY_DESIGN: readonly string[] = ["sign-in/page.tsx", "page.tsx"]
+const UNGUARDED_BY_DESIGN: readonly string[] = ["sign-in/page.tsx", "page.tsx", "demo/page.tsx"]
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -49,8 +57,35 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page and the root redirect", () => {
-    expect([...UNGUARDED_BY_DESIGN].sort()).toEqual(["page.tsx", "sign-in/page.tsx"])
+  it("exempts only the sign-in page, the root redirect and the demo", () => {
+    expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
+      "demo/page.tsx",
+      "page.tsx",
+      "sign-in/page.tsx",
+    ])
+  })
+
+  /**
+   * The exemption is only defensible while it stays true. An unguarded page that
+   * reached the portal's store, its telemetry journal or its identity would be
+   * an open door to the very things the guard exists for — and it would look
+   * exactly like an ordinary import.
+   */
+  it("keeps every unguarded page away from the portal's own store and journal", () => {
+    /**
+     * Auth is not on the list: `/sign-in` exists to use it. What must not be
+     * reachable without a session is the reviewed tree, the write path that
+     * appends to it, and the journal of what has been asked of it.
+     */
+    const FORBIDDEN = ["@/lib/store", "@/lib/telemetry", "@/lib/write", "@/lib/database"]
+
+    const reaching = UNGUARDED_BY_DESIGN.filter((page) => {
+      const source = readFileSync(join(APP, page), "utf8")
+
+      return FORBIDDEN.some((module) => source.includes(`from "${module}`))
+    })
+
+    expect(reaching).toEqual([])
   })
 
   /**

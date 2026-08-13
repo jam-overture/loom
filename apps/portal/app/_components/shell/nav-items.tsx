@@ -47,6 +47,22 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
+      /**
+       * The one public route, listed here anyway: a reviewer looking at what
+       * this deployment holds should be able to reach the surface anyone else
+       * can see, without having to be told the path.
+       */
+      label: "demo",
+      href: "/demo",
+      icon: (
+        <svg {...strokeProps}>
+          <rect x="3" y="4" width="18" height="14" rx="2" />
+          <path d="M8 21h8" />
+          <path d="M10 9l4 2-4 2z" />
+        </svg>
+      ),
+    },
+    {
       label: "primitives",
       href: "/primitives",
       icon: (
