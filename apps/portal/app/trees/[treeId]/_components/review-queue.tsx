@@ -1,5 +1,7 @@
 import type { HeldProposal } from "@loom/runtime/write"
 
+import { StateNotice } from "@/app/_components/state-notice"
+
 import { HeldProposalCard } from "./held-proposal"
 
 /**
@@ -17,9 +19,13 @@ export const ReviewQueue = ({ held }: { readonly held: readonly HeldProposal[] }
     </div>
 
     {held.length === 0 ? (
-      <p className="text-ink-muted text-xs">
-        Nothing is held. Changes the Gate accepts are written without asking.
-      </p>
+      <StateNotice tone="empty" title="Nothing is held.">
+        <p>
+          Changes the Gate accepts are written without asking, and ones it refuses outright never
+          reach you — a hold is the middle case, where the stakes were high enough that the Gate
+          declined to decide alone. An empty queue is the Gate having decided, not having stalled.
+        </p>
+      </StateNotice>
     ) : (
       <ul className="flex flex-col gap-3">
         {held.map((proposal) => (

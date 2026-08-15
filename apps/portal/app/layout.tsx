@@ -46,9 +46,32 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body className="min-h-screen">
+        {/*
+         * First in the tab order, and off-screen until it is focused. The
+         * chrome above and beside every page is a topbar and a rail of six
+         * routes, so without this the first thing a keyboard user does on
+         * every navigation is tab past the same nine stops again.
+         */}
+        <a href="#page" className="loom-skip-link">
+          skip to the page
+        </a>
         <TopBar />
         {signedIn && <Sidebar />}
-        <main className={`min-h-screen pt-14 ${signedIn ? "pl-14" : ""}`}>{children}</main>
+        {/*
+         * `tabIndex={-1}` so the skip link moves real focus here rather than
+         * only scrolling — a screen reader that was not moved is still reading
+         * the rail. The ring is suppressed on this one element on purpose: it
+         * is the whole viewport, so a 2px outline around it is noise rather
+         * than the "you are here" a ring is for. Every focusable thing inside
+         * it still gets one.
+         */}
+        <main
+          id="page"
+          tabIndex={-1}
+          className={`min-h-screen pt-14 focus-visible:outline-none ${signedIn ? "pl-14" : ""}`}
+        >
+          {children}
+        </main>
       </body>
     </html>
   )

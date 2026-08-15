@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeTelemetryError, episodesOf, tallyEpisodes } from "@loom/runtime/telemetry"
 
+import { StateNotice } from "@/app/_components/state-notice"
 import { requireActor } from "@/lib/auth/identity"
 import { portalTelemetry } from "@/lib/telemetry"
 import { storeIsDurable } from "@/lib/store"
@@ -43,9 +44,16 @@ const ActivityPage = async ({
 
   if (!page.ok) {
     return (
-      <div className="flex max-w-3xl flex-col gap-3 p-8">
+      <div className="flex max-w-3xl flex-col gap-4 p-8">
         <h1 className="text-2xl tracking-tight">activity</h1>
-        <p className="text-ink-muted text-sm">{describeTelemetryError(page.error)}</p>
+        <StateNotice tone="failure" title="The journal could not be read.">
+          <p>{describeTelemetryError(page.error)}</p>
+          <p>
+            This is a failed read, not a quiet journal. A page with nothing on it because the
+            journal is empty says so in different words — if you are here to check whether
+            something was recorded, this page cannot answer that yet.
+          </p>
+        </StateNotice>
       </div>
     )
   }
@@ -67,11 +75,27 @@ const ActivityPage = async ({
       </div>
 
       {episodes.length === 0 ? (
-        <p className="text-ink-muted text-sm">
-          Nothing has been recorded here. Every ask the runtime interprets lands in this
-          journal — including the ones it refused — so an empty page means nothing has been
-          asked, not that nothing was kept.
-        </p>
+        <StateNotice
+          tone="empty"
+          title="Nothing has been recorded here."
+          action={
+            scope?.success ? (
+              <Link href="/activity">every tree →</Link>
+            ) : (
+              <Link href="/trees">every tree →</Link>
+            )
+          }
+        >
+          <p>
+            Every ask the runtime interprets lands in this journal — including the ones it
+            refused, and the ones the model declined to interpret at all. So an empty page
+            means nothing has been asked, not that nothing was kept.
+          </p>
+          <p>
+            Ask a tree for a change and it appears here, with what the interpreter made of it
+            and what the Gate decided.
+          </p>
+        </StateNotice>
       ) : (
         <>
           <TallyBar tally={tally} />
@@ -114,11 +138,13 @@ const ActivityPage = async ({
       </div>
 
       {storeIsDurable ? null : (
-        <p className="text-ink-muted text-xs">
-          No database is configured, so this journal lives in the server process and holds only
-          what this instance has seen. Set <span className="font-mono">DATABASE_URL</span> to make
-          it durable.
-        </p>
+        <StateNotice tone="notice">
+          <p>
+            No database is configured, so this journal lives in the server process and holds only
+            what this instance has seen. Set <span className="font-mono">DATABASE_URL</span> to make
+            it durable.
+          </p>
+        </StateNotice>
       )}
     </div>
   )
