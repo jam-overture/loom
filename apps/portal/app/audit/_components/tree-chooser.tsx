@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { StateNotice } from "@/app/_components/state-notice"
 import { isAuditable } from "@/lib/seeds"
 import { portalStore } from "@/lib/store"
 
@@ -16,12 +17,33 @@ import { portalStore } from "@/lib/store"
 export const AuditTreeChooser = async () => {
   const page = await portalStore.list()
 
-  if (!page.ok) return <p className="text-ink-muted text-sm">{describeStoreError(page.error)}</p>
+  if (!page.ok) {
+    return (
+      <StateNotice tone="failure" title="The store could not be listed.">
+        <p>{describeStoreError(page.error)}</p>
+        <p>
+          Nothing has been audited and nothing has passed. A page that cannot list the trees
+          has checked none of them — which is a different thing from finding none to check.
+        </p>
+      </StateNotice>
+    )
+  }
 
   const { trees } = page.value
 
   if (trees.length === 0) {
-    return <p className="text-ink-muted text-sm">No trees stored, so there is nothing to audit.</p>
+    return (
+      <StateNotice
+        tone="empty"
+        title="No trees stored, so there is nothing to audit."
+        action={<Link href="/trees">trees →</Link>}
+      >
+        <p>
+          An audit needs two things: a log, and a seed this deployment can reproduce (0028).
+          Both arrive with the tree, so this page fills itself as soon as one is stored.
+        </p>
+      </StateNotice>
+    )
   }
 
   return (

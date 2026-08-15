@@ -1,3 +1,4 @@
+import { StateNotice } from "@/app/_components/state-notice"
 import { attemptLogIsDurable, portalAttemptLog } from "@/lib/auth/attempt-log"
 import { requireActor } from "@/lib/auth/identity"
 import { readPressure, SURVEY_LIMIT } from "@/lib/auth/pressure"
@@ -54,11 +55,15 @@ const SignInsPage = async () => {
          * who has to fix it, and "unavailable" without a reason is a page that
          * wastes their next hour.
          */
-        <p className="text-ink-muted text-sm">
-          The attempt log could not be read, so the throttle cannot be reported on. Sign-in itself
-          fails closed on the same error rather than letting attempts through uncounted (0034).
-          <span className="mt-1 block font-mono text-xs">{survey.error.detail}</span>
-        </p>
+        <StateNotice tone="failure" title="The attempt log could not be read.">
+          <p>
+            The throttle cannot be reported on. This page saying nothing is not the same as
+            nobody knocking — read it as &ldquo;unknown&rdquo;, never as &ldquo;quiet&rdquo;.
+            Sign-in itself fails closed on the same error rather than letting attempts through
+            uncounted (0034).
+          </p>
+          <p className="font-mono">{survey.error.detail}</p>
+        </StateNotice>
       )}
 
       <p className="text-ink-muted text-xs">{describePolicy(policy)}</p>
@@ -71,11 +76,13 @@ const SignInsPage = async () => {
       </p>
 
       {attemptLogIsDurable ? null : (
-        <p className="text-ink-muted text-xs">
-          No database is configured, so attempts are counted in this server process alone. On a
-          deployment with more than one instance that makes this page a report on whichever
-          instance answered it. Set <span className="font-mono">DATABASE_URL</span> to count once.
-        </p>
+        <StateNotice tone="notice">
+          <p>
+            No database is configured, so attempts are counted in this server process alone. On a
+            deployment with more than one instance that makes this page a report on whichever
+            instance answered it. Set <span className="font-mono">DATABASE_URL</span> to count once.
+          </p>
+        </StateNotice>
       )}
     </div>
   )
