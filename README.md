@@ -160,6 +160,41 @@ edits a live tree that uses them, and watches the Gate respond. Every example is
 therefore a real registry entry, and an example that cannot render is a failing
 test rather than a stale snippet.
 
+### 4e — Adapters: how a primitive reaches data
+
+**Status: a real gap, and the honest answer to "are we planning for adapters?"**
+
+Loom has **one** network seam and it is excellent: `ModelClient` in
+`src/interpretation/client.ts` is a single method, the whole boundary sits above
+it, and `anthropicModelClient` is an optional peer dependency behind its own
+entry point ([0005](decisions/0005-model-access-is-an-optional-adapter.md)). A
+host brings its own model by implementing one interface.
+
+That is the *model* adapter. There is no **data** adapter. Props are static JSON
+authored by AI; a grep for network code outside `src/interpretation/` returns
+nothing. Today a developer cannot say that a pricing table's rows come from
+Stripe, or that a testimonial list comes from their database. Hermes solved this
+with `binding` fields resolved against a profile and integration handles — the
+third of the four port mismatches above — and Loom has no equivalent layer.
+
+This is load-bearing for everything downstream. A marketing site can be static;
+a real application cannot, and neither can the `services` and `products`
+primitives when the port reaches them.
+
+Two things make it delicate rather than merely unbuilt:
+
+- **It probably reaches the prop model**, which makes it an escalation rather
+  than something a routine decides alone. A resolved value is not a JSON literal,
+  and the render seam validates props against a declared schema.
+- **It must not become a second ungoverned channel.** If a primitive can fetch
+  whatever it likes, "what changed and who asked for it" stops being answerable
+  from the tree — the same objection that decided [0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md).
+  A data adapter has to be as bounded and as declared as the registry is.
+
+Tracked as [F-001](FINDINGS.md). Sequenced when the port hits a primitive that
+needs it, which will happen during §4b — not before, because the concrete case
+will shape the answer better than speculation.
+
 ### 4d — Marketing site
 
 **Built entirely in Loom.** This is the one surface where the framework is
@@ -170,6 +205,30 @@ primitives.
 
 It cannot start before the demo exists. Positioning, audience and licensing are
 undecided and are not engineering questions; scope them when §4b lands.
+
+#### The adaptive-site idea
+
+The version worth aiming at: **the site rewrites itself as the visitor
+interacts, with the telemetry visible while it happens.** A visitor says what
+they came for, the page composes itself around that, and the panel beside it
+shows the proposal, the Gate's verdict and the revision — the product
+demonstrating itself rather than describing itself. If Loom works as intended
+this is also the strongest conversion argument available, because no competitor
+can show the second half.
+
+The same idea is arguably stronger on the docs site, and cheaper to make
+truthful. Instead of search dropping a reader into a topic page, the reader says
+what they are trying to learn — or pastes code they are stuck on — and Loom
+composes a page for that: the relevant explanation, a live example built from
+real primitives, and a correction against their own snippet. The material is
+already written and already accurate, so the model composes from a bounded
+corpus rather than inventing.
+
+Both are their own routines rather than additions to §4c or §4d, and both are
+**gated on the demo existing** — an adaptive site made of a vocabulary that has
+not been proven is a demo of nothing. Each needs the interpreter running live,
+which needs `ANTHROPIC_API_KEY` reaching the deployment; that is a deployment
+question, not a framework one.
 
 ## Layout
 
@@ -292,6 +351,14 @@ does instead — with exercises you run. [Start with the syllabus](lessons/READM
 
 New to the codebase? Read [lesson 01](lessons/01-why-a-runtime.md) before
 anything else; it is the thesis the rest of the system defends.
+
+## How this gets built
+
+Loom is built by scheduled cloud agents, one objective each.
+[`docs/routines.md`](docs/routines.md) is the governance: which routines exist,
+what each owns, what may change one, and the token discipline that keeps a
+routine from quietly spending a week's allowance. [`FINDINGS.md`](FINDINGS.md)
+is how a finding in one routine reaches the routine that can act on it.
 
 ## Decisions
 
