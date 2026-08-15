@@ -354,6 +354,9 @@ anything else; it is the thesis the rest of the system defends.
 
 ## How this gets built
 
+[`docs/rollout.md`](docs/rollout.md) is the phased path to a public release,
+with the conditions that would move each date.
+
 Loom is built by scheduled cloud agents, one objective each.
 [`docs/routines.md`](docs/routines.md) is the governance: which routines exist,
 what each owns, what may change one, and the token discipline that keeps a

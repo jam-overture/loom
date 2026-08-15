@@ -53,10 +53,13 @@ enabled routine with nothing to do still spends a session discovering that.
 | Routine | Owns | Cadence | State |
 | --- | --- | --- | --- |
 | **Loom daily build** | `src/` — the framework, the primitive library, the demo | 09:07 and 21:07 UTC | Enabled |
-| **Loom portal** | `apps/portal` | — | **Disabled** until the demo exists and the portal's objectives are settled |
+| **Loom portal** | `apps/portal` | — | **Disabled** until the demo exists. Objective now settled: free. |
 | **Loom marketing** | `apps/marketing` — §4d, built in Loom | — | **Disabled** until §4b's vocabulary lands |
 | **Loom docs** | `apps/docs` — §4c | — | **Disabled** until §4b's vocabulary lands |
 | **Loom lessons** | `lessons/` | — | **Paused** while the maintainer catches up |
+
+[`rollout.md`](rollout.md) is the phased plan these routines serve, with the
+conditions that would move each date.
 
 Only the build routine is enabled, so the standing cost is **2 sessions a day** —
 unchanged by the addition of the three new ones. Each disabled routine names its
