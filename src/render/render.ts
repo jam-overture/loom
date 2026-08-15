@@ -1,6 +1,8 @@
 import { createElement, Fragment, type CSSProperties, type ReactNode } from "react"
 
+import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
 import type { JsonObject } from "../json.js"
+import { DATA_PROP_KEY } from "../reserved-props.js"
 import { assertNever } from "../result.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
@@ -55,6 +57,13 @@ export type RenderOptions = {
    * bounds the palettes, font packs and style presets a proposal may name (0049).
    */
   readonly themes?: ThemeRegistry
+  /**
+   * Absent means the tree's bindings are not answered, and a tree that declares
+   * one says so in a diagnostic. Resolution is async and rendering is not, so it
+   * happens before the walk — `renderRequest` does it, and a caller driving
+   * `renderLoomTree` itself resolves with `resolveTreeData` first (0058).
+   */
+  readonly data?: DataResolution
   /** Off by default: decoration is opt-in per request, never ambient. */
   readonly editMode?: boolean
   readonly slots?: SlotContent
@@ -79,6 +88,7 @@ type RenderContext = {
   readonly tree: LoomTree
   /** Mounted on the root element, and nowhere else. */
   readonly theme: CSSProperties | undefined
+  readonly data: DataResolution | undefined
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
@@ -133,6 +143,7 @@ const renderElementBody = (node: ElementNode, context: RenderContext): ElementBo
 const renderContextFor = (
   node: ElementNode,
   slots: SlotChildren,
+  data: NodeData,
   context: RenderContext
 ): LoomRenderContext => {
   const isRoot = isRootNode(node, context)
@@ -142,11 +153,41 @@ const renderContextFor = (
     nodeId: node.id,
     type: node.type,
     slots,
+    data,
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
       : {}),
     ...(theme ? { theme } : {}),
   }
+}
+
+/**
+ * The answers for a node that declared bindings, and a diagnostic for each one
+ * that has none. The plan was read from this same tree before the walk began, so
+ * the lookup is a map read: nothing here parses, asks or waits.
+ */
+const nodeDataFor = (node: ElementNode, context: RenderContext): NodeData => {
+  if (!context.data) {
+    context.collect({ code: "data-unresolved", nodeId: node.id })
+
+    return NO_DATA
+  }
+
+  for (const problem of context.data.problemsFor(node.id)) {
+    context.collect(
+      problem.kind === "misdeclared"
+        ? { code: "data-misdeclared", nodeId: node.id, error: problem.error }
+        : {
+            code: "data-unavailable",
+            nodeId: node.id,
+            name: problem.name,
+            source: problem.source,
+            unavailable: problem.unavailable,
+          }
+    )
+  }
+
+  return context.data.lookup(node.id)
 }
 
 /**
@@ -166,6 +207,9 @@ const reportUnreadReservedProps = (
       if (!isRoot) context.collect({ code: "theme-misplaced", nodeId: node.id })
       continue
     }
+
+    /** Read before the walk, by the data seam, and reported by `nodeDataFor`. */
+    if (key === DATA_PROP_KEY) continue
 
     context.collect({ code: "reserved-prop-unrecognised", nodeId: node.id, key })
   }
@@ -212,11 +256,12 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     context.collect({ code: "props-undeclared", nodeId: node.id, type: node.type })
   }
 
+  const data = reserved[DATA_PROP_KEY] === undefined ? NO_DATA : nodeDataFor(node, context)
   const body = renderElementBody(node, context)
 
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, body.slots, context),
+    loom: renderContextFor(node, body.slots, data, context),
     props,
     children: body.children,
   })
@@ -294,6 +339,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     slots: options.slots ?? {},
     tree,
     theme: theme ? themeStyle(theme) : undefined,
+    data: options.data,
     collect,
   })
 

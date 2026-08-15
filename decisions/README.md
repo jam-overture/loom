@@ -115,3 +115,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0055](0055-motion-is-a-static-stylesheet-the-primitive-emits.md) | Motion is a static stylesheet the primitive emits, never a prop in the tree | Accepted | §4b |
 | [0056](0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md) | The demo is public, and shares nothing with the portal but the deployment | Accepted | §4b → §5 |
 | [0057](0057-a-preset-is-a-deterministic-interpreter.md) | A demonstrated change is a deterministic interpreter, not a script beside the runtime | Accepted | §4b → §4c |
+| [0058](0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md) | A binding is a question the tree asks, answered before the walk | Accepted | §4e → §3, §4b |

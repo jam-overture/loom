@@ -1,3 +1,5 @@
+import { ZodEffects, ZodObject, type ZodRawShape, type ZodTypeAny } from "zod"
+
 import type { PrimitiveType, SlotName } from "./primitive-type.js"
 
 /**
@@ -36,3 +38,49 @@ export type CataloguedPrimitive = {
 }
 
 export type PrimitiveCatalogue = readonly CataloguedPrimitive[]
+
+/**
+ * Field names for the catalogue, when the declared schema is an object schema
+ * and its keys can therefore be enumerated. Anything else — a union of shapes, a
+ * refined record — answers `undefined` rather than an empty list, because "I
+ * cannot tell you" and "there are none" are different facts and a model reading
+ * the catalogue would act on them differently.
+ *
+ * It lives here rather than beside either of its two callers because both
+ * `definePrimitive` and `defineSource` project a Zod schema into this shape, and
+ * the second one arriving is what turned a private helper into the catalogue's
+ * own job. Only public Zod surface is used: `instanceof`, `.shape`,
+ * `.innerType()`, and `.isOptional()`.
+ */
+
+/**
+ * The object schema inside whatever wraps it, or nothing when there is none.
+ *
+ * A cross-field rule — "alt text is required unless the image is decorative" —
+ * is a `.refine()`, and refining an object schema returns a `ZodEffects` around
+ * it rather than another `ZodObject`. Stopping at the wrapper would answer
+ * "I cannot enumerate these" for exactly the schemas that most need explaining
+ * to a model, so the wrapper is unwrapped and the constraint lives where it
+ * always did: in validation, not in the catalogue.
+ */
+const objectSchemaWithin = (schema: ZodTypeAny): ZodObject<ZodRawShape> | undefined => {
+  if (schema instanceof ZodObject) return schema
+  if (schema instanceof ZodEffects) return objectSchemaWithin(schema.innerType() as ZodTypeAny)
+
+  return undefined
+}
+
+export const catalogueFields = (schema: ZodTypeAny): readonly CataloguedProp[] | undefined => {
+  const object = objectSchemaWithin(schema)
+  if (!object) return undefined
+
+  const shape: Readonly<Record<string, ZodTypeAny>> = object.shape
+
+  return Object.keys(shape)
+    .sort()
+    .flatMap((name) => {
+      const member = shape[name]
+
+      return member ? [{ name, required: !member.isOptional() }] : []
+    })
+}
