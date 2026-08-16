@@ -144,11 +144,100 @@ changed shape and no consumer was touched.
 
 ---
 
+## 2026-08-16 — `21st.dev` is unreachable from the primitives routine's environment
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The primitives brief names one external source and makes it mandatory:
+*"**WebFetch `https://21st.dev`** for the visual standard."* The environment's
+egress proxy refuses it.
+
+```
+EGRESS_BLOCKED — Access to 21st.dev is blocked by the network egress proxy.
+```
+
+This is not a transient failure and not one a routine can route around: the
+proxy is configured per environment, `selective` is false, and the routine is
+told never to disable TLS verification or unset `HTTPS_PROXY`. Every run of this
+routine will hit it at the same point.
+
+The 16 August run proceeded against the standard the brief names second —
+`loom.hero` and `loom.feature-grid` as the floor — plus the Hermes content
+models, which are reachable on disk. That is a workable substitute for the
+*content* half of the bar and a poor one for the *visual* half, which is the
+half the brief says has to pop.
+
+Two ways out, both the maintainer's: add `21st.dev` to the environment's egress
+allowlist, or replace the instruction with something reachable — a checked-in
+set of reference screenshots would work as well and would not depend on a third
+party's uptime.
+
+---
+
+## 2026-08-16 — the library has its first primitive-owned English string
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#76** — the seam exists ([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md));
+moving `loom.perk`'s two strings onto it is filed back below, because
+`src/primitives/` is not the framework routine's lane
+
+`loom.perk` renders a marker glyph for each of three states, and two of them
+carry an accessible name the tree did not supply:
+
+```ts
+excluded: { glyph: "✕", label: "Not included", … }
+coming:   { glyph: "○", label: "Coming soon",  … }
+```
+
+Every other user-facing string in the twenty-four primitives comes from the
+tree. These two cannot: the glyph means something the perk's own label does not
+say, and a screen-reader user who gets "Priority support" with no marker read to
+them is told the opposite of what the page shows. Making them props would put
+the accessible name inside the space a model writes, which is the same shape
+[0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)
+and [0055](decisions/0055-motion-is-a-static-stylesheet-the-primitive-emits.md)
+both refused for good reasons.
+
+So the string belongs to the registered component — and there is nowhere for a
+deployment to translate it. A German host registering the starter library gets
+an English "Not included" in the middle of a German pricing table.
+
+Not urgent: one string in one primitive, and the port ahead will add few. Filed
+now because the answer changes what `definePrimitive` looks like, which is the
+framework routine's file and not this one's — and because the number of these
+only goes up. The shape worth considering is the one the theme and the data seam
+both already use: a registered thing addressed by id, resolved before or during
+the walk, with the primitive naming which strings it needs rather than
+inventing them.
+
+The 16 August run shipped the English strings rather than dropping the
+accessible name, on the grounds that an untranslated label is a smaller failure
+than a marker no assistive technology can read at all.
+
+---
+
+## 2026-08-16 — no framework gaps this run
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+
+Recorded for the reason the other two routines record it. Six primitives —
+`tier-table`, `tier`, `perk-list`, `perk`, `quote-grid`, `badge` — needed
+nothing from the framework that `definePrimitive`, `loom.slots` and the shared
+stylesheet do not already give. `loom.slots` carried the tier's badge and action
+regions exactly as 0051 describes, and the one thing that looked like a gap on
+the way past — a container needing to style children it does not render, for a
+masonry wall — is not one: a descendant rule in the static stylesheet reaches
+them, the way `details[open] > summary .loom-marker` already does.
+
+Nothing outside `src/primitives/` was touched.
+
+---
+
 ## 2026-08-16 — the first primitive-owned string now has somewhere to be translated
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open —
-the seam is built on branch `day-53-the-text-seam`; moving `loom.perk` onto it is
-the primitives routine's, because `src/primitives/` is not this routine's lane
+the seam is on **#76**; moving `loom.perk` onto it is the primitives routine's,
+because `src/primitives/` is not this routine's lane
 
 Answering the finding the primitives routine filed the same day: `loom.perk`
 carries "Not included" and "Coming soon" as accessible names, they cannot come
@@ -193,11 +282,16 @@ reserve a number. So:
 - **#75 (`Loom primitives`) wrote 0059**, on a branch cut from `main`.
 - **This branch wrote 0060**, also cut from `main`, where 0059 does not exist.
 
-Both are correct by the rules they were given. The result is that this branch's
-`pnpm verify` fails on exactly one assertion — `0059 is missing` — until #75
-merges and `main` is merged back in. The alternative was to also call mine 0059,
-which is the failure the guard exists to catch and would have made every
-reference to "0059" ambiguous permanently.
+Both are correct by the rules they were given. The result was that #76's
+`pnpm verify` failed on exactly one assertion — `0059 is missing` — for as long
+as #75 was open. The alternative was to also call mine 0059, which is the failure
+the guard exists to catch and would have made every reference to "0059" ambiguous
+permanently.
+
+**That instance is now resolved**: #75 merged as `3a1e419`, `main` was merged into
+#76, and the numbers run 0058, 0059, 0060 unbroken. The cost was one red branch
+and one hand-resolved conflict in `decisions/README.md` — small, and paid again
+by every pair of routines that record on the same day.
 
 The same shape hit `FINDINGS.md` on 15 August: two branches appending to the end
 of one file conflict, harmlessly but every time.

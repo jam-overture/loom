@@ -3,6 +3,7 @@ import { createPrimitiveRegistry, type PrimitiveRegistry, type RegistryError } f
 import type { Result } from "../result.js"
 
 import { loomAction } from "./loom.action.js"
+import { loomBadge } from "./loom.badge.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
@@ -14,15 +15,20 @@ import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
 import { loomPage } from "./loom.page.js"
+import { loomPerk } from "./loom.perk.js"
+import { loomPerkList } from "./loom.perk-list.js"
 import { loomProse } from "./loom.prose.js"
 import { loomQuote } from "./loom.quote.js"
+import { loomQuoteGrid } from "./loom.quote-grid.js"
 import { loomSection } from "./loom.section.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStat } from "./loom.stat.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
+import { loomTier } from "./loom.tier.js"
+import { loomTierTable } from "./loom.tier-table.js"
 
 /**
- * The starter primitive library, in two layers.
+ * The starter primitive library, in three layers.
  *
  * **The structural ten** came first and were chosen to cover the *contract*
  * rather than the catalogue: four that compose, two of them through named
@@ -36,8 +42,17 @@ import { loomStatGrid } from "./loom.stat-grid.js"
  * nothing, and because §4d's marketing site is built from this list rather than
  * beside it: the demo vocabulary and the marketing vocabulary are one list.
  *
+ * **The decision six** are the two bands that close a sale and that the first
+ * eighteen could not build: the pricing table, and a wall of proof rather than
+ * a single pull quote. They are three pairs and a leaf — `tier-table` over
+ * `tier`, `perk-list` over `perk`, `quote-grid` over the `quote` that was
+ * already there, and the `badge` a featured tier needs so that "Most popular"
+ * is a node someone placed rather than a boolean somebody set.
+ *
  * The ordering is registration order, which is what a model reads first in the
- * catalogue, so the thing a page starts with is at the top.
+ * catalogue, so the thing a page starts with is at the top: page structure,
+ * then the bands in the order a page uses them, then the leaves that go
+ * anywhere.
  */
 
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
@@ -49,6 +64,11 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomFeature,
   loomStatGrid,
   loomStat,
+  loomTierTable,
+  loomTier,
+  loomPerkList,
+  loomPerk,
+  loomQuoteGrid,
   loomQuote,
   loomLogoCloud,
   loomLogo,
@@ -56,6 +76,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomFaq,
   loomHeading,
   loomProse,
+  loomBadge,
   loomDivider,
   loomMedia,
   loomAction,
@@ -76,6 +97,7 @@ export * from "./tokens.js"
 export * from "./stylesheet.js"
 export {
   loomAction,
+  loomBadge,
   loomDivider,
   loomFaq,
   loomFaqList,
@@ -87,10 +109,15 @@ export {
   loomLogoCloud,
   loomMedia,
   loomPage,
+  loomPerk,
+  loomPerkList,
   loomProse,
   loomQuote,
+  loomQuoteGrid,
   loomSection,
   loomSplit,
   loomStat,
   loomStatGrid,
+  loomTier,
+  loomTierTable,
 }

@@ -126,8 +126,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as eighteen primitives, structure first and composed vocabulary after", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(18)
+  it("registers as twenty-four primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(24)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.section",
@@ -137,6 +137,11 @@ describe("the starter library", () => {
       "loom.feature",
       "loom.stat-grid",
       "loom.stat",
+      "loom.tier-table",
+      "loom.tier",
+      "loom.perk-list",
+      "loom.perk",
+      "loom.quote-grid",
       "loom.quote",
       "loom.logo-cloud",
       "loom.logo",
@@ -144,10 +149,31 @@ describe("the starter library", () => {
       "loom.faq",
       "loom.heading",
       "loom.prose",
+      "loom.badge",
       "loom.divider",
       "loom.media",
       "loom.action",
     ])
+  })
+
+  it("pairs every container with the singular child it is named for", () => {
+    const types = new Set(registry.primitives.map((primitive) => primitive.type))
+
+    /**
+     * 0054's rule, asserted rather than trusted: the container is the child's
+     * name plus the arrangement, so stripping the arrangement word off a
+     * container must name something registered. A pair that drifted apart — a
+     * `loom.tier-table` whose child got renamed — fails here rather than in a
+     * catalogue a model misreads.
+     */
+    const ARRANGEMENTS = ["grid", "list", "cloud", "table", "row", "carousel"]
+
+    for (const type of types) {
+      const arrangement = ARRANGEMENTS.find((word) => type.endsWith(`-${word}`))
+      if (arrangement === undefined) continue
+
+      expect(types).toContain(type.slice(0, -(arrangement.length + 1)))
+    }
   })
 
   it("passes the edit-mode conformance audit, so the portal can address all of it", () => {
@@ -170,6 +196,7 @@ describe("the starter library", () => {
     expect(auditRegistry(registry).leaves).toEqual([
       "loom.feature",
       "loom.stat",
+      "loom.perk",
       "loom.quote",
       "loom.logo",
       "loom.faq",
@@ -194,13 +221,41 @@ describe("the starter library", () => {
     expect(media?.props?.find((prop) => prop.name === "alt")?.required).toBe(true)
   })
 
-  it("names the two regions the composing primitives place", () => {
+  it("names the regions the composing primitives place", () => {
     const catalogue = catalogueOf(registry)
 
     expect(catalogue.find((primitive) => primitive.type === "loom.section")?.slots).toEqual(["heading"])
     expect(catalogue.find((primitive) => primitive.type === "loom.split")?.slots).toEqual([
       "start",
       "end",
+    ])
+    expect(catalogue.find((primitive) => primitive.type === "loom.tier")?.slots).toEqual([
+      "badge",
+      "action",
+    ])
+  })
+
+  it("keeps a tier's five props to the fixed fields of one plan", () => {
+    const catalogue = catalogueOf(registry)
+    const tier = catalogue.find((primitive) => primitive.type === "loom.tier")
+
+    /**
+     * The 0052 assertion for this unit. Hermes' `PricingTier` had eight fields;
+     * `features`, `description` and the two CTA fields became structure, and
+     * `highlighted` split into an `emphasis` prop and a badge region. What is
+     * left must stay fixed fields — an `items`, a `features` or a `ctaUrl`
+     * reappearing here is the port sliding back into a prop bag.
+     */
+    expect(tier?.props?.map((prop) => prop.name)).toEqual([
+      "emphasis",
+      "name",
+      "note",
+      "period",
+      "price",
+    ])
+    expect(tier?.props?.filter((prop) => prop.required).map((prop) => prop.name)).toEqual([
+      "name",
+      "price",
     ])
   })
 })
@@ -380,6 +435,165 @@ const marketingPage = (theme: Record<string, string>, idFactory: IdFactory = seq
 }
 
 /**
+ * The third fixture: the two bands that close a sale. It is here rather than
+ * folded into `marketingPage` because it is the one that has to be read as a
+ * *decomposition* — every piece of a Hermes `PricingTier` that became a node is
+ * a node someone can point at in this tree, and the assertions below count
+ * them.
+ */
+const pricingPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const perk = (label: string, extra: JsonObject = {}): ReturnType<typeof buildElement> =>
+    buildElement(idFactory, { type: "loom.perk", props: { label, ...extra } })
+
+  const tier = (
+    props: JsonObject,
+    summary: string,
+    perks: readonly ReturnType<typeof buildElement>[],
+    cta: string,
+    badge?: string
+  ): ReturnType<typeof buildElement> =>
+    buildElement(idFactory, {
+      type: "loom.tier",
+      props,
+      children: [
+        ...(badge === undefined
+          ? []
+          : [
+              buildSlot(idFactory, "badge", [
+                buildElement(idFactory, {
+                  type: "loom.badge",
+                  props: { tone: "accent" },
+                  children: [buildText(idFactory, badge)],
+                }),
+              ]),
+            ]),
+        buildElement(idFactory, {
+          type: "loom.prose",
+          props: { tone: "muted" },
+          children: [buildText(idFactory, summary)],
+        }),
+        buildElement(idFactory, {
+          type: "loom.perk-list",
+          props: { density: "loose" },
+          children: [...perks],
+        }),
+        buildSlot(idFactory, "action", [
+          buildElement(idFactory, {
+            type: "loom.action",
+            props: {
+              href: "https://example.com/start",
+              variant: props["emphasis"] === "featured" ? "primary" : "secondary",
+            },
+            children: [buildText(idFactory, cta)],
+          }),
+        ]),
+      ],
+    })
+
+  const pricing = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Pricing", width: "wide" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "One record beside every change, at every size")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.tier-table",
+        props: { columns: "three" },
+        children: [
+          tier(
+            { name: "Starter", price: "Free", period: "for one project" },
+            "Everything you need to see whether the record is worth keeping.",
+            [perk("One tree, one reviewer"), perk("Full revision log"), perk("Priority support", { state: "excluded" })],
+            "Start free"
+          ),
+          tier(
+            { name: "Studio", price: "$99", period: "per month", note: "billed annually", emphasis: "featured" },
+            "For teams shipping AI-authored changes to a live product.",
+            [
+              perk("Unlimited trees and reviewers"),
+              perk("Policy per change", { note: "stakes and reversibility, per rule" }),
+              perk("Calibration reporting"),
+              perk("SSO", { state: "coming" }),
+            ],
+            "Start a trial",
+            "Most popular"
+          ),
+          tier(
+            { name: "Scale", price: "Custom", note: "annual contract" },
+            "Your own store, your own policy, your own retention.",
+            [
+              perk("Self-hosted Postgres"),
+              perk("Bring your own model"),
+              perk("Audit export", { note: "every verdict, every fingerprint" }),
+            ],
+            "Talk to us"
+          ),
+        ],
+      }),
+    ],
+  })
+
+  const wall = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Proof", tone: "surface" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "What teams say once the arguing stops")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.quote-grid",
+        props: { columns: "three" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.quote",
+            props: {
+              quote: "The Gate held a change nobody would have caught in review.",
+              author: "Ada Whitfield",
+              role: "Head of Platform, Northwind",
+            },
+          }),
+          buildElement(idFactory, {
+            type: "loom.quote",
+            props: {
+              quote: "Undo is a proposal. That single decision ended a whole category of incident for us.",
+              author: "Ren Okafor",
+              role: "Staff Engineer, Meridian",
+              avatar: "https://example.com/ren.jpg",
+            },
+          }),
+          buildElement(idFactory, {
+            type: "loom.quote",
+            props: {
+              quote: "We can finally answer what the assistant changed, and who approved it.",
+              author: "Sofia Lindqvist",
+              role: "Design Director, Halcyon",
+            },
+          }),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [pricing, buildElement(idFactory, { type: "loom.divider" }), wall],
+    }),
+    idFactory
+  )
+}
+
+/**
  * The library's stylesheet is hoisted ahead of the tree by React, so every
  * assertion about "the root" has to step over it first. Splitting it out is
  * also the only way to check the claim that matters about it: one stylesheet
@@ -394,12 +608,17 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the two fixtures", () => {
-    const used = new Set(
-      [...render(samplePage(EDITORIAL), true).markup.matchAll(/data-loom-type="([^"]+)"/g)]
-        .concat([...render(marketingPage(EDITORIAL), true).markup.matchAll(/data-loom-type="([^"]+)"/g)])
-        .map((match) => match[1])
-    )
+  it("covers every registered primitive across the three fixtures", () => {
+    const typesIn = (tree: LoomTree): readonly string[] =>
+      [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
+        match[1] === undefined ? [] : [match[1]]
+      )
+
+    const used = new Set([
+      ...typesIn(samplePage(EDITORIAL)),
+      ...typesIn(marketingPage(EDITORIAL)),
+      ...typesIn(pricingPage(EDITORIAL)),
+    ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
   })
@@ -480,6 +699,89 @@ describe("the composed vocabulary", () => {
   })
 })
 
+describe("the pricing band", () => {
+  it("renders three plans and their checklists with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(pricingPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Studio")
+    expect(markup).toContain("$99")
+    expect(markup).toContain("per month")
+    expect(markup).toContain("billed annually")
+    expect(markup).toContain("Calibration reporting")
+    expect(markup).toContain("stakes and reversibility, per rule")
+  })
+
+  it("makes every perk its own addressable node, which is the whole of 0052 here", () => {
+    const { markup } = render(pricingPage(EDITORIAL), true)
+
+    /**
+     * Ten perks across three plans. As Hermes shipped it these were ten strings
+     * inside three `features` arrays inside one `items` array — none of them a
+     * node, so none of them insertable, movable, attributable or separately
+     * reversible. The count is asserted because it is the number that says the
+     * decomposition actually happened.
+     */
+    expect(markup.match(/data-loom-type="loom\.perk"/g)?.length).toBe(10)
+    expect(markup.match(/data-loom-type="loom\.tier"/g)?.length).toBe(3)
+    expect(markup.match(/data-loom-type="loom\.perk-list"/g)?.length).toBe(3)
+  })
+
+  it("places the badge beside the plan name and the action at the foot of the card", () => {
+    const { markup } = render(pricingPage(EDITORIAL))
+
+    const badgeAt = markup.indexOf("Most popular")
+    const priceAt = markup.indexOf("$99")
+    const lastPerkAt = markup.indexOf("SSO")
+    const actionAt = markup.indexOf("Start a trial")
+
+    /**
+     * The 0051 assertion for this primitive: neither region is where the flow
+     * of children would have put it. The badge arrives as the tier's *first*
+     * child in the tree and renders after the plan name; the action arrives
+     * last and renders after a body it is not part of.
+     */
+    expect(badgeAt).toBeGreaterThan(-1)
+    expect(badgeAt).toBeLessThan(priceAt)
+    expect(priceAt).toBeLessThan(lastPerkAt)
+    expect(lastPerkAt).toBeLessThan(actionAt)
+  })
+
+  it("names a perk's state only when the glyph says something the text does not", () => {
+    const { markup } = render(pricingPage(EDITORIAL))
+
+    expect(markup.match(/aria-label="Not included"/g)?.length).toBe(1)
+    expect(markup.match(/aria-label="Coming soon"/g)?.length).toBe(1)
+    /** The other eight are marked, and not one of them announces itself. */
+    expect(markup).not.toContain('aria-label="Included"')
+    expect(markup.match(/✓/g)?.length).toBe(8)
+  })
+
+  it("builds a proof wall out of the quote that was already registered", () => {
+    const { markup } = render(pricingPage(EDITORIAL), true)
+
+    expect(markup.match(/data-loom-type="loom\.quote"/g)?.length).toBe(3)
+    expect(markup.match(/<blockquote/g)?.length).toBe(3)
+    expect(markup).toContain('src="https://example.com/ren.jpg"')
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(pricingPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(pricingPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("emits one stylesheet for a band whose every card asks for it", () => {
+    const { markup } = render(pricingPage(EDITORIAL))
+
+    expect(markup.match(/<style/g)?.length).toBe(1)
+  })
+})
+
 describe("the re-theme guarantee", () => {
   const styleOf = (markup: string): string => markup.slice(0, markup.indexOf(">"))
 
@@ -546,6 +848,39 @@ describe("the schemas the seam enforces", () => {
     expect(action({ href: "/relative" }).outcome).toBe("invalid")
     expect(action({ href: "https://example.com" }).outcome).toBe("valid")
     expect(action({ href: "mailto:hello@example.com" }).outcome).toBe("valid")
+  })
+
+  it("refuses a tier that tries to carry its own list of features again", () => {
+    const tier = propsOf("loom.tier")
+
+    /**
+     * The port's rule, enforced by the schema rather than by a reviewer
+     * noticing. `.strict()` is what makes "features are child nodes" a fact
+     * about the tree and not a convention a proposal can route around.
+     */
+    expect(tier({ name: "Studio", price: "$99", features: ["a", "b"] }).outcome).toBe("invalid")
+    expect(tier({ name: "Studio", price: "$99", ctaUrl: "https://example.com" }).outcome).toBe("invalid")
+    expect(tier({ name: "Studio", price: "$99", highlighted: true }).outcome).toBe("invalid")
+    expect(tier({ name: "Studio", price: "$99", emphasis: "featured" }).outcome).toBe("valid")
+  })
+
+  it("lets a price be the free text a real price list needs", () => {
+    const tier = propsOf("loom.tier")
+
+    for (const price of ["Free", "Custom", "$99", "from £5k"]) {
+      expect(tier({ name: "Plan", price }).outcome).toBe("valid")
+    }
+
+    expect(tier({ name: "Plan", price: 99 }).outcome).toBe("invalid")
+    expect(tier({ name: "Plan" }).outcome).toBe("invalid")
+  })
+
+  it("refuses a perk state the renderer has no marker for", () => {
+    const perk = propsOf("loom.perk")
+
+    expect(perk({ label: "SSO", state: "maybe" }).outcome).toBe("invalid")
+    expect(perk({ label: "SSO", state: "coming" }).outcome).toBe("valid")
+    expect(perk({ label: "SSO" }).outcome).toBe("valid")
   })
 
   it("refuses an image source that is not fetched over http", () => {
