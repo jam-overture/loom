@@ -137,6 +137,12 @@ across 48 files.
 Runtime: **1187 passing** across 87 files. `pnpm install && pnpm verify` green —
 typecheck, both suites, `next build`. Nothing was weakened or skipped.
 
+Re-verified after merging `main` in to resolve a conflict (#76's text seam, #78
+and #79's rollout doc, and two findings landed while this branch was open):
+**1225 framework tests across 89 files, 484 portal, `next build` clean**. The
+conflict was `FINDINGS.md` and nothing else — both sides had appended entries at
+the end of the file; the resolution keeps both, `main`'s first.
+
 | file | what it pins |
 | --- | --- |
 | `lib/proposal-effect.test.ts` (18) | before/after per key; not-set vs cleared; inert configure and inert move; what a removal carries; an insert placed by its neighbour and at the end; staleness; the obstacle in the runtime's words; each operation read against the tree the last one left; the walk surviving a failure |
@@ -184,8 +190,13 @@ The bar, answered for the one unit this run shipped:
    should say `git fetch origin main` first and branch off `origin/main`. Cost of
    the current wording: I nearly filed a false report that the maintainer's own
    task had been reverted.
-2. **`docs/rollout.md` is still missing**, and is still named by my brief as
-   read-first. Three routines have now reported it.
+2. ~~**`docs/rollout.md` is still missing.**~~ **Answered while this branch was
+   open**: #78 restored it and #79 amended it, both after this work started. I
+   read it when merging `main` in to resolve a conflict. Nothing in it changes
+   this unit — Phase 1 lists the portal's exit condition as *"a developer using
+   Loom opens it daily because it tells them something they cannot get
+   elsewhere"*, which is the bar the brief already sets and the one the value
+   section above answers.
 3. **Next from me, unless you say otherwise: the calibration page over real
    judgements**, then history. Calibration is where Loom's data is least
    substitutable — a self-graded confidence against the actual approve/refuse

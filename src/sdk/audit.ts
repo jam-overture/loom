@@ -63,8 +63,8 @@ const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
 export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
   const audits = registry.primitives.map((primitive) => ({
     type: primitive.type,
-    verdict: probeEditableDecoration(primitive.component),
-    placement: probeSlotPlacement(primitive.component, primitive.slots),
+    verdict: probeEditableDecoration(primitive.component, primitive.text),
+    placement: probeSlotPlacement(primitive.component, primitive.slots, primitive.text),
   }))
 
   return {

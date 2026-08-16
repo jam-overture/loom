@@ -259,6 +259,45 @@ where to build it rather than in a month.
 
 ---
 
+## Set K — two days after lesson 09
+
+Interleaved with 01–08, and built around a failure mode that only appears once a
+system starts keeping records: **mistaking what was decided for what was true.**
+A verdict names one reason; several were true at the moment it was reached, and
+four of these questions are about the gap between those two things.
+
+1. Name the six Gate rules in order. Then name the pair that reads the same
+   input, say where each sits, and say what that pair proves about how a rule's
+   position is chosen.
+2. A change is irreversible *and* above its origin's ceiling. Give the reason
+   recorded on the disposition. Then say what a count of that reason code across
+   a month of records is actually a count of, and name the one thing that would
+   change the number without the interpreter changing at all.
+3. Give the test for whether two axes are really two *(08)*, then give the
+   version of it that applies to a ladder. Name one policy — actual field names
+   and values — under which a rung can never fire.
+4. Undoing a `remove` costs something undoing an `insert` does not. Say what,
+   name the policy knob that exists because of it, and then say which rung of
+   the ladder that knob reaches and which rung sits above it. *(06, 08)*
+5. `discards-later-work` is `high` rather than `critical`, and it also has a
+   rule of its own above the ceiling. Those are two separate decisions. Give
+   both arguments, and say what would go wrong if you made either choice
+   differently. *(08)*
+6. A model may not name the nodes it inserts. Give the reason without using the
+   word "trust". *(04)*
+7. Why is a half-applied delta worse than a rejected one? *(03)*
+8. A disposition carries a policy *name* and a policy *fingerprint*. Say what
+   each answers that the other cannot, then say what a rename does to the pair
+   and what an edit does — and which of those two the contract in 0033 asks a
+   host to do.
+
+Question 2 is the slow one, and it is the same shape as Set J's question 3 in a
+new costume: something derived is being read as though it were measured. If you
+answered J3 well and this one badly, that is worth knowing — it means the idea is
+attached to the example you met it in rather than to the shape.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -277,3 +316,4 @@ you already know.
 | H | 2 days after L06 | | |
 | I | 2 days after L07 | | |
 | J | 2 days after L08 | | |
+| K | 2 days after L09 | | |

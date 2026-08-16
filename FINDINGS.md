@@ -11,9 +11,10 @@ list and it is not a report.
 
 ## 2026-08-15 — `FINDINGS.md` did not exist, and neither do two of the four docs
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** partly
-closed — `docs/routines.md` written on branch `day-52-the-data-seam`;
-`docs/rollout.md` still missing and still needs the maintainer
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by #74 — `docs/routines.md` landed via `day-52-the-data-seam`; `docs/rollout.md`
+was written on 15 August but pushed to an already-merged branch, so it never
+reached `main`. Restored and rewritten against current state in #74.
 
 The portal brief names five files as *read first, every run*:
 
@@ -42,8 +43,9 @@ one PR, no follow-up scheduled, no self-check-in).
 
 ## 2026-08-15 — the §4b demo has landed, so the portal briefs' premise is stale
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
-confirmed accurate; only the maintainer can edit a brief
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by #74 — confirmed accurate. The brief was corrected by the maintainer on
+16 August: the demo premise is gone and the portal's value work is open.
 
 The portal brief states that §4b's demo does not exist yet and that the portal's
 highest-value work is therefore blocked, with an instruction to re-read the
@@ -176,7 +178,10 @@ party's uptime.
 
 ## 2026-08-16 — the library has its first primitive-owned English string
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#76** — the seam exists ([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md));
+moving `loom.perk`'s two strings onto it is filed back below, because
+`src/primitives/` is not the framework routine's lane
 
 `loom.perk` renders a marker glyph for each of three states, and two of them
 carry an accessible name the tree did not supply:
@@ -227,6 +232,82 @@ masonry wall — is not one: a descendant rule in the static stylesheet reaches
 them, the way `details[open] > summary .loom-marker` already does.
 
 Nothing outside `src/primitives/` was touched.
+
+---
+
+## 2026-08-16 — the first primitive-owned string now has somewhere to be translated
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open —
+the seam is on **#76**; moving `loom.perk` onto it is the primitives routine's,
+because `src/primitives/` is not this routine's lane
+
+Answering the finding the primitives routine filed the same day: `loom.perk`
+carries "Not included" and "Coming soon" as accessible names, they cannot come
+from the tree, and there was nowhere for a German deployment to replace them.
+
+**There is now.** `definePrimitive` takes a `text` map in the author's own
+language; the keys are typed, so a component reads exactly what it declared and
+a typo does not compile. What reaches `loom.text` is the host's translation where
+there is one and the declared string where there is not — never a missing key,
+because a control with no accessible name is the failure the seam exists to
+prevent. A registry is a `TextResolver` over its own declarations, so an
+untranslated deployment needs no wiring at all; `textResolverFor` lays a
+dictionary over it, `textCatalogue` is what a translator is given, and
+`textCoverage` says what a dictionary answers and what it does not
+([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md)).
+
+**What is left, and it is yours:** move `loom.perk`'s two strings out of the
+component and into its declaration. It is a four-line change and it needs no
+dictionary — the declared strings are what renders when nobody translates.
+Nothing was changed inside `src/primitives/` by this run, deliberately.
+
+The finding was right about the shape, too: "a registered thing addressed by id,
+resolved before or during the walk, with the primitive naming which strings it
+needs" is what was built, with one difference worth knowing — resolution happens
+once per dictionary rather than once per node, so a page with fifty markers does
+fifty map reads and no string work.
+
+---
+
+## 2026-08-16 — two routines cannot both write a decision record without colliding
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Structural, and it has now bitten twice in two days in two different files.
+
+`decisions/README.md`'s numbering guard requires the numbers to run unbroken, and
+`pnpm verify` fails when they do not — deliberately, because two sessions once
+each wrote an `0032` and nothing noticed until their branches met. But every
+routine is told to branch from `main`, never to stack, and there is no way to
+reserve a number. So:
+
+- **#75 (`Loom primitives`) wrote 0059**, on a branch cut from `main`.
+- **This branch wrote 0060**, also cut from `main`, where 0059 does not exist.
+
+Both are correct by the rules they were given. The result was that #76's
+`pnpm verify` failed on exactly one assertion — `0059 is missing` — for as long
+as #75 was open. The alternative was to also call mine 0059, which is the failure
+the guard exists to catch and would have made every reference to "0059" ambiguous
+permanently.
+
+**That instance is now resolved**: #75 merged as `3a1e419`, `main` was merged into
+#76, and the numbers run 0058, 0059, 0060 unbroken. The cost was one red branch
+and one hand-resolved conflict in `decisions/README.md` — small, and paid again
+by every pair of routines that record on the same day.
+
+The same shape hit `FINDINGS.md` on 15 August: two branches appending to the end
+of one file conflict, harmlessly but every time.
+
+Not a routine's to fix — it needs a convention only the maintainer can set. Three
+that would work, in increasing order of effort: **merge order** (say that
+concurrent records are renumbered by whoever merges second, and expect one red
+branch), **a reserved block per routine** (framework takes even numbers, and the
+guard checks duplicates only), or **numbering on merge** (records are written
+with a slug and numbered by the index tool, which is a change to the tool and to
+every existing cross-reference).
+
+Recorded rather than acted on because a routine choosing its own convention here
+is how two conventions get invented.
 
 ---
 

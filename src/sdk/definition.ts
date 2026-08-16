@@ -4,6 +4,7 @@ import { catalogueFields, type CataloguedProp } from "../catalogue.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
+import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 
 /**
  * The registration contract: what an author declares to make a component
@@ -23,14 +24,27 @@ import type { PropsIssue, PropsVerdict } from "../render/props.js"
  *   guess about its own internals.
  * - `slots` — the named regions it projects into, so a proposal can be told
  *   where children may go rather than discovering it by being refused.
+ * - `text` — the strings the primitive owns rather than reads from the tree, in
+ *   the author's own language, so a deployment has something to translate and a
+ *   model has nothing to write. Optional: most primitives own no strings at all.
  */
 
-export type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject> = {
+export type PrimitiveDefinition<
+  TProps extends JsonObjectView = JsonObject,
+  TText extends string = never,
+> = {
   readonly type: string
   readonly description: string
   readonly props: ZodType<TProps, ZodTypeDef, unknown>
   readonly slots?: readonly string[]
-  readonly component: LoomPrimitive<TProps>
+  /**
+   * Declared strings, by key. The keys are inferred, so the component's
+   * `loom.text` is typed to exactly what was declared here — an author who
+   * reads a key they did not declare finds out at the declaration, which is the
+   * same bargain the props schema makes.
+   */
+  readonly text?: Readonly<Record<TText, string>>
+  readonly component: LoomPrimitive<TProps, TText>
 }
 
 /**
@@ -45,7 +59,26 @@ export type PrimitiveEntry = {
   readonly slots: readonly string[]
   readonly component: LoomPrimitive
   readonly declaredProps: readonly CataloguedProp[] | undefined
+  /** Declared strings, keys erased alongside the props type. Empty when none. */
+  readonly text: PrimitiveText<string>
   readonly validate: (props: JsonObject) => PropsVerdict
+}
+
+/**
+ * Declared text, copied into a frozen null-prototype map at declaration.
+ *
+ * Copied because the caller keeps a reference to the literal it passed and an
+ * entry that shares it is one mutation away from a deployment's strings changing
+ * under a rendered page. Null-prototype for the reason `NO_TEXT` gives.
+ */
+const freezeText = (text: Readonly<Record<string, string>> | undefined): PrimitiveText<string> => {
+  if (!text) return NO_TEXT
+
+  const copy: Record<string, string> = Object.create(null) as Record<string, string>
+
+  for (const [key, value] of Object.entries(text)) copy[key] = value
+
+  return Object.freeze(copy)
 }
 
 const toIssue = (issue: { path: readonly (string | number | symbol)[]; message: string }): PropsIssue => ({
@@ -75,12 +108,13 @@ const verdictFor = <TProps extends JsonObjectView>(
  * declaration rather than at the point of registration — an author who reads
  * `props.titel` finds out here.
  */
-export const definePrimitive = <TProps extends JsonObjectView>(
-  definition: PrimitiveDefinition<TProps>
+export const definePrimitive = <TProps extends JsonObjectView, TText extends string = never>(
+  definition: PrimitiveDefinition<TProps, TText>
 ): PrimitiveEntry => ({
   type: definition.type,
   description: definition.description,
   slots: definition.slots ?? [],
+  text: freezeText(definition.text),
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

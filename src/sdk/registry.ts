@@ -1,8 +1,15 @@
 import type { JsonObject } from "../json.js"
-import { primitiveTypeSchema, slotNameSchema, type PrimitiveType, type SlotName } from "../primitive-type.js"
+import {
+  primitiveTypeSchema,
+  slotNameSchema,
+  textKeySchema,
+  type PrimitiveType,
+  type SlotName,
+} from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
+import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
 
 import type { PrimitiveEntry } from "./definition.js"
 
@@ -18,6 +25,12 @@ import type { PrimitiveEntry } from "./definition.js"
  * separate on purpose) but it is then a host's explicit decision, not an
  * accident of construction.
  *
+ * It also satisfies `TextResolver`, over the declared strings themselves. A
+ * deployment that translates nothing is then correct with no extra wiring, and
+ * translating is `textResolverFor` wrapping this same registry with a
+ * dictionary — the untranslated case is the base case, not a fallback path that
+ * only runs when something is missing.
+ *
  * Construction is pure and does not touch the components. Nothing here calls a
  * primitive, so registering cannot run someone's render as a side effect of an
  * import; the checks that need to call one live in `audit.ts`, which a host runs
@@ -30,16 +43,21 @@ export type RegisteredPrimitive = {
   readonly slots: readonly SlotName[]
   readonly component: LoomPrimitive
   readonly declaredProps: PrimitiveEntry["declaredProps"]
+  /** Declared strings in the author's language, before any dictionary. */
+  readonly text: PrimitiveText<string>
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
 export type RegistryError =
   | { readonly code: "invalid-primitive-type"; readonly type: string }
   | { readonly code: "invalid-slot-name"; readonly type: string; readonly slot: string }
+  | { readonly code: "invalid-text-key"; readonly type: string; readonly key: string }
+  | { readonly code: "blank-text"; readonly type: string; readonly key: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
-  PropsValidator & {
+  PropsValidator &
+  TextResolver & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
   }
@@ -50,6 +68,10 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" is not a valid primitive type — expected dot-namespaced kebab-case, like "commerce.product-card"`
     case "invalid-slot-name":
       return `"${error.slot}" is not a valid slot name on "${error.type}" — expected camelCase, like "mainContent"`
+    case "invalid-text-key":
+      return `"${error.key}" is not a valid text key on "${error.type}" — expected camelCase with no dots, like "notIncluded"`
+    case "blank-text":
+      return `"${error.key}" on "${error.type}" declares an empty string; a string worth translating has something in it, and a blank one renders as a control with no name`
     case "duplicate-primitive-type":
       return `"${error.type}" is registered twice; a tree naming it would resolve to whichever registration won`
   }
@@ -68,12 +90,21 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     slots.push(parsed.data)
   }
 
+  for (const [key, value] of Object.entries(entry.text)) {
+    if (!textKeySchema.safeParse(key).success) {
+      return err({ code: "invalid-text-key", type: entry.type, key })
+    }
+
+    if (value.trim() === "") return err({ code: "blank-text", type: entry.type, key })
+  }
+
   return ok({
     type: type.data,
     description: entry.description,
     slots,
     component: entry.component,
     declaredProps: entry.declaredProps,
+    text: entry.text,
     validate: entry.validate,
   })
 }
@@ -110,5 +141,6 @@ export const createPrimitiveRegistry = (
     resolve: (type: PrimitiveType) => byType.get(type)?.component,
     validateProps: (type: PrimitiveType, props: JsonObject): PropsVerdict =>
       byType.get(type)?.validate(props) ?? { outcome: "undeclared" },
+    textFor: (type: PrimitiveType): PrimitiveText<string> => byType.get(type)?.text ?? NO_TEXT,
   })
 }

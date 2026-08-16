@@ -495,7 +495,7 @@ system's standards moved.
 **Let each Gate rule read the tree itself.** No `ChangeAnalysis` type at all —
 `protectedTypeRemoved(tree, delta, policy)` walks the tree, and so does the next
 rule, and the next. Tempting because it deletes a layer. Rejected on three counts:
-seven rules walk the tree seven times; two rules can quietly disagree about what
+eight rules walk the tree eight times; two rules can quietly disagree about what
 the delta did, because each computes it separately; and the Gate stops being a
 pure function of a small record, which is the property 0002 spends its entire
 argument on. It also leaves nothing to record — the facts would exist only inside
