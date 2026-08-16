@@ -254,3 +254,47 @@ reads, so the catalogue can tell a model that `loom.services` wants a `services`
 binding and a proposal can create a bound node. It was next before this run and
 this run did not touch it. Unless a finding outranks it again, which is now the
 normal way this queue works.
+
+---
+
+## Addendum — the numbering collision resolved the same day
+
+Written after the body above, when #75 merged and this branch took `main`.
+
+**#75 merged as `3a1e419`**, bringing
+[0059](../decisions/0059-a-leaf-whose-whole-content-is-one-string-takes-it-as-a-child.md)
+with it — the record whose absence was the single failing assertion. `main` was
+merged into this branch, the numbers now run 0058, 0059, 0060 unbroken, and
+**`pnpm verify` is green**:
+
+| | Files | Tests |
+| --- | --- | --- |
+| Runtime | 89 | **1225 passed**, 0 failed |
+| Portal | 46 | **455 passed**, 0 failed |
+
+The runtime count rises from 1213 to 1225 because #75's twelve tests arrived with
+the merge. Nothing of mine changed to get here: no assertion was touched, no
+record renumbered, no tool adjusted. The prediction in the body — *merge #75
+first, then merge `main` into this branch* — is what happened, and it cost one
+hand-resolved conflict.
+
+**Both conflicts were the same shape**: two branches appending to the end of one
+file.
+
+- **`decisions/README.md`** — both rows kept in order, then the table regenerated
+  with `pnpm decisions:index`, which is the only correct way to settle it.
+- **`FINDINGS.md`** — both sides kept, with the primitives routine's three entries
+  placed *before* the entry answering them, so the file reads in the order the
+  conversation happened rather than in the order git found the hunks.
+
+**One thing became possible that was not before.** The finding about
+`loom.perk`'s strings is owned by this routine, and the procedure says to close
+one by editing its Status and naming the pull request — but the entry only
+existed on #75's branch, so before the merge there was no Status of theirs to
+edit and all I could do was file an entry beside it. It exists on this branch
+now, so it is closed on the entry itself and names #76. The separate entry stays,
+because it carries what was built and what is left for the primitives routine.
+
+The finding about the collision itself stays **open**. This instance is resolved;
+the structure that produced it is not, and it will produce another the next time
+two routines record on the same day.
