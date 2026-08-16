@@ -7,6 +7,7 @@ import { availablePresets } from "@/lib/demo/presets"
 import { demoRegistry, demoThemes } from "@/lib/demo/registry"
 import { demoPolicy, demoSession } from "@/lib/demo/session"
 import { readVisitorId } from "@/lib/demo/visitor"
+import { describeProposalEffect, type ProposalEffect } from "@/lib/proposal-effect"
 
 import { AskBox } from "./_components/ask-box"
 import { RecordCard } from "./_components/record-card"
@@ -42,6 +43,29 @@ const DemoPage = async () => {
   })
 
   const records = session?.records ?? []
+
+  /**
+   * What each waiting proposal would replace, read against the tree on the left.
+   *
+   * Only the held ones. A record whose change already applied describes a tree
+   * that no longer exists, so resolving its delta against the current one would
+   * produce a confident and wrong "before" — the history view is where an
+   * applied change is read, against the revision it was applied to.
+   */
+  const holds = session === undefined ? undefined : await session.holds.forTree(tree.treeId)
+  const effects = new Map<string, ProposalEffect>(
+    (holds?.ok ? holds.value : []).map((held) => [
+      held.proposalId,
+      describeProposalEffect(tree, held.proposal.delta),
+    ])
+  )
+
+  /** Absent rather than `undefined`: the prop is optional, not nullable. */
+  const effectProps = (record: (typeof records)[number]): { readonly effect?: ProposalEffect } => {
+    const found = record.heldProposalId === undefined ? undefined : effects.get(record.heldProposalId)
+
+    return found === undefined ? {} : { effect: found }
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] flex-col lg:h-[calc(100vh-3.5rem)] lg:flex-row">
@@ -96,7 +120,7 @@ const DemoPage = async () => {
           ) : (
             <ul className="flex flex-col gap-2">
               {records.map((record) => (
-                <RecordCard key={record.recordId} record={record} />
+                <RecordCard key={record.recordId} record={record} {...effectProps(record)} />
               ))}
             </ul>
           )}

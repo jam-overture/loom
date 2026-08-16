@@ -2,8 +2,10 @@
 
 import { useActionState } from "react"
 
+import { ProposalEffectView } from "@/app/_components/proposal-effect"
 import { ruleSentence, type ChangeRecord, type RecordOutcome } from "@/lib/demo/record"
 import { toneClasses, type OutcomeTone, type WriteReport } from "@/lib/outcome"
+import type { ProposalEffect } from "@/lib/proposal-effect"
 
 import { answerHeld, undoRevision } from "../actions"
 
@@ -54,7 +56,19 @@ const Section = ({ title, children }: { readonly title: string; readonly childre
   </section>
 )
 
-export const RecordCard = ({ record }: { readonly record: ChangeRecord }) => {
+export const RecordCard = ({
+  record,
+  effect,
+}: {
+  readonly record: ChangeRecord
+  /**
+   * Present only while the change is waiting on the visitor. An applied change
+   * has already moved the tree, so describing it against the tree as it is now
+   * would report the change as having no effect — true, and the opposite of
+   * useful.
+   */
+  readonly effect?: ProposalEffect
+}) => {
   const [answerReport, answer, answering] = useActionState<WriteReport | null, FormData>(answerHeld, null)
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
   const report = answerReport ?? undoReport
@@ -141,6 +155,8 @@ export const RecordCard = ({ record }: { readonly record: ChangeRecord }) => {
           </Row>
         </Section>
       )}
+
+      {effect && <ProposalEffectView effect={effect} />}
 
       {record.failure && <p className="bg-inapplicable text-inapplicable-ink rounded-sm p-2 text-2xs">{record.failure}</p>}
 

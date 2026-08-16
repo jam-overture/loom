@@ -227,3 +227,59 @@ masonry wall — is not one: a descendant rule in the static stylesheet reaches
 them, the way `details[open] > summary .loom-marker` already does.
 
 Nothing outside `src/primitives/` was touched.
+
+---
+
+## 2026-08-16 — a routine's local `main` can be four merges stale, silently
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The procedure says *"Branch off `main`"*
+([`docs/routines.md`](docs/routines.md), step 3). In this run's container that
+produced a branch **four merges behind**: the clone left `HEAD` detached at
+`3a1e419` while the local `main` ref still pointed at `7f7b615`, so #72, #73,
+#74 and #75 were all absent from the branch I had just created off `main`.
+
+Nothing warned me, and the symptom was worse than a missing feature. On the
+stale tree `apps/portal/app/globals.css` still had `--surface-wash` and
+`globals.test.ts` did not exist, so the evidence in front of me read as **the
+maintainer's own first task having been reverted on `main`**. That was one step
+from being filed as a finding against the framework routine. `git fetch origin
+main` and `git log --oneline -3 origin/main` disproved it in a minute — but only
+because the claim was surprising enough to check twice. A routine whose work
+does not happen to touch a file another routine recently changed would notice
+nothing at all, and would open a pull request that silently reverts merged work.
+
+The fix is one line in the procedure, and it is the maintainer's because the
+briefs and `docs/routines.md` both carry the current wording:
+
+```
+git fetch origin main && git checkout -b <branch> origin/main
+```
+
+The 16 August portal run did exactly that after discovering it, and branched off
+`3a1e419`.
+
+---
+
+## 2026-08-16 — no framework gaps this run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Recorded because absence is worth knowing, and because this run is the first
+portal work that genuinely reaches into the tree model rather than styling
+chrome. `lib/proposal-effect.ts` needed nine things from the runtime — `applyDelta`,
+`applyOperation`, `configurationOf`, `describeTreeError`, `findNode`,
+`findParent`, `nodeLabel`, `nodePath`, `walkTree` — and every one of them is
+exported from `@loom/runtime`'s root entry point. No deep import was wanted and
+`src/` is untouched, so 0018's enforcement was tested by this diff and held.
+
+Two things about that are worth saying rather than leaving implicit. `applyDelta`
+being public is what lets the portal report applicability **as the runtime's
+answer** rather than re-deriving it, which is the difference between a surface
+that can disagree with the runtime and one that cannot. And `describeTreeError`
+being public is what lets a refusal reach a reviewer in the runtime's own words
+instead of a portal paraphrase that would drift.
+
+The §4e data-seam finding above — that the review surfaces could show a
+`data-unavailable` diagnostic — was **not** acted on this run and stays open.
