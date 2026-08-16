@@ -43,14 +43,13 @@ Four routines, and only two of them are running.
 | **Docs** | `Loom docs` | **disabled** | A stranger can install Loom, register a primitive, and get a proposal accepted, working only from the site |
 | **Marketing** | `Loom marketing` | **disabled** | Pages that show the adaptation and the record beside it, good enough to send to someone cold |
 
-Docs and marketing were held until the vocabulary existed. It now does, in the
-sense that the pattern is proven and eighteen primitives are real — so the block
-is no longer technical, it is budget.
+Docs and marketing were held until the vocabulary existed. It now does — the
+pattern is proven and eighteen primitives are real — **so nothing is blocking
+them.** Each is roughly 8–12 runs, and they are the two surfaces a launch cannot
+happen without.
 
-**Cost note.** Each enabled routine is one cloud session a day. The standing
-bill is currently **4/day**; enabling both remaining surfaces makes it 6. That
-is the decision that sets this phase's length, and it is a budget question
-rather than an engineering one.
+The phase's length is set by how many of the four run in parallel, not by
+anything technical. Sequential is roughly a month; all four is roughly ten days.
 
 ## Phase 2 — What launch actually requires · target mid-to-late September
 
@@ -92,13 +91,20 @@ It costs one to two weeks and it is the cheapest insurance available.
 
 In order of likelihood:
 
-1. **Token budget.** Phase 1 with all four routines running is 6 sessions a day.
-   At 4 it takes proportionally longer. This is now the largest lever.
+1. **How many efforts run in parallel.** Phase 1 is four independent surfaces,
+   and its length is roughly the number of them running at once. This is the
+   largest lever and it is a scheduling choice, not a constraint.
 2. **Review latency.** The schedule assumes PRs merge within a day or so. A
-   fourteen-PR stack cost four days of visibility once already.
+   fourteen-PR stack cost four days of visibility once already, and the portal
+   spent a day blocked on a document that existed only on a merged branch.
 3. **The quality bar.** "Nothing marginal" is a real constraint and the right
    one, but a primitive rejected and rebuilt is a run spent twice.
 4. **Licensing.** Not a risk to the schedule so much as a hard gate on Phase 4.
+
+Not on this list: the cost of running the routines. The failure worth guarding
+against is a *runaway* — a process that re-arms itself and scales with how long
+the maintainer is away, which is what `send_later` chains did in August. Work
+that was asked for is not that, and is not rationed.
 
 ## Marketing — not now, but the shape of it
 
