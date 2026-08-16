@@ -359,7 +359,7 @@ whole ladder gets an argument rather than a mention.
 
 | What | Where |
 | --- | --- |
-| The damage axis: seven factors, highest wins | [`src/runtime/stakes.ts`](../src/runtime/stakes.ts) |
+| The damage axis: eight factors, highest wins | [`src/runtime/stakes.ts`](../src/runtime/stakes.ts) |
 | Four levels, and the comparisons on them | [`src/runtime/stake-level.ts`](../src/runtime/stake-level.ts) |
 | The permanence axis, and where the undo comes from | [`src/runtime/reversibility.ts`](../src/runtime/reversibility.ts) |
 | Both axes assembled, and the last place a tree is touched | [`src/runtime/assessment.ts`](../src/runtime/assessment.ts) |
@@ -765,8 +765,8 @@ ones that quietly break your model later.
 ## Come back to this
 
 - **In 2 days:** Self-check 1 and 3, closed book.
-- **In 1 week:** From memory, write the seven stake factor codes with their
-  levels, then the two irreversibility reasons. Then say, for each of the seven,
+- **In 1 week:** From memory, write the eight stake factor codes with their
+  levels, then the two irreversibility reasons. Then say, for each of the eight,
   whether the input it reads also feeds the other axis.
 - **In 1 month:** Redo exercise C from memory — predict all five rows, including
   the boundary — and then say what the grid would look like if `removalThresholds`
