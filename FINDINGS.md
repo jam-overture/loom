@@ -227,3 +227,70 @@ masonry wall — is not one: a descendant rule in the static stylesheet reaches
 them, the way `details[open] > summary .loom-marker` already does.
 
 Nothing outside `src/primitives/` was touched.
+
+---
+
+## 2026-08-16 — the repository is private, so no image in a report or a pull request has ever rendered
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The maintainer's review of #75: *"I can't see your screen shots, so I don't see
+the preview. The link comes back as 404."*
+
+Both halves are environmental, and neither is a broken link.
+
+**The screenshots.** `jam-overture/loom` is **private**. Markdown image embeds
+are fetched by GitHub's own image proxy, which is unauthenticated, so a
+`raw.githubusercontent.com` URL to a file in this repository returns 404 to the
+proxy and the image never renders — for anyone, including the maintainer, who
+can read the file perfectly well by clicking through to it. Verified from this
+session: `raw.githubusercontent.com/.../main/reports/…png` answers **404** for a
+path that exists on `main`.
+
+This is **not specific to the primitives routine**. #72 used the same pattern for
+three screenshots, so the portal routine's before/after images were almost
+certainly never seen either. Every routine's brief asks for a visual; the way all
+of them deliver it does not work.
+
+What does work, in rough order of effort:
+
+1. **A link rather than an embed.** `github.com/jam-overture/loom/blob/main/reports/<file>.png`
+   renders for a signed-in reader. Ugly but free, and correct today.
+2. **Publish the visual outside the repository.** The 16 August run did this —
+   the specimen sheet for #76 is a live page rather than an image, so the
+   primitives are real DOM under both palettes rather than a picture of them.
+   Better than a screenshot and immune to this problem.
+3. **Make the repository public**, if that was always the intent — the README
+   describes a framework meant to be adopted.
+
+**The preview 404.** Separate cause: Vercel preview deployments are protected by
+default, and the portal's `/` requires an actor besides. A preview URL is
+therefore only useful to someone signed in to both. Worth knowing before a brief
+asks for one again.
+
+---
+
+## 2026-08-16 — 21st.dev: answered by the maintainer
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** answered, pending the allowlist entry
+
+Answering the finding filed earlier today. The maintainer on #75:
+
+> *"If 21st.dev is blocked just because of not being added to a white list, then
+> I can add it. I just point to that site because it has great visually appealing
+> UI's and I want you to emulate that. The main objective is to create a wide
+> range of primitives. Basic to extremely well designed and amazing UIs."*
+
+So: the allowlist is the fix, and the instruction stands as written. Recorded
+here rather than left in a pull-request thread, because a merged PR's comments
+are not something the next run reads.
+
+Two things worth carrying forward from that sentence, since they sharpen the
+brief rather than restate it: **21st.dev is a reference for the visual bar, not
+a specification** — "emulate that" is about how finished the components look,
+not about porting their catalogue — and **breadth is the main objective**, from
+basic to elaborate, which is the ordering to plan runs against.
+
+Until the allowlist lands, runs fall back on `loom.hero` and `loom.feature-grid`
+as the floor plus the Hermes content models on disk, and should say so.

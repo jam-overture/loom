@@ -126,8 +126,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as twenty-four primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(24)
+  it("registers as twenty-five primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(25)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.section",
@@ -140,7 +140,7 @@ describe("the starter library", () => {
       "loom.tier-table",
       "loom.tier",
       "loom.perk-list",
-      "loom.perk",
+      "loom.perk-list-item",
       "loom.quote-grid",
       "loom.quote",
       "loom.logo-cloud",
@@ -150,6 +150,7 @@ describe("the starter library", () => {
       "loom.heading",
       "loom.prose",
       "loom.badge",
+      "loom.perk",
       "loom.divider",
       "loom.media",
       "loom.action",
@@ -176,6 +177,30 @@ describe("the starter library", () => {
     }
   })
 
+  it("says out loud where the perk trio breaks the stem rule, since the stem rule cannot", () => {
+    const types = new Set(registry.primitives.map((primitive) => primitive.type))
+
+    /**
+     * The cost 0060 accepts, pinned so it stays deliberate. The test above
+     * passes for `loom.perk-list` because stripping `-list` names
+     * `loom.perk` — but `loom.perk` is the standalone `<div>`, not the list's
+     * child. All three are registered and each says in its own description
+     * where it goes, which is the whole of the mitigation.
+     *
+     * If 0060 is rejected and the rename reverted, this test is the one that
+     * should be deleted rather than adjusted.
+     */
+    expect(types).toContain("loom.perk-list")
+    expect(types).toContain("loom.perk-list-item")
+    expect(types).toContain("loom.perk")
+
+    const describes = (type: string): string =>
+      registry.primitives.find((primitive) => primitive.type === type)?.description ?? ""
+
+    expect(describes("loom.perk-list-item")).toContain("loom.perk")
+    expect(describes("loom.perk")).toContain("loom.perk-list-item")
+  })
+
   it("passes the edit-mode conformance audit, so the portal can address all of it", () => {
     const audit = auditRegistry(registry)
 
@@ -196,10 +221,11 @@ describe("the starter library", () => {
     expect(auditRegistry(registry).leaves).toEqual([
       "loom.feature",
       "loom.stat",
-      "loom.perk",
+      "loom.perk-list-item",
       "loom.quote",
       "loom.logo",
       "loom.faq",
+      "loom.perk",
       "loom.divider",
     ])
   })
@@ -443,7 +469,7 @@ const marketingPage = (theme: Record<string, string>, idFactory: IdFactory = seq
  */
 const pricingPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
   const perk = (label: string, extra: JsonObject = {}): ReturnType<typeof buildElement> =>
-    buildElement(idFactory, { type: "loom.perk", props: { label, ...extra } })
+    buildElement(idFactory, { type: "loom.perk-list-item", props: { label, ...extra } })
 
   const tier = (
     props: JsonObject,
@@ -534,6 +560,15 @@ const pricingPage = (theme: Record<string, string>, idFactory: IdFactory = seque
             "Talk to us"
           ),
         ],
+      }),
+      /**
+       * The standalone case 0060 exists for: one reassurance under the band,
+       * belonging to no list. As a `loom.perk-list-item` this would be an `<li>`
+       * with no `<ul>` anywhere near it.
+       */
+      buildElement(idFactory, {
+        type: "loom.perk",
+        props: { label: "Every plan includes the full revision log", note: "no card required to start" },
       }),
     ],
   })
@@ -722,9 +757,27 @@ describe("the pricing band", () => {
      * reversible. The count is asserted because it is the number that says the
      * decomposition actually happened.
      */
-    expect(markup.match(/data-loom-type="loom\.perk"/g)?.length).toBe(10)
+    expect(markup.match(/data-loom-type="loom\.perk-list-item"/g)?.length).toBe(10)
     expect(markup.match(/data-loom-type="loom\.tier"/g)?.length).toBe(3)
     expect(markup.match(/data-loom-type="loom\.perk-list"/g)?.length).toBe(3)
+  })
+
+  it("gives a row an <li> and a standalone perk a <div>, which is the whole of 0060", () => {
+    const { markup } = render(pricingPage(EDITORIAL))
+
+    /**
+     * Ten rows in three lists, and one perk belonging to no list. Before the
+     * rename the eleventh was an `<li>` outside any `<ul>` — markup that
+     * renders correctly and says something untrue about the page.
+     */
+    expect(markup.match(/<ul/g)?.length).toBe(3)
+    expect(markup.match(/<li/g)?.length).toBe(10)
+    expect(markup).toContain("Every plan includes the full revision log")
+
+    const standaloneAt = markup.indexOf("Every plan includes the full revision log")
+    const lastListCloseAt = markup.lastIndexOf("</ul>")
+
+    expect(standaloneAt).toBeGreaterThan(lastListCloseAt)
   })
 
   it("places the badge beside the plan name and the action at the foot of the card", () => {
@@ -752,9 +805,12 @@ describe("the pricing band", () => {
 
     expect(markup.match(/aria-label="Not included"/g)?.length).toBe(1)
     expect(markup.match(/aria-label="Coming soon"/g)?.length).toBe(1)
-    /** The other eight are marked, and not one of them announces itself. */
+    /**
+     * The other nine are marked — eight rows plus the standalone perk under the
+     * band — and not one of them announces itself.
+     */
     expect(markup).not.toContain('aria-label="Included"')
-    expect(markup.match(/✓/g)?.length).toBe(8)
+    expect(markup.match(/✓/g)?.length).toBe(9)
   })
 
   it("builds a proof wall out of the quote that was already registered", () => {
@@ -875,12 +931,20 @@ describe("the schemas the seam enforces", () => {
     expect(tier({ name: "Plan" }).outcome).toBe("invalid")
   })
 
-  it("refuses a perk state the renderer has no marker for", () => {
-    const perk = propsOf("loom.perk")
+  it("refuses a perk state the renderer has no marker for, on both halves of the pair", () => {
+    /**
+     * Asserted on both because 0060 splits one primitive into two that share a
+     * schema module. The point of sharing it is that a state added to one
+     * cannot be missing from the other, and this is what says so.
+     */
+    for (const type of ["loom.perk-list-item", "loom.perk"]) {
+      const perk = propsOf(type)
 
-    expect(perk({ label: "SSO", state: "maybe" }).outcome).toBe("invalid")
-    expect(perk({ label: "SSO", state: "coming" }).outcome).toBe("valid")
-    expect(perk({ label: "SSO" }).outcome).toBe("valid")
+      expect(perk({ label: "SSO", state: "maybe" }).outcome).toBe("invalid")
+      expect(perk({ label: "SSO", state: "coming" }).outcome).toBe("valid")
+      expect(perk({ label: "SSO" }).outcome).toBe("valid")
+      expect(perk({ label: "SSO", note: "single sign-on" }).outcome).toBe("valid")
+    }
   })
 
   it("refuses an image source that is not fetched over http", () => {
