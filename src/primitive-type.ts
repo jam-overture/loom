@@ -24,3 +24,15 @@ export const slotNameSchema = z
   .regex(/^[a-z][a-zA-Z0-9]*$/)
   .brand<"SlotName">()
 export type SlotName = z.infer<typeof slotNameSchema>
+
+/**
+ * A key naming one of the strings a primitive owns. camelCase, mirroring slot
+ * and prop naming — and, load-bearing, never containing a dot: a dictionary
+ * addresses a string as `${type}.${key}`, and a key with a dot in it would make
+ * that address ambiguous between two primitives.
+ */
+export const textKeySchema = z
+  .string()
+  .regex(/^[a-z][a-zA-Z0-9]*$/)
+  .brand<"TextKey">()
+export type TextKey = z.infer<typeof textKeySchema>

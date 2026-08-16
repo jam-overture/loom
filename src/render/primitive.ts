@@ -6,6 +6,7 @@ import type { JsonObject, JsonObjectView } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 import type { EditableAttributes } from "./editable.js"
+import type { PrimitiveText } from "./text.js"
 
 /**
  * The primitive contract — what a registered component receives, and the only
@@ -19,7 +20,7 @@ import type { EditableAttributes } from "./editable.js"
  * smuggled past it.
  */
 
-export type LoomRenderContext = {
+export type LoomRenderContext<TText extends string = never> = {
   readonly nodeId: NodeId
   readonly type: PrimitiveType
   /**
@@ -67,6 +68,20 @@ export type LoomRenderContext = {
    * belongs to whoever runs the deployment.
    */
   readonly data: NodeData
+  /**
+   * The strings this primitive declared, resolved for this deployment.
+   *
+   * Always present and always complete: every key the primitive declared is
+   * here, carrying the host's translation where there is one and the declared
+   * string where there is not. A primitive reads `loom.text.excluded` and gets a
+   * string, never `undefined` — a control whose accessible name went missing
+   * because nobody translated it is the failure this seam exists to prevent.
+   *
+   * Empty for a primitive that declared none, and typed as such: `TText` is the
+   * union of declared keys, so reading one that was never declared does not
+   * compile.
+   */
+  readonly text: PrimitiveText<TText>
 }
 
 /**
@@ -92,17 +107,21 @@ export const NO_SLOTS: SlotChildren = Object.freeze(
  * makes the claim true is the render seam validating against the same schema
  * the type came from; that pairing is the registry's job (see `sdk/registry.ts`).
  */
-export type LoomPrimitiveProps<TProps extends JsonObjectView = JsonObject> = {
-  readonly loom: LoomRenderContext
+export type LoomPrimitiveProps<
+  TProps extends JsonObjectView = JsonObject,
+  TText extends string = never,
+> = {
+  readonly loom: LoomRenderContext<TText>
   /** The node's props, exactly as they appear in the tree. */
   readonly props: TProps
   /** Rendered children in tree order, or null when the node has none. */
   readonly children: ReactNode
 }
 
-export type LoomPrimitive<TProps extends JsonObjectView = JsonObject> = ComponentType<
-  LoomPrimitiveProps<TProps>
->
+export type LoomPrimitive<
+  TProps extends JsonObjectView = JsonObject,
+  TText extends string = never,
+> = ComponentType<LoomPrimitiveProps<TProps, TText>>
 
 /**
  * The renderer's whole dependency on the registry: one lookup. §4 owns

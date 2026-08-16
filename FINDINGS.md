@@ -141,3 +141,74 @@ one structural change inside the framework and no new capability from outside it
 `reserved-props.ts` because the `loom:` namespace acquired a second reader that
 is not part of rendering. `render/theme.ts` re-exports it, so no entry point
 changed shape and no consumer was touched.
+
+---
+
+## 2026-08-16 — the first primitive-owned string now has somewhere to be translated
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open —
+the seam is built on branch `day-53-the-text-seam`; moving `loom.perk` onto it is
+the primitives routine's, because `src/primitives/` is not this routine's lane
+
+Answering the finding the primitives routine filed the same day: `loom.perk`
+carries "Not included" and "Coming soon" as accessible names, they cannot come
+from the tree, and there was nowhere for a German deployment to replace them.
+
+**There is now.** `definePrimitive` takes a `text` map in the author's own
+language; the keys are typed, so a component reads exactly what it declared and
+a typo does not compile. What reaches `loom.text` is the host's translation where
+there is one and the declared string where there is not — never a missing key,
+because a control with no accessible name is the failure the seam exists to
+prevent. A registry is a `TextResolver` over its own declarations, so an
+untranslated deployment needs no wiring at all; `textResolverFor` lays a
+dictionary over it, `textCatalogue` is what a translator is given, and
+`textCoverage` says what a dictionary answers and what it does not
+([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md)).
+
+**What is left, and it is yours:** move `loom.perk`'s two strings out of the
+component and into its declaration. It is a four-line change and it needs no
+dictionary — the declared strings are what renders when nobody translates.
+Nothing was changed inside `src/primitives/` by this run, deliberately.
+
+The finding was right about the shape, too: "a registered thing addressed by id,
+resolved before or during the walk, with the primitive naming which strings it
+needs" is what was built, with one difference worth knowing — resolution happens
+once per dictionary rather than once per node, so a page with fifty markers does
+fifty map reads and no string work.
+
+---
+
+## 2026-08-16 — two routines cannot both write a decision record without colliding
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Structural, and it has now bitten twice in two days in two different files.
+
+`decisions/README.md`'s numbering guard requires the numbers to run unbroken, and
+`pnpm verify` fails when they do not — deliberately, because two sessions once
+each wrote an `0032` and nothing noticed until their branches met. But every
+routine is told to branch from `main`, never to stack, and there is no way to
+reserve a number. So:
+
+- **#75 (`Loom primitives`) wrote 0059**, on a branch cut from `main`.
+- **This branch wrote 0060**, also cut from `main`, where 0059 does not exist.
+
+Both are correct by the rules they were given. The result is that this branch's
+`pnpm verify` fails on exactly one assertion — `0059 is missing` — until #75
+merges and `main` is merged back in. The alternative was to also call mine 0059,
+which is the failure the guard exists to catch and would have made every
+reference to "0059" ambiguous permanently.
+
+The same shape hit `FINDINGS.md` on 15 August: two branches appending to the end
+of one file conflict, harmlessly but every time.
+
+Not a routine's to fix — it needs a convention only the maintainer can set. Three
+that would work, in increasing order of effort: **merge order** (say that
+concurrent records are renumbered by whoever merges second, and expect one red
+branch), **a reserved block per routine** (framework takes even numbers, and the
+guard checks duplicates only), or **numbering on merge** (records are written
+with a slug and numbered by the index tool, which is a change to the tool and to
+every existing cross-reference).
+
+Recorded rather than acted on because a routine choosing its own convention here
+is how two conventions get invented.
