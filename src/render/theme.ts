@@ -1,12 +1,13 @@
 import type { CSSProperties } from "react"
 
-import type { JsonObject, JsonValue } from "../json.js"
+import type { JsonObject } from "../json.js"
+import { THEME_PROP_KEY } from "../reserved-props.js"
 import { themeVariables } from "../theme/apply.js"
 import type { ThemeError, ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
 
 /**
- * The runtime's own props, and the theme read out of them.
+ * The theme read out of the runtime's own props.
  *
  * 0049 put a theme in the tree as three registered ids carried on the root
  * node's props, so that re-theming is an ordinary `configure` the Gate weighs
@@ -14,55 +15,25 @@ import type { ResolvedTheme } from "../theme/theme.js"
  * primitive, and a root primitive declaring a strict schema would reject a key
  * it never asked for — blanking the page over the theme rather than wearing it.
  *
- * So the `loom:` prefix names a **reserved namespace**: keys under it belong to
- * the runtime, are read here, and are removed from the bag before either the
- * validator or the primitive sees it. That keeps 0049's other promise too — a
- * primitive reads `var(--loom-accent)` and never learns which palette is
- * mounted, which it could not claim if the palette id arrived in its props.
+ * So the `loom:` prefix names a **reserved namespace** ([`reserved-props.ts`](../reserved-props.ts)):
+ * keys under it belong to the runtime, are read here, and are removed from the
+ * bag before either the validator or the primitive sees it. That keeps 0049's
+ * other promise too — a primitive reads `var(--loom-accent)` and never learns
+ * which palette is mounted, which it could not claim if the palette id arrived
+ * in its props.
  *
  * Reserved keys the runtime does not recognise are dropped, and say so in a
  * diagnostic: a namespace that silently swallows whatever is put in it is a
  * place for data to go missing.
  */
 
-/** Prop keys under this prefix belong to the runtime rather than to a primitive. */
-export const RESERVED_PROP_PREFIX = "loom:"
-
-/** The one reserved key that exists today: 0049's three ids, on the root node. */
-export const THEME_PROP_KEY = `${RESERVED_PROP_PREFIX}theme`
-
-export const isReservedPropKey = (key: string): boolean => key.startsWith(RESERVED_PROP_PREFIX)
-
-export type PartitionedProps = {
-  /** What the primitive and the validator see. */
-  readonly props: JsonObject
-  /** What the runtime reads, keyed as it appears in the tree. */
-  readonly reserved: JsonObject
-}
-
-const NO_RESERVED_PROPS: JsonObject = Object.freeze({})
-
-/**
- * Splitting costs one pass over the keys, and allocates nothing at all for the
- * ordinary node that carries no reserved key — which is every node but one.
- */
-export const partitionReservedProps = (props: JsonObject): PartitionedProps => {
-  const keys = Object.keys(props)
-  if (!keys.some(isReservedPropKey)) return { props, reserved: NO_RESERVED_PROPS }
-
-  const own: Record<string, JsonValue> = {}
-  const reserved: Record<string, JsonValue> = {}
-
-  for (const key of keys) {
-    const value = props[key]
-    if (value === undefined) continue
-
-    if (isReservedPropKey(key)) reserved[key] = value
-    else own[key] = value
-  }
-
-  return { props: own, reserved }
-}
+export {
+  isReservedPropKey,
+  partitionReservedProps,
+  RESERVED_PROP_PREFIX,
+  THEME_PROP_KEY,
+  type PartitionedProps,
+} from "../reserved-props.js"
 
 export type ThemeResolution =
   | { readonly outcome: "themed"; readonly theme: ResolvedTheme }

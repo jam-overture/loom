@@ -1,5 +1,6 @@
 import { isValidElement, type ReactNode } from "react"
 
+import { NO_DATA } from "../data/resolution.js"
 import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
@@ -42,7 +43,7 @@ const PROBE_TYPE = primitiveTypeSchema.parse("loom.probe")
 const PROBE_CHILDREN = "loom-probe-children"
 
 const probeProps = (editable: EditableAttributes): LoomPrimitiveProps => ({
-  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS },
+  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS, data: NO_DATA },
   props: {},
   children: PROBE_CHILDREN,
 })
@@ -185,7 +186,7 @@ export const probeSlotPlacement = (
     try {
       return ok(
         probeable.value({
-          loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots },
+          loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots, data: NO_DATA },
           props: {},
           children: PROBE_CHILDREN,
         })

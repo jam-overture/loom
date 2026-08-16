@@ -1,3 +1,5 @@
+import type { DataRegistry } from "../data/adapter.js"
+import { resolveTreeData } from "../data/resolve.js"
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { err, ok, type Result } from "../result.js"
@@ -46,6 +48,12 @@ export type RenderDependencies = {
   readonly validator?: PropsValidator
   /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */
   readonly themes?: ThemeRegistry
+  /**
+   * Absent means the tree's bindings are not answered — see `RenderOptions.data`.
+   * Supplying a registry is what bounds the sources a proposal may name, the
+   * same way `themes` bounds the palettes (0058).
+   */
+  readonly sources?: DataRegistry
   readonly slots?: SlotContent
 }
 
@@ -84,11 +92,25 @@ export const renderRequest = async (
     return err({ code: "tree-id-mismatch", requested: request.treeId, received: tree.treeId })
   }
 
+  /**
+   * The only await between loading the tree and rendering it, and the reason
+   * this function is async at all now. It happens after the parse because the
+   * plan is read off a tree that has been proved to be one, and before the walk
+   * because the walk cannot wait for anything (0058).
+   */
+  const data = dependencies.sources
+    ? await resolveTreeData(tree, {
+        registry: dependencies.sources,
+        ...(request.context ? { context: request.context } : {}),
+      })
+    : undefined
+
   const rendered = renderLoomTree(tree, {
     resolver: dependencies.resolver,
     editMode: request.editMode,
     ...(dependencies.validator ? { validator: dependencies.validator } : {}),
     ...(dependencies.themes ? { themes: dependencies.themes } : {}),
+    ...(data ? { data } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
   })
 

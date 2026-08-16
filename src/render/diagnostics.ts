@@ -1,3 +1,6 @@
+import { describeDataUnavailable, type DataUnavailable } from "../data/adapter.js"
+import { describeBindingError, type BindingError } from "../data/binding.js"
+import type { BindingName, SourceId } from "../data/source.js"
 import type { NodeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { assertNever } from "../result.js"
@@ -71,6 +74,35 @@ export type RenderDiagnostic =
       readonly nodeId: NodeId
       readonly key: string
     }
+  | {
+      /**
+       * `loom:data` that is not a map of binding names to registered sources.
+       * The node renders — its props are its own and are still valid — with no
+       * data at all, which is what a primitive's unavailable path is for.
+       */
+      readonly code: "data-misdeclared"
+      readonly nodeId: NodeId
+      readonly error: BindingError
+    }
+  | {
+      /**
+       * A binding that could not be answered: no such source, params the source
+       * refuses, an answer that fails its own schema, or an adapter that could
+       * not reach what it wraps. One region of the page is short of data; the
+       * page still renders, because the alternative is a whole page lost to one
+       * integration being down.
+       */
+      readonly code: "data-unavailable"
+      readonly nodeId: NodeId
+      readonly name: BindingName
+      readonly source: SourceId
+      readonly unavailable: DataUnavailable
+    }
+  | {
+      /** The tree asks for data and this render was given no resolution. */
+      readonly code: "data-unresolved"
+      readonly nodeId: NodeId
+    }
 
 const describeIssues = (issues: readonly PropsIssue[]): string =>
   issues.map((issue) => `${issue.path}: ${issue.message}`).join("; ")
@@ -91,6 +123,12 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} names a theme and is not the root, so it was ignored — a theme is mounted once, at the render root`
     case "reserved-prop-unrecognised":
       return `node ${diagnostic.nodeId} carries "${diagnostic.key}", which is in the runtime's reserved namespace and is read by nothing, so it was dropped`
+    case "data-misdeclared":
+      return `node ${diagnostic.nodeId} declares data that is not a map of binding names to sources, so it rendered with none — ${describeBindingError(diagnostic.error)}`
+    case "data-unavailable":
+      return `node ${diagnostic.nodeId} binds "${diagnostic.name}" to "${diagnostic.source}" and it could not be answered — ${describeDataUnavailable(diagnostic.unavailable)}`
+    case "data-unresolved":
+      return `node ${diagnostic.nodeId} asks for data and this render was given no resolution, so it rendered with none`
     default:
       return assertNever(diagnostic, "describeRenderDiagnostic")
   }

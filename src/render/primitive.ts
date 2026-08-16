@@ -1,5 +1,6 @@
 import type { ComponentType, CSSProperties, ReactNode } from "react"
 
+import type { NodeData } from "../data/resolution.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
@@ -50,6 +51,22 @@ export type LoomRenderContext = {
    * region rather than a position in `children` (0051).
    */
   readonly slots: SlotChildren
+  /**
+   * What the host answered for this node's bindings, by binding name (0058).
+   *
+   * Always present, empty when the node binds nothing, so a primitive reads
+   * `loom.data.services` without first proving the map exists. Each answer is
+   * `ready` or `unavailable` with a reason — never merely absent — because a
+   * primitive shows different things for "you have no services yet" and "we
+   * could not reach your services", and a shape that cannot tell them apart
+   * guarantees it eventually shows the wrong one.
+   *
+   * It arrives beside `props` rather than merged into them because the two have
+   * different authors. Props are in the tree, proposed by a model and weighed by
+   * the Gate; data is the host's answer to a question the tree asked, and it
+   * belongs to whoever runs the deployment.
+   */
+  readonly data: NodeData
 }
 
 /**

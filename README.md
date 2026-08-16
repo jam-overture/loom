@@ -86,13 +86,51 @@ Order, and the reason for it:
    leaves; the theme registry joins the catalogue the model is shown; and
    decomposed pairs have a naming rule
    ([0054](decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)).
-4. **The remaining primitives**, which by then are mechanical — and they come
+4. **Data** — the seam the port hits at the first primitive that needs any
+   ([§4e](#4e--data-what-a-primitive-cannot-be-told-in-props), done).
+5. **The remaining primitives**, which by then are mechanical — and they come
    after §4c and §4d, because a site that shows the runtime is worth more than
    the fifty-second block. Only then §7, since a marketplace of primitives needs
    primitives.
 
 Refinement inside §1–§6 is **reactive from here**: driven by what the port
 breaks, not run as its own stream.
+
+### 4e — Data: what a primitive cannot be told in props
+
+Five of the seventy Hermes blocks resolve a `binding` rather than reading a
+prop: `about` binds three fields to one profile, and `services`, `products`,
+`feed` and `marquee` bind a list to a connected integration. Ported without an
+answer they become an author typing their own services in by hand, which is not
+the block anyone used.
+
+**A binding is a question the tree asks, and never an answer**
+([0058](decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)).
+`loom:data` is the second key in the reserved namespace 0050 opened, and it
+names a registered source and the params to ask it with:
+
+```json
+"loom:data": { "services": { "source": "catalogue.services", "params": { "limit": 6 } } }
+```
+
+Resolution happens in three steps, and the middle one is the only IO in serving
+a page: `planTreeData` reads every binding out of the tree as a pure pass and
+deduplicates it, `resolveDataPlan` asks every question at once, and
+`renderLoomTree` takes the finished answers and stays as synchronous as it was.
+`renderRequest` is where the three meet.
+
+A source is registered like a primitive is. `defineSource` declares what it
+accepts and what it answers, both as Zod; the registry is the allowlist a
+binding can reach, params are checked before the adapter is called and the
+answer after. A primitive reads `loom.data`, beside `props` rather than merged
+into it, and every answer is either `ready` or `unavailable` **with a reason** —
+"you have no services yet" and "we could not reach your services" are different
+sentences and a shape that cannot tell them apart eventually shows the wrong one.
+
+What is not built yet is the authoring half: a primitive declaring which binding
+names it reads, so the catalogue can tell a model that `loom.services` wants a
+`services` binding. Until then a bound tree is hand-authored, and no starter
+primitive binds anything.
 
 ### 4c — The documentation site ← current
 
@@ -127,6 +165,7 @@ src/
 ├── ids.ts             # Brand-typed NodeId / TreeId / DeltaId + the IdFactory seam
 ├── json.ts            # The JSON value space every boundary is restricted to
 ├── primitive-type.ts  # Primitive type and slot name identifiers
+├── reserved-props.ts  # The `loom:` namespace: the runtime's own props
 ├── result.ts          # Result<T, E> — nothing throws across a seam
 ├── testing/           # Deterministic fixtures and test doubles
 ├── tree/
@@ -168,6 +207,14 @@ src/
 │   ├── theme.ts         # The reserved prop namespace, and the theme read from it
 │   ├── render.ts        # The tree, projected into React
 │   └── request.ts       # Per-request resolution: load, validate, render
+├── data/                # The data seam — the only IO in serving a page
+│   ├── source.ts          # Source ids and binding names
+│   ├── binding.ts         # What a node asks, as it appears in the tree
+│   ├── adapter.ts         # defineSource, the adapter contract, the registry
+│   ├── plan.ts            # The tree's questions, deduplicated — a pure pass
+│   ├── resolve.ts         # Asking them, all at once, catching everything
+│   ├── resolution.ts      # The answers, indexed the way the walk needs them
+│   └── catalogue.ts       # What a deployment can ask about, as data
 ├── catalogue.ts         # What a deployment can build with, as data
 ├── primitives/          # The starter library — a separate entry point
 │   ├── tokens.ts        # The only way a primitive names a colour or a length

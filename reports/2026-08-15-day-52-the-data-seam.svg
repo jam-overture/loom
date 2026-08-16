@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="760" viewBox="0 0 960 760" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="760" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">A binding is a question, not an answer</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0058 — day 52 — §4e → §3, §4b. The render walk stays synchronous, so the asking happens before it.</text>
+
+  <!-- ================= the three steps ================= -->
+  <text x="32" y="100" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">ONE REQUEST — pure, then IO, then pure again</text>
+
+  <rect x="32" y="112" width="228" height="118" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="132" font-size="11.5" fill="#111827">node props</text>
+  <text x="44" y="152" font-size="10.5" fill="#2563eb">"loom:data": {</text>
+  <text x="44" y="168" font-size="10.5" fill="#6b7280">  services: {</text>
+  <text x="44" y="184" font-size="10.5" fill="#6b7280">    source: "catalogue.services",</text>
+  <text x="44" y="200" font-size="10.5" fill="#6b7280">    params: { limit: 6 } } }</text>
+  <text x="44" y="220" font-size="9.5" fill="#9ca3af">the second key in 0050's namespace</text>
+
+  <path d="M 260 171 L 316 171" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="262" y="164" font-size="9.5" fill="#9ca3af">plan</text>
+
+  <rect x="316" y="112" width="196" height="118" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="328" y="132" font-size="11.5" fill="#111827">planTreeData</text>
+  <text x="328" y="152" font-size="10.5" fill="#6b7280">a pure pass over the tree</text>
+  <text x="328" y="172" font-size="10.5" fill="#374151">→ deduplicated questions</text>
+  <text x="328" y="194" font-size="9.5" fill="#9ca3af">three fields bound to one</text>
+  <text x="328" y="208" font-size="9.5" fill="#9ca3af">profile ask once, and key</text>
+  <text x="328" y="222" font-size="9.5" fill="#9ca3af">order does not matter</text>
+
+  <path d="M 512 171 L 568 171" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="514" y="164" font-size="9.5" fill="#9ca3af">ask</text>
+
+  <rect x="568" y="112" width="196" height="118" rx="6" fill="#fffbeb" stroke="#f59e0b"/>
+  <text x="580" y="132" font-size="11.5" fill="#111827">resolveDataPlan</text>
+  <text x="580" y="152" font-size="10.5" fill="#b45309">the only IO in a render</text>
+  <text x="580" y="172" font-size="10.5" fill="#6b7280">all at once, never in turn</text>
+  <text x="580" y="194" font-size="9.5" fill="#9ca3af">params checked before,</text>
+  <text x="580" y="208" font-size="9.5" fill="#9ca3af">answer checked after,</text>
+  <text x="580" y="222" font-size="9.5" fill="#9ca3af">a throw caught either way</text>
+
+  <path d="M 764 171 L 820 171" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="820" y="112" width="108" height="118" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="832" y="132" font-size="11.5" fill="#111827">renderLoom</text>
+  <text x="832" y="146" font-size="11.5" fill="#111827">Tree</text>
+  <text x="832" y="168" font-size="10.5" fill="#6b7280">unchanged:</text>
+  <text x="832" y="184" font-size="10.5" fill="#6b7280">pure, sync,</text>
+  <text x="832" y="200" font-size="10.5" fill="#6b7280">no await</text>
+  <text x="832" y="220" font-size="9.5" fill="#9ca3af">a map read</text>
+
+  <!-- ================= what the primitive sees ================= -->
+  <text x="32" y="278" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT THE PRIMITIVE RECEIVES — two bags, two authors</text>
+
+  <rect x="32" y="290" width="432" height="96" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="310" font-size="11.5" fill="#111827">props</text>
+  <text x="44" y="330" font-size="10.5" fill="#6b7280">proposed by a model, weighed by the Gate,</text>
+  <text x="44" y="346" font-size="10.5" fill="#6b7280">attributed by the log, taken back by the inverse</text>
+  <text x="44" y="370" font-size="10.5" fill="#2563eb">{ heading: "What I do" }</text>
+
+  <rect x="496" y="290" width="432" height="96" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="508" y="310" font-size="11.5" fill="#111827">loom.data</text>
+  <text x="508" y="330" font-size="10.5" fill="#6b7280">answered by the host, changes with no proposal,</text>
+  <text x="508" y="346" font-size="10.5" fill="#6b7280">differs per visitor, nobody undoes it</text>
+  <text x="508" y="370" font-size="10.5" fill="#2563eb">{ services: { status: "ready", value: [...] } }</text>
+
+  <text x="32" y="408" font-size="10.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">Merging them would make the tree a cache of somebody's database, and every configure a write against stale content.</text>
+
+  <!-- ================= the two failures ================= -->
+  <text x="32" y="454" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">THE DISTINCTION THE SHAPE EXISTS TO PROTECT</text>
+
+  <rect x="32" y="466" width="432" height="106" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="44" y="486" font-size="11.5" fill="#111827">status: "ready", value: []</text>
+  <text x="44" y="508" font-size="10.5" fill="#15803d">"You have not added any services yet."</text>
+  <text x="44" y="530" font-size="10.5" fill="#6b7280">The source answered. There is nothing there.</text>
+  <text x="44" y="552" font-size="9.5" fill="#9ca3af">A prompt to add one is the right thing to show.</text>
+
+  <rect x="496" y="466" width="432" height="106" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="508" y="486" font-size="11.5" fill="#111827">status: "unavailable", reason: "unavailable"</text>
+  <text x="508" y="508" font-size="10.5" fill="#b91c1c">"We could not reach your services."</text>
+  <text x="508" y="530" font-size="10.5" fill="#6b7280">The source did not answer. We do not know.</text>
+  <text x="508" y="552" font-size="9.5" fill="#9ca3af">Showing the prompt here says the data is gone.</text>
+
+  <path d="M 464 519 L 496 519" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="3 3" marker-end="url(#arrowRed)"/>
+
+  <text x="32" y="596" font-size="10.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">There is deliberately no way to express "empty" as a failure, and no way to express unavailable as an absent key. A primitive</text>
+  <text x="32" y="612" font-size="10.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">writing `loom.data.services ?? []` cannot compile the mistake the portal spent its 15 August run undoing.</text>
+
+  <!-- ================= the honest cost ================= -->
+  <text x="32" y="656" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT THIS COSTS, SAID PLAINLY</text>
+
+  <rect x="32" y="668" width="896" height="70" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="690" font-size="10.5" fill="#111827">A page is no longer a function of the tree alone — 0050 claimed that property and a tree that asks a question does not have it.</text>
+  <text x="44" y="710" font-size="10.5" fill="#374151">What survives: the tree alone determines what is asked. Which questions, of which sources, with which params, is fixed by the</text>
+  <text x="44" y="730" font-size="10.5" fill="#374151">revision. Only the answers vary, and they vary at named points somebody proposed and the Gate weighed.</text>
+</svg>
