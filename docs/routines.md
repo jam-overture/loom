@@ -49,10 +49,19 @@ Each routine owns one part of the repository and does not edit another's.
 
 | Routine | Owns |
 | --- | --- |
-| Framework (`Loom daily build`) | `src/`, the primitive library, the demo |
+| Framework (`Loom daily build`) | `src/` **except `src/primitives/`**, and the demo |
+| Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
 | Portal | `apps/portal` |
 | Documentation site | §4c |
 | Marketing site | §4d |
+
+`Loom primitives` was split out of the framework routine on 16 August, once
+[0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+settled how a Hermes block becomes nodes. Roughly twenty of Hermes' seventy are
+ported; the remainder is breadth against a fixed rule, which is a different job
+from deciding the rule and parallelises cleanly. The two routines share a
+directory boundary and nothing else, so the framework routine must **stop adding
+primitives** rather than race for the same files.
 
 Work that belongs to another lane is **filed in `FINDINGS.md` for its owner**,
 not done. The docs, marketing and portal routines were held until the framework
