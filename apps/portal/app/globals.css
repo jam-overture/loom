@@ -9,17 +9,27 @@
 
 @layer base {
   :root {
-    /* ── Surfaces ────────────────────────────────────────────────── */
-    --surface-page: #f2f6f8;
-    --surface-wash: linear-gradient(150deg, #e3f7fbd1 0%, transparent 65%);
+    /* ── Surfaces ────────────────────────────────────────────────────
+       The portal is white. Every resting surface is the same white, and
+       what separates one region from another is a border, not a tint —
+       so a card, the rail, the topbar and the page behind them all read
+       as one sheet with rules drawn on it.
+
+       Tints are reserved for things that changed: hover, selection, and
+       the disposition colours further down. A surface that is not white
+       here means something happened to it.
+       ─────────────────────────────────────────────────────────────── */
+    --surface-page: #ffffff;
     --surface-base: #ffffff;
     --surface-sidebar: #ffffff;
     --surface-topbar: #ffffff;
     --surface-hover: #eceef2;
     --surface-active: #e3e6ee;
-    /* The preview pane reads as a document, not a panel — so it sits on a
-       flatter surface than the chrome around it. */
-    --surface-preview: #fbfcfd;
+    /* The preview pane reads as a document, not a panel. That used to be a
+       tint against a tinted page; against a white one the same tint would
+       read as a panel *darker* than its surroundings, which is the opposite
+       claim. The border around it carries the distinction instead. */
+    --surface-preview: #ffffff;
 
     /* ── Borders ─────────────────────────────────────────────────── */
     --border-default: rgba(0, 0, 0, 0.2);
@@ -42,6 +52,17 @@
     --nav-active-bg: #e3e6ee;
     --nav-active-border: #5b6478;
     --nav-inactive-text: #6c6c6c;
+
+    /* ── Focus ───────────────────────────────────────────────────────
+       One ring, drawn outside the element so it never moves layout, in
+       the same slate the rail uses for the active route. It is a token
+       rather than the browser default because the default is drawn in a
+       colour we do not choose and, on a white sheet with 2px radii,
+       reads as a bug.
+       ─────────────────────────────────────────────────────────────── */
+    --focus-ring: #5b6478;
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
 
     /* ── Actions ─────────────────────────────────────────────────── */
     --action-affirm-bg: #72e3ad;
@@ -118,6 +139,8 @@
   --color-nav-edge: var(--nav-active-border);
   --color-nav-idle: var(--nav-inactive-text);
 
+  --color-focus: var(--focus-ring);
+
   --color-affirm: var(--action-affirm-bg);
   --color-affirm-ink: var(--action-affirm-text);
   --color-affirm-edge: var(--action-affirm-border);
@@ -191,10 +214,64 @@
 @layer base {
   body {
     background-color: var(--surface-page);
-    background-image: var(--surface-wash);
-    background-repeat: no-repeat;
     color: var(--text-primary);
     font-size: var(--size-base);
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FOCUS — one ring, everywhere
+   `:focus-visible` rather than `:focus`, so a pointer user clicking a
+   button does not get an outline they did not ask for while a keyboard
+   user still gets one on every stop. Applied to the universal selector
+   because the alternative is remembering it on each of forty-one
+   components, and the one that gets forgotten is the one a keyboard
+   user needs.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The rail is `overflow-hidden` so it can animate its width, which would
+     clip a ring drawn outside a nav item at the left edge. Tucking the
+     offset inward keeps the whole ring inside the clip. */
+  .loom-rail :focus-visible {
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SKIP LINK — the first stop, and it must not be the topbar
+   Every page carries a fixed topbar and a rail of routes, so a keyboard
+   user arriving at a page tabs through the whole of the chrome before
+   reaching anything the page is about. The link sits off-screen until
+   it is focused, which is the only time it has anything to offer.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  .loom-skip-link {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    /* Its own height plus its margin plus the ring it will draw when focused —
+       a bare percentage leaves a sliver of border on the topbar. */
+    transform: translateY(calc(-100% - 8px - var(--focus-ring-offset) - var(--focus-ring-width)));
+    background-color: var(--surface-base);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-medium);
+    margin: 8px;
+    padding: 8px 12px;
+    font-size: var(--size-sm);
+    text-decoration: none;
+  }
+
+  .loom-skip-link:focus-visible {
+    transform: translateY(0);
   }
 }

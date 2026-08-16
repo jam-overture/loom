@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { StateNotice } from "@/app/_components/state-notice"
 import { requireActor } from "@/lib/auth/identity"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
@@ -22,9 +23,15 @@ const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
 
   if (!page.ok) {
     return (
-      <div className="p-8">
+      <div className="flex max-w-xl flex-col gap-4 p-8">
         <h1 className="text-2xl tracking-tight">trees</h1>
-        <p className="text-ink-muted mt-2 text-sm">{describeStoreError(page.error)}</p>
+        <StateNotice tone="failure" title="The store could not be listed.">
+          <p>{describeStoreError(page.error)}</p>
+          <p>
+            This is not an empty store — it is a store that did not answer. Nothing has been
+            lost by this page; a listing is a read.
+          </p>
+        </StateNotice>
       </div>
     )
   }
@@ -36,7 +43,22 @@ const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
       <h1 className="text-2xl tracking-tight">trees</h1>
 
       {trees.length === 0 ? (
-        <p className="text-ink-muted text-sm">No trees stored.</p>
+        <StateNotice
+          tone="empty"
+          title="The store has no trees in it."
+          action={<Link href="/demo">try the demo →</Link>}
+        >
+          <p>
+            A tree arrives one of two ways: a host calls{" "}
+            <span className="font-mono">create</span> on a store handle, or this portal seeds
+            one on first read. Seeing nothing here means neither has happened against the
+            store this deployment is pointed at.
+          </p>
+          <p>
+            The demo needs no store and no account — it runs a tree in memory so you can watch
+            a change be proposed, weighed and recorded before committing a database to it.
+          </p>
+        </StateNotice>
       ) : (
         <ul className="flex flex-col gap-2">
           {trees.map((listing) => (
@@ -63,13 +85,15 @@ const TreesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
       )}
 
       {storeIsDurable ? null : (
-        <p className="text-ink-muted text-xs">
-          No database is configured, so trees live in the server process. Locally that lasts
-          as long as `pnpm dev`; on a serverless deployment an accepted change may not be
-          there when you reload, because the next request can be served by a different
-          instance. Set <span className="font-mono">DATABASE_URL</span> to make writes
-          durable.
-        </p>
+        <StateNotice tone="notice">
+          <p>
+            No database is configured, so trees live in the server process. Locally that lasts
+            as long as `pnpm dev`; on a serverless deployment an accepted change may not be
+            there when you reload, because the next request can be served by a different
+            instance. Set <span className="font-mono">DATABASE_URL</span> to make writes
+            durable.
+          </p>
+        </StateNotice>
       )}
     </div>
   )

@@ -36,7 +36,13 @@ export const SidebarNav = () => {
                 }
               >
                 {item.icon}
-                <span className="ml-3 font-mono whitespace-nowrap opacity-0 transition-opacity delay-100 duration-150 group-hover:opacity-100">
+                {/*
+                 * The label follows focus as well as the pointer. Without
+                 * `group-focus-within` a keyboard user tabs the rail as six
+                 * unlabelled icons — the rail would be navigable and unreadable
+                 * at the same time, which is worse than either.
+                 */}
+                <span className="ml-3 font-mono whitespace-nowrap opacity-0 transition-opacity delay-100 duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
                   {item.label}
                 </span>
               </Link>

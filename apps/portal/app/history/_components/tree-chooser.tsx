@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { StateNotice } from "@/app/_components/state-notice"
 import { portalStore } from "@/lib/store"
 
 /**
@@ -16,12 +17,31 @@ import { portalStore } from "@/lib/store"
 export const TreeChooser = async () => {
   const page = await portalStore.list()
 
-  if (!page.ok) return <p className="text-ink-muted text-sm">{describeStoreError(page.error)}</p>
+  if (!page.ok) {
+    return (
+      <StateNotice tone="failure" title="The store could not be listed.">
+        <p>{describeStoreError(page.error)}</p>
+        <p>There may well be logs to read; this page could not find out which.</p>
+      </StateNotice>
+    )
+  }
 
   const { trees } = page.value
 
   if (trees.length === 0) {
-    return <p className="text-ink-muted text-sm">No trees stored, so there is nothing to read.</p>
+    return (
+      <StateNotice
+        tone="empty"
+        title="No trees stored, so there is no log to read."
+        action={<Link href="/trees">trees →</Link>}
+      >
+        <p>
+          A log is the truth and the tree is a view of it (0016), so a log begins the moment a
+          tree does — there is no separate thing to switch on. Store a tree and its history is
+          already here.
+        </p>
+      </StateNotice>
+    )
   }
 
   return (
