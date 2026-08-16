@@ -11,9 +11,10 @@ list and it is not a report.
 
 ## 2026-08-15 — `FINDINGS.md` did not exist, and neither do two of the four docs
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** partly
-closed — `docs/routines.md` written on branch `day-52-the-data-seam`;
-`docs/rollout.md` still missing and still needs the maintainer
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by #74 — `docs/routines.md` landed via `day-52-the-data-seam`; `docs/rollout.md`
+was written on 15 August but pushed to an already-merged branch, so it never
+reached `main`. Restored and rewritten against current state in #74.
 
 The portal brief names five files as *read first, every run*:
 
@@ -42,8 +43,9 @@ one PR, no follow-up scheduled, no self-check-in).
 
 ## 2026-08-15 — the §4b demo has landed, so the portal briefs' premise is stale
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
-confirmed accurate; only the maintainer can edit a brief
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by #74 — confirmed accurate. The brief was corrected by the maintainer on
+16 August: the demo premise is gone and the portal's value work is open.
 
 The portal brief states that §4b's demo does not exist yet and that the portal's
 highest-value work is therefore blocked, with an instruction to re-read the
