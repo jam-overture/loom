@@ -118,3 +118,68 @@ describe("the declared props a definition exposes", () => {
     expect(entryFor(z.object({})).declaredProps).toEqual([])
   })
 })
+
+describe("the text a definition declares", () => {
+  const markerFor = (text: Readonly<Record<string, string>>) =>
+    definePrimitive({
+      type: "loom.marker",
+      description: "a state marker",
+      props: z.object({}),
+      text,
+      component: anyPrimitive,
+    })
+
+  it("carries the declared strings onto the entry", () => {
+    expect(markerFor({ excluded: "Not included" }).text).toEqual({ excluded: "Not included" })
+  })
+
+  it("defaults to none, because most primitives own no strings", () => {
+    expect(
+      definePrimitive({
+        type: "loom.card",
+        description: "a bounded block of content",
+        props: z.object({}),
+        component: anyPrimitive,
+      }).text
+    ).toEqual({})
+  })
+
+  it("copies what it was given, so a later mutation cannot change a rendered page", () => {
+    const declared: Record<string, string> = { excluded: "Not included" }
+    const entry = markerFor(declared)
+
+    declared["excluded"] = "Something else entirely"
+
+    expect(entry.text["excluded"]).toBe("Not included")
+  })
+
+  it("has no prototype, so a key named after one of Object's is an ordinary key", () => {
+    expect(Object.getPrototypeOf(markerFor({ toString: "A string" }).text)).toBeNull()
+  })
+
+  /**
+   * The type-level half, checked by `tsc` rather than by vitest: the keys a
+   * component may read are exactly the keys it declared. An author who reads one
+   * they did not declare finds out here, the same way `props.titel` does.
+   */
+  it("types the component's text by what was declared", () => {
+    const entry = definePrimitive({
+      type: "loom.marker",
+      description: "a state marker",
+      props: z.object({}),
+      text: { excluded: "Not included" },
+      component: ({ loom }) => createElement("span", null, loom.text.excluded),
+    })
+
+    definePrimitive({
+      type: "loom.marker",
+      description: "a state marker",
+      props: z.object({}),
+      text: { excluded: "Not included" },
+      // @ts-expect-error — `included` was never declared, so it cannot be read
+      component: ({ loom }) => createElement("span", null, loom.text.included),
+    })
+
+    expect(entry.text["excluded"]).toBe("Not included")
+  })
+})

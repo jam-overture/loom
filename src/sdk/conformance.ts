@@ -5,6 +5,7 @@ import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
 import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
+import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
 
 /**
@@ -42,8 +43,17 @@ const PROBE_NODE_ID = nodeIdSchema.parse("n_probe")
 const PROBE_TYPE = primitiveTypeSchema.parse("loom.probe")
 const PROBE_CHILDREN = "loom-probe-children"
 
-const probeProps = (editable: EditableAttributes): LoomPrimitiveProps => ({
-  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS, data: NO_DATA },
+/**
+ * A probe is handed the primitive's own declared strings rather than an empty
+ * map. A component that reads `loom.text.excluded` and formats it would throw on
+ * `undefined` and read as `not-probeable` — a false negative produced entirely
+ * by the probe, for a primitive that is correct.
+ */
+const probeProps = (
+  editable: EditableAttributes,
+  text: PrimitiveText<string>
+): LoomPrimitiveProps => ({
+  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS, data: NO_DATA, text },
   props: {},
   children: PROBE_CHILDREN,
 })
@@ -96,7 +106,10 @@ const asProbeable = (primitive: LoomPrimitive): Result<ProbeableComponent, strin
   return ok(primitive as ProbeableComponent)
 }
 
-export const probeEditableDecoration = (primitive: LoomPrimitive): ConformanceVerdict => {
+export const probeEditableDecoration = (
+  primitive: LoomPrimitive,
+  text: PrimitiveText<string> = NO_TEXT
+): ConformanceVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
 
@@ -107,7 +120,7 @@ export const probeEditableDecoration = (primitive: LoomPrimitive): ConformanceVe
 
   const called = ((): Result<ReactNode, string> => {
     try {
-      return ok(probeable.value(probeProps(editable)))
+      return ok(probeable.value(probeProps(editable, text)))
     } catch (thrown) {
       return err(thrown instanceof Error ? thrown.message : String(thrown))
     }
@@ -174,7 +187,8 @@ const containsMarker = (node: unknown, marker: string): boolean => {
 
 export const probeSlotPlacement = (
   primitive: LoomPrimitive,
-  declaredSlots: readonly string[]
+  declaredSlots: readonly string[],
+  text: PrimitiveText<string> = NO_TEXT
 ): PlacementVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
@@ -186,7 +200,7 @@ export const probeSlotPlacement = (
     try {
       return ok(
         probeable.value({
-          loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots, data: NO_DATA },
+          loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots, data: NO_DATA, text },
           props: {},
           children: PROBE_CHILDREN,
         })

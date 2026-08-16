@@ -87,7 +87,10 @@ Order, and the reason for it:
    decomposed pairs have a naming rule
    ([0054](decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)).
 4. **Data** — the seam the port hits at the first primitive that needs any
-   ([§4e](#4e--data-what-a-primitive-cannot-be-told-in-props), done).
+   ([§4e](#4e--data-what-a-primitive-cannot-be-told-in-props), done), and
+   **text** — the strings a primitive owns rather than reads from the tree
+   ([§4f](#4f--text-the-strings-a-primitive-owns), done). Both are the same
+   shape of gap: something a page needs that props cannot carry.
 5. **The remaining primitives**, which by then are mechanical — and they come
    after §4c and §4d, because a site that shows the runtime is worth more than
    the fifty-second block. Only then §7, since a marketplace of primitives needs
@@ -131,6 +134,34 @@ What is not built yet is the authoring half: a primitive declaring which binding
 names it reads, so the catalogue can tell a model that `loom.services` wants a
 `services` binding. Until then a bound tree is hand-authored, and no starter
 primitive binds anything.
+
+### 4f — Text: the strings a primitive owns
+
+Almost every user-facing string on a page comes from the tree. A few cannot: a
+marker glyph carries an accessible name the visible label does not say, and
+making that a prop would put an accessible name in the space a model writes.
+Left inline in the component it is untranslatable, and a German deployment
+renders an English "Not included" in the middle of a German pricing table — the
+gap the primitives routine hit at `loom.perk` and filed.
+
+**A primitive declares the strings it owns; a deployment may replace them**
+([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md)).
+`definePrimitive` takes a `text` map in the author's own language, the keys are
+typed so a component can only read what it declared, and what reaches
+`loom.text` is the translation where there is one and the declared string where
+there is not — never a missing key.
+
+```ts
+text: { excluded: "Not included", coming: "Coming soon" }
+```
+
+A registry is a `TextResolver` over its own declarations, so an untranslated
+deployment is the base case rather than a fallback path. `textResolverFor` lays a
+dictionary over it, merging once per dictionary rather than once per node;
+`textCatalogue` is the extraction a translation file is written from, and
+`textCoverage` says what a dictionary answers, what it does not, and which of its
+keys name nothing. Which language a visitor gets stays the host's decision — the
+framework never reads a request header.
 
 ### 4c — The documentation site ← current
 
@@ -205,6 +236,7 @@ src/
 │   ├── editable.ts      # Edit-mode decoration, as attributes
 │   ├── diagnostics.ts   # What rendering could not honour
 │   ├── theme.ts         # The reserved prop namespace, and the theme read from it
+│   ├── text.ts          # The strings a primitive owns, and the seam that translates them
 │   ├── render.ts        # The tree, projected into React
 │   └── request.ts       # Per-request resolution: load, validate, render
 ├── data/                # The data seam — the only IO in serving a page
@@ -226,6 +258,7 @@ src/
 │   ├── registry.ts      # The registry: resolver and validator in one object
 │   ├── conformance.ts   # Does a primitive spread loom.editable?
 │   ├── audit.ts         # The conformance check a host runs
+│   ├── text.ts          # Dictionaries, extraction, and what a translation covers
 │   └── catalogue.ts     # The registry, projected for consumers outside it
 ├── cli/                 # Scaffolding — a separate entry point
 │   ├── args.ts          # The grammar: two commands, one option

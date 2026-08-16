@@ -10,6 +10,7 @@ import { parseTree, type LoomTree } from "../tree/tree.js"
 import type { PrimitiveResolver } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
 import { renderLoomTree, type RenderOutput, type SlotContent } from "./render.js"
+import type { TextResolver } from "./text.js"
 
 /**
  * Resolution, once per request.
@@ -54,6 +55,14 @@ export type RenderDependencies = {
    * same way `themes` bounds the palettes (0058).
    */
   readonly sources?: DataRegistry
+  /**
+   * Absent means primitives receive no strings, including their own declared
+   * ones — see `RenderOptions.text`. A host serving one language wires its
+   * registry here; a host serving several builds one resolver per dictionary and
+   * picks by whatever it reads the request's language from, which is its own
+   * business and not the framework's.
+   */
+  readonly text?: TextResolver
   readonly slots?: SlotContent
 }
 
@@ -111,6 +120,7 @@ export const renderRequest = async (
     ...(dependencies.validator ? { validator: dependencies.validator } : {}),
     ...(dependencies.themes ? { themes: dependencies.themes } : {}),
     ...(data ? { data } : {}),
+    ...(dependencies.text ? { text: dependencies.text } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
   })
 
