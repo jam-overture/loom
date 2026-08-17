@@ -10,6 +10,7 @@ import { nodeCredits } from "@/lib/attribution-view"
 import { requireActor } from "@/lib/auth/identity"
 import { isInterpreterConfigured } from "@/lib/interpreter"
 import { outlineRows } from "@/lib/outline"
+import { describeProposalEffect } from "@/lib/proposal-effect"
 import { portalRegistry } from "@/lib/registry"
 import { ensureSeeded, portalStore } from "@/lib/store"
 import { portalHolds } from "@/lib/write"
@@ -65,6 +66,17 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
   const holds = await portalHolds.forTree(parsed.data)
 
   /**
+   * Each hold, against the tree this page rendered rather than against a fresh
+   * read. A proposal described against a revision the reviewer is not looking at
+   * would show them a "before" that is not on their screen, which is a worse
+   * failure than showing none.
+   */
+  const changes = (holds.ok ? holds.value : []).map((held) => ({
+    held,
+    effect: describeProposalEffect(rendered.value.tree, held.proposal.delta),
+  }))
+
+  /**
    * Attributed from the tree that was rendered, not from a fresh `head` read: a
    * revision that landed in between would credit nodes this page is not showing.
    * A read failure costs the credits and nothing else — a reviewer who cannot be
@@ -96,7 +108,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
             configured={isInterpreterConfigured}
           />
 
-          <ReviewQueue held={holds.ok ? holds.value : []} />
+          <ReviewQueue changes={changes} />
 
           <Link href={`/activity?tree=${encodeURIComponent(rendered.value.tree.treeId)}`} className="text-xs">
             what has been asked of this tree →

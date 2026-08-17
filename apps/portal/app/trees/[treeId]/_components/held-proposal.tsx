@@ -4,8 +4,10 @@ import { useActionState } from "react"
 
 import type { HeldProposal } from "@loom/runtime/write"
 
+import { ProposalEffectView } from "@/app/_components/proposal-effect"
 import { summariseOperations } from "@/lib/delta-summary"
 import { toneClasses, type WriteReport } from "@/lib/outcome"
+import type { ProposalEffect } from "@/lib/proposal-effect"
 
 import { confirmProposal, discardProposal } from "../actions"
 
@@ -17,8 +19,18 @@ import { confirmProposal, discardProposal } from "../actions"
  * but "the runtime is unsure for *this* reason — do you accept it". Confirming
  * re-runs the Gate server-side, so the button is permission to proceed, not an
  * override.
+ *
+ * The reason answers *why you are being asked*. `effect` answers *what you are
+ * being asked about*, which the card could not say before: "reconfigure, add" is
+ * the delta's shape, and a reviewer needs the value that would be written over.
  */
-export const HeldProposalCard = ({ held }: { readonly held: HeldProposal }) => {
+export const HeldProposalCard = ({
+  held,
+  effect,
+}: {
+  readonly held: HeldProposal
+  readonly effect: ProposalEffect
+}) => {
   const [confirmReport, confirm, confirming] = useActionState<WriteReport | null, FormData>(
     confirmProposal,
     null
@@ -73,6 +85,15 @@ export const HeldProposalCard = ({ held }: { readonly held: HeldProposal }) => {
         {held.disposition.reason.detail}
       </p>
 
+      <ProposalEffectView effect={effect} />
+
+      {/*
+        * The buttons stay live even when the effect says the delta would not
+        * apply. This page is a snapshot too, and the confirmation re-runs the
+        * Gate against the tree as it is at that moment — refusing an answer on
+        * the strength of a read that may be a minute old would make the portal
+        * the authority, which it is not. The reviewer is told, and decides.
+        */}
       <div className={`flex gap-2 ${answered ? "hidden" : ""}`}>
         <form action={confirm}>
           <input type="hidden" name="treeId" value={held.treeId} />
