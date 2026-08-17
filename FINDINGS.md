@@ -526,6 +526,44 @@ this lane can do.
 
 ---
 
+## 2026-08-17 — three Hermes blocks are blocked on seams, not on primitives
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while writing [`docs/hermes-port-map.md`](docs/hermes-port-map.md), which
+classifies all seventy Hermes blocks. Sixty-seven of them are a primitives
+question. Three are not, and they will sit unported however many pairs this
+routine builds.
+
+**`tabs` needs client-side selection.** The runtime has no state seam: a render
+is a pure function of the tree, and nothing carries "which tab is open" between
+one render and the next. `loom.faq` ships only because HTML has `<details>` —
+the disclosure state lives in the browser and never in the tree, so the
+primitive stays pure. Tabs have no such element. The options, in the framework
+routine's judgement rather than this one's:
+
+- **Leave it unported**, and say so in the map. A tab strip is one of the few
+  Hermes blocks with no honest static rendering, and a library that stops at the
+  edge of its own model is not obviously worse than one that grows a state seam
+  for one block.
+- **A radio-and-label technique**, which is real HTML with no script and would
+  work — at the cost of a primitive whose markup is a trick, and which cannot
+  say which panel is open in the tree that a proposal reads.
+- **A state seam**, which is a much larger decision than one primitive and
+  reaches the delta model.
+
+**`contactform` and `newsletter` need a form target.** Both are a field list and
+a submit. The field list is an ordinary 0052 decomposition and this routine can
+build it; the submit is a decision about where a deployment's data goes, which
+is a host concern with a security surface and belongs nowhere near a primitive's
+props. Recorded together with `tabs` because both are the same shape of problem:
+the primitive is not the hard part.
+
+No action taken beyond the map, which marks all three **blocked** rather than
+pending, so a later run does not pick one up and discover this again.
+
+---
+
 ## 2026-08-17 — the demo and the portal's tree view were both wired the quiet way
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** closed

@@ -17,8 +17,12 @@ import { loomIcon } from "./loom.icon.js"
 import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
+import { loomMilestone } from "./loom.milestone.js"
+import { loomMilestoneList } from "./loom.milestone-list.js"
 import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
+import { loomPerson } from "./loom.person.js"
+import { loomPersonGrid } from "./loom.person-grid.js"
 import { loomPerkList } from "./loom.perk-list.js"
 import { loomPerkListItem } from "./loom.perk-list-item.js"
 import { loomProse } from "./loom.prose.js"
@@ -65,6 +69,14 @@ import { loomTierTable } from "./loom.tier-table.js"
  * they are what the bands nobody has ported yet can be assembled from in the
  * meantime ([0062](../../decisions/0062-a-general-arranger-is-named-for-the-arrangement-alone.md)).
  *
+ * **The sequence pair and the people pair** are the port resuming against the
+ * remaining Hermes blocks now that there is something to assemble them from.
+ * `milestone-list` over `milestone` is seven Hermes blocks at once — timeline,
+ * journey, roadmap, changelog, process-steps, course-modules, event-agenda —
+ * which are one content model wearing seven sets of words; `person-grid` over
+ * `person` is two more. See `docs/hermes-port-map.md` for what the other
+ * fifty-odd are and which of them need no primitive at all.
+ *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
  * then the bands in the order a page uses them, then the leaves that go
@@ -87,6 +99,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomHero,
   loomFeatureGrid,
   loomFeature,
+  loomMilestoneList,
+  loomMilestone,
   loomStatGrid,
   loomStat,
   loomTierTable,
@@ -95,6 +109,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPerkListItem,
   loomQuoteGrid,
   loomQuote,
+  loomPersonGrid,
+  loomPerson,
   loomLogoCloud,
   loomLogo,
   loomFaqList,
@@ -139,10 +155,14 @@ export {
   loomLogo,
   loomLogoCloud,
   loomMedia,
+  loomMilestone,
+  loomMilestoneList,
   loomPage,
   loomPerk,
   loomPerkList,
   loomPerkListItem,
+  loomPerson,
+  loomPersonGrid,
   loomProse,
   loomQuote,
   loomQuoteGrid,
