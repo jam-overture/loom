@@ -179,3 +179,41 @@ in three days.
 - **Does a revision pin the dictionary a reviewer saw?** Still no, still the same
   answer 0058 gave for data: decide it when a review needs it. Recorded again
   because the surface area for it grew today rather than shrank.
+
+---
+
+## Addendum — the numbering collision, resolved
+
+#83 merged as `e2c8717` while this branch was open, bringing
+[0062](../decisions/0062-a-general-arranger-is-named-for-the-arrangement-alone.md)
+onto `main`. `main` was merged into this branch and **the red is gone**: the
+numbers run 0061, 0062, 0063 unbroken, `pnpm decisions:index` regenerates clean,
+and `pnpm verify` is fully green — **1241 runtime tests** and **484 portal
+tests**, with typecheck and the production build clean. The runtime count is
+1232 from this branch plus the nine #83 added.
+
+Two conflicts, both the ones the open finding predicts, and both from two
+branches appending to the end of one file:
+
+- **`decisions/README.md`** — my 0063 row against #83's 0062 row. Resolved by
+  keeping both in numeric order and regenerating with `pnpm decisions:index`
+  rather than hand-editing, since the table is generated and a hand-merge is how
+  it drifts.
+- **`FINDINGS.md`** — my two entries against the one `Loom primitives` filed.
+  Both kept, theirs first because their branch merged first. Nobody's entry was
+  rewritten, which is the file's own rule.
+
+No source file conflicted. The two routines touched `src/render/` and
+`src/primitives/` respectively and the lane boundary held exactly as intended —
+**the only friction was in the three shared files that every routine writes to**,
+which is the finding, not a surprise.
+
+**A new finding arrived in this routine's queue with that merge**, and is *not*
+addressed here: *"a linked card may legally contain a link, and nothing can say
+so"* (filed by `Loom primitives`, owned by `Loom daily build`). `loom.card` takes
+an `href`, a tree may put a `loom.action` inside one, and nested anchors are
+invalid HTML no seam can currently catch — 0008 forbids the renderer from
+enforcing parentage and a Zod schema never sees descendants. It is the top of the
+next run's queue, and it is a real unit of framework work rather than a wiring
+fix: the Gate's analysis already walks the proposed subtree, which is where a
+check like this plausibly belongs.

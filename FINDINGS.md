@@ -436,6 +436,12 @@ basic to elaborate, which is the ordering to plan runs against.
 Until the allowlist lands, runs fall back on `loom.hero` and `loom.feature-grid`
 as the floor plus the Hermes content models on disk, and should say so.
 
+**Re-verified 17 August 2026** by the `primitives-04-compose-and-arrange` run:
+still `EGRESS_BLOCKED`, identical message. The allowlist entry has not landed.
+That run worked to the fallback standard and said so in its report. Noting the
+date here rather than opening a second finding, so the gap between "answered"
+and "in effect" is visible without reading two entries.
+
 ---
 
 ## 2026-08-16 — a render that omits `options.text` loses an accessible name silently
@@ -479,6 +485,44 @@ Worth considering, in the framework routine's judgement rather than this one's:
 No action taken beyond this routine's own lane: `library.test.ts` now passes
 `text: registry` with a comment saying why, so the library's tests would catch a
 regression here again.
+
+---
+
+## 2026-08-17 — a linked card may legally contain a link, and nothing can say so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+`loom.card` takes an `href`, which makes the whole surface the target a reader
+aims at — the same call `loom.feature` already makes, and the right one: a card
+whose only clickable thing is a "learn more" that says nothing is a worse
+target. It also means a tree may put a `loom.action` inside a card that has one,
+and nested anchors are invalid HTML that browsers resolve by dropping one of the
+two links. The reader sees a card that does not work.
+
+Nothing in the seam can catch it, and that is deliberate rather than an
+oversight. [0008](decisions/0008-the-renderer-is-a-total-pure-projection.md)
+forbids the renderer from enforcing parentage, `auditRegistry` probes a
+primitive in isolation, and a Zod schema sees one node's props and never its
+descendants. So the constraint is real, checkable in principle, and currently
+expressible nowhere.
+
+It pre-existed this run — `loom.feature` has had `href` since the first port —
+but the compose-and-arrange layer widens it from one tile that holds fixed
+fields to a general surface that holds whatever the tree puts on it, which is
+where it stops being theoretical.
+
+Two homes, both in the framework routine's lane rather than this one's:
+
+- **The Gate's analysis**, which already walks the proposed subtree and is where
+  "this change produces something a person would call broken" belongs. An
+  interactive node inside an interactive ancestor is a cheap walk.
+- **A declared constraint on the definition** — something like "no interactive
+  descendants" — which is more machinery, and which 0054 already rejected the
+  parentage-declaring version of for adjacent reasons.
+
+Recorded rather than worked around. The card's own doc comment says a linked
+card should hold no link, which is documentation, not enforcement, and is all
+this lane can do.
 
 ---
 
