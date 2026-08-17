@@ -111,11 +111,11 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0051](0051-a-slot-is-a-region-the-primitive-places.md) | A slot is a region the primitive places, not content inline in its children | Accepted | §3 → §4b |
 | [0052](0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md) | A repeated item is a node; a fixed field is a prop | Accepted | §4b |
 | [0053](0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md) | A URL in the tree is checked against a scheme allowlist | Accepted | §4b |
-| [0054](0054-a-container-is-its-childs-name-plus-the-arrangement.md) | A container is its child's name plus the arrangement it puts them in | Accepted | §4b |
+| [0054](0054-a-container-is-its-childs-name-plus-the-arrangement.md) | A container is its child's name plus the arrangement it puts them in | Accepted — partially superseded by 0061 | §4b |
 | [0055](0055-motion-is-a-static-stylesheet-the-primitive-emits.md) | Motion is a static stylesheet the primitive emits, never a prop in the tree | Accepted | §4b |
 | [0056](0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md) | The demo is public, and shares nothing with the portal but the deployment | Accepted | §4b → §5 |
 | [0057](0057-a-preset-is-a-deterministic-interpreter.md) | A demonstrated change is a deterministic interpreter, not a script beside the runtime | Accepted | §4b → §4c |
 | [0058](0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md) | A binding is a question the tree asks, answered before the walk | Accepted | §4e → §3, §4b |
 | [0059](0059-a-leaf-whose-whole-content-is-one-string-takes-it-as-a-child.md) | A leaf whose whole content is one string takes it as a child | Accepted | §4b |
 | [0060](0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md) | A primitive owns a string, and a deployment may replace it | Accepted | §4f → §3, §4 |
-| [0061](0061-a-suffix-that-names-the-markup-earns-its-place.md) | A suffix that names the markup earns its place; a suffix that names the parent does not | Proposed — contradicts [0054](0054-a-container-is-its-childs-name-plus-the-arrangement.md), which stands until someone decides | §4b |
+| [0061](0061-a-suffix-that-names-the-markup-earns-its-place.md) | A suffix that names the markup earns its place; a suffix that names the parent does not | Accepted — partially supersedes 0054 | §4b |

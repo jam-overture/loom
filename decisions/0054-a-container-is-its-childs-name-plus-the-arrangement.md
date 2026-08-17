@@ -1,6 +1,6 @@
 # 0054. A container is its child's name plus the arrangement it puts them in
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by 0061
 **Date:** 2026-08-12
 **Section:** §4b
 

@@ -33,10 +33,10 @@ import {
  * and its history.
  *
  * **This shipped as `loom.perk` and was renamed on 16 August** at the
- * maintainer's direction, which [0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md)
- * records as `Proposed` because 0054 says "no `-item` suffix, ever". The
- * argument for the rename is that the suffix here is not saying "this belongs
- * to a list" — the tree already says that — but naming the element the
+ * maintainer's direction. [0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md)
+ * records the rename and partially supersedes 0054, which had said "no `-item`
+ * suffix, ever". The argument is that the suffix here is not saying "this
+ * belongs to a list" — the tree already says that — but naming the element the
  * primitive *is*. `loom.perk` is now the standalone `<div>`, and the two are
  * different markup for the same content rather than one primitive pretending to
  * be at home in both places.

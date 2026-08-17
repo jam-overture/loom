@@ -1,6 +1,6 @@
 # 0061. A suffix that names the markup earns its place; a suffix that names the parent does not
 
-**Status:** Proposed — contradicts [0054](0054-a-container-is-its-childs-name-plus-the-arrangement.md), which stands until someone decides
+**Status:** Accepted — partially supersedes 0054
 **Date:** 2026-08-16
 **Section:** §4b
 
@@ -45,7 +45,8 @@ primitives.
 **A suffix is permitted when it names the markup the primitive emits, and
 forbidden when it only names where the primitive sits.**
 
-Concretely, and replacing 0054's first consequence:
+Concretely, and replacing **0054's first consequence** — *"No `-item` suffix,
+ever"* — and only that one:
 
 ```
 loom.perk-list  over  loom.perk-list-item   (a <ul> over its <li>)
@@ -101,9 +102,11 @@ mechanism every other choice between two primitives relies on.
 **Keep 0054 as written and refuse the rename.** The record is `Accepted`, the
 governance says a contradiction is an escalation, and a routine overturning a
 naming rule on its own would be exactly what that rule exists to prevent. It is
-the reason this record is `Proposed` and 0054 is untouched. What it cannot do is
-answer the defect underneath: one primitive is still doing two jobs, and the
-standalone use still emits an `<li>` in no list.
+the reason this record was written `Proposed`, with 0054 left standing, and the
+rename shipped in #81 while the record waited — the maintainer accepted it on 17
+August. What refusing could not do is answer the defect underneath: one
+primitive would still be doing two jobs, and the standalone use would still emit
+an `<li>` in no list.
 
 **Rename, and keep one primitive.** `loom.perk-list-item` alone, with
 standalone use simply unsupported. Cheaper by one primitive and one module, and
