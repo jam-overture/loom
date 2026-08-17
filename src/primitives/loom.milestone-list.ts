@@ -17,20 +17,22 @@ import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
  * that "timeline" is what a person says out loud, so the description says it
  * for them.
  *
- * **It styles its children through the stylesheet rather than through props**,
- * which is the one thing here worth reading twice. The spacing between entries
- * and the two things only a position can know — that the last entry has no
- * connector below it, and that a list with no rail has none at all — cannot be
- * inline styles on a child, because a child is rendered from its own node and
- * knows nothing about its siblings. Passing them down as props is worse: the
- * renderer does not inject props into children (0009), and a `rail` prop
- * repeated on every entry would be a `configure` per row for a decision that
- * belongs to the list.
+ * **It styles its entries through the stylesheet rather than through props.**
+ * The spacing between entries, the flush last entry and the rail-less variant
+ * are all things a child cannot know from its own node — a render is a pure
+ * function of one node, and where that node sits among its siblings is the
+ * browser's business. So the list applies a class and `stylesheet.ts` carries
+ * four static rules, which is CSS doing the one thing only CSS can.
  *
- * So the list applies a class and `stylesheet.ts` carries three static rules.
- * Nothing is interpolated into them, every value in them is a `var()`, and they
- * are byte-identical under every theme — which is the bargain 0055 struck for
- * motion, holding equally for the two selectors that are about position.
+ * The alternative was passing them down as props, and it is worse for reasons
+ * that have nothing to do with CSS: the renderer does not inject props into
+ * children (0009), so every entry would have to carry its own copy of a
+ * decision belonging to the list — a `configure` per row to change the density
+ * of one band, and *n* chances for a model to leave them disagreeing.
+ *
+ * Nothing is interpolated into those rules, every value in them is a `var()`,
+ * and they are byte-identical under every theme — which is the bargain 0055
+ * struck for motion, holding equally for the selectors that are about position.
  */
 
 const props = z

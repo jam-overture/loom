@@ -15,11 +15,21 @@ import { createElement, type ReactElement } from "react"
  *   decision, and honouring it is not optional
  * - **position selectors** — `:last-child`. A render is a pure function of one
  *   node, so no primitive can know it is the last of its siblings; a rail that
- *   must stop at the final dot has nowhere else to be said. This one arrived
- *   with `loom.milestone-list` and is the only category here that is about
- *   layout rather than motion, which is why it is listed last and should stay
- *   rare — a stylesheet reaching into children is a coupling the tree does not
- *   show.
+ *   must stop at the final dot has nowhere else to be said.
+ *
+ * That last one is ordinary CSS doing what only CSS can, and it needs no more
+ * justification than `:hover` does — where a primitive sits among its siblings
+ * is the browser's business, and how a primitive is styled is simply part of
+ * what that primitive *is*. Two mechanics are worth knowing before writing one,
+ * though, because both are easy to get wrong once and hard to see afterwards:
+ *
+ * 1. **An inline style beats a rule here**, always. A primitive that sets a
+ *    property inline has made that property unreachable from this file, so a
+ *    value the stylesheet needs to vary — `loom.milestone`'s bottom gap — must
+ *    not also be set on the element.
+ * 2. **Scope every selector to a library class.** `li:last-child` would reach
+ *    every list on the host's page; `.loom-rail > li:last-child` reaches only
+ *    the one this library drew.
  *
  * So a primitive that needs any of them emits this element beside its own root.
  * It is static text: no prop reaches it, nothing is interpolated into it, and it

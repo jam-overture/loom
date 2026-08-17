@@ -226,12 +226,12 @@ export const loomMilestone = definePrimitive({
         })
       ),
       /**
-       * The gap below an entry is the list's to set and it is set in the
-       * stylesheet, not here — an inline style would win on specificity and
-       * make `density` and the flush last entry unreachable. The cost is that a
-       * milestone rendered outside a list sits tight against the next one,
-       * which is a legible tree rendering plainly rather than a broken one
-       * (0008).
+       * The gap below an entry belongs to the list and is set in the
+       * stylesheet, so it is deliberately **not** set here: an inline style
+       * wins on specificity, and one written here would make `density` and the
+       * flush last entry unreachable. The cost is that a milestone rendered
+       * outside a list sits tight against the next one, which is a legible tree
+       * rendering plainly rather than a broken one (0008).
        */
       createElement("div", { key: "content", className: LIBRARY_CLASS.railBody }, content)
     )

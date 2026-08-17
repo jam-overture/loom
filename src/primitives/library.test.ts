@@ -120,14 +120,18 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
     resolver: registry,
     validator: registry,
     /**
-     * The registry is its own `TextResolver`, over the strings the primitives
-     * declared (0060). Wired here because omitting it is not a no-op: every
-     * primitive is handed an empty map, so a declared accessible name silently
-     * becomes no accessible name — which is the failure the seam exists to
-     * prevent, arriving through the seam itself. This library's own tests are
-     * the closest thing to a host that would notice.
+     * **No `text` here, deliberately.** It used to be wired because omitting it
+     * was not a no-op — every primitive was handed an empty map, so a declared
+     * accessible name silently became no accessible name, which this library's
+     * tests noticed and filed as a finding on 16 August.
+     *
+     * #84 closed it: declarations now come off the `resolver` itself, and
+     * `options.text` is only a host's dictionary laid over them
+     * ([0063](../../decisions/0063-a-declared-string-travels-with-the-primitive.md)).
+     * So leaving it out is the honest wiring for a host that has no
+     * translations, and the declared-name assertions below now prove the new
+     * behaviour rather than working around the old one.
      */
-    text: registry,
     themes,
     editMode,
   })

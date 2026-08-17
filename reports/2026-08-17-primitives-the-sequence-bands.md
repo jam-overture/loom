@@ -175,3 +175,68 @@ The nine pairs, in the map's order — **written pieces** (`articles`, `press`,
 `case-studies`, `tutorials`, `recipes` → `loom.article-grid` / `loom.article`)
 first, since it is the largest group and the one a creator page leans on hardest.
 Chrome — `loom.nav` and `loom.footer` — still outstanding from the last run.
+
+---
+
+## Addendum — the maintainer on `stylesheet.ts`, and #84 landing under this branch
+
+Both arrived after the report above was written. Recorded here rather than by
+editing it, so the sequence stays legible.
+
+### The `:last-child` rule needed less defending, not more
+
+The maintainer, on #85:
+
+> *"If the primitive is styled on last-child, that is the primitive. The render
+> doesn't need to know if it is the last, middle, first or only. How the
+> primitive is styled should just BE. Unless I am missing something."*
+
+Nothing is missing, and the correction is accepted. The code was right and the
+**prose around it was wrong**: it framed an ordinary CSS selector as a coupling
+to be uneasy about, and told future runs it "should stay rare". `:last-child`
+needs no more justification than `:hover` does — where an element sits among its
+siblings is the browser's business, and how a primitive is styled is part of
+what that primitive is. Hedging in a comment is not harmless; it is the thing
+the next run reads as guidance.
+
+So the comments in `stylesheet.ts` and `loom.milestone-list.ts` now state the
+rule plainly and keep only the two things that are **mechanics rather than
+misgivings**, because both are easy to get wrong once and hard to see
+afterwards:
+
+1. **An inline style beats a rule in this file**, so a value the stylesheet
+   needs to vary must not also be set on the element. This is not theoretical —
+   it cost a red test during the run, when `loom.milestone` set its own bottom
+   padding and made `density` unreachable.
+2. **Every selector is scoped to a library class.** `li:last-child` would reach
+   every list on the host's page; `.loom-rail > li:last-child` reaches only the
+   one this library drew.
+
+The argument against *props* is unchanged and is not a CSS argument at all: the
+renderer does not inject props into children (0009), so passing `density` down
+would put a list-level decision on every row — a `configure` per entry, and *n*
+chances for a model to leave them disagreeing.
+
+### #84 closed this routine's oldest open finding
+
+`main` moved under this branch while it was open. #84 shipped
+[0063](../decisions/0063-a-declared-string-travels-with-the-primitive.md): the
+renderer now reads declared strings off the `resolver`, and `options.text` is
+only a host's dictionary laid over them.
+
+That closes the finding this routine filed on **16 August** — that a render
+omitting `options.text` silently lost a declared accessible name. It was already
+marked closed on `main`; nothing was needed here.
+
+It does change this library's own test wiring, and the change is worth making
+rather than leaving: `text: registry` was passed **only** to work around the old
+behaviour, and is now redundant. It has been removed, so the declared-name
+assertions — `In progress`, `Planned`, and `loom.perk`'s `Not included` — now
+prove 0063 works instead of stepping around the bug it fixed. All 65 tests in
+the file pass with no `text` wired at all, which is the evidence.
+
+### Merge
+
+`origin/main` was merged in to resolve a conflict in `FINDINGS.md` — the known
+append-vs-append collision between two routines filing on the same day, which is
+its own open finding. Both entries were kept; neither was rewritten.

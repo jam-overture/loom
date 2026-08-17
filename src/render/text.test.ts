@@ -10,10 +10,10 @@ import { registryOf } from "../testing/definitions.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
-import type { LoomPrimitiveProps } from "./primitive.js"
+import { staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 import { renderRequest, type TreeSource } from "./request.js"
-import type { TextResolver } from "./text.js"
+import { NO_TEXT, type TextResolver } from "./text.js"
 
 /**
  * The primitive the seam exists for: a marker whose glyph carries a name no
@@ -90,8 +90,49 @@ describe("the text seam", () => {
     expect(markupOf("included", registry)).toContain('data-text-keys=""')
   })
 
-  it("hands nothing at all when the render was given no resolver", () => {
-    expect(markupOf("excluded")).toContain("<span>")
+  it("hands a primitive its declared strings when no dictionary was wired", () => {
+    /**
+     * The wiring a deployment serving the library's own language writes, which
+     * is `resolver` and nothing else. Before 0063 this rendered a nameless
+     * marker: the declared string was present in the registry, reachable, and
+     * dropped because the composition root did not repeat itself.
+     */
+    expect(markupOf("excluded")).toContain('aria-label="Not included"')
+  })
+
+  it("hands nothing when the resolver carries no declarations", () => {
+    const components = staticPrimitiveResolver({
+      "loom.page": pageDefinition.component,
+      "loom.marker": markerDefinition.component,
+    })
+
+    const markup = renderToStaticMarkup(
+      renderLoomTree(treeWith("excluded"), { resolver: components }).element
+    )
+
+    expect(markup).toContain("<span>")
+    expect(markup).toContain('data-text-keys=""')
+  })
+
+  it("keeps a declared string the wired resolver does not answer for", () => {
+    /**
+     * A host resolver built over a different library — a rename, a second
+     * registry, a hand-written one covering the primitives it knew about. The
+     * declared strings underneath it are what stops that being an accessible
+     * name that silently disappears.
+     */
+    const partial: TextResolver = { textFor: () => NO_TEXT }
+
+    expect(markupOf("excluded", partial)).toContain('aria-label="Not included"')
+  })
+
+  it("lets a dictionary win over the declaration for the key it answers", () => {
+    const partial: TextResolver = {
+      textFor: () => Object.freeze({ excluded: "Nicht enthalten" }),
+    }
+
+    expect(markupOf("excluded", partial)).toContain('aria-label="Nicht enthalten"')
+    expect(markupOf("included", partial)).toContain('aria-label="Included"')
   })
 
   it("never puts declared text into the props the tree carries", () => {
@@ -177,6 +218,29 @@ describe("the text seam", () => {
 
     expect(markup.match(/Nicht enthalten/g)).toHaveLength(2)
     expect(markup.match(/Included/g)).toHaveLength(1)
+  })
+
+  it("merges a dictionary over the declarations once per type, not once per node", () => {
+    const idFactory = sequentialIdFactory()
+    const markers = ["excluded", "included", "excluded"].map((state) =>
+      buildElement(idFactory, { type: "loom.marker", props: { state } })
+    )
+    const tree = createTree(
+      buildElement(idFactory, { type: "loom.page", children: markers }),
+      idFactory
+    )
+
+    const asked: string[] = []
+    const counting: TextResolver = {
+      textFor: (type) => {
+        asked.push(type)
+        return NO_TEXT
+      },
+    }
+
+    renderToStaticMarkup(renderLoomTree(tree, { resolver: registry, text: counting }).element)
+
+    expect(asked).toEqual(["loom.page", "loom.marker"])
   })
 
   it("says nothing in diagnostics about an untranslated string", () => {

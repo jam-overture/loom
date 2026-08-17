@@ -117,6 +117,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0057](0057-a-preset-is-a-deterministic-interpreter.md) | A demonstrated change is a deterministic interpreter, not a script beside the runtime | Accepted | §4b → §4c |
 | [0058](0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md) | A binding is a question the tree asks, answered before the walk | Accepted | §4e → §3, §4b |
 | [0059](0059-a-leaf-whose-whole-content-is-one-string-takes-it-as-a-child.md) | A leaf whose whole content is one string takes it as a child | Accepted | §4b |
-| [0060](0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md) | A primitive owns a string, and a deployment may replace it | Accepted | §4f → §3, §4 |
+| [0060](0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md) | A primitive owns a string, and a deployment may replace it | Accepted — partially superseded by 0063 | §4f → §3, §4 |
 | [0061](0061-a-suffix-that-names-the-markup-earns-its-place.md) | A suffix that names the markup earns its place; a suffix that names the parent does not | Accepted — partially supersedes 0054 | §4b |
 | [0062](0062-a-general-arranger-is-named-for-the-arrangement-alone.md) | A general arranger is named for the arrangement alone, and a named band wins where one exists | Accepted | §4b |
+| [0063](0063-a-declared-string-travels-with-the-primitive.md) | A declared string travels with the primitive; a dictionary is what a host adds | Accepted — partially supersedes 0060 | §4f → §3 |
