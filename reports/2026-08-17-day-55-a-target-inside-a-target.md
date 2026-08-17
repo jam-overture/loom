@@ -1,6 +1,6 @@
 # 17 August 2026 — a target inside a target, and the first thing the Gate refuses for being wrong
 
-**Routine:** `Loom daily build` · **Section:** §2 (with §4's declaration seam) · **Branch:** `day-55-a-target-inside-a-target`
+**Routine:** `Loom daily build` · **Section:** §2 → §4 · **Branch:** `day-55-a-target-inside-a-target` · **Pull request:** [#88](https://github.com/jam-overture/loom/pull/88)
 
 ![The change, why nothing caught it, and what now does](2026-08-17-day-55-a-target-inside-a-target.svg)
 
@@ -165,21 +165,27 @@ than race for a file; recorded as an open question below.
 
 ## Test numbers
 
-`pnpm verify` — **green**: build, typecheck, 1279 runtime tests across 90 files,
-and the portal's own 484 unchanged. Nothing was skipped and nothing was
-weakened.
+`pnpm verify` — **green**: build, typecheck, **1282 runtime tests across 91
+files**, and the portal's own **484**, unchanged and untouched by this diff.
+Nothing was skipped and nothing was weakened.
 
-New tests, 40 in total:
+**41 new tests**, counted from the diff:
 
 | file | tests | what they hold |
 | --- | --- | --- |
-| `src/runtime/nesting.test.ts` | 14 | the predicate and the walk — slots, depth, the nearest ancestor, `constructor` as a primitive type |
+| `src/runtime/nesting.test.ts` | 15 | the predicate and the walk — slots, depth, the nearest ancestor, `constructor` as a primitive type and as a trigger prop |
 | `src/runtime/analysis.test.ts` | +7 | one case per operation kind, plus inherited-versus-introduced and the change that *removes* a nesting |
 | `src/runtime/stakes.test.ts` | +3 | the factor, its level, and the detail naming every pair |
 | `src/runtime/pipeline.test.ts` | +4 | end to end: refused, with both nodes named; not refused with no vocabulary; not refused for an unlinked card; refused however high the origin's ceiling |
 | `src/runtime/policy-fingerprint.test.ts` | +3 | declaring a target is an edit; a changed trigger is an edit; a reordered vocabulary is not |
 | `src/sdk/registry.test.ts` | +5 | the declaration survives registration; a trigger naming an undeclared prop is refused; an unenumerable schema is left alone |
 | `src/sdk/interactivity.test.ts` | 4 | the derivation, and that it drives the predicate the analysis uses |
+
+The runtime total is the whole suite on this branch. The comparable figure on
+`main` is not quoted, because the only run of it this session was made before
+`dist/` existed and three smoke tests reported against a build that was not
+there — an honest 41-from-the-diff is worth more than a subtraction against a
+number that was measuring something else.
 
 The one number worth reading twice is the third pipeline test: an action inside
 a card with no `href` still applies. That is the case a cheaper design would

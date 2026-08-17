@@ -491,7 +491,7 @@ regression here again.
 ## 2026-08-17 — a linked card may legally contain a link, and nothing can say so
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
-by **#PR** — a primitive declares whether it is a target and the Gate refuses a
+by **#88** — a primitive declares whether it is a target and the Gate refuses a
 change that nests two
 ([0064](decisions/0064-a-primitive-says-whether-it-is-a-target-and-the-gate-derives-the-nesting.md)).
 Adopting it in `src/primitives/` is filed back below. Original status below.
