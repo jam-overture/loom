@@ -6,6 +6,7 @@ import type {
   UnjudgedReason,
 } from "@loom/runtime/telemetry"
 
+import type { MissCause } from "./calibration-misses"
 import type { OutcomeTone } from "./outcome"
 
 /**
@@ -42,6 +43,17 @@ export type GapReading = {
  */
 const GAP_TOLERANCE = 0.1
 
+/**
+ * Whether a score's own reading is "these agree".
+ *
+ * Exported because a second component now asks the same question, and a second
+ * copy of `0.1` would let the page call a band on the mark in one place and off
+ * it in another — the disagreement being invisible precisely because both would
+ * look right on their own.
+ */
+export const isOnTheMark = (score: CalibrationScore): boolean =>
+  score.gap !== null && Math.abs(score.gap) <= GAP_TOLERANCE
+
 export const readGap = (score: CalibrationScore): GapReading => {
   if (score.gap === null) {
     return {
@@ -51,7 +63,7 @@ export const readGap = (score: CalibrationScore): GapReading => {
     }
   }
 
-  if (Math.abs(score.gap) <= GAP_TOLERANCE) {
+  if (isOnTheMark(score)) {
     return {
       tone: "applied",
       label: "on the mark",
@@ -145,4 +157,58 @@ export const UNJUDGED_LABELS: Readonly<Record<UnjudgedReason, string>> = {
   "awaiting-answer": "waiting on a human",
   failed: "broke mid-flight",
   unsettled: "unfinished in this window",
+}
+
+/**
+ * What kept catching a confident claim, in words that name a class of change.
+ *
+ * A reason code is the Gate's vocabulary and it is exactly right on a verdict,
+ * where the reader is looking at one change and wants the rule. Grouped over a
+ * window it is being asked a different question — *what does this model keep
+ * being wrong about* — and `stakes-above-ceiling` repeated nine times does not
+ * answer it. These do, which is why they are sentences about the model rather
+ * than translations of the code.
+ */
+export const MISS_CAUSE_LABELS: Readonly<Record<MissCause, string>> = {
+  "confidence-below-floor": "sure about a change the Gate would not take on trust",
+  "stakes-at-refusal-floor": "sure about a change of a kind this policy never takes",
+  irreversible: "sure about a change that could not be undone",
+  "discards-later-work": "sure about a change that would have thrown away later work",
+  "stakes-above-ceiling": "sure about a change too big to apply unattended",
+  "confidence-below-minimum": "sure, and under the floor it had to clear anyway",
+  "within-policy": "refused with nothing in the policy against it",
+  "discarded-by-human": "sure, the Gate agreed, and a person said no",
+  "survived-anyway": "hedged on a change that was fine",
+}
+
+/**
+ * The reader's next move, which differs by cause and is the reason these are
+ * grouped at all.
+ *
+ * The discard is the one worth reading twice. Every other row is the model
+ * disagreeing with a rule the host wrote, and a host may reasonably conclude the
+ * rule is right and the model should be less sure. A discard is the model and
+ * the Gate agreeing with each other and both being overruled from outside, which
+ * is the only signal here that no amount of policy tuning would have produced —
+ * and 0031 says so in as many words.
+ */
+export const MISS_CAUSE_NOTES: Readonly<Record<MissCause, string>> = {
+  "confidence-below-floor":
+    "The Gate held these for a person. Either the claims are inflated for this class of change, or the floor is stricter than this host needs.",
+  "stakes-at-refusal-floor":
+    "This policy refuses this class outright, so no confidence would have carried them. The claim is measuring something the Gate never consults.",
+  irreversible:
+    "Reversibility is assessed from the delta, not claimed. A model confident about changes it cannot undo is confident about the wrong axis.",
+  "discards-later-work":
+    "These would have overwritten revisions that landed after the model read the tree (0035). The claim was made against a tree that had moved.",
+  "stakes-above-ceiling":
+    "Size, not correctness. These may well have been right — the policy declines to apply changes this large without a person, whatever the model thinks.",
+  "confidence-below-minimum":
+    "The claim was under the minimum and high enough to count as a miss here, which means the floor and this reading disagree about what counts as sure.",
+  "within-policy":
+    "Nothing in the policy refused these, so the refusal came from somewhere the disposition does not name. Worth reading the episodes directly.",
+  "discarded-by-human":
+    "The Gate was willing and a person was not. This is the only judgment here made from outside the system, and the only one no policy change would have produced.",
+  "survived-anyway":
+    "These cost a reviewer's attention rather than a wrong page: each one was held or hedged and turned out fine. A queue of them is how a review surface stops being read.",
 }

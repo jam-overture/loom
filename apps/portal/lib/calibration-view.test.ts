@@ -1,16 +1,20 @@
 import { describe, expect, it } from "vitest"
 
-import { UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
+import { dispositionReasonCodeSchema, UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
 import type {
   CalibrationReport,
   CalibrationScore,
   PolicyCalibration,
 } from "@loom/runtime/telemetry"
 
+import type { MissCause } from "./calibration-misses"
 import {
   describePolicy,
   formatRange,
   formatRate,
+  isOnTheMark,
+  MISS_CAUSE_LABELS,
+  MISS_CAUSE_NOTES,
   NO_VALUE,
   poolsMoreThanOneGate,
   readGap,
@@ -158,5 +162,52 @@ describe("poolsMoreThanOneGate", () => {
 
   it("is not tripped by a row that is merely unrecorded", () => {
     expect(poolsMoreThanOneGate(reportOf([segmentWith([], 5)]))).toBe(false)
+  })
+})
+
+describe("isOnTheMark", () => {
+  /**
+   * Two components now ask this, and the point of exporting it is that they
+   * cannot answer differently. A band called settled by the table and unsettled
+   * by the misses beside it would be a disagreement invisible from either side.
+   */
+  it("agrees with the label the reader is shown", () => {
+    expect(isOnTheMark(scoreWith(0.05))).toBe(true)
+    expect(readGap(scoreWith(0.05)).label).toBe("on the mark")
+
+    expect(isOnTheMark(scoreWith(0.3))).toBe(false)
+    expect(readGap(scoreWith(0.3)).label).not.toBe("on the mark")
+  })
+
+  it("is false when there was nothing to compare", () => {
+    expect(isOnTheMark(scoreWith(null))).toBe(false)
+  })
+})
+
+describe("the miss vocabulary", () => {
+  const CAUSES: readonly MissCause[] = [
+    ...dispositionReasonCodeSchema.options,
+    "discarded-by-human",
+    "survived-anyway",
+  ]
+
+  /**
+   * A reason code the runtime adds and this file does not would render as an
+   * empty heading over a real group of claims — the same failure `episode-view`
+   * guards, one level down. The `Record` catches it at compile time; this catches
+   * a placeholder somebody typed to make the compiler stop.
+   */
+  it("has something to say about every cause a claim can have", () => {
+    for (const cause of CAUSES) {
+      expect(MISS_CAUSE_LABELS[cause]).not.toBe("")
+      expect(MISS_CAUSE_NOTES[cause]).not.toBe("")
+    }
+  })
+
+  /** A heading that repeated the code would make the grouping a `GROUP BY` with a title. */
+  it("says something other than the code itself", () => {
+    for (const cause of CAUSES) {
+      expect(MISS_CAUSE_LABELS[cause]).not.toBe(cause)
+    }
   })
 })
