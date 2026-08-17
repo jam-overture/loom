@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { COLUMN_MINIMUMS, COLUMN_NAMES } from "./layout.js"
 import { space } from "./tokens.js"
 
 /**
@@ -25,7 +26,7 @@ import { space } from "./tokens.js"
 const props = z
   .object({
     /** A floor for each column, not a count: the grid fits what it can and wraps. */
-    columns: z.enum(["auto", "two", "three", "four"]).optional(),
+    columns: z.enum(COLUMN_NAMES).optional(),
     /** `loose` gives tiles room to read as cards; `tight` reads as a list. */
     density: z.enum(["tight", "loose"]).optional(),
   })
@@ -33,7 +34,10 @@ const props = z
 
 type Props = z.infer<typeof props>
 
-const MINIMUMS = { auto: "16rem", two: "22rem", three: "17rem", four: "13rem" } as const
+/**
+ * The minimums moved to `layout.ts` when `loom.grid` needed the same four, so
+ * the two grids wrap at the same widths. The values are unchanged.
+ */
 
 export const loomFeatureGrid = definePrimitive({
   type: "loom.feature-grid",
@@ -47,7 +51,7 @@ export const loomFeatureGrid = definePrimitive({
         ...loom.editable,
         style: {
           display: "grid",
-          gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${MINIMUMS[given.columns ?? "auto"]}), 1fr))`,
+          gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${COLUMN_MINIMUMS[given.columns ?? "auto"]}), 1fr))`,
           gap: given.density === "tight" ? space(4) : space(5),
           width: "100%",
           alignItems: "stretch",
