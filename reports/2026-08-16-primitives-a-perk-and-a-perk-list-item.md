@@ -84,8 +84,8 @@ elaborate.
 
 ## The decision recorded — and it needs a word from him
 
-[**0060 — a suffix that names the markup earns its place; a suffix that names the
-parent does not.**](../decisions/0060-a-suffix-that-names-the-markup-earns-its-place.md)
+[**0061 — a suffix that names the markup earns its place; a suffix that names the
+parent does not.**](../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md)
 **Status: `Proposed`.**
 
 The rename contradicts an `Accepted` record.
@@ -95,15 +95,15 @@ says, in as many words: **"No `-item` suffix, ever."**
 `decisions/README.md` is unambiguous about what happens next: *"A change that
 contradicts an `Accepted` record is an escalation, not a refactor: write the
 replacement with status `Proposed`, flag it for review, and leave the existing
-record standing until someone decides."* So 0054 is untouched and 0060 is
+record standing until someone decides."* So 0054 is untouched and 0061 is
 `Proposed`.
 
 I built the rename anyway, because the maintainer asked for it directly and
 maintainer comments outrank the plan. That leaves a deliberate inconsistency —
 the code follows a `Proposed` record while an `Accepted` one says otherwise —
-and it is his to close with one word: accept 0060, or revert.
+and it is his to close with one word: accept 0061, or revert.
 
-**The argument in 0060, briefly.** 0054 was defending against a suffix carrying
+**The argument in 0061, briefly.** 0054 was defending against a suffix carrying
 *no information*: `faq-item` tells a reader only that it goes inside a `faq`,
 which the tree already shows. This suffix carries a different fact — that
 `loom.perk-list-item` is an `<li>` and `loom.perk` is a `<div>` — and nothing
@@ -115,22 +115,43 @@ pair. Strip `-list` from `loom.perk-list` and you get `loom.perk`, which is now
 the standalone `<div>`, not the list's child. A model guessing the pair from the
 container's name gets a registered primitive that renders the wrong element.
 There is a test named after this that pins it as deliberate rather than
-accidental, and it is the one to delete if 0060 is rejected.
+accidental, and it is the one to delete if 0061 is rejected.
 
 **Blast radius of the rename: zero.** `loom.perk` reached `main` in #75 hours
 before this, and no demo tree, portal fixture or `apps/` code references it.
 
+## Rebased onto five merges, and two things changed underneath
+
+`main` moved from `3a1e419` to `55165a9` while this branch was open — #76 through
+#80. Two of them bear on this work.
+
+**The record number collided.** `Loom daily build` took **0060** the same day, so
+this run's record is **0061**. That is the collision `FINDINGS.md` already has an
+entry about; the practical lesson is that a record number is not reserved by
+writing the file, and the check that catches it is `pnpm decisions:index`
+failing rather than anything at review time.
+
+**0060 is the answer to this routine's own finding**, filed twelve hours earlier:
+*a primitive owns a string, and a deployment may replace it*. The framework
+routine built the seam and — correctly — did not reach into `src/primitives/` to
+adopt it, filing a finding back instead. **So this run adopts it.** `PERK_TEXT`
+declares the two keys, both primitives pass `loom.text` into the marker, and the
+strings are no longer inline. That finding is now closed.
+
+Adopting it cost one red test, and the red test is the interesting part — see the
+findings below.
+
 ## Real test numbers
 
-`pnpm verify` — green, on `3a1e419`.
+`pnpm verify` — green, on `55165a9`.
 
 | | Files | Tests |
 | --- | --- | --- |
-| `@loom/runtime` | 87 passed | 1189 passed |
-| `@loom/portal` | 46 passed | 455 passed |
+| `@loom/runtime` | 89 passed | 1228 passed |
+| `@loom/portal` | 48 passed | 484 passed |
 
 Build and typecheck clean. Nothing skipped, no test weakened.
-`library.test.ts` 46 → 48 tests. What is new:
+`library.test.ts` 46 → 49 tests. What is new:
 
 - **The `<ul>`/`<li>`/`<div>` split asserted directly** — three lists, ten `<li>`,
   and the standalone perk positioned after the last `</ul>`. Before the rename
@@ -138,15 +159,30 @@ Build and typecheck clean. Nothing skipped, no test weakened.
   and says something untrue about the page.
 - **The schema asserted on both halves of the pair**, which is what makes sharing
   `perk-content.ts` worth doing rather than merely tidy.
-- **The stem-rule exception pinned by name**, so 0060's cost stays visible.
+- **The stem-rule exception pinned by name**, so 0061's cost stays visible.
+- **The declared strings asserted on both halves** — two keys, `excluded` and
+  `coming`, and no key for `included`.
 
 One test failed on the way, and again the fix was in the test: adding the
 standalone perk to the fixture made nine ticks where the assertion said eight.
 
 ## Findings
 
-Two filed, one of them answering an earlier one.
+Three filed, one closed.
 
+- **Closed: the first primitive-owned string now has somewhere to be translated.**
+  The framework routine's finding, answered by adopting 0060 in both halves of
+  the perk pair.
+- **A render that omits `options.text` loses an accessible name silently.** This
+  is what the red test was. `renderLoomTree`'s `text` parameter is optional, and
+  a host that wires `resolver` and `validator` but not `text` hands every
+  primitive an empty map — so the *declared* string does not arrive either, and
+  the marker falls through to its no-name branch. `library.test.ts` had been
+  passing `resolver`, `validator` and `themes` since long before the seam
+  existed, so the perk's "Not included" simply vanished. The separate interface
+  is deliberate and well argued in `text.ts`; the observation is only about which
+  way the default fails, and it fails towards the nameless control the seam was
+  built to prevent. Owned by the framework routine, with two options offered.
 - **The repository is private, so no embedded image has ever rendered.** Owned by
   the maintainer; three options given, cheapest first.
 - **21st.dev — answered.** Recorded in `FINDINGS.md` so it survives the merged PR
@@ -154,7 +190,7 @@ Two filed, one of them answering an earlier one.
 
 ## Open questions
 
-**1. 0060 itself.** Accept or revert — the one thing in this run that is
+**1. 0061 itself.** Accept or revert — the one thing in this run that is
 genuinely blocked on him.
 
 **2. Should the specimen sheet become a repeatable thing?** This run generated it

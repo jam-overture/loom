@@ -1,6 +1,8 @@
 import { createElement, type CSSProperties, type ReactNode } from "react"
 import { z } from "zod"
 
+import type { PrimitiveText } from "../render/text.js"
+
 import { colour, family, radius, size, space } from "./tokens.js"
 
 /**
@@ -17,6 +19,28 @@ import { colour, family, radius, size, space } from "./tokens.js"
  * the type they implement (`loom.perk.ts`); this one is named for what it
  * holds, the way `tokens.ts` and `url.ts` are.
  */
+
+/**
+ * The two strings a perk owns rather than reads from the tree, declared here so
+ * both primitives declare the same ones.
+ *
+ * These are the strings that prompted 0060: a marker glyph carries meaning the
+ * perk's own label does not, so a screen-reader user reading "Priority support"
+ * with no marker announced is told the opposite of what the page shows. They
+ * cannot be props — that would put an accessible name in the space a model
+ * writes — and until 0060 they were inline in the component and untranslatable.
+ *
+ * There is deliberately no key for `included`. A tick beside an item in a list
+ * of what a plan includes says nothing the surrounding heading has not, and
+ * announcing "Included" on every one of nine rows is how a list becomes
+ * unlistenable. Only the two states that *contradict* the default are named.
+ */
+export const PERK_TEXT = {
+  excluded: "Not included",
+  coming: "Coming soon",
+} as const
+
+export type PerkTextKey = keyof typeof PERK_TEXT
 
 export const perkProps = z
   .object({
@@ -43,28 +67,21 @@ export type PerkState = NonNullable<PerkProps["state"]>
  * derived from `state`, so a proposal cannot put a tick beside something a
  * reader does not get.
  */
-const MARKERS: Readonly<Record<PerkState, { glyph: string; label: string | undefined; style: CSSProperties }>> = {
+const MARKERS: Readonly<Record<PerkState, { glyph: string; names: PerkTextKey | undefined; style: CSSProperties }>> = {
   included: {
     glyph: "✓",
-    /**
-     * No accessible name, on purpose. A tick beside an item in a list of what a
-     * plan includes tells a screen-reader user nothing the surrounding heading
-     * has not already said, and announcing "Included" on every one of nine rows
-     * is how a list becomes unlistenable. The two states that *contradict* the
-     * default are the ones that carry meaning no text conveys, so those are
-     * named and this one is decoration.
-     */
-    label: undefined,
+    /** Decoration — see `PERK_TEXT` for why this one has no accessible name. */
+    names: undefined,
     style: { background: colour("accent-subtle"), color: colour("accent-strong") },
   },
   excluded: {
     glyph: "✕",
-    label: "Not included",
+    names: "excluded",
     style: { background: colour("bg-surface-muted"), color: colour("fg-subtle") },
   },
   coming: {
     glyph: "○",
-    label: "Coming soon",
+    names: "coming",
     style: { background: colour("bg-surface-muted"), color: colour("fg-muted") },
   },
 }
@@ -94,15 +111,22 @@ export const perkRowStyle = (state: PerkState): CSSProperties => ({
   color: TEXT[state],
 })
 
-export const perkMarker = (state: PerkState): ReactNode => {
+/**
+ * The accessible name comes from `loom.text` rather than from this module's own
+ * constant, so a deployment that replaced the string gets its replacement (0060).
+ * `PERK_TEXT` is what the primitive *declares*; `text` is what the render
+ * *resolved*, and only the second one has been through the host's overrides.
+ */
+export const perkMarker = (state: PerkState, text: PrimitiveText<PerkTextKey>): ReactNode => {
   const marker = MARKERS[state]
+  const named = marker.names === undefined ? undefined : text[marker.names]
 
   return createElement(
     "span",
     {
-      ...(marker.label === undefined
+      ...(named === undefined
         ? { "aria-hidden": true }
-        : { role: "img", "aria-label": marker.label }),
+        : { role: "img", "aria-label": named }),
       style: {
         ...marker.style,
         display: "inline-flex",

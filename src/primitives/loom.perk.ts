@@ -3,7 +3,15 @@ import { createElement } from "react"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { perkMarker, perkProps, perkRowStyle, perkText, type PerkProps } from "./perk-content.js"
+import {
+  perkMarker,
+  perkProps,
+  perkRowStyle,
+  perkText,
+  PERK_TEXT,
+  type PerkProps,
+  type PerkTextKey,
+} from "./perk-content.js"
 
 /**
  * A perk on its own: a marker, a claim, and an optional clarification, in a
@@ -17,7 +25,7 @@ import { perkMarker, perkProps, perkRowStyle, perkText, type PerkProps } from ".
  * says something untrue about the page.
  *
  * Both exist because the rename that produced them
- * ([0060](../../decisions/0060-a-suffix-that-names-the-markup-earns-its-place.md), `Proposed`)
+ * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md), `Proposed`)
  * observed that the row inside a list and the line standing alone are the same
  * *content* and different *markup*, and that a library which offers only the
  * `<li>` forces every standalone use to misuse it. What it costs is a model
@@ -34,7 +42,8 @@ export const loomPerk = definePrimitive({
     "A single perk standing on its own — a marker, a claim, and an optional note. Use loom.perk-list-item inside a list.",
   props: perkProps,
   slots: [],
-  component: ({ loom, props: given }: LoomPrimitiveProps<PerkProps>) =>
+  text: PERK_TEXT,
+  component: ({ loom, props: given }: LoomPrimitiveProps<PerkProps, PerkTextKey>) =>
     createElement(
       "div",
       {
@@ -45,7 +54,7 @@ export const loomPerk = definePrimitive({
           alignSelf: "flex-start",
         },
       },
-      perkMarker(given.state ?? "included"),
+      perkMarker(given.state ?? "included", loom.text),
       perkText(given)
     ),
 })

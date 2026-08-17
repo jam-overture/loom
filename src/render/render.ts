@@ -19,6 +19,7 @@ import {
   type SlotChildren,
 } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
+import { NO_TEXT, type PrimitiveText, type TextResolver } from "./text.js"
 import { partitionReservedProps, resolveTheme, themeStyle, THEME_PROP_KEY } from "./theme.js"
 
 /**
@@ -64,6 +65,14 @@ export type RenderOptions = {
    * `renderLoomTree` itself resolves with `resolveTreeData` first (0058).
    */
   readonly data?: DataResolution
+  /**
+   * Absent means every primitive is handed an empty string map — including the
+   * strings it declared itself. A registry built by §4's SDK is a `TextResolver`
+   * over its own declarations, so wiring the same object into `resolver` and
+   * here is the ordinary case and is what an untranslated deployment wants;
+   * `textResolverFor` wraps it with a dictionary to translate.
+   */
+  readonly text?: TextResolver
   /** Off by default: decoration is opt-in per request, never ambient. */
   readonly editMode?: boolean
   readonly slots?: SlotContent
@@ -89,6 +98,7 @@ type RenderContext = {
   /** Mounted on the root element, and nowhere else. */
   readonly theme: CSSProperties | undefined
   readonly data: DataResolution | undefined
+  readonly text: TextResolver | undefined
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
@@ -144,6 +154,7 @@ const renderContextFor = (
   node: ElementNode,
   slots: SlotChildren,
   data: NodeData,
+  text: PrimitiveText<string>,
   context: RenderContext
 ): LoomRenderContext => {
   const isRoot = isRootNode(node, context)
@@ -154,6 +165,7 @@ const renderContextFor = (
     type: node.type,
     slots,
     data,
+    text,
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
       : {}),
@@ -257,11 +269,18 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
   }
 
   const data = reserved[DATA_PROP_KEY] === undefined ? NO_DATA : nodeDataFor(node, context)
+
+  /**
+   * A map read, and the same map for every node of one type — the merge with
+   * whatever dictionary this deployment supplied happened once, when the
+   * resolver was built.
+   */
+  const text = context.text?.textFor(node.type) ?? NO_TEXT
   const body = renderElementBody(node, context)
 
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, body.slots, data, context),
+    loom: renderContextFor(node, body.slots, data, text, context),
     props,
     children: body.children,
   })
@@ -340,6 +359,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     tree,
     theme: theme ? themeStyle(theme) : undefined,
     data: options.data,
+    text: options.text,
     collect,
   })
 

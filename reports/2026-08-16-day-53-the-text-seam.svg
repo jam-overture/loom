@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="700" viewBox="0 0 960 700" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="700" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">A primitive owns a string, and a deployment may replace it</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0060 — day 53 — §4f → §3, §4. Two authors, two places, and one map that is always complete.</text>
+
+  <!-- ================= where a string can come from ================= -->
+  <text x="32" y="102" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHERE A STRING ON THE PAGE COMES FROM</text>
+
+  <rect x="32" y="116" width="272" height="120" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="138" font-size="11.5" fill="#111827">the tree</text>
+  <text x="44" y="158" font-size="10.5" fill="#2563eb">props: { label: "Priority support" }</text>
+  <text x="44" y="180" font-size="9.5" fill="#6b7280">proposed by a model, weighed by the Gate,</text>
+  <text x="44" y="194" font-size="9.5" fill="#6b7280">recorded on a revision, undoable</text>
+  <text x="44" y="218" font-size="9.5" fill="#059669">almost every string on the page</text>
+
+  <rect x="328" y="116" width="272" height="120" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="340" y="138" font-size="11.5" fill="#111827">the primitive</text>
+  <text x="340" y="158" font-size="10.5" fill="#7c3aed">text: { excluded: "Not included" }</text>
+  <text x="340" y="180" font-size="9.5" fill="#6b7280">the accessible name of a glyph — a promise</text>
+  <text x="340" y="194" font-size="9.5" fill="#6b7280">about the control, not about the content</text>
+  <text x="340" y="218" font-size="9.5" fill="#059669">declared, never proposed</text>
+
+  <rect x="624" y="116" width="304" height="120" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="636" y="138" font-size="11.5" fill="#991b1b">what was refused</text>
+  <text x="636" y="160" font-size="10" fill="#b91c1c">a prop</text>
+  <text x="648" y="174" font-size="9.5" fill="#6b7280">→ a model writing an accessible name (0053, 0055)</text>
+  <text x="636" y="194" font-size="10" fill="#b91c1c">inline in the component</text>
+  <text x="648" y="208" font-size="9.5" fill="#6b7280">→ English in the middle of a German pricing table</text>
+  <text x="636" y="226" font-size="9.5" fill="#9ca3af">the gap `Loom primitives` filed on 16 August</text>
+
+  <!-- ================= the merge ================= -->
+  <text x="32" y="286" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">ONCE PER DICTIONARY — not once per node</text>
+
+  <rect x="32" y="300" width="230" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="322" font-size="11.5" fill="#111827">the registry</text>
+  <text x="44" y="342" font-size="10" fill="#7c3aed">loom.marker.excluded</text>
+  <text x="44" y="358" font-size="10" fill="#6b7280">  "Not included"</text>
+  <text x="44" y="374" font-size="10" fill="#7c3aed">loom.marker.coming</text>
+  <text x="44" y="390" font-size="10" fill="#6b7280">  "Coming soon"</text>
+
+  <rect x="286" y="300" width="230" height="104" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="298" y="322" font-size="11.5" fill="#111827">the dictionary — de-DE</text>
+  <text x="298" y="342" font-size="10" fill="#7c3aed">loom.marker.excluded</text>
+  <text x="298" y="358" font-size="10" fill="#059669">  "Nicht enthalten"</text>
+  <text x="298" y="382" font-size="9.5" fill="#9ca3af">coming is not translated yet</text>
+
+  <path d="M 262 352 L 284 352" stroke="#9ca3af" stroke-width="1.4"/>
+  <path d="M 516 352 L 560 352" stroke="#059669" stroke-width="1.4" marker-end="url(#arrowGreen)"/>
+  <text x="518" y="345" font-size="9.5" fill="#059669">merge</text>
+
+  <rect x="560" y="300" width="368" height="104" rx="6" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="572" y="322" font-size="11.5" fill="#111827">loom.text, at the primitive</text>
+  <text x="572" y="344" font-size="10.5" fill="#059669">excluded: "Nicht enthalten"</text>
+  <text x="700" y="344" font-size="9.5" fill="#9ca3af">the translation</text>
+  <text x="572" y="364" font-size="10.5" fill="#111827">coming:   "Coming soon"</text>
+  <text x="700" y="364" font-size="9.5" fill="#9ca3af">the declared string</text>
+  <text x="572" y="388" font-size="9.5" fill="#6b7280">every declared key present — never undefined, never a nameless control</text>
+
+  <!-- ================= what the types refuse ================= -->
+  <text x="32" y="452" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT DOES NOT COMPILE, AND WHAT IS NOT REPORTED</text>
+
+  <rect x="32" y="466" width="440" height="106" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="44" y="488" font-size="11" fill="#111827">the keys are the type</text>
+  <text x="44" y="510" font-size="10" fill="#6b7280">text: { excluded: "Not included" }</text>
+  <text x="44" y="528" font-size="10" fill="#059669">loom.text.excluded</text>
+  <text x="200" y="528" font-size="9.5" fill="#9ca3af">✓</text>
+  <text x="44" y="546" font-size="10" fill="#b91c1c">loom.text.included</text>
+  <text x="200" y="546" font-size="9.5" fill="#9ca3af">✗ never declared — a compile error at the declaration</text>
+  <text x="44" y="564" font-size="9.5" fill="#9ca3af">a primitive that declares none can read none: TText defaults to never</text>
+
+  <rect x="488" y="466" width="440" height="106" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="500" y="488" font-size="11" fill="#111827">an untranslated string is not a diagnostic</text>
+  <text x="500" y="510" font-size="9.5" fill="#6b7280">it is a property of a library and a dictionary, not of a node —</text>
+  <text x="500" y="526" font-size="9.5" fill="#6b7280">reporting it per node would put one beside every marker,</text>
+  <text x="500" y="542" font-size="9.5" fill="#6b7280">on every request, forever</text>
+  <text x="500" y="564" font-size="10" fill="#059669">textCoverage answers it once, at startup — reported, never enforced (0012)</text>
+
+  <!-- ================= who decides what ================= -->
+  <text x="32" y="618" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHO DECIDES</text>
+
+  <text x="32" y="642" font-size="10.5" fill="#111827">the primitive's author</text>
+  <text x="200" y="642" font-size="10.5" fill="#6b7280">which strings exist, and what they say in the author's language</text>
+
+  <text x="32" y="662" font-size="10.5" fill="#111827">the deployment</text>
+  <text x="200" y="662" font-size="10.5" fill="#6b7280">whether to replace them, and with what — a JSON file, not a fork</text>
+
+  <text x="32" y="682" font-size="10.5" fill="#111827">the host, not Loom</text>
+  <text x="200" y="682" font-size="10.5" fill="#6b7280">which language this visitor gets; the framework never reads a header</text>
+</svg>

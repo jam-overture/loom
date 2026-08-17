@@ -11,27 +11,27 @@ import { ReviewQueue } from "./review-queue"
  */
 describe("ReviewQueue", () => {
   it("says nothing is held rather than disappearing", () => {
-    render(<ReviewQueue held={[]} />)
+    render(<ReviewQueue changes={[]} />)
 
     expect(screen.getByRole("heading", { name: "waiting on you" })).toBeInstanceOf(HTMLElement)
     expect(document.body.textContent).toContain("Nothing is held.")
   })
 
   it("explains the middle case, so an empty queue is not read as a stalled one", () => {
-    render(<ReviewQueue held={[]} />)
+    render(<ReviewQueue changes={[]} />)
 
     expect(document.body.textContent).toContain("having decided, not having stalled")
   })
 
   it("shows an empty queue as empty, never as a failure", () => {
-    const { container } = render(<ReviewQueue held={[]} />)
+    const { container } = render(<ReviewQueue changes={[]} />)
 
     expect(container.querySelector("[data-tone]")?.getAttribute("data-tone")).toBe("empty")
     expect(screen.queryByRole("status")).toBeNull()
   })
 
   it("counts what is held beside the heading, whether or not there is any", () => {
-    const { container } = render(<ReviewQueue held={[]} />)
+    const { container } = render(<ReviewQueue changes={[]} />)
 
     expect(container.querySelector(".font-mono")?.textContent).toBe("0")
   })

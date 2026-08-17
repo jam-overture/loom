@@ -11,9 +11,10 @@ list and it is not a report.
 
 ## 2026-08-15 — `FINDINGS.md` did not exist, and neither do two of the four docs
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** partly
-closed — `docs/routines.md` written on branch `day-52-the-data-seam`;
-`docs/rollout.md` still missing and still needs the maintainer
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by #74 — `docs/routines.md` landed via `day-52-the-data-seam`; `docs/rollout.md`
+was written on 15 August but pushed to an already-merged branch, so it never
+reached `main`. Restored and rewritten against current state in #74.
 
 The portal brief names five files as *read first, every run*:
 
@@ -42,8 +43,9 @@ one PR, no follow-up scheduled, no self-check-in).
 
 ## 2026-08-15 — the §4b demo has landed, so the portal briefs' premise is stale
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
-confirmed accurate; only the maintainer can edit a brief
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by #74 — confirmed accurate. The brief was corrected by the maintainer on
+16 August: the demo premise is gone and the portal's value work is open.
 
 The portal brief states that §4b's demo does not exist yet and that the portal's
 highest-value work is therefore blocked, with an instruction to re-read the
@@ -176,7 +178,10 @@ party's uptime.
 
 ## 2026-08-16 — the library has its first primitive-owned English string
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#76** — the seam exists ([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md));
+moving `loom.perk`'s two strings onto it is filed back below, because
+`src/primitives/` is not the framework routine's lane
 
 `loom.perk` renders a marker glyph for each of three states, and two of them
 carry an accessible name the tree did not supply:
@@ -227,6 +232,142 @@ masonry wall — is not one: a descendant rule in the static stylesheet reaches
 them, the way `details[open] > summary .loom-marker` already does.
 
 Nothing outside `src/primitives/` was touched.
+
+---
+
+## 2026-08-16 — the first primitive-owned string now has somewhere to be translated
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** closed
+by #81 — `loom.perk-list-item` and `loom.perk` both declare `PERK_TEXT` and read
+`loom.text`; the strings are no longer inline. Original status below.
+
+**Status:** open —
+the seam is on **#76**; moving `loom.perk` onto it is the primitives routine's,
+because `src/primitives/` is not this routine's lane
+
+Answering the finding the primitives routine filed the same day: `loom.perk`
+carries "Not included" and "Coming soon" as accessible names, they cannot come
+from the tree, and there was nowhere for a German deployment to replace them.
+
+**There is now.** `definePrimitive` takes a `text` map in the author's own
+language; the keys are typed, so a component reads exactly what it declared and
+a typo does not compile. What reaches `loom.text` is the host's translation where
+there is one and the declared string where there is not — never a missing key,
+because a control with no accessible name is the failure the seam exists to
+prevent. A registry is a `TextResolver` over its own declarations, so an
+untranslated deployment needs no wiring at all; `textResolverFor` lays a
+dictionary over it, `textCatalogue` is what a translator is given, and
+`textCoverage` says what a dictionary answers and what it does not
+([0060](decisions/0060-a-primitive-owns-a-string-and-a-deployment-may-replace-it.md)).
+
+**What is left, and it is yours:** move `loom.perk`'s two strings out of the
+component and into its declaration. It is a four-line change and it needs no
+dictionary — the declared strings are what renders when nobody translates.
+Nothing was changed inside `src/primitives/` by this run, deliberately.
+
+The finding was right about the shape, too: "a registered thing addressed by id,
+resolved before or during the walk, with the primitive naming which strings it
+needs" is what was built, with one difference worth knowing — resolution happens
+once per dictionary rather than once per node, so a page with fifty markers does
+fifty map reads and no string work.
+
+---
+
+## 2026-08-16 — two routines cannot both write a decision record without colliding
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Structural, and it has now bitten twice in two days in two different files.
+
+`decisions/README.md`'s numbering guard requires the numbers to run unbroken, and
+`pnpm verify` fails when they do not — deliberately, because two sessions once
+each wrote an `0032` and nothing noticed until their branches met. But every
+routine is told to branch from `main`, never to stack, and there is no way to
+reserve a number. So:
+
+- **#75 (`Loom primitives`) wrote 0059**, on a branch cut from `main`.
+- **This branch wrote 0060**, also cut from `main`, where 0059 does not exist.
+
+Both are correct by the rules they were given. The result was that #76's
+`pnpm verify` failed on exactly one assertion — `0059 is missing` — for as long
+as #75 was open. The alternative was to also call mine 0059, which is the failure
+the guard exists to catch and would have made every reference to "0059" ambiguous
+permanently.
+
+**That instance is now resolved**: #75 merged as `3a1e419`, `main` was merged into
+#76, and the numbers run 0058, 0059, 0060 unbroken. The cost was one red branch
+and one hand-resolved conflict in `decisions/README.md` — small, and paid again
+by every pair of routines that record on the same day.
+
+The same shape hit `FINDINGS.md` on 15 August: two branches appending to the end
+of one file conflict, harmlessly but every time.
+
+Not a routine's to fix — it needs a convention only the maintainer can set. Three
+that would work, in increasing order of effort: **merge order** (say that
+concurrent records are renumbered by whoever merges second, and expect one red
+branch), **a reserved block per routine** (framework takes even numbers, and the
+guard checks duplicates only), or **numbering on merge** (records are written
+with a slug and numbered by the index tool, which is a change to the tool and to
+every existing cross-reference).
+
+Recorded rather than acted on because a routine choosing its own convention here
+is how two conventions get invented.
+
+---
+
+## 2026-08-16 — a routine's local `main` can be four merges stale, silently
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The procedure says *"Branch off `main`"*
+([`docs/routines.md`](docs/routines.md), step 3). In this run's container that
+produced a branch **four merges behind**: the clone left `HEAD` detached at
+`3a1e419` while the local `main` ref still pointed at `7f7b615`, so #72, #73,
+#74 and #75 were all absent from the branch I had just created off `main`.
+
+Nothing warned me, and the symptom was worse than a missing feature. On the
+stale tree `apps/portal/app/globals.css` still had `--surface-wash` and
+`globals.test.ts` did not exist, so the evidence in front of me read as **the
+maintainer's own first task having been reverted on `main`**. That was one step
+from being filed as a finding against the framework routine. `git fetch origin
+main` and `git log --oneline -3 origin/main` disproved it in a minute — but only
+because the claim was surprising enough to check twice. A routine whose work
+does not happen to touch a file another routine recently changed would notice
+nothing at all, and would open a pull request that silently reverts merged work.
+
+The fix is one line in the procedure, and it is the maintainer's because the
+briefs and `docs/routines.md` both carry the current wording:
+
+```
+git fetch origin main && git checkout -b <branch> origin/main
+```
+
+The 16 August portal run did exactly that after discovering it, and branched off
+`3a1e419`.
+
+---
+
+## 2026-08-16 — no framework gaps this run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Recorded because absence is worth knowing, and because this run is the first
+portal work that genuinely reaches into the tree model rather than styling
+chrome. `lib/proposal-effect.ts` needed nine things from the runtime — `applyDelta`,
+`applyOperation`, `configurationOf`, `describeTreeError`, `findNode`,
+`findParent`, `nodeLabel`, `nodePath`, `walkTree` — and every one of them is
+exported from `@loom/runtime`'s root entry point. No deep import was wanted and
+`src/` is untouched, so 0018's enforcement was tested by this diff and held.
+
+Two things about that are worth saying rather than leaving implicit. `applyDelta`
+being public is what lets the portal report applicability **as the runtime's
+answer** rather than re-deriving it, which is the difference between a surface
+that can disagree with the runtime and one that cannot. And `describeTreeError`
+being public is what lets a refusal reach a reviewer in the runtime's own words
+instead of a portal paraphrase that would drift.
+
+The §4e data-seam finding above — that the review surfaces could show a
+`data-unavailable` diagnostic — was **not** acted on this run and stays open.
 
 ---
 
@@ -294,3 +435,41 @@ basic to elaborate, which is the ordering to plan runs against.
 
 Until the allowlist lands, runs fall back on `loom.hero` and `loom.feature-grid`
 as the floor plus the Hermes content models on disk, and should say so.
+
+---
+
+## 2026-08-16 — a render that omits `options.text` loses an accessible name silently
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while adopting 0060, and it cost one red test to notice.
+
+`renderLoomTree` takes `text?: TextResolver`, optional. A host that wires
+`resolver` and `validator` but not `text` hands every primitive `NO_TEXT`, so a
+**declared** string does not reach the component either — the primitive falls
+through to its no-name branch and the marker renders `aria-hidden`. The perk
+pair's declared "Not included" vanished exactly that way in this routine's own
+test suite, which had been passing `resolver`, `validator` and `themes` since
+long before the seam existed.
+
+`text.ts` is explicit that this is deliberate, and the reasoning is good — a
+separate interface makes "this deployment supplies strings" a visible choice at
+the composition root rather than a property of whichever resolver got wired in.
+The observation is only about **which way the default fails**: the record says
+what reaches the primitive is "the translation where there is one, the declared
+string where there is not", and that holds only once a resolver is passed. With
+none, neither arrives, and the result is the nameless control the seam exists to
+prevent.
+
+Worth considering, in the framework routine's judgement rather than this one's:
+
+- **Default `text` to the resolver when it also satisfies `TextResolver`.** The
+  registry already does, so the ordinary wiring would work and a host wanting to
+  suppress declared strings would pass something explicit.
+- **Or leave it and make it loud** — `auditRegistry` knows which primitives
+  declare text, so a host could assert that a render is wired for them, the way
+  `notDecorated` is asserted empty today.
+
+No action taken beyond this routine's own lane: `library.test.ts` now passes
+`text: registry` with a comment saying why, so the library's tests would catch a
+regression here again.

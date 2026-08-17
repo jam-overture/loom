@@ -3,7 +3,15 @@ import { createElement } from "react"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { perkMarker, perkProps, perkRowStyle, perkText, type PerkProps } from "./perk-content.js"
+import {
+  perkMarker,
+  perkProps,
+  perkRowStyle,
+  perkText,
+  PERK_TEXT,
+  type PerkProps,
+  type PerkTextKey,
+} from "./perk-content.js"
 
 /**
  * One row of a `loom.perk-list`: a marker, a claim, and an optional
@@ -25,7 +33,7 @@ import { perkMarker, perkProps, perkRowStyle, perkText, type PerkProps } from ".
  * and its history.
  *
  * **This shipped as `loom.perk` and was renamed on 16 August** at the
- * maintainer's direction, which [0060](../../decisions/0060-a-suffix-that-names-the-markup-earns-its-place.md)
+ * maintainer's direction, which [0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md)
  * records as `Proposed` because 0054 says "no `-item` suffix, ever". The
  * argument for the rename is that the suffix here is not saying "this belongs
  * to a list" — the tree already says that — but naming the element the
@@ -40,11 +48,12 @@ export const loomPerkListItem = definePrimitive({
     "One row of a loom.perk-list — a marker, a claim, and an optional note. An <li>; use loom.perk to stand alone.",
   props: perkProps,
   slots: [],
-  component: ({ loom, props: given }: LoomPrimitiveProps<PerkProps>) =>
+  text: PERK_TEXT,
+  component: ({ loom, props: given }: LoomPrimitiveProps<PerkProps, PerkTextKey>) =>
     createElement(
       "li",
       { ...loom.editable, style: perkRowStyle(given.state ?? "included") },
-      perkMarker(given.state ?? "included"),
+      perkMarker(given.state ?? "included", loom.text),
       perkText(given)
     ),
 })

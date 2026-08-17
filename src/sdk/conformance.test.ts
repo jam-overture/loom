@@ -1,10 +1,12 @@
 import { Component, createElement, useState, type ReactNode } from "react"
 import { describe, expect, it } from "vitest"
+import { z } from "zod"
 
 import type { LoomPrimitive, LoomPrimitiveProps } from "../render/primitive.js"
 import { undecoratedPrimitive } from "../testing/primitives.js"
 
 import { probeEditableDecoration, probeSlotPlacement } from "./conformance.js"
+import { definePrimitive } from "./definition.js"
 
 const decorating = ({ loom, children }: LoomPrimitiveProps) =>
   createElement("section", { ...loom.editable }, children)
@@ -168,5 +170,43 @@ describe("probeSlotPlacement", () => {
     const verdict = probeSlotPlacement(readingAnInheritedName, ["constructor"])
 
     expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual([])
+  })
+})
+
+/**
+ * Both probes call a component outside a renderer, so whatever they hand it is
+ * the whole world that component gets. A primitive that reads a string it
+ * declared and does something with it — upper-cases it, measures it — throws on
+ * `undefined` and reads as `not-probeable`: a failure invented by the probe, for
+ * a primitive that is correct.
+ */
+describe("a probe of a primitive that reads its own declared text", () => {
+  const entry = definePrimitive({
+    type: "loom.marker",
+    description: "a state marker",
+    props: z.object({}),
+    text: { aside: "Aside" },
+    component: ({ loom, children }) =>
+      createElement(
+        "div",
+        { ...loom.editable, "aria-label": loom.text.aside.toUpperCase() },
+        children
+      ),
+  })
+
+  it("hands it the declared strings rather than an empty map", () => {
+    expect(probeEditableDecoration(entry.component, entry.text)).toEqual({ outcome: "decorates" })
+  })
+
+  it("does the same for the placement probe", () => {
+    expect(probeSlotPlacement(entry.component, [], entry.text)).toEqual({
+      outcome: "probed",
+      unplacedSlots: [],
+      rendersChildren: true,
+    })
+  })
+
+  it("would have called it unprobeable without them", () => {
+    expect(probeEditableDecoration(entry.component).outcome).toBe("not-probeable")
   })
 })

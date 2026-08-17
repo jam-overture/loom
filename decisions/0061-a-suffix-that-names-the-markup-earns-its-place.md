@@ -1,4 +1,4 @@
-# 0060. A suffix that names the markup earns its place; a suffix that names the parent does not
+# 0061. A suffix that names the markup earns its place; a suffix that names the parent does not
 
 **Status:** Proposed — contradicts [0054](0054-a-container-is-its-childs-name-plus-the-arrangement.md), which stands until someone decides
 **Date:** 2026-08-16

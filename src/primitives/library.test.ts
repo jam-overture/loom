@@ -118,6 +118,15 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
   const rendered = renderLoomTree(tree, {
     resolver: registry,
     validator: registry,
+    /**
+     * The registry is its own `TextResolver`, over the strings the primitives
+     * declared (0060). Wired here because omitting it is not a no-op: every
+     * primitive is handed an empty map, so a declared accessible name silently
+     * becomes no accessible name — which is the failure the seam exists to
+     * prevent, arriving through the seam itself. This library's own tests are
+     * the closest thing to a host that would notice.
+     */
+    text: registry,
     themes,
     editMode,
   })
@@ -181,13 +190,13 @@ describe("the starter library", () => {
     const types = new Set(registry.primitives.map((primitive) => primitive.type))
 
     /**
-     * The cost 0060 accepts, pinned so it stays deliberate. The test above
+     * The cost 0061 accepts, pinned so it stays deliberate. The test above
      * passes for `loom.perk-list` because stripping `-list` names
      * `loom.perk` — but `loom.perk` is the standalone `<div>`, not the list's
      * child. All three are registered and each says in its own description
      * where it goes, which is the whole of the mitigation.
      *
-     * If 0060 is rejected and the rename reverted, this test is the one that
+     * If 0061 is rejected and the rename reverted, this test is the one that
      * should be deleted rather than adjusted.
      */
     expect(types).toContain("loom.perk-list")
@@ -562,7 +571,7 @@ const pricingPage = (theme: Record<string, string>, idFactory: IdFactory = seque
         ],
       }),
       /**
-       * The standalone case 0060 exists for: one reassurance under the band,
+       * The standalone case 0061 exists for: one reassurance under the band,
        * belonging to no list. As a `loom.perk-list-item` this would be an `<li>`
        * with no `<ul>` anywhere near it.
        */
@@ -762,7 +771,7 @@ describe("the pricing band", () => {
     expect(markup.match(/data-loom-type="loom\.perk-list"/g)?.length).toBe(3)
   })
 
-  it("gives a row an <li> and a standalone perk a <div>, which is the whole of 0060", () => {
+  it("gives a row an <li> and a standalone perk a <div>, which is the whole of 0061", () => {
     const { markup } = render(pricingPage(EDITORIAL))
 
     /**
@@ -798,6 +807,25 @@ describe("the pricing band", () => {
     expect(badgeAt).toBeLessThan(priceAt)
     expect(priceAt).toBeLessThan(lastPerkAt)
     expect(lastPerkAt).toBeLessThan(actionAt)
+  })
+
+  it("declares the two strings a perk owns, so a deployment has something to replace", () => {
+    /**
+     * 0060's seam, adopted. The strings were inline in the component until the
+     * framework routine answered this routine's finding the same day; declared,
+     * they are in the entry a host can override and the render resolves before
+     * the component sees them.
+     */
+    const declared = (type: string): Readonly<Record<string, string>> =>
+      registry.primitives.find((primitive) => primitive.type === type)?.text ?? {}
+
+    for (const type of ["loom.perk-list-item", "loom.perk"]) {
+      expect(Object.keys(declared(type)).sort()).toEqual(["coming", "excluded"])
+      expect(declared(type)["excluded"]).toBe("Not included")
+    }
+
+    /** No key for `included` — nine rows announcing themselves is unlistenable. */
+    expect(declared("loom.perk")["included"]).toBeUndefined()
   })
 
   it("names a perk's state only when the glyph says something the text does not", () => {
@@ -933,7 +961,7 @@ describe("the schemas the seam enforces", () => {
 
   it("refuses a perk state the renderer has no marker for, on both halves of the pair", () => {
     /**
-     * Asserted on both because 0060 splits one primitive into two that share a
+     * Asserted on both because 0061 splits one primitive into two that share a
      * schema module. The point of sharing it is that a state added to one
      * cannot be missing from the other, and this is what says so.
      */
