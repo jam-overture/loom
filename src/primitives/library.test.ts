@@ -196,8 +196,8 @@ describe("the starter library", () => {
      * child. All three are registered and each says in its own description
      * where it goes, which is the whole of the mitigation.
      *
-     * If 0061 is rejected and the rename reverted, this test is the one that
-     * should be deleted rather than adjusted.
+     * 0054's stem rule still holds everywhere else, which is why the test above
+     * stays as it is: 0061 supersedes one clause of 0054, not the record.
      */
     expect(types).toContain("loom.perk-list")
     expect(types).toContain("loom.perk-list-item")

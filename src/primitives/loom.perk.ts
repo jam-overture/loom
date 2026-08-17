@@ -25,7 +25,7 @@ import {
  * says something untrue about the page.
  *
  * Both exist because the rename that produced them
- * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md), `Proposed`)
+ * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md))
  * observed that the row inside a list and the line standing alone are the same
  * *content* and different *markup*, and that a library which offers only the
  * `<li>` forces every standalone use to misuse it. What it costs is a model

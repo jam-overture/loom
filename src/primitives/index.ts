@@ -50,8 +50,7 @@ import { loomTierTable } from "./loom.tier-table.js"
  * already there, the `badge` a featured tier needs so that "Most popular" is a
  * node someone placed rather than a boolean somebody set, and `perk`, which is
  * a perk-list-item's content in a `<div>` for the lines that stand alone
- * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md),
- * `Proposed`).
+ * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md)).
  *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
