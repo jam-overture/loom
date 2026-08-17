@@ -613,3 +613,53 @@ while saying it is still worth having. With declarations now underneath every
 render there is nothing left for it to catch, so it was not built. If a host ever
 wants to assert that a dictionary is complete, `textCoverage` already answers
 that and is the better place for it.
+
+---
+
+## 2026-08-17 — no telemetry surface can be demonstrated to anyone
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Found while trying to produce the screenshot the brief asks for. It is not
+specific to calibration — it applies to `/calibration`, `/activity` and
+`/sign-ins` equally, which is why it is worth a finding rather than a line in a
+report.
+
+Three things are each individually reasonable and together leave no path:
+
+- **`/calibration` requires an actor** (0027, and `guarded-pages.test.ts`
+  enforces it). Correct, and not something to relax.
+- **The demo does not feed the journal.** `beginDemoWrite` sends events to a
+  per-request array, deliberately — `session.ts` says the demo's record *is* the
+  event stream, read back within the same request, so a visitor sees what the
+  runtime said rather than a summary. Also correct.
+- **Preview deployments are protected**, which the maintainer already reported on
+  #75 and is recorded above.
+
+So the only way to look at a telemetry surface with real data is a signed-in
+session against a configured `DATABASE_URL` with judged proposals already in it.
+Neither a reviewer of a pull request nor a routine writing a report can reach
+that, and the 17 August run's visual is therefore **the real components rendered
+against a fixture fold**, which the report says plainly.
+
+This matters more than a screenshot. `/activity`, `/calibration` and `/sign-ins`
+are three of the portal's eight pages, they are the ones whose value is hardest
+to argue in the abstract, and **nobody outside this repository has ever seen any
+of them with data in.**
+
+Two ways out, and the first is small:
+
+- **Let the demo session keep a journal.** A `memoryTelemetryJournal` per demo
+  session, written from the same envelopes `narrated()` already collects, and a
+  demo-scoped read on the telemetry pages. The demo already mints a policy, a
+  store and a hold store per visitor; a fourth is the same shape. It would make
+  every telemetry surface demonstrable to a visitor with no account, which is
+  what `/demo` is for (0056).
+- **Or a seeded fixture journal behind an explicit flag**, which is less
+  honest — a page that says "this data is made up" is a screenshot with extra
+  steps.
+
+Filed against my own lane rather than acted on: the first option touches
+`apps/portal/lib/demo`, which is mine, but it is a unit of its own and this run
+was already one. It is the change I would make next if history were not ahead of
+it.
