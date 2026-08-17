@@ -17,6 +17,7 @@ import { loomMedia } from "./loom.media.js"
 import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
 import { loomPerkList } from "./loom.perk-list.js"
+import { loomPerkListItem } from "./loom.perk-list-item.js"
 import { loomProse } from "./loom.prose.js"
 import { loomQuote } from "./loom.quote.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
@@ -42,17 +43,21 @@ import { loomTierTable } from "./loom.tier-table.js"
  * nothing, and because §4d's marketing site is built from this list rather than
  * beside it: the demo vocabulary and the marketing vocabulary are one list.
  *
- * **The decision six** are the two bands that close a sale and that the first
+ * **The decision seven** are the two bands that close a sale and that the first
  * eighteen could not build: the pricing table, and a wall of proof rather than
- * a single pull quote. They are three pairs and a leaf — `tier-table` over
- * `tier`, `perk-list` over `perk`, `quote-grid` over the `quote` that was
- * already there, and the `badge` a featured tier needs so that "Most popular"
- * is a node someone placed rather than a boolean somebody set.
+ * a single pull quote. Three pairs and two leaves — `tier-table` over `tier`,
+ * `perk-list` over `perk-list-item`, `quote-grid` over the `quote` that was
+ * already there, the `badge` a featured tier needs so that "Most popular" is a
+ * node someone placed rather than a boolean somebody set, and `perk`, which is
+ * a perk-list-item's content in a `<div>` for the lines that stand alone
+ * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md),
+ * `Proposed`).
  *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
  * then the bands in the order a page uses them, then the leaves that go
- * anywhere.
+ * anywhere — which is where `loom.perk` sits and `loom.perk-list-item` does
+ * not, since one of them has exactly one legal parent.
  */
 
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
@@ -67,7 +72,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomTierTable,
   loomTier,
   loomPerkList,
-  loomPerk,
+  loomPerkListItem,
   loomQuoteGrid,
   loomQuote,
   loomLogoCloud,
@@ -77,6 +82,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomHeading,
   loomProse,
   loomBadge,
+  loomPerk,
   loomDivider,
   loomMedia,
   loomAction,
@@ -111,6 +117,7 @@ export {
   loomPage,
   loomPerk,
   loomPerkList,
+  loomPerkListItem,
   loomProse,
   loomQuote,
   loomQuoteGrid,

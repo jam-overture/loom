@@ -237,7 +237,11 @@ Nothing outside `src/primitives/` was touched.
 
 ## 2026-08-16 — the first primitive-owned string now has somewhere to be translated
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open —
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** closed
+by #81 — `loom.perk-list-item` and `loom.perk` both declare `PERK_TEXT` and read
+`loom.text`; the strings are no longer inline. Original status below.
+
+**Status:** open —
 the seam is on **#76**; moving `loom.perk` onto it is the primitives routine's,
 because `src/primitives/` is not this routine's lane
 
@@ -364,3 +368,108 @@ instead of a portal paraphrase that would drift.
 
 The §4e data-seam finding above — that the review surfaces could show a
 `data-unavailable` diagnostic — was **not** acted on this run and stays open.
+
+---
+
+## 2026-08-16 — the repository is private, so no image in a report or a pull request has ever rendered
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The maintainer's review of #75: *"I can't see your screen shots, so I don't see
+the preview. The link comes back as 404."*
+
+Both halves are environmental, and neither is a broken link.
+
+**The screenshots.** `jam-overture/loom` is **private**. Markdown image embeds
+are fetched by GitHub's own image proxy, which is unauthenticated, so a
+`raw.githubusercontent.com` URL to a file in this repository returns 404 to the
+proxy and the image never renders — for anyone, including the maintainer, who
+can read the file perfectly well by clicking through to it. Verified from this
+session: `raw.githubusercontent.com/.../main/reports/…png` answers **404** for a
+path that exists on `main`.
+
+This is **not specific to the primitives routine**. #72 used the same pattern for
+three screenshots, so the portal routine's before/after images were almost
+certainly never seen either. Every routine's brief asks for a visual; the way all
+of them deliver it does not work.
+
+What does work, in rough order of effort:
+
+1. **A link rather than an embed.** `github.com/jam-overture/loom/blob/main/reports/<file>.png`
+   renders for a signed-in reader. Ugly but free, and correct today.
+2. **Publish the visual outside the repository.** The 16 August run did this —
+   the specimen sheet for #76 is a live page rather than an image, so the
+   primitives are real DOM under both palettes rather than a picture of them.
+   Better than a screenshot and immune to this problem.
+3. **Make the repository public**, if that was always the intent — the README
+   describes a framework meant to be adopted.
+
+**The preview 404.** Separate cause: Vercel preview deployments are protected by
+default, and the portal's `/` requires an actor besides. A preview URL is
+therefore only useful to someone signed in to both. Worth knowing before a brief
+asks for one again.
+
+---
+
+## 2026-08-16 — 21st.dev: answered by the maintainer
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** answered, pending the allowlist entry
+
+Answering the finding filed earlier today. The maintainer on #75:
+
+> *"If 21st.dev is blocked just because of not being added to a white list, then
+> I can add it. I just point to that site because it has great visually appealing
+> UI's and I want you to emulate that. The main objective is to create a wide
+> range of primitives. Basic to extremely well designed and amazing UIs."*
+
+So: the allowlist is the fix, and the instruction stands as written. Recorded
+here rather than left in a pull-request thread, because a merged PR's comments
+are not something the next run reads.
+
+Two things worth carrying forward from that sentence, since they sharpen the
+brief rather than restate it: **21st.dev is a reference for the visual bar, not
+a specification** — "emulate that" is about how finished the components look,
+not about porting their catalogue — and **breadth is the main objective**, from
+basic to elaborate, which is the ordering to plan runs against.
+
+Until the allowlist lands, runs fall back on `loom.hero` and `loom.feature-grid`
+as the floor plus the Hermes content models on disk, and should say so.
+
+---
+
+## 2026-08-16 — a render that omits `options.text` loses an accessible name silently
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while adopting 0060, and it cost one red test to notice.
+
+`renderLoomTree` takes `text?: TextResolver`, optional. A host that wires
+`resolver` and `validator` but not `text` hands every primitive `NO_TEXT`, so a
+**declared** string does not reach the component either — the primitive falls
+through to its no-name branch and the marker renders `aria-hidden`. The perk
+pair's declared "Not included" vanished exactly that way in this routine's own
+test suite, which had been passing `resolver`, `validator` and `themes` since
+long before the seam existed.
+
+`text.ts` is explicit that this is deliberate, and the reasoning is good — a
+separate interface makes "this deployment supplies strings" a visible choice at
+the composition root rather than a property of whichever resolver got wired in.
+The observation is only about **which way the default fails**: the record says
+what reaches the primitive is "the translation where there is one, the declared
+string where there is not", and that holds only once a resolver is passed. With
+none, neither arrives, and the result is the nameless control the seam exists to
+prevent.
+
+Worth considering, in the framework routine's judgement rather than this one's:
+
+- **Default `text` to the resolver when it also satisfies `TextResolver`.** The
+  registry already does, so the ordinary wiring would work and a host wanting to
+  suppress declared strings would pass something explicit.
+- **Or leave it and make it loud** — `auditRegistry` knows which primitives
+  declare text, so a host could assert that a render is wired for them, the way
+  `notDecorated` is asserted empty today.
+
+No action taken beyond this routine's own lane: `library.test.ts` now passes
+`text: registry` with a comment saying why, so the library's tests would catch a
+regression here again.
