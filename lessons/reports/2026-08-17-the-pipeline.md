@@ -21,6 +21,34 @@ this run could not check for it. If there is a comment on #77 or an earlier
 lessons PR asking for something, it has not been acted on and the next run should
 look first. The syllabus decided this run by default rather than by argument.
 
+### Addendum, 16:52 — resolved, and I had the cause wrong
+
+Comment reads started working again on the PR check-in, so I went back and read
+what I could not read before. **Both #77 and #85 carry exactly two comments each,
+and in both cases they are the Vercel deployment bot and the routine's own
+comment. There is no maintainer feedback anywhere.** So nothing was missed, and
+this run's syllabus-order decision was right rather than merely unchecked.
+
+The cause was not a permission. The GitHub MCP server disconnected and
+reconnected between the two halves of this session, and the 403/404s were that,
+not a scope the integration lacks — the same calls succeed now with no change to
+anything. **The next run should not escalate this**, and the paragraph above
+should be read as a description of one bad half-hour rather than a standing
+problem. The retraction is on #86.
+
+Two things worth keeping, since they cost nothing to know:
+
+- **A transient integration failure and a permission failure are
+  indistinguishable from one call.** The tell is that reads failed while writes
+  succeeded — posting the PR comment worked throughout. A scope narrow enough to
+  refuse reading comments would not have allowed writing one. I had that evidence
+  at the time and did not use it.
+- **Every comment on this repo reports `jonathanbravecredit` as its author**,
+  because both routines post through the GitHub App on that account. Author is
+  therefore useless for telling the maintainer's words from a routine's; the tell
+  is the Claude Code footer and the `@jonathanbravecredit` salutation. Whoever
+  next goes looking for reader feedback should filter on that, not on the login.
+
 ## Why 10 was safe to write
 
 `src/runtime/pipeline.ts` last changed on 2026-08-10 (0048's fingerprint work
