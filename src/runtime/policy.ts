@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { interactiveTypesSchema, type InteractiveTypes } from "../interactivity.js"
 import { primitiveTypeSchema, type PrimitiveType } from "../primitive-type.js"
 
 import { intentOriginSchema, type IntentOrigin } from "./intent.js"
@@ -39,6 +40,20 @@ export const gatePolicySchema = z.object({
   outOfTreeEffectTypes: z.array(primitiveTypeSchema).default([]),
   /** Prop keys that carry meaning rather than presentation. Host vocabulary. */
   protectedPropKeys: z.array(z.string().min(1)).default([]),
+  /**
+   * Primitives that render a target the reader aims at — an anchor, a button —
+   * and what makes them one. A change that leaves one of these inside another
+   * produces markup a browser resolves by dropping a link, so the page renders
+   * and something on it stops working.
+   *
+   * Host vocabulary like the lists above, but the host does not have to write
+   * it: `interactiveTypesFor(registry)` in the SDK reads what each primitive
+   * declared about itself, so the knowledge stays with the component rather
+   * than in a policy file that drifts from it. Empty by default, which is
+   * exactly today's behaviour — a deployment that declares nothing is judged on
+   * shape alone.
+   */
+  interactiveTypes: interactiveTypesSchema.default({}),
 
   removalThresholds: z
     .object({
@@ -78,6 +93,7 @@ export type GatePolicy = {
   readonly protectedPrimitiveTypes: readonly PrimitiveType[]
   readonly outOfTreeEffectTypes: readonly PrimitiveType[]
   readonly protectedPropKeys: readonly string[]
+  readonly interactiveTypes: InteractiveTypes
   readonly removalThresholds: { readonly medium: number; readonly high: number }
   readonly breadthThreshold: number
   readonly shallowDepthThreshold: number
