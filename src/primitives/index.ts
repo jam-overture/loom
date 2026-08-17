@@ -4,13 +4,16 @@ import type { Result } from "../result.js"
 
 import { loomAction } from "./loom.action.js"
 import { loomBadge } from "./loom.badge.js"
+import { loomCard } from "./loom.card.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
 import { loomFeatureGrid } from "./loom.feature-grid.js"
+import { loomGrid } from "./loom.grid.js"
 import { loomHeading } from "./loom.heading.js"
 import { loomHero } from "./loom.hero.js"
+import { loomIcon } from "./loom.icon.js"
 import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
@@ -23,6 +26,7 @@ import { loomQuote } from "./loom.quote.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
 import { loomSection } from "./loom.section.js"
 import { loomSplit } from "./loom.split.js"
+import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
 import { loomTier } from "./loom.tier.js"
@@ -52,17 +56,34 @@ import { loomTierTable } from "./loom.tier-table.js"
  * a perk-list-item's content in a `<div>` for the lines that stand alone
  * ([0061](../../decisions/0061-a-suffix-that-names-the-markup-earns-its-place.md)).
  *
+ * **The compose-and-arrange four** are the general layer the first
+ * twenty-five did without: `stack` and `grid` arrange whatever they are given,
+ * `card` is a surface holding whatever is put on it, and `icon` is the glyph
+ * that until now existed only inside a feature. Every container before them is
+ * a *named band* — excellent at the section it was named for, and unable to say
+ * "these two things, side by side". They are the basic end of the range, and
+ * they are what the bands nobody has ported yet can be assembled from in the
+ * meantime ([0062](../../decisions/0062-a-general-arranger-is-named-for-the-arrangement-alone.md)).
+ *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
  * then the bands in the order a page uses them, then the leaves that go
  * anywhere — which is where `loom.perk` sits and `loom.perk-list-item` does
  * not, since one of them has exactly one legal parent.
+ *
+ * The general arrangers sit with page structure rather than at the top, and
+ * that placement is the one nudge this file gives: a model reading down the
+ * catalogue meets `loom.feature-grid` before it has any reason to reach for
+ * `loom.grid`, which is the order 0062 wants those two considered in.
  */
 
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPage,
   loomSection,
   loomSplit,
+  loomStack,
+  loomGrid,
+  loomCard,
   loomHero,
   loomFeatureGrid,
   loomFeature,
@@ -81,6 +102,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomHeading,
   loomProse,
   loomBadge,
+  loomIcon,
   loomPerk,
   loomDivider,
   loomMedia,
@@ -100,16 +122,20 @@ export const createStarterPrimitiveRegistry = (
 
 export * from "./tokens.js"
 export * from "./stylesheet.js"
+export * from "./layout.js"
 export {
   loomAction,
   loomBadge,
+  loomCard,
   loomDivider,
   loomFaq,
   loomFaqList,
   loomFeature,
   loomFeatureGrid,
+  loomGrid,
   loomHeading,
   loomHero,
+  loomIcon,
   loomLogo,
   loomLogoCloud,
   loomMedia,
@@ -122,6 +148,7 @@ export {
   loomQuoteGrid,
   loomSection,
   loomSplit,
+  loomStack,
   loomStat,
   loomStatGrid,
   loomTier,

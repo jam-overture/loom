@@ -15,6 +15,7 @@ import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
 import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
+import { LIBRARY_CLASS } from "./stylesheet.js"
 
 const registryOf = (): PrimitiveRegistry => {
   const built = createStarterPrimitiveRegistry()
@@ -135,12 +136,15 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as twenty-five primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(25)
+  it("registers as twenty-nine primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(29)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.section",
       "loom.split",
+      "loom.stack",
+      "loom.grid",
+      "loom.card",
       "loom.hero",
       "loom.feature-grid",
       "loom.feature",
@@ -159,6 +163,7 @@ describe("the starter library", () => {
       "loom.heading",
       "loom.prose",
       "loom.badge",
+      "loom.icon",
       "loom.perk",
       "loom.divider",
       "loom.media",
@@ -184,6 +189,35 @@ describe("the starter library", () => {
 
       expect(types).toContain(type.slice(0, -(arrangement.length + 1)))
     }
+  })
+
+  it("names a general arranger for the arrangement alone, without tripping the stem rule", () => {
+    const types = new Set(registry.primitives.map((primitive) => primitive.type))
+
+    /**
+     * 0062, and the reason it needs no exception carved out of the test above:
+     * the stem rule strips an arrangement word *with its hyphen*, and neither
+     * general arranger has one. `loom.grid` is not a container that lost its
+     * child — its whole name is the arrangement, which is what a container that
+     * repeats nothing in particular is called.
+     */
+    expect(types).toContain("loom.stack")
+    expect(types).toContain("loom.grid")
+    expect(types).not.toContain("loom.stack-grid")
+
+    for (const general of ["loom.stack", "loom.grid"]) expect(general.endsWith("-grid")).toBe(false)
+
+    /**
+     * The preference is carried by the descriptions, because a description is
+     * all a model has when it is choosing between `loom.grid` and a band named
+     * for what it holds. If this ever stops being said out loud, 0062's only
+     * mitigation is gone.
+     */
+    const describes = (type: string): string =>
+      registry.primitives.find((primitive) => primitive.type === type)?.description ?? ""
+
+    expect(describes("loom.stack")).toContain("prefer a named band")
+    expect(describes("loom.grid")).toContain("prefer a named band")
   })
 
   it("says out loud where the perk trio breaks the stem rule, since the stem rule cannot", () => {
@@ -652,7 +686,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the three fixtures", () => {
+  it("covers every registered primitive across the four fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -662,6 +696,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(samplePage(EDITORIAL)),
       ...typesIn(marketingPage(EDITORIAL)),
       ...typesIn(pricingPage(EDITORIAL)),
+      ...typesIn(arrangedPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -863,6 +898,297 @@ describe("the pricing band", () => {
     const { markup } = render(pricingPage(EDITORIAL))
 
     expect(markup.match(/<style/g)?.length).toBe(1)
+  })
+})
+
+/**
+ * The compose-and-arrange layer, exercised as the thing it exists for: a band
+ * nobody has ported, assembled out of the general four. Every band in the three
+ * fixtures above is a primitive that knew what it held; this one is a
+ * `loom.grid` of `loom.card`s that holds whatever the tree put on it, which is
+ * the whole of 0062's floor-not-ceiling argument in one fixture.
+ */
+const arrangedPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const icon = (glyph: string, props: JsonObject) =>
+    buildElement(idFactory, { type: "loom.icon", props, children: [text(glyph)] })
+
+  const integration = (glyph: string, title: string, body: string, tone: string) =>
+    buildElement(idFactory, {
+      type: "loom.card",
+      props: { tone, padding: "loose" },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.stack",
+          props: { gap: "snug", align: "start" },
+          children: [
+            icon(glyph, { shape: "soft", tone: tone === "accent" ? "strong" : "accent" }),
+            buildElement(idFactory, {
+              type: "loom.heading",
+              props: { level: 3 },
+              children: [text(title)],
+            }),
+            buildElement(idFactory, {
+              type: "loom.prose",
+              props: { tone: "muted", size: "small" },
+              children: [text(body)],
+            }),
+          ],
+        }),
+        buildSlot(idFactory, "footer", [
+          buildElement(idFactory, {
+            type: "loom.action",
+            props: { href: "https://example.com/docs", variant: "quiet", scale: "small" },
+            children: [text(`Wire up ${title}`)],
+          }),
+        ]),
+      ],
+    })
+
+  /** The one card with a picture, so the media region has something to bleed. */
+  const featured = buildElement(idFactory, {
+    type: "loom.card",
+    props: { href: "https://example.com/changelog", padding: "loose" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.stack",
+        props: { direction: "row", gap: "tight", align: "center", wrap: false },
+        children: [
+          icon("◆", { shape: "circle", tone: "accent", size: "small" }),
+          buildElement(idFactory, { type: "loom.badge", props: { tone: "neutral" }, children: [text("New")] }),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.heading",
+        props: { level: 3 },
+        children: [text("Every proposal, end to end")],
+      }),
+    ],
+  })
+
+  const featuredWithMedia = buildElement(idFactory, {
+    type: "loom.card",
+    props: { tone: "outline", padding: "normal" },
+    children: [
+      buildSlot(idFactory, "media", [
+        buildElement(idFactory, {
+          type: "loom.media",
+          props: {
+            src: "https://example.com/portal.png",
+            alt: "The review queue, mid-proposal",
+            aspect: "wide",
+            corners: "none",
+          },
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.heading",
+        props: { level: 3 },
+        children: [text("Watch a change land")],
+      }),
+    ],
+  })
+
+  const band = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Integrations", tone: "surface" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("It meets the stack you already run")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.grid",
+        props: { columns: "three", gap: "normal" },
+        children: [
+          integration("◈", "Postgres", "Your own store, your own retention.", "surface"),
+          integration("◇", "Vercel", "Ship the portal beside the app.", "surface"),
+          integration("★", "Anthropic", "Bring the model you already pay for.", "accent"),
+          featured,
+          featuredWithMedia,
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [band],
+    }),
+    idFactory
+  )
+}
+
+describe("the compose-and-arrange layer", () => {
+  it("renders a band nobody ported, out of the general four", () => {
+    const { markup, diagnostics } = render(arrangedPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("It meets the stack you already run")
+    expect(markup).toContain("Wire up Postgres")
+    expect(markup).toContain("Every proposal, end to end")
+  })
+
+  it("puts the card's media outside the padding and its footer on the card's floor", () => {
+    const { markup } = render(arrangedPage(EDITORIAL))
+
+    /**
+     * The two claims that make these regions rather than children (0051). The
+     * media region carries no padding — that is what "flush to the edges"
+     * means — and the footer carries `margin-top:auto`, which is the only
+     * reason a row of cards of unequal length has its actions on one line.
+     */
+    const mediaAt = markup.indexOf("portal.png")
+    const cardOpensAt = markup.lastIndexOf("<div", mediaAt)
+
+    expect(markup.slice(cardOpensAt, mediaAt)).not.toContain("padding:")
+    expect(markup).toContain("margin-top:auto")
+    expect(markup).toContain("border-top:1px solid var(--loom-border-subtle)")
+
+    /** And the clip that lets it be flush without a negative margin. */
+    expect(markup).toContain("overflow:hidden")
+  })
+
+  it("makes a linked card the anchor, and lifts it without being told to", () => {
+    const { markup } = render(arrangedPage(EDITORIAL))
+    const anchorAt = markup.indexOf('href="https://example.com/changelog"')
+    const anchor = markup.slice(markup.lastIndexOf("<a", anchorAt), markup.indexOf(">", anchorAt))
+
+    expect(anchor.startsWith("<a ")).toBe(true)
+    expect(anchor).toContain(LIBRARY_CLASS.lift)
+  })
+
+  it("flips a stack's axis with a prop, since a flip is a configure and not a rebuild", () => {
+    const column = render(arrangedPage(EDITORIAL)).markup
+
+    expect(column).toContain("flex-direction:row")
+    expect(column).toContain("flex-direction:column")
+
+    /**
+     * The 0062 assertion. `direction` decides how however-many children are
+     * arranged and never how many there are, so the same node with the same
+     * children renders both ways — which is what makes the adaptation a
+     * `configure` rather than a `remove` and an `insert`.
+     */
+    const rowOnly = render(
+      createTree(
+        buildElement(sequentialIdFactory(), {
+          type: "loom.stack",
+          props: { direction: "row" },
+          children: [buildText(sequentialIdFactory(), "one"), buildText(sequentialIdFactory(), "two")],
+        }),
+        sequentialIdFactory()
+      )
+    ).markup
+
+    expect(rowOnly).toContain("flex-direction:row")
+    expect(rowOnly).toContain("one")
+    expect(rowOnly).toContain("two")
+  })
+
+  it("keeps a grid's columns a floor rather than a count", () => {
+    const idFactory = sequentialIdFactory()
+    const children = ["alpha", "beta", "gamma", "delta", "epsilon"]
+
+    const gridOf = (columns: string): string =>
+      render(
+        createTree(
+          buildElement(idFactory, {
+            type: "loom.grid",
+            props: { columns },
+            children: children.map((child) => buildText(idFactory, child)),
+          }),
+          idFactory
+        )
+      ).markup
+
+    /**
+     * The near-miss the granularity doc warns about, asserted rather than
+     * argued: `two` and `four` change the minimum width and nothing else. Every
+     * child survives both, so the prop changes no node and stays a prop.
+     */
+    for (const columns of ["two", "four"]) {
+      const markup = gridOf(columns)
+      for (const child of children) expect(markup).toContain(child)
+    }
+
+    expect(gridOf("two")).toContain("22rem")
+    expect(gridOf("four")).toContain("13rem")
+  })
+
+  it("wraps a general grid at the same widths as the band-shaped one", () => {
+    const idFactory = sequentialIdFactory()
+
+    const minimumIn = (markup: string): string | undefined =>
+      /minmax\(min\(100%, ([^)]+)\)/.exec(markup)?.[1]
+
+    const general = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.grid",
+          props: { columns: "three" },
+          children: [buildText(idFactory, "cell")],
+        }),
+        idFactory
+      )
+    ).markup
+
+    const band = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.feature-grid",
+          props: { columns: "three" },
+          children: [buildText(idFactory, "cell")],
+        }),
+        idFactory
+      )
+    ).markup
+
+    /** One shared table in `layout.ts`, so a page that mixes them breaks in one place. */
+    expect(minimumIn(general)).toBe(minimumIn(band))
+    expect(minimumIn(general)).toBe("17rem")
+  })
+
+  it("hides an unlabelled glyph and names a labelled one", () => {
+    const idFactory = sequentialIdFactory()
+
+    const iconOf = (props: JsonObject): string =>
+      render(
+        createTree(
+          buildElement(idFactory, { type: "loom.icon", props, children: [buildText(idFactory, "★")] }),
+          idFactory
+        )
+      ).markup
+
+    /**
+     * Decorative is the default because the common case is a glyph beside the
+     * word it repeats, and a screen reader reading both is worse than reading
+     * neither. Naming one is opting in.
+     */
+    expect(iconOf({})).toContain('aria-hidden="true"')
+    expect(iconOf({})).not.toContain('role="img"')
+
+    const named = iconOf({ label: "Favourite" })
+    expect(named).toContain('role="img"')
+    expect(named).toContain('aria-label="Favourite"')
+    expect(named).not.toContain("aria-hidden")
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(arrangedPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(arrangedPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(arrangedPage(BOLD)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
   })
 })
 
