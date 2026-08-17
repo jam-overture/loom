@@ -2,6 +2,7 @@ import { createElement, Fragment, type CSSProperties, type ReactNode } from "rea
 
 import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
 import type { JsonObject } from "../json.js"
+import type { PrimitiveType } from "../primitive-type.js"
 import { DATA_PROP_KEY } from "../reserved-props.js"
 import { assertNever } from "../result.js"
 import type { ThemeRegistry } from "../theme/registry.js"
@@ -19,7 +20,13 @@ import {
   type SlotChildren,
 } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
-import { NO_TEXT, type PrimitiveText, type TextResolver } from "./text.js"
+import {
+  isTextResolver,
+  NO_TEXT,
+  overlayText,
+  type PrimitiveText,
+  type TextResolver,
+} from "./text.js"
 import { partitionReservedProps, resolveTheme, themeStyle, THEME_PROP_KEY } from "./theme.js"
 
 /**
@@ -66,11 +73,18 @@ export type RenderOptions = {
    */
   readonly data?: DataResolution
   /**
-   * Absent means every primitive is handed an empty string map — including the
-   * strings it declared itself. A registry built by §4's SDK is a `TextResolver`
-   * over its own declarations, so wiring the same object into `resolver` and
-   * here is the ordinary case and is what an untranslated deployment wants;
-   * `textResolverFor` wraps it with a dictionary to translate.
+   * The host's answer for the strings primitives declared — a dictionary, in the
+   * language this deployment serves. Absent means the declared strings render as
+   * their authors wrote them, which is what an untranslated deployment wants and
+   * needs no wiring: the renderer reads declarations off `resolver` when that
+   * resolver is a registry (0063). `textResolverFor` builds one of these from a
+   * registry and a dictionary.
+   *
+   * A key this does not answer keeps its declared string, so a partial
+   * dictionary is a partial translation rather than a missing accessible name.
+   * There is deliberately no wiring that suppresses a declared string: a control
+   * with no accessible name is the failure the seam exists to prevent, and it
+   * should not be reachable by leaving something out.
    */
   readonly text?: TextResolver
   /** Off by default: decoration is opt-in per request, never ambient. */
@@ -343,6 +357,44 @@ const mountedTheme = (
   }
 }
 
+/**
+ * The two halves of the text seam, composed into the one lookup the walk uses.
+ *
+ * Declarations are read off the resolver, because they belong to the primitive
+ * and travel with it; the host's dictionary is laid over them, because the
+ * language is the host's. Neither half is required and neither is enough on its
+ * own: with no dictionary a page renders the authors' strings, and with a
+ * dictionary that answers for only part of the library the rest keeps theirs.
+ *
+ * The merge is memoised per type for the length of one render — a page with
+ * fifty markers merges once, not fifty times — and the cache lives in this
+ * closure rather than at module scope, so two renders of the same tree cannot
+ * disagree because one of them ran first.
+ */
+const composeText = (
+  resolver: PrimitiveResolver,
+  supplied: TextResolver | undefined
+): TextResolver | undefined => {
+  const declared = isTextResolver(resolver) ? resolver : undefined
+
+  if (!supplied) return declared
+  if (!declared) return supplied
+
+  const merged = new Map<PrimitiveType, PrimitiveText<string>>()
+
+  return {
+    textFor: (type: PrimitiveType): PrimitiveText<string> => {
+      const cached = merged.get(type)
+      if (cached) return cached
+
+      const resolved = overlayText(declared.textFor(type), supplied.textFor(type))
+      merged.set(type, resolved)
+
+      return resolved
+    },
+  }
+}
+
 export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOutput => {
   const diagnostics: RenderDiagnostic[] = []
   const collect = (diagnostic: RenderDiagnostic): void => {
@@ -359,7 +411,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     tree,
     theme: theme ? themeStyle(theme) : undefined,
     data: options.data,
-    text: options.text,
+    text: composeText(options.resolver, options.text),
     collect,
   })
 

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="720" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#059669"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">A declared string travels with the primitive</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0063 — day 54 — §4f → §3. The renderer reads declarations off the resolver; `text` is the dictionary laid over them.</text>
+
+  <!-- ================= the wiring everyone writes ================= -->
+  <text x="32" y="104" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">THE WIRING EVERY CONSUMER ACTUALLY WROTE</text>
+
+  <rect x="32" y="118" width="896" height="74" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="46" y="140" font-size="10.5" fill="#111827">renderLoomTree(tree, { resolver: registry, validator: registry, themes })</text>
+  <text x="46" y="162" font-size="9.5" fill="#6b7280">apps/portal/app/demo · apps/portal/app/trees/[treeId] · the primitives routine's own library.test.ts, until it lost a red test finding out</text>
+  <text x="46" y="180" font-size="9.5" fill="#b91c1c">no `text`, because nothing in the option list said the omission cost anything</text>
+
+  <!-- ================= before / after ================= -->
+  <text x="32" y="232" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT `loom.perk-list-item` RENDERED UNDER THAT WIRING — REAL MARKUP, BOTH RUNS</text>
+
+  <rect x="32" y="246" width="440" height="176" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="46" y="268" font-size="11.5" fill="#991b1b" font-family="ui-sans-serif, system-ui, sans-serif">before</text>
+  <text x="46" y="292" font-size="10" fill="#b91c1c">&lt;span aria-hidden="true"&gt;✕&lt;/span&gt;</text>
+  <text x="46" y="312" font-size="10" fill="#374151">&lt;span&gt;Priority support&lt;/span&gt;</text>
+  <text x="46" y="342" font-size="9.5" fill="#6b7280">the declared string existed, in the registry,</text>
+  <text x="46" y="356" font-size="9.5" fill="#6b7280">one lookup away — and was dropped</text>
+  <text x="46" y="384" font-size="10" fill="#991b1b">a screen reader is read "Priority support"</text>
+  <text x="46" y="400" font-size="10" fill="#991b1b">with the ✕ hidden: the opposite of the page</text>
+
+  <rect x="488" y="246" width="440" height="176" rx="6" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="502" y="268" font-size="11.5" fill="#166534" font-family="ui-sans-serif, system-ui, sans-serif">after</text>
+  <text x="502" y="292" font-size="10" fill="#059669">&lt;span role="img" aria-label="Not included"&gt;✕&lt;/span&gt;</text>
+  <text x="502" y="312" font-size="10" fill="#374151">&lt;span&gt;Priority support&lt;/span&gt;</text>
+  <text x="502" y="342" font-size="9.5" fill="#6b7280">the same wiring, unedited — the renderer</text>
+  <text x="502" y="356" font-size="9.5" fill="#6b7280">reads declarations off the resolver it has</text>
+  <text x="502" y="384" font-size="10" fill="#166534">0060 clause 4 said "correct with no wiring".</text>
+  <text x="502" y="400" font-size="10" fill="#166534">Now it is.</text>
+
+  <!-- ================= the two halves ================= -->
+  <text x="32" y="462" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">TWO HALVES, TWO OWNERS, ONE MAP</text>
+
+  <rect x="32" y="476" width="256" height="112" rx="6" fill="#faf5ff" stroke="#e9d5ff"/>
+  <text x="46" y="498" font-size="11" fill="#6b21a8">resolver — the primitive's</text>
+  <text x="46" y="520" font-size="10" fill="#7c3aed">{ excluded: "Not included" }</text>
+  <text x="46" y="546" font-size="9.5" fill="#6b7280">ships in the package, with the markup;</text>
+  <text x="46" y="560" font-size="9.5" fill="#6b7280">present whenever the resolver is a registry,</text>
+  <text x="46" y="574" font-size="9.5" fill="#6b7280">absent when there was nothing to declare</text>
+
+  <rect x="352" y="476" width="256" height="112" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="366" y="498" font-size="11" fill="#1e40af">options.text — the host's</text>
+  <text x="366" y="520" font-size="10" fill="#2563eb">{ excluded: "Nicht enthalten" }</text>
+  <text x="366" y="546" font-size="9.5" fill="#6b7280">a dictionary, per language, wired at the</text>
+  <text x="366" y="560" font-size="9.5" fill="#6b7280">composition root; optional, and a key it</text>
+  <text x="366" y="574" font-size="9.5" fill="#6b7280">does not answer keeps the declared string</text>
+
+  <rect x="672" y="476" width="256" height="112" rx="6" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="686" y="498" font-size="11" fill="#166534">loom.text — the primitive's</text>
+  <text x="686" y="520" font-size="10" fill="#059669">always complete, never undefined</text>
+  <text x="686" y="546" font-size="9.5" fill="#6b7280">merged once per type per render, not once</text>
+  <text x="686" y="560" font-size="9.5" fill="#6b7280">per node; typed to the declared keys, so</text>
+  <text x="686" y="574" font-size="9.5" fill="#6b7280">reading one that was not declared will not compile</text>
+
+  <line x1="288" y1="532" x2="348" y2="532" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="608" y1="532" x2="668" y2="532" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- ================= why the old mirror was wrong ================= -->
+  <text x="32" y="632" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHY `themes` AND `data` WERE THE WRONG MIRROR</text>
+
+  <rect x="32" y="646" width="896" height="54" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="46" y="668" font-size="9.5" fill="#374151">A tree that names a theme, or binds data, <tspan fill="#059669">says so in the tree</tspan> — so the renderer sees the mismatch and reports it: `theme-unregistered`, `data-unresolved`.</text>
+  <text x="46" y="686" font-size="9.5" fill="#374151">Nothing in a tree says a primitive declares strings. <tspan fill="#b91c1c">Silence was not a diagnostic left out — it was the only outcome available.</tspan> So the seam changed instead.</text>
+</svg>

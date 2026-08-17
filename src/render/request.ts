@@ -56,11 +56,11 @@ export type RenderDependencies = {
    */
   readonly sources?: DataRegistry
   /**
-   * Absent means primitives receive no strings, including their own declared
-   * ones — see `RenderOptions.text`. A host serving one language wires its
-   * registry here; a host serving several builds one resolver per dictionary and
-   * picks by whatever it reads the request's language from, which is its own
-   * business and not the framework's.
+   * Absent means primitives render the strings their authors declared — see
+   * `RenderOptions.text`. A host serving one language in the library's own
+   * language wires nothing here; a host serving another builds a resolver per
+   * dictionary and picks by whatever it reads the request's language from, which
+   * is its own business and not the framework's.
    */
   readonly text?: TextResolver
   readonly slots?: SlotContent

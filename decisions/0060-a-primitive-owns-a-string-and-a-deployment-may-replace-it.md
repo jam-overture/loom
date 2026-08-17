@@ -1,6 +1,6 @@
 # 0060 — A primitive owns a string, and a deployment may replace it
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by 0063
 **Date:** 2026-08-16
 **Section:** §4f → §3, §4
 

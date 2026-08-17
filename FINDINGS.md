@@ -440,7 +440,13 @@ as the floor plus the Hermes content models on disk, and should say so.
 
 ## 2026-08-16 — a render that omits `options.text` loses an accessible name silently
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#84** — the renderer now reads declared strings off the resolver and treats
+`options.text` as the dictionary laid over them
+([0063](decisions/0063-a-declared-string-travels-with-the-primitive.md), which
+partially supersedes 0060). Original status below.
+
+**Status:** open
 
 Found while adopting 0060, and it cost one red test to notice.
 
@@ -473,3 +479,55 @@ Worth considering, in the framework routine's judgement rather than this one's:
 No action taken beyond this routine's own lane: `library.test.ts` now passes
 `text: registry` with a comment saying why, so the library's tests would catch a
 regression here again.
+
+---
+
+## 2026-08-17 — the demo and the portal's tree view were both wired the quiet way
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** closed
+by **#84** — no edit is needed in `apps/`; recorded so neither routine spends a
+run looking for one
+
+Answering the finding above, which this routine owns, and reporting what turned
+up while proving it.
+
+`apps/portal/app/demo/page.tsx` and `apps/portal/app/trees/[treeId]/page.tsx`
+both wire `resolver`, `validator` and (in the demo's case) `themes`, and neither
+wires `text` — the exact shape the primitives routine hit in its own suite. That
+is not a criticism of either page: nothing in the option list said the omission
+cost anything, which is why it is a framework fix rather than four wiring fixes.
+
+**Both are correct now with no change**, because the renderer reads declared
+strings off the resolver they already pass
+([0063](decisions/0063-a-declared-string-travels-with-the-primitive.md)). Neither
+registry declares any text today, so nothing about the rendered pages moves; what
+changed is that neither will lose an accessible name when it grows one, and
+neither has to know the rule to get it right.
+
+The one thing worth carrying forward: **`text` now means the dictionary and
+nothing else.** A portal or docs deployment serving English wires nothing. A
+deployment serving another language builds `textResolverFor(registry, dictionary)`
+and wires that — and a dictionary that answers for part of the library is now a
+partial translation rather than a page of nameless controls, so it can be filled
+in over time.
+
+---
+
+## 2026-08-17 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Recorded for the reason the other routines record it. The change needed one new
+export inside the render seam — `isTextResolver`, beside `NO_TEXT` in
+`render/text.ts` — and nothing from outside `src/`. No entry point changed shape,
+no consumer was touched, and `src/primitives/` was deliberately not opened: the
+starter library's two declared strings are already on the seam after #81, and
+they get better from this change without being edited.
+
+One thing this run did **not** do, which is worth naming rather than leaving as
+an absence. The finding offered a second option — an audit that asserts a render
+is wired for the primitives that declare text — and 0063 rejects it as the *fix*
+while saying it is still worth having. With declarations now underneath every
+render there is nothing left for it to catch, so it was not built. If a host ever
+wants to assert that a dictionary is complete, `textCoverage` already answers
+that and is the better place for it.
