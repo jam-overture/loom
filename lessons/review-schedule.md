@@ -298,6 +298,92 @@ attached to the example you met it in rather than to the shape.
 
 ---
 
+## Set L — two days after lesson 10
+
+Interleaved with 01–09, and built around the failure mode lesson 10 exists to
+name: **assuming that something decided once does not need deciding again.** It
+is the natural way to think about a sequence of steps, it is right about four of
+Loom's stages and wrong about three, and telling those apart is most of what
+Part II was for.
+
+1. Name the five outcomes of `composeChange`. Two of them carry no disposition —
+   name those two, say what they have in common, and give a question a monthly
+   report would get wrong if the type let them carry one.
+2. A held change is confirmed and the Gate returns `requires-confirmation` a
+   second time. Say what happens, then say what the disposition recorded on the
+   applied change reads. Then: somebody counts that kind in the journal to find
+   changes waiting on a human. Say what they actually get, and name the lesson-09
+   finding this is a second costume of. *(09)*
+3. The policy is resolved once across a refusal and its repair, and again across
+   a confirmation. State the one rule that produces both numbers — it is not
+   "once per call" and not "once per proposal". Then apply it to a case neither
+   lesson mentions: two intents raised a second apart against the same tree.
+4. `PolicyContext` is the tree and the intent, and cannot see the proposal.
+   Describe the failure that omission prevents, in terms of a number that would
+   look healthy while measuring nothing — then name the lesson-07 separation this
+   is the same instinct as, and say which one is about honesty and which is about
+   being able to read a year of records. *(07)*
+5. A confirmation reuses the stored proposal rather than re-interpreting the
+   utterance. That proposal's delta names node ids that were minted, or will
+   mint, an hour ago. Say what lesson 04 has to be true for the reuse to be safe
+   at all — and then say what would go wrong if Loom had chosen positional
+   addresses instead, being specific about *when* the reviewer would find out.
+   *(04)*
+6. Two checks stop a stale confirmation and they are one layer apart. Name both,
+   say which fires first in a supported deployment, and say what the later one is
+   for. Then give the general statement of what `baseRevision` protects against.
+   *(03)*
+7. Text is a node rather than a prop, and `slot` is a node kind rather than a
+   prop on its parent. Say what those two decisions have in common, in one
+   sentence about what a delta has to be able to address. *(02)*
+8. Name the property that puts a field on `CompositionRuntime`. Apply it to
+   `policySource`, which was not on that list when lesson 05 was written, and say
+   what its being a *seam* rather than a value makes possible — the thing lesson
+   09's last exercise demonstrated. *(05, 09)*
+
+Question 3 is the slow one and the one to write out in full sentences rather than
+a number. Question 5 is the payoff of the whole course so far: it reaches back
+across five lessons to Part I, and if the connection is not there yet, this is a
+better place to build it than a month from now.
+
+---
+
+## Set M — one week after Part II
+
+Part II ends at lesson 10, so this is its consolidation set, and it is the
+counterpart to Set E. Do it **out loud**, to a person or a recording. Spoken
+explanation is retrieval plus elaboration at once, and it catches the gaps that
+written notes let you skate over — you cannot silently mean the right thing.
+
+1. Trace one change from an utterance to a row in the log, naming every stage and
+   what each one is forbidden to do. Then do it again for a change that a person
+   had to allow, and say which stages ran twice.
+2. Part II is five lessons and one sentence: *a change is measured, then judged,
+   then applied, and the three are kept apart.* Name what each separation buys,
+   and find the one place in the material where something crosses a line you
+   just drew and say why it is allowed to.
+3. Derive the inverse delta from the delta's ordering guarantee, then say why the
+   inverse is computed at assessment time rather than at apply time — and what
+   that means for a change the Gate holds and nobody ever answers.
+4. Somebody proposes a `GatePolicy` knob for how many repair attempts a refusal
+   gets. Argue against it using only what is in Part II, then argue for it as
+   strongly as you can, then say which argument would have to be answered first.
+5. Write the six Gate rules in order from memory. Beside each, write the
+   disposition kind it produces, and mark the two that read the same input.
+6. A change is applied at revision 7 and undone at revision 8. Say what the
+   disposition on revision 8 can say, what it cannot, and which of Part II's
+   separations is the reason.
+7. Name every place in Part II where the system does something a second time
+   rather than trusting a stored answer, and give the single argument all of them
+   share. Then name the one thing it deliberately does *not* redo, and say why
+   the argument reverses there.
+
+Question 7 is the one this set is built around, and the one to be least satisfied
+with a short answer to. Question 3's last clause reaches into Part IV, which you
+have not read — attempt it anyway.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -317,3 +403,5 @@ you already know.
 | I | 2 days after L07 | | |
 | J | 2 days after L08 | | |
 | K | 2 days after L09 | | |
+| L | 2 days after L10 | | |
+| M | 1 week after Part II | | |
