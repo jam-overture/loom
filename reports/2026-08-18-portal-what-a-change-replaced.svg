@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" font-family="ui-sans-serif, system-ui, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #0d0e12; }
+      .row { fill: #15171d; stroke: #262a33; stroke-width: 1; }
+      .rowAnchor { fill: #171b26; stroke: #3a4353; stroke-width: 1.5; }
+      .ink { fill: #e7e9ee; }
+      .muted { fill: #8b909c; }
+      .secondary { fill: #b7bcc7; }
+      .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+      .rev { fill: #c9cdd6; }
+      .warn { fill: #3a2f16; stroke: #6b571f; stroke-width: 1; }
+      .warnInk { fill: #e8c765; }
+      .bar { fill: #2a2e38; }
+      .barNew { fill: #3a4353; }
+      .title { fill: #f3f4f7; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="960" height="720"/>
+
+  <text class="muted mono" x="32" y="40" font-size="12" letter-spacing="1.5">§5 · LOOM PORTAL · /history</text>
+  <text class="title" x="32" y="70" font-size="24" letter-spacing="-0.3">What a change replaced</text>
+  <text class="secondary" x="32" y="94" font-size="14">The forward delta records what a revision <tspan font-style="italic">did</tspan>. Each row now also carries what its inverse would put back —</text>
+  <text class="secondary" x="32" y="113" font-size="14">the value it wrote over, the subtree it destroyed — read from the log before anyone presses undo.</text>
+
+  <!-- Row A: reconfigure, clean restore of a prior value -->
+  <g transform="translate(32,140)">
+    <rect class="row" x="0" y="0" width="896" height="118" rx="8"/>
+    <text class="rev mono" x="20" y="28" font-size="13">revision 12</text>
+    <text class="muted mono" x="876" y="28" font-size="11" text-anchor="end">2026-08-18T14:02:19.884Z</text>
+
+    <rect class="bar" x="20" y="42" width="3" height="16"/>
+    <text x="34" y="55" font-size="12.5"><tspan class="ink">reconfigure</tspan> <tspan class="ink mono">n_c4</tspan> <tspan class="muted">variant</tspan></text>
+
+    <text class="muted mono" x="20" y="82" font-size="10.5" letter-spacing="1">UNDOING THIS WOULD</text>
+    <rect class="barNew" x="20" y="90" width="3" height="16"/>
+    <text x="34" y="103" font-size="12.5"><tspan class="secondary">restores</tspan> <tspan class="ink mono">n_c4</tspan> <tspan class="muted">variant to </tspan><tspan class="warnInk">&#8220;outlined&#8221;</tspan></text>
+  </g>
+
+  <!-- Row B: removal, restores destroyed subtree -->
+  <g transform="translate(32,274)">
+    <rect class="row" x="0" y="0" width="896" height="118" rx="8"/>
+    <text class="rev mono" x="20" y="28" font-size="13">revision 9</text>
+    <text class="muted mono" x="876" y="28" font-size="11" text-anchor="end">2026-08-18T13:41:07.220Z</text>
+
+    <rect class="bar" x="20" y="42" width="3" height="16"/>
+    <text x="34" y="55" font-size="12.5"><tspan class="ink">delete</tspan> <tspan class="ink mono">n_c4</tspan> <tspan class="muted">and everything under it</tspan></text>
+
+    <text class="muted mono" x="20" y="82" font-size="10.5" letter-spacing="1">UNDOING THIS WOULD</text>
+    <rect class="barNew" x="20" y="90" width="3" height="16"/>
+    <text x="34" y="103" font-size="12.5"><tspan class="secondary">restores</tspan> <tspan class="ink mono">n_c4</tspan> <tspan class="muted">loom.card, with the 4 nodes it held, back into </tspan><tspan class="ink mono">n_page</tspan></text>
+  </g>
+
+  <!-- Row C: reconfigure with a contested undo -->
+  <g transform="translate(32,408)">
+    <rect class="rowAnchor" x="0" y="0" width="896" height="150" rx="8"/>
+    <text class="rev mono" x="20" y="28" font-size="13">revision 7</text>
+    <text class="muted mono" x="876" y="28" font-size="11" text-anchor="end">2026-08-18T13:12:55.019Z</text>
+
+    <rect class="bar" x="20" y="42" width="3" height="16"/>
+    <text x="34" y="55" font-size="12.5"><tspan class="ink">reconfigure</tspan> <tspan class="ink mono">n_h2</tspan> <tspan class="muted">level</tspan></text>
+
+    <text class="muted mono" x="20" y="82" font-size="10.5" letter-spacing="1">UNDOING THIS WOULD</text>
+    <rect class="barNew" x="20" y="90" width="3" height="16"/>
+    <text x="34" y="103" font-size="12.5"><tspan class="secondary">restores</tspan> <tspan class="ink mono">n_h2</tspan> <tspan class="muted">level to </tspan><tspan class="warnInk">1</tspan></text>
+
+    <rect class="warn" x="20" y="116" width="640" height="22" rx="4"/>
+    <text x="30" y="131" font-size="11.5"><tspan class="warnInk">It writes over what revisions </tspan><tspan class="warnInk mono">9, 11</tspan><tspan class="warnInk"> did to nodes it touches, so a person has to confirm it.</tspan></text>
+  </g>
+
+  <!-- Caption / the bar -->
+  <text class="muted" x="32" y="596" font-size="13">
+    <tspan font-weight="600" class="secondary">What this tells a developer that nothing else can: </tspan>the left-hand value a change replaced.
+  </text>
+  <text class="muted" x="32" y="618" font-size="13">A diff in <tspan class="mono ink">git log</tspan> carries both sides of every change. Loom's delta stores only the new one — the old</text>
+  <text class="muted" x="32" y="638" font-size="13">value, the deleted subtree, the origin of a move are recoverable nowhere but here, by inverting the log.</text>
+  <text class="muted" x="32" y="672" font-size="12">Copy is the exact text the components emit. Ids and timestamps are illustrative; the durable store on the preview holds no revisions yet.</text>
+</svg>
