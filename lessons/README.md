@@ -107,7 +107,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [07](07-measuring-a-change.md) | Measuring a change | What analysis extracts, and why measurement is separated from judgment. |
 | [08](08-two-axes.md) | Two axes: stakes and reversibility | The distinction that a test caught us getting wrong. |
 | [09](09-the-gate.md) | The Gate | A rule ladder, not a score. Why order encodes precedence. |
-| 10 | The pipeline | Intent → proposal → assessment → disposition → apply. |
+| [10](10-the-pipeline.md) | The pipeline | Intent → proposal → assessment → disposition → apply — and what it means that the sequence can stop halfway. |
 
 ### Part III — Talking to a model
 

@@ -532,6 +532,44 @@ this lane can do.
 
 ---
 
+## 2026-08-17 — three Hermes blocks are blocked on seams, not on primitives
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while writing [`docs/hermes-port-map.md`](docs/hermes-port-map.md), which
+classifies all seventy Hermes blocks. Sixty-seven of them are a primitives
+question. Three are not, and they will sit unported however many pairs this
+routine builds.
+
+**`tabs` needs client-side selection.** The runtime has no state seam: a render
+is a pure function of the tree, and nothing carries "which tab is open" between
+one render and the next. `loom.faq` ships only because HTML has `<details>` —
+the disclosure state lives in the browser and never in the tree, so the
+primitive stays pure. Tabs have no such element. The options, in the framework
+routine's judgement rather than this one's:
+
+- **Leave it unported**, and say so in the map. A tab strip is one of the few
+  Hermes blocks with no honest static rendering, and a library that stops at the
+  edge of its own model is not obviously worse than one that grows a state seam
+  for one block.
+- **A radio-and-label technique**, which is real HTML with no script and would
+  work — at the cost of a primitive whose markup is a trick, and which cannot
+  say which panel is open in the tree that a proposal reads.
+- **A state seam**, which is a much larger decision than one primitive and
+  reaches the delta model.
+
+**`contactform` and `newsletter` need a form target.** Both are a field list and
+a submit. The field list is an ordinary 0052 decomposition and this routine can
+build it; the submit is a decision about where a deployment's data goes, which
+is a host concern with a security surface and belongs nowhere near a primitive's
+props. Recorded together with `tabs` because both are the same shape of problem:
+the primitive is not the hard part.
+
+No action taken beyond the map, which marks all three **blocked** rather than
+pending, so a later run does not pick one up and discover this again.
+
+---
+
 ## 2026-08-17 — the demo and the portal's tree view were both wired the quiet way
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** closed
@@ -581,6 +619,56 @@ while saying it is still worth having. With declarations now underneath every
 render there is nothing left for it to catch, so it was not built. If a host ever
 wants to assert that a dictionary is complete, `textCoverage` already answers
 that and is the better place for it.
+
+---
+
+## 2026-08-17 — no telemetry surface can be demonstrated to anyone
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Found while trying to produce the screenshot the brief asks for. It is not
+specific to calibration — it applies to `/calibration`, `/activity` and
+`/sign-ins` equally, which is why it is worth a finding rather than a line in a
+report.
+
+Three things are each individually reasonable and together leave no path:
+
+- **`/calibration` requires an actor** (0027, and `guarded-pages.test.ts`
+  enforces it). Correct, and not something to relax.
+- **The demo does not feed the journal.** `beginDemoWrite` sends events to a
+  per-request array, deliberately — `session.ts` says the demo's record *is* the
+  event stream, read back within the same request, so a visitor sees what the
+  runtime said rather than a summary. Also correct.
+- **Preview deployments are protected**, which the maintainer already reported on
+  #75 and is recorded above.
+
+So the only way to look at a telemetry surface with real data is a signed-in
+session against a configured `DATABASE_URL` with judged proposals already in it.
+Neither a reviewer of a pull request nor a routine writing a report can reach
+that, and the 17 August run's visual is therefore **the real components rendered
+against a fixture fold**, which the report says plainly.
+
+This matters more than a screenshot. `/activity`, `/calibration` and `/sign-ins`
+are three of the portal's eight pages, they are the ones whose value is hardest
+to argue in the abstract, and **nobody outside this repository has ever seen any
+of them with data in.**
+
+Two ways out, and the first is small:
+
+- **Let the demo session keep a journal.** A `memoryTelemetryJournal` per demo
+  session, written from the same envelopes `narrated()` already collects, and a
+  demo-scoped read on the telemetry pages. The demo already mints a policy, a
+  store and a hold store per visitor; a fourth is the same shape. It would make
+  every telemetry surface demonstrable to a visitor with no account, which is
+  what `/demo` is for (0056).
+- **Or a seeded fixture journal behind an explicit flag**, which is less
+  honest — a page that says "this data is made up" is a screenshot with extra
+  steps.
+
+Filed against my own lane rather than acted on: the first option touches
+`apps/portal/lib/demo`, which is mine, but it is a unit of its own and this run
+was already one. It is the change I would make next if history were not ahead of
+it.
 
 ---
 
@@ -670,6 +758,28 @@ Three ways to settle it, all the maintainer's:
 
 Until then the seam is real, tested and unused, which is a worse state than
 either resolution.
+
+**18 August — answered by the maintainer**, recorded here by `Loom primitives`
+because a merged PR's comments are not something the next run reads:
+
+> *"The demo can be set up as its own routine. We will place it under the
+> marketing documents routine."*
+
+So it is the **third option**, with the ownership named: the demo becomes its
+own routine and sits under the marketing documents routine rather than under
+this one or the portal's. Two consequences worth stating so neither routine
+waits on the other:
+
+- **`apps/portal/app/demo` and `apps/portal/lib/demo` stop being contested.**
+  Neither the framework routine nor the portal routine owns the demo; whoever
+  runs the new routine does, and `apps/portal` returns to being wholly the
+  portal's.
+- **`interactiveTypesFor(registry)` gets its live user from that routine**, not
+  from this branch. The seam stays real, tested and unused until then, which is
+  now a known wait rather than an open question.
+
+The entry stays open until the routine exists and the lane table in
+`docs/routines.md` says so.
 
 ---
 

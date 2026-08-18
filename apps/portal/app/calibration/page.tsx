@@ -9,8 +9,12 @@ import { requireActor } from "@/lib/auth/identity"
 import { portalTelemetry } from "@/lib/telemetry"
 import { storeIsDurable } from "@/lib/store"
 
+import { contradictedBands, groupMisses, missesOf } from "@/lib/calibration-misses"
+import { isOnTheMark } from "@/lib/calibration-view"
+
 import { BucketRow } from "./_components/bucket-row"
 import { CalibrationSummary } from "./_components/calibration-summary"
+import { MissedClaims } from "./_components/missed-claims"
 import { PolicyBreakdown } from "./_components/policy-breakdown"
 
 /**
@@ -57,7 +61,15 @@ const CalibrationPage = async ({
     )
   }
 
-  const report = calibrationOf(episodesOf(page.value.records))
+  /*
+   * One fold, read twice. `calibrationOf` answers "is a 0.9 actually a 0.9" and
+   * discards the claims to do it; `missesOf` keeps the ones the answer is made
+   * of. Folding the records once and passing the result to both is what makes
+   * the two views incapable of describing different windows.
+   */
+  const fold = episodesOf(page.value.records)
+  const report = calibrationOf(fold)
+  const misses = missesOf(fold)
   const lastIndex = report.buckets.length - 1
 
   /*
@@ -153,6 +165,31 @@ const CalibrationPage = async ({
             picture rather than a lifetime one. Bands with nothing in them are left blank — a rate
             over no claims is not zero.
           </p>
+
+          {/*
+           * Nothing missed is a real result and worth saying, rather than a
+           * section that silently disappears. A page whose misses vanish when
+           * there are none is indistinguishable from a page that never had the
+           * section, and the reader cannot tell "I checked" from "nothing
+           * checked".
+           */}
+          {misses.length > 0 ? (
+            <MissedClaims
+              groups={groupMisses(misses)}
+              contradicted={contradictedBands(report.buckets, misses, isOnTheMark)}
+              total={misses.length}
+            />
+          ) : (
+            <StateNotice tone="empty" title="No claim here was wrong by more than a coin flip.">
+              <p>
+                Every scored claim landed on the side its own confidence predicted: nothing the
+                model called likely was refused, and nothing it hedged on sailed through. That is
+                the result, not an empty section — with {report.overall.judged}{" "}
+                {report.overall.judged === 1 ? "claim" : "claims"} judged it is also a small
+                sample.
+              </p>
+            </StateNotice>
+          )}
         </>
       )}
 

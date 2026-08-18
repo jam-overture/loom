@@ -120,14 +120,18 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
     resolver: registry,
     validator: registry,
     /**
-     * The registry is its own `TextResolver`, over the strings the primitives
-     * declared (0060). Wired here because omitting it is not a no-op: every
-     * primitive is handed an empty map, so a declared accessible name silently
-     * becomes no accessible name — which is the failure the seam exists to
-     * prevent, arriving through the seam itself. This library's own tests are
-     * the closest thing to a host that would notice.
+     * **No `text` here, deliberately.** It used to be wired because omitting it
+     * was not a no-op — every primitive was handed an empty map, so a declared
+     * accessible name silently became no accessible name, which this library's
+     * tests noticed and filed as a finding on 16 August.
+     *
+     * #84 closed it: declarations now come off the `resolver` itself, and
+     * `options.text` is only a host's dictionary laid over them
+     * ([0063](../../decisions/0063-a-declared-string-travels-with-the-primitive.md)).
+     * So leaving it out is the honest wiring for a host that has no
+     * translations, and the declared-name assertions below now prove the new
+     * behaviour rather than working around the old one.
      */
-    text: registry,
     themes,
     editMode,
   })
@@ -136,8 +140,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as twenty-nine primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(29)
+  it("registers as thirty-three primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(33)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.section",
@@ -148,6 +152,8 @@ describe("the starter library", () => {
       "loom.hero",
       "loom.feature-grid",
       "loom.feature",
+      "loom.milestone-list",
+      "loom.milestone",
       "loom.stat-grid",
       "loom.stat",
       "loom.tier-table",
@@ -156,6 +162,8 @@ describe("the starter library", () => {
       "loom.perk-list-item",
       "loom.quote-grid",
       "loom.quote",
+      "loom.person-grid",
+      "loom.person",
       "loom.logo-cloud",
       "loom.logo",
       "loom.faq-list",
@@ -263,9 +271,11 @@ describe("the starter library", () => {
      */
     expect(auditRegistry(registry).leaves).toEqual([
       "loom.feature",
+      "loom.milestone",
       "loom.stat",
       "loom.perk-list-item",
       "loom.quote",
+      "loom.person",
       "loom.logo",
       "loom.faq",
       "loom.perk",
@@ -686,7 +696,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the four fixtures", () => {
+  it("covers every registered primitive across the five fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -697,6 +707,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(marketingPage(EDITORIAL)),
       ...typesIn(pricingPage(EDITORIAL)),
       ...typesIn(arrangedPage(EDITORIAL)),
+      ...typesIn(portedPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -1186,6 +1197,203 @@ describe("the compose-and-arrange layer", () => {
     const body = bold.slice(bold.indexOf(">"))
 
     expect(render(arrangedPage(BOLD)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+})
+
+/**
+ * The two ported pairs. The milestone band is deliberately built here as a
+ * *roadmap* rather than a timeline — same primitive, markers that are versions
+ * and statuses instead of dates — because that equivalence is the whole reason
+ * seven Hermes blocks became one pair, and a fixture that only ever showed
+ * dates would not demonstrate it.
+ */
+const portedPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const milestone = (props: JsonObject) => buildElement(idFactory, { type: "loom.milestone", props })
+
+  const roadmap = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Roadmap" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("What has shipped, and what is next")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.milestone-list",
+        props: { density: "loose" },
+        children: [
+          milestone({
+            marker: "v0.4",
+            title: "The compose-and-arrange layer",
+            body: "Stack, grid, card and icon — the general vocabulary.",
+            state: "done",
+          }),
+          milestone({
+            marker: "v0.5",
+            title: "The sequence bands",
+            body: "Seven Hermes blocks, one pair.",
+            state: "current",
+            href: "https://example.com/roadmap",
+          }),
+          milestone({ marker: "Q4", title: "Chrome", body: "Navigation and a footer.", state: "planned" }),
+        ],
+      }),
+    ],
+  })
+
+  const team = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Team", tone: "surface" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("The people who answer when you write in")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.person-grid",
+        props: { columns: "three" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.person",
+            props: {
+              name: "Ada Whitfield",
+              role: "Head of Platform",
+              bio: "Wrote the Gate's first rule table and has argued about it since.",
+              photo: "https://example.com/ada.jpg",
+            },
+          }),
+          buildElement(idFactory, {
+            type: "loom.person",
+            props: { name: "Ren Okafor", role: "Staff Engineer", href: "https://example.com/ren" },
+          }),
+          buildElement(idFactory, {
+            type: "loom.person",
+            props: { name: "Sofia Lindqvist", role: "Design Director", align: "center" },
+          }),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [roadmap, team],
+    }),
+    idFactory
+  )
+}
+
+describe("the ported bands", () => {
+  it("renders a roadmap and a team with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(portedPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("What has shipped, and what is next")
+    expect(markup).toContain("The compose-and-arrange layer")
+    expect(markup).toContain("Ada Whitfield")
+  })
+
+  it("takes a marker that is a version, a quarter or a date, because Hermes never parsed it", () => {
+    const { markup } = render(portedPage(EDITORIAL))
+
+    /**
+     * The reason seven blocks are one pair: `marker` is free text, so a roadmap
+     * and a changelog and a timeline differ by what is written in it and not by
+     * which primitive was chosen.
+     */
+    for (const marker of ["v0.4", "v0.5", "Q4"]) expect(markup).toContain(marker)
+  })
+
+  it("ends the rail at the last dot, in CSS, because no node knows it is last", () => {
+    const { markup } = render(portedPage(EDITORIAL))
+    const { stylesheet } = splitStylesheet(markup)
+
+    /** Every entry draws a connector — including the last, which cannot know. */
+    const connectors = [...markup.matchAll(new RegExp(LIBRARY_CLASS.railLine, "g"))]
+    expect(connectors.length).toBeGreaterThanOrEqual(3)
+
+    /** And the stylesheet is the only thing that does know. */
+    expect(stylesheet).toContain(`.loom-rail > li:last-child .${LIBRARY_CLASS.railLine}`)
+    expect(stylesheet).toContain(`.loom-rail > li:last-child .${LIBRARY_CLASS.railBody}`)
+  })
+
+  it("names the two states that contradict the default, and only those", () => {
+    const { markup } = render(portedPage(EDITORIAL))
+
+    /**
+     * `loom.perk`'s rule, applied to a second primitive: a hollow dot says "not
+     * yet" to someone looking and nothing to someone listening, so `current`
+     * and `planned` carry declared names (0060). `done` does not — announcing
+     * "Completed" on every row of a history is how a list becomes unlistenable.
+     */
+    expect(markup).toContain('aria-label="In progress"')
+    expect(markup).toContain('aria-label="Planned"')
+    expect(markup).not.toContain('aria-label="Completed"')
+    expect(markup).toContain('aria-hidden="true"')
+  })
+
+  it("carries the list's density and rail in classes, since a child cannot be told", () => {
+    const idFactory = sequentialIdFactory()
+
+    /**
+     * The tree, not the whole markup: the hoisted stylesheet names every class
+     * in the library, so asserting a class is *absent* from the markup would
+     * pass only by accident and fail here for the wrong reason.
+     */
+    const listOf = (props: JsonObject): string =>
+      splitStylesheet(
+        render(
+          createTree(
+            buildElement(idFactory, {
+              type: "loom.milestone-list",
+              props,
+              children: [buildElement(idFactory, { type: "loom.milestone", props: { title: "One" } })],
+            }),
+            idFactory
+          )
+        ).markup
+      ).tree
+
+    expect(listOf({})).toContain(LIBRARY_CLASS.rail)
+    expect(listOf({})).not.toContain(LIBRARY_CLASS.railTight)
+    expect(listOf({ density: "tight" })).toContain(LIBRARY_CLASS.railTight)
+    expect(listOf({ rail: "none" })).toContain(LIBRARY_CLASS.railNone)
+  })
+
+  it("falls back to a monogram for a person with no photograph", () => {
+    const { markup } = render(portedPage(EDITORIAL))
+
+    /** Two initials, the convention a reader recognises. */
+    expect(markup).toContain(">RO<")
+    expect(markup).toContain(">SL<")
+
+    /**
+     * And an empty alt on the one that has a photograph: the name is in the
+     * same node, so alt text would make a screen reader say it twice.
+     */
+    expect(markup).toContain('src="https://example.com/ada.jpg"')
+    expect(markup).toMatch(/<img[^>]*src="https:\/\/example\.com\/ada\.jpg"[^>]*alt=""/)
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(portedPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(portedPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(portedPage(BOLD)).diagnostics).toEqual([])
     expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
     expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
