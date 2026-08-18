@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 20 blocks, 33 primitives.**
+**Done — 29 blocks, 37 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -72,6 +72,8 @@ stands alone.
 | `divider` | `loom.divider` | atomic ✅ |
 | `timeline`, `journey`, `roadmap`, `changelog`, `process-steps`, `course-modules`, `event-agenda` | `loom.milestone-list` / `loom.milestone` | pair ✅ |
 | `team-members`, `staff-roster` | `loom.person-grid` / `loom.person` | pair ✅ |
+| `articles`, `press`, `case-studies`, `tutorials`, `recipes` | `loom.article-grid` / `loom.article` | pair ✅ |
+| `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -96,13 +98,11 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 29 blocks, 9 pairs.** Grouped by the content model they
+**Pairs to build — 20 blocks, 7 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
-| Written pieces | `articles`, `press`, `case-studies`, `tutorials`, `recipes` | `loom.article-grid` / `loom.article` |
-| Things for sale | `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` |
 | Things booked | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-list` / `loom.offering` |
 | Credentials | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-list` / `loom.credential` |
 | Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
@@ -141,13 +141,22 @@ the block names alone would produce.
 
 | | Blocks |
 | --- | --- |
-| Ported | 20 |
+| Ported | 29 |
 | Need no primitive | 13 |
-| Pairs still to build | 29 (9 pairs) |
+| Pairs still to build | 20 (7 pairs) |
 | Atomic still to build | 4 |
 | Blocked on a seam | 4 |
 
-**33 of 70 are settled**, and the 29 that remain are nine pairs rather than
-twenty-nine primitives. That is the number worth quoting, because "70 blocks"
+**42 of 70 are settled**, and the 20 that remain are seven pairs rather than
+twenty primitives. That is the number worth quoting, because "70 blocks"
 has been the shape of this job since the port started and it was never the real
 size of it.
+
+**Seven of those remaining pairs are a card in a grid**, and what separates them
+is not their fields — it is what the reader aims at.
+[0064](../decisions/0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
+settles it once for all of them: `loom.credential`, `loom.book` and
+`loom.episode` are **read**, so the card is the target; `loom.offering`,
+`loom.listing` and `loom.event` are **acted on**, so a control is. That is the
+one question the article/product pair had to answer that the granularity rules
+did not already answer.

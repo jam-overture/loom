@@ -140,8 +140,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as thirty-three primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(33)
+  it("registers as thirty-seven primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(37)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.section",
@@ -160,10 +160,14 @@ describe("the starter library", () => {
       "loom.tier",
       "loom.perk-list",
       "loom.perk-list-item",
+      "loom.product-grid",
+      "loom.product",
       "loom.quote-grid",
       "loom.quote",
       "loom.person-grid",
       "loom.person",
+      "loom.article-grid",
+      "loom.article",
       "loom.logo-cloud",
       "loom.logo",
       "loom.faq-list",
@@ -274,8 +278,10 @@ describe("the starter library", () => {
       "loom.milestone",
       "loom.stat",
       "loom.perk-list-item",
+      "loom.product",
       "loom.quote",
       "loom.person",
+      "loom.article",
       "loom.logo",
       "loom.faq",
       "loom.perk",
@@ -310,6 +316,17 @@ describe("the starter library", () => {
     ])
     expect(catalogue.find((primitive) => primitive.type === "loom.tier")?.slots).toEqual([
       "badge",
+      "action",
+    ])
+
+    /**
+     * The catalogue pair, where the region list is the difference between them:
+     * a written piece has qualifiers and nowhere to put a button, because the
+     * card is already the button (0064).
+     */
+    expect(catalogue.find((primitive) => primitive.type === "loom.article")?.slots).toEqual(["meta"])
+    expect(catalogue.find((primitive) => primitive.type === "loom.product")?.slots).toEqual([
+      "meta",
       "action",
     ])
   })
@@ -696,7 +713,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the five fixtures", () => {
+  it("covers every registered primitive across the six fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -708,6 +725,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(pricingPage(EDITORIAL)),
       ...typesIn(arrangedPage(EDITORIAL)),
       ...typesIn(portedPage(EDITORIAL)),
+      ...typesIn(cataloguePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -1394,6 +1412,286 @@ describe("the ported bands", () => {
     const body = bold.slice(bold.indexOf(">"))
 
     expect(render(portedPage(BOLD)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+})
+
+/**
+ * The two catalogue pairs, and the one fixture that shows what separates them.
+ *
+ * Both bands are the same five fields — a picture, a name, a label, a sentence,
+ * a destination — so a fixture that rendered them apart would prove nothing.
+ * Rendered together, the whole of [0064] is visible in one page: the written
+ * pieces put their anchor over the card, and the products put a control on the
+ * floor and link nothing else.
+ *
+ * The article band is built as a **press page** rather than a blog index —
+ * kickers that are publications rather than dates — for the reason the ported
+ * fixture is built as a roadmap: the collapse of five Hermes blocks into one
+ * pair is the claim, and a fixture that only ever showed dated posts would not
+ * demonstrate it.
+ */
+const cataloguePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const badge = (label: string) =>
+    buildElement(idFactory, { type: "loom.badge", props: { tone: "outline" }, children: [text(label)] })
+
+  const article = (props: JsonObject, meta: readonly string[] = []) =>
+    buildElement(idFactory, {
+      type: "loom.article",
+      props,
+      children: meta.length === 0 ? [] : [buildSlot(idFactory, "meta", meta.map(badge))],
+    })
+
+  const press = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Press" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("What people have written about us")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.article-grid",
+        props: { columns: "three", lead: true },
+        children: [
+          article(
+            {
+              kicker: "The Standard",
+              title: "The framework that asks permission before it changes anything",
+              excerpt:
+                "A long look at why the interesting part of an AI-authored interface is the part that refuses.",
+              image: "https://example.com/standard.jpg",
+              href: "https://example.com/press/standard",
+            },
+            ["Feature", "12 min read"]
+          ),
+          article({
+            kicker: "Q2 2026",
+            title: "Rebuilding a year-old page in an afternoon",
+            excerpt: "Seventy blocks, twenty-five content models, and what the difference cost.",
+            href: "https://example.com/press/rebuild",
+          }),
+          article(
+            {
+              kicker: "Northwind Foods",
+              title: "Forty stores, one tree, no deploy",
+              excerpt: "What happened when the people who write the copy stopped filing tickets for it.",
+              image: "https://example.com/northwind.jpg",
+              href: "https://example.com/press/northwind",
+            },
+            ["Case study"]
+          ),
+        ],
+      }),
+    ],
+  })
+
+  const product = (props: JsonObject, meta: readonly string[], action?: string) =>
+    buildElement(idFactory, {
+      type: "loom.product",
+      props,
+      children: [
+        buildSlot(idFactory, "meta", meta.map(badge)),
+        ...(action === undefined
+          ? []
+          : [
+              buildSlot(idFactory, "action", [
+                buildElement(idFactory, {
+                  type: "loom.action",
+                  props: { href: "https://example.com/buy", variant: "primary" },
+                  children: [text(action)],
+                }),
+              ]),
+            ]),
+      ],
+    })
+
+  const shop = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Shop", tone: "surface" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("Things you can take away today")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.product-grid",
+        props: { columns: "three" },
+        children: [
+          product(
+            {
+              name: "The porting field guide",
+              price: "$29",
+              description: "Seventy blocks, one at a time, with the granularity test worked through each.",
+              image: "https://example.com/guide.jpg",
+              href: "https://example.com/guide",
+            },
+            ["PDF", "148 pages"],
+            "Buy the guide"
+          ),
+          product(
+            {
+              name: "Starter trees",
+              price: "Free",
+              description: "Six pages you can drop in and rearrange.",
+              href: "https://example.com/trees",
+            },
+            ["JSON"],
+            "Download"
+          ),
+          product({ name: "Stationery", price: "From £12", image: "https://example.com/paper.jpg" }, ["18 items"]),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [press, shop],
+    }),
+    idFactory
+  )
+}
+
+describe("the catalogue bands", () => {
+  it("renders a press page and a shop with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(cataloguePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("What people have written about us")
+    expect(markup).toContain("The framework that asks permission before it changes anything")
+    expect(markup).toContain("The porting field guide")
+    expect(markup).toContain("From £12")
+  })
+
+  it("names a written piece's link by its title alone, and covers the card with it", () => {
+    const { markup, diagnostics } = render(cataloguePage(EDITORIAL))
+
+    /**
+     * 0064's first half, and the assertion the whole record exists for. The
+     * anchor's text content is the accessible name, so it must be the title and
+     * nothing else — not the kicker, not the excerpt, not the meta strip. The
+     * card is still the click target, and that is what the class says.
+     */
+    const anchors = [...markup.matchAll(/<a\b[^>]*class="([^"]*)"[^>]*>([^<]*)<\/a>/g)]
+    const covers = anchors.filter(([, className]) => className?.includes(LIBRARY_CLASS.coverLink))
+
+    expect(covers).toHaveLength(3)
+    expect(covers.map(([, , label]) => label)).toEqual([
+      "The framework that asks permission before it changes anything",
+      "Rebuilding a year-old page in an afternoon",
+      "Forty stores, one tree, no deploy",
+    ])
+
+    /** The root of a written piece is not itself a target, which is what makes a link inside one valid. */
+    expect(markup).not.toMatch(/<a[^>]*>\s*<article/)
+    expect(diagnostics).toEqual([])
+  })
+
+  it("gives a product a control on the floor and no overlay to fight it", () => {
+    const { markup } = render(cataloguePage(EDITORIAL))
+
+    /**
+     * 0064's second half. The three articles carry the overlay class; the three
+     * products carry none, so the buy buttons are the only targets on their
+     * cards. A product's name is still a link — an ordinary one.
+     */
+    expect(splitStylesheet(markup).tree.match(new RegExp(LIBRARY_CLASS.coverLink, "g"))).toHaveLength(3)
+    expect(markup).toContain(">Buy the guide<")
+    expect(markup).toContain(">Download<")
+    expect(markup).toMatch(/<a[^>]*href="https:\/\/example\.com\/guide"[^>]*>The porting field guide<\/a>/)
+  })
+
+  it("makes every qualifier its own node, since a download is never one thing", () => {
+    const { markup } = render(cataloguePage(EDITORIAL), true)
+
+    /**
+     * Hermes' `format` and `itemCount` were single strings, and this is what
+     * they became: `PDF` and `148 pages` are two badges a delta can insert or
+     * remove one at a time, not one field somebody has to split at a separator.
+     */
+    const badges = [...markup.matchAll(/data-loom-type="loom\.badge"/g)]
+    expect(badges).toHaveLength(7)
+    expect(markup).toContain(">PDF<")
+    expect(markup).toContain(">148 pages<")
+    expect(markup).toContain(">18 items<")
+  })
+
+  it("takes a kicker that is a publication, a quarter or a client, because Hermes never parsed it", () => {
+    const { markup } = render(cataloguePage(EDITORIAL))
+
+    /**
+     * The claim the five-block collapse rests on: `date`, publication `name`
+     * and `client` are one free-text label, and a parsed date could carry none
+     * of the three.
+     */
+    expect(markup).toContain(">The Standard<")
+    expect(markup).toContain(">Q2 2026<")
+    expect(markup).toContain(">Northwind Foods<")
+  })
+
+  it("carries the lead layout in a class, since no cell knows it is first", () => {
+    const { stylesheet, tree } = splitStylesheet(render(cataloguePage(EDITORIAL)).markup)
+
+    expect(tree).toContain(LIBRARY_CLASS.lead)
+    expect(stylesheet).toContain(".loom-lead > article:first-of-type")
+
+    /**
+     * And it stays a prop, which is the granularity doc's sharper question
+     * asserted rather than argued: turning it off changes the class and leaves
+     * the set of nodes exactly as it was. A `lead` that promoted, truncated or
+     * duplicated a cell would fail here.
+     */
+    const bandOf = (props: JsonObject): string => {
+      const idFactory = sequentialIdFactory()
+      const grid = buildElement(idFactory, {
+        type: "loom.article-grid",
+        props,
+        children: [
+          buildElement(idFactory, { type: "loom.article", props: { title: "First" } }),
+          buildElement(idFactory, { type: "loom.article", props: { title: "Second" } }),
+        ],
+      })
+
+      return render(
+        createTree(
+          buildElement(idFactory, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: EDITORIAL, width: "wide" },
+            children: [grid],
+          }),
+          idFactory
+        ),
+        true
+      ).markup
+    }
+
+    const idsIn = (markup: string): readonly string[] =>
+      [...markup.matchAll(/data-loom-id="([^"]+)"/g)].flatMap((match) => (match[1] === undefined ? [] : [match[1]]))
+
+    expect(splitStylesheet(bandOf({ lead: true })).tree).toContain(LIBRARY_CLASS.lead)
+    expect(splitStylesheet(bandOf({})).tree).not.toContain(LIBRARY_CLASS.lead)
+    expect(idsIn(bandOf({ lead: true }))).toEqual(idsIn(bandOf({})))
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(cataloguePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(cataloguePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(cataloguePage(BOLD)).diagnostics).toEqual([])
     expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
     expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)

@@ -3,6 +3,8 @@ import { createPrimitiveRegistry, type PrimitiveRegistry, type RegistryError } f
 import type { Result } from "../result.js"
 
 import { loomAction } from "./loom.action.js"
+import { loomArticle } from "./loom.article.js"
+import { loomArticleGrid } from "./loom.article-grid.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomCard } from "./loom.card.js"
 import { loomDivider } from "./loom.divider.js"
@@ -25,6 +27,8 @@ import { loomPerson } from "./loom.person.js"
 import { loomPersonGrid } from "./loom.person-grid.js"
 import { loomPerkList } from "./loom.perk-list.js"
 import { loomPerkListItem } from "./loom.perk-list-item.js"
+import { loomProduct } from "./loom.product.js"
+import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
 import { loomQuote } from "./loom.quote.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
@@ -77,6 +81,14 @@ import { loomTierTable } from "./loom.tier-table.js"
  * `person` is two more. See `docs/hermes-port-map.md` for what the other
  * fifty-odd are and which of them need no primitive at all.
  *
+ * **The catalogue pairs** are the two bands a page uses to list things that
+ * exist elsewhere. `article-grid` over `article` is five Hermes blocks —
+ * articles, press, case-studies, tutorials, recipes — which are one written
+ * piece wearing five sets of words; `product-grid` over `product` is four more.
+ * They are the pair of pairs that shows where a card's *target* goes, which is
+ * the only thing separating them
+ * ([0064](../../decisions/0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)).
+ *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
  * then the bands in the order a page uses them, then the leaves that go
@@ -107,10 +119,14 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomTier,
   loomPerkList,
   loomPerkListItem,
+  loomProductGrid,
+  loomProduct,
   loomQuoteGrid,
   loomQuote,
   loomPersonGrid,
   loomPerson,
+  loomArticleGrid,
+  loomArticle,
   loomLogoCloud,
   loomLogo,
   loomFaqList,
@@ -141,6 +157,8 @@ export * from "./stylesheet.js"
 export * from "./layout.js"
 export {
   loomAction,
+  loomArticle,
+  loomArticleGrid,
   loomBadge,
   loomCard,
   loomDivider,
@@ -163,6 +181,8 @@ export {
   loomPerkListItem,
   loomPerson,
   loomPersonGrid,
+  loomProduct,
+  loomProductGrid,
   loomProse,
   loomQuote,
   loomQuoteGrid,
