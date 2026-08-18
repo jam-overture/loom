@@ -663,3 +663,56 @@ Filed against my own lane rather than acted on: the first option touches
 `apps/portal/lib/demo`, which is mine, but it is a unit of its own and this run
 was already one. It is the change I would make next if history were not ahead of
 it.
+
+---
+
+## 2026-08-18 — the batched revert plan `/history` asked for exists
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+
+Answering the finding this routine's owner filed on #91 the same day: `/history`
+reads one revert plan per row and cannot batch it, so a page costs
+`O(rows × head)`.
+
+**It can now.** `planReverts(reader, { treeId, revisions, seed })` returns a plan
+per revision, keyed by revision, from one read of the log — the forward replay
+walked once for every named revision, the head-ward trails walked together, and
+the replay stopped at the last target so a later failure cannot contradict a plan
+already finished. It is exported from `@loom/runtime/store` beside `planRevert`.
+
+```ts
+const planned = await planReverts(reader, {
+  treeId,
+  revisions: rows.map((row) => row.revision),
+  seed,
+})
+// planned.ok ? planned.value.get(row.revision) : the store's own failure
+```
+
+**Each plan is exactly what `planRevert` would have said for that revision
+alone** — out-of-range, a gap, a delta that no longer applies and an uninvertible
+target all land on the same revisions they would have landed on one at a time.
+The tests assert that by comparing the two directly rather than by restating the
+outcomes, so the two cannot drift. `planRevert` is now the same walk told to look
+for one revision, which is the second half of what the finding asked for: there
+is still one copy of the replay, the inversion and the overlap check, and it is
+the runtime's.
+
+Nothing in `apps/portal` was touched — #91 is open on exactly those files.
+
+**The finding's own Status could not be edited here.** It is on #91 and this
+branch is off `main`; whichever of the two merges second should mark it closed by
+this pull request.
+
+---
+
+## 2026-08-18 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Nothing in the store, the tree or the runtime obstructed this run. The one piece
+of friction was the record-numbering collision already filed on 16 August, which
+bit a fourth time: #88 holds 0064 and #89 holds 0065, both unmerged, so a record
+written here would have opened this pull request on a red index guard. It was
+cheaper to notice that no record was warranted than to work around it, but the
+next run that genuinely needs one will not have that option.
