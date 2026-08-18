@@ -528,7 +528,16 @@ this lane can do.
 
 ## 2026-08-17 — three Hermes blocks are blocked on seams, not on primitives
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+**partly closed** by **#89** — the form-target half is answered by the submission
+seam ([0065](decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)):
+`contactform` and `newsletter` are now an ordinary 0052 decomposition plus
+`loom:submit`, and are unblocked as far as this seam goes. **The `tabs` half
+stays open** and is unchanged — a state seam is a much larger decision than one
+primitive, reaches the delta model, and is not something a run should reach for
+because a block wants it. Original status below.
+
+**Status:** open
 
 Found while writing [`docs/hermes-port-map.md`](docs/hermes-port-map.md), which
 classifies all seventy Hermes blocks. Sixty-seven of them are a primitives
@@ -663,3 +672,90 @@ Filed against my own lane rather than acted on: the first option touches
 `apps/portal/lib/demo`, which is mine, but it is a unit of its own and this run
 was already one. It is the change I would make next if history were not ahead of
 it.
+
+---
+
+## 2026-08-18 — two Hermes form blocks are unblocked, and neither can be built here
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The submission seam landed on **#89**, which answers the form-target half of the
+finding above. `contactform` and `newsletter` are now buildable, and building
+them is `src/primitives/`, which is not this routine's lane.
+
+What a form primitive reads:
+
+```ts
+if (!loom.submit) …                              // the tree named no endpoint
+if (loom.submit.status === "unavailable") …      // this deployment could not answer
+const { action, method, fields } = loom.submit.target
+```
+
+Three states rather than two, and each is a different page. Absent is an
+authoring gap — nobody said where this posts. `unavailable` is a deployment that
+could not answer *right now*, which is a form that should say so rather than one
+that looks fine and swallows what a visitor typed. `ready` carries the address,
+the method, and the hidden inputs the form must render — a CSRF token arrives
+that way, and a primitive that drops `fields` produces a form the host will
+reject with no visible reason.
+
+`src/render/submit.test.ts` has a working form primitive in about fifteen lines,
+written as a fixture rather than as a library entry precisely because the library
+is yours.
+
+Two things worth knowing before building either:
+
+- **Nothing enforces that a form primitive has a target.** A primitive that needs
+  one and is given none renders untargeted and only its author knows that is
+  wrong. The machinery to declare it exists — it is the shape `interactive` uses
+  on #88 — and 0065 deliberately did not use it: one seam per run, and the audit
+  is cheap to add once a primitive exists that would fail it. If you build one and
+  want the audit, file it back.
+- **The field list is the ordinary part.** 0052 settles it: each field is a node,
+  the fixed bits are props. Nothing in the seam touches how a form is composed.
+
+---
+
+## 2026-08-18 — a change of destination is not yet a stake
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+
+Recorded against my own lane so the next run finds it rather than rediscovering
+it, and left undone on purpose.
+
+A `configure` that moves `loom:submit` from `newsletter.subscribe` to
+`contact.enquiry` sends the next visitor's message somewhere else. Both are
+registered, so nothing leaves the deployment and no address was authored — the
+seam holds. But the analysis reports it as a prop change like any other, and
+"this form now posts somewhere else" is not an ordinary prop change: it is the
+one prop whose meaning is *where a stranger's data goes*.
+
+It belongs in the stakes vocabulary, beside `nested-target`. It is not built here
+for one reason: **#88 is open and extends `src/runtime/stakes.ts`,
+`policy.ts` and `analysis.ts`**, and two routines appending to those files at once
+is the friction this repository already knows about from three shared files. One
+branch, one unit — this is the next run's, once #88 has landed.
+
+The shape, so the next run does not re-derive it: `planTreeSubmissions` already
+reads every declaration off a tree, so the factor is the same "resulting tree,
+less what the tree already had" comparison #88 makes for nesting. `configure` is
+the operation that produces it; `insert` of a form pointing somewhere is a new
+form rather than a redirected one, and is not the same event.
+
+---
+
+## 2026-08-18 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Nothing was wanted from another lane to build the submission seam. `apps/` was
+not opened: no page moves, because no primitive posts anywhere yet, and the demo
+gains nothing until one does.
+
+One thing worth saying rather than filing, since it is nobody's blocker yet:
+**`renderRequest` now takes four optional registries** — `sources`, `themes`,
+`text` and `endpoints` — each failing closed with a diagnostic when a tree needs
+one that was not wired. That is the right default and it is getting long. A
+single `LoomDeployment` bundling the four is the obvious next shape, and it is
+recorded in 0065's consequences rather than built, because nothing has yet been
+made harder by the current one.

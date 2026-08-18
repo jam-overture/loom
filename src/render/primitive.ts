@@ -4,6 +4,7 @@ import type { NodeData } from "../data/resolution.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
+import type { SubmissionOutcome } from "../submit/resolution.js"
 
 import type { EditableAttributes } from "./editable.js"
 import type { PrimitiveText } from "./text.js"
@@ -68,6 +69,20 @@ export type LoomRenderContext<TText extends string = never> = {
    * belongs to whoever runs the deployment.
    */
   readonly data: NodeData
+  /**
+   * Where this node's form posts, if it declared a submission (0065).
+   *
+   * Absent — not `unavailable` — when the node declared none: the three states
+   * are distinct and a form primitive acts differently on each. Absent is a
+   * tree that never said where to post, which is an authoring gap; `unavailable`
+   * is a deployment that could not answer right now, which is not.
+   *
+   * Unlike `data`, `text` and `slots` there is at most one per node, because a
+   * form posts to one place. Everything on a `ready` target is host-authored:
+   * nothing about the address is in the tree, so nothing about it survives into
+   * a delta, a revision, or the diff a reviewer reads.
+   */
+  readonly submit?: SubmissionOutcome
   /**
    * The strings this primitive declared, resolved for this deployment.
    *
