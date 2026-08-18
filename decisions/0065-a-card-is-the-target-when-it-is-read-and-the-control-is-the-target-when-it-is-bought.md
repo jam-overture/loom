@@ -1,4 +1,4 @@
-# 0064. A card is the target when it is read; the control is the target when it is acted on
+# 0065. A card is the target when it is read; the control is the target when it is acted on
 
 **Status:** Accepted
 **Date:** 2026-08-18

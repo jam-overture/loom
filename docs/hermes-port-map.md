@@ -154,7 +154,7 @@ size of it.
 
 **Seven of those remaining pairs are a card in a grid**, and what separates them
 is not their fields — it is what the reader aims at.
-[0064](../decisions/0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
+[0065](../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 settles it once for all of them: `loom.credential`, `loom.book` and
 `loom.episode` are **read**, so the card is the target; `loom.offering`,
 `loom.listing` and `loom.event` are **acted on**, so a control is. That is the

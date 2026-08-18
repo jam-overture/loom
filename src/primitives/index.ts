@@ -87,7 +87,7 @@ import { loomTierTable } from "./loom.tier-table.js"
  * piece wearing five sets of words; `product-grid` over `product` is four more.
  * They are the pair of pairs that shows where a card's *target* goes, which is
  * the only thing separating them
- * ([0064](../../decisions/0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)).
+ * ([0065](../../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)).
  *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,

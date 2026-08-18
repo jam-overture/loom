@@ -314,13 +314,21 @@ Recorded rather than acted on because a routine choosing its own convention here
 is how two conventions get invented.
 
 **18 August, `Loom primitives`** — hit a third time, and this time both branches
-are open at once. #88 (`Loom daily build`) claims **0064**; the catalogue-bands
-branch needed a record and could not take 0065, because the guard refuses a gap
-and 0064 is not on `main`. So both branches call it 0064 and whichever merges
-second renumbers — one `git mv`, one `sed`, one `pnpm decisions:index`. Noting
-the date here rather than opening a fourth entry. Of the three conventions
-offered above, **merge order** is the one this instance would have cost nothing
-under, since it is what both routines are doing anyway without being told to.
+were open at once. #88 (`Loom daily build`) claims **0064**, and the
+catalogue-bands branch wrote its own record as 0064 too, because the guard
+refuses a gap and 0064 was not on `main`.
+
+**Settled by merge order, and the order was knowable**: the maintainer asked the
+18 August primitives run to fix #88's merge conflict, so #88 is unblocked and
+lands first. The catalogue-bands record is therefore **0065**, and that branch
+carries one red assertion — `0064 is missing` — until #88 merges, exactly as #76
+did against #75 on 16 August.
+
+So of the three conventions offered above, **merge order** is the one this
+repository is already running on, twice now, without anyone having written it
+down. It costs one red branch and one rename per collision, both cheap, and it
+is the only one of the three that needs no new tooling. Worth making explicit in
+`docs/routines.md` rather than leaving each pair of routines to rediscover.
 
 ---
 

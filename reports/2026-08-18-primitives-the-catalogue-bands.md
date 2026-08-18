@@ -5,7 +5,7 @@
 Two pairs — `loom.article-grid` / `loom.article` and `loom.product-grid` /
 `loom.product` — taking the library from **33 to 37**, and the Hermes ledger
 from **20 blocks ported to 29**. Plus
-[0064](../decisions/0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md),
+[0064](../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md),
 which is the half of this run that decides the seven pairs after it.
 
 ![The two new bands under the editorial palette](2026-08-18-primitives-the-catalogue-bands-editorial.png)
@@ -197,7 +197,7 @@ No test was weakened, skipped, or marked `todo`.
 ## Records
 
 **One, and it needs a word about its number.**
-[0064](../decisions/0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
+[0064](../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 is `Accepted` — it contradicts nothing, and 0051, 0052 and 0054 are untouched.
 
 **PR #88 also claims 0064**, and it is still open, so 0064 is not on `main`. The

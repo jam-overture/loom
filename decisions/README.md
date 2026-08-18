@@ -121,4 +121,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0061](0061-a-suffix-that-names-the-markup-earns-its-place.md) | A suffix that names the markup earns its place; a suffix that names the parent does not | Accepted — partially supersedes 0054 | §4b |
 | [0062](0062-a-general-arranger-is-named-for-the-arrangement-alone.md) | A general arranger is named for the arrangement alone, and a named band wins where one exists | Accepted | §4b |
 | [0063](0063-a-declared-string-travels-with-the-primitive.md) | A declared string travels with the primitive; a dictionary is what a host adds | Accepted — partially supersedes 0060 | §4f → §3 |
-| [0064](0064-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md) | A card is the target when it is read; the control is the target when it is acted on | Accepted | §4b |
+| [0065](0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md) | A card is the target when it is read; the control is the target when it is acted on | Accepted | §4b |
