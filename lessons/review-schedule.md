@@ -384,6 +384,53 @@ have not read — attempt it anyway.
 
 ---
 
+## Set N — two days after lesson 11
+
+Interleaved with 01–10, and built around the failure mode Part III opens on:
+**treating a boundary as a place to hide something, rather than as a place where
+you decide what may cross.** Three of these ask you what a boundary *refuses*,
+and they are deliberately spread apart so you cannot answer the second from the
+shape of the first.
+
+1. `ChangeInterpreter` returns a `ProposedChange` and not a `TreeDelta`. Give
+   both reasons — one is about identity, one is about what else a proposal
+   carries — then say which of the two would still hold if a model were somehow
+   trustworthy about ids.
+2. Name the five actors a failure can name. Then give the rule for which one an
+   unrecognised HTTP status falls to, and argue the *other* direction as strongly
+   as you can before saying why it loses.
+3. A model may not name the nodes it inserts. Give the reason without the word
+   "trust" *(04)*, then say what the `IdFactory` being an injected seam adds that
+   the rule alone does not, and then say which of those two exercise C's second
+   row is a test of. *(05)*
+4. `ModelClient` returns text. `PolicyContext` is the tree and the intent and
+   cannot see the proposal *(10)*. Both are decisions about what does not cross a
+   boundary, and they are not the same kind of decision. Say what each one is
+   protecting, and which of the two would be caught by a test if you got it
+   wrong.
+5. Two proposals carry the same `promptHash` and different deltas. Say what that
+   pair establishes and what it does not — then say which other provenance field
+   a calibration report must read before it may count either of them, and why the
+   obvious alternative field goes stale. *(07 for why measurement and judgment
+   are kept apart)*
+6. A revert produces a delta with `confidence: 1`. A model produces one with
+   `confidence: 0.41`. Say what makes only one of those a claim that can be
+   wrong, and name the lesson-06 fact about inverses that makes the other one
+   arithmetic. *(06)*
+7. Two of the five composition outcomes carry no disposition. Name them, then say
+   which of the seven interpretation codes produce the first of the two — all of
+   them, or some. *(10)*
+8. Why is a half-applied delta worse than a rejected one? *(03)*
+
+Question 4 is the slow one and the reason this set exists. Both answers are
+"something upstream must not see something downstream", and they diverge on
+*why*: one is about a metric that would look healthy while measuring nothing, the
+other is about a test suite that would assert your fake agrees with your fake.
+If those feel like the same answer, that is the thing to fix here rather than in
+a month.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -405,3 +452,4 @@ you already know.
 | K | 2 days after L09 | | |
 | L | 2 days after L10 | | |
 | M | 1 week after Part II | | |
+| N | 2 days after L11 | | |
