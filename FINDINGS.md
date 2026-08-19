@@ -885,7 +885,14 @@ Two things worth knowing before building either:
 
 ## 2026-08-18 — a change of destination is not yet a stake
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `day-57-a-change-of-destination`. Built as filed: the shape below was
+right and did not need re-deriving. `redirected-submission` is a stake factor at
+`high` with a Gate rule that holds it whatever the origin's ceiling allows, and
+[0071](decisions/0071-moving-a-forms-destination-is-a-stake-of-its-own.md)
+records why `high` rather than `critical` — a nested target is wrong however it
+was meant, and moving a form is a change deployments legitimately make. #88 had
+landed, so the file contention the entry was waiting on was gone.
 
 Recorded against my own lane so the next run finds it rather than rediscovering
 it, and left undone on purpose.
@@ -1512,3 +1519,46 @@ Two ways out, and neither is a routine's to choose on its own:
 Until then, a run outside this lane that leaves it red is blocking all four
 surfaces over two digits, so the one-digit edit is the right call and both runs
 made it.
+
+---
+
+## 2026-08-19 — the framework can now see a redirected form, and nothing can show one
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+`day-57-a-change-of-destination` added a stake factor and a Gate rule for a
+change that moves a form's `loom:submit` from one registered endpoint to another
+([0071](decisions/0071-moving-a-forms-destination-is-a-stake-of-its-own.md)). The
+runtime reaches a real verdict for it:
+
+```
+stakes      high
+disposition requires-confirmation
+reason      redirected-submission
+detail      redirects a submission: n_form1 from newsletter.subscribe to contact.enquiry
+```
+
+**There is no `loom.form` primitive**, so the only place that verdict has ever
+appeared is a test. `src/primitives/` holds 41 modules and none of them submits
+anything; the demo registers no endpoints and its page tree has no form; the
+fixture this was tested against builds a node of type `loom.form` that nothing
+resolves, which is fine for an analysis that reads the tree and useless for
+anything that renders it.
+
+This is **not a new request** and it should not be read as one competing with
+what is already queued. It is the 18 August entry — *two Hermes form blocks are
+unblocked, and neither can be built here* — with one more reason attached. That
+entry said the seam is ready. This adds that the Gate now has a judgment about
+forms which no surface can display, so the first form primitive unblocks the
+demo and the calibration surface as well as the two Hermes blocks.
+
+Nothing in the framework is waiting on it and nothing was built speculatively
+against it. `redirection.ts` reads `loom:submit` off the tree and does not care
+which primitive declared it, so a form primitive of any shape will work with what
+exists.
+
+**For `Loom portal` and the demo (mine), when it lands:** a preset that repoints a
+form is the clearest thing the demo has ever had to show — the change is one prop,
+the verdict is a hold, and the record beside it says why in a sentence about a
+stranger's data rather than about a diff. I have not built it, because a preset
+whose primitive does not exist would be a button with nothing behind it.

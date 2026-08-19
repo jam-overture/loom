@@ -1,4 +1,5 @@
 import { sequentialIdFactory, type NodeId } from "../ids.js"
+import { SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
@@ -53,5 +54,41 @@ export const sampleTree = (): SampleTree => {
       body: body.id,
       footer: footer.id,
     },
+  }
+}
+
+export type FormTree = {
+  readonly tree: LoomTree
+  readonly ids: {
+    readonly page: NodeId
+    readonly form: NodeId
+    /** A sibling that posts nowhere, so a test can move a destination onto one. */
+    readonly aside: NodeId
+  }
+}
+
+/**
+ * A page whose form already posts somewhere. Separate from `sampleTree` rather
+ * than a node added to it: every count in the stakes and analysis suites is
+ * asserted against that tree's exact size, and a fixture that grows is a fixture
+ * that makes unrelated tests wrong.
+ */
+export const formTree = (to = "newsletter.subscribe"): FormTree => {
+  const idFactory = sequentialIdFactory("form")
+
+  const form = buildElement(idFactory, {
+    type: "loom.form",
+    props: { [SUBMIT_PROP_KEY]: { to } },
+  })
+  const aside = buildElement(idFactory, { type: "loom.form" })
+  const page = buildElement(idFactory, {
+    type: "loom.page",
+    props: { title: "Contact" },
+    children: [form, aside],
+  })
+
+  return {
+    tree: createTree(page, idFactory),
+    ids: { page: page.id, form: form.id, aside: aside.id },
   }
 }

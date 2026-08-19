@@ -108,6 +108,28 @@ const confirmDiscardsLaterWork: GateRule = (assessment, policy) => {
   })
 }
 
+/**
+ * A change that moves where a form posts is never applied without a person,
+ * whatever latitude its origin has.
+ *
+ * The same argument as the rule above, about the same kind of thing: a level
+ * cannot say "never auto-apply" while ceilings are per origin, and the fact that
+ * must not pass unnoticed — the next visitor's message arriving somewhere else —
+ * does not depend on who asked for it.
+ *
+ * Below the refusal floor for the same reason, so a host that has declared this
+ * much damage refusable still gets a refusal.
+ */
+const confirmRedirectedSubmission: GateRule = (assessment, policy) => {
+  const factor = stakeFactor(assessment.stakes, "redirected-submission")
+  if (!factor) return null
+
+  return decide(assessment, policy, "requires-confirmation", {
+    code: "redirected-submission",
+    detail: factor.detail,
+  })
+}
+
 const confirmAboveCeiling: GateRule = (assessment, policy) => {
   const ceiling = ceilingFor(policy, assessment.proposal.provenance.origin)
   if (!isAbove(assessment.stakes.level, ceiling)) return null
@@ -144,6 +166,7 @@ const ESCALATION_RULES: readonly GateRule[] = [
   rejectAtRefusalFloor,
   confirmIrreversible,
   confirmDiscardsLaterWork,
+  confirmRedirectedSubmission,
   confirmAboveCeiling,
   confirmBelowMinimumConfidence,
 ]

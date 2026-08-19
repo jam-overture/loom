@@ -174,6 +174,7 @@ export const MISS_CAUSE_LABELS: Readonly<Record<MissCause, string>> = {
   "stakes-at-refusal-floor": "sure about a change of a kind this policy never takes",
   irreversible: "sure about a change that could not be undone",
   "discards-later-work": "sure about a change that would have thrown away later work",
+  "redirected-submission": "sure about a change that would have pointed a form somewhere else",
   "stakes-above-ceiling": "sure about a change too big to apply unattended",
   "confidence-below-minimum": "sure, and under the floor it had to clear anyway",
   "within-policy": "refused with nothing in the policy against it",
@@ -201,6 +202,8 @@ export const MISS_CAUSE_NOTES: Readonly<Record<MissCause, string>> = {
     "Reversibility is assessed from the delta, not claimed. A model confident about changes it cannot undo is confident about the wrong axis.",
   "discards-later-work":
     "These would have overwritten revisions that landed after the model read the tree (0035). The claim was made against a tree that had moved.",
+  "redirected-submission":
+    "These would have moved where a form posts. Both ends were registered, so nothing left the deployment — what the model was sure about is that the next visitor's message should arrive somewhere else.",
   "stakes-above-ceiling":
     "Size, not correctness. These may well have been right — the policy declines to apply changes this large without a person, whatever the model thinks.",
   "confidence-below-minimum":

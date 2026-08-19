@@ -169,6 +169,8 @@ const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
   "stakes-at-refusal-floor": "This deployment does not offer changes this damaging at all.",
   irreversible: "It could not be taken back cleanly, so a person decides — however small it is.",
   "discards-later-work": "It would write over work already in the log, so nobody may do it alone.",
+  "redirected-submission":
+    "It sends the next visitor's message to a different place than the page was built to send it, so nobody may do it alone.",
   "stakes-above-ceiling": "More damage than this origin may do without asking.",
   "confidence-below-minimum": "Confident enough to offer, not confident enough to apply unasked.",
 }

@@ -2,6 +2,7 @@ import type { ChangeAnalysis } from "./analysis.js"
 import { describeNestedTarget } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
+import { describeRedirectedSubmission } from "./redirection.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
 
 /**
@@ -31,6 +32,7 @@ export type StakeFactorCode =
   | "shallow-structural-change"
   | "discards-later-work"
   | "nested-target"
+  | "redirected-submission"
 
 export type StakeFactor = {
   readonly code: StakeFactorCode
@@ -224,6 +226,39 @@ const nestedTarget = ({ analysis }: StakeInput): StakeFactor | null => {
   }
 }
 
+/**
+ * A form pointed somewhere else, as damage.
+ *
+ * `high` rather than `critical`, and the comparison with `nested-target` above
+ * is the argument. That one measures a change that is wrong however it was
+ * meant, so it is refused. This one measures a change that is often exactly
+ * right — a deployment that splits one mailing list into two repoints its forms,
+ * and refusing that would mean no proposal could ever move a form at all. What
+ * must not happen is that it goes through without anybody noticing, and that is
+ * a question of who decides rather than of whether it may be done.
+ *
+ * So it is `high` plus a rule in the Gate, in the shape 0035 established for
+ * discarded work: a level alone cannot say "never auto-apply", because ceilings
+ * are per origin (0002) and a `high` factor is a hold for one origin and a
+ * silent apply for another. Where a visitor's data goes should not depend on who
+ * asked for it to move.
+ *
+ * Host-independent, so no vocabulary knob: `loom:submit` is the runtime's own
+ * key, and both endpoints were registered by the host in either case.
+ */
+const redirectedSubmission = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { redirectedSubmissions } = analysis
+  if (redirectedSubmissions.length === 0) return null
+
+  return {
+    code: "redirected-submission",
+    level: "high",
+    detail: `redirects ${
+      redirectedSubmissions.length === 1 ? "a submission" : `${redirectedSubmissions.length} submissions`
+    }: ${redirectedSubmissions.map(describeRedirectedSubmission).join("; ")}`,
+  }
+}
+
 const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
   protectedTypeRemoved,
   protectedTypeTouched,
@@ -234,6 +269,7 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   shallowStructuralChange,
   discardsLaterWork,
   nestedTarget,
+  redirectedSubmission,
 ]
 
 export const assessStakes = (input: StakeInput, policy: GatePolicy): StakeAssessment => {

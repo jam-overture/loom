@@ -1,6 +1,7 @@
 import type { NodeId } from "../ids.js"
 import { SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { walkTree } from "../tree/navigation.js"
+import type { LoomNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { parseSubmission, type SubmissionError } from "./declaration.js"
@@ -43,13 +44,25 @@ export const submissionPlanIsEmpty = (plan: SubmissionPlan): boolean =>
  * newsletter forms on one page post to the same place, and a per-form nonce
  * would break the second one every time somebody used the first.
  */
-export const planTreeSubmissions = (tree: LoomTree): SubmissionPlan => {
+export const planTreeSubmissions = (tree: LoomTree): SubmissionPlan =>
+  planSubmissionsIn(tree.root)
+
+/**
+ * The same plan, for a root that is not a stored tree.
+ *
+ * The runtime needs one for a tree that exists only as the result of applying a
+ * delta — nothing has minted an id for it and nothing ever will, so it is a node
+ * and not a `LoomTree`. Reading the destinations twice would be two walks that
+ * had to agree about which declarations are readable, and the second one would
+ * drift.
+ */
+export const planSubmissionsIn = (root: LoomNode): SubmissionPlan => {
   const endpoints: EndpointId[] = []
   const submissions: PlannedSubmission[] = []
   const problems: SubmissionProblem[] = []
   const seen = new Set<EndpointId>()
 
-  for (const node of walkTree(tree.root)) {
+  for (const node of walkTree(root)) {
     if (node.kind !== "element") continue
 
     const declared = node.props[SUBMIT_PROP_KEY]

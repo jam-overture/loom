@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory } from "../ids.js"
 import { buildProposal } from "../testing/doubles.js"
-import { sampleTree, type SampleTree } from "../testing/fixtures.js"
+import { formTree, sampleTree, type FormTree, type SampleTree } from "../testing/fixtures.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 
 import { assessChange, type ChangeAssessment } from "./assessment.js"
@@ -375,5 +375,107 @@ describe("purity", () => {
     const assessment = assessmentFor({ build: tweak })
 
     expect(gate(assessment, defaultGatePolicy)).toEqual(gate(assessment, defaultGatePolicy))
+  })
+})
+
+/**
+ * A form's destination is the one prop whose meaning is where a stranger's data
+ * goes, so the rule that holds it is the one 0035 established for discarded
+ * work: a level cannot say "never auto-apply" while ceilings are per origin.
+ */
+describe("a change of destination", () => {
+  type FormScenario = {
+    readonly policy?: GatePolicy
+    readonly origin?: IntentOrigin
+    readonly build: (ids: FormTree["ids"]) => TreeOperation[]
+  }
+
+  const decideOnForm = (scenario: FormScenario) => {
+    const { tree, ids } = formTree()
+    const policy = scenario.policy ?? defaultGatePolicy
+
+    const proposal = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: scenario.build(ids),
+      },
+      ...(scenario.origin ? { origin: scenario.origin } : {}),
+    })
+
+    const assessed = assessChange(tree, proposal, policy, spare.deltaId())
+    if (!assessed.ok) throw new Error(assessed.error.code)
+
+    return gate(assessed.value, policy)
+  }
+
+  const repoint = (ids: FormTree["ids"]): TreeOperation[] => [
+    {
+      op: "configure",
+      nodeId: ids.form,
+      set: { "loom:submit": { to: "contact.enquiry" } },
+      unset: [],
+    },
+  ]
+
+  it("holds a change that moves where a form posts, and names both ends", () => {
+    const disposition = decideOnForm({ build: repoint })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("redirected-submission")
+    expect(disposition.reason.detail).toContain("newsletter.subscribe")
+    expect(disposition.reason.detail).toContain("contact.enquiry")
+    expect(disposition.stakes).toBe("high")
+  })
+
+  it("holds it for an origin whose ceiling would otherwise allow it", () => {
+    const disposition = decideOnForm({ build: repoint, origin: "developer" })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("redirected-submission")
+  })
+
+  it("holds it for a policy that trusts every origin completely", () => {
+    const trusting = gatePolicySchema.parse({
+      autoApplyCeiling: { developer: "critical", "user-instruction": "critical" },
+    })
+
+    expect(decideOnForm({ build: repoint, policy: trusting, origin: "developer" }).kind).toBe(
+      "requires-confirmation"
+    )
+  })
+
+  /** The floor stays sovereign, exactly as it does for discarded work. */
+  it("refuses rather than holds when the host's floor reaches it", () => {
+    const strict = gatePolicySchema.parse({ refusalFloor: "high" })
+    const disposition = decideOnForm({ build: repoint, policy: strict })
+
+    expect(disposition.kind).toBe("rejected")
+    expect(disposition.reason.code).toBe("stakes-at-refusal-floor")
+  })
+
+  it("accepts a form that gains a destination, which is a new form and not a moved one", () => {
+    const disposition = decideOnForm({
+      build: (ids) => [
+        {
+          op: "configure",
+          nodeId: ids.aside,
+          set: { "loom:submit": { to: "contact.enquiry" } },
+          unset: [],
+        },
+      ],
+    })
+
+    expect(disposition.kind).toBe("accepted")
+  })
+
+  it("leaves a change that touches no destination exactly where it was", () => {
+    const disposition = decideOnForm({
+      build: (ids) => [{ op: "configure", nodeId: ids.form, set: { legend: "Sign up" }, unset: [] }],
+    })
+
+    expect(disposition.kind).toBe("accepted")
   })
 })

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type TreeId } from "../ids.js"
-import { sampleTree, type SampleTree } from "../testing/fixtures.js"
+import { SUBMIT_PROP_KEY } from "../reserved-props.js"
+import { formTree, sampleTree, type FormTree, type SampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { createTree } from "../tree/tree.js"
@@ -311,5 +312,128 @@ describe("analyzeDelta nested targets", () => {
     ])
 
     expect(analysis.nestedTargets).toEqual([])
+  })
+})
+
+describe("analyzeDelta on a change of destination", () => {
+  const analyzeForm = (build: (ids: FormTree["ids"]) => TreeOperation[]) => {
+    const { tree, ids } = formTree()
+    const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)))
+    if (!result.ok) throw new Error(result.error.code)
+
+    return { analysis: result.value, ids }
+  }
+
+  it("reports a configure that moves a form's destination", () => {
+    const { analysis, ids } = analyzeForm((ids) => [
+      {
+        op: "configure",
+        nodeId: ids.form,
+        set: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+        unset: [],
+      },
+    ])
+
+    expect(analysis.redirectedSubmissions).toEqual([
+      { nodeId: ids.form, from: "newsletter.subscribe", to: "contact.enquiry" },
+    ])
+  })
+
+  /**
+   * The whole point of the factor: without it this delta is indistinguishable
+   * from any other prop tweak on an unprotected node.
+   */
+  it("is the only thing that separates it from an ordinary prop change", () => {
+    const { analysis } = analyzeForm((ids) => [
+      {
+        op: "configure",
+        nodeId: ids.form,
+        set: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+        unset: [],
+      },
+    ])
+
+    expect(analysis.configuredNodeCount).toBe(1)
+    expect(analysis.configuredPropKeys).toEqual([SUBMIT_PROP_KEY])
+    expect(analysis.removedNodeCount).toBe(0)
+    expect(analysis.insertedNodeCount).toBe(0)
+  })
+
+  it("reports nothing for a form that gains a destination it never had", () => {
+    const { analysis } = analyzeForm((ids) => [
+      {
+        op: "configure",
+        nodeId: ids.aside,
+        set: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+        unset: [],
+      },
+    ])
+
+    expect(analysis.redirectedSubmissions).toEqual([])
+  })
+
+  it("reports nothing for an inserted form, however it points", () => {
+    const arrival = buildElement(spare, {
+      type: "loom.form",
+      props: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+    })
+    const { analysis } = analyzeForm((ids) => [
+      { op: "insert", parentId: ids.page, index: 0, node: arrival },
+    ])
+
+    expect(analysis.redirectedSubmissions).toEqual([])
+  })
+
+  it("reports nothing for a form that is removed rather than moved", () => {
+    const { analysis } = analyzeForm((ids) => [{ op: "remove", nodeId: ids.form }])
+
+    expect(analysis.redirectedSubmissions).toEqual([])
+  })
+
+  it("reports nothing for a relocated form that keeps posting where it did", () => {
+    const { analysis } = analyzeForm((ids) => [
+      { op: "move", nodeId: ids.form, parentId: ids.page, index: 1 },
+    ])
+
+    expect(analysis.redirectedSubmissions).toEqual([])
+  })
+
+  /** Measured on the resulting tree, so a delta that comes back is not a change. */
+  it("reports nothing when a delta moves the destination and moves it back", () => {
+    const { analysis } = analyzeForm((ids) => [
+      {
+        op: "configure",
+        nodeId: ids.form,
+        set: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+        unset: [],
+      },
+      {
+        op: "configure",
+        nodeId: ids.form,
+        set: { [SUBMIT_PROP_KEY]: { to: "newsletter.subscribe" } },
+        unset: [],
+      },
+    ])
+
+    expect(analysis.redirectedSubmissions).toEqual([])
+  })
+
+  it("needs no interactive vocabulary, unlike the nesting it sits beside", () => {
+    const { tree, ids } = formTree()
+    const result = analyzeDelta(
+      tree,
+      deltaOf(tree.treeId, [
+        {
+          op: "configure",
+          nodeId: ids.form,
+          set: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+          unset: [],
+        },
+      ])
+    )
+    if (!result.ok) throw new Error(result.error.code)
+
+    expect(result.value.nestedTargets).toEqual([])
+    expect(result.value.redirectedSubmissions).toHaveLength(1)
   })
 })
