@@ -13,6 +13,7 @@ import {
   type CollectingEventSink,
 } from "../testing/doubles.js"
 import { sampleTree, type SampleTree } from "../testing/fixtures.js"
+import { buildElement } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { findNode } from "../tree/navigation.js"
 import type { LoomTree } from "../tree/tree.js"
@@ -625,5 +626,73 @@ describe("composeChange when the event sink fails", () => {
     const outcome = await composeChange(runtime, tree, intentFor(tree))
 
     expect(outcome.kind).toBe("applied")
+  })
+})
+
+/**
+ * The end-to-end shape of 0064: a proposal that would put a link inside a link
+ * is refused by the same machinery that refuses any critical change, and the
+ * repairer — which exists to answer a refusal — gets the reason.
+ */
+describe("composeChange on a change that nests one target inside another", () => {
+  const withTargets = gatePolicySchema.parse({
+    policyId: "library",
+    interactiveTypes: { "loom.card": { whenProps: ["href"] }, "loom.action": "always" },
+  })
+
+  const linkInsideALink = (ids: SampleTree["ids"]): TreeOperation[] => [
+    { op: "configure", nodeId: ids.card, set: { href: "/pricing" }, unset: [] },
+    {
+      op: "insert",
+      parentId: ids.card,
+      index: 0,
+      node: buildElement(spare, { type: "loom.action" }),
+    },
+  ]
+
+  it("refuses it, naming both nodes", async () => {
+    const { runtime, tree, ids } = harnessFor({ build: linkInsideALink, policy: withTargets })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.reason.code).toBe("stakes-at-refusal-floor")
+    expect(outcome.disposition.reason.detail).toContain(`inside loom.card ${ids.card}`)
+  })
+
+  it("leaves the same change alone when the host declares no targets", async () => {
+    const { runtime, tree } = harnessFor({ build: linkInsideALink })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("applied")
+  })
+
+  it("does not refuse an action inside a card that is not a link", async () => {
+    const { runtime, tree } = harnessFor({
+      policy: withTargets,
+      build: (ids) => [
+        {
+          op: "insert",
+          parentId: ids.card,
+          index: 0,
+          node: buildElement(spare, { type: "loom.action" }),
+        },
+      ],
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("applied")
+  })
+
+  it("refuses it however high the origin's ceiling is, because the markup is wrong either way", async () => {
+    const { runtime, tree } = harnessFor({
+      build: linkInsideALink,
+      policy: withTargets,
+      origin: "developer",
+    })
+
+    expect((await composeChange(runtime, tree, intentFor(tree))).kind).toBe("rejected")
   })
 })

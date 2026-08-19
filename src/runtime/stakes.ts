@@ -1,4 +1,5 @@
 import type { ChangeAnalysis } from "./analysis.js"
+import { describeNestedTarget } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
@@ -29,6 +30,7 @@ export type StakeFactorCode =
   | "broad-change"
   | "shallow-structural-change"
   | "discards-later-work"
+  | "nested-target"
 
 export type StakeFactor = {
   readonly code: StakeFactorCode
@@ -189,6 +191,39 @@ const discardsLaterWork = ({ discards }: StakeInput): StakeFactor | null => {
   }
 }
 
+/**
+ * A target left inside another target, as damage.
+ *
+ * `critical`, which under the default refusal floor means refused rather than
+ * offered — the strongest thing the Gate does, and the level is the argument.
+ * Every other factor here measures a change that might be right: destroying a
+ * protected primitive is what a redesign looks like, and discarding work is
+ * sometimes the point. This one measures a change that is wrong however it was
+ * meant. Nested anchors are invalid HTML, browsers resolve them by dropping a
+ * link, and nobody has ever wanted the result.
+ *
+ * Refusal is also the useful disposition rather than merely the severe one: a
+ * refused proposal is the one a repairer gets to try again, and "you put a link
+ * inside a link" is feedback a model can act on. Confirmation would put the
+ * question to a person who can only answer no.
+ *
+ * A host that disagrees does not need a knob — it declares no interactive
+ * vocabulary, and this never fires. Like the lists above, silence is the
+ * default (0002).
+ */
+const nestedTarget = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { nestedTargets } = analysis
+  if (nestedTargets.length === 0) return null
+
+  return {
+    code: "nested-target",
+    level: "critical",
+    detail: `nests ${nestedTargets.length === 1 ? "a target" : `${nestedTargets.length} targets`} inside another: ${nestedTargets
+      .map(describeNestedTarget)
+      .join("; ")}`,
+  }
+}
+
 const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
   protectedTypeRemoved,
   protectedTypeTouched,
@@ -198,6 +233,7 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   broadChange,
   shallowStructuralChange,
   discardsLaterWork,
+  nestedTarget,
 ]
 
 export const assessStakes = (input: StakeInput, policy: GatePolicy): StakeAssessment => {

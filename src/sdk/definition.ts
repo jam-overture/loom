@@ -1,6 +1,7 @@
 import type { ZodType, ZodTypeAny, ZodTypeDef } from "zod"
 
 import { catalogueFields, type CataloguedProp } from "../catalogue.js"
+import type { InteractiveWhen } from "../interactivity.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
@@ -27,6 +28,10 @@ import { NO_TEXT, type PrimitiveText } from "../render/text.js"
  * - `text` — the strings the primitive owns rather than reads from the tree, in
  *   the author's own language, so a deployment has something to translate and a
  *   model has nothing to write. Optional: most primitives own no strings at all.
+ * - `interactive` — whether it renders a target the reader aims at, so the Gate
+ *   can refuse a change that puts one inside another (0064). Optional, and the
+ *   only field here that is read by nothing at render time: it exists so the
+ *   author who knows the component emits an anchor is the one who says so.
  */
 
 export type PrimitiveDefinition<
@@ -44,6 +49,14 @@ export type PrimitiveDefinition<
    * same bargain the props schema makes.
    */
   readonly text?: Readonly<Record<TText, string>>
+  /**
+   * `"always"` for a primitive that is a target however it is configured, or
+   * `{ whenProps }` naming the props that make it one — `href` on a card, which
+   * is a plain surface without it. The named props must be props the schema
+   * declares; the registry refuses a declaration that names one it does not, so
+   * a renamed prop cannot leave this quietly pointing at nothing.
+   */
+  readonly interactive?: InteractiveWhen
   readonly component: LoomPrimitive<TProps, TText>
 }
 
@@ -61,6 +74,8 @@ export type PrimitiveEntry = {
   readonly declaredProps: readonly CataloguedProp[] | undefined
   /** Declared strings, keys erased alongside the props type. Empty when none. */
   readonly text: PrimitiveText<string>
+  /** Absent for the ordinary primitive, which is not a target at all. */
+  readonly interactive: InteractiveWhen | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -115,6 +130,7 @@ export const definePrimitive = <TProps extends JsonObjectView, TText extends str
   description: definition.description,
   slots: definition.slots ?? [],
   text: freezeText(definition.text),
+  interactive: definition.interactive,
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

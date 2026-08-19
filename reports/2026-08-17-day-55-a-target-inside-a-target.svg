@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="760" viewBox="0 0 960 760" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="960" height="760" fill="#ffffff"/>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="40" font-size="19" font-weight="600" fill="#111827" font-family="ui-sans-serif, system-ui, sans-serif">A primitive says whether it is a target; the Gate derives the nesting</text>
+  <text x="32" y="62" font-size="12.5" fill="#6b7280" font-family="ui-sans-serif, system-ui, sans-serif">0064 — day 55 — §2. Interactive content does not nest, and until now that was expressible nowhere.</text>
+
+  <!-- ================= the tree ================= -->
+  <text x="32" y="104" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">THE CHANGE — A TREE A MODEL CAN PROPOSE TODAY, AND NOTHING OBJECTS</text>
+
+  <rect x="32" y="118" width="440" height="164" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="46" y="142" font-size="10.5" fill="#111827">loom.card  href="/pricing"</text>
+  <text x="66" y="164" font-size="10.5" fill="#111827">loom.stack</text>
+  <text x="86" y="186" font-size="10.5" fill="#b91c1c">loom.action  "Choose Pro"</text>
+  <text x="46" y="222" font-size="9.5" fill="#6b7280">insert an action · or configure the card with an href</text>
+  <text x="46" y="238" font-size="9.5" fill="#6b7280">over actions that were already inside it</text>
+  <text x="46" y="262" font-size="9.5" fill="#b91c1c">both produce &lt;a&gt; inside &lt;a&gt;</text>
+
+  <rect x="504" y="118" width="424" height="164" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="518" y="142" font-size="11.5" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">what the browser does with it</text>
+  <text x="518" y="170" font-size="10" fill="#111827">renders · looks right in a screenshot</text>
+  <text x="518" y="192" font-size="10" fill="#111827">reports nothing, anywhere</text>
+  <text x="518" y="214" font-size="10" fill="#b91c1c">drops one of the two links</text>
+  <text x="518" y="248" font-size="9.5" fill="#6b7280">the rare structural mistake that is invisible to review</text>
+  <text x="518" y="264" font-size="9.5" fill="#6b7280">and obvious to a reader who clicks</text>
+
+  <!-- ================= why nothing caught it ================= -->
+  <text x="32" y="326" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHY NO EXISTING SEAM COULD SAY SO — EACH FOR A GOOD REASON</text>
+
+  <rect x="32" y="340" width="288" height="86" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="46" y="362" font-size="10.5" fill="#111827">the renderer</text>
+  <text x="46" y="384" font-size="9.5" fill="#6b7280">0008 — a total pure projection;</text>
+  <text x="46" y="400" font-size="9.5" fill="#6b7280">it may not enforce parentage</text>
+
+  <rect x="336" y="340" width="288" height="86" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="350" y="362" font-size="10.5" fill="#111827">auditRegistry</text>
+  <text x="350" y="384" font-size="9.5" fill="#6b7280">probes one primitive alone —</text>
+  <text x="350" y="400" font-size="9.5" fill="#6b7280">which is what makes it cheap</text>
+
+  <rect x="640" y="340" width="288" height="86" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="654" y="362" font-size="10.5" fill="#111827">the props schema</text>
+  <text x="654" y="384" font-size="9.5" fill="#6b7280">sees one node's props and</text>
+  <text x="654" y="400" font-size="9.5" fill="#6b7280">never its descendants</text>
+
+  <!-- ================= the path ================= -->
+  <text x="32" y="470" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT LANDED — A FACT THAT TRAVELS WITH THE PRIMITIVE, AND A GATE THAT DERIVES THE REST</text>
+
+  <rect x="32" y="484" width="200" height="92" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="46" y="506" font-size="10.5" fill="#1e3a8a">definePrimitive</text>
+  <text x="46" y="528" font-size="9.5" fill="#1d4ed8">interactive:</text>
+  <text x="46" y="544" font-size="9.5" fill="#1d4ed8">{ whenProps: ["href"] }</text>
+  <text x="46" y="566" font-size="9" fill="#6b7280">a fact about the node</text>
+
+  <line x1="236" y1="530" x2="266" y2="530" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="270" y="484" width="200" height="92" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="284" y="506" font-size="10.5" fill="#1e3a8a">GatePolicy</text>
+  <text x="284" y="528" font-size="9.5" fill="#1d4ed8">interactiveTypes:</text>
+  <text x="284" y="544" font-size="9.5" fill="#1d4ed8">interactiveTypesFor(registry)</text>
+  <text x="284" y="566" font-size="9" fill="#6b7280">derived, so it cannot drift</text>
+
+  <line x1="474" y1="530" x2="504" y2="530" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="508" y="484" width="200" height="92" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="522" y="506" font-size="10.5" fill="#1e3a8a">ChangeAnalysis</text>
+  <text x="522" y="528" font-size="9.5" fill="#1d4ed8">nestedTargets</text>
+  <text x="522" y="550" font-size="9" fill="#6b7280">the result's pairs, less</text>
+  <text x="522" y="566" font-size="9" fill="#6b7280">the ones it inherited</text>
+
+  <line x1="712" y1="530" x2="742" y2="530" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+
+  <rect x="746" y="484" width="182" height="92" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="760" y="506" font-size="10.5" fill="#991b1b">stakes: critical</text>
+  <text x="760" y="528" font-size="9.5" fill="#b91c1c">rejected</text>
+  <text x="760" y="550" font-size="9" fill="#6b7280">under the default floor,</text>
+  <text x="760" y="566" font-size="9" fill="#6b7280">and the repairer gets it</text>
+
+  <!-- ================= what the reviewer reads ================= -->
+  <text x="32" y="620" font-size="12" font-weight="600" fill="#374151" font-family="ui-sans-serif, system-ui, sans-serif">WHAT THE DISPOSITION SAYS — THE PAIR, NOT A COUNT</text>
+
+  <rect x="32" y="634" width="896" height="60" rx="6" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="46" y="658" font-size="10" fill="#111827">stakes-at-refusal-floor — nests a target inside another:</text>
+  <text x="46" y="678" font-size="10" fill="#b91c1c">loom.action n_a41 inside loom.card n_c17</text>
+
+  <text x="32" y="726" font-size="9.5" fill="#6b7280">Not built, and said so: a render-time diagnostic for a tree that never passed the Gate, and a probe that checks the declaration against real markup —</text>
+  <text x="32" y="742" font-size="9.5" fill="#6b7280">which reads as a false negative for any primitive that delegates its root. The starter library declares nothing yet; that is the primitives routine's lane.</text>
+</svg>

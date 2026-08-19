@@ -490,7 +490,13 @@ regression here again.
 
 ## 2026-08-17 — a linked card may legally contain a link, and nothing can say so
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#88** — a primitive declares whether it is a target and the Gate refuses a
+change that nests two
+([0064](decisions/0064-a-primitive-says-whether-it-is-a-target-and-the-gate-derives-the-nesting.md)).
+Adopting it in `src/primitives/` is filed back below. Original status below.
+
+**Status:** open
 
 `loom.card` takes an `href`, which makes the whole surface the target a reader
 aims at — the same call `loom.feature` already makes, and the right one: a card
@@ -672,6 +678,132 @@ Filed against my own lane rather than acted on: the first option touches
 `apps/portal/lib/demo`, which is mine, but it is a unit of its own and this run
 was already one. It is the change I would make next if history were not ahead of
 it.
+
+---
+
+## 2026-08-17 — the library can now say which of its primitives are targets
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+Answering the finding above, which this routine owns, and handing back the half
+that is not this routine's to do.
+
+**A primitive now declares whether it renders a target**, and the Gate refuses a
+change that leaves one inside another
+([0064](decisions/0064-a-primitive-says-whether-it-is-a-target-and-the-gate-derives-the-nesting.md)).
+The declaration is about the node and never about the parent — which is what
+keeps it clear of the parentage field
+[0054](decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)
+rejected:
+
+```ts
+definePrimitive({ type: "loom.action", interactive: "always",               … })
+definePrimitive({ type: "loom.card",   interactive: { whenProps: ["href"] }, … })
+```
+
+The conditional form is the important one. A card with no `href` holding an
+action is the ordinary composition of a page, and a check that refused *that*
+would be a check every host turns off — so a card is a target only when the tree
+actually gave it one, and a blank or cleared `href` does not count.
+
+**What is left, and it is yours.** Four primitives are targets by inspection of
+their schemas, and none of them declares it yet, so nothing changes for any
+deployment until they do:
+
+| primitive | declaration |
+| --- | --- |
+| `loom.action` | `"always"` — `href` is required |
+| `loom.card` | `{ whenProps: ["href"] }` |
+| `loom.feature` | `{ whenProps: ["href"] }` |
+| `loom.logo` | `{ whenProps: ["href"] }` |
+
+It is one line each, it needs no other change, and `createPrimitiveRegistry`
+refuses a trigger naming a prop the schema does not declare — so a typo or a
+renamed prop is a failed registration rather than a check that quietly stops
+firing. Nothing inside `src/primitives/` was touched by this run, deliberately.
+
+Worth knowing while you are there: **the check is only as good as the
+declaration, and only part of that is verifiable.** The registry checks the prop
+names exist. Nothing checks that the component really emits an anchor, because a
+probe for that reads as a false negative for any primitive that delegates its
+root to another component — the same limit `probeEditableDecoration` documents
+about itself. `loom.feature` and `loom.logo` both branch on `href` internally,
+so they are the two where a future refactor could make the declaration a lie
+without anything noticing.
+
+---
+
+## 2026-08-17 — the interactive check has no live user until a policy derives it
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Structural, small, and a lane question rather than a technical one.
+
+`interactiveTypesFor(registry)` turns a registry's declarations into the
+vocabulary a `GatePolicy` reads. Until some deployment calls it, 0064 refuses
+nothing anywhere. The obvious place is **the demo**, which mints a policy per
+visitor already and which exists to show the Gate doing exactly this kind of
+thing — a proposal held or refused, with the reason in the Gate's own words.
+
+The trouble is that the framework brief and `docs/routines.md` both say this
+routine owns "the demo", and the demo's files live in `apps/portal/lib/demo` and
+`apps/portal/app/demo`, which are the portal routine's directory. The portal run
+of the same day proposed further changes to `lib/demo/session.ts` on #87. Two
+routines editing one directory is the thing the lane table exists to prevent, so
+this run did not touch it.
+
+Three ways to settle it, all the maintainer's:
+
+- **Say the demo is the portal's**, and the framework routine files demo work as
+  findings like any other `apps/` work. Simplest, and matches where the files
+  actually are.
+- **Say the framework routine owns `apps/portal/app/demo` and
+  `apps/portal/lib/demo` specifically**, with the portal routine filing findings
+  against them. Matches the briefs as written, at the cost of a directory
+  boundary inside one app.
+- **Move the demo out of the portal** into its own app. Most work, cleanest
+  boundary, and it would give the marketing routine something to embed that does
+  not carry the portal's chrome.
+
+Until then the seam is real, tested and unused, which is a worse state than
+either resolution.
+
+**18 August — answered by the maintainer**, recorded here by `Loom primitives`
+because a merged PR's comments are not something the next run reads:
+
+> *"The demo can be set up as its own routine. We will place it under the
+> marketing documents routine."*
+
+So it is the **third option**, with the ownership named: the demo becomes its
+own routine and sits under the marketing documents routine rather than under
+this one or the portal's. Two consequences worth stating so neither routine
+waits on the other:
+
+- **`apps/portal/app/demo` and `apps/portal/lib/demo` stop being contested.**
+  Neither the framework routine nor the portal routine owns the demo; whoever
+  runs the new routine does, and `apps/portal` returns to being wholly the
+  portal's.
+- **`interactiveTypesFor(registry)` gets its live user from that routine**, not
+  from this branch. The seam stays real, tested and unused until then, which is
+  now a known wait rather than an open question.
+
+The entry stays open until the routine exists and the lane table in
+`docs/routines.md` says so.
+
+---
+
+## 2026-08-17 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Recorded for the reason the other routines record it. The change needed one new
+shared module at the root — `src/interactivity.ts`, holding the declaration
+vocabulary — because it has two readers that do not know about each other, the
+SDK where an author declares it and the policy where a deployment's set arrives.
+Nothing under `sdk/` imports from `runtime/` today, and this was not the change
+to start with, so the type went where `reserved-props.ts` went when the `loom:`
+namespace acquired its second reader. No entry point changed shape and no
+consumer was touched.
 
 ---
 
