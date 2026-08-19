@@ -1,0 +1,134 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("getting-started", "your-first-tree")
+
+# Your first tree
+
+A tree is the page, as data. This one is five nodes.
+
+```ts
+import { buildElement, buildText, createTree, sequentialIdFactory } from "@loom/runtime"
+
+const ids = sequentialIdFactory("firsttree")
+
+const tree = createTree(
+  buildElement(ids, {
+    type: "loom.page",
+    props: {
+      width: "readable",
+      "loom:theme": {
+        palette: "editorial",
+        fontPack: "editorial-serif",
+        stylePreset: "comfortable",
+      },
+    },
+    children: [
+      buildElement(ids, {
+        type: "loom.heading",
+        props: { level: 1 },
+        children: [buildText(ids, "Hello from a tree")],
+      }),
+      buildElement(ids, {
+        type: "loom.prose",
+        children: [buildText(ids, "Nothing here was written as markup.")],
+      }),
+    ],
+  }),
+  ids
+)
+```
+
+That is the whole of it. Rendered through the runtime, it is this:
+
+<Example id="first-tree" />
+
+Open **show the tree** under the frame. What you are reading is the exact value
+the render walked — not a transcription of it.
+
+The one prop that is not the page's own is `loom:theme`: three registered ids
+that the root primitive resolves and mounts, which is why the example is styled
+at all. [Rendering a tree](/docs/getting-started/rendering-a-tree) covers it.
+
+## Three kinds of node
+
+| Kind | Built with | What it is |
+| --- | --- | --- |
+| `element` | `buildElement` | a named primitive, its props, and its children |
+| `text` | `buildText` | a string. The only place user-visible copy lives |
+| `slot` | `buildSlot` | a named region a parent primitive places itself |
+
+An element's `type` must name something the registry knows. Its `props` must
+satisfy that primitive's declared schema. Both are checked — the first when the
+tree is rendered, the second either at render or the moment a proposal touches
+it, which is the subject of
+[Rendering a tree](/docs/getting-started/rendering-a-tree).
+
+<Callout kind="note">
+  Text is a node rather than a prop for a reason worth internalising early: it
+  makes every sentence on a page separately addressable. "Change the headline"
+  is then one `configure` at a known id, and not a rewrite of the heading.
+</Callout>
+
+## Ids, and why you pass a factory
+
+Every node carries an id, and every downstream operation addresses nodes by it.
+A delta says "insert here", where *here* is an id.
+
+`buildElement` does not invent one. It asks the `IdFactory` you passed, and
+which factory you pass is a real decision:
+
+```ts
+import { randomIdFactory, sequentialIdFactory } from "@loom/runtime"
+
+sequentialIdFactory("demo") // n_demo1, n_demo2, … — the same tree every time
+randomIdFactory //            n_8f3c…      — a new tree every time
+```
+
+Use a **sequential** factory for anything built more than once from the same
+code — a seed, a fixture, an example on this site. The tree comes out
+byte-identical on every instance that builds it, which is what makes a stored
+tree and a scripted change against it survive a deploy.
+
+Use a **random** factory for nodes created at runtime, where two of them must
+never collide.
+
+<Callout kind="warning">
+  Ids must be unique across the whole tree. Reusing one factory across a tree
+  guarantees it; building two subtrees with two sequential factories in the same
+  namespace does not, and `validateTreeInvariants` will tell you so.
+
+  A namespace is part of the id, so it has to be a legal one: lowercase letters
+  and digits, up to 32 characters in total. `"firsttree"` is fine and
+  `"first-tree"` throws at the first node it builds.
+</Callout>
+
+## A tree is more than its root
+
+```ts
+tree.treeId //        t_firsttree1 — what a store keys it by
+tree.revision //      0 — every applied change increments this
+tree.schemaVersion // the shape of everything above
+tree.root //          the element node
+```
+
+`revision` is how a proposal says which version of the page it was written
+against. A change interpreted against revision 4 and applied to revision 7 is a
+change nobody checked, so the runtime declines it rather than guessing.
+
+## Builders, or a parse
+
+The builders above make it hard to produce an invalid tree. When the tree comes
+from somewhere else — a database row, a request body, a file — you do not have
+that guarantee, so there is a boundary parse instead:
+
+```ts
+import { parseTree } from "@loom/runtime"
+
+const parsed = parseTree(await request.json())
+
+if (!parsed.ok) return reject(parsed.error)
+```
+
+Everything past that point is a `LoomTree` and can be treated as one. That is
+the whole purpose of having a schema: exactly one place where unknown input
+becomes a known value.

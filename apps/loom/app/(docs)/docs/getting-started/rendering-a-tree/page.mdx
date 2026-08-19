@@ -1,0 +1,122 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("getting-started", "rendering-a-tree")
+
+# Rendering a tree
+
+Rendering turns a tree into React elements. It is synchronous, pure, and it
+never fails.
+
+```tsx
+import { createThemeRegistry } from "@loom/runtime"
+import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
+import { renderLoomTree } from "@loom/runtime/react"
+
+const registry = createStarterPrimitiveRegistry()
+
+if (!registry.ok) throw new Error("the registry was refused")
+
+const rendered = renderLoomTree(tree, {
+  resolver: registry.value,
+  validator: registry.value,
+  themes: createThemeRegistry(),
+})
+
+return <main>{rendered.element}</main>
+```
+
+Three options and one of them is required. `resolver` answers "what component
+is `loom.heading`?". `validator` answers "are these props legal for it?". A
+registry built through the SDK satisfies both, so passing the same object twice
+is the ordinary case — they are separate options because they are separate
+questions, and a host may want the first without the second.
+
+## It always returns an element
+
+This is the property to plan around. A tree can name a primitive you have not
+registered — a proposal invented it, or a deployment rolled the code back but
+not the tree — and blanking a page over one unknown card serves nobody.
+
+So `renderLoomTree` renders what it can and reports what it could not, beside
+the element rather than instead of it:
+
+```ts
+const { element, diagnostics, theme } = renderLoomTree(tree, options)
+```
+
+`diagnostics` is a list, and it is empty on a healthy render. Each entry names
+the node it happened at:
+
+| Code | What happened |
+| --- | --- |
+| `unknown-primitive` | the tree named a type the resolver does not have |
+| `invalid-props` | props failed the primitive's schema; the node rendered without them |
+| `props-undeclared` | the resolver knows the type and the validator does not — a wiring fault |
+| `theme-unresolved` | the root named a theme the registry refused |
+
+<Callout kind="warning">
+  Diagnostics are not a debug channel to leave unread. They are the record that
+  a page served something other than what its tree asked for. Show them in
+  development, log them in production, and — as this site does under every
+  example — fail a test on them.
+</Callout>
+
+## Themes are three ids on the root
+
+A theme is not a stylesheet you import. It is a palette, a font pack and a style
+preset, named by id on the root node under the reserved `loom:theme` prop:
+
+```ts
+props: {
+  "loom:theme": {
+    palette: "editorial",
+    fontPack: "editorial-serif",
+    stylePreset: "comfortable",
+  },
+}
+```
+
+Pass a `ThemeRegistry` and the render resolves those three ids and hands the
+result to the **root primitive**, which mounts them as CSS custom properties on
+its own element. Every primitive underneath is styled from `var(--loom-*)` and
+never knows which theme it is wearing.
+
+That is worth reading twice, because it is the one part that catches people out:
+mounting is the root primitive's job, and `loom.page` is the primitive in the
+starter library that does it. A tree rooted at something else renders with none
+of those properties set — legal, silent, and indistinguishable from a stylesheet
+that failed to load.
+
+<Example id="themed-tree" />
+
+Two consequences follow, and both are the reason it is done this way. A
+re-theme is an ordinary `configure` on one node — the same operation as any
+other change, gated the same way. And the registry you pass is the **allowlist**:
+a proposal can only name a palette you registered, so "make it look different"
+has a bounded set of answers.
+
+<Callout kind="note">
+  Leave `themes` out and a tree that names one says so in a
+  `theme-unresolved` diagnostic and renders unstyled. That is the same bargain
+  every diagnostic makes: less than was asked for, never nothing.
+</Callout>
+
+## Serving a page, rather than rendering a value
+
+`renderLoomTree` is synchronous because rendering is. A real request usually has
+two things to do first — load the tree from somewhere, and answer any data
+bindings it declares — and both are IO.
+
+`renderRequest` is where those meet: it loads, parses, plans the tree's
+bindings, resolves them all at once, and then renders. It returns a `Result`,
+because loading and parsing are the two steps that genuinely can fail.
+
+```ts
+const served = await renderRequest(request, { source, resolver, validator, themes })
+
+if (!served.ok) return notFound()
+
+return <main>{served.value.element}</main>
+```
+
+Rendering stays as pure as it was; the IO happens in one place, before the walk.

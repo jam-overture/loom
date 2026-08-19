@@ -1255,6 +1255,7 @@ Until both hold, the honest substitute is what this run did — publish the
 rendered page somewhere public and link that. It is better than a screenshot and
 it does not depend on either.
 
+
 ---
 
 ## 2026-08-19 — 21st.dev, re-verified a third time
@@ -1340,3 +1341,174 @@ Nothing is broken and no test is wrong. If the wording is ever worth widening �
 is a string in the runtime rather than anything in the library. Filed rather than
 fixed because `src/runtime/` is not this lane, and because it is genuinely
 marginal.
+
+---
+
+## 2026-08-19 — `apps/loom` exists, and every lane is a route group now
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`, `Loom docs`,
+`Loom marketing`, `Loom lessons` · **Status:** open
+
+The 0067 migration landed. Four routines are reading this to know when they can
+start, so this is the state of the tree rather than an ask.
+
+`apps/portal`, `apps/docs` and `apps/marketing` no longer exist. There is one
+application, `apps/loom`, and one route group per surface:
+
+| routine | lane | serves |
+| --- | --- | --- |
+| `Loom marketing` | `apps/loom/app/(marketing)/` | `/`, `/how-it-works` |
+| `Loom docs` | `apps/loom/app/(docs)/` | `/docs/…` |
+| `Loom lessons` | `apps/loom/app/(lessons)/` | `/lessons` — an empty shell |
+| `Loom portal` | `apps/loom/app/(portal)/` | `/portal/…`, behind sign-in |
+
+**Four things to know before your next run.**
+
+- **Your lane is one directory and everything under it.** A surface's components
+  and its non-route code live *inside* its route group, in `_components/` and
+  `_lib/` — Next excludes an underscore-prefixed folder from routing, so they sit
+  beside the routes without becoming any. `@/lib/nav` is now
+  `@/app/(docs)/_lib/nav`, and the alias says whose it is
+  ([0068](decisions/0068-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md)).
+- **Every portal URL gained a `/portal` prefix.** `/trees` is `/portal/trees`,
+  `/history` is `/portal/history`, and so on for all eleven routes. There are no
+  redirects from the old paths. Anything the portal routine has in flight against
+  `apps/portal/` will not apply cleanly and wants rewriting rather than merging.
+- **Sign-in is scoped to `/portal` in `proxy.ts`.** Marketing, docs and lessons
+  are public and no longer need to be exempted one at a time. `requireActor`
+  still runs inside every guarded page, because 0027 says both checks or neither.
+- **`pnpm verify` is one filter now**, `@loom/app`. The three per-app `verify`
+  scripts are gone.
+
+Nothing was redesigned on the way past. Every test moved with its code and the
+count is the arithmetic sum of the three suites — 546 + 44 + 52 = 642, all
+passing. The two additions are a `(lessons)` shell with one page saying what it
+is, and `/docs` taking over the redirect that used to be the documentation
+application's `/`.
+
+---
+
+## 2026-08-19 — one deployment now, and the Vercel projects point at nothing
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open
+
+The half of the migration that cannot be done from the repository, and it is a
+dashboard change of about a minute.
+
+`loom-portal` and `loom-marketing` have Root Directory set to `apps/portal` and
+`apps/marketing`, and neither directory exists on this branch. **Repoint one
+project at `apps/loom` and delete the other**; `docs/deployment.md` opens with
+this and the rest of that document is written for the one project that remains.
+
+Which one to keep matters slightly: the environment variables live on the
+project, and `loom-portal` is the one that has them — the session secret, the
+reviewer roster and `DATABASE_URL`. Keeping `loom-portal` and renaming it costs
+nothing; keeping `loom-marketing` means copying five variables across.
+
+Worth knowing while you are in there, because it is the same screen: the
+19 August preview-URL finding above is now half-answered. Previews build — #97
+reached `Ready` on both projects — so what is left is the second half, that a
+preview is only readable by someone signed in to Vercel unless deployment
+protection is relaxed for preview environments. With one project instead of
+three, relaxing it is one setting.
+
+---
+
+## 2026-08-19 — a record numbered 0068 existed on two branches, and merge order settled it
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** this instance resolved; the underlying request — write the convention
+down — stays **open** against the 16 August numbering finding.
+
+Recorded because the 16 August entry asked for the convention to be written down
+and this is the fifth collision, the first where the loser could see it coming.
+
+`main` ended at 0067, so 0068 was the next free number, which is what the brief
+says to take. **#97 also held 0068** (and 0069, `Proposed`), unmerged, written the
+same morning. Both branches were correct by the rules they were given.
+
+**Merge order settled it, and this branch lost.** #97 merged as `dd54502` while
+this one was open, so the record renumbered **0068 → 0070** — `git mv`, `sed` over
+the cross-references, `pnpm decisions:index` — and the index runs unbroken to 0070.
+The rename lives in this branch's merge commit rather than its first, so the
+record's own history is intact and the diff reads as a rename.
+
+**Neither branch was ever red**, which is what made this one cheap and is the
+difference from the 16 August collision. Each was contiguous on its own tree, so
+the loser paid one rename after the fact instead of sitting red for as long as the
+other stayed open. Two things followed the rename and are worth knowing, because
+they are the real cost rather than the `git mv`: the marketing site's checked
+record count had to move twice — `"67"` → `"68"` on this branch alone, then
+`"70"` on the merge — and two source comments referencing the record by number had
+to be repointed.
+
+The 16 August entry's conclusion still stands and is now five for five: **merge
+order is the convention this repository already runs on**, it costs one rename per
+collision, and it is the only one of the three candidates that needs no tooling.
+It is worth a line in `docs/routines.md` — which a routine should not add on its
+own initiative, since a routine choosing its own convention here is how two
+conventions get invented.
+
+---
+
+## 2026-08-19 — no framework gaps this run, and nothing in `src/` was opened
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed
+
+Recorded for the reason the other routines record it, and this run is the
+strongest version of it: **`src/` is untouched by this branch.** A migration of
+three applications into one needed nothing from the runtime, no new export, and
+no change to any entry point — which is the outcome 0018 predicts when a surface
+is genuinely a consumer, tested here by moving all four of them at once.
+
+Two open findings this routine owns were **not** closed, deliberately, and both
+for the same reason. The 18 August "a change of destination is not yet a stake"
+is a `src/runtime/` unit that the migration outranked; the two 19 August findings
+filed against this lane by the marketing run — the relative-URL refusal and
+`loom.divider`'s ornaments — both land in `src/primitives/`, which is not this
+routine's directory, and #97 reports having taken both.
+
+---
+
+## 2026-08-19 — the marketing site's checked numbers make every other lane's run go red
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+
+Recorded here rather than left in a pull-request thread, because a merged PR's
+comments are not something the next run reads — and this one has now been hit
+twice in one day by two different routines.
+
+`FACTS` in `app/(marketing)/_lib/copy.ts` holds two counts as literal strings —
+37 primitives, 68 decision records — and `facts.test.ts` asserts each against the
+repository itself. **That design is right and should not be undone.** A number on a
+marketing page that nothing checks is a number that is wrong within a fortnight,
+and the file's own comment says so.
+
+What follows from it is the problem. Both counts move when a routine that is *not*
+marketing does ordinary work:
+
+- **#97** added four primitives, took the library from 37 to 41, and had to edit
+  this file to get green.
+- **This branch** added one decision record, 67 → 68, and had to do the same.
+
+So every primitives run and every run that writes a record now edits a file in the
+marketing lane. Each edit is one digit and none is a judgement call, but the lane
+system exists to keep two routines out of one file, and this is a file three of them
+are structurally required to touch.
+
+Two ways out, and neither is a routine's to choose on its own:
+
+- **Derive the counts at build time.** `catalogueOf(siteRegistry).length` is already
+  how the test computes the primitive count, and the record count is a `readdir`.
+  A page that renders the number rather than asserting a literal cannot drift, and
+  nobody outside this lane ever edits the file again. It costs the page a build-time
+  filesystem read, which is what a marketing page's numbers being true is worth.
+- **Leave it and accept the one-digit edits**, saying so explicitly in
+  `docs/routines.md` so a routine that hits it knows it is expected rather than
+  trespassing.
+
+Until then, a run outside this lane that leaves it red is blocking all four
+surfaces over two digits, so the one-digit edit is the right call and both runs
+made it.

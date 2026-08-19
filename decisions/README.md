@@ -127,3 +127,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0067](0067-the-four-surfaces-are-one-application.md) | The four surfaces are one application, and a route group is a lane | Accepted | §4c, §4d, §5 |
 | [0068](0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md) | A primitive is a target when the reader aims at the whole of it | Accepted | §4b |
 | [0069](0069-a-root-relative-path-is-a-destination-a-tree-may-name.md) | A root-relative path is a destination a tree may name | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |
+| [0070](0070-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md) | The portal is a segment, and the marketing site is the front door | Accepted | §4c, §4d, §5 |
