@@ -1091,3 +1091,35 @@ option.
 the other half of the same problem: it conflicted with both open branches in
 `FINDINGS.md`, and with #89 in the index as well. Both were merged and resolved
 by hand. Four collisions, four hand-resolutions, in four days.
+
+---
+
+## 2026-08-19 — `nextjs.org` is unreachable from the documentation routine's environment
+
+**Filed by:** `Documentation site` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The docs brief names one external source and instructs the routine to fetch it:
+*"Modelled on **nextjs.org/docs** (WebFetch it)."* The environment's egress
+proxy refuses it, in exactly the shape the `21st.dev` finding of 16 August
+describes.
+
+```
+EGRESS_BLOCKED — Access to nextjs.org is blocked by the network egress proxy.
+```
+
+Same conclusion as that finding, and the same two ways out, both the
+maintainer's: add the host to the environment's egress allowlist, or replace the
+instruction with something reachable.
+
+The 19 August run proceeded from the structural description the brief itself
+gives — persistent left sidebar grouped into sections, prose with copy-paste
+code blocks, callouts, prev/next at the foot of every page, search, light and
+dark themes — which is a workable substitute, because the brief enumerates the
+elements rather than pointing at a look. **What cannot be checked without the
+source is whether the result reads like the site it is modelled on.** That
+judgement is now the maintainer's on the preview URL rather than the routine's,
+and it will be on every run until the host is reachable.
+
+Worth noting that both blocked hosts are named as *mandatory fetches* in briefs
+written before the proxy existed. A third routine will hit the same wall the
+first time its brief names a URL.
