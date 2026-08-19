@@ -313,6 +313,30 @@ every existing cross-reference).
 Recorded rather than acted on because a routine choosing its own convention here
 is how two conventions get invented.
 
+**18 August, `Loom primitives`** — hit a third time, and this time both branches
+were open at once. #88 (`Loom daily build`) claims **0064**, and the
+catalogue-bands branch wrote its own record as 0064 too, because the guard
+refuses a gap and 0064 was not on `main`.
+
+**Settled by merge order, and it took two rounds.** The maintainer asked the
+18 August primitives run to fix #88's merge conflict, so #88 landed first and the
+catalogue-bands record renumbered 0064 → 0065. Then **#89 landed its own 0065**
+while that branch was still open, so it renumbered again, 0065 → 0066. Two
+renames for one record, each one `git mv` + `sed` + `pnpm decisions:index`, and
+the branch is green at the end of it.
+
+The second round is the more instructive one: the first collision was visible
+(both branches were open at once and both said 0064), and the second was not —
+#89 was written, merged and numbered without the catalogue-bands branch ever
+being able to see it coming. **Merge order handles both, but only the loser
+finds out**, and always by a red branch rather than a warning.
+
+So of the three conventions offered above, **merge order** is the one this
+repository is already running on, twice now, without anyone having written it
+down. It costs one red branch and one rename per collision, both cheap, and it
+is the only one of the three that needs no new tooling. Worth making explicit in
+`docs/routines.md` rather than leaving each pair of routines to rediscover.
+
 ---
 
 ## 2026-08-16 — a routine's local `main` can be four merges stale, silently
@@ -876,6 +900,40 @@ form rather than a redirected one, and is not the same event.
 
 ---
 
+## 2026-08-18 — the catalogue pairs will need the `interactive` declaration
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+
+A note from this routine to its own next run, so the adoption is not discovered
+twice.
+
+#88 files a finding for this lane: apply `interactive` to `loom.action`,
+`loom.card`, `loom.feature` and `loom.logo`, one line each, so the Gate can
+derive a nested-target refusal. **It landed while this branch was open**, so the
+field now exists — but the adoption is still not this branch's, which is a
+catalogue-bands unit and would be widening itself to take it. It is the first
+thing the next run does.
+
+Two of the four primitives this run added want it as well, and they want
+*different* forms, which is worth writing down while the reasoning is fresh:
+
+- **`loom.product`** is `{ whenProps: ["href"] }` — the name is an ordinary
+  anchor when there is a destination and nothing when there is not.
+- **`loom.article`** is the interesting one. Its root is an `<article>` and its
+  anchor is the title, so it is **not** a target in the sense #88 means: a
+  `loom.action` inside one is valid HTML. What it *is* is a card with a
+  stretched overlay, and a control underneath that overlay is broken in a way no
+  nesting check would name. If a declaration is ever wanted for it, it is a
+  different fact from `interactive` and should get a different word rather than
+  be squeezed into that one.
+- **`loom.article-grid`** and **`loom.product-grid`** declare nothing: a
+  container is not a target.
+
+So the next run has six one-line declarations to write, not four — and one
+question to answer first, about what word `loom.article` deserves.
+
+---
+
 ## 2026-08-18 — no framework gaps this run
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
@@ -947,3 +1005,23 @@ exactly the drift 0018 exists to prevent. So this is a framework observation, no
 a portal fix. It bites only on a long log on a slow store; the seeded portal and
 the fixtures never feel it. Filed so a later run reads it here rather than
 rediscovering it from a timing graph.
+
+---
+
+## 2026-08-18 — no framework gaps in the primitives run either
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+
+Recorded for the reason the other routines record it. Four primitives, two
+regions apiece at most, one decision record and one stylesheet category, and
+nothing outside `src/primitives/` was needed or wanted. The seam answered every
+question this unit asked: `slots` placed the two regions (0051), the props
+schema carried the free-text price and kicker without a refinement, and the
+declared-string seam was not reached at all because neither pair owns a string —
+every word on these cards comes from the tree.
+
+The one thing that *was* awkward is not a gap. `stylesheet.ts`'s rule that an
+inline style beats a rule in that file cost this run its first screenshot, the
+same way it cost the 17 August run a red test. It is CSS behaving exactly as CSS
+does, the file already says so in as many words, and a third routine hitting it
+would be a reason to make the comment louder rather than to change anything.
