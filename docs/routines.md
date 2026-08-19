@@ -76,8 +76,12 @@ Two rules follow from sharing an application, and they are what keep it safe:
 - **`pnpm verify` green is the merge gate for everyone**, because one broken
   build now blocks four surfaces rather than one.
 
-Until `apps/loom` exists, the portal continues in `apps/portal`. The migration
-is owned by `Loom daily build`.
+`apps/loom` exists as of 19 August 2026: `apps/portal`, `apps/docs` and
+`apps/marketing` were retired into `(portal)`, `(docs)` and `(marketing)`, and
+`(lessons)` is an empty shell waiting for its owner. Each lane is that one
+directory and everything under it — a surface's components and its non-route code
+live inside its own route group, so `app/(docs)/_lib/nav.ts` is the documentation
+routine's and nobody else has to be told so.
 
 Work that belongs to another lane is **filed in `FINDINGS.md` for its owner**,
 not done.

@@ -1,7 +1,20 @@
-# Deploying the portal
+# Deploying Loom
 
-The portal is a Next.js app inside a pnpm workspace. `apps/portal/vercel.json`
-pins the one setting that must not drift:
+**One deployment, four surfaces.** `apps/loom` is a single Next.js application
+inside a pnpm workspace, and its four route groups are the marketing site at `/`,
+the documentation at `/docs`, the lessons at `/lessons` and the portal at
+`/portal` ([0067](../decisions/0067-the-four-surfaces-are-one-application.md)).
+One domain and one session: a visitor signs in on the way into `/portal` and is
+the same person everywhere else on the deployment.
+
+> **If you are looking at a Vercel project created before 19 August 2026**, it
+> points at `apps/portal`, `apps/docs` or `apps/marketing` and none of those
+> directories exist any more. Repoint **one** project's Root Directory at
+> `apps/loom` and delete the others — the sections below are written for that one
+> project. Everything a deleted project held that matters is environment
+> variables, and they are listed under [Environment](#environment).
+
+`apps/loom/vercel.json` pins the one setting that must not drift:
 
 ```json
 { "framework": "nextjs" }
@@ -19,17 +32,17 @@ Import `jam-overture/loom` and set:
 
 | Setting                           | Value                        |
 | --------------------------------- | ---------------------------- |
-| Root Directory                    | `apps/portal` — **verify it, see below** |
+| Root Directory                    | `apps/loom` — **verify it, see below** |
 | Framework preset                  | pinned by `vercel.json`      |
 | Install / Build / Output commands | leave as default             |
 
 Vercel reads `packageManager` from the root `package.json`, installs with the
-committed lockfile, and runs the portal's `build` script.
+committed lockfile, and runs the application's `build` script.
 
 ### Root Directory is the one that bites, and it fails silently
 
 **Setting it during the import is not enough — verify it after.** On the New
-Project screen the field shows `apps/portal` as **greyed placeholder text**, which
+Project screen the field shows `apps/loom` as **greyed placeholder text**, which
 looks identical to a value that has been set. Vercel's default is an empty Root
 Directory, meaning the repository root.
 
@@ -50,7 +63,7 @@ Skipping cache upload because no files were prepared
 dependencies and prints a Next.js route table, and takes minutes.
 
 To fix or confirm: **Settings → Build and Deployment → Root Directory** → Edit →
-`apps/portal` → Save, then redeploy. That section only exists once the project
+`apps/loom` → Save, then redeploy. That section only exists once the project
 does, which is why it cannot be fully settled during the import.
 
 ### Its aftershock: the framework preset
@@ -67,15 +80,15 @@ Error: No Output Directory named "public" found after the Build completed.
 "Other" means static site, and a static site is expected to leave a `public`
 directory behind. Next.js leaves `.next`.
 
-`apps/portal/vercel.json` pins `"framework": "nextjs"`, which overrides the
+`apps/loom/vercel.json` pins `"framework": "nextjs"`, which overrides the
 dashboard, so this is fixed from the repo and stays fixed. Setting the preset by
 hand in **Settings → Build and Deployment → Framework Preset** works too, but it
 lives where nobody reviews it.
 
 ### The workspace link, which you do not have to do anything about
 
-`apps/portal` depends on `@loom/runtime` as `workspace:*`, which resolves to the
-**repository root package**. An install scoped to `apps/portal` alone would have
+`apps/loom` depends on `@loom/runtime` as `workspace:*`, which resolves to the
+**repository root package**. An install scoped to `apps/loom` alone would have
 nothing to link against.
 
 Vercel controls that with **"Include source files outside of the Root Directory
@@ -93,7 +106,7 @@ reasoning about it.
 
 ## Environment
 
-`apps/portal/.env.example` is the full list with the commentary. Five variables,
+`apps/loom/.env.example` is the full list with the commentary. Five variables,
 two of which are required:
 
 | Variable                         | Required | Notes                                   |
@@ -126,10 +139,10 @@ openssl rand -hex 24   # one key per reviewer
 LOOM_PORTAL_REVIEWERS=ana@example.com:2f4c…,bo@example.com:9ab1…
 ```
 
-The key **is** the identity. A reviewer pastes a key at `/sign-in` and the roster
+The key **is** the identity. A reviewer pastes a key at `/portal/sign-in` and the roster
 says who that is — there is no name field, because a name that can be typed is a
 name anyone can type. The actor lands in `Provenance.actor` and is what
-`/history` and `/activity` show, so pick something a reader will recognise.
+`/portal/history` and `/portal/activity` show, so pick something a reader will recognise.
 
 **Set both, or the portal admits nobody.** This is the one place where absent
 configuration does not degrade gracefully, and that is deliberate: an empty
@@ -202,7 +215,7 @@ would hold a connection per function instance and exhaust the pool.
 
 ### 3. `DATABASE_URL`, and the mistake that costs a deployment
 
-Set it in Vercel (Production and Preview) and in `apps/portal/.env.local`.
+Set it in Vercel (Production and Preview) and in `apps/loom/.env.local`.
 
 **The value is the bare URL.** An environment entry is `KEY=value`, so a line that
 reads `DATABASE_URL=DATABASE_URL=postgresql://…` puts the key name *inside* the
@@ -212,17 +225,17 @@ and the client is constructed at module scope. It surfaced as:
 
 ```
 TypeError: Invalid URL
-Error: Failed to collect page data for /trees
+Error: Failed to collect page data for /portal/trees
 ```
 
-Nothing in that mentions the environment. `lib/connection.ts` now catches it and
+Nothing in that mentions the environment. `app/(portal)/_lib/connection.ts` now catches it and
 says so by name, but the fastest check is still to look at the value and confirm it
 begins `postgresql://`.
 
 ### 4. Create the tables
 
 ```bash
-pnpm --filter @loom/portal db:push
+pnpm --filter @loom/app db:push
 ```
 
 Once, from a machine with `.env.local` in place. Idempotent — every statement is
@@ -278,7 +291,7 @@ WHERE relname LIKE 'loom\_%';
 
 ### 6. Redeploy, and check the right thing
 
-The tell is on `/trees`: the "No database is configured" note **disappears** when
+The tell is on `/portal/trees`: the "No database is configured" note **disappears** when
 `DATABASE_URL` is picked up. The proof is making a change through the prompt box
 and reloading.
 
@@ -289,7 +302,7 @@ to forget is your decision and a framework that made it on a timer it chose woul
 be deciding for you (0037).
 
 ```bash
-pnpm --filter @loom/portal telemetry:prune
+pnpm --filter @loom/app telemetry:prune
 ```
 
 Defaults to a **90-day** horizon; set `LOOM_TELEMETRY_MAX_AGE_MS` to change it.
@@ -306,7 +319,7 @@ loom: forgot 1284 telemetry records, keeping 7 older records for 1 unfinished ep
 ```
 
 A large "keeping …" that does not shrink means something very old is still held
-awaiting an answer. `/activity` is where to find it.
+awaiting an answer. `/portal/activity` is where to find it.
 
 This deletes the *account* of what happened — proposals, dispositions, rationales.
 It cannot touch a tree or a revision: those live in `loom_trees` and

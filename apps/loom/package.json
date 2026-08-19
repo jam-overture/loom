@@ -1,0 +1,44 @@
+{
+  "name": "@loom/app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "pnpm --filter @loom/runtime build && next build",
+    "start": "next start",
+    "typecheck": "pnpm --filter @loom/runtime build && tsc --noEmit",
+    "test": "vitest run",
+    "verify": "pnpm typecheck && pnpm test && pnpm build",
+    "db:push": "tsx scripts/db-push.ts",
+    "telemetry:prune": "tsx scripts/telemetry-prune.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@loom/runtime": "workspace:*",
+    "@mdx-js/loader": "^3.1.1",
+    "@mdx-js/react": "^3.1.1",
+    "@next/mdx": "^16.2.12",
+    "drizzle-orm": "^0.45.2",
+    "next": "^16.2.12",
+    "postgres": "^3.4.9",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "@next/env": "^16.2.12",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^30.0.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.1",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.7"
+  }
+}

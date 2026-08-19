@@ -314,26 +314,42 @@ src/
 
 ## The workspace
 
-The repo is a pnpm workspace. `@loom/runtime` is the root package; `apps/portal`
-is the §5 Portal, and it depends on the runtime as `workspace:*` so it can only
-reach the published entry points — a deep import into `src/` does not resolve.
-When the portal needs something the public API does not expose, that is a
+The repo is a pnpm workspace with two packages. `@loom/runtime` is the root;
+`@loom/app` is `apps/loom`, and it depends on the runtime as `workspace:*` so it
+can only reach the published entry points — a deep import into `src/` does not
+resolve. When a surface needs something the public API does not expose, that is a
 framework gap to close in the framework (see
 [0018](decisions/0018-the-portal-is-a-consumer-not-an-insider.md)).
 
+**`apps/loom` is one Next.js application with four surfaces in it**, one route
+group each ([0067](decisions/0067-the-four-surfaces-are-one-application.md)). A
+route group contributes nothing to a URL, so what a group holds is the surface's
+own root layout, its own stylesheet and its own code — and what a reader types is
+the segment underneath it.
+
 ```
-apps/portal/
-├── app/
-│   ├── globals.css      # The silver design system, as tokens
-│   ├── layout.tsx       # Topbar, rail, and the content column
-│   └── _components/
-│       └── shell/       # Topbar, sidebar, nav items
-└── lib/nav.ts           # Active-section matching, as a pure function
+apps/loom/
+├── proxy.ts             # Sign-in, scoped to /portal and nothing else
+└── app/
+    ├── (marketing)/     # /             — the site, composed in Loom
+    ├── (docs)/          # /docs         — prose, in MDX
+    ├── (lessons)/       # /lessons      — the course
+    └── (portal)/        # /portal       — behind sign-in
+        ├── globals.css  #   The silver design system, as tokens
+        ├── layout.tsx   #   Topbar, rail, and the content column
+        ├── _components/ #   Topbar, sidebar, nav items
+        ├── _lib/        #   View models, the store, auth
+        └── portal/      #   The routes themselves
 ```
 
+Three of the four are **built in Loom** — they compose registered primitives and
+may not grow a component library of their own. The portal is the stated exception
+(0067): it is a tool for reviewing Loom trees rather than content built out of
+them.
+
 `pnpm verify` at the root compiles the runtime, typechecks it, runs its tests,
-then runs the portal's typecheck, tests and build. The portal's build is part of
-it because prerendering is what proves the shell renders.
+then runs the application's typecheck, tests and build. The build is part of it
+because prerendering is what proves the surfaces render.
 
 **The build comes first, and that order is load-bearing.** `src/cli/scaffold-fixture/`
 is checked-in scaffold output, and it imports `@loom/runtime/react` and
@@ -344,15 +360,15 @@ mapping those specifiers back to `src/` means the typecheck also proves the
 `exports` map resolves, which is the thing a consumer actually depends on.
 
 The runtime compiles to `dist/` and every entry point resolves there (0030), so
-the portal consumes it as an ordinary Node package rather than as TypeScript
-source. `apps/portal` builds the runtime before its own typecheck and build,
+the application consumes it as an ordinary Node package rather than as TypeScript
+source. `apps/loom` builds the runtime before its own typecheck and build,
 because a clean clone has no `dist` and a build order that is not written down is
 one that fails somewhere else.
 
 ## Deploying
 
-The portal deploys to Vercel from `apps/portal`. Settings, and what a deployment
-can and cannot do before a backing store lands, are in
+All four surfaces deploy to Vercel as one project from `apps/loom`. Settings, and
+what a deployment can and cannot do before a backing store lands, are in
 [`docs/deployment.md`](docs/deployment.md).
 
 ## Learning Loom
