@@ -1,0 +1,108 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("the-runtime", "proposing-a-change")
+
+# Proposing a change
+
+Up to here a tree has been something you wrote. This is the part where somebody
+else asks for one to change, and the runtime decides what happens next.
+
+The short version: **nothing edits a page directly.** An ask becomes a written
+proposal, the proposal is examined, and only then is anything applied. Every
+example on this site has that whole sequence behind it, and you can run it.
+
+<Example id="first-tree" />
+
+Click a chip. What appears underneath is not a description of what would happen
+— it is what happened, printed out of the same functions a production
+deployment calls.
+
+## The four steps, in the order they happen
+
+**1. Somebody asks for something.** That ask is an *intent*: a sentence, plus
+who is asking and which page they are looking at. The sentence on the chips
+above is the intent's own words.
+
+**2. Something turns the sentence into a plan.** The plan is a *delta* — a short
+list of operations against the page as it is right now. There are four verbs and
+no more:
+
+| Verb | What it does |
+| --- | --- |
+| `insert` | puts a new node under a parent, at a position |
+| `remove` | takes a node out, and everything under it goes too |
+| `move` | puts an existing node somewhere else, unchanged |
+| `configure` | sets or clears props on one node |
+
+You can read the delta for yourself in the box: every operation names a node by
+its id, so a change is a list of small edits to specific things rather than a
+new version of the page to diff against the old one.
+
+**3. Something judges the plan.** That is the Gate, and it is the next page.
+
+**4. If the Gate allows it, the delta is applied** and the page has a new
+revision. If not, the tree is exactly as it was — a refusal changes nothing.
+
+<Callout>
+  This is why the vocabulary is bounded. A change described as "four operations
+  on five named nodes" can be read, weighed and undone. A change described as
+  "here is the new page" cannot be any of those things, however good the new
+  page is.
+</Callout>
+
+## Who writes the plan
+
+Step 2 is the only step in the sequence that has to guess, and it is the only
+one Loom lets you swap. The thing that does it is a *change interpreter*, and
+the runtime does not care what is behind it:
+
+```ts
+type ChangeInterpreter = {
+  interpret: (intent: EditIntent, tree: LoomTree) => Promise<Result<ProposedChange, …>>
+}
+```
+
+Two of them ship. `modelInterpreter` asks a language model, which is the case
+Loom exists for. The other computes its operations from the tree with no model
+at all — which is what every chip on this site uses, and why the examples work
+in a browser with no API key, no server and no network.
+
+Everything after step 2 is unable to tell the difference. The proposal records
+which one wrote it, and the Gate judges both by the same rules.
+
+<Callout>
+  That is worth pausing on, because it is the whole architecture in one
+  sentence: **the model is a component, not the system.** Interpretation is the
+  one non-deterministic step, so it is the one step behind an interface.
+</Callout>
+
+## What a proposal carries
+
+A delta is the plan. The proposal around it is the paperwork, and every field
+on it is there because someone downstream reads it:
+
+- **`rationale`** — why these operations answer that ask, in the interpreter's
+  own words. It is what a human reviewer reads when the Gate holds the change.
+- **`provenance`** — who asked, what interpreted it, and how confident that
+  interpreter is in its own answer. The chips on this site report a confidence
+  of `1`, and that is not a boast: their operations are computed rather than
+  guessed, and the record says `authoredBy: "runtime"` so nobody counts them as
+  a model's perfect score.
+- **`baseRevision`** — the revision of the page this plan was written against.
+  A proposal written for revision 3 does not apply to revision 4 by accident; it
+  is refused as inapplicable, with a reason.
+
+Click the same chip twice in the box above and watch the revision number in the
+frame's header go up. The second proposal is planned against the page as it is
+after the first — not against the page the button was drawn on.
+
+## Nothing here was stored
+
+This site holds each example's tree in the browser and throws it away on
+reload. A real deployment appends every applied change to a log, which is what
+makes a page's history readable, attributable, and undoable — an undo in Loom is
+itself a proposal, judged like any other, rather than a rewind that skips the
+Gate.
+
+That is a chapter this site has not written yet. What matters here is the shape:
+everything above is true whether the tree lives in a browser tab or in Postgres.
