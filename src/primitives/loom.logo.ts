@@ -39,6 +39,8 @@ export const loomLogo = definePrimitive({
   type: "loom.logo",
   description: "One client or partner mark — a wordmark, or an image with the name as its alt text.",
   props,
+  /** The mark becomes the anchor when the tree gives it a destination (0064). */
+  interactive: { whenProps: ["href"] },
   slots: [],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const mark: ReactNode =

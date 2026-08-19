@@ -35,7 +35,7 @@ export const viewport: Viewport = {
  *
  * It sits in the `(portal)` group's layout rather than the application's, so it
  * covers this surface and not the three public ones — which is what let the
- * marketing site and the documentation go back to being prerendered (0068).
+ * marketing site and the documentation go back to being prerendered (0070).
  */
 export const dynamic = "force-dynamic"
 

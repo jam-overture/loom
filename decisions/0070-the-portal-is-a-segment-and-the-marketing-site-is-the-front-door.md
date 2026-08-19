@@ -1,4 +1,4 @@
-# 0068. The portal is a segment, and the marketing site is the front door
+# 0070. The portal is a segment, and the marketing site is the front door
 
 **Status:** Accepted
 **Date:** 2026-08-19

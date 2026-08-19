@@ -12,15 +12,19 @@ import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
 import { loomFeatureGrid } from "./loom.feature-grid.js"
+import { loomFooter } from "./loom.footer.js"
 import { loomGrid } from "./loom.grid.js"
 import { loomHeading } from "./loom.heading.js"
 import { loomHero } from "./loom.hero.js"
 import { loomIcon } from "./loom.icon.js"
+import { loomLink } from "./loom.link.js"
+import { loomLinkList } from "./loom.link-list.js"
 import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
+import { loomNav } from "./loom.nav.js"
 import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
 import { loomPerson } from "./loom.person.js"
@@ -89,6 +93,18 @@ import { loomTierTable } from "./loom.tier-table.js"
  * the only thing separating them
  * ([0066](../../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)).
  *
+ * **The chrome four** are the top of the page and the bottom of it, which the
+ * library went thirty-seven primitives without. `loom.link` is the plain text
+ * link the catalogue never had — everything before it that wanted one had to
+ * spend a `loom.action`, and a row of quiet buttons is not a menu; `loom.nav`
+ * and `loom.footer` are the two bands that hold them, each with a region at
+ * either end and the repeated part as children; `loom.link-list` is the named
+ * column a footer is made of. They are the first primitives here with no Hermes
+ * ancestor at all — a creator's profile got its chrome from the app shell, and
+ * a marketing site has to say it in the tree
+ * ([0068](../../decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md)
+ * is the other half of this run and settles which of them is a target).
+ *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
  * then the bands in the order a page uses them, then the leaves that go
@@ -103,6 +119,7 @@ import { loomTierTable } from "./loom.tier-table.js"
 
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPage,
+  loomNav,
   loomSection,
   loomSplit,
   loomStack,
@@ -131,6 +148,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomLogo,
   loomFaqList,
   loomFaq,
+  loomFooter,
+  loomLinkList,
   loomHeading,
   loomProse,
   loomBadge,
@@ -139,6 +158,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomDivider,
   loomMedia,
   loomAction,
+  loomLink,
 ]
 
 /**
@@ -166,15 +186,19 @@ export {
   loomFaqList,
   loomFeature,
   loomFeatureGrid,
+  loomFooter,
   loomGrid,
   loomHeading,
   loomHero,
   loomIcon,
+  loomLink,
+  loomLinkList,
   loomLogo,
   loomLogoCloud,
   loomMedia,
   loomMilestone,
   loomMilestoneList,
+  loomNav,
   loomPage,
   loomPerk,
   loomPerkList,

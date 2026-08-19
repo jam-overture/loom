@@ -81,6 +81,14 @@ export const loomArticle = definePrimitive({
   description:
     "A written piece — cover, a small label, a title, a sentence, and a link over the whole card. A cell of a loom.article-grid.",
   props,
+  /**
+   * The declaration 0068 exists to justify. This root is an `<article>` and not
+   * an anchor, so nothing here nests two anchors — but the title's `::after`
+   * covers the whole card, and a control placed under it is unreachable in a way
+   * no reader can see and no markup check would name. What 0064 is protecting is
+   * the reader's aim, and by that measure a covered card is a target.
+   */
+  interactive: { whenProps: ["href"] },
   slots: ["meta"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const meta = loom.slots["meta"]

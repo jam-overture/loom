@@ -57,6 +57,8 @@ export const loomAction = definePrimitive({
   type: "loom.action",
   description: "A call to action: a link styled as a button. Its label is child text.",
   props,
+  /** `href` is required, so it is a target however it is configured (0064). */
+  interactive: "always",
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const scale = SCALES[given.scale ?? "medium"]

@@ -40,7 +40,7 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
           {/*
            * `/docs`, not `/`. This wordmark went to the first page of the
            * documentation when the docs were their own application and `/` was
-           * their redirect; `/` is the marketing site's now (0068), so the same
+           * their redirect; `/` is the marketing site's now (0070), so the same
            * href would quietly have turned "back to the docs" into "leave the
            * docs". Whether the wordmark should offer the front door instead is
            * this surface's call, not the migration's.

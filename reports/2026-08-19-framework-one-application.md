@@ -64,7 +64,7 @@ nothing to a URL, so `(marketing)/page.tsx` and `(portal)/page.tsx` are the same
 route and one of them had to give up `/`. Marketing keeps it: the maintainer's
 requirement is that the portal is reached *through* the marketing site, which is a
 statement about which one a stranger meets first.
-[0068](../decisions/0068-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md)
+[0070](../decisions/0070-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md)
 records that, the private-folder layout, and the middleware scope. **There are no
 redirects from the old portal paths** — the record argues why, and it is the
 decision in here I would most like a second opinion on.
@@ -96,21 +96,28 @@ is honest — they do not share a design.
 
 ## Records
 
-**Added:** [0068](../decisions/0068-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md),
-`Accepted`. Nothing superseded; 0068 answers what 0067 left open and contradicts no
+**Added:** [0070](../decisions/0070-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md),
+`Accepted`. Nothing superseded; it answers what 0067 left open and contradicts no
 record.
 
-**The number is contested.** `main` ends at 0067 so 0068 is the next free number,
-which is what the brief says to take — and #97 also wrote 0068 (and 0069) the same
-morning. Merge order settles it: whichever branch lands second renumbers. Neither
-branch is red today, which is the difference between this collision and the one on
-16 August, where a branch sat red for as long as the other stayed open. Filed.
+**It was written as 0068, and merge order made it 0070.** `main` ended at 0067 when
+this branch was cut, so 0068 was the next free number and the brief says to take it —
+and #97 took the same number the same morning for its own record, plus 0069. #97
+merged first, so this branch renumbered: `git mv`, `sed` over the cross-references,
+`pnpm decisions:index`, and the index runs unbroken to 0070. The rename is in this
+branch's merge commit rather than its first, so the record's own history is intact.
+
+That is the fifth collision and the convention held again. Worth noting what made
+this one cheap: **neither branch was ever red.** Each was contiguous on its own tree,
+so the loser paid one rename after the fact instead of sitting red for as long as the
+other stayed open, which is what the 16 August collision cost. Filed.
 
 ## One edit outside my lane, and why
 
 `app/(marketing)/_lib/copy.ts` says how many decision records the repository holds,
-and `facts.test.ts` asserts it against `decisions/` — so writing 0068 turned the
-marketing suite red on a literal `"67"`. I changed it to `"68"`.
+and `facts.test.ts` asserts it against `decisions/` — so writing a record turned the
+marketing suite red on a literal `"67"`. I changed it, and then changed it again:
+`"68"` on this branch alone, `"70"` once #97's two records merged in.
 
 That is a file in the marketing lane and I would rather not have touched it, but
 `pnpm verify` green is now the merge gate for four surfaces, and leaving it red
@@ -121,9 +128,10 @@ that requires two other lanes to edit one file is worth fixing rather than
 apologising for, and because the previous run said so only in a PR comment, which
 nothing reads afterwards.
 
-**One consequence to watch:** if #97 lands first, the record count becomes 70 and
-this literal needs to say 70. Whoever merges second is already renumbering a record;
-this is the same edit.
+**That second change is the whole argument for fixing this.** The literal was correct
+for the two hours this branch existed alone and wrong the moment another routine's
+records landed, and nothing about either edit needed a person's judgement — which is
+what a derived number is for.
 
 ## Findings
 
@@ -131,7 +139,7 @@ this is the same edit.
 owned by the four surface routines — three of them are blocked on this shape and
 that entry is what tells them they are not any more. That one Vercel project needs
 repointing at `apps/loom` and the others deleting, owned by the maintainer. And the
-0068 collision, as an instance of the 16 August numbering finding rather than a new
+0068/0070 collision, as an instance of the 16 August numbering finding rather than a
 one. And that the marketing site's checked numbers oblige two other lanes to edit
 one of its files, owned by the marketing routine.
 
@@ -144,7 +152,8 @@ which is not this routine's directory; #97 reports having taken both.
 
 ## Tests
 
-`pnpm verify` at the root, green. **1361 runtime, 642 application.**
+`pnpm verify` at the root, green. **1373 runtime, 642 application** — 1361 on this
+branch alone, and 1373 once #97's twelve new primitive tests merged in.
 
 The 642 is the arithmetic sum of the three suites that went in — 546 portal, 44
 docs, 52 marketing — which is the number this migration had to produce. Nothing was
@@ -200,7 +209,7 @@ The same server, asked for every route that matters:
 
 Three public surfaces answering without a session, the portal turning a signed-out
 visitor away and remembering where they were going, and a URL outside all four
-reaching the application's own not-found. That is 0068's access model, observed
+reaching the application's own not-found. That is 0070's access model, observed
 rather than asserted.
 
 - [`…-marketing.png`](2026-08-19-framework-one-application-marketing.png) — `/`

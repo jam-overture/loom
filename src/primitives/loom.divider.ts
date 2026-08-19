@@ -55,6 +55,15 @@ const dot = (key: number): ReturnType<typeof createElement> =>
  * `role="separator"` on every mode, and no text. A divider is decoration that
  * carries meaning to a sighted reader only, so the mode is invisible to a screen
  * reader by design rather than by omission.
+ *
+ * **Every ornament states its own width**, and two of them did not until the
+ * marketing routine put one on a real page and filed it. The divider's element
+ * is a flex row; `rule` filled it because it set `width: 100%`, and `dots` and
+ * `diamond` set neither a width nor a flex, so they took `flex: 0 1 auto` and
+ * shrank to their content — three dots centred inside a box the width of three
+ * dots, and a diamond whose two hairlines had nothing to grow into. The library
+ * palette test rendered both and asserted about colour, so a mark drawn in
+ * entirely the wrong place passed it.
  */
 const ORNAMENTS = {
   rule: () =>
@@ -64,13 +73,13 @@ const ORNAMENTS = {
   dots: () =>
     createElement(
       "span",
-      { style: { display: "flex", justifyContent: "center", gap: space(2) } },
+      { style: { display: "flex", flex: "1 1 auto", justifyContent: "center", gap: space(2) } },
       Array.from({ length: DOT_COUNT }, (_unused, index) => dot(index))
     ),
   diamond: () =>
     createElement(
       "span",
-      { style: { display: "flex", alignItems: "center", gap: space(3) } },
+      { style: { display: "flex", flex: "1 1 auto", alignItems: "center", gap: space(3) } },
       createElement("span", {
         key: "before",
         style: { flex: "1 1 0", height: "1px", background: colour("border-subtle") },

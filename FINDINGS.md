@@ -707,7 +707,18 @@ it.
 
 ## 2026-08-17 — the library can now say which of its primitives are targets
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-07-the-page-chrome` — adopted, with two of the listed
+answers changed. `loom.action` is `"always"`; `loom.card`, `loom.feature`,
+`loom.logo` and `loom.article` are `{ whenProps: ["href"] }`; `loom.link`, added
+that run, is `"always"`. **`loom.product` is deliberately not declared** — its
+`href` links the name and 0066 puts a real `loom.action` in the region beneath,
+so declaring it would refuse this library's own composition. `loom.article`'s
+open question needed no new word: its title anchor's `::after` covers the card,
+which is the same consequence by a different mechanism.
+[0068](decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md)
+states the test the two answers differ on — *is there anywhere inside this node
+a reader could put a second control and have it work?*
 
 Answering the finding above, which this routine owns, and handing back the half
 that is not this routine's to do.
@@ -902,7 +913,11 @@ form rather than a redirected one, and is not the same event.
 
 ## 2026-08-18 — the catalogue pairs will need the `interactive` declaration
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-07-the-page-chrome`, with this entry's own `loom.product`
+answer overturned — see the 17 August entry above and 0068. The note was right
+that `loom.article` deserved a question and wrong about which one: it is not
+whether it needs a different word, it is what the word already meant.
 
 A note from this routine to its own next run, so the adoption is not discovered
 twice.
@@ -1170,7 +1185,11 @@ function and one test, and deleting it is a small change.
 ## 2026-08-19 — `loom.divider`'s diamond and dots ornaments collapse to the left
 
 **Filed by:** `Loom daily build` (marketing) · **Owned by:** `Loom daily build` ·
-**Status:** open
+**Status:** closed by `primitives-07-the-page-chrome`. The diagnosis was exact
+and the fix is the two lines it named — `flex: 1 1 auto` on both ornament spans.
+The missing assertion is there too, as the finding asked: the ornament's own
+element must state a width, checked for all three modes. The marketing page can
+drop its `ornament: "rule"` workaround whenever that routine next runs.
 
 Found by putting one on a page. `rule` renders correctly; the other two do not
 span the line — they draw a small mark at the start of it and leave the rest
@@ -1199,7 +1218,15 @@ saying why.
 ## 2026-08-19 — no routine can produce a preview URL, and now there are two reasons
 
 **Filed by:** `Loom daily build` (marketing) · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open
+**Status:** **half closed the same day.** `primitives-07-the-page-chrome` (#97) is
+the first routine branch in this repository's history whose preview **built**:
+both `loom-marketing` and `loom-portal` reached `Ready` within a minute of the
+push, so reason 1 below — the committing account not being on the Vercel team —
+has been fixed. Reason 2 is untested: whether the URL opens for someone not
+signed in to Vercel could not be checked from that run's environment, because the
+egress proxy refuses `*.vercel.app` with a 403 at the CONNECT. **A routine cannot
+verify this half at all**, on any run, which is worth knowing before anyone asks
+one to. Whoever opens the link next should say so here and close it or reopen it.
 
 Every brief asks its routine to include a deployed preview URL in the PR. The
 16 August finding gave one reason that cannot happen — Vercel previews are
@@ -1228,6 +1255,92 @@ Until both hold, the honest substitute is what this run did — publish the
 rendered page somewhere public and link that. It is better than a screenshot and
 it does not depend on either.
 
+
+---
+
+## 2026-08-19 — 21st.dev, re-verified a third time
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 16 August entry rather than opened as a
+second finding.
+
+`primitives-07-the-page-chrome` fetched `https://21st.dev` and got the identical
+refusal:
+
+```
+EGRESS_BLOCKED — Access to 21st.dev is blocked by the network egress proxy.
+```
+
+Three runs, three days, same message. The maintainer answered on #75 that the
+allowlist is the fix and the instruction stands; the entry has not landed. This
+run built to the fallback standard the earlier entry names — `loom.hero` and
+`loom.feature-grid` as the floor — and says so in its report.
+
+Worth stating plainly now that it has happened three times: **the chrome is the
+part of a library where that reference would have mattered most.** A nav and a
+footer are almost pure visual judgment — there is no Hermes content model to
+port, because Hermes never had one — so this is the first unit built with
+nothing but the library's own precedent to calibrate against.
+
+---
+
+## 2026-08-19 — a page cannot collapse its own menu, and probably should not try
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a note to this routine's own next run, and to whoever asks why the nav
+wraps.
+
+`loom.nav` wraps to a second line on a narrow viewport rather than collapsing
+behind a menu button. That is a limit, and it is worth writing down once so it is
+not rediscovered as a bug.
+
+**Why a CSS-only disclosure does not work here.** The `<details>` trick
+`loom.faq` uses needs the collapsible content to be *inside* the element. A nav
+needs its links inside the `<details>` on a phone and outside it on a laptop,
+which is one subtree in two places. The three ways out are all worse than
+wrapping:
+
+- **Render the menu twice** and hide one by media query. A screen reader reads
+  both, so the site announces every nav item twice.
+- **Override the disclosure from CSS** so the panel shows while closed. Modern
+  engines hide `::details-content` with `content-visibility`, which an author
+  `display` on the child does not override. It works in some browsers today,
+  which is the worst of the three outcomes.
+- **Client state.** The runtime has none, and 0008 makes a render a pure
+  function with no effects. This is the same wall `tabs` is behind in the port
+  map.
+
+**What would close it, if anyone decides it is worth closing.** Not a state
+seam — a `loom:viewport`-style *binding* would be worse, since the tree would
+become a function of the reader's device. The honest options are a primitive
+that ships a scoped `<style>` with its own media query and a `:has()`-driven
+checkbox toggle, or accepting that a Loom nav wraps. This run recommends
+accepting it: a menu of four to six links wrapping onto a second row is what a
+good editorial site does anyway, and the failure mode is legible rather than
+silent.
+
+---
+
+## 2026-08-19 — the Gate's nested-target reason will be a shade wrong for a covered card
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — small, cosmetic, and not worth a branch of its own.
+
+[0068](decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md)
+declares `loom.article` `{ whenProps: ["href"] }`, which is the right *verdict*:
+its title anchor stretches a `::after` over the whole card, so a control placed
+underneath never receives a click. The mechanism is not nested anchors, though,
+and `src/runtime/`'s refusal reason says a target was placed inside a target.
+
+For `loom.card` that sentence is literally true. For `loom.article` it is true of
+the reader's aim and false of the markup, so a person checking the diff will look
+for an `<a>` inside an `<a>` and not find one.
+
+Nothing is broken and no test is wrong. If the wording is ever worth widening —
+"a target the reader cannot reach, because this node already covers itself" — it
+is a string in the runtime rather than anything in the library. Filed rather than
+fixed because `src/runtime/` is not this lane, and because it is genuinely
+marginal.
 
 ---
 
@@ -1302,25 +1415,33 @@ three, relaxing it is one setting.
 
 ---
 
-## 2026-08-19 — a record numbered 0068 exists on two branches
+## 2026-08-19 — a record numbered 0068 existed on two branches, and merge order settled it
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open — an instance of the 16 August numbering finding, not a new
-problem
+**Status:** this instance resolved; the underlying request — write the convention
+down — stays **open** against the 16 August numbering finding.
 
 Recorded because the 16 August entry asked for the convention to be written down
-and this is the fifth collision, the first where the loser can see it coming.
+and this is the fifth collision, the first where the loser could see it coming.
 
-`main` ends at 0067, so 0068 is the next free number, which is what the brief says
-to take. **#97 also holds 0068** (and 0069, `Proposed`), unmerged, written the
-same morning. Both branches are correct by the rules they were given.
+`main` ended at 0067, so 0068 was the next free number, which is what the brief
+says to take. **#97 also held 0068** (and 0069, `Proposed`), unmerged, written the
+same morning. Both branches were correct by the rules they were given.
 
-**Merge order settles it and I am content to be the loser.** If #97 lands first,
-this record renumbers 0068 → 0070 — `git mv`, `sed` over the cross-references,
-`pnpm decisions:index` — and the branch is green again. If this one lands first,
-#97 does the same. Neither branch is red today: each is contiguous on its own
-tree, which is the difference between this collision and the 16 August one, where
-a branch sat red for as long as the other was open.
+**Merge order settled it, and this branch lost.** #97 merged as `dd54502` while
+this one was open, so the record renumbered **0068 → 0070** — `git mv`, `sed` over
+the cross-references, `pnpm decisions:index` — and the index runs unbroken to 0070.
+The rename lives in this branch's merge commit rather than its first, so the
+record's own history is intact and the diff reads as a rename.
+
+**Neither branch was ever red**, which is what made this one cheap and is the
+difference from the 16 August collision. Each was contiguous on its own tree, so
+the loser paid one rename after the fact instead of sitting red for as long as the
+other stayed open. Two things followed the rename and are worth knowing, because
+they are the real cost rather than the `git mv`: the marketing site's checked
+record count had to move twice — `"67"` → `"68"` on this branch alone, then
+`"70"` on the merge — and two source comments referencing the record by number had
+to be repointed.
 
 The 16 August entry's conclusion still stands and is now five for five: **merge
 order is the convention this repository already runs on**, it costs one rename per
