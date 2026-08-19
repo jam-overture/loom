@@ -84,14 +84,20 @@ stands alone.
 | `manifesto` | `section` > `heading` + `prose` |
 | `image-text` | `split` (its `imagePosition` is `split.reverse`) |
 | `featured` | `card` > `media` + `heading` + `prose` + `action` |
-| `contact-info` | `stack` > `action` per channel |
-| `social-links` | `stack` (row) > `action` + `icon` — but its items are a **curation**, so 0058 answers them |
+| `contact-info` | `link-list` > `link` per channel — `mailto:` and `tel:` are on the allowlist |
+| `social-links` | `link-list` (row) > `link` + `icon` — but its items are a **curation**, so 0058 answers them |
 | `gallery` | `grid` > `media` |
 | `live-chat-prompt` | `card` > `prose` + `action` |
 | `book-consultation` | `card` > `heading` + `prose` + `action` |
 | `office-hours` | `section` > `heading` + `prose` + `action` |
 | `now-page` | `section` > `prose` + `milestone-list` |
 | `hours-of-operation` | `milestone-list` > `milestone` per day |
+
+Two of these got better on 19 August without changing category. `contact-info`
+and `social-links` were both *a row of quiet buttons* until `loom.link` and
+`loom.link-list` existed, because the catalogue had no plain text link; they are
+now the thing they always were. Nothing about the verdict changes — still no
+primitive to build.
 
 `hours-of-operation` is worth reading twice: Hermes holds it as **seven fixed
 fields** — `monday` through `sunday` — which is repeated content that never got
@@ -139,6 +145,20 @@ creator's profiles. And `social-links` itself takes its items from a
 business before they are a primitive's — the tree asks a question and the host
 answers it. **Do not port either as an authored list**, which is what reading
 the block names alone would produce.
+
+## What Hermes never had
+
+The ledger above counts *Hermes blocks*, and a block Hermes never defined cannot
+appear in it. There is one such group and it is not small: **page chrome.**
+Hermes was a creator-profile toolkit whose header and footer came from the app
+shell, so a page's top and bottom bar were markup rather than content — nothing
+in the seventy is a nav and nothing is a footer.
+
+A site built in Loom cannot borrow that shell, because the claim is that the
+whole page is data. `loom.nav`, `loom.footer`, `loom.link` and `loom.link-list`
+landed on 19 August for that reason, and they are the first primitives in the
+library with no Hermes ancestor at all. Read the count below as "of the Hermes
+catalogue", not "of the library".
 
 ## Where this leaves the count
 

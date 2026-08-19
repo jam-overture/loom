@@ -73,6 +73,16 @@ export const loomProduct = definePrimitive({
   description:
     "One thing for sale — picture, name, price, and a buy button on the card's floor. A cell of a loom.product-grid.",
   props,
+  /**
+   * **Deliberately no `interactive` declaration, and this is the one place the
+   * rule bites.** An earlier note in `FINDINGS.md` listed this primitive as
+   * `{ whenProps: ["href"] }` alongside `loom.card`, reading only that it has an
+   * `href`. It would have been wrong, and expensively so: `href` here links the
+   * *name*, and 0066 puts a real `loom.action` in the `action` region on purpose
+   * — so declaring it would make the Gate refuse this library's own intended
+   * composition, which is how a check ends up switched off. 0068 states the test
+   * the two answers differ on.
+   */
   slots: ["meta", "action"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const meta = loom.slots["meta"]
