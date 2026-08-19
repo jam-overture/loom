@@ -3,6 +3,8 @@ import { resolveTreeData } from "../data/resolve.js"
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { err, ok, type Result } from "../result.js"
+import type { EndpointRegistry } from "../submit/endpoint.js"
+import { resolveTreeSubmissions } from "../submit/resolve.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { TreeError } from "../tree/errors.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
@@ -56,6 +58,14 @@ export type RenderDependencies = {
    */
   readonly sources?: DataRegistry
   /**
+   * Absent means the tree's submissions are not answered — see
+   * `RenderOptions.submissions`. Supplying a registry is what bounds the
+   * destinations a proposal may name, and it is the only thing that does: an
+   * address never appears in a tree, so a deployment that registers nothing has
+   * no form that posts anywhere (0065).
+   */
+  readonly endpoints?: EndpointRegistry
+  /**
    * Absent means primitives render the strings their authors declared — see
    * `RenderOptions.text`. A host serving one language in the library's own
    * language wires nothing here; a host serving another builds a resolver per
@@ -103,16 +113,27 @@ export const renderRequest = async (
 
   /**
    * The only await between loading the tree and rendering it, and the reason
-   * this function is async at all now. It happens after the parse because the
-   * plan is read off a tree that has been proved to be one, and before the walk
-   * because the walk cannot wait for anything (0058).
+   * this function is async at all. Both seams happen after the parse, because a
+   * plan is read off a tree that has been proved to be one, and before the walk,
+   * because the walk cannot wait for anything (0058, 0065).
+   *
+   * They run together rather than in turn. Neither knows about the other, and a
+   * page with a form and an integration should not pay for both in series.
    */
-  const data = dependencies.sources
-    ? await resolveTreeData(tree, {
-        registry: dependencies.sources,
-        ...(request.context ? { context: request.context } : {}),
-      })
-    : undefined
+  const [data, submissions] = await Promise.all([
+    dependencies.sources
+      ? resolveTreeData(tree, {
+          registry: dependencies.sources,
+          ...(request.context ? { context: request.context } : {}),
+        })
+      : undefined,
+    dependencies.endpoints
+      ? resolveTreeSubmissions(tree, {
+          registry: dependencies.endpoints,
+          ...(request.context ? { context: request.context } : {}),
+        })
+      : undefined,
+  ])
 
   const rendered = renderLoomTree(tree, {
     resolver: dependencies.resolver,
@@ -120,6 +141,7 @@ export const renderRequest = async (
     ...(dependencies.validator ? { validator: dependencies.validator } : {}),
     ...(dependencies.themes ? { themes: dependencies.themes } : {}),
     ...(data ? { data } : {}),
+    ...(submissions ? { submissions } : {}),
     ...(dependencies.text ? { text: dependencies.text } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
   })
