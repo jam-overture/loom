@@ -51,21 +51,36 @@ Each routine owns one part of the repository and does not edit another's.
 | --- | --- |
 | Framework (`Loom daily build`) | `src/` **except `src/primitives/`**, and the demo |
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
-| Portal | `apps/portal` |
-| Documentation site | §4c |
-| Marketing site | §4d |
+| Portal (`Loom portal`) | `apps/loom/app/(portal)/` |
+| Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
+| Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` |
+| Lessons (`Loom lessons`) | `apps/loom/app/(lessons)/` and `lessons/` |
 
 `Loom primitives` was split out of the framework routine on 16 August, once
 [0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
-settled how a Hermes block becomes nodes. Roughly twenty of Hermes' seventy are
-ported; the remainder is breadth against a fixed rule, which is a different job
-from deciding the rule and parallelises cleanly. The two routines share a
-directory boundary and nothing else, so the framework routine must **stop adding
+settled how a Hermes block becomes nodes. The two routines share a directory
+boundary and nothing else, so the framework routine must **stop adding
 primitives** rather than race for the same files.
 
+The four surfaces became **one application** on 18 August
+([0067](../decisions/0067-the-four-surfaces-are-one-application.md)), so a lane
+is now a **route group** rather than a directory. The property that matters is
+unchanged: a PR touches one surface and is reviewable on its own.
+
+Two rules follow from sharing an application, and they are what keep it safe:
+
+- **No surface may grow its own component library.** Marketing, docs and
+  lessons compose registered Loom primitives; a missing primitive is a finding
+  for `Loom primitives`, never a local component. The portal is the stated
+  exception (0067) because it is a tool rather than content.
+- **`pnpm verify` green is the merge gate for everyone**, because one broken
+  build now blocks four surfaces rather than one.
+
+Until `apps/loom` exists, the portal continues in `apps/portal`. The migration
+is owned by `Loom daily build`.
+
 Work that belongs to another lane is **filed in `FINDINGS.md` for its owner**,
-not done. The docs, marketing and portal routines were held until the framework
-routine's vocabulary and demo existed; they landed with #70 and #71 on 12 August.
+not done.
 
 ## Read first, every run
 
