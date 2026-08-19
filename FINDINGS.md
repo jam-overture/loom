@@ -313,6 +313,30 @@ every existing cross-reference).
 Recorded rather than acted on because a routine choosing its own convention here
 is how two conventions get invented.
 
+**18 August, `Loom primitives`** — hit a third time, and this time both branches
+were open at once. #88 (`Loom daily build`) claims **0064**, and the
+catalogue-bands branch wrote its own record as 0064 too, because the guard
+refuses a gap and 0064 was not on `main`.
+
+**Settled by merge order, and it took two rounds.** The maintainer asked the
+18 August primitives run to fix #88's merge conflict, so #88 landed first and the
+catalogue-bands record renumbered 0064 → 0065. Then **#89 landed its own 0065**
+while that branch was still open, so it renumbered again, 0065 → 0066. Two
+renames for one record, each one `git mv` + `sed` + `pnpm decisions:index`, and
+the branch is green at the end of it.
+
+The second round is the more instructive one: the first collision was visible
+(both branches were open at once and both said 0064), and the second was not —
+#89 was written, merged and numbered without the catalogue-bands branch ever
+being able to see it coming. **Merge order handles both, but only the loser
+finds out**, and always by a red branch rather than a warning.
+
+So of the three conventions offered above, **merge order** is the one this
+repository is already running on, twice now, without anyone having written it
+down. It costs one red branch and one rename per collision, both cheap, and it
+is the only one of the three that needs no new tooling. Worth making explicit in
+`docs/routines.md` rather than leaving each pair of routines to rediscover.
+
 ---
 
 ## 2026-08-16 — a routine's local `main` can be four merges stale, silently
@@ -876,6 +900,40 @@ form rather than a redirected one, and is not the same event.
 
 ---
 
+## 2026-08-18 — the catalogue pairs will need the `interactive` declaration
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+
+A note from this routine to its own next run, so the adoption is not discovered
+twice.
+
+#88 files a finding for this lane: apply `interactive` to `loom.action`,
+`loom.card`, `loom.feature` and `loom.logo`, one line each, so the Gate can
+derive a nested-target refusal. **It landed while this branch was open**, so the
+field now exists — but the adoption is still not this branch's, which is a
+catalogue-bands unit and would be widening itself to take it. It is the first
+thing the next run does.
+
+Two of the four primitives this run added want it as well, and they want
+*different* forms, which is worth writing down while the reasoning is fresh:
+
+- **`loom.product`** is `{ whenProps: ["href"] }` — the name is an ordinary
+  anchor when there is a destination and nothing when there is not.
+- **`loom.article`** is the interesting one. Its root is an `<article>` and its
+  anchor is the title, so it is **not** a target in the sense #88 means: a
+  `loom.action` inside one is valid HTML. What it *is* is a card with a
+  stretched overlay, and a control underneath that overlay is broken in a way no
+  nesting check would name. If a declaration is ever wanted for it, it is a
+  different fact from `interactive` and should get a different word rather than
+  be squeezed into that one.
+- **`loom.article-grid`** and **`loom.product-grid`** declare nothing: a
+  container is not a target.
+
+So the next run has six one-line declarations to write, not four — and one
+question to answer first, about what word `loom.article` deserves.
+
+---
+
 ## 2026-08-18 — no framework gaps this run
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
@@ -891,6 +949,148 @@ one that was not wired. That is the right default and it is getting long. A
 single `LoomDeployment` bundling the four is the obvious next shape, and it is
 recorded in 0065's consequences rather than built, because nothing has yet been
 made harder by the current one.
+
+---
+
+## 2026-08-18 — `/history` joins the pages nobody outside the repo can see with data
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+The same wall the 17 August finding above named for `/calibration`, `/activity`
+and `/sign-ins`, hit from a fourth page. `/history` requires an actor (0027), the
+seeded tree is created at revision 0 with an empty log, and the demo writes to a
+per-request array rather than the durable store — so there is no path by which a
+PR reviewer, or a routine writing a report, can open a populated `/history`. This
+run's reversal preview only has anything to show once a log has entries, and on
+the preview it never does.
+
+So four of the portal's eight pages now share one reason nobody outside this
+repository has watched them work, and this run's visual is a faithful render of
+the real components against illustrative data rather than a live screenshot — the
+same honest substitute the calibration run used, said plainly in the report.
+
+The 17 August finding's first option (a demo-scoped journal) closes it for the
+telemetry pages. Its sibling closes it here: **let a signed-out demo visitor write
+to a demo-scoped durable tree**, so `/history` has a log to read. Both touch
+`apps/portal/lib/demo`, which is this routine's lane, and both are a unit of their
+own. This is the change I would make next.
+
+---
+
+## 2026-08-18 — the portal reads one revert plan per history row, and cannot batch it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#93** — `planReverts(reader, { treeId, revisions, seed })` plans a page from
+one read of the log, and `planRevert` is now that same walk told to look for one
+revision, so there is still one copy of the replay, the inversion and the overlap
+check. Closed on the merge of #93, which landed after #91 filed this: the entry
+below it names the call the portal needs. Original status below.
+
+**Status:** open
+
+Not urgent, and recorded rather than worked around because the workaround is the
+insider move 0018 forbids.
+
+`/history`'s reversal preview reads what undoing each shown revision would restore
+and cost. The only public seam for that is `planRevert(reader, { treeId, revision,
+seed })`, which is per-target: it replays the log forward from the seed to the
+target, inverts it, then trails to head checking overlap. One row is one bounded
+read, which is the trade 0041 already made for attribution and is fine. A page of
+rows is that read repeated per row — `O(rows × head)` — because there is no way to
+ask "plan the reverts for this window" in one pass.
+
+The efficient shape exists in principle: a single forward replay from the seed
+passes through every revision's observed tree, so the inverse of each — the
+"what it replaced" half — could be computed for the whole page in one walk. The
+discard half (what later work an undo writes over) genuinely needs the head-ward
+trail per target. A batched `planReverts(reader, treeId, seed, revisions)` that
+did the forward walk once and the trails together would collapse the common case.
+
+The portal will not reimplement the walk to get there: `planRevert`'s replay,
+inversion and overlap logic is the runtime's, and a second copy in the portal is
+exactly the drift 0018 exists to prevent. So this is a framework observation, not
+a portal fix. It bites only on a long log on a slow store; the seeded portal and
+the fixtures never feel it. Filed so a later run reads it here rather than
+rediscovering it from a timing graph.
+
+---
+
+## 2026-08-18 — no framework gaps in the primitives run either
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+
+Recorded for the reason the other routines record it. Four primitives, two
+regions apiece at most, one decision record and one stylesheet category, and
+nothing outside `src/primitives/` was needed or wanted. The seam answered every
+question this unit asked: `slots` placed the two regions (0051), the props
+schema carried the free-text price and kicker without a refinement, and the
+declared-string seam was not reached at all because neither pair owns a string —
+every word on these cards comes from the tree.
+
+The one thing that *was* awkward is not a gap. `stylesheet.ts`'s rule that an
+inline style beats a rule in that file cost this run its first screenshot, the
+same way it cost the 17 August run a red test. It is CSS behaving exactly as CSS
+does, the file already says so in as many words, and a third routine hitting it
+would be a reason to make the comment louder rather than to change anything.
+
+---
+
+## 2026-08-18 — the batched revert plan `/history` asked for exists
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+
+Answering the finding this routine's owner filed on #91 the same day: `/history`
+reads one revert plan per row and cannot batch it, so a page costs
+`O(rows × head)`.
+
+**It can now.** `planReverts(reader, { treeId, revisions, seed })` returns a plan
+per revision, keyed by revision, from one read of the log — the forward replay
+walked once for every named revision, the head-ward trails walked together, and
+the replay stopped at the last target so a later failure cannot contradict a plan
+already finished. It is exported from `@loom/runtime/store` beside `planRevert`.
+
+```ts
+const planned = await planReverts(reader, {
+  treeId,
+  revisions: rows.map((row) => row.revision),
+  seed,
+})
+// planned.ok ? planned.value.get(row.revision) : the store's own failure
+```
+
+**Each plan is exactly what `planRevert` would have said for that revision
+alone** — out-of-range, a gap, a delta that no longer applies and an uninvertible
+target all land on the same revisions they would have landed on one at a time.
+The tests assert that by comparing the two directly rather than by restating the
+outcomes, so the two cannot drift. `planRevert` is now the same walk told to look
+for one revision, which is the second half of what the finding asked for: there
+is still one copy of the replay, the inversion and the overlap check, and it is
+the runtime's.
+
+Nothing in `apps/portal` was touched — #91 is open on exactly those files.
+
+**The finding's own Status could not be edited here.** It is on #91 and this
+branch is off `main`; whichever of the two merges second should mark it closed by
+this pull request.
+
+---
+
+## 2026-08-18 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Nothing in the store, the tree or the runtime obstructed this run. The one piece
+of friction was the record-numbering collision already filed on 16 August, which
+bit a fourth time: when this branch was cut, #88 held 0064 and #89 held 0065,
+both unmerged, so a record written here would have opened this pull request on a
+red index guard. It was cheaper to notice that no record was warranted than to
+work around it, but the next run that genuinely needs one will not have that
+option.
+
+#88 merged the same evening, which resolved that instance and immediately caused
+the other half of the same problem: it conflicted with both open branches in
+`FINDINGS.md`, and with #89 in the index as well. Both were merged and resolved
+by hand. Four collisions, four hand-resolutions, in four days.
 
 ---
 

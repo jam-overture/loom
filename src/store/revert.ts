@@ -1,5 +1,5 @@
 import type { NodeId, TreeId } from "../ids.js"
-import { err, ok, reduceResult, type Result } from "../result.js"
+import { ok, type Result } from "../result.js"
 import type { DiscardedWork } from "../runtime/proposal.js"
 import { applyDelta } from "../tree/apply.js"
 import type { TreeOperation } from "../tree/delta.js"
@@ -106,22 +106,50 @@ export type RevertTarget = {
   readonly seed: LoomTree
 }
 
-/** Everything the walk must find before the target, and track after it. */
-type Scan =
-  | { readonly phase: "seeking"; readonly nextRevision: number; readonly tree: LoomTree }
-  | {
-      readonly phase: "trailing"
-      readonly nextRevision: number
-      readonly target: StoredRevision
-      readonly operations: readonly TreeOperation[]
-      readonly named: ReadonlySet<NodeId>
-      readonly discards: readonly DiscardedWork[]
-    }
+/** The same question asked about several revisions of one tree, in one read. */
+export type RevertTargets = {
+  readonly treeId: TreeId
+  readonly revisions: readonly number[]
+  readonly seed: LoomTree
+}
 
-type ScanObstacle = Extract<
-  RevertPlan,
-  { readonly outcome: "unreplayable" | "uninvertible" }
->
+/** A target that has been reached and inverted, collecting what an undo of it would discard. */
+type Trail = {
+  readonly target: StoredRevision
+  readonly operations: readonly TreeOperation[]
+  readonly named: ReadonlySet<NodeId>
+  readonly discards: readonly DiscardedWork[]
+}
+
+/**
+ * The replayed tree, and the targets still waiting for it.
+ *
+ * It exists only while something still seeks: once every named revision has
+ * been reached, no later entry needs to be applied, and the walk stops paying
+ * for a replay nobody reads. That is not an optimisation — it is what keeps a
+ * batch honest. A delta that no longer applies is only an obstacle for a target
+ * *after* it, and continuing to apply would let a late failure contradict a
+ * plan that was already complete.
+ */
+type Replay = { readonly tree: LoomTree; readonly seeking: ReadonlySet<number> }
+
+/** Everything the walk must find, track, and remember about why it stopped. */
+type Scan = {
+  readonly nextRevision: number
+  readonly replay: Replay | null
+  readonly trails: ReadonlyMap<number, Trail>
+  readonly uninvertible: ReadonlyMap<number, TreeError>
+  /** Why the replay stopped short, for the targets it never reached. */
+  readonly stopped: ReplayMismatch | null
+  /** A break in the log's own numbering: nothing after it can be read at all. */
+  readonly halted: ReplayMismatch | null
+}
+
+type ScanContext = {
+  readonly scan: Scan
+  readonly earliest: number
+  readonly headRevision: number
+}
 
 /**
  * The undo's own reach, plus the target delta's.
@@ -136,74 +164,119 @@ const reachOf = (
 ): ReadonlySet<NodeId> =>
   new Set([...namedNodeIds(target.delta.operations), ...namedNodeIds(operations)])
 
-const reachTarget = (
-  scan: Extract<Scan, { readonly phase: "seeking" }>,
-  entry: StoredRevision
-): Result<Scan, ScanObstacle> => {
-  const inverted = invertOperations(scan.tree, entry.delta)
-  if (!inverted.ok) {
-    return err({ outcome: "uninvertible", revision: entry.revision, error: inverted.error })
-  }
+const withoutRevision = (
+  seeking: ReadonlySet<number>,
+  revision: number
+): ReadonlySet<number> => new Set([...seeking].filter((wanted) => wanted !== revision))
 
-  return ok({
-    phase: "trailing",
-    nextRevision: entry.revision + 1,
-    target: entry,
-    operations: inverted.value,
-    named: reachOf(entry, inverted.value),
-    discards: [],
-  })
+const trailed = (
+  trails: ReadonlyMap<number, Trail>,
+  entry: StoredRevision
+): ReadonlyMap<number, Trail> => {
+  if (trails.size === 0) return trails
+
+  const named = namedNodeIds(entry.delta.operations)
+
+  return new Map(
+    [...trails].map(([revision, trail]) => {
+      const overlap = named.filter((nodeId) => trail.named.has(nodeId))
+
+      return [
+        revision,
+        overlap.length === 0
+          ? trail
+          : {
+              ...trail,
+              discards: [...trail.discards, { revision: entry.revision, nodeIds: overlap }],
+            },
+      ]
+    })
+  )
 }
 
-const noteDiscard = (
-  scan: Extract<Scan, { readonly phase: "trailing" }>,
-  entry: StoredRevision
-): Scan => {
-  const overlap = namedNodeIds(entry.delta.operations).filter((nodeId) => scan.named.has(nodeId))
+const withTrail = (scan: Scan, replay: Replay, entry: StoredRevision): Scan => {
+  const inverted = invertOperations(replay.tree, entry.delta)
 
-  return {
+  return inverted.ok
+    ? {
+        ...scan,
+        trails: new Map([
+          ...scan.trails,
+          [
+            entry.revision,
+            {
+              target: entry,
+              operations: inverted.value,
+              named: reachOf(entry, inverted.value),
+              discards: [],
+            },
+          ],
+        ]),
+      }
+    : {
+        ...scan,
+        uninvertible: new Map([...scan.uninvertible, [entry.revision, inverted.error]]),
+      }
+}
+
+/** Advances the replay past an entry, or records why it cannot go further. */
+const advanced = (scan: Scan, replay: Replay, entry: StoredRevision): Scan => {
+  const seeking = withoutRevision(replay.seeking, entry.revision)
+  if (seeking.size === 0) return { ...scan, replay: null }
+
+  const applied = applyDelta(replay.tree, entry.delta)
+
+  return applied.ok
+    ? { ...scan, replay: { tree: applied.value, seeking } }
+    : {
+        ...scan,
+        replay: null,
+        stopped: {
+          code: "delta-rejected",
+          revision: entry.revision,
+          detail: applied.error.code,
+        },
+      }
+}
+
+const stepScan = (scan: Scan, entry: StoredRevision): Scan => {
+  if (entry.revision !== scan.nextRevision) {
+    return {
+      ...scan,
+      halted: { code: "revision-gap", expected: scan.nextRevision, found: entry.revision },
+    }
+  }
+
+  const trailing: Scan = {
     ...scan,
     nextRevision: entry.revision + 1,
-    discards:
-      overlap.length === 0
-        ? scan.discards
-        : [...scan.discards, { revision: entry.revision, nodeIds: overlap }],
+    trails: trailed(scan.trails, entry),
   }
+
+  if (trailing.replay === null) return trailing
+
+  const reached = trailing.replay.seeking.has(entry.revision)
+    ? withTrail(trailing, trailing.replay, entry)
+    : trailing
+
+  return advanced(reached, trailing.replay, entry)
 }
 
-const stepScan = (
-  scan: Scan,
-  entry: StoredRevision,
-  revision: number
-): Result<Scan, ScanObstacle> => {
-  if (entry.revision !== scan.nextRevision) {
-    return err({
-      outcome: "unreplayable",
-      mismatch: { code: "revision-gap", expected: scan.nextRevision, found: entry.revision },
-    })
-  }
-
-  if (scan.phase === "trailing") return ok(noteDiscard(scan, entry))
-  if (entry.revision === revision) return reachTarget(scan, entry)
-
-  const applied = applyDelta(scan.tree, entry.delta)
-  if (!applied.ok) {
-    return err({
-      outcome: "unreplayable",
-      mismatch: { code: "delta-rejected", revision: entry.revision, detail: applied.error.code },
-    })
-  }
-
-  return ok({ phase: "seeking", nextRevision: entry.revision + 1, tree: applied.value })
-}
+/** Nothing left to reach and nothing left to trail: further pages cannot change an answer. */
+const settled = (scan: Scan): boolean =>
+  scan.halted !== null || (scan.replay === null && scan.trails.size === 0)
 
 /**
- * Walks the log forward one page at a time, in one pass: replaying up to the
- * target, inverting it, then checking everything after it for overlap.
+ * Walks the log forward one page at a time, in one pass: replaying up to each
+ * named revision, inverting it, then checking everything after it for overlap.
  *
  * One pass rather than three because the three questions are answered at
  * different points of the same sequence, and reading it three times would give
  * three answers about three moments of a log that is still being appended to.
+ * One pass for *every* named revision rather than one pass each, because the
+ * forward replay a second target needs is the one the first already walked —
+ * the reason a page of history costs one read here and `rows × head` when the
+ * question is asked a row at a time.
  *
  * Entries at or before the seed are skipped rather than folded — a checkpoint
  * seed already contains them, and a walk that refused them would make the seed
@@ -211,24 +284,101 @@ const stepScan = (
  */
 const scanLog = async (
   reader: TreeReader,
-  target: RevertTarget,
+  treeId: TreeId,
+  seedRevision: number,
   scan: Scan,
   cursor?: string
-): Promise<Result<Result<Scan, ScanObstacle>, StoreError>> => {
-  const page = await reader.revisions(target.treeId, cursor === undefined ? {} : { cursor })
+): Promise<Result<Scan, StoreError>> => {
+  const page = await reader.revisions(treeId, cursor === undefined ? {} : { cursor })
   if (!page.ok) return page
 
-  const walked = reduceResult<StoredRevision, Scan, ScanObstacle>(
-    page.value.revisions.filter((entry) => entry.revision > target.seed.revision),
-    scan,
-    (current, entry) => stepScan(current, entry, target.revision)
+  const walked = page.value.revisions
+    .filter((entry) => entry.revision > seedRevision)
+    .reduce((current, entry) => (settled(current) ? current : stepScan(current, entry)), scan)
+
+  return page.value.newer === null || settled(walked)
+    ? ok(walked)
+    : await scanLog(reader, treeId, seedRevision, walked, page.value.newer)
+}
+
+/**
+ * Reads head, then walks the log once for every revision worth walking for.
+ *
+ * A revision outside the span needs no read at all, so a survey asked only
+ * about those never opens the log — which is what makes planning one
+ * out-of-range revision as cheap in a batch as it is alone.
+ */
+const surveyLog = async (
+  reader: TreeReader,
+  targets: RevertTargets
+): Promise<Result<ScanContext, StoreError>> => {
+  const head = await reader.head(targets.treeId)
+  if (!head.ok) return head
+
+  const earliest = targets.seed.revision + 1
+  const headRevision = head.value.revision
+  const seeking = new Set(
+    targets.revisions.filter((revision) => revision >= earliest && revision <= headRevision)
   )
 
-  if (!walked.ok) return ok(walked)
+  const scan: Scan = {
+    nextRevision: earliest,
+    replay: seeking.size === 0 ? null : { tree: targets.seed, seeking },
+    trails: new Map(),
+    uninvertible: new Map(),
+    stopped: null,
+    halted: null,
+  }
 
-  return page.value.newer === null
-    ? ok(walked)
-    : await scanLog(reader, target, walked.value, page.value.newer)
+  if (seeking.size === 0) return ok({ scan, earliest, headRevision })
+
+  const walked = await scanLog(reader, targets.treeId, targets.seed.revision, scan)
+
+  return walked.ok ? ok({ scan: walked.value, earliest, headRevision }) : walked
+}
+
+/**
+ * What one revision's plan is, given a walk that was told to look for it.
+ *
+ * The order the cases are read in is the order the walk would have met them
+ * planning that revision alone, which is what makes a batched plan the same
+ * answer as a solitary one: a target that could not be inverted was decided
+ * before any later break in the log, a target that was reached is only undone
+ * by a break *after* it, and a target that was never reached takes whichever
+ * obstacle came first.
+ */
+const planFrom = (context: ScanContext, revision: number): RevertPlan => {
+  const { scan, earliest, headRevision } = context
+
+  if (revision < earliest || revision > headRevision) {
+    return { outcome: "out-of-range", revision, earliest, headRevision }
+  }
+
+  const error = scan.uninvertible.get(revision)
+  if (error !== undefined) return { outcome: "uninvertible", revision, error }
+
+  const trail = scan.trails.get(revision)
+  if (trail !== undefined) {
+    return scan.halted === null
+      ? {
+          outcome: "revertable",
+          target: trail.target,
+          operations: trail.operations,
+          headRevision,
+          discards: trail.discards,
+        }
+      : { outcome: "unreplayable", mismatch: scan.halted }
+  }
+
+  return {
+    outcome: "unreplayable",
+    mismatch: scan.stopped ??
+      scan.halted ?? {
+        code: "revision-gap",
+        expected: scan.nextRevision,
+        found: headRevision,
+      },
+  }
 }
 
 /**
@@ -243,40 +393,41 @@ export const planRevert = async (
   reader: TreeReader,
   target: RevertTarget
 ): Promise<Result<RevertPlan, StoreError>> => {
-  const head = await reader.head(target.treeId)
-  if (!head.ok) return head
-
-  const earliest = target.seed.revision + 1
-  const headRevision = head.value.revision
-
-  if (target.revision < earliest || target.revision > headRevision) {
-    return ok({ outcome: "out-of-range", revision: target.revision, earliest, headRevision })
-  }
-
-  const walked = await scanLog(reader, target, {
-    phase: "seeking",
-    nextRevision: earliest,
-    tree: target.seed,
+  const surveyed = await surveyLog(reader, {
+    treeId: target.treeId,
+    revisions: [target.revision],
+    seed: target.seed,
   })
 
-  if (!walked.ok) return walked
-  if (!walked.value.ok) return ok(walked.value.error)
+  return surveyed.ok ? ok(planFrom(surveyed.value, target.revision)) : surveyed
+}
 
-  const scan = walked.value.value
+/**
+ * The same plans for several revisions, from one read of the log.
+ *
+ * Each plan is exactly what `planRevert` would have produced for that revision
+ * on its own — the batch changes what it costs to ask, never what the answer
+ * is. A page of history is the case it exists for: the forward replay is walked
+ * once for all of them, and only the head-ward trail, which genuinely differs
+ * per target, is tracked per target.
+ *
+ * Revisions are keyed rather than positional so a caller can ask about the rows
+ * it is showing and read the answers back by revision; asking twice about one
+ * revision costs nothing and answers once.
+ */
+export const planReverts = async (
+  reader: TreeReader,
+  targets: RevertTargets
+): Promise<Result<ReadonlyMap<number, RevertPlan>, StoreError>> => {
+  const surveyed = await surveyLog(reader, targets)
+  if (!surveyed.ok) return surveyed
 
-  /** Head claimed a revision the log does not contain, so the two disagree. */
-  if (scan.phase === "seeking") {
-    return ok({
-      outcome: "unreplayable",
-      mismatch: { code: "revision-gap", expected: scan.nextRevision, found: headRevision },
-    })
-  }
-
-  return ok({
-    outcome: "revertable",
-    target: scan.target,
-    operations: scan.operations,
-    headRevision,
-    discards: scan.discards,
-  })
+  return ok(
+    new Map(
+      [...new Set(targets.revisions)].map((revision) => [
+        revision,
+        planFrom(surveyed.value, revision),
+      ])
+    )
+  )
 }

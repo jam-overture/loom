@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 20 blocks, 33 primitives.**
+**Done — 29 blocks, 37 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -72,6 +72,8 @@ stands alone.
 | `divider` | `loom.divider` | atomic ✅ |
 | `timeline`, `journey`, `roadmap`, `changelog`, `process-steps`, `course-modules`, `event-agenda` | `loom.milestone-list` / `loom.milestone` | pair ✅ |
 | `team-members`, `staff-roster` | `loom.person-grid` / `loom.person` | pair ✅ |
+| `articles`, `press`, `case-studies`, `tutorials`, `recipes` | `loom.article-grid` / `loom.article` | pair ✅ |
+| `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -96,13 +98,11 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 29 blocks, 9 pairs.** Grouped by the content model they
+**Pairs to build — 22 blocks, 8 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
-| Written pieces | `articles`, `press`, `case-studies`, `tutorials`, `recipes` | `loom.article-grid` / `loom.article` |
-| Things for sale | `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` |
 | Things booked | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-list` / `loom.offering` |
 | Credentials | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-list` / `loom.credential` |
 | Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
@@ -110,6 +110,7 @@ share, which is the order to build them in.
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
 | Comparison | `comparison-table` | `loom.comparison-table` / `loom.comparison-row` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
+| Forms | `contactform`, `newsletter` | `loom.form` / `loom.field` — **unblocked on 18 August** by the submission seam ([0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)). The field list is an ordinary 0052 decomposition; the primitive reads `loom.submit` for the address and renders its three states |
 
 **Atomic to build — 4 blocks.**
 
@@ -120,12 +121,14 @@ share, which is the order to build them in.
 | `code-block` | preserves whitespace and needs a monospace treatment nothing else in the library has |
 | `before-after` | two images and a divider position — self-measuring if it is ever draggable |
 
-**Blocked — 4 blocks.**
+**Blocked — 2 blocks.** `contactform` and `newsletter` left this table on 18
+August: [0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)
+gave a form somewhere to post, so they are a pair to build rather than a seam to
+wait on.
 
 | Hermes block | Blocked on |
 | --- | --- |
 | `tabs` | client-side selection. The runtime has no state seam; `loom.faq` gets away with `<details>` because HTML has one. Filed. |
-| `contactform`, `newsletter` | a form primitive, which means a submit target and therefore a decision about where a deployment's data goes. Larger than a primitive. |
 | `feed` | its items are a `binding`, not authored content — [0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md) is the seam and the shape of the answer is a design question. |
 
 Two of these are not what their names suggest. `marquee` is not scrolling text:
@@ -141,13 +144,22 @@ the block names alone would produce.
 
 | | Blocks |
 | --- | --- |
-| Ported | 20 |
+| Ported | 29 |
 | Need no primitive | 13 |
-| Pairs still to build | 29 (9 pairs) |
+| Pairs still to build | 22 (8 pairs) |
 | Atomic still to build | 4 |
-| Blocked on a seam | 4 |
+| Blocked on a seam | 2 |
 
-**33 of 70 are settled**, and the 29 that remain are nine pairs rather than
-twenty-nine primitives. That is the number worth quoting, because "70 blocks"
+**42 of 70 are settled**, and the 22 that remain are eight pairs rather than
+twenty-two primitives. That is the number worth quoting, because "70 blocks"
 has been the shape of this job since the port started and it was never the real
 size of it.
+
+**Seven of those remaining pairs are a card in a grid**, and what separates them
+is not their fields — it is what the reader aims at.
+[0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
+settles it once for all of them: `loom.credential`, `loom.book` and
+`loom.episode` are **read**, so the card is the target; `loom.offering`,
+`loom.listing` and `loom.event` are **acted on**, so a control is. That is the
+one question the article/product pair had to answer that the granularity rules
+did not already answer.

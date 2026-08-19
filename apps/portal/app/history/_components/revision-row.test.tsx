@@ -146,4 +146,50 @@ describe("RevisionRow", () => {
     expect(form?.querySelector<HTMLInputElement>('input[name="revision"]')?.value).toBe("4")
     expect(form?.querySelector<HTMLInputElement>('input[name="treeId"]')?.value).toBe("t_1")
   })
+
+  /**
+   * The reversal is what the undo would do, read before the click. With one, the
+   * row shows the restore preview *and* keeps the button; without one it falls
+   * back to the button alone, which is what it did before the preview existed.
+   */
+  describe("the reversal preview", () => {
+    it("shows what undoing would restore, and still offers the button", () => {
+      const { container } = render(
+        <RevisionRow
+          stored={entryAt(4)}
+          reversal={{
+            kind: "revertable",
+            restores: [{ verb: "restores", subject: "n_card", detail: "variant to “outlined”" }],
+            discards: [],
+          }}
+        />
+      )
+
+      expect(screen.getByText("variant to “outlined”")).toBeTruthy()
+      expect(within(rowOf(container)).getByRole("button", { name: "undo this change" })).toBeTruthy()
+    })
+
+    /**
+     * A change that cannot be undone hides the button rather than leaving it to
+     * fail on a press — the reason takes its place (0019).
+     */
+    it("hides the button and shows the reason when the change cannot be undone", () => {
+      const { container } = render(
+        <RevisionRow
+          stored={entryAt(4)}
+          reversal={{ kind: "blocked", reason: "This change cannot be inverted (node-not-found)." }}
+        />
+      )
+
+      expect(screen.getByText(/cannot be inverted/)).toBeTruthy()
+      expect(within(rowOf(container)).queryByRole("button")).toBeNull()
+    })
+
+    it("falls back to the button alone when no reversal could be read", () => {
+      const { container } = render(<RevisionRow stored={entryAt(4)} />)
+
+      expect(within(rowOf(container)).getByRole("button", { name: "undo this change" })).toBeTruthy()
+      expect(screen.queryByText("undoing this would")).toBeNull()
+    })
+  })
 })

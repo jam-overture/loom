@@ -40,7 +40,7 @@ and became *how does a form get an action a model never wrote*.
 
 ## What landed
 
-[0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)
+[0066](../decisions/0066-a-submission-names-a-destination-and-never-carries-one.md)
 — **a submission names a destination, and never carries one.**
 
 The tree says which form. The host says where it goes.
@@ -127,7 +127,7 @@ this run and a third copy was the alternative. Nothing about the grammar changed
 **Not treated as an escalation.** It contradicts no `Accepted` record. 0008
 stands untouched — the renderer does no IO and enforces nothing; 0050 predicted
 this shape of cost when it opened the namespace; 0058 is neither superseded nor
-contradicted, and the one place this seam departs from it is argued in 0065's
+contradicted, and the one place this seam departs from it is argued in 0066's
 Decision rather than by amending 0058.
 
 ## Deliberately not built
@@ -143,7 +143,7 @@ Decision rather than by amending 0058.
   does not re-derive it.
 - **A declaration that a primitive requires a target.** The machinery exists —
   it is the shape `interactive` uses on #88 — and using it here would be a second
-  seam in one run. Recorded in 0065's consequences and in the finding filed for
+  seam in one run. Recorded in 0066's consequences and in the finding filed for
   `Loom primitives`: the audit is cheap to add once a primitive exists that would
   fail it.
 - **Anything in `src/primitives/` or `apps/`.** Neither is this routine's lane,
@@ -151,7 +151,7 @@ Decision rather than by amending 0058.
 
 ## Records
 
-- **Added:** [0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md),
+- **Added:** [0066](../decisions/0066-a-submission-names-a-destination-and-never-carries-one.md),
   `Accepted`. Five alternatives recorded, including the one that was genuinely
   tempting — an endpoint as a data source that answers with a URL, which is no new
   machinery at all and collapses the read/write distinction that is the entire
@@ -196,7 +196,7 @@ namespace invites.
 **The one failure is the numbering guard, not the code.** `pnpm verify` fails on
 one assertion in `tools/decisions/decisions.test.ts`:
 `0064 is missing — the numbers must run unbroken from 0001`. #88 holds 0064 on an
-open branch, this record is 0065, and the guard requires the numbers to run
+open branch, this record is 0066, and the guard requires the numbers to run
 unbroken. Confirmed by standing a placeholder 0064 in the directory: with it
 present the index regenerates clean and all 25 decisions tests pass; the
 placeholder was then deleted. **This branch goes green by merging `main` once #88
@@ -241,7 +241,7 @@ next decision number.
 `main` was merged in and both resolved. `FINDINGS.md` keeps both blocks in date
 order — #88's three entries from 17 August, then this branch's three from
 18 August, nothing rewritten on either side. `decisions/README.md` keeps both
-rows, 0064 then 0065, regenerated with `pnpm decisions:index` rather than
+rows, 0064 then 0066, regenerated with `pnpm decisions:index` rather than
 hand-merged.
 
 **The one red this report named is now green.** The guard was failing only
