@@ -229,3 +229,28 @@ floor for twelve hours. The standing finding about this is
   0058 gave for data: decide it when a review needs it. Recorded again because the
   surface grew rather than shrank — approving a change to a form now approves the
   destination's *name*, not the address it resolved to on the day.
+
+---
+
+## Addendum, 2026-08-18 21:40 UTC — the numbering guard, cleared
+
+#88 merged as `872a39b` after this report was written, which conflicted with
+this branch twice: both had appended to `FINDINGS.md`, and both had claimed the
+next decision number.
+
+`main` was merged in and both resolved. `FINDINGS.md` keeps both blocks in date
+order — #88's three entries from 17 August, then this branch's three from
+18 August, nothing rewritten on either side. `decisions/README.md` keeps both
+rows, 0064 then 0065, regenerated with `pnpm decisions:index` rather than
+hand-merged.
+
+**The one red this report named is now green.** The guard was failing only
+because 0064 sat on an unmerged branch, exactly as predicted:
+
+- Runtime: **1343 tests across 96 files, all passing** (the 1302 this branch had
+  plus #88's).
+- Portal: **522 tests across 50 files, all passing**.
+- `pnpm verify` exit 0, nothing skipped and nothing weakened.
+
+The record-numbering collision itself stays open as a finding for the
+maintainer; this is the fourth time it has been resolved by hand after the fact.
