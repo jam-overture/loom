@@ -313,6 +313,30 @@ every existing cross-reference).
 Recorded rather than acted on because a routine choosing its own convention here
 is how two conventions get invented.
 
+**18 August, `Loom primitives`** — hit a third time, and this time both branches
+were open at once. #88 (`Loom daily build`) claims **0064**, and the
+catalogue-bands branch wrote its own record as 0064 too, because the guard
+refuses a gap and 0064 was not on `main`.
+
+**Settled by merge order, and it took two rounds.** The maintainer asked the
+18 August primitives run to fix #88's merge conflict, so #88 landed first and the
+catalogue-bands record renumbered 0064 → 0065. Then **#89 landed its own 0065**
+while that branch was still open, so it renumbered again, 0065 → 0066. Two
+renames for one record, each one `git mv` + `sed` + `pnpm decisions:index`, and
+the branch is green at the end of it.
+
+The second round is the more instructive one: the first collision was visible
+(both branches were open at once and both said 0064), and the second was not —
+#89 was written, merged and numbered without the catalogue-bands branch ever
+being able to see it coming. **Merge order handles both, but only the loser
+finds out**, and always by a red branch rather than a warning.
+
+So of the three conventions offered above, **merge order** is the one this
+repository is already running on, twice now, without anyone having written it
+down. It costs one red branch and one rename per collision, both cheap, and it
+is the only one of the three that needs no new tooling. Worth making explicit in
+`docs/routines.md` rather than leaving each pair of routines to rediscover.
+
 ---
 
 ## 2026-08-16 — a routine's local `main` can be four merges stale, silently
@@ -534,7 +558,16 @@ this lane can do.
 
 ## 2026-08-17 — three Hermes blocks are blocked on seams, not on primitives
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+**partly closed** by **#89** — the form-target half is answered by the submission
+seam ([0065](decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)):
+`contactform` and `newsletter` are now an ordinary 0052 decomposition plus
+`loom:submit`, and are unblocked as far as this seam goes. **The `tabs` half
+stays open** and is unchanged — a state seam is a much larger decision than one
+primitive, reaches the delta model, and is not something a run should reach for
+because a block wants it. Original status below.
+
+**Status:** open
 
 Found while writing [`docs/hermes-port-map.md`](docs/hermes-port-map.md), which
 classifies all seventy Hermes blocks. Sixty-seven of them are a primitives
@@ -795,6 +828,210 @@ Nothing under `sdk/` imports from `runtime/` today, and this was not the change
 to start with, so the type went where `reserved-props.ts` went when the `loom:`
 namespace acquired its second reader. No entry point changed shape and no
 consumer was touched.
+
+---
+
+## 2026-08-18 — two Hermes form blocks are unblocked, and neither can be built here
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The submission seam landed on **#89**, which answers the form-target half of the
+finding above. `contactform` and `newsletter` are now buildable, and building
+them is `src/primitives/`, which is not this routine's lane.
+
+What a form primitive reads:
+
+```ts
+if (!loom.submit) …                              // the tree named no endpoint
+if (loom.submit.status === "unavailable") …      // this deployment could not answer
+const { action, method, fields } = loom.submit.target
+```
+
+Three states rather than two, and each is a different page. Absent is an
+authoring gap — nobody said where this posts. `unavailable` is a deployment that
+could not answer *right now*, which is a form that should say so rather than one
+that looks fine and swallows what a visitor typed. `ready` carries the address,
+the method, and the hidden inputs the form must render — a CSRF token arrives
+that way, and a primitive that drops `fields` produces a form the host will
+reject with no visible reason.
+
+`src/render/submit.test.ts` has a working form primitive in about fifteen lines,
+written as a fixture rather than as a library entry precisely because the library
+is yours.
+
+Two things worth knowing before building either:
+
+- **Nothing enforces that a form primitive has a target.** A primitive that needs
+  one and is given none renders untargeted and only its author knows that is
+  wrong. The machinery to declare it exists — it is the shape `interactive` uses
+  on #88 — and 0065 deliberately did not use it: one seam per run, and the audit
+  is cheap to add once a primitive exists that would fail it. If you build one and
+  want the audit, file it back.
+- **The field list is the ordinary part.** 0052 settles it: each field is a node,
+  the fixed bits are props. Nothing in the seam touches how a form is composed.
+
+---
+
+## 2026-08-18 — a change of destination is not yet a stake
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+
+Recorded against my own lane so the next run finds it rather than rediscovering
+it, and left undone on purpose.
+
+A `configure` that moves `loom:submit` from `newsletter.subscribe` to
+`contact.enquiry` sends the next visitor's message somewhere else. Both are
+registered, so nothing leaves the deployment and no address was authored — the
+seam holds. But the analysis reports it as a prop change like any other, and
+"this form now posts somewhere else" is not an ordinary prop change: it is the
+one prop whose meaning is *where a stranger's data goes*.
+
+It belongs in the stakes vocabulary, beside `nested-target`. It is not built here
+for one reason: **#88 is open and extends `src/runtime/stakes.ts`,
+`policy.ts` and `analysis.ts`**, and two routines appending to those files at once
+is the friction this repository already knows about from three shared files. One
+branch, one unit — this is the next run's, once #88 has landed.
+
+The shape, so the next run does not re-derive it: `planTreeSubmissions` already
+reads every declaration off a tree, so the factor is the same "resulting tree,
+less what the tree already had" comparison #88 makes for nesting. `configure` is
+the operation that produces it; `insert` of a form pointing somewhere is a new
+form rather than a redirected one, and is not the same event.
+
+---
+
+## 2026-08-18 — the catalogue pairs will need the `interactive` declaration
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+
+A note from this routine to its own next run, so the adoption is not discovered
+twice.
+
+#88 files a finding for this lane: apply `interactive` to `loom.action`,
+`loom.card`, `loom.feature` and `loom.logo`, one line each, so the Gate can
+derive a nested-target refusal. **It landed while this branch was open**, so the
+field now exists — but the adoption is still not this branch's, which is a
+catalogue-bands unit and would be widening itself to take it. It is the first
+thing the next run does.
+
+Two of the four primitives this run added want it as well, and they want
+*different* forms, which is worth writing down while the reasoning is fresh:
+
+- **`loom.product`** is `{ whenProps: ["href"] }` — the name is an ordinary
+  anchor when there is a destination and nothing when there is not.
+- **`loom.article`** is the interesting one. Its root is an `<article>` and its
+  anchor is the title, so it is **not** a target in the sense #88 means: a
+  `loom.action` inside one is valid HTML. What it *is* is a card with a
+  stretched overlay, and a control underneath that overlay is broken in a way no
+  nesting check would name. If a declaration is ever wanted for it, it is a
+  different fact from `interactive` and should get a different word rather than
+  be squeezed into that one.
+- **`loom.article-grid`** and **`loom.product-grid`** declare nothing: a
+  container is not a target.
+
+So the next run has six one-line declarations to write, not four — and one
+question to answer first, about what word `loom.article` deserves.
+
+---
+
+## 2026-08-18 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Nothing was wanted from another lane to build the submission seam. `apps/` was
+not opened: no page moves, because no primitive posts anywhere yet, and the demo
+gains nothing until one does.
+
+One thing worth saying rather than filing, since it is nobody's blocker yet:
+**`renderRequest` now takes four optional registries** — `sources`, `themes`,
+`text` and `endpoints` — each failing closed with a diagnostic when a tree needs
+one that was not wired. That is the right default and it is getting long. A
+single `LoomDeployment` bundling the four is the obvious next shape, and it is
+recorded in 0065's consequences rather than built, because nothing has yet been
+made harder by the current one.
+
+---
+
+## 2026-08-18 — `/history` joins the pages nobody outside the repo can see with data
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+The same wall the 17 August finding above named for `/calibration`, `/activity`
+and `/sign-ins`, hit from a fourth page. `/history` requires an actor (0027), the
+seeded tree is created at revision 0 with an empty log, and the demo writes to a
+per-request array rather than the durable store — so there is no path by which a
+PR reviewer, or a routine writing a report, can open a populated `/history`. This
+run's reversal preview only has anything to show once a log has entries, and on
+the preview it never does.
+
+So four of the portal's eight pages now share one reason nobody outside this
+repository has watched them work, and this run's visual is a faithful render of
+the real components against illustrative data rather than a live screenshot — the
+same honest substitute the calibration run used, said plainly in the report.
+
+The 17 August finding's first option (a demo-scoped journal) closes it for the
+telemetry pages. Its sibling closes it here: **let a signed-out demo visitor write
+to a demo-scoped durable tree**, so `/history` has a log to read. Both touch
+`apps/portal/lib/demo`, which is this routine's lane, and both are a unit of their
+own. This is the change I would make next.
+
+---
+
+## 2026-08-18 — the portal reads one revert plan per history row, and cannot batch it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#93** — `planReverts(reader, { treeId, revisions, seed })` plans a page from
+one read of the log, and `planRevert` is now that same walk told to look for one
+revision, so there is still one copy of the replay, the inversion and the overlap
+check. Closed on the merge of #93, which landed after #91 filed this: the entry
+below it names the call the portal needs. Original status below.
+
+**Status:** open
+
+Not urgent, and recorded rather than worked around because the workaround is the
+insider move 0018 forbids.
+
+`/history`'s reversal preview reads what undoing each shown revision would restore
+and cost. The only public seam for that is `planRevert(reader, { treeId, revision,
+seed })`, which is per-target: it replays the log forward from the seed to the
+target, inverts it, then trails to head checking overlap. One row is one bounded
+read, which is the trade 0041 already made for attribution and is fine. A page of
+rows is that read repeated per row — `O(rows × head)` — because there is no way to
+ask "plan the reverts for this window" in one pass.
+
+The efficient shape exists in principle: a single forward replay from the seed
+passes through every revision's observed tree, so the inverse of each — the
+"what it replaced" half — could be computed for the whole page in one walk. The
+discard half (what later work an undo writes over) genuinely needs the head-ward
+trail per target. A batched `planReverts(reader, treeId, seed, revisions)` that
+did the forward walk once and the trails together would collapse the common case.
+
+The portal will not reimplement the walk to get there: `planRevert`'s replay,
+inversion and overlap logic is the runtime's, and a second copy in the portal is
+exactly the drift 0018 exists to prevent. So this is a framework observation, not
+a portal fix. It bites only on a long log on a slow store; the seeded portal and
+the fixtures never feel it. Filed so a later run reads it here rather than
+rediscovering it from a timing graph.
+
+---
+
+## 2026-08-18 — no framework gaps in the primitives run either
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+
+Recorded for the reason the other routines record it. Four primitives, two
+regions apiece at most, one decision record and one stylesheet category, and
+nothing outside `src/primitives/` was needed or wanted. The seam answered every
+question this unit asked: `slots` placed the two regions (0051), the props
+schema carried the free-text price and kicker without a refinement, and the
+declared-string seam was not reached at all because neither pair owns a string —
+every word on these cards comes from the tree.
+
+The one thing that *was* awkward is not a gap. `stylesheet.ts`'s rule that an
+inline style beats a rule in that file cost this run its first screenshot, the
+same way it cost the 17 August run a red test. It is CSS behaving exactly as CSS
+does, the file already says so in as many words, and a third routine hitting it
+would be a reason to make the comment louder rather than to change anything.
 
 ---
 

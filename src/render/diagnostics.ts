@@ -4,6 +4,12 @@ import type { BindingName, SourceId } from "../data/source.js"
 import type { NodeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { assertNever } from "../result.js"
+import { describeSubmissionError, type SubmissionError } from "../submit/declaration.js"
+import {
+  describeSubmissionUnavailable,
+  type EndpointId,
+  type SubmissionUnavailable,
+} from "../submit/endpoint.js"
 import { describeThemeError, type ThemeError } from "../theme/registry.js"
 
 import type { PropsIssue } from "./props.js"
@@ -103,6 +109,33 @@ export type RenderDiagnostic =
       readonly code: "data-unresolved"
       readonly nodeId: NodeId
     }
+  | {
+      /**
+       * `loom:submit` that is not an endpoint id under `to`. The node renders —
+       * its props are its own and are still valid — with no target, which is
+       * what a form primitive's unavailable path is for.
+       */
+      readonly code: "submit-misdeclared"
+      readonly nodeId: NodeId
+      readonly error: SubmissionError
+    }
+  | {
+      /**
+       * A form whose endpoint could not give a target: nobody registered it,
+       * it refused this visitor, or it answered with something the seam refuses.
+       * The page still renders, because a page lost to one form is worse than a
+       * form that says it cannot be sent right now.
+       */
+      readonly code: "submit-unavailable"
+      readonly nodeId: NodeId
+      readonly to: EndpointId
+      readonly unavailable: SubmissionUnavailable
+    }
+  | {
+      /** The tree names an endpoint and this render was given no resolution. */
+      readonly code: "submit-unresolved"
+      readonly nodeId: NodeId
+    }
 
 const describeIssues = (issues: readonly PropsIssue[]): string =>
   issues.map((issue) => `${issue.path}: ${issue.message}`).join("; ")
@@ -129,6 +162,12 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} binds "${diagnostic.name}" to "${diagnostic.source}" and it could not be answered — ${describeDataUnavailable(diagnostic.unavailable)}`
     case "data-unresolved":
       return `node ${diagnostic.nodeId} asks for data and this render was given no resolution, so it rendered with none`
+    case "submit-misdeclared":
+      return `node ${diagnostic.nodeId} declares a submission that is not an endpoint id under \`to\`, so it rendered with no target — ${describeSubmissionError(diagnostic.error)}`
+    case "submit-unavailable":
+      return `node ${diagnostic.nodeId} posts to "${diagnostic.to}" and no target could be given for it — ${describeSubmissionUnavailable(diagnostic.unavailable)}`
+    case "submit-unresolved":
+      return `node ${diagnostic.nodeId} names an endpoint and this render was given no resolution, so it rendered with no target`
     default:
       return assertNever(diagnostic, "describeRenderDiagnostic")
   }

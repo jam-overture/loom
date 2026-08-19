@@ -13,6 +13,8 @@ import {
   historyRead,
   parseRevisionParam,
 } from "@/lib/history-link"
+import { previewReversal, type Reversal } from "@/lib/reversal"
+import { seedFor } from "@/lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/lib/store"
 
 import { RevisionBox } from "./_components/revision-box"
@@ -26,6 +28,13 @@ import { TreeChooser } from "./_components/tree-chooser"
  * became of the tree — and the two are deliberately different views, because a
  * refused proposal appears in one and never in the other. 0016 made the log the
  * truth and the snapshot a view of it; this is the log, read directly.
+ *
+ * Each row also carries what its own delta cannot: what undoing it would put
+ * back. A reconfigure records the value it set and not the one it wrote over; a
+ * removal records the id it deleted and not the subtree that went with it. The
+ * "before" side is gone from the tree as it stands and lives only in the log,
+ * inverted — which is the one thing a reviewer deciding whether to undo actually
+ * needs, and which nothing but a replay can produce.
  *
  * The page is taken from the newest end (0026). A log only grows, and "what
  * changed lately" is the question — paging forward from revision 1 would answer
@@ -91,6 +100,37 @@ const HistoryPage = async ({
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   /**
+   * What undoing each shown revision would restore and cost, read from the log.
+   *
+   * A revision's forward delta records only what it did; the value it wrote over,
+   * the subtree it destroyed and the place a move came from are recoverable only
+   * by inverting the log, which is what `previewReversal` asks the runtime to do
+   * (0016, 0035). Computed here, on a review page, rather than on any render path.
+   *
+   * One plan per shown revision — the runtime's own forward walk, consumed rather
+   * than reimplemented (0018). That is one bounded read per row: a review page can
+   * afford it where a render path could not, the same trade 0041 made for
+   * attribution. A host whose log grows long enough for the per-row cost to bite
+   * is the case for a batched plan, filed as a finding rather than worked around.
+   *
+   * Absent for a host with no seed for this tree: without the shape the log
+   * replays from, no inverse can be computed, and the row falls back to offering
+   * undo and answering on the click (the same reason `undoRevision` needs one).
+   */
+  const seed = seedFor(scope.data)
+  const reversals: ReadonlyMap<number, Reversal | undefined> =
+    seed === undefined
+      ? new Map()
+      : new Map(
+          await Promise.all(
+            newestFirst.map(
+              async (stored) =>
+                [stored.revision, await previewReversal(portalStore, scope.data, seed, stored.revision)] as const
+            )
+          )
+        )
+
+  /**
    * A revision this log does not hold is not an error to the store — it answers
    * with the entries on that side of the number instead — so the page lands
    * looking exactly like an ordinary visit. Saying which of the ways it missed
@@ -133,6 +173,7 @@ const HistoryPage = async ({
               key={stored.revision}
               stored={stored}
               anchored={stored.revision === anchor}
+              reversal={reversals.get(stored.revision)}
             />
           ))}
         </ul>
