@@ -60,7 +60,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm --filter @loom/portal verify",
+    "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm --filter @loom/portal verify && pnpm --filter @loom/marketing verify",
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "decisions:index": "tsx tools/decisions/build-index.ts"
