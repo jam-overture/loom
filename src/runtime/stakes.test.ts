@@ -20,6 +20,7 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   removedPrimitiveTypes: [],
   relocatedPrimitiveTypes: [],
   configuredPropKeys: [],
+  nestedTargets: [],
   shallowestAffectedDepth: 5,
   ...overrides,
 })
@@ -260,5 +261,36 @@ describe("factor aggregation", () => {
 
     expect(touched.level).toBe("high")
     expect(removed.level).toBe("critical")
+  })
+})
+
+describe("assessStakes on a nested target", () => {
+  const nested = (count: number) =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_inner${index}`),
+      type: primitiveTypeSchema.parse("loom.action"),
+      ancestorId: nodeIdSchema.parse(`n_card${index}`),
+      ancestorType: primitiveTypeSchema.parse("loom.card"),
+    }))
+
+  it("is critical, which under the default floor is a refusal rather than a question", () => {
+    const assessment = stakesOf(analysisOf({ nestedTargets: nested(1) }), defaultGatePolicy)
+
+    expect(assessment.level).toBe("critical")
+    expect(stakeFactor(assessment, "nested-target")?.detail).toBe(
+      "nests a target inside another: loom.action n_inner0 inside loom.card n_card0"
+    )
+  })
+
+  it("names every pair, because a reviewer fixes nodes and not a count", () => {
+    const assessment = stakesOf(analysisOf({ nestedTargets: nested(2) }), defaultGatePolicy)
+
+    expect(stakeFactor(assessment, "nested-target")?.detail).toBe(
+      "nests 2 targets inside another: loom.action n_inner0 inside loom.card n_card0; loom.action n_inner1 inside loom.card n_card1"
+    )
+  })
+
+  it("says nothing about a change that nests none", () => {
+    expect(stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "nested-target")).toBeUndefined()
   })
 })

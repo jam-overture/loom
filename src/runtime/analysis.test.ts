@@ -4,8 +4,10 @@ import { sequentialIdFactory, type TreeId } from "../ids.js"
 import { sampleTree, type SampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
+import { createTree } from "../tree/tree.js"
 
 import { analyzeDelta } from "./analysis.js"
+import { interactivePredicateFor, nestedTargetsIn } from "./nesting.js"
 
 const spare = sequentialIdFactory("an")
 
@@ -198,5 +200,116 @@ describe("analyzeDelta sequencing", () => {
     )
 
     expect(!result.ok && result.error.code).toBe("node-not-found")
+  })
+})
+
+/**
+ * The sample tree's `loom.card` carries no `href`, so it is a plain surface
+ * until a delta gives it one — which is the point: two of these four cases put
+ * an action inside a card and only two of them break anything.
+ */
+const isTarget = interactivePredicateFor({
+  "loom.card": { whenProps: ["href"] },
+  "loom.action": "always",
+})
+
+const analyzeWithTargets = (build: (ids: SampleTree["ids"]) => TreeOperation[]) => {
+  const { tree, ids } = sampleTree()
+  const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)), isTarget)
+  if (!result.ok) throw new Error(result.error.code)
+
+  return { analysis: result.value, ids }
+}
+
+describe("analyzeDelta nested targets", () => {
+  it("reports none when the host declares no interactive vocabulary", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const { analysis } = analyze((ids) => [
+      { op: "configure", nodeId: ids.card, set: { href: "/pricing" }, unset: [] },
+      { op: "insert", parentId: ids.card, index: 0, node: action },
+    ])
+
+    expect(analysis.nestedTargets).toEqual([])
+  })
+
+  it("accepts an action inside a card that is not a link", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const { analysis } = analyzeWithTargets((ids) => [
+      { op: "insert", parentId: ids.card, index: 0, node: action },
+    ])
+
+    expect(analysis.nestedTargets).toEqual([])
+  })
+
+  it("catches an action inserted into a card the same delta linked", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const { analysis, ids } = analyzeWithTargets((fixture) => [
+      { op: "configure", nodeId: fixture.card, set: { href: "/pricing" }, unset: [] },
+      { op: "insert", parentId: fixture.card, index: 0, node: action },
+    ])
+
+    expect(analysis.nestedTargets).toEqual([
+      {
+        nodeId: action.id,
+        type: "loom.action",
+        ancestorId: ids.card,
+        ancestorType: "loom.card",
+      },
+    ])
+  })
+
+  it("catches a configure that links a card over actions already inside it", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const { analysis } = analyzeWithTargets((ids) => [
+      { op: "insert", parentId: ids.card, index: 0, node: action },
+      { op: "configure", nodeId: ids.card, set: { href: "/pricing" }, unset: [] },
+    ])
+
+    expect(analysis.nestedTargets.map((nested) => nested.nodeId)).toEqual([action.id])
+  })
+
+  it("catches a move that carries an action into a linked card", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const { analysis } = analyzeWithTargets((ids) => [
+      { op: "insert", parentId: ids.footer, index: 0, node: action },
+      { op: "configure", nodeId: ids.card, set: { href: "/pricing" }, unset: [] },
+      { op: "move", nodeId: action.id, parentId: ids.card, index: 0 },
+    ])
+
+    expect(analysis.nestedTargets.map((nested) => nested.nodeId)).toEqual([action.id])
+  })
+
+  it("blames a change for what it introduces and not for what it inherited", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const card = buildElement(spare, {
+      type: "loom.card",
+      props: { href: "/pricing" },
+      children: [action],
+    })
+    const page = buildElement(spare, { type: "loom.page", children: [card] })
+    const alreadyBroken = createTree(page, spare)
+
+    const result = analyzeDelta(
+      alreadyBroken,
+      deltaOf(alreadyBroken.treeId, [
+        { op: "configure", nodeId: page.id, set: { title: "Pricing" }, unset: [] },
+      ]),
+      isTarget
+    )
+    if (!result.ok) throw new Error(result.error.code)
+
+    expect(nestedTargetsIn(page, isTarget)).toHaveLength(1)
+    expect(result.value.nestedTargets).toEqual([])
+  })
+
+  it("reports the change that removes the nesting as introducing none", () => {
+    const action = buildElement(spare, { type: "loom.action" })
+    const { analysis } = analyzeWithTargets((ids) => [
+      { op: "configure", nodeId: ids.card, set: { href: "/pricing" }, unset: [] },
+      { op: "insert", parentId: ids.card, index: 0, node: action },
+      { op: "configure", nodeId: ids.card, set: {}, unset: ["href"] },
+    ])
+
+    expect(analysis.nestedTargets).toEqual([])
   })
 })

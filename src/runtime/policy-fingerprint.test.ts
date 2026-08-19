@@ -114,6 +114,38 @@ describe("policyFingerprintOf", () => {
   })
 })
 
+describe("policyFingerprintOf over the interactive vocabulary", () => {
+  it("calls declaring a target an edit", () => {
+    const before = policyWith({ policyId: "library" })
+    const after = policyWith({
+      policyId: "library",
+      interactiveTypes: { "loom.card": { whenProps: ["href"] } },
+    })
+
+    expect(rulesetContinuityOf([policyFingerprintOf(before), policyFingerprintOf(after)])).toBe(
+      "changed"
+    )
+  })
+
+  it("calls a changed trigger an edit, even with the same types declared", () => {
+    const byHref = policyWith({ interactiveTypes: { "loom.card": { whenProps: ["href"] } } })
+    const always = policyWith({ interactiveTypes: { "loom.card": "always" } })
+
+    expect(policyFingerprintOf(byHref)).not.toBe(policyFingerprintOf(always))
+  })
+
+  it("reads the same vocabulary written in another order as unchanged", () => {
+    const one = policyWith({
+      interactiveTypes: { "loom.card": { whenProps: ["href", "onSelect"] }, "loom.action": "always" },
+    })
+    const other = policyWith({
+      interactiveTypes: { "loom.action": "always", "loom.card": { whenProps: ["onSelect", "href"] } },
+    })
+
+    expect(policyFingerprintOf(one)).toBe(policyFingerprintOf(other))
+  })
+})
+
 describe("policyShapeOf", () => {
   it("is the half before the separator", () => {
     expect(policyShapeOf("abcdef01:0123456789abcdef")).toBe("abcdef01")
