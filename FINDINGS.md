@@ -891,3 +891,59 @@ one that was not wired. That is the right default and it is getting long. A
 single `LoomDeployment` bundling the four is the obvious next shape, and it is
 recorded in 0065's consequences rather than built, because nothing has yet been
 made harder by the current one.
+
+---
+
+## 2026-08-18 — `/history` joins the pages nobody outside the repo can see with data
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+The same wall the 17 August finding above named for `/calibration`, `/activity`
+and `/sign-ins`, hit from a fourth page. `/history` requires an actor (0027), the
+seeded tree is created at revision 0 with an empty log, and the demo writes to a
+per-request array rather than the durable store — so there is no path by which a
+PR reviewer, or a routine writing a report, can open a populated `/history`. This
+run's reversal preview only has anything to show once a log has entries, and on
+the preview it never does.
+
+So four of the portal's eight pages now share one reason nobody outside this
+repository has watched them work, and this run's visual is a faithful render of
+the real components against illustrative data rather than a live screenshot — the
+same honest substitute the calibration run used, said plainly in the report.
+
+The 17 August finding's first option (a demo-scoped journal) closes it for the
+telemetry pages. Its sibling closes it here: **let a signed-out demo visitor write
+to a demo-scoped durable tree**, so `/history` has a log to read. Both touch
+`apps/portal/lib/demo`, which is this routine's lane, and both are a unit of their
+own. This is the change I would make next.
+
+---
+
+## 2026-08-18 — the portal reads one revert plan per history row, and cannot batch it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+
+Not urgent, and recorded rather than worked around because the workaround is the
+insider move 0018 forbids.
+
+`/history`'s reversal preview reads what undoing each shown revision would restore
+and cost. The only public seam for that is `planRevert(reader, { treeId, revision,
+seed })`, which is per-target: it replays the log forward from the seed to the
+target, inverts it, then trails to head checking overlap. One row is one bounded
+read, which is the trade 0041 already made for attribution and is fine. A page of
+rows is that read repeated per row — `O(rows × head)` — because there is no way to
+ask "plan the reverts for this window" in one pass.
+
+The efficient shape exists in principle: a single forward replay from the seed
+passes through every revision's observed tree, so the inverse of each — the
+"what it replaced" half — could be computed for the whole page in one walk. The
+discard half (what later work an undo writes over) genuinely needs the head-ward
+trail per target. A batched `planReverts(reader, treeId, seed, revisions)` that
+did the forward walk once and the trails together would collapse the common case.
+
+The portal will not reimplement the walk to get there: `planRevert`'s replay,
+inversion and overlap logic is the runtime's, and a second copy in the portal is
+exactly the drift 0018 exists to prevent. So this is a framework observation, not
+a portal fix. It bites only on a long log on a slow store; the seeded portal and
+the fixtures never feel it. Filed so a later run reads it here rather than
+rediscovering it from a timing graph.
