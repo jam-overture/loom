@@ -1123,3 +1123,108 @@ and it will be on every run until the host is reachable.
 Worth noting that both blocked hosts are named as *mandatory fetches* in briefs
 written before the proxy existed. A third routine will hit the same wall the
 first time its brief names a URL.
+
+---
+
+## 2026-08-19 — a Loom site cannot link to its own next page
+
+**Filed by:** `Loom daily build` (marketing) · **Owned by:** `Loom daily build` ·
+**Status:** open
+
+`linkUrlSchema` (0053) allowlists schemes by parsing with `new URL(value)` and
+refusing anything that does not parse — which is every relative URL. So
+`href: "/how-it-works"` is not a value a `loom.action`, `loom.card`,
+`loom.article`, `loom.logo`, `loom.person`, `loom.product`, `loom.tier`'s action
+or `loom.feature` can hold. A tree can point at another site and cannot point at
+the page beside it.
+
+That is fine for the demo, whose links all leave. It is the first thing a
+*site* needs: `apps/marketing` has a header, a footer and eight calls to action,
+and every one of them is internal.
+
+**What the site does today.** It resolves an origin per request —
+`LOOM_SITE_ORIGIN`, else `VERCEL_URL`, else `http://localhost:3000` — and builds
+absolute URLs from it (`apps/marketing/lib/site.ts`). It works, including on
+preview deployments, and it costs something real: the tree is now a function of
+route, theme **and deployment**, so two deployments of the same site hold
+different trees, and a stored tree would carry one deployment's hostname into
+another's. That is the property 0050 protects when it says a page is a function
+of the tree rather than of deployment config, and this is the first place it has
+had to bend.
+
+**What would close it.** The allowlist's job is to refuse `javascript:` and
+friends, and a root-relative path is not a scheme — it cannot execute anything.
+Accepting a URL that begins `/` (and only that: not `//host`, which is
+scheme-relative and reaches another origin) refuses exactly as much as today and
+lets a site link to itself. `mediaUrlSchema` wants the same treatment for the
+same reason, once a page has images of its own.
+
+The change lands in `src/primitives/url.ts`, which is `Loom primitives`' lane
+rather than mine, and it touches 0053, so whoever takes it should say in the
+record that a same-origin path was considered and why it is or is not allowed.
+I have not built anything that depends on the answer; the origin seam is one
+function and one test, and deleting it is a small change.
+
+---
+
+## 2026-08-19 — `loom.divider`'s diamond and dots ornaments collapse to the left
+
+**Filed by:** `Loom daily build` (marketing) · **Owned by:** `Loom daily build` ·
+**Status:** open
+
+Found by putting one on a page. `rule` renders correctly; the other two do not
+span the line — they draw a small mark at the start of it and leave the rest
+empty (visible in this run's first screenshots).
+
+The cause is one missing width. The divider's own element is
+`display: flex; align-items: center; width: 100%`, and each ornament is a
+`<span>` inside it. `rule`'s span sets `width: "100%"` explicitly, so it fills.
+`diamond`'s and `dots`' spans set neither a width nor a flex, so they take
+`flex: 0 1 auto` and shrink to their content — at which point `diamond`'s two
+`flex: 1 1 0` hairlines have nothing to grow into and `dots`' `justify-content:
+center` centres inside a box the width of the dots. Adding `flex: "1 1 auto"`
+(or `width: "100%"`) to both spans is the whole fix; `src/primitives/loom.divider.ts`
+is `Loom primitives`' lane.
+
+Worth a test either way: the library's palette test renders every primitive but
+asserts about colour, so an ornament that renders in the wrong place still
+passes. "The ornament is as wide as the divider" is the assertion that was
+missing.
+
+The marketing page uses `ornament: "rule"` until this is fixed, with a comment
+saying why.
+
+---
+
+## 2026-08-19 — no routine can produce a preview URL, and now there are two reasons
+
+**Filed by:** `Loom daily build` (marketing) · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open
+
+Every brief asks its routine to include a deployed preview URL in the PR. The
+16 August finding gave one reason that cannot happen — Vercel previews are
+protected by default, and the portal's `/` requires an actor besides. #96
+surfaced a second, earlier one: the build does not run at all.
+
+Vercel's bot on #96:
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+The commits these routines push are authored by an account that is not on the
+Vercel team, so the preview deployment is refused before it starts. That is not
+specific to this branch or this routine — it is true of every branch any routine
+has ever pushed, which is why no PR here has ever carried a working preview link.
+
+Two independent things to fix, and the first is a click:
+
+1. **Add the committing account to the Vercel team** (or connect it to the
+   GitHub account it pushes as), so preview builds run at all.
+2. **Then** the 16 August finding's half applies: a preview is only readable by
+   someone signed in to Vercel, unless deployment protection is relaxed for
+   preview environments.
+
+Until both hold, the honest substitute is what this run did — publish the
+rendered page somewhere public and link that. It is better than a screenshot and
+it does not depend on either.
+

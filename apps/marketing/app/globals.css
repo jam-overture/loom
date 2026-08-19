@@ -1,0 +1,21 @@
+/*
+ * Everything this stylesheet is allowed to do.
+ *
+ * No colour, no type, no spacing: all three come from the theme mounted on the
+ * page's root node as `--loom-*` custom properties, and a stylesheet that set
+ * any of them here would be a second source of truth that no re-theme reaches.
+ * What is left is the document itself — the margin a browser adds, and making
+ * the page tall enough that the canvas it paints reaches the bottom of the
+ * window on a short page.
+ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: grid;
+  min-height: 100dvh;
+}
