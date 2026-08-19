@@ -13,7 +13,7 @@ import type { LoomTree } from "../tree/tree.js"
 
 import type { StoreError } from "./errors.js"
 import { memoryTreeStore } from "./memory.js"
-import { describeRevertPlan, planRevert, type RevertPlan } from "./revert.js"
+import { describeRevertPlan, planRevert, planReverts, type RevertPlan } from "./revert.js"
 import type { StoredRevision, TreeReader, TreeStore } from "./store.js"
 
 const spare = sequentialIdFactory("plan")
@@ -393,5 +393,254 @@ describe("describeRevertPlan", () => {
         mismatch: { code: "revision-gap", expected: 4, found: 7 },
       })
     ).toBe("the log jumps from 3 to 7")
+  })
+})
+
+const plansOf = async (
+  reader: TreeReader,
+  seed: LoomTree,
+  revisions: readonly number[]
+): Promise<ReadonlyMap<number, RevertPlan>> => {
+  const planned = await planReverts(reader, { treeId: seed.treeId, revisions, seed })
+  if (!planned.ok) throw new Error(`plans: ${planned.error.code}`)
+
+  return planned.value
+}
+
+/** The same question asked one revision at a time, which is what a batch must agree with. */
+const oneAtATime = async (
+  reader: TreeReader,
+  seed: LoomTree,
+  revisions: readonly number[]
+): Promise<ReadonlyMap<number, RevertPlan>> => {
+  const planned = new Map<number, RevertPlan>()
+
+  for (const revision of revisions) {
+    planned.set(revision, await planOf(reader, seed, revision))
+  }
+
+  return planned
+}
+
+type CountedReader = { readonly reader: TreeReader; readonly counts: { pages: number } }
+
+const countingReader = (reader: TreeReader): CountedReader => {
+  const counts = { pages: 0 }
+
+  return {
+    counts,
+    reader: {
+      head: (treeId) => reader.head(treeId),
+      revisions: (treeId, request) => {
+        counts.pages += 1
+
+        return reader.revisions(treeId, request)
+      },
+    },
+  }
+}
+
+describe("planReverts answers for several revisions at once", () => {
+  it("gives each revision the plan it would have been given alone", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+    await history.append([{ op: "remove", nodeId: history.ids.card }])
+    await history.append(setValue(history.ids.headline, "fourth"))
+
+    const revisions = [1, 2, 3]
+
+    expect(await plansOf(history.store, history.seed, revisions)).toEqual(
+      await oneAtATime(history.store, history.seed, revisions)
+    )
+  })
+
+  it("tracks what each undo would discard separately", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+    await history.append(setValue(history.ids.headline, "third"))
+    await history.append(setValue(history.ids.body, "fourth"))
+
+    const plans = await plansOf(history.store, history.seed, [1, 2])
+    const first = plans.get(1)
+    const second = plans.get(2)
+
+    if (first?.outcome !== "revertable" || second?.outcome !== "revertable") {
+      throw new Error("both revisions are revertable")
+    }
+
+    expect(first.discards).toEqual([{ revision: 3, nodeIds: [history.ids.body] }])
+    expect(second.discards).toEqual([])
+  })
+
+  it("answers a revision named twice once", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+
+    const plans = await plansOf(history.store, history.seed, [1, 1])
+
+    expect(plans.size).toBe(1)
+    expect(plans.get(1)?.outcome).toBe("revertable")
+  })
+
+  it("mixes revisions inside the span with ones outside it", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+
+    const revisions = [0, 1, 2]
+
+    expect(await plansOf(history.store, history.seed, revisions)).toEqual(
+      await oneAtATime(history.store, history.seed, revisions)
+    )
+  })
+
+  it("reports the store's own failure rather than turning it into verdicts", async () => {
+    const unavailable: StoreError = { code: "unavailable", detail: "down" }
+    const history = await historyOf()
+    const reader: TreeReader = {
+      head: () => Promise.resolve(err(unavailable)),
+      revisions: () => Promise.resolve(err(unavailable)),
+    }
+
+    const planned = await planReverts(reader, {
+      treeId: history.seed.treeId,
+      revisions: [1, 2],
+      seed: history.seed,
+    })
+
+    expect(!planned.ok && planned.error.code).toBe("unavailable")
+  })
+})
+
+describe("planReverts reads the log once", () => {
+  it("costs one pass where asking a revision at a time costs one each", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+    await history.append(setValue(history.ids.headline, "third"))
+    await history.append(setValue(history.ids.body, "fourth"))
+
+    const batched = countingReader(history.store)
+    await plansOf(batched.reader, history.seed, [1, 2, 3])
+
+    const separate = countingReader(history.store)
+    await oneAtATime(separate.reader, history.seed, [1, 2, 3])
+
+    expect(batched.counts.pages).toBe(1)
+    expect(separate.counts.pages).toBe(3)
+  })
+
+  it("opens the log at all only for a revision that could be in it", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+
+    const counted = countingReader(history.store)
+    const plans = await plansOf(counted.reader, history.seed, [0, 7])
+
+    expect(counted.counts.pages).toBe(0)
+    expect([...plans.values()].map((plan) => plan.outcome)).toEqual([
+      "out-of-range",
+      "out-of-range",
+    ])
+  })
+
+  it("walks a paged log once for every target on it", async () => {
+    const history = await historyOf()
+    for (let index = 0; index < 105; index += 1) {
+      await history.append(setValue(history.ids.body, `value ${index}`))
+    }
+
+    const revisions = [1, 50, 104]
+    const batched = countingReader(history.store)
+    const plans = await plansOf(batched.reader, history.seed, revisions)
+
+    expect(batched.counts.pages).toBe(2)
+    expect(plans).toEqual(await oneAtATime(history.store, history.seed, revisions))
+  })
+})
+
+/**
+ * The batch meets an obstacle at one point of one walk, where a revision at a
+ * time would have met it once per revision. Agreeing about which revisions the
+ * obstacle belongs to is the whole contract.
+ */
+describe("planReverts on a log that does not add up", () => {
+  const brokenHistory = async (): Promise<{
+    readonly reader: TreeReader
+    readonly seed: LoomTree
+    readonly foreign: NodeId
+  }> => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+    await history.append(setValue(history.ids.headline, "third"))
+    const applied = await history.append(setValue(history.ids.body, "fourth"))
+
+    const page = await history.store.revisions(history.seed.treeId)
+    if (!page.ok) throw new Error(page.error.code)
+
+    const entries = page.value.revisions
+    const [first, second, third] = entries
+    if (!first || !second || !third) throw new Error("three entries")
+
+    const foreign = spare.nodeId()
+
+    return {
+      seed: history.seed,
+      foreign,
+      reader: readerOver(applied, [
+        first,
+        { ...second, delta: { ...second.delta, operations: setValue(foreign, "x") } },
+        third,
+      ]),
+    }
+  }
+
+  it("agrees with a revision at a time about a delta that no longer applies", async () => {
+    const broken = await brokenHistory()
+    const revisions = [1, 2, 3]
+
+    const plans = await plansOf(broken.reader, broken.seed, revisions)
+
+    expect(plans).toEqual(await oneAtATime(broken.reader, broken.seed, revisions))
+    expect(plans.get(1)?.outcome).toBe("revertable")
+    expect(plans.get(2)?.outcome).toBe("uninvertible")
+    expect(plans.get(3)).toEqual({
+      outcome: "unreplayable",
+      mismatch: { code: "delta-rejected", revision: 2, detail: "node-not-found" },
+    })
+  })
+
+  it("agrees with a revision at a time about a gap, for targets on both sides of it", async () => {
+    const history = await historyOf()
+    await history.append(setValue(history.ids.body, "second"))
+    const applied = await history.append(setValue(history.ids.headline, "third"))
+
+    const page = await history.store.revisions(history.seed.treeId)
+    if (!page.ok) throw new Error(page.error.code)
+
+    const [first, second] = page.value.revisions
+    if (!first || !second) throw new Error("two entries")
+
+    const reader = readerOver({ ...applied, revision: 4 }, [first, { ...second, revision: 3 }])
+    const revisions = [1, 3]
+
+    const plans = await plansOf(reader, history.seed, revisions)
+
+    expect(plans).toEqual(await oneAtATime(reader, history.seed, revisions))
+    expect(plans.get(1)).toEqual({
+      outcome: "unreplayable",
+      mismatch: { code: "revision-gap", expected: 2, found: 3 },
+    })
+    expect(plans.get(3)?.outcome).toBe("unreplayable")
+  })
+
+  it("agrees with a revision at a time about a head the log does not reach", async () => {
+    const history = await historyOf()
+    const applied = await history.append(setValue(history.ids.body, "second"))
+
+    const reader = readerOver({ ...applied, revision: 3 }, [])
+    const revisions = [1, 3]
+
+    expect(await plansOf(reader, history.seed, revisions)).toEqual(
+      await oneAtATime(reader, history.seed, revisions)
+    )
   })
 })
