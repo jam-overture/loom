@@ -125,3 +125,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0065](0065-a-submission-names-a-destination-and-never-carries-one.md) | A submission names a destination, and never carries one | Accepted | §4g → §3, §4b |
 | [0066](0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md) | A card is the target when it is read; the control is the target when it is acted on | Accepted | §4b |
 | [0067](0067-the-four-surfaces-are-one-application.md) | The four surfaces are one application, and a route group is a lane | Accepted | §4c, §4d, §5 |
+| [0068](0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md) | A primitive is a target when the reader aims at the whole of it | Accepted | §4b |
+| [0069](0069-a-root-relative-path-is-a-destination-a-tree-may-name.md) | A root-relative path is a destination a tree may name | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |

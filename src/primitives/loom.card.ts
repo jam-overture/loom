@@ -46,8 +46,10 @@ import { linkUrlSchema } from "./url.js"
  *
  * A linked card should not contain a link. The renderer is total (0008) and
  * will happily nest one, and the browser will render something no one can
- * click. Nothing here can prevent it; a `loom.action` inside a card with `href`
- * is a tree that wants reviewing.
+ * click. This primitive still cannot prevent it — but it can now *say* it: the
+ * `interactive` declaration below is what a deployment's Gate policy reads to
+ * refuse the change that would produce it (0064). The declaration is the whole
+ * of this module's part in that; nothing here is read at render time.
  */
 
 const props = z
@@ -94,6 +96,8 @@ export const loomCard = definePrimitive({
   description:
     "A surface holding whatever is put on it, with a full-bleed media region above and a footer pinned below.",
   props,
+  /** The root becomes the anchor when the tree gives it a destination (0064). */
+  interactive: { whenProps: ["href"] },
   slots: ["media", "footer"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const linked = given.href !== undefined

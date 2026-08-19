@@ -140,10 +140,11 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as thirty-seven primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(37)
+  it("registers as forty-one primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(41)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
+      "loom.nav",
       "loom.section",
       "loom.split",
       "loom.stack",
@@ -172,6 +173,8 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.faq-list",
       "loom.faq",
+      "loom.footer",
+      "loom.link-list",
       "loom.heading",
       "loom.prose",
       "loom.badge",
@@ -180,6 +183,7 @@ describe("the starter library", () => {
       "loom.divider",
       "loom.media",
       "loom.action",
+      "loom.link",
     ])
   })
 
@@ -713,7 +717,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the six fixtures", () => {
+  it("covers every registered primitive across the seven fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -726,6 +730,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(arrangedPage(EDITORIAL)),
       ...typesIn(portedPage(EDITORIAL)),
       ...typesIn(cataloguePage(EDITORIAL)),
+      ...typesIn(chromePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -1698,6 +1703,299 @@ describe("the catalogue bands", () => {
   })
 })
 
+/**
+ * The chrome, top and bottom, around a page that is only there to be framed.
+ *
+ * It is built as a **site** rather than as a specimen strip, because the two
+ * claims the chrome makes are about a site and cannot be seen anywhere else:
+ * the header knows which page the reader is on, and the footer's columns are
+ * named groups rather than columns that happen to look like groups. A fixture
+ * of one nav and one footer with placeholder links would render the same
+ * pixels and prove neither.
+ */
+const chromePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const link = (label: string, href: string, props: JsonObject = {}) =>
+    buildElement(idFactory, { type: "loom.link", props: { href, ...props }, children: [text(label)] })
+
+  const group = (label: string, items: readonly (readonly [string, string])[]) =>
+    buildElement(idFactory, {
+      type: "loom.link-list",
+      props: { label },
+      children: items.map(([itemLabel, href]) => link(itemLabel, href, { tone: "muted", scale: "small" })),
+    })
+
+  const nav = buildElement(idFactory, {
+    type: "loom.nav",
+    props: { position: "sticky", tone: "surface", align: "end" },
+    children: [
+      link("Product", "https://example.com/product", { scale: "small", current: true }),
+      link("How it works", "https://example.com/how-it-works", { scale: "small" }),
+      link("Pricing", "https://example.com/pricing", { scale: "small" }),
+      link("Docs", "https://example.com/docs", { scale: "small" }),
+      buildSlot(idFactory, "brand", [
+        buildElement(idFactory, {
+          type: "loom.logo",
+          props: { name: "Loom", href: "https://example.com/" },
+        }),
+      ]),
+      buildSlot(idFactory, "actions", [
+        buildElement(idFactory, {
+          type: "loom.action",
+          props: { href: "https://example.com/start", variant: "primary", scale: "small" },
+          children: [text("Start building")],
+        }),
+      ]),
+    ],
+  })
+
+  const body = buildElement(idFactory, {
+    type: "loom.hero",
+    props: { backdrop: "grid", align: "center", eyebrow: "The chrome" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 1, balance: true },
+          children: [text("A page knows where it begins and where it ends")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        children: [text("The bar above and the band below are nodes, not markup wrapped around the render.")],
+      }),
+    ],
+  })
+
+  const footer = buildElement(idFactory, {
+    type: "loom.footer",
+    props: { tone: "surface", columns: "four" },
+    children: [
+      group("Product", [
+        ["Overview", "https://example.com/product"],
+        ["Pricing", "https://example.com/pricing"],
+        ["Changelog", "https://example.com/changelog"],
+      ]),
+      group("Learn", [
+        ["Documentation", "https://example.com/docs"],
+        ["Decision records", "https://example.com/decisions"],
+        ["The porting guide", "https://example.com/guide"],
+      ]),
+      group("Company", [
+        ["About", "https://example.com/about"],
+        ["Careers", "https://example.com/careers"],
+        ["Write to us", "mailto:hello@example.com"],
+      ]),
+      buildSlot(idFactory, "brand", [
+        buildElement(idFactory, { type: "loom.logo", props: { name: "Loom" } }),
+        buildElement(idFactory, {
+          type: "loom.prose",
+          props: { size: "small", tone: "muted" },
+          children: [text("An adaptive UI runtime. The interface is data, and every change to it is reviewable.")],
+        }),
+      ]),
+      buildSlot(idFactory, "note", [
+        buildElement(idFactory, {
+          type: "loom.prose",
+          props: { size: "small", tone: "muted" },
+          children: [text("© 2026 Loom")],
+        }),
+        buildElement(idFactory, {
+          type: "loom.link-list",
+          props: { direction: "row" },
+          children: [
+            link("Privacy", "https://example.com/privacy", { tone: "muted", scale: "small" }),
+            link("Terms", "https://example.com/terms", { tone: "muted", scale: "small" }),
+            link("Source", "https://example.com/source", { tone: "muted", scale: "small", external: true }),
+          ],
+        }),
+      ]),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "full", fills: true },
+      children: [nav, body, footer],
+    }),
+    idFactory
+  )
+}
+
+describe("the page chrome", () => {
+  it("renders a header and a footer with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(chromePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<nav")
+    expect(markup).toContain("<footer")
+    expect(markup).toContain("How it works")
+    expect(markup).toContain("Decision records")
+    expect(markup).toContain("Start building")
+  })
+
+  it("marks the page the reader is on, which is the whole reason `current` exists", () => {
+    const { markup } = render(chromePage(EDITORIAL))
+
+    /**
+     * One `aria-current` and exactly one. The header keeps every route in the
+     * menu and marks the one it is showing — the marketing site's header
+     * dropped the current route instead, because nothing in the tree could say
+     * this, and a menu that changes length as you walk the site is what that
+     * costs.
+     */
+    const marked = [...markup.matchAll(/<a[^>]*aria-current="page"[^>]*>([^<]*)</g)]
+
+    expect(marked.map(([, label]) => label)).toEqual(["Product"])
+
+    /** Pinned open by the stylesheet rather than by a second class to learn. */
+    expect(markup).toContain(`.loom-underline[aria-current="page"]`)
+  })
+
+  it("names every group of links, so a footer is landmarks rather than columns", () => {
+    const { markup } = render(chromePage(EDITORIAL))
+
+    const labelled = [...markup.matchAll(/<nav[^>]*aria-label="([^"]+)"/g)]
+
+    expect(labelled.map(([, label]) => label)).toEqual(["Product", "Learn", "Company"])
+
+    /**
+     * The visible heading and the landmark's name are one prop, so they cannot
+     * drift. The unlabelled group in the note region is a `<div>` for the
+     * reason `loom.link-list` gives: a page of nameless navigation landmarks is
+     * worse for a reader than none.
+     */
+    expect(markup).toContain(">Product</p>")
+    expect([...markup.matchAll(/<nav\b/g)]).toHaveLength(4)
+  })
+
+  it("keeps the menu children and puts the ends in regions, which is 0052 and 0051", () => {
+    const catalogue = catalogueOf(registry)
+
+    expect(catalogue.find((primitive) => primitive.type === "loom.nav")?.slots).toEqual([
+      "brand",
+      "actions",
+    ])
+    expect(catalogue.find((primitive) => primitive.type === "loom.footer")?.slots).toEqual([
+      "brand",
+      "note",
+    ])
+
+    /**
+     * The 0052 assertion for this unit: neither band declares a prop that
+     * carries its items, so a menu grows and shrinks by `insert` and `remove`
+     * and every link is a node with an author.
+     */
+    const propNames = (type: string): readonly string[] =>
+      catalogue.find((primitive) => primitive.type === type)?.props?.map((prop) => prop.name) ?? []
+
+    expect(propNames("loom.nav")).toEqual(["align", "position", "tone"])
+    expect(propNames("loom.footer")).toEqual(["columns", "tone"])
+  })
+
+  it("takes a link's label as a child, since one string is the whole of what it says", () => {
+    const catalogue = catalogueOf(registry)
+
+    expect(catalogueOf(registry).find((primitive) => primitive.type === "loom.link")?.props?.map((prop) => prop.name))
+      .toEqual(["current", "external", "href", "scale", "tone"])
+
+    /** No `label`. 0059, and the same call `loom.action` and `loom.badge` make. */
+    expect(catalogue.find((primitive) => primitive.type === "loom.link")?.props?.some((prop) => prop.name === "label"))
+      .toBe(false)
+    expect(auditRegistry(registry).leaves).not.toContain("loom.link")
+  })
+
+  it("wraps the bar rather than collapsing it, because no render reads a viewport", () => {
+    const { markup } = render(chromePage(EDITORIAL))
+
+    const bar = markup.slice(markup.indexOf("<nav"), markup.indexOf("</nav>"))
+
+    /**
+     * The limit, asserted so it stays a decision. A disclosure menu would need
+     * one subtree inside a `<details>` on a phone and outside it on a laptop;
+     * the alternatives are two copies for a screen reader to read, or client
+     * state the runtime does not have. Flex wrapping is what a pure render can
+     * honestly do, and it is `loom.split`'s call.
+     */
+    expect(bar).toContain("flex-wrap:wrap")
+    expect(bar).not.toContain("<details")
+    expect(bar).not.toContain("@media")
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(chromePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(chromePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(chromePage(BOLD)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+})
+
+describe("the targets the library declares", () => {
+  const declarationOf = (type: string) =>
+    registry.primitives.find((primitive) => primitive.type === type)?.interactive
+
+  it("declares a target wherever the reader aims at the whole node", () => {
+    /**
+     * 0064's adoption, which #88 filed for this lane and 0068 finishes. The
+     * list is asserted rather than derived, so a primitive that grows an
+     * `href` and forgets to say so fails here rather than in a deployment
+     * whose Gate quietly stops refusing nested targets.
+     */
+    expect(declarationOf("loom.action")).toBe("always")
+    expect(declarationOf("loom.link")).toBe("always")
+
+    for (const type of ["loom.card", "loom.feature", "loom.logo", "loom.article"]) {
+      expect(declarationOf(type)).toEqual({ whenProps: ["href"] })
+    }
+  })
+
+  it("leaves the card whose control is the target undeclared, which is 0066 and 0068", () => {
+    /**
+     * The one that reads the other way, and the reason 0068 was worth writing.
+     * `loom.product` has an `href` like the others — but it links the *name*,
+     * and 0066 puts a real `loom.action` in the region beneath on purpose.
+     * Declaring it would make the Gate refuse this library's own composition,
+     * which is how a check ends up switched off everywhere.
+     */
+    expect(declarationOf("loom.product")).toBeUndefined()
+
+    const { diagnostics, markup } = render(cataloguePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Buy the guide")
+  })
+
+  it("declares nothing on a container, since a container is not a target", () => {
+    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid"]) {
+      expect(declarationOf(type)).toBeUndefined()
+    }
+  })
+
+  it("names only props the schema declares, which the registry is what enforces", () => {
+    /**
+     * The half of the declaration that is checkable. A renamed prop with the
+     * trigger left pointing at the old name is the drift that actually
+     * happens, and it is a failed registration rather than a check that
+     * quietly stops firing.
+     */
+    const declared = createStarterPrimitiveRegistry([
+      {
+        ...STARTER_PRIMITIVES.find((primitive) => primitive.type === "loom.card")!,
+        type: "host.card",
+        interactive: { whenProps: ["destination"] },
+      },
+    ])
+
+    expect(declared.ok).toBe(false)
+  })
+})
+
 describe("the re-theme guarantee", () => {
   const styleOf = (markup: string): string => markup.slice(0, markup.indexOf(">"))
 
@@ -1839,6 +2137,22 @@ describe("the enum-driven display mode", () => {
 
   it("defaults to the plain rule when the tree names no ornament", () => {
     expect(dividerMarkup({})).toBe(dividerMarkup({ ornament: "rule" }))
+  })
+
+  it("spans the line with every ornament, which nothing asserted until one shipped wrong", () => {
+    /**
+     * The marketing routine's finding, as the assertion that was missing. The
+     * palette test rendered all three ornaments and asserted about colour, so a
+     * mark drawn at the left end of an empty line passed it for six days. The
+     * divider's element is a flex row: an ornament that states neither a width
+     * nor a flex shrinks to its content, and `dots` and `diamond` both did.
+     */
+    const ornament = (markup: string): string =>
+      markup.slice(markup.indexOf("<span"), markup.indexOf(">", markup.indexOf("<span")))
+
+    expect(ornament(dividerMarkup({ ornament: "rule" }))).toContain("width:100%")
+    expect(ornament(dividerMarkup({ ornament: "dots" }))).toContain("flex:1 1 auto")
+    expect(ornament(dividerMarkup({ ornament: "diamond" }))).toContain("flex:1 1 auto")
   })
 })
 

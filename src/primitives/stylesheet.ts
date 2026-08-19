@@ -10,7 +10,11 @@ import { createElement, type ReactElement } from "react"
  * product:
  *
  * - **keyframes** — an entrance, a drift, a marquee
- * - **state selectors** — `:hover`, `:focus-visible`, `details[open]`
+ * - **state selectors** — `:hover`, `:focus-visible`, `details[open]`,
+ *   `[aria-current="page"]`. The last one is a state the *tree* sets rather
+ *   than the reader, and it is here for the same reason as the others: a link
+ *   that says which page you are on has to be marked with the mark hovering
+ *   already makes, and one element cannot hold two values of one property.
  * - **`prefers-reduced-motion`** — the one media query that is not a layout
  *   decision, and honouring it is not optional
  * - **pseudo-elements** — `::after`. A card whose title anchor covers the whole
@@ -123,6 +127,9 @@ const CSS = `
   transition: background-size var(--loom-motion-medium) cubic-bezier(0.22, 1, 0.36, 1);
 }
 .loom-underline:hover, .loom-underline:focus-visible {
+  background-size: 100% 2px;
+}
+.loom-underline[aria-current="page"] {
   background-size: 100% 2px;
 }
 .loom-aurora {

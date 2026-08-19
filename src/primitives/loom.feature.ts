@@ -58,6 +58,8 @@ export const loomFeature = definePrimitive({
   type: "loom.feature",
   description: "One feature tile — glyph, title, and a sentence. A cell of a loom.feature-grid.",
   props,
+  /** The whole tile becomes the anchor when the tree gives it a destination (0064). */
+  interactive: { whenProps: ["href"] },
   slots: [],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const card = given.surface !== "plain"
