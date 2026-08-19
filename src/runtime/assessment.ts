@@ -4,6 +4,7 @@ import type { TreeError } from "../tree/errors.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import { analyzeDelta, type ChangeAnalysis } from "./analysis.js"
+import { interactivePredicateFor } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 import { assessReversibility, type Reversibility } from "./reversibility.js"
@@ -20,7 +21,10 @@ import { assessStakes, type StakeAssessment } from "./stakes.js"
  *
  * This is also where a proposal's own declaration about what it writes over is
  * folded into the damage estimate (0035), so the Gate keeps seeing two axes and
- * a policy rather than growing a third input.
+ * a policy rather than growing a third input. The policy's interactive
+ * vocabulary reaches the analysis the same way and for the same reason (0064):
+ * the fact needs a host's primitives to state, and one seam should hold
+ * everything the Gate's inputs are assembled from.
  */
 
 export type ChangeAssessment = {
@@ -36,14 +40,16 @@ export const assessChange = (
   policy: GatePolicy,
   inverseDeltaId: DeltaId
 ): Result<ChangeAssessment, TreeError> =>
-  flatMapResult(analyzeDelta(tree, proposal.delta), (analysis) =>
-    mapResult(
-      assessReversibility(tree, proposal.delta, analysis, policy, inverseDeltaId),
-      (reversibility) => ({
-        proposal,
-        analysis,
-        stakes: assessStakes({ analysis, discards: proposal.discards ?? [] }, policy),
-        reversibility,
-      })
-    )
+  flatMapResult(
+    analyzeDelta(tree, proposal.delta, interactivePredicateFor(policy.interactiveTypes)),
+    (analysis) =>
+      mapResult(
+        assessReversibility(tree, proposal.delta, analysis, policy, inverseDeltaId),
+        (reversibility) => ({
+          proposal,
+          analysis,
+          stakes: assessStakes({ analysis, discards: proposal.discards ?? [] }, policy),
+          reversibility,
+        })
+      )
   )

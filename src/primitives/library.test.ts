@@ -322,7 +322,7 @@ describe("the starter library", () => {
     /**
      * The catalogue pair, where the region list is the difference between them:
      * a written piece has qualifiers and nowhere to put a button, because the
-     * card is already the button (0065).
+     * card is already the button (0066).
      */
     expect(catalogue.find((primitive) => primitive.type === "loom.article")?.slots).toEqual(["meta"])
     expect(catalogue.find((primitive) => primitive.type === "loom.product")?.slots).toEqual([
@@ -1423,7 +1423,7 @@ describe("the ported bands", () => {
  *
  * Both bands are the same five fields — a picture, a name, a label, a sentence,
  * a destination — so a fixture that rendered them apart would prove nothing.
- * Rendered together, the whole of [0065] is visible in one page: the written
+ * Rendered together, the whole of [0066] is visible in one page: the written
  * pieces put their anchor over the card, and the products put a control on the
  * floor and link nothing else.
  *
@@ -1580,7 +1580,7 @@ describe("the catalogue bands", () => {
     const { markup, diagnostics } = render(cataloguePage(EDITORIAL))
 
     /**
-     * 0065's first half, and the assertion the whole record exists for. The
+     * 0066's first half, and the assertion the whole record exists for. The
      * anchor's text content is the accessible name, so it must be the title and
      * nothing else — not the kicker, not the excerpt, not the meta strip. The
      * card is still the click target, and that is what the class says.
@@ -1604,7 +1604,7 @@ describe("the catalogue bands", () => {
     const { markup } = render(cataloguePage(EDITORIAL))
 
     /**
-     * 0065's second half. The three articles carry the overlay class; the three
+     * 0066's second half. The three articles carry the overlay class; the three
      * products carry none, so the buy buttons are the only targets on their
      * cards. A product's name is still a link — an ordinary one.
      */

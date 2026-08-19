@@ -3,10 +3,11 @@ import { createElement, Fragment, type CSSProperties, type ReactNode } from "rea
 import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
-import { DATA_PROP_KEY } from "../reserved-props.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { assertNever } from "../result.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
+import type { SubmissionOutcome, SubmissionResolution } from "../submit/resolution.js"
 import type { ElementNode, LoomNode, SlotNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -73,6 +74,14 @@ export type RenderOptions = {
    */
   readonly data?: DataResolution
   /**
+   * Absent means the tree's submissions are not answered, and a tree that names
+   * an endpoint says so in a diagnostic. Resolution may do IO — minting a token
+   * usually does — so it happens before the walk, the same way data does;
+   * `renderRequest` does it, and a caller driving `renderLoomTree` itself
+   * resolves with `resolveTreeSubmissions` first (0065).
+   */
+  readonly submissions?: SubmissionResolution
+  /**
    * The host's answer for the strings primitives declared — a dictionary, in the
    * language this deployment serves. Absent means the declared strings render as
    * their authors wrote them, which is what an untranslated deployment wants and
@@ -112,6 +121,7 @@ type RenderContext = {
   /** Mounted on the root element, and nowhere else. */
   readonly theme: CSSProperties | undefined
   readonly data: DataResolution | undefined
+  readonly submissions: SubmissionResolution | undefined
   readonly text: TextResolver | undefined
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
@@ -168,6 +178,7 @@ const renderContextFor = (
   node: ElementNode,
   slots: SlotChildren,
   data: NodeData,
+  submit: SubmissionOutcome | undefined,
   text: PrimitiveText<string>,
   context: RenderContext
 ): LoomRenderContext => {
@@ -180,6 +191,7 @@ const renderContextFor = (
     slots,
     data,
     text,
+    ...(submit ? { submit } : {}),
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
       : {}),
@@ -217,6 +229,37 @@ const nodeDataFor = (node: ElementNode, context: RenderContext): NodeData => {
 }
 
 /**
+ * The target for a node that named an endpoint, and a diagnostic when it has
+ * none. The plan was read from this same tree before the walk began, so the
+ * lookup is a map read: nothing here parses, asks or waits.
+ */
+const nodeSubmissionFor = (
+  node: ElementNode,
+  context: RenderContext
+): SubmissionOutcome | undefined => {
+  if (!context.submissions) {
+    context.collect({ code: "submit-unresolved", nodeId: node.id })
+
+    return undefined
+  }
+
+  for (const problem of context.submissions.problemsFor(node.id)) {
+    context.collect(
+      problem.kind === "misdeclared"
+        ? { code: "submit-misdeclared", nodeId: node.id, error: problem.error }
+        : {
+            code: "submit-unavailable",
+            nodeId: node.id,
+            to: problem.to,
+            unavailable: problem.unavailable,
+          }
+    )
+  }
+
+  return context.submissions.lookup(node.id)
+}
+
+/**
  * Reserved keys are removed from every node's props, whether or not anything
  * reads them here; a key that reaches a primitive is a key that primitive has
  * to know about. What each one means, though, depends on where it sits, so
@@ -236,6 +279,9 @@ const reportUnreadReservedProps = (
 
     /** Read before the walk, by the data seam, and reported by `nodeDataFor`. */
     if (key === DATA_PROP_KEY) continue
+
+    /** The same, by the submission seam and `nodeSubmissionFor`. */
+    if (key === SUBMIT_PROP_KEY) continue
 
     context.collect({ code: "reserved-prop-unrecognised", nodeId: node.id, key })
   }
@@ -284,6 +330,9 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
 
   const data = reserved[DATA_PROP_KEY] === undefined ? NO_DATA : nodeDataFor(node, context)
 
+  const submit =
+    reserved[SUBMIT_PROP_KEY] === undefined ? undefined : nodeSubmissionFor(node, context)
+
   /**
    * A map read, and the same map for every node of one type — the merge with
    * whatever dictionary this deployment supplied happened once, when the
@@ -294,7 +343,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
 
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, body.slots, data, text, context),
+    loom: renderContextFor(node, body.slots, data, submit, text, context),
     props,
     children: body.children,
   })
@@ -411,6 +460,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     tree,
     theme: theme ? themeStyle(theme) : undefined,
     data: options.data,
+    submissions: options.submissions,
     text: composeText(options.resolver, options.text),
     collect,
   })

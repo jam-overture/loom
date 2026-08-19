@@ -5,7 +5,7 @@
 Two pairs — `loom.article-grid` / `loom.article` and `loom.product-grid` /
 `loom.product` — taking the library from **33 to 37**, and the Hermes ledger
 from **20 blocks ported to 29**. Plus
-[0065](../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md),
+[0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md),
 which is the half of this run that decides the seven pairs after it.
 
 ![The two new bands under the editorial palette](2026-08-18-primitives-the-catalogue-bands-editorial.png)
@@ -63,7 +63,7 @@ merely overlaps — a failure a person can see rather than one the browser hides
 is the pattern that ships broken: two click regions overlap and which one wins
 depends on paint order.
 
-0065 writes that down as a rule with the assignments already made —
+0066 writes that down as a rule with the assignments already made —
 `loom.credential`, `loom.book` and `loom.episode` are read; `loom.offering`,
 `loom.listing` and `loom.event` are acted on. It is deliberately **not a prop**:
 a shop card configured "the card is the target" under its own button is
@@ -95,7 +95,7 @@ link) are one content model.
 | `name` / `title`, `price`, `description` / `desc`, `image` | **props** | fixed fields of one record. `price` is free text and deliberately not a number, which is `loom.tier`'s argument and Hermes' hard-won one: "Free", "From £12" and "Pay what you want" are all things people write |
 | `format` (`"PDF · 24 pages"`), `itemCount` (`"18 items"`) | **child nodes** in a `meta` region | the same field wearing two names, and **there is never exactly one of them** — a download is a PDF *and* 148 pages *and* MIT-licensed. Repeated content wants nodes |
 | `btnText` + `fileUrl` | **a region** holding a `loom.action` | the library already has a call to action; a product reimplementing one would be a second scheme allowlist to keep in step with 0053 |
-| `link` | `href` **prop** | links the name, not the card (0065) |
+| `link` | `href` **prop** | links the name, not the card (0066) |
 
 **The `meta` regions are the 0052 call worth reading twice.** `format` and
 `itemCount` and `duration` and `level` are four separate Hermes fields that are
@@ -184,7 +184,7 @@ Four worth naming:
 
 - **the anchor's text content is the title alone**, asserted by extracting every
   stretched anchor and comparing its label to the three titles. This is what
-  0065 exists for, and it is the assertion that fails if someone later "tidies"
+  0066 exists for, and it is the assertion that fails if someone later "tidies"
   the anchor up to wrap the card.
 - **the root of a written piece is not itself a target** — `<a><article>` is
   asserted absent, which is what makes a link inside one valid markup.
@@ -197,24 +197,38 @@ No test was weakened, skipped, or marked `todo`.
 ## Records
 
 **One, and it needs a word about its number.**
-[0065](../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
+[0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 is `Accepted` — it contradicts nothing, and 0051, 0052 and 0054 are untouched.
 
-**It was written as 0064, which #88 also claims, and it is 0065 because #88
-merges first.** That ordering is not a guess: the maintainer asked this run to
-fix #88's merge conflict, which it did, so #88 is unblocked and this branch is
-the one arriving second. Renumbering was the whole cost — one `git mv`, one
-`sed`, one `pnpm decisions:index`.
+**It was written as 0064 and shipped as 0066**, and the two renames are the
+story. #88 also claimed 0064, and the maintainer asked this run to fix #88's
+merge conflict — so #88 landed first and this record became 0065. Then **#89
+landed its own 0065** while this branch was still open, and it became 0066.
 
-**The consequence is that `pnpm verify` is red on this branch on exactly one
-assertion**, `0064 is missing`, until #88 lands. Everything else is green and
-nothing was weakened to get there: 1254 of 1255 runtime tests pass, portal 522,
-typecheck and build clean. The alternative was to also call this record 0064,
-which is precisely the duplicate the numbering guard exists to catch and would
-have made every reference to "0064" permanently ambiguous. It is the same trade
-#76 made against #75 on 16 August, recorded in `FINDINGS.md` as one red branch
-being the right price. **Merging `main` after #88 lands turns it green with no
-conflict in the record itself.**
+The second collision is the one worth noting, because it is a different shape
+from the first. The first was *visible*: two branches open at once, both saying
+0064, and whichever merged second would renumber. The second was not visible
+from here at all — #89 was written, reviewed, numbered and merged without this
+branch having any way to see it coming. Merge order resolves both, and in both
+cases only the losing branch finds out, by going red.
+
+**`pnpm verify` is green on the merge**, with 0064, 0065 and 0066 running
+unbroken and `decisions/README.md` regenerated by the tool rather than
+hand-resolved.
+
+## What `main` moving changed underneath this branch
+
+Three merges landed while it was open, and two of them reach this lane:
+
+- **#88 shipped `interactive`**, so the declaration this run filed a finding
+  about now exists. It is *not* adopted here — that is a second unit and this one
+  is the catalogue bands — but the finding is updated to say the field is real
+  and the adoption is the next run's first job.
+- **#89 shipped the submission seam**, which **unblocks two Hermes blocks**.
+  `contactform` and `newsletter` were in the port map's *Blocked* table waiting
+  on a form target; they are now an ordinary pair to build. The map moves them:
+  blocked 4 → **2**, pairs to build 20 → **22 blocks over 8 pairs**. Nothing else
+  about the count changes.
 
 ## Findings
 
@@ -227,7 +241,7 @@ closed — `loom.article` and `loom.product` are off it by construction, and
 
 ## Next
 
-The port map's order, with 0065 now deciding the target for each: **things
+The port map's order, with 0066 now deciding the target for each: **things
 booked** (`loom.offering-list` / `loom.offering`, seven blocks) is the largest
 remaining group and the one that needs the most from the pricing band's
 vocabulary. **Credentials** is four more blocks and is the cheapest pair left.

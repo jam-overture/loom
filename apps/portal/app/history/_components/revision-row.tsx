@@ -2,7 +2,9 @@ import type { StoredRevision } from "@loom/runtime/store"
 
 import { describeOperation } from "@/lib/delta-summary"
 import { revisionAnchorId } from "@/lib/history-link"
+import type { Reversal } from "@/lib/reversal"
 
+import { ReversalNote } from "./reversal-note"
 import { UndoButton } from "./undo-button"
 
 /**
@@ -33,14 +35,25 @@ import { UndoButton } from "./undo-button"
  * A revision something later built on is offered too: it comes back held rather
  * than applied, naming the revisions it would write over (0035), which is a
  * better answer than a button that was never shown.
+ *
+ * The reversal is what that undo would actually do, read from the log before the
+ * button is pressed: the prior values a reconfigure wrote over, the subtree a
+ * removal destroyed, and whether undoing now writes over later work. When it is
+ * absent — this host has no seed, or the log could not be read — the row falls
+ * back to offering undo and reporting the outcome on the click, which is what it
+ * did before the preview existed. When it says the change cannot be undone, the
+ * button is hidden rather than left to fail on a press.
  */
 export const RevisionRow = ({
   stored,
   anchored = false,
+  reversal,
 }: {
   readonly stored: StoredRevision
   /** True when this is the revision a link sent the reader here to read (0043). */
   readonly anchored?: boolean
+  /** What undoing this would restore and cost, read from the log (0035, 0016). */
+  readonly reversal?: Reversal | undefined
 }) => (
   <li
     id={revisionAnchorId(stored.revision)}
@@ -96,6 +109,10 @@ export const RevisionRow = ({
       </div>
     </dl>
 
-    <UndoButton treeId={stored.treeId} revision={stored.revision} />
+    {reversal !== undefined && <ReversalNote reversal={reversal} />}
+
+    {(reversal === undefined || reversal.kind === "revertable") && (
+      <UndoButton treeId={stored.treeId} revision={stored.revision} />
+    )}
   </li>
 )

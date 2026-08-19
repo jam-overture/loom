@@ -888,7 +888,7 @@ ones that quietly break your model later.
 - [`decisions/0033`](../decisions/0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md) — once per intent, again per confirmation
 - [`decisions/0006`](../decisions/0006-one-repair-attempt-and-both-halves-recorded.md) — the repair path, which lesson 13 takes properly
 - [`src/runtime/pipeline.test.ts`](../src/runtime/pipeline.test.ts) — the narration tests are the sequence, written down as assertions
-- Next: 11 — The model seam *(not yet written)*
+- Next: [11 — The model seam](11-the-model-seam.md)
 
 ---
 

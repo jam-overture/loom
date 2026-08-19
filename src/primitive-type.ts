@@ -1,17 +1,27 @@
 import { z } from "zod"
 
-/**
- * The identifier of a registered primitive — the contract between an element
- * node and whatever renders it. Dot-namespaced kebab-case: `stack`,
- * `commerce.product-card`. The tree schema only cares about the shape of the
- * identifier; resolving it to an implementation is the registry's job, which
- * keeps the AST independent of any particular primitive library.
- */
 const SEGMENT = "[a-z][a-z0-9]*(?:-[a-z0-9]+)*"
 
+/**
+ * The grammar of every name a tree uses to reach something a deployment
+ * registered: a primitive, a data source, a submission endpoint. Dot-namespaced
+ * kebab-case — `stack`, `commerce.product-card`, `contact.enquiry`.
+ *
+ * One pattern rather than one per registry, because the sameness is the point.
+ * A tree names a capability and a registry decides what that name reaches; a
+ * second grammar would say those are different kinds of name when they are not.
+ */
+export const NAMESPACED_ID_PATTERN = new RegExp(`^${SEGMENT}(?:\\.${SEGMENT})*$`)
+
+/**
+ * The identifier of a registered primitive — the contract between an element
+ * node and whatever renders it. The tree schema only cares about the shape of
+ * the identifier; resolving it to an implementation is the registry's job, which
+ * keeps the AST independent of any particular primitive library.
+ */
 export const primitiveTypeSchema = z
   .string()
-  .regex(new RegExp(`^${SEGMENT}(?:\\.${SEGMENT})*$`))
+  .regex(NAMESPACED_ID_PATTERN)
   .brand<"PrimitiveType">()
 export type PrimitiveType = z.infer<typeof primitiveTypeSchema>
 

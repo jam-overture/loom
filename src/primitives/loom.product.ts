@@ -38,7 +38,7 @@ import { linkUrlSchema, mediaUrlSchema } from "./url.js"
  * broken, because the two click regions overlap and which one wins depends on
  * paint order. So this primitive links its **name only**, and the thing on the
  * floor of the card is a real control the reader can tab to
- * ([0065](../../decisions/0065-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)).
+ * ([0066](../../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)).
  *
  * The two regions earn slots under 0051 for the reason `loom.tier`'s do: the
  * card places them where the flow of children does not go — the qualifiers on a
