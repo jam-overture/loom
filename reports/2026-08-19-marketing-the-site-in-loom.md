@@ -37,7 +37,7 @@ than read a claim about it. Both starter triples are registered ids on the root
 node, which is all a re-theme is (0049).
 
 **The numbers are checked.** "37 primitives" is counted through
-`catalogueOf(siteRegistry)` and "66 decision records" off `decisions/` in a test.
+`catalogueOf(siteRegistry)` and "67 decision records" off `decisions/` in a test.
 When either moves, the test fails and the page is corrected — which is the only
 way a number on a marketing page stays true.
 
@@ -116,3 +116,35 @@ Two, both filed, neither worked around in `src/`:
   positioning fits on two.
 - **A deployed preview.** This routine cannot create the Vercel project; what is
   needed is in the PR comment.
+
+## After the merge with `main`
+
+`main` moved twice while this branch was open — #94 (the docs site) and #95
+(decision [0067](../decisions/0067-the-four-surfaces-are-one-application.md)).
+The merge conflicted in two places and both were mechanical:
+
+- **`package.json`** — the root `verify` script. Both branches appended a
+  surface to the chain; the resolution runs all three, portal then docs then
+  marketing.
+- **`FINDINGS.md`** — both branches appended on the same day at the same point.
+  Both sides kept, in merge order, nothing rewritten.
+
+The merge also **failed a test, correctly**: 0067 is the sixty-seventh decision
+record, and `facts.test.ts` refused the page's "66". That is the entire reason
+that test exists, and it is the first time a number on this site would have gone
+stale unnoticed. The page now says 67.
+
+**0067 is a bigger question than a conflict, and it is the maintainer's.** It
+was accepted the day this ran, and it says the four surfaces become one
+application — `apps/loom`, one route group per surface, a lane being
+`app/(marketing)/` rather than `apps/marketing`. This PR builds a sibling
+application, which is the shape that record rejects. `apps/loom` does not exist
+yet and `docs/routines.md` says its creation belongs to `Loom daily build`, so
+this routine did not create it: doing so would decide the shared root layout,
+the middleware boundary and the deployment on another lane's behalf, in a PR
+nobody could review as one thing.
+
+What this surface costs to move is small and deliberately so — it has no shared
+components, no imports outside itself, and nothing in `src/`. The move is one
+directory into `apps/loom/app/(marketing)/`, its `lib/` with it, and the
+`@/` alias re-pointed. Asked in the PR comment, with a recommendation.

@@ -1,0 +1,140 @@
+import { pageMetadata } from "@/lib/metadata"
+
+export const metadata = pageMetadata("building-with-loom", "primitives")
+
+# Primitives and the registry
+
+A primitive is three things: a **name** a tree may say, a **schema** its props
+must satisfy, and a **component** that renders it. The registry is the set of
+them a given surface allows.
+
+That is the whole vocabulary bargain in one sentence. AI can arrange your
+primitives; it cannot invent one, and it cannot reach past a schema.
+
+## Defining one
+
+```tsx
+import { createElement } from "react"
+import { z } from "zod"
+
+import { definePrimitive } from "@loom/runtime/sdk"
+import type { LoomPrimitiveProps } from "@loom/runtime/react"
+
+const props = z
+  .object({
+    value: z.string().min(1).max(24),
+    label: z.string().min(1).max(80),
+    caption: z.string().min(1).max(160).optional(),
+  })
+  .strict()
+
+type Props = z.infer<typeof props>
+
+export const stat = definePrimitive({
+  type: "loom.stat",
+  description: "A single figure with a short label — one cell of a loom.stat-grid.",
+  props,
+  slots: [],
+  component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
+    createElement("div", { ...loom.editable }, given.value, given.label),
+})
+```
+
+Four of those five fields are doing more work than they look like.
+
+**`type`** is what a node names, and what a model reads in the catalogue. It is
+a lowercase, dotted identifier — namespace your own.
+
+**`description`** is not a comment. It is shown to the model as part of the
+catalogue of what it may propose, and it is the single most effective place to
+say when *not* to use this primitive.
+
+**`props`** is a Zod schema, and `.strict()` matters: it makes an unrecognised
+prop a rejection rather than a value that rides along. Bound every string. A
+`label` with no maximum is an invitation for a model to write an essay into your
+layout.
+
+**`component`** receives a bag — `loom`, `props`, `children` — and reads what it
+declared. `props` are validated against exactly the schema above before it is
+called, so the type is a claim the render seam has already checked.
+
+<Callout kind="warning">
+  Spread `loom.editable` onto your root element. A primitive that drops it
+  renders perfectly and is invisible to the portal, which is a bug nobody
+  notices until someone tries to select the node.
+</Callout>
+
+## Prop or child?
+
+The question that comes up at every primitive, and the rule is short:
+
+- **Repeated content is a node.** Three features in a grid are three children,
+  so a proposal can add a fourth with an `insert`.
+- **A fixed field is a prop.** A stat has exactly one value and one label, so
+  changing either is exactly a `configure`.
+
+Getting it backwards has a cost either way. Fixed fields as children make a stat
+whose label was deleted a still-valid tree. Repeated content as props makes
+"add a feature" impossible to say without a new primitive.
+
+<Example id="a-container-and-its-children" />
+
+## What a component gets
+
+`loom` is the runtime's own bag, kept separate from your props so nothing can be
+smuggled in through it:
+
+| | |
+| --- | --- |
+| `loom.nodeId`, `loom.type` | where this node is, and what it is |
+| `loom.editable` | spread it; present in edit mode |
+| `loom.slots` | the content of this node's named regions |
+| `loom.theme` | the resolved theme, on the root node only |
+| `loom.data` | what the host answered for this node's bindings |
+| `loom.text` | the strings this primitive declared, translated |
+
+`loom.text` is worth knowing about early. A few strings a primitive shows are
+not in the tree — the accessible name on a marker glyph, for instance — and
+those are declared beside the component rather than left inline, so a deployment
+can translate them:
+
+```ts
+text: { excluded: "Not included" }
+```
+
+The keys are typed from that declaration, so reading one you did not declare
+does not compile, and `loom.text.excluded` is always a string — never a missing
+key at render time.
+
+## Registering
+
+```ts
+import { createPrimitiveRegistry, describeRegistryError } from "@loom/runtime/sdk"
+
+const built = createPrimitiveRegistry([stat, statGrid, heading])
+
+if (!built.ok) throw new Error(describeRegistryError(built.error))
+```
+
+The registry refuses rather than repairs: a duplicate type, a definition whose
+declarations disagree with its schema. It is built once at composition and
+passed to the render.
+
+<Callout kind="note">
+  A registry is a **per-surface** decision, not a global one. The same
+  deployment can render an internal tool from one and a public page from
+  another, and the second is the answer to "what may a model propose *here*".
+</Callout>
+
+## Start from the starter library
+
+`@loom/runtime/primitives` ships a library covering the structural range — pages
+and sections, headings and prose, containers over repeated children, a hero, a
+pricing table. Every example on this site is built from it.
+
+```ts
+import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
+```
+
+It is a good place to begin and a better place to read: each primitive is a
+worked answer to the prop-or-child question above.
