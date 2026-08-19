@@ -1218,7 +1218,15 @@ saying why.
 ## 2026-08-19 — no routine can produce a preview URL, and now there are two reasons
 
 **Filed by:** `Loom daily build` (marketing) · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open
+**Status:** **half closed the same day.** `primitives-07-the-page-chrome` (#97) is
+the first routine branch in this repository's history whose preview **built**:
+both `loom-marketing` and `loom-portal` reached `Ready` within a minute of the
+push, so reason 1 below — the committing account not being on the Vercel team —
+has been fixed. Reason 2 is untested: whether the URL opens for someone not
+signed in to Vercel could not be checked from that run's environment, because the
+egress proxy refuses `*.vercel.app` with a 403 at the CONNECT. **A routine cannot
+verify this half at all**, on any run, which is worth knowing before anyone asks
+one to. Whoever opens the link next should say so here and close it or reopen it.
 
 Every brief asks its routine to include a deployed preview URL in the PR. The
 16 August finding gave one reason that cannot happen — Vercel previews are
