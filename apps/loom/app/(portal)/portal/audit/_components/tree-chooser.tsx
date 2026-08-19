@@ -35,8 +35,8 @@ export const AuditTreeChooser = async () => {
     return (
       <StateNotice
         tone="empty"
-        title="No trees stored, so there is nothing to audit."
-        action={<Link href="/portal/trees">trees →</Link>}
+        title="You don&rsquo;t have any pages yet, so there is nothing to audit."
+        action={<Link href="/portal/pages">Your pages →</Link>}
       >
         <p>
           An audit needs two things: a log, and a seed this deployment can reproduce (0028).

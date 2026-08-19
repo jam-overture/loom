@@ -1512,3 +1512,53 @@ Two ways out, and neither is a routine's to choose on its own:
 Until then, a run outside this lane that leaves it red is blocking all four
 surfaces over two digits, so the one-digit edit is the right call and both runs
 made it.
+
+---
+
+## 2026-08-19 — the plain-language redirection has begun; four surfaces still speak runtime
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Recorded so the next portal run knows where the 18 August redirection stands
+rather than re-deriving it from the diff.
+
+`portal-05-in-plain-language` did the surfaces a new person meets first — the
+pages list (renamed from `/trees`), the held-proposal review card, the review
+queue's empty state, the demo record card, and `not-found` — and built the two
+pieces the rest of the work reuses: `_lib/vocabulary.ts` (the one place a state
+is named) and `_components/technical-detail.tsx` (the disclosure). The vocabulary
+table is the load-bearing part: every future rename should add a state to that
+table and read it, never invent a label in a component, or the portal will be
+speaking two languages again within a fortnight.
+
+**Still in the runtime's voice, by design not oversight:** `/portal/calibration`
+and `/portal/audit` (route names *and* their in-page vocabulary), and the
+Activity, History and Sign-ins screens beyond their nav capitalisation. Their nav
+labels deliberately keep the runtime's words — a label renamed ahead of its
+screen is a promise the screen does not keep. Each is its own cut; the brief is
+explicit that a single sweeping rename is unreviewable.
+
+**Two cross-lane notes this run leaves for whoever owns those files:**
+
+- `docs/deployment.md` still names `/portal/trees` (lines ~228, ~294). The route
+  now 308-redirects, so the links work, but the doc's example path is the old
+  name. It is the `Loom daily build` / docs lane's file, not the portal's, so it
+  was left.
+- Decision `0070` says "a bookmark to `/trees` is now `/portal/trees`". That is
+  now `/portal/pages`. `0070` is an Accepted record and a routine does not rewrite
+  one, so it was left; if the rename is blessed, `0070` wants a one-line
+  superseding note from whoever owns the decision log.
+
+---
+
+## 2026-08-19 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Recorded because absence is worth knowing. The plain-language work is chrome,
+vocabulary and a disclosure component — it needed nothing from `@loom/runtime`
+that its published entry points do not already expose. No deep import was wanted,
+`src/` is untouched, and 0018's enforcement was not tested by this diff. The one
+place the portal reads a runtime *type* to build a rename table
+(`RecordOutcome`, `DispositionReasonCode`, `StakeLevel`, `WriteOutcome`) is a
+type-only import through the root entry point, erased at build time.

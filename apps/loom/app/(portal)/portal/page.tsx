@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
 const Home = () => {
-  redirect("/portal/trees")
+  redirect("/portal/pages")
 }
 
 export default Home

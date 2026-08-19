@@ -96,22 +96,22 @@ describe("a record card", () => {
     expect(screen.getByText("within-policy")).toBeTruthy()
     expect(screen.getByText("demo")).toBeTruthy()
     expect(screen.getByText(/0123456789abcdef/)).toBeTruthy()
-    expect(screen.getByText(/applied on its own/)).toBeTruthy()
+    expect(screen.getByText(/went ahead on its own/)).toBeTruthy()
   })
 
   it("says which revision it produced and offers to undo it", () => {
     render(<RecordCard record={APPLIED} />)
 
     expect(screen.getByText(/1, replacing 0/)).toBeTruthy()
-    expect(screen.getByRole("button", { name: /undo revision 1/ })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Undo this change" })).toBeTruthy()
   })
 
   it("offers an answer, and no undo, while a change is waiting on the visitor", () => {
     render(<RecordCard record={HELD} />)
 
-    expect(screen.getByText("waiting on you")).toBeTruthy()
-    expect(screen.getByRole("button", { name: "apply it" })).toBeTruthy()
-    expect(screen.getByRole("button", { name: "discard" })).toBeTruthy()
+    expect(screen.getByText("Waiting on you")).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Apply this change" })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "No thanks" })).toBeTruthy()
     expect(screen.queryByRole("button", { name: /undo/ })).toBeNull()
     expect(screen.getByText("restructures at depth 1 · medium")).toBeTruthy()
   })

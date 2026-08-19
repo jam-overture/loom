@@ -15,7 +15,7 @@ describe("the not-found page", () => {
   it("explains that a malformed tree id is refused rather than guessed at", () => {
     render(<NotFound />)
 
-    expect(screen.getByRole("heading", { name: "nothing at this address" })).toBeInstanceOf(
+    expect(screen.getByRole("heading", { name: "There\u2019s nothing here" })).toBeInstanceOf(
       HTMLElement
     )
     expect(document.body.textContent).toContain("well-formed tree id")
@@ -26,7 +26,7 @@ describe("the not-found page", () => {
 
     const destinations = screen.getAllByRole("link").map((link) => link.getAttribute("href"))
 
-    expect(destinations).toContain("/portal/trees")
+    expect(destinations).toContain("/portal/pages")
     expect(destinations).toContain("/portal/activity")
   })
 

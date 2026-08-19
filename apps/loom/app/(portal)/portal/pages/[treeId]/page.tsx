@@ -37,7 +37,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
 
   if (!parsed.success) notFound()
 
-  await requireActor(`/portal/trees/${parsed.data}`)
+  await requireActor(`/portal/pages/${parsed.data}`)
   await ensureSeeded()
 
   const rendered = await renderRequest(
@@ -111,7 +111,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           <ReviewQueue changes={changes} />
 
           <Link href={`/portal/activity?tree=${encodeURIComponent(rendered.value.tree.treeId)}`} className="text-xs">
-            what has been asked of this tree →
+            Everything asked of this page →
           </Link>
         </div>
       </div>

@@ -15,7 +15,7 @@ const strokeProps = {
 } as const
 
 /**
- * Three groups. What the runtime holds — the stored trees, and the catalogue a
+ * Three groups. What the runtime holds — the pages themselves, and the catalogue a
  * model is told it may build from (0013). Then the record of how they got that
  * way: what the runtime was asked to do and what became of it (0023), what was
  * accepted into a tree (0016), whether the model's own confidence has been worth
@@ -27,6 +27,12 @@ const strokeProps = {
  * would suggest the two are answerable from the same log. They are not, which is
  * the whole of why the sign-in table belongs to the portal (0018).
  *
+ * The labels are what a person would call these things rather than what the
+ * runtime calls them: `trees` was the data structure, and `Pages` is what is
+ * actually in it. `Calibration` and `Audit` keep the runtime's words for now —
+ * a nav label renamed ahead of the screen it points at is a promise the screen
+ * does not keep.
+ *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
  * about what a thing can do. It comes back now that its page does — and the page
  * keeps the claim honest, because a tree whose seed this host cannot reproduce
@@ -35,8 +41,8 @@ const strokeProps = {
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
     {
-      label: "trees",
-      href: "/portal/trees",
+      label: "Pages",
+      href: "/portal/pages",
       icon: (
         <svg {...strokeProps}>
           <rect x="3" y="3" width="7" height="7" />
@@ -52,7 +58,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
        * this deployment holds should be able to reach the surface anyone else
        * can see, without having to be told the path.
        */
-      label: "demo",
+      label: "Demo",
       href: "/portal/demo",
       icon: (
         <svg {...strokeProps}>
@@ -63,7 +69,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "primitives",
+      label: "Primitives",
       href: "/portal/primitives",
       icon: (
         <svg {...strokeProps}>
@@ -77,7 +83,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   ],
   [
     {
-      label: "activity",
+      label: "Activity",
       href: "/portal/activity",
       icon: (
         <svg {...strokeProps}>
@@ -86,7 +92,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "history",
+      label: "History",
       href: "/portal/history",
       icon: (
         <svg {...strokeProps}>
@@ -96,7 +102,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "calibration",
+      label: "Calibration",
       href: "/portal/calibration",
       icon: (
         <svg {...strokeProps}>
@@ -106,7 +112,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "audit",
+      label: "Audit",
       href: "/portal/audit",
       icon: (
         <svg {...strokeProps}>
@@ -119,7 +125,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   ],
   [
     {
-      label: "sign-ins",
+      label: "Sign-ins",
       href: "/portal/sign-ins",
       icon: (
         <svg {...strokeProps}>

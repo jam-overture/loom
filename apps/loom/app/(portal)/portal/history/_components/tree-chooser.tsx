@@ -32,8 +32,8 @@ export const TreeChooser = async () => {
     return (
       <StateNotice
         tone="empty"
-        title="No trees stored, so there is no log to read."
-        action={<Link href="/portal/trees">trees →</Link>}
+        title="You don&rsquo;t have any pages yet, so there is no history to read."
+        action={<Link href="/portal/pages">Your pages →</Link>}
       >
         <p>
           A log is the truth and the tree is a view of it (0016), so a log begins the moment a

@@ -34,11 +34,19 @@ const APP = join(process.cwd(), "app", "(portal)")
  * and no identity. An exemption that grew to include a page reading
  * `portalStore` would be the failure this list exists to make visible, so the
  * test below asserts that it does not.
+ *
+ * `/portal/trees` is the fourth and it is here for `/portal`'s reason exactly:
+ * it is the old name of `/portal/pages`, kept alive as a 308 so a bookmark or a
+ * link in a report still lands somewhere. It renders nothing and reads nothing,
+ * so an actor would gate a page that has no content to protect. The proxy still
+ * covers it — it is under `/portal` — so a signed-out visitor is sent to sign in
+ * and returned here, and only then forwarded on.
  */
 const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/sign-in/page.tsx",
   "portal/page.tsx",
   "portal/demo/page.tsx",
+  "portal/trees/[[...rest]]/page.tsx",
 ]
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
@@ -66,11 +74,12 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page, the root redirect and the demo", () => {
+  it("exempts only the sign-in page, the two redirects and the demo", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
       "portal/demo/page.tsx",
       "portal/page.tsx",
       "portal/sign-in/page.tsx",
+      "portal/trees/[[...rest]]/page.tsx",
     ])
   })
 
