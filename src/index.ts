@@ -1,6 +1,7 @@
 export * from "./catalogue.js"
 export * from "./data/index.js"
 export * from "./ids.js"
+export * from "./interactivity.js"
 export * from "./interpretation/index.js"
 export * from "./json.js"
 export * from "./paging.js"

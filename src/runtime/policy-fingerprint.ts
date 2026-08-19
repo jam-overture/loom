@@ -1,3 +1,5 @@
+import type { InteractiveTypes, InteractiveWhen } from "../interactivity.js"
+
 import type { GatePolicy } from "./policy.js"
 
 /**
@@ -65,10 +67,27 @@ type PolicyContent = Omit<GatePolicy, "policyId">
  */
 type PolicyProjection = { readonly [K in keyof PolicyContent]-?: CanonicalField }
 
+/**
+ * What one vocabulary entry says, as a value a map can digest. The prop list is
+ * sorted and deduplicated for the reason a set is: which props turn a primitive
+ * into a target is a membership test, and neither their order nor a repeat
+ * reaches a decision.
+ */
+const interactiveDigest = (when: InteractiveWhen): string =>
+  when === "always" ? "always" : `when:${Array.from(new Set(when.whenProps)).sort().join(",")}`
+
+const interactiveEntries = (
+  types: InteractiveTypes
+): Readonly<Record<string, string | undefined>> =>
+  Object.fromEntries(
+    Object.entries(types).map(([type, when]) => [type, when && interactiveDigest(when)])
+  )
+
 const project = (policy: GatePolicy): PolicyProjection => ({
   protectedPrimitiveTypes: set(policy.protectedPrimitiveTypes),
   outOfTreeEffectTypes: set(policy.outOfTreeEffectTypes),
   protectedPropKeys: set(policy.protectedPropKeys),
+  interactiveTypes: map(interactiveEntries(policy.interactiveTypes)),
   removalThresholds: struct({
     medium: atom(policy.removalThresholds.medium),
     high: atom(policy.removalThresholds.high),

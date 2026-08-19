@@ -167,3 +167,24 @@ comes back as a `StoreError` rather than as verdicts.
 Nothing was skipped and nothing was weakened. The 19 tests `planRevert` already
 had were left exactly as they were, and they are what says the refactor did not
 change the single-target answer.
+
+---
+
+## Addendum, 2026-08-18 21:45 UTC — #88 merged, and both open branches were merged onto it
+
+#88 landed as `872a39b` minutes after this pull request opened. It conflicted
+with this branch in `FINDINGS.md` — both appended entries at the end — and with
+#89 in `FINDINGS.md` and `decisions/README.md` both.
+
+Both were resolved by merging `main` in, keeping every entry from both sides in
+date order and regenerating the decision index rather than hand-merging it. No
+entry on either side was rewritten.
+
+Two things in the body above are now stale, and are left standing rather than
+edited: `main` ends at 0064 rather than 0063, and the numbering collision the
+"no decision record" section describes is resolved for #89, whose guard is green
+now that 0064 is on `main`.
+
+`pnpm verify` re-run on this branch after the merge: **green, exit 0** —
+**1300 runtime tests across 91 files** (this branch's 11 additions on top of the
+1289 `main` now carries with #88 in it), **522 portal**, nothing skipped.
