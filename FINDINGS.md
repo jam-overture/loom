@@ -1562,3 +1562,33 @@ that its published entry points do not already expose. No deep import was wanted
 place the portal reads a runtime *type* to build a rename table
 (`RecordOutcome`, `DispositionReasonCode`, `StakeLevel`, `WriteOutcome`) is a
 type-only import through the root entry point, erased at build time.
+
+---
+
+## 2026-08-19 — Vercel deploys fail on every PR: the projects still root at `apps/portal` and `apps/marketing`, which #98 deleted
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` / `@jonathanbravecredit` · **Status:** open
+
+The migration in #98 (0067) retired `apps/portal`, `apps/marketing` and `apps/docs`
+into `apps/loom/app/(portal)`, `(marketing)` and `(docs)`. The **Vercel projects
+were not migrated with them.** `loom-portal` still has `rootDirectory: apps/portal`
+and `loom-marketing` still has `rootDirectory: apps/marketing` — directories that
+no longer exist — so every deployment errors before it builds.
+
+This is not a code failure and not any one PR's failure. It is red on **every open
+PR** and on **`main`**: #101 (this portal run) and #100 (the lessons run) carry the
+identical two failing statuses, `Vercel – loom-portal` and `Vercel – loom-marketing`,
+both since #98 merged at ~15:58 on 19 August. `pnpm verify` — which runs the real
+`next build` against `apps/loom` — is green on both, so the app builds; only Vercel's
+stale project root is wrong.
+
+**No routine can fix this.** `rootDirectory` is a Vercel dashboard setting, not a
+file in the repo (`apps/loom/vercel.json` only declares the framework). It needs the
+account owner to either point both projects' root directory at `apps/loom`, or
+collapse the four projects into one `loom` project rooted at `apps/loom` — which is
+what 0067's "one application" now implies. Until then, the preview URL the portal is
+meant to be judged by does not exist for any surface.
+
+The portal brief requires a PR to carry "the deployed preview URL and a screenshot".
+The screenshot is there (local production build); the preview URL cannot be, through
+no fault of the diff, until the Vercel projects are re-rooted.
