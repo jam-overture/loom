@@ -87,10 +87,12 @@ Order, and the reason for it:
    decomposed pairs have a naming rule
    ([0054](decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)).
 4. **Data** — the seam the port hits at the first primitive that needs any
-   ([§4e](#4e--data-what-a-primitive-cannot-be-told-in-props), done), and
-   **text** — the strings a primitive owns rather than reads from the tree
-   ([§4f](#4f--text-the-strings-a-primitive-owns), done). Both are the same
-   shape of gap: something a page needs that props cannot carry.
+   ([§4e](#4e--data-what-a-primitive-cannot-be-told-in-props), done), **text** —
+   the strings a primitive owns rather than reads from the tree
+   ([§4f](#4f--text-the-strings-a-primitive-owns), done), and **submissions** —
+   where a form's contents go
+   ([§4g](#4g--submissions-where-a-forms-contents-go), done). All three are the
+   same shape of gap: something a page needs that props cannot carry.
 5. **The remaining primitives**, which by then are mechanical — and they come
    after §4c and §4d, because a site that shows the runtime is worth more than
    the fifty-second block. Only then §7, since a marketplace of primitives needs
@@ -162,6 +164,33 @@ dictionary over it, merging once per dictionary rather than once per node;
 `textCoverage` says what a dictionary answers, what it does not, and which of its
 keys name nothing. Which language a visitor gets stays the host's decision — the
 framework never reads a request header.
+
+### 4g — Submissions: where a form's contents go
+
+Three of the seventy Hermes blocks are blocked on a seam rather than on a
+primitive, and two of them are the same one: `contactform` and `newsletter` are a
+field list and a submit. The field list is an ordinary
+[0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+decomposition. The submit is a decision about where a deployment's data goes,
+and a URL in a prop is AI-authored by definition — a scheme allowlist does not
+help, because `https://collect.example.com/harvest` passes it.
+
+**A submission names a destination, and never carries one**
+([0065](decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)).
+A node names a registered endpoint and nothing else:
+
+```json
+"loom:submit": { "to": "contact.enquiry" }
+```
+
+`defineEndpoint` is the host's half — it answers with an `action`, a `method`,
+and the hidden `fields` a form must carry, a CSRF token being why that list
+exists. Resolution happens before the walk, beside the data seam and at the same
+time as it, so the renderer stays synchronous. A form has a target, or an
+`unavailable` with a reason, or nothing at all when the tree never said — three
+states, because a submit button that silently goes nowhere is the failure the
+shape exists to prevent. There are deliberately no params: a deployment with two
+lists registers two endpoints, and the id is the whole AI-authored surface.
 
 ### 4c — The documentation site ← current
 
@@ -247,6 +276,13 @@ src/
 │   ├── resolve.ts         # Asking them, all at once, catching everything
 │   ├── resolution.ts      # The answers, indexed the way the walk needs them
 │   └── catalogue.ts       # What a deployment can ask about, as data
+├── submit/              # The submission seam — where a form's contents go
+│   ├── endpoint.ts        # defineEndpoint, the target contract, the registry
+│   ├── declaration.ts     # What a node names, as it appears in the tree
+│   ├── plan.ts            # The tree's endpoints, deduplicated — a pure pass
+│   ├── resolve.ts         # Asking them, all at once, catching everything
+│   ├── resolution.ts      # The targets, indexed the way the walk needs them
+│   └── catalogue.ts       # Where a deployment will accept a submission
 ├── catalogue.ts         # What a deployment can build with, as data
 ├── primitives/          # The starter library — a separate entry point
 │   ├── tokens.ts        # The only way a primitive names a colour or a length

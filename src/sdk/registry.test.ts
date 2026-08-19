@@ -2,6 +2,7 @@ import { createElement } from "react"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
+import type { InteractiveWhen } from "../interactivity.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { cardDefinition, registryOf, testDefinitions } from "../testing/definitions.js"
@@ -102,5 +103,61 @@ describe("describeRegistryError", () => {
       "camelCase"
     )
     expect(describeRegistryError({ code: "duplicate-primitive-type", type: "loom.card" })).toContain("twice")
+  })
+})
+
+describe("createPrimitiveRegistry over interactivity", () => {
+  const linked = (interactive: InteractiveWhen) =>
+    definePrimitive({
+      type: "loom.linked-card",
+      description: "a surface that may be the link",
+      props: z.object({ href: z.string().optional(), tone: z.string().optional() }),
+      interactive,
+      component: ({ children }: LoomPrimitiveProps<{ readonly href?: string | undefined; readonly tone?: string | undefined }>) =>
+        createElement("a", null, children),
+    })
+
+  it("carries the declaration through to the registered primitive", () => {
+    const built = createPrimitiveRegistry([linked({ whenProps: ["href"] })])
+
+    expect(built.ok && built.value.primitives[0]?.interactive).toEqual({ whenProps: ["href"] })
+  })
+
+  it("leaves a primitive that declares nothing with nothing", () => {
+    const built = createPrimitiveRegistry([entry({ type: "loom.quiet" })])
+
+    expect(built.ok && built.value.primitives[0]?.interactive).toBeUndefined()
+  })
+
+  it("refuses a trigger naming a prop the schema does not declare", () => {
+    const error = errorOf([linked({ whenProps: ["hrefs"] })])
+
+    expect(error).toEqual({
+      code: "undeclared-interactive-prop",
+      type: "loom.linked-card",
+      prop: "hrefs",
+    })
+    expect(describeRegistryError(error)).toContain("\"hrefs\"")
+  })
+
+  it("accepts `always`, which names no prop to check", () => {
+    expect(createPrimitiveRegistry([linked("always")]).ok).toBe(true)
+  })
+
+  /**
+   * "I cannot enumerate this schema" is not "this schema has no such prop", and
+   * refusing on the strength of it would be refusing on a guess.
+   */
+  it("leaves a schema whose fields cannot be enumerated alone", () => {
+    const opaque = definePrimitive({
+      type: "loom.opaque",
+      description: "a primitive whose props are a union",
+      props: z.union([z.object({ href: z.string() }), z.object({ to: z.string() })]),
+      interactive: { whenProps: ["href", "to"] },
+      component: ({ children }: LoomPrimitiveProps<{ readonly href: string } | { readonly to: string }>) =>
+        createElement("a", null, children),
+    })
+
+    expect(createPrimitiveRegistry([opaque]).ok).toBe(true)
   })
 })

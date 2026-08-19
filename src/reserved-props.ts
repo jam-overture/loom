@@ -21,6 +21,9 @@ export const THEME_PROP_KEY = `${RESERVED_PROP_PREFIX}theme`
 /** 0058's bindings — what a node asks the host to answer, honoured on any node. */
 export const DATA_PROP_KEY = `${RESERVED_PROP_PREFIX}data`
 
+/** 0065's submission — which registered endpoint a form posts to, on any node. */
+export const SUBMIT_PROP_KEY = `${RESERVED_PROP_PREFIX}submit`
+
 export const isReservedPropKey = (key: string): boolean => key.startsWith(RESERVED_PROP_PREFIX)
 
 export type PartitionedProps = {

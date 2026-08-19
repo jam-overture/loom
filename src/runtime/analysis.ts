@@ -8,6 +8,13 @@ import { findNode, pathToNode, walkTree } from "../tree/navigation.js"
 import type { LoomNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
+import {
+  nestedTargetsIn,
+  NOTHING_INTERACTIVE,
+  type InteractivePredicate,
+  type NestedTarget,
+} from "./nesting.js"
+
 /**
  * Facts about what a delta does, extracted before anyone judges it.
  *
@@ -15,6 +22,11 @@ import type { LoomTree } from "../tree/tree.js"
  * changed and nothing about whether that is acceptable. Policy and judgment
  * live downstream, which means the Gate's rules can change without touching
  * how a change is measured.
+ *
+ * One fact needs vocabulary to state, and that is not the same as needing
+ * judgment. "This node renders a target" is a property of the host's primitives
+ * that no amount of looking at the tree recovers, so it arrives as a predicate;
+ * what it is worth is still decided downstream.
  */
 
 export type ChangeAnalysis = {
@@ -53,6 +65,21 @@ export type ChangeAnalysis = {
    */
   readonly removedPrimitiveTypes: readonly PrimitiveType[]
   readonly configuredPropKeys: readonly string[]
+  /**
+   * Targets this change leaves inside another target — invalid markup, and a
+   * link a reader cannot use.
+   *
+   * Measured on the resulting tree rather than on the operations, because every
+   * operation kind can produce it and only one of them looks like it does:
+   * `insert` and `move` put a target somewhere, and `configure` breaks every
+   * link already inside a card by giving the card an `href`. Positions the tree
+   * already had are excluded, so a change is answerable for the breakage it
+   * introduces and not for the breakage it inherited.
+   *
+   * Empty for every host that declares no interactive vocabulary, which is the
+   * default.
+   */
+  readonly nestedTargets: readonly NestedTarget[]
   /**
    * Distance from the root of the shallowest touched position, where the root
    * is 0. A change near the root restructures the page; a change deep in a leaf
@@ -177,6 +204,29 @@ const tallyOperation = (
   }
 }
 
+/** Two ids name the pair; nothing else about it can differ. */
+const pairKey = (nested: NestedTarget): string => `${nested.ancestorId}>${nested.nodeId}`
+
+/**
+ * The nested targets this delta is answerable for: the ones in the tree it
+ * produces, less the ones already in the tree it started from.
+ *
+ * The before-walk is skipped when the result has none, which is the ordinary
+ * case — a page with no nesting cannot have inherited any.
+ */
+const introducedNestedTargets = (
+  before: LoomNode,
+  after: LoomNode,
+  isInteractive: InteractivePredicate
+): readonly NestedTarget[] => {
+  const produced = nestedTargetsIn(after, isInteractive)
+  if (produced.length === 0) return produced
+
+  const inherited = new Set(nestedTargetsIn(before, isInteractive).map(pairKey))
+
+  return produced.filter((nested) => !inherited.has(pairKey(nested)))
+}
+
 /**
  * Walks the delta forward so each operation is measured against the tree it
  * actually observes — an operation may target a node an earlier operation in
@@ -184,7 +234,8 @@ const tallyOperation = (
  */
 export const analyzeDelta = (
   tree: LoomTree,
-  delta: TreeDelta
+  delta: TreeDelta,
+  isInteractive: InteractivePredicate = NOTHING_INTERACTIVE
 ): Result<ChangeAnalysis, TreeError> => {
   const tally = emptyTally()
   let state: LoomNode = tree.root
@@ -211,6 +262,7 @@ export const analyzeDelta = (
     removedPrimitiveTypes: Array.from(tally.removedTypes),
     relocatedPrimitiveTypes: Array.from(tally.relocatedTypes),
     configuredPropKeys: Array.from(tally.propKeys),
+    nestedTargets: introducedNestedTargets(tree.root, state, isInteractive),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,
   })
 }

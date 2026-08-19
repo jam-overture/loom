@@ -1,3 +1,4 @@
+import type { InteractiveWhen } from "../interactivity.js"
 import type { JsonObject } from "../json.js"
 import {
   primitiveTypeSchema,
@@ -45,6 +46,8 @@ export type RegisteredPrimitive = {
   readonly declaredProps: PrimitiveEntry["declaredProps"]
   /** Declared strings in the author's language, before any dictionary. */
   readonly text: PrimitiveText<string>
+  /** Whether it renders a target, and what makes it one. Absent for most. */
+  readonly interactive: InteractiveWhen | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -53,6 +56,7 @@ export type RegistryError =
   | { readonly code: "invalid-slot-name"; readonly type: string; readonly slot: string }
   | { readonly code: "invalid-text-key"; readonly type: string; readonly key: string }
   | { readonly code: "blank-text"; readonly type: string; readonly key: string }
+  | { readonly code: "undeclared-interactive-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
@@ -72,9 +76,33 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.key}" is not a valid text key on "${error.type}" — expected camelCase with no dots, like "notIncluded"`
     case "blank-text":
       return `"${error.key}" on "${error.type}" declares an empty string; a string worth translating has something in it, and a blank one renders as a control with no name`
+    case "undeclared-interactive-prop":
+      return `"${error.type}" says it renders a target when "${error.prop}" is set, and its schema declares no such prop; a trigger naming a prop that cannot arrive is a target the Gate will never see`
     case "duplicate-primitive-type":
       return `"${error.type}" is registered twice; a tree naming it would resolve to whichever registration won`
   }
+}
+
+/**
+ * A trigger prop that the schema does not declare, if there is one.
+ *
+ * The one thing about an interactivity declaration that can be checked without
+ * calling the component, and the drift that actually happens: a prop is renamed
+ * and the declaration keeps naming the old one, which is silent — the primitive
+ * still renders its anchor and the Gate stops believing it ever does.
+ *
+ * A schema whose fields cannot be enumerated answers `undefined` rather than an
+ * empty list, and is left alone. "I cannot tell you" is not "there are none",
+ * and refusing a registration on the strength of it would be refusing on a
+ * guess.
+ */
+const undeclaredTriggerProp = (entry: PrimitiveEntry): string | undefined => {
+  const { interactive, declaredProps } = entry
+  if (!interactive || interactive === "always" || !declaredProps) return undefined
+
+  const declared = new Set(declaredProps.map((prop) => prop.name))
+
+  return interactive.whenProps.find((prop) => !declared.has(prop))
 }
 
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
@@ -98,6 +126,11 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     if (value.trim() === "") return err({ code: "blank-text", type: entry.type, key })
   }
 
+  const undeclared = undeclaredTriggerProp(entry)
+  if (undeclared !== undefined) {
+    return err({ code: "undeclared-interactive-prop", type: entry.type, prop: undeclared })
+  }
+
   return ok({
     type: type.data,
     description: entry.description,
@@ -105,6 +138,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     component: entry.component,
     declaredProps: entry.declaredProps,
     text: entry.text,
+    interactive: entry.interactive,
     validate: entry.validate,
   })
 }

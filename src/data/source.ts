@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { NAMESPACED_ID_PATTERN } from "../primitive-type.js"
+
 /**
  * The identifier of a registered data source — the contract between a binding
  * in the tree and whatever answers it.
@@ -8,12 +10,7 @@ import { z } from "zod"
  * capability, a registry decides what that name reaches, and the AST stays
  * independent of any particular host's data. `profile`, `commerce.products`.
  */
-const SEGMENT = "[a-z][a-z0-9]*(?:-[a-z0-9]+)*"
-
-export const sourceIdSchema = z
-  .string()
-  .regex(new RegExp(`^${SEGMENT}(?:\\.${SEGMENT})*$`))
-  .brand<"SourceId">()
+export const sourceIdSchema = z.string().regex(NAMESPACED_ID_PATTERN).brand<"SourceId">()
 export type SourceId = z.infer<typeof sourceIdSchema>
 
 /**

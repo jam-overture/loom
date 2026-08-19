@@ -490,7 +490,13 @@ regression here again.
 
 ## 2026-08-17 — a linked card may legally contain a link, and nothing can say so
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by **#88** — a primitive declares whether it is a target and the Gate refuses a
+change that nests two
+([0064](decisions/0064-a-primitive-says-whether-it-is-a-target-and-the-gate-derives-the-nesting.md)).
+Adopting it in `src/primitives/` is filed back below. Original status below.
+
+**Status:** open
 
 `loom.card` takes an `href`, which makes the whole surface the target a reader
 aims at — the same call `loom.feature` already makes, and the right one: a card
@@ -528,7 +534,16 @@ this lane can do.
 
 ## 2026-08-17 — three Hermes blocks are blocked on seams, not on primitives
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+**partly closed** by **#89** — the form-target half is answered by the submission
+seam ([0065](decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)):
+`contactform` and `newsletter` are now an ordinary 0052 decomposition plus
+`loom:submit`, and are unblocked as far as this seam goes. **The `tabs` half
+stays open** and is unchanged — a state seam is a much larger decision than one
+primitive, reaches the delta model, and is not something a run should reach for
+because a block wants it. Original status below.
+
+**Status:** open
 
 Found while writing [`docs/hermes-port-map.md`](docs/hermes-port-map.md), which
 classifies all seventy Hermes blocks. Sixty-seven of them are a primitives
@@ -663,6 +678,219 @@ Filed against my own lane rather than acted on: the first option touches
 `apps/portal/lib/demo`, which is mine, but it is a unit of its own and this run
 was already one. It is the change I would make next if history were not ahead of
 it.
+
+---
+
+## 2026-08-17 — the library can now say which of its primitives are targets
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+Answering the finding above, which this routine owns, and handing back the half
+that is not this routine's to do.
+
+**A primitive now declares whether it renders a target**, and the Gate refuses a
+change that leaves one inside another
+([0064](decisions/0064-a-primitive-says-whether-it-is-a-target-and-the-gate-derives-the-nesting.md)).
+The declaration is about the node and never about the parent — which is what
+keeps it clear of the parentage field
+[0054](decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)
+rejected:
+
+```ts
+definePrimitive({ type: "loom.action", interactive: "always",               … })
+definePrimitive({ type: "loom.card",   interactive: { whenProps: ["href"] }, … })
+```
+
+The conditional form is the important one. A card with no `href` holding an
+action is the ordinary composition of a page, and a check that refused *that*
+would be a check every host turns off — so a card is a target only when the tree
+actually gave it one, and a blank or cleared `href` does not count.
+
+**What is left, and it is yours.** Four primitives are targets by inspection of
+their schemas, and none of them declares it yet, so nothing changes for any
+deployment until they do:
+
+| primitive | declaration |
+| --- | --- |
+| `loom.action` | `"always"` — `href` is required |
+| `loom.card` | `{ whenProps: ["href"] }` |
+| `loom.feature` | `{ whenProps: ["href"] }` |
+| `loom.logo` | `{ whenProps: ["href"] }` |
+
+It is one line each, it needs no other change, and `createPrimitiveRegistry`
+refuses a trigger naming a prop the schema does not declare — so a typo or a
+renamed prop is a failed registration rather than a check that quietly stops
+firing. Nothing inside `src/primitives/` was touched by this run, deliberately.
+
+Worth knowing while you are there: **the check is only as good as the
+declaration, and only part of that is verifiable.** The registry checks the prop
+names exist. Nothing checks that the component really emits an anchor, because a
+probe for that reads as a false negative for any primitive that delegates its
+root to another component — the same limit `probeEditableDecoration` documents
+about itself. `loom.feature` and `loom.logo` both branch on `href` internally,
+so they are the two where a future refactor could make the declaration a lie
+without anything noticing.
+
+---
+
+## 2026-08-17 — the interactive check has no live user until a policy derives it
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Structural, small, and a lane question rather than a technical one.
+
+`interactiveTypesFor(registry)` turns a registry's declarations into the
+vocabulary a `GatePolicy` reads. Until some deployment calls it, 0064 refuses
+nothing anywhere. The obvious place is **the demo**, which mints a policy per
+visitor already and which exists to show the Gate doing exactly this kind of
+thing — a proposal held or refused, with the reason in the Gate's own words.
+
+The trouble is that the framework brief and `docs/routines.md` both say this
+routine owns "the demo", and the demo's files live in `apps/portal/lib/demo` and
+`apps/portal/app/demo`, which are the portal routine's directory. The portal run
+of the same day proposed further changes to `lib/demo/session.ts` on #87. Two
+routines editing one directory is the thing the lane table exists to prevent, so
+this run did not touch it.
+
+Three ways to settle it, all the maintainer's:
+
+- **Say the demo is the portal's**, and the framework routine files demo work as
+  findings like any other `apps/` work. Simplest, and matches where the files
+  actually are.
+- **Say the framework routine owns `apps/portal/app/demo` and
+  `apps/portal/lib/demo` specifically**, with the portal routine filing findings
+  against them. Matches the briefs as written, at the cost of a directory
+  boundary inside one app.
+- **Move the demo out of the portal** into its own app. Most work, cleanest
+  boundary, and it would give the marketing routine something to embed that does
+  not carry the portal's chrome.
+
+Until then the seam is real, tested and unused, which is a worse state than
+either resolution.
+
+**18 August — answered by the maintainer**, recorded here by `Loom primitives`
+because a merged PR's comments are not something the next run reads:
+
+> *"The demo can be set up as its own routine. We will place it under the
+> marketing documents routine."*
+
+So it is the **third option**, with the ownership named: the demo becomes its
+own routine and sits under the marketing documents routine rather than under
+this one or the portal's. Two consequences worth stating so neither routine
+waits on the other:
+
+- **`apps/portal/app/demo` and `apps/portal/lib/demo` stop being contested.**
+  Neither the framework routine nor the portal routine owns the demo; whoever
+  runs the new routine does, and `apps/portal` returns to being wholly the
+  portal's.
+- **`interactiveTypesFor(registry)` gets its live user from that routine**, not
+  from this branch. The seam stays real, tested and unused until then, which is
+  now a known wait rather than an open question.
+
+The entry stays open until the routine exists and the lane table in
+`docs/routines.md` says so.
+
+---
+
+## 2026-08-17 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Recorded for the reason the other routines record it. The change needed one new
+shared module at the root — `src/interactivity.ts`, holding the declaration
+vocabulary — because it has two readers that do not know about each other, the
+SDK where an author declares it and the policy where a deployment's set arrives.
+Nothing under `sdk/` imports from `runtime/` today, and this was not the change
+to start with, so the type went where `reserved-props.ts` went when the `loom:`
+namespace acquired its second reader. No entry point changed shape and no
+consumer was touched.
+
+---
+
+## 2026-08-18 — two Hermes form blocks are unblocked, and neither can be built here
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The submission seam landed on **#89**, which answers the form-target half of the
+finding above. `contactform` and `newsletter` are now buildable, and building
+them is `src/primitives/`, which is not this routine's lane.
+
+What a form primitive reads:
+
+```ts
+if (!loom.submit) …                              // the tree named no endpoint
+if (loom.submit.status === "unavailable") …      // this deployment could not answer
+const { action, method, fields } = loom.submit.target
+```
+
+Three states rather than two, and each is a different page. Absent is an
+authoring gap — nobody said where this posts. `unavailable` is a deployment that
+could not answer *right now*, which is a form that should say so rather than one
+that looks fine and swallows what a visitor typed. `ready` carries the address,
+the method, and the hidden inputs the form must render — a CSRF token arrives
+that way, and a primitive that drops `fields` produces a form the host will
+reject with no visible reason.
+
+`src/render/submit.test.ts` has a working form primitive in about fifteen lines,
+written as a fixture rather than as a library entry precisely because the library
+is yours.
+
+Two things worth knowing before building either:
+
+- **Nothing enforces that a form primitive has a target.** A primitive that needs
+  one and is given none renders untargeted and only its author knows that is
+  wrong. The machinery to declare it exists — it is the shape `interactive` uses
+  on #88 — and 0065 deliberately did not use it: one seam per run, and the audit
+  is cheap to add once a primitive exists that would fail it. If you build one and
+  want the audit, file it back.
+- **The field list is the ordinary part.** 0052 settles it: each field is a node,
+  the fixed bits are props. Nothing in the seam touches how a form is composed.
+
+---
+
+## 2026-08-18 — a change of destination is not yet a stake
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+
+Recorded against my own lane so the next run finds it rather than rediscovering
+it, and left undone on purpose.
+
+A `configure` that moves `loom:submit` from `newsletter.subscribe` to
+`contact.enquiry` sends the next visitor's message somewhere else. Both are
+registered, so nothing leaves the deployment and no address was authored — the
+seam holds. But the analysis reports it as a prop change like any other, and
+"this form now posts somewhere else" is not an ordinary prop change: it is the
+one prop whose meaning is *where a stranger's data goes*.
+
+It belongs in the stakes vocabulary, beside `nested-target`. It is not built here
+for one reason: **#88 is open and extends `src/runtime/stakes.ts`,
+`policy.ts` and `analysis.ts`**, and two routines appending to those files at once
+is the friction this repository already knows about from three shared files. One
+branch, one unit — this is the next run's, once #88 has landed.
+
+The shape, so the next run does not re-derive it: `planTreeSubmissions` already
+reads every declaration off a tree, so the factor is the same "resulting tree,
+less what the tree already had" comparison #88 makes for nesting. `configure` is
+the operation that produces it; `insert` of a form pointing somewhere is a new
+form rather than a redirected one, and is not the same event.
+
+---
+
+## 2026-08-18 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Nothing was wanted from another lane to build the submission seam. `apps/` was
+not opened: no page moves, because no primitive posts anywhere yet, and the demo
+gains nothing until one does.
+
+One thing worth saying rather than filing, since it is nobody's blocker yet:
+**`renderRequest` now takes four optional registries** — `sources`, `themes`,
+`text` and `endpoints` — each failing closed with a diagnostic when a tree needs
+one that was not wired. That is the right default and it is getting long. A
+single `LoomDeployment` bundling the four is the obvious next shape, and it is
+recorded in 0065's consequences rather than built, because nothing has yet been
+made harder by the current one.
 
 ---
 
