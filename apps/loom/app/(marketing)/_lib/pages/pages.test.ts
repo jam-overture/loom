@@ -7,7 +7,15 @@ import { describe, expect, it } from "vitest"
 
 import { PLACEHOLDER_STRINGS } from "../copy"
 import { renderSitePage, SITE_PAGES, treeFor } from "../render"
-import { internalHref, SITE_ROUTES, type SiteRoute, type SiteThemeName } from "../site"
+import {
+  DEFAULT_THEME,
+  internalHref,
+  SITE_ROUTES,
+  SITE_THEME_NAMES,
+  SITE_THEMES,
+  type SiteRoute,
+  type SiteThemeName,
+} from "../site"
 
 /**
  * What has to be true of every page on this site, asked of every page.
@@ -20,7 +28,13 @@ import { internalHref, SITE_ROUTES, type SiteRoute, type SiteThemeName } from ".
  */
 
 const ORIGIN = "https://loom.example"
-const THEMES: readonly SiteThemeName[] = ["editorial", "bold"]
+
+/**
+ * Every registered palette, read off the site rather than listed here. The
+ * assertions below are the ones that must hold for *all* of them, so a palette
+ * added to the site and not to this array would be a palette nothing checks.
+ */
+const THEMES: readonly SiteThemeName[] = SITE_THEME_NAMES
 
 const rendered = (route: SiteRoute, theme: SiteThemeName) =>
   renderSitePage(route, { origin: ORIGIN, theme })
@@ -48,12 +62,23 @@ const belowRoot = (markup: string): string => markup.slice(markup.indexOf(">", r
  * The two places the palette's *name* legitimately reaches the markup.
  *
  * This site keeps the palette in the URL, so every internal link carries the
- * visitor's forward and the footer's offer names the other one. Both are
+ * visitor's forward and the footer's offers name the others. Both are
  * normalised here and nothing else is, which keeps the assertion the strong one
  * — a re-theme changes the root's variables and no markup below them.
+ *
+ * Derived from the site's own list rather than spelled out, because a palette
+ * missing from a hand-written alternation would not fail this: its name would
+ * survive normalisation and the invariance assertion would report a difference
+ * below the root that is only ever the switcher naming itself.
  */
 const withoutPaletteNames = (markup: string): string =>
-  markup.replace(/theme=(editorial|bold)/g, "theme=P").replace(/>(Editorial|Bold)</g, ">P<")
+  SITE_THEME_NAMES.reduce(
+    (text, name) =>
+      text
+        .replaceAll(`theme=${name}`, "theme=P")
+        .replaceAll(`>${SITE_THEMES[name].label}<`, ">P<"),
+    markup
+  )
 
 /** Every link the page offers a visitor. Not the stylesheet's own `href`. */
 const linksIn = (markup: string): readonly string[] =>
@@ -78,8 +103,8 @@ describe.each(SITE_ROUTES)("$path", (route) => {
   })
 
   it("builds the same tree twice, byte for byte", () => {
-    const once = treeFor(route, { origin: ORIGIN, theme: "editorial" })
-    const twice = treeFor(route, { origin: ORIGIN, theme: "editorial" })
+    const once = treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const twice = treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
 
     expect(JSON.stringify(twice)).toBe(JSON.stringify(once))
   })
@@ -107,24 +132,44 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     })
   })
 
-  it("changes only the root's variables when the palette changes", () => {
-    const editorial = markupOf(route, "editorial")
-    const bold = markupOf(route, "bold")
+  /**
+   * Every pair, not one pair. With two palettes the distinction was empty;
+   * with three it is the whole assertion — a palette whose markup differed
+   * below the root from one of the others and not from the rest would pass a
+   * check that only ever compared the same two.
+   */
+  it.each(
+    THEMES.flatMap((one, index) => THEMES.slice(index + 1).map((other) => [one, other] as const))
+  )("changes only the root's variables between %s and %s", (one, other) => {
+    const first = markupOf(route, one)
+    const second = markupOf(route, other)
 
-    expect(rootStyle(editorial)).not.toBe(rootStyle(bold))
-    expect(withoutPaletteNames(belowRoot(editorial))).toBe(withoutPaletteNames(belowRoot(bold)))
+    expect(rootStyle(first)).not.toBe(rootStyle(second))
+    expect(withoutPaletteNames(belowRoot(first))).toBe(withoutPaletteNames(belowRoot(second)))
   })
 
   it("carries the header and the footer as nodes, not as markup", () => {
-    const body = belowRoot(markupOf(route, "editorial"))
+    const body = belowRoot(markupOf(route, DEFAULT_THEME))
 
     /** The wordmark, and the footer's re-theme offer: both are tree nodes. */
     expect(body).toContain("Loom")
-    expect(body).toContain("Same tree, other palette:")
+    expect(body).toContain("Same tree, another palette:")
+  })
+
+  /** Every palette but the one being worn is reachable from the footer. */
+  it("offers each of the other palettes on the page itself", () => {
+    for (const theme of THEMES) {
+      const markup = markupOf(route, theme)
+
+      for (const other of THEMES.filter((name) => name !== theme)) {
+        expect(markup).toContain(`href="${internalHref(ORIGIN, route.path, other)}"`)
+        expect(markup).toContain(`>${SITE_THEMES[other].label}<`)
+      }
+    }
   })
 
   it("links to every route of the site, and to no unknown one", () => {
-    const internal = linksIn(markupOf(route, "editorial"))
+    const internal = linksIn(markupOf(route, DEFAULT_THEME))
       .filter((href) => href.startsWith(ORIGIN))
       .map((href) => new URL(href).pathname)
 
@@ -141,20 +186,20 @@ describe.each(SITE_ROUTES)("$path", (route) => {
   })
 
   it("holds no link the scheme allowlist would have refused", () => {
-    for (const href of linksIn(markupOf(route, "editorial"))) {
+    for (const href of linksIn(markupOf(route, DEFAULT_THEME))) {
       expect(new URL(href).protocol).toMatch(/^https?:$/)
     }
   })
 
   it("has exactly one first-level heading", () => {
-    const markup = markupOf(route, "editorial")
+    const markup = markupOf(route, DEFAULT_THEME)
 
     expect([...markup.matchAll(/<h1\b/g)]).toHaveLength(1)
   })
 })
 
 describe("the words that are not engineering's to write", () => {
-  const everything = SITE_ROUTES.map((route) => markupOf(route, "editorial")).join("\n")
+  const everything = SITE_ROUTES.map((route) => markupOf(route, DEFAULT_THEME)).join("\n")
 
   it("appears on the page, marked, rather than being invented quietly", () => {
     for (const placeholder of PLACEHOLDER_STRINGS) {
