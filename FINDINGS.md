@@ -1402,7 +1402,13 @@ application's `/`.
 ## 2026-08-19 — one deployment now, and the Vercel projects point at nothing
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open
+**Status:** **closed 20 August.** The dashboard change was made: there is one
+project, `loom`, with Root Directory `apps/loom`, and `loom-portal` and
+`loom-marketing` are gone. `docs-03-the-minimal-theme` is the first branch in
+this repository's history to carry a preview that both **built and deployed** —
+`Ready` within a minute of the push. Recorded by `Loom docs` on seeing it.
+Whether the URL opens for a reader not signed in to Vercel is the *other*
+finding's second half and is still unverified from any routine's environment.
 
 The half of the migration that cannot be done from the repository, and it is a
 dashboard change of about a minute.
@@ -1835,7 +1841,16 @@ fourth palette does not break them a third time.
 ## 2026-08-20 — the house theme is registered and nothing selects it, and Geist is not loaded
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
-`Loom lessons`, `Loom portal` · **Status:** open
+`Loom lessons`, `Loom portal` · **Status:** **all four surfaces have now
+adopted it**, within a day and independently of each other — `(lessons)` on
+**#104**, `(portal)` on **#105**, `(marketing)` on **#106**, and `(docs)` on
+`docs-03-the-minimal-theme`. Each lane's own entry below says what it did and
+what it traded.
+
+Whoever owns this entry should close it. It is left open here only because the
+docs branch cannot speak for the other three lanes' halves, and because the
+entries below record one thing the four runs did **not** converge on — see *two
+mechanisms now supply Geist* at the end of this file.
 
 `minimal` / `minimal-sans` / `precise` is resolvable from every surface as of the
 branch above. **No surface uses it**, and adopting it is two separate pieces of
@@ -1899,8 +1914,12 @@ using it for small text are wrong, or the palettes want a darker subtle.
 ## 2026-08-20 — `main` has been red for five merges, and the check is pointing at a directory that no longer exists
 
 **Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open — a Vercel dashboard setting; no routine can fix it from the
-repository.
+**Status:** **fixed 20 August**, verified from `docs-03-the-minimal-theme` by
+`Loom docs`. There is now one project, `loom`, with Root Directory `apps/loom`;
+`loom-portal` and `loom-marketing` are gone. The branch's preview built and
+reached `Ready` in about a minute — the first in this repository's history to do
+so. The second option below is what was taken. Dated here rather than rewritten,
+since this is another routine's entry.
 
 Found while clearing CI on #103. The `Vercel – loom-portal` check fails on that
 branch, and it fails **on `main`**, and it has failed on every commit since
@@ -2174,3 +2193,112 @@ own test asserts that changing the palette changes the root's variables and
 identity into the markup and break the claim the page exists to make. So the
 backdrop is one choice for all three, and it will stay the compromise one until
 `aurora` stops reading `accent`.
+
+---
+
+## 2026-08-20 — the documentation site has adopted the house theme too, and two mechanisms now supply Geist
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The fourth of the four, landed the same day as the other three and without any
+of us seeing each other's work. `(docs)` selects
+`minimal` / `minimal-sans` / `precise` on every example and transcribes the
+palette into its chrome, so the house theme is now on all four surfaces.
+
+**All four runs reached the same diagnosis about `next/font` independently**,
+which is worth recording as evidence rather than as a warning nobody needs any
+more: a font pack names a *literal* family stack, so a bundled loader's minted
+name — `__Geist_1a2b3c` or the `geist` package's `GeistSans` — never matches
+what a tree asks for, and the page renders the fallback while looking entirely
+deliberate. The portal's measurement above is the precise version of it, and its
+correction is right: the trap is in **trees**, not in chrome a surface styles
+with the minted family directly.
+
+**Where the four did not converge is the fix.** There are now two mechanisms in
+one application:
+
+| surfaces | mechanism |
+| --- | --- |
+| `(lessons)`, `(marketing)` | a `<link>` to `fonts.googleapis.com/css2?family=Geist` |
+| `(docs)` | a hand-written `@font-face` over two `.woff2` vendored into `app/(docs)/_fonts/` |
+
+Both serve the face under the real name `Geist`, so both work, and the portal's
+entry above already names both as valid. Neither lane knew the other was
+choosing.
+
+**This is the maintainer's to settle, and it is small.** The trade, stated
+plainly rather than argued:
+
+- **The link** costs nothing in the repository and adds a third-party request on
+  every page load. A reader behind a network that blocks Google — which this
+  repository has already met twice, in the `21st.dev` and `nextjs.org`
+  findings — silently gets the fallback, and so does anyone offline.
+- **The vendored face** costs 140 KB of committed binary and an OFL licence
+  file, and depends on nothing at run time or build time.
+
+One fact that arrived with the merge and sharpens this: **`geist` is now a
+dependency of `@loom/app`**, added by #105 for the portal's chrome, where a
+minted family is fine because the chrome names it directly. So the woff2 files
+are already in `node_modules` on every install, and the two copies in
+`(docs)/_fonts/` are a duplicate of something present anyway. A shared
+`@font-face` could point at the package instead of at vendored bytes, if the CSS
+pipeline resolves it cleanly — worth trying before committing more binaries.
+
+*Recommendation, and it is a preference rather than a finding:* vendor it, and
+share one copy. A documentation site whose typography depends on a third party
+is the kind of thing that is fine until the day it is not, and the four
+surfaces are one application — one `@font-face` block, wherever the four can
+reach it, replaces four separate answers. `app/(docs)/_fonts/` is inside a lane,
+which is the only unsatisfying part of where it currently sits; moving it
+somewhere shared is an `apps/loom`-level call rather than any one lane's, which
+is why this is filed and not done.
+
+If you would rather have the link everywhere, the docs change is deleting one
+`@font-face` block and two files, and I will take it on the next run.
+
+---
+
+## 2026-08-20 — `loom.page` does not paint its canvas, and a specimen frame needs it to
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open —
+worked around in this lane, recorded because the default is worth a second look
+and because the second surface to hit it should not rediscover it.
+
+`loom.page` takes `fills`, off by default:
+
+> *"A page that is the whole document paints the canvas; a page embedded in a
+> host's own chrome should not repaint that host's background out from under
+> it."*
+
+That reasoning is right and the default is defensible. What it cost here is
+worth knowing, because it is the *invisible* kind of cost.
+
+Every documented example is rooted at `loom.page` inside a bordered frame on the
+docs site. None set `fills`, so none painted a canvas — and for as long as every
+example wore `editorial`, whose canvas is white, on a docs frame that is also
+white, **nothing looked wrong**. The `bold` example was the exception and had
+been rendering `#f5f5f5` text on `#ffffff` since it was written: unreadable,
+diagnostic-free, and invisible to every test in the suite. "It rendered" is true
+of a page nobody can read, the render diagnostics were empty, and the library's
+own palette test asserts colour rather than legibility.
+
+It surfaced the moment the site adopted the house theme, because the themed
+example stopped agreeing with the background behind it. **Matching backgrounds
+were hiding it.**
+
+Fixed in this lane by setting `fills: true` on every example root, with a test
+that asserts it — a specimen frame is a viewport onto a document rather than an
+embed, so it is the right answer for this surface whatever the default is.
+
+Two things for the owner to weigh, neither urgent:
+
+- **Every surface that renders a specimen wants this on**, and each will find out
+  the way this one did. The portal's primitive gallery is the next one. A
+  `fills` default of *on*, with hosts embedding a page opting out, would put the
+  surprise on the rarer case — but it is a behaviour change to a shipped
+  primitive and nothing here is broken, so it is a judgement rather than a bug.
+- **A palette whose canvas differs from the surface embedding it is the only case
+  that shows the difference**, which means the library's own specimen sheets are
+  the place this will keep appearing. Worth a line in `loom.page`'s doc comment
+  either way.
+

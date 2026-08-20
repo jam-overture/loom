@@ -36,20 +36,51 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
  * `--loom-*` properties set, which is legal, diagnostic-free, and looks like a
  * stylesheet failed to load — not the first impression a documented example
  * should make.
+ *
+ * **It is the house theme, which is also the one this site's chrome wears.**
+ * That is the point rather than a coincidence: a reader looking at an example
+ * is looking at the same three registered ids the page around it was built
+ * from, so "the site is made of the thing it documents" is visible instead of
+ * claimed. The registration lives in `src/theme/library.ts` and the site names
+ * it here — a surface selects a theme, it does not define one.
  */
-const EDITORIAL: JsonObject = {
-  palette: "editorial",
-  fontPack: "editorial-serif",
-  stylePreset: "comfortable",
+const MINIMAL: JsonObject = {
+  palette: "minimal",
+  fontPack: "minimal-sans",
+  stylePreset: "precise",
 }
 
-/** Where the themed example goes instead: the same tree, three different ids. */
+/**
+ * Where the themed example goes instead: the same tree, three different ids.
+ *
+ * `bold` rather than `editorial` now that the default is `minimal`, and the
+ * distance is the reason — the lesson on that page is that swapping three
+ * strings on the root changes everything below it, and the further apart the
+ * two look, the harder that is to mistake for a coincidence.
+ */
 const BOLD: JsonObject = {
   palette: "bold",
   fontPack: "bold-sans",
   stylePreset: "airy-modern",
 }
 
+/**
+ * Every example's root, and the one prop on it that is not obvious.
+ *
+ * **`fills: true`.** `loom.page` paints the theme's canvas only when asked,
+ * because a page embedded in a host's own chrome should not repaint the host's
+ * background out from under it — a good default, and the wrong one here. An
+ * example frame is a *viewport onto a document*, not an embed: the reader is
+ * being shown what the tree looks like as a page, and a page whose canvas is
+ * whatever happens to be behind it is not that.
+ *
+ * It was absent until the site adopted the minimal theme, and cost nothing
+ * visible for as long as every example's canvas was the same white as the frame
+ * around it. The `bold` example was the exception and had been rendering pale
+ * grey text on white — legible to nobody, diagnostic-free, and invisible to
+ * every test, because "it rendered" is true of an unreadable page. Matching
+ * backgrounds were hiding it.
+ */
 const page = (
   ids: IdFactory,
   theme: JsonObject,
@@ -59,7 +90,7 @@ const page = (
   createTree(
     buildElement(ids, {
       type: "loom.page",
-      props: { ...props, [THEME_PROP_KEY]: theme },
+      props: { fills: true, ...props, [THEME_PROP_KEY]: theme },
       children,
     }),
     ids
@@ -92,7 +123,7 @@ export type DocsExample = {
 const firstTree = (): LoomTree => {
   const ids = sequentialIdFactory("firsttree")
 
-  return page(ids, EDITORIAL, { width: "readable" }, [
+  return page(ids, MINIMAL, { width: "readable" }, [
     heading(ids, 1, "Hello from a tree"),
     prose(ids, "Nothing here was written as markup."),
   ])
@@ -112,7 +143,7 @@ const themedTree = (): LoomTree => {
 const slotTree = (): LoomTree => {
   const ids = sequentialIdFactory("slottree")
 
-  return page(ids, EDITORIAL, { width: "readable" }, [
+  return page(ids, MINIMAL, { width: "readable" }, [
     buildElement(ids, {
       type: "loom.section",
       props: { tone: "surface", width: "readable", eyebrow: "Slots" },
@@ -139,7 +170,7 @@ const containerAndChildren = (): LoomTree => {
   const feature = (icon: string, title: string, body: string): LoomNode =>
     buildElement(ids, { type: "loom.feature", props: { icon, title, body, surface: "card" } })
 
-  return page(ids, EDITORIAL, { width: "wide" }, [
+  return page(ids, MINIMAL, { width: "wide" }, [
     buildElement(ids, {
       type: "loom.feature-grid",
       props: { columns: "three" },
@@ -179,7 +210,7 @@ const containerAndChildren = (): LoomTree => {
 const cardWithAControl = (): LoomTree => {
   const ids = sequentialIdFactory("cardcontrol")
 
-  return page(ids, EDITORIAL, { width: "readable" }, [
+  return page(ids, MINIMAL, { width: "readable" }, [
     heading(ids, 1, "A card, and a control on it"),
     buildElement(ids, {
       type: "loom.card",

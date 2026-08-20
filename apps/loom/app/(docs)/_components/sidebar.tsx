@@ -41,7 +41,7 @@ export const Sidebar = ({ onNavigate }: { readonly onNavigate?: () => void }) =>
                     {...(here ? { "aria-current": "page" as const } : {})}
                     className={`-ml-px block border-l py-1.5 pl-3 transition-colors ${
                       here
-                        ? "border-ink text-ink font-medium"
+                        ? "border-accent-ring text-ink font-medium"
                         : "text-ink-muted hover:border-edge-strong hover:text-ink border-transparent"
                     }`}
                   >
