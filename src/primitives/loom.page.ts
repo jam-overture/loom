@@ -19,9 +19,11 @@ const props = z
   .object({
     width: z.enum(["full", "wide", "readable"]).optional(),
     /**
-     * Off by default. A page that is the whole document paints the canvas; a
-     * page embedded in a host's own chrome should not repaint that host's
-     * background out from under it.
+     * **On by default**, and it governs the ink as well as the canvas — see
+     * [0072](../../decisions/0072-a-page-paints-its-ink-and-its-canvas-together.md).
+     * A page that is the whole document paints both. A page embedded in a
+     * host's own chrome sets `fills: false` and paints neither, so it takes the
+     * host's colours rather than half of each.
      */
     fills: z.boolean().optional(),
   })
@@ -36,6 +38,7 @@ export const loomPage = definePrimitive({
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const width: WidthName = given.width ?? "wide"
+    const fills = given.fills !== false
 
     return createElement(
       "div",
@@ -52,8 +55,12 @@ export const loomPage = definePrimitive({
           fontFamily: family("body"),
           fontWeight: weight("body"),
           fontSize: size(3),
-          color: colour("fg-default"),
-          ...(given.fills === true ? { background: colour("bg-canvas") } : {}),
+          /**
+           * Both or neither. A page that painted its ink and not its canvas is
+           * how the documentation site rendered `#f5f5f5` body text on white
+           * for a fortnight with no diagnostic and every test passing (0072).
+           */
+          ...(fills ? { color: colour("fg-default"), background: colour("bg-canvas") } : {}),
         },
       },
       createElement(
@@ -63,6 +70,8 @@ export const loomPage = definePrimitive({
             display: "flex",
             flexDirection: "column",
             gap: space(6),
+            /** No stylesheet resets these, so padding would otherwise widen the band past its parent. */
+            boxSizing: "border-box",
             width: "100%",
             maxWidth: WIDTHS[width],
             paddingInline: space(4),

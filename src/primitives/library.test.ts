@@ -4,6 +4,15 @@ import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type IdFactory } from "../ids.js"
 import type { JsonObject } from "../json.js"
+import { SUBMIT_PROP_KEY } from "../reserved-props.js"
+import { err, ok } from "../result.js"
+import {
+  createEndpointRegistry,
+  defineEndpoint,
+  type EndpointEntry,
+  type EndpointRegistry,
+} from "../submit/endpoint.js"
+import { resolveTreeSubmissions } from "../submit/resolve.js"
 import { catalogueOf } from "../sdk/catalogue.js"
 import { auditRegistry } from "../sdk/audit.js"
 import { describeRegistryError, type PrimitiveRegistry } from "../sdk/registry.js"
@@ -141,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as forty-one primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(41)
+  it("registers as forty-five primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(45)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -174,6 +183,9 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.faq-list",
       "loom.faq",
+      "loom.form",
+      "loom.field",
+      "loom.option",
       "loom.footer",
       "loom.link-list",
       "loom.heading",
@@ -184,6 +196,7 @@ describe("the starter library", () => {
       "loom.divider",
       "loom.media",
       "loom.action",
+      "loom.button",
       "loom.link",
     ])
   })
@@ -289,6 +302,14 @@ describe("the starter library", () => {
       "loom.article",
       "loom.logo",
       "loom.faq",
+      /**
+       * A false leaf, and worth knowing rather than working around: the probe
+       * renders a primitive once, and a `loom.field` of the default type places
+       * no children because only a `select` has any. Filed for the framework
+       * routine — the audit classifies by one configuration, and this is the
+       * first primitive whose answer depends on a prop.
+       */
+      "loom.field",
       "loom.perk",
       "loom.divider",
     ])
@@ -718,7 +739,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the seven fixtures", () => {
+  it("covers every registered primitive across the eight fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -732,9 +753,42 @@ describe("the composed vocabulary", () => {
       ...typesIn(portedPage(EDITORIAL)),
       ...typesIn(cataloguePage(EDITORIAL)),
       ...typesIn(chromePage(EDITORIAL)),
+      ...typesIn(contactPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
+  })
+
+  it("never pads a full-width band past the parent it sits in", () => {
+    /**
+     * A phone-width horizontal scroll, asserted as an invariant rather than
+     * caught by eye. An inline style carries no reset, so `box-sizing` is
+     * `content-box` and a band that says `width: 100%` and then pads itself is
+     * wider than its parent by exactly its padding — on a 390px screen the
+     * library was rendering a 486px page. Nothing in a pure render can notice
+     * that, and no test before this one could either.
+     */
+    const offenders = [
+      samplePage,
+      marketingPage,
+      pricingPage,
+      arrangedPage,
+      portedPage,
+      cataloguePage,
+      chromePage,
+      contactPage,
+    ].flatMap((fixture) =>
+      [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
+        .map(([, style]) => style ?? "")
+        .filter(
+          (style) =>
+            /padding-inline[^:]*:(?!0)/.test(style) &&
+            style.includes("width:100%") &&
+            !style.includes("box-sizing:border-box")
+        )
+    )
+
+    expect(offenders).toEqual([])
   })
 
   it("renders a marketing page with nothing left unhonoured", () => {
@@ -1937,6 +1991,421 @@ describe("the page chrome", () => {
   })
 })
 
+/**
+ * The contact page: two forms, one that asks a lot and one that asks for an
+ * email address, plus the section that introduces them.
+ *
+ * `declared` is what the tree says under `loom:submit`, and it defaults to
+ * **nothing** — so the fixtures that render this page synchronously exercise
+ * the untargeted state, which is the one a page has before anybody wires a
+ * deployment. The targeted states need the seam resolved first and are asked
+ * for by name below.
+ */
+const contactPage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory(),
+  declared: { readonly enquiry?: JsonObject; readonly subscribe?: JsonObject } = {}
+): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const field = (props: JsonObject, choices: readonly string[] = []) =>
+    buildElement(idFactory, {
+      type: "loom.field",
+      props,
+      children: choices.map((choice) =>
+        buildElement(idFactory, { type: "loom.option", children: [text(choice)] })
+      ),
+    })
+
+  const button = (label: string, props: JsonObject) =>
+    buildElement(idFactory, { type: "loom.button", props, children: [text(label)] })
+
+  const enquiry = buildElement(idFactory, {
+    type: "loom.form",
+    props: {
+      layout: "paired",
+      width: "wide",
+      ...(declared.enquiry === undefined ? {} : { [SUBMIT_PROP_KEY]: declared.enquiry }),
+    },
+    children: [
+      field({ name: "name", label: "Your name", required: true, autocomplete: "name" }),
+      field({ name: "email", label: "Email", type: "email", required: true }),
+      field({ name: "organisation", label: "Company", autocomplete: "organization" }),
+      field(
+        { name: "heard", label: "How did you hear about Loom?", type: "select", placeholder: "Choose one" },
+        ["A colleague", "The documentation", "A conference talk", "Somewhere else"]
+      ),
+      field({
+        name: "message",
+        label: "What are you building?",
+        type: "textarea",
+        required: true,
+        span: "row",
+        hint: "A paragraph is plenty. We read every one of these.",
+      }),
+      buildSlot(idFactory, "submit", [
+        button("Send the message", { variant: "primary", scale: "large", width: "full" }),
+      ]),
+      buildSlot(idFactory, "note", [
+        buildElement(idFactory, {
+          type: "loom.perk",
+          props: { label: "We reply within two working days", state: "included" },
+        }),
+      ]),
+    ],
+  })
+
+  const subscribe = buildElement(idFactory, {
+    type: "loom.form",
+    props: {
+      layout: "inline",
+      width: "readable",
+      ...(declared.subscribe === undefined ? {} : { [SUBMIT_PROP_KEY]: declared.subscribe }),
+    },
+    children: [
+      field({
+        name: "email",
+        label: "Email",
+        type: "email",
+        required: true,
+        placeholder: "you@example.com",
+      }),
+      buildSlot(idFactory, "submit", [button("Subscribe", { variant: "secondary" })]),
+      buildSlot(idFactory, "note", [
+        buildElement(idFactory, {
+          type: "loom.prose",
+          props: { size: "small", tone: "muted" },
+          children: [text("One note a month about what shipped. Leave whenever you like.")],
+        }),
+      ]),
+    ],
+  })
+
+  const section = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Contact", width: "wide" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2, balance: true },
+          children: [text("Tell us what you are building")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "lead", tone: "muted" },
+        children: [text("The heading, the sentence and the form are three nodes, not three fields on one.")],
+      }),
+      enquiry,
+      subscribe,
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide" },
+      children: [section],
+    }),
+    idFactory
+  )
+}
+
+const endpointsOf = (...entries: readonly EndpointEntry[]): EndpointRegistry => {
+  const built = createEndpointRegistry(entries)
+  if (!built.ok) throw new Error(`the endpoint registry refused: ${built.error.code}`)
+
+  return built.value
+}
+
+/**
+ * A render with the submission seam resolved, which is the only way to see a
+ * form in any state but untargeted. It is the same wiring a deployment does —
+ * plan, resolve, then a synchronous walk (0065) — so the two-step is the
+ * assertion as much as the markup is.
+ */
+const renderPosting = async (
+  tree: LoomTree,
+  endpoints: EndpointRegistry
+): Promise<{ markup: string; diagnostics: readonly unknown[] }> => {
+  const submissions = await resolveTreeSubmissions(tree, { registry: endpoints })
+  const rendered = renderLoomTree(tree, {
+    resolver: registry,
+    validator: registry,
+    themes,
+    submissions,
+  })
+
+  return { markup: renderToStaticMarkup(rendered.element), diagnostics: rendered.diagnostics }
+}
+
+const propsOfType = (type: string): readonly string[] =>
+  catalogueOf(registry)
+    .find((primitive) => primitive.type === type)
+    ?.props?.map((prop) => prop.name) ?? []
+
+const CSRF = "a-token-minted-for-this-request"
+
+const workingEndpoints = (): EndpointRegistry =>
+  endpointsOf(
+    defineEndpoint({
+      id: "contact.enquiry",
+      description: "The enquiry inbox.",
+      endpoint: {
+        target: async () =>
+          ok({
+            action: "/api/enquiry",
+            method: "post" as const,
+            fields: [{ name: "csrf", value: CSRF }],
+          }),
+      },
+    }),
+    defineEndpoint({
+      id: "newsletter.subscribe",
+      description: "The monthly note.",
+      endpoint: {
+        target: async () =>
+          ok({ action: "https://lists.example.com/subscribe", method: "post" as const, fields: [] }),
+      },
+    })
+  )
+
+const targeted = (theme: Record<string, string>): LoomTree =>
+  contactPage(theme, sequentialIdFactory(), {
+    enquiry: { to: "contact.enquiry" },
+    subscribe: { to: "newsletter.subscribe" },
+  })
+
+describe("the form band", () => {
+  it("posts where the deployment said, carrying what the deployment asked it to carry", async () => {
+    const { markup, diagnostics } = await renderPosting(targeted(EDITORIAL), workingEndpoints())
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain('action="/api/enquiry"')
+    expect(markup).toContain('action="https://lists.example.com/subscribe"')
+    expect(markup).toContain('method="post"')
+    expect(markup).toContain(`<input type="hidden" name="csrf" value="${CSRF}"/>`)
+
+    /**
+     * The token is outside the fieldset, and this is the assertion that keeps
+     * it there: a disabled fieldset makes every control inside it unsuccessful,
+     * so a CSRF field that ever sits in one is a form that posts without its
+     * token on the day the endpoint has a bad afternoon.
+     */
+    expect(markup.indexOf('name="csrf"')).toBeLessThan(markup.indexOf("<fieldset"))
+    expect(markup).not.toContain("<fieldset disabled")
+  })
+
+  it("renders disabled, and says so, when the tree never named a destination", () => {
+    const { markup, diagnostics } = render(contactPage(EDITORIAL))
+
+    /**
+     * The failure 0065 exists to prevent is a submit button that silently goes
+     * nowhere. A tree that declared nothing is not a diagnostic — nothing was
+     * misdeclared — so the page itself has to be honest about it.
+     */
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<fieldset disabled")
+    expect(markup).toContain("This form is not connected yet")
+    expect(markup).not.toContain("<form action")
+    expect(markup).not.toContain('method="post"')
+  })
+
+  it("tells a deployment that cannot answer apart from one that will not", async () => {
+    const failing = endpointsOf(
+      defineEndpoint({
+        id: "contact.enquiry",
+        description: "The enquiry inbox, mid-incident.",
+        endpoint: {
+          target: async () => err({ code: "unavailable" as const, detail: "the token store timed out" }),
+        },
+      }),
+      defineEndpoint({
+        id: "newsletter.subscribe",
+        description: "A list that closed.",
+        endpoint: {
+          target: async () => err({ code: "refused" as const, detail: "the list is not taking sign-ups" }),
+        },
+      })
+    )
+
+    const { markup, diagnostics } = await renderPosting(targeted(EDITORIAL), failing)
+
+    /** Two states the seam keeps apart, so two sentences a visitor acts on differently. */
+    expect(markup).toContain("Please try again in a moment")
+    expect(markup).toContain("not accepting messages")
+    expect(markup).not.toContain("<form action")
+
+    /**
+     * The reason itself never reaches the page. It reaches the diagnostics,
+     * where the person who can fix a timed-out token store is looking.
+     */
+    expect(markup).not.toContain("token store")
+    expect(diagnostics).toHaveLength(2)
+    expect(JSON.stringify(diagnostics)).toContain("submit-unavailable")
+    expect(JSON.stringify(diagnostics)).toContain("the token store timed out")
+  })
+
+  it("disables the submit control without the control knowing anything about it", () => {
+    const { markup } = render(contactPage(EDITORIAL))
+
+    /**
+     * `loom.submit` reaches the node that declared the submission and not its
+     * children, so a `loom.button` cannot know the form around it has no
+     * address. A disabled fieldset is what makes that irrelevant — and it is
+     * why the button carries no `disabled` prop for some other node to set
+     * correctly.
+     */
+    const fieldset = markup.slice(markup.indexOf("<fieldset"))
+
+    expect(fieldset).toContain("<button")
+    expect(fieldset).toContain("Send the message")
+    expect(propsOfType("loom.button")).toEqual(["scale", "variant", "width"])
+  })
+
+  it("turns Hermes' twelve-shape `fields` array into twelve nodes, which is 0052's first half", () => {
+    const catalogue = catalogueOf(registry)
+    const propsOf = (type: string): readonly string[] =>
+      catalogue.find((primitive) => primitive.type === type)?.props?.map((prop) => prop.name) ?? []
+
+    /**
+     * The whole 0052 assertion for this unit. Hermes held a `fields` list of
+     * `ContactFormField` on the block, so adding a phone number was a
+     * `configure` carrying all twelve and no field had an author. Neither prop
+     * here carries an item.
+     */
+    expect(propsOf("loom.form")).toEqual(["layout", "width"])
+    expect(propsOf("loom.field")).toEqual([
+      "autocomplete",
+      "hint",
+      "label",
+      "name",
+      "placeholder",
+      "required",
+      "span",
+      "type",
+    ])
+
+    /** The two regions the form places wherever its fields end (0051). */
+    expect(catalogue.find((primitive) => primitive.type === "loom.form")?.slots).toEqual([
+      "submit",
+      "note",
+    ])
+  })
+
+  it("gives a select the choices Hermes' dropdown never had, as child nodes", () => {
+    const { markup } = render(contactPage(EDITORIAL))
+
+    const select = markup.slice(markup.indexOf("<select"), markup.indexOf("</select>"))
+
+    expect(select).toContain(">A colleague<")
+    expect(select).toContain(">Somewhere else<")
+
+    /**
+     * No `value` attribute on a choice whose label is the value: an `<option>`
+     * submits its own text, so the string is not written twice to drift.
+     */
+    expect(select).toContain("<option>A colleague</option>")
+
+    /** The placeholder is the selected choice, and it is not a submittable one. */
+    expect(select).toContain('<option value="" disabled="" selected="">Choose one</option>')
+  })
+
+  it("wires a label, a hint and an autocomplete token to the control they belong to", () => {
+    const { markup } = render(contactPage(EDITORIAL))
+
+    const labelled = [...markup.matchAll(/<label for="([^"]+)"/g)].map(([, id]) => id)
+    const controls = [...markup.matchAll(/<(?:input|textarea|select)[^>]*id="([^"]+)"/g)].map(
+      ([, id]) => id
+    )
+
+    /** Every label points at a control that exists, and every control has one. */
+    expect(labelled).toHaveLength(6)
+    expect(controls.sort()).toEqual([...labelled].sort())
+
+    const describedBy = /<textarea[^>]*aria-describedby="([^"]+)"/.exec(markup)?.[1]
+
+    expect(describedBy).toBeDefined()
+    expect(markup).toContain(`<p id="${describedBy ?? ""}"`)
+    expect(markup).toContain("A paragraph is plenty")
+
+    /**
+     * `autocomplete` is emitted, and derived where the type says it plainly —
+     * better markup than Hermes had rather than a port of it. A contact form
+     * that makes someone type their own email address again is one measurably
+     * fewer people finish.
+     */
+    /**
+     * Case-insensitively, because React 19 writes the prop's own spelling into
+     * the attribute and HTML attribute names do not care. The browser reads it
+     * either way; the assertion should not pin a renderer's spelling.
+     */
+    expect(markup).toMatch(/autocomplete="name"/i)
+    expect(markup).toMatch(/autocomplete="organization"/i)
+    expect(markup).toMatch(/type="email" autocomplete="email"/i)
+  })
+
+  it("keeps the row layout to CSS the children cannot see", async () => {
+    const { markup } = await renderPosting(targeted(EDITORIAL), workingEndpoints())
+
+    /**
+     * A field in a row has to grow and a field in a column must not, and the
+     * field cannot know which it is in. A descendant rule in the static
+     * stylesheet reaches it — the same mechanic `details[open] > summary` uses
+     * — so no prop was invented for a parent to set on its children.
+     */
+    expect(markup).toContain(".loom-form-inline > .loom-field")
+    expect(markup).toContain(`class="${LIBRARY_CLASS.formInline}"`)
+  })
+
+  it("draws its own focus ring and its own chevron, because neither is the palette's by default", () => {
+    const { markup } = render(contactPage(EDITORIAL))
+
+    /** A native select arrow is the operating system's colour, and cannot be told about a theme. */
+    expect(markup).toContain(".loom-select::after")
+    expect(markup).toContain("border-inline-end: 2px solid currentColor")
+    expect(markup).toContain(".loom-input:focus-visible")
+    expect(markup).toContain("outline: 2px solid var(--loom-border-accent)")
+
+    /** Reduced motion drops the transition and keeps the ring, which is feedback rather than movement. */
+    const reduced = markup.slice(markup.indexOf("@media (prefers-reduced-motion"))
+
+    expect(reduced).toContain(".loom-input")
+  })
+
+  it("survives the re-theme in every state, with no literal colour below the root", async () => {
+    const editorial = await renderPosting(targeted(EDITORIAL), workingEndpoints())
+    const bold = await renderPosting(targeted(BOLD), workingEndpoints())
+    const boldBody = splitStylesheet(bold.markup).tree
+
+    expect(editorial.diagnostics).toEqual([])
+    expect(bold.diagnostics).toEqual([])
+    expect(splitStylesheet(editorial.markup).tree.slice(splitStylesheet(editorial.markup).tree.indexOf(">")))
+      .toBe(boldBody.slice(boldBody.indexOf(">")))
+    expect(boldBody.slice(boldBody.indexOf(">"))).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(boldBody.slice(boldBody.indexOf(">"))).not.toMatch(/\b(rgba?|hsla?)\(/)
+
+    /** The untargeted state is a different page, and it is held to the same rule. */
+    const untargeted = splitStylesheet(render(contactPage(MINIMAL)).markup).tree
+
+    expect(untargeted.slice(untargeted.indexOf(">"))).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+  })
+
+  it("carries no destination of its own on the control that sends it", () => {
+    /**
+     * `formAction` is the one attribute that would let a button override where
+     * its form posts, and a primitive that accepted it would have reopened the
+     * channel 0065 closed. There is no prop here that reaches the network, on
+     * the button or on the form.
+     */
+    expect(propsOfType("loom.button")).not.toContain("formAction")
+    expect(propsOfType("loom.form")).not.toContain("action")
+    expect(propsOfType("loom.form")).not.toContain("to")
+    expect(render(contactPage(EDITORIAL)).markup).not.toContain("formaction")
+  })
+})
+
 describe("the targets the library declares", () => {
   const declarationOf = (type: string) =>
     registry.primitives.find((primitive) => primitive.type === type)?.interactive
@@ -1950,6 +2419,8 @@ describe("the targets the library declares", () => {
      */
     expect(declarationOf("loom.action")).toBe("always")
     expect(declarationOf("loom.link")).toBe("always")
+    /** The submit control: the whole of it is what a reader presses (0068). */
+    expect(declarationOf("loom.button")).toBe("always")
 
     for (const type of ["loom.card", "loom.feature", "loom.logo", "loom.article"]) {
       expect(declarationOf(type)).toEqual({ whenProps: ["href"] })
@@ -1973,7 +2444,7 @@ describe("the targets the library declares", () => {
   })
 
   it("declares nothing on a container, since a container is not a target", () => {
-    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid"]) {
+    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
       expect(declarationOf(type)).toBeUndefined()
     }
   })
@@ -2028,10 +2499,10 @@ describe("the re-theme guarantee", () => {
      * primitive reads its colours from slots, and the third proves the *slots
      * were filled by someone who knew what reads them*. A palette that put its
      * light green at `accent` would compile, register, and resolve — and every
-     * eyebrow, kicker and disclosure marker in these seven fixtures would come
+     * eyebrow, kicker and disclosure marker in these eight fixtures would come
      * out at 1.6:1 with nothing failing.
      */
-    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage]) {
+    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage, contactPage]) {
       const { markup, diagnostics } = render(fixture(MINIMAL))
       const tree = splitStylesheet(markup).tree
       const body = tree.slice(tree.indexOf(">"))
