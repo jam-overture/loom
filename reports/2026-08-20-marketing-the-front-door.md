@@ -106,8 +106,8 @@ stranger should not have to learn a noun to find the door.
 
 ## Tests
 
-`pnpm verify` green — **1407 runtime, 849 application**. Nothing skipped, nothing
-weakened.
+`pnpm verify` green — **1426 runtime, 849 application**, on the tree with
+`main` merged in. Nothing skipped, nothing weakened.
 
 The marketing suite went **67 → 94 tests**. `chrome.test.ts` is new and holds
 eleven of them; it exists because every failure this run fixed is invisible to an
@@ -128,6 +128,20 @@ Added at the page level, over every route and every palette:
   builds *or* a declared surface, and a link to anything else on this origin
   still fails. That is a widening of the rule and it is the one test in this run
   that got weaker; it is written to be weaker by exactly one named list.
+
+## The merge with `main`
+
+#108 and #109 landed while this branch was open and `main` moved two commits
+ahead. **One file conflicted and it was `FINDINGS.md` again** — the same
+append-against-append every routine hits, since three runs finished on the same
+day and all three added entries at the end of the file. Both sides kept, in the
+order they landed: `main`'s nine entries, then this run's two. Nothing rewritten.
+
+Nothing else conflicted. What `main` changed inside this lane is one file and two
+digits — `FACTS` in `copy.ts`, from 41 primitives and 71 records to 45 and 74 —
+which is the open finding about that file doing exactly what it says it does.
+The screenshots in this report were re-taken after the merge, so the numbers in
+them are the merged tree's rather than this branch's.
 
 ## Findings
 
