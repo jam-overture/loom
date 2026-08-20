@@ -2302,3 +2302,206 @@ Two things for the owner to weigh, neither urgent:
   the place this will keep appearing. Worth a line in `loom.page`'s doc comment
   either way.
 
+
+---
+
+## 2026-08-20 — every Loom page had a horizontal scrollbar on a phone, and no test could see it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+by the form-band run — five primitives and one new control now declare
+`box-sizing: border-box`, and an invariant test holds every fixture to it
+
+Found while screenshotting this run's specimen, not by looking for it.
+
+**An inline style carries no reset.** The library styles everything inline, on
+purpose (0008 — nothing to attach, nothing to load), and `box-sizing` therefore
+defaults to `content-box` in every one of them. A band that says
+
+```ts
+width: "100%",
+paddingInline: space(6),
+```
+
+is exactly its own padding wider than the parent it sits in. Measured on the
+specimen at a 390px viewport: **`document.scrollWidth` was 486px** — a page 25%
+wider than the phone showing it, with the hero clipped and everything below it
+sliding under a horizontal scrollbar.
+
+Five primitives had it, all of them page-level: `loom.page`'s inner column,
+`loom.hero` with any backdrop, `loom.nav` and `loom.footer` with any tone but
+plain, and `loom.section` with a tone. The marketing site, the demo and every
+documented example have been rendering this way since the day each landed.
+
+**Nothing in the test suite could have caught it**, and that is the part worth
+carrying forward. The palette tests assert that colour comes from slots; the
+markup tests assert that elements are present and in the right order; a pure
+render has no viewport and no layout. Every assertion in the library was true
+of a page that scrolled sideways.
+
+What closes it is one line per primitive plus **an invariant rather than a
+case**: a test that walks every inline style in all eight fixtures and fails on
+any that combines `padding-inline` with `width: 100%` and no
+`box-sizing: border-box`. It caught a sixth instance the moment it was written —
+`loom.button` with `width: "full"`, added in the same run.
+
+Worth knowing for anything built next: the rule is that *any* primitive setting
+a percentage width and its own padding declares the border box, and the test is
+what makes that a rule rather than a habit.
+
+---
+
+## 2026-08-20 — a level-1 heading does not fit on a phone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+
+Seen in the same phone screenshot as the finding above, and left alone because
+it is a bigger call than a run should slip in.
+
+`loom.heading` at `level: 1` renders `var(--loom-scale-8)`, which is **72px in
+every registered font pack**. On a 390px screen a hero headline sets one word
+per line and the long ones — "something", "interfaces" — run past the padding
+into the section's `overflow: hidden`. It is clipped rather than scrolling, so
+it does not show up in the overflow measurement above, and it looks like a
+design choice until you read the word that lost its last letter.
+
+The type ramp is the font pack's, and a font pack declares eight fixed pixel
+sizes. So the fix is one of:
+
+- **Clamp in the primitive** — `min(var(--loom-scale-8), 11vw)` at the top of
+  the ramp only. It stays token-based, needs no palette change, and is the
+  smallest thing that works. It also puts a viewport unit inside a primitive
+  for the first time, which is a precedent worth naming out loud rather than
+  slipping in.
+- **A fluid ramp in the font pack** — `scaleRamp` entries become clamps rather
+  than numbers. Much better, and it changes a schema three registered packs and
+  the theme tests all depend on, which makes it the framework routine's.
+
+Recorded rather than done: this run's lane is the form band, and re-sizing every
+heading in the library on the way past is not a change that belongs inside it.
+
+---
+
+## 2026-08-20 — `auditRegistry` calls `loom.field` a leaf, and it is one only sometimes
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Small, and interesting because it is the first primitive in the library where
+the answer depends on a prop.
+
+`auditRegistry` probes each primitive once, with props its schema accepts, and
+reports the ones that placed no children as `leaves` — the check that catches a
+primitive quietly dropping `children`. `loom.field` renders its children **only
+when `type` is `select`**, because only a select has choices (they are
+`loom.option` nodes — 0052 applied to the one thing on a form that repeats).
+Probed at its default type, it places nothing and is reported a leaf.
+
+Nothing is broken: the library's own test now asserts the leaf list including
+`loom.field`, with a comment saying why. But the report is wrong in a way a host
+reading it would act on — "this primitive has nowhere to put a child node" is
+false, and the primitive that would genuinely have lost its `children` is
+indistinguishable from this one.
+
+Two ways out, both the framework routine's:
+
+- **Probe more than one configuration.** The declared schema enumerates
+  `type`'s eight values, so the audit could probe each closed enum's options and
+  report a leaf only when *no* configuration places children. It costs a handful
+  of renders per primitive and it is the honest answer.
+- **Report the third state.** `leaves` becomes "placed no children under the
+  configuration probed", with a separate list for "placed children under some".
+  Cheaper, and it moves the judgement to the reader.
+
+No action taken beyond the comment in `library.test.ts`, since `sdk/audit.ts` is
+not this lane's file.
+
+---
+
+## 2026-08-20 — the submission audit 0065 deferred now has something to audit
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+0065 named this and deliberately did not build it:
+
+> Nothing enforces that a form primitive has a target. A primitive that needs
+> one and is given none renders untargeted, and only its own author knows that
+> is wrong. The parallel machinery — a declaration on `definePrimitive`, the way
+> `interactive` is declared — is available and deliberately not used yet: one
+> seam per run, and the audit is cheap to add once a primitive exists that would
+> fail it.
+
+**One exists.** `loom.form` needs a target, and a host that registers the
+starter library, renders a tree with `loom:submit` on a form and forgets to pass
+`submissions` to `renderLoomTree` gets a `submit-unresolved` diagnostic per node
+— which is good — while a host whose *tree* simply never declared one gets
+nothing at all, because a tree that declared nothing is not a misdeclaration.
+
+The shape 0065 sketched still looks right: a `submits: true` on the definition,
+read by `auditRegistry` the way `interactive` is, so a deployment can assert
+that every registered primitive which posts was rendered with the seam wired.
+
+**It is not urgent, and this run made it less so on purpose**
+([0073](decisions/0073-a-form-with-nowhere-to-post-renders-disabled-and-says-so.md)):
+an untargeted form renders disabled with a line saying it is not connected, so
+the cost of the missing audit is a visible notice on a page rather than a submit
+button that quietly goes nowhere. The audit would move that from *the visitor
+finds out* to *the deployment finds out first*, which is where it belongs.
+
+---
+
+## 2026-08-20 — the aurora finding, answered — with a different slot than the one suggested
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing site` · **Status:** closed
+
+Answering the marketing routine's finding of the same day: `loom.hero`'s
+`aurora` read `accent` as a field colour, and `minimal` sets `accent` to
+`#0a0a0a`, so the house palette's front door had a grey cloud across its
+top-left corner.
+
+**Fixed, and the diagnosis was exactly right** — a slot cannot be both near-black
+ink and a tinted field, the library reads `accent` as ink far more often, so the
+one place that reads it as an area is the thing that has to move.
+
+**The suggested slot was `accent-subtle`, and it would have replaced a visible
+smudge with an invisible field.** That slot is a *tile background* in every
+palette — `#e6ebf2` under editorial, `#effbf5` under minimal — and at 32%
+opacity on a light canvas it is nothing at all. `theme.test.ts` says what it is
+for in its own contrast pair: `accent-strong` on `accent-subtle`.
+
+**`accent-strong` is what the aurora now paints**, beside `brand-secondary` as
+before. It is the slot that has to hold up as a glyph against `accent-subtle`,
+so every palette gives it real chroma by construction: `#34425a`, `#e0b800`,
+`#176e44`. Bold keeps the gold-and-red glow the finding was right to mourn,
+editorial is unchanged in character (its `accent` and `brand-secondary` are the
+same blue, so this gives it two shades where it had one), and minimal gets
+Hyperion's green over its mint — which is the palette's own description.
+
+**The marketing site can put `backdrop: "aurora"` back on its home hero**
+whenever that lane next runs. The `grid` backdrop was a considered compromise
+and it no longer has to be one. Not changed here: `apps/` is not this lane.
+
+---
+
+## 2026-08-20 — `loom.page`'s `fills`, answered by pairing rather than by a default
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** closed
+
+Answering the documentation routine's finding: `loom.page` did not paint its
+canvas by default, so a `bold` example rendered `#f5f5f5` text on white for a
+fortnight with no diagnostic and every test passing.
+
+The finding asked whether the default should flip.
+[0072](decisions/0072-a-page-paints-its-ink-and-its-canvas-together.md) says yes
+**and** that the default was the smaller half of it: the component set the
+palette's ink unconditionally and its canvas only when asked, so `fills: false`
+meant *paint the ink of one theme onto the background of another*. That is
+broken in both directions and in every configuration, not only the one the docs
+site hit.
+
+So `fills` now governs both, and it is on by default. `fills: false` paints
+neither and inherits the host's. The default moved on the evidence the finding
+gave plus one more: **every tree in this repository that roots at the starter
+`loom.page` already passes `fills: true`** — marketing, the demo, every docs
+example — so the old default was serving nobody and catching people out.
+
+Nothing in `apps/` changes appearance, and the docs site's explicit `fills: true`
+is now redundant rather than wrong. Removing it is optional and that lane's call.

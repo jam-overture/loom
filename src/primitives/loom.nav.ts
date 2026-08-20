@@ -129,6 +129,8 @@ export const loomNav = definePrimitive({
           flexWrap: "wrap",
           alignItems: "center",
           gap: space(4),
+          /** No stylesheet resets these, so padding would otherwise widen the band past its parent. */
+          boxSizing: "border-box",
           width: "100%",
           paddingBlock: space(3),
           paddingInline: tone === "plain" ? "0" : space(5),
