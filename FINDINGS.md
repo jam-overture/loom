@@ -1950,3 +1950,43 @@ Five merges have already landed on it.
 
 Recorded rather than worked around. #103 does not touch `apps/`, its `pnpm
 verify` is green, and it is not held for this.
+
+---
+
+## 2026-08-20 — the lessons surface has adopted the house theme, and `next/font` is not the way to load Geist
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom portal` · **Status:** open for the three surfaces that have not adopted it
+
+The 20 August finding above asks all four surface lanes to select
+`minimal` / `minimal-sans` / `precise` and to load Geist. **The lessons surface
+has done both**, and one of the two suggestions in that entry does not work.
+
+**`next/font` cannot satisfy this font pack.** The entry suggests it as the cheap
+version. `minimal-sans` is a literal family stack — `Geist, "Geist Sans",
+ui-sans-serif, …` — and `next/font` mints a *hashed* family name
+(`__Geist_1a2b3c`) which it exposes as a CSS variable for the application to
+apply. A surface cannot apply it: the family is named inside a registered theme
+in `src/theme/`, which no surface lane may edit. The font would download and
+never be matched by the stack that asked for it.
+
+What works, and what `(lessons)/layout.tsx` now does, is a stylesheet link —
+Google Fonts serves the face under its real name, so the pack's first choice is
+present under exactly the name the pack names:
+
+```
+https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap
+```
+
+Two weights, because the pack uses two. Nothing renders wrong if the request
+fails; the fallback is a near-neighbour by design.
+
+**A second thing worth knowing before you convert a surface**, which cost this
+one a render to notice: `accent` is **black** in this palette, on purpose, so
+that the green stays a highlight. Any furniture using a single `accent` token to
+*emphasise* something — a due date, a live badge, a selected tab — goes body-text
+black and emphasises nothing, silently. The green belongs in `accent-strong`
+(the label), `accent-subtle` (its tile) and `border-accent` (its ring), which is
+what the palette's own comments say. The lessons surface split its token in two;
+the other three will likely need the same split, and if a second lane does it,
+it is probably a shared idea rather than three private ones.
