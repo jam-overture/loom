@@ -33,13 +33,20 @@ export const Sidebar = ({ onNavigate }: { readonly onNavigate?: () => void }) =>
               const href = `/docs/${section.slug}/${page.slug}`
               const here = pathname === href
 
+              /**
+               * A generated section's pages are named after something a reader
+               * types — an import path — so the rail sets them in the mono face
+               * it is set in everywhere else on the site.
+               */
+              const face = section.source === "generated" ? "font-mono text-[0.8125rem]" : ""
+
               return (
                 <li key={page.slug}>
                   <Link
                     href={href}
                     {...dismiss}
                     {...(here ? { "aria-current": "page" as const } : {})}
-                    className={`-ml-px block border-l py-1.5 pl-3 transition-colors ${
+                    className={`-ml-px block border-l py-1.5 pl-3 transition-colors ${face} ${
                       here
                         ? "border-accent-ring text-ink font-medium"
                         : "text-ink-muted hover:border-edge-strong hover:text-ink border-transparent"

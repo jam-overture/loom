@@ -2609,7 +2609,20 @@ What each owner may want to weigh, neither urgent and neither mine to decide:
 
 ## 2026-08-20 — the Gate's refusal and the page explaining it now describe different things
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** closed
+by `docs-04-the-api-reference` — the smaller of the two fixes, and a paragraph
+rather than the suggested clause. `what-the-gate-decides` now points at the
+difference explicitly: the refusal says *puts a target where the reader cannot
+reach it*, a link inside a link is one way to produce that, and `loom.article`
+covering itself with a stretched anchor is another that has no nesting in it at
+all. The page's worked example is still `loom.card`, so the mechanism it
+demonstrates and the sentence the runtime prints no longer read as two different
+claims. The larger fix — a second live example on `loom.article` — was not
+built: it wants an example that provokes a refusal the current catalogue has no
+tree for, which is a unit of its own rather than a paragraph. Original status
+below.
+
+**Status:** open
 
 0074's sibling change in this run reworded the `nested-target` refusal from
 *"nests a target inside another"* to *"puts a target where the reader cannot
@@ -2742,3 +2755,109 @@ The second is the one worth wanting and it is blocked on the same question the
 first raises: **what may a page a stranger is looking at spend?** A recorded
 transcript replayed on the page costs nothing and shows the whole loop; a live
 call shows it is real. They are different products and only one of them is free.
+
+---
+
+## 2026-08-20 — two thirds of the published surface has no sentence, and it is on a page now
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+
+The API reference is generated from the declarations the package publishes
+(§4c's rule), so for the first time there is a **count** rather than an
+impression. Measured on `main` at `15ffb13`:
+
+| | |
+| --- | --- |
+| exported names across the eleven entry points | **670** |
+| with a doc comment of their own | 238 |
+| **without one** | **432** — 104 of them functions |
+| of those, in `src/primitives/` | 67 (filed separately, below) |
+| of those, elsewhere in `src/` | **365** |
+
+That number is far less alarming than it sounds, and the reason is worth
+knowing: **the module's own opening paragraph carries most of it.** 145 of the
+160 modules open with a comment about themselves, the reference lifts that
+paragraph under each heading, and a reader landing on `applyDelta` gets "the
+tree, changed" from the module even when the function says nothing. Only **19
+exports have neither** — no sentence of their own and none from their module —
+and those are the ones that render as a bare name and a signature.
+
+So this is not "the runtime is undocumented". It is two smaller things:
+
+- **Fifteen modules open with no paragraph**, and four of them are ones a reader
+  reaches early: `result`, `json`, `tree/errors`, `store/source`. The full list
+  is `data/source`, `json`, `primitive-type`, `result`, `runtime/stake-level`,
+  `tree/errors`, `sdk/catalogue`, `sdk/interactivity`, `store/source`,
+  `store/database`, `store/migrate`, `telemetry/memory`, `telemetry/migrate`,
+  `telemetry/schema` — and `primitives/loom.prose`, which is the other lane's.
+  One paragraph each closes the gap for every export underneath it, which makes
+  this the cheapest documentation work in the repository by a wide margin.
+- **104 exported functions say nothing.** Not urgent, and not all of them need
+  to: `describeXError` next to `XError` is self-evident. The ones worth a line
+  are the ones whose *name* does not give the argument order or the failure
+  mode.
+
+One thing that came with this and is now load-bearing, so it is worth saying
+plainly. **The blank line after a module's opening comment is doing work.**
+Declaration emit drops it, so in `dist/` a file's opening paragraph is
+indistinguishable from documentation for whatever export happens to be first —
+which is how `TREE_SCHEMA_VERSION` came to be described as "the persisted
+document". The generator reads the blurb from `src/`, where the empty line still
+exists, and a file that loses it will silently credit its first export with the
+module's sentence. 158 of 188 source files follow the convention today; 17 do
+not, and 13 have no opening comment at all. Nothing enforces it and this run did
+not add anything that would, because a lint rule about comment spacing in `src/`
+is that lane's call rather than this one's.
+
+---
+
+## 2026-08-20 — sixty-seven primitives exports have no sentence, and one primitive has no paragraph
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open
+
+The `src/primitives/` half of the count above, split out because it is a
+different lane and a different kind of work.
+
+`@loom/runtime/primitives` publishes 80 names, and **67 of them have no doc
+comment of their own**. As above, that mostly does not matter: every primitive
+module opens with a paragraph saying what the primitive is for — "A surface
+holding whatever is put on it, with a region above its content and a region
+below" — and the reference puts that under the heading, so
+`/docs/api-reference/primitives` reads well as it stands.
+
+Two things in it are worth a few minutes:
+
+- **`loom.prose` opens with no paragraph at all.** It is the only primitive
+  module that does not, so it is the only one whose heading on the reference
+  page is followed straight by a list of names. One sentence fixes it.
+- **The shared vocabulary is bare.** `CONTROL_VARIANTS`, `CONTROL_SCALES`,
+  `GAP_NAMES`, `ALIGN_NAMES`, `JUSTIFY_NAMES`, `COLUMN_NAMES` and their six
+  types say nothing, and they are the exports whose *values* an author most
+  wants to look up — "what may I put in `gap`" is answered by the signature
+  alone today, which works, but a line saying what a gap name means in a theme
+  would answer the question behind the question. The 45 `loomX` definitions are
+  bare too and it matters much less: each one's module paragraph is right above
+  it and describes exactly that primitive.
+
+Nothing here is a framework gap and nothing blocks the site. Recorded because
+the page that shows it is now public, and because the fix is a sentence rather
+than a change.
+
+---
+
+## 2026-08-20 — no framework gaps in the documentation run
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed
+
+Recorded for the reason the other routines record it, and this run is a fair
+test of it: generating a reference reaches further into the package than any
+documentation work so far. It needed **nothing from `@loom/runtime` at all** —
+not one import — because the thing it reads is the package's own
+`package.json` and the `dist/*.d.ts` files `pnpm build` produces. `src/` was not
+opened for anything but the module blurbs, and nothing in `apps/loom` outside
+`app/(docs)/` was touched except one line in `package.json` adding the
+`docs:api` script, which is named for this surface and used by nothing else.
+
+Worth saying because it is the argument for how this section was built: a
+reference that consumed a private API to describe a public one would be
+documenting something a reader cannot reach.

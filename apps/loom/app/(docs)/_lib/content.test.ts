@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 import { docsExampleIds } from "./examples/catalogue"
-import { docsOrder, docsSections } from "./nav"
+import { docsHref, docsSections, writtenDocsSections } from "./nav"
 
 /**
  * The navigation, the pages on disk, and the examples they name — held against
@@ -16,9 +16,19 @@ import { docsOrder, docsSections } from "./nav"
  * an example id that no longer names anything. The first two are why the
  * sidebar reads `lib/nav.ts` instead of the filesystem — a single list can be
  * checked; two lists that agree by convention cannot.
+ *
+ * Everything here is about **written** sections. A generated section has no
+ * `page.mdx` to find and no heading typed by hand; what holds it honest is
+ * `api/extract.test.ts`, which checks it against the thing it was generated
+ * from.
  */
 
 const docsRoot = fileURLToPath(new URL("../docs", import.meta.url))
+
+/** Every written page, in reading order. */
+const writtenOrder = writtenDocsSections.flatMap((section) =>
+  section.pages.map((page) => ({ href: docsHref(section.slug, page.slug), section, page }))
+)
 
 const pageFileFor = (sectionSlug: string, pageSlug: string): string =>
   join(docsRoot, sectionSlug, pageSlug, "page.mdx")
@@ -40,7 +50,7 @@ const sourceOf = (sectionSlug: string, pageSlug: string): string =>
 const EXAMPLE_REFERENCE = /<Example\s+id="([^"]+)"/g
 
 const referencedExampleIds = (): readonly string[] =>
-  docsOrder.flatMap((entry) =>
+  writtenOrder.flatMap((entry) =>
     [...sourceOf(entry.section.slug, entry.page.slug).matchAll(EXAMPLE_REFERENCE)].map(
       (match) => match[1] ?? ""
     )
@@ -48,7 +58,7 @@ const referencedExampleIds = (): readonly string[] =>
 
 describe("the navigation and the pages on disk", () => {
   it("has a written page behind every link", () => {
-    for (const { section, page } of docsOrder) {
+    for (const { section, page } of writtenOrder) {
       expect(existsSync(pageFileFor(section.slug, page.slug)), `${section.slug}/${page.slug}`).toBe(
         true
       )
@@ -56,13 +66,13 @@ describe("the navigation and the pages on disk", () => {
   })
 
   it("links to every page that exists", () => {
-    const listed = docsOrder.map((entry) => `${entry.section.slug}/${entry.page.slug}`)
+    const listed = writtenOrder.map((entry) => `${entry.section.slug}/${entry.page.slug}`)
 
     expect([...pagesOnDisk()].sort()).toEqual([...listed].sort())
   })
 
   it("titles each page once, in its own heading", () => {
-    for (const { section, page } of docsOrder) {
+    for (const { section, page } of writtenOrder) {
       const headings = sourceOf(section.slug, page.slug).match(/^# .+$/gm) ?? []
 
       expect(headings, `${section.slug}/${page.slug}`).toEqual([`# ${page.title}`])
@@ -70,7 +80,7 @@ describe("the navigation and the pages on disk", () => {
   })
 
   it("declares its metadata from the navigation rather than beside it", () => {
-    for (const { section, page } of docsOrder) {
+    for (const { section, page } of writtenOrder) {
       expect(sourceOf(section.slug, page.slug), `${section.slug}/${page.slug}`).toContain(
         `pageMetadata("${section.slug}", "${page.slug}")`
       )
