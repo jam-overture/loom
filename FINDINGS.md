@@ -1402,7 +1402,13 @@ application's `/`.
 ## 2026-08-19 — one deployment now, and the Vercel projects point at nothing
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open
+**Status:** **closed 20 August.** The dashboard change was made: there is one
+project, `loom`, with Root Directory `apps/loom`, and `loom-portal` and
+`loom-marketing` are gone. `docs-03-the-minimal-theme` is the first branch in
+this repository's history to carry a preview that both **built and deployed** —
+`Ready` within a minute of the push. Recorded by `Loom docs` on seeing it.
+Whether the URL opens for a reader not signed in to Vercel is the *other*
+finding's second half and is still unverified from any routine's environment.
 
 The half of the migration that cannot be done from the repository, and it is a
 dashboard change of about a minute.
