@@ -4,9 +4,10 @@ import { PLACEHOLDER_COPY } from "./copy"
 import { action, prose, stack } from "./nodes"
 import {
   internalHref,
-  otherTheme,
+  otherThemes,
   REPOSITORY_URL,
   SITE_ROUTES,
+  SITE_THEMES,
   type SiteRoute,
   type SiteThemeName,
 } from "./site"
@@ -72,18 +73,18 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         ]),
       ]),
       /**
-       * The re-theme, offered rather than described. It is an ordinary link to
-       * the same route wearing the other palette, and what comes back is the
-       * same tree with three different ids on its root — which is the whole of
-       * what a re-theme is (0049).
+       * The re-theme, offered rather than described. Each is an ordinary link to
+       * the same route wearing another palette, and what comes back is the same
+       * tree with three different ids on its root — which is the whole of what a
+       * re-theme is (0049).
        */
       stack(ids, { direction: "row", gap: "snug", align: "center" }, [
-        prose(ids, "Same tree, other palette:", { size: "small", tone: "muted" }),
-        action(
-          ids,
-          otherTheme(context.theme) === "bold" ? "Bold" : "Editorial",
-          internalHref(context.origin, context.current.path, otherTheme(context.theme)),
-          { variant: "quiet", scale: "small" }
+        prose(ids, "Same tree, another palette:", { size: "small", tone: "muted" }),
+        ...otherThemes(context.theme).map((name) =>
+          action(ids, SITE_THEMES[name].label, internalHref(context.origin, context.current.path, name), {
+            variant: "quiet",
+            scale: "small",
+          })
         ),
       ]),
     ],

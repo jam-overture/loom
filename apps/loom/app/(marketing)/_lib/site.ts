@@ -1,7 +1,7 @@
 import type { JsonObject } from "@loom/runtime"
 
 /**
- * What the site is, as data: its routes, its navigation, its two palettes, and
+ * What the site is, as data: its routes, its navigation, its palettes, and
  * where it is being served from.
  *
  * Every one of those is needed *while the tree is being built* rather than
@@ -40,25 +40,57 @@ export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS]
 /**
  * The palettes a visitor may see the site in.
  *
- * These are the two starter theme triples, and switching between them is the
+ * These are the registered theme triples, and switching between them is the
  * claim the site is making made checkable: the same tree, three different
  * registered ids on its root, and nothing below the root touched (0049). The
- * footer offers both, so the visitor can do it rather than read about it.
+ * footer offers the others, so the visitor can do it rather than read about it.
+ *
+ * **`minimal` is the house theme and the one a visitor arrives on.** The other
+ * two stay reachable because they are what makes the claim demonstrable — a
+ * site that only ever renders one palette is asserting re-theming rather than
+ * showing it — but they are the demonstration, not the front door.
+ *
+ * The label lives here beside the selection because the footer needs a word for
+ * each, and a switcher that spelled its own names would drift from this list
+ * the first time one was added.
  */
-export type SiteThemeName = "editorial" | "bold"
+export type SiteThemeName = "minimal" | "editorial" | "bold"
 
-export const SITE_THEMES: Readonly<Record<SiteThemeName, JsonObject>> = {
-  editorial: { palette: "editorial", fontPack: "editorial-serif", stylePreset: "comfortable" },
-  bold: { palette: "bold", fontPack: "bold-sans", stylePreset: "airy-modern" },
+export type SiteTheme = {
+  readonly label: string
+  /** The three registered ids, as the root node's reserved theme prop holds them. */
+  readonly selection: JsonObject
 }
 
-export const DEFAULT_THEME: SiteThemeName = "editorial"
+export const SITE_THEMES: Readonly<Record<SiteThemeName, SiteTheme>> = {
+  minimal: {
+    label: "Minimal",
+    selection: { palette: "minimal", fontPack: "minimal-sans", stylePreset: "precise" },
+  },
+  editorial: {
+    label: "Editorial",
+    selection: { palette: "editorial", fontPack: "editorial-serif", stylePreset: "comfortable" },
+  },
+  bold: {
+    label: "Bold",
+    selection: { palette: "bold", fontPack: "bold-sans", stylePreset: "airy-modern" },
+  },
+}
 
-const THEME_NAMES: readonly SiteThemeName[] = ["editorial", "bold"]
+export const DEFAULT_THEME: SiteThemeName = "minimal"
 
-/** The other one. There are two, so a toggle is a function rather than a list. */
-export const otherTheme = (theme: SiteThemeName): SiteThemeName =>
-  theme === "editorial" ? "bold" : "editorial"
+/** Every palette, in the order the footer offers them. */
+export const SITE_THEME_NAMES = Object.keys(SITE_THEMES) as readonly SiteThemeName[]
+
+/**
+ * The ones the visitor is not currently wearing.
+ *
+ * A list rather than the toggle this was while there were two of them: with a
+ * third palette "the other one" stops being a function, and a switcher that
+ * cycled would hide a palette behind two clicks for no reason.
+ */
+export const otherThemes = (theme: SiteThemeName): readonly SiteThemeName[] =>
+  SITE_THEME_NAMES.filter((name) => name !== theme)
 
 /**
  * A theme name out of a query string.
@@ -69,7 +101,7 @@ export const otherTheme = (theme: SiteThemeName): SiteThemeName =>
 export const readThemeName = (given: string | readonly string[] | undefined): SiteThemeName => {
   const first = typeof given === "string" ? given : given?.[0]
 
-  return THEME_NAMES.find((name) => name === first) ?? DEFAULT_THEME
+  return SITE_THEME_NAMES.find((name) => name === first) ?? DEFAULT_THEME
 }
 
 /**

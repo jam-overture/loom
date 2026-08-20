@@ -43,7 +43,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",
     props: {
-      backdrop: "aurora",
+      backdrop: "grid",
       align: "center",
       stature: "tall",
       eyebrow: "An AI-native UI runtime",
@@ -319,7 +319,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
     buildElement(ids, {
       type: "loom.page",
       props: {
-        [THEME_PROP_KEY]: SITE_THEMES[context.theme],
+        [THEME_PROP_KEY]: SITE_THEMES[context.theme].selection,
         width: "wide",
         fills: true,
       },

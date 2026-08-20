@@ -1950,3 +1950,56 @@ Five merges have already landed on it.
 
 Recorded rather than worked around. #103 does not touch `apps/`, its `pnpm
 verify` is green, and it is not held for this.
+
+---
+
+## 2026-08-20 — `loom.hero`'s `aurora` reads `accent` as a field colour, and the minimal palette sets it to black
+
+**Filed by:** `Loom marketing site` · **Owned by:** `Loom primitives` ·
+**Status:** open — worked around in the marketing lane by changing a prop, not
+patched in `src/`.
+
+Found converting the marketing site to the `minimal` theme (#103). The home
+hero used `backdrop: "aurora"`, which paints two soft fields:
+
+```ts
+// src/primitives/loom.hero.ts — backdropLayers()
+field("accent",           { insetInlineStart: "0", insetBlockStart: "0" }),
+field("brand-secondary",  { insetInlineEnd: "0",   insetBlockEnd: "0"   }),
+// …each: background: colour(slot), opacity: 0.32
+```
+
+Under `editorial` `accent` is a muted blue and under `bold` it is yellow, so
+both fields read as colour. Under `minimal`, **`accent` is `#0a0a0a`** — so the
+first field is a black cloud at 32% opacity on white paper. On the surface whose
+palette is described as *"white paper, black ink, one green"*, the front door
+rendered with a grey smudge across the top-left of the hero.
+
+**Neither side is wrong on its own, which is what makes it a finding.** #103 set
+`accent` to black deliberately and said why: the library reads that slot as
+*text* — eyebrows, kickers, the disclosure marker, the current nav item — far
+more often than as a fill, and the mint is 1.58:1 on white. `aurora` is the one
+place in the library that reads the same slot as a **large area of colour**, and
+a slot cannot be both near-black text and a tinted field.
+
+**Suggested resolution, for whoever owns it:** paint `aurora` from
+`brand-secondary` and `accent-subtle` rather than from `accent` and
+`brand-secondary`. Both are area colours by contract in all three palettes
+(`#effbf5` / `#72e3ad` under minimal, the blues under editorial, the reds under
+bold), and no palette has to be re-coloured for it. The narrower alternative —
+give `aurora` its own pair of slots — costs two more entries on every palette
+forever.
+
+**What the marketing lane did instead.** Changed one prop, `backdrop: "aurora"`
+→ `"grid"` on the home hero. It is a real improvement under `minimal` — faint
+graph-paper rules on white, which is what the theme is asking for — and a real
+loss under `bold`, whose glow was its best feature. That trade was taken because
+`minimal` is the palette a visitor arrives on and the other two are reachable
+demonstrations behind a query string.
+
+**It could not be split per palette**, and that is worth recording: the site's
+own test asserts that changing the palette changes the root's variables and
+*nothing below them* (0049). A backdrop chosen per theme would put the palette's
+identity into the markup and break the claim the page exists to make. So the
+backdrop is one choice for all three, and it will stay the compromise one until
+`aurora` stops reading `accent`.
