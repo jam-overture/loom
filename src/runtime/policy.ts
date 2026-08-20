@@ -43,8 +43,8 @@ export const gatePolicySchema = z.object({
   /**
    * Primitives that render a target the reader aims at — an anchor, a button —
    * and what makes them one. A change that leaves one of these inside another
-   * produces markup a browser resolves by dropping a link, so the page renders
-   * and something on it stops working.
+   * puts a control where the reader cannot reach it, so the page renders and
+   * something on it stops working.
    *
    * Host vocabulary like the lists above, but the host does not have to write
    * it: `interactiveTypesFor(registry)` in the SDK reads what each primitive

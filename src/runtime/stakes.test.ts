@@ -280,15 +280,39 @@ describe("assessStakes on a nested target", () => {
 
     expect(assessment.level).toBe("critical")
     expect(stakeFactor(assessment, "nested-target")?.detail).toBe(
-      "nests a target inside another: loom.action n_inner0 inside loom.card n_card0"
+      "puts a target where the reader cannot reach it: loom.action n_inner0 inside loom.card n_card0"
     )
+  })
+
+  /**
+   * The sentence names the damage rather than the mechanism, and this is the
+   * case that forces it. `loom.card` really does nest one anchor in another;
+   * `loom.article` is a target because its title anchor stretches a `::after`
+   * over the whole card (0068), so the control underneath is unreachable while
+   * the markup stays well formed. A refusal that said "a link inside a link"
+   * would send a reader of that diff hunting for markup that is not there.
+   */
+  it("describes an overlaying ancestor in the same words as a nesting one", () => {
+    const covered = [
+      {
+        nodeId: nodeIdSchema.parse("n_buy0"),
+        type: primitiveTypeSchema.parse("loom.action"),
+        ancestorId: nodeIdSchema.parse("n_story0"),
+        ancestorType: primitiveTypeSchema.parse("loom.article"),
+      },
+    ]
+    const detail = stakeFactor(stakesOf(analysisOf({ nestedTargets: covered }), defaultGatePolicy), "nested-target")
+      ?.detail
+
+    expect(detail).toBe("puts a target where the reader cannot reach it: loom.action n_buy0 inside loom.article n_story0")
+    expect(detail).not.toMatch(/nest|markup|link inside/i)
   })
 
   it("names every pair, because a reviewer fixes nodes and not a count", () => {
     const assessment = stakesOf(analysisOf({ nestedTargets: nested(2) }), defaultGatePolicy)
 
     expect(stakeFactor(assessment, "nested-target")?.detail).toBe(
-      "nests 2 targets inside another: loom.action n_inner0 inside loom.card n_card0; loom.action n_inner1 inside loom.card n_card1"
+      "puts 2 targets where the reader cannot reach them: loom.action n_inner0 inside loom.card n_card0; loom.action n_inner1 inside loom.card n_card1"
     )
   })
 

@@ -71,8 +71,8 @@
        ─────────────────────────────────────────────────────────────── */
     --text-primary: #0a0a0a;
     --text-secondary: #52525b;
-    --text-muted: #8a8a94;
-    --text-placeholder: #8a8a94;
+    --text-muted: #6e6e78;
+    --text-placeholder: #6e6e78;
     --text-inverse: #ffffff;
 
     /* ── Navigation ──────────────────────────────────────────────────
@@ -144,7 +144,7 @@
     --outcome-uninterpreted-bg: #f4f4f5;
     --outcome-uninterpreted-text: #52525b;
     --outcome-inapplicable-bg: #f4f4f5;
-    --outcome-inapplicable-text: #8a8a94;
+    --outcome-inapplicable-text: #6e6e78;
 
     /* ── Edit mode ───────────────────────────────────────────────────
        The outline drawn over a `data-loom-node`. 0010 fixed that edit

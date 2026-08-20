@@ -194,19 +194,28 @@ const discardsLaterWork = ({ discards }: StakeInput): StakeFactor | null => {
 }
 
 /**
- * A target left inside another target, as damage.
+ * A target the reader cannot reach, as damage.
  *
  * `critical`, which under the default refusal floor means refused rather than
  * offered — the strongest thing the Gate does, and the level is the argument.
  * Every other factor here measures a change that might be right: destroying a
  * protected primitive is what a redesign looks like, and discarding work is
  * sometimes the point. This one measures a change that is wrong however it was
- * meant. Nested anchors are invalid HTML, browsers resolve them by dropping a
- * link, and nobody has ever wanted the result.
+ * meant. A control nobody can click is not a control.
+ *
+ * **The damage is unreachability, not nesting**, which is why the sentence says
+ * so. Nested anchors are one way to produce it — invalid HTML, resolved by
+ * browsers dropping a link — and they were the only way until 0068 declared
+ * `loom.article` a target on `href`. That one stretches its title anchor over
+ * the whole card with a `::after`, so a control placed underneath receives
+ * nothing while the markup stays perfectly well formed. "You put a link inside a
+ * link" would send a reader of that diff looking for an `<a>` inside an `<a>`
+ * that is not there. What both cases share is the enclosing node taking the
+ * whole of itself, which is exactly what `isInteractive` reports.
  *
  * Refusal is also the useful disposition rather than merely the severe one: a
- * refused proposal is the one a repairer gets to try again, and "you put a link
- * inside a link" is feedback a model can act on. Confirmation would put the
+ * refused proposal is the one a repairer gets to try again, and "this control
+ * cannot be reached" is feedback a model can act on. Confirmation would put the
  * question to a person who can only answer no.
  *
  * A host that disagrees does not need a knob — it declares no interactive
@@ -217,12 +226,14 @@ const nestedTarget = ({ analysis }: StakeInput): StakeFactor | null => {
   const { nestedTargets } = analysis
   if (nestedTargets.length === 0) return null
 
+  const one = nestedTargets.length === 1
+
   return {
     code: "nested-target",
     level: "critical",
-    detail: `nests ${nestedTargets.length === 1 ? "a target" : `${nestedTargets.length} targets`} inside another: ${nestedTargets
-      .map(describeNestedTarget)
-      .join("; ")}`,
+    detail: `puts ${one ? "a target" : `${nestedTargets.length} targets`} where the reader cannot reach ${
+      one ? "it" : "them"
+    }: ${nestedTargets.map(describeNestedTarget).join("; ")}`,
   }
 }
 
