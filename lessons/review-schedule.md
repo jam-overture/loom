@@ -431,6 +431,51 @@ a month.
 
 ---
 
+## Set O — two days after lesson 12
+
+Interleaved with 01, 04, 05, 07, 10, 11. Six of the eight ask you to compare
+two projections or to derive one — because the argument that lands in a month
+is "these are the same shape", not "each of them is well-designed".
+
+1. Give the sentence *The idea* uses to define a projection, without looking
+   it up. Then apply it to one of the three projections lesson 12 named — say
+   what the source of truth is, what the projection throws away, and what
+   would break if the projection tried to *not* throw it away. *(12)*
+2. The reply schema and the catalogue are both projections. Name three
+   properties they share, and one property one of them has that the other
+   deliberately does not. The last part is the interesting one and it is not
+   "size". *(12)*
+3. `interpretationReplyJsonSchema` is a pure function of a depth argument.
+   Say what stops being true — of provenance, and of caching — if it were
+   allowed to read the current registry. Give both. *(05, 07 for provenance,
+   11 for the caching argument)*
+4. A schema whose keys cannot be enumerated projects `props: undefined` and
+   renders `not declared`. Give the concrete downstream action that differs
+   when a model reads that versus reading `props: none`. Then say why picking
+   the same word for both would fail a rule you first met in a different
+   lesson. *(12, 09 for the rule)*
+5. Depth was not what consumed the grammar budget. Name what did, and give
+   the argument as "positions × cost per position". Then say why depth felt
+   like the answer — the failure mode of estimating cost by depth alone is
+   worth naming, because it comes back on any schema that unrolls. *(12)*
+6. Two prompts differ by four characters at the very end. Give the reason
+   the difference is where it is, and name the property of `buildUserMessage`
+   that puts it there. Then answer: `promptHash` returns two different
+   hashes for those two prompts. Is that a feature or a limitation, and for
+   which consumer of provenance? *(11, 07)*
+7. A model may not name the nodes it inserts. Lesson 04 gave the argument;
+   lesson 11 turned it into a type; lesson 12 turned it into a shape. Say
+   what the shape is, and say which of the three projections lesson 12 named
+   was the one that carried the rule. *(04, 11, 12)*
+8. Why is a half-applied delta worse than a rejected one? *(03)*
+
+Question 2's last part is the one to be least satisfied with a short answer
+to. Both are projections, both are deterministic, both are lossy — the axis
+where they diverge is what the *consumer* is going to do with what they
+receive, and the answer sits on that axis.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -459,3 +504,4 @@ renders this file rather than restating it.
 | L | 2 days after L10 | | |
 | M | 1 week after Part II | | |
 | N | 2 days after L11 | | |
+| O | 2 days after L12 | | |
