@@ -1,18 +1,20 @@
 import { redirect } from "next/navigation"
 
-import { describeAuthProblem, portalAuth } from "@/app/(portal)/_lib/auth/config"
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
 import { safeReturnPath } from "@/app/(portal)/_lib/auth/paths"
+import { portalAuth } from "@/app/(portal)/_lib/auth/config"
+import { authReadout } from "@/app/(portal)/_lib/signin-view"
 
-import { SignInForm } from "./_components/sign-in-form"
+import { SignInHero } from "./_components/sign-in-hero"
 
 /**
  * The only page reachable without a session.
  *
- * When nothing is configured it says which variable is missing, rather than
- * showing a form that could never accept anything. An operator who has just
- * deployed this needs the name of the thing they forgot; "that key was not
- * recognised" would send them looking for a key that does not exist.
+ * The page is a shell now: it gathers the return path, checks that nobody is
+ * already signed in, resolves the deployment's config into the visitor-and-
+ * operator readout, and hands both to the hero. Everything a visitor reads and
+ * everything an operator does about it is in `SignInHero`; that split is what
+ * makes both testable without an async-server-component dance.
  */
 const SignInPage = async ({ searchParams }: { searchParams: Promise<{ from?: string }> }) => {
   const { from } = await searchParams
@@ -21,26 +23,7 @@ const SignInPage = async ({ searchParams }: { searchParams: Promise<{ from?: str
   /** Already signed in: nothing to do here, and a second sign-in is not a page. */
   if ((await currentActor()) !== null) redirect(destination)
 
-  return (
-    <div className="flex max-w-md flex-col gap-6 p-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">sign in</h1>
-        <p className="text-ink-muted text-sm">
-          Every change this portal makes is recorded against whoever asked for it, so it
-          needs to know who you are before it will show you a tree.
-        </p>
-      </div>
-
-      {portalAuth.ok ? (
-        <SignInForm from={destination} disabled={false} />
-      ) : (
-        <>
-          <SignInForm from={destination} disabled={true} />
-          <p className="text-ink-muted text-xs">{describeAuthProblem(portalAuth.error)}</p>
-        </>
-      )}
-    </div>
-  )
+  return <SignInHero readout={authReadout(portalAuth)} destination={destination} />
 }
 
 export default SignInPage

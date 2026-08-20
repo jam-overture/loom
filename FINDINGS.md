@@ -2673,7 +2673,13 @@ Two shapes worth considering when it is taken:
 
 ## 2026-08-20 — the sign-in page is a dead end, and the front door now sends people to it
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom portal` · **Status:** closed
+by portal-07 — the topbar's wordmark is a `<Link>` (to `/` signed-out, to `/portal`
+signed-in, the same shape the docs' wordmark uses), the sign-in page leads with
+a plain sentence about what this is and who it is for rather than an env-var
+name, offers `/portal/demo` as the next action for a visitor without a key, and
+carries a "Back to Loom" link on the page itself. The operator's exact bytes are
+kept behind a disclosure — nothing removed, one click away.
 
 The marketing site's header now carries **Sign in**, pointing at `/portal`, which
 is what "access to the portal is through the marketing site" means once the two
