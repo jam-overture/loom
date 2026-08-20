@@ -51,9 +51,23 @@ That trade was taken because `minimal` is the palette a visitor arrives on and t
 
 **It could not be split per palette.** The site asserts that changing the palette changes the root's variables and *nothing below them* (0049). A backdrop chosen per theme would put the palette's identity into the markup and break the claim the page exists to make.
 
+## The font, which the merge caught
+
+`main` gained the lessons (#104) and portal (#105) conversions while this branch was open, and two of the findings they filed are owned by this lane. They say the conversion was incomplete, and they are right: **`minimal-sans` names Geist and nothing on this surface loaded it**, so every page rendered the fallback — silently, because the fallback stack is a near-neighbour and the page looks entirely deliberate either way.
+
+It matters more here than on any other surface. The portal's measurement separates the two cases precisely: chrome that styles itself can use any minted family name, but **a tree reads `--loom-body-family`, which is the pack's *literal* stack**. This surface is a tree to its edges — the header and footer are nodes, not layout — so every character on it goes through that stack.
+
+Which rules out the bundled loaders. `next/font` mints `__Geist_1a2b3c`; the `geist` package mints `GeistSans`. The pack asks for `Geist`, and a stack is matched by name, so either downloads the file and renders the fallback anyway. `(marketing)/layout.tsx` links the face under its real name, as `(lessons)/layout.tsx` does.
+
+`_lib/font.test.ts` is new and asserts the thing no other test on this site can see — the markup is byte-identical whether or not the face exists. It ties the link to the pack rather than to a string: the family it requests is read from `minimalSansFontPack.bodyFamily`, and the weights from the pack's own two.
+
+**Not verified end to end from this environment.** The URL is right — `curl` returns `@font-face { font-family: 'Geist' … }`, which is exactly the name the pack wants — but headless Chromium here cannot reach it through the sandbox's egress proxy, so `document.fonts` came back empty and **the screenshots below show the fallback, not Geist**. The preview deployment is where it can be confirmed, and it is worth confirming by eye.
+
+One thing worth recording from trying: `document.fonts.check("16px Geist")` returned `true` on a page that had loaded nothing at all. The portal's finding names that trap and it is real — `check()` answers "can this be rendered", and fallback means yes.
+
 ## Tests
 
-`pnpm verify` green — **1407 runtime, 773 application**. Nothing skipped, nothing weakened.
+`pnpm verify` green — **1407 runtime, 819 application** (773 before the merge brought the lessons and portal suites in). Nothing skipped, nothing weakened.
 
 The marketing suite went **52 → 67 tests** on three files. The growth is not padding — most of it is the existing per-palette `describe` block now running against three palettes instead of two, which is the point:
 
@@ -73,7 +87,7 @@ All four taken against one `next start`, full page.
 - [home · editorial](2026-08-20-marketing-the-minimal-theme-home-editorial.png) — unchanged but for the hero backdrop
 - [home · bold](2026-08-20-marketing-the-minimal-theme-home-bold.png) — footer now offers Minimal and Editorial
 
-What the theme does to the page, which is more than a recolour: `bg-surface` equals the canvas white, so every card, the nav, the footer and the pricing tiers are defined by their border instead of by a change of background. The green appears only as the pill's ring, the icon tiles, the check marks, the featured tier's ring and the closing band's tint. The type is Geist, one family separated by weight.
+What the theme does to the page, which is more than a recolour: `bg-surface` equals the canvas white, so every card, the nav, the footer and the pricing tiers are defined by their border instead of by a change of background. The green appears only as the pill's ring, the icon tiles, the check marks, the featured tier's ring and the closing band's tint. The type is one family separated by weight alone — Geist where the face resolves, and these shots were taken before the layout linked it, so what they show is the fallback grotesque the stack falls through to. The shapes and the weights are right; the face is not.
 
 ## Findings
 
