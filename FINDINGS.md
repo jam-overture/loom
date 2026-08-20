@@ -2443,7 +2443,32 @@ heading in the library on the way past is not a change that belongs inside it.
 
 ## 2026-08-20 — `auditRegistry` calls `loom.field` a leaf, and it is one only sometimes
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-02-the-audit-answers-from-every-shape`, which took the first
+of the two ways out — probe more than one configuration — and generalised it:
+[0075](decisions/0075-a-primitive-is-audited-under-every-shape-its-schema-closes-over.md).
+
+`closedChoices` lists the props whose values can be listed rather than invented
+(an enum's members, both values of a boolean, through `.optional()`,
+`.default()` and `.nullable()`), and both probes now run under the default
+configuration plus each choice's values one at a time — the sum, not the
+product. `loom.field` is asked about all eight of its types and places its
+`loom.option` children under `select`, so it is out of `leaves`. The comment in
+`library.test.ts` explaining the wrong answer is gone; the test now says the
+absence is deliberate.
+
+Two things came with it that the finding did not ask for and the same machinery
+made free. **Decoration is now required under every configuration** rather than
+under one, because it is a promise and a primitive that is addressable in seven
+modes and invisible in the eighth is broken in the eighth. And a configuration
+the component **throws** on — a value its own schema accepts — is reported as
+`throwsOnDeclaredProps` rather than poisoning the verdict. Both lists are empty
+for the starter library today, checked.
+
+The one thing 0075 deliberately does not do is probe *combinations*: a primitive
+that places children only when two particular values are set together is still
+called a leaf. The product is unbounded where the sum is not, and the record says
+so rather than leaving it to be found.
 
 Small, and interesting because it is the first primitive in the library where
 the answer depends on a prop.
@@ -2478,7 +2503,25 @@ not this lane's file.
 
 ## 2026-08-20 — the submission audit 0065 deferred now has something to audit
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — **still mine, deliberately not taken on 20 August.** Read and agreed
+with; the shape 0065 sketched still looks right.
+
+Not built this run for a reason worth recording rather than leaving as silence.
+A `submits: true` is only worth adding when something declares it, and the only
+thing that would is `loom.form` in `src/primitives/` — which is `Loom
+primitives`' lane. Shipping the declaration and the audit with no primitive
+using them would be a seam with no user, and crossing the lane to declare it is
+a bigger crossing than the theme one was: that was three documents appended to a
+list nobody else was editing, this is a change to a primitive's definition on the
+day its owner is actively working on forms.
+
+The finding's own assessment holds: 0073 made an untargeted form render disabled
+and say so, which turns the cost of the missing audit into a visible notice on a
+page rather than a button that goes nowhere. It is the next framework unit unless
+a finding outranks it, and the honest version of it wants either the primitives
+routine to declare `submits` on `loom.form` in its own lane first, or the
+maintainer to say the crossing is fine.
 
 0065 named this and deliberately did not build it:
 
@@ -2639,7 +2682,30 @@ the distinction is actually taught. Filed rather than done because
 
 ## 2026-08-20 — a host's own palette is not held to the bar the starter palettes now clear
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-02-the-audit-answers-from-every-shape`, with the second of
+the two shapes it named — the exported `auditPalette` — and explicitly not the
+first:
+[0076](decisions/0076-loom-offers-a-host-the-contrast-bar-and-does-not-impose-it.md).
+
+`src/theme/contrast.ts` now holds what `theme.test.ts` held privately:
+`PALETTE_TEXT_PAIRINGS` (twelve pairings, each naming the primitives that
+render it), `contrastRatio`, `TEXT_CONTRAST_MINIMUM` and
+`auditPalette(palette)`, plus `describePaletteAudit` for a failing test's
+message. All exported from `@loom/runtime`. The library's own suite is now one
+call per shipped palette, so 0074's guarantee and a host's are the same check
+rather than two that can drift.
+
+Two things worth knowing if you use it. It **refuses nothing** — a host that
+never calls it is exactly where it was, which is the trade 0076 makes and
+defends. And `unmeasured` is a real third outcome rather than a pass:
+`contrastRatio` measures three- and six-digit hex and answers `undefined` for
+`rgb()`, `hsl()`, named colours and eight-digit hex, so a host whose palette is
+written in `hsl()` gets told it could not be measured rather than told it
+passed. Assert both `failures` and `unmeasured` empty if you want the guarantee.
+
+The `RenderOutput` diagnostic — the other shape this finding suggested — is
+deferred rather than rejected, and 0076 says where it would go if it is built.
 
 Named in 0074's consequences and repeated here so it is not lost in a record.
 
@@ -2742,3 +2808,92 @@ The second is the one worth wanting and it is blocked on the same question the
 first raises: **what may a page a stranger is looking at spend?** A recorded
 transcript replayed on the page costs nothing and shows the whole loop; a live
 call shows it is real. They are different products and only one of them is free.
+
+---
+
+## 2026-08-20 — the audit calls a component more than once now, and one comment in the portal says otherwise
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+
+Nothing is broken and no test changed. This is a doc comment that became false,
+in a file whose reasoning is otherwise exactly right.
+
+`apps/loom/app/(portal)/_lib/addressing.ts` says:
+
+> The audit calls every registered component once, which is why `auditRegistry`
+> is a function a host calls rather than something `createPrimitiveRegistry` does
+> behind its back.
+
+[0075](decisions/0075-a-primitive-is-audited-under-every-shape-its-schema-closes-over.md)
+makes it call each component once **per configuration its schema closes over**,
+and twice over for the second probe. For the forty-five starter primitives that
+is 320 configurations and 640 calls rather than 90. The conclusion the comment
+draws is unaffected and in fact stronger: doing it once at module scope rather
+than per request is now worth more than it was.
+
+**What to change:** "once" → "once for each shape its props can take", or drop
+the count and keep the reason. Filed rather than fixed because `app/(portal)/`
+is not this lane, and a routine editing its own prose beats mine editing it.
+
+Worth a second's thought while you are there, though it does not change the
+conclusion: the module-scope call is a fixed cost at cold start and it grew by
+roughly seven times. It is synchronous element construction with no DOM, and the
+whole starter library audits in 20ms in this repository's own test run. If a cold
+start ever looks slow this is not the reason, but it is now a line item where it
+was noise.
+
+---
+
+## 2026-08-20 — two files in other lanes had to change so `pnpm verify` would pass
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`, `Loom marketing` ·
+**Status:** open — nothing to fix, but each owner should know their file was opened
+
+`src/primitives/library.test.ts` asserts the exact list `auditRegistry` reports
+as leaves, and that list is what
+[0075](decisions/0075-a-primitive-is-audited-under-every-shape-its-schema-closes-over.md)
+changed. `"loom.field"` is removed from the expected list, and the comment above
+it — which explained, correctly, that the entry was a false leaf produced by the
+probe and had been filed for the framework routine — is replaced by one saying
+the absence is deliberate and naming the record.
+
+That is the whole diff in your lane: one string and one comment, in an assertion
+whose *subject* is a framework behaviour. Nothing about any primitive changed,
+and `loom.field` itself was not opened.
+
+The re-probe under the new configurations moved exactly one type across the whole
+starter library, which is the reassuring outcome: no primitive turned out to
+decorate conditionally, none threw on a value its own schema accepts, and no
+declared slot was found to be placed only under some prop. `notDecorated`,
+`unplacedSlots` and the new `throwsOnDeclaredProps` are all still empty.
+
+**`Loom marketing`:** `app/(marketing)/_lib/copy.ts` says `decisions: "74"` and
+`facts.test.ts` checks it against the contents of `decisions/`, so the two
+records this run adds turned it red. Bumped to `"76"`. This is the fourth time
+it has happened to a lane that is not yours and it is already open as a finding
+of its own (19 August, *the marketing site's checked numbers make every other
+lane's run go red*) — repeated here only so the count of occurrences is
+visible. Deriving the number at build time rather than asserting a literal
+would end it; that is your call and your file.
+
+---
+
+## 2026-08-20 — no framework gaps this run, and the migration is still done
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Recorded because absence is worth knowing, the way the portal routine records it.
+
+The 20 August framework run needed nothing from outside `src/` that was not
+already exported, and it introduced no seam it could not test with fixtures. The
+one lane crossing (`src/primitives/library.test.ts`, above) is an assertion about
+framework behaviour rather than about a primitive, and it is filed.
+
+The migration the framework brief still names as its next unit — 0067's one
+application — **is done**, and has been since #98. `apps/loom` exists with all
+four route groups, `apps/portal` and `apps/docs` are retired, sign-in is at the
+`(portal)` boundary in `proxy.ts`, and one Vercel project is rooted at
+`apps/loom`. Nothing in the tree is half-migrated. Noted here because a fresh
+session reading that brief cold will go looking for the work first, and the
+answer is in the git log rather than in this file.
+

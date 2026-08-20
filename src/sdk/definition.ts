@@ -1,6 +1,6 @@
 import type { ZodType, ZodTypeAny, ZodTypeDef } from "zod"
 
-import { catalogueFields, type CataloguedProp } from "../catalogue.js"
+import { catalogueFields, closedChoices, type CataloguedProp, type ClosedChoice } from "../catalogue.js"
 import type { InteractiveWhen } from "../interactivity.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
 import type { LoomPrimitive } from "../render/primitive.js"
@@ -72,6 +72,13 @@ export type PrimitiveEntry = {
   readonly slots: readonly string[]
   readonly component: LoomPrimitive
   readonly declaredProps: readonly CataloguedProp[] | undefined
+  /**
+   * The props whose accepted values can be listed, so the conformance probe can
+   * ask the primitive what it does under each one rather than under whichever
+   * shape it happens to take with no props at all (0075). Empty for the
+   * primitive whose rendering does not turn on a closed choice, which is most.
+   */
+  readonly choices: readonly ClosedChoice[]
   /** Declared strings, keys erased alongside the props type. Empty when none. */
   readonly text: PrimitiveText<string>
   /** Absent for the ordinary primitive, which is not a target at all. */
@@ -141,5 +148,6 @@ export const definePrimitive = <TProps extends JsonObjectView, TText extends str
    */
   component: definition.component as LoomPrimitive,
   declaredProps: catalogueFields(definition.props as ZodTypeAny),
+  choices: closedChoices(definition.props as ZodTypeAny),
   validate: (props) => verdictFor(definition.props, props),
 })

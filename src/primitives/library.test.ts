@@ -303,13 +303,12 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.faq",
       /**
-       * A false leaf, and worth knowing rather than working around: the probe
-       * renders a primitive once, and a `loom.field` of the default type places
-       * no children because only a `select` has any. Filed for the framework
-       * routine — the audit classifies by one configuration, and this is the
-       * first primitive whose answer depends on a prop.
+       * `loom.field` is deliberately absent. It places children only when its
+       * `type` is `select`, and the probe now asks it under every value its own
+       * enum declares (0075) rather than under the default alone — so the one
+       * primitive here whose answer depends on a prop is no longer reported as
+       * having nowhere to put a child node.
        */
-      "loom.field",
       "loom.perk",
       "loom.divider",
     ])

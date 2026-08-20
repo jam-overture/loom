@@ -42,6 +42,30 @@ const leaf = definePrimitive({
   component: ({ loom }: LoomPrimitiveProps) => createElement("span", { ...loom.editable }, "fixed"),
 })
 
+/**
+ * The shape 0075 exists for: a primitive that is a container under one prop
+ * value and a leaf under another, which the probe used to classify by whichever
+ * shape it happened to take with no props at all.
+ */
+const conditional = definePrimitive({
+  type: "loom.conditional",
+  description: "places its children only when asked to",
+  props: z.object({ kind: z.enum(["plain", "listing"]).optional() }),
+  component: ({ loom, props, children }) =>
+    createElement("div", { ...loom.editable }, props.kind === "listing" ? children : null),
+})
+
+const brittle = definePrimitive({
+  type: "loom.brittle",
+  description: "throws on a value its own schema accepts",
+  props: z.object({ tone: z.enum(["calm", "loud"]).optional() }),
+  component: ({ loom, props, children }) => {
+    if (props.tone === "loud") throw new Error("no rendering for tone loud")
+
+    return createElement("div", { ...loom.editable }, children)
+  },
+})
+
 describe("auditRegistry", () => {
   it("finds nothing to report for primitives that all decorate", () => {
     const audit = auditRegistry(registryOf(testDefinitions))
@@ -94,6 +118,36 @@ describe("auditRegistry", () => {
     expect(audit.unplacedSlots).toEqual([])
     expect(audit.leaves).toEqual([])
   })
+
+  it("does not call a primitive a leaf because its default shape places nothing", () => {
+    const audit = auditRegistry(registryOf([conditional, leaf]))
+
+    expect(audit.leaves).toEqual(["loom.leaf"])
+  })
+
+  it("names a primitive that threw on props built from its own schema", () => {
+    const audit = auditRegistry(registryOf([brittle]))
+
+    expect(audit.throwsOnDeclaredProps).toEqual([
+      {
+        type: "loom.brittle",
+        failures: [{ props: { tone: "loud" }, reason: "no rendering for tone loud" }],
+      },
+    ])
+  })
+
+  /** A throw under one shape is a fault of its own; it does not spoil the verdict. */
+  it("still judges the primitive that threw, from the shapes that rendered", () => {
+    const audit = auditRegistry(registryOf([brittle]))
+
+    expect(audit.notDecorated).toEqual([])
+    expect(audit.notProbeable).toEqual([])
+    expect(audit.leaves).toEqual([])
+  })
+
+  it("has nothing to report for a library that renders under every shape it accepts", () => {
+    expect(auditRegistry(registryOf(testDefinitions)).throwsOnDeclaredProps).toEqual([])
+  })
 })
 
 describe("describeRegistryAudit", () => {
@@ -110,6 +164,19 @@ describe("describeRegistryAudit", () => {
 
     expect(described).toContain("declares aside and does not place it")
     expect(described).toContain("loom.leaf: spreads loom.editable; renders no children (a leaf)")
+  })
+
+  it("says how many shapes a leaf was asked about, so the claim can be weighed", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([conditional])))
+
+    expect(described).toContain("renders its children")
+    expect(describeRegistryAudit(auditRegistry(registryOf([leaf])))).not.toContain("configurations")
+  })
+
+  it("names the props it threw on, which is the whole reproduction", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([brittle])))
+
+    expect(described).toContain('threw on {"tone":"loud"} (no rendering for tone loud)')
   })
 })
 

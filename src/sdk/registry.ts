@@ -44,6 +44,8 @@ export type RegisteredPrimitive = {
   readonly slots: readonly SlotName[]
   readonly component: LoomPrimitive
   readonly declaredProps: PrimitiveEntry["declaredProps"]
+  /** The props the conformance probe can vary, from the declared schema (0075). */
+  readonly choices: PrimitiveEntry["choices"]
   /** Declared strings in the author's language, before any dictionary. */
   readonly text: PrimitiveText<string>
   /** Whether it renders a target, and what makes it one. Absent for most. */
@@ -137,6 +139,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     slots,
     component: entry.component,
     declaredProps: entry.declaredProps,
+    choices: entry.choices,
     text: entry.text,
     interactive: entry.interactive,
     validate: entry.validate,
