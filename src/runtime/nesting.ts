@@ -37,7 +37,7 @@ export const interactivePredicateFor = (types: InteractiveTypes): InteractivePre
   }
 }
 
-/** One target sitting inside another, named by the node a browser will drop. */
+/** One target sitting inside another, named by the node the reader cannot reach. */
 export type NestedTarget = {
   readonly nodeId: NodeId
   readonly type: PrimitiveType

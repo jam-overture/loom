@@ -67,8 +67,11 @@ export type ChangeAnalysis = {
   readonly removedPrimitiveTypes: readonly PrimitiveType[]
   readonly configuredPropKeys: readonly string[]
   /**
-   * Targets this change leaves inside another target — invalid markup, and a
-   * link a reader cannot use.
+   * Targets this change leaves inside another target, which is a control the
+   * reader cannot use. Sometimes because the markup is invalid and a browser
+   * drops the inner link; sometimes because the enclosing node covers itself
+   * with an overlay and the click never arrives (0068). Same damage either way,
+   * and only the outer node's own declaration distinguishes it.
    *
    * Measured on the resulting tree rather than on the operations, because every
    * operation kind can produce it and only one of them looks like it does:

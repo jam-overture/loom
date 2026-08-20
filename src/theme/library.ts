@@ -33,7 +33,8 @@ export const editorialPalette: Palette = paletteSchema.parse({
     "bg-overlay": "#ffffff",
     "fg-default": "#0a0a0a",
     "fg-muted": "#525252",
-    "fg-subtle": "#a3a3a3",
+    /** Third step of the ink ramp, and it still has to be readable (0072). */
+    "fg-subtle": "#6a6a6a",
     "fg-on-accent": "#ffffff",
     accent: "#4a5b78",
     "accent-strong": "#34425a",
@@ -58,7 +59,8 @@ export const boldPalette: Palette = paletteSchema.parse({
     "bg-overlay": "#1a1a1a",
     "fg-default": "#f5f5f5",
     "fg-muted": "#a3a3a3",
-    "fg-subtle": "#6b6b6b",
+    /** Third step of the ink ramp, and it still has to be readable (0072). */
+    "fg-subtle": "#8a8a8a",
     "fg-on-accent": "#0a0a0a",
     accent: "#ffd400",
     "accent-strong": "#e0b800",
@@ -196,7 +198,8 @@ export const minimalPalette: Palette = paletteSchema.parse({
     /** Never pure black. #000 on #fff is a glare a printed page never produces. */
     "fg-default": "#0a0a0a",
     "fg-muted": "#52525b",
-    "fg-subtle": "#8a8a94",
+    /** Third step of the ink ramp, keeping this palette's cool cast (0072). */
+    "fg-subtle": "#6e6e78",
     "fg-on-accent": "#ffffff",
     /** Black, so the green is a highlight and not the biggest thing on the page. */
     accent: "#0a0a0a",
