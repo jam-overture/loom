@@ -1,3 +1,6 @@
+import { entryPoints } from "./entry-points"
+import { apiNavLabelFor, apiSlugFor } from "./api/model"
+
 /**
  * The site's shape, in one place.
  *
@@ -8,29 +11,65 @@
  * broken link — `content.test.ts` fails on either, which is what keeps the two
  * halves honest without anyone remembering to check.
  *
- * Only sections that have pages are listed. Three of §4c's five — the runtime,
- * the API reference and Architecture — are not written yet, and an empty group
- * in a sidebar is a promise the site cannot keep. They arrive with their pages.
+ * Two kinds of section live here and the difference is which of those two
+ * checks applies. A **written** section is prose in MDX, one directory per
+ * page. A **generated** section has no files at all: its pages come from
+ * something the repository already knows, and asking for a `page.mdx` behind
+ * one would be asking for the copy that generating it exists to avoid.
+ *
+ * Architecture, the last of §4c's five sections, is not here yet — an empty
+ * group in a sidebar is a promise the site cannot keep, so a section arrives
+ * with its pages.
  */
 
 export type DocsPage = {
   /** The last path segment, and the directory name under `app/docs/<section>/`. */
   readonly slug: string
+  /** What the rail and the pager call it. */
   readonly title: string
   /** One sentence. It is the page's `<meta name="description">` and its pager caption. */
   readonly summary: string
+  /** The page's own heading, where it is longer than the rail can carry. */
+  readonly heading?: string
 }
 
 export type DocsSection = {
   readonly slug: string
   readonly title: string
+  /** Whether a person writes these pages or the repository does. */
+  readonly source: "written" | "generated"
   readonly pages: readonly DocsPage[]
 }
 
-export const docsSections: readonly DocsSection[] = [
+/**
+ * The API reference: one page per published entry point, and nothing typed
+ * twice.
+ *
+ * The list is `entryPoints`, which `entry-points.test.ts` already holds against
+ * the runtime's own `exports` map — so a door that opens in `package.json` and
+ * is missing from the rail is a red test rather than a page nobody can find.
+ * What is *behind* each door is generated separately and read only by the page;
+ * the rail deliberately does not import it, because the sidebar is a client
+ * component and three hundred kilobytes of signatures have no business in a
+ * browser.
+ */
+const apiReferenceSection: DocsSection = {
+  slug: "api-reference",
+  title: "API reference",
+  source: "generated",
+  pages: entryPoints.map((entry) => ({
+    slug: apiSlugFor(entry.specifier),
+    title: apiNavLabelFor(entry.specifier),
+    summary: entry.summary,
+    heading: entry.specifier,
+  })),
+}
+
+const writtenSections: readonly DocsSection[] = [
   {
     slug: "getting-started",
     title: "Getting started",
+    source: "written",
     pages: [
       {
         slug: "introduction",
@@ -59,6 +98,7 @@ export const docsSections: readonly DocsSection[] = [
   {
     slug: "building-with-loom",
     title: "Building with Loom",
+    source: "written",
     pages: [
       {
         slug: "primitives",
@@ -77,6 +117,7 @@ export const docsSections: readonly DocsSection[] = [
   {
     slug: "the-runtime",
     title: "The runtime",
+    source: "written",
     pages: [
       {
         slug: "proposing-a-change",
@@ -93,6 +134,11 @@ export const docsSections: readonly DocsSection[] = [
     ],
   },
 ]
+
+export const docsSections: readonly DocsSection[] = [...writtenSections, apiReferenceSection]
+
+/** The written sections, for the checks that are about files on disk. */
+export const writtenDocsSections: readonly DocsSection[] = writtenSections
 
 export type DocsEntry = {
   readonly href: string
