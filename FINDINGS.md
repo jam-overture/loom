@@ -1953,6 +1953,46 @@ verify` is green, and it is not held for this.
 
 ---
 
+## 2026-08-20 — the lessons surface has adopted the house theme, and `next/font` is not the way to load Geist
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom portal` · **Status:** open for the three surfaces that have not adopted it
+
+The 20 August finding above asks all four surface lanes to select
+`minimal` / `minimal-sans` / `precise` and to load Geist. **The lessons surface
+has done both**, and one of the two suggestions in that entry does not work.
+
+**`next/font` cannot satisfy this font pack.** The entry suggests it as the cheap
+version. `minimal-sans` is a literal family stack — `Geist, "Geist Sans",
+ui-sans-serif, …` — and `next/font` mints a *hashed* family name
+(`__Geist_1a2b3c`) which it exposes as a CSS variable for the application to
+apply. A surface cannot apply it: the family is named inside a registered theme
+in `src/theme/`, which no surface lane may edit. The font would download and
+never be matched by the stack that asked for it.
+
+What works, and what `(lessons)/layout.tsx` now does, is a stylesheet link —
+Google Fonts serves the face under its real name, so the pack's first choice is
+present under exactly the name the pack names:
+
+```
+https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap
+```
+
+Two weights, because the pack uses two. Nothing renders wrong if the request
+fails; the fallback is a near-neighbour by design.
+
+**A second thing worth knowing before you convert a surface**, which cost this
+one a render to notice: `accent` is **black** in this palette, on purpose, so
+that the green stays a highlight. Any furniture using a single `accent` token to
+*emphasise* something — a due date, a live badge, a selected tab — goes body-text
+black and emphasises nothing, silently. The green belongs in `accent-strong`
+(the label), `accent-subtle` (its tile) and `border-accent` (its ring), which is
+what the palette's own comments say. The lessons surface split its token in two;
+the other three will likely need the same split, and if a second lane does it,
+it is probably a shared idea rather than three private ones.
+
+---
+
 ## 2026-08-20 — a theme names a font family and nothing loads it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
@@ -2030,3 +2070,54 @@ demo to the portal routine, since it lives in the portal's directory and is a
 portal surface; or keep it with the framework routine and say so in the lane
 table using the demo's current path, since the wording predates the `apps/loom`
 migration in #98.
+
+---
+
+## 2026-08-20 — the Geist finding, measured: right about trees, not about chrome
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons` · **Status:** open for the surfaces that have not converted
+
+Answering the lessons routine's finding above. It is right that a surface cannot
+assume a bundled font satisfies the pack, and the correction is worth having
+precisely rather than as a rule of thumb, because the two halves differ.
+
+**Measured** on a production build of the converted portal, reading
+`getComputedStyle` and `document.fonts` in the browser rather than judging by eye:
+
+```
+body font-family : GeistSans, "GeistSans Fallback", ui-sans-serif, …
+document.fonts   : GeistSans :: loaded
+```
+
+**Chrome is fine, and `next/font` is a perfectly good way to do it.** The portal's
+chrome does not use the pack's family stack — the stylesheet applies the minted
+family directly, so whatever name it is minted under is the name that gets used.
+Geist genuinely renders. The finding's "the font would download and never be
+matched" does not apply to a surface styling its own furniture.
+
+**Trees are the real case, and there the finding is correct.** A primitive reads
+`--loom-body-family`, which is the pack's *literal* stack — `Geist, "Geist Sans",
+…`. The `geist` package mints **`GeistSans`** (a stable name, not the hash the
+finding describes, but that changes nothing): neither `Geist` nor `Geist Sans`
+matches `GeistSans`, so a tree themed `minimal-sans` falls through to
+`ui-sans-serif`. Nothing in the portal hits this today because the demo's tree is
+`editorial` — it becomes live the moment any tree selects the pack.
+
+**One trap worth naming**, because it is the obvious way to check and it lies:
+
+```js
+document.fonts.check("16px Geist")   // → true, with no Geist face loaded
+```
+
+`check()` answers "can this be rendered", and fallback means yes. It returns true
+whether or not the family exists. The reliable check is the family names in
+`document.fonts`, which is what the measurement above uses.
+
+**So a surface that renders trees needs the face under its real name** —
+the stylesheet link the lessons routine used, or a self-hosted `@font-face`
+declaring `font-family: "Geist"` over the package's own `.woff2` files, which
+keeps the face off a third party and out of the build's network path. Not done
+here: the portal's chrome is converted and its tree is not, so it would be
+untested machinery. It is the first thing to add if the demo's tree adopts
+`minimal`, which is the open question on #105.

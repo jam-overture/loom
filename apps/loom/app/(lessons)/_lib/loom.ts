@@ -42,14 +42,32 @@ export const courseRegistry: PrimitiveRegistry = built.value
 export const courseThemes: ThemeRegistry = createThemeRegistry()
 
 /**
- * Serif, comfortable spacing, and the quieter of the two palettes. A course is
- * read for twenty minutes at a time, which is a different job from a landing
- * page, and this is the theme in the starter library that admits it.
+ * The house theme, selected here as the surface half of the work that registered
+ * it (#103, and the finding it filed against all four surface lanes).
+ *
+ * The course was on `editorial` because it was the quieter of the two palettes
+ * available when this surface was built, and a course is read for twenty minutes
+ * at a time rather than scanned. `minimal` is the better answer to that same
+ * argument and a stronger one for this surface in particular:
+ *
+ * - **White paper, black ink, and the green only as a highlight.** A review
+ *   question is the thing on the page; a palette that tints the paper puts
+ *   something else there. The one place accent now appears on this surface is
+ *   what is due today, which is the one thing worth pointing at.
+ * - **Outlined rather than filled.** `bg-surface` is the canvas white, so the
+ *   answer box and the sitting panel are defined by a hairline instead of a
+ *   change of ground — a question and a page that hold the same paper.
+ * - **`precise` widens the gutters and tightens the radii.** Space does the
+ *   work, which is what the reading column wanted anyway.
+ *
+ * One face at two weights, which is `minimal-sans`'s own argument: heading and
+ * body separated by weight rather than by family. The lessons layout links Geist
+ * so the pack's first choice is actually present — see the note there.
  */
 export const COURSE_THEME: JsonObject = {
-  palette: "editorial",
-  fontPack: "editorial-serif",
-  stylePreset: "comfortable",
+  palette: "minimal",
+  fontPack: "minimal-sans",
+  stylePreset: "precise",
 }
 
 export const heading = (ids: IdFactory, level: number, text: string, props: JsonObject = {}): LoomNode =>

@@ -35,6 +35,22 @@ describe("the course, composed", () => {
     }
   })
 
+  it("wears the house theme, and wears the two things that make it that theme", () => {
+    const style = COURSE_THEME_STYLE as Record<string, string>
+
+    /**
+     * Outline-first: the fill behind a card is the page's own white, so every
+     * panel on this surface is a hairline rather than a change of ground. Flip
+     * the surface back to a palette that fills its cards and this fails.
+     */
+    expect(style["--loom-bg-surface"]).toBe(style["--loom-bg-canvas"])
+
+    /** One face at two weights, which is what `minimal-sans` argues for. */
+    expect(style["--loom-heading-family"]).toBe(style["--loom-body-family"])
+    expect(style["--loom-heading-family"]).toContain("Geist")
+    expect(style["--loom-heading-weight"]).not.toBe(style["--loom-body-weight"])
+  })
+
   it("mounts one theme for the whole surface, in variables rather than colours", () => {
     const variables = Object.keys(COURSE_THEME_STYLE)
 
