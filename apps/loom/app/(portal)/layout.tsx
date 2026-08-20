@@ -1,3 +1,4 @@
+import { GeistSans } from "geist/font/sans"
 import type { Metadata, Viewport } from "next"
 
 import { currentActor } from "@/app/(portal)/_lib/auth/identity"
@@ -48,7 +49,18 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const signedIn = (await currentActor()) !== null
 
   return (
-    <html lang="en">
+    /*
+     * The `minimal-sans` font pack names Geist first, and a font pack carries a
+     * family name rather than a file — Loom never fetches a font, deliberately.
+     * So the family only becomes real where a surface loads it, which is here.
+     *
+     * The `geist` package rather than `next/font/google`, because that one
+     * fetches from a font CDN at build time: a network dependency in `next build`
+     * turns a deploy red for a reason that has nothing to do with the change
+     * being deployed. This ships the files with the dependency and binds them to
+     * `--font-geist-sans`, which `globals.css` reads.
+     */
+    <html lang="en" className={GeistSans.variable}>
       <body className="min-h-screen">
         {/*
          * First in the tab order, and off-screen until it is focused. The

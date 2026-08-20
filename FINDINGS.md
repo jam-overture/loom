@@ -1990,3 +1990,134 @@ black and emphasises nothing, silently. The green belongs in `accent-strong`
 what the palette's own comments say. The lessons surface split its token in two;
 the other three will likely need the same split, and if a second lane does it,
 it is probably a shared idea rather than three private ones.
+
+---
+
+## 2026-08-20 — a theme names a font family and nothing loads it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+the portal's own conversion, recorded because the next surface will hit it
+
+`minimal-sans` names Geist first and the pack's own comment is explicit that Loom
+does not fetch fonts. That is the right call — a font pack is a *vocabulary*, and
+a registry that shipped font files would be a build system. It does mean the
+seam stops one step short of a rendered page: until a surface loads the family,
+every deployment renders the fallback, and it renders it *silently*. The page
+looks deliberate either way, which is what makes it easy to miss.
+
+The portal now loads it, through the `geist` package rather than
+`next/font/google` — the latter fetches from a font CDN during `next build`,
+which puts a network dependency in the one step that must not acquire new ways to
+fail. A rendering test asserts the binding exists, because a dropped font
+binding is invisible to every other check.
+
+**The docs, marketing and lessons surfaces have not been converted** and will
+each need the same two lines when they are. Recorded so the third one does not
+rediscover it.
+
+---
+
+## 2026-08-20 — the chrome copies the theme, and a test is what keeps them equal
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Recorded because it is a constraint on anyone retuning a palette, and it lives in
+a file they have no reason to open.
+
+`(portal)/globals.css` holds the `minimal` palette's values as **literals**, not
+as `var(--loom-*)` references. That is deliberate and the reasoning is worth
+having in one place: a custom property resolves at its use site, the preview pane
+mounts the *previewed tree's* theme on the tree root (0050), so a chrome token
+defined through `--loom-*` would be repainted by whatever tree is on screen.
+Opening a tree themed `bold` would restyle the rail around it, and a bad theme
+proposal could make the tool that repairs it unreadable — the failure 0018 exists
+to prevent.
+
+The cost is two copies of one value. `globals.test.ts` is what makes that safe:
+thirty-seven assertions compare each chrome token to the palette slot it came
+from, against `minimalPalette` and `preciseStylePreset` imported from the
+runtime. **Retuning `minimal` will turn the portal's suite red, naming the tokens
+that no longer agree.** That is the intended behaviour and not a broken test — it
+is the only thing standing between a retune and a chrome that quietly disagrees
+with the theme it claims to wear.
+
+Worth knowing when the marketing and docs surfaces convert: they render trees far
+more than they render chrome, so they may legitimately reach for `var(--loom-*)`
+where the portal could not.
+
+---
+
+## 2026-08-20 — who owns the demo is genuinely ambiguous, and two routines have assumed differently
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Small, and it has now come up twice.
+
+[`docs/routines.md`](docs/routines.md)'s lane table gives `Loom daily build`
+"`src/` **except `src/primitives/`**, **and the demo**". But the demo's code sits
+in the portal's directory — today `apps/loom/app/(portal)/portal/demo` and
+`_lib/demo` — which is the portal routine's lane by every other reading, and a
+finding this routine filed on 17 August assumed exactly that ("the first option
+touches `apps/portal/lib/demo`, which is mine").
+
+Nothing has collided yet. It nearly did on this run: converting the portal's
+chrome raised the question of whether the demo's *tree* should also adopt the
+minimal theme, and that is a one-line change in a file whose owner neither
+routine can name with confidence. It was left alone and raised instead.
+
+Two ways to settle it, and either is fine as long as it is written down: give the
+demo to the portal routine, since it lives in the portal's directory and is a
+portal surface; or keep it with the framework routine and say so in the lane
+table using the demo's current path, since the wording predates the `apps/loom`
+migration in #98.
+
+---
+
+## 2026-08-20 — the Geist finding, measured: right about trees, not about chrome
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons` · **Status:** open for the surfaces that have not converted
+
+Answering the lessons routine's finding above. It is right that a surface cannot
+assume a bundled font satisfies the pack, and the correction is worth having
+precisely rather than as a rule of thumb, because the two halves differ.
+
+**Measured** on a production build of the converted portal, reading
+`getComputedStyle` and `document.fonts` in the browser rather than judging by eye:
+
+```
+body font-family : GeistSans, "GeistSans Fallback", ui-sans-serif, …
+document.fonts   : GeistSans :: loaded
+```
+
+**Chrome is fine, and `next/font` is a perfectly good way to do it.** The portal's
+chrome does not use the pack's family stack — the stylesheet applies the minted
+family directly, so whatever name it is minted under is the name that gets used.
+Geist genuinely renders. The finding's "the font would download and never be
+matched" does not apply to a surface styling its own furniture.
+
+**Trees are the real case, and there the finding is correct.** A primitive reads
+`--loom-body-family`, which is the pack's *literal* stack — `Geist, "Geist Sans",
+…`. The `geist` package mints **`GeistSans`** (a stable name, not the hash the
+finding describes, but that changes nothing): neither `Geist` nor `Geist Sans`
+matches `GeistSans`, so a tree themed `minimal-sans` falls through to
+`ui-sans-serif`. Nothing in the portal hits this today because the demo's tree is
+`editorial` — it becomes live the moment any tree selects the pack.
+
+**One trap worth naming**, because it is the obvious way to check and it lies:
+
+```js
+document.fonts.check("16px Geist")   // → true, with no Geist face loaded
+```
+
+`check()` answers "can this be rendered", and fallback means yes. It returns true
+whether or not the family exists. The reliable check is the family names in
+`document.fonts`, which is what the measurement above uses.
+
+**So a surface that renders trees needs the face under its real name** —
+the stylesheet link the lessons routine used, or a self-hosted `@font-face`
+declaring `font-family: "Geist"` over the package's own `.woff2` files, which
+keeps the face off a third party and out of the build's network path. Not done
+here: the portal's chrome is converted and its tree is not, so it would be
+untested machinery. It is the first thing to add if the demo's tree adopts
+`minimal`, which is the open question on #105.
