@@ -1597,3 +1597,75 @@ copied into the docs site, and should not be. An example's destination is
 illustrative; a site's navigation is not. Two different problems that happen to
 share a schema.
 
+---
+
+## 2026-08-19 — nothing in the library can say `ChangeInterpreter` inside a sentence
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:** open
+
+The lessons surface renders the course's prose by composing registered
+primitives, as 0067 requires. That works for headings, paragraphs, cards and
+stacks. It does not work for the thing a course about a codebase does in almost
+every sentence: naming a symbol.
+
+A Loom text node is a string (0001), `loom.prose` takes its text as child nodes,
+and no primitive in the starter library marks a span *inside* a paragraph. So
+markdown's `` ` ``, `**` and `*` have three possible fates on this surface and
+all three are bad:
+
+| what the surface could do | what the reader sees |
+| --- | --- |
+| render the markers literally | `` `ChangeInterpreter` `` with the backticks on the page |
+| strip them (**what it does today**) | `ChangeInterpreter` in the same face as the words around it |
+| wrap the span in `loom.badge` | a pill in the middle of a sentence, which is not what a badge means |
+
+The evidence is the course's own text rather than a hypothetical: review set N
+names `ChangeInterpreter`, `ProposedChange`, `TreeDelta`, `IdFactory`,
+`ModelClient` and `PolicyContext`, and every one of those is a question about the
+difference between two named things. Set L's questions italicise the word that
+carries the distinction. Both are lost.
+
+This is a gap in the library, not in the surface, and it is a gap the docs site
+will hit the moment its prose stops being MDX. What it asks for is small and
+awkward: something like `loom.code` and `loom.emphasis` as inline leaves that a
+paragraph may hold, which raises the question of whether `loom.prose` should
+accept element children at all and what a delta addressing half a sentence
+means. That is a decision, not a patch — which is why it is filed here rather
+than worked around locally.
+
+The surface strips the markers meanwhile, and says so in `_lib/text.ts`.
+
+---
+
+## 2026-08-19 — `sequentialIdFactory` takes a namespace it cannot mint an id from
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+`sequentialIdFactory(namespace)` interpolates the namespace into every id and
+validates the *result*: `nodeIdSchema.parse(`n_${namespace}${n}`)`. Node ids are
+`n_[0-9a-z]{1,32}`, so a namespace with a hyphen, a capital or more than about
+thirty characters is accepted by the factory and then fails on first use.
+
+What that looks like from the caller's side — this surface named its fragments
+`set-n-q1`, which reads like exactly the debugging affordance the namespace is
+documented to be:
+
+```
+ZodError: [ { "validation": "regex", "code": "invalid_string", "path": [] } ]
+ ❯ Object.nodeId src/ids.ts:95
+ ❯ buildText src/tree/builders.ts:31
+ ❯ heading app/(lessons)/_lib/loom.ts:59
+```
+
+The message names neither the namespace, nor the factory, nor the rule. It
+surfaces inside whichever `buildText` happens to run first, which in a page
+builder is several frames and one file away from the mistake, and the same
+factory will mint tree and delta ids that fail the same way at different times.
+
+Cheap fix, and the same shape as the rest of the repository: validate the
+namespace where it is given, and say what it must be. Everything else about the
+factory is fine — it is deterministic, per-kind, and the namespace does what it
+says once it is legal.
+
+The lessons surface sanitises its own keys meanwhile, with a comment pointing
+here.

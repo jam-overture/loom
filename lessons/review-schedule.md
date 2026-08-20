@@ -437,6 +437,12 @@ Keep it lightweight — a note per set with the date, and any question where you
 were **confident and wrong**. That list is your real study plan; everything else
 you already know.
 
+If you would rather not keep it by hand, `/lessons/review` keeps exactly this
+table: it reads the sets below, works out which is due from the days you worked
+through each lesson, and records the confidence you gave *before* each reveal
+alongside how it actually went. The questions are these questions — that page
+renders this file rather than restating it.
+
 | Set | Do it on | Done | Confident-and-wrong |
 | --- | --- | --- | --- |
 | A | 2 days after L01 | | |
