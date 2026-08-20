@@ -38,6 +38,52 @@ export const HOW_IT_WORKS: SiteRoute = {
 export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS]
 
 /**
+ * The rest of the product, which is the rest of this same application.
+ *
+ * The four surfaces are one Next application and a route group contributes
+ * nothing to a URL (0067), so `/docs` and `/portal` are paths on this origin
+ * rather than other sites to link out to — and the marketing site holding `/`
+ * is what makes it the front door rather than one of four things that link to
+ * each other (0070). A visitor should be able to arrive here, read, follow the
+ * documentation and open the portal without once feeling they have left.
+ *
+ * They are listed here and not in `SITE_ROUTES` because the two are different
+ * kinds of thing and the tests depend on the difference: a site route is a page
+ * this lane builds and must have a builder and a `page.tsx`, and a surface is a
+ * destination this lane may only point at. Pointing at one is the whole
+ * contract — the path is the other lane's front door, so it stays correct
+ * across anything that lane does behind it.
+ */
+export type Surface = {
+  readonly path: string
+  /** What the link says. Plain words: a visitor has never heard of any of this. */
+  readonly label: string
+  /** One sentence for the front door's band, in the same plain words. */
+  readonly blurb: string
+  /** Whether a visitor who is not signed in is sent to a sign-in page first. */
+  readonly guarded: boolean
+}
+
+export const DOCS: Surface = {
+  path: "/docs",
+  label: "Docs",
+  blurb:
+    "How to install it, connect your own components, and get your first change approved. Nothing to sign up for.",
+  guarded: false,
+}
+
+export const PORTAL: Surface = {
+  path: "/portal",
+  label: "Portal",
+  blurb:
+    "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts it back. Signing in is required, and who may sign in is set by whoever runs the deployment.",
+  guarded: true,
+}
+
+/** Everywhere else in the product, in the order the front door offers them. */
+export const PRODUCT_SURFACES: readonly Surface[] = [DOCS, PORTAL]
+
+/**
  * The palettes a visitor may see the site in.
  *
  * These are the registered theme triples, and switching between them is the
@@ -143,6 +189,18 @@ export const internalHref = (origin: string, path: string, theme?: SiteThemeName
 
   return url.toString()
 }
+
+/**
+ * A link into another surface of the product.
+ *
+ * The palette is deliberately **not** carried across. It is this site's
+ * demonstration — the same tree wearing three registered triples — and the
+ * documentation and the portal each dress themselves; a `?theme=bold` arriving
+ * at a surface that does not read it is a parameter that means nothing and
+ * looks like it means something.
+ */
+export const surfaceHref = (origin: string, surface: Surface): string =>
+  internalHref(origin, surface.path)
 
 /** Where the site points when it points at the project itself. */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"

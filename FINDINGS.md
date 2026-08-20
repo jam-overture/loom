@@ -2669,3 +2669,76 @@ Two shapes worth considering when it is taken:
   refuses nothing and makes the bar available to anyone who wants it. Cheapest,
   and the one that matches how `auditRegistry` already works.
 
+---
+
+## 2026-08-20 — the sign-in page is a dead end, and the front door now sends people to it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom portal` · **Status:** open
+
+The marketing site's header now carries **Sign in**, pointing at `/portal`, which
+is what "access to the portal is through the marketing site" means once the two
+share a domain (0070). `proxy.ts` redirects an unauthenticated visitor to
+`/portal/sign-in?from=/portal`, which is correct and is not the problem.
+
+The problem is what that page holds. Its whole set of links is:
+
+```
+href="#page"                            the skip link
+href="/_next/static/chunks/…"           the bundle
+```
+
+**There is no way back.** No wordmark, no "Loom", no link to `/`. A visitor who
+follows the front door's action out of curiosity — which is now a thing the
+front door invites — lands on a form they cannot fill in, on a page with no
+navigation, and their only move is the browser's back button.
+
+It did not matter while the portal was its own deployment reached from a
+bookmark by people who already had a key. It matters now: this is the first
+build in which a stranger can arrive at that page by clicking something.
+
+The fix is small and it is that lane's: a wordmark linking to `/`, the way the
+documentation's chrome already does — `/docs/getting-started/introduction`
+carries `href="/"` and the loop closes there. This one does not.
+
+Worth knowing while doing it: the page is honest about configuration and says
+which environment variable is missing when the roster is unset, which is right
+for an operator. A visitor who is not an operator reads that as an error they
+caused. A line saying who the portal is *for* would cost nothing and would stop
+the front door's action reading as broken.
+
+---
+
+## 2026-08-20 — the demo is behind the sign-in, so the front door has nothing to show
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a policy question, not an engineering one
+
+`docs/rollout.md` records what the marketing site is meant to be:
+
+> *"The marketing site is the demo, not a description of it. It is built in Loom
+> and adapts in front of the visitor. The strongest asset available is the
+> product working on the page they are reading."*
+
+The demo exists and is good. It is at **`/portal/demo`**, which `proxy.ts` guards
+with the closed set `["/portal", "/portal/:path*"]` — so it is behind a sign-in
+whose roster is an environment variable set by whoever runs the deployment. **No
+stranger can see it.** The site can say the page adapts and can show a re-theme;
+it cannot show a change being proposed, judged and recorded, which is the half of
+the story the rollout calls the differentiator.
+
+Three ways out, and the choice is a policy one rather than a routine's:
+
+- **Make `/portal/demo` public**, by naming it in the proxy's matcher as an
+  exception. Cheapest by far and it changes the meaning of the guard from "the
+  portal is closed" to "the portal is closed except the demo" — worth deciding
+  deliberately, since the demo writes to whatever store it is pointed at.
+- **Build a demo on the marketing site.** That is this lane's work, is what the
+  brief calls "the strongest version", and needs an answer to what it may run
+  against: a live model call from a public page is a spend anyone can trigger.
+- **Leave it.** Defensible while nothing is public — but it means the front door
+  is a description of the product, which is the thing §4d says it must not be.
+
+The second is the one worth wanting and it is blocked on the same question the
+first raises: **what may a page a stranger is looking at spend?** A recorded
+transcript replayed on the page costs nothing and shows the whole loop; a live
+call shows it is real. They are different products and only one of them is free.
