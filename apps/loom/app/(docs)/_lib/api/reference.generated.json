@@ -37,6 +37,20 @@
               "signature": "const catalogueFields: (schema: ZodTypeAny) => readonly CataloguedProp[] | undefined",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "ClosedChoice",
+              "kind": "type",
+              "signature": "type ClosedChoice = {\n    readonly name: string;\n    readonly options: readonly (string | boolean)[];\n};",
+              "truncated": false,
+              "summary": "A prop whose accepted values can be listed rather than invented."
+            },
+            {
+              "name": "closedChoices",
+              "kind": "function",
+              "signature": "const closedChoices: (schema: ZodTypeAny) => readonly ClosedChoice[]",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -2074,6 +2088,76 @@
               "signature": "const themeVariables: (theme: ResolvedTheme) => ThemeVariables",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "theme/contrast",
+          "title": "Contrast",
+          "summary": "The bar 0074 set, as a function a host can run against its own palettes.",
+          "symbols": [
+            {
+              "name": "TEXT_CONTRAST_MINIMUM",
+              "kind": "value",
+              "signature": "const TEXT_CONTRAST_MINIMUM = 4.5",
+              "truncated": false,
+              "summary": "WCAG AA for body text. The bar 0074 chose, and the only one this asserts."
+            },
+            {
+              "name": "TextPairing",
+              "kind": "type",
+              "signature": "type TextPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    /** Where it happens, so a failure names a page rather than two slot ids. */\n    readonly where: string;\n};",
+              "truncated": false,
+              "summary": "A foreground slot read on a background slot, and the primitives that put them together."
+            },
+            {
+              "name": "PALETTE_TEXT_PAIRINGS",
+              "kind": "value",
+              "signature": "const PALETTE_TEXT_PAIRINGS: readonly TextPairing[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "contrastRatio",
+              "kind": "function",
+              "signature": "const contrastRatio: (a: string, b: string) => number | undefined",
+              "truncated": false,
+              "summary": "The WCAG contrast ratio between two colours, or `undefined` when either is a form `channelsOf` declines to guess at."
+            },
+            {
+              "name": "MeasuredPairing",
+              "kind": "type",
+              "signature": "type MeasuredPairing = {\n    readonly pairing: TextPairing;\n    readonly ratio: number;\n    readonly meets: boolean;\n};",
+              "truncated": false,
+              "summary": "A pairing that was measured, whether or not it cleared the bar."
+            },
+            {
+              "name": "UnmeasuredPairing",
+              "kind": "type",
+              "signature": "type UnmeasuredPairing = {\n    readonly pairing: TextPairing;\n    readonly foreground: string;\n    readonly background: string;\n};",
+              "truncated": false,
+              "summary": "A pairing whose colours could not be measured, and which colour stopped it."
+            },
+            {
+              "name": "PaletteAudit",
+              "kind": "type",
+              "signature": "type PaletteAudit = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPairing[];\n    /** Measured and under the bar. The list a host asserts empty. */\n    readonly failures: readonly MeasuredPairing[];\n    /**\n     * Neither a pass nor a failure. Separate from `failures` for the reason\n     * `notProbeable` is separate in the registry audit: a host that wants the\n     * guarantee asserts both empty, and a host whose palette is written in `hsl()`\n     * can tell \"unreadable\" from \"unmeasurable\".\n     */\n    readonly unmeasured: readonly UnmeasuredPairing[];\n};",
+              "truncated": false,
+              "summary": "What the bar found in one palette: what was measured, what failed, what could not be."
+            },
+            {
+              "name": "auditPalette",
+              "kind": "function",
+              "signature": "const auditPalette: (palette: Palette) => PaletteAudit",
+              "truncated": false,
+              "summary": "Measures every pairing the primitives render, in one palette. Refuses nothing."
+            },
+            {
+              "name": "describePaletteAudit",
+              "kind": "function",
+              "signature": "const describePaletteAudit: (audit: PaletteAudit) => string",
+              "truncated": false,
+              "summary": "One line per problem, for a CLI or a failing test's message. Empty when clean."
             }
           ]
         },
@@ -4351,9 +4435,16 @@
               "summary": "A primitive that declared a region and then did not render it."
             },
             {
+              "name": "ThrowingConfigurations",
+              "kind": "type",
+              "signature": "type ThrowingConfigurations = {\n    readonly type: PrimitiveType;\n    readonly failures: readonly ProbeFailure[];\n};",
+              "truncated": false,
+              "summary": "A primitive that threw under some configuration its own schema accepts."
+            },
+            {
               "name": "RegistryAudit",
               "kind": "type",
-              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n};",
+              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props built from its own schema. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4407,23 +4498,37 @@
               "summary": ""
             },
             {
+              "name": "probeConfigurations",
+              "kind": "function",
+              "signature": "const probeConfigurations: (choices: readonly ClosedChoice[]) => readonly JsonObject[]",
+              "truncated": false,
+              "summary": "The prop configurations a primitive is probed under (0075)."
+            },
+            {
               "name": "probeEditableDecoration",
               "kind": "function",
-              "signature": "const probeEditableDecoration: (primitive: LoomPrimitive, text?: PrimitiveText<string>) => ConformanceVerdict",
+              "signature": "const probeEditableDecoration: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly JsonObject[]) => ConformanceVerdict",
               "truncated": false,
-              "summary": ""
+              "summary": "Decoration is a promise that holds however the primitive is configured, so one configuration that fails to decorate makes the answer `not-decorated` even if the rest pass. A configuration that throws answers nothing either way and is skipped; when none of them answer, the reason from the first is what the caller gets, because the default configuration is first and its failure is the one worth reading."
+            },
+            {
+              "name": "ProbeFailure",
+              "kind": "type",
+              "signature": "type ProbeFailure = {\n    readonly props: JsonObject;\n    readonly reason: string;\n};",
+              "truncated": false,
+              "summary": "A configuration the schema accepts that the component threw on."
             },
             {
               "name": "PlacementVerdict",
               "kind": "type",
-              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots whose content did not reach the output. */\n    readonly unplacedSlots: readonly string[];\n    /** Whether the children it was handed reached the output — a container, not a leaf. */\n    readonly rendersChildren: boolean;\n} | {\n    readonly outcome: \"not-probeable\";\n    readonly reason: string;\n};",
+              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /** The configurations that answered — `{}` alone when the schema closes over nothing. */\n    readonly probed: readonly JsonObject[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | {\n    readonly outcome: \"not-probeable\";\n    readonly reason: string;\n};",
               "truncated": false,
-              "summary": "The second probe: does a primitive place what it was handed?"
+              "summary": ""
             },
             {
               "name": "probeSlotPlacement",
               "kind": "function",
-              "signature": "const probeSlotPlacement: (primitive: LoomPrimitive, declaredSlots: readonly string[], text?: PrimitiveText<string>) => PlacementVerdict",
+              "signature": "const probeSlotPlacement: (primitive: LoomPrimitive, declaredSlots: readonly string[], text?: PrimitiveText<string>, configurations?: readonly JsonObject[]) => PlacementVerdict",
               "truncated": false,
               "summary": ""
             }
@@ -4444,7 +4549,7 @@
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all (0075). Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
@@ -4479,7 +4584,7 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema (0075). */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": ""
             },

@@ -188,22 +188,33 @@ the probe now knows and nothing else does. Reporting it separately keeps
 
 ## Test numbers
 
-`pnpm install && pnpm verify` — **green, run twice** (once before the records
-were written, once after the marketing count was bumped).
+`pnpm install && pnpm verify` — **green**, on the merge of `main` (final numbers):
 
 ```
 @loom/runtime   99 test files   1458 tests   passed
-@loom/app       77 test files    849 tests   passed
+@loom/app       81 test files    889 tests   passed
                                  ─────
-                                 2307 passed, 0 failed, 0 skipped
+                                 2347 passed, 0 failed, 0 skipped
 ```
 
 Typecheck and build clean. Nothing was skipped, weakened or marked `todo`.
 
-One test **failed and was fixed rather than weakened** on the way:
+**Three tests failed on the way and all three were fixed rather than weakened.**
+
 `app/(marketing)/_lib/facts.test.ts` asserts the marketing site's decision count
 against the contents of `decisions/`, and two new records made it read 74 against
 76. The literal in `copy.ts` was corrected; the assertion was not touched.
+
+`app/(docs)/_lib/api/extract.test.ts` — **after merging `main`.** #112 landed the
+generated API reference while this branch was open, and it holds a committed
+snapshot against what the generator produces now. This branch adds nineteen
+exports, so it moved. The test says exactly what to do and it was done:
+`pnpm --filter @loom/app docs:api`, committed. The published surface is 689
+exports where the docs routine measured 670 this morning.
+
+`FINDINGS.md` conflicted on the same merge — both branches append entries at the
+end of the file. Resolved by keeping both, in the order they were written. No
+entry of anyone else's was rewritten.
 
 Three existing assertions in `conformance.test.ts` were updated because
 `PlacementVerdict` gained two members (`probed`, `threw`) and they compare the
@@ -221,6 +232,26 @@ on Vercel to create deployments."* Not a test failure and nothing to do with the
 diff. Amended to the author every other routine's branch uses — `Claude
 <noreply@anthropic.com>`, the repo's configured default — and force-pushed, which
 is safe on a branch nobody else had. **A routine should not set a commit author.**
+
+## Merged `main` mid-run
+
+#112, #113 and #114 landed after this branch was cut. `main` was merged in rather
+than rebased, the three failures above were fixed, and `pnpm verify` was run
+again on the merge — the numbers above are from that run. The branch is a merge
+commit on top of `1aabebb`, never a stack.
+
+One thing arrived with #112 that is **now an open finding owned by this lane**:
+*two thirds of the published surface has no sentence*, filed by `Loom docs`. It
+counts 432 exports with no doc comment of their own, of which only 19 have
+neither their own sentence nor a paragraph from their module — and it names
+fifteen modules whose opening paragraph is missing, `sdk/catalogue` among them.
+Not touched here, because widening a migration-shaped PR with unrelated prose is
+how a diff becomes unreviewable. It is a strong candidate for the next run: the
+finding says it is the cheapest documentation work in the repository, and it is
+one paragraph per module.
+
+What this branch did do about it is not add to the count: **all nineteen new
+exports carry a doc comment of their own.**
 
 ## What is not in this branch
 
