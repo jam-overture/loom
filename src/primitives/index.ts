@@ -6,13 +6,16 @@ import { loomAction } from "./loom.action.js"
 import { loomArticle } from "./loom.article.js"
 import { loomArticleGrid } from "./loom.article-grid.js"
 import { loomBadge } from "./loom.badge.js"
+import { loomButton } from "./loom.button.js"
 import { loomCard } from "./loom.card.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
 import { loomFeatureGrid } from "./loom.feature-grid.js"
+import { loomField } from "./loom.field.js"
 import { loomFooter } from "./loom.footer.js"
+import { loomForm } from "./loom.form.js"
 import { loomGrid } from "./loom.grid.js"
 import { loomHeading } from "./loom.heading.js"
 import { loomHero } from "./loom.hero.js"
@@ -25,6 +28,7 @@ import { loomMedia } from "./loom.media.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
 import { loomNav } from "./loom.nav.js"
+import { loomOption } from "./loom.option.js"
 import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
 import { loomPerson } from "./loom.person.js"
@@ -105,6 +109,16 @@ import { loomTierTable } from "./loom.tier-table.js"
  * ([0068](../../decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md)
  * is the other half of this run and settles which of them is a target).
  *
+ * **The form four** are the band where a page stops telling and starts asking,
+ * and the first primitives here that post anywhere. `loom.form` is the first
+ * caller of the submission seam
+ * ([0065](../../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)),
+ * which had shipped with nobody using it; `loom.field` is Hermes' twelve-shape
+ * `fields` array turned into twelve nodes, with the options its `dropdown` type
+ * never had; `loom.option` is one of those choices; and `loom.button` is the
+ * control that sends the thing — an anchor's twin that goes nowhere, sharing
+ * its paint through `control.ts` and carrying no destination of its own.
+ *
  * The ordering is registration order, which is what a model reads first in the
  * catalogue, so the thing a page starts with is at the top: page structure,
  * then the bands in the order a page uses them, then the leaves that go
@@ -148,6 +162,9 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomLogo,
   loomFaqList,
   loomFaq,
+  loomForm,
+  loomField,
+  loomOption,
   loomFooter,
   loomLinkList,
   loomHeading,
@@ -158,6 +175,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomDivider,
   loomMedia,
   loomAction,
+  loomButton,
   loomLink,
 ]
 
@@ -173,6 +191,7 @@ export const createStarterPrimitiveRegistry = (
   createPrimitiveRegistry([...STARTER_PRIMITIVES, ...additional])
 
 export * from "./tokens.js"
+export * from "./control.js"
 export * from "./stylesheet.js"
 export * from "./layout.js"
 export {
@@ -180,13 +199,16 @@ export {
   loomArticle,
   loomArticleGrid,
   loomBadge,
+  loomButton,
   loomCard,
   loomDivider,
   loomFaq,
   loomFaqList,
   loomFeature,
   loomFeatureGrid,
+  loomField,
   loomFooter,
+  loomForm,
   loomGrid,
   loomHeading,
   loomHero,
@@ -199,6 +221,7 @@ export {
   loomMilestone,
   loomMilestoneList,
   loomNav,
+  loomOption,
   loomPage,
   loomPerk,
   loomPerkList,

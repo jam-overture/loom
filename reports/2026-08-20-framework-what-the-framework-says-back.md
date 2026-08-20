@@ -91,7 +91,7 @@ where the next person to edit it will read it.
 A new test renders the `loom.article` case specifically and asserts the refusal
 says nothing about nesting, markup, or a link inside a link.
 
-### 3. `fg-subtle` meets AA in every registered palette — [0072](../decisions/0072-a-palette-slot-that-carries-text-meets-aa.md)
+### 3. `fg-subtle` meets AA in every registered palette — [0074](../decisions/0074-a-palette-slot-that-carries-text-meets-aa.md)
 
 *Filed by `Loom primitives`, 20 August.*
 
@@ -168,19 +168,27 @@ value the framework changed underneath them.
 
 ## Records
 
-- **[0072](../decisions/0072-a-palette-slot-that-carries-text-meets-aa.md)** —
+- **[0074](../decisions/0074-a-palette-slot-that-carries-text-meets-aa.md)** —
   *A palette slot that carries text meets AA, and the palette moves rather than
   the bar.* Accepted. §4b. Nothing superseded.
 
-**The number may have to change before this merges.** `decisions/README.md` is
-generated and `pnpm verify` fails on a gap, so a record has to take the next free
-number **on `main`**, which is 0072. PR #108 — open since this morning, in the
-primitives lane — claims 0072 and 0073 on its own branch. Whichever merges second
-renumbers. If #108 lands first this record becomes 0074, along with four
-references to it in `src/theme/`. This is the collision filed on 16 August as
-*"two routines cannot both write a decision record without colliding"*, still open
-and still owned by the maintainer; it cost a rename on 19 August and will cost one
-here.
+**It was written as 0072 and renumbered to 0074, which is the collision arriving
+for the second time.** `decisions/README.md` is generated and `pnpm verify` fails
+on a numbering gap, so a record must take the next free number **on `main`** — at
+the time this branch was cut, 0072. #108 was open with 0072 and 0073 claimed on
+its own branch, which this run said out loud rather than hoped about. #108 merged
+first, and the rename cost a `git mv`, a heading, four references in `src/theme/`
+and fourteen in prose.
+
+That is the finding of 16 August — *"two routines cannot both write a decision
+record without colliding"* — still open, still owned by the maintainer, and now
+paid twice: once on 19 August and once here. **The cost is not the rename**, which
+is mechanical and took a minute. It is that a record cannot be linked to until it
+merges, so anything referring to it by number is provisional, and a second lane
+reading this branch mid-flight would read a number that turned out to be somebody
+else's. The cheapest fix is probably to stop requiring the numbers to be
+contiguous — a gap costs a reader nothing, and the index generator is the only
+thing that objects.
 
 ## Findings
 
@@ -217,14 +225,14 @@ here.
 
 ## Open questions
 
-**Does Loom enforce accessibility on hosts, or only meet it itself?** 0072's bar
+**Does Loom enforce accessibility on hosts, or only meet it itself?** 0074's bar
 is a test iterating `STARTER_PALETTES`. `createThemeRegistry({ palettes: [...] })`
 replaces that list wholesale (0049), so a host's own palette gets `paletteSchema` —
 which checks a slot holds a colour and has no idea which slots are read as text on
 which others — and nothing more. A host palette with a 2:1 subtle registers,
 resolves and renders. Deliberately not fixed in this run: moving the check into
 the schema is a refusal at registration, a behaviour change to a shipped seam, and
-it answers a question 0072 did not ask. The two shapes worth weighing are a
+it answers a question 0074 did not ask. The two shapes worth weighing are a
 `RenderOutput` diagnostic in the shape `data-unavailable` already established
 (0058), or an exported `auditPalette` a host can run in its own tests the way
 `auditRegistry` already works. Recommendation in the PR comment.

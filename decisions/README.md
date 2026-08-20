@@ -129,4 +129,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0069](0069-a-root-relative-path-is-a-destination-a-tree-may-name.md) | A root-relative path is a destination a tree may name | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |
 | [0070](0070-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md) | The portal is a segment, and the marketing site is the front door | Accepted | §4c, §4d, §5 |
 | [0071](0071-moving-a-forms-destination-is-a-stake-of-its-own.md) | Moving a form's destination is a stake of its own | Accepted | §2 → §4g |
-| [0072](0072-a-palette-slot-that-carries-text-meets-aa.md) | A palette slot that carries text meets AA, and the palette moves rather than the bar | Accepted | §4b |
+| [0072](0072-a-page-paints-its-ink-and-its-canvas-together.md) | A page paints its ink and its canvas together, or neither | Accepted | §4b |
+| [0073](0073-a-form-with-nowhere-to-post-renders-disabled-and-says-so.md) | A form with nowhere to post renders disabled, and says so | Accepted | §4b → §4g |
+| [0074](0074-a-palette-slot-that-carries-text-meets-aa.md) | A palette slot that carries text meets AA, and the palette moves rather than the bar | Accepted | §4b |

@@ -90,6 +90,14 @@ export const LIBRARY_CLASS = {
   coverBody: "loom-cover-body",
   /** A `loom.article-grid` running its first piece across the top. */
   lead: "loom-lead",
+  /** One `loom.field`. Named so the form it sits in can size it in a row. */
+  field: "loom-field",
+  /** Any control inside a field: the focus ring, the hover, the placeholder. */
+  input: "loom-input",
+  /** The wrapper that draws a select's chevron, since the native one is not the palette's. */
+  select: "loom-select",
+  /** A `loom.form` laid out as a single row — see the rule about sizing children. */
+  formInline: "loom-form-inline",
 } as const
 
 /**
@@ -191,13 +199,47 @@ details[open] > summary .loom-marker {
   aspect-ratio: auto;
   min-height: 16rem;
 }
+.loom-input {
+  transition: border-color var(--loom-motion-medium) ease;
+}
+.loom-input:hover {
+  border-color: var(--loom-border-strong);
+}
+.loom-input:focus-visible {
+  outline: 2px solid var(--loom-border-accent);
+  outline-offset: 2px;
+  border-color: var(--loom-border-accent);
+}
+.loom-input::placeholder {
+  color: var(--loom-fg-muted);
+  opacity: 1;
+}
+.loom-input:disabled {
+  cursor: not-allowed;
+}
+.loom-select::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: var(--loom-spacing-3);
+  inset-block-start: 50%;
+  width: 0.42em;
+  height: 0.42em;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  transform: translate3d(0, -70%, 0) rotate(45deg);
+  color: var(--loom-fg-muted);
+  pointer-events: none;
+}
+.loom-form-inline > .loom-field {
+  flex: 1 1 14rem;
+}
 @media (prefers-reduced-motion: reduce) {
   .loom-rise, .loom-aurora {
     animation: none;
     opacity: 1;
     transform: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input {
     transition: none;
   }
   .loom-lift:hover {

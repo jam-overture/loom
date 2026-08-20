@@ -152,7 +152,7 @@ describe("what the library reads against what", () => {
     ["accent-strong", "accent-subtle", "loom.badge accent, loom.icon soft"],
     ["fg-default", "accent-subtle", "loom.section tone accent"],
     /**
-     * `fg-subtle` is held to the body-text bar like the rest, which is 0072.
+     * `fg-subtle` is held to the body-text bar like the rest, which is 0074.
      * The slot recedes and none of what it carries is reliably large — a
      * `loom.footer` note row and a `loom.tier` note are ordinary small text —
      * so a threshold of 3:1 would be a bar chosen to fit the colours rather

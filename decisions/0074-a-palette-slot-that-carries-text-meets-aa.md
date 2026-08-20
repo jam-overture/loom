@@ -1,4 +1,4 @@
-# 0072. A palette slot that carries text meets AA, and the palette moves rather than the bar
+# 0074. A palette slot that carries text meets AA, and the palette moves rather than the bar
 
 **Status:** Accepted
 **Date:** 2026-08-20
