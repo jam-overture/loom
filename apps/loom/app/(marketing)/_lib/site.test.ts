@@ -3,17 +3,26 @@ import { describe, expect, it } from "vitest"
 import {
   DEFAULT_THEME,
   internalHref,
-  otherTheme,
+  otherThemes,
   readThemeName,
   siteOrigin,
   SITE_ROUTES,
+  SITE_THEME_NAMES,
   SITE_THEMES,
 } from "./site"
 
 describe("the palette a visitor arrives on", () => {
+  it("is the house theme, which is the minimal one", () => {
+    expect(DEFAULT_THEME).toBe("minimal")
+    expect(SITE_THEMES[DEFAULT_THEME].selection).toEqual({
+      palette: "minimal",
+      fontPack: "minimal-sans",
+      stylePreset: "precise",
+    })
+  })
+
   it("reads a known name from the query string", () => {
-    expect(readThemeName("bold")).toBe("bold")
-    expect(readThemeName("editorial")).toBe("editorial")
+    for (const name of SITE_THEME_NAMES) expect(readThemeName(name)).toBe(name)
   })
 
   it("falls back to the default rather than failing", () => {
@@ -27,14 +36,24 @@ describe("the palette a visitor arrives on", () => {
   })
 
   it("names a registered triple for each", () => {
-    for (const selection of Object.values(SITE_THEMES)) {
-      expect(Object.keys(selection).sort()).toEqual(["fontPack", "palette", "stylePreset"])
+    for (const theme of Object.values(SITE_THEMES)) {
+      expect(Object.keys(theme.selection).sort()).toEqual(["fontPack", "palette", "stylePreset"])
+      expect(theme.label.length).toBeGreaterThan(0)
     }
   })
 
-  it("has an other one, both ways", () => {
-    expect(otherTheme("editorial")).toBe("bold")
-    expect(otherTheme("bold")).toBe("editorial")
+  /**
+   * The switcher's list, held to the palette list. Offering *every other*
+   * palette is what stops a third one being registered and never reachable —
+   * the failure the binary toggle this replaced would have had silently.
+   */
+  it("offers every palette but the one being worn", () => {
+    for (const name of SITE_THEME_NAMES) {
+      const others = otherThemes(name)
+
+      expect(others).not.toContain(name)
+      expect([...others, name].sort()).toEqual([...SITE_THEME_NAMES].sort())
+    }
   })
 })
 

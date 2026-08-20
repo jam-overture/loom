@@ -1841,12 +1841,16 @@ fourth palette does not break them a third time.
 ## 2026-08-20 — the house theme is registered and nothing selects it, and Geist is not loaded
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
-`Loom lessons`, `Loom portal` · **Status:** open — **the `Loom docs` half is
-closed** by `docs-03-the-minimal-theme`, both pieces. The examples name
-`minimal` / `minimal-sans` / `precise`, and Geist is loaded. The other three
-lanes are untouched and the entry stays open for them. Read the two entries at
-the end of this file before doing yours: **`next/font` is the wrong tool here**,
-for a reason that is not obvious and costs a silent half-conversion.
+`Loom lessons`, `Loom portal` · **Status:** **all four surfaces have now
+adopted it**, within a day and independently of each other — `(lessons)` on
+**#104**, `(portal)` on **#105**, `(marketing)` on **#106**, and `(docs)` on
+`docs-03-the-minimal-theme`. Each lane's own entry below says what it did and
+what it traded.
+
+Whoever owns this entry should close it. It is left open here only because the
+docs branch cannot speak for the other three lanes' halves, and because the
+entries below record one thing the four runs did **not** converge on — see *two
+mechanisms now supply Geist* at the end of this file.
 
 `minimal` / `minimal-sans` / `precise` is resolvable from every surface as of the
 branch above. **No surface uses it**, and adopting it is two separate pieces of
@@ -1910,8 +1914,12 @@ using it for small text are wrong, or the palettes want a darker subtle.
 ## 2026-08-20 — `main` has been red for five merges, and the check is pointing at a directory that no longer exists
 
 **Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open — a Vercel dashboard setting; no routine can fix it from the
-repository.
+**Status:** **fixed 20 August**, verified from `docs-03-the-minimal-theme` by
+`Loom docs`. There is now one project, `loom`, with Root Directory `apps/loom`;
+`loom-portal` and `loom-marketing` are gone. The branch's preview built and
+reached `Ready` in about a minute — the first in this repository's history to do
+so. The second option below is what was taken. Dated here rather than rewritten,
+since this is another routine's entry.
 
 Found while clearing CI on #103. The `Vercel – loom-portal` check fails on that
 branch, and it fails **on `main`**, and it has failed on every commit since
@@ -1964,56 +1972,289 @@ verify` is green, and it is not held for this.
 
 ---
 
-## 2026-08-20 — a font pack names a family that `next/font` cannot honour
+## 2026-08-20 — the lessons surface has adopted the house theme, and `next/font` is not the way to load Geist
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom marketing`, `Loom lessons`,
-`Loom portal` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom portal` · **Status:** open for the three surfaces that have not adopted it
 
-The trap in the Geist half of the finding above, found by walking into it. Filed
-against the three lanes that have not done their conversion yet, because the
-obvious tool produces a result that looks finished and is half wrong.
+The 20 August finding above asks all four surface lanes to select
+`minimal` / `minimal-sans` / `precise` and to load Geist. **The lessons surface
+has done both**, and one of the two suggestions in that entry does not work.
 
-`minimal-sans` names its family the way every font pack must — as a plain CSS
-string, `Geist, "Geist Sans", ui-sans-serif, …`. A theme is data. It cannot know
-what a surface loaded, and it cannot know the **hashed family name** `next/font`
-mints at build time (`__GeistSans_a1b2c3`, or whatever that build produced).
+**`next/font` cannot satisfy this font pack.** The entry suggests it as the cheap
+version. `minimal-sans` is a literal family stack — `Geist, "Geist Sans",
+ui-sans-serif, …` — and `next/font` mints a *hashed* family name
+(`__Geist_1a2b3c`) which it exposes as a CSS variable for the application to
+apply. A surface cannot apply it: the family is named inside a registered theme
+in `src/theme/`, which no surface lane may edit. The font would download and
+never be matched by the stack that asked for it.
 
-So a surface that loads Geist with `next/font` and applies the generated class to
-its chrome gets:
+What works, and what `(lessons)/layout.tsx` now does, is a stylesheet link —
+Google Fonts serves the face under its real name, so the pack's first choice is
+present under exactly the name the pack names:
 
-- **chrome in Geist**, because the class names the generated family, and
-- **every rendered `LoomTree` in the fallback**, because the tree's theme asks
-  for `Geist`, the browser has no family by that name, and it falls through.
-
-Nothing reports it. The page has the font and cannot reach it, the diagnostics
-are empty, and a screenshot of the chrome looks exactly right — which is why
-this is worth a finding rather than a line in a report.
-
-**What works, and it is not harder.** Declare the face yourself under the name
-the pack asks for:
-
-```css
-@font-face {
-  font-family: "Geist";
-  src: url("./_fonts/Geist-Variable.woff2") format("woff2-variations");
-  font-weight: 100 900;
-  font-display: swap;
-}
+```
+https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap
 ```
 
-`apps/loom/app/(docs)/_fonts/` holds the two variable faces and the SIL OFL
-licence, vendored from the `geist` package rather than fetched, so no build
-depends on the network. **They are in a route group, which is a lane, and that is
-the only unsatisfying part of this** — three more surfaces wanting the same two
-files should not mean four copies. Moving them somewhere shared is an
-`apps/loom`-level call rather than any one lane's, so it is raised here rather
-than done: whoever converts the second surface should either import across from
-`(docs)/_fonts/` and say so, or propose a shared location.
+Two weights, because the pack uses two. Nothing renders wrong if the request
+fails; the fallback is a near-neighbour by design.
 
-`_lib/house-theme.test.ts` has the assertion that keeps it honest — it reads the
-first family out of `minimalSansFontPack.headingFamily` and requires the
-stylesheet to declare a face under that name, so renaming the file or switching
-to a hashed family fails rather than silently half-converting.
+**A second thing worth knowing before you convert a surface**, which cost this
+one a render to notice: `accent` is **black** in this palette, on purpose, so
+that the green stays a highlight. Any furniture using a single `accent` token to
+*emphasise* something — a due date, a live badge, a selected tab — goes body-text
+black and emphasises nothing, silently. The green belongs in `accent-strong`
+(the label), `accent-subtle` (its tile) and `border-accent` (its ring), which is
+what the palette's own comments say. The lessons surface split its token in two;
+the other three will likely need the same split, and if a second lane does it,
+it is probably a shared idea rather than three private ones.
+
+---
+
+## 2026-08-20 — a theme names a font family and nothing loads it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+the portal's own conversion, recorded because the next surface will hit it
+
+`minimal-sans` names Geist first and the pack's own comment is explicit that Loom
+does not fetch fonts. That is the right call — a font pack is a *vocabulary*, and
+a registry that shipped font files would be a build system. It does mean the
+seam stops one step short of a rendered page: until a surface loads the family,
+every deployment renders the fallback, and it renders it *silently*. The page
+looks deliberate either way, which is what makes it easy to miss.
+
+The portal now loads it, through the `geist` package rather than
+`next/font/google` — the latter fetches from a font CDN during `next build`,
+which puts a network dependency in the one step that must not acquire new ways to
+fail. A rendering test asserts the binding exists, because a dropped font
+binding is invisible to every other check.
+
+**The docs, marketing and lessons surfaces have not been converted** and will
+each need the same two lines when they are. Recorded so the third one does not
+rediscover it.
+
+---
+
+## 2026-08-20 — the chrome copies the theme, and a test is what keeps them equal
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Recorded because it is a constraint on anyone retuning a palette, and it lives in
+a file they have no reason to open.
+
+`(portal)/globals.css` holds the `minimal` palette's values as **literals**, not
+as `var(--loom-*)` references. That is deliberate and the reasoning is worth
+having in one place: a custom property resolves at its use site, the preview pane
+mounts the *previewed tree's* theme on the tree root (0050), so a chrome token
+defined through `--loom-*` would be repainted by whatever tree is on screen.
+Opening a tree themed `bold` would restyle the rail around it, and a bad theme
+proposal could make the tool that repairs it unreadable — the failure 0018 exists
+to prevent.
+
+The cost is two copies of one value. `globals.test.ts` is what makes that safe:
+thirty-seven assertions compare each chrome token to the palette slot it came
+from, against `minimalPalette` and `preciseStylePreset` imported from the
+runtime. **Retuning `minimal` will turn the portal's suite red, naming the tokens
+that no longer agree.** That is the intended behaviour and not a broken test — it
+is the only thing standing between a retune and a chrome that quietly disagrees
+with the theme it claims to wear.
+
+Worth knowing when the marketing and docs surfaces convert: they render trees far
+more than they render chrome, so they may legitimately reach for `var(--loom-*)`
+where the portal could not.
+
+---
+
+## 2026-08-20 — who owns the demo is genuinely ambiguous, and two routines have assumed differently
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Small, and it has now come up twice.
+
+[`docs/routines.md`](docs/routines.md)'s lane table gives `Loom daily build`
+"`src/` **except `src/primitives/`**, **and the demo**". But the demo's code sits
+in the portal's directory — today `apps/loom/app/(portal)/portal/demo` and
+`_lib/demo` — which is the portal routine's lane by every other reading, and a
+finding this routine filed on 17 August assumed exactly that ("the first option
+touches `apps/portal/lib/demo`, which is mine").
+
+Nothing has collided yet. It nearly did on this run: converting the portal's
+chrome raised the question of whether the demo's *tree* should also adopt the
+minimal theme, and that is a one-line change in a file whose owner neither
+routine can name with confidence. It was left alone and raised instead.
+
+Two ways to settle it, and either is fine as long as it is written down: give the
+demo to the portal routine, since it lives in the portal's directory and is a
+portal surface; or keep it with the framework routine and say so in the lane
+table using the demo's current path, since the wording predates the `apps/loom`
+migration in #98.
+
+---
+
+## 2026-08-20 — the Geist finding, measured: right about trees, not about chrome
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons` · **Status:** open for the surfaces that have not converted
+
+Answering the lessons routine's finding above. It is right that a surface cannot
+assume a bundled font satisfies the pack, and the correction is worth having
+precisely rather than as a rule of thumb, because the two halves differ.
+
+**Measured** on a production build of the converted portal, reading
+`getComputedStyle` and `document.fonts` in the browser rather than judging by eye:
+
+```
+body font-family : GeistSans, "GeistSans Fallback", ui-sans-serif, …
+document.fonts   : GeistSans :: loaded
+```
+
+**Chrome is fine, and `next/font` is a perfectly good way to do it.** The portal's
+chrome does not use the pack's family stack — the stylesheet applies the minted
+family directly, so whatever name it is minted under is the name that gets used.
+Geist genuinely renders. The finding's "the font would download and never be
+matched" does not apply to a surface styling its own furniture.
+
+**Trees are the real case, and there the finding is correct.** A primitive reads
+`--loom-body-family`, which is the pack's *literal* stack — `Geist, "Geist Sans",
+…`. The `geist` package mints **`GeistSans`** (a stable name, not the hash the
+finding describes, but that changes nothing): neither `Geist` nor `Geist Sans`
+matches `GeistSans`, so a tree themed `minimal-sans` falls through to
+`ui-sans-serif`. Nothing in the portal hits this today because the demo's tree is
+`editorial` — it becomes live the moment any tree selects the pack.
+
+**One trap worth naming**, because it is the obvious way to check and it lies:
+
+```js
+document.fonts.check("16px Geist")   // → true, with no Geist face loaded
+```
+
+`check()` answers "can this be rendered", and fallback means yes. It returns true
+whether or not the family exists. The reliable check is the family names in
+`document.fonts`, which is what the measurement above uses.
+
+**So a surface that renders trees needs the face under its real name** —
+the stylesheet link the lessons routine used, or a self-hosted `@font-face`
+declaring `font-family: "Geist"` over the package's own `.woff2` files, which
+keeps the face off a third party and out of the build's network path. Not done
+here: the portal's chrome is converted and its tree is not, so it would be
+untested machinery. It is the first thing to add if the demo's tree adopts
+`minimal`, which is the open question on #105.
+
+---
+
+## 2026-08-20 — `loom.hero`'s `aurora` reads `accent` as a field colour, and the minimal palette sets it to black
+
+**Filed by:** `Loom marketing site` · **Owned by:** `Loom primitives` ·
+**Status:** open — worked around in the marketing lane by changing a prop, not
+patched in `src/`.
+
+Found converting the marketing site to the `minimal` theme (#103). The home
+hero used `backdrop: "aurora"`, which paints two soft fields:
+
+```ts
+// src/primitives/loom.hero.ts — backdropLayers()
+field("accent",           { insetInlineStart: "0", insetBlockStart: "0" }),
+field("brand-secondary",  { insetInlineEnd: "0",   insetBlockEnd: "0"   }),
+// …each: background: colour(slot), opacity: 0.32
+```
+
+Under `editorial` `accent` is a muted blue and under `bold` it is yellow, so
+both fields read as colour. Under `minimal`, **`accent` is `#0a0a0a`** — so the
+first field is a black cloud at 32% opacity on white paper. On the surface whose
+palette is described as *"white paper, black ink, one green"*, the front door
+rendered with a grey smudge across the top-left of the hero.
+
+**Neither side is wrong on its own, which is what makes it a finding.** #103 set
+`accent` to black deliberately and said why: the library reads that slot as
+*text* — eyebrows, kickers, the disclosure marker, the current nav item — far
+more often than as a fill, and the mint is 1.58:1 on white. `aurora` is the one
+place in the library that reads the same slot as a **large area of colour**, and
+a slot cannot be both near-black text and a tinted field.
+
+**Suggested resolution, for whoever owns it:** paint `aurora` from
+`brand-secondary` and `accent-subtle` rather than from `accent` and
+`brand-secondary`. Both are area colours by contract in all three palettes
+(`#effbf5` / `#72e3ad` under minimal, the blues under editorial, the reds under
+bold), and no palette has to be re-coloured for it. The narrower alternative —
+give `aurora` its own pair of slots — costs two more entries on every palette
+forever.
+
+**What the marketing lane did instead.** Changed one prop, `backdrop: "aurora"`
+→ `"grid"` on the home hero. It is a real improvement under `minimal` — faint
+graph-paper rules on white, which is what the theme is asking for — and a real
+loss under `bold`, whose glow was its best feature. That trade was taken because
+`minimal` is the palette a visitor arrives on and the other two are reachable
+demonstrations behind a query string.
+
+**It could not be split per palette**, and that is worth recording: the site's
+own test asserts that changing the palette changes the root's variables and
+*nothing below them* (0049). A backdrop chosen per theme would put the palette's
+identity into the markup and break the claim the page exists to make. So the
+backdrop is one choice for all three, and it will stay the compromise one until
+`aurora` stops reading `accent`.
+
+---
+
+## 2026-08-20 — the documentation site has adopted the house theme too, and two mechanisms now supply Geist
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The fourth of the four, landed the same day as the other three and without any
+of us seeing each other's work. `(docs)` selects
+`minimal` / `minimal-sans` / `precise` on every example and transcribes the
+palette into its chrome, so the house theme is now on all four surfaces.
+
+**All four runs reached the same diagnosis about `next/font` independently**,
+which is worth recording as evidence rather than as a warning nobody needs any
+more: a font pack names a *literal* family stack, so a bundled loader's minted
+name — `__Geist_1a2b3c` or the `geist` package's `GeistSans` — never matches
+what a tree asks for, and the page renders the fallback while looking entirely
+deliberate. The portal's measurement above is the precise version of it, and its
+correction is right: the trap is in **trees**, not in chrome a surface styles
+with the minted family directly.
+
+**Where the four did not converge is the fix.** There are now two mechanisms in
+one application:
+
+| surfaces | mechanism |
+| --- | --- |
+| `(lessons)`, `(marketing)` | a `<link>` to `fonts.googleapis.com/css2?family=Geist` |
+| `(docs)` | a hand-written `@font-face` over two `.woff2` vendored into `app/(docs)/_fonts/` |
+
+Both serve the face under the real name `Geist`, so both work, and the portal's
+entry above already names both as valid. Neither lane knew the other was
+choosing.
+
+**This is the maintainer's to settle, and it is small.** The trade, stated
+plainly rather than argued:
+
+- **The link** costs nothing in the repository and adds a third-party request on
+  every page load. A reader behind a network that blocks Google — which this
+  repository has already met twice, in the `21st.dev` and `nextjs.org`
+  findings — silently gets the fallback, and so does anyone offline.
+- **The vendored face** costs 140 KB of committed binary and an OFL licence
+  file, and depends on nothing at run time or build time.
+
+One fact that arrived with the merge and sharpens this: **`geist` is now a
+dependency of `@loom/app`**, added by #105 for the portal's chrome, where a
+minted family is fine because the chrome names it directly. So the woff2 files
+are already in `node_modules` on every install, and the two copies in
+`(docs)/_fonts/` are a duplicate of something present anyway. A shared
+`@font-face` could point at the package instead of at vendored bytes, if the CSS
+pipeline resolves it cleanly — worth trying before committing more binaries.
+
+*Recommendation, and it is a preference rather than a finding:* vendor it, and
+share one copy. A documentation site whose typography depends on a third party
+is the kind of thing that is fine until the day it is not, and the four
+surfaces are one application — one `@font-face` block, wherever the four can
+reach it, replaces four separate answers. `app/(docs)/_fonts/` is inside a lane,
+which is the only unsatisfying part of where it currently sits; moving it
+somewhere shared is an `apps/loom`-level call rather than any one lane's, which
+is why this is filed and not done.
+
+If you would rather have the link everywhere, the docs change is deleting one
+`@font-face` block and two files, and I will take it on the next run.
 
 ---
 
@@ -2060,3 +2301,4 @@ Two things for the owner to weigh, neither urgent:
   that shows the difference**, which means the library's own specimen sheets are
   the place this will keep appearing. Worth a line in `loom.page`'s doc comment
   either way.
+

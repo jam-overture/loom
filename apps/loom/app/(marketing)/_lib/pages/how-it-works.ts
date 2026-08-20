@@ -230,7 +230,7 @@ export const howItWorksPageTree = (context: PageContext): LoomTree => {
     buildElement(ids, {
       type: "loom.page",
       props: {
-        [THEME_PROP_KEY]: SITE_THEMES[context.theme],
+        [THEME_PROP_KEY]: SITE_THEMES[context.theme].selection,
         width: "wide",
         fills: true,
       },

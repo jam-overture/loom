@@ -22,8 +22,31 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 
+/**
+ * Geist, linked rather than bundled, and named rather than hashed.
+ *
+ * `minimal-sans` names `Geist` first and falls through to the platform
+ * grotesques, because Loom does not fetch fonts — a font loader inside a pure
+ * render function is a network dependency in a projection. Supplying the face is
+ * therefore surface work, and it has to supply one *called* `Geist`: the font
+ * pack is a literal family stack in a registered theme this lane may not edit,
+ * so `next/font`, which mints a hashed family name like `__Geist_1a2b3c`, would
+ * load the file and never be matched by it. A stylesheet link defines the real
+ * name, which is the one the theme asks for.
+ *
+ * Two weights, because the pack uses exactly two: 700 for headings, 400 for
+ * body. Nothing here renders wrong if the request fails — the fallback stack is
+ * a near-neighbour, and the page still looks like this theme.
+ */
+const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap"
+
 const LessonsLayout = ({ children }: { readonly children: ReactNode }) => (
   <html lang="en">
+    <head>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+      <link rel="stylesheet" href={GEIST} />
+    </head>
     <body style={{ ...COURSE_THEME_STYLE, margin: 0, background: "var(--loom-bg-canvas)" }}>
       <div
         style={{

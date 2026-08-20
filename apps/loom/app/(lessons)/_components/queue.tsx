@@ -57,7 +57,7 @@ const Row = ({ entry }: { readonly entry: QueueEntry }) => (
     >
       <strong>Set {entry.set.letter}</strong> — {entry.set.timing}
     </Link>
-    <span style={{ ...style.note, color: entry.status === "due" ? style.accent : style.inkSubtle }}>
+    <span style={{ ...style.note, color: entry.status === "due" ? style.inkMuted : style.inkSubtle }}>
       {when(entry)}
     </span>
   </li>
@@ -80,8 +80,15 @@ export const Queue = ({ sets, parts }: QueueProps) => {
           early is a set you remember instead of retrieve.
         </p>
       ) : (
-        <section style={{ ...style.panel, ...style.column(3) }}>
-          <h2 style={{ ...style.label, color: style.accent }}>Today&rsquo;s sitting</h2>
+        <section
+          style={{
+            ...style.panel,
+            ...style.column(3),
+            background: style.highlightTint,
+            borderColor: style.highlightEdge,
+          }}
+        >
+          <h2 style={{ ...style.label, color: style.highlight }}>Today&rsquo;s sitting</h2>
           <Link
             href={`/lessons/review/${next.set.slug}`}
             style={{ color: style.ink, fontFamily: style.bodyFamily, fontSize: "var(--loom-scale-5)" }}
@@ -122,7 +129,7 @@ export const Queue = ({ sets, parts }: QueueProps) => {
 
         return (
           <section key={status} style={style.column(2)}>
-            <h2 style={{ ...style.label, color: status === "due" ? style.accent : style.inkMuted }}>
+            <h2 style={style.label}>
               {title} ({band.length})
             </h2>
             {blurb === "" ? undefined : <p style={style.note}>{blurb}</p>}
@@ -183,7 +190,7 @@ export const DueSummary = ({ sets, parts }: QueueProps) => {
         : `Due for review: Set ${due[0]?.set.letter}${
             due.length > 1 ? `, and ${due.length - 1} more behind it` : ""
           }. `}
-      <Link href="/lessons/review" style={{ color: style.accent }}>
+      <Link href="/lessons/review" style={{ color: style.highlight }}>
         The review queue
       </Link>
     </p>
