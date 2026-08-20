@@ -15,11 +15,14 @@ import { FACTS, PLACEHOLDER_COPY } from "../copy"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
   DECISIONS_URL,
+  DOCS,
   HOME,
   HOW_IT_WORKS,
   internalHref,
+  PORTAL,
   REPOSITORY_URL,
   SITE_THEMES,
+  surfaceHref,
   type SiteThemeName,
 } from "../site"
 
@@ -289,6 +292,56 @@ const questions = (ids: IdFactory): LoomNode =>
     }),
   ])
 
+/**
+ * The three ways further in, on the page rather than only in the chrome.
+ *
+ * The front door's job is not finished when a visitor has read it. Loom's
+ * documentation and its portal are paths on this same origin (0067, 0070), so
+ * the band that sends someone to them is part of this page and not a footer
+ * afterthought — and each card is honest about what is behind it, which is why
+ * the portal's says that signing in is required rather than pretending the
+ * whole product is one click away.
+ *
+ * The sentences come off `PRODUCT_SURFACES`, so the words a visitor reads here
+ * and the words under the same link in the footer cannot drift apart.
+ */
+const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
+  section(ids, { tone: "surface", width: "wide", eyebrow: "Keep going" }, "Where to go from here", [
+    buildElement(ids, {
+      type: "loom.feature-grid",
+      props: { columns: "three" },
+      children: [
+        buildElement(ids, {
+          type: "loom.feature",
+          props: {
+            icon: "▤",
+            title: "Read the docs",
+            body: DOCS.blurb,
+            href: surfaceHref(context.origin, DOCS),
+          },
+        }),
+        buildElement(ids, {
+          type: "loom.feature",
+          props: {
+            icon: "◉",
+            title: "Open the portal",
+            body: PORTAL.blurb,
+            href: surfaceHref(context.origin, PORTAL),
+          },
+        }),
+        buildElement(ids, {
+          type: "loom.feature",
+          props: {
+            icon: "⟨⟩",
+            title: "Read the source",
+            body: "Every decision written down, every test in the open. The best way to check whether any of this is true is to look.",
+            href: REPOSITORY_URL,
+          },
+        }),
+      ],
+    }),
+  ])
+
 const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page is a tree. So is yours.", [
     prose(
@@ -338,6 +391,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
         facts(ids),
         pricing(ids),
         questions(ids),
+        waysIn(ids, context),
         closing(ids, context),
         siteFooter(ids, chrome),
       ],

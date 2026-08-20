@@ -2,13 +2,17 @@ import { describe, expect, it } from "vitest"
 
 import {
   DEFAULT_THEME,
+  DOCS,
   internalHref,
   otherThemes,
+  PORTAL,
+  PRODUCT_SURFACES,
   readThemeName,
   siteOrigin,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   SITE_THEMES,
+  surfaceHref,
 } from "./site"
 
 describe("the palette a visitor arrives on", () => {
@@ -106,6 +110,55 @@ describe("the routes", () => {
       expect(route.title.length).toBeGreaterThan(0)
       expect(route.description.length).toBeGreaterThan(40)
       expect(route.label.length).toBeGreaterThan(0)
+    }
+  })
+})
+
+/**
+ * The rest of the product, which this lane may point at and may not build.
+ *
+ * The assertions are about the boundary rather than about the destinations: a
+ * surface is a path on this origin (0067), it is somebody else's front door,
+ * and it is not a page this routine is responsible for.
+ */
+describe("the rest of the product", () => {
+  it("is on this origin, because the four surfaces are one application", () => {
+    for (const surface of PRODUCT_SURFACES) {
+      expect(surface.path.startsWith("/")).toBe(true)
+      expect(surface.path.startsWith("//")).toBe(false)
+      expect(surfaceHref("https://loom.example", surface)).toBe(
+        `https://loom.example${surface.path}`
+      )
+    }
+  })
+
+  it("is never one of this site's own pages", () => {
+    const routes = SITE_ROUTES.map((route) => route.path)
+
+    for (const surface of PRODUCT_SURFACES) expect(routes).not.toContain(surface.path)
+  })
+
+  it("names each in words a visitor who has never heard of Loom would use", () => {
+    for (const surface of PRODUCT_SURFACES) {
+      expect(surface.label.length).toBeGreaterThan(0)
+      expect(surface.blurb.length).toBeGreaterThan(40)
+    }
+  })
+
+  /**
+   * The portal is behind a sign-in enforced in `proxy.ts` (0070), so a front
+   * door that offered it as one more page to read would be making a promise the
+   * deployment breaks. The flag is what the header and the band read to say so.
+   */
+  it("says which of them a visitor can reach without signing in", () => {
+    expect(DOCS.guarded).toBe(false)
+    expect(PORTAL.guarded).toBe(true)
+    expect(PORTAL.blurb.toLowerCase()).toContain("sign")
+  })
+
+  it("does not carry this site's palette into a surface that does not read it", () => {
+    for (const surface of PRODUCT_SURFACES) {
+      expect(surfaceHref("https://loom.example", surface)).not.toContain("theme=")
     }
   })
 })

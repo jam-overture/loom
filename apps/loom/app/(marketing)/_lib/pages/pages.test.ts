@@ -10,9 +10,11 @@ import { renderSitePage, SITE_PAGES, treeFor } from "../render"
 import {
   DEFAULT_THEME,
   internalHref,
+  PRODUCT_SURFACES,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   SITE_THEMES,
+  surfaceHref,
   type SiteRoute,
   type SiteThemeName,
 } from "../site"
@@ -156,6 +158,42 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     expect(body).toContain("Same tree, another palette:")
   })
 
+  /**
+   * The two landmarks a reader navigating by landmark expects, emitted by the
+   * primitives rather than by a layout. The chrome was a run of `loom.stack`s
+   * until #97, and a stack cannot say that a row of links is the navigation.
+   */
+  it("announces its navigation and its closing band as landmarks", () => {
+    const body = belowRoot(markupOf(route, DEFAULT_THEME))
+
+    expect(body).toContain("<nav")
+    expect(body).toContain("<footer")
+    /** The footer's groups are named, so a landmark menu reads three names. */
+    for (const name of ["This site", "The product", "The project"]) {
+      expect(body).toContain(`aria-label="${name}"`)
+    }
+  })
+
+  it("marks the page the reader is on rather than dropping it from the menu", () => {
+    const body = belowRoot(markupOf(route, DEFAULT_THEME))
+
+    expect(body).toContain('aria-current="page"')
+    expect(body).toContain(`>${route.label}<`)
+  })
+
+  /**
+   * The front door leads somewhere. The four surfaces are one application
+   * (0067) with this one at its root (0070), so every page of it offers the way
+   * into the documentation and the way into the portal.
+   */
+  it("offers the rest of the product from every page", () => {
+    const markup = markupOf(route, DEFAULT_THEME)
+
+    for (const surface of PRODUCT_SURFACES) {
+      expect(markup).toContain(`href="${surfaceHref(ORIGIN, surface)}"`)
+    }
+  })
+
   /** Every palette but the one being worn is reachable from the footer. */
   it("offers each of the other palettes on the page itself", () => {
     for (const theme of THEMES) {
@@ -168,13 +206,23 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     }
   })
 
-  it("links to every route of the site, and to no unknown one", () => {
+  /**
+   * Two kinds of destination on this origin, and the difference is the point.
+   * A site route is a page this lane builds, so it must have a builder; a
+   * surface is another route group's front door, which this lane may point at
+   * and must not otherwise know anything about. Anything else on this origin is
+   * a link to nowhere.
+   */
+  it("links to every route of the site, and to no unknown path on this origin", () => {
     const internal = linksIn(markupOf(route, DEFAULT_THEME))
       .filter((href) => href.startsWith(ORIGIN))
       .map((href) => new URL(href).pathname)
+    const surfaces = PRODUCT_SURFACES.map((surface) => surface.path)
 
     for (const other of SITE_ROUTES) expect(internal).toContain(other.path)
-    for (const path of internal) expect(SITE_PAGES.has(path)).toBe(true)
+    for (const path of internal) {
+      expect(SITE_PAGES.has(path) || surfaces.includes(path)).toBe(true)
+    }
   })
 
   it("keeps the visitor's palette when they navigate", () => {

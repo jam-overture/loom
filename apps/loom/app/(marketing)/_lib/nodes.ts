@@ -44,6 +44,28 @@ export const action = (
     children: [buildText(ids, label)],
   })
 
+/**
+ * A link, which is not a button.
+ *
+ * `loom.action` is the button and this is the link, and the site spent its
+ * first two weeks conflating them: the header was five `quiet` actions in a
+ * row, because a quiet button was the closest thing the catalogue offered to a
+ * menu item. It is not one — it carries a button's padding and pill radius, and
+ * five in a row read as five dismissed choices. The primitive arrived in #97,
+ * filed against that comment.
+ */
+export const link = (
+  ids: IdFactory,
+  label: string,
+  href: string,
+  props: JsonObject = {}
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.link",
+    props: { href, ...props },
+    children: [buildText(ids, label)],
+  })
+
 /** A band with its heading in the region the section places it in (0051). */
 export const section = (
   ids: IdFactory,
