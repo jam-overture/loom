@@ -1,15 +1,34 @@
+"use client"
+
+import { type LoomTree } from "@loom/runtime"
 import { describeRenderDiagnostic, renderLoomTree } from "@loom/runtime/react"
+import { useState } from "react"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
 
+import { ProposalBox } from "./proposal-box"
+
 /**
- * An example, rendered.
+ * An example, rendered — and changeable.
  *
  * What is inside the frame is not a screenshot, an iframe or a copy of the
  * output. It is `renderLoomTree` walking the same tree the catalogue holds,
  * through the same registry a host would use, with the same theme resolution —
  * so the page a reader is looking at is the claim the prose is making.
+ *
+ * **Why this is a client component.** §4c settles that every example has a
+ * working propose-a-change box beside it, and a change produces a *new tree*
+ * that has to be rendered. The tree therefore lives in React state and the walk
+ * happens wherever the state does. The cost is real and worth naming: the
+ * starter library ships to the browser on any page with an example on it. The
+ * thing bought with it is that the whole runtime — interpret, analyse, weigh,
+ * judge, apply — runs in front of the reader with no server, no key and no
+ * session, which is what makes it work on a preview deployment and in a clone.
+ *
+ * The first render is still server-rendered and hydrates cleanly, because
+ * building a tree is deterministic: the same id factory, the same counters, the
+ * same bytes. Nothing here reads a clock until a reader clicks something.
  *
  * An unknown id throws rather than rendering an empty frame. A page that names
  * an example nobody wrote is a broken page, and the build is the right place to
@@ -20,14 +39,16 @@ import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
  * happens, and a documentation site that hid it would be teaching the reader
  * that it cannot happen.
  */
-export const Example = ({ id }: { readonly id: string }) => {
+export const Example = ({ id, interactive = true }: { readonly id: string; readonly interactive?: boolean }) => {
   const example = docsExamples.get(id)
 
   if (example === undefined) {
     throw new Error(`loom: no documented example is registered as "${id}"`)
   }
 
-  const tree = example.build()
+  const [tree, setTree] = useState<LoomTree>(example.build)
+  const changed = tree.revision > 0
+
   const rendered = renderLoomTree(tree, {
     resolver: docsRegistry,
     validator: docsRegistry,
@@ -39,7 +60,7 @@ export const Example = ({ id }: { readonly id: string }) => {
       <div className="border-edge bg-surface-sunken flex items-center justify-between gap-3 rounded-t-lg border px-3 py-2">
         <span className="text-ink-muted text-xs font-medium">{example.title}</span>
         <span className="text-ink-faint font-mono text-[0.65rem] tracking-wide uppercase">
-          live · rendered through the runtime
+          {changed ? `live · revision ${tree.revision}` : "live · rendered through the runtime"}
         </span>
       </div>
 
@@ -61,6 +82,16 @@ export const Example = ({ id }: { readonly id: string }) => {
             <li key={index}>{describeRenderDiagnostic(diagnostic)}</li>
           ))}
         </ul>
+      )}
+
+      {interactive && (
+        <ProposalBox
+          exampleId={example.id}
+          tree={tree}
+          onTree={setTree}
+          changed={changed}
+          onReset={() => setTree(example.build())}
+        />
       )}
 
       <details className="border-edge bg-surface-sunken group rounded-b-lg border-x border-b">
