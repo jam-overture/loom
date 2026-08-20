@@ -72,6 +72,30 @@ It is the highest-value part of this course and the easiest to skip. Ten minutes
 of closed-book recall a week after a lesson will do more for you than rereading
 all four parts.
 
+## Where to actually do it: `/lessons`
+
+The schedule above asks you to work out what is due, to keep a table of what you
+have done, and to hold your confidence rating in your head until after you have
+checked. That is three pieces of bookkeeping standing between you and ten
+minutes of recall, and bookkeeping is what does not get done.
+
+So the course also runs as a surface — `/lessons` in the Loom application — and
+what it adds is only the part paper cannot do:
+
+- **What is due today**, computed from the days you actually worked through each
+  lesson. One sitting is offered at a time; a backlog is listed second and said
+  out loud to be massed practice.
+- **Rate, then write, then check.** A set runs one question at a time. The
+  confidence rating is taken before anything is revealed, the answer box comes
+  after it, and where to look comes only after you have written something. No
+  answer is ever shown next to its question — the sets have no printed answers,
+  and going to get one is another retrieval.
+- **Confident and wrong**, counted. That pair is the study plan, and it is
+  unmeasurable on paper because the rating is gone by the time you know.
+
+**The markdown here stays the source.** The surface reads these files; a lesson
+is still written, reviewed and versioned as text in this directory.
+
 ## The one-paragraph version
 
 Read this *after* lesson 01, not before — it is a summary, and summaries are

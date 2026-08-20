@@ -1,0 +1,93 @@
+import { render } from "@testing-library/react"
+import { beforeEach, describe, expect, it } from "vitest"
+
+import { Queue } from "./queue"
+import type { ScheduledSet } from "../_lib/queue"
+
+/**
+ * The queue as the reader meets it: a stored record, today's date, and a list
+ * that says what to do now and refuses to offer what is not due yet.
+ */
+
+const SETS: readonly ScheduledSet[] = [
+  { letter: "A", slug: "set-a", timing: "two days after lesson 01", anchor: { kind: "lesson", lesson: 1 }, delayDays: 2 },
+  { letter: "B", slug: "set-b", timing: "two days after lesson 02", anchor: { kind: "lesson", lesson: 2 }, delayDays: 2 },
+  { letter: "E", slug: "set-e", timing: "one week after Part I", anchor: { kind: "part", part: "I" }, delayDays: 7 },
+]
+
+const PARTS = { I: [1, 2] }
+
+const stored = (progress: unknown) => {
+  window.localStorage.setItem("loom.lessons.progress.v1", JSON.stringify(progress))
+}
+
+const daysAgo = (days: number): string =>
+  new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)
+
+describe("the review queue", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("gives a reader who has done nothing fourteen sets and nothing to do", () => {
+    const { container } = render(<Queue sets={SETS} parts={PARTS} />)
+
+    expect(container.textContent).toContain("Waiting on a lesson (3)")
+    expect(container.textContent).toContain("Nothing is due today")
+    expect(container.textContent).toContain("when lesson 01 is done")
+  })
+
+  it("puts a set in the queue two days after the lesson it follows", () => {
+    stored({ lessons: { "1": daysAgo(3) }, sets: {} })
+
+    const { container } = render(<Queue sets={SETS} parts={PARTS} />)
+
+    expect(container.textContent).toContain("Today\u2019s sitting")
+    expect(container.textContent).toContain("Set A — two days after lesson 01")
+    expect(container.textContent).toContain("Due 1 day ago")
+    expect(container.textContent).not.toContain("Also overdue")
+  })
+
+  it("holds a set back while its gap is still doing the work", () => {
+    stored({ lessons: { "1": daysAgo(1) }, sets: {} })
+
+    const { container } = render(<Queue sets={SETS} parts={PARTS} />)
+
+    expect(container.textContent).toContain("Coming up (1)")
+    expect(container.textContent).toContain("in 1 day, on")
+  })
+
+  it("counts a part from its last lesson, so Part I's set arrives a week after 02", () => {
+    stored({ lessons: { "1": daysAgo(30), "2": daysAgo(8) }, sets: {} })
+
+    const { container } = render(<Queue sets={SETS} parts={PARTS} />)
+
+    /** Three are late, and exactly one of them is offered as today's sitting. */
+    expect(container.textContent).toContain("Today\u2019s sitting")
+    expect(container.textContent).toContain("Also overdue (2)")
+    expect(container.textContent).toContain("massed practice")
+  })
+
+  it("reports the pair the schedule asks the reader to keep by hand", () => {
+    stored({
+      lessons: { "1": daysAgo(9) },
+      sets: {
+        "set-a": {
+          completedOn: daysAgo(1),
+          attempts: [
+            { question: 1, confidence: 5, grade: "missed", answer: "", on: daysAgo(1) },
+            { question: 2, confidence: 2, grade: "missed", answer: "no", on: daysAgo(1) },
+            { question: 3, confidence: 4, grade: "got-it", answer: "yes", on: daysAgo(1) },
+          ],
+        },
+      },
+    })
+
+    const { container } = render(<Queue sets={SETS} parts={PARTS} />)
+
+    expect(container.textContent).toContain("Confident and wrong: 1")
+    expect(container.textContent).toContain("SET A q1")
+    expect(container.textContent).toContain("1 of 3 questions got")
+    expect(container.textContent).toContain("Behind you (1)")
+  })
+})
