@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 29 blocks, 37 primitives.**
+**Done — 31 blocks, 45 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -74,6 +74,7 @@ stands alone.
 | `team-members`, `staff-roster` | `loom.person-grid` / `loom.person` | pair ✅ |
 | `articles`, `press`, `case-studies`, `tutorials`, `recipes` | `loom.article-grid` / `loom.article` | pair ✅ |
 | `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` | pair ✅ |
+| `contactform`, `newsletter` | `loom.form` / `loom.field` (+ `loom.option`, `loom.button`) | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -104,7 +105,7 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 22 blocks, 8 pairs.** Grouped by the content model they
+**Pairs to build — 20 blocks, 7 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
@@ -116,7 +117,6 @@ share, which is the order to build them in.
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
 | Comparison | `comparison-table` | `loom.comparison-table` / `loom.comparison-row` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
-| Forms | `contactform`, `newsletter` | `loom.form` / `loom.field` — **unblocked on 18 August** by the submission seam ([0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)). The field list is an ordinary 0052 decomposition; the primitive reads `loom.submit` for the address and renders its three states |
 
 **Atomic to build — 4 blocks.**
 
@@ -128,9 +128,10 @@ share, which is the order to build them in.
 | `before-after` | two images and a divider position — self-measuring if it is ever draggable |
 
 **Blocked — 2 blocks.** `contactform` and `newsletter` left this table on 18
-August: [0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)
-gave a form somewhere to post, so they are a pair to build rather than a seam to
-wait on.
+August, when [0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)
+gave a form somewhere to post, and left the *pairs to build* table on 20 August
+when `loom.form` was built against it
+([0073](../decisions/0073-a-form-with-nowhere-to-post-renders-disabled-and-says-so.md)).
 
 | Hermes block | Blocked on |
 | --- | --- |
@@ -164,18 +165,18 @@ catalogue", not "of the library".
 
 | | Blocks |
 | --- | --- |
-| Ported | 29 |
+| Ported | 31 |
 | Need no primitive | 13 |
-| Pairs still to build | 22 (8 pairs) |
+| Pairs still to build | 20 (7 pairs) |
 | Atomic still to build | 4 |
 | Blocked on a seam | 2 |
 
-**42 of 70 are settled**, and the 22 that remain are eight pairs rather than
-twenty-two primitives. That is the number worth quoting, because "70 blocks"
+**44 of 70 are settled**, and the 20 that remain are seven pairs rather than
+twenty primitives. That is the number worth quoting, because "70 blocks"
 has been the shape of this job since the port started and it was never the real
 size of it.
 
-**Seven of those remaining pairs are a card in a grid**, and what separates them
+**Six of those remaining pairs are a card in a grid**, and what separates them
 is not their fields — it is what the reader aims at.
 [0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 settles it once for all of them: `loom.credential`, `loom.book` and

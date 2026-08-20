@@ -53,6 +53,8 @@ export const loomSection = definePrimitive({
           display: "flex",
           flexDirection: "column",
           gap: space(5),
+          /** No stylesheet resets these, so padding would otherwise widen the band past its parent. */
+          boxSizing: "border-box",
           width: "100%",
           maxWidth: WIDTHS[width],
           paddingBlock: given.tone === undefined || given.tone === "canvas" ? space(3) : space(6),

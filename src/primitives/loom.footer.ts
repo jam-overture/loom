@@ -116,6 +116,8 @@ export const loomFooter = definePrimitive({
           display: "flex",
           flexDirection: "column",
           gap: space(6),
+          /** No stylesheet resets these, so padding would otherwise widen the band past its parent. */
+          boxSizing: "border-box",
           width: "100%",
           paddingBlock: space(7),
           ...(tone === "surface"

@@ -94,7 +94,7 @@ const backdropLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly Reac
      * obvious way to write this and it renders as a rectangle with two hard
      * sides — the clip crossing the middle of the glow.
      */
-    const field = (slot: "accent" | "brand-secondary", position: CSSProperties): ReactNode =>
+    const field = (slot: "accent-strong" | "brand-secondary", position: CSSProperties): ReactNode =>
       createElement("div", {
         key: slot,
         className: LIBRARY_CLASS.aurora,
@@ -112,8 +112,27 @@ const backdropLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly Reac
         },
       })
 
+    /**
+     * **`accent-strong`, not `accent`**, and the difference is a finding the
+     * marketing routine filed on 20 August. A slot cannot be both near-black
+     * text and a tinted field: `minimal` sets `accent` to `#0a0a0a` on purpose,
+     * because the library reads that slot as *ink* — eyebrows, kickers, the
+     * disclosure marker, the current nav item — far more often than as a fill.
+     * This is the one place in the library that reads a slot as a large area of
+     * colour, so it is this that has to move. On the white-paper palette the
+     * hero was rendering a grey cloud across its top-left corner.
+     *
+     * The finding suggested `accent-subtle`, and it would fix the smudge by
+     * making the field vanish: that slot is a *tile background* — `#e6ebf2` and
+     * `#effbf5` — which at 32% on a light canvas is nothing at all.
+     * `accent-strong` is the slot that must hold up as a glyph against
+     * `accent-subtle`, so every palette gives it real chroma: `#34425a`,
+     * `#e0b800`, `#176e44`. Bold keeps its gold-and-red glow, editorial gains a
+     * second blue where it previously painted one colour twice, and minimal
+     * gets Hyperion's green over its mint.
+     */
     return [
-      field("accent", { insetInlineStart: "0", insetBlockStart: "0" }),
+      field("accent-strong", { insetInlineStart: "0", insetBlockStart: "0" }),
       /** Started part-way through the cycle so the two fields never move in step. */
       field("brand-secondary", {
         insetInlineEnd: "0",
@@ -223,6 +242,8 @@ export const loomHero = definePrimitive({
           alignItems: "center",
           justifyContent: centred && media === undefined ? "center" : "flex-start",
           gap: space(6),
+          /** No stylesheet resets these, so padding would otherwise widen the band past its parent. */
+          boxSizing: "border-box",
           width: "100%",
           minHeight: given.stature === "tall" ? "78vh" : "auto",
           paddingBlock: space(8),

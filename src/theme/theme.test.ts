@@ -151,6 +151,17 @@ describe("what the library reads against what", () => {
     ["fg-on-accent", "accent", "loom.action primary label"],
     ["accent-strong", "accent-subtle", "loom.badge accent, loom.icon soft"],
     ["fg-default", "accent-subtle", "loom.section tone accent"],
+    /**
+     * `fg-subtle` is held to the body-text bar like the rest, which is 0074.
+     * The slot recedes and none of what it carries is reliably large — a
+     * `loom.footer` note row and a `loom.tier` note are ordinary small text —
+     * so a threshold of 3:1 would be a bar chosen to fit the colours rather
+     * than the reader. `bg-surface-muted` is here because `loom.perk` is the
+     * one primitive that puts the pair together deliberately.
+     */
+    ["fg-subtle", "bg-canvas", "loom.footer note, loom.link-list group label"],
+    ["fg-subtle", "bg-surface", "loom.tier note, loom.milestone marker"],
+    ["fg-subtle", "bg-surface-muted", "loom.perk excluded marker"],
   ]
 
   it("meets AA on every pairing a primitive puts together, in every registered palette", () => {
@@ -203,16 +214,27 @@ describe("what the library reads against what", () => {
   })
 
   /**
-   * **`fg-subtle` is deliberately not in the table above.** It is the slot for
-   * text that is meant to recede — a `loom.link-list` label, a footer note — and
-   * the three registered palettes sit at 2.41:1 (`editorial`), 3.42:1
-   * (`minimal`) and 3.72:1 (`bold`). Two of those would pass AA for large text
-   * and none passes for body text.
-   *
-   * Not asserted, and not quietly lowered to a bar they all clear, which would
-   * make the test say nothing. `editorial` is a shipped palette and re-colouring
-   * it is a change nobody asked this branch to make; it is filed instead.
+   * The ramp has to stay a ramp. Darkening `fg-subtle` to clear AA moves it
+   * towards `fg-muted`, and a palette where the two are the same colour has
+   * spent a slot on nothing — the assertion that would have caught it if the
+   * repair had been taken one step further.
    */
+  it("keeps the three ink slots distinct after the subtle one was darkened", () => {
+    for (const palette of STARTER_PALETTES) {
+      const [subtle, muted, base] = [
+        palette.slots["fg-subtle"] ?? "",
+        palette.slots["fg-muted"] ?? "",
+        palette.slots["fg-default"] ?? "",
+      ]
+
+      expect(new Set([subtle, muted, base]).size, palette.id).toBe(3)
+
+      const canvas = palette.slots["bg-canvas"] ?? ""
+
+      expect(contrast(subtle, canvas), palette.id).toBeLessThan(contrast(muted, canvas))
+      expect(contrast(muted, canvas), palette.id).toBeLessThan(contrast(base, canvas))
+    }
+  })
 })
 
 describe("theme registry", () => {

@@ -1335,7 +1335,18 @@ silent.
 ## 2026-08-19 — the Gate's nested-target reason will be a shade wrong for a covered card
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — small, cosmetic, and not worth a branch of its own.
+closed by #109 `framework-01-what-the-framework-says-back`, which took the wording the
+finding suggested. The refusal now reads *"puts a target where the reader cannot
+reach it: `loom.action n_buy0` inside `loom.article n_story0`"* — the damage
+rather than the mechanism, true of a nested anchor and of a covering `::after`
+alike. The list still names the pair, because a reviewer fixes nodes and not a
+sentence. Three doc comments that asserted invalid markup (`analysis.ts`,
+`policy.ts`, `nesting.ts`) were corrected with it, and a test renders the
+`loom.article` case specifically and asserts the string says nothing about
+nesting.
+
+It rode along with two other findings rather than getting a branch of its own,
+which is what "not worth a branch" should mean.
 
 [0068](decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md)
 declares `loom.article` `{ whenProps: ["href"] }`, which is the right *verdict*:
@@ -1652,7 +1663,19 @@ The surface strips the markers meanwhile, and says so in `_lib/text.ts`.
 
 ## 2026-08-19 — `sequentialIdFactory` takes a namespace it cannot mint an id from
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by #109 `framework-01-what-the-framework-says-back`. The diagnosis was exact and the
+fix is the one it named: the namespace is checked where it is given, and the
+message carries the namespace, the rule and a namespace that would have worked
+(`Try "setnq1"`). The bound is 24 characters, not 32 — the counter needs the
+remaining eight, so a namespace that is legal at the first node stays legal at
+the hundred-millionth. Lowercase alphanumerics only, as filed.
+
+The lessons surface's `namespaceOf` already slices to 24 and strips the same
+characters, so nothing there breaks and its keys are unchanged. It can be
+deleted whenever that lane next runs — `sequentialIdFactory` now throws with a
+message that says what to do — or kept, since sanitising a key is a different
+job from being told a key is wrong. Only the comment pointing here is stale.
 
 `sequentialIdFactory(namespace)` interpolates the namespace into every id and
 validates the *result*: `nodeIdSchema.parse(`n_${namespace}${n}`)`. Node ids are
@@ -1737,7 +1760,12 @@ type-only import through the root entry point, erased at build time.
 
 ## 2026-08-19 — Vercel deploys fail on every PR: the projects still root at `apps/portal` and `apps/marketing`, which #98 deleted
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` / `@jonathanbravecredit` · **Status:** open
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` / `@jonathanbravecredit` · **Status:** closed —
+**fixed by the maintainer on 20 August**, and verified from #109. There is one Vercel project now,
+`loom`, with `rootDirectory: apps/loom`; `loom-portal` and `loom-marketing` are
+gone. #108's deploy reached `Ready` in about a minute. The second of the two
+routes out below — collapse to one project — is the one that was taken, which is
+what 0067 implies. A routine can put a real preview URL in a pull request again.
 
 The migration in #98 (0067) retired `apps/portal`, `apps/marketing` and `apps/docs`
 into `apps/loom/app/(portal)`, `(marketing)` and `(docs)`. The **Vercel projects
@@ -1811,7 +1839,15 @@ whose primitive does not exist would be a button with nothing behind it.
 ## 2026-08-20 — a house theme was added, and it was added in someone else's lane
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — needs acknowledging rather than fixing.
+closed — **acknowledged**, on 20 August, by the framework routine, which is all
+this asked for. Nothing was discovered by merge conflict: the crossing was read
+here before `src/theme/` was opened, and the two census assertions that were
+rewritten to *derive* their expectations rather than list ids held without
+further edits when 0074 changed three slot values in the same file. Doing it
+that way is the reason this run's palette change was three hex values and not a
+test rewrite. The reasoning for crossing the lane — `createThemeRegistry()`
+replaces rather than merges, so a theme every surface can reach has exactly one
+home — is accepted.
 
 The maintainer asked, in a live session, for a minimalist theme available to all
 four surfaces. It landed on `theme-01-the-minimal-theme` as `minimal` /
@@ -1882,7 +1918,31 @@ fallback's enough to be worth a second look at step 8.
 ## 2026-08-20 — `fg-subtle` does not meet AA in any registered palette
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open
+closed by #109 `framework-01-what-the-framework-says-back`, with the decision the
+finding asked for:
+[0074](decisions/0074-a-palette-slot-that-carries-text-meets-aa.md). The fork was
+read the second way — the palettes moved, the bar did not.
+
+| palette | was | is | canvas / surface / muted |
+| --- | --- | --- | --- |
+| `editorial` | `#a3a3a3` | `#6a6a6a` | 5.17 / 5.41 / 4.66 |
+| `bold` | `#6b6b6b` | `#8a8a8a` | 5.73 / 5.04 / 5.55 |
+| `minimal` | `#8a8a94` | `#6e6e78` | 5.04 / 5.04 / 4.59 |
+
+The "large or secondary text only" contract was rejected because nothing can
+enforce it: a primitive picks a colour and a size independently, a style preset
+can change the size afterwards, and no test in the repository could ever check
+it. The exclusion is gone from the suite and `fg-subtle` is in the pairing table
+with all three of its backgrounds — `bg-surface-muted` included, since
+`loom.perk` puts the pair together deliberately. A second assertion keeps
+`fg-subtle`, `fg-muted` and `fg-default` three distinct colours in increasing
+contrast, because the obvious way to overshoot this repair is to darken the
+subtle slot into the muted one.
+
+**Every page in these palettes looks slightly different now**, in six places:
+`loom.footer`'s note, `loom.tier`'s note, `loom.milestone`'s marker,
+`loom.link-list`'s group label, `loom.logo-cloud`'s label and `loom.perk`'s
+markers. Nothing moves; one colour is darker.
 
 Found by writing the contrast suite that now guards `src/theme/library.ts`. Every
 pairing the primitives put together meets 4.5:1 in all three palettes, with one
@@ -2302,6 +2362,312 @@ Two things for the owner to weigh, neither urgent:
   the place this will keep appearing. Worth a line in `loom.page`'s doc comment
   either way.
 
+
+---
+
+## 2026-08-20 — every Loom page had a horizontal scrollbar on a phone, and no test could see it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+by the form-band run — five primitives and one new control now declare
+`box-sizing: border-box`, and an invariant test holds every fixture to it
+
+Found while screenshotting this run's specimen, not by looking for it.
+
+**An inline style carries no reset.** The library styles everything inline, on
+purpose (0008 — nothing to attach, nothing to load), and `box-sizing` therefore
+defaults to `content-box` in every one of them. A band that says
+
+```ts
+width: "100%",
+paddingInline: space(6),
+```
+
+is exactly its own padding wider than the parent it sits in. Measured on the
+specimen at a 390px viewport: **`document.scrollWidth` was 486px** — a page 25%
+wider than the phone showing it, with the hero clipped and everything below it
+sliding under a horizontal scrollbar.
+
+Five primitives had it, all of them page-level: `loom.page`'s inner column,
+`loom.hero` with any backdrop, `loom.nav` and `loom.footer` with any tone but
+plain, and `loom.section` with a tone. The marketing site, the demo and every
+documented example have been rendering this way since the day each landed.
+
+**Nothing in the test suite could have caught it**, and that is the part worth
+carrying forward. The palette tests assert that colour comes from slots; the
+markup tests assert that elements are present and in the right order; a pure
+render has no viewport and no layout. Every assertion in the library was true
+of a page that scrolled sideways.
+
+What closes it is one line per primitive plus **an invariant rather than a
+case**: a test that walks every inline style in all eight fixtures and fails on
+any that combines `padding-inline` with `width: 100%` and no
+`box-sizing: border-box`. It caught a sixth instance the moment it was written —
+`loom.button` with `width: "full"`, added in the same run.
+
+Worth knowing for anything built next: the rule is that *any* primitive setting
+a percentage width and its own padding declares the border box, and the test is
+what makes that a rule rather than a habit.
+
+---
+
+## 2026-08-20 — a level-1 heading does not fit on a phone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+
+Seen in the same phone screenshot as the finding above, and left alone because
+it is a bigger call than a run should slip in.
+
+`loom.heading` at `level: 1` renders `var(--loom-scale-8)`, which is **72px in
+every registered font pack**. On a 390px screen a hero headline sets one word
+per line and the long ones — "something", "interfaces" — run past the padding
+into the section's `overflow: hidden`. It is clipped rather than scrolling, so
+it does not show up in the overflow measurement above, and it looks like a
+design choice until you read the word that lost its last letter.
+
+The type ramp is the font pack's, and a font pack declares eight fixed pixel
+sizes. So the fix is one of:
+
+- **Clamp in the primitive** — `min(var(--loom-scale-8), 11vw)` at the top of
+  the ramp only. It stays token-based, needs no palette change, and is the
+  smallest thing that works. It also puts a viewport unit inside a primitive
+  for the first time, which is a precedent worth naming out loud rather than
+  slipping in.
+- **A fluid ramp in the font pack** — `scaleRamp` entries become clamps rather
+  than numbers. Much better, and it changes a schema three registered packs and
+  the theme tests all depend on, which makes it the framework routine's.
+
+Recorded rather than done: this run's lane is the form band, and re-sizing every
+heading in the library on the way past is not a change that belongs inside it.
+
+---
+
+## 2026-08-20 — `auditRegistry` calls `loom.field` a leaf, and it is one only sometimes
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Small, and interesting because it is the first primitive in the library where
+the answer depends on a prop.
+
+`auditRegistry` probes each primitive once, with props its schema accepts, and
+reports the ones that placed no children as `leaves` — the check that catches a
+primitive quietly dropping `children`. `loom.field` renders its children **only
+when `type` is `select`**, because only a select has choices (they are
+`loom.option` nodes — 0052 applied to the one thing on a form that repeats).
+Probed at its default type, it places nothing and is reported a leaf.
+
+Nothing is broken: the library's own test now asserts the leaf list including
+`loom.field`, with a comment saying why. But the report is wrong in a way a host
+reading it would act on — "this primitive has nowhere to put a child node" is
+false, and the primitive that would genuinely have lost its `children` is
+indistinguishable from this one.
+
+Two ways out, both the framework routine's:
+
+- **Probe more than one configuration.** The declared schema enumerates
+  `type`'s eight values, so the audit could probe each closed enum's options and
+  report a leaf only when *no* configuration places children. It costs a handful
+  of renders per primitive and it is the honest answer.
+- **Report the third state.** `leaves` becomes "placed no children under the
+  configuration probed", with a separate list for "placed children under some".
+  Cheaper, and it moves the judgement to the reader.
+
+No action taken beyond the comment in `library.test.ts`, since `sdk/audit.ts` is
+not this lane's file.
+
+---
+
+## 2026-08-20 — the submission audit 0065 deferred now has something to audit
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+0065 named this and deliberately did not build it:
+
+> Nothing enforces that a form primitive has a target. A primitive that needs
+> one and is given none renders untargeted, and only its own author knows that
+> is wrong. The parallel machinery — a declaration on `definePrimitive`, the way
+> `interactive` is declared — is available and deliberately not used yet: one
+> seam per run, and the audit is cheap to add once a primitive exists that would
+> fail it.
+
+**One exists.** `loom.form` needs a target, and a host that registers the
+starter library, renders a tree with `loom:submit` on a form and forgets to pass
+`submissions` to `renderLoomTree` gets a `submit-unresolved` diagnostic per node
+— which is good — while a host whose *tree* simply never declared one gets
+nothing at all, because a tree that declared nothing is not a misdeclaration.
+
+The shape 0065 sketched still looks right: a `submits: true` on the definition,
+read by `auditRegistry` the way `interactive` is, so a deployment can assert
+that every registered primitive which posts was rendered with the seam wired.
+
+**It is not urgent, and this run made it less so on purpose**
+([0073](decisions/0073-a-form-with-nowhere-to-post-renders-disabled-and-says-so.md)):
+an untargeted form renders disabled with a line saying it is not connected, so
+the cost of the missing audit is a visible notice on a page rather than a submit
+button that quietly goes nowhere. The audit would move that from *the visitor
+finds out* to *the deployment finds out first*, which is where it belongs.
+
+---
+
+## 2026-08-20 — the aurora finding, answered — with a different slot than the one suggested
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing site` · **Status:** closed
+
+Answering the marketing routine's finding of the same day: `loom.hero`'s
+`aurora` read `accent` as a field colour, and `minimal` sets `accent` to
+`#0a0a0a`, so the house palette's front door had a grey cloud across its
+top-left corner.
+
+**Fixed, and the diagnosis was exactly right** — a slot cannot be both near-black
+ink and a tinted field, the library reads `accent` as ink far more often, so the
+one place that reads it as an area is the thing that has to move.
+
+**The suggested slot was `accent-subtle`, and it would have replaced a visible
+smudge with an invisible field.** That slot is a *tile background* in every
+palette — `#e6ebf2` under editorial, `#effbf5` under minimal — and at 32%
+opacity on a light canvas it is nothing at all. `theme.test.ts` says what it is
+for in its own contrast pair: `accent-strong` on `accent-subtle`.
+
+**`accent-strong` is what the aurora now paints**, beside `brand-secondary` as
+before. It is the slot that has to hold up as a glyph against `accent-subtle`,
+so every palette gives it real chroma by construction: `#34425a`, `#e0b800`,
+`#176e44`. Bold keeps the gold-and-red glow the finding was right to mourn,
+editorial is unchanged in character (its `accent` and `brand-secondary` are the
+same blue, so this gives it two shades where it had one), and minimal gets
+Hyperion's green over its mint — which is the palette's own description.
+
+**The marketing site can put `backdrop: "aurora"` back on its home hero**
+whenever that lane next runs. The `grid` backdrop was a considered compromise
+and it no longer has to be one. Not changed here: `apps/` is not this lane.
+
+---
+
+## 2026-08-20 — `loom.page`'s `fills`, answered by pairing rather than by a default
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** closed
+
+Answering the documentation routine's finding: `loom.page` did not paint its
+canvas by default, so a `bold` example rendered `#f5f5f5` text on white for a
+fortnight with no diagnostic and every test passing.
+
+The finding asked whether the default should flip.
+[0072](decisions/0072-a-page-paints-its-ink-and-its-canvas-together.md) says yes
+**and** that the default was the smaller half of it: the component set the
+palette's ink unconditionally and its canvas only when asked, so `fills: false`
+meant *paint the ink of one theme onto the background of another*. That is
+broken in both directions and in every configuration, not only the one the docs
+site hit.
+
+So `fills` now governs both, and it is on by default. `fills: false` paints
+neither and inherits the host's. The default moved on the evidence the finding
+gave plus one more: **every tree in this repository that roots at the starter
+`loom.page` already passes `fills: true`** — marketing, the demo, every docs
+example — so the old default was serving nobody and catching people out.
+
+Nothing in `apps/` changes appearance, and the docs site's explicit `fills: true`
+is now redundant rather than wrong. Removing it is optional and that lane's call.
+
+---
+
+## 2026-08-20 — two files in other lanes had to change so `pnpm verify` would pass
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`, `Loom marketing` ·
+**Status:** open — nothing to fix, but each owner should know their file moved
+and why, rather than finding it in a diff.
+
+#109 `framework-01-what-the-framework-says-back` changes one palette slot in
+`src/theme/library.ts` (0074) and adds one decision record. Two tests outside
+this lane are wired to notice exactly that, and both were red until the value
+they check was updated:
+
+| file | change | the test that forced it |
+| --- | --- | --- |
+| `app/(portal)/globals.css` | `#8a8a94` → `#6e6e78`, three tokens | `(portal)/globals.test.ts` — `--text-muted`, `--text-placeholder` and `--outcome-inapplicable-text` must equal the registered palette's `fg-subtle` |
+| `app/(marketing)/_lib/copy.ts` | `decisions: "71"` → `"72"` | `(marketing)/_lib/facts.test.ts` — the checked number must equal the count of records on disk |
+
+**Both tests did their job**, and this is worth saying plainly because both have
+been complained about. The portal's finding of 20 August — *"the chrome copies
+the theme, and a test is what keeps them equal"* — is the reason the portal's
+sign-in page is not still rendering the old grey today. The marketing site's
+checked numbers were filed on 19 August as *"the thing that makes every other
+lane's run go red"*; that is true, and the alternative is a marketing page that
+says 71 when the answer is 72. A test that fails when a fact changes is not a
+tax, it is the fact being checked.
+
+What each owner may want to weigh, neither urgent and neither mine to decide:
+
+- **The portal chrome duplicates three palette values as literals.** Reading them
+  from the registry at build time would make the test unnecessary rather than
+  merely satisfied. There may be a good reason it is a literal — a stylesheet
+  cannot import TypeScript — in which case the test *is* the mechanism and this
+  is working as designed.
+- **The marketing count could be derived rather than transcribed.** `facts.test.ts`
+  already counts the records on disk to compare against; the same count could
+  produce the string. That trades a checked constant for a build-time read, which
+  is a real trade and the owner's call.
+
+---
+
+## 2026-08-20 — the Gate's refusal and the page explaining it now describe different things
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
+
+0074's sibling change in this run reworded the `nested-target` refusal from
+*"nests a target inside another"* to *"puts a target where the reader cannot
+reach it"*, because 0068 made `loom.article` a target by overlay rather than by
+nesting — so the old sentence sent a reader looking for an `<a>` inside an `<a>`
+that is not in the markup.
+
+`docs/the-runtime/what-the-gate-decides` still explains the refusal in the old
+terms:
+
+> *"the button inside it becomes a link inside a link: markup a browser resolves
+> by throwing one of them away"*
+
+**Nothing is broken and no test fails.** The page's worked example is
+`loom.card`, where nested anchors are literally what happens, so the prose is
+still true of what it demonstrates. The mismatch is that the live refusal
+rendered a few lines below it now says something else, and a reader who presses
+the button gets a sentence about reach and an explanation about markup.
+
+The smaller fix is a clause — *"or, when the enclosing primitive covers itself
+with an overlay, a control the click never reaches"*. The larger and better one
+is a second worked example on `loom.article`, which would make the site the place
+the distinction is actually taught. Filed rather than done because
+`app/(docs)/` is not this lane.
+
+---
+
+## 2026-08-20 — a host's own palette is not held to the bar the starter palettes now clear
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+
+Named in 0074's consequences and repeated here so it is not lost in a record.
+
+0074 says a palette slot that primitives put text in meets 4.5:1 against every
+background they pair it with, and the three registered palettes now do. **The
+check that enforces it is a test in `src/theme/theme.test.ts`, iterating
+`STARTER_PALETTES`.** `createThemeRegistry({ palettes: [...] })` replaces that
+list wholesale (0049), so a host supplying its own palettes gets `paletteSchema` —
+which checks that every slot holds a colour and has no idea which slots are read
+as text on which others — and nothing else. A host palette with a 2:1 subtle
+registers, resolves, re-themes and renders.
+
+**Not fixed in this run, deliberately.** Moving the check into `paletteSchema`
+would make it a refusal at registration, which is a behaviour change to a shipped
+seam and would reject palettes that are legal today — including, possibly, ones a
+host is already using. It also decides a question 0074 did not: whether Loom
+*enforces* accessibility on hosts or merely *meets* it itself. That is a decision
+record, and it wants the maintainer rather than a quiet patch.
+
+Two shapes worth considering when it is taken:
+
+- **A `RenderOutput` diagnostic rather than a refusal**, in the shape
+  `data-unavailable` already established (0058) — the page renders, and the
+  surface reviewing it is told which pairing fails and by how much. Non-breaking,
+  and it puts the answer where a person is already looking.
+- **An exported `auditPalette(palette)` a host can run in its own tests**, which
+  refuses nothing and makes the bar available to anyone who wants it. Cheapest,
+  and the one that matches how `auditRegistry` already works.
 
 ---
 

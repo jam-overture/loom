@@ -19,7 +19,9 @@ import { z } from "zod"
  * NodeId belongs; the brand types are the real enforcement.
  */
 
-const ID_BODY = "[0-9a-z]{1,32}"
+const ID_BODY_MAX_LENGTH = 32
+const ID_BODY_ALPHABET = "[0-9a-z]"
+const ID_BODY = `${ID_BODY_ALPHABET}{1,${ID_BODY_MAX_LENGTH}}`
 
 export const nodeIdSchema = z
   .string()
@@ -83,12 +85,51 @@ export const randomIdFactory: IdFactory = {
 }
 
 /**
+ * The counter is appended to the namespace and the pair has to fit an id body,
+ * so the namespace cannot have all of it. Eight characters of headroom is a
+ * hundred million ids per kind, which is more than a deterministic run will ever
+ * mint, and it means a namespace that is legal at the first node is still legal
+ * at the last one — a bound that holds only until the counter grows a digit is
+ * the same fault with a longer fuse.
+ */
+const NAMESPACE_COUNTER_HEADROOM = 8
+const NAMESPACE_MAX_LENGTH = ID_BODY_MAX_LENGTH - NAMESPACE_COUNTER_HEADROOM
+const namespacePattern = new RegExp(`^${ID_BODY_ALPHABET}{0,${NAMESPACE_MAX_LENGTH}}$`)
+
+/**
+ * The nearest legal namespace to the one that was refused, so the message ends
+ * in something to paste rather than in a rule to re-read. A namespace with
+ * nothing legal left in it has no repair to offer, and the caller is told to
+ * drop the argument instead.
+ */
+const suggestNamespace = (namespace: string): string => {
+  const repaired = namespace.toLowerCase().replace(/[^0-9a-z]/g, "").slice(0, NAMESPACE_MAX_LENGTH)
+
+  return repaired === "" ? "pass no namespace at all" : JSON.stringify(repaired)
+}
+
+/**
  * Deterministic ids for tests and for replaying a recorded session. Counters
  * are per-kind so a tree and its deltas read as `n_1, n_2 … d_1, d_2`. The
  * namespace keeps two independent factories from minting the same id — a test
  * that builds nodes for an existing tree passes one.
+ *
+ * The namespace is checked here rather than at the first mint. Interpolating it
+ * and validating only the result is what a lessons page hit with `set-n-q1`:
+ * the factory accepted it, and the failure arrived later as a bare Zod regex
+ * error inside whichever builder happened to run first, naming neither the
+ * namespace nor this call. Every id the factory would go on to mint is decided
+ * the moment the namespace is given, so this is the moment it can be refused.
  */
 export const sequentialIdFactory = (namespace = ""): IdFactory => {
+  if (!namespacePattern.test(namespace)) {
+    throw new Error(
+      `loom: sequentialIdFactory was given the namespace ${JSON.stringify(namespace)}, which cannot appear in an id. ` +
+        `A namespace is lowercase letters and digits only, at most ${NAMESPACE_MAX_LENGTH} of them — no hyphens, ` +
+        `underscores or capitals. Try ${suggestNamespace(namespace)}.`
+    )
+  }
+
   const counters = { node: 0, tree: 0, delta: 0, intent: 0, proposal: 0 }
 
   return {
