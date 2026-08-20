@@ -13,7 +13,26 @@ import type { CSSProperties } from "react"
 export const ink = "var(--loom-fg-default)"
 export const inkMuted = "var(--loom-fg-muted)"
 export const inkSubtle = "var(--loom-fg-subtle)"
+/**
+ * Two accents, because they are two jobs, and one theme proved it.
+ *
+ * `accent` is what a filled control is made of, and `highlight` is what points
+ * at something. Under a palette whose accent is a colour those read as the same
+ * decision, which is why this file had one token until the house theme arrived
+ * with `accent: #0a0a0a` — a black primary button, deliberately, so that the
+ * green is left free to be a highlight rather than the largest element on the
+ * page. Everything that used `accent` to *emphasise* went black overnight and
+ * emphasised nothing.
+ *
+ * So: fills and rings that mean "this is the button" take `accent`; the one
+ * thing on a page that is being pointed at takes `highlight`, on `highlightTint`
+ * inside `highlightEdge`. Both still come from the theme, and a palette that
+ * makes them the same colour again is welcome to.
+ */
 export const accent = "var(--loom-accent)"
+export const highlight = "var(--loom-accent-strong)"
+export const highlightTint = "var(--loom-accent-subtle)"
+export const highlightEdge = "var(--loom-border-accent)"
 export const edge = "var(--loom-border-default)"
 export const surface = "var(--loom-bg-surface)"
 export const surfaceMuted = "var(--loom-bg-surface-muted)"
