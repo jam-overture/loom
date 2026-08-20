@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
+import { endpointIdSchema } from "../submit/endpoint.js"
 
 import type { ChangeAnalysis } from "./analysis.js"
 import { defaultGatePolicy, gatePolicySchema } from "./policy.js"
@@ -21,6 +22,7 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   relocatedPrimitiveTypes: [],
   configuredPropKeys: [],
   nestedTargets: [],
+  redirectedSubmissions: [],
   shallowestAffectedDepth: 5,
   ...overrides,
 })
@@ -292,5 +294,61 @@ describe("assessStakes on a nested target", () => {
 
   it("says nothing about a change that nests none", () => {
     expect(stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "nested-target")).toBeUndefined()
+  })
+})
+
+describe("assessStakes on a redirected submission", () => {
+  const redirected = (count: number) =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_form${index}`),
+      from: endpointIdSchema.parse("newsletter.subscribe"),
+      to: endpointIdSchema.parse(`contact.enquiry${index}`),
+    }))
+
+  it("is high, not critical: moving a form is a change somebody may legitimately want", () => {
+    const assessment = stakesOf(analysisOf({ redirectedSubmissions: redirected(1) }))
+
+    expect(assessment.level).toBe("high")
+    expect(stakeFactor(assessment, "redirected-submission")?.detail).toBe(
+      "redirects a submission: n_form0 from newsletter.subscribe to contact.enquiry0"
+    )
+  })
+
+  it("names every form that moved, and both of its ends", () => {
+    const assessment = stakesOf(analysisOf({ redirectedSubmissions: redirected(2) }))
+
+    expect(stakeFactor(assessment, "redirected-submission")?.detail).toBe(
+      "redirects 2 submissions: n_form0 from newsletter.subscribe to contact.enquiry0; n_form1 from newsletter.subscribe to contact.enquiry1"
+    )
+  })
+
+  it("says nothing about a change that moves none", () => {
+    expect(stakeFactor(stakesOf(analysisOf()), "redirected-submission")).toBeUndefined()
+  })
+
+  it("needs no host vocabulary, unlike every protected list", () => {
+    const silent = gatePolicySchema.parse({})
+
+    expect(codesOf(analysisOf({ redirectedSubmissions: redirected(1) }), silent)).toContain(
+      "redirected-submission"
+    )
+  })
+
+  it("does not outrank a nested target, which is the one that is simply wrong", () => {
+    const assessment = stakesOf(
+      analysisOf({
+        redirectedSubmissions: redirected(1),
+        nestedTargets: [
+          {
+            nodeId: nodeIdSchema.parse("n_inner"),
+            type: primitiveTypeSchema.parse("loom.action"),
+            ancestorId: nodeIdSchema.parse("n_card"),
+            ancestorType: primitiveTypeSchema.parse("loom.card"),
+          },
+        ],
+      })
+    )
+
+    expect(assessment.level).toBe("critical")
   })
 })

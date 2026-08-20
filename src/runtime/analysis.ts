@@ -14,6 +14,7 @@ import {
   type InteractivePredicate,
   type NestedTarget,
 } from "./nesting.js"
+import { redirectedSubmissionsBetween, type RedirectedSubmission } from "./redirection.js"
 
 /**
  * Facts about what a delta does, extracted before anyone judges it.
@@ -80,6 +81,15 @@ export type ChangeAnalysis = {
    * default.
    */
   readonly nestedTargets: readonly NestedTarget[]
+  /**
+   * Forms this change points somewhere else — a node that posted to one
+   * registered endpoint before and posts to another after.
+   *
+   * Measured on both trees, like `nestedTargets`, and unlike it needs no host
+   * vocabulary: `loom:submit` is the runtime's own key. A node that gains or
+   * loses a destination is not here; `redirection.ts` says why.
+   */
+  readonly redirectedSubmissions: readonly RedirectedSubmission[]
   /**
    * Distance from the root of the shallowest touched position, where the root
    * is 0. A change near the root restructures the page; a change deep in a leaf
@@ -263,6 +273,7 @@ export const analyzeDelta = (
     relocatedPrimitiveTypes: Array.from(tally.relocatedTypes),
     configuredPropKeys: Array.from(tally.propKeys),
     nestedTargets: introducedNestedTargets(tree.root, state, isInteractive),
+    redirectedSubmissions: redirectedSubmissionsBetween(tree.root, state),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,
   })
 }

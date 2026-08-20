@@ -257,6 +257,8 @@ const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
   "stakes-at-refusal-floor": "This project does not allow changes this risky at all.",
   irreversible: "It could not be cleanly undone, so a person decides — however small it is.",
   "discards-later-work": "It would write over work already done, so nobody may do it alone.",
+  "redirected-submission":
+    "It would send what people type into a form to a different place than before, so nobody may do it alone.",
   "stakes-above-ceiling": "Riskier than a request from here is allowed to be without asking.",
   "confidence-below-minimum": "Sure enough to suggest, not sure enough to do without asking.",
 }

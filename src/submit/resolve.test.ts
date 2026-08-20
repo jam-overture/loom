@@ -13,7 +13,7 @@ import {
   type EndpointRegistry,
   type EndpointEntry,
 } from "./endpoint.js"
-import { planTreeSubmissions } from "./plan.js"
+import { planSubmissionsIn, planTreeSubmissions } from "./plan.js"
 import { buildSubmissionResolution } from "./resolution.js"
 import { resolveSubmissionPlan, resolveTreeSubmissions } from "./resolve.js"
 
@@ -109,6 +109,17 @@ describe("planTreeSubmissions", () => {
 
     expect(plan.problems).toHaveLength(1)
     expect(plan.endpoints).toEqual(["contact.enquiry"])
+  })
+
+  /**
+   * The runtime plans a root that no `LoomTree` wraps — the result of applying a
+   * delta, which nothing has minted an id for. The two must not drift about
+   * which declarations are readable.
+   */
+  it("plans a bare root exactly as it plans the tree around it", () => {
+    const tree = posting({ to: "Contact_Enquiry" }, { to: "contact.enquiry" })
+
+    expect(planSubmissionsIn(tree.root)).toEqual(planTreeSubmissions(tree))
   })
 })
 
