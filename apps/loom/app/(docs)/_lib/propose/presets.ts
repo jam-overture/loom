@@ -87,10 +87,19 @@ const themeOf = (tree: LoomTree): JsonObject | undefined => {
   return typeof value === "object" && value !== null && !Array.isArray(value) ? value : undefined
 }
 
-const EDITORIAL: JsonObject = {
-  palette: "editorial",
-  fontPack: "editorial-serif",
-  stylePreset: "comfortable",
+/**
+ * The two ends of the re-theme chip, and they are the site's own house theme
+ * and the loudest thing the starter library registers.
+ *
+ * All three ids are set every time even when only one differs, because a
+ * selection missing a key does not resolve and the page renders unthemed —
+ * which is legal, diagnostic-free and looks exactly like a stylesheet that
+ * failed to load.
+ */
+const MINIMAL: JsonObject = {
+  palette: "minimal",
+  fontPack: "minimal-sans",
+  stylePreset: "precise",
 }
 
 const BOLD: JsonObject = {
@@ -167,7 +176,7 @@ const retheme: DocsPreset = {
     const current = themeOf(tree)
     if (current === undefined) return undefined
 
-    const next = current["palette"] === "bold" ? EDITORIAL : BOLD
+    const next = current["palette"] === "bold" ? MINIMAL : BOLD
 
     return [{ op: "configure", nodeId: tree.root.id, set: { [THEME_PROP_KEY]: next }, unset: [] }]
   },

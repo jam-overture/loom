@@ -1835,7 +1835,12 @@ fourth palette does not break them a third time.
 ## 2026-08-20 — the house theme is registered and nothing selects it, and Geist is not loaded
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
-`Loom lessons`, `Loom portal` · **Status:** open
+`Loom lessons`, `Loom portal` · **Status:** open — **the `Loom docs` half is
+closed** by `docs-03-the-minimal-theme`, both pieces. The examples name
+`minimal` / `minimal-sans` / `precise`, and Geist is loaded. The other three
+lanes are untouched and the entry stays open for them. Read the two entries at
+the end of this file before doing yours: **`next/font` is the wrong tool here**,
+for a reason that is not obvious and costs a silent half-conversion.
 
 `minimal` / `minimal-sans` / `precise` is resolvable from every surface as of the
 branch above. **No surface uses it**, and adopting it is two separate pieces of
@@ -1950,3 +1955,102 @@ Five merges have already landed on it.
 
 Recorded rather than worked around. #103 does not touch `apps/`, its `pnpm
 verify` is green, and it is not held for this.
+
+---
+
+## 2026-08-20 — a font pack names a family that `next/font` cannot honour
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing`, `Loom lessons`,
+`Loom portal` · **Status:** open
+
+The trap in the Geist half of the finding above, found by walking into it. Filed
+against the three lanes that have not done their conversion yet, because the
+obvious tool produces a result that looks finished and is half wrong.
+
+`minimal-sans` names its family the way every font pack must — as a plain CSS
+string, `Geist, "Geist Sans", ui-sans-serif, …`. A theme is data. It cannot know
+what a surface loaded, and it cannot know the **hashed family name** `next/font`
+mints at build time (`__GeistSans_a1b2c3`, or whatever that build produced).
+
+So a surface that loads Geist with `next/font` and applies the generated class to
+its chrome gets:
+
+- **chrome in Geist**, because the class names the generated family, and
+- **every rendered `LoomTree` in the fallback**, because the tree's theme asks
+  for `Geist`, the browser has no family by that name, and it falls through.
+
+Nothing reports it. The page has the font and cannot reach it, the diagnostics
+are empty, and a screenshot of the chrome looks exactly right — which is why
+this is worth a finding rather than a line in a report.
+
+**What works, and it is not harder.** Declare the face yourself under the name
+the pack asks for:
+
+```css
+@font-face {
+  font-family: "Geist";
+  src: url("./_fonts/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-display: swap;
+}
+```
+
+`apps/loom/app/(docs)/_fonts/` holds the two variable faces and the SIL OFL
+licence, vendored from the `geist` package rather than fetched, so no build
+depends on the network. **They are in a route group, which is a lane, and that is
+the only unsatisfying part of this** — three more surfaces wanting the same two
+files should not mean four copies. Moving them somewhere shared is an
+`apps/loom`-level call rather than any one lane's, so it is raised here rather
+than done: whoever converts the second surface should either import across from
+`(docs)/_fonts/` and say so, or propose a shared location.
+
+`_lib/house-theme.test.ts` has the assertion that keeps it honest — it reads the
+first family out of `minimalSansFontPack.headingFamily` and requires the
+stylesheet to declare a face under that name, so renaming the file or switching
+to a hashed family fails rather than silently half-converting.
+
+---
+
+## 2026-08-20 — `loom.page` does not paint its canvas, and a specimen frame needs it to
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open —
+worked around in this lane, recorded because the default is worth a second look
+and because the second surface to hit it should not rediscover it.
+
+`loom.page` takes `fills`, off by default:
+
+> *"A page that is the whole document paints the canvas; a page embedded in a
+> host's own chrome should not repaint that host's background out from under
+> it."*
+
+That reasoning is right and the default is defensible. What it cost here is
+worth knowing, because it is the *invisible* kind of cost.
+
+Every documented example is rooted at `loom.page` inside a bordered frame on the
+docs site. None set `fills`, so none painted a canvas — and for as long as every
+example wore `editorial`, whose canvas is white, on a docs frame that is also
+white, **nothing looked wrong**. The `bold` example was the exception and had
+been rendering `#f5f5f5` text on `#ffffff` since it was written: unreadable,
+diagnostic-free, and invisible to every test in the suite. "It rendered" is true
+of a page nobody can read, the render diagnostics were empty, and the library's
+own palette test asserts colour rather than legibility.
+
+It surfaced the moment the site adopted the house theme, because the themed
+example stopped agreeing with the background behind it. **Matching backgrounds
+were hiding it.**
+
+Fixed in this lane by setting `fills: true` on every example root, with a test
+that asserts it — a specimen frame is a viewport onto a document rather than an
+embed, so it is the right answer for this surface whatever the default is.
+
+Two things for the owner to weigh, neither urgent:
+
+- **Every surface that renders a specimen wants this on**, and each will find out
+  the way this one did. The portal's primitive gallery is the next one. A
+  `fills` default of *on*, with hosts embedding a page opting out, would put the
+  surprise on the rarer case — but it is a behaviour change to a shipped
+  primitive and nothing here is broken, so it is a judgement rather than a bug.
+- **A palette whose canvas differs from the surface embedding it is the only case
+  that shows the difference**, which means the library's own specimen sheets are
+  the place this will keep appearing. Worth a line in `loom.page`'s doc comment
+  either way.

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════
-   The documentation site's own surface.
+   The documentation site's own surface, wearing the minimal theme.
 
    None of this reaches an example. A primitive styles itself from the
    theme mounted on the tree it belongs to (0049/0050), so everything
@@ -9,94 +9,222 @@
    properties this file never sets and must never set — a docs site
    that tinted its own examples would be showing the reader a page
    they cannot reproduce.
+
+   That separation is exactly why the values below are *transcribed*
+   from `minimal` / `minimal-sans` / `precise` rather than read from
+   them. Site chrome is application furniture — the sidebar, the
+   search, the pager (0067) — and furniture is not a Loom tree, so it
+   has no theme mounted on it and nothing to resolve. Copying is the
+   honest description of what is happening, and the copy is named in
+   each block so a later reader can diff it against the source.
+
+   Three departures, each argued where it is made: `--ink-faint` takes
+   a darker step than `fg-subtle` (an open AA finding), the two
+   non-green states keep an amber and a red because a refusal that
+   cannot be told from an acceptance is a broken page rather than a
+   restrained one, and dark is the site's own inversion because the
+   registered palette is light-only.
    ══════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  /*
+   * Geist, self-hosted, and the family name matters more than the file.
+   *
+   * `minimal-sans` names `Geist` first in a plain CSS family string, and a
+   * theme is data — it cannot know what a surface loaded or under what
+   * generated name. `next/font` mints a hashed family, so a font loaded that
+   * way would style this chrome and leave every *example* on the fallback,
+   * with the theme naming a face the page had and could not reach.
+   *
+   * Declaring it here under its real name is what closes that: the chrome and
+   * the trees inside it resolve the same word to the same font. The files are
+   * vendored in `_fonts/` (SIL OFL, licence beside them) rather than fetched,
+   * because a build that reaches the network is a build that can fail for a
+   * reason nobody changed.
+   */
+  font-family: "Geist";
+  src: url("./_fonts/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("./_fonts/GeistMono-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @layer base {
   :root {
+    /*
+     * The whites, transcribed from `minimal`.
+     *
+     * `--surface-sunken` going white is the whole conversion in one line, and
+     * it is the same move the palette makes with `bg-surface`: the example
+     * frame's header, the propose-a-change box and the "show the tree"
+     * disclosure were all defined by a grey fill, and they are now defined by
+     * their border. Nothing else had to change for the site to read as
+     * outlined rather than filled.
+     */
     --surface-page: #ffffff;
-    --surface-sunken: #fafafa;
+    --surface-sunken: #ffffff;
     --surface-raised: #ffffff;
-    --surface-hover: #f2f2f2;
-    --surface-selected: #f0f0f0;
+    /*
+     * The one fill left, and it is `bg-surface-muted`'s value for
+     * `bg-surface-muted`'s reason: these are *functional* rather than
+     * structural. A row that lights up under the pointer and a header that
+     * marks a table's first row are telling the reader something; a surface
+     * that is merely a different white is decoration.
+     */
+    --surface-muted: #f4f4f5;
+    --surface-hover: #f4f4f5;
+    --surface-selected: #e6e6ea;
 
-    --edge: rgba(0, 0, 0, 0.11);
-    --edge-strong: rgba(0, 0, 0, 0.22);
+    /*
+     * `border-default` and `border-strong`, exactly. Both are load-bearing now
+     * that no fill separates one box from the next, which is why `--edge` took
+     * the palette's default step rather than its subtle one — a hairline that
+     * was decorative at 11% black is the only thing holding a card together
+     * here.
+     */
+    --edge: #d4d4d9;
+    --edge-strong: #0a0a0a;
 
-    --ink: #111111;
-    --ink-muted: #5f5f5f;
-    --ink-faint: #8c8c8c;
+    /** Never pure black: #000 on #fff is a glare a printed page never makes. */
+    --ink: #0a0a0a;
+    --ink-muted: #52525b;
+    /*
+     * **A departure, and the only one in the neutrals.** `fg-subtle` is
+     * `#8a8a94`, which is 3.42:1 on white and misses AA — filed on 20 August
+     * against every registered palette, this one included. Chrome is not a
+     * Loom tree, so nothing forces the site to inherit a value the finding
+     * already calls wrong; this is the same hue two steps down, at 5.0:1.
+     * Every uppercase row label in a verdict panel and every section header in
+     * the sidebar is drawn with it, and they are labels rather than ornament.
+     */
+    --ink-faint: #6f6f7a;
     --ink-inverse: #ffffff;
 
-    --accent: #111111;
+    /*
+     * Black, exactly as the palette has it, and for the argument the palette
+     * makes: the green is a highlight, so it must not be the largest element
+     * on the page.
+     */
+    --accent: #0a0a0a;
+    /** Hyperion's own `--btn-positive-bg`. The green a reader actually sees. */
+    --accent-ring: #72e3ad;
+    /** A mid stop on the same ramp — green enough to read as green, at 5.91:1. */
+    --accent-strong: #176e44;
+    --accent-subtle: #effbf5;
 
-    --warning-surface: #fff8e6;
-    --warning-ink: #7a5300;
+    /*
+     * A note is the site's one recurring highlight, so it is where the green
+     * belongs: a tinted ground, a mint ring, and the mid stop for its label.
+     * It was blue, which was a fourth colour the theme does not have.
+     */
+    --note-surface: #effbf5;
+    --note-edge: #72e3ad;
+    --note-ink: #176e44;
 
-    --note-surface: #f4f6fb;
-    --note-edge: rgba(40, 70, 140, 0.24);
-    --note-ink: #26365c;
+    /*
+     * The three things a Gate can say. Three tones and no more, because there
+     * are exactly three dispositions and a fourth colour here would be
+     * inventing a verdict the runtime does not have.
+     *
+     * **Two of them keep a hue the theme does not name, and that is deliberate.**
+     * Minimal is whites, black and green; a refusal rendered in green-or-grey
+     * would be restrained and unreadable, and the distinction between "applied"
+     * and "refused" is information rather than decoration. So the grounds are
+     * pulled back to near-whites — shades of white, which is what the theme
+     * asks for — and the colour is spent on the ring and the label alone.
+     */
+    --verdict-accepted-surface: #f4fdf8;
+    --verdict-accepted-edge: #72e3ad;
+    --verdict-accepted-ink: #176e44;
 
-    /* The three things a Gate can say. Three tones and no more, because
-       there are exactly three dispositions and a fourth colour here would
-       be inventing a verdict the runtime does not have. */
-    --verdict-accepted-surface: #eef7f0;
-    --verdict-accepted-edge: rgba(30, 110, 60, 0.26);
-    --verdict-accepted-ink: #1c5c37;
-
-    --verdict-held-surface: #fff8e6;
-    --verdict-held-edge: rgba(140, 100, 0, 0.28);
+    --verdict-held-surface: #fffbf2;
+    --verdict-held-edge: #e0b355;
     --verdict-held-ink: #7a5300;
 
-    --verdict-refused-surface: #fdf0ef;
-    --verdict-refused-edge: rgba(150, 40, 30, 0.26);
+    --verdict-refused-surface: #fdf7f6;
+    --verdict-refused-edge: #e0a49c;
     --verdict-refused-ink: #8c2a20;
 
-    --code-surface: #f6f6f7;
-    --code-ink: #111111;
+    /** Shares the warning family, because a caution and a hold are the same note. */
+    --warning-surface: #fffbf2;
+    --warning-edge: #e0b355;
+    --warning-ink: #7a5300;
+
+    --code-surface: #f4f4f5;
+    --code-ink: #0a0a0a;
 
     color-scheme: light;
   }
 
+  /*
+   * Dark is the site's own inversion of the theme, not a registered palette.
+   *
+   * `minimal` is white paper and there is no `minimal-dark`; a docs site with a
+   * theme toggle still needs an answer at midnight. So this keeps the *rules*
+   * rather than the values — one ink, one paper, structure carried by borders
+   * rather than by fills, and Hyperion's green as the only hue — and inverts
+   * the two neutrals. Anyone who registers a dark minimal palette later should
+   * expect these numbers to move to match it.
+   *
+   * The examples do **not** invert with it, and that is correct rather than an
+   * oversight: a tree carries its own theme, so a `minimal` example renders
+   * white paper inside dark chrome. It is the clearest demonstration on the
+   * site that a page's appearance is a property of its tree.
+   */
   [data-theme="dark"] {
     --surface-page: #0a0a0a;
-    --surface-sunken: #111111;
-    --surface-raised: #151515;
-    --surface-hover: #1c1c1c;
-    --surface-selected: #202020;
+    --surface-sunken: #0a0a0a;
+    --surface-raised: #0a0a0a;
+    --surface-muted: #17171a;
+    --surface-hover: #17171a;
+    --surface-selected: #212126;
 
-    --edge: rgba(255, 255, 255, 0.13);
-    --edge-strong: rgba(255, 255, 255, 0.26);
+    --edge: #2b2b31;
+    --edge-strong: #f4f4f5;
 
-    --ink: #ededed;
-    --ink-muted: #a1a1a1;
-    --ink-faint: #737373;
+    --ink: #f4f4f5;
+    --ink-muted: #a1a1ab;
+    --ink-faint: #8a8a94;
     --ink-inverse: #0a0a0a;
 
-    --accent: #ededed;
+    --accent: #f4f4f5;
+    /** The same mint. It is the one colour that does not need inverting. */
+    --accent-ring: #72e3ad;
+    --accent-strong: #72e3ad;
+    --accent-subtle: #0e1f17;
 
-    --warning-surface: #2a2005;
-    --warning-ink: #f0c674;
+    --note-surface: #0e1f17;
+    --note-edge: #2f7a56;
+    --note-ink: #86e3b4;
 
-    --note-surface: #12182a;
-    --note-edge: rgba(140, 170, 240, 0.28);
-    --note-ink: #c3d0ee;
+    --verdict-accepted-surface: #0d1a13;
+    --verdict-accepted-edge: #2f7a56;
+    --verdict-accepted-ink: #86e3b4;
 
-    --verdict-accepted-surface: #0d1c13;
-    --verdict-accepted-edge: rgba(120, 200, 150, 0.28);
-    --verdict-accepted-ink: #86d9a4;
-
-    --verdict-held-surface: #2a2005;
-    --verdict-held-edge: rgba(240, 198, 116, 0.3);
+    --verdict-held-surface: #1e1808;
+    --verdict-held-edge: #7a5f22;
     --verdict-held-ink: #f0c674;
 
-    --verdict-refused-surface: #250f0d;
-    --verdict-refused-edge: rgba(240, 140, 130, 0.3);
+    --verdict-refused-surface: #1e100e;
+    --verdict-refused-edge: #7a3b34;
     --verdict-refused-ink: #f0958c;
 
-    --code-surface: #141414;
-    --code-ink: #ededed;
+    --warning-surface: #1e1808;
+    --warning-edge: #7a5f22;
+    --warning-ink: #f0c674;
+
+    --code-surface: #17171a;
+    --code-ink: #f4f4f5;
 
     color-scheme: dark;
   }
@@ -115,8 +243,15 @@
   body {
     background: var(--surface-page);
     color: var(--ink);
+    /*
+     * `minimal-sans`'s stack, word for word, so the chrome and the examples
+     * fall back the same way if the face ever fails to load. Everything after
+     * Geist is a neo-grotesque of the same temperature, which is what makes
+     * the fallback a near-neighbour rather than a lurch.
+     */
     font-family:
-      ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      Geist, "Geist Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -127,9 +262,25 @@
 }
 
 @theme inline {
+  /*
+   * `precise`'s radii, in the three names Tailwind's utilities read. Tighter
+   * than the site had, because a soft corner is ornament and this theme spends
+   * its budget on space instead. `rounded-full` is untouched — it is a circle
+   * rather than a style, the same reason the preset leaves `full` at 9999.
+   */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --font-sans:
+    Geist, "Geist Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
   --color-surface-page: var(--surface-page);
   --color-surface-sunken: var(--surface-sunken);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
   --color-surface-hover: var(--surface-hover);
   --color-surface-selected: var(--surface-selected);
 
@@ -142,8 +293,12 @@
   --color-ink-inverse: var(--ink-inverse);
 
   --color-accent: var(--accent);
+  --color-accent-ring: var(--accent-ring);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-subtle: var(--accent-subtle);
 
   --color-warning-surface: var(--warning-surface);
+  --color-warning-edge: var(--warning-edge);
   --color-warning-ink: var(--warning-ink);
 
   --color-note-surface: var(--note-surface);
@@ -174,8 +329,16 @@
    ─────────────────────────────────────────────────────────────── */
 
 @layer components {
+  /*
+   * The reading sizes are `minimal-sans`'s ramp rather than numbers chosen
+   * here: 16 for body, 20 for h3, 26 for h2 and the display step 44 for the
+   * page title. The pack is gentle through the reading sizes and jumps at the
+   * top, which is what makes a page read as one object with a title on it
+   * instead of a document with a masthead — and it is the reason the h1 grew
+   * rather than a decision to make headings bigger.
+   */
   .prose {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.75;
     color: var(--ink-muted);
   }
@@ -184,33 +347,38 @@
     margin-top: 1.25rem;
   }
 
+  /*
+   * 700, which is the pack's `headingWeight`. One family at two weights is the
+   * typographic half of this theme: there is no second face to carry
+   * hierarchy, so weight and size carry all of it.
+   */
   .prose h1,
   .prose h2,
   .prose h3,
   .prose h4 {
     color: var(--ink);
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     scroll-margin-top: 5rem;
   }
 
   .prose h1 {
-    font-size: 2.25rem;
-    line-height: 1.15;
+    font-size: 2.75rem;
+    line-height: 1.1;
     margin-top: 0;
   }
 
   .prose h2 {
-    font-size: 1.375rem;
+    font-size: 1.625rem;
     line-height: 1.3;
-    margin-top: 3rem;
-    padding-top: 1.75rem;
+    margin-top: 3.5rem;
+    padding-top: 2rem;
     border-top: 1px solid var(--edge);
   }
 
   .prose h3 {
-    font-size: 1.0625rem;
-    margin-top: 2.25rem;
+    font-size: 1.25rem;
+    margin-top: 2.5rem;
   }
 
   .prose strong {
@@ -218,11 +386,18 @@
     font-weight: 600;
   }
 
+  /*
+   * The green, in the one place prose earns it: a link's rest state is a mint
+   * rule under black text, and hover pulls it to the ink. Underlining in
+   * `--edge-strong` would now be black on black, since that slot went to the
+   * palette's `border-strong`.
+   */
+
   .prose a {
     color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: var(--edge-strong);
+    text-decoration-color: var(--accent-ring);
   }
 
   .prose a:hover {
@@ -274,7 +449,7 @@
   .prose th {
     color: var(--ink);
     font-weight: 600;
-    background: var(--surface-sunken);
+    background: var(--surface-muted);
   }
 
   .prose :not(pre) > code {
@@ -284,7 +459,7 @@
     border-radius: 4px;
     padding: 0.1em 0.32em;
     font-size: 0.85em;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   }
 
   .prose .not-prose {

@@ -1,0 +1,128 @@
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+
+import { minimalSansFontPack } from "@loom/runtime"
+import { describe, expect, it } from "vitest"
+
+import { docsExamples } from "./examples/catalogue"
+import { docsThemes } from "./loom/registry"
+
+/**
+ * The house theme, and the two ways this site could quietly stop wearing it.
+ *
+ * Converting a surface to a theme is not one change, it is two that have to
+ * agree: the trees name three registered ids, and the chrome around them is
+ * hand-written CSS transcribed from the same three documents. Nothing in the
+ * framework can hold those together — chrome is application furniture and has
+ * no theme mounted on it (0067) — so it is held together here or not at all.
+ */
+
+const THEME_PROP = "loom:theme"
+
+const HOUSE = { palette: "minimal", fontPack: "minimal-sans", stylePreset: "precise" } as const
+
+const globals = (): string =>
+  readFileSync(fileURLToPath(new URL("../globals.css", import.meta.url)), "utf8")
+
+const themeOf = (id: string): Record<string, unknown> => {
+  const example = docsExamples.get(id)
+  if (example === undefined) throw new Error(`no example is registered as "${id}"`)
+
+  const declared = example.build().root.props[THEME_PROP]
+
+  if (typeof declared !== "object" || declared === null || Array.isArray(declared)) {
+    throw new Error(`"${id}" names no theme on its root`)
+  }
+
+  return declared as Record<string, unknown>
+}
+
+describe("the theme the examples wear", () => {
+  it("is the house theme on every example but the one about themes", () => {
+    for (const id of docsExamples.keys()) {
+      if (id === "themed-tree") continue
+
+      expect(themeOf(id), `"${id}" is not on the house theme`).toEqual(HOUSE)
+    }
+  })
+
+  /**
+   * The themed example exists to show that three ids on the root change
+   * everything below them. It can only do that by being different from the
+   * page around it, so this is the one example the rule above must not reach.
+   */
+  it("is deliberately not the house theme on the themed example", () => {
+    expect(themeOf("themed-tree")).not.toEqual(HOUSE)
+  })
+
+  /**
+   * The assertion that would have caught the `bold` example rendering pale
+   * grey on white for as long as it did. A page that does not paint its canvas
+   * borrows the frame's, so an example only *looks* right while its theme and
+   * the docs chrome happen to agree — which is exactly the coincidence a page
+   * about themes must not depend on.
+   */
+  it("paints its own canvas rather than borrowing the frame's", () => {
+    for (const id of docsExamples.keys()) {
+      const example = docsExamples.get(id)
+      if (example === undefined) throw new Error(id)
+
+      expect(example.build().root.props["fills"], `"${id}" does not fill`).toBe(true)
+    }
+  })
+
+  it("names ids the registry actually has", () => {
+    for (const id of docsExamples.keys()) {
+      const declared = themeOf(id)
+
+      expect(docsThemes.resolve(declared).ok, `"${id}" names a theme the registry refused`).toBe(
+        true
+      )
+    }
+  })
+})
+
+describe("the chrome around them", () => {
+  /**
+   * The reason the fonts are vendored rather than loaded through `next/font`.
+   *
+   * A font pack names a family as a plain string, and a theme is data — it
+   * cannot know what a surface loaded or under what generated name. So the
+   * only thing that makes the *examples* render in Geist is a `@font-face`
+   * declared under the exact family the pack asks for. Rename the file, switch
+   * to a hashed family, and the chrome would still look right while every
+   * example silently fell back — which is precisely the failure nobody would
+   * notice from a screenshot of the chrome.
+   */
+  it("declares a face under the family name the font pack asks for", () => {
+    const wanted = minimalSansFontPack.headingFamily.split(",")[0]?.trim()
+
+    expect(wanted).toBe("Geist")
+    expect(globals()).toContain(`font-family: "${wanted}"`)
+  })
+
+  /** Compared with runs of whitespace flattened, because the stylesheet wraps it. */
+  it("gives the body the font pack's own stack, so it falls back the same way", () => {
+    const flatten = (value: string): string => value.replace(/\s+/g, " ")
+
+    expect(flatten(globals())).toContain(flatten(minimalSansFontPack.bodyFamily))
+  })
+
+  /**
+   * The one line that turns the library outline-first, transcribed. If a later
+   * change gives the docs chrome a grey fill back, the site stops looking like
+   * the theme it says it wears, and no other test here would notice.
+   */
+  it("keeps its structural surfaces on the page colour", () => {
+    const source = globals()
+
+    expect(source).toContain("--surface-page: #ffffff")
+    expect(source).toContain("--surface-sunken: #ffffff")
+    expect(source).toContain("--surface-raised: #ffffff")
+  })
+
+  it("spends the green only where the palette spends it", () => {
+    expect(globals()).toContain("--accent-ring: #72e3ad")
+    expect(globals()).toContain("--accent: #0a0a0a")
+  })
+})

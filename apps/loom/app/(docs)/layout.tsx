@@ -51,7 +51,9 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
           </Link>
 
           <div className="flex items-center gap-3">
-            <span className="border-edge text-ink-faint hidden rounded-full border px-2 py-0.5 text-[0.65rem] tracking-wide uppercase sm:inline">
+            {/* The header's one green: a mint ring, which is where this theme
+                spends the colour it is sparing with. */}
+            <span className="border-accent-ring text-ink-faint hidden rounded-full border px-2 py-0.5 text-[0.65rem] tracking-wide uppercase sm:inline">
               pre-production alpha
             </span>
             <a
