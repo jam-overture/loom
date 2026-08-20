@@ -21,5 +21,5 @@ export const pageMetadata = (sectionSlug: string, pageSlug: string): Metadata =>
     )
   }
 
-  return { title: entry.page.title, description: entry.page.summary }
+  return { title: entry.page.heading ?? entry.page.title, description: entry.page.summary }
 }

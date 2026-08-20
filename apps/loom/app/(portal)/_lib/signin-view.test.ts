@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 
+import type { AuthResult } from "./auth/config"
 import type { SignInPressure } from "./auth/pressure"
 import { DEFAULT_THROTTLE_POLICY } from "./auth/throttle"
 import {
+  authReadout,
   describeLocked,
   describePolicy,
   describePressure,
@@ -130,5 +132,52 @@ describe("describePolicy", () => {
     expect(described).toContain("60 minutes")
     expect(described).toContain("1 minute")
     expect(described).toContain("15 minutes")
+  })
+})
+
+/**
+ * The visitor and the operator do not read the same sentence, and until this
+ * function existed the page rendered the operator's one at both of them. What
+ * the test is really pinning is the *split*: a headline that names no variable,
+ * and a `technical` field that carries the operator's message unaltered.
+ */
+describe("authReadout", () => {
+  const okAuth: AuthResult = { ok: true, value: { secret: "x".repeat(32), reviewers: [] } }
+
+  it("passes an ok config through as ok — nothing to show, nothing to explain", () => {
+    expect(authReadout(okAuth)).toEqual({ ok: true })
+  })
+
+  it("leads a missing-secret with a plain sentence and keeps the operator's message word for word", () => {
+    const readout = authReadout({ ok: false, error: { code: "no-secret" } })
+
+    expect(readout.ok).toBe(false)
+    if (readout.ok) return
+
+    expect(readout.headline).toBe("This portal isn't set up yet.")
+    expect(readout.headline).not.toContain("LOOM_PORTAL")
+    expect(readout.detail).toContain("live demo")
+    /*
+     * The exact bytes `describeAuthProblem` returns — this is the disclosure
+     * the plain-language rule guarantees: nothing is removed, only moved.
+     */
+    expect(readout.technical).toContain("LOOM_PORTAL_SESSION_SECRET")
+    expect(readout.technical).toContain("openssl rand -hex 32")
+  })
+
+  it("leads a malformed roster the same way, with the roster problem behind the disclosure", () => {
+    const readout = authReadout({
+      ok: false,
+      error: { code: "bad-roster", problem: { code: "malformed-entry", entry: "no-colon" } },
+    })
+
+    expect(readout.ok).toBe(false)
+    if (readout.ok) return
+
+    /* A visitor's next move is identical to the missing-secret case, so the
+     * headline is identical. The rule that is really being enforced is: the
+     * visitor's sentence does not depend on which variable is wrong. */
+    expect(readout.headline).toBe("This portal isn't set up yet.")
+    expect(readout.technical).toContain("no-colon")
   })
 })

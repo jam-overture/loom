@@ -113,6 +113,15 @@ button inside it becomes a link inside a link: markup a browser resolves by
 throwing one of them away. The page still renders. Something on it silently
 stops working.
 
+Read the refusal itself and you will notice it does not say "a link inside a
+link". It says the change **puts a target where the reader cannot reach it** —
+and the difference matters, because a link inside a link is only one way to
+produce that. A card can also cover itself: `loom.article` stretches its title's
+anchor over the whole surface, so a button placed on top of it is perfectly
+valid markup that receives no clicks at all. Same damage, no nesting to find.
+The runtime names the damage rather than the mechanism, which is why one
+sentence covers both.
+
 Nothing about the *operation* shows that. The runtime finds it by looking at the
 tree the change would produce, and only counts the breakage this change
 introduces — not breakage the page already had.

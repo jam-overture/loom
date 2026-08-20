@@ -1,3 +1,4 @@
+import { describeAuthProblem, type AuthResult } from "./auth/config"
 import type { SignInPressure } from "./auth/pressure"
 import { describeWait, type ThrottlePolicy } from "./auth/throttle"
 import type { OutcomeTone } from "./outcome"
@@ -143,3 +144,50 @@ export const describePolicy = (policy: ThrottlePolicy): string =>
   `${policy.threshold} failures within ${describeWait(policy.windowMs)} locks a caller out for ` +
   `${describeWait(policy.lockoutMs)}, doubling with each further failure up to ` +
   `${describeWait(policy.maxLockoutMs)}. A correct key clears the count.`
+
+/**
+ * The sign-in page in two altitudes: what a visitor reads, and what an operator
+ * needs to fix.
+ *
+ * The page used to lead with the operator's message word for word —
+ * `LOOM_PORTAL_SESSION_SECRET is unset or shorter than 32 characters, so no
+ * session can be signed. Generate one with: openssl rand -hex 32` — because
+ * `describeAuthProblem` returns exactly that string and the page rendered it
+ * unaltered. Right for an operator, wrong for a visitor who has never heard of
+ * this portal and reads it as an error they somehow caused.
+ *
+ * The plain-language rule this file exists to support (0074, and the
+ * `vocabulary.ts` comment): a visitor reads a sentence in a person's words,
+ * and the operator's message is one click away and unchanged. So this splits
+ * the one string into two, and the technical field is the exact bytes
+ * `describeAuthProblem` returned — nothing removed.
+ *
+ * Every case gets one plain sentence because a visitor's next move is the
+ * same in both — wait for whoever runs this to finish setting it up, or look
+ * at the demo in the meantime. Which environment variable is missing does not
+ * change what they do; it belongs in the disclosure.
+ */
+export type AuthReadout =
+  | { readonly ok: true }
+  | {
+      readonly ok: false
+      /** The one sentence a visitor reads first. Never a variable name. */
+      readonly headline: string
+      /** One more sentence saying what the visitor might do next. */
+      readonly detail: string
+      /** `describeAuthProblem`'s output, verbatim. Shown behind a disclosure. */
+      readonly technical: string
+    }
+
+export const authReadout = (auth: AuthResult): AuthReadout => {
+  if (auth.ok) return { ok: true }
+
+  return {
+    ok: false,
+    headline: "This portal isn't set up yet.",
+    detail:
+      "Whoever runs this deployment has to finish configuring sign-in before " +
+      "anyone can use it. You can still see what Loom does in the live demo.",
+    technical: describeAuthProblem(auth.error),
+  }
+}

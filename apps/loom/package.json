@@ -10,6 +10,7 @@
     "typecheck": "pnpm --filter @loom/runtime build && tsc --noEmit",
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm test && pnpm build",
+    "docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
     "db:push": "tsx scripts/db-push.ts",
     "telemetry:prune": "tsx scripts/telemetry-prune.ts"
   },

@@ -130,6 +130,7 @@ export type UnmeasuredPairing = {
   readonly background: string
 }
 
+/** What the bar found in one palette: what was measured, what failed, what could not be. */
 export type PaletteAudit = {
   readonly palette: ThemeId
   readonly measured: readonly MeasuredPairing[]
@@ -144,6 +145,7 @@ export type PaletteAudit = {
   readonly unmeasured: readonly UnmeasuredPairing[]
 }
 
+/** Measures every pairing the primitives render, in one palette. Refuses nothing. */
 export const auditPalette = (palette: Palette): PaletteAudit => {
   const results = PALETTE_TEXT_PAIRINGS.map((pairing) => {
     const foreground = palette.slots[pairing.foreground] ?? ""
