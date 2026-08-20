@@ -29,6 +29,7 @@ const themes = createThemeRegistry()
 
 const EDITORIAL = { palette: "editorial", fontPack: "editorial-serif", stylePreset: "comfortable" }
 const BOLD = { palette: "bold", fontPack: "bold-sans", stylePreset: "airy-modern" }
+const MINIMAL = { palette: "minimal", fontPack: "minimal-sans", stylePreset: "precise" }
 
 /**
  * A page that uses every primitive in the library at least once, so a single
@@ -2018,6 +2019,40 @@ describe("the re-theme guarantee", () => {
     /** No literal colour anywhere below the root: hex, rgb(), or hsl(). */
     expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("renders every fixture under the house theme, which is the third palette's whole job", () => {
+    /**
+     * `minimal` is the first palette not ported from Hermes, and a third one
+     * earns its keep here rather than in the theme tests: two palettes prove a
+     * primitive reads its colours from slots, and the third proves the *slots
+     * were filled by someone who knew what reads them*. A palette that put its
+     * light green at `accent` would compile, register, and resolve — and every
+     * eyebrow, kicker and disclosure marker in these seven fixtures would come
+     * out at 1.6:1 with nothing failing.
+     */
+    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage]) {
+      const { markup, diagnostics } = render(fixture(MINIMAL))
+      const tree = splitStylesheet(markup).tree
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+
+  it("changes nothing below the root when the house theme is the one selected", () => {
+    /**
+     * The same guarantee the two ported palettes are held to, asserted for the
+     * third: a re-theme is three ids on the root and nothing else (0049). The
+     * font pack and style preset differ here as well as the palette, so this
+     * also catches a primitive that hard-coded a length or a family.
+     */
+    const editorial = splitStylesheet(render(chromePage(EDITORIAL)).markup).tree
+    const minimal = splitStylesheet(render(chromePage(MINIMAL)).markup).tree
+
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(minimal.slice(minimal.indexOf(">")))
   })
 
   it("renders identically under both palettes once the variables are stripped", () => {

@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest"
 
 import { themeVariables } from "./apply.js"
-import { boldPalette, editorialPalette, editorialSerifFontPack, comfortableStylePreset } from "./library.js"
+import {
+  boldPalette,
+  editorialPalette,
+  editorialSerifFontPack,
+  comfortableStylePreset,
+  STARTER_PALETTES,
+} from "./library.js"
 import { createThemeRegistry, describeThemeError } from "./registry.js"
-import { PALETTE_SLOTS, paletteSchema, themeSelectionSchema } from "./theme.js"
+import { PALETTE_SLOTS, paletteSchema, themeSelectionSchema, type PaletteSlot } from "./theme.js"
 
 const registry = createThemeRegistry()
 
@@ -28,8 +34,13 @@ describe("palette schema", () => {
     expect(paletteSchema.safeParse({ ...editorialPalette, slots: missing }).success).toBe(false)
   })
 
-  it("holds both starter palettes to the same shape", () => {
-    for (const palette of [editorialPalette, boldPalette]) {
+  it("holds every starter palette to the same shape", () => {
+    /**
+     * Iterated rather than listed, so a palette added to the starter set is
+     * held to the slot contract without anyone remembering to add it here.
+     * It was two named palettes until `minimal` arrived and showed why.
+     */
+    for (const palette of STARTER_PALETTES) {
       for (const slot of PALETTE_SLOTS) {
         expect(palette.slots[slot], `${palette.id} is missing ${slot}`).toBeDefined()
       }
@@ -98,6 +109,90 @@ describe("themeVariables", () => {
   })
 })
 
+/**
+ * A palette can be well-formed and still unusable, and nothing above catches it.
+ * The slot schema checks that every slot holds a colour; it has no idea which
+ * slots are read as text on which other slots, so a palette whose accent is a
+ * pale mint registers, resolves, re-themes and renders every eyebrow on the page
+ * at 1.6:1.
+ *
+ * These are the pairings `src/primitives` actually puts together — read off the
+ * components rather than imagined — held to WCAG AA for body text. It is the
+ * check that decides where a green goes, and it ran before `minimal` was
+ * written rather than after.
+ */
+describe("what the library reads against what", () => {
+  const channel = (value: number): number => {
+    const c = value / 255
+
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  }
+
+  const luminance = (hex: string): number => {
+    const [r, g, b] = [1, 3, 5].map((at) => channel(Number.parseInt(hex.slice(at, at + 2), 16)))
+
+    return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0)
+  }
+
+  const contrast = (a: string, b: string): number => {
+    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+
+    return ((high ?? 0) + 0.05) / ((low ?? 0) + 0.05)
+  }
+
+  /** Foreground slot, background slot, and the primitive that puts them together. */
+  const PAIRINGS: readonly (readonly [PaletteSlot, PaletteSlot, string])[] = [
+    ["fg-default", "bg-canvas", "loom.page body copy"],
+    ["fg-default", "bg-surface", "loom.card body copy"],
+    ["fg-muted", "bg-canvas", "loom.prose tone muted"],
+    ["fg-muted", "bg-surface", "loom.feature body"],
+    ["accent", "bg-canvas", "loom.section eyebrow, loom.link current"],
+    ["accent", "bg-surface", "loom.faq marker, loom.article kicker"],
+    ["fg-on-accent", "accent", "loom.action primary label"],
+    ["accent-strong", "accent-subtle", "loom.badge accent, loom.icon soft"],
+    ["fg-default", "accent-subtle", "loom.section tone accent"],
+  ]
+
+  it("meets AA on every pairing a primitive puts together, in every registered palette", () => {
+    for (const palette of STARTER_PALETTES) {
+      for (const [fg, bg, where] of PAIRINGS) {
+        const ratio = contrast(palette.slots[fg] ?? "#000000", palette.slots[bg] ?? "#ffffff")
+
+        expect(ratio, `${palette.id}: ${fg} on ${bg} (${where}) is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+  })
+
+  it("proves the pairing that decided where the house palette's green went", () => {
+    /**
+     * `minimal` carries Hyperion's two greens at the two stops the library can
+     * actually use them at. The mint reads at 1.58:1 on white, so it is a border
+     * and never a letterform; the deep green reads at 12.26:1, so it is both the
+     * text and the fill. Asserted as the specific numbers because the swap is
+     * tempting and silent — it is the *obvious* assignment and it is the wrong one.
+     */
+    const minimal = STARTER_PALETTES.find((palette) => palette.id === "minimal")
+    if (!minimal) throw new Error("minimal palette is not registered")
+
+    expect(minimal.slots["border-accent"]).toBe("#72e3ad")
+    expect(minimal.slots.accent).toBe("#0d3d26")
+    expect(contrast(minimal.slots["border-accent"] ?? "", minimal.slots["bg-canvas"] ?? "")).toBeLessThan(3)
+    expect(contrast(minimal.slots.accent ?? "", minimal.slots["bg-canvas"] ?? "")).toBeGreaterThan(7)
+  })
+
+  /**
+   * **`fg-subtle` is deliberately not in the table above.** It is the slot for
+   * text that is meant to recede — a `loom.link-list` label, a footer note — and
+   * the three registered palettes sit at 2.41:1 (`editorial`), 3.42:1
+   * (`minimal`) and 3.72:1 (`bold`). Two of those would pass AA for large text
+   * and none passes for body text.
+   *
+   * Not asserted, and not quietly lowered to a bar they all clear, which would
+   * make the test say nothing. `editorial` is a shipped palette and re-colouring
+   * it is a change nobody asked this branch to make; it is filed instead.
+   */
+})
+
 describe("theme registry", () => {
   it("resolves three registered ids", () => {
     expect(resolved().palette.id).toBe("editorial")
@@ -127,9 +222,25 @@ describe("theme registry", () => {
   it("offers a catalogue a model can choose from", () => {
     const catalogue = registry.catalogue()
 
-    expect(catalogue.palettes.map((entry) => entry.id)).toEqual(["editorial", "bold"])
-    expect(catalogue.palettes[0]?.description.length).toBeGreaterThan(0)
-    expect(catalogue.stylePresets).toHaveLength(2)
+    expect(catalogue.palettes.map((entry) => entry.id)).toEqual(["editorial", "bold", "minimal"])
+    expect(catalogue.fontPacks.map((entry) => entry.id)).toEqual([
+      "editorial-serif",
+      "bold-sans",
+      "minimal-sans",
+    ])
+    expect(catalogue.stylePresets.map((entry) => entry.id)).toEqual([
+      "comfortable",
+      "airy-modern",
+      "precise",
+    ])
+
+    /**
+     * Every entry, not just the first. A description is all a model has when it
+     * is choosing, so an id registered without one is an id it can only guess at.
+     */
+    for (const group of [catalogue.palettes, catalogue.fontPacks, catalogue.stylePresets]) {
+      for (const entry of group) expect(entry.description.length, entry.id).toBeGreaterThan(0)
+    }
   })
 
   it("takes a host's own vocabulary in place of the starter one", () => {
