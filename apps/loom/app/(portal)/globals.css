@@ -1,109 +1,177 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════
-   DESIGN TOKENS — Silver
-   Every colour, radius and type size is a custom property here.
-   Components reference the semantic utilities generated from these
-   in @theme inline below; never a raw hex, per code-style.md.
+   DESIGN TOKENS — Minimal
+   White paper, black ink, one green.
+
+   Every value below is taken from the registered `minimal` theme —
+   the `minimal` palette, the `minimal-sans` font pack and the
+   `precise` style preset in `@loom/runtime`'s theme library. It is
+   copied here as literals rather than read through `var(--loom-*)`,
+   and that is deliberate: the preview pane mounts the *previewed
+   tree's* theme on the tree root (0050), so a chrome token defined as
+   `var(--loom-bg-canvas)` would resolve against whatever theme the
+   tree carries at every use site inside the preview. Opening a tree
+   themed `bold` would repaint the rail around it — and a bad theme
+   proposal could make the tool that repairs it unreadable, which is
+   the failure 0018 exists to prevent.
+
+   So the chrome takes the theme as a host choice, fixed at the root,
+   and `globals.test.ts` pins these literals to the registry so the two
+   cannot drift apart silently.
    ══════════════════════════════════════════════════════════════════ */
 
 @layer base {
   :root {
     /* ── Surfaces ────────────────────────────────────────────────────
-       The portal is white. Every resting surface is the same white, and
-       what separates one region from another is a border, not a tint —
-       so a card, the rail, the topbar and the page behind them all read
-       as one sheet with rules drawn on it.
+       The portal is white, and the minimal palette makes that a theme
+       decision rather than a portal one: `bg-canvas` and `bg-surface`
+       are the same white, which is what turns every card, rail and
+       panel into an outlined shape instead of a filled one.
 
-       Tints are reserved for things that changed: hover, selection, and
-       the disposition colours further down. A surface that is not white
-       here means something happened to it.
+       Tints are reserved for things that changed. Hover is the one
+       functional fill the palette keeps (`bg-surface-muted`);
+       selection is the green tint (`accent-subtle`), which is the
+       theme's own instruction that green appears as a tinted mark.
        ─────────────────────────────────────────────────────────────── */
     --surface-page: #ffffff;
     --surface-base: #ffffff;
     --surface-sidebar: #ffffff;
     --surface-topbar: #ffffff;
-    --surface-hover: #eceef2;
-    --surface-active: #e3e6ee;
-    /* The preview pane reads as a document, not a panel. That used to be a
-       tint against a tinted page; against a white one the same tint would
-       read as a panel *darker* than its surroundings, which is the opposite
-       claim. The border around it carries the distinction instead. */
+    --surface-hover: #f4f4f5;
+    --surface-active: #effbf5;
     --surface-preview: #ffffff;
 
-    /* ── Borders ─────────────────────────────────────────────────── */
-    --border-default: rgba(0, 0, 0, 0.2);
-    --border-subtle: rgba(0, 0, 0, 0.13);
-    --border-strong: rgba(0, 0, 0, 0.36);
+    /* ── Borders ─────────────────────────────────────────────────────
+       Load-bearing in this palette rather than decorative: with every
+       surface the same white, a border is the only thing that says
+       where one region stops.
+       ─────────────────────────────────────────────────────────────── */
+    --border-default: #d4d4d9;
+    --border-subtle: #e6e6ea;
+    --border-strong: #0a0a0a;
 
-    /* ── Radii — deliberately tight ──────────────────────────────── */
-    --radius-base: 2px;
-    --radius-medium: 4px;
-    --radius-large: 6px;
+    /* ── Radii — the `precise` preset ────────────────────────────────
+       Tighter than the other presets on purpose; a 24px radius is
+       ornament, and this theme spends its budget on space instead.
+       ─────────────────────────────────────────────────────────────── */
+    --radius-base: 4px;
+    --radius-medium: 8px;
+    --radius-large: 12px;
 
-    /* ── Text ────────────────────────────────────────────────────── */
-    --text-primary: #1a1a1a;
-    --text-secondary: #4a4a4a;
-    --text-muted: #6e6e6e;
-    --text-placeholder: #b0b0b0;
+    /* ── Text ────────────────────────────────────────────────────────
+       Never pure black: #000 on #fff is a glare a printed page never
+       produces, so `fg-default` is #0a0a0a.
+
+       The palette has three ink stops and the chrome names four, so
+       placeholder and muted resolve to the same `fg-subtle`. Inventing
+       a fourth lighter grey would put a colour on screen that no
+       palette declares, which is the thing this file is not allowed to
+       do.
+       ─────────────────────────────────────────────────────────────── */
+    --text-primary: #0a0a0a;
+    --text-secondary: #52525b;
+    --text-muted: #8a8a94;
+    --text-placeholder: #8a8a94;
     --text-inverse: #ffffff;
 
-    /* ── Navigation ──────────────────────────────────────────────── */
-    --nav-active-bg: #e3e6ee;
-    --nav-active-border: #5b6478;
-    --nav-inactive-text: #6c6c6c;
+    /* ── Navigation ──────────────────────────────────────────────────
+       The active route is the clearest place in the chrome for the
+       green to do its job: a tinted cell with a green rule down its
+       edge, which is `accent-subtle` plus `border-accent` exactly as
+       the palette describes them.
+       ─────────────────────────────────────────────────────────────── */
+    --nav-active-bg: #effbf5;
+    --nav-active-border: #72e3ad;
+    --nav-inactive-text: #52525b;
 
     /* ── Focus ───────────────────────────────────────────────────────
-       One ring, drawn outside the element so it never moves layout, in
-       the same slate the rail uses for the active route. It is a token
-       rather than the browser default because the default is drawn in a
-       colour we do not choose and, on a white sheet with 2px radii,
-       reads as a bug.
+       Black, not green, and this is the one place the theme's own hint
+       is not followed. The palette suggests `border-accent` for rings —
+       but #72e3ad on white is 1.6:1, well under the 3:1 a non-text
+       indicator needs, and a focus ring is the one ring that is not
+       decorative. `accent` is black in this palette, so black is both
+       accessible and on-theme.
        ─────────────────────────────────────────────────────────────── */
-    --focus-ring: #5b6478;
+    --focus-ring: #0a0a0a;
     --focus-ring-width: 2px;
     --focus-ring-offset: 2px;
 
-    /* ── Actions ─────────────────────────────────────────────────── */
-    --action-affirm-bg: #72e3ad;
-    --action-affirm-text: #0d3d26;
-    --action-affirm-border: #5ed49a;
-
-    --action-refuse-bg: #ffb3b3;
-    --action-refuse-text: #7b1f1f;
-    --action-refuse-border: #ff9999;
-
-    --action-neutral-bg: #f0f1f3;
-    --action-neutral-text: #4a4a4a;
-    --action-neutral-border: #e0e1e5;
+    /* ── Actions ─────────────────────────────────────────────────────
+       One filled button on the page and everything else outlined. The
+       palette makes `accent` black precisely so the affirmative action
+       is the single black shape and the green stays a highlight; the
+       refusal and the neutral are outlined, separated by ink weight
+       rather than by colour. The minimal palette has no red, and
+       inventing one to fill a "discard" button would be exactly the
+       second source of truth this file refuses.
+       ─────────────────────────────────────────────────────────────── */
+    --action-affirm-bg: #0a0a0a;
+    --action-affirm-text: #ffffff;
+    --action-affirm-border: #0a0a0a;
+    --action-refuse-bg: #ffffff;
+    --action-refuse-text: #0a0a0a;
+    --action-refuse-border: #d4d4d9;
+    --action-neutral-bg: #ffffff;
+    --action-neutral-text: #52525b;
+    --action-neutral-border: #d4d4d9;
 
     /* ── Dispositions ────────────────────────────────────────────────
        One token pair per `ChangeOutcome` kind in the composition
        runtime, so a disposition can never be rendered in a colour the
        runtime has no name for. Add a kind, add a pair.
+
+       These are the one group that is *not* drawn from the brand
+       palette, and the reason is worth stating rather than hiding. A
+       verdict colour is functional: "applied", "waiting on you" and
+       "refused" have to be tellable apart at a glance, and a palette
+       with a single accent cannot say three things. Rendering all three
+       in greys and greens would cost a reviewer the fastest signal on
+       the page.
+
+       So `applied` is the theme's green exactly — `accent-subtle` and
+       `accent-strong` — and the amber and red are the ones the
+       documentation site already uses for held and refused, so a
+       verdict reads the same on both surfaces. They are muted to sit
+       beside this palette rather than to compete with it.
        ─────────────────────────────────────────────────────────────── */
-    --outcome-applied-bg: rgba(34, 197, 94, 0.12);
-    --outcome-applied-text: #15803d;
-    --outcome-awaiting-bg: rgba(251, 146, 60, 0.15);
-    --outcome-awaiting-text: #c2410c;
-    --outcome-rejected-bg: rgba(204, 34, 0, 0.1);
-    --outcome-rejected-text: #a11b00;
-    --outcome-uninterpreted-bg: rgba(0, 0, 0, 0.06);
-    --outcome-uninterpreted-text: #6c6c6c;
-    --outcome-inapplicable-bg: rgba(91, 100, 120, 0.12);
-    --outcome-inapplicable-text: #414a5c;
+    --outcome-applied-bg: #effbf5;
+    --outcome-applied-text: #176e44;
+    --outcome-awaiting-bg: #fff8e6;
+    --outcome-awaiting-text: #7a5300;
+    --outcome-rejected-bg: #fdf0ef;
+    --outcome-rejected-text: #8c2a20;
+    --outcome-uninterpreted-bg: #f4f4f5;
+    --outcome-uninterpreted-text: #52525b;
+    --outcome-inapplicable-bg: #f4f4f5;
+    --outcome-inapplicable-text: #8a8a94;
 
     /* ── Edit mode ───────────────────────────────────────────────────
        The outline drawn over a `data-loom-node`. 0010 fixed that edit
        mode decorates and never invents DOM, so selection has to be
        expressible as a style on a node that is already there.
+
+       Green rather than black here, and for a reason particular to
+       this overlay: it is drawn on top of a rendered tree whose own
+       theme is usually black-on-white too, so a black outline would be
+       one more black line among the content's. `brand-secondary-strong`
+       is the portal speaking over the page rather than in it.
        ─────────────────────────────────────────────────────────────── */
-    --node-hover-outline: rgba(91, 100, 120, 0.4);
-    --node-selected-outline: #5b6478;
-    --node-label-bg: #5b6478;
+    --node-hover-outline: rgba(31, 152, 94, 0.45);
+    --node-selected-outline: #1f985e;
+    --node-label-bg: #1f985e;
     --node-label-text: #ffffff;
 
-    /* ── Type — 14px base, dense scale ───────────────────────────── */
+    /* ── Type — 14px base, dense scale ───────────────────────────────
+       Deliberately *not* the font pack's `scaleRamp`. That ramp runs
+       12→72 because it is sized for pages a visitor reads — a hero
+       headline needs the top step. This is a dense review tool whose
+       job is to fit a proposal, its verdict and its provenance on one
+       screen, and a 72px step has nothing to do here.
+
+       The family is the font pack's, which is the half of the type
+       system that carries the identity. The sizes are the tool's.
+       ─────────────────────────────────────────────────────────────── */
     --size-2xs: 11px;
     --size-xs: 12px;
     --size-sm: 13px;
@@ -215,6 +283,17 @@
   body {
     background-color: var(--surface-page);
     color: var(--text-primary);
+    /*
+     * The `minimal-sans` font pack's family, reached through the variable
+     * `next/font` binds in the layout. The pack names Geist first and Loom does
+     * not fetch fonts — a theme carries a family *name*, never a file — so the
+     * portal is the surface that has to load it, and this is where the two ends
+     * meet. The fallbacks are the pack's own, in its order, so a page that never
+     * gets Geist still lands on a neo-grotesque of the same temperature rather
+     * than lurching into Times.
+     */
+    font-family: var(--font-geist-sans), ui-sans-serif, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: var(--size-base);
     -webkit-tap-highlight-color: transparent;
   }
