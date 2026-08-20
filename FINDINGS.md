@@ -1893,3 +1893,60 @@ change to a shipped palette that nobody asked this branch to make, and it would
 alter every page already rendered with it. It wants a decision, not a patch:
 either the slot's contract is "large or secondary text only" and the primitives
 using it for small text are wrong, or the palettes want a darker subtle.
+
+---
+
+## 2026-08-20 — `main` has been red for five merges, and the check is pointing at a directory that no longer exists
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a Vercel dashboard setting; no routine can fix it from the
+repository.
+
+Found while clearing CI on #103. The `Vercel – loom-portal` check fails on that
+branch, and it fails **on `main`**, and it has failed on every commit since
+#98. The boundary is exact:
+
+| commit | `loom-portal` |
+| --- | --- |
+| `435d19e` … `d3e0f78` (#94–#96) | no check |
+| `dd54502` — §4b the page chrome (#97) | **success** |
+| `555ad73` — §4c/§4d/§5 the four surfaces become one application (#98) | **failure** |
+| `108d4f0` (#99), `fc661d7` (#100), `a59d90e` (#101), `d541bea` (#102) | **failure** |
+
+**The cause is in the Vercel project settings, not in the repository.** The bot's
+own payload names it:
+
+```
+loom-marketing  rootDirectory: apps/loom     → Ready
+loom-portal     rootDirectory: apps/portal   → Error
+```
+
+`apps/portal` does not exist. #98 moved all four surfaces into `apps/loom`
+([0067](decisions/0067-the-four-surfaces-are-one-application.md)), and
+`git ls-tree origin/main apps/` now returns `apps/loom` and nothing else. The
+`loom-portal` project is still told to build a directory that was deleted five
+merges ago, so it fails before it compiles anything. Nothing any branch contains
+can change that.
+
+**Two ways to fix it, and the second is better.**
+
+1. **Repoint `loom-portal`'s Root Directory to `apps/loom`.** One field. It then
+   builds — and two Vercel projects build the identical application from the
+   identical root, which is a doubled build on every push and two preview URLs
+   that serve the same four surfaces.
+2. **Delete the `loom-portal` project, and rename `loom-marketing`.** One
+   application, one project. The names are the other half of the problem: the
+   project that currently deploys the portal, the docs, the lessons *and* the
+   marketing site is called `loom-marketing`, so the preview URL a routine puts
+   in a pull request describes one quarter of what it serves. `loom` is the
+   honest name.
+
+**Why this matters more than one red check.** Every routine is told *never open a
+pull request on red* and *`pnpm verify` green is the merge gate for everyone*.
+A check that is red on `main` for structural reasons trains every run to look
+past red — and the next genuinely broken build will be merged, because five
+people in a row will have correctly reasoned that the red one is the usual one.
+Five merges have already landed on it.
+
+Recorded rather than worked around. #103 does not touch `apps/`, its `pnpm
+verify` is green, and it is not held for this.
