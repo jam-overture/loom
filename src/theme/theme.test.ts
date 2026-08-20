@@ -163,21 +163,43 @@ describe("what the library reads against what", () => {
     }
   })
 
-  it("proves the pairing that decided where the house palette's green went", () => {
+  it("keeps the house palette's green out of the slot that is read as text", () => {
     /**
-     * `minimal` carries Hyperion's two greens at the two stops the library can
-     * actually use them at. The mint reads at 1.58:1 on white, so it is a border
-     * and never a letterform; the deep green reads at 12.26:1, so it is both the
-     * text and the fill. Asserted as the specific numbers because the swap is
-     * tempting and silent — it is the *obvious* assignment and it is the wrong one.
+     * The mint reads at 1.58:1 on white, so it can be a border and can never be
+     * a letterform. Asserted as the specific value because the swap is tempting
+     * and silent: `accent` paints the primary button, so putting the button
+     * colour there is the *obvious* move, and it takes every eyebrow, kicker and
+     * disclosure marker on the page down with it.
      */
     const minimal = STARTER_PALETTES.find((palette) => palette.id === "minimal")
     if (!minimal) throw new Error("minimal palette is not registered")
 
     expect(minimal.slots["border-accent"]).toBe("#72e3ad")
-    expect(minimal.slots.accent).toBe("#0d3d26")
     expect(contrast(minimal.slots["border-accent"] ?? "", minimal.slots["bg-canvas"] ?? "")).toBeLessThan(3)
-    expect(contrast(minimal.slots.accent ?? "", minimal.slots["bg-canvas"] ?? "")).toBeGreaterThan(7)
+    expect(minimal.slots.accent).not.toBe(minimal.slots["border-accent"])
+
+    /** The green still has to be visibly green where it does appear. */
+    expect(contrast(minimal.slots["accent-strong"] ?? "", minimal.slots["accent-subtle"] ?? "")).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it("defines its components by their border rather than by a fill", () => {
+    /**
+     * The outline-first instruction, as the one assertion that can hold it.
+     * `bg-surface` is the fill behind a card, a nav, a footer and a hero panel,
+     * so `bg-surface === bg-canvas` is what makes all of them outlined — and it
+     * only works while `border-subtle` is actually visible, since it is now the
+     * only thing separating a card from the page.
+     *
+     * `bg-surface-muted` is deliberately *not* held to this. It is a functional
+     * fill — the well behind a missing image, a monogram — and a placeholder the
+     * colour of the page is a placeholder nobody can see.
+     */
+    const minimal = STARTER_PALETTES.find((palette) => palette.id === "minimal")
+    if (!minimal) throw new Error("minimal palette is not registered")
+
+    expect(minimal.slots["bg-surface"]).toBe(minimal.slots["bg-canvas"])
+    expect(contrast(minimal.slots["border-subtle"] ?? "", minimal.slots["bg-canvas"] ?? "")).toBeGreaterThan(1.15)
+    expect(minimal.slots["bg-surface-muted"]).not.toBe(minimal.slots["bg-canvas"])
   })
 
   /**

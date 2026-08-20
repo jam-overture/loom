@@ -70,10 +70,10 @@ So the assignment follows the *reading*, not the colour:
 
 | slot | value | why |
 | --- | --- | --- |
-| `accent` | `#0d3d26` — Hyperion's, exact | 12.26:1 on the canvas. Text and fill both |
-| `fg-on-accent` | `#ffffff` | 12.26:1 on the button |
-| `accent-strong` | `#082819` | text on the pale tint |
-| `accent-subtle` | `#e6faf0` | the tint behind an accent card, badge or icon tile |
+| `accent` | `#0a0a0a` | black. The primary button, and every accent letterform |
+| `fg-on-accent` | `#ffffff` | 19.8:1 on the button |
+| `accent-strong` | `#176e44` | a mid stop — the glyph on a tinted tile, visibly green at 5.91:1 |
+| `accent-subtle` | `#effbf5` | the whisper of mint behind a tile, badge or accent card |
 | `border-accent` | `#72e3ad` — Hyperion's, exact | **where the green you actually see lives** |
 
 `border-accent` is the eyebrow pill's ring, the quote's rule, the featured
@@ -81,29 +81,65 @@ tier's border, the badge outline. A 1px mint hairline at 1.58:1 is not a
 contrast failure — borders are not held to text contrast — it is exactly the
 phrase in the request: *subtle highlights of green*.
 
-And the deep stop earns the rest of it. A primary button in `#0d3d26` reads as a
-near-black button with a green cast, which is the restraint the theme is for,
-while a 12px eyebrow in it reads at 12.26:1. **The green is legible as green
-where there is area to see it and quiet everywhere else** — the difference
-between a minimalist palette and a merely desaturated one.
+## The revision, and why the first answer was wrong
 
-## The whites
+**`accent` was `#0d3d26` — Hyperion's deep stop — in the first cut, and it was
+sent back.** The reasoning had been that a near-black button with a green cast
+was the restrained reading, and that 12.26:1 kept a 12px eyebrow legible.
 
-Four, cool-neutral rather than warm, which is what the reference page uses and
-what `editorial` deliberately is not:
+Rendered, it was neither thing. The review called it *"that dark hunter green
+black"*, which is precisely what it looked like: too dark to read as green, too
+green to read as black. It is the failure mode a contrast table cannot show you —
+every number was fine, and the colour was muddy.
+
+Black is the correct answer and it was available from the start, in the brief's
+own words: *whites, **black**, and the subtle highlights of green*. Three
+colours, and the largest element on the page should be one of the first two. A
+green button is not a highlight — it is the loudest thing in the composition, and
+it spends the green where the brief said to be sparing with it.
+
+`accent-strong` moved with it, from `#082819` to `#176e44`. On a tinted tile the
+job of that slot is to be **visibly green**, not to maximise a contrast it
+already has in hand; 5.91:1 clears AA with room and actually looks like the
+colour it is meant to be.
+
+**What this costs, stated plainly.** `loom.link`'s `current` reads `accent`, so
+the current page in a nav is now marked in black — bold and underlined, but not
+coloured. Under the deep green it was the nicest small use of the accent on the
+page. That is the real trade in going black, and it is a trade rather than an
+oversight: the two cannot differ while both are the same slot.
+
+## The whites, and the one slot that made the library outline-first
+
+The second instruction on review was: **prefer outlined components to denote the
+boundary between one component and the next, and use different background fills
+sparingly.**
+
+That turned out to be a one-slot change, and it is the most useful thing in this
+palette. `bg-surface` is the fill behind a `loom.card`, a `loom.nav`, a
+`loom.footer`, a `loom.hero` panel and a `tone: "surface"` section — *every*
+component that reads as a filled box. Setting it to the canvas white makes all of
+them defined by their border instead, with no primitive touched and no authoring
+change required:
 
 ```
 bg-canvas        #ffffff   the page
-bg-surface       #fafafa   cards, nav, footer
-bg-surface-muted #f4f4f5   a recessed well
+bg-surface       #ffffff   ← the same white. Cards are outlines, not fills
+bg-surface-muted #f4f4f5   the one fill left, and it is functional
 bg-overlay       #ffffff   modals
-border-subtle    #efeff1   border-default #e4e4e7   border-strong #0a0a0a
+border-subtle    #e6e6ea   border-default #d4d4d9   border-strong #0a0a0a
 ```
 
-Note the inversion from `editorial`, which puts an off-white canvas under white
-surfaces. Here the canvas is the pure white and surfaces sit *slightly darker* on
-it. On a page whose cards already carry a hairline, that reads as paper with
-panels laid on it rather than as panels cut out of paper.
+Two consequences worth naming:
+
+- **`border-subtle` became load-bearing**, so it moved a step darker
+  (`#efeff1` → `#e6e6ea`). It is now the only thing separating a card from the
+  page; at the old value a card simply disappeared.
+- **`bg-surface-muted` deliberately stays a real fill.** Nine primitives read it
+  and every one is *functional* rather than structural — the well behind an image
+  that has not loaded, a person's monogram, a neutral badge. A placeholder the
+  colour of the page is a placeholder nobody can see. "Sparingly" is not "never",
+  and this is what the exception is for.
 
 `fg-default` is `#0a0a0a` and not `#000000`. Pure black on pure white is a glare
 no printed page produces.
@@ -161,6 +197,10 @@ fg-muted on bg-surface · accent on bg-canvas · accent on bg-surface
 fg-on-accent on accent · accent-strong on accent-subtle · fg-default on accent-subtle
 ```
 
+Two more assertions carry the review decisions so they cannot be undone by
+accident: that the mint never lands in `accent` (the slot read as text), and that
+`bg-surface === bg-canvas` with a `border-subtle` visible enough to replace it.
+
 All three palettes pass all nine. It is the check that would have caught the
 mint-at-`accent` mistake, and it now guards every palette anyone adds.
 
@@ -176,10 +216,10 @@ not this change's business. Filed.
 
 | Package | Files | Tests |
 | --- | --- | --- |
-| `@loom/runtime` | 97 | 1406 |
+| `@loom/runtime` | 97 | 1407 |
 | `@loom/app` | 74 | 758 |
 
-Runtime went 96 → 97 files and 1373 → 1406 tests: the contrast suite, the
+Runtime went 96 → 97 files and 1373 → 1407 tests: the contrast suite, the
 catalogue census widened to all three groups with descriptions checked on every
 entry, and two primitives-side tests that render **all seven fixtures** under the
 new theme and assert no literal colour survives below the root.

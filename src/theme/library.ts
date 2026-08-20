@@ -149,21 +149,48 @@ export const airyModernStylePreset: StylePreset = stylePresetSchema.parse({
  * featured tier's border are exactly the "subtle highlight" the brief asks for
  * and where 1.58:1 is a soft mark rather than a failure.
  *
- * `accent` takes the deep stop, so a primary action reads as a near-black
- * button with a green cast — the restraint the palette is for — and a 12px
- * eyebrow reads at 12.26:1. The green is *legible as green* where there is area
- * to see it, and quiet everywhere else. That is the difference between a
- * minimalist palette and a desaturated one.
+ * **`accent` is black, and that is the maintainer's call after seeing it green.**
+ * The first cut gave it the deep stop, `#0d3d26`, on the reasoning that a
+ * near-black button with a green cast was the restrained reading. Rendered, it
+ * was neither: too dark to read as green and too green to read as black — the
+ * review called it "dark hunter green black", which is exactly what it looked
+ * like. The brief names three colours, whites, black *and* green, and a black
+ * button is the one that leaves the green to be a highlight rather than the
+ * largest element on the page.
+ *
+ * So the green now lives entirely in the places a highlight belongs:
+ * `border-accent` for hairlines and rings, `accent-subtle` for a tinted tile,
+ * and `accent-strong` — a mid stop rather than the darkest — for the glyph or
+ * label sitting on that tile, where being *visibly* green matters more than
+ * maximising contrast it already has in hand at 5.91:1.
  */
 export const minimalPalette: Palette = paletteSchema.parse({
   id: "minimal",
   name: "Minimal",
   description:
-    "White paper, black ink, one green. Shades of white for surfaces, near-black text, and a green accent used sparingly.",
+    "White paper, black ink, one green. Components are outlined rather than filled; the green appears only as rules, rings and tinted marks.",
   slots: {
-    /** Four whites: the page, the surfaces on it, a recessed well, and an overlay. */
+    /**
+     * **`bg-surface` is the canvas white, and that is the whole outline-first
+     * decision.** It is the fill behind a card, a nav, a footer, a hero panel
+     * and a `tone: "surface"` section — so setting it to the page colour means
+     * every one of those is defined by its border instead of by a change of
+     * background, without a single primitive being touched. The instruction was
+     * to prefer outlined components and use fills sparingly; this is the one
+     * slot that turns the entire library over.
+     *
+     * It also means `border-subtle` is now load-bearing rather than decorative,
+     * which is why it is a step darker here than the palettes that back their
+     * borders with a fill.
+     */
     "bg-canvas": "#ffffff",
-    "bg-surface": "#fafafa",
+    "bg-surface": "#ffffff",
+    /**
+     * The one fill left, and it stays a real one because it is *functional*
+     * rather than structural: the well behind an image that has not loaded, a
+     * person's monogram, a neutral badge. Nine primitives read it, and a
+     * placeholder the same colour as the page is a placeholder nobody can see.
+     */
     "bg-surface-muted": "#f4f4f5",
     "bg-overlay": "#ffffff",
     /** Never pure black. #000 on #fff is a glare a printed page never produces. */
@@ -171,15 +198,17 @@ export const minimalPalette: Palette = paletteSchema.parse({
     "fg-muted": "#52525b",
     "fg-subtle": "#8a8a94",
     "fg-on-accent": "#ffffff",
-    /** Hyperion's `--btn-positive-text`, exactly. 12.26:1 on the canvas. */
-    accent: "#0d3d26",
-    "accent-strong": "#082819",
-    "accent-subtle": "#e6faf0",
+    /** Black, so the green is a highlight and not the biggest thing on the page. */
+    accent: "#0a0a0a",
+    /** A mid stop on Hyperion's ramp: the glyph on a tinted tile, visibly green at 5.91:1. */
+    "accent-strong": "#176e44",
+    "accent-subtle": "#effbf5",
     "brand-secondary": "#72e3ad",
     "brand-secondary-strong": "#1f985e",
-    "border-default": "#e4e4e7",
+    /** Carrying structure now, so a step darker than a fill-backed palette needs. */
+    "border-default": "#d4d4d9",
     "border-strong": "#0a0a0a",
-    "border-subtle": "#efeff1",
+    "border-subtle": "#e6e6ea",
     /** Hyperion's `--btn-positive-bg`, exactly. The green you actually see. */
     "border-accent": "#72e3ad",
   },
