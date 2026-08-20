@@ -122,7 +122,19 @@ describe("a theme the render cannot mount", () => {
       {
         code: "theme-unresolved",
         nodeId: rendered.diagnostics[0]?.nodeId,
-        error: { code: "unknown-palette", id: "midcentury", available: ["editorial", "bold"] },
+        error: {
+          code: "unknown-palette",
+          id: "midcentury",
+          /**
+           * Read off the registry rather than written out. The point of the
+           * field is that a refusal tells the caller what it *could* have said,
+           * so the assertion is that it matches what is registered — not that
+           * the starter set is any particular length. Spelled out, this test
+           * failed the day a third palette was added, which is a census
+           * changing rather than a diagnostic breaking.
+           */
+          available: themes.catalogue().palettes.map((entry) => entry.id),
+        },
       },
     ])
     expect(renderToStaticMarkup(rendered.element)).toContain("<main")

@@ -1799,3 +1799,154 @@ form is the clearest thing the demo has ever had to show — the change is one p
 the verdict is a hold, and the record beside it says why in a sentence about a
 stranger's data rather than about a diff. I have not built it, because a preset
 whose primitive does not exist would be a button with nothing behind it.
+
+---
+
+## 2026-08-20 — a house theme was added, and it was added in someone else's lane
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — needs acknowledging rather than fixing.
+
+The maintainer asked, in a live session, for a minimalist theme available to all
+four surfaces. It landed on `theme-01-the-minimal-theme` as `minimal` /
+`minimal-sans` / `precise`, and **it is in `src/theme/`, which is the framework
+routine's lane, not the primitives routine's.**
+
+Recorded here because the next `Loom daily build` run must not discover it by
+merge conflict. Files touched: `src/theme/library.ts` (three documents plus
+registration), `src/theme/theme.test.ts` (census, and a new contrast suite),
+`src/render/theme.test.ts` (one diagnostic assertion that listed the palette ids
+by hand).
+
+**Why it was not filed as a finding instead**, which is what the lane table says
+to do. All four surfaces build their registry with `createThemeRegistry()` and
+no arguments, and that call takes `input.palettes ?? STARTER_PALETTES` — it
+*replaces* rather than merges. So a theme every surface can reach has exactly
+one home, and it is `STARTER_PALETTES`. Filing it would have made a live request
+wait a day for a change that is three documents appended to a list.
+
+Two things done to keep the crossing cheap: nothing existing was re-coloured or
+renamed, and the two census assertions that broke were rewritten to **derive**
+their expectations from the registry rather than to list the new ids — so a
+fourth palette does not break them a third time.
+
+---
+
+## 2026-08-20 — the house theme is registered and nothing selects it, and Geist is not loaded
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons`, `Loom portal` · **Status:** open
+
+`minimal` / `minimal-sans` / `precise` is resolvable from every surface as of the
+branch above. **No surface uses it**, and adopting it is two separate pieces of
+work in the surface lanes:
+
+**1. Select it.** Each surface names its theme in the tree it builds. The
+selection is:
+
+```json
+{ "palette": "minimal", "fontPack": "minimal-sans", "stylePreset": "precise" }
+```
+
+**2. Load Geist, or accept the fallback.** Loom does not fetch fonts — that is
+deliberate and predates this (see the note above `editorialSerifFontPack`). The
+pack names `Geist` first and falls back through `ui-sans-serif` and the platform
+grotesques, so a surface that links nothing still renders correctly and still
+looks like this theme; it just is not Geist. The stack is ordered so the fallback
+is a near-neighbour rather than a lurch.
+
+`apps/loom` is Next.js, so the cheap version is `next/font` in each route
+group's layout, assigning the loaded family to a CSS variable the surface then
+uses. Whoever does it should check the specimen in
+`reports/2026-08-20-theme-the-minimal-theme.md` against their result — the type
+ramp was tuned against a render at 1440px, and Geist's metrics differ from the
+fallback's enough to be worth a second look at step 8.
+
+---
+
+## 2026-08-20 — `fg-subtle` does not meet AA in any registered palette
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open
+
+Found by writing the contrast suite that now guards `src/theme/library.ts`. Every
+pairing the primitives put together meets 4.5:1 in all three palettes, with one
+slot excepted:
+
+| palette | `fg-subtle` on `bg-canvas` | on `bg-surface` |
+| --- | --- | --- |
+| `editorial` | **2.41:1** | 2.52:1 |
+| `minimal` | 3.42:1 | 3.27:1 |
+| `bold` | 3.72:1 | 3.27:1 |
+
+AA is 4.5:1 for body text and 3:1 for large text. `editorial` misses both.
+
+`fg-subtle` is the slot for text meant to recede — a `loom.link-list` group
+label, a footer note, a `loom.person` role — so some of it is genuinely large or
+genuinely secondary. Not all of it is: the footer's note row is ordinary small
+text.
+
+**Deliberately not fixed and not asserted.** The suite excludes the slot with a
+comment saying why, rather than lowering the bar to one all three clear — a
+threshold of 2.4 would make the test say nothing. Re-colouring `editorial` is a
+change to a shipped palette that nobody asked this branch to make, and it would
+alter every page already rendered with it. It wants a decision, not a patch:
+either the slot's contract is "large or secondary text only" and the primitives
+using it for small text are wrong, or the palettes want a darker subtle.
+
+---
+
+## 2026-08-20 — `main` has been red for five merges, and the check is pointing at a directory that no longer exists
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a Vercel dashboard setting; no routine can fix it from the
+repository.
+
+Found while clearing CI on #103. The `Vercel – loom-portal` check fails on that
+branch, and it fails **on `main`**, and it has failed on every commit since
+#98. The boundary is exact:
+
+| commit | `loom-portal` |
+| --- | --- |
+| `435d19e` … `d3e0f78` (#94–#96) | no check |
+| `dd54502` — §4b the page chrome (#97) | **success** |
+| `555ad73` — §4c/§4d/§5 the four surfaces become one application (#98) | **failure** |
+| `108d4f0` (#99), `fc661d7` (#100), `a59d90e` (#101), `d541bea` (#102) | **failure** |
+
+**The cause is in the Vercel project settings, not in the repository.** The bot's
+own payload names it:
+
+```
+loom-marketing  rootDirectory: apps/loom     → Ready
+loom-portal     rootDirectory: apps/portal   → Error
+```
+
+`apps/portal` does not exist. #98 moved all four surfaces into `apps/loom`
+([0067](decisions/0067-the-four-surfaces-are-one-application.md)), and
+`git ls-tree origin/main apps/` now returns `apps/loom` and nothing else. The
+`loom-portal` project is still told to build a directory that was deleted five
+merges ago, so it fails before it compiles anything. Nothing any branch contains
+can change that.
+
+**Two ways to fix it, and the second is better.**
+
+1. **Repoint `loom-portal`'s Root Directory to `apps/loom`.** One field. It then
+   builds — and two Vercel projects build the identical application from the
+   identical root, which is a doubled build on every push and two preview URLs
+   that serve the same four surfaces.
+2. **Delete the `loom-portal` project, and rename `loom-marketing`.** One
+   application, one project. The names are the other half of the problem: the
+   project that currently deploys the portal, the docs, the lessons *and* the
+   marketing site is called `loom-marketing`, so the preview URL a routine puts
+   in a pull request describes one quarter of what it serves. `loom` is the
+   honest name.
+
+**Why this matters more than one red check.** Every routine is told *never open a
+pull request on red* and *`pnpm verify` green is the merge gate for everyone*.
+A check that is red on `main` for structural reasons trains every run to look
+past red — and the next genuinely broken build will be merged, because five
+people in a row will have correctly reasoned that the red one is the usual one.
+Five merges have already landed on it.
+
+Recorded rather than worked around. #103 does not touch `apps/`, its `pnpm
+verify` is green, and it is not held for this.
