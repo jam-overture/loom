@@ -164,6 +164,41 @@ const containerAndChildren = (): LoomTree => {
   ])
 }
 
+/**
+ * A card that holds a control, which is an ordinary and correct composition —
+ * and the tree in which one `configure` breaks something several nodes away.
+ *
+ * Giving this card an `href` would make the whole card the thing a reader aims
+ * at, and the button inside it would become an anchor inside an anchor: invalid
+ * markup a browser resolves by dropping one of the two links. Nothing about that
+ * operation looks dangerous, which is exactly why it is worth a documented
+ * example — the "make the whole card a link" chip on this page is the only one
+ * on the site whose damage is invisible in the operation and only shows up in
+ * the resulting tree (0064, 0068).
+ */
+const cardWithAControl = (): LoomTree => {
+  const ids = sequentialIdFactory("cardcontrol")
+
+  return page(ids, EDITORIAL, { width: "readable" }, [
+    heading(ids, 1, "A card, and a control on it"),
+    buildElement(ids, {
+      type: "loom.card",
+      props: { tone: "surface", padding: "loose" },
+      children: [
+        heading(ids, 2, "Everything in the archive"),
+        prose(ids, "Two hundred issues, searchable, with the whole back catalogue.", {
+          tone: "muted",
+        }),
+        buildElement(ids, {
+          type: "loom.action",
+          props: { href: "https://example.com/archive", variant: "primary", scale: "small" },
+          children: [buildText(ids, "Read the archive")],
+        }),
+      ],
+    }),
+  ])
+}
+
 const entries: readonly DocsExample[] = [
   {
     id: "first-tree",
@@ -192,6 +227,13 @@ const entries: readonly DocsExample[] = [
     caption:
       "A feature grid arranges feature nodes. The repeated thing is a node, so a proposal can add one — a fixed field would have needed a new primitive.",
     build: containerAndChildren,
+  },
+  {
+    id: "a-card-and-a-control",
+    title: "A card holding a control",
+    caption:
+      "A perfectly ordinary composition: a surface with a heading, a sentence and a button on it. Ask to make the whole card a link and watch what the Gate says.",
+    build: cardWithAControl,
   },
 ]
 

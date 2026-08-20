@@ -1146,6 +1146,10 @@ Worth noting that both blocked hosts are named as *mandatory fetches* in briefs
 written before the proxy existed. A third routine will hit the same wall the
 first time its brief names a URL.
 
+**Re-verified 19 August 2026** by the `docs-02-propose-a-change` run: still
+`EGRESS_BLOCKED`, identical message. Noted here rather than opened as a second
+entry, the way the primitives routine dates its `21st.dev` re-verifications.
+
 ---
 
 ## 2026-08-19 — a Loom site cannot link to its own next page
@@ -1519,6 +1523,159 @@ Two ways out, and neither is a routine's to choose on its own:
 Until then, a run outside this lane that leaves it red is blocking all four
 surfaces over two digits, so the one-digit edit is the right call and both runs
 made it.
+
+---
+
+## 2026-08-19 — 0064's interactive check has a live user, and it is the documentation site
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Answering, in part, the 17 August finding that `interactiveTypesFor(registry)`
+"stays real, tested and unused" until some deployment calls it. That entry
+expected the caller to be the demo, once the demo became its own routine.
+
+**It is called now, from `apps/loom/app/(docs)/_lib/propose/policy.ts`**, in one
+line:
+
+```ts
+export const docsGatePolicy: GatePolicy = gatePolicySchema.parse({
+  policyId: "loom-docs",
+  protectedPrimitiveTypes: ["loom.heading"],
+  interactiveTypes: interactiveTypesFor(docsRegistry),
+})
+```
+
+So the nested-target refusal fires on a deployed surface, in front of readers,
+with a documented example built to provoke it: a `loom.card` holding a
+`loom.action`, and a chip that gives the card an `href`. The Gate refuses it at
+`stakes-at-refusal-floor`, naming both nodes, and the page beside it explains why
+an operation that configures one node broke a different one.
+
+Three things worth carrying, since they are what a first live user is for:
+
+- **The declarations are right.** `loom.action` is `"always"` and `loom.card` is
+  `{ whenProps: ["href"] }`, and a test asserts the derived map against both — so
+  a primitive that stopped declaring itself would take this site red.
+- **The wording is a shade wrong in exactly the way the primitives routine
+  predicted.** For `loom.card` the refusal reason — a target inside a target — is
+  literally true, and the docs page could quote it directly. That routine's
+  19 August finding about `loom.article` stands unchanged; nothing here needs it
+  fixed.
+- **It costs a deployment one line and no maintenance**, which is the claim
+  `interactiveTypesFor` makes about itself, now tested by something other than
+  its own unit test.
+
+**This does not close the 17 August entry**, and it is filed to the maintainer
+rather than to a routine because that entry is a *lane* question — who owns the
+demo — and a routine wiring the seam somewhere else does not answer it. What has
+changed is that "the seam is real, tested and unused, which is a worse state than
+either resolution" is no longer true, so the lane question can be settled without
+that pressure on it.
+
+---
+
+## 2026-08-19 — the relative-URL refusal, hit by a second lane
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open —
+noted against the marketing routine's 19 August entry rather than opened as a
+rival finding.
+
+`linkUrlSchema` still refuses every relative URL, and
+[0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
+is `Proposed` and `ARCHITECTURAL — needs review`, with `src/primitives/url.ts`
+unchanged. The marketing routine found it because a site's calls to action are
+internal. The documentation site found it a different way, which is why it is
+worth one paragraph rather than silence.
+
+A documented example wanted a card with a button on it — the smallest honest
+composition in which the nested-target refusal is interesting — and the button
+wanted somewhere to point. `href: "/docs"` renders an `invalid-props` diagnostic
+and the example test fails, correctly, on the first run. So both the example and
+the preset that reconfigures it use `https://example.com/archive`.
+
+That is a smaller cost than the marketing site's — an example may point anywhere
+and nothing about the lesson depends on the destination — but it is the same
+wall, and it is now visible in **two** of the four surfaces. Recorded so that
+whoever answers 0069 knows the demand is not one routine's.
+
+Worth stating for the record while here: the fallback the marketing site chose —
+resolving an origin per request and building absolute URLs from it — was **not**
+copied into the docs site, and should not be. An example's destination is
+illustrative; a site's navigation is not. Two different problems that happen to
+share a schema.
+
+---
+
+## 2026-08-19 — nothing in the library can say `ChangeInterpreter` inside a sentence
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:** open
+
+The lessons surface renders the course's prose by composing registered
+primitives, as 0067 requires. That works for headings, paragraphs, cards and
+stacks. It does not work for the thing a course about a codebase does in almost
+every sentence: naming a symbol.
+
+A Loom text node is a string (0001), `loom.prose` takes its text as child nodes,
+and no primitive in the starter library marks a span *inside* a paragraph. So
+markdown's `` ` ``, `**` and `*` have three possible fates on this surface and
+all three are bad:
+
+| what the surface could do | what the reader sees |
+| --- | --- |
+| render the markers literally | `` `ChangeInterpreter` `` with the backticks on the page |
+| strip them (**what it does today**) | `ChangeInterpreter` in the same face as the words around it |
+| wrap the span in `loom.badge` | a pill in the middle of a sentence, which is not what a badge means |
+
+The evidence is the course's own text rather than a hypothetical: review set N
+names `ChangeInterpreter`, `ProposedChange`, `TreeDelta`, `IdFactory`,
+`ModelClient` and `PolicyContext`, and every one of those is a question about the
+difference between two named things. Set L's questions italicise the word that
+carries the distinction. Both are lost.
+
+This is a gap in the library, not in the surface, and it is a gap the docs site
+will hit the moment its prose stops being MDX. What it asks for is small and
+awkward: something like `loom.code` and `loom.emphasis` as inline leaves that a
+paragraph may hold, which raises the question of whether `loom.prose` should
+accept element children at all and what a delta addressing half a sentence
+means. That is a decision, not a patch — which is why it is filed here rather
+than worked around locally.
+
+The surface strips the markers meanwhile, and says so in `_lib/text.ts`.
+
+---
+
+## 2026-08-19 — `sequentialIdFactory` takes a namespace it cannot mint an id from
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+`sequentialIdFactory(namespace)` interpolates the namespace into every id and
+validates the *result*: `nodeIdSchema.parse(`n_${namespace}${n}`)`. Node ids are
+`n_[0-9a-z]{1,32}`, so a namespace with a hyphen, a capital or more than about
+thirty characters is accepted by the factory and then fails on first use.
+
+What that looks like from the caller's side — this surface named its fragments
+`set-n-q1`, which reads like exactly the debugging affordance the namespace is
+documented to be:
+
+```
+ZodError: [ { "validation": "regex", "code": "invalid_string", "path": [] } ]
+ ❯ Object.nodeId src/ids.ts:95
+ ❯ buildText src/tree/builders.ts:31
+ ❯ heading app/(lessons)/_lib/loom.ts:59
+```
+
+The message names neither the namespace, nor the factory, nor the rule. It
+surfaces inside whichever `buildText` happens to run first, which in a page
+builder is several frames and one file away from the mistake, and the same
+factory will mint tree and delta ids that fail the same way at different times.
+
+Cheap fix, and the same shape as the rest of the repository: validate the
+namespace where it is given, and say what it must be. Everything else about the
+factory is fine — it is deterministic, per-kind, and the namespace does what it
+says once it is legal.
+
+The lessons surface sanitises its own keys meanwhile, with a comment pointing
+here.
 
 ---
 
