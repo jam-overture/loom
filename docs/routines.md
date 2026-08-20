@@ -146,6 +146,30 @@ require migrating built code, or that contradicts an `Accepted` record, is
 supersede anything, build what does not depend on it, and say in the report what
 was left out.
 
+## Network access
+
+`.claude/settings.json` is committed and carries the network policy every run
+inherits. **Do not delete it as stray configuration.** Added by the maintainer
+on 19 August 2026 after repeated egress failures reaching third-party sites.
+
+Two separate mechanisms gate the network, and a domain usually needs both:
+
+- **`sandbox.network.allowedDomains`** governs *Bash* — `git`, `gh`, `pnpm`.
+  Nothing is allowed by default.
+- **`permissions.allow` with `WebFetch(domain:…)`** governs the *WebFetch tool*,
+  which is in-process and does **not** consult the sandbox allowlist. A headless
+  run has nobody to approve a prompt, so an unlisted domain simply fails.
+
+Currently allowed: `21st.dev` and `nextjs.org` (the visual and structural
+references the primitives, marketing and docs briefs tell you to consult),
+GitHub, and the npm registry.
+
+**Needing a domain that is not listed is a finding, not a fix.** File it in
+`FINDINGS.md` and say what you were trying to reach. Widening egress is the
+security-relevant half of the sandbox — it is what stops a compromised command
+sending `ANTHROPIC_API_KEY` or the database credentials somewhere — so the list
+stays narrow and deliberate.
+
 ## Credentials
 
 `ANTHROPIC_API_KEY` is in the environment. Read it from `process.env`. **Never
