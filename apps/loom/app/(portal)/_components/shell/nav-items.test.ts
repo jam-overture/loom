@@ -15,8 +15,8 @@ import { NAV_GROUPS } from "./nav-items"
 const GROUP = join(process.cwd(), "app", "(portal)")
 
 /**
- * A route group contributes nothing to a URL, so `/portal/trees` is on disk at
- * `app/(portal)/portal/trees` — the group is where the file is, the segment is
+ * A route group contributes nothing to a URL, so `/portal/pages` is on disk at
+ * `app/(portal)/portal/pages` — the group is where the file is, the segment is
  * what a reader types, and only the second half appears in an `href`.
  */
 const routeExists = (href: string): boolean =>
@@ -40,6 +40,6 @@ describe("NAV_GROUPS", () => {
   /** Guards the guard: a broken href must actually be detected as broken. */
   it("detects a route that does not exist", () => {
     expect(routeExists("/nowhere")).toBe(false)
-    expect(routeExists("/portal/trees")).toBe(true)
+    expect(routeExists("/portal/pages")).toBe(true)
   })
 })

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import type { EditIntent, RuntimeEvent, RuntimeEventEnvelope } from "@loom/runtime"
 
-import { recordFromEvents, ruleSentence } from "./record"
+import { recordFromEvents } from "./record"
 
 /**
  * The projection, on the paths that are hard to cause on purpose.
@@ -104,23 +104,5 @@ describe("a record", () => {
     ])
 
     expect(record?.askedAt).toBe("2026-08-12T09:00:00.000Z")
-  })
-})
-
-describe("every rule the Gate can fire", () => {
-  it("has a sentence a reader who has never seen the codebase can follow", () => {
-    const codes = [
-      "within-policy",
-      "confidence-below-floor",
-      "stakes-at-refusal-floor",
-      "irreversible",
-      "discards-later-work",
-      "stakes-above-ceiling",
-      "confidence-below-minimum",
-    ] as const
-
-    for (const code of codes) {
-      expect(ruleSentence(code).length, code).toBeGreaterThan(20)
-    }
   })
 })

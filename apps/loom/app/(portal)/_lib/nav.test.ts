@@ -8,7 +8,7 @@ describe("isNavItemActive", () => {
   })
 
   it("matches a child route against its section", () => {
-    expect(isNavItemActive("/portal/trees/t_abc", "/portal/trees")).toBe(true)
+    expect(isNavItemActive("/portal/pages/t_abc", "/portal/pages")).toBe(true)
   })
 
   it("does not match a different section", () => {
@@ -21,7 +21,7 @@ describe("isNavItemActive", () => {
    * wrong nav item, and nothing catches it until two routes collide.
    */
   it("does not match a route that merely shares a prefix", () => {
-    expect(isNavItemActive("/portal/trees-archive", "/portal/trees")).toBe(false)
+    expect(isNavItemActive("/portal/pages-archive", "/portal/pages")).toBe(false)
     expect(isNavItemActive("/historian", "/portal/history")).toBe(false)
   })
 
@@ -31,7 +31,7 @@ describe("isNavItemActive", () => {
   })
 
   it("matches a tree's own route against the root section it belongs to", () => {
-    expect(isNavItemActive("/portal/trees/t_abc", "/portal/trees")).toBe(true)
-    expect(isNavItemActive("/portal/trees", "/portal/trees")).toBe(true)
+    expect(isNavItemActive("/portal/pages/t_abc", "/portal/pages")).toBe(true)
+    expect(isNavItemActive("/portal/pages", "/portal/pages")).toBe(true)
   })
 })

@@ -48,9 +48,16 @@ const answerSchema = z.object({ proposalId: proposalIdSchema })
 
 const revertSchema = z.object({ revision: z.coerce.number().int().positive() })
 
+/**
+ * The form did not arrive in a shape the server could read, so nothing was
+ * asked of the runtime at all. The plain half says that; the issue itself is
+ * the technical half, because a Zod message is written for whoever wrote the
+ * form rather than for whoever filled it in.
+ */
 const invalid = (issue: string): WriteReport => ({
   tone: "inapplicable",
-  headline: "not sent",
+  headline: "Nothing was sent",
+  meaning: "That didn't reach Loom, so nothing on the page has changed.",
   detail: issue,
 })
 
@@ -160,8 +167,18 @@ export const answerHeld = async (
     revalidatePath("/portal/demo")
 
     return discarded.ok
-      ? { tone: "rejected", headline: "discarded", detail: "The proposal was not applied." }
-      : { tone: "inapplicable", headline: "nothing to answer", detail: describeHoldError(discarded.error) }
+      ? {
+          tone: "rejected",
+          headline: "You said no",
+          meaning: "The change was turned down. The page was left as it was.",
+          detail: "The proposal was not applied.",
+        }
+      : {
+          tone: "inapplicable",
+          headline: "Already answered",
+          meaning: "Somebody has answered this one. There is nothing left to decide.",
+          detail: describeHoldError(discarded.error),
+        }
   }
 
   const outcome = await confirmHeld(write.path, {

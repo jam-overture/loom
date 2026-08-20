@@ -156,28 +156,6 @@ const dispositionOf = (disposition: Disposition): DispositionView => ({
 })
 
 /**
- * The sentence a reader needs about a rule code.
- *
- * The runtime's `detail` is precise and says what the numbers were; it does not
- * say what the rule is *for*. Both belong on screen — a demo that showed only
- * the code would be showing an enum, and one that showed only prose would be
- * showing an opinion (0019).
- */
-const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
-  "within-policy": "Nothing this policy watches for was present, so it applied on its own.",
-  "confidence-below-floor": "The interpreter was too unsure to be worth asking about.",
-  "stakes-at-refusal-floor": "This deployment does not offer changes this damaging at all.",
-  irreversible: "It could not be taken back cleanly, so a person decides — however small it is.",
-  "discards-later-work": "It would write over work already in the log, so nobody may do it alone.",
-  "redirected-submission":
-    "It sends the next visitor's message to a different place than the page was built to send it, so nobody may do it alone.",
-  "stakes-above-ceiling": "More damage than this origin may do without asking.",
-  "confidence-below-minimum": "Confident enough to offer, not confident enough to apply unasked.",
-}
-
-export const ruleSentence = (code: DispositionReasonCode): string => RULE_SENTENCES[code]
-
-/**
  * The record under construction.
  *
  * Views rather than raw runtime values, because a draft can start from a record

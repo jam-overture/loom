@@ -76,7 +76,7 @@ const OperationRow = ({ effect }: { readonly effect: OperationEffect }) => (
 
 export const ProposalEffectView = ({ effect }: { readonly effect: ProposalEffect }) => (
   <section className="text-2xs flex flex-col gap-2">
-    <h4 className="text-ink-muted text-2xs tracking-wide uppercase">what it would replace</h4>
+    <h4 className="text-ink-muted text-2xs tracking-wide uppercase">what this would change</h4>
 
     {/*
       * The obstacle goes above the operations, not below them. A proposal that

@@ -36,7 +36,7 @@ export const isPublicPath = (pathname: string): boolean =>
  * check for a leading `/` alone lets an attacker send a reviewer somewhere else
  * entirely with a link that looks like this portal's own.
  */
-export const DEFAULT_LANDING = "/portal/trees"
+export const DEFAULT_LANDING = "/portal/pages"
 
 export const safeReturnPath = (value: string | undefined | null): string => {
   if (!value) return DEFAULT_LANDING
