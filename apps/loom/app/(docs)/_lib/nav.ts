@@ -74,6 +74,24 @@ export const docsSections: readonly DocsSection[] = [
       },
     ],
   },
+  {
+    slug: "the-runtime",
+    title: "The runtime",
+    pages: [
+      {
+        slug: "proposing-a-change",
+        title: "Proposing a change",
+        summary:
+          "Nothing edits a page directly. An ask becomes a written plan of four kinds of operation, and only then is anything applied.",
+      },
+      {
+        slug: "what-the-gate-decides",
+        title: "What the Gate decides",
+        summary:
+          "Yes, ask a person, or no — and the two questions the runtime asks about a change before it answers.",
+      },
+    ],
+  },
 ]
 
 export type DocsEntry = {

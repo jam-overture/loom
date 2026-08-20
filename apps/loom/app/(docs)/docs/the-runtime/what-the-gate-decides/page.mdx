@@ -1,0 +1,144 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("the-runtime", "what-the-gate-decides")
+
+# What the Gate decides
+
+The Gate is the thing that looks at a proposed change and says one of three
+words: **yes**, **ask a person**, or **no**.
+
+It is a pure function. Same change, same rules, same answer, every time — and it
+runs *before* anything is applied, so a refusal costs nothing and leaves nothing
+behind.
+
+## It answers in three ways, and never more
+
+| Answer | What happens |
+| --- | --- |
+| `accepted` | the change is applied |
+| `requires-confirmation` | the change waits for a person to say yes |
+| `rejected` | the change does not happen, and cannot be confirmed into happening |
+
+The middle one is the one worth having. Software that can only allow or forbid
+has to decide, at design time, which changes are safe — and it will be wrong,
+because whether a change is safe depends on what it touches. Handing the
+uncertain ones to a person is not a fallback; it is the point.
+
+## The two questions it asks
+
+Before deciding, the runtime measures two things about the change. Neither of
+them involves an opinion about whether the change is *good*.
+
+**How much is at stake?** Not "how big is the delta" — how much would it matter
+if this were wrong. Removing twelve nodes is a bigger deal than removing one.
+Restructuring the top of the page is a bigger deal than editing something deep
+inside it. Touching a thing the deployment has declared consequential is a
+bigger deal than touching anything it has not.
+
+**Can it be undone?** The runtime computes the exact delta that would put the
+page back, at the same moment it assesses the change. A change is *reversible*
+when that inverse would actually restore things — and some are not: a change
+that reaches outside the tree cannot be undone by editing the tree, however
+neatly the operations invert.
+
+Try it below. Every chip on this example produces a different answer, and the
+box prints the factors the assessment found, in the runtime's own words.
+
+<Example id="a-card-and-a-control" />
+
+## The deployment decides what is consequential
+
+Here is the part people expect to be built in and is not. The Gate ships with
+sensible structural thresholds — how much removal counts as large, how close to
+the root counts as restructuring — because those are questions about shape, and
+shape means the same thing everywhere.
+
+It ships with **no** opinion about your primitives, because it cannot have one.
+Only you know that `commerce.checkout` matters more than `layout.stack`.
+
+So a deployment writes a policy:
+
+```ts
+const policy = gatePolicySchema.parse({
+  policyId: "acme-storefront",
+  protectedPrimitiveTypes: ["commerce.checkout", "legal.consent-notice"],
+  protectedPropKeys: ["price"],
+})
+```
+
+**This site has one too**, and it is deliberately small so that its effects are
+legible:
+
+```ts
+const docsGatePolicy = gatePolicySchema.parse({
+  policyId: "loom-docs",
+  protectedPrimitiveTypes: ["loom.heading"],
+  interactiveTypes: interactiveTypesFor(docsRegistry),
+})
+```
+
+That first line is why "demote the page's heading" is held for you and "add a
+sentence" is not. A heading is not intrinsically precious — *this deployment
+said it was*, and the two chips differ by nothing else. Change the policy and
+the verdicts change with it.
+
+<Callout>
+  The ordering that follows is the runtime's, not the policy's: **reconfiguring**
+  something protected is high stakes, and **destroying** it is critical. Under
+  the default ceilings the first asks you and the second is refused outright. One
+  line of vocabulary, two visibly different outcomes.
+</Callout>
+
+## The one list you should not write by hand
+
+`interactiveTypes` is the second line above, and it is derived rather than
+typed. It answers "which primitives render a thing the reader aims at?" — a
+link, a button — and the answer already lives on each primitive, because each
+primitive declared it:
+
+```ts
+definePrimitive({ type: "loom.action", interactive: "always", … })
+definePrimitive({ type: "loom.card",   interactive: { whenProps: ["href"] }, … })
+```
+
+`interactiveTypesFor(registry)` reads them all. A hand-written copy would be
+wrong the first day someone gave another primitive an `href`, and nothing would
+say so.
+
+What it buys is the most interesting refusal on this site. Press **make the
+whole card a link** on the example above. The operation is a single `configure`
+naming a single node — it looks like the re-theme, which is waved straight
+through. But a card with an `href` is the thing the reader aims at, and the
+button inside it becomes a link inside a link: markup a browser resolves by
+throwing one of them away. The page still renders. Something on it silently
+stops working.
+
+Nothing about the *operation* shows that. The runtime finds it by looking at the
+tree the change would produce, and only counts the breakage this change
+introduces — not breakage the page already had.
+
+<Callout kind="warning">
+  This is the failure mode a bounded vocabulary exists to catch, and it is worth
+  being honest about how ordinary it looks. Nobody proposing that change is
+  being careless. It is a reasonable thing to want, described correctly, that
+  happens to break something three nodes away.
+</Callout>
+
+## Confirmation is not a way past the Gate
+
+When a change is held and a person says yes, the runtime **judges it again**
+against the page as it stands at that moment — not against the assessment made
+when it was held. If the page moved in between, the second look is a look at
+things as they are now, and a change that would now be refused stays refused.
+
+A person answering a hold is answering the question the Gate asked. They are not
+overruling it.
+
+## What a verdict tells you afterwards
+
+Every decision records the rule that produced it, the factors that led there,
+and the name of the policy that decided — so a change judged six months ago can
+still say what it was judged by. That is why a policy has a `policyId`, and why
+changing what a policy contains means giving it a new name: every decision
+already written under the old one claims to have been judged by what that name
+meant then.

@@ -38,6 +38,21 @@
     --note-edge: rgba(40, 70, 140, 0.24);
     --note-ink: #26365c;
 
+    /* The three things a Gate can say. Three tones and no more, because
+       there are exactly three dispositions and a fourth colour here would
+       be inventing a verdict the runtime does not have. */
+    --verdict-accepted-surface: #eef7f0;
+    --verdict-accepted-edge: rgba(30, 110, 60, 0.26);
+    --verdict-accepted-ink: #1c5c37;
+
+    --verdict-held-surface: #fff8e6;
+    --verdict-held-edge: rgba(140, 100, 0, 0.28);
+    --verdict-held-ink: #7a5300;
+
+    --verdict-refused-surface: #fdf0ef;
+    --verdict-refused-edge: rgba(150, 40, 30, 0.26);
+    --verdict-refused-ink: #8c2a20;
+
     --code-surface: #f6f6f7;
     --code-ink: #111111;
 
@@ -67,6 +82,18 @@
     --note-surface: #12182a;
     --note-edge: rgba(140, 170, 240, 0.28);
     --note-ink: #c3d0ee;
+
+    --verdict-accepted-surface: #0d1c13;
+    --verdict-accepted-edge: rgba(120, 200, 150, 0.28);
+    --verdict-accepted-ink: #86d9a4;
+
+    --verdict-held-surface: #2a2005;
+    --verdict-held-edge: rgba(240, 198, 116, 0.3);
+    --verdict-held-ink: #f0c674;
+
+    --verdict-refused-surface: #250f0d;
+    --verdict-refused-edge: rgba(240, 140, 130, 0.3);
+    --verdict-refused-ink: #f0958c;
 
     --code-surface: #141414;
     --code-ink: #ededed;
@@ -122,6 +149,18 @@
   --color-note-surface: var(--note-surface);
   --color-note-edge: var(--note-edge);
   --color-note-ink: var(--note-ink);
+
+  --color-verdict-accepted-surface: var(--verdict-accepted-surface);
+  --color-verdict-accepted-edge: var(--verdict-accepted-edge);
+  --color-verdict-accepted-ink: var(--verdict-accepted-ink);
+
+  --color-verdict-held-surface: var(--verdict-held-surface);
+  --color-verdict-held-edge: var(--verdict-held-edge);
+  --color-verdict-held-ink: var(--verdict-held-ink);
+
+  --color-verdict-refused-surface: var(--verdict-refused-surface);
+  --color-verdict-refused-edge: var(--verdict-refused-edge);
+  --color-verdict-refused-ink: var(--verdict-refused-ink);
 
   --color-code-surface: var(--code-surface);
   --color-code-ink: var(--code-ink);
