@@ -15,7 +15,7 @@ import { AuditTreeChooser } from "./_components/tree-chooser"
 /**
  * Whether the log still produces the tree being served.
  *
- * `/portal/history` shows what the log says happened and `/portal/trees` shows what is being
+ * `/portal/history` shows what the log says happened and `/portal/pages` shows what is being
  * served. Nothing until now checked that the first still produces the second —
  * 0016 made the snapshot a materialised view of the log, and a view nobody
  * verifies is a claim rather than a fact. `auditSnapshot` has existed since the
@@ -70,7 +70,7 @@ const AuditPage = async ({ searchParams }: { searchParams: Promise<{ tree?: stri
           <Link href={`/portal/history?${scopeQuery}`} className="text-xs">
             what changed →
           </Link>
-          <Link href={`/portal/trees/${scope.data}`} className="font-mono text-xs">
+          <Link href={`/portal/pages/${scope.data}`} className="font-mono text-xs">
             {scope.data}
           </Link>
         </div>

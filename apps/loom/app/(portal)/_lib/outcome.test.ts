@@ -125,6 +125,7 @@ describe("reportOf", () => {
       const report = reportOf(outcome)
 
       expect(report.headline.length).toBeGreaterThan(0)
+      expect(report.meaning.length).toBeGreaterThan(0)
       expect(report.detail.length).toBeGreaterThan(0)
     }
   })
@@ -149,7 +150,9 @@ describe("reportOf", () => {
    * The three uninterpreted causes share a tone and a headline, because to a
    * reviewer they are the same event: nothing was proposed. What they must not
    * share is the sentence — one clears itself, one needs an operator, and one
-   * needs a change to Loom.
+   * needs a change to Loom. That sentence is the *technical* half now: the
+   * plain half says the same thing for all three, because "the AI did not
+   * understand" is true of all three and is what a person needs first.
    */
   it("distinguishes an outage from a misconfiguration in the detail, not the tone", () => {
     const reports = (
@@ -161,7 +164,7 @@ describe("reportOf", () => {
     ).map((error) => reportOf({ kind: "not-interpreted", error }))
 
     expect(new Set(reports.map((report) => report.tone))).toEqual(new Set(["uninterpreted"]))
-    expect(new Set(reports.map((report) => report.headline))).toEqual(new Set(["not interpreted"]))
+    expect(new Set(reports.map((report) => report.headline))).toEqual(new Set(["Not understood"]))
     expect(new Set(reports.map((report) => report.detail)).size).toBe(3)
     expect(reports[1]?.detail).toContain("operator")
   })
@@ -202,14 +205,19 @@ describe("revertReportOf", () => {
     const report = revertReportOf(held)
 
     expect(report.tone).toBe("awaiting")
-    expect(report.detail).toContain("review queue")
+    /*
+     * In the sentence a person reads, not in the runtime's own account of the
+     * write — "go and answer it over there" is the only thing on this report
+     * that tells somebody what to do next, so it cannot be behind a click.
+     */
+    expect(report.meaning).toContain("review queue")
   })
 
   it("reads a plan that produced no undo as inapplicable, not as a refusal", () => {
     const report = revertReportOf(unrevertable)
 
     expect(report.tone).toBe("inapplicable")
-    expect(report.headline).toBe("cannot undo")
+    expect(report.headline).toBe("Can't be undone")
     expect(report.detail).toContain("7")
   })
 

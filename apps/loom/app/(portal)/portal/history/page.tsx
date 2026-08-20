@@ -151,7 +151,7 @@ const HistoryPage = async ({
           <Link href={`/portal/activity?${scopeQuery}`} className="text-xs">
             what was asked →
           </Link>
-          <Link href={`/portal/trees/${scope.data}`} className="font-mono text-xs">
+          <Link href={`/portal/pages/${scope.data}`} className="font-mono text-xs">
             {scope.data}
           </Link>
         </div>

@@ -40,9 +40,16 @@ const answerInputSchema = z.object({
   proposalId: proposalIdSchema,
 })
 
+/**
+ * The form did not arrive in a shape the server could read, so nothing was
+ * asked of the runtime at all. The plain half says that; the issue itself is
+ * the technical half, because a Zod message is written for whoever wrote the
+ * form rather than for whoever filled it in.
+ */
 const invalid = (issue: string): WriteReport => ({
   tone: "inapplicable",
-  headline: "not sent",
+  headline: "Nothing was sent",
+  meaning: "That didn't reach Loom, so nothing on the page has changed.",
   detail: issue,
 })
 
@@ -64,7 +71,7 @@ export const proposeChange = async (
 
   const { treeId, baseRevision, utterance, scopeNodeId } = parsed.data
 
-  const actor = await requireActor(`/portal/trees/${treeId}`)
+  const actor = await requireActor(`/portal/pages/${treeId}`)
   const write = beginWrite()
 
   const outcome = await commitIntent(write.path, {
@@ -81,7 +88,7 @@ export const proposeChange = async (
 
   await write.finish()
 
-  revalidatePath(`/portal/trees/${treeId}`)
+  revalidatePath(`/portal/pages/${treeId}`)
 
   return reportOf(outcome)
 }
@@ -97,7 +104,7 @@ export const confirmProposal = async (
 
   if (!parsed.success) return invalid(firstIssue(parsed.error))
 
-  const actor = await requireActor(`/portal/trees/${parsed.data.treeId}`)
+  const actor = await requireActor(`/portal/pages/${parsed.data.treeId}`)
   const write = beginWrite()
   const outcome = await confirmHeld(write.path, { proposalId: parsed.data.proposalId, actor })
 
@@ -110,7 +117,7 @@ export const confirmProposal = async (
    * with it, leaving a reviewer who clicked "apply" with nothing but a
    * disappearing row.
    */
-  if (outcome.kind === "committed") revalidatePath(`/portal/trees/${parsed.data.treeId}`)
+  if (outcome.kind === "committed") revalidatePath(`/portal/pages/${parsed.data.treeId}`)
 
   return reportOf(outcome)
 }
@@ -126,15 +133,25 @@ export const discardProposal = async (
 
   if (!parsed.success) return invalid(firstIssue(parsed.error))
 
-  const actor = await requireActor(`/portal/trees/${parsed.data.treeId}`)
+  const actor = await requireActor(`/portal/pages/${parsed.data.treeId}`)
   const write = beginWrite()
   const discarded = await discardHeld(write.path, { proposalId: parsed.data.proposalId, actor })
 
   await write.finish()
 
-  revalidatePath(`/portal/trees/${parsed.data.treeId}`)
+  revalidatePath(`/portal/pages/${parsed.data.treeId}`)
 
   return discarded.ok
-    ? { tone: "rejected", headline: "discarded", detail: "The proposal was not applied." }
-    : { tone: "inapplicable", headline: "nothing to answer", detail: describeHoldError(discarded.error) }
+    ? {
+        tone: "rejected",
+        headline: "You said no",
+        meaning: "The change was turned down. The page was left as it was.",
+        detail: "The proposal was not applied.",
+      }
+    : {
+        tone: "inapplicable",
+        headline: "Already answered",
+        meaning: "Somebody has answered this one. There is nothing left to decide.",
+        detail: describeHoldError(discarded.error),
+      }
 }

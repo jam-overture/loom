@@ -69,7 +69,7 @@ const ActivityPage = async ({
         <h1 className="text-2xl tracking-tight">activity</h1>
         {scope?.success && (
           <Link href="/portal/activity" className="text-xs">
-            every tree →
+            all pages →
           </Link>
         )}
       </div>
@@ -80,9 +80,9 @@ const ActivityPage = async ({
           title="Nothing has been recorded here."
           action={
             scope?.success ? (
-              <Link href="/portal/activity">every tree →</Link>
+              <Link href="/portal/activity">all pages →</Link>
             ) : (
-              <Link href="/portal/trees">every tree →</Link>
+              <Link href="/portal/pages">Your pages →</Link>
             )
           }
         >

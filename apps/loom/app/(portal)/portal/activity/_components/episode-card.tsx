@@ -40,7 +40,7 @@ export const EpisodeCard = ({ episode }: { readonly episode: IntentEpisode }) =>
           )}
         </span>
 
-        <Link href={`/portal/trees/${episode.treeId}`} className="font-mono text-2xs">
+        <Link href={`/portal/pages/${episode.treeId}`} className="font-mono text-2xs">
           {episode.treeId}
         </Link>
       </div>

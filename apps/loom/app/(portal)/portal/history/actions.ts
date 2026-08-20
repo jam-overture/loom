@@ -26,9 +26,16 @@ const undoInputSchema = z.object({
   revision: z.coerce.number().int().positive(),
 })
 
-const refused = (headline: string, detail: string): WriteReport => ({
+/**
+ * An undo this page would not even attempt — a malformed form, or a revision
+ * the reader is not allowed to name. The caller supplies both halves, because
+ * these are the portal's own refusals rather than the runtime's, and only the
+ * caller knows which one it is turning away.
+ */
+const refused = (headline: string, meaning: string, detail: string): WriteReport => ({
   tone: "inapplicable",
   headline,
+  meaning,
   detail,
 })
 
@@ -43,7 +50,8 @@ export const undoRevision = async (
 
   if (!parsed.success) {
     return refused(
-      "not sent",
+      "Nothing was sent",
+      "That didn't reach Loom, so nothing on the page has changed.",
       parsed.error.issues[0]?.message ?? "the form was not something the server could read"
     )
   }
@@ -58,7 +66,8 @@ export const undoRevision = async (
   const seed = seedFor(treeId)
   if (seed === undefined) {
     return refused(
-      "cannot undo",
+      "Can't be undone",
+      "Loom can't rebuild this page's history far enough back to put this change back.",
       "This host has no seed for that tree, so its log cannot be replayed to the point the change was made."
     )
   }
@@ -88,7 +97,7 @@ export const undoRevision = async (
    */
   if (outcome.kind === "committed") revalidatePath("/portal/history")
   if (outcome.kind === "committed" || outcome.kind === "held") {
-    revalidatePath(`/portal/trees/${treeId}`)
+    revalidatePath(`/portal/pages/${treeId}`)
   }
 
   return revertReportOf(outcome)

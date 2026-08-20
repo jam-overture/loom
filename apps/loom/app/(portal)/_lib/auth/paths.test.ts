@@ -20,8 +20,8 @@ describe("isPublicPath", () => {
   it("does not let anything else through", () => {
     const guarded = [
       "/",
-      "/portal/trees",
-      "/portal/trees/t_1",
+      "/portal/pages",
+      "/portal/pages/t_1",
       "/portal/activity",
       "/portal/history",
       "/demos",
@@ -53,7 +53,7 @@ describe("isPublicPath", () => {
 
 describe("safeReturnPath", () => {
   it("returns the path it was given", () => {
-    expect(safeReturnPath("/portal/trees/t_1")).toBe("/portal/trees/t_1")
+    expect(safeReturnPath("/portal/pages/t_1")).toBe("/portal/pages/t_1")
     expect(safeReturnPath("/portal/history?tree=t_1")).toBe("/portal/history?tree=t_1")
   })
 

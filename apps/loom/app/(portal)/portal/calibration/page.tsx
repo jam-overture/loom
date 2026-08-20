@@ -93,7 +93,7 @@ const CalibrationPage = async ({
         <h1 className="text-2xl tracking-tight">calibration</h1>
         {scope?.success && (
           <Link href="/portal/calibration" className="text-xs">
-            every tree →
+            all pages →
           </Link>
         )}
       </div>
