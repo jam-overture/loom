@@ -1335,7 +1335,7 @@ silent.
 ## 2026-08-19 — the Gate's nested-target reason will be a shade wrong for a covered card
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-closed by `framework-01-what-the-framework-says-back`, which took the wording the
+closed by #109 `framework-01-what-the-framework-says-back`, which took the wording the
 finding suggested. The refusal now reads *"puts a target where the reader cannot
 reach it: `loom.action n_buy0` inside `loom.article n_story0`"* — the damage
 rather than the mechanism, true of a nested anchor and of a covering `::after`
@@ -1664,7 +1664,7 @@ The surface strips the markers meanwhile, and says so in `_lib/text.ts`.
 ## 2026-08-19 — `sequentialIdFactory` takes a namespace it cannot mint an id from
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
-by `framework-01-what-the-framework-says-back`. The diagnosis was exact and the
+by #109 `framework-01-what-the-framework-says-back`. The diagnosis was exact and the
 fix is the one it named: the namespace is checked where it is given, and the
 message carries the namespace, the rule and a namespace that would have worked
 (`Try "setnq1"`). The bound is 24 characters, not 32 — the counter needs the
@@ -1761,8 +1761,7 @@ type-only import through the root entry point, erased at build time.
 ## 2026-08-19 — Vercel deploys fail on every PR: the projects still root at `apps/portal` and `apps/marketing`, which #98 deleted
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` / `@jonathanbravecredit` · **Status:** closed —
-**fixed by the maintainer on 20 August**, and verified from
-`framework-01-what-the-framework-says-back`. There is one Vercel project now,
+**fixed by the maintainer on 20 August**, and verified from #109. There is one Vercel project now,
 `loom`, with `rootDirectory: apps/loom`; `loom-portal` and `loom-marketing` are
 gone. #108's deploy reached `Ready` in about a minute. The second of the two
 routes out below — collapse to one project — is the one that was taken, which is
@@ -1919,7 +1918,7 @@ fallback's enough to be worth a second look at step 8.
 ## 2026-08-20 — `fg-subtle` does not meet AA in any registered palette
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-closed by `framework-01-what-the-framework-says-back`, with the decision the
+closed by #109 `framework-01-what-the-framework-says-back`, with the decision the
 finding asked for:
 [0072](decisions/0072-a-palette-slot-that-carries-text-meets-aa.md). The fork was
 read the second way — the palettes moved, the bar did not.
@@ -2372,7 +2371,7 @@ Two things for the owner to weigh, neither urgent:
 **Status:** open — nothing to fix, but each owner should know their file moved
 and why, rather than finding it in a diff.
 
-`framework-01-what-the-framework-says-back` changes one palette slot in
+#109 `framework-01-what-the-framework-says-back` changes one palette slot in
 `src/theme/library.ts` (0072) and adds one decision record. Two tests outside
 this lane are wired to notice exactly that, and both were red until the value
 they check was updated:

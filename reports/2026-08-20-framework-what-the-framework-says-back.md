@@ -1,7 +1,8 @@
 # 2026-08-20 — What the framework says back
 
 **Routine:** `Loom daily build` · **Section:** §2, §4b
-**Branch:** `framework-01-what-the-framework-says-back`
+**Branch:** `framework-01-what-the-framework-says-back` · **PR:** #109
+**Preview:** https://loom-git-framework-01-what-t-a6202e-jpizzolato36-6341s-projects.vercel.app
 
 ---
 
