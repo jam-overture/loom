@@ -3088,6 +3088,61 @@ reply grammar rather than the prompt.
 
 ---
 
+## 2026-08-20 — the Architecture section should link into the lessons, not restate them
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+
+The documentation site's Architecture section and the lessons course explain the
+same things — why three node kinds, why undo is a delta, why nothing throws at a
+seam. The docs brief already says `decisions/` and `lessons/` are *the source for
+Architecture, not copied into it*, and that rule is the right one; this finding
+is to make it concrete now that `/lessons` is a real surface rather than a folder
+of markdown.
+
+**Architecture should be a thin index that points outward** — a short orientation
+and then links into the lessons for the reasoning and into the decision records
+for the ruling. Two copies of an argument is two copies to keep true, and the
+copy inside a docs site is the one that goes stale, because nothing fails when it
+does.
+
+Note the reading contracts differ and that is deliberate: a docs page is built to
+let a reader skim to the answer, and the course is built so they cannot. Link to
+a lesson as a lesson — somewhere to work through — rather than lifting its
+explanation onto a docs page and discarding the retrieval that makes it work.
+
+---
+
+## 2026-08-20 — the review queue tests fail west of UTC in the evening
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom lessons` · **Status:** open
+
+`app/(lessons)/_components/queue.test.tsx` fails two assertions when the local
+date and the UTC date differ — reproducible at 19:53 PDT on 2026-08-20, green
+under `TZ=UTC` in the same working tree:
+
+```
+expected 'Today's sitting…' to contain 'Due 1 day ago'
+expected 'Nothing is due today…' to contain 'in 1 day, on'
+```
+
+Both are off by exactly one day. The helper builds its fixture dates with
+`new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)`, which is a
+**UTC** calendar date, while the queue works out "today" locally. After 17:00
+Pacific the two are different days and every relative label shifts.
+
+CI runs in UTC, so this is invisible there and green on `main`. It is still worth
+fixing: it fails for any maintainer west of UTC working in the evening, and the
+failure looks like a broken working tree rather than a timezone, which is how an
+hour disappears.
+
+The fix is the one this project already made everywhere else — [0005 and the
+`Clock` seam](decisions/0005-model-access-is-an-optional-adapter.md): today is an
+input, not something a component reads from the ambient environment. Injecting it
+makes the test say what day it is instead of asking, and removes the class rather
+than this instance.
+
+---
+
 ## 2026-08-21 — a decision number is a footnote to a document the reader cannot open
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
