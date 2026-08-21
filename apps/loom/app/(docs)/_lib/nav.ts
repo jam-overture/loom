@@ -17,9 +17,11 @@ import { apiNavLabelFor, apiSlugFor } from "./api/model"
  * something the repository already knows, and asking for a `page.mdx` behind
  * one would be asking for the copy that generating it exists to avoid.
  *
- * Architecture, the last of §4c's five sections, is not here yet — an empty
- * group in a sidebar is a promise the site cannot keep, so a section arrives
- * with its pages.
+ * Architecture is written, and is the odd one: its prose is orientation only
+ * and everything it points at — the course in `lessons/`, the rulings in
+ * `decisions/` — is read from the repository as the page builds. So it is two
+ * short MDX files that the checks below can see, holding two components that
+ * cannot say anything the repository does not.
  */
 
 export type DocsPage = {
@@ -65,7 +67,37 @@ const apiReferenceSection: DocsSection = {
   })),
 }
 
-const writtenSections: readonly DocsSection[] = [
+/**
+ * Architecture: a thin index that points outward, and the last section on
+ * purpose.
+ *
+ * It comes after the reference because a reader who wants to know *why* has
+ * usually already tried to build something. Two pages is the whole of it —
+ * anything longer would be the third copy of an argument that already exists in
+ * `lessons/` and `decisions/`, and the copy on a docs site is the one that goes
+ * stale, because nothing fails when it does.
+ */
+const architectureSection: DocsSection = {
+  slug: "architecture",
+  title: "Architecture",
+  source: "written",
+  pages: [
+    {
+      slug: "how-it-fits-together",
+      title: "How it fits together",
+      summary:
+        "The eight ideas the whole system rests on, a paragraph each, and where to go for the reasoning and for the ruling.",
+    },
+    {
+      slug: "decision-records",
+      title: "Decision records",
+      summary:
+        "Every ruling Loom has made, what it means when one has been replaced, and why the trail is never edited.",
+    },
+  ],
+}
+
+const orderedSections: readonly DocsSection[] = [
   {
     slug: "getting-started",
     title: "Getting started",
@@ -133,12 +165,22 @@ const writtenSections: readonly DocsSection[] = [
       },
     ],
   },
+  apiReferenceSection,
+  architectureSection,
 ]
 
-export const docsSections: readonly DocsSection[] = [...writtenSections, apiReferenceSection]
+export const docsSections: readonly DocsSection[] = orderedSections
 
-/** The written sections, for the checks that are about files on disk. */
-export const writtenDocsSections: readonly DocsSection[] = writtenSections
+/**
+ * The written sections, for the checks that are about files on disk.
+ *
+ * Derived rather than listed, because a section that appeared in one list and
+ * not the other would be a page nobody checks — which is the failure the two
+ * checks exist to catch.
+ */
+export const writtenDocsSections: readonly DocsSection[] = docsSections.filter(
+  (section) => section.source === "written"
+)
 
 export type DocsEntry = {
   readonly href: string
