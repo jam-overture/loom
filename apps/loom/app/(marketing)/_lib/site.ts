@@ -206,6 +206,33 @@ export const internalHref = (origin: string, path: string, theme?: SiteThemeName
 }
 
 /**
+ * The front door, with what the visitor has asked of it written into the address.
+ *
+ * The band that lets a visitor rearrange this page keeps nothing: no session, no
+ * cookie, nothing on the server between one request and the next. What the page
+ * looks like is a function of its address, which is why `/?ask=costs` can be
+ * copied, shared, bookmarked and reloaded a week later and still be the page it
+ * was — and why two people looking at the site cannot rearrange it under each
+ * other.
+ */
+export const askHref = (
+  origin: string,
+  options: {
+    readonly theme?: SiteThemeName
+    readonly ask?: string
+    readonly approve?: boolean
+  } = {}
+): string => {
+  const url = new URL(HOME.path, `${origin}/`)
+
+  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
+  if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
+  if (options.approve === true) url.searchParams.set("approve", "1")
+
+  return url.toString()
+}
+
+/**
  * A link into another surface of the product.
  *
  * The palette is deliberately **not** carried across. It is this site's

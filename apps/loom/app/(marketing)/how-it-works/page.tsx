@@ -12,7 +12,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 const HowItWorksPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
   const params = await searchParams
-  const rendered = renderSitePage(HOW_IT_WORKS, {
+  const rendered = await renderSitePage(HOW_IT_WORKS, {
     origin: siteOrigin(),
     theme: readThemeName(params["theme"]),
   })
