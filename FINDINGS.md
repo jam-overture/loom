@@ -3085,3 +3085,121 @@ rather than on feel, and both belong to whoever owns the interpreter:
 Worth knowing either way: this is the first change that has grown the model's
 context without adding a primitive, and 0014's budget is stated in terms of the
 reply grammar rather than the prompt.
+
+---
+
+## 2026-08-21 — a decision number is a footnote to a document the reader cannot open
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+
+The maintainer, on the API reference:
+
+> *"I don't think docs should reference internal decisions (like "(0007)"). The
+> casual reader would not know what those are."*
+
+Right, and it was reaching readers in two ways rather than one. The reference
+lifts its sentences from doc comments in `src/`, so every `(0007)` in a comment
+was appearing verbatim on a public page — **and so was every one written inside
+a type**, because a union carries doc comments against its own members and those
+render in the signature's code block. That second channel is the one worth
+knowing about: 21 signatures carried a number, and none of them looked like
+prose.
+
+**Fixed on the docs side, for both channels** — `readerFacing` and
+`readerFacingSignature` in `app/(docs)/_lib/api/extract.ts`, with a test that
+fails if a number reaches any page. Nothing in `src/` was touched. But the fix
+has two grades and the second one costs you something:
+
+- **A citation is lifted out.** `(0014)`, `(0053, 0055)`, `(see 0012)`,
+  `, inherited from 0009` — all footnotes, and the sentence reads the same
+  without them. **14 texts** were fixed this way and lost nothing.
+- **A sentence whose grammar needs the number is withheld entirely.** There is
+  nothing to lift out of *"0049's three theme ids"*, and this lane will not
+  paraphrase the package — the only reason a generated reference can be trusted
+  is that the words are the package's own. So the export renders with its
+  module's paragraph and its signature, and **the sentence you wrote does not
+  appear at all**.
+
+**Ten texts are currently withheld**, and each is one rewrite away from being
+back on the site:
+
+| where | what it says now |
+| --- | --- |
+| `reserved-props/THEME_PROP_KEY` | *0049's three theme ids, honoured on the root node.* |
+| `reserved-props/DATA_PROP_KEY` | *0058's bindings — what a node asks the host to answer…* |
+| `reserved-props/SUBMIT_PROP_KEY` | *0065's submission — which registered endpoint a form posts to…* |
+| `submit/plan/planTreeSubmissions` | *…That is 0058's "identical questions are asked once" applied to…* |
+| `theme/contrast` (module) | *The bar 0074 set, as a function a host can run against its own palettes.* |
+| `theme/contrast/TEXT_CONTRAST_MINIMUM` | *WCAG AA for body text. The bar 0074 chose…* |
+| `render/theme/resolveTheme` | *…the failure 0049 rejected when it rejected host-supplied theming outright.* |
+| `sdk/audit` (module) | *The registration-time check 0010 asked for, as a function a host calls…* |
+| `telemetry/calibration` (module) | *0007 made confidence self-graded and trusted on purpose, on one condition…* |
+| `primitives/loom.quote-grid/loomQuoteGrid` | *…the reason is 0054: a container's name states its arrangement…* |
+
+The last row is `Loom primitives`' and is filed for that lane below; the other
+nine are this one's.
+
+**The convention that falls out of this, and it is cheap to follow.** Cite a
+record in parentheses and the site handles it — *"Props arrive as one
+JSON-encoded object (0014)."* renders as *"Props arrive as one JSON-encoded
+object."* and the record stays in the source for whoever is reading the code.
+Make the number the subject of a sentence and that sentence is invisible to
+every reader of the documentation. Nothing enforces this in `src/` and this lane
+did not add anything that would; the list above is what it costs today.
+
+Worth saying plainly: **the rewrites are worth doing but nothing is broken
+without them.** 147 of 165 modules still carry an opening paragraph, so every
+withheld export still has a sentence above it explaining the module it lives in.
+
+---
+
+## 2026-08-21 — one of those ten is in `src/primitives/`
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open
+
+The one row of the table above that is this lane's. `loomQuoteGrid`'s doc
+comment opens:
+
+> *There is no `flow: "grid" | "columns"` prop, and the reason is 0054: a
+> container's name states its arrangement, so a prop that switched this one from
+> a grid to a multi-column flow would make the name wrong for half its values.*
+
+It is a good paragraph and it is the sort of thing a reader of an API reference
+is glad to find — which is why it is a shame that the site cannot show it. The
+number is the subject of the clause, so there is nothing to lift out, and the
+whole summary is withheld from `/docs/api-reference/primitives`.
+
+Rewording the first clause — *"and the reason is the rule that a container's
+name states its arrangement"* — puts it back on the site at the next
+regeneration, with nothing to change in `app/(docs)/`.
+
+---
+
+## 2026-08-21 — the lessons review surface shows a reader a record number
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom lessons` · **Status:** open
+
+Found while checking that the maintainer's rule held across the whole build
+rather than only on my own pages. Every prerendered page in `apps/loom` was
+grepped for a record number; after the docs fix, **one is left**, and it is not
+mine:
+
+```
+/lessons/review/set-k — "…and which of those two the contract in 0033 asks a host to do."
+```
+
+It comes from `lessons/10-the-pipeline.md`, which cites records in running prose
+throughout — correctly, because a lesson is written for somebody reading this
+repository. The review surface then renders a question built from that prose to
+somebody who may not be.
+
+Not acted on: `(lessons)` and `lessons/` are that lane's, and the fix is a
+judgement about who the review sets are for rather than a mechanical strip. Two
+shapes that would both work, if it is worth fixing at all: reword the question,
+or let the review surface link a record the way the lesson does — `lessons/`
+already writes `[decisions/0033](…)` with the record's full title, and a link
+with a title is a very different thing from a bare number.
+
+The docs lane's own answer is in the entry above, if the same rule is wanted
+there: lift a parenthetical citation, and withhold a sentence that cannot lose
+the number without losing its grammar.

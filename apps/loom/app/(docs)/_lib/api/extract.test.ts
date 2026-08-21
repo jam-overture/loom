@@ -6,10 +6,13 @@ import { describe, expect, it } from "vitest"
 import { entryPoints } from "../entry-points"
 import { docsSections } from "../nav"
 import {
+  DECISION_NUMBER,
   extractReference,
   GENERATED_FILE,
   packageRoot,
   publishedEntries,
+  readerFacing,
+  readerFacingSignature,
   serializeReference,
 } from "./extract"
 import { MODULE_TITLES, moduleTitle } from "./groups"
@@ -164,9 +167,114 @@ describe("the generated reference", () => {
     }
   })
 
+  /**
+   * The maintainer's rule, as a check rather than a habit.
+   *
+   * `(0007)` is a footnote to a document a reader of this site has never seen
+   * and cannot open from here. There are none on the site today; what keeps it
+   * that way is this test rather than anyone remembering, because the sentences
+   * are lifted from `src/` and a comment written next week can carry one in.
+   */
+  it("never puts a decision-record number in front of a reader", () => {
+    const carriers: string[] = []
+
+    for (const entry of apiEntries) {
+      for (const group of entry.groups) {
+        if (DECISION_NUMBER.test(group.summary)) carriers.push(`${group.module} — ${group.summary}`)
+
+        for (const symbol of group.symbols) {
+          if (DECISION_NUMBER.test(symbol.summary)) carriers.push(`${symbol.name} — ${symbol.summary}`)
+
+          /*
+           * Signatures too. A union type carries doc comments against its own
+           * members, so a code block is a second way for a citation to reach a
+           * page and it was the way the first attempt at this missed.
+           */
+          if (DECISION_NUMBER.test(symbol.signature)) carriers.push(`${symbol.name}'s signature`)
+        }
+      }
+    }
+
+    expect(carriers, "a decision number reached the page").toEqual([])
+  })
+
   it("refuses a file that is not a reference", () => {
     expect(() => parseReference({ entries: [{ specifier: 1 }] })).toThrow(/not an entry point/)
     expect(() => parseReference({})).toThrow(/no entry points/)
+  })
+})
+
+describe("a doc comment a stranger has to read", () => {
+  it("lifts out a parenthetical citation and leaves the sentence whole", () => {
+    expect(readerFacing("Props arrive as one JSON-encoded object (0014). Parse it.")).toBe(
+      "Props arrive as one JSON-encoded object. Parse it."
+    )
+    expect(readerFacing("The configurations a primitive is probed under (0075).")).toBe(
+      "The configurations a primitive is probed under."
+    )
+    expect(readerFacing("Refused for the reasons given (0053, 0055).")).toBe(
+      "Refused for the reasons given."
+    )
+    expect(readerFacing("Reports and never enforces (see 0012), so a host must run it.")).toBe(
+      "Reports and never enforces, so a host must run it."
+    )
+  })
+
+  it("lifts out a trailing attribution clause", () => {
+    expect(readerFacing("The prop-validation seam, inherited from 0009.")).toBe(
+      "The prop-validation seam."
+    )
+    expect(readerFacing("The conformance probe, per 0010.")).toBe("The conformance probe.")
+  })
+
+  it("withholds a sentence whose grammar needs the number", () => {
+    expect(readerFacing("0049's three theme ids, honoured on the root node.")).toBe("")
+    expect(readerFacing("The bar 0074 set, as a function a host can run.")).toBe("")
+  })
+
+  it("leaves the spaced em dash this codebase writes on purpose", () => {
+    expect(readerFacing("A host runs it — and most will not.")).toBe(
+      "A host runs it — and most will not."
+    )
+    expect(readerFacing("A host runs it (0012) — and most will not.")).toBe(
+      "A host runs it — and most will not."
+    )
+  })
+
+  it("lifts a citation out of a comment inside a signature, and leaves the code", () => {
+    const signature = [
+      "type TreeError = {",
+      "    readonly code: \"node-not-found\";",
+      "}",
+      "/** An id this delta removed, re-inserted as a different node (0038). */",
+      " | { readonly code: \"recycled-node-id\" };",
+    ].join("\n")
+
+    expect(readerFacingSignature(signature)).toContain(
+      "/** An id this delta removed, re-inserted as a different node. */"
+    )
+    expect(readerFacingSignature(signature)).toContain('readonly code: "node-not-found";')
+  })
+
+  it("drops a comment whose grammar needs the number, and keeps what it described", () => {
+    const signature = ["type Theme = {", "    /** 0049's three ids. */", "    readonly id: string;", "}"].join("\n")
+    const cleaned = readerFacingSignature(signature)
+
+    expect(cleaned).not.toContain("0049")
+    expect(cleaned).not.toContain("/**")
+    expect(cleaned).toContain("readonly id: string;")
+    expect(cleaned.split("\n")).toHaveLength(3)
+  })
+
+  it("leaves a signature with nothing to lift exactly as it was", () => {
+    const signature = "const applyDelta: (tree: LoomTree, delta: TreeDelta) => Result<LoomTree, TreeError>"
+
+    expect(readerFacingSignature(signature)).toBe(signature)
+  })
+
+  it("leaves a number that is not a decision record alone", () => {
+    expect(readerFacing("Rounded to 0.05 of a second.")).toBe("Rounded to 0.05 of a second.")
+    expect(readerFacing("The 1024-byte ceiling.")).toBe("The 1024-byte ceiling.")
   })
 })
 

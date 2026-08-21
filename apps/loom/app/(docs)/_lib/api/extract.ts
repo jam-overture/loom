@@ -127,6 +127,9 @@ const signatureOf = (name: string, declaration: ts.Declaration): string => {
   return declaration.getText().replace(LEADING_MODIFIERS, "")
 }
 
+/** A doc comment written inside a declaration, against the member it describes. */
+const COMMENT_IN_CODE = /\/\*\*[\s\S]*?\*\//g
+
 /**
  * The first paragraph of a doc comment, as one line of prose.
  *
@@ -143,8 +146,93 @@ const firstParagraph = (comment: string): string => {
   return (trimmed.split(/\n\s*\n/)[0] ?? "").replace(/\s+/g, " ").trim()
 }
 
+/** A decision record's number, as it is written everywhere in this repository. */
+export const DECISION_NUMBER = /\b0\d{3}\b/
+
+/**
+ * A citation of a decision record, in the two shapes the runtime writes them.
+ *
+ * A parenthetical — `(0014)`, `(0053, 0055)`, `(see 0012)` — and a trailing
+ * attribution clause — `, inherited from 0009`. Both are footnotes: lifting
+ * them out leaves the sentence saying exactly what it said before.
+ */
+const CITATION =
+  /(?:\s*\((?:see\s+)?0\d{3}(?:\s*(?:,|and)\s*0\d{3})*\))|(?:,\s+(?:inherited\s+from|per|following|see)\s+0\d{3}(?:\s*(?:,|and)\s*0\d{3})*)/g
+
+/**
+ * A doc comment as a stranger can read it — or nothing at all.
+ *
+ * **No decision-record number may reach a page.** The maintainer's rule, and it
+ * is right: `(0007)` is a footnote to a document a reader of this site has
+ * never seen and cannot open from here, so it reads as a defect in the sentence
+ * rather than as a reference.
+ *
+ * Two things happen here and the second is the interesting one.
+ *
+ * A **citation** is a footnote, so it is lifted out: "the prop-validation seam,
+ * inherited from 0009" says the same thing without its last four words, and
+ * that is the shape most of them take.
+ *
+ * When the number is **part of the grammar** — "0049's three theme ids", "the
+ * bar 0074 set" — there is nothing to lift. The sentence is written to somebody
+ * who has read that record, and no rule here can turn it into one written to
+ * somebody who has not. So the summary is **withheld**: the export renders with
+ * its module's paragraph and its signature, which is less than it deserves and
+ * is at least all true. Rewriting it here would mean this page paraphrasing the
+ * package, which is the one thing a generated reference must never do — the
+ * whole reason it can be trusted is that the words are the package's own.
+ *
+ * Withholding is deliberately self-retiring. Reword the comment in `src/` so it
+ * reads without the number, and the sentence appears on the site at the next
+ * regeneration with nothing here to update. The comments that need it are
+ * listed in `FINDINGS.md` for the lanes that own them.
+ */
+/**
+ * The same rule, applied inside a signature.
+ *
+ * A union or an object type carries doc comments against its own members, and
+ * those cite records exactly as prose does — a reader meets `(0038)` in a code
+ * block instead of in a sentence, which is no better.
+ *
+ * The **code is never touched**, only the comments in it: a citation is lifted
+ * out, and a comment whose grammar needs the number is dropped whole, leaving
+ * the member it described. A signature is the one thing on this page that must
+ * be exactly what the package declares, so when the choice is between an
+ * annotated declaration a reader cannot follow and a bare one they can, it is
+ * the annotation that goes.
+ */
+export const readerFacingSignature = (signature: string): string => {
+  const cleaned = signature.replace(COMMENT_IN_CODE, (comment) => {
+    const cited = comment.replace(CITATION, "").replace(/\s+([.,;:])/g, "$1")
+
+    return DECISION_NUMBER.test(cited) ? "" : cited
+  })
+
+  if (cleaned === signature) return signature
+
+  return cleaned
+    .split("\n")
+    /** A line that held nothing but a dropped comment is not left behind as blank. */
+    .filter((line) => line.trim() !== "")
+    /** A comment lifted from mid-line leaves two spaces where there was one. */
+    .map((line) => line.replace(/(\S) {2,}/g, "$1 ").trimEnd())
+    .join("\n")
+}
+
+export const readerFacing = (summary: string): string => {
+  /*
+   * Closing punctuation only, and deliberately not the em dash: lifting
+   * " (0014)" out of "object (0014). This" leaves " ." to tidy, while this
+   * codebase writes a spaced " — " on purpose and a rule that tightened it
+   * would rewrite every summary on the site, citation or not.
+   */
+  const cited = summary.replace(CITATION, "").replace(/\s+([.,;:])/g, "$1").trim()
+
+  return DECISION_NUMBER.test(cited) ? "" : cited
+}
+
 const summaryOf = (symbol: ts.Symbol, checker: ts.TypeChecker): string =>
-  firstParagraph(ts.displayPartsToString(symbol.getDocumentationComment(checker)))
+  readerFacing(firstParagraph(ts.displayPartsToString(symbol.getDocumentationComment(checker))))
 
 /** A doc comment with its fencing taken off: no opening `/**`, no `*` down the side. */
 const undecorate = (block: string): string =>
@@ -188,7 +276,7 @@ const moduleSummaryFrom = (module: string, root: string): string => {
   if (start === -1 || end === -1) return ""
   if (!DETACHED.test(text.slice(end + 2))) return ""
 
-  return firstParagraph(undecorate(text.slice(start, end + 2)))
+  return readerFacing(firstParagraph(undecorate(text.slice(start, end + 2))))
 }
 
 const resolveAlias = (symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol =>
@@ -220,7 +308,7 @@ const extractSymbol = (symbol: ts.Symbol, checker: ts.TypeChecker, typesRoot: st
   return {
     name,
     kind: kindOf(declaration),
-    signature: truncated ? `${full.slice(0, SIGNATURE_CAP).trimEnd()}\n…` : full,
+    signature: readerFacingSignature(truncated ? `${full.slice(0, SIGNATURE_CAP).trimEnd()}\n…` : full),
     truncated,
     summary: summaryOf(resolved, checker),
     module: moduleOf(declaration, typesRoot),
