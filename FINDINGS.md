@@ -3021,3 +3021,67 @@ opened for anything but the module blurbs, and nothing in `apps/loom` outside
 Worth saying because it is the argument for how this section was built: a
 reference that consumed a private API to describe a public one would be
 documenting something a reader cannot reach.
+
+---
+
+## 2026-08-21 — `accentFamily` is emitted as a variable no primitive reads
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Noticed while writing seventeen font packs, none of which set it.
+
+`fontPackSchema` declares an optional `accentFamily`, and `apply.ts` emits it as
+`--loom-accent-family` when a pack sets one. **Nothing reads it.**
+`src/primitives/tokens.ts` exports `family(role: "heading" | "body")` and there
+is no third role, so the variable lands on the root and is never referenced by
+any of the forty-five primitives.
+
+It is a seam with no other end. Three ways to close it, and the middle one is
+probably right:
+
+- **Delete the field.** It is optional and no registered pack sets it, so
+  nothing breaks. Costs a schema change and closes a door.
+- **Give it a reader.** A display face for `loom.hero`'s headline, or a mono
+  face for `loom.code` when that exists — an accent family is a real
+  typographic idea and the packs would use it. `loom.quote`'s pull quote is the
+  other obvious candidate.
+- **Leave it and say so** in the schema comment, as a slot reserved for hosts
+  whose own components want a third family. Cheapest, and it stops the next
+  person rediscovering this.
+
+Not acted on: `theme.ts` is not this lane's file, and the reader — if there is
+to be one — would be a change to `tokens.ts` and at least one primitive, which
+is a decision about the type system rather than a font pack.
+
+---
+
+## 2026-08-21 — the theme catalogue is now fifty-one entries in every proposal prompt
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Filed as a number to watch rather than a problem to fix, and recorded now so
+nobody has to rediscover where it came from.
+
+The starter theme sets went from three of each to **21 palettes, 20 font packs
+and 10 style presets** ([0077](decisions/0077-a-palette-is-derived-once-and-committed-as-literals.md)).
+`interpreter.ts` passes `themeCatalogue` into `buildUserMessage`, so every
+registered entry's id, name and description is in the model's context on every
+proposal — nine short lines before, fifty-one now.
+
+0077 signs that cost off deliberately and says which way to cut it if it ever
+needs cutting: **presets and packs before palettes**, because the palette is
+what a viewer actually sees. Two things would make that decision on evidence
+rather than on feel, and both belong to whoever owns the interpreter:
+
+- **Measure it.** The catalogue's contribution to a request is countable and
+  nobody has counted it. If it is a rounding error next to the primitive
+  catalogue and the tree projection, this finding closes itself.
+- **Consider a per-deployment subset.** `createThemeRegistry` already lets a
+  host register only the themes they want, so a deployment that ships one brand
+  has a one-entry catalogue by construction. The starter set being large is only
+  a cost for hosts who take all of it — which is the demo, and the demo is the
+  one place the range is the point.
+
+Worth knowing either way: this is the first change that has grown the model's
+context without adding a primitive, and 0014's budget is stated in terms of the
+reply grammar rather than the prompt.
