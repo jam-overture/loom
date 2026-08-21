@@ -3943,3 +3943,56 @@ would be worse at the job it has, and a translation pinned to the code is a
 better arrangement than a runtime trying to serve two readers. It is worth
 recording only so that the next surface that needs plain words knows the
 translation is expected to live on the surface rather than upstream.
+
+---
+
+## 2026-08-21 — a `<strong>` followed by a space and a newline loses the space, and two portal pages shipped that way
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-08-can-you-trust-it` — both fixed with `{" "}`
+
+Found while screenshotting this run's page, by eye, which is not a mechanism.
+
+```tsx
+<strong className="font-medium">Changes here won&rsquo;t be kept.</strong> No
+database is set up, so anything you accept lives only until the server restarts.
+```
+
+renders as **"Changes here won't be kept.No database is set up"**. The space
+between `</strong>` and `No` sits at the end of a source line, and JSX strips
+trailing whitespace from a line before joining it to the next one — so a space
+that is plainly there in the source is not there in the DOM.
+
+`/portal/pages` has had it since the ephemeral-store notice was written, and this
+run's `/portal/trust` reproduced it by copying the shape. Both now use `{" "}`.
+
+Worth knowing rather than worth tooling: it only bites where a bold run ends a
+line, it is invisible in review because the source looks correct, and no test
+would catch it unless somebody thought to assert on a space. The general form is
+the one this lane keeps re-learning — **anything checked only by eye is checked
+only on the runs where somebody happens to look.**
+
+---
+
+## 2026-08-21 — the telemetry surfaces still cannot be photographed, and the workaround is now a routine
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Not a new finding — the 17 August entry (*no telemetry surface can be
+demonstrated to anyone*) and the 18 August one about `/history` name it already.
+This run is the fourth to hit it and the note is only about what it now costs.
+
+`/portal/trust` is the page this redirection has the most to prove on: whether a
+plain-language verdict over a technical record is better than the record alone is
+a judgement made by looking, and nobody outside a signed-in deployment with a
+populated journal can look. So this run did what the calibration and history runs
+did — built a temporary route rendering **the real components against a fixture
+fold**, photographed it, and deleted the route before pushing.
+
+That is the third time a run has hand-built the same scaffolding. The 17 August
+entry's first option (**a demo-scoped journal**, written from the envelopes
+`narrated()` already collects) would close it for every telemetry page at once
+and would also make the surfaces demonstrable to a visitor with no account, which
+is what `/portal/demo` is for. It stays the change I would make next, and it is
+now the thing standing between this lane and being judged on the thing the
+maintainer said he judges by eye.

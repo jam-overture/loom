@@ -9,17 +9,23 @@ import { toneClasses } from "@/app/(portal)/_lib/outcome"
  * is the only thing here that says what *kind* of change this was. A reader
  * scanning six overconfident claims is looking for the pattern between them, and
  * the pattern is in the sentences, not in the ids.
+ *
+ * `survived` and `rejected` are the runtime's words for the two outcomes and
+ * they read as the model's fate rather than the page's. What a person watched
+ * happen is that the change went live or that it did not, so that is what the
+ * badge says — the same two values, named after the page they landed on.
  */
 export const MissedClaimRow = ({ claim }: { readonly claim: MissedClaim }) => (
   <li className="border-edge-subtle flex flex-col gap-1.5 border-t py-3">
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <span
         className={
-          "rounded-sm px-1.5 py-0.5 font-mono text-2xs " +
+          "rounded-sm px-1.5 py-0.5 text-2xs " +
           toneClasses(claim.verdict === "survived" ? "applied" : "rejected")
         }
       >
-        claimed {formatRate(claim.confidence)} · {claim.verdict}
+        Said it was {formatRate(claim.confidence)} sure ·{" "}
+        {claim.verdict === "survived" ? "went through anyway" : "turned down"}
       </span>
 
       {/*
@@ -27,8 +33,8 @@ export const MissedClaimRow = ({ claim }: { readonly claim: MissedClaim }) => (
         * the next one, so it is shown rather than left as an invisible ordering
         * a reader has to take on faith.
         */}
-      <span className="text-ink-muted font-mono text-2xs">
-        off by {formatRate(claim.surprise)}
+      <span className="text-ink-muted text-2xs">
+        {formatRate(claim.surprise)} wide of the mark
       </span>
 
       {claim.answeredBy !== undefined && (
