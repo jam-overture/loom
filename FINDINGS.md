@@ -3356,6 +3356,29 @@ a routine confirm the page it is pointing at actually renders. Worth having, and
 lower value than the first fix: the bot's URL is right whether or not anyone can
 fetch it.
 
+**Re-verified 21 August 2026** by the `framework-01-the-package-own-words` run,
+and the recommended practice works — recorded here rather than as a second entry,
+the way the `21st.dev` re-verifications are dated.
+
+This branch is `framework-01-the-package-own-words`, which is long enough to be
+truncated exactly as this entry predicts: Vercel assigned
+`loom-git-framework-01-the-pa-529904-…`, where constructing it from the branch
+name would have produced `loom-git-framework-01-the-package-own-words-…` and been
+wrong. **Reading `previewUrl` off the `vercel[bot]` comment gave the right URL
+first time**, so the fix this entry proposes is confirmed on a second branch and
+is worth the line in `docs/routines.md` it asks for.
+
+The egress half is unchanged: `curl` to the assigned URL still returns
+`CONNECT tunnel failed, response 403`, so the pull request says plainly that the
+preview was published unverified rather than implying it was checked.
+
+One detail worth adding for whoever writes that line: the bot posts **twice** —
+once at `nextCommitStatus: PENDING` while building, once edited in place at
+`DEPLOYED`. Both carry the same `previewUrl`, so a routine does not need to wait
+for the second; but only the second means the page is actually up, and the PR
+status check (`Vercel — Deployment has completed`) is the cheaper thing to read
+if a routine wants to say the deployment is green.
+
 ---
 
 ## 2026-08-20 — the front door cannot show anyone how to start, because there is nothing to install
