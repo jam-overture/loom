@@ -46,6 +46,17 @@ export type DemoPreset = {
   readonly utterance: string
   /** The chip's label — shorter than the utterance, and never a different claim. */
   readonly label: string
+  /**
+   * What a visitor will *see*, in one clause, before they press it.
+   *
+   * Deliberately about the page and never about the verdict. Whether the Gate
+   * applies a change or holds it is computed from the tree at assessment time,
+   * so a label promising "this one will be held" would be a surface predicting
+   * a decision it does not make — and would be wrong the first time the policy
+   * or the page moved. What is safe to promise is the movement itself, because
+   * `plan` is what produces it and it is right here.
+   */
+  readonly promise: string
   /** The interpreter's own words about why these operations answer that. */
   readonly rationale: string
   /**
@@ -84,7 +95,8 @@ const themeOf = (tree: LoomTree): JsonObject | undefined => {
 const palette: DemoPreset = {
   id: "palette",
   utterance: "Switch this page to the other palette.",
-  label: "Re-theme the page",
+  label: "Re-theme the whole page",
+  promise: "Every colour and typeface on the page changes at once.",
   rationale:
     "A theme is three registered ids on the root node, so switching palette is one configure against one node. Nothing below the root is touched, and no primitive names a colour.",
   plan: (tree) => {
@@ -103,6 +115,7 @@ const backdrop: DemoPreset = {
   id: "backdrop",
   utterance: "Swap the hero's backdrop for the other one.",
   label: "Swap the hero backdrop",
+  promise: "The band at the top repaints. Nothing else moves.",
   rationale:
     "The hero's backdrop is one enum prop. Changing it re-paints the band without replacing the hero or any of its copy, and the motion is not reachable from the tree at all.",
   plan: (tree) => {
@@ -145,6 +158,7 @@ const band: DemoPreset = {
   id: "band",
   utterance: "Add a new band near the bottom of the page.",
   label: "Insert a section",
+  promise: "A section that was not there appears near the bottom.",
   rationale:
     "Adds one section, with its heading and a line of copy, as a child of the page root. Everything already on the page keeps its node id and its position relative to the others.",
   plan: (tree, ids) => {
@@ -159,6 +173,7 @@ const trim: DemoPreset = {
   id: "trim",
   utterance: "Take the numbers band off the page.",
   label: "Remove the stats",
+  promise: "The three figures come off the page.",
   rationale:
     "Removes the stat grid and the three figures inside it. The inverse delta carries the whole subtree, so undoing this restores every node with the id it had.",
   plan: (tree) => {
@@ -177,6 +192,7 @@ const promote: DemoPreset = {
   id: "promote",
   utterance: "Move the quote up, just under the hero.",
   label: "Move the quote up",
+  promise: "The quote jumps to just under the opening band.",
   rationale:
     "Relocates the quote to the second position on the page. It is a move, not a delete and a re-insert, so the node keeps its identity and its history.",
   plan: (tree) => {

@@ -1,7 +1,16 @@
 import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
 import type { DispositionReasonCode, StakeLevel } from "@loom/runtime"
 
-import type { RecordOutcome } from "./demo/record"
+/*
+ * The demo moved out of this route group to `app/(demo)` on 21 August, and this
+ * is the one line of the portal a demo run had to touch to move it: a
+ * type-only import that used to read `./demo/record`. The direction of the
+ * dependency is unchanged and is the one the note above `stateOfRecord`
+ * describes — this module does not depend on the demo at runtime, the demo
+ * depends on this. Filed as a finding: `stateOfRecord` is the demo's half of a
+ * table the portal owns, and shared ground would be a better home for both.
+ */
+import type { RecordOutcome } from "@/app/(demo)/_lib/record"
 
 /**
  * The one place the portal decides what to call things.
