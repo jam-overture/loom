@@ -42,6 +42,16 @@ import {
  * the workarounds are gone and the findings with them.
  */
 
+/**
+ * What the footer says above the palette links.
+ *
+ * Exported because two test files assert it, and a string spelled out in three
+ * places is a string that gets re-worded in one of them. It was "Same tree,
+ * another palette:" until 20 August — accurate, and one of our nouns, on the
+ * front door.
+ */
+export const PALETTE_SWITCHER_LABEL = "The same page, a different palette:"
+
 export type ChromeContext = {
   readonly origin: string
   readonly theme: SiteThemeName
@@ -163,7 +173,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
          * what a re-theme is (0049).
          */
         stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-          prose(ids, "Same tree, another palette:", { size: "small", tone: "muted" }),
+          prose(ids, PALETTE_SWITCHER_LABEL, { size: "small", tone: "muted" }),
           ...otherThemes(context.theme).map((name) =>
             link(
               ids,

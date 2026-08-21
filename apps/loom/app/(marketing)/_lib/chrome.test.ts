@@ -1,7 +1,7 @@
 import { sequentialIdFactory, type ElementNode, type LoomNode } from "@loom/runtime"
 import { describe, expect, it } from "vitest"
 
-import { siteFooter, siteHeader, type ChromeContext } from "./chrome"
+import { PALETTE_SWITCHER_LABEL, siteFooter, siteHeader, type ChromeContext } from "./chrome"
 import {
   DEFAULT_THEME,
   HOME,
@@ -168,6 +168,6 @@ describe("the footer", () => {
   })
 
   it("keeps the palette switcher, which is the site's claim made checkable", () => {
-    expect(labelOf(footer())).toContain("Same tree, another palette:")
+    expect(labelOf(footer())).toContain(PALETTE_SWITCHER_LABEL)
   })
 })

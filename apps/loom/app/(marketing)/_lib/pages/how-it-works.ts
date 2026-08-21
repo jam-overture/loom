@@ -41,7 +41,7 @@ const hero = (ids: IdFactory): LoomNode =>
       ]),
       prose(
         ids,
-        "A change to a Loom page is never applied by whatever asked for it. It is described, weighed, decided and recorded first — and each of those is a separate, testable step rather than a promise about a prompt.",
+        "Whatever asks for a change never gets to make it. The change is written down, measured, decided on and recorded first. Each of those is a separate step you can test, rather than a promise about a prompt.",
         { size: "lead", measured: true }
       ),
     ],
@@ -57,8 +57,8 @@ const journey = (ids: IdFactory): LoomNode =>
           type: "loom.milestone",
           props: {
             marker: "1",
-            title: "An intent arrives",
-            body: "Someone says what they want in their own words, against a named tree. Nothing has been interpreted yet, and nothing has moved.",
+            title: "Someone asks for something",
+            body: "In their own words, about one particular page. Nothing has been worked out yet and nothing has moved.",
             state: "done",
           },
         }),
@@ -66,8 +66,8 @@ const journey = (ids: IdFactory): LoomNode =>
           type: "loom.milestone",
           props: {
             marker: "2",
-            title: "It is interpreted into a delta",
-            body: "The model is shown the tree as an outline and the catalogue of primitives it may name, and answers with a structural change — insert, remove, move or configure — plus a rationale and its provenance.",
+            title: "The AI writes down what it wants to change",
+            body: "It is shown an outline of the page and the list of pieces it is allowed to use. It answers with an exact list of changes — add this, remove that, move the other, change a setting — and with why it wants them and who asked. That list is called a delta, and it is the only thing that travels from here on.",
             state: "done",
           },
         }),
@@ -75,8 +75,8 @@ const journey = (ids: IdFactory): LoomNode =>
           type: "loom.milestone",
           props: {
             marker: "3",
-            title: "The change is analysed",
-            body: "Pure facts first: what it touches, how much of the page it is, whether it can be inverted against the tree it would apply to.",
+            title: "The change is measured",
+            body: "Facts before opinions: what it touches, how much of the page it moves, and whether it can be taken back cleanly.",
             state: "done",
           },
         }),
@@ -84,8 +84,8 @@ const journey = (ids: IdFactory): LoomNode =>
           type: "loom.milestone",
           props: {
             marker: "4",
-            title: "The Gate decides",
-            body: "A policy reads those facts and returns one of three answers — apply it, hold it for a person, or refuse it — and says which rule fired.",
+            title: "Your rules decide",
+            body: "They read those measurements and give one of three answers — do it, hold it for a person to look at, or refuse it — and name the rule that answered. The part that applies them is called the Gate.",
             state: "done",
           },
         }),
@@ -93,8 +93,8 @@ const journey = (ids: IdFactory): LoomNode =>
           type: "loom.milestone",
           props: {
             marker: "5",
-            title: "A revision is appended",
-            body: "What applied is written to a log with its author and its inverse. The page's history is the log; nothing is overwritten and nothing is lost.",
+            title: "What happened is written down",
+            body: "The change goes into a log with who asked for it and the change that would undo it. That log is the page\u2019s history — nothing is overwritten and nothing is lost.",
             state: "done",
           },
         }),
@@ -106,7 +106,7 @@ const weighed = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { tone: "surface", width: "wide", eyebrow: "The middle step" },
-    "What the Gate actually weighs",
+    "What the Gate weighs",
     [
       buildElement(ids, {
         type: "loom.feature-grid",
@@ -116,24 +116,24 @@ const weighed = (ids: IdFactory): LoomNode =>
             type: "loom.feature",
             props: {
               icon: "▲",
-              title: "Stakes",
-              body: "How much damage this could do, as named factors rather than one score: how much of the page moves, and whether what it touches is load-bearing.",
+              title: "How much is at stake",
+              body: "Named factors rather than one score out of ten: how much of the page moves, and whether the thing it touches is holding something else up.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
               icon: "↺",
-              title: "Reversibility",
-              body: "Whether the change has an inverse that applies to the tree it would land on. A change that cannot be taken back is a different kind of change.",
+              title: "Whether it can be undone",
+              body: "Worked out against the page as it stands right now, not in general. A change nobody can take back is a different kind of change, and it is weighed as one.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
               icon: "§",
-              title: "Policy",
-              body: "The host's rules and the structural ones, together. Which policy judged a change is part of the record, so a verdict can be re-derived later.",
+              title: "Which rules applied",
+              body: "Yours and the built-in ones together. Which of them judged a change is kept with the change, so months later you can work out why the answer was what it was.",
             },
           }),
         ],
@@ -148,18 +148,18 @@ const record = (ids: IdFactory): LoomNode =>
       props: { ratio: "even", align: "start" },
       children: [
         buildSlot(ids, "start", [
-          heading(ids, 3, "A record, not a diff of files"),
+          heading(ids, 3, "A record, not a pile of file changes"),
           prose(
             ids,
-            "Each revision names the delta that produced it, who proposed it, which rule allowed it and what it replaced. Reading the history is reading the log rather than reconstructing it.",
+            "Each entry names the change that produced it, who asked, which rule allowed it and what it replaced. You read the history instead of reconstructing it from what the files look like now.",
             { tone: "muted" }
           ),
         ]),
         buildSlot(ids, "end", [
-          heading(ids, 3, "An undo that is a proposal"),
+          heading(ids, 3, "An undo that asks, like anything else"),
           prose(
             ids,
-            "Reversing a revision means proposing its inverse. It passes the same Gate, appends a new revision, and can itself be reversed — so the way back is never a special case.",
+            "Putting something back means asking for the change that reverses it. It goes through the same rules, is written down as its own entry, and can itself be undone — so the way back is never a special case.",
             { tone: "muted" }
           ),
         ]),
@@ -176,26 +176,26 @@ const questions = (ids: IdFactory): LoomNode =>
         buildElement(ids, {
           type: "loom.faq",
           props: {
-            question: "What happens when the model proposes something invalid?",
+            question: "What happens when the AI asks for something impossible?",
             answer:
-              "It never reaches the tree. A proposed node is validated against its primitive's schema, and a change that does not apply cleanly is refused as a whole — application is atomic, so a page is never half-changed.",
+              "It never reaches the page. Every piece it asks for is checked against what that kind of piece is allowed to hold, and a change that does not fit is refused whole rather than in part. A page is never left half-changed.",
             open: true,
           },
         }),
         buildElement(ids, {
           type: "loom.faq",
           props: {
-            question: "Does rendering depend on the model being available?",
+            question: "Does the page need the AI to be up in order to load?",
             answer:
-              "No. Interpretation is the only non-deterministic step and it happens before anything is applied. Rendering a tree is pure and total: no hooks, no IO, and anything it could not render comes back as a diagnostic rather than a thrown error.",
+              "No. The AI is involved once, when a change is being worked out, and never when a page is being shown. Drawing the page is plain, predictable code that talks to nothing — and anything it could not draw is reported rather than thrown, so one bad piece cannot take the page down.",
           },
         }),
         buildElement(ids, {
           type: "loom.faq",
           props: {
-            question: "Can I use my own primitives?",
+            question: "Can I use my own components?",
             answer:
-              "That is the intended shape. A registry is a per-surface decision about what a model may name there; the starter library is a default, not a requirement.",
+              "That is the point. What the AI may use is a list you write, one per site — the ready-made set is a starting point and not a requirement.",
           },
         }),
       ],

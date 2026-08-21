@@ -19,7 +19,9 @@ import {
   HOME,
   HOW_IT_WORKS,
   internalHref,
+  LESSONS,
   PORTAL,
+  PRODUCT_SURFACES,
   REPOSITORY_URL,
   SITE_THEMES,
   surfaceHref,
@@ -49,7 +51,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
       backdrop: "grid",
       align: "center",
       stature: "tall",
-      eyebrow: "An AI-native UI runtime",
+      eyebrow: "For pages that AI is allowed to change",
     },
     children: [
       buildSlot(ids, "heading", [
@@ -59,7 +61,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
       ]),
       prose(
         ids,
-        "Loom makes the interface data. A page is a tree of registered primitives, every change to it arrives as a proposal with a rationale, is weighed against a policy before it lands, and carries the change that undoes it.",
+        "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules — and every change keeps a record of who asked, what moved, and how to put it back.",
         { size: "lead", measured: true, align: "center" }
       ),
       buildSlot(ids, "actions", [
@@ -78,18 +80,28 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
     ],
   })
 
-/** The four nouns the rest of the page is about, before it is about them. */
+/**
+ * The four steps every change takes, in four words.
+ *
+ * This band used to read *Proposals · The Gate · Revisions · Inverses* under the
+ * heading "The four things underneath" — our four nouns, taught to a stranger in
+ * the first screen and a half, before the page had said what any of them were
+ * for. It is the exact thing the brief forbids, and the maintainer named it on
+ * 20 August reading the page against `nextjs.org`.
+ *
+ * The four words below are the same four things. Nobody has to be taught them.
+ */
 const vocabulary = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.logo-cloud",
-    props: { label: "The four things underneath", align: "center" },
-    children: ["Proposals", "The Gate", "Revisions", "Inverses"].map((name) =>
+    props: { label: "Every change takes the same four steps", align: "center" },
+    children: ["Ask", "Check", "Record", "Undo"].map((name) =>
       buildElement(ids, { type: "loom.logo", props: { name } })
     ),
   })
 
 const capabilities = (ids: IdFactory): LoomNode =>
-  section(ids, { eyebrow: "What the runtime does", width: "wide" }, "Change, with a paper trail", [
+  section(ids, { eyebrow: "What you get", width: "wide" }, "Change, with a paper trail", [
     buildElement(ids, {
       type: "loom.feature-grid",
       props: { columns: "four" },
@@ -98,32 +110,32 @@ const capabilities = (ids: IdFactory): LoomNode =>
           type: "loom.feature",
           props: {
             icon: "◇",
-            title: "A page is a tree, not a file",
-            body: "Nodes of registered primitives, addressed by id. A change is four operations over that tree — insert, remove, move, configure — and nothing else.",
+            title: "Your page is made of parts",
+            body: "Every heading, card and button is a piece the AI can move, add or remove. It cannot write new code into your page — only rearrange the pieces you gave it.",
           },
         }),
         buildElement(ids, {
           type: "loom.feature",
           props: {
             icon: "◈",
-            title: "Every change is proposed first",
-            body: "What a model wants arrives as a delta with a rationale and its provenance attached, before anything has moved.",
+            title: "Nothing changes without asking",
+            body: "The AI says what it wants to change and why, before anything moves. You get a request to look at, not a surprise to discover.",
           },
         }),
         buildElement(ids, {
           type: "loom.feature",
           props: {
             icon: "◆",
-            title: "A policy decides, not a vibe",
-            body: "The Gate is a pure function of the change, its stakes and whether it can be taken back. The same proposal always gets the same verdict.",
+            title: "Your rules decide, not a vibe",
+            body: "Every request is weighed against rules you write: how much of the page moves, what it touches, whether it can be taken back. Ask twice, get the same answer twice.",
           },
         }),
         buildElement(ids, {
           type: "loom.feature",
           props: {
             icon: "◊",
-            title: "Undo is a change like any other",
-            body: "Every delta has an inverse. Taking one back is proposed, weighed and recorded the same way — the log never gains a hole.",
+            title: "One click puts it back",
+            body: "Every change arrives with the change that reverses it. Undoing goes through the same rules and is written down too, so the history never gains a hole.",
           },
         }),
       ],
@@ -141,15 +153,15 @@ const facts = (ids: IdFactory): LoomNode =>
           type: "loom.stat",
           props: {
             value: FACTS.primitives,
-            label: "primitives in the starter library",
-            caption: "Every one reads its colour and type from the theme, and hard-codes none of it.",
+            label: "ready-made pieces to build with",
+            caption: "Each one takes its colours and type from whatever theme the page is wearing.",
           },
         }),
         buildElement(ids, {
           type: "loom.stat",
           props: {
             value: FACTS.decisions,
-            label: "decision records",
+            label: "decisions written down",
             caption: "What was chosen, what was rejected, and why — written before the code, kept after it.",
           },
         }),
@@ -157,8 +169,8 @@ const facts = (ids: IdFactory): LoomNode =>
           type: "loom.stat",
           props: {
             value: FACTS.operations,
-            label: "delta operations",
-            caption: "Insert, remove, move, configure. A vocabulary small enough to review by hand.",
+            label: "kinds of change there are",
+            caption: "Add something, remove something, move something, change a setting. That is the whole list.",
           },
         }),
       ],
@@ -225,9 +237,9 @@ const pricing = (ids: IdFactory): LoomNode =>
       props: { columns: "three" },
       children: [
         tier(ids, PLACEHOLDER_COPY.tierStarterName, PLACEHOLDER_COPY.tierStarterPrice, [
-          perk(ids, "The runtime and the starter primitives"),
-          perk(ids, "Proposals, the Gate and the revision log"),
-          perk(ids, "Hosted portal", "excluded"),
+          perk(ids, "Everything that runs your pages, and the ready-made pieces"),
+          perk(ids, "Requests, your rules, and the record of what changed"),
+          perk(ids, "A review site we host for you", "excluded"),
         ]),
         tier(
           ids,
@@ -235,14 +247,14 @@ const pricing = (ids: IdFactory): LoomNode =>
           PLACEHOLDER_COPY.tierTeamPrice,
           [
             perk(ids, "Everything in the tier above"),
-            perk(ids, "The review portal, with attribution"),
-            perk(ids, "Telemetry and calibration", "coming"),
+            perk(ids, "The review site, with a name against every change"),
+            perk(ids, "Reports on how well it is doing", "coming"),
           ],
           { featured: true }
         ),
         tier(ids, PLACEHOLDER_COPY.tierEnterpriseName, PLACEHOLDER_COPY.tierEnterprisePrice, [
           perk(ids, "Everything in the tier above"),
-          perk(ids, "Your own primitives, your own policy"),
+          perk(ids, "Your own pieces, your own rules"),
           perk(ids, "Support terms", "coming"),
         ]),
       ],
@@ -258,9 +270,9 @@ const questions = (ids: IdFactory): LoomNode =>
         buildElement(ids, {
           type: "loom.faq",
           props: {
-            question: "Can the model write arbitrary code into my page?",
+            question: "Can the AI write code into my page?",
             answer:
-              "No. It configures nodes of primitives you registered. Behaviour lives in the registered component and never travels in the tree, so the worst a proposal can say is something your vocabulary already has a word for.",
+              "No. It can only use the pieces you handed it, and it can only set the options those pieces already have. Your code stays in your own components and never travels with a change, so the worst the AI can ask for is something your page already knows how to do.",
             open: true,
           },
         }),
@@ -269,7 +281,7 @@ const questions = (ids: IdFactory): LoomNode =>
           props: {
             question: "What stops a bad change from landing?",
             answer:
-              "The Gate. It reads the change, its stakes and whether it can be reversed, and applies a policy — allow, hold for review, or refuse. It is a pure function, so its verdict can be tested rather than trusted.",
+              "Your rules do. Each request is weighed on how much of the page it moves, what it touches and whether it can be taken back, and then it is allowed, held for a person to look at, or refused. The rules are ordinary code, so you can test them instead of hoping.",
           },
         }),
         buildElement(ids, {
@@ -277,7 +289,7 @@ const questions = (ids: IdFactory): LoomNode =>
           props: {
             question: "Is this a page builder?",
             answer:
-              "It is the runtime underneath one. There is no editor assumed and no hosting required: a tree, a registry of primitives and a renderer are the whole surface, and the page renders per request with no hooks and no IO.",
+              "It is the part a page builder would be built on. There is no editor to learn and nothing you have to host with us: you keep your own components, and Loom decides what may change and keeps the record of what did.",
           },
         }),
         buildElement(ids, {
@@ -285,7 +297,7 @@ const questions = (ids: IdFactory): LoomNode =>
           props: {
             question: "What happens when a change is wrong?",
             answer:
-              "Every delta has an inverse, computed from the tree it applied to. Undoing is proposing that inverse — it is weighed like anything else and appends a revision rather than erasing one.",
+              "You put it back. Every change is stored together with the change that reverses it, and undoing is checked against your rules and written down like anything else. Nothing is erased to make room for it.",
           },
         }),
       ],
@@ -293,41 +305,58 @@ const questions = (ids: IdFactory): LoomNode =>
   ])
 
 /**
- * The three ways further in, on the page rather than only in the chrome.
+ * How a surface is offered here: the verb, and the mark above it.
  *
- * The front door's job is not finished when a visitor has read it. Loom's
- * documentation and its portal are paths on this same origin (0067, 0070), so
- * the band that sends someone to them is part of this page and not a footer
- * afterthought — and each card is honest about what is behind it, which is why
- * the portal's says that signing in is required rather than pretending the
- * whole product is one click away.
+ * The sentence is **not** here — it is `Surface.blurb`, so the words a visitor
+ * reads on this card and the words under the same link in the footer cannot
+ * drift apart. What lives here is the part that is this band's rather than the
+ * surface's: a card invites, so it says *Read the docs* where a menu item says
+ * *Docs*.
  *
- * The sentences come off `PRODUCT_SURFACES`, so the words a visitor reads here
- * and the words under the same link in the footer cannot drift apart.
+ * Keyed by path and held total by a test. The band enumerated its three cards by
+ * hand until 21 August, and the merge that added the lessons course to
+ * `PRODUCT_SURFACES` proved why that was wrong: the course appeared in the
+ * header and in the footer and silently not here, in a band whose own comment
+ * promised it could not.
+ */
+const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: string }>> = {
+  [DOCS.path]: { icon: "▤", title: "Read the docs" },
+  [LESSONS.path]: { icon: "◍", title: "Take the course" },
+  [PORTAL.path]: { icon: "◉", title: "Open the portal" },
+}
+
+/**
+ * The ways further in, on the page rather than only in the chrome.
+ *
+ * The front door's job is not finished when a visitor has read it. Every other
+ * surface is a path on this same origin (0067, 0070), so the band that sends
+ * someone to them is part of this page and not a footer afterthought — and each
+ * card is honest about what is behind it, which is why the portal's says that
+ * signing in is required rather than pretending the whole product is one click
+ * away.
  */
 const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: "Keep going" }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.feature-grid",
-      props: { columns: "three" },
+      props: { columns: "four" },
       children: [
-        buildElement(ids, {
-          type: "loom.feature",
-          props: {
-            icon: "▤",
-            title: "Read the docs",
-            body: DOCS.blurb,
-            href: surfaceHref(context.origin, DOCS),
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.feature",
-          props: {
-            icon: "◉",
-            title: "Open the portal",
-            body: PORTAL.blurb,
-            href: surfaceHref(context.origin, PORTAL),
-          },
+        ...PRODUCT_SURFACES.map((surface) => {
+          const way = WAYS_IN[surface.path]
+
+          if (way === undefined) {
+            throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
+          }
+
+          return buildElement(ids, {
+            type: "loom.feature",
+            props: {
+              icon: way.icon,
+              title: way.title,
+              body: surface.blurb,
+              href: surfaceHref(context.origin, surface),
+            },
+          })
         }),
         buildElement(ids, {
           type: "loom.feature",
@@ -343,10 +372,10 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
   ])
 
 const closing = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "accent", width: "full" }, "This page is a tree. So is yours.", [
+  section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
     prose(
       ids,
-      "Everything above — the header, the pricing table, this sentence — is a node a proposal could address. Nothing on it is markup.",
+      "The menu, the pricing table, this sentence — every one of them is a piece the AI could be asked to move. None of it was written by hand.",
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
