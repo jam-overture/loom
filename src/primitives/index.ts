@@ -5,9 +5,12 @@ import type { Result } from "../result.js"
 import { loomAction } from "./loom.action.js"
 import { loomArticle } from "./loom.article.js"
 import { loomArticleGrid } from "./loom.article-grid.js"
+import { loomAvatar } from "./loom.avatar.js"
+import { loomAvatarRow } from "./loom.avatar-row.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomButton } from "./loom.button.js"
 import { loomCard } from "./loom.card.js"
+import { loomCode } from "./loom.code.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
@@ -20,6 +23,7 @@ import { loomGrid } from "./loom.grid.js"
 import { loomHeading } from "./loom.heading.js"
 import { loomHero } from "./loom.hero.js"
 import { loomIcon } from "./loom.icon.js"
+import { loomKbd } from "./loom.kbd.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
 import { loomLogo } from "./loom.logo.js"
@@ -27,6 +31,7 @@ import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
+import { loomMosaic } from "./loom.mosaic.js"
 import { loomNav } from "./loom.nav.js"
 import { loomOption } from "./loom.option.js"
 import { loomPage } from "./loom.page.js"
@@ -125,6 +130,19 @@ import { loomTierTable } from "./loom.tier-table.js"
  * anywhere — which is where `loom.perk` sits and `loom.perk-list-item` does
  * not, since one of them has exactly one legal parent.
  *
+ * **The technical five** are the vocabulary a page about a *tool* is written
+ * in, which the library went forty-five primitives without. `loom.code` is the
+ * snippet and the terminal — the one content model where whitespace is the
+ * content, and the reason no arrangement of `loom.prose` could stand in for it;
+ * `loom.kbd` is the key cap beside it. `loom.avatar` is the face that until now
+ * could only be reached by claiming to be a `loom.person` or a `loom.quote`,
+ * and `loom.avatar-row` is the cluster of them a page puts above a number.
+ * `loom.mosaic` is the third general arranger and the first band here that is
+ * not a table of identical rectangles — it answers the finding the marketing
+ * lane filed against `loom.feature-grid` on 20 August, at the cost 0062 names
+ * ([0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+ * is the width media query it needs).
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -138,6 +156,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomSplit,
   loomStack,
   loomGrid,
+  loomMosaic,
   loomCard,
   loomHero,
   loomFeatureGrid,
@@ -156,6 +175,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomQuote,
   loomPersonGrid,
   loomPerson,
+  loomAvatarRow,
   loomArticleGrid,
   loomArticle,
   loomLogoCloud,
@@ -169,8 +189,11 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomLinkList,
   loomHeading,
   loomProse,
+  loomCode,
   loomBadge,
   loomIcon,
+  loomAvatar,
+  loomKbd,
   loomPerk,
   loomDivider,
   loomMedia,
@@ -198,9 +221,12 @@ export {
   loomAction,
   loomArticle,
   loomArticleGrid,
+  loomAvatar,
+  loomAvatarRow,
   loomBadge,
   loomButton,
   loomCard,
+  loomCode,
   loomDivider,
   loomFaq,
   loomFaqList,
@@ -213,6 +239,7 @@ export {
   loomHeading,
   loomHero,
   loomIcon,
+  loomKbd,
   loomLink,
   loomLinkList,
   loomLogo,
@@ -220,6 +247,7 @@ export {
   loomMedia,
   loomMilestone,
   loomMilestoneList,
+  loomMosaic,
   loomNav,
   loomOption,
   loomPage,

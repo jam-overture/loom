@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as forty-five primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(45)
+  it("registers as fifty primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(50)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -159,6 +159,7 @@ describe("the starter library", () => {
       "loom.split",
       "loom.stack",
       "loom.grid",
+      "loom.mosaic",
       "loom.card",
       "loom.hero",
       "loom.feature-grid",
@@ -177,6 +178,7 @@ describe("the starter library", () => {
       "loom.quote",
       "loom.person-grid",
       "loom.person",
+      "loom.avatar-row",
       "loom.article-grid",
       "loom.article",
       "loom.logo-cloud",
@@ -190,8 +192,11 @@ describe("the starter library", () => {
       "loom.link-list",
       "loom.heading",
       "loom.prose",
+      "loom.code",
       "loom.badge",
       "loom.icon",
+      "loom.avatar",
+      "loom.kbd",
       "loom.perk",
       "loom.divider",
       "loom.media",
@@ -233,9 +238,20 @@ describe("the starter library", () => {
      */
     expect(types).toContain("loom.stack")
     expect(types).toContain("loom.grid")
+    expect(types).toContain("loom.mosaic")
     expect(types).not.toContain("loom.stack-grid")
 
-    for (const general of ["loom.stack", "loom.grid"]) expect(general.endsWith("-grid")).toBe(false)
+    /**
+     * `loom.mosaic` is the third of them and the one that shows the rule is
+     * doing work rather than describing two names that happened to be short:
+     * *mosaic* is an arrangement with no child word to build a container name
+     * out of, and `loom.bento-grid` — the name a model is likelier to reach for
+     * — would have tripped the stem rule by promising a `loom.bento` that does
+     * not and should not exist.
+     */
+    for (const general of ["loom.stack", "loom.grid", "loom.mosaic"]) {
+      expect(general.endsWith("-grid")).toBe(false)
+    }
 
     /**
      * The preference is carried by the descriptions, because a description is
@@ -248,6 +264,9 @@ describe("the starter library", () => {
 
     expect(describes("loom.stack")).toContain("prefer a named band")
     expect(describes("loom.grid")).toContain("prefer a named band")
+    expect(describes("loom.mosaic")).toContain("prefer a named band")
+    /** The word a model looking for this arrangement actually knows it by. */
+    expect(describes("loom.mosaic")).toContain("bento")
   })
 
   it("says out loud where the perk trio breaks the stem rule, since the stem rule cannot", () => {
@@ -302,6 +321,8 @@ describe("the starter library", () => {
       "loom.article",
       "loom.logo",
       "loom.faq",
+      /** The face on its own, which is a leaf for the reason `loom.person` is. */
+      "loom.avatar",
       /**
        * `loom.field` is deliberately absent. It places children only when its
        * `type` is `select`, and the probe now asks it under every value its own
@@ -738,7 +759,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the eight fixtures", () => {
+  it("covers every registered primitive across the nine fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -753,6 +774,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(cataloguePage(EDITORIAL)),
       ...typesIn(chromePage(EDITORIAL)),
       ...typesIn(contactPage(EDITORIAL)),
+      ...typesIn(technicalPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -2501,7 +2523,7 @@ describe("the re-theme guarantee", () => {
      * eyebrow, kicker and disclosure marker in these eight fixtures would come
      * out at 1.6:1 with nothing failing.
      */
-    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage, contactPage]) {
+    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage, contactPage, technicalPage]) {
       const { markup, diagnostics } = render(fixture(MINIMAL))
       const tree = splitStylesheet(markup).tree
       const body = tree.slice(tree.indexOf(">"))
@@ -2726,5 +2748,343 @@ describe("the root primitive", () => {
     const markup = renderToStaticMarkup(createElement("div", null, element))
 
     expect(markup.startsWith("<div><div style=")).toBe(true)
+  })
+})
+
+/**
+ * The technical vocabulary: a page about a tool rather than about a service.
+ *
+ * It exercises every one of the five at least once and each of the props whose
+ * value changes the markup, because the conformance probe asks a primitive what
+ * it does under every closed choice (0075) and a fixture that only ever renders
+ * the default leaves half of each schema unrendered by anything.
+ */
+const technicalPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const code = (props: JsonObject, body: string) =>
+    buildElement(idFactory, { type: "loom.code", props, children: [text(body)] })
+
+  const avatar = (name: string, image?: string) =>
+    buildElement(idFactory, {
+      type: "loom.avatar",
+      props: image === undefined ? { name } : { name, image },
+    })
+
+  const key = (legend: string) =>
+    buildElement(idFactory, { type: "loom.kbd", children: [text(legend)] })
+
+  const install = buildElement(idFactory, {
+    type: "loom.hero",
+    props: { backdrop: "grid", align: "center", eyebrow: "Loom" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 1 },
+          children: [text("A tree, a delta, and a page that adapts")],
+        }),
+      ]),
+      buildSlot(idFactory, "actions", [
+        code({ tone: "terminal", density: "compact", language: "bash" }, "pnpm add @loom/runtime"),
+      ]),
+    ],
+  })
+
+  const proof = buildElement(idFactory, {
+    type: "loom.stack",
+    props: { direction: "row", gap: "snug" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.avatar-row",
+        children: [
+          avatar("Ada Lovelace", "https://example.com/ada.jpg"),
+          avatar("Grace Hopper"),
+          avatar("Alan Turing"),
+          avatar("Katherine Johnson"),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "small", tone: "muted" },
+        children: [text("and four thousand others")],
+      }),
+    ],
+  })
+
+  const shortcut = buildElement(idFactory, {
+    type: "loom.stack",
+    props: { direction: "row", gap: "tight", wrap: false },
+    children: [key("⌘"), key("K")],
+  })
+
+  const band = buildElement(idFactory, {
+    type: "loom.mosaic",
+    props: { rhythm: "showcase", gap: "loose" },
+    children: [
+      code(
+        { language: "loom.tree.json", caption: "The node the proposal addresses" },
+        '{\n  "type": "loom.heading",\n  "props": { "level": 1 }\n}'
+      ),
+      buildElement(idFactory, {
+        type: "loom.card",
+        props: { tone: "surface" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.heading",
+            props: { level: 3 },
+            children: [text("Open the palette")],
+          }),
+          shortcut,
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.feature",
+        props: { title: "Gated", body: "Every change is weighed before it lands." },
+      }),
+      buildElement(idFactory, {
+        type: "loom.feature",
+        props: { title: "Attributed", body: "Every node knows who placed it." },
+      }),
+      buildElement(idFactory, {
+        type: "loom.feature",
+        props: { title: "Reversible", body: "Every delta has an inverse." },
+      }),
+    ],
+  })
+
+  const spaced = buildElement(idFactory, {
+    type: "loom.avatar-row",
+    props: { spacing: "spaced" },
+    children: [
+      avatar("Ada Lovelace"),
+      buildElement(idFactory, {
+        type: "loom.avatar",
+        props: { name: "Grace Hopper", size: "large", shape: "soft" },
+      }),
+      buildElement(idFactory, { type: "loom.avatar", props: { name: "Alan Turing", size: "small" } }),
+    ],
+  })
+
+  const lead = buildElement(idFactory, {
+    type: "loom.mosaic",
+    props: { rhythm: "lead" },
+    children: [
+      code({ tone: "source" }, "const inverse = invert(delta)"),
+      buildElement(idFactory, { type: "loom.card", children: [text("One")] }),
+      buildElement(idFactory, { type: "loom.card", children: [text("Two")] }),
+    ],
+  })
+
+  const page = buildElement(idFactory, {
+    type: "loom.page",
+    props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+    children: [
+      install,
+      buildElement(idFactory, {
+        type: "loom.section",
+        children: [proof, band, spaced, lead],
+      }),
+      buildElement(idFactory, { type: "loom.mosaic", props: { rhythm: "alternating" }, children: [] }),
+    ],
+  })
+
+  return createTree(page, idFactory)
+}
+
+describe("the technical vocabulary", () => {
+  it("renders all five with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(technicalPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<pre")
+    expect(markup).toContain("<kbd")
+    expect(markup).toContain("pnpm add @loom/runtime")
+    expect(markup).toContain("and four thousand others")
+  })
+
+  it("keeps a snippet's whitespace, which is the whole reason it is not prose", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * The newlines and the two-space indent survive into the markup verbatim.
+     * `loom.prose` would fold both into single spaces, which is why the port
+     * map calls this block atomic rather than a composition.
+     */
+    expect(markup).toContain("{\n  &quot;type&quot;: &quot;loom.heading&quot;,")
+    expect(markup).toMatch(/<pre[^>]*white-space:pre/)
+  })
+
+  it("scrolls a long line inside the panel rather than across the page", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * The 20 August phone-scrollbar finding, in the one primitive whose content
+     * is deliberately unwrappable: the overflow is the `pre`'s, and the root is
+     * allowed to be narrower than it so a flex or grid track is not widened by
+     * a line nobody can break.
+     */
+    expect(markup).toMatch(/<pre[^>]*overflow-x:auto/)
+    expect(markup).toMatch(/<figure[^>]*min-width:0/)
+  })
+
+  it("gives a terminal its window bar and a source listing none", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * The display-mode assertion for this unit (0052): one enum, two
+     * renderings, and the difference is markup rather than a colour — a
+     * terminal that were merely a darker panel would be unreadable under a
+     * palette that has no dark surface.
+     */
+    const panels = [...markup.matchAll(/<pre/g)]
+    const bars = [...markup.matchAll(/border-block-end:1px solid var\(--loom-border-subtle\)/g)]
+
+    expect(panels).toHaveLength(3)
+    /** Two bars: the terminal, and the source listing that carries a filename. */
+    expect(bars).toHaveLength(2)
+    expect(markup).toContain("loom.tree.json")
+  })
+
+  it("names a face however it is drawn, so a monogram and a photograph read alike", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /** The photograph carries the name as its alt; the monogram carries it as a label. */
+    expect(markup).toContain('alt="Ada Lovelace"')
+    expect(markup).toContain('role="img" aria-label="Grace Hopper"')
+    /** The first letter of the first two words, and never a third. */
+    expect(markup).toContain(">GH<")
+    expect(markup).toContain(">AT<")
+  })
+
+  it("keeps the overlap on the row and off the face, and puts its rule after the faces", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * The coupling this pair exists to avoid: a `loom.avatar` carries no prop
+     * that means anything only inside a `loom.avatar-row`, so the negative
+     * margin is a rule keyed on position. That rule is `> * + *`, which counts
+     * from the first child — so a `<style>` emitted *before* the faces would
+     * pull the first one half a face to the left. The library's other emitters
+     * put it first; these two cannot.
+     */
+    expect(propsOfType("loom.avatar")).toEqual(["image", "name", "shape", "size"])
+    expect(propsOfType("loom.avatar-row")).toEqual(["spacing"])
+    expect(markup).toContain(".loom-cluster > * + *")
+    expect(markup).toMatch(/class="loom-cluster"[^>]*><img/)
+  })
+
+  it("switches the mosaic's rhythm off below the breakpoint, and counts from the first cell", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * 0079: the six columns exist only where there is room for them, and the
+     * markup is identical either side of the breakpoint. The cycles are
+     * asserted because a span that did not sum to six would leave a hole in
+     * every row and no test that only renders would see it.
+     */
+    expect(markup).toContain("@media (min-width: 48rem)")
+    expect(markup).toContain("grid-template-columns: repeat(6, 1fr)")
+    expect(markup).toContain(".loom-mosaic-showcase > *:nth-child(5n + 1)")
+    expect(markup).toContain(".loom-mosaic-lead > *:first-child")
+
+    expect(markup).toMatch(/class="loom-mosaic loom-mosaic-showcase"[^>]*><figure/)
+  })
+
+  it("sets no column count inline, because the rule is what has to change it", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * The trap `stylesheet.ts` names: an inline style beats a rule, so a
+     * `display:grid` or a `grid-template-columns` set on the element would make
+     * the media query inert and the band would be six columns on a phone.
+     */
+    const root = markup.slice(markup.indexOf('class="loom-mosaic'))
+    const opening = root.slice(0, root.indexOf(">"))
+
+    expect(opening).not.toContain("grid-template-columns")
+    expect(opening).not.toContain("display:grid")
+    expect(opening).toContain("gap:")
+  })
+
+  it("renders an empty mosaic as an empty band rather than as nothing", () => {
+    const { diagnostics, markup } = render(technicalPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect([...markup.matchAll(/class="loom-mosaic /g)]).toHaveLength(3)
+  })
+
+  it("takes its monospace from a variable the theme does not yet set, and falls back", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * The finding filed with this run: a font pack declares heading, body and
+     * accent families and no mono. Written as a fallback so that the day
+     * `--loom-mono-family` exists, every code panel and key cap already reads
+     * it — and until then the stack resolves and nothing is unstyled.
+     */
+    expect(markup).toContain("var(--loom-mono-family, ui-monospace")
+  })
+
+  it("carries no props at all on the key cap, which is the honest shape", () => {
+    /**
+     * 0052's atomic case: a key is a key. A `size` prop was the candidate and
+     * is wrong — a cap sits inside a line of text more often than beside one,
+     * so it is sized in `em` against whatever it is set in.
+     */
+    expect(propsOfType("loom.kbd")).toEqual([])
+    expect(render(technicalPage(EDITORIAL)).markup).toMatch(/<kbd[^>]*font-size:0\.85em/)
+  })
+
+  it("renders the same under every palette, with no colour of its own", () => {
+    for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+      const { markup, diagnostics } = render(technicalPage(theme))
+      const tree = splitStylesheet(markup).tree
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+})
+
+describe("a headline on a narrow screen", () => {
+  it("holds the top two steps under a fraction of the screen, and leaves the rest alone", () => {
+    /**
+     * The 20 August finding, closed. A font pack's ramp is eight fixed pixel
+     * sizes, so `level: 1` is 72px in every registered pack and a long word
+     * runs past the padding into the hero's `overflow: hidden` — clipped, so no
+     * overflow measurement sees it.
+     *
+     * Asserted as a `min()` rather than by measuring, because nothing in a pure
+     * render has a viewport to measure against: what a test can hold is that
+     * the cap is expressed, that it is expressed only where the ramp overflows,
+     * and that the ramp is still the other half of it.
+     */
+    const idFactory = sequentialIdFactory()
+    const heading = (level: number) =>
+      buildElement(idFactory, {
+        type: "loom.heading",
+        props: { level },
+        children: [buildText(idFactory, `Level ${level}`)],
+      })
+
+    const { markup } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: MINIMAL },
+          children: [heading(1), heading(2), heading(3)],
+        }),
+        idFactory
+      )
+    )
+
+    expect(markup).toContain("font-size:min(var(--loom-scale-8), 11vw)")
+    expect(markup).toContain("font-size:min(var(--loom-scale-7), 9vw)")
+    /** Step 6 is 32px and fits a phone with room to spare. */
+    expect(markup).toContain("font-size:var(--loom-scale-6)")
+    expect(markup).not.toContain("min(var(--loom-scale-6)")
   })
 })

@@ -34,6 +34,42 @@ type Props = z.infer<typeof props>
 /** Level 1 is the largest step on the ramp; each level down is one step smaller. */
 const STEP_FOR_LEVEL: Readonly<Record<number, RampStep>> = { 1: 8, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3 }
 
+/**
+ * The ceiling the top two steps are held under on a narrow screen, and the
+ * finding this lane filed against itself on 20 August.
+ *
+ * A font pack's `scaleRamp` is **eight fixed pixel sizes**, so `level: 1` is
+ * 72px in every registered pack. On a 390px screen that sets one word per line
+ * and the long ones run past the padding into the hero's `overflow: hidden` —
+ * clipped rather than scrolling, so no overflow measurement sees it and it
+ * looks like a design choice until you read the word that lost its last letter.
+ *
+ * `min()` against a viewport unit is the smallest thing that fixes it: the ramp
+ * wins at every width that can hold it, and below that the headline is a
+ * fraction of the screen instead of a fixed number of pixels. It is the same
+ * bargain [0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+ * makes for `loom.mosaic`'s one media query — the markup is unchanged, nothing
+ * is interpolated, and the browser rather than the render function is what
+ * reads the width. It has the same limit, too: a `vw` is the *viewport*, so a
+ * level-1 heading inside a narrow column on a wide screen is not held back.
+ *
+ * Only the two steps that overflow are capped. Step 6 is 32px and fits a phone
+ * with room to spare, so capping it would shrink headings nobody complained
+ * about and make the ramp mean less than it says.
+ *
+ * The better fix is a fluid `scaleRamp` in the font pack, which is a schema
+ * three registered packs depend on and therefore another lane's. This does not
+ * block it: a pack whose step 8 is already a clamp is simply a ramp that wins
+ * here at every width.
+ */
+const CAP_FOR_STEP: Readonly<Partial<Record<RampStep, string>>> = { 8: "11vw", 7: "9vw" }
+
+const headingSize = (step: RampStep): string => {
+  const cap = CAP_FOR_STEP[step]
+
+  return cap === undefined ? size(step) : `min(${size(step)}, ${cap})`
+}
+
 export const loomHeading = definePrimitive({
   type: "loom.heading",
   description: "A heading. Its level sets both the document outline and the size.",
@@ -48,7 +84,7 @@ export const loomHeading = definePrimitive({
           margin: "0",
           fontFamily: family("heading"),
           fontWeight: weight("heading"),
-          fontSize: size(STEP_FOR_LEVEL[given.level] ?? 5),
+          fontSize: headingSize(STEP_FOR_LEVEL[given.level] ?? 5),
           lineHeight: 1.15,
           color: colour("fg-default"),
           textAlign: given.align ?? "start",
