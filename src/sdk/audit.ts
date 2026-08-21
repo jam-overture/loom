@@ -2,10 +2,12 @@ import type { DecorationLookup } from "../render/addressing.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 import {
+  probeConfigurations,
   probeEditableDecoration,
   probeSlotPlacement,
   type ConformanceVerdict,
   type PlacementVerdict,
+  type ProbeFailure,
 } from "./conformance.js"
 import type { PrimitiveRegistry } from "./registry.js"
 
@@ -23,6 +25,12 @@ import type { PrimitiveRegistry } from "./registry.js"
  * `loom.editable` renders correctly and is only invisible to the portal, so
  * whether that blocks a deployment depends on whether the deployment has a
  * portal. `notDecorated` is there to be asserted empty by a host that cares.
+ *
+ * Every probe runs under every configuration the primitive's schema closes over
+ * (0075) rather than under no props at all, because a primitive whose rendering
+ * turns on a prop — `loom.field` places children only when its `type` is
+ * `select` — was reported by the shape it takes at its default, which is a
+ * claim about one configuration wearing the name of the primitive.
  */
 
 export type PrimitiveAudit = {
@@ -35,6 +43,12 @@ export type PrimitiveAudit = {
 export type UnplacedSlots = {
   readonly type: PrimitiveType
   readonly slots: readonly string[]
+}
+
+/** A primitive that threw under some configuration its own schema accepts. */
+export type ThrowingConfigurations = {
+  readonly type: PrimitiveType
+  readonly failures: readonly ProbeFailure[]
 }
 
 export type RegistryAudit = {
@@ -55,17 +69,31 @@ export type RegistryAudit = {
    * into this node" needs it to avoid offering a place nothing will appear.
    */
   readonly leaves: readonly PrimitiveType[]
+  /**
+   * Threw on props built from its own schema. A fault whoever registered it
+   * wants to know about — a tree the validator accepts can take the page down —
+   * and never a reason to distrust the rest of this audit, which is answered by
+   * the configurations that did render.
+   */
+  readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[]
 }
 
 const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
   placement.outcome === "probed" ? placement.unplacedSlots : []
 
+const threwIn = (placement: PlacementVerdict): readonly ProbeFailure[] =>
+  placement.outcome === "probed" ? placement.threw : []
+
 export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
-  const audits = registry.primitives.map((primitive) => ({
-    type: primitive.type,
-    verdict: probeEditableDecoration(primitive.component, primitive.text),
-    placement: probeSlotPlacement(primitive.component, primitive.slots, primitive.text),
-  }))
+  const audits = registry.primitives.map((primitive) => {
+    const configurations = probeConfigurations(primitive.choices)
+
+    return {
+      type: primitive.type,
+      verdict: probeEditableDecoration(primitive.component, primitive.text, configurations),
+      placement: probeSlotPlacement(primitive.component, primitive.slots, primitive.text, configurations),
+    }
+  })
 
   return {
     audits,
@@ -77,6 +105,9 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
     leaves: audits
       .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
       .map((audit) => audit.type),
+    throwsOnDeclaredProps: audits
+      .filter((audit) => threwIn(audit.placement).length > 0)
+      .map((audit) => ({ type: audit.type, failures: threwIn(audit.placement) })),
   }
 }
 
@@ -123,7 +154,23 @@ const describePlacement = (placement: PlacementVerdict): string => {
     return `declares ${placement.unplacedSlots.join(", ")} and does not place ${placement.unplacedSlots.length === 1 ? "it" : "them"}`
   }
 
-  return placement.rendersChildren ? "renders its children" : "renders no children (a leaf)"
+  const under =
+    placement.probed.length === 1 ? "" : ` under all ${placement.probed.length} configurations probed`
+  const children = placement.rendersChildren
+    ? "renders its children"
+    : `renders no children (a leaf)${under}`
+
+  if (placement.threw.length === 0) return children
+
+  /**
+   * Named rather than counted. A person reading this has to reproduce it, and
+   * `{"type":"select"}` is the whole reproduction.
+   */
+  const threw = placement.threw
+    .map((failure) => `${JSON.stringify(failure.props)} (${failure.reason})`)
+    .join(", ")
+
+  return `${children}; threw on ${threw}`
 }
 
 /** One line per primitive, for a CLI or a failing test's message. */

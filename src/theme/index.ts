@@ -1,4 +1,5 @@
 export * from "./apply.js"
+export * from "./contrast.js"
 export * from "./library.js"
 export * from "./registry.js"
 export * from "./theme.js"

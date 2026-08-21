@@ -9,7 +9,13 @@ import {
   STARTER_PALETTES,
 } from "./library.js"
 import { createThemeRegistry, describeThemeError } from "./registry.js"
-import { PALETTE_SLOTS, paletteSchema, themeSelectionSchema, type PaletteSlot } from "./theme.js"
+import {
+  auditPalette,
+  contrastRatio,
+  describePaletteAudit,
+  PALETTE_TEXT_PAIRINGS,
+} from "./contrast.js"
+import { PALETTE_SLOTS, paletteSchema, themeSelectionSchema } from "./theme.js"
 
 const registry = createThemeRegistry()
 
@@ -122,55 +128,26 @@ describe("themeVariables", () => {
  * written rather than after.
  */
 describe("what the library reads against what", () => {
-  const channel = (value: number): number => {
-    const c = value / 255
-
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  }
-
-  const luminance = (hex: string): number => {
-    const [r, g, b] = [1, 3, 5].map((at) => channel(Number.parseInt(hex.slice(at, at + 2), 16)))
-
-    return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0)
-  }
-
+  /**
+   * The pairings and the maths moved into `contrast.ts` (0076) so a host can run
+   * the same bar against its own palettes, which `createThemeRegistry` lets it
+   * substitute wholesale. What is left here is the assertion that the palettes
+   * Loom ships clear it, plus the two facts about `minimal` that are about this
+   * palette rather than about the bar.
+   */
   const contrast = (a: string, b: string): number => {
-    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+    const ratio = contrastRatio(a, b)
+    if (ratio === undefined) throw new Error(`cannot measure "${a}" on "${b}"`)
 
-    return ((high ?? 0) + 0.05) / ((low ?? 0) + 0.05)
+    return ratio
   }
-
-  /** Foreground slot, background slot, and the primitive that puts them together. */
-  const PAIRINGS: readonly (readonly [PaletteSlot, PaletteSlot, string])[] = [
-    ["fg-default", "bg-canvas", "loom.page body copy"],
-    ["fg-default", "bg-surface", "loom.card body copy"],
-    ["fg-muted", "bg-canvas", "loom.prose tone muted"],
-    ["fg-muted", "bg-surface", "loom.feature body"],
-    ["accent", "bg-canvas", "loom.section eyebrow, loom.link current"],
-    ["accent", "bg-surface", "loom.faq marker, loom.article kicker"],
-    ["fg-on-accent", "accent", "loom.action primary label"],
-    ["accent-strong", "accent-subtle", "loom.badge accent, loom.icon soft"],
-    ["fg-default", "accent-subtle", "loom.section tone accent"],
-    /**
-     * `fg-subtle` is held to the body-text bar like the rest, which is 0074.
-     * The slot recedes and none of what it carries is reliably large — a
-     * `loom.footer` note row and a `loom.tier` note are ordinary small text —
-     * so a threshold of 3:1 would be a bar chosen to fit the colours rather
-     * than the reader. `bg-surface-muted` is here because `loom.perk` is the
-     * one primitive that puts the pair together deliberately.
-     */
-    ["fg-subtle", "bg-canvas", "loom.footer note, loom.link-list group label"],
-    ["fg-subtle", "bg-surface", "loom.tier note, loom.milestone marker"],
-    ["fg-subtle", "bg-surface-muted", "loom.perk excluded marker"],
-  ]
 
   it("meets AA on every pairing a primitive puts together, in every registered palette", () => {
     for (const palette of STARTER_PALETTES) {
-      for (const [fg, bg, where] of PAIRINGS) {
-        const ratio = contrast(palette.slots[fg] ?? "#000000", palette.slots[bg] ?? "#ffffff")
+      const audit = auditPalette(palette)
 
-        expect(ratio, `${palette.id}: ${fg} on ${bg} (${where}) is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5)
-      }
+      expect(describePaletteAudit(audit)).toBe("")
+      expect(audit.measured).toHaveLength(PALETTE_TEXT_PAIRINGS.length)
     }
   })
 

@@ -1,4 +1,14 @@
-import { ZodEffects, ZodObject, type ZodRawShape, type ZodTypeAny } from "zod"
+import {
+  ZodBoolean,
+  ZodDefault,
+  ZodEffects,
+  ZodEnum,
+  ZodNullable,
+  ZodObject,
+  ZodOptional,
+  type ZodRawShape,
+  type ZodTypeAny,
+} from "zod"
 
 import type { PrimitiveType, SlotName } from "./primitive-type.js"
 
@@ -82,5 +92,63 @@ export const catalogueFields = (schema: ZodTypeAny): readonly CataloguedProp[] |
       const member = shape[name]
 
       return member ? [{ name, required: !member.isOptional() }] : []
+    })
+}
+
+/**
+ * A prop whose accepted values can be listed rather than invented.
+ *
+ * The values are `string | boolean` and never a number, because those are the
+ * two shapes a schema closes over by construction: an enum names its members
+ * and a boolean has exactly two. `z.number()` has no enumerable set, and
+ * choosing one would make anything read off it a function of the guess.
+ */
+export type ClosedChoice = {
+  readonly name: string
+  readonly options: readonly (string | boolean)[]
+}
+
+/**
+ * The closed choices a declared schema names, by prop, name-sorted.
+ *
+ * This is not the catalogue and is deliberately not part of it — a model reads
+ * concrete prop values in the tree outline, which is the reason the catalogue
+ * stops at names. It lives here anyway because it reads the same object schema
+ * through the same public Zod surface, and the alternative is a second copy of
+ * `objectSchemaWithin` in another file.
+ *
+ * What wants it is the conformance probe (0075): a primitive whose children
+ * depend on a prop cannot be classified from one render, and these are the
+ * props whose values the probe can vary without making anything up.
+ */
+const choicesWithin = (schema: ZodTypeAny): readonly (string | boolean)[] | undefined => {
+  if (schema instanceof ZodEnum) return (schema as ZodEnum<[string, ...string[]]>).options
+  if (schema instanceof ZodBoolean) return [false, true]
+
+  /**
+   * Wrappers, not shapes. `.optional()` and `.default()` change whether a prop
+   * must be present, not which values it accepts, so a `type` that is an
+   * optional enum closes over exactly the enum's members.
+   */
+  if (schema instanceof ZodOptional) return choicesWithin(schema.unwrap() as ZodTypeAny)
+  if (schema instanceof ZodNullable) return choicesWithin(schema.unwrap() as ZodTypeAny)
+  if (schema instanceof ZodDefault) return choicesWithin(schema.removeDefault() as ZodTypeAny)
+
+  return undefined
+}
+
+export const closedChoices = (schema: ZodTypeAny): readonly ClosedChoice[] => {
+  const object = objectSchemaWithin(schema)
+  if (!object) return []
+
+  const shape: Readonly<Record<string, ZodTypeAny>> = object.shape
+
+  return Object.keys(shape)
+    .sort()
+    .flatMap((name) => {
+      const member = shape[name]
+      const options = member ? choicesWithin(member) : undefined
+
+      return options ? [{ name, options }] : []
     })
 }

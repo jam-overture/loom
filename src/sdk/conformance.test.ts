@@ -5,7 +5,7 @@ import { z } from "zod"
 import type { LoomPrimitive, LoomPrimitiveProps } from "../render/primitive.js"
 import { undecoratedPrimitive } from "../testing/primitives.js"
 
-import { probeEditableDecoration, probeSlotPlacement } from "./conformance.js"
+import { probeConfigurations, probeEditableDecoration, probeSlotPlacement } from "./conformance.js"
 import { definePrimitive } from "./definition.js"
 
 const decorating = ({ loom, children }: LoomPrimitiveProps) =>
@@ -123,6 +123,8 @@ describe("probeSlotPlacement", () => {
       outcome: "probed",
       unplacedSlots: [],
       rendersChildren: true,
+      probed: [{}],
+      threw: [],
     })
   })
 
@@ -152,6 +154,8 @@ describe("probeSlotPlacement", () => {
       outcome: "probed",
       unplacedSlots: [],
       rendersChildren: true,
+      probed: [{}],
+      threw: [],
     })
   })
 
@@ -203,10 +207,130 @@ describe("a probe of a primitive that reads its own declared text", () => {
       outcome: "probed",
       unplacedSlots: [],
       rendersChildren: true,
+      probed: [{}],
+      threw: [],
     })
   })
 
   it("would have called it unprobeable without them", () => {
     expect(probeEditableDecoration(entry.component).outcome).toBe("not-probeable")
+  })
+})
+
+/**
+ * The finding that produced 0075: `loom.field` places children only when its
+ * `type` is `select`, because only a select has choices, and a probe that calls
+ * a component once with no props reported it as a primitive with nowhere to put
+ * a child node. The shape is reproduced here rather than imported, so the test
+ * keeps meaning something if the library's field is rewritten.
+ */
+describe("a primitive whose children depend on a prop", () => {
+  const entry = definePrimitive({
+    type: "loom.choice",
+    description: "a control whose options are children, and only when it has options",
+    props: z.object({
+      kind: z.enum(["text", "select"]).optional(),
+      framed: z.boolean().optional(),
+    }),
+    slots: ["hint"],
+    component: ({ loom, props, children }) =>
+      createElement(
+        "div",
+        { ...loom.editable },
+        props.kind === "select" ? children : null,
+        props.framed === true ? loom.slots["hint"] : null
+      ),
+  })
+
+  const configurations = probeConfigurations(entry.choices)
+
+  it("enumerates the sum of the closed choices and not their product", () => {
+    expect(configurations).toEqual([
+      {},
+      { framed: false },
+      { framed: true },
+      { kind: "text" },
+      { kind: "select" },
+    ])
+  })
+
+  it("called it a leaf when it was probed at its default alone", () => {
+    const verdict = probeSlotPlacement(entry.component, entry.slots, entry.text)
+
+    expect(verdict.outcome === "probed" && verdict.rendersChildren).toBe(false)
+  })
+
+  it("finds the children under the one configuration that places them", () => {
+    const verdict = probeSlotPlacement(entry.component, entry.slots, entry.text, configurations)
+
+    expect(verdict.outcome === "probed" && verdict.rendersChildren).toBe(true)
+    expect(verdict.outcome === "probed" && verdict.probed).toHaveLength(configurations.length)
+  })
+
+  it("counts a region placed under any configuration as placed", () => {
+    const verdict = probeSlotPlacement(entry.component, entry.slots, entry.text, configurations)
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual([])
+  })
+})
+
+describe("a primitive that does not hold its promises under every shape", () => {
+  const sometimesDecorating = definePrimitive({
+    type: "loom.sometimes",
+    description: "decorates, except in the one mode nobody probed",
+    props: z.object({ mode: z.enum(["plain", "bare"]).optional() }),
+    component: ({ loom, props, children }) =>
+      props.mode === "bare"
+        ? createElement("div", null, children)
+        : createElement("div", { ...loom.editable }, children),
+  })
+
+  const throwingOnOneValue = definePrimitive({
+    type: "loom.brittle",
+    description: "throws on a value its own schema accepts",
+    props: z.object({ tone: z.enum(["calm", "loud"]).optional() }),
+    component: ({ loom, props, children }) => {
+      if (props.tone === "loud") throw new Error("no rendering for tone loud")
+
+      return createElement("div", { ...loom.editable }, children)
+    },
+  })
+
+  it("calls a primitive not-decorated when any configuration fails to decorate", () => {
+    const entry = sometimesDecorating
+
+    expect(probeEditableDecoration(entry.component, entry.text)).toEqual({ outcome: "decorates" })
+    expect(
+      probeEditableDecoration(entry.component, entry.text, probeConfigurations(entry.choices))
+    ).toEqual({ outcome: "not-decorated" })
+  })
+
+  it("still answers from the configurations that rendered, and names the one that threw", () => {
+    const entry = throwingOnOneValue
+    const verdict = probeSlotPlacement(
+      entry.component,
+      entry.slots,
+      entry.text,
+      probeConfigurations(entry.choices)
+    )
+
+    expect(verdict.outcome === "probed" && verdict.rendersChildren).toBe(true)
+    expect(verdict.outcome === "probed" && verdict.threw).toEqual([
+      { props: { tone: "loud" }, reason: "no rendering for tone loud" },
+    ])
+    expect(verdict.outcome === "probed" && verdict.probed).toEqual([{}, { tone: "calm" }])
+  })
+
+  it("declines to judge only when no configuration answers at all", () => {
+    const alwaysThrows = ({ children }: LoomPrimitiveProps) => {
+      throw new Error(`never renders ${String(children)}`)
+    }
+
+    expect(probeSlotPlacement(alwaysThrows, [], undefined, [{}, { tone: "calm" }]).outcome).toBe(
+      "not-probeable"
+    )
+    expect(probeEditableDecoration(alwaysThrows, undefined, [{}, { tone: "calm" }]).outcome).toBe(
+      "not-probeable"
+    )
   })
 })
