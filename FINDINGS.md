@@ -3380,3 +3380,103 @@ in this library and does not.
 
 Not blocking. The site looks deliberate as it stands; this is the difference
 between deliberate and composed.
+
+---
+
+## 2026-08-21 — `loom.split` cannot say how far apart its two regions sit
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
+**Status:** open — low priority, and worked around by not using the primitive
+
+`loom.split` takes `ratio`, `align` and `reverse`. It does not take `gap`, and
+passing one is refused:
+
+```
+invalid-props  loom.split  Unrecognized key(s) in object: 'gap'
+```
+
+Every other arranger in the library takes one. `loom.stack` has `gap`,
+`loom.grid` has `gap`, `loom.section` spaces its children — so a tree that lays
+two regions side by side is the one arrangement whose author cannot say how far
+apart they sit, and the omission reads as an oversight rather than a position.
+
+It is filed rather than requested because the band that hit it stopped using the
+primitive for an unrelated reason: a five-step record beside a five-button
+column left half the band empty and squeezed the record into a gutter forty
+characters wide, so the front door stacks them instead. The next surface that
+wants two regions with air between them will hit the same wall with no such
+escape.
+
+Worth knowing before it is designed: `gap` here is not the same question it is
+on `loom.stack`. A split that collapses to one column on a narrow page has two
+gaps — the one between the columns and the one between the stacked rows — and
+they are rarely the same number. `loom.grid` may already have solved this; if it
+has, the answer is to copy it rather than invent a second spelling.
+
+---
+
+## 2026-08-21 — the front door demonstrates the sequence, and it cannot demonstrate a model
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a positioning and budget question, not an engineering one
+
+The landing page now performs a real change on itself, with the record beside it
+([0079](decisions/0079-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)).
+Five choices, one per kind of change plus one the rules refuse; each is worked
+out, measured, weighed, applied or held or refused, and reversible. Everything a
+visitor sees is the real sequence.
+
+**What it cannot show is somebody typing.** The choices are buttons, and the
+change behind each is computed from the page rather than asked of a model. That
+is 0057 working exactly as intended and it is the only affordable shape for this
+surface: a free-text box on the front door is a model call per visitor per idle
+curiosity, on the highest-traffic and lowest-intent page the project has, with no
+session to hold a budget in because 0079 keeps nothing per visitor.
+
+The gap it leaves is real, though, and it is the gap between what the hero
+promises — *ask for a change in your own words* — and what the band offers. The
+band says plainly that the change was worked out rather than asked of an AI, so
+nothing on the page is untrue; what is missing is the demonstration of the one
+sentence the site leads with.
+
+Three ways out, and choosing between them is the maintainer's:
+
+- **A budget on the front door.** A small number of free-text changes per
+  instance per hour, shared by everyone, degrading to the buttons when spent.
+  Cheap to build on top of what is there; it needs a number and a willingness to
+  spend it on strangers.
+- **Send them to the demo.** The portal's demo already has the box, the session
+  and the budget, and it is being moved to a public `/demo` by its own routine.
+  The front door would offer the buttons and then the door. Free, and it costs a
+  click at the moment of highest interest.
+- **Change the hero.** If free text is never going to be on this page, the
+  headline should promise what the page can do rather than what the product can.
+
+Related and still open: the demo behind the sign-in (20 August), and there being
+nothing to install (20 August). All three are the same question wearing three
+hats — *what, exactly, do we want a stranger to be able to do here?*
+
+---
+
+## 2026-08-21 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom marketing` · **Owned by:** — · **Status:** closed
+
+Recorded because its absence is worth as much as an entry. The band that makes
+the front door adapt was built entirely from what `@loom/runtime` already
+exports: `composeChange`, `confirmChange`, `fixedPolicy`, `gatePolicySchema`,
+`noopEventSink`, `sequentialIdFactory` and `applyDelta`, plus the nine starter
+primitives the panel composes. Nothing was added to `src/`, nothing in `src/` was
+edited, and no local component was grown.
+
+The one thing worth naming: the runtime's own strings could not be printed. A
+verdict's `reason.detail` reads *"removes 11 nodes"* and a stake factor's reads
+*"restructures at depth 1"* — both exactly right, and both unusable on a page a
+stranger arrives at. The front door translates them, keyed by the code the
+runtime returned, with the maps held total by the compiler.
+
+That is not a gap. A runtime that phrased its judgments for a marketing audience
+would be worse at the job it has, and a translation pinned to the code is a
+better arrangement than a runtime trying to serve two readers. It is worth
+recording only so that the next surface that needs plain words knows the
+translation is expected to live on the surface rather than upstream.

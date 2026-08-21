@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest"
 
 import { PALETTE_SWITCHER_LABEL } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
-import { renderSitePage, SITE_PAGES, treeFor } from "../render"
+import { renderTree, SITE_PAGES, treeFor } from "../render"
 import {
   DEFAULT_THEME,
   HOME,
@@ -41,7 +41,7 @@ const ORIGIN = "https://loom.example"
 const THEMES: readonly SiteThemeName[] = SITE_THEME_NAMES
 
 const rendered = (route: SiteRoute, theme: SiteThemeName) =>
-  renderSitePage(route, { origin: ORIGIN, theme })
+  renderTree(treeFor(route, { origin: ORIGIN, theme }))
 
 const markupOf = (route: SiteRoute, theme: SiteThemeName): string =>
   renderToStaticMarkup(rendered(route, theme).element)
