@@ -22,7 +22,7 @@ export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
   primitives: "50",
   /** Numbered records in `decisions/`, README excluded. */
-  decisions: "80",
+  decisions: "81",
   /** Delta operations. The whole vocabulary of structural change. */
   operations: "4",
 } as const

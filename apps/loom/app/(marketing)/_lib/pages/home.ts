@@ -10,9 +10,13 @@ import {
 } from "@loom/runtime"
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
+import type { AskId } from "../adapt/asks"
+import type { ChangeRecord } from "../adapt/record"
+import { BAND } from "../bands"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS, PLACEHOLDER_COPY } from "../copy"
 import { action, heading, prose, section, stack } from "../nodes"
+import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
   DOCS,
@@ -42,6 +46,25 @@ import {
 export type PageContext = {
   readonly origin: string
   readonly theme: SiteThemeName
+  /**
+   * What the visitor has asked the page for, off the address.
+   *
+   * Optional because two of the site's three pages have no such thing and
+   * because the landing page has to be buildable *before* the ask is run —
+   * the change is worked out against a page, so a page has to exist first.
+   */
+  readonly ask?: AskId
+  /**
+   * Whether the visitor has answered a change the rules held back.
+   *
+   * It changes nothing about how the page is *built* and everything about what
+   * is run against it, which is why it sits here beside `ask` rather than in the
+   * runner: both are what the address said, and the address is what a page of
+   * this site is a function of.
+   */
+  readonly approve?: boolean
+  /** What happened, once it has. See `render.ts` for why this arrives in a second pass. */
+  readonly record?: ChangeRecord
 }
 
 const hero = (ids: IdFactory, context: PageContext): LoomNode =>
@@ -101,7 +124,7 @@ const vocabulary = (ids: IdFactory): LoomNode =>
   })
 
 const capabilities = (ids: IdFactory): LoomNode =>
-  section(ids, { eyebrow: "What you get", width: "wide" }, "Change, with a paper trail", [
+  section(ids, { eyebrow: BAND.capabilities, width: "wide" }, "Change, with a paper trail", [
     buildElement(ids, {
       type: "loom.feature-grid",
       props: { columns: "four" },
@@ -144,7 +167,7 @@ const capabilities = (ids: IdFactory): LoomNode =>
 
 /** Numbers held against the repository by a test, rather than typed from memory. */
 const facts = (ids: IdFactory): LoomNode =>
-  section(ids, { tone: "surface", width: "wide", eyebrow: "Where it is today" }, "Built in the open", [
+  section(ids, { tone: "surface", width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     buildElement(ids, {
       type: "loom.stat-grid",
       props: { columns: "three", align: "center" },
@@ -230,7 +253,7 @@ const tier = (
  * recently: this is the first page it has appeared on.
  */
 const pricing = (ids: IdFactory): LoomNode =>
-  section(ids, { width: "wide", eyebrow: "Plans" }, "Pricing", [
+  section(ids, { width: "wide", eyebrow: BAND.pricing }, "Pricing", [
     prose(ids, PLACEHOLDER_COPY.pricingNotice, { tone: "muted", size: "small" }),
     buildElement(ids, {
       type: "loom.tier-table",
@@ -262,7 +285,7 @@ const pricing = (ids: IdFactory): LoomNode =>
   ])
 
 const questions = (ids: IdFactory): LoomNode =>
-  section(ids, { width: "wide", eyebrow: "Questions" }, "The ones worth asking first", [
+  section(ids, { width: "wide", eyebrow: BAND.questions }, "The ones worth asking first", [
     buildElement(ids, {
       type: "loom.faq-list",
       props: { columns: "two" },
@@ -336,7 +359,7 @@ const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: 
  * away.
  */
 const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "surface", width: "wide", eyebrow: "Keep going" }, "Where to go from here", [
+  section(ids, { tone: "surface", width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.feature-grid",
       props: { columns: "four" },
@@ -395,7 +418,12 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
 
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
-  const chrome: ChromeContext = { ...context, current: HOME }
+  const chrome: ChromeContext = {
+    origin: context.origin,
+    theme: context.theme,
+    current: HOME,
+    ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
+  }
 
   return createTree(
     buildElement(ids, {
@@ -409,6 +437,18 @@ export const homePageTree = (context: PageContext): LoomTree => {
         siteHeader(ids, chrome),
         hero(ids, context),
         vocabulary(ids),
+        /**
+         * Third band, and deliberately before anything that argues for the
+         * product. The hero has made the claim and the four words have named
+         * the steps; the next thing a visitor meets should be the claim being
+         * true, not four features explaining why it would be.
+         */
+        seeItHappenBand(ids, {
+          origin: context.origin,
+          theme: context.theme,
+          ...(context.ask === undefined ? {} : { ask: context.ask }),
+          ...(context.record === undefined ? {} : { record: context.record }),
+        }),
         capabilities(ids),
         /**
          * A rule rather than the diamond this band wants: `loom.divider`'s
