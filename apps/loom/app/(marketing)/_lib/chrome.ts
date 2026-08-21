@@ -1,8 +1,10 @@
 import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@loom/runtime"
 
+import type { AskId } from "./adapt/asks"
 import { PLACEHOLDER_COPY } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
+  askHref,
   DECISIONS_URL,
   HOME,
   internalHref,
@@ -57,7 +59,28 @@ export type ChromeContext = {
   readonly theme: SiteThemeName
   /** The route being rendered, so the menu can mark it rather than drop it. */
   readonly current: SiteRoute
+  /** What the visitor has asked the front door for, when they are on it. */
+  readonly ask?: AskId
+  readonly approve?: boolean
 }
+
+/**
+ * The same page, wearing another palette — and still the page the visitor made.
+ *
+ * The switcher used to rebuild the route's address from scratch, which quietly
+ * threw away whatever the visitor had asked the front door for: change the
+ * palette halfway through watching a change and the page snapped back to how it
+ * had arrived. That is the worst possible moment to lose it, because the two
+ * claims are being made at once — a re-theme touches only the root, and it is
+ * the *same* page underneath.
+ */
+const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): string =>
+  context.current.path === HOME.path
+    ? askHref(context.origin, {
+        theme: palette,
+        ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
+      })
+    : internalHref(context.origin, context.current.path, palette)
 
 /**
  * A menu item, and the page the reader is already on says so.
@@ -178,7 +201,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
             link(
               ids,
               SITE_THEMES[name].label,
-              internalHref(context.origin, context.current.path, name),
+              inAnotherPalette(context, name),
               { tone: "muted", scale: "small" }
             )
           ),

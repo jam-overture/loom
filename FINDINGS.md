@@ -3474,6 +3474,12 @@ small change to one band whenever the answer exists.
 different primitive rather than with a prop on this one — see the entry dated
 21 August below for why, and for what it costs.
 
+**Closed by the filer, same day.** `marketing-07-problems-not-prices` uses it for
+the band that says what Loom is for, which is its first use outside its own
+specimen page and is the exact band this was filed about. The answer is better
+than the request: the arrangement stayed on the arranger, and the cells needed no
+knowledge of being in a mosaic.
+
 The maintainer named `nextjs.org`'s layout as a reference we will keep using, so
 this is filed as a gap to know about rather than a request to act on now.
 
@@ -3979,3 +3985,180 @@ should say what I did — open the pull request, unsubscribe, exit — so it is 
 step rather than a judgement call. The second is cheaper and needs nobody to
 find the setting. Either way a routine should not be deciding this on its own
 each time.
+
+---
+
+## 2026-08-21 — `loom.split` cannot say how far apart its two regions sit
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
+**Status:** open — low priority, and worked around by not using the primitive
+
+`loom.split` takes `ratio`, `align` and `reverse`. It does not take `gap`, and
+passing one is refused:
+
+```
+invalid-props  loom.split  Unrecognized key(s) in object: 'gap'
+```
+
+Every other arranger in the library takes one. `loom.stack` has `gap`,
+`loom.grid` has `gap`, `loom.section` spaces its children — so a tree that lays
+two regions side by side is the one arrangement whose author cannot say how far
+apart they sit, and the omission reads as an oversight rather than a position.
+
+It is filed rather than requested because the band that hit it stopped using the
+primitive for an unrelated reason: a five-step record beside a five-button
+column left half the band empty and squeezed the record into a gutter forty
+characters wide, so the front door stacks them instead. The next surface that
+wants two regions with air between them will hit the same wall with no such
+escape.
+
+Worth knowing before it is designed: `gap` here is not the same question it is
+on `loom.stack`. A split that collapses to one column on a narrow page has two
+gaps — the one between the columns and the one between the stacked rows — and
+they are rarely the same number. `loom.grid` may already have solved this; if it
+has, the answer is to copy it rather than invent a second spelling.
+
+---
+
+## 2026-08-21 — the front door demonstrates the sequence, and it cannot demonstrate a model
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a positioning and budget question, not an engineering one
+
+The landing page now performs a real change on itself, with the record beside it
+([0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)).
+Five choices, one per kind of change plus one the rules refuse; each is worked
+out, measured, weighed, applied or held or refused, and reversible. Everything a
+visitor sees is the real sequence.
+
+**What it cannot show is somebody typing.** The choices are buttons, and the
+change behind each is computed from the page rather than asked of a model. That
+is 0057 working exactly as intended and it is the only affordable shape for this
+surface: a free-text box on the front door is a model call per visitor per idle
+curiosity, on the highest-traffic and lowest-intent page the project has, with no
+session to hold a budget in because 0081 keeps nothing per visitor.
+
+The gap it leaves is real, though, and it is the gap between what the hero
+promises — *ask for a change in your own words* — and what the band offers. The
+band says plainly that the change was worked out rather than asked of an AI, so
+nothing on the page is untrue; what is missing is the demonstration of the one
+sentence the site leads with.
+
+Three ways out, and choosing between them is the maintainer's:
+
+- **A budget on the front door.** A small number of free-text changes per
+  instance per hour, shared by everyone, degrading to the buttons when spent.
+  Cheap to build on top of what is there; it needs a number and a willingness to
+  spend it on strangers.
+- **Send them to the demo.** The portal's demo already has the box, the session
+  and the budget, and it is being moved to a public `/demo` by its own routine.
+  The front door would offer the buttons and then the door. Free, and it costs a
+  click at the moment of highest interest.
+- **Change the hero.** If free text is never going to be on this page, the
+  headline should promise what the page can do rather than what the product can.
+
+Related and still open: the demo behind the sign-in (20 August), and there being
+nothing to install (20 August). All three are the same question wearing three
+hats — *what, exactly, do we want a stranger to be able to do here?*
+
+---
+
+## 2026-08-21 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom marketing` · **Owned by:** — · **Status:** closed
+
+Recorded because its absence is worth as much as an entry. The band that makes
+the front door adapt was built entirely from what `@loom/runtime` already
+exports: `composeChange`, `confirmChange`, `fixedPolicy`, `gatePolicySchema`,
+`noopEventSink`, `sequentialIdFactory` and `applyDelta`, plus the nine starter
+primitives the panel composes. Nothing was added to `src/`, nothing in `src/` was
+edited, and no local component was grown.
+
+The one thing worth naming: the runtime's own strings could not be printed. A
+verdict's `reason.detail` reads *"removes 11 nodes"* and a stake factor's reads
+*"restructures at depth 1"* — both exactly right, and both unusable on a page a
+stranger arrives at. The front door translates them, keyed by the code the
+runtime returned, with the maps held total by the compiler.
+
+That is not a gap. A runtime that phrased its judgments for a marketing audience
+would be worse at the job it has, and a translation pinned to the code is a
+better arrangement than a runtime trying to serve two readers. It is worth
+recording only so that the next surface that needs plain words knows the
+translation is expected to live on the surface rather than upstream.
+
+---
+
+## 2026-08-21 — a sentence about the rules went stale one commit after the rules did
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` ·
+**Status:** closed by `marketing-07-problems-not-prices`
+
+Recorded because the failure is a pattern rather than a typo, and this is the
+second time this lane has had it.
+
+The front door's demonstration band tells a reader what the site protects
+*before* offering the choice that will be refused for exactly that reason — a
+refusal nobody saw coming reads as the page breaking rather than as a rule
+holding. The sentence said:
+
+> This site protects two things from being taken away: **what it charges**, and
+> the way out of it.
+
+The maintainer took pricing off the front door on 21 August. The rules changed in
+the same commit — `loom.tier-table` out, `loom.mosaic` in — and the sentence did
+not, because nothing connected them. It said the site protected a band that no
+longer existed, on a page whose entire argument is that it can tell you what its
+rules did.
+
+It was caught by eye, in a screenshot. That is not a mechanism, and it is exactly
+what [0078](decisions/0078-the-front-door-speaks-the-visitors-language.md) was
+written about: on this surface, an unchecked claim rots one defensible commit at
+a time.
+
+Closed by derivation rather than by correction. `PROTECTED_IN_PLAIN_WORDS` names
+each protected type in the words a visitor would use; the band builds the
+sentence from the rules themselves — the phrases and the count, deduplicated,
+because the menu and the footer are two pieces of one promise — and a protected
+type nobody has named throws while the page is being built.
+
+**The general lesson, for any lane with a page that describes its own
+configuration:** two spellings of one fact will diverge, and the one that
+diverges is always the prose. Derive the sentence, or assert it against the
+value. Do not proofread it.
+
+---
+
+## 2026-08-21 — 0081 carries an amendment rather than a superseding record
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a governance question, and a small one
+
+[0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)
+merged on the morning of 21 August. Hours later the maintainer took pricing off
+the front door, which made one paragraph inside it wrong: the record names what
+the site's rules protect, and one of the two things had ceased to exist.
+
+`decisions/README.md` says **never edit a record to reflect a change of
+direction** — mark it `Superseded by NNNN`, leave the text intact, write a new
+one. This is not a change of direction: everything 0081 decides is untouched, and
+what moved is an illustration inside the argument. Superseding a record whose
+decision still stands, over a detail, seemed worse than the alternative: it would
+put two records in the index describing one shape, and a reader would have to
+work out that the second exists to correct a noun.
+
+So the record keeps its text and its status, and carries a dated `## Amendment`
+section at the end saying what moved and why.
+
+That is a judgment call in a gap the convention does not cover, and it should be
+the maintainer's rather than a routine's. **Two things worth deciding:**
+
+- **Is an additive, dated amendment allowed** on an `Accepted` record when the
+  decision stands and a fact inside it has moved? If yes, it belongs in
+  `decisions/README.md` beside the superseding rules, because the next lane to
+  hit this will guess too.
+- **If not**, this should be reverted to a superseding record and I will write
+  one. Nothing depends on the answer; it is one section of one file.
+
+Worth noting that the alternative nobody should pick is leaving it alone. A
+merged record describing a band the site does not have is the same class of stale
+claim `docs/rollout.md` opens by warning about.
