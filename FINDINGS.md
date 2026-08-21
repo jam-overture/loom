@@ -3561,3 +3561,48 @@ composes somewhere too narrow, which is visible the moment anyone looks.
 Revisit when the support floor is not worth thinking about, or if a page turns
 up that puts a mosaic inside a column. Mine to fix; filed rather than left in a
 report because the next run in this lane will not remember it.
+
+---
+
+## 2026-08-21 — Vercel refuses to build a preview at all, so no PR has one
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an access question, not an engineering one, and it blocks
+every lane
+
+The open finding above says a routine cannot reliably *construct* a preview URL
+and cannot *verify* the one it publishes. This is worse and simpler: on **#121
+there is no deployment to point at.** `vercel[bot]` commented, and it is not a
+build log:
+
+> @jpizzo must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+The commit author on every routine branch is `jpizzo`, so this is not one PR's
+bad luck — it is every PR any routine opens from now until somebody adds that
+account to the Vercel team, or turns off the per-author authorisation check.
+
+Why it matters more than it looks: **every routine's brief requires the preview
+URL on the pull request**, and the primitives brief goes further — *"the
+deployed preview URL and a screenshot of every primitive you added, under both
+palettes. This is the surface that has to pop; it has to be looked at."* A
+screenshot committed to `reports/` is a workaround for the looking; it is not a
+workaround for a reviewer wanting to click through a page and use it.
+
+**The fix is one of two clicks**, both linked from the bot's own comment: add
+`@jpizzo` to the team, or connect that GitHub account to an existing Vercel
+member. Nothing in the repository can do either.
+
+Worth pairing with the 20 August finding that the demo sits behind the sign-in
+and the front door has nothing to show. Between them, a person arriving at this
+project through a pull request currently cannot see a running Loom page at all.
+
+**A second thing this run hit, and it is this lane's to say rather than to fix:**
+the repository is **private**, so a screenshot committed to `reports/` cannot be
+embedded in a pull request body either — GitHub will not proxy
+`raw.githubusercontent.com` for a private repo, and the image renders as a broken
+icon. #121's body links the report instead, which *does* render its images inline
+because relative paths resolve inside the repository's own file view. Any routine
+told to put a screenshot on a PR should link the report rather than embed the
+PNG, and that is worth a line in `docs/routines.md` — which is not this lane's
+file.
