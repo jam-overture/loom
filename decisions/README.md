@@ -134,3 +134,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0074](0074-a-palette-slot-that-carries-text-meets-aa.md) | A palette slot that carries text meets AA, and the palette moves rather than the bar | Accepted | §4b |
 | [0075](0075-a-primitive-is-audited-under-every-shape-its-schema-closes-over.md) | A primitive is audited under every shape its schema closes over | Accepted | §4 |
 | [0076](0076-loom-offers-a-host-the-contrast-bar-and-does-not-impose-it.md) | Loom offers a host the contrast bar and does not impose it | Accepted | §4b |
+| [0077](0077-a-palette-is-derived-once-and-committed-as-literals.md) | A palette is derived once and committed as literals | Accepted | §4b |

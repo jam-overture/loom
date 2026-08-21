@@ -1,3 +1,6 @@
+import { ADDITIONAL_FONT_PACKS } from "./font-packs.js"
+import { DERIVED_PALETTES } from "./palettes.js"
+import { ADDITIONAL_STYLE_PRESETS } from "./style-presets.js"
 import {
   fontPackSchema,
   paletteSchema,
@@ -283,14 +286,27 @@ export const preciseStylePreset: StylePreset = stylePresetSchema.parse({
   density: "comfortable",
 })
 
-export const STARTER_PALETTES: readonly Palette[] = [editorialPalette, boldPalette, minimalPalette]
+/**
+ * The three palettes this file authors by hand, then the eighteen derived ones
+ * (`palettes.ts`). The three come first because they are the ones the four
+ * surfaces wear and the ones the re-theme tests are written against; the rest
+ * are range.
+ */
+export const STARTER_PALETTES: readonly Palette[] = [
+  minimalPalette,
+  editorialPalette,
+  boldPalette,
+  ...DERIVED_PALETTES,
+]
 export const STARTER_FONT_PACKS: readonly FontPack[] = [
+  minimalSansFontPack,
   editorialSerifFontPack,
   boldSansFontPack,
-  minimalSansFontPack,
+  ...ADDITIONAL_FONT_PACKS,
 ]
 export const STARTER_STYLE_PRESETS: readonly StylePreset[] = [
+  preciseStylePreset,
   comfortableStylePreset,
   airyModernStylePreset,
-  preciseStylePreset,
+  ...ADDITIONAL_STYLE_PRESETS,
 ]

@@ -243,17 +243,40 @@ describe("theme registry", () => {
   it("offers a catalogue a model can choose from", () => {
     const catalogue = registry.catalogue()
 
-    expect(catalogue.palettes.map((entry) => entry.id)).toEqual(["editorial", "bold", "minimal"])
-    expect(catalogue.fontPacks.map((entry) => entry.id)).toEqual([
+    /**
+     * The house theme leads each list, and the other two hand-authored ones
+     * follow it. What comes after is range — asserted by count rather than by
+     * name, so adding a palette is one number here rather than a list to
+     * re-type, while the three a surface actually wears stay pinned.
+     */
+    expect(catalogue.palettes.map((entry) => entry.id).slice(0, 3)).toEqual([
+      "minimal",
+      "editorial",
+      "bold",
+    ])
+    expect(catalogue.fontPacks.map((entry) => entry.id).slice(0, 3)).toEqual([
+      "minimal-sans",
       "editorial-serif",
       "bold-sans",
-      "minimal-sans",
     ])
-    expect(catalogue.stylePresets.map((entry) => entry.id)).toEqual([
+    expect(catalogue.stylePresets.map((entry) => entry.id).slice(0, 3)).toEqual([
+      "precise",
       "comfortable",
       "airy-modern",
-      "precise",
     ])
+
+    expect(catalogue.palettes).toHaveLength(21)
+    expect(catalogue.fontPacks).toHaveLength(20)
+    expect(catalogue.stylePresets).toHaveLength(10)
+
+    /**
+     * Every id is unique, which `createThemeRegistry` enforces by overwriting
+     * rather than refusing — so a duplicate would silently drop a palette from
+     * the catalogue rather than fail here.
+     */
+    for (const group of [catalogue.palettes, catalogue.fontPacks, catalogue.stylePresets]) {
+      expect(new Set(group.map((entry) => entry.id)).size).toBe(group.length)
+    }
 
     /**
      * Every entry, not just the first. A description is all a model has when it

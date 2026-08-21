@@ -2162,6 +2162,202 @@
           ]
         },
         {
+          "module": "theme/derive",
+          "title": "Derive",
+          "summary": "Builds a palette that clears the bar, from three hues and a mode.",
+          "symbols": [
+            {
+              "name": "PaletteMode",
+              "kind": "type",
+              "signature": "type PaletteMode = \"light\" | \"dark\";",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "HueSpec",
+              "kind": "type",
+              "signature": "type HueSpec = {\n    /** 0–360. */\n    readonly hue: number;\n    /** 0–100. Zero gives a neutral grey, which is how the monochrome palettes are built. */\n    readonly saturation: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PaletteSpec",
+              "kind": "type",
+              "signature": "type PaletteSpec = {\n    readonly id: string;\n    readonly name: string;\n    readonly description: string;\n    readonly mode: PaletteMode;\n    /** The page itself. Its hue tints every neutral, which is what stops a palette looking like grey with colour on top. */\n    readonly canvas: HueSpec;\n    /** The colour that carries meaning as text. Darkened, or lightened, until it can. */\n    readonly accent: HueSpec;\n    /** The second colour. Never carries text, so it keeps its chroma — this is what `loom.hero`'s aurora paints. */\n    readonly secondary: HueSpec;\n    /**\n     * Lightness of the canvas, the surface behind a card, and the muted well, in\n     * that order. Defaults suit most palettes; a deeper dark mode or a warmer\n     * paper is where you would change them.\n     */\n    readonly levels?: readonly [number, number, number];\n    /**\n     * Forces `accent` to the end of the range rather than to the lightest value\n     * that clears the bar. A palette with no chroma has nothing to solve for, and\n     * solving anyway leaves a mid-grey primary button that reads as a disabled\n     * one.\n     */\n    readonly extremeAccent?: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "hslHex",
+              "kind": "function",
+              "signature": "const hslHex: (hue: number, saturation: number, lightness: number) => string",
+              "truncated": false,
+              "summary": "HSL to a six-digit hex, which is the only form `contrastRatio` measures."
+            },
+            {
+              "name": "solveLightness",
+              "kind": "function",
+              "signature": "const solveLightness: (hue: number, saturation: number, on: string, target: number, darkening: boolean) => string",
+              "truncated": false,
+              "summary": "The lightest ink (or darkest, on a dark palette) at this hue that still clears `target` against `on`."
+            },
+            {
+              "name": "derivePalette",
+              "kind": "function",
+              "signature": "const derivePalette: (spec: PaletteSpec) => Palette",
+              "truncated": false,
+              "summary": "Derives a palette. Total: it always returns one, and `auditPalette` on the result is the check that it worked — see `derivePaletteChecked` for the pair."
+            },
+            {
+              "name": "derivePaletteChecked",
+              "kind": "function",
+              "signature": "const derivePaletteChecked: (spec: PaletteSpec) => {\n    readonly palette: Palette;\n    readonly clean: boolean;\n}",
+              "truncated": false,
+              "summary": "The palette and its audit together, which is how a host should call this: the derivation is a rule and the audit is the check on it, and a rule that has never been checked is a rule that will eventually be wrong at one hue."
+            },
+            {
+              "name": "canCarryText",
+              "kind": "function",
+              "signature": "const canCarryText: (colour: string, on: string) => boolean",
+              "truncated": false,
+              "summary": "Whether a brand colour can carry text on a given ground."
+            }
+          ]
+        },
+        {
+          "module": "theme/font-packs",
+          "title": "Font packs",
+          "summary": "The seventeen font packs the starter library ships beyond the first three.",
+          "symbols": [
+            {
+              "name": "grotesqueFontPack",
+              "kind": "value",
+              "signature": "const grotesqueFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "transitionalFontPack",
+              "kind": "value",
+              "signature": "const transitionalFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "didoneFontPack",
+              "kind": "value",
+              "signature": "const didoneFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "humanistFontPack",
+              "kind": "value",
+              "signature": "const humanistFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "slabFontPack",
+              "kind": "value",
+              "signature": "const slabFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "monoFontPack",
+              "kind": "value",
+              "signature": "const monoFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "monoDisplayFontPack",
+              "kind": "value",
+              "signature": "const monoDisplayFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "geometricFontPack",
+              "kind": "value",
+              "signature": "const geometricFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "classicalFontPack",
+              "kind": "value",
+              "signature": "const classicalFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "condensedFontPack",
+              "kind": "value",
+              "signature": "const condensedFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "roundedFontPack",
+              "kind": "value",
+              "signature": "const roundedFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "nativeFontPack",
+              "kind": "value",
+              "signature": "const nativeFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "typewriterFontPack",
+              "kind": "value",
+              "signature": "const typewriterFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "interUiFontPack",
+              "kind": "value",
+              "signature": "const interUiFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "displaySerifFontPack",
+              "kind": "value",
+              "signature": "const displaySerifFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "spaceFontPack",
+              "kind": "value",
+              "signature": "const spaceFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "workhorseFontPack",
+              "kind": "value",
+              "signature": "const workhorseFontPack: FontPack",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ADDITIONAL_FONT_PACKS",
+              "kind": "value",
+              "signature": "const ADDITIONAL_FONT_PACKS: readonly FontPack[]",
+              "truncated": false,
+              "summary": "In catalogue order: the stack packs first, then the four that need a host to serve a face. A model reading down the list meets something that always works before something that depends on a deployment it cannot see."
+            }
+          ]
+        },
+        {
           "module": "theme/library",
           "title": "Library",
           "summary": "The starter vocabulary, ported from the Hermes registry.",
@@ -2234,7 +2430,7 @@
               "kind": "value",
               "signature": "const STARTER_PALETTES: readonly Palette[]",
               "truncated": false,
-              "summary": ""
+              "summary": "The three palettes this file authors by hand, then the eighteen derived ones (`palettes.ts`). The three come first because they are the ones the four surfaces wear and the ones the re-theme tests are written against; the rest are range."
             },
             {
               "name": "STARTER_FONT_PACKS",
@@ -2249,6 +2445,146 @@
               "signature": "const STARTER_STYLE_PRESETS: readonly StylePreset[]",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "theme/palettes",
+          "title": "Palettes",
+          "summary": "The eighteen palettes the starter library ships beyond the first three.",
+          "symbols": [
+            {
+              "name": "paperPalette",
+              "kind": "value",
+              "signature": "const paperPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "slatePalette",
+              "kind": "value",
+              "signature": "const slatePalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "sagePalette",
+              "kind": "value",
+              "signature": "const sagePalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "blushPalette",
+              "kind": "value",
+              "signature": "const blushPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "harbourPalette",
+              "kind": "value",
+              "signature": "const harbourPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "citrusPalette",
+              "kind": "value",
+              "signature": "const citrusPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "lilacPalette",
+              "kind": "value",
+              "signature": "const lilacPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "graphitePalette",
+              "kind": "value",
+              "signature": "const graphitePalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "clayPalette",
+              "kind": "value",
+              "signature": "const clayPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "linenPalette",
+              "kind": "value",
+              "signature": "const linenPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "midnightPalette",
+              "kind": "value",
+              "signature": "const midnightPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "carbonPalette",
+              "kind": "value",
+              "signature": "const carbonPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "plumPalette",
+              "kind": "value",
+              "signature": "const plumPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "forestPalette",
+              "kind": "value",
+              "signature": "const forestPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "emberPalette",
+              "kind": "value",
+              "signature": "const emberPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "duskPalette",
+              "kind": "value",
+              "signature": "const duskPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "obsidianPalette",
+              "kind": "value",
+              "signature": "const obsidianPalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "tidePalette",
+              "kind": "value",
+              "signature": "const tidePalette: Palette",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DERIVED_PALETTES",
+              "kind": "value",
+              "signature": "const DERIVED_PALETTES: readonly Palette[]",
+              "truncated": false,
+              "summary": "In the order a catalogue reads best: the light palettes, then the dark ones, each run from the most neutral to the most committed. A model reading down this list meets `paper` and `slate` before `plum`, which is the order a person would offer them in."
             }
           ]
         },
@@ -2305,6 +2641,69 @@
               "signature": "const createThemeRegistry: (input?: ThemeRegistryInput) => ThemeRegistry",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "theme/style-presets",
+          "title": "Style presets",
+          "summary": "The seven style presets the starter library ships beyond the first three, and the reason there are seven rather than seventeen.",
+          "symbols": [
+            {
+              "name": "editorialPrintStylePreset",
+              "kind": "value",
+              "signature": "const editorialPrintStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "brutalistStylePreset",
+              "kind": "value",
+              "signature": "const brutalistStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "softStylePreset",
+              "kind": "value",
+              "signature": "const softStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "compactStylePreset",
+              "kind": "value",
+              "signature": "const compactStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "technicalStylePreset",
+              "kind": "value",
+              "signature": "const technicalStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "showcaseStylePreset",
+              "kind": "value",
+              "signature": "const showcaseStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "cardStylePreset",
+              "kind": "value",
+              "signature": "const cardStylePreset: StylePreset",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ADDITIONAL_STYLE_PRESETS",
+              "kind": "value",
+              "signature": "const ADDITIONAL_STYLE_PRESETS: readonly StylePreset[]",
+              "truncated": false,
+              "summary": "In catalogue order, from the most neutral to the most committed: a model reading down the list meets `card` and `technical` before `brutalist`."
             }
           ]
         },
