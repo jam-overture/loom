@@ -8,7 +8,7 @@ import { plainText, referencedLessons } from "./text"
  * These run against the file in `lessons/`, not against a fixture.
  *
  * A fixture would test the parser against a copy of the schedule's shape, which
- * is the shape most likely to drift: the next lesson adds Set O by hand, in
+ * is the shape most likely to drift: the next lesson adds Set R by hand, in
  * markdown, and nothing about the fixture notices. Reading the real file means
  * a set the parser cannot read fails the build of all four surfaces, which is
  * the right amount of alarming.
@@ -16,14 +16,14 @@ import { plainText, referencedLessons } from "./text"
 
 describe("the review schedule, read as a queue", () => {
   it("finds every set in the file, in order", () => {
-    expect(REVIEW_SETS.map((set) => set.letter).join("")).toBe("ABCDEFGHIJKLMNO")
+    expect(REVIEW_SETS.map((set) => set.letter).join("")).toBe("ABCDEFGHIJKLMNOPQ")
   })
 
   it("stops at the tracking table rather than reading it as a set", () => {
     const last = REVIEW_SETS.at(-1)
 
-    expect(last?.letter).toBe("O")
-    expect(last?.questions).toHaveLength(8)
+    expect(last?.letter).toBe("Q")
+    expect(last?.questions).toHaveLength(7)
     expect(last?.closing.join(" ")).not.toContain("Confident-and-wrong")
   })
 
@@ -37,9 +37,11 @@ describe("the review schedule, read as a queue", () => {
   it("anchors the consolidation sets to a part and the rest to a lesson", () => {
     const parts = REVIEW_SETS.filter((set) => set.anchor.kind === "part").map((set) => set.letter)
 
-    expect(parts).toEqual(["E", "F", "M"])
+    expect(parts).toEqual(["E", "F", "M", "Q"])
     expect(reviewSet("set-m")?.anchor).toEqual({ kind: "part", part: "II" })
     expect(reviewSet("set-m")?.delayDays).toBe(7)
+    expect(reviewSet("set-q")?.anchor).toEqual({ kind: "part", part: "III" })
+    expect(reviewSet("set-q")?.delayDays).toBe(7)
   })
 
   it("gives every set at least three questions and every question some text", () => {

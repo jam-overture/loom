@@ -3846,3 +3846,63 @@ the sharper version — the loser cannot find out early even by looking, so the
 `git mv` at merge time is not avoidable diligence, it is the cost of the
 convention. Still cheap, still paid by every pair of routines that record on the
 same day, and still worth writing down in `docs/routines.md`.
+
+---
+
+## 2026-08-21 — a refusal that a repairer declined is indistinguishable from one nobody tried to repair
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while writing lesson 13. `CompositionOutcome` carries enough to tell a
+*repaired-and-refused-again* change from a first refusal, and not enough to tell
+a *repairer that declined* from *no repairer at all*.
+
+Three runs of `composeChange`, same tree, same policy, same refusal:
+
+```
+repaired, refused   -> rejected | stakes-at-refusal-floor
+      what came back: p_r6 | repairOf: p_r5
+repairer said no    -> rejected | stakes-at-refusal-floor
+      what came back: p_r7 | repairOf: undefined
+no repairer wired   -> rejected | stakes-at-refusal-floor
+      what came back: p_r9 | repairOf: undefined
+```
+
+The mechanism is in `attemptRepair`: when the repairer returns an error it emits
+`repair-failed` and then returns **the original refusal's** assessment and
+disposition, so the proposal the caller gets back carries no `repairOf` — which
+is exactly the shape a run with no repairer produces. The middle row is a real
+event ("we asked for something smaller and the interpreter could not find one")
+and the returned value says the same thing as the row where nothing was asked.
+
+Only the event stream separates them. A host that wants to tell an operator why
+a change is not happening has to fold `repair-failed` out of the narration to
+recover a fact the pipeline had in hand — which is the shape 0040's alternatives
+section rejects one layer up: *"a fact the adapter has at hand should not be
+reconstructed downstream from a sentence."*
+
+**Not a correctness bug**, and nothing in the record is lost: the journal holds
+`repair-failed` with its `InterpretationError`, so telemetry can see it and
+`interpretationFault` still names the actor. It is the synchronous return value
+that flattens.
+
+**Two shapes that would fix it**, and the choice is yours rather than mine:
+
+- an optional field on the `rejected` outcome carrying the repair attempt's
+  fate — absent when no repairer was wired, present with the
+  `InterpretationError` when one declined; or
+- a fourth outcome kind, which is heavier and probably wrong: the change *was*
+  refused, and the repair's failure is a detail of that refusal rather than a
+  different ending.
+
+The first is one optional field and one line in `attemptRepair`. Filed rather
+than fixed because `src/` is not this lane's, and a lessons pull request that
+also changes behaviour is one nobody can review.
+
+**Related and deliberately not filed:** `renderDelta` prints a `configure`'s
+prop keys without their values (`configure n_7 set title unset subtitle`) while
+`insert` prints an inserted node's props in full. Defensible either way — the
+projection exists to tell a model how broadly it reached — so lesson 13 carries
+it as a judgement call for the reader rather than as a bug report. If the prompt
+lane thinks the asymmetry is wrong, it is two lines in
+`src/interpretation/render.ts`.
