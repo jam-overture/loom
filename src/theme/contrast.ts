@@ -1,9 +1,9 @@
 import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
 
 /**
- * The bar 0074 set, as a function a host can run against its own palettes.
+ * The contrast bar, as a function a host can run against its own palettes (0074).
  *
- * 0074 says a palette slot that primitives put text in meets 4.5:1 against every
+ * A palette slot that primitives put text in meets 4.5:1 against every
  * background they pair it with, and the three starter palettes clear it because
  * a test iterating `STARTER_PALETTES` says so. `createThemeRegistry({ palettes })`
  * *replaces* that list (0049), so a host supplying its own gets `paletteSchema` —
@@ -20,7 +20,7 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
  * the same reason.
  */
 
-/** WCAG AA for body text. The bar 0074 chose, and the only one this asserts. */
+/** WCAG AA for body text — the bar this module holds every text slot to (0074). */
 export const TEXT_CONTRAST_MINIMUM = 4.5
 
 /**
@@ -50,7 +50,7 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
   { foreground: "accent-strong", background: "accent-subtle", where: "loom.badge accent, loom.icon soft" },
   { foreground: "fg-default", background: "accent-subtle", where: "loom.section tone accent" },
   /**
-   * `fg-subtle` is held to the body-text bar like the rest, which is 0074. The
+   * `fg-subtle` is held to the body-text bar like the rest (0074). The
    * slot recedes and none of what it carries is reliably large — a `loom.footer`
    * note row and a `loom.tier` note are ordinary small text — so a threshold of
    * 3:1 would be a bar chosen to fit the colours rather than the reader.

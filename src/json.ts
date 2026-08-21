@@ -1,6 +1,14 @@
 import { z } from "zod"
 
 /**
+ * The JSON floor the rest of the runtime stands on.
+ *
+ * A tree is written by a model, stored in a database, sent over a wire and read
+ * back, so the values it carries have to survive all four. This module says what
+ * those values may be and gives the schema that checks it.
+ */
+
+/**
  * Everything that crosses a Loom boundary — the tree, deltas, telemetry — must
  * round-trip through JSON without loss. Props are therefore restricted to JSON
  * values: no functions, no Dates, no undefined, no class instances.

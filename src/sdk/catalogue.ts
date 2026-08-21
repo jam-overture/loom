@@ -3,6 +3,14 @@ import type { PrimitiveCatalogue } from "../catalogue.js"
 import type { PrimitiveRegistry } from "./registry.js"
 
 /**
+ * The one function that turns a registry into something that can leave the
+ * process.
+ *
+ * Everything a model, a telemetry record or another service is told about a
+ * deployment's primitives comes through here.
+ */
+
+/**
  * The registry, projected into the catalogue other components read.
  *
  * A projection rather than the registry itself, because the registry holds

@@ -2,7 +2,7 @@ import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
 /**
- * The prop-validation seam, inherited from 0009.
+ * The prop-validation seam (0009).
  *
  * A primitive declares what its props must look like; something has to check
  * that the tree's props match, and this is where it happens — once, at the

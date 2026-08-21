@@ -1,3 +1,10 @@
+/**
+ * The tree, and every operation that produces another one.
+ *
+ * Nothing here mutates: a delta applied to a tree returns a new tree or an error
+ * saying why it could not. This is the model everything else in Loom is about.
+ */
+
 export * from "./apply.js"
 export * from "./builders.js"
 export * from "./compare.js"

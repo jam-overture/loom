@@ -3,6 +3,14 @@ import { z } from "zod"
 import { NAMESPACED_ID_PATTERN } from "../primitive-type.js"
 
 /**
+ * What a data source is, from the tree's side of the seam.
+ *
+ * A binding names a source and says nothing about where the answer comes from.
+ * This module holds that name and the shape of the answer, so a tree can ask a
+ * question no part of it knows how to answer.
+ */
+
+/**
  * The identifier of a registered data source — the contract between a binding
  * in the tree and whatever answers it.
  *

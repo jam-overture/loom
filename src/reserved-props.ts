@@ -15,13 +15,13 @@ import type { JsonObject, JsonValue } from "./json.js"
 /** Prop keys under this prefix belong to the runtime rather than to a primitive. */
 export const RESERVED_PROP_PREFIX = "loom:"
 
-/** 0049's three theme ids, honoured on the root node. */
+/** The palette, font pack and style preset a tree names, honoured on the root node (0049). */
 export const THEME_PROP_KEY = `${RESERVED_PROP_PREFIX}theme`
 
-/** 0058's bindings — what a node asks the host to answer, honoured on any node. */
+/** A node's bindings — what it asks the host to answer, honoured on any node (0058). */
 export const DATA_PROP_KEY = `${RESERVED_PROP_PREFIX}data`
 
-/** 0065's submission — which registered endpoint a form posts to, on any node. */
+/** A node's submission — which registered endpoint a form posts to, on any node (0065). */
 export const SUBMIT_PROP_KEY = `${RESERVED_PROP_PREFIX}submit`
 
 export const isReservedPropKey = (key: string): boolean => key.startsWith(RESERVED_PROP_PREFIX)

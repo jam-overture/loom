@@ -12,8 +12,8 @@ import {
 import type { PrimitiveRegistry } from "./registry.js"
 
 /**
- * The registration-time check 0010 asked for, as a function a host calls rather
- * than a side effect of building a registry.
+ * The registration-time check, as a function a host calls rather than a side
+ * effect of building a registry (0010).
  *
  * The split matters. Probing calls every registered component once, and calling
  * arbitrary components while a module graph is still evaluating is not something

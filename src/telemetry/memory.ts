@@ -13,6 +13,13 @@ import {
 } from "./journal.js"
 
 /**
+ * The telemetry journal that keeps its records in the process.
+ *
+ * It is the implementation the contract is written against, so what it does is
+ * what a journal is expected to do.
+ */
+
+/**
  * A journal in memory: the reference implementation of the contract, and the
  * one `pnpm dev` runs on.
  *

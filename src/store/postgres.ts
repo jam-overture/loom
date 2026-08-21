@@ -72,7 +72,7 @@ const storedRevisionSchema = z.object({
   delta: treeDeltaSchema,
   provenance: provenanceSchema,
   appliedAt: z.string().datetime(),
-  /** Null on every row written before 0029, and on every change nobody had to allow. */
+  /** Null on every row written before the column existed (0029), and on every change nobody had to allow. */
   answeredBy: z.string().nullable().optional(),
 })
 

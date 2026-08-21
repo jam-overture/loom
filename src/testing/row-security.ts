@@ -3,6 +3,13 @@ import { sql } from "drizzle-orm"
 import type { LoomDatabase } from "../store/database.js"
 
 /**
+ * Asking Postgres whether a table really is protected.
+ *
+ * A test helper, shared so that the store's suite and the journal's check the
+ * same promise the same way.
+ */
+
+/**
  * Whether Postgres has row level security on a table, read from the catalogue
  * rather than inferred from having run the statement.
  *

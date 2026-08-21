@@ -3,6 +3,14 @@ import { assertNever } from "../result.js"
 import type { NodeKind } from "./node.js"
 
 /**
+ * What a tree operation says when it refuses.
+ *
+ * Every failure in this module is a value rather than an exception, and every
+ * one of them is a case a caller can handle — a node that is not there, an id
+ * used twice, a move into a node that holds nothing.
+ */
+
+/**
  * Every way a tree operation can legitimately fail. Data only — rendering a
  * message is a separate concern so hosts can localise or structure it however
  * they like.

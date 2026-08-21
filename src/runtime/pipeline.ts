@@ -227,7 +227,7 @@ export const composeChange = async (
    * Resolved once, before interpretation, and used for every judgment this
    * intent produces — including a repair's. Resolving again per proposal would
    * let a repair be judged by a different policy than the proposal it replaces,
-   * which is the one comparison 0006 exists to make.
+   * which is the one comparison the gate exists to make (0006).
    */
   const policy = runtime.policySource.resolve({ tree, intent })
   emit({ type: "policy-resolved", intentId: intent.intentId, policy })

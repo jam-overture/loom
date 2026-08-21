@@ -5,6 +5,13 @@ import { describeStoreError } from "./errors.js"
 import type { TreeReader } from "./store.js"
 
 /**
+ * The adapter that lets the renderer read from the store.
+ *
+ * One function, and it is the join between the part of Loom that keeps trees
+ * and the part that draws them.
+ */
+
+/**
  * The store, as the renderer's `TreeSource`.
  *
  * §3 defined that seam and nothing implemented it, so §2 and §3 have until now

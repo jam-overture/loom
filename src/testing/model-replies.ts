@@ -71,8 +71,8 @@ export const FOREIGN_ID_REPLY = JSON.stringify({
 
 /**
  * Passes the schema, because the schema only says "a string", and fails the
- * parse. This is the failure mode 0014 accepted in exchange for the grammar
- * budget, so it is a fixture rather than an impossibility.
+ * parse. This is the failure mode accepted in exchange for the grammar budget
+ * (0014), so it is a fixture rather than an impossibility.
  */
 export const UNDECODABLE_PROP_REPLY = JSON.stringify({
   outcome: "change",

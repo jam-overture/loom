@@ -39,8 +39,9 @@ export const submissionPlanIsEmpty = (plan: SubmissionPlan): boolean =>
 
 /**
  * Two forms naming one endpoint are resolved once and share a target. That is
- * 0058's "identical questions are asked once" applied to a question that has no
- * params to differ by, and it is also the behaviour a reader would expect: two
+ * the rule that identical questions are asked once (0058), applied to a question
+ * that has no params to differ by, and it is also the behaviour a reader would
+ * expect: two
  * newsletter forms on one page post to the same place, and a per-form nonce
  * would break the second one every time somebody used the first.
  */
