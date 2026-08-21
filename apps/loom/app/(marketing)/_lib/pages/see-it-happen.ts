@@ -2,6 +2,7 @@ import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } fro
 
 import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
+import { protectedInPlainWords } from "../adapt/run"
 import { BAND } from "../bands"
 import { heading, prose, stack } from "../nodes"
 import { askHref, type SiteThemeName } from "../site"
@@ -167,6 +168,32 @@ const panel = (ids: IdFactory, context: SeeItHappenContext): LoomNode => {
   })
 }
 
+/**
+ * How many, in words. Small enough a table beats a library, and the sentence
+ * reads badly with a digit in it.
+ */
+const COUNT_IN_WORDS: readonly string[] = ["nothing", "one thing", "two things", "three things"]
+
+/**
+ * What this site protects, said before the reader meets a refusal.
+ *
+ * Every part of it is read off the rules: the phrases, and the count. A run that
+ * protects a fourth thing and forgets this sentence gets a page that says
+ * "three things" and lists four, which is the kind of near-miss nobody notices
+ * in review — so it cannot happen.
+ */
+const protectionNotice = (): string => {
+  const protectedThings = protectedInPlainWords()
+  const listed =
+    protectedThings.length === 1
+      ? protectedThings[0]
+      : `${protectedThings.slice(0, -1).join(", ")} and ${protectedThings[protectedThings.length - 1]}`
+
+  return `This site protects ${
+    COUNT_IN_WORDS[protectedThings.length] ?? `${protectedThings.length} things`
+  } from being taken away: ${listed}. Everything else a request may rearrange on its own — and one of the five above will be refused, which is the part worth watching.`
+}
+
 const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
   stack(ids, { direction: "column", gap: "snug", align: "start" }, [
     prose(ids, "What did you come here for?", { size: "lead" }),
@@ -197,11 +224,7 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
      * band says what this site protects, in one sentence, above the button that
      * will be refused for exactly that reason.
      */
-    prose(
-      ids,
-      "This site protects two things from being taken away: what it charges, and the way out of it. Everything else a request may rearrange on its own — and one of the five above will be refused, which is the part worth watching.",
-      { tone: "muted", size: "small" }
-    ),
+    prose(ids, protectionNotice(), { tone: "muted", size: "small" }),
   ])
 
 export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>

@@ -14,7 +14,7 @@ import {
 } from "../site"
 import { ASKS, askById, readAskId, type AskId } from "./asks"
 import { RECORD_VOCABULARY, type Verdict } from "./record"
-import { runAsk } from "./run"
+import { FRONT_DOOR_POLICY, PROTECTED_IN_PLAIN_WORDS, protectedInPlainWords, runAsk } from "./run"
 
 /**
  * The band where the front door stops describing itself and does it.
@@ -76,8 +76,8 @@ const EXPECTED: Readonly<Record<AskId, Verdict>> = {
   calmer: "landed",
   shorter: "landed",
   proof: "landed",
-  costs: "held",
-  "drop-prices": "refused",
+  problem: "held",
+  "drop-pitch": "refused",
 }
 
 describe("what this site's rules do with each request", () => {
@@ -99,8 +99,8 @@ describe("what this site's rules do with each request", () => {
    * else would make the band's "I say yes" button decoration.
    */
   it("applies the held change when the visitor says yes", async () => {
-    const ask = askById("costs")
-    if (ask === undefined) throw new Error("loom: the costs choice is gone")
+    const ask = askById("problem")
+    if (ask === undefined) throw new Error("loom: the get-to-the-point choice is gone")
 
     const held = await runAsk(basePage(), ask)
     const approved = await runAsk(basePage(), ask, true)
@@ -117,7 +117,7 @@ describe("what this site's rules do with each request", () => {
    * here because the band is where a visitor is told it.
    */
   it("still refuses the refused change when the visitor says yes", async () => {
-    const ask = askById("drop-prices")
+    const ask = askById("drop-pitch")
     if (ask === undefined) throw new Error("loom: the refused choice is gone")
 
     const approved = await runAsk(basePage(), ask, true)
@@ -127,13 +127,13 @@ describe("what this site's rules do with each request", () => {
     expect(shapeOf(approved.page)).toBe(shapeOf(basePage()))
   })
 
-  it("leaves the plans on the page, which is what the rules protect", async () => {
-    const ask = askById("drop-prices")
+  it("leaves the point of the product on the page, which is what the rules protect", async () => {
+    const ask = askById("drop-pitch")
     if (ask === undefined) throw new Error("loom: the refused choice is gone")
 
     const approved = await runAsk(basePage(), ask, true)
 
-    expect(countOf(approved.page, "loom.tier-table")).toBe(1)
+    expect(countOf(approved.page, "loom.mosaic")).toBe(1)
   })
 })
 
@@ -276,6 +276,43 @@ describe("the page a choice leaves behind", () => {
     const markup = renderToStaticMarkup(renderTree(page).element)
 
     expect([...markup.matchAll(/<h1\b/g)]).toHaveLength(1)
+  })
+})
+
+/**
+ * What the band tells a reader it protects, held against what is protected.
+ *
+ * A refusal the reader did not see coming reads as the page breaking rather
+ * than as a rule holding, so the band says what this site protects before
+ * offering the button that will be refused. That sentence is the thing that goes
+ * stale — it still said "what it charges" for one commit after pricing left the
+ * front door — so every word of it is derived, and this is what holds the
+ * derivation honest.
+ */
+describe("what the band says this site protects", () => {
+  it.each(FRONT_DOOR_POLICY.protectedPrimitiveTypes)("says what %s is, in plain words", (type) => {
+    expect(PROTECTED_IN_PLAIN_WORDS[type]).toBeTypeOf("string")
+  })
+
+  it("says it on the page, in the visitor's words and not in ours", () => {
+    const words = wordsOf(basePage().root)
+
+    for (const phrase of protectedInPlainWords()) expect(words).toContain(phrase)
+    for (const type of FRONT_DOOR_POLICY.protectedPrimitiveTypes) {
+      expect(words).not.toContain(type)
+    }
+  })
+
+  it("counts them rather than claiming a number", () => {
+    /**
+     * Two, today. The assertion is not the number — it is that the page and the
+     * rules agree on it, so a fourth protected thing cannot leave the page
+     * saying "two things" and listing three.
+     */
+    const words = wordsOf(basePage().root)
+    const named = protectedInPlainWords().length
+
+    expect(words).toContain(`protects ${named === 1 ? "one thing" : `${named === 2 ? "two" : "three"} things`}`)
   })
 })
 

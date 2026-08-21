@@ -38,19 +38,25 @@ import { nothingHappened, recordOf, type ChangeRecord } from "./record"
  * The rules this site publishes under, and they are a real set of rules rather
  * than a set arranged to make a demonstration look good.
  *
- * Two things are protected: **what the site charges, and the way out of it.**
- * That is the rule an ordinary business would actually write — an AI may
- * rearrange the argument all it likes, and it may not quietly take the prices
- * or the menu off the page — and writing it produces, without any further
- * contrivance, all three answers a set of rules can give:
+ * Two things are protected: **what the site says it is for, and the way out of
+ * it.** That is the rule an ordinary business would actually write — an AI may
+ * rearrange the argument all it likes, and it may not quietly take away the
+ * statement of what the product does, or the menu that leads out — and writing
+ * it produces, without any further contrivance, all three answers a set of rules
+ * can give:
  *
  * - Adding a band, taking the questions away and calming the top of the page are
  *   nobody's crisis. They **land on their own**.
- * - Lifting the plans to the top *moves* something protected, which is not
- *   damage but is not a machine's call either. It **stops and asks a person**,
- *   and the person here is the visitor.
- * - Taking the plans away **destroys** something protected, and that is refused
+ * - Lifting the point of the product to the top *moves* something protected,
+ *   which is not damage but is not a machine's call either. It **stops and asks
+ *   a person**, and the person here is the visitor.
+ * - Taking that band away **destroys** something protected, and that is refused
  *   outright. Saying yes does not help, which is the point of a floor.
+ *
+ * It was the pricing table here until 21 August, when the maintainer took
+ * pricing off the front door. `loom.mosaic` is the band that replaced it and is
+ * what the list now names — the type is the handle the rules have, and the words
+ * a visitor reads for it are "what this site says it is for".
  *
  * A **named** set rather than an edited default
  * ([0033](../../../../../../decisions/0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md)):
@@ -60,8 +66,48 @@ import { nothingHappened, recordOf, type ChangeRecord } from "./record"
 export const FRONT_DOOR_POLICY: GatePolicy = gatePolicySchema.parse({
   ...defaultGatePolicy,
   policyId: "front-door",
-  protectedPrimitiveTypes: ["loom.tier-table", "loom.nav", "loom.footer"],
+  protectedPrimitiveTypes: ["loom.mosaic", "loom.nav", "loom.footer"],
 })
+
+/**
+ * What each protected type is, said the way a visitor would say it.
+ *
+ * The band has to tell a reader what this site protects *before* offering the
+ * button that will be refused for exactly that reason — a refusal the reader
+ * did not see coming reads as the page breaking rather than as a rule holding.
+ * So the sentence exists, and the sentence is the thing that goes stale: it
+ * still said "what it charges" for one commit after pricing left the front door.
+ *
+ * Deriving it from the list is what stops that happening twice. A protected type
+ * with no plain words here throws while the page is being built, which is a
+ * failing test rather than a landing page quietly making a promise its rules no
+ * longer keep.
+ */
+export const PROTECTED_IN_PLAIN_WORDS: Readonly<Record<string, string>> = {
+  "loom.mosaic": "what it says it is for",
+  "loom.nav": "the way out of it",
+  "loom.footer": "the way out of it",
+}
+
+/**
+ * The protected list as a reader meets it: no type names, and deduplicated,
+ * because the menu and the closing band are two pieces of one promise and a
+ * visitor told "the way out of it, and the way out of it" is being read a list
+ * of implementation details.
+ */
+export const protectedInPlainWords = (): readonly string[] => [
+  ...new Set(
+    FRONT_DOOR_POLICY.protectedPrimitiveTypes.map((type) => {
+      const words = PROTECTED_IN_PLAIN_WORDS[type]
+
+      if (words === undefined) {
+        throw new Error(`loom: ${type} is protected and nothing on the front door says so`)
+      }
+
+      return words
+    })
+  ),
+]
 
 export type AskRun = {
   /** The page as the visitor should now see it: changed if the rules allowed it. */

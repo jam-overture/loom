@@ -45,7 +45,7 @@ import { REPOSITORY_URL } from "../site"
 /** What the record says worked the change out. It is not a model, and it says so. */
 export const FRONT_DOOR_INTERPRETER = "loom/front-door-ask"
 
-export type AskId = "costs" | "shorter" | "proof" | "calmer" | "drop-prices"
+export type AskId = "problem" | "shorter" | "proof" | "calmer" | "drop-pitch"
 
 export type Ask = {
   readonly id: AskId
@@ -95,21 +95,21 @@ const openingBand = (
  * change that reverses this one be a single step
  * ([0044](../../../../../../decisions/0044-a-move-relocates-a-subtree-and-the-analysis-measures-the-subtree.md)).
  */
-const costs: Ask = {
-  id: "costs",
-  utterance: "Show me what it costs before anything else.",
-  label: "Price first",
+const problem: Ask = {
+  id: "problem",
+  utterance: "Skip the tour. What problem does this actually solve?",
+  label: "Get to the point",
   rationale:
-    "This lifts the whole band of plans to just under the headline and leaves every other band where it was. Nothing is copied and nothing is rewritten: the band under the headline is the one that was further down.",
+    "This lifts the whole band about what Loom is for to just under the headline and leaves every other band where it was. Nothing is copied and nothing is rewritten: the band under the headline is the one that was further down.",
   plan: (page) => {
     const opening = openingBand(page)
-    const plans = bandAt(page, BAND.pricing)
+    const point = bandAt(page, BAND.problems)
 
-    if (opening === undefined || plans === undefined) return undefined
-    if (plans.index === opening.index + 1) return undefined
+    if (opening === undefined || point === undefined) return undefined
+    if (point.index === opening.index + 1) return undefined
 
     return [
-      { op: "move", nodeId: plans.band.id, parentId: page.root.id, index: opening.index + 1 },
+      { op: "move", nodeId: point.band.id, parentId: page.root.id, index: opening.index + 1 },
     ]
   },
 }
@@ -217,26 +217,32 @@ const calmer: Ask = {
  * are asked for — so the band offers a request that is refused, in front of the
  * visitor, with the reason attached.
  *
- * It is refused because the plans are one of the two things this site's rules
- * protect, and taking a protected piece away is the one weight that sits at the
- * refusal floor rather than under it. There is no button to override it. That is
- * the difference between a rule and a suggestion.
+ * It is refused because **what this site says it is for** is one of the two
+ * things its rules protect, and taking a protected piece away is the one weight
+ * that sits at the refusal floor rather than under it. There is no button to
+ * override it. That is the difference between a rule and a suggestion.
+ *
+ * It was the pricing band until 21 August, when the maintainer took pricing off
+ * the front door. The choice of what to protect got better for it: a business
+ * protecting its price list is ordinary, and a business refusing to let a
+ * machine delete the statement of what it does for people is the same instinct
+ * pointed at the thing that actually matters.
  */
-const dropPrices: Ask = {
-  id: "drop-prices",
-  utterance: "Take the plans off the page. Nobody wants to see prices.",
-  label: "Delete the prices",
+const dropPitch: Ask = {
+  id: "drop-pitch",
+  utterance: "Cut the sales pitch. I only want to see the product.",
+  label: "Cut the pitch",
   rationale:
-    "This takes the plans away — the whole band, the three columns and everything listed under them. What it destroys is one of the two things this site's rules protect, which is a fact about the change rather than about who asked for it.",
+    "This takes away the whole band about what Loom is for, and the four things under it. What it destroys is one of the two things this site's rules protect, which is a fact about the change rather than about who asked for it.",
   plan: (page) => {
-    const plans = bandAt(page, BAND.pricing)
+    const point = bandAt(page, BAND.problems)
 
-    return plans === undefined ? undefined : [{ op: "remove", nodeId: plans.band.id }]
+    return point === undefined ? undefined : [{ op: "remove", nodeId: point.band.id }]
   },
 }
 
 /** Every choice, in the order the band offers them. */
-export const ASKS: readonly Ask[] = [costs, shorter, proof, calmer, dropPrices]
+export const ASKS: readonly Ask[] = [problem, shorter, proof, calmer, dropPitch]
 
 export const askById = (id: string | undefined): Ask | undefined =>
   id === undefined ? undefined : ASKS.find((ask) => ask.id === id)

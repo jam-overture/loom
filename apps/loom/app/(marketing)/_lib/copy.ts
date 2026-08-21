@@ -34,16 +34,21 @@ export const FACTS = {
  * against each other in both directions: a placeholder that stopped being used
  * is a question that has quietly been answered by deletion, and a placeholder
  * used but unlisted is one nobody will remember to ask about.
+ *
+ * **There is one left, and that is the news.** Seven of the eight were the
+ * pricing band — a notice and three tiers with their prices held open, built as
+ * structure so the shape could be reviewed before the numbers existed. On
+ * 21 August the maintainer said the front door does not need pricing yet: the
+ * marketplace is a long way off and how to position it is undecided. So the band
+ * is gone rather than waiting, and the seven placeholders went with it.
+ *
+ * Deleting the shape rather than keeping it empty is the right call for a reason
+ * worth writing down: a band marked *placeholder* still occupies the most
+ * expensive space a page has, and a visitor reading three empty tiers learns
+ * that this product has not decided what it is. An absent band says nothing at
+ * all, which is a great deal better than that.
  */
 export const PLACEHOLDER_COPY = {
-  pricingNotice:
-    "Placeholder — pricing is not decided. The band below is structure, so that the shape can be reviewed before the numbers exist.",
-  tierStarterName: "Tier one",
-  tierStarterPrice: "—",
-  tierTeamName: "Tier two",
-  tierTeamPrice: "—",
-  tierEnterpriseName: "Tier three",
-  tierEnterprisePrice: "Talk to us",
   licence: "Licensing is not settled, and this line is where it will be stated.",
 } as const
 
