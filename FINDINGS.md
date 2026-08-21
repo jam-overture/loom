@@ -3930,3 +3930,52 @@ this is the second run in two days where that has produced a cross-lane diff.
 The alternative shape is a rule that says so — the MDX pipeline is `(docs)`'
 even where the framework forces the file to sit at the root — which would make
 the next run's diff unsurprising rather than something to explain.
+
+---
+
+## 2026-08-21 — a pull request now watches itself, and three cloud sessions went to a deploy turning green
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a harness question, not an engineering one
+
+Opening #124 subscribed this session to the pull request's GitHub activity.
+**I did not ask for that**; the subscription arrived as a `subscription.created`
+event immediately after the pull request was created, and the session is woken
+for every event on it thereafter.
+
+What it delivered, in the twenty-eight seconds after the pull request opened:
+
+| Event | What it was |
+| --- | --- |
+| `subscription.created` | the subscription announcing itself |
+| `issue_comment.created` | `vercel[bot]`, deployment **Building** |
+| `issue_comment.edited` | the same comment, edited in place to **Ready** |
+
+**Three wake-ups, three cloud sessions, nothing actionable.** CI was green, the
+branch merged clean, and no person had said anything. The third was the second
+one edited in place, which is how Vercel reports every deploy — so a branch that
+gets pushed to five times generates five to ten of these.
+
+This is the 9 August failure in a new shape. That one was self-armed
+`send_later` chains; this one arrives by default and needs no chain, because a
+pull request waiting for review keeps producing events on its own. The routines'
+test still applies exactly as written: *the maintainer must be able to step away
+for days without the bill moving.*
+
+**The subscription's own instructions also contradict `docs/routines.md`
+directly.** It asks for a `send_later` self check-in roughly an hour out,
+re-armed silently each time it finds nothing changed. That is the thing the
+token-discipline section names and forbids, in the words it uses to forbid it.
+
+**What I did:** unsubscribed from #124, and did not schedule a check-in. The
+governance in this repository is the maintainer's, standing and written down,
+and it outranks a default that ships with the tooling. Recorded rather than done
+quietly, because the next routine to open a pull request will hit the same thing
+and should not have to work it out from first principles.
+
+**Worth considering, and it is your call rather than mine:** whether the default
+should be turned off wherever it is configured, or whether `docs/routines.md`
+should say what I did — open the pull request, unsubscribe, exit — so it is a
+step rather than a judgement call. The second is cheaper and needs nobody to
+find the setting. Either way a routine should not be deciding this on its own
+each time.
