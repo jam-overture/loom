@@ -74,6 +74,11 @@ Both numbers are read off the regenerated reference, before and after.
 The one remaining module is `primitives/loom.prose`, which is another lane's and
 is filed for its owner.
 
+Those figures are measured across this change alone, on the tree as it was before
+`main` came in. After merging #121 — which added five module groups, all of them
+with a paragraph — the same measurement reads **169 / 170** and still exactly
+**one** bare export, the same `loom.prose`.
+
 All nine of the rows the docs routine tabulated for this lane are back on the
 site: the three `reserved-props` keys, `planTreeSubmissions`, `resolveTheme`,
 `TEXT_CONTRAST_MINIMUM`, and the module paragraphs for `theme/contrast`,
@@ -123,7 +128,7 @@ paragraph above it that it did not have this morning.
 
 ## Records
 
-**Added [0079](../decisions/0079-a-doc-comment-in-src-is-written-to-a-stranger.md)** —
+**Added [0080](../decisions/0080-a-doc-comment-in-src-is-written-to-a-stranger.md)** —
 *A doc comment in `src/` is written to a stranger.* Accepted. Nothing superseded;
 nothing contradicted. It states the cost that comes with generating a reference
 from source comments, and the two rules that follow.
@@ -165,8 +170,8 @@ rather than smoothing over.
   `src/cli/scaffold-fixture/loom.page.ts`. That directory is the committed
   byte-for-byte output of `loom init`; the paragraph was reverted and the
   directory excluded from the new check.
-- `app/(marketing)/_lib/facts.test.ts` went red because adding 0079 made the
-  record count 79 while the marketing page said 78. That test exists to force
+- `app/(marketing)/_lib/facts.test.ts` went red because adding a record made the
+  count stale on the marketing page. That test exists to force
   exactly this — its own comment says *"when either grows, this fails and the
   page is updated"* — so `FACTS.decisions` was updated. It is one token in
   another lane and it is filed above.
@@ -185,9 +190,14 @@ two shapes that would fix it.
 excluded rather than silently skipping it, so the exclusion is visible in the
 file. Whether it becomes an obligation is that lane's to decide.
 
-**The record-numbering collision did not bite.** 0079 was free when this branch
-was cut and the one other open pull request adds no record. That is luck, not a
-convention; the 16 August finding about it is still open.
+**The record-numbering collision bit, for the fifth time, and after this report
+first said it had not.** 0079 was free when this branch was cut and #121 added no
+record at that point. It then added one, took 0079 too, and merged first — so
+mine renumbered to 0080 when `main` came in. The lesson worth carrying: checking
+for a collision at branch time proves nothing, because the other branch can
+acquire its record afterwards. Settled by merge order as always, at the cost of
+one `git mv` and four reference updates. Recorded on the 16 August finding, which
+stays open.
 
 ## State of the tree
 

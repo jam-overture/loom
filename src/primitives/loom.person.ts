@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { monogramOf } from "./monogram.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
@@ -47,30 +48,6 @@ const props = z
 type Props = z.infer<typeof props>
 
 const PHOTO_SIZE = "4.5rem"
-
-/**
- * The first letter of the first two words, which is the convention a reader
- * recognises and the only one that does not need a name to be two words. A name
- * written in a script with no case is unchanged by `toUpperCase`, which is the
- * right behaviour rather than a missing one.
- *
- * It takes `string | undefined` although the schema says `string`, and that is
- * not defensiveness for its own sake: a primitive is called with an unvalidated
- * bag by the conformance probe (`conformance.ts`) and, per
- * [0008](../../decisions/0008-the-renderer-is-a-total-pure-projection.md), must
- * be total. Every other primitive gets this for free because React renders
- * `undefined` as nothing; this one is the first to *compute* from a prop, so it
- * is the first that has to say so. Throwing here made `loom.person` the only
- * primitive in the library the portal could not probe.
- */
-const monogramOf = (name: string | undefined): string =>
-  (name ?? "")
-    .split(/\s+/u)
-    .filter((part) => part.length > 0)
-    .slice(0, 2)
-    .map((part) => [...part][0] ?? "")
-    .join("")
-    .toUpperCase()
 
 export const loomPerson = definePrimitive({
   type: "loom.person",

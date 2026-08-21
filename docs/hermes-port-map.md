@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 31 blocks, 45 primitives.**
+**Done — 32 blocks, 50 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -75,6 +75,7 @@ stands alone.
 | `articles`, `press`, `case-studies`, `tutorials`, `recipes` | `loom.article-grid` / `loom.article` | pair ✅ |
 | `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` | pair ✅ |
 | `contactform`, `newsletter` | `loom.form` / `loom.field` (+ `loom.option`, `loom.button`) | pair ✅ |
+| `code-block` | `loom.code` | atomic ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -118,13 +119,12 @@ share, which is the order to build them in.
 | Comparison | `comparison-table` | `loom.comparison-table` / `loom.comparison-row` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
 
-**Atomic to build — 4 blocks.**
+**Atomic to build — 3 blocks.**
 
 | Hermes block | Why it cannot decompose |
 | --- | --- |
 | `marquee` | continuous animation over its content; splitting produces nodes that mean nothing alone. **Its content is a binding** — see below |
 | `embed` | a third-party `iframe` with an aspect ratio it must maintain |
-| `code-block` | preserves whitespace and needs a monospace treatment nothing else in the library has |
 | `before-after` | two images and a divider position — self-measuring if it is ever draggable |
 
 **Blocked — 2 blocks.** `contactform` and `newsletter` left this table on 18
@@ -161,17 +161,24 @@ landed on 19 August for that reason, and they are the first primitives in the
 library with no Hermes ancestor at all. Read the count below as "of the Hermes
 catalogue", not "of the library".
 
+Four more joined them on 21 August, and they are the same shape of gap. Hermes
+sold a creator's *services*; nothing in the seventy is about a **tool**, so
+nothing in it is a key cap or an avatar reachable outside a person record, and
+`loom.mosaic` arranges cells at sizes no Hermes block ever varied. `loom.kbd`,
+`loom.avatar`, `loom.avatar-row` and `loom.mosaic` have no row above because
+there is no block they port.
+
 ## Where this leaves the count
 
 | | Blocks |
 | --- | --- |
-| Ported | 31 |
+| Ported | 32 |
 | Need no primitive | 13 |
 | Pairs still to build | 20 (7 pairs) |
-| Atomic still to build | 4 |
+| Atomic still to build | 3 |
 | Blocked on a seam | 2 |
 
-**44 of 70 are settled**, and the 20 that remain are seven pairs rather than
+**45 of 70 are settled**, and the 20 that remain are seven pairs rather than
 twenty primitives. That is the number worth quoting, because "70 blocks"
 has been the shape of this job since the port started and it was never the real
 size of it.

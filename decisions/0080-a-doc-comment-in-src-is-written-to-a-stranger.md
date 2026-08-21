@@ -1,4 +1,4 @@
-# 0079. A doc comment in `src/` is written to a stranger
+# 0080. A doc comment in `src/` is written to a stranger
 
 **Status:** Accepted
 **Date:** 2026-08-21

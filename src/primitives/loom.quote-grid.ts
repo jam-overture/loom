@@ -38,10 +38,12 @@ type Props = z.infer<typeof props>
 const MINIMUMS = { auto: "20rem", two: "26rem", three: "19rem" } as const
 
 /**
- * There is no `flow: "grid" | "columns"` prop, and the reason is 0054: a
- * container's name states its arrangement, so a prop that switched this one
- * from a grid to a multi-column flow would make the name wrong for half its
- * values. The masonry wall is a different container — `loom.quote-column`,
+ * There is no `flow: "grid" | "columns"` prop, and the reason is the rule that
+ * a container's name states its arrangement
+ * ([0054](../../decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md)):
+ * a prop that switched this one from a grid to a multi-column flow would make
+ * the name wrong for half its values.
+ * The masonry wall is a different container — `loom.quote-column`,
  * unbuilt — and it is buildable today: `break-inside: avoid` has to land on the
  * *children*, which a descendant rule in the shared stylesheet can do, the way
  * `details[open] > summary .loom-marker` already does. It is a unit of its own,
