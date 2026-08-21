@@ -1,6 +1,15 @@
 import { z } from "zod"
 
 /**
+ * The scale the gate weighs a change on, and the order it compares two of them
+ * in.
+ *
+ * It lives on its own because both halves of the runtime read it and neither
+ * owns it: the analysis assigns a level, the policy has a ceiling, and a
+ * comparison between the two is the whole of the verdict.
+ */
+
+/**
  * How much damage a change does if it turns out to be wrong. Four levels is
  * enough to separate "just do it" from "ask first" from "refuse", with one
  * level of headroom in between.

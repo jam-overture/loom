@@ -1,5 +1,13 @@
 import { z } from "zod"
 
+/**
+ * The names a tree uses to reach what a deployment registered.
+ *
+ * One grammar serves every registry — primitives, data sources, submission
+ * endpoints — so that naming a capability looks the same wherever a tree does
+ * it.
+ */
+
 const SEGMENT = "[a-z][a-z0-9]*(?:-[a-z0-9]+)*"
 
 /**

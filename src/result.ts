@@ -2,6 +2,8 @@
  * Loom never throws across a module seam. Every fallible operation returns a
  * Result so callers must acknowledge failure in the type system.
  */
+
+/** Either a value or an error, and the type says which until the caller checks. */
 export type Result<TValue, TError> =
   | { readonly ok: true; readonly value: TValue }
   | { readonly ok: false; readonly error: TError }

@@ -3,6 +3,14 @@ import { sql } from "drizzle-orm"
 import type { LoomDatabase } from "../store/database.js"
 
 /**
+ * Creating the table the telemetry journal writes to, with its row level
+ * security switched on.
+ *
+ * The same shape as the store's migration, kept separate because a deployment
+ * may keep its journal somewhere its trees are not.
+ */
+
+/**
  * The journal's schema, as statements a host can run.
  *
  * One statement per entry for the same reason the store's DDL is a list: a

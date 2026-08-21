@@ -67,7 +67,7 @@ export type RenderDiagnostic =
     }
   | {
       /**
-       * A theme below the root, which 0049 does not mount: the variables are
+       * A theme below the root, which is not mounted (0049): the variables are
        * mounted once, at the render root, so a nested selection would be read
        * by nothing. Reported rather than dropped, because someone meant it.
        */

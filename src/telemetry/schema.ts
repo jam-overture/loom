@@ -2,6 +2,13 @@ import { sql } from "drizzle-orm"
 import { bigserial, index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
 /**
+ * The table the telemetry journal is stored in, as Drizzle sees it.
+ *
+ * The column choices here are the ones the journal's promises rest on — arrival
+ * order, and one copy of every fact.
+ */
+
+/**
  * One table, because a journal is one thing: an append-only list of what the
  * runtime narrated.
  *

@@ -1,8 +1,8 @@
 import type { EpisodeFold, ProposalEpisode } from "./episode.js"
 
 /**
- * 0007 made confidence self-graded and trusted on purpose, on one condition:
- * that it be calibrated. This is the measurement half of that promise. It
+ * Confidence is self-graded and trusted on purpose, on one condition: that it
+ * be calibrated (0007). This is the measurement half of that promise. It
  * compares what the model claimed against what became of the claim, and it
  * changes nothing — no threshold moves, no policy reads it.
  *
@@ -89,7 +89,7 @@ export type PolicyCalibration = {
   /**
    * The distinct fingerprints the judgments in this segment named, sorted.
    *
-   * A name is host-declared, and 0033 asked hosts to rename a policy they edit.
+   * A name is host-declared, and hosts are asked to rename a policy they edit (0033).
    * More than one fingerprint under one name means that did not happen, and this
    * row is pooling gates that differ by more than what they are called — the same
    * error the segments exist to correct, one level down. `rulesetContinuityOf`

@@ -372,7 +372,7 @@
         {
           "module": "data/source",
           "title": "A source a node may name",
-          "summary": "",
+          "summary": "What a data source is, from the tree's side of the seam.",
           "symbols": [
             {
               "name": "sourceIdSchema",
@@ -820,7 +820,7 @@
         {
           "module": "json",
           "title": "JSON, narrowly defined",
-          "summary": "",
+          "summary": "The JSON floor the rest of the runtime stands on.",
           "symbols": [
             {
               "name": "JsonValue",
@@ -911,7 +911,7 @@
         {
           "module": "primitive-type",
           "title": "Primitive names",
-          "summary": "",
+          "summary": "The names a tree uses to reach what a deployment registered.",
           "symbols": [
             {
               "name": "NAMESPACED_ID_PATTERN",
@@ -981,21 +981,21 @@
               "kind": "value",
               "signature": "const THEME_PROP_KEY = \"loom:theme\"",
               "truncated": false,
-              "summary": ""
+              "summary": "The palette, font pack and style preset a tree names, honoured on the root node."
             },
             {
               "name": "DATA_PROP_KEY",
               "kind": "value",
               "signature": "const DATA_PROP_KEY = \"loom:data\"",
               "truncated": false,
-              "summary": ""
+              "summary": "A node's bindings — what it asks the host to answer, honoured on any node."
             },
             {
               "name": "SUBMIT_PROP_KEY",
               "kind": "value",
               "signature": "const SUBMIT_PROP_KEY = \"loom:submit\"",
               "truncated": false,
-              "summary": ""
+              "summary": "A node's submission — which registered endpoint a form posts to, on any node."
             },
             {
               "name": "isReservedPropKey",
@@ -1023,14 +1023,14 @@
         {
           "module": "result",
           "title": "Results, and the errors they carry",
-          "summary": "",
+          "summary": "Loom never throws across a module seam. Every fallible operation returns a Result so callers must acknowledge failure in the type system.",
           "symbols": [
             {
               "name": "Result",
               "kind": "type",
               "signature": "type Result<TValue, TError> = {\n    readonly ok: true;\n    readonly value: TValue;\n} | {\n    readonly ok: false;\n    readonly error: TError;\n};",
               "truncated": false,
-              "summary": "Loom never throws across a module seam. Every fallible operation returns a Result so callers must acknowledge failure in the type system."
+              "summary": "Either a value or an error, and the type says which until the caller checks."
             },
             {
               "name": "ok",
@@ -1653,7 +1653,7 @@
         {
           "module": "runtime/stake-level",
           "title": "Stake level",
-          "summary": "",
+          "summary": "The scale the gate weighs a change on, and the order it compares two of them in.",
           "symbols": [
             {
               "name": "stakeLevelSchema",
@@ -1989,7 +1989,7 @@
               "kind": "function",
               "signature": "const planTreeSubmissions: (tree: LoomTree) => SubmissionPlan",
               "truncated": false,
-              "summary": ""
+              "summary": "Two forms naming one endpoint are resolved once and share a target. That is the rule that identical questions are asked once, applied to a question that has no params to differ by, and it is also the behaviour a reader would expect: two newsletter forms on one page post to the same place, and a per-form nonce would break the second one every time somebody used the first."
             },
             {
               "name": "planSubmissionsIn",
@@ -2094,14 +2094,14 @@
         {
           "module": "theme/contrast",
           "title": "Contrast",
-          "summary": "",
+          "summary": "The contrast bar, as a function a host can run against its own palettes.",
           "symbols": [
             {
               "name": "TEXT_CONTRAST_MINIMUM",
               "kind": "value",
               "signature": "const TEXT_CONTRAST_MINIMUM = 4.5",
               "truncated": false,
-              "summary": ""
+              "summary": "WCAG AA for body text — the bar this module holds every text slot to."
             },
             {
               "name": "TextPairing",
@@ -3032,7 +3032,7 @@
         {
           "module": "tree/errors",
           "title": "Errors",
-          "summary": "",
+          "summary": "What a tree operation says when it refuses.",
           "symbols": [
             {
               "name": "TreeError",
@@ -3541,7 +3541,7 @@
             {
               "name": "RenderDiagnostic",
               "kind": "type",
-              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /** The tree asks for data and this render was given no resolution. */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * `loom:submit` that is not an endpoint id under `to`. The node renders —\n     * its props are its own and are still valid — with no target, which is\n     * what a form primitive's unavailable path is for.\n     */\n    readonly code: \"submit-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: SubmissionError;\n} | {\n    /**\n     * A form whose endpoint could not give a target: nobody registered it,\n     * it refused this visitor, or it answered with something the seam refuses.\n     * The page still renders, because a page lost to one form is worse than a\n     * form that says it cannot be sent right now.\n     */\n    readonly code: \"submit-unavailable\";\n    readonly nodeId: NodeId;\n    readonly to: EndpointId;\n    readonly unavailable: SubmissionUnavailable;\n} | {\n    /** The tree names an endpoint and this render was given no resolution. */\n    readonly code: \"submit-unresolved\";\n    readonly nodeId: NodeId;\n};",
+              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /** The tree asks for data and this render was given no resolution. */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * `loom:submit` that is not an endpoint id under `to`. The node renders —\n     * its props are its own and are still valid — with no target, which is\n     * what a form primitive's unavailable path is for.\n     */\n    readonly code: \"submit-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: SubmissionError;\n} | {\n    /**\n     * A form whose endpoint could not give a target: nobody registered it,\n     * it refused this visitor, or it answered with something the seam refuses.\n     * The page still renders, because a page lost to one form is worse than a\n     * form that says it cannot be sent right now.\n     */\n    readonly code: \"submit-unavailable\";\n    readonly nodeId: NodeId;\n    readonly to: EndpointId;\n    readonly unavailable: SubmissionUnavailable;\n} | {\n    /** The tree names an endpoint and this render was given no resolution. */\n    readonly code: \"submit-unresolved\";\n    readonly nodeId: NodeId;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -3837,7 +3837,7 @@
               "kind": "function",
               "signature": "const resolveTheme: (reserved: JsonObject, registry: ThemeRegistry | undefined) => ThemeResolution",
               "truncated": false,
-              "summary": ""
+              "summary": "There is no fallback theme, deliberately. A host-supplied default would mount a look the tree does not name, which makes the page a function of deployment config as well as of the tree — the failure that rejecting host-supplied theming outright was meant to prevent. An unthemed tree renders unstyled, and says so."
             },
             {
               "name": "themeStyle",
@@ -3865,7 +3865,7 @@
               "kind": "value",
               "signature": "const THEME_PROP_KEY = \"loom:theme\"",
               "truncated": false,
-              "summary": ""
+              "summary": "The palette, font pack and style preset a tree names, honoured on the root node."
             },
             {
               "name": "isReservedPropKey",
@@ -4094,6 +4094,34 @@
           ]
         },
         {
+          "module": "primitives/loom.avatar",
+          "title": "loom.avatar",
+          "summary": "One face, or the two letters that stand in for it.",
+          "symbols": [
+            {
+              "name": "loomAvatar",
+              "kind": "value",
+              "signature": "const loomAvatar: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.avatar-row",
+          "title": "loom.avatar-row",
+          "summary": "A run of `loom.avatar` faces, overlapping — the cluster a page puts beside \"and four thousand others\".",
+          "symbols": [
+            {
+              "name": "loomAvatarRow",
+              "kind": "value",
+              "signature": "const loomAvatarRow: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.badge",
           "title": "loom.badge",
           "summary": "A short label attached to something else — \"Most popular\", \"Beta\", \"New\".",
@@ -4130,6 +4158,20 @@
               "name": "loomCard",
               "kind": "value",
               "signature": "const loomCard: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.code",
+          "title": "loom.code",
+          "summary": "A snippet, set in monospace on a tinted surface — or a terminal, which is the same panel wearing a window bar.",
+          "symbols": [
+            {
+              "name": "loomCode",
+              "kind": "value",
+              "signature": "const loomCode: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -4304,6 +4346,20 @@
           ]
         },
         {
+          "module": "primitives/loom.kbd",
+          "title": "loom.kbd",
+          "summary": "One key, as a key cap — `⌘`, `K`, `Esc`.",
+          "symbols": [
+            {
+              "name": "loomKbd",
+              "kind": "value",
+              "signature": "const loomKbd: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.link",
           "title": "loom.link",
           "summary": "A link that is a link — text, a destination, and nothing drawn around it.",
@@ -4396,6 +4452,20 @@
               "name": "loomMilestoneList",
               "kind": "value",
               "signature": "const loomMilestoneList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.mosaic",
+          "title": "loom.mosaic",
+          "summary": "Whatever it is given, in cells of deliberately unequal width — the band a page uses when a grid of identical rectangles would read as a table.",
+          "symbols": [
+            {
+              "name": "loomMosaic",
+              "kind": "value",
+              "signature": "const loomMosaic: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -4703,7 +4773,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n}",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.mosaic`: one column until there is room for six. */\n    readonly mosaic: \"loom-mosaic\";\n    /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */\n    readonly mosaicAlternating: \"loom-mosaic-alternating\";\n    readonly mosaicShowcase: \"loom-mosaic-showcase\";\n    readonly mosaicLead: \"loom-mosaic-lead\";\n}",
               "truncated": false,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -4785,6 +4855,20 @@
               "summary": ""
             },
             {
+              "name": "MONOSPACE_STACK",
+              "kind": "value",
+              "signature": "const MONOSPACE_STACK = \"ui-monospace, SFMono-Regular, Menlo, Consolas, \\\"Liberation Mono\\\", monospace\"",
+              "truncated": false,
+              "summary": "The one family in this library that a font pack does not supply."
+            },
+            {
+              "name": "monospace",
+              "kind": "function",
+              "signature": "const monospace: () => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
               "name": "READABLE_MEASURE",
               "kind": "value",
               "signature": "const READABLE_MEASURE = \"68ch\"",
@@ -4817,7 +4901,7 @@
         {
           "module": "sdk/audit",
           "title": "Audit",
-          "summary": "",
+          "summary": "The registration-time check, as a function a host calls rather than a side effect of building a registry.",
           "symbols": [
             {
               "name": "PrimitiveAudit",
@@ -4873,7 +4957,7 @@
         {
           "module": "sdk/catalogue",
           "title": "Catalogue",
-          "summary": "",
+          "summary": "The one function that turns a registry into something that can leave the process.",
           "symbols": [
             {
               "name": "catalogueOf",
@@ -4964,7 +5048,7 @@
         {
           "module": "sdk/interactivity",
           "title": "Interactivity",
-          "summary": "",
+          "summary": "How a library tells the gate which of its primitives a reader aims at.",
           "symbols": [
             {
               "name": "interactiveTypesFor",
@@ -5489,7 +5573,7 @@
         {
           "module": "store/source",
           "title": "Reading a tree back",
-          "summary": "",
+          "summary": "The adapter that lets the renderer read from the store.",
           "symbols": [
             {
               "name": "treeSourceFromStore",
@@ -5508,7 +5592,7 @@
             {
               "name": "StoredRevision",
               "kind": "type",
-              "signature": "type StoredRevision = {\n    readonly treeId: TreeId;\n    /** The revision this entry produced, so `revision - 1` is what it applied to. */\n    readonly revision: number;\n    readonly proposalId: ProposalId;\n    readonly delta: TreeDelta;\n    readonly provenance: Provenance;\n    /** When the runtime applied it, which is not when the model produced it. */\n    readonly appliedAt: string;\n    readonly answeredBy?: string;\n};",
+              "signature": "type StoredRevision = {\n    readonly treeId: TreeId;\n    /** The revision this entry produced, so `revision - 1` is what it applied to. */\n    readonly revision: number;\n    readonly proposalId: ProposalId;\n    readonly delta: TreeDelta;\n    readonly provenance: Provenance;\n    /** When the runtime applied it, which is not when the model produced it. */\n    readonly appliedAt: string;\n    /**\n     * Who allowed it, when a human had to.\n     *\n     * Distinct from `provenance.actor`, which is who *asked*. A hold exists to put\n     * a second person in the way of a change, so recording only the asker would\n     * make every confirmed change look like somebody waving through their own\n     * request.\n     *\n     * Absent on a change nobody had to allow — one the Gate accepted outright —\n     * and absent on everything written before the column existed, which nobody can prove the\n     * approver of. It is never back-filled: the log is append-only, and a\n     * fact nobody observed does not belong in it.\n     */\n    readonly answeredBy?: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -5811,7 +5895,7 @@
         {
           "module": "store/database",
           "title": "Database",
-          "summary": "",
+          "summary": "The database handle the postgres store and its migration share.",
           "symbols": [
             {
               "name": "LoomDatabase",
@@ -5825,7 +5909,7 @@
         {
           "module": "store/migrate",
           "title": "Migrate",
-          "summary": "",
+          "summary": "Creating the tables the postgres store expects.",
           "symbols": [
             {
               "name": "TREE_STORE_DDL",
@@ -5888,7 +5972,7 @@
         {
           "module": "telemetry/calibration",
           "title": "Calibration",
-          "summary": "",
+          "summary": "Confidence is self-graded and trusted on purpose, on one condition: that it be calibrated. This is the measurement half of that promise. It compares what the model claimed against what became of the claim, and it changes nothing — no threshold moves, no policy reads it.",
           "symbols": [
             {
               "name": "CalibrationVerdict",
@@ -5942,7 +6026,7 @@
             {
               "name": "PolicyCalibration",
               "kind": "type",
-              "signature": "type PolicyCalibration = {\n    /**\n     * Which policy judged these claims, as its own dispositions named it.\n     *\n     * `null` means this window never saw the judgment — the page opened after the\n     * disposition and before the commit, say. Distinct from the recorded string\n     * `UNATTRIBUTED_POLICY_ID`, which is a judgment that really was made before the\n     * Gate wrote down which policy made it. One is a gap in the reader, the other\n     * is a gap in the record, and merging them would let a fixed record look like a\n     * short page.\n     */\n    readonly policyId: string | null;\n    readonly overall: CalibrationScore;\n    readonly buckets: readonly ConfidenceBucket[];\n    readonly fingerprints: readonly string[];\n    /**\n     * Judged claims in this segment whose disposition named no fingerprint. Kept\n     * beside the list rather than folded into it: one fingerprint plus twelve\n     * unfingerprinted judgments is not a segment shown to be constant, and a list\n     * of length one would say it was.\n     */\n    readonly unfingerprinted: number;\n};",
+              "signature": "type PolicyCalibration = {\n    /**\n     * Which policy judged these claims, as its own dispositions named it.\n     *\n     * `null` means this window never saw the judgment — the page opened after the\n     * disposition and before the commit, say. Distinct from the recorded string\n     * `UNATTRIBUTED_POLICY_ID`, which is a judgment that really was made before the\n     * Gate wrote down which policy made it. One is a gap in the reader, the other\n     * is a gap in the record, and merging them would let a fixed record look like a\n     * short page.\n     */\n    readonly policyId: string | null;\n    readonly overall: CalibrationScore;\n    readonly buckets: readonly ConfidenceBucket[];\n    /**\n     * The distinct fingerprints the judgments in this segment named, sorted.\n     *\n     * A name is host-declared, and hosts are asked to rename a policy they edit.\n     * More than one fingerprint under one name means that did not happen, and this\n     * row is pooling gates that differ by more than what they are called — the same\n     * error the segments exist to correct, one level down. `rulesetContinuityOf`\n     * reads this list; the list itself is carried so a host can match a digest to\n     * the configuration it is looking at.\n     */\n    readonly fingerprints: readonly string[];\n    /**\n     * Judged claims in this segment whose disposition named no fingerprint. Kept\n     * beside the list rather than folded into it: one fingerprint plus twelve\n     * unfingerprinted judgments is not a segment shown to be constant, and a list\n     * of length one would say it was.\n     */\n    readonly unfingerprinted: number;\n};",
               "truncated": false,
               "summary": "A calibration reading confined to the claims one policy judged."
             },
@@ -6180,7 +6264,7 @@
             {
               "name": "TelemetryReadRequest",
               "kind": "type",
-              "signature": "type TelemetryReadRequest = {\n    readonly treeId?: TreeId;\n    /** A cursor from a previous page's `older`/`newer`, passed back unread. */\n    readonly cursor?: string;\n    /**\n     * Default `newer`, which with no cursor is the oldest page. `older` with no\n     * cursor is the newest page — the read a reader almost always wants first.\n     */\n    readonly direction?: PageDirection;\n    readonly limit?: number;\n};",
+              "signature": "type TelemetryReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /** A cursor from a previous page's `older`/`newer`, passed back unread. */\n    readonly cursor?: string;\n    /**\n     * Default `newer`, which with no cursor is the oldest page. `older` with no\n     * cursor is the newest page — the read a reader almost always wants first.\n     */\n    readonly direction?: PageDirection;\n    readonly limit?: number;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6238,7 +6322,7 @@
         {
           "module": "telemetry/memory",
           "title": "Memory",
-          "summary": "",
+          "summary": "The telemetry journal that keeps its records in the process.",
           "symbols": [
             {
               "name": "memoryTelemetryJournal",
@@ -6378,7 +6462,7 @@
         {
           "module": "telemetry/migrate",
           "title": "Migrate",
-          "summary": "",
+          "summary": "Creating the table the telemetry journal writes to, with its row level security switched on.",
           "symbols": [
             {
               "name": "TELEMETRY_DDL",
@@ -6413,7 +6497,7 @@
         {
           "module": "telemetry/schema",
           "title": "Schema",
-          "summary": "",
+          "summary": "The table the telemetry journal is stored in, as Drizzle sees it.",
           "symbols": [
             {
               "name": "loomTelemetry",

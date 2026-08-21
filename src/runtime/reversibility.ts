@@ -44,8 +44,8 @@ const irreversibilityReasons = (
   /**
    * Relocated types count here as well as touched ones. Whether moving a live
    * payment flow fires anything outside the tree is genuinely open, and
-   * phrasing must not decide it: before 0044 a move that named the checkout was
-   * irreversible and one that named its parent was not. Where
+   * phrasing must not decide it: a move that named the checkout was once
+   * irreversible while one that named its parent was not (0044). Where
    * phrasing-independence forces a single answer, this takes the conservative
    * one — a change wrongly called irreversible is offered for confirmation, and
    * one wrongly called reversible is applied.

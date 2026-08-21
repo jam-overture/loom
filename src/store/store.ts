@@ -44,7 +44,7 @@ export type StoredRevision = {
    * request.
    *
    * Absent on a change nobody had to allow — one the Gate accepted outright —
-   * and absent on everything written before 0029, which nobody can prove the
+   * and absent on everything written before the column existed (0029), which nobody can prove the
    * approver of. It is never back-filled: the log is append-only (0016), and a
    * fact nobody observed does not belong in it.
    */

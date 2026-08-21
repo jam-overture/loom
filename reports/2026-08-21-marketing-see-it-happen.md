@@ -78,7 +78,7 @@ moved.
 
 ## Nothing is kept, and the address is the whole of the state
 
-Recorded as [0079](../decisions/0079-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md).
+Recorded as [0081](../decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md).
 
 The portal's demo keeps a session per visitor — a tree, a hold store, a list of
 records, a model budget, eviction — and that is the right shape for what it does,

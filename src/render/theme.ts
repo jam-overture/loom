@@ -47,8 +47,9 @@ export type ThemeResolution =
 /**
  * There is no fallback theme, deliberately. A host-supplied default would mount
  * a look the tree does not name, which makes the page a function of deployment
- * config as well as of the tree — the failure 0049 rejected when it rejected
- * host-supplied theming outright. An unthemed tree renders unstyled, and says so.
+ * config as well as of the tree — the failure that rejecting host-supplied
+ * theming outright was meant to prevent (0049). An unthemed tree renders
+ * unstyled, and says so.
  */
 export const resolveTheme = (
   reserved: JsonObject,

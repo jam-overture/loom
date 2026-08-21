@@ -1293,6 +1293,16 @@ footer are almost pure visual judgment — there is no Hermes content model to
 port, because Hermes never had one — so this is the first unit built with
 nothing but the library's own precedent to calibrate against.
 
+**A fourth time, 21 August.** `primitives-09-the-technical-vocabulary` fetched
+the same URL and got the same `EGRESS_BLOCKED`. Still open, still noted here
+rather than filed again. `docs/routines.md` says `21st.dev` is on the WebFetch
+allowlist; it is not, and the gap between what that document promises and what
+the proxy does is now the more useful half of this entry — a routine reading the
+brief has no way to know the reference it is told to consult is unreachable
+until it tries. This run's mosaic is the primitive that reference would have
+calibrated, and it was built against `loom.hero` and `loom.article-grid`
+instead.
+
 ---
 
 ## 2026-08-19 — a page cannot collapse its own menu, and probably should not try
@@ -2412,7 +2422,23 @@ what makes that a rule rather than a habit.
 
 ## 2026-08-20 — a level-1 heading does not fit on a phone
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed by `primitives-09-the-technical-vocabulary`**, which took the first of
+the two ways out — `min(var(--loom-scale-8), 11vw)` on level 1 and
+`min(var(--loom-scale-7), 9vw)` on level 2, and nothing below them, since step 6
+is 32px and fits a phone with room to spare.
+
+The precedent the entry asked to have named out loud is named:
+[0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+is the record, written for `loom.mosaic`'s media query and covering this by the
+same argument — the markup does not change, nothing is interpolated, and the
+browser rather than the render function reads the width. It carries the same
+limit, stated there: a `vw` is the viewport, so a headline inside a narrow
+column on a wide screen is not held back.
+
+The second way out — a fluid `scaleRamp` in the font pack — is still the better
+fix and is still `Loom daily build`'s, and this does not block it: a pack whose
+step 8 is already a clamp is a ramp that wins here at every width.
 
 Seen in the same phone screenshot as the finding above, and left alone because
 it is a bigger call than a run should slip in.
@@ -2920,7 +2946,39 @@ answer is in the git log rather than in this file.
 
 ## 2026-08-20 — two thirds of the published surface has no sentence, and it is on a page now
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** **partly
+closed** by `framework-01-the-package-own-words`.
+
+**The first bullet is closed, and it was the cheap one exactly as the finding
+said.** All fourteen of the named modules in this lane now open with a paragraph,
+as do fourteen the finding did not count — the 13 entry-point barrels, which had
+no comment at all, and `testing/row-security.ts`. Measured on
+the regenerated reference: module groups carrying a paragraph went **147 → 164 of
+165**, and exports rendering as a bare name and a signature went **29 → 1**. The
+one is `primitives/loom.prose`, filed below.
+
+**The blank line is now enforced rather than observed.** The finding was right
+that it had become load-bearing with nothing holding it —
+`src/documentation.test.ts` fails on a module whose first comment is attached to
+its first declaration, which is the shape that silently credits an export with
+the module's sentence
+([0080](decisions/0080-a-doc-comment-in-src-is-written-to-a-stranger.md)). The
+finding left this as "that lane's call rather than this one's"; the call is that
+it is worth a check, because the convention had already drifted in 30 files.
+
+**The second bullet stays open** and is unchanged: **104 exported functions say
+nothing of their own.** Not addressed here and deliberately not — the finding's
+own reading is right that many of them do not need it, and a run that wrote 104
+sentences to clear a count would be padding the reference rather than improving
+it. The ones worth a line are the ones whose name does not give the argument
+order or the failure mode, and picking those is a judgement per function rather
+than a sweep. Now that every module has a paragraph above it, each of those
+exports has context it did not have this morning, which lowers the urgency
+further.
+
+Original status below.
+
+**Status:** open
 
 The API reference is generated from the declarations the package publishes
 (§4c's rule), so for the first time there is a **count** rather than an
@@ -3145,7 +3203,25 @@ than this instance.
 
 ## 2026-08-21 — a decision number is a footnote to a document the reader cannot open
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-01-the-package-own-words`. All nine rows of the table below are
+rewritten and back on the site; the tenth is `Loom primitives`' and stays open
+below. The convention the finding proposed is now checked rather than hoped for
+([0080](decisions/0080-a-doc-comment-in-src-is-written-to-a-stranger.md)):
+`src/documentation.test.ts` refuses a record number that is not a parenthetical
+citation, so a sentence cannot be silently withheld again. The check is
+deliberately **narrower** than `readerFacing` — parentheses only, not the
+trailing `, inherited from 0009` form, of which there were two and both were
+rewritten — because narrower is the safe direction: everything it permits, the
+generator lifts.
+
+The finding was right about the second channel being the one worth knowing
+about. Four signatures were losing member annotations, not because the summary
+was withheld but because `readerFacingSignature` drops an annotation whole:
+`RenderDiagnostic`, `StoredRevision`, `PolicyCalibration` and
+`TelemetryReadRequest`. All four are intact now. Original status below.
+
+**Status:** open
 
 The maintainer, on the API reference:
 
@@ -3210,7 +3286,12 @@ withheld export still has a sentence above it explaining the module it lives in.
 
 ## 2026-08-21 — one of those ten is in `src/primitives/`
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** closed
+by `primitives-09-the-technical-vocabulary`. Reworded exactly as suggested — the
+clause now opens *"the reason is the rule that a container's name states its
+arrangement"* and the record follows as a parenthetical link, so the summary
+survives the next regeneration of `/docs/api-reference/primitives` with nothing
+to change in `app/(docs)/`.
 
 The one row of the table above that is this lane's. `loomQuoteGrid`'s doc
 comment opens:
@@ -3306,6 +3387,29 @@ a routine confirm the page it is pointing at actually renders. Worth having, and
 lower value than the first fix: the bot's URL is right whether or not anyone can
 fetch it.
 
+**Re-verified 21 August 2026** by the `framework-01-the-package-own-words` run,
+and the recommended practice works — recorded here rather than as a second entry,
+the way the `21st.dev` re-verifications are dated.
+
+This branch is `framework-01-the-package-own-words`, which is long enough to be
+truncated exactly as this entry predicts: Vercel assigned
+`loom-git-framework-01-the-pa-529904-…`, where constructing it from the branch
+name would have produced `loom-git-framework-01-the-package-own-words-…` and been
+wrong. **Reading `previewUrl` off the `vercel[bot]` comment gave the right URL
+first time**, so the fix this entry proposes is confirmed on a second branch and
+is worth the line in `docs/routines.md` it asks for.
+
+The egress half is unchanged: `curl` to the assigned URL still returns
+`CONNECT tunnel failed, response 403`, so the pull request says plainly that the
+preview was published unverified rather than implying it was checked.
+
+One detail worth adding for whoever writes that line: the bot posts **twice** —
+once at `nextCommitStatus: PENDING` while building, once edited in place at
+`DEPLOYED`. Both carry the same `previewUrl`, so a routine does not need to wait
+for the second; but only the second means the page is actually up, and the PR
+status check (`Vercel — Deployment has completed`) is the cheaper thing to read
+if a routine wants to say the deployment is green.
+
 ---
 
 ## 2026-08-20 — the front door cannot show anyone how to start, because there is nothing to install
@@ -3354,7 +3458,9 @@ small change to one band whenever the answer exists.
 ## 2026-08-20 — the reference's feature grid mixes cell sizes and `loom.feature-grid` cannot
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
-**Status:** open — low priority, and worked around by using the grid as it is
+**Status:** **answered 21 August by `loom.mosaic`**, and answered with a
+different primitive rather than with a prop on this one — see the entry dated
+21 August below for why, and for what it costs.
 
 The maintainer named `nextjs.org`'s layout as a reference we will keep using, so
 this is filed as a gap to know about rather than a request to act on now.
@@ -3383,6 +3489,363 @@ between deliberate and composed.
 
 ---
 
+## 2026-08-21 — the mixed-size band exists, and it is not `loom.feature-grid`
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing` ·
+**Status:** open for the filer to use — the primitive is built and merged with
+`primitives-09-the-technical-vocabulary`
+
+The 20 August finding above asked for a way to say *this cell is bigger* in a
+feature band, and suggested a `feature`-level `emphasis` the grid reads, by
+analogy with `loom.tier` inside `loom.tier-table`. The answer shipped as a
+**different primitive**, and the reasoning is worth having because it changes
+what the marketing lane should write.
+
+`loom.mosaic` is a general arranger (0062) that lays its children out on a
+repeating cycle of unequal column spans — `alternating`, `showcase` or `lead` —
+and it will hold `loom.feature` cells, `loom.card` cells, a `loom.code` panel,
+or one of each. The rhythm is the container's, so nothing about `loom.feature`
+changed and no child carries a prop that is inert outside one parent.
+
+**Why not `emphasis` on the child**, since this library has that shape already:
+`loom.tier`'s `emphasis` changes how *that tier paints itself* — its border, its
+surface — which is a thing a tier can do alone. A span is not: it means nothing
+without a column count that lives on the parent, and a `span: 4` in a tree whose
+parent is three columns wide is a number that is simply wrong. That is the
+coupling `loom.split` avoids by keeping `ratio` on the arranger, and the reason
+the original finding's own instinct — *"it is probably wrong"* — was right.
+
+**What it costs you**, and it is the cost 0062 names rather than a surprise: a
+band built this way is a `loom.mosaic` holding features, not a
+`loom.feature-grid`, so the node no longer says *this is the feature band*. The
+projection a model reads and the analysis the Gate weighs both lose that. If the
+marketing site ends up wanting the varied feature band **twice**, that is 0062's
+stated signal to name the pair — `loom.feature-mosaic` over `loom.feature` — and
+it is a small primitive once `loom.mosaic` exists. Say so and this lane will
+build it; it was not built now because one use is not yet a band.
+
+One limit to know before you place one: the rhythm switches off below `48rem`
+and a mosaic is a single column on a phone, which is deliberate
+([0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)).
+
+---
+
+## 2026-08-21 — a font pack declares three families and none of them is monospace
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** open — worked around, and the workaround needs nothing undone when
+this lands
+
+`loom.code` and `loom.kbd` need a monospace face, and there is no way for a
+theme to give them one. `fontPackSchema` (`src/theme/theme.ts`) declares
+`headingFamily`, `bodyFamily` and an optional `accentFamily`; the renderer emits
+`--loom-heading-family` and `--loom-body-family`, and `tokens.ts` exposes
+`family("heading" | "body")`. There is no third role, so a code panel either
+hard-codes a stack — which is the class of mistake `tokens.ts` exists to make
+impossible for colour — or does what it does now.
+
+**The workaround, and why it is not a hack:** the two primitives ask for
+
+```
+var(--loom-mono-family, ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace)
+```
+
+through a `monospace()` helper beside the other token helpers. It is a `var()`
+with the system stack as its **fallback**, so the day a font pack declares a
+mono family and the renderer emits that variable, every code panel and key cap
+in every deployment picks it up with nothing in `src/primitives/` to change.
+Until then the fallback resolves, nothing is unstyled, and the value is
+identical under every palette — so 0049's re-theme guarantee is untouched and
+the library's tests still see no literal below the root.
+
+**What is actually wanted:** `monoFamily` on `fontPackSchema`, emitted as
+`--loom-mono-family` alongside the other two, and a `family("mono")` overload.
+Optional or required is the owner's call — optional keeps every registered pack
+valid and means the fallback stays live for packs that decline to answer, which
+is the shape `accentFamily` already has.
+
+Worth saying while the file is open: `accentFamily` is emitted as a variable no
+primitive reads (filed 21 August, above). A pack that has an opinion about a
+display face and none about a mono face has the roles the wrong way round for a
+library whose next four primitives are technical.
+
+---
+
+## 2026-08-21 — a code block cannot offer a copy button, and the fake would be worse than the gap
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** open — not blocking, and deliberately not faked
+
+Every reference page a developer reads puts a copy control on its code panels,
+and `nextjs.org`'s single most load-bearing element — the `npx create-next-app`
+line under the hero — is one. `loom.code` ships without it.
+
+It is not a state problem, which is what makes it worth filing separately from
+the `tabs` block. A copy button needs **no state at all**: one click handler
+calling `navigator.clipboard.writeText`, and optionally a label that changes for
+two seconds. What it needs is somewhere for a *behaviour* to come from, and a
+primitive's props are JSON (0009) — there is no seam through which a registered
+component receives or declares an interaction, only `interactive`, which
+*describes* a target for the Gate rather than creating one.
+
+Three shapes, in the order I would rank them:
+
+1. **The registered component owns it, like the animations do.** `loom.code`
+   emits a client component that reads its own `textContent`. This is 0055's
+   bargain applied to behaviour instead of motion: the tree says *code panel*,
+   the registry vouches for what a code panel does, and an AI proposal cannot
+   reach the handler. It needs the render seam to permit a client boundary
+   inside a primitive, which is the part I cannot check from this lane.
+2. **A declared behaviour vocabulary** — `behaviours: ["copy"]` beside `slots`,
+   resolved by the host. More machinery, and it makes the closed set of things
+   a primitive may *do* explicit, which is the property that would matter if
+   this ever grows past copying.
+3. **Nothing, permanently**, and say so. A defensible answer for a library whose
+   claim is that the whole page is data.
+
+Not worked around, on purpose. A button that looks like it copies and does not
+is worse for a visitor than no button, and a `loom.action` pointing at the
+snippet would be exactly that.
+
+---
+
+## 2026-08-21 — `loom.mosaic` reads the viewport where it should read its container
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — a known limit of the thing that shipped, recorded so it is
+revisited deliberately
+
+[0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+allows the library's first width media query, for the band that cannot be laid
+out intrinsically. A media query asks about the **viewport**, and what a mosaic
+actually wants to know is how wide *it* is.
+
+The case where they differ is real: a mosaic placed in the narrow column of a
+`loom.split`, on a wide screen, gets six columns in a space that cannot hold
+them. Nothing renders wrongly — the cells simply get very thin.
+
+A container query (`@container`) is the honest mechanism and is what this should
+become. It is not what shipped, for the reason 0079 gives: where container
+queries are unsupported, the un-queried rules are the ones that apply, so a
+mosaic would render its *narrow* single-column layout forever on those clients,
+silently. A width query fails the other way — it composes, and occasionally
+composes somewhere too narrow, which is visible the moment anyone looks.
+
+Revisit when the support floor is not worth thinking about, or if a page turns
+up that puts a mosaic inside a column. Mine to fix; filed rather than left in a
+report because the next run in this lane will not remember it.
+
+---
+
+## 2026-08-21 — Vercel refuses to build a preview at all, so no PR has one
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an access question, not an engineering one, and it blocks
+every lane
+
+The open finding above says a routine cannot reliably *construct* a preview URL
+and cannot *verify* the one it publishes. This is worse and simpler: on **#121
+there is no deployment to point at.** `vercel[bot]` commented, and it is not a
+build log:
+
+> @jpizzo must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+The commit author on every routine branch is `jpizzo`, so this is not one PR's
+bad luck — it is every PR any routine opens from now until somebody adds that
+account to the Vercel team, or turns off the per-author authorisation check.
+
+Why it matters more than it looks: **every routine's brief requires the preview
+URL on the pull request**, and the primitives brief goes further — *"the
+deployed preview URL and a screenshot of every primitive you added, under both
+palettes. This is the surface that has to pop; it has to be looked at."* A
+screenshot committed to `reports/` is a workaround for the looking; it is not a
+workaround for a reviewer wanting to click through a page and use it.
+
+**The fix is one of two clicks**, both linked from the bot's own comment: add
+`@jpizzo` to the team, or connect that GitHub account to an existing Vercel
+member. Nothing in the repository can do either.
+
+Worth pairing with the 20 August finding that the demo sits behind the sign-in
+and the front door has nothing to show. Between them, a person arriving at this
+project through a pull request currently cannot see a running Loom page at all.
+
+**A second thing this run hit, and it is this lane's to say rather than to fix:**
+the repository is **private**, so a screenshot committed to `reports/` cannot be
+embedded in a pull request body either — GitHub will not proxy
+`raw.githubusercontent.com` for a private repo, and the image renders as a broken
+icon. #121's body links the report instead, which *does* render its images inline
+because relative paths resolve inside the repository's own file view. Any routine
+told to put a screenshot on a PR should link the report rather than embed the
+PNG, and that is worth a line in `docs/routines.md` — which is not this lane's
+file.
+
+**Appended 21 August by `Loom daily build`, because the headline is too strong and
+it is addressed to the maintainer as a blocker.** Not rewriting the entry — the
+diagnosis of *#121* is exact and the fix it names is probably still worth doing.
+But *"no PR has one"* and *"every PR any routine opens"* are both false as
+stated, and acting on them would be chasing the wrong thing.
+
+**#122 built and deployed twice, green both times**, on the branch
+`framework-01-the-package-own-words`, with the preview URL in its body and the
+`Vercel — Deployment has completed` status on both commits.
+
+The difference is the commit author, which is the variable this entry correctly
+identified and then over-generalised:
+
+```
+#121's branch    jpizzo                     → refused, not a team member
+#122's branch    Claude <noreply@anthropic…> → deployed
+```
+
+So the authorisation check is real and it is **per commit author**, not per
+repository or per routine — and routines do not all commit as the same author.
+Whatever configures that differs between these two environments, which is worth
+knowing before somebody adds one account to the Vercel team and expects every
+lane to start deploying.
+
+Two things this does **not** change. The fix this entry asks for is still the
+right one if `jpizzo` is the author on other lanes' branches — it just does not
+unblock "every PR". And the second half of the entry is correct and useful
+independent of any of this: an embedded `raw.githubusercontent.com` PNG cannot
+render for a private repository, while relative image paths inside a committed
+report do. This run's report embeds relative paths for exactly that reason and
+its pull request links rather than embeds, which is the same conclusion reached
+separately.
+
+---
+
+## 2026-08-21 — six comments and one module in `src/primitives/` are the rest of the reference gap
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+Handing back the half of two findings that is not this lane's, with the work
+already done on the other side of the boundary so the shape is settled rather
+than proposed.
+
+[0080](decisions/0080-a-doc-comment-in-src-is-written-to-a-stranger.md) says a
+doc comment in `src/` is written to a stranger, and asserts two rules over the
+lane in `src/documentation.test.ts`. **`src/primitives/` is excluded, by name, in
+that file.** It is yours, it currently fails both rules, and widening the check
+is one line once these are closed:
+
+```ts
+const EXCLUDED = ["src/primitives", "src/cli/scaffold-fixture"]
+//                 ^ delete this entry
+```
+
+(The second entry stays: `scaffold-fixture/` is the committed byte-for-byte
+output of `loom init` rather than source, and a blurb there breaks the test that
+holds it to the template.)
+
+**One module has no opening paragraph.** `loom.prose.ts` — its first comment is
+attached to a declaration rather than detached from it by an empty line, so the
+reference has no paragraph for the module and every export under that heading
+renders as a bare name and a signature. It is the **only** one of 165 module
+groups still in that state; the other 29 were closed by this run. Two sentences
+and a blank line fixes it, and the blank line is the part that matters: the
+generator reads the blurb from `src/` precisely because declaration emit drops
+it.
+
+**Six comments make a record number part of a published sentence**, so what they
+say does not reach a reader at all — withheld as a summary, or dropped whole
+from a signature:
+
+| where | what is unreachable |
+| --- | --- |
+| `loom.article.ts:55` | *…a prop rather than a `loom.prose` child, for 0059's other half…* |
+| `loom.article.ts:84` | *The declaration 0068 exists to justify…* |
+| `loom.page.ts:21` | a markdown link to 0072 in the first paragraph |
+| `loom.product.ts:76` | *…and 0066 puts a real `loom.action` in the `action` region…* |
+| `loom.quote-grid.ts:40` | *…the reason is 0054: a container's name states its arrangement…* |
+| `perk-content.ts:48` | *…the second string that keeps a perk on the props side of 0059.* |
+
+The `loom.quote-grid` row is the one the documentation routine already filed
+against this lane on 21 August; the other five it did not see, because it was
+measuring summaries and these five include the signature channel.
+
+**The rewrite is mechanical and the rule is one line to remember: put the number
+in parentheses.** *"…and the reason is 0054: a container's name states its
+arrangement"* becomes *"…because a container's name states its arrangement
+(0054)"*, and the site prints the sentence with the citation lifted out. Make the
+number the subject and the sentence is invisible. Every one of the 23 comments
+rewritten in this lane took that form and none of them lost anything — the
+number stays in the source for whoever is reading the code.
+
+`loom.page.ts` is the odd one: a markdown link, not prose. `[0072](…)` in a first
+paragraph is a number as far as the generator is concerned. Moving it out of the
+opening paragraph is enough; later paragraphs of a top-level comment are not
+published.
+
+---
+
+## 2026-08-21 — `reference.generated.json` was regenerated from another lane
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+for your awareness rather than for you to do anything
+
+The third time this repository has recorded a file in one lane having to move for
+a change in another, so it is recorded the same way rather than left in a diff.
+
+This run rewrote 23 doc comments and added 29 module paragraphs in `src/`, which
+is the input `pnpm docs:api` reads. `reference.generated.json` lives in
+`app/(docs)/_lib/api/`, which is yours. **It is regenerated in this pull
+request**, by running your script and touching nothing else in your directory.
+
+Leaving it alone was the alternative and it was worse: the whole point of the
+change is that nine withheld sentences and seventeen module paragraphs reach a
+reader, and none of them would until somebody ran the generator. `docs:api` is
+not part of `pnpm verify`, so nothing would have failed and nothing would have
+said so — the pull request would have looked complete and delivered nothing
+visible.
+
+**Worth considering, and it is your call rather than mine:** the generated file
+is checked in but its freshness is not checked. A drift assertion in your suite —
+regenerate to a temporary path, compare — would turn "somebody remembered" into
+"CI knows". It would also mean any `src/` comment change fails the docs build
+until regenerated, which is a real cost and the reason I have not assumed the
+answer. The alternative shape is to generate at build time and stop committing
+it, which trades reviewability for freshness.
+
+---
+
+## 2026-08-21 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Recorded for the reason the other routines record it. Nothing was wanted from
+another lane to do this work, and nothing in `src/` obstructed it: the change is
+entirely comments plus one new test file, no signature or export moved, and
+`dist/` is byte-identical in every respect that a consumer can observe.
+
+Two things are worth saying rather than leaving as absences.
+
+**The migration is still done and was not touched.** `apps/loom` holds the four
+route groups, `apps/portal` and `apps/docs` are retired, and the only file this
+run changed under `apps/` is the generated reference named above. The three
+routines waiting on the migration's shape have not been given anything new to
+wait for.
+
+**The record-numbering collision bit for the fifth time, and this entry originally
+said it had not.** When this branch was cut, #121 was the only other open pull
+request and it added no record, so 0079 was free and I took it — and said so here.
+#121 then added its own record before merging, took 0079 as well, and merged
+first. Both branches were correct by the rules they were given, which is the
+finding's whole point.
+
+**Settled by merge order, as it has been every time**: #121's
+[0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+stands and mine renumbered 0079 → 0080 — `git mv`, the heading, four references
+across `FINDINGS.md` and the report, and `pnpm decisions:index`.
+
+What this instance adds to the 16 August entry is that **checking for a collision
+when the branch is cut proves nothing.** I checked, correctly, and was still
+wrong, because the other branch acquired its record afterwards. The entry already
+observed that "merge order handles both, but only the loser finds out"; this is
+the sharper version — the loser cannot find out early even by looking, so the
+`git mv` at merge time is not avoidable diligence, it is the cost of the
+convention. Still cheap, still paid by every pair of routines that record on the
+same day, and still worth writing down in `docs/routines.md`.
 ## 2026-08-21 — `loom.split` cannot say how far apart its two regions sit
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
@@ -3421,7 +3884,7 @@ has, the answer is to copy it rather than invent a second spelling.
 **Status:** open — a positioning and budget question, not an engineering one
 
 The landing page now performs a real change on itself, with the record beside it
-([0079](decisions/0079-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)).
+([0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)).
 Five choices, one per kind of change plus one the rules refuse; each is worked
 out, measured, weighed, applied or held or refused, and reversible. Everything a
 visitor sees is the real sequence.
@@ -3431,7 +3894,7 @@ change behind each is computed from the page rather than asked of a model. That
 is 0057 working exactly as intended and it is the only affordable shape for this
 surface: a free-text box on the front door is a model call per visitor per idle
 curiosity, on the highest-traffic and lowest-intent page the project has, with no
-session to hold a budget in because 0079 keeps nothing per visitor.
+session to hold a budget in because 0081 keeps nothing per visitor.
 
 The gap it leaves is real, though, and it is the gap between what the hero
 promises — *ask for a change in your own words* — and what the band offers. The

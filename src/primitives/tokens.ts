@@ -41,6 +41,28 @@ export const weight = (role: "heading" | "body"): string => `var(--loom-${role}-
 export const motion = (speed: "fast" | "medium" | "slow"): string => `var(--loom-motion-${speed})`
 
 /**
+ * The one family in this library that a font pack does not supply.
+ *
+ * A code panel and a key cap need a monospace face, and a font pack declares
+ * `headingFamily`, `bodyFamily` and `accentFamily` — none of which is one.
+ * Filed for `Loom daily build`, whose file `src/theme/theme.ts` is; a font pack
+ * that named its own mono is a better answer than a stack chosen here, because
+ * a pack built around Berkeley Mono should get to say so.
+ *
+ * Written as a `var()` with the stack as its **fallback** rather than as the
+ * stack alone, so the day `--loom-mono-family` is emitted every code block in
+ * every deployment picks it up with nothing here to change. Until then the
+ * fallback is what resolves, and it is a system stack rather than a webfont:
+ * nothing to load, and identical under every palette, which is what keeps the
+ * re-theme guarantee (0049) true for a primitive that needs a face the theme
+ * has not got.
+ */
+export const MONOSPACE_STACK =
+  'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace'
+
+export const monospace = (): string => `var(--loom-mono-family, ${MONOSPACE_STACK})`
+
+/**
  * The reading measure, as a length rather than a palette slot.
  *
  * Line length is a typographic constant — around 65 characters — not something a
