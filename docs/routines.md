@@ -15,9 +15,12 @@ requests are the only continuity.** This document is what binds them.
 > Where a brief and this file disagree, **the brief wins and this file is
 > wrong** — say so in a report rather than following it.
 >
-> `docs/rollout.md` is the other missing document and is **still missing**. It is
-> named by the portal brief as the phased plan; no routine has seen its contents,
-> so no routine can write it. That half of the finding stays open.
+> `docs/rollout.md` was the other missing document. It **now exists**, added by
+> the maintainer on 16 August: it had been written a day earlier and pushed to a
+> branch whose pull request had already merged, so it never reached `main`. The
+> finding is closed. The portal routine's reasoning for why it could not fix that
+> itself was right and is worth keeping — a routine cannot write the governance it
+> is bound by, or the plan it is meant to find its position in.
 
 ## Token discipline
 
@@ -49,12 +52,13 @@ Each routine owns one part of the repository and does not edit another's.
 
 | Routine | Owns |
 | --- | --- |
-| Framework (`Loom daily build`) | `src/` **except `src/primitives/`**, and the demo |
+| Framework (`Loom daily build`) | `src/` **except `src/primitives/`**, and the application shell |
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
 | Portal (`Loom portal`) | `apps/loom/app/(portal)/` |
 | Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
 | Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` |
 | Lessons (`Loom lessons`) | `apps/loom/app/(lessons)/` and `lessons/` |
+| Demo (`Loom demo`) | `apps/loom/app/(demo)/` |
 
 `Loom primitives` was split out of the framework routine on 16 August, once
 [0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
@@ -78,10 +82,20 @@ Two rules follow from sharing an application, and they are what keep it safe:
 
 `apps/loom` exists as of 19 August 2026: `apps/portal`, `apps/docs` and
 `apps/marketing` were retired into `(portal)`, `(docs)` and `(marketing)`, and
-`(lessons)` is an empty shell waiting for its owner. Each lane is that one
+`(lessons)` has since been filled by its owner. Each lane is that one
 directory and everything under it — a surface's components and its non-route code
 live inside its own route group, so `app/(docs)/_lib/nav.ts` is the documentation
 routine's and nobody else has to be told so.
+
+`Loom demo` was split out of the framework routine on 20 August. The demo had
+been built by the routine that owns the runtime, which judged it done because by
+its own standard it was — the pipeline runs, the record is complete, the tests
+pass. The maintainer's verdict was that it was clunky and did not make sense.
+A demo is judged by whether it lands, not by whether it is correct, and those are
+different objectives that pull in different directions.
+
+Its first task is moving the demo off `/portal/demo`, where public code sat at
+the one path that reads as private, onto a public `/demo` of its own.
 
 Work that belongs to another lane is **filed in `FINDINGS.md` for its owner**,
 not done.
