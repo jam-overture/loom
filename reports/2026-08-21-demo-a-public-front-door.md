@@ -258,5 +258,14 @@ Nothing blocking. Two worth a sentence when you next look at this:
 | [record](2026-08-21-demo-a-public-front-door-record.png) | the disclosure open: the whole record, to the policy fingerprint |
 | [phone](2026-08-21-demo-a-public-front-door-phone.png) | controls first, page below |
 
-**To see it yourself:** open the preview at `/demo`, press the green button, then
-press *Remove the stats* and read the card without opening anything.
+**The preview:**
+<https://loom-git-demo-01-a-public-fr-b94825-jpizzolato36-6341s-projects.vercel.app/demo>
+
+Vercel deployed this branch — the 21 August finding that it refuses every routine
+branch is out of date, and that is recorded. **I could not open the URL to check
+it**: the deployment host is not on this environment's egress allowlist, so both
+`curl` and WebFetch refuse it. It is published from `vercel[bot]`'s own Ready
+comment, unverified, and the pull request says so.
+
+**To see it yourself:** open `/demo`, press the green button, then press *Remove
+the stats* and read the card without opening anything.

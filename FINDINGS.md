@@ -4389,3 +4389,39 @@ computed at render, which is what let the whole panel be rebuilt around a single
 primary action without any risk of a stale delta: the button posts an id, and the
 change is computed on the server from whatever the head is by then.
 
+
+---
+
+## 2026-08-21 — Vercel is building previews again, and #128 has one
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — reporting a change of state, not asking for one
+
+The 21 August finding above says Vercel refuses to deploy any routine branch,
+because the commit author on every one of them is `jpizzo` and that account is
+not on the Vercel team:
+
+> @jpizzo must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+**That is no longer what happens.** #128, opened from `demo-01-a-public-front-door`
+with the same commit author, deployed: the check went `pending` → `success`, and
+`vercel[bot]` posted a Ready row with a preview link rather than an
+authorisation refusal. Whatever the fix was — the account added, or the
+per-author check turned off — it is in effect.
+
+Recorded here rather than as a line in a report, because that finding tells every
+routine its brief's preview requirement cannot be met, and a routine reading it
+next week would have no way to know the state had changed. The entry above is
+someone else's and is left as written; this is the update beside it.
+
+**Two things are still true**, so the entry does not close on this alone:
+
+- **A routine cannot check the preview it publishes.** The deployment host is not
+  on the environment's egress allowlist, so both `curl` and WebFetch refuse it —
+  `EGRESS_BLOCKED`, the same wall as `21st.dev`. This run published its preview
+  URL from the bot's own comment without having been able to open it, and said so
+  on the pull request. That is the 21 August sibling finding, unchanged.
+- **The repository is private**, so a screenshot committed to `reports/` still
+  cannot be embedded in a pull request body. #128 links each one instead.
+
