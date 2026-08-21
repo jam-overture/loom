@@ -98,6 +98,20 @@ export const LIBRARY_CLASS = {
   select: "loom-select",
   /** A `loom.form` laid out as a single row — see the rule about sizing children. */
   formInline: "loom-form-inline",
+  /**
+   * A `loom.avatar-row` cluster: each face overlaps the one before it and rings
+   * itself in the page's ground so the edge reads. The ring is `bg-canvas`
+   * because a primitive cannot know what it is sitting on — a cluster placed
+   * inside a `loom.card` rings itself in the canvas colour rather than the
+   * card's, which is a hair off and the honest limit of a static stylesheet.
+   */
+  cluster: "loom-cluster",
+  /** A `loom.mosaic`: one column until there is room for six. */
+  mosaic: "loom-mosaic",
+  /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
+  mosaicAlternating: "loom-mosaic-alternating",
+  mosaicShowcase: "loom-mosaic-showcase",
+  mosaicLead: "loom-mosaic-lead",
 } as const
 
 /**
@@ -232,6 +246,45 @@ details[open] > summary .loom-marker {
 }
 .loom-form-inline > .loom-field {
   flex: 1 1 14rem;
+}
+.loom-cluster > * + * {
+  margin-inline-start: -0.7em;
+}
+.loom-cluster > * {
+  box-shadow: 0 0 0 2px var(--loom-bg-canvas);
+}
+.loom-mosaic {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+@media (min-width: 48rem) {
+  .loom-mosaic {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .loom-mosaic-alternating > *:nth-child(4n + 1),
+  .loom-mosaic-alternating > *:nth-child(4n) {
+    grid-column: span 4;
+  }
+  .loom-mosaic-alternating > *:nth-child(4n + 2),
+  .loom-mosaic-alternating > *:nth-child(4n + 3) {
+    grid-column: span 2;
+  }
+  .loom-mosaic-showcase > *:nth-child(5n + 1),
+  .loom-mosaic-showcase > *:nth-child(5n + 2) {
+    grid-column: span 3;
+  }
+  .loom-mosaic-showcase > *:nth-child(5n + 3),
+  .loom-mosaic-showcase > *:nth-child(5n + 4),
+  .loom-mosaic-showcase > *:nth-child(5n) {
+    grid-column: span 2;
+  }
+  .loom-mosaic-lead > * {
+    grid-column: span 2;
+  }
+  .loom-mosaic-lead > *:first-child {
+    grid-column: span 6;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .loom-rise, .loom-aurora {

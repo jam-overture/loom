@@ -1293,6 +1293,16 @@ footer are almost pure visual judgment — there is no Hermes content model to
 port, because Hermes never had one — so this is the first unit built with
 nothing but the library's own precedent to calibrate against.
 
+**A fourth time, 21 August.** `primitives-09-the-technical-vocabulary` fetched
+the same URL and got the same `EGRESS_BLOCKED`. Still open, still noted here
+rather than filed again. `docs/routines.md` says `21st.dev` is on the WebFetch
+allowlist; it is not, and the gap between what that document promises and what
+the proxy does is now the more useful half of this entry — a routine reading the
+brief has no way to know the reference it is told to consult is unreachable
+until it tries. This run's mosaic is the primitive that reference would have
+calibrated, and it was built against `loom.hero` and `loom.article-grid`
+instead.
+
 ---
 
 ## 2026-08-19 — a page cannot collapse its own menu, and probably should not try
@@ -2412,7 +2422,23 @@ what makes that a rule rather than a habit.
 
 ## 2026-08-20 — a level-1 heading does not fit on a phone
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed by `primitives-09-the-technical-vocabulary`**, which took the first of
+the two ways out — `min(var(--loom-scale-8), 11vw)` on level 1 and
+`min(var(--loom-scale-7), 9vw)` on level 2, and nothing below them, since step 6
+is 32px and fits a phone with room to spare.
+
+The precedent the entry asked to have named out loud is named:
+[0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+is the record, written for `loom.mosaic`'s media query and covering this by the
+same argument — the markup does not change, nothing is interpolated, and the
+browser rather than the render function reads the width. It carries the same
+limit, stated there: a `vw` is the viewport, so a headline inside a narrow
+column on a wide screen is not held back.
+
+The second way out — a fluid `scaleRamp` in the font pack — is still the better
+fix and is still `Loom daily build`'s, and this does not block it: a pack whose
+step 8 is already a clamp is a ramp that wins here at every width.
 
 Seen in the same phone screenshot as the finding above, and left alone because
 it is a bigger call than a run should slip in.
@@ -3210,7 +3236,12 @@ withheld export still has a sentence above it explaining the module it lives in.
 
 ## 2026-08-21 — one of those ten is in `src/primitives/`
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** closed
+by `primitives-09-the-technical-vocabulary`. Reworded exactly as suggested — the
+clause now opens *"the reason is the rule that a container's name states its
+arrangement"* and the record follows as a parenthetical link, so the summary
+survives the next regeneration of `/docs/api-reference/primitives` with nothing
+to change in `app/(docs)/`.
 
 The one row of the table above that is this lane's. `loomQuoteGrid`'s doc
 comment opens:
@@ -3354,7 +3385,9 @@ small change to one band whenever the answer exists.
 ## 2026-08-20 — the reference's feature grid mixes cell sizes and `loom.feature-grid` cannot
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
-**Status:** open — low priority, and worked around by using the grid as it is
+**Status:** **answered 21 August by `loom.mosaic`**, and answered with a
+different primitive rather than with a prop on this one — see the entry dated
+21 August below for why, and for what it costs.
 
 The maintainer named `nextjs.org`'s layout as a reference we will keep using, so
 this is filed as a gap to know about rather than a request to act on now.
@@ -3380,3 +3413,151 @@ in this library and does not.
 
 Not blocking. The site looks deliberate as it stands; this is the difference
 between deliberate and composed.
+
+---
+
+## 2026-08-21 — the mixed-size band exists, and it is not `loom.feature-grid`
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing` ·
+**Status:** open for the filer to use — the primitive is built and merged with
+`primitives-09-the-technical-vocabulary`
+
+The 20 August finding above asked for a way to say *this cell is bigger* in a
+feature band, and suggested a `feature`-level `emphasis` the grid reads, by
+analogy with `loom.tier` inside `loom.tier-table`. The answer shipped as a
+**different primitive**, and the reasoning is worth having because it changes
+what the marketing lane should write.
+
+`loom.mosaic` is a general arranger (0062) that lays its children out on a
+repeating cycle of unequal column spans — `alternating`, `showcase` or `lead` —
+and it will hold `loom.feature` cells, `loom.card` cells, a `loom.code` panel,
+or one of each. The rhythm is the container's, so nothing about `loom.feature`
+changed and no child carries a prop that is inert outside one parent.
+
+**Why not `emphasis` on the child**, since this library has that shape already:
+`loom.tier`'s `emphasis` changes how *that tier paints itself* — its border, its
+surface — which is a thing a tier can do alone. A span is not: it means nothing
+without a column count that lives on the parent, and a `span: 4` in a tree whose
+parent is three columns wide is a number that is simply wrong. That is the
+coupling `loom.split` avoids by keeping `ratio` on the arranger, and the reason
+the original finding's own instinct — *"it is probably wrong"* — was right.
+
+**What it costs you**, and it is the cost 0062 names rather than a surprise: a
+band built this way is a `loom.mosaic` holding features, not a
+`loom.feature-grid`, so the node no longer says *this is the feature band*. The
+projection a model reads and the analysis the Gate weighs both lose that. If the
+marketing site ends up wanting the varied feature band **twice**, that is 0062's
+stated signal to name the pair — `loom.feature-mosaic` over `loom.feature` — and
+it is a small primitive once `loom.mosaic` exists. Say so and this lane will
+build it; it was not built now because one use is not yet a band.
+
+One limit to know before you place one: the rhythm switches off below `48rem`
+and a mosaic is a single column on a phone, which is deliberate
+([0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)).
+
+---
+
+## 2026-08-21 — a font pack declares three families and none of them is monospace
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** open — worked around, and the workaround needs nothing undone when
+this lands
+
+`loom.code` and `loom.kbd` need a monospace face, and there is no way for a
+theme to give them one. `fontPackSchema` (`src/theme/theme.ts`) declares
+`headingFamily`, `bodyFamily` and an optional `accentFamily`; the renderer emits
+`--loom-heading-family` and `--loom-body-family`, and `tokens.ts` exposes
+`family("heading" | "body")`. There is no third role, so a code panel either
+hard-codes a stack — which is the class of mistake `tokens.ts` exists to make
+impossible for colour — or does what it does now.
+
+**The workaround, and why it is not a hack:** the two primitives ask for
+
+```
+var(--loom-mono-family, ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace)
+```
+
+through a `monospace()` helper beside the other token helpers. It is a `var()`
+with the system stack as its **fallback**, so the day a font pack declares a
+mono family and the renderer emits that variable, every code panel and key cap
+in every deployment picks it up with nothing in `src/primitives/` to change.
+Until then the fallback resolves, nothing is unstyled, and the value is
+identical under every palette — so 0049's re-theme guarantee is untouched and
+the library's tests still see no literal below the root.
+
+**What is actually wanted:** `monoFamily` on `fontPackSchema`, emitted as
+`--loom-mono-family` alongside the other two, and a `family("mono")` overload.
+Optional or required is the owner's call — optional keeps every registered pack
+valid and means the fallback stays live for packs that decline to answer, which
+is the shape `accentFamily` already has.
+
+Worth saying while the file is open: `accentFamily` is emitted as a variable no
+primitive reads (filed 21 August, above). A pack that has an opinion about a
+display face and none about a mono face has the roles the wrong way round for a
+library whose next four primitives are technical.
+
+---
+
+## 2026-08-21 — a code block cannot offer a copy button, and the fake would be worse than the gap
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** open — not blocking, and deliberately not faked
+
+Every reference page a developer reads puts a copy control on its code panels,
+and `nextjs.org`'s single most load-bearing element — the `npx create-next-app`
+line under the hero — is one. `loom.code` ships without it.
+
+It is not a state problem, which is what makes it worth filing separately from
+the `tabs` block. A copy button needs **no state at all**: one click handler
+calling `navigator.clipboard.writeText`, and optionally a label that changes for
+two seconds. What it needs is somewhere for a *behaviour* to come from, and a
+primitive's props are JSON (0009) — there is no seam through which a registered
+component receives or declares an interaction, only `interactive`, which
+*describes* a target for the Gate rather than creating one.
+
+Three shapes, in the order I would rank them:
+
+1. **The registered component owns it, like the animations do.** `loom.code`
+   emits a client component that reads its own `textContent`. This is 0055's
+   bargain applied to behaviour instead of motion: the tree says *code panel*,
+   the registry vouches for what a code panel does, and an AI proposal cannot
+   reach the handler. It needs the render seam to permit a client boundary
+   inside a primitive, which is the part I cannot check from this lane.
+2. **A declared behaviour vocabulary** — `behaviours: ["copy"]` beside `slots`,
+   resolved by the host. More machinery, and it makes the closed set of things
+   a primitive may *do* explicit, which is the property that would matter if
+   this ever grows past copying.
+3. **Nothing, permanently**, and say so. A defensible answer for a library whose
+   claim is that the whole page is data.
+
+Not worked around, on purpose. A button that looks like it copies and does not
+is worse for a visitor than no button, and a `loom.action` pointing at the
+snippet would be exactly that.
+
+---
+
+## 2026-08-21 — `loom.mosaic` reads the viewport where it should read its container
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — a known limit of the thing that shipped, recorded so it is
+revisited deliberately
+
+[0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+allows the library's first width media query, for the band that cannot be laid
+out intrinsically. A media query asks about the **viewport**, and what a mosaic
+actually wants to know is how wide *it* is.
+
+The case where they differ is real: a mosaic placed in the narrow column of a
+`loom.split`, on a wide screen, gets six columns in a space that cannot hold
+them. Nothing renders wrongly — the cells simply get very thin.
+
+A container query (`@container`) is the honest mechanism and is what this should
+become. It is not what shipped, for the reason 0079 gives: where container
+queries are unsupported, the un-queried rules are the ones that apply, so a
+mosaic would render its *narrow* single-column layout forever on those clients,
+silently. A width query fails the other way — it composes, and occasionally
+composes somewhere too narrow, which is visible the moment anyone looks.
+
+Revisit when the support floor is not worth thinking about, or if a page turns
+up that puts a mosaic inside a column. Mine to fix; filed rather than left in a
+report because the next run in this lane will not remember it.

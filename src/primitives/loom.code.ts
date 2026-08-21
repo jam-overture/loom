@@ -1,0 +1,223 @@
+import { createElement, type CSSProperties } from "react"
+import { z } from "zod"
+
+import type { LoomPrimitiveProps } from "../render/primitive.js"
+import { definePrimitive } from "../sdk/definition.js"
+
+import { colour, monospace, radius, size, space, weight } from "./tokens.js"
+
+/**
+ * A snippet, set in monospace on a tinted surface — or a terminal, which is the
+ * same panel wearing a window bar.
+ *
+ * Ported from Hermes' `code-block` (`language`, `code`, `caption`), and one of
+ * the four blocks the port map calls **atomic**: whitespace is the content
+ * here, and the reason nothing else in the library can stand in for it. A
+ * `loom.prose` collapses runs of spaces, folds every newline into a space, and
+ * renders in the body face — so a tree that says "here is the command" through
+ * prose says it wrong in three ways at once, and none of them are recoverable
+ * by a delta.
+ *
+ * **The code is children, not the `code` prop Hermes had.** It is exactly
+ * 0052's third clause and the same call `loom.badge` and `loom.action` make: one
+ * string that is the whole of what the node says is prose, so it is a text node
+ * with an author, a history and an inverse of its own. A snippet that could not
+ * be re-authored without replacing the node would be the odd one out in a
+ * library where a headline can.
+ *
+ * `language` and `caption` stay props for the fixed-field half of the same
+ * rule: there is exactly one of each, they label the snippet rather than being
+ * it, and changing one is exactly a `configure`.
+ *
+ * **`tone` is a display mode, not a second primitive.** A terminal and a source
+ * listing are two renderings of one content model — text whose spacing is
+ * meaningful — and 0052 keeps a closed set of renderings on one enum for the
+ * reason `loom.divider`'s ornaments are one enum: a model turning a snippet into
+ * a command emits one `configure` the Gate weighs as the small reversible thing
+ * it is, rather than a `remove` and an `insert` that loses the snippet's
+ * identity and its text node's history along with it.
+ *
+ * There is no syntax highlighting and no copy button. The first needs a parser
+ * per language, which is a registry of its own; the second needs a click a tree
+ * cannot express, and is filed rather than faked — a button that looks like it
+ * copies and does not is worse than no button.
+ */
+
+const props = z
+  .object({
+    /**
+     * A free-text label — `typescript`, `bash`, `loom.tree.json`. Free text
+     * because a closed enum here would be a list of every language anybody
+     * might ever paste, and because a filename is just as good a label as a
+     * language and neither is more correct.
+     */
+    language: z.string().min(1).max(32).optional(),
+    /** A sentence under the panel, the way `loom.media` captions a picture. */
+    caption: z.string().min(1).max(200).optional(),
+    /**
+     * Two renderings: a source listing on a tinted surface, or a terminal with
+     * the window bar that says *this is a thing you run* before a reader has
+     * read a character of it.
+     */
+    tone: z.enum(["source", "terminal"]).optional(),
+    /**
+     * `compact` is the one-line install command a landing page puts under its
+     * hero — the panel sized to the line rather than to a listing.
+     */
+    density: z.enum(["comfortable", "compact"]).optional(),
+  })
+  .strict()
+
+type Props = z.infer<typeof props>
+
+/**
+ * The bar is `border-subtle` against a `bg-surface-muted` panel in both tones,
+ * so a terminal is not a *darker* panel — no palette slot means "dark", and one
+ * that did would be black text on black under `minimal`. What separates the two
+ * is the window dots and the label's alignment, which read the same way under
+ * every palette because neither is a colour.
+ */
+const DOT: CSSProperties = {
+  width: "0.6rem",
+  height: "0.6rem",
+  borderRadius: radius("full"),
+  background: colour("border-strong"),
+}
+
+export const loomCode = definePrimitive({
+  type: "loom.code",
+  description:
+    "A code snippet or a terminal command, in monospace on a tinted surface, with an optional language label and caption. Its code is a child.",
+  props,
+  slots: [],
+  component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
+    const terminal = given.tone === "terminal"
+    const compact = given.density === "compact"
+    const barred = terminal || given.language !== undefined
+
+    const bar = !barred
+      ? null
+      : createElement(
+          "div",
+          {
+            key: "bar",
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: space(2),
+              paddingBlock: space(2),
+              paddingInline: space(3),
+              borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+              background: colour("bg-surface"),
+            },
+          },
+          !terminal
+            ? null
+            : createElement(
+                "span",
+                {
+                  key: "dots",
+                  "aria-hidden": true,
+                  style: { display: "flex", gap: space(1), flex: "0 0 auto" },
+                },
+                createElement("span", { key: "a", style: DOT }),
+                createElement("span", { key: "b", style: DOT }),
+                createElement("span", { key: "c", style: DOT })
+              ),
+          given.language === undefined
+            ? null
+            : createElement(
+                "span",
+                {
+                  key: "language",
+                  style: {
+                    /** Centred in a terminal bar, leading in a source bar — where a filename goes. */
+                    marginInline: terminal ? "auto" : undefined,
+                    fontFamily: monospace(),
+                    fontSize: size(1),
+                    fontWeight: weight("body"),
+                    letterSpacing: "0.06em",
+                    color: colour("fg-muted"),
+                  },
+                },
+                given.language
+              )
+        )
+
+    const listing = createElement(
+      "pre",
+      {
+        key: "code",
+        /**
+         * The scroll is the `pre`'s and never the page's. A long line inside a
+         * flex or grid cell expands its track unless the cell is allowed to be
+         * narrower than its content, which is what `minWidth: 0` on the root
+         * below buys — the phone-scrollbar failure filed on 20 August, in the
+         * one primitive whose content is deliberately unwrappable.
+         */
+        style: {
+          margin: "0",
+          overflowX: "auto",
+          paddingBlock: compact ? space(3) : space(4),
+          paddingInline: compact ? space(3) : space(4),
+          fontFamily: monospace(),
+          fontSize: size(2),
+          lineHeight: compact ? 1.5 : 1.7,
+          color: colour("fg-default"),
+          /** `pre-wrap` would silently rewrap a command; the content's own breaks are the content. */
+          whiteSpace: "pre",
+          tabSize: 2,
+        },
+      },
+      createElement("code", { style: { fontFamily: "inherit" } }, children)
+    )
+
+    const panel = createElement(
+      "div",
+      {
+        key: "panel",
+        style: {
+          /**
+           * Takes the height its cell gives it rather than the height its
+           * content asks for. A four-line snippet beside a card in a
+           * `loom.mosaic` would otherwise leave the cell half empty, and a band
+           * whose panels stop at different heights is the ragged look the
+           * mosaic exists to avoid. Where nothing imposes a height — a panel
+           * under a hero, a panel in a column — this does nothing at all.
+           */
+          flex: "1 1 auto",
+          background: colour("bg-surface-muted"),
+          border: `1px solid ${colour("border-subtle")}`,
+          borderRadius: radius("md"),
+          overflow: "hidden",
+        },
+      },
+      bar,
+      listing
+    )
+
+    return createElement(
+      "figure",
+      {
+        ...loom.editable,
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          gap: space(2),
+          margin: "0",
+          width: "100%",
+          minWidth: "0",
+          boxSizing: "border-box",
+        },
+      },
+      panel,
+      given.caption === undefined
+        ? null
+        : createElement(
+            "figcaption",
+            { style: { fontSize: size(1), color: colour("fg-muted") } },
+            given.caption
+          )
+    )
+  },
+})
