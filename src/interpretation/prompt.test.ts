@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, type NodeId } from "../ids.js"
+import { createStarterPrimitiveRegistry } from "../primitives/index.js"
 import { catalogueOf } from "../sdk/catalogue.js"
 import { THEME_PROP_KEY } from "../render/theme.js"
 import { createThemeRegistry } from "../theme/registry.js"
@@ -9,7 +10,13 @@ import { testRegistry } from "../testing/definitions.js"
 import { buildIntent, buildProposal } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
 
-import { buildRepairMessage, buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
+import {
+  buildRepairMessage,
+  buildUserMessage,
+  hashPrompt,
+  measurePrompt,
+  INTERPRETER_SYSTEM_PROMPT,
+} from "./prompt.js"
 
 const intentFor = (utterance: string, scopeNodeId?: NodeId) => {
   const { tree } = sampleTree()
@@ -270,5 +277,91 @@ describe("INTERPRETER_SYSTEM_PROMPT on repair", () => {
   it("forbids slicing a refused change into a smaller piece of the same thing", () => {
     expect(INTERPRETER_SYSTEM_PROMPT).toContain("one revision")
     expect(INTERPRETER_SYSTEM_PROMPT).toContain("must not be the same change split into a smaller piece")
+  })
+})
+
+describe("measurePrompt", () => {
+  const starterCatalogue = () => {
+    const registry = createStarterPrimitiveRegistry()
+    if (!registry.ok) throw new Error("the starter registry did not build")
+
+    return catalogueOf(registry.value)
+  }
+
+  it("adds up to what is actually sent", () => {
+    const { tree } = sampleTree()
+    const intent = intentFor("make the body quieter")
+    const themes = createThemeRegistry().catalogue()
+    const catalogue = starterCatalogue()
+
+    const measured = measurePrompt(intent, tree, catalogue, themes)
+    const sent =
+      INTERPRETER_SYSTEM_PROMPT.length + buildUserMessage(intent, tree, catalogue, themes).length
+
+    expect(measured.total).toBe(sent)
+    expect(
+      measured.system + measured.primitives + measured.themes + measured.tree + measured.request
+    ).toBe(measured.total)
+  })
+
+  it("charges nothing for a vocabulary the host did not register", () => {
+    const { tree } = sampleTree()
+    const measured = measurePrompt(intentFor("make the body quieter"), tree)
+
+    expect(measured.primitives).toBe(0)
+    expect(measured.themes).toBe(0)
+    expect(measured.system).toBeGreaterThan(0)
+    expect(measured.tree).toBeGreaterThan(0)
+  })
+
+  /**
+   * A ceiling rather than an assertion of today's number, because the starter
+   * library is meant to grow and a test that fails on every addition is a test
+   * people learn to update without reading.
+   *
+   * 8000 is roughly 30% above what the 51 starter entries cost when this was
+   * measured — another eighteen entries or so before it fires. The fixed prose in
+   * the block is already minimal (about 800 characters, most of it the
+   * instruction that makes the vocabulary usable at all), so when this does fire
+   * the answer is either that the starter library has grown past what one
+   * deployment should register all of, or that 0077's cut order — presets and
+   * packs before palettes — applies. Raising the ceiling is the third answer and
+   * wants a reason written down.
+   */
+  it("keeps the starter theme catalogue inside its budget", () => {
+    const { tree } = sampleTree()
+    const measured = measurePrompt(
+      intentFor("make the body quieter"),
+      tree,
+      starterCatalogue(),
+      createThemeRegistry().catalogue()
+    )
+
+    expect(
+      measured.themes,
+      "the starter theme catalogue has outgrown its prompt budget: either the starter library has grown past what one deployment should register all of, or 0077's cut order applies (presets and packs before palettes), or the ceiling moves and the reason is written down"
+    ).toBeLessThan(8_000)
+  })
+
+  /**
+   * The thing the block is for, held against the thing it competes with. A
+   * deployment is free to register fifty themes and five primitives; Loom's own
+   * starter set spending more of a model's attention on what a page can wear
+   * than on what can exist is a different matter, and the moment to notice it is
+   * when it happens rather than when a request gets expensive.
+   */
+  it("does not let the starter themes outgrow the starter primitives", () => {
+    const { tree } = sampleTree()
+    const measured = measurePrompt(
+      intentFor("make the body quieter"),
+      tree,
+      starterCatalogue(),
+      createThemeRegistry().catalogue()
+    )
+
+    expect(
+      measured.themes,
+      "the starter themes now cost a model more attention than the starter primitives, which is the moment 0077's cut order was written for"
+    ).toBeLessThan(measured.primitives)
   })
 })

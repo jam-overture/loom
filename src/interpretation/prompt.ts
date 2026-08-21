@@ -95,21 +95,103 @@ To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an 
 `
 }
 
+/**
+ * The message in its parts, so that assembling it and measuring it read from
+ * the same place. A measurement that rebuilt the blocks itself would be a
+ * second assembly to keep in step, and the first thing to go stale.
+ */
+type UserMessageParts = {
+  readonly primitives: string
+  readonly themes: string
+  readonly tree: string
+  readonly request: string
+}
+
+const userMessageParts = (
+  intent: EditIntent,
+  tree: LoomTree,
+  catalogue: PrimitiveCatalogue | undefined,
+  themes: ThemeCatalogue | undefined
+): UserMessageParts => {
+  const scopeLine = intent.scopeNodeId
+    ? `\nConfine the change to the subtree rooted at ${intent.scopeNodeId}, marked "<- scope" above.`
+    : ""
+
+  return {
+    primitives: catalogueBlock(catalogue),
+    themes: themeBlock(themes),
+    tree: `Current tree:\n\n${renderTree(tree, intent.scopeNodeId)}\n\n`,
+    request: `Request (${intent.origin}): ${intent.utterance}${scopeLine}`,
+  }
+}
+
 export const buildUserMessage = (
   intent: EditIntent,
   tree: LoomTree,
   catalogue?: PrimitiveCatalogue,
   themes?: ThemeCatalogue
 ): string => {
-  const scopeLine = intent.scopeNodeId
-    ? `\nConfine the change to the subtree rooted at ${intent.scopeNodeId}, marked "<- scope" above.`
-    : ""
+  const parts = userMessageParts(intent, tree, catalogue, themes)
 
-  return `${catalogueBlock(catalogue)}${themeBlock(themes)}Current tree:
+  return `${parts.primitives}${parts.themes}${parts.tree}${parts.request}`
+}
 
-${renderTree(tree, intent.scopeNodeId)}
+/**
+ * What one proposal request costs, block by block, in characters.
+ *
+ * Characters rather than tokens, deliberately. A token count depends on a
+ * tokenizer that belongs to a model and changes with it, so a number measured
+ * here would be wrong somewhere else and stale eventually; the package would
+ * also have to carry a tokenizer to produce it. Characters are exact, free, and
+ * proportional enough for the question this exists to answer — which block is
+ * the request made of, and what did registering more of something cost.
+ *
+ * `system` is the constant prompt. It is included because it is part of what is
+ * sent, and separated because it is the one part a provider's cache can hold
+ * across every intent: a large constant is a different kind of cost from a large
+ * catalogue that arrives on every request behind a tree that keeps changing.
+ *
+ * A repair sends this message plus the refused delta and the objection, so a
+ * repaired intent costs about twice what this reports.
+ */
+export type PromptMeasurement = {
+  readonly system: number
+  readonly primitives: number
+  readonly themes: number
+  readonly tree: number
+  readonly request: number
+  /** The sum of the five, and what actually goes over the wire. */
+  readonly total: number
+}
 
-Request (${intent.origin}): ${intent.utterance}${scopeLine}`
+/**
+ * Measures a request without sending it.
+ *
+ * A host deciding what to register is the intended caller: `createThemeRegistry`
+ * and the primitive registry both take exactly what a deployment wants, and this
+ * is how the cost of taking all of it becomes a number rather than a feeling
+ * (0077's cost, made countable).
+ */
+export const measurePrompt = (
+  intent: EditIntent,
+  tree: LoomTree,
+  catalogue?: PrimitiveCatalogue,
+  themes?: ThemeCatalogue
+): PromptMeasurement => {
+  const parts = userMessageParts(intent, tree, catalogue, themes)
+
+  const measured = {
+    system: INTERPRETER_SYSTEM_PROMPT.length,
+    primitives: parts.primitives.length,
+    themes: parts.themes.length,
+    tree: parts.tree.length,
+    request: parts.request.length,
+  }
+
+  return {
+    ...measured,
+    total: Object.values(measured).reduce((sum, part) => sum + part, 0),
+  }
 }
 
 export const buildRepairMessage = (

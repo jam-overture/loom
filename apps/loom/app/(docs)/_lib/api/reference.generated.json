@@ -732,6 +732,20 @@
               "summary": ""
             },
             {
+              "name": "PromptMeasurement",
+              "kind": "type",
+              "signature": "type PromptMeasurement = {\n    readonly system: number;\n    readonly primitives: number;\n    readonly themes: number;\n    readonly tree: number;\n    readonly request: number;\n    /** The sum of the five, and what actually goes over the wire. */\n    readonly total: number;\n};",
+              "truncated": false,
+              "summary": "What one proposal request costs, block by block, in characters."
+            },
+            {
+              "name": "measurePrompt",
+              "kind": "function",
+              "signature": "const measurePrompt: (intent: EditIntent, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => PromptMeasurement",
+              "truncated": false,
+              "summary": "Measures a request without sending it."
+            },
+            {
               "name": "buildRepairMessage",
               "kind": "function",
               "signature": "const buildRepairMessage: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => string",
