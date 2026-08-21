@@ -1,3 +1,10 @@
+/**
+ * What an author uses to give Loom a component to render.
+ *
+ * A primitive is defined with a schema, a description and a component, collected
+ * into a registry, and checked at registration rather than at request time.
+ */
+
 export * from "./audit.js"
 export * from "./catalogue.js"
 export * from "./conformance.js"

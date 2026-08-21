@@ -3,6 +3,14 @@ import type { InteractiveTypes, InteractiveWhen } from "../interactivity.js"
 import type { PrimitiveRegistry } from "./registry.js"
 
 /**
+ * How a library tells the gate which of its primitives a reader aims at.
+ *
+ * The declaration is made once, on the primitive, and read here into the
+ * vocabulary a policy uses to refuse a change that would nest one target inside
+ * another.
+ */
+
+/**
  * A registry's interactivity declarations, in the shape a Gate policy takes.
  *
  * This is the whole reason the declaration lives on the primitive rather than

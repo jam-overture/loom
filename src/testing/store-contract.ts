@@ -151,7 +151,7 @@ export const describeTreeStoreContract = (
     })
 
     /**
-     * 0029. Both stores have to agree on the *absence* as well as the value: a
+     * Who allowed a change (0029). Both stores have to agree on the *absence* as well as the value: a
      * null column and an absent key must read back the same, or the two
      * implementations differ on what an unapproved change looks like.
      */
@@ -200,7 +200,7 @@ export const describeTreeStoreContract = (
       expect(missing.ok ? "" : missing.error.code).toBe("delta-rejected")
     })
 
-    /** The atomicity 0016 requires, asserted from the outside. */
+    /** The atomicity the store promises, asserted from the outside (0016). */
     it("leaves the snapshot and the log untouched when an append is refused", async () => {
       const { tree } = sampleTree()
       const store = await freshStore()
@@ -319,8 +319,8 @@ export const describeTreeStoreContract = (
 
     /**
      * The log is read a page at a time, from either end (0026). These are the
-     * same promises 0025 made about the telemetry journal, asserted here for the
-     * log because the two are separate contracts that happen to agree.
+     * same promises made about the telemetry journal (0025), asserted here for
+     * the log because the two are separate contracts that happen to agree.
      */
     describe("revisions", () => {
       it("reads forward from the oldest entry by default", async () => {

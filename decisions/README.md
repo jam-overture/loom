@@ -136,3 +136,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0076](0076-loom-offers-a-host-the-contrast-bar-and-does-not-impose-it.md) | Loom offers a host the contrast bar and does not impose it | Accepted | §4b |
 | [0077](0077-a-palette-is-derived-once-and-committed-as-literals.md) | A palette is derived once and committed as literals | Accepted | §4b |
 | [0078](0078-the-front-door-speaks-the-visitors-language.md) | The front door speaks the visitor's language, and a test holds it there | Accepted | §4d |
+| [0079](0079-a-doc-comment-in-src-is-written-to-a-stranger.md) | A doc comment in `src/` is written to a stranger | Accepted | §4c |

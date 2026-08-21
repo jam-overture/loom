@@ -2920,7 +2920,39 @@ answer is in the git log rather than in this file.
 
 ## 2026-08-20 — two thirds of the published surface has no sentence, and it is on a page now
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** **partly
+closed** by `framework-01-the-package-own-words`.
+
+**The first bullet is closed, and it was the cheap one exactly as the finding
+said.** All fourteen of the named modules in this lane now open with a paragraph,
+as do fourteen the finding did not count — the 13 entry-point barrels, which had
+no comment at all, and `testing/row-security.ts`. Measured on
+the regenerated reference: module groups carrying a paragraph went **147 → 164 of
+165**, and exports rendering as a bare name and a signature went **29 → 1**. The
+one is `primitives/loom.prose`, filed below.
+
+**The blank line is now enforced rather than observed.** The finding was right
+that it had become load-bearing with nothing holding it —
+`src/documentation.test.ts` fails on a module whose first comment is attached to
+its first declaration, which is the shape that silently credits an export with
+the module's sentence
+([0079](decisions/0079-a-doc-comment-in-src-is-written-to-a-stranger.md)). The
+finding left this as "that lane's call rather than this one's"; the call is that
+it is worth a check, because the convention had already drifted in 30 files.
+
+**The second bullet stays open** and is unchanged: **104 exported functions say
+nothing of their own.** Not addressed here and deliberately not — the finding's
+own reading is right that many of them do not need it, and a run that wrote 104
+sentences to clear a count would be padding the reference rather than improving
+it. The ones worth a line are the ones whose name does not give the argument
+order or the failure mode, and picking those is a judgement per function rather
+than a sweep. Now that every module has a paragraph above it, each of those
+exports has context it did not have this morning, which lowers the urgency
+further.
+
+Original status below.
+
+**Status:** open
 
 The API reference is generated from the declarations the package publishes
 (§4c's rule), so for the first time there is a **count** rather than an
@@ -3145,7 +3177,25 @@ than this instance.
 
 ## 2026-08-21 — a decision number is a footnote to a document the reader cannot open
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-01-the-package-own-words`. All nine rows of the table below are
+rewritten and back on the site; the tenth is `Loom primitives`' and stays open
+below. The convention the finding proposed is now checked rather than hoped for
+([0079](decisions/0079-a-doc-comment-in-src-is-written-to-a-stranger.md)):
+`src/documentation.test.ts` refuses a record number that is not a parenthetical
+citation, so a sentence cannot be silently withheld again. The check is
+deliberately **narrower** than `readerFacing` — parentheses only, not the
+trailing `, inherited from 0009` form, of which there were two and both were
+rewritten — because narrower is the safe direction: everything it permits, the
+generator lifts.
+
+The finding was right about the second channel being the one worth knowing
+about. Four signatures were losing member annotations, not because the summary
+was withheld but because `readerFacingSignature` drops an annotation whole:
+`RenderDiagnostic`, `StoredRevision`, `PolicyCalibration` and
+`TelemetryReadRequest`. All four are intact now. Original status below.
+
+**Status:** open
 
 The maintainer, on the API reference:
 
@@ -3380,3 +3430,121 @@ in this library and does not.
 
 Not blocking. The site looks deliberate as it stands; this is the difference
 between deliberate and composed.
+
+---
+
+## 2026-08-21 — six comments and one module in `src/primitives/` are the rest of the reference gap
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+Handing back the half of two findings that is not this lane's, with the work
+already done on the other side of the boundary so the shape is settled rather
+than proposed.
+
+[0079](decisions/0079-a-doc-comment-in-src-is-written-to-a-stranger.md) says a
+doc comment in `src/` is written to a stranger, and asserts two rules over the
+lane in `src/documentation.test.ts`. **`src/primitives/` is excluded, by name, in
+that file.** It is yours, it currently fails both rules, and widening the check
+is one line once these are closed:
+
+```ts
+const EXCLUDED = ["src/primitives", "src/cli/scaffold-fixture"]
+//                 ^ delete this entry
+```
+
+(The second entry stays: `scaffold-fixture/` is the committed byte-for-byte
+output of `loom init` rather than source, and a blurb there breaks the test that
+holds it to the template.)
+
+**One module has no opening paragraph.** `loom.prose.ts` — its first comment is
+attached to a declaration rather than detached from it by an empty line, so the
+reference has no paragraph for the module and every export under that heading
+renders as a bare name and a signature. It is the **only** one of 165 module
+groups still in that state; the other 29 were closed by this run. Two sentences
+and a blank line fixes it, and the blank line is the part that matters: the
+generator reads the blurb from `src/` precisely because declaration emit drops
+it.
+
+**Six comments make a record number part of a published sentence**, so what they
+say does not reach a reader at all — withheld as a summary, or dropped whole
+from a signature:
+
+| where | what is unreachable |
+| --- | --- |
+| `loom.article.ts:55` | *…a prop rather than a `loom.prose` child, for 0059's other half…* |
+| `loom.article.ts:84` | *The declaration 0068 exists to justify…* |
+| `loom.page.ts:21` | a markdown link to 0072 in the first paragraph |
+| `loom.product.ts:76` | *…and 0066 puts a real `loom.action` in the `action` region…* |
+| `loom.quote-grid.ts:40` | *…the reason is 0054: a container's name states its arrangement…* |
+| `perk-content.ts:48` | *…the second string that keeps a perk on the props side of 0059.* |
+
+The `loom.quote-grid` row is the one the documentation routine already filed
+against this lane on 21 August; the other five it did not see, because it was
+measuring summaries and these five include the signature channel.
+
+**The rewrite is mechanical and the rule is one line to remember: put the number
+in parentheses.** *"…and the reason is 0054: a container's name states its
+arrangement"* becomes *"…because a container's name states its arrangement
+(0054)"*, and the site prints the sentence with the citation lifted out. Make the
+number the subject and the sentence is invisible. Every one of the 23 comments
+rewritten in this lane took that form and none of them lost anything — the
+number stays in the source for whoever is reading the code.
+
+`loom.page.ts` is the odd one: a markdown link, not prose. `[0072](…)` in a first
+paragraph is a number as far as the generator is concerned. Moving it out of the
+opening paragraph is enough; later paragraphs of a top-level comment are not
+published.
+
+---
+
+## 2026-08-21 — `reference.generated.json` was regenerated from another lane
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+for your awareness rather than for you to do anything
+
+The third time this repository has recorded a file in one lane having to move for
+a change in another, so it is recorded the same way rather than left in a diff.
+
+This run rewrote 23 doc comments and added 29 module paragraphs in `src/`, which
+is the input `pnpm docs:api` reads. `reference.generated.json` lives in
+`app/(docs)/_lib/api/`, which is yours. **It is regenerated in this pull
+request**, by running your script and touching nothing else in your directory.
+
+Leaving it alone was the alternative and it was worse: the whole point of the
+change is that nine withheld sentences and seventeen module paragraphs reach a
+reader, and none of them would until somebody ran the generator. `docs:api` is
+not part of `pnpm verify`, so nothing would have failed and nothing would have
+said so — the pull request would have looked complete and delivered nothing
+visible.
+
+**Worth considering, and it is your call rather than mine:** the generated file
+is checked in but its freshness is not checked. A drift assertion in your suite —
+regenerate to a temporary path, compare — would turn "somebody remembered" into
+"CI knows". It would also mean any `src/` comment change fails the docs build
+until regenerated, which is a real cost and the reason I have not assumed the
+answer. The alternative shape is to generate at build time and stop committing
+it, which trades reviewability for freshness.
+
+---
+
+## 2026-08-21 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Recorded for the reason the other routines record it. Nothing was wanted from
+another lane to do this work, and nothing in `src/` obstructed it: the change is
+entirely comments plus one new test file, no signature or export moved, and
+`dist/` is byte-identical in every respect that a consumer can observe.
+
+Two things are worth saying rather than leaving as absences.
+
+**The migration is still done and was not touched.** `apps/loom` holds the four
+route groups, `apps/portal` and `apps/docs` are retired, and the only file this
+run changed under `apps/` is the generated reference named above. The three
+routines waiting on the migration's shape have not been given anything new to
+wait for.
+
+**The record-numbering collision did not bite this time.** 0079 was the next free
+number when this branch was cut and #121 — the only other open pull request —
+adds no record, so the guard should be green on merge. That is luck rather than a
+convention, and the 16 August finding about it is still open.

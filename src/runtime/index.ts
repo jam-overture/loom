@@ -1,3 +1,11 @@
+/**
+ * The part of Loom that decides whether a change may happen.
+ *
+ * An intent becomes a proposal, the proposal is analysed for what it puts at
+ * stake, and a policy turns that into one of three answers: apply it, ask a human
+ * first, or refuse. What it decided, and why, is narrated as it goes.
+ */
+
 export * from "./analysis.js"
 export * from "./assessment.js"
 export * from "./disposition.js"

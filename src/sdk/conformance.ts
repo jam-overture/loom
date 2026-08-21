@@ -11,7 +11,7 @@ import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
 
 /**
- * The conformance probe, inherited from 0010.
+ * The conformance probe (0010).
  *
  * Edit mode decorates by handing a primitive `loom.editable` and trusting it to
  * spread the attributes onto its own root element. A primitive that ignores them

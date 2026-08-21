@@ -3,6 +3,13 @@ import { sql } from "drizzle-orm"
 import type { LoomDatabase } from "./database.js"
 
 /**
+ * Creating the tables the postgres store expects.
+ *
+ * Not a migration framework: one version of the schema, stated as statements a
+ * host runs once, and safe to run again.
+ */
+
+/**
  * The schema, as statements a host can run.
  *
  * One statement per entry, because a driver may refuse several commands in a
@@ -44,7 +51,7 @@ export const TREE_STORE_DDL: readonly string[] = [
    * Locking the tables is part of creating them, not a step in a document.
    *
    * On a managed Postgres that fronts the `public` schema with a REST API — the
-   * host 0022 chose — a new table is world-readable through a public key the
+   * kind of host Loom targets (0022) — a new table is world-readable through a public key the
    * moment it exists. That has been a manual step in `docs/deployment.md` since
    * the first table, and it has been carried as an open item in every report
    * since the second one, which is the evidence that a manual step is the wrong
@@ -52,9 +59,9 @@ export const TREE_STORE_DDL: readonly string[] = [
    * exposed.
    *
    * No policies accompany this, deliberately. RLS with no policy denies every
-   * role except the table's owner, and the owner is who Loom connects as: 0022
-   * put the runtime on plain SQL rather than on the REST layer, so the effect is
-   * to close the door Loom never uses. A host that connects as some other role
+   * role except the table's owner, and the owner is who Loom connects as: the
+   * runtime is on plain SQL rather than on the REST layer (0022), so the effect
+   * is to close the door Loom never uses. A host that connects as some other role
    * is outside that contract and has to grant itself a policy — stated here and
    * in `docs/deployment.md`, because it fails closed and a closed door is a
    * thing you want to have been told about.

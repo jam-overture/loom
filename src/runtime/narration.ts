@@ -23,8 +23,9 @@ const ignore = (): void => undefined
  * `emit` is declared to return `void`, which does not stop a host from writing
  * an `async` one — TypeScript assigns `() => Promise<void>` to `() => void`
  * without complaint. Such a sink rejects instead of throwing, and an unhandled
- * rejection is a process-level failure on exactly the serverless hosts 0024 was
- * written for. Containment has to cover both shapes or it covers neither.
+ * rejection is a process-level failure on exactly the serverless hosts this
+ * containment was written for (0024). It has to cover both shapes or it covers
+ * neither.
  */
 const isThenable = (value: unknown): value is PromiseLike<unknown> =>
   typeof value === "object" &&
@@ -34,7 +35,7 @@ const isThenable = (value: unknown): value is PromiseLike<unknown> =>
 /**
  * Emits without letting the sink refuse. Nothing is reported when containment
  * fires, because the only channel for reporting it is the thing that just
- * failed — see 0042 for why that is accepted rather than worked around.
+ * failed, which is accepted rather than worked around (see 0042).
  */
 const contain = (events: EventSink, envelope: RuntimeEventEnvelope): void => {
   try {

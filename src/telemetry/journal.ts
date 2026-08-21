@@ -54,7 +54,7 @@ export type RecordedTelemetry = TelemetryRecord & {
 }
 
 export type TelemetryReadRequest = {
-  /** Absent reads every tree the handle can see, which is the scope rule 0020 set. */
+  /** Absent reads every tree the handle can see, which is the scope rule (0020). */
   readonly treeId?: TreeId
   /** A cursor from a previous page's `older`/`newer`, passed back unread. */
   readonly cursor?: string
