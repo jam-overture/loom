@@ -15,9 +15,8 @@
  */
 export const BAND = {
   seeItHappen: "See it happen",
-  capabilities: "What you get",
+  problems: "What this is for",
   facts: "Where it is today",
-  pricing: "Plans",
   questions: "Questions",
   waysIn: "Keep going",
 } as const

@@ -3462,6 +3462,12 @@ small change to one band whenever the answer exists.
 different primitive rather than with a prop on this one — see the entry dated
 21 August below for why, and for what it costs.
 
+**Closed by the filer, same day.** `marketing-07-problems-not-prices` uses it for
+the band that says what Loom is for, which is its first use outside its own
+specimen page and is the exact band this was filed about. The answer is better
+than the request: the arrangement stayed on the arranger, and the cells needed no
+knowledge of being in a mosaic.
+
 The maintainer named `nextjs.org`'s layout as a reference we will keep using, so
 this is filed as a gap to know about rather than a request to act on now.
 
@@ -3943,3 +3949,80 @@ would be worse at the job it has, and a translation pinned to the code is a
 better arrangement than a runtime trying to serve two readers. It is worth
 recording only so that the next surface that needs plain words knows the
 translation is expected to live on the surface rather than upstream.
+
+---
+
+## 2026-08-21 — a sentence about the rules went stale one commit after the rules did
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` ·
+**Status:** closed by `marketing-07-problems-not-prices`
+
+Recorded because the failure is a pattern rather than a typo, and this is the
+second time this lane has had it.
+
+The front door's demonstration band tells a reader what the site protects
+*before* offering the choice that will be refused for exactly that reason — a
+refusal nobody saw coming reads as the page breaking rather than as a rule
+holding. The sentence said:
+
+> This site protects two things from being taken away: **what it charges**, and
+> the way out of it.
+
+The maintainer took pricing off the front door on 21 August. The rules changed in
+the same commit — `loom.tier-table` out, `loom.mosaic` in — and the sentence did
+not, because nothing connected them. It said the site protected a band that no
+longer existed, on a page whose entire argument is that it can tell you what its
+rules did.
+
+It was caught by eye, in a screenshot. That is not a mechanism, and it is exactly
+what [0078](decisions/0078-the-front-door-speaks-the-visitors-language.md) was
+written about: on this surface, an unchecked claim rots one defensible commit at
+a time.
+
+Closed by derivation rather than by correction. `PROTECTED_IN_PLAIN_WORDS` names
+each protected type in the words a visitor would use; the band builds the
+sentence from the rules themselves — the phrases and the count, deduplicated,
+because the menu and the footer are two pieces of one promise — and a protected
+type nobody has named throws while the page is being built.
+
+**The general lesson, for any lane with a page that describes its own
+configuration:** two spellings of one fact will diverge, and the one that
+diverges is always the prose. Derive the sentence, or assert it against the
+value. Do not proofread it.
+
+---
+
+## 2026-08-21 — 0081 carries an amendment rather than a superseding record
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a governance question, and a small one
+
+[0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)
+merged on the morning of 21 August. Hours later the maintainer took pricing off
+the front door, which made one paragraph inside it wrong: the record names what
+the site's rules protect, and one of the two things had ceased to exist.
+
+`decisions/README.md` says **never edit a record to reflect a change of
+direction** — mark it `Superseded by NNNN`, leave the text intact, write a new
+one. This is not a change of direction: everything 0081 decides is untouched, and
+what moved is an illustration inside the argument. Superseding a record whose
+decision still stands, over a detail, seemed worse than the alternative: it would
+put two records in the index describing one shape, and a reader would have to
+work out that the second exists to correct a noun.
+
+So the record keeps its text and its status, and carries a dated `## Amendment`
+section at the end saying what moved and why.
+
+That is a judgment call in a gap the convention does not cover, and it should be
+the maintainer's rather than a routine's. **Two things worth deciding:**
+
+- **Is an additive, dated amendment allowed** on an `Accepted` record when the
+  decision stands and a fact inside it has moved? If yes, it belongs in
+  `decisions/README.md` beside the superseding rules, because the next lane to
+  hit this will guess too.
+- **If not**, this should be reverted to a superseding record and I will write
+  one. Nothing depends on the answer; it is one section of one file.
+
+Worth noting that the alternative nobody should pick is leaving it alone. A
+merged record describing a band the site does not have is the same class of stale
+claim `docs/rollout.md` opens by warning about.

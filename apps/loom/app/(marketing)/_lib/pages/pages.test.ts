@@ -257,13 +257,19 @@ describe("the words that are not engineering's to write", () => {
     }
   })
 
-  it("is confined to the pricing band and the footer's licence line", () => {
+  it("is down to the footer's licence line, and nothing else", () => {
     /**
      * The count is asserted so that adding placeholder copy is a deliberate act
      * with a test to change, rather than something that accumulates unnoticed
-     * between reviews.
+     * between reviews. It went 8 → 1 on 21 August: seven of the eight were the
+     * pricing band, and the maintainer took pricing off the front door.
+     *
+     * One is the right number to still be here. Licensing is genuinely
+     * undecided, it gates whether this repository can be public at all, and the
+     * footer is the one place a reader looks for it — so the line stays, marked,
+     * rather than the page quietly implying an answer by omission.
      */
-    expect(PLACEHOLDER_STRINGS).toHaveLength(8)
+    expect(PLACEHOLDER_STRINGS).toHaveLength(1)
   })
 })
 
