@@ -10,6 +10,7 @@ import { PLACEHOLDER_STRINGS } from "../copy"
 import { renderSitePage, SITE_PAGES, treeFor } from "../render"
 import {
   DEFAULT_THEME,
+  HOME,
   internalHref,
   PRODUCT_SURFACES,
   SITE_ROUTES,
@@ -263,5 +264,31 @@ describe("the words that are not engineering's to write", () => {
      * between reviews.
      */
     expect(PLACEHOLDER_STRINGS).toHaveLength(8)
+  })
+})
+
+/**
+ * The front door offers every surface in all three of the places it offers
+ * anything: the menu, the footer's map, and the band that invites.
+ *
+ * The band enumerated its cards by hand until 21 August, when a merge added the
+ * lessons course to `PRODUCT_SURFACES` and it appeared in the header and the
+ * footer and silently not in the band — in a page whose own comment promised
+ * that could not happen. A surface added by another run is not a run that will
+ * think to look here, so the assertion is the thing that has to.
+ */
+describe("a surface added to the product", () => {
+  const home = markupOf(HOME, DEFAULT_THEME)
+
+  it.each(PRODUCT_SURFACES)("$label is invited on the front door, not only linked", (surface) => {
+    /**
+     * Three occurrences of the href: the menu (open surfaces only), the
+     * footer's map, and the card. The guarded one is the bar's action rather
+     * than a menu item, so two is its floor and the card is what this checks.
+     */
+    const offers = home.split(`href="${surfaceHref(ORIGIN, surface)}"`).length - 1
+
+    expect(offers).toBeGreaterThanOrEqual(2)
+    expect(home).toContain(surface.blurb)
   })
 })

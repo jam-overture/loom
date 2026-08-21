@@ -114,12 +114,34 @@ honest equivalent, and inventing one would be the first false claim on the site.
 
 ![The reference](2026-08-20-marketing-plain-language-reference.png)
 
+## The merge with `main`, and the one thing it broke
+
+Five pull requests landed while this was open, and `FINDINGS.md` was the only
+conflict — the append-against-append that happens whenever two runs finish on one
+day. Both sides kept in the order they landed, nothing rewritten.
+
+`_lib/site.ts` merged cleanly and it is the interesting one: **#117 added a
+lessons course to `PRODUCT_SURFACES` while this branch was rewriting the copy
+around it.** Git had no trouble; the *page* did. The header and the footer are
+built by mapping over that list, so the course appeared in both automatically —
+and the "Where to go from here" band enumerated its three cards by hand, so it
+silently did not. In a band whose own doc comment promised the words here and the
+words in the footer could not drift apart.
+
+Fixed rather than left: the band now maps `PRODUCT_SURFACES` too, with a
+`WAYS_IN` table holding only what is genuinely the band's — the mark, and the
+verb, because a card invites where a menu item names. A test holds that table
+total against the surface list, since the run that adds the fifth surface will be
+in another lane and will have no reason to look at this file.
+
+![Where to go from here, with the course](2026-08-20-marketing-plain-language-ways-in.png)
+
 ## Tests
 
-`pnpm verify` green — **1473 runtime, 909 application**. Nothing skipped, nothing
-weakened.
+`pnpm verify` green on the merged tree — **1473 runtime, 921 application**.
+Nothing skipped, nothing weakened.
 
-Marketing suite **94 → 114**, twenty of them new in `voice.test.ts`. The palette
+Marketing suite **94 → 117**, twenty of them new in `voice.test.ts`. The palette
 switcher's label moved into an exported constant on the way past, because two
 test files were asserting the same sentence and a string spelled out in three
 places is a string that gets re-worded in one of them.

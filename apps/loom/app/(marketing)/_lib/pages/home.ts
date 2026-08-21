@@ -19,7 +19,9 @@ import {
   HOME,
   HOW_IT_WORKS,
   internalHref,
+  LESSONS,
   PORTAL,
+  PRODUCT_SURFACES,
   REPOSITORY_URL,
   SITE_THEMES,
   surfaceHref,
@@ -303,41 +305,58 @@ const questions = (ids: IdFactory): LoomNode =>
   ])
 
 /**
- * The three ways further in, on the page rather than only in the chrome.
+ * How a surface is offered here: the verb, and the mark above it.
  *
- * The front door's job is not finished when a visitor has read it. Loom's
- * documentation and its portal are paths on this same origin (0067, 0070), so
- * the band that sends someone to them is part of this page and not a footer
- * afterthought — and each card is honest about what is behind it, which is why
- * the portal's says that signing in is required rather than pretending the
- * whole product is one click away.
+ * The sentence is **not** here — it is `Surface.blurb`, so the words a visitor
+ * reads on this card and the words under the same link in the footer cannot
+ * drift apart. What lives here is the part that is this band's rather than the
+ * surface's: a card invites, so it says *Read the docs* where a menu item says
+ * *Docs*.
  *
- * The sentences come off `PRODUCT_SURFACES`, so the words a visitor reads here
- * and the words under the same link in the footer cannot drift apart.
+ * Keyed by path and held total by a test. The band enumerated its three cards by
+ * hand until 21 August, and the merge that added the lessons course to
+ * `PRODUCT_SURFACES` proved why that was wrong: the course appeared in the
+ * header and in the footer and silently not here, in a band whose own comment
+ * promised it could not.
+ */
+const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: string }>> = {
+  [DOCS.path]: { icon: "▤", title: "Read the docs" },
+  [LESSONS.path]: { icon: "◍", title: "Take the course" },
+  [PORTAL.path]: { icon: "◉", title: "Open the portal" },
+}
+
+/**
+ * The ways further in, on the page rather than only in the chrome.
+ *
+ * The front door's job is not finished when a visitor has read it. Every other
+ * surface is a path on this same origin (0067, 0070), so the band that sends
+ * someone to them is part of this page and not a footer afterthought — and each
+ * card is honest about what is behind it, which is why the portal's says that
+ * signing in is required rather than pretending the whole product is one click
+ * away.
  */
 const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: "Keep going" }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.feature-grid",
-      props: { columns: "three" },
+      props: { columns: "four" },
       children: [
-        buildElement(ids, {
-          type: "loom.feature",
-          props: {
-            icon: "▤",
-            title: "Read the docs",
-            body: DOCS.blurb,
-            href: surfaceHref(context.origin, DOCS),
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.feature",
-          props: {
-            icon: "◉",
-            title: "Open the portal",
-            body: PORTAL.blurb,
-            href: surfaceHref(context.origin, PORTAL),
-          },
+        ...PRODUCT_SURFACES.map((surface) => {
+          const way = WAYS_IN[surface.path]
+
+          if (way === undefined) {
+            throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
+          }
+
+          return buildElement(ids, {
+            type: "loom.feature",
+            props: {
+              icon: way.icon,
+              title: way.title,
+              body: surface.blurb,
+              href: surfaceHref(context.origin, surface),
+            },
+          })
         }),
         buildElement(ids, {
           type: "loom.feature",
