@@ -139,3 +139,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0079](0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md) | A layout only CSS can express belongs in the stylesheet, width query and all | Accepted | §4b |
 | [0080](0080-a-doc-comment-in-src-is-written-to-a-stranger.md) | A doc comment in `src/` is written to a stranger | Accepted | §4c |
 | [0081](0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md) | The front door demonstrates statelessly, and the address is the whole of the state | Accepted | §4d |
+| [0082](0082-a-refusal-says-what-became-of-the-repair.md) | A refusal says what became of the repair | Accepted | §2 |

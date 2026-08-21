@@ -4167,7 +4167,36 @@ claim `docs/rollout.md` opens by warning about.
 
 ## 2026-08-21 — a refusal that a repairer declined is indistinguishable from one nobody tried to repair
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** **closed
+by `framework-02-the-repair-that-declined`** — accurate as filed, and fixed the
+first of the two ways it proposed.
+
+`CompositionOutcome`'s `rejected` now carries an optional `repairFailure`, set
+only when a repairer was asked and declined, holding the `InterpretationError` it
+declined with ([0082](decisions/0082-a-refusal-says-what-became-of-the-repair.md)).
+The three rows in the table below now return three different values: `repairOf`
+set is a repair that was refused in its turn, `repairFailure` set is a repairer
+that declined, neither is a run where nothing was asked.
+
+The fourth outcome kind was rejected for the reason this finding gave — the
+change *was* refused, and the repair's failure is a detail of that refusal.
+
+**One thing the finding did not ask for and needed:** `WriteOutcome.refused`
+carries it too. The surfaces hold that outcome, not the composition one, so
+stopping at the pipeline would have left the fact one layer short of everyone who
+needs it. `describeWriteOutcome` says it in the sentence as well.
+
+**Deliberately not acted on: the related `renderDelta` note.** The asymmetry is
+real — a `configure` prints its prop keys, an `insert` prints its node's props in
+full — and this lane's reading is that it should stay. The projection is there so
+a model can see how broadly a change reached, and a `configure`'s *old* values
+are already in the tree projection the model was handed; printing the new ones
+would restate half the delta in the summary of it. Recorded here rather than
+filed so the next person does not rediscover the question.
+
+Original text below.
+
+**Status:** open
 
 Found while writing lesson 13. `CompositionOutcome` carries enough to tell a
 *repaired-and-refused-again* change from a first refusal, and not enough to tell
@@ -4222,3 +4251,63 @@ projection exists to tell a model how broadly it reached — so lesson 13 carrie
 it as a judgement call for the reader rather than as a bug report. If the prompt
 lane thinks the asymmetry is wrong, it is two lines in
 `src/interpretation/render.ts`.
+
+---
+
+## 2026-08-21 — a refusal can now say a repair was declined, and no surface says it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`, `Loom daily build` ·
+**Status:** open — nothing is broken, and there is a sentence worth writing
+
+`framework-02-the-repair-that-declined` puts `repairFailure` on the refused
+outcome ([0082](decisions/0082-a-refusal-says-what-became-of-the-repair.md)).
+Every surface that turns an outcome into words still reads only the kind and the
+disposition, so the fact is available and unsaid.
+
+The one that would benefit most is **`(portal)/_lib/vocabulary.ts`**. It maps
+outcome kinds to plain language and it is the file the demo and the review queue
+both go through, which is exactly why this lane did not edit it — the table
+exists so that one state cannot be called two things, and a routine that is not
+its owner adding a row is how that starts. A refusal where a repairer declined
+deserves a different sentence from one where nothing was asked: *"we asked for
+something smaller and could not get one"* is a different fact for a reviewer than
+*"refused"*.
+
+`describeWriteOutcome` already says it for a caller that only prints a sentence,
+so a surface that wants the short path has one today.
+
+**The demo's record panel is this lane's own and is not edited here either**,
+because it is mid-review in #128 and a second pull request touching the same
+files would make both unreviewable. It is the obvious next place: the demo is
+where a visitor watches a refusal happen, and "we tried a smaller version and the
+model could not find one" is the most interesting thing that can be said about
+one. Left for the run after #128 lands.
+
+---
+
+## 2026-08-21 — two files in other lanes moved, both because their own tests said to
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, `Loom docs` ·
+**Status:** open — nothing to fix, recorded so each owner knows their file was
+opened and why
+
+Adding one decision record and one optional field to a published type made two
+tests in `apps/loom` fail, both of them working exactly as designed. Neither
+change is a judgement about the file; both are the mechanical consequence the
+test was written to force.
+
+| file | change | forced by |
+| --- | --- | --- |
+| `app/(marketing)/_lib/copy.ts` | `FACTS.decisions` `"81"` → `"82"` | `facts.test.ts` counts records on disk |
+| `app/(docs)/_lib/api/reference.generated.json` | regenerated, 2 lines | `extract.test.ts` holds it against the generator |
+
+The marketing one is the number on the front page, and the test is the reason it
+is a fact rather than something someone typed once — it is a good test and this
+is it working. Worth knowing all the same: **every decision record any routine
+writes now edits a marketing file.** Four routines write records; the count is
+one line and the failure is legible, so this is a note rather than a complaint.
+
+The docs one is the second time this has happened (see the 21 August entry on
+`reference.generated.json`). It is the mechanical output of
+`pnpm --filter @loom/app docs:api` over the doc comments in `src/`, nothing else
+in that lane was touched, and leaving it stale fails `pnpm verify` for everyone.

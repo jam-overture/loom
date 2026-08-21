@@ -17,6 +17,7 @@ import {
   failingEventSink,
   fixedClock,
   scriptedInterpreter,
+  scriptedRepairer,
   type CollectingEventSink,
   type RecordingInterpreter,
 } from "../testing/doubles.js"
@@ -244,6 +245,39 @@ describe("commitIntent when nothing should be written", () => {
     const outcome = await commitIntent(path, intent)
 
     expect(outcome.kind).toBe("refused")
+
+    const history = await path.store.revisions(tree.treeId)
+    expect(history.ok && history.value.revisions).toHaveLength(0)
+
+    expect(outcome.kind === "refused" && outcome.repairFailure).toBeUndefined()
+    expect(describeWriteOutcome(outcome)).not.toContain("smaller")
+  })
+
+  /**
+   * The refusal is the same one either way, so a caller told only "refused"
+   * cannot tell a deployment that asked for something smaller and was turned
+   * down from one that never asked. The write path carries the difference out.
+   */
+  it("says a repair was asked for and declined, in the outcome and in the sentence", async () => {
+    const { path, intent, tree } = await harnessFor({ confidence: 0.05 })
+    const repairing: WritePath = {
+      ...path,
+      runtime: {
+        ...path.runtime,
+        repairer: scriptedRepairer(
+          err({ code: "not-understood", detail: "no gentler version exists" })
+        ),
+      },
+    }
+
+    const outcome = await commitIntent(repairing, intent)
+    if (outcome.kind !== "refused") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.repairFailure).toEqual({
+      code: "not-understood",
+      detail: "no gentler version exists",
+    })
+    expect(describeWriteOutcome(outcome)).toContain("asked for something smaller")
 
     const history = await path.store.revisions(tree.treeId)
     expect(history.ok && history.value.revisions).toHaveLength(0)
