@@ -106,6 +106,21 @@ Ten new tests, nothing failed, nothing skipped, no test weakened. The
 regenerated `reference.generated.json` is committed with the change, so the
 drift test stays green and the diff shows exactly which sentences moved.
 
+## The preview URL was wrong, and I could not have caught it by checking
+
+Worth recording because it affects every routine rather than this run. I built
+the preview URL from the branch name, as the previous runs did. **Vercel
+truncates a long branch name and inserts a hash**, so the links in the first
+version of the pull-request body and comment were dead — short branch names had
+happened to survive this until now.
+
+`*.vercel.app` is also refused by the egress proxy (`CONNECT tunnel failed,
+response 403`), the same shape as the `nextjs.org` finding, so a routine cannot
+confirm the URL it publishes either. The fix needs no allowlist: the
+`vercel[bot]` comment carries the assigned URL and its deploy status, and it
+arrives before a routine writes its own comment. Filed, with the suggestion that
+`docs/routines.md` say so.
+
 ## Findings
 
 **Filed:** the nine withheld comments in `src/` for `Loom daily build`, with the
@@ -113,6 +128,7 @@ table of what each one says today and the convention that follows — cite in
 parentheses and the site handles it; make the number the subject and the
 sentence becomes invisible. **Filed:** the tenth, `loomQuoteGrid`, for
 `Loom primitives`. **Filed:** `/lessons/review/set-k` for `Loom lessons`.
+**Filed:** the preview-URL problem above, for the maintainer.
 
 ## Open questions
 

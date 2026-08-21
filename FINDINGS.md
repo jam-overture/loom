@@ -3203,3 +3203,50 @@ with a title is a very different thing from a bare number.
 The docs lane's own answer is in the entry above, if the same rule is wanted
 there: lift a parenthetical citation, and withhold a sentence that cannot lose
 the number without losing its grammar.
+
+---
+
+## 2026-08-21 — a routine cannot check the preview URL its brief requires it to publish
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Every routine's brief asks for the deployed preview URL on the pull request.
+None of them can confirm the one they publish, and on **#119 the one I published
+was wrong**.
+
+Two causes, and the first is the fixable one.
+
+**Vercel does not name a preview after the branch.** A long branch name is
+truncated and a hash inserted, so `docs-05-no-decision-numbers` deployed to:
+
+```
+loom-git-docs-05-no-decision-602049-…vercel.app     ← what Vercel assigned
+loom-git-docs-05-no-decision-numbers-…vercel.app    ← what I constructed
+```
+
+Short branch names have happened to survive this — `docs-03-the-minimal-theme`
+was published by hand on #107 and worked — which is exactly why it went
+unnoticed until a branch name ran long.
+
+**And the URL cannot be verified from a routine's environment.** `*.vercel.app`
+is refused by the egress proxy, in the same shape as the `nextjs.org` and
+`21st.dev` findings above:
+
+```
+curl: (56) CONNECT tunnel failed, response 403
+```
+
+So a routine can neither derive the URL reliably nor check the one it derived.
+
+**What works, and it needs no allowlist entry:** the `vercel[bot]` comment on
+the pull request carries the assigned `previewUrl` and its deploy status, and it
+arrives before a routine writes its own comment. Reading it off that comment is
+authoritative where constructing it is a guess. That is what #119's body now
+does, and it is what every routine should do rather than building the URL from
+its branch name — worth a line in `docs/routines.md`, which is not this lane's
+file.
+
+Adding `*.vercel.app` to the egress allowlist would close the other half and let
+a routine confirm the page it is pointing at actually renders. Worth having, and
+lower value than the first fix: the bot's URL is right whether or not anyone can
+fetch it.
