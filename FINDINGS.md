@@ -3148,7 +3148,19 @@ reply grammar rather than the prompt.
 
 ## 2026-08-20 — the Architecture section should link into the lessons, not restate them
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** closed
+by `docs-06-architecture-points-outward`. The section is two pages: an
+orientation of eight ideas, each carrying a link to its lesson and a link to its
+record, and an index of all eighty records. **Nothing in it is typed** — the
+lesson and record a page points at are resolved out of `lessons/README.md` and
+`decisions/README.md` as the site builds, an unknown number throws rather than
+rendering a dead link, and a test walks every target against the filesystem. The
+only prose written into the section is the eight orientation paragraphs, which
+are the layer that ages slowest. The reading-contract point was taken: a lesson
+is linked as a lesson, with a note that the course is meant to be worked through
+rather than read, and none of its explanation is lifted. Original status below.
+
+**Status:** open
 
 The documentation site's Architecture section and the lessons course explain the
 same things — why three node kinds, why undo is a delta, why nothing throws at a
@@ -3846,3 +3858,75 @@ the sharper version — the loser cannot find out early even by looking, so the
 `git mv` at merge time is not avoidable diligence, it is the cost of the
 convention. Still cheap, still paid by every pair of routines that record on the
 same day, and still worth writing down in `docs/routines.md`.
+
+---
+
+## 2026-08-21 — every markdown table on the documentation site was a paragraph of pipes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **fixed in
+this pull request**, recorded because the failure mode is general and the next
+one will not be tables
+
+MDX on its own is CommonMark, and CommonMark has no tables. GFM was never
+enabled. This does not fail: a pipe table compiles happily into a paragraph of
+pipe characters, so the page builds, deploys, and ships looking like somebody
+pasted a spreadsheet into it.
+
+**Seven pages had one each**, since each was written — including
+`/docs/the-runtime/what-the-gate-decides`, whose three-answer table is the
+clearest thing on the page:
+
+```
+| Answer | What happens | | --- | --- | | accepted | the change is applied | …
+```
+
+Found by looking at a screenshot. Nothing else could have found it.
+`content.test.ts` checks that a page exists and is linked; the api-reference
+tests check generated data against its source. **Nothing checked what a page's
+markdown turns into**, so an entire markdown feature could be absent without a
+single failure anywhere.
+
+Fixed by `remark-gfm`, and held by `app/(docs)/_lib/mdx.test.ts`, which compiles
+every `page.mdx` through the same plugin list the build uses and fails if a page
+containing a table produces no table.
+
+**The general form, and what is still open.** Tables were one member of a class:
+*a markdown feature the writer assumes and the pipeline does not have, which
+degrades to plausible-looking prose instead of an error.* The new test covers
+tables, autolinked URLs and ordinary paragraphs. Footnotes, definition lists and
+anything else a writer reaches for are still unchecked, and would fail the same
+silent way. The cheap answer if it bites again is another case in that file; the
+thorough one is a check that the rendered HTML of every page contains no
+markdown syntax at all.
+
+---
+
+## 2026-08-21 — two files outside the docs route group had to change, and both are the docs site's own settings
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+for your awareness rather than for you to do anything
+
+The fourth time this repository has recorded a file in one lane having to move
+for a change in another, so it is recorded the same way rather than left in a
+diff.
+
+- **`apps/loom/mdx-components.tsx`** — two components added to what a `page.mdx`
+  may use without importing. This file exists only because Next requires it at
+  the application root; nothing outside `(docs)` writes a `page.mdx`, which its
+  own doc comment says.
+- **`apps/loom/next.config.ts`** — one import and one option, to hand the loader
+  the remark plugins. The *decision* about what dialect a docs page is written
+  in now lives in `app/(docs)/_lib/mdx.ts`, inside my lane and next to the pages
+  it governs; the config file only wires it up, and its comment says so.
+
+Both changes affect only `(docs)`, because `pageExtensions` means only `(docs)`
+has MDX pages at all. Leaving them alone was not an option in either case: the
+first is where a component becomes usable in prose, and the second is where the
+site stops losing its tables.
+
+**Worth considering, and it is your call rather than mine:** these two files are
+in the framework lane by location and in the documentation lane by content, and
+this is the second run in two days where that has produced a cross-lane diff.
+The alternative shape is a rule that says so — the MDX pipeline is `(docs)`'
+even where the framework forces the file to sit at the root — which would make
+the next run's diff unsurprising rather than something to explain.
