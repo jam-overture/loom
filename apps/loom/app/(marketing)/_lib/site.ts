@@ -72,6 +72,14 @@ export const DOCS: Surface = {
   guarded: false,
 }
 
+export const LESSONS: Surface = {
+  path: "/lessons",
+  label: "Lessons",
+  blurb:
+    "A course on why Loom works the way it does. You answer before you read, and it tells you when to come back — slower than skimming, and the reason it stays with you.",
+  guarded: false,
+}
+
 export const PORTAL: Surface = {
   path: "/portal",
   label: "Portal",
@@ -80,8 +88,15 @@ export const PORTAL: Surface = {
   guarded: true,
 }
 
-/** Everywhere else in the product, in the order the front door offers them. */
-export const PRODUCT_SURFACES: readonly Surface[] = [DOCS, PORTAL]
+/**
+ * Everywhere else in the product, in the order the front door offers them.
+ *
+ * Documentation, then the course, then the portal: what the thing is, why it is
+ * that way, and where the work happens. The two open surfaces come before the
+ * guarded one because a visitor who cannot sign in should still be offered
+ * everywhere they *can* go before they meet a door.
+ */
+export const PRODUCT_SURFACES: readonly Surface[] = [DOCS, LESSONS, PORTAL]
 
 /**
  * The palettes a visitor may see the site in.

@@ -3088,6 +3088,226 @@ reply grammar rather than the prompt.
 
 ---
 
+## 2026-08-20 — the Architecture section should link into the lessons, not restate them
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+
+The documentation site's Architecture section and the lessons course explain the
+same things — why three node kinds, why undo is a delta, why nothing throws at a
+seam. The docs brief already says `decisions/` and `lessons/` are *the source for
+Architecture, not copied into it*, and that rule is the right one; this finding
+is to make it concrete now that `/lessons` is a real surface rather than a folder
+of markdown.
+
+**Architecture should be a thin index that points outward** — a short orientation
+and then links into the lessons for the reasoning and into the decision records
+for the ruling. Two copies of an argument is two copies to keep true, and the
+copy inside a docs site is the one that goes stale, because nothing fails when it
+does.
+
+Note the reading contracts differ and that is deliberate: a docs page is built to
+let a reader skim to the answer, and the course is built so they cannot. Link to
+a lesson as a lesson — somewhere to work through — rather than lifting its
+explanation onto a docs page and discarding the retrieval that makes it work.
+
+---
+
+## 2026-08-20 — the review queue tests fail west of UTC in the evening
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom lessons` · **Status:** open
+
+`app/(lessons)/_components/queue.test.tsx` fails two assertions when the local
+date and the UTC date differ — reproducible at 19:53 PDT on 2026-08-20, green
+under `TZ=UTC` in the same working tree:
+
+```
+expected 'Today's sitting…' to contain 'Due 1 day ago'
+expected 'Nothing is due today…' to contain 'in 1 day, on'
+```
+
+Both are off by exactly one day. The helper builds its fixture dates with
+`new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)`, which is a
+**UTC** calendar date, while the queue works out "today" locally. After 17:00
+Pacific the two are different days and every relative label shifts.
+
+CI runs in UTC, so this is invisible there and green on `main`. It is still worth
+fixing: it fails for any maintainer west of UTC working in the evening, and the
+failure looks like a broken working tree rather than a timezone, which is how an
+hour disappears.
+
+The fix is the one this project already made everywhere else — [0005 and the
+`Clock` seam](decisions/0005-model-access-is-an-optional-adapter.md): today is an
+input, not something a component reads from the ambient environment. Injecting it
+makes the test say what day it is instead of asking, and removes the class rather
+than this instance.
+
+---
+
+## 2026-08-21 — a decision number is a footnote to a document the reader cannot open
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+
+The maintainer, on the API reference:
+
+> *"I don't think docs should reference internal decisions (like "(0007)"). The
+> casual reader would not know what those are."*
+
+Right, and it was reaching readers in two ways rather than one. The reference
+lifts its sentences from doc comments in `src/`, so every `(0007)` in a comment
+was appearing verbatim on a public page — **and so was every one written inside
+a type**, because a union carries doc comments against its own members and those
+render in the signature's code block. That second channel is the one worth
+knowing about: 21 signatures carried a number, and none of them looked like
+prose.
+
+**Fixed on the docs side, for both channels** — `readerFacing` and
+`readerFacingSignature` in `app/(docs)/_lib/api/extract.ts`, with a test that
+fails if a number reaches any page. Nothing in `src/` was touched. But the fix
+has two grades and the second one costs you something:
+
+- **A citation is lifted out.** `(0014)`, `(0053, 0055)`, `(see 0012)`,
+  `, inherited from 0009` — all footnotes, and the sentence reads the same
+  without them. **14 texts** were fixed this way and lost nothing.
+- **A sentence whose grammar needs the number is withheld entirely.** There is
+  nothing to lift out of *"0049's three theme ids"*, and this lane will not
+  paraphrase the package — the only reason a generated reference can be trusted
+  is that the words are the package's own. So the export renders with its
+  module's paragraph and its signature, and **the sentence you wrote does not
+  appear at all**.
+
+**Ten texts are currently withheld**, and each is one rewrite away from being
+back on the site:
+
+| where | what it says now |
+| --- | --- |
+| `reserved-props/THEME_PROP_KEY` | *0049's three theme ids, honoured on the root node.* |
+| `reserved-props/DATA_PROP_KEY` | *0058's bindings — what a node asks the host to answer…* |
+| `reserved-props/SUBMIT_PROP_KEY` | *0065's submission — which registered endpoint a form posts to…* |
+| `submit/plan/planTreeSubmissions` | *…That is 0058's "identical questions are asked once" applied to…* |
+| `theme/contrast` (module) | *The bar 0074 set, as a function a host can run against its own palettes.* |
+| `theme/contrast/TEXT_CONTRAST_MINIMUM` | *WCAG AA for body text. The bar 0074 chose…* |
+| `render/theme/resolveTheme` | *…the failure 0049 rejected when it rejected host-supplied theming outright.* |
+| `sdk/audit` (module) | *The registration-time check 0010 asked for, as a function a host calls…* |
+| `telemetry/calibration` (module) | *0007 made confidence self-graded and trusted on purpose, on one condition…* |
+| `primitives/loom.quote-grid/loomQuoteGrid` | *…the reason is 0054: a container's name states its arrangement…* |
+
+The last row is `Loom primitives`' and is filed for that lane below; the other
+nine are this one's.
+
+**The convention that falls out of this, and it is cheap to follow.** Cite a
+record in parentheses and the site handles it — *"Props arrive as one
+JSON-encoded object (0014)."* renders as *"Props arrive as one JSON-encoded
+object."* and the record stays in the source for whoever is reading the code.
+Make the number the subject of a sentence and that sentence is invisible to
+every reader of the documentation. Nothing enforces this in `src/` and this lane
+did not add anything that would; the list above is what it costs today.
+
+Worth saying plainly: **the rewrites are worth doing but nothing is broken
+without them.** 147 of 165 modules still carry an opening paragraph, so every
+withheld export still has a sentence above it explaining the module it lives in.
+
+---
+
+## 2026-08-21 — one of those ten is in `src/primitives/`
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open
+
+The one row of the table above that is this lane's. `loomQuoteGrid`'s doc
+comment opens:
+
+> *There is no `flow: "grid" | "columns"` prop, and the reason is 0054: a
+> container's name states its arrangement, so a prop that switched this one from
+> a grid to a multi-column flow would make the name wrong for half its values.*
+
+It is a good paragraph and it is the sort of thing a reader of an API reference
+is glad to find — which is why it is a shame that the site cannot show it. The
+number is the subject of the clause, so there is nothing to lift out, and the
+whole summary is withheld from `/docs/api-reference/primitives`.
+
+Rewording the first clause — *"and the reason is the rule that a container's
+name states its arrangement"* — puts it back on the site at the next
+regeneration, with nothing to change in `app/(docs)/`.
+
+---
+
+## 2026-08-21 — the lessons review surface shows a reader a record number
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom lessons` · **Status:** open
+
+Found while checking that the maintainer's rule held across the whole build
+rather than only on my own pages. Every prerendered page in `apps/loom` was
+grepped for a record number; after the docs fix, **one is left**, and it is not
+mine:
+
+```
+/lessons/review/set-k — "…and which of those two the contract in 0033 asks a host to do."
+```
+
+It comes from `lessons/10-the-pipeline.md`, which cites records in running prose
+throughout — correctly, because a lesson is written for somebody reading this
+repository. The review surface then renders a question built from that prose to
+somebody who may not be.
+
+Not acted on: `(lessons)` and `lessons/` are that lane's, and the fix is a
+judgement about who the review sets are for rather than a mechanical strip. Two
+shapes that would both work, if it is worth fixing at all: reword the question,
+or let the review surface link a record the way the lesson does — `lessons/`
+already writes `[decisions/0033](…)` with the record's full title, and a link
+with a title is a very different thing from a bare number.
+
+The docs lane's own answer is in the entry above, if the same rule is wanted
+there: lift a parenthetical citation, and withhold a sentence that cannot lose
+the number without losing its grammar.
+
+---
+
+## 2026-08-21 — a routine cannot check the preview URL its brief requires it to publish
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Every routine's brief asks for the deployed preview URL on the pull request.
+None of them can confirm the one they publish, and on **#119 the one I published
+was wrong**.
+
+Two causes, and the first is the fixable one.
+
+**Vercel does not name a preview after the branch.** A long branch name is
+truncated and a hash inserted, so `docs-05-no-decision-numbers` deployed to:
+
+```
+loom-git-docs-05-no-decision-602049-…vercel.app     ← what Vercel assigned
+loom-git-docs-05-no-decision-numbers-…vercel.app    ← what I constructed
+```
+
+Short branch names have happened to survive this — `docs-03-the-minimal-theme`
+was published by hand on #107 and worked — which is exactly why it went
+unnoticed until a branch name ran long.
+
+**And the URL cannot be verified from a routine's environment.** `*.vercel.app`
+is refused by the egress proxy, in the same shape as the `nextjs.org` and
+`21st.dev` findings above:
+
+```
+curl: (56) CONNECT tunnel failed, response 403
+```
+
+So a routine can neither derive the URL reliably nor check the one it derived.
+
+**What works, and it needs no allowlist entry:** the `vercel[bot]` comment on
+the pull request carries the assigned `previewUrl` and its deploy status, and it
+arrives before a routine writes its own comment. Reading it off that comment is
+authoritative where constructing it is a guess. That is what #119's body now
+does, and it is what every routine should do rather than building the URL from
+its branch name — worth a line in `docs/routines.md`, which is not this lane's
+file.
+
+Adding `*.vercel.app` to the egress allowlist would close the other half and let
+a routine confirm the page it is pointing at actually renders. Worth having, and
+lower value than the first fix: the bot's URL is right whether or not anyone can
+fetch it.
+
+---
+
 ## 2026-08-20 — the front door cannot show anyone how to start, because there is nothing to install
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
