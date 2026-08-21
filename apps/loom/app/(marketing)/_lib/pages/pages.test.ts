@@ -5,6 +5,7 @@ import { PALETTE_SLOTS } from "@loom/runtime"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
+import { PALETTE_SWITCHER_LABEL } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
 import { renderSitePage, SITE_PAGES, treeFor } from "../render"
 import {
@@ -155,7 +156,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
 
     /** The wordmark, and the footer's re-theme offer: both are tree nodes. */
     expect(body).toContain("Loom")
-    expect(body).toContain("Same tree, another palette:")
+    expect(body).toContain(PALETTE_SWITCHER_LABEL)
   })
 
   /**

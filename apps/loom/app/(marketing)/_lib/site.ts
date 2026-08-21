@@ -21,9 +21,9 @@ export type SiteRoute = {
 export const HOME: SiteRoute = {
   path: "/",
   label: "Home",
-  title: "Loom — the interface is data",
+  title: "Loom — every change your AI makes, written down",
   description:
-    "Loom is a runtime where a page is a tree of registered primitives. Every change to it arrives as a proposal, is weighed against a policy, and carries its own way back.",
+    "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules, and every change keeps a record of who asked, what moved, and how to put it back.",
 }
 
 export const HOW_IT_WORKS: SiteRoute = {
@@ -31,7 +31,7 @@ export const HOW_IT_WORKS: SiteRoute = {
   label: "How it works",
   title: "How it works — Loom",
   description:
-    "A change to a Loom page travels the same five steps every time: it is proposed, described, weighed, gated and recorded. This is that path, end to end.",
+    "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
 }
 
 /** Every route, in nav order. A route that is not here has no way to be reached. */

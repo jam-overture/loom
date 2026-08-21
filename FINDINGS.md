@@ -3085,3 +3085,78 @@ rather than on feel, and both belong to whoever owns the interpreter:
 Worth knowing either way: this is the first change that has grown the model's
 context without adding a primitive, and 0014's budget is stated in terms of the
 reply grammar rather than the prompt.
+
+---
+
+## 2026-08-20 — the front door cannot show anyone how to start, because there is nothing to install
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a release question, not an engineering one
+
+The maintainer sent `nextjs.org` as the layout reference on 20 August. Nearly
+everything in it is reachable with what we have; **one thing is not, and it is
+the single most load-bearing element on their page.** Directly under the hero,
+above the fold, they put one line a visitor can copy:
+
+```
+▲ ~ npx create-next-app@latest
+```
+
+That line is the whole conversion path. Everything below it is persuasion; that
+is the thing you actually do. Our hero's two actions are "See how a change
+travels" and "Read the source" — a page to read and a repository to browse.
+There is no way for a visitor to *have* Loom.
+
+There cannot be, yet: `@loom/runtime` is `private: true` and unpublished, and
+`apps/loom` consumes it as `workspace:*`. Nothing is wrong — it is simply not a
+released thing, and a marketing page cannot invent an install command for a
+package that does not exist on any registry. Writing one would be the first
+outright false claim on the site.
+
+This is worth an answer sooner than it looks, because it shapes the front door
+rather than decorating it:
+
+- **If a package is coming**, the hero should be built around that line now, the
+  way the reference is, and the band order should assume it.
+- **If Loom is not going to be installable for a while**, the honest equivalent
+  is a demo the visitor can *use* on the page — which is the open finding from
+  20 August about `/portal/demo` being behind the sign-in, and the two questions
+  collapse into one.
+- **If it is never going to be a public package**, the front door is selling
+  something else entirely and the positioning questions from #96 need answering
+  before the copy can be right.
+
+Filed rather than guessed at. The site is built so that adding the line is a
+small change to one band whenever the answer exists.
+
+---
+
+## 2026-08-20 — the reference's feature grid mixes cell sizes and `loom.feature-grid` cannot
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
+**Status:** open — low priority, and worked around by using the grid as it is
+
+The maintainer named `nextjs.org`'s layout as a reference we will keep using, so
+this is filed as a gap to know about rather than a request to act on now.
+
+Their feature band is not a uniform grid. Three cells in the top row carry
+illustrations and are visually larger; the rest are text-only and half the
+height; and one cell in the middle of the run is a dark promotional card
+advertising the current release. It reads as a composed page rather than as a
+table of features, and the variation is what does that.
+
+`loom.feature-grid` lays every child out identically — `auto-fit` over one
+minimum width — so the band this site renders is eight equal rectangles. That is
+the right default and it is not a bug. What is missing is any way for a tree to
+say *this one is bigger*, and the cost is that every feature band anyone builds
+with this library will look like a table.
+
+Worth knowing before it is designed: the obvious fix is a `span` prop on
+`loom.feature`, and it is probably wrong — it makes a child responsible for the
+parent's layout, which is the coupling `loom.split`'s `ratio` avoids by keeping
+the arrangement on the arranger. A `feature`-level `emphasis` that the grid reads
+(the way `loom.tier`'s `emphasis` works inside `loom.tier-table`) has precedent
+in this library and does not.
+
+Not blocking. The site looks deliberate as it stands; this is the difference
+between deliberate and composed.
