@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="470" viewBox="0 0 900 470" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="900" height="470" fill="#0f1115"/>
+  <text x="32" y="44" fill="#e6e9ef" font-size="17" font-family="ui-sans-serif, system-ui, sans-serif">Three ways a refusal ends, as the caller sees them</text>
+  <text x="32" y="68" fill="#8b93a7" font-size="12.5">One tree, one policy, one refusal — confidence below the floor. Real output from src/runtime/pipeline.</text>
+
+  <line x1="32" y1="88" x2="868" y2="88" stroke="#242938"/>
+
+  <text x="32" y="114" fill="#6f7789" font-size="11.5">BEFORE</text>
+  <text x="120" y="114" fill="#6f7789" font-size="11.5">— two of the three rows return the same value</text>
+
+  <text x="32" y="144" fill="#c9cede" font-size="13">repaired, refused</text>
+  <text x="250" y="144" fill="#e5484d" font-size="13">rejected</text>
+  <text x="340" y="144" fill="#8b93a7" font-size="13">repairOf: p_r1</text>
+
+  <text x="32" y="170" fill="#c9cede" font-size="13">repairer said no</text>
+  <text x="250" y="170" fill="#e5484d" font-size="13">rejected</text>
+  <text x="340" y="170" fill="#8b93a7" font-size="13">repairOf: undefined</text>
+  <text x="596" y="170" fill="#f5a524" font-size="12.5">◀ indistinguishable</text>
+
+  <text x="32" y="196" fill="#c9cede" font-size="13">no repairer wired</text>
+  <text x="250" y="196" fill="#e5484d" font-size="13">rejected</text>
+  <text x="340" y="196" fill="#8b93a7" font-size="13">repairOf: undefined</text>
+  <text x="596" y="196" fill="#f5a524" font-size="12.5">◀ indistinguishable</text>
+
+  <line x1="32" y1="226" x2="868" y2="226" stroke="#242938"/>
+
+  <text x="32" y="252" fill="#6f7789" font-size="11.5">AFTER</text>
+  <text x="120" y="252" fill="#6f7789" font-size="11.5">— repairFailure, set only when a repairer was asked and declined</text>
+
+  <text x="32" y="282" fill="#c9cede" font-size="13">repaired, refused</text>
+  <text x="250" y="282" fill="#e5484d" font-size="13">rejected</text>
+  <text x="340" y="282" fill="#8b93a7" font-size="13">repairOf: p_r1</text>
+  <text x="596" y="282" fill="#8b93a7" font-size="13">repairFailure: undefined</text>
+
+  <text x="32" y="308" fill="#c9cede" font-size="13">repairer said no</text>
+  <text x="250" y="308" fill="#e5484d" font-size="13">rejected</text>
+  <text x="340" y="308" fill="#8b93a7" font-size="13">repairOf: undefined</text>
+  <text x="596" y="308" fill="#30a46c" font-size="13">repairFailure: not-understood</text>
+
+  <text x="32" y="334" fill="#c9cede" font-size="13">no repairer wired</text>
+  <text x="250" y="334" fill="#e5484d" font-size="13">rejected</text>
+  <text x="340" y="334" fill="#8b93a7" font-size="13">repairOf: undefined</text>
+  <text x="596" y="334" fill="#8b93a7" font-size="13">repairFailure: undefined</text>
+
+  <line x1="32" y1="364" x2="868" y2="364" stroke="#242938"/>
+
+  <text x="32" y="392" fill="#8b93a7" font-size="12.5" font-family="ui-sans-serif, system-ui, sans-serif">The disposition is identical in all three. What separates them is what the runtime already knew</text>
+  <text x="32" y="412" fill="#8b93a7" font-size="12.5" font-family="ui-sans-serif, system-ui, sans-serif">and did not hand back: whether anyone asked for something smaller, and what came of asking.</text>
+  <text x="32" y="444" fill="#6f7789" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif">Filed by Loom lessons, 21 August · closed by 0082 · the same fact reaches WriteOutcome.refused too.</text>
+</svg>

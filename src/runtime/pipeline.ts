@@ -62,6 +62,19 @@ export type CompositionOutcome =
       readonly kind: "rejected"
       readonly assessment: ChangeAssessment
       readonly disposition: Disposition
+      /**
+       * Why no smaller change was offered instead — present only when a repairer
+       * was asked for one and could not produce it.
+       *
+       * The three ways a refusal can end are told apart by this field and
+       * `assessment.proposal.repairOf` together: `repairOf` set means a repair
+       * was made and refused in its turn; this field set means the repairer
+       * declined; neither means no repairer was wired, so nothing was asked.
+       * Without it the second and third read identically, and a host that wanted
+       * to say "we asked for something smaller and could not get one" had to
+       * recover the fact from the event stream (0040).
+       */
+      readonly repairFailure?: InterpretationError
     }
   | { readonly kind: "not-interpreted"; readonly error: InterpretationError }
   | {
@@ -177,6 +190,10 @@ const judgeProposal = (
  * dispositions are already in the event stream by the time this returns, which
  * is what makes "refused, then accepted a smaller version" a pattern telemetry
  * can find rather than one it has to infer.
+ *
+ * A repairer that declines leaves the original refusal standing and carries its
+ * error out on the outcome, so a caller holding only the return value can still
+ * tell that ending from a run where nothing was asked.
  */
 const attemptRepair = async (
   runtime: CompositionRuntime,
@@ -200,7 +217,12 @@ const attemptRepair = async (
   if (!repaired.ok) {
     emit({ type: "repair-failed", refusedProposalId: refused.proposalId, error: repaired.error })
 
-    return { kind: "rejected", assessment: refusal.assessment, disposition }
+    return {
+      kind: "rejected",
+      assessment: refusal.assessment,
+      disposition,
+      repairFailure: repaired.error,
+    }
   }
 
   const judged = judgeProposal(
