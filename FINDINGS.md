@@ -4362,7 +4362,15 @@ lane thinks the asymmetry is wrong, it is two lines in
 
 ## 2026-08-21 — the marketing site does not link to the demo at all, and now it can
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** closed by
+`marketing-08-the-front-door-leads-to-the-demo` — the demo is a `Surface` in
+`site.ts`, which puts it in the header menu, the footer's map and the front
+door's invitation band, plus the three placements this finding and the lane's
+own open question named: the hero's second action, the foot of the band that
+demonstrates, and the foot of `/how-it-works`. Both of the obvious places this
+finding suggested were taken. `linkUrlSchema` refusing relative URLs did **not**
+get in the way — `surfaceHref` has built absolute origin-qualified hrefs since
+19 August, so the workaround for that finding absorbed this with no edit.
 
 The demo brief says to update the marketing site's link to the demo by filing a
 finding rather than by editing that route group. Filing it turned up something
@@ -4772,3 +4780,95 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-22 — the demo has no way out of it, and the front door now sends four streams of people in
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open
+
+Found by grepping the route group for anchors before linking to it, which is a
+thing worth doing before pointing a front door at somewhere.
+
+**`app/(demo)/` contains exactly one `<a>` and it is the skip link.** No
+`next/link`, no `href` on anything else, in the layout or in any component. The
+wordmark in `DemoBar` is a `<span>`. There is no route from the demo to the
+marketing site, the documentation, the course, the portal or the repository.
+
+That was survivable while nothing linked in — a page nobody arrives at cannot
+strand anybody. As of this branch the front door offers `/demo` from **six**
+places: the header menu on every page, the footer's map on every page, the
+hero's second action, the invitation band's card, the foot of the band that
+demonstrates, and the foot of `/how-it-works`. Every one of them is a one-way
+door, and the visitor most likely to walk through it is the one who has decided
+they are interested.
+
+The bar's own comment says it says three things and stops, and the third is
+**"where to go next"**. It currently says whose page it is and that it is live,
+and then does not say the third.
+
+What this lane would suggest, in order, and none of it is this lane's to write:
+
+- **The wordmark becomes a link home.** One attribute, and it is the convention
+  every visitor already has — the mark in the top-left goes to the front door.
+  It is also what the `(marketing)` chrome does, so the two surfaces would agree.
+- **Something at the end of the record rail**, for the visitor who has watched a
+  few changes and now wants to know how to do this to their own page. `/docs` is
+  the honest destination for that and it needs no account.
+- **Not a full site header.** The bar exists because the portal's chrome was
+  wrong here, and replacing it with the marketing chrome would make the same
+  mistake pointing the other way. The demo should stay the instrument.
+
+Worth saying plainly: this is **not a blocker for linking**, and the links are
+shipping without it. A visitor who reaches a page with no way out still has the
+back button, and a demo nobody can reach is worse than a demo that is a
+cul-de-sac. But it is the next thing that would make the route worth having, and
+it is roughly one line of the three.
+
+### One limit of the test this run added, since it touches the same seam
+
+`site.test.ts` now asserts that every `Surface` path is served by a `page.tsx` in
+some route group, which is the guard this lane did not have when `/portal/demo`
+moved. It proves **a page answers**, not that the right one does: pointed at
+`/portal/demo` it passes, because that path still exists as the
+`permanentRedirect` this lane's finding says was kept deliberately. That is the
+correct behaviour for a redirect that is meant to work, and it means the test
+catches a deleted route rather than a demoted one. Recorded so nobody reads more
+into it than it says.
+
+---
+
+## 2026-08-22 — the wrapping nav is now three rows on a phone, and the finding that accepted it was calibrated on two
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — a measurement against an existing decision, not a new complaint
+
+The 19 August entry above — *a page cannot collapse its own menu, and probably
+should not try* — lays out why `loom.nav` wraps rather than collapsing, and its
+reasoning is right and should not be undone. Its recommendation was to accept
+the wrap, on this ground:
+
+> a menu of four to six links wrapping onto a second row is what a good
+> editorial site does anyway, and the failure mode is legible rather than silent
+
+This branch added the demo to the menu, taking the front door from four items to
+five plus the sign-in action. **At 390px that is three rows, not two**, and the
+bar is roughly a quarter of the first screen before any content — the mark on
+its own row, three links, then two links and the button. The screenshot is in
+this run's report.
+
+Nothing is broken and no link is unreachable, which is why this is a
+measurement rather than a bug. But the accepted trade was priced at two rows,
+and the site has now grown past the size that argument was made about. Two things
+follow, and both are that lane's call:
+
+- **The number the finding should quote is a menu of four**, not four to six.
+  Five items plus an action is where the second row becomes a third.
+- **The `:has()`-driven checkbox toggle the finding lists as an honest option is
+  worth more than it was**, because the cost it buys down has gone up. This lane
+  has no opinion on whether it is worth building; it has a use for it if it is.
+
+What this lane will *not* do about it is drop a surface from the menu to keep
+the bar short. Every surface being reachable from every page is the property
+`pages.test.ts` holds and 0070 asks for, and a bar that omits a destination to
+look tidier is the failure that assertion exists to prevent.
