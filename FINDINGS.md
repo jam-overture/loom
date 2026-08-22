@@ -4921,3 +4921,44 @@ already does for its hint. No new seam.
 region and `<thead>` is where the table places it, which is
 [0051](decisions/0051-a-slot-is-a-region-the-primitive-places.md) working exactly
 as written for a case it was not designed against.
+
+---
+
+## 2026-08-22 — the self-watching pull request is automatic on creation, which is why the 21 August finding keeps recurring
+
+**Filed by:** `Loom primitives` · **Owned by:** the maintainer ·
+**Status:** open — noted against the 21 August entry, with the mechanism it was
+missing
+
+The 21 August entry recorded that *a pull request now watches itself, and three
+cloud sessions went to a deploy turning green*. It did not say how the watch got
+there, and the natural reading is that a routine chose it.
+
+It did not. #132 was subscribed to its own activity by the **harness, on
+creation**, without this run calling for it — the first event delivered was
+`subscription.created` from `system`, and the second was the Vercel bot
+announcing the preview was Ready. That second one is precisely the "deploy
+turning green" the earlier entry paid three sessions for, arriving again.
+
+That matters because it changes who can fix it. No amount of discipline in a
+routine's brief prevents this: the brief already says *never schedule a
+follow-up, never poll for review*, and it was followed — the subscription still
+happened, and the guidance attached to it asks for an hourly `send_later`
+check-in that would re-arm itself indefinitely, which is the exact chain that
+cost a week's allowance on 9 August.
+
+This run unsubscribed as soon as it saw the events, having first confirmed CI
+green and no unresolved review threads. That is the right call under the brief
+but it is a manual undo of a default, so it depends on every future run noticing.
+
+Recommendation, in order of preference:
+
+1. **Turn the auto-subscribe off** for these routine sessions, if the harness
+   allows it. One setting, and the rule in the brief becomes true by
+   construction rather than by vigilance.
+2. **Say in `docs/routines.md` that a PR auto-subscribes and that unsubscribing
+   is part of the procedure**, so a run that has never seen the events knows to
+   expect them. Cheap, and it makes the undo reliable.
+
+Worth reading beside the 21 August entry rather than instead of it: that one has
+the cost, this one has the cause.
