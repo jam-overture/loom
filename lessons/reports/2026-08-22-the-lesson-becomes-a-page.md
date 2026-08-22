@@ -13,6 +13,13 @@ across 95. Thirty of those are new here; nothing was skipped or weakened.
 No new lesson this run, and no new review set. This is the machinery half of the
 alternation, and it is the piece the last two reports named.
 
+**Preview:** `/lessons/13` and `/lessons/04` under
+`https://loom-git-lessons-14-the-less-ccde3b-jpizzolato36-6341s-projects.vercel.app`,
+taken from the deployment bot's Ready row on #136. The deployment host is not on
+this environment's egress allowlist, so that URL is published without having
+been opened — the 21 August finding, unchanged. Everything asserted below was
+verified locally against the production build.
+
 ## Machinery rather than lesson 14, as promised twice
 
 The 08-20 report said "machinery next run" and the 08-21 report chose lesson 13
