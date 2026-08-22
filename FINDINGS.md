@@ -4906,3 +4906,34 @@ construction. That is not a gap: a page name a person chose does not exist in th
 tree model, and inventing one here would be the portal making up an identity the
 log cannot join on. Recorded because the obvious "make it friendlier" instinct
 would break the one thing that makes the row useful.
+
+---
+
+## 2026-08-22 — a commit authored under the wrong identity produces no preview at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` and every other routine
+· **Status:** open — nothing is broken, and it costs the one artefact the
+maintainer judges by
+
+This run's first push came back from Vercel as **Blocked**, not Ready, with no
+preview URL. Nothing was wrong with the code — `pnpm verify` was green and the
+same commit deployed fine on the second attempt.
+
+The cause was the commit identity. I set `user.email` explicitly on the commit,
+to something descriptive; that address resolves to a GitHub account which is not
+a member of the Vercel team, and Vercel refuses to build a commit authored by a
+non-member. The environment's **default** identity — `Claude
+<noreply@anthropic.com>` — is on the team, and it is what every other lane's
+branches carry.
+
+**So: do not override `user.name` or `user.email`.** The default is already
+correct and overriding it is the failure. It is worth a finding rather than a
+line in a report because the failure mode is entirely silent from inside the
+run: every check passes, the branch pushes, the pull request opens, and the only
+symptom is a bot comment saying a person needs to be added to a team. A routine
+that opens its pull request and exits without reading that comment ships a
+review surface with no way to look at it — which for this lane is most of the
+point.
+
+Fixed here by `git commit --amend --reset-author` and a force-push, before any
+review existed to disturb.

@@ -223,6 +223,15 @@ symptom the last three portal reports flagged, same fix. `pnpm verify` also
 failed once on a stale `.next/types/validator.ts` still importing the temporary
 screenshot route after it was deleted; `rm -rf apps/loom/.next` cleared it.
 
+**The first push produced no preview at all**, and the cause was outside the
+code. I committed under an explicit `user.email`, which resolves to a GitHub
+account that is not on the Vercel team, so the deployment came back **Blocked**
+rather than Ready and there was no URL to put in the pull request. The
+environment's default identity — `Claude <noreply@anthropic.com>`, which every
+other lane uses — is the one that deploys. Amended and force-pushed before any
+review; filed, because a routine that overrides the identity to be helpfully
+descriptive silently loses the one artefact the maintainer judges by.
+
 ## How the screenshots were taken
 
 Worth stating because four findings in this repository say a portal surface
