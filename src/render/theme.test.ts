@@ -37,6 +37,13 @@ const bold: ThemeSelection = {
   stylePreset: "airy-modern",
 } as ThemeSelection
 
+/** The pack the four surfaces wear, and the only starter pack that names a mono. */
+const minimal: ThemeSelection = {
+  palette: "minimal",
+  fontPack: "minimal-sans",
+  stylePreset: "precise",
+} as ThemeSelection
+
 const themes = createThemeRegistry()
 
 const treeWearing = (rootProps: JsonObject, cardProps: JsonObject = {}): LoomTree => {
@@ -100,6 +107,26 @@ describe("mounting a theme at the render root", () => {
     expect(renderToStaticMarkup(render(tree).element)).toBe(
       renderToStaticMarkup(render(tree).element)
     )
+  })
+
+  /**
+   * The mono family reaches the root the same way a colour does, and the two
+   * assertions below are the two halves of 0084's bargain: a pack that names a
+   * face mounts it, and a pack that names none mounts nothing — leaving
+   * `var(--loom-mono-family, <system stack>)` in the primitive to resolve to a
+   * face that exists everywhere rather than to nothing at all.
+   */
+  it("mounts the font pack's mono family when it declares one", () => {
+    const markup = renderToStaticMarkup(render(treeWearing({ [THEME_PROP_KEY]: minimal })).element)
+
+    expect(markup).toContain("--loom-mono-family:&quot;Geist Mono&quot;")
+  })
+
+  it("mounts no mono family for a pack that declares none", () => {
+    const markup = renderToStaticMarkup(render(treeWearing({ [THEME_PROP_KEY]: editorial })).element)
+
+    expect(markup).toContain("--loom-body-family:")
+    expect(markup).not.toContain("--loom-mono-family")
   })
 
   it("mounts nothing, and reports nothing, for a tree that names no theme", () => {

@@ -3084,7 +3084,20 @@ documenting something a reader cannot reach.
 
 ## 2026-08-21 — `accentFamily` is emitted as a variable no primitive reads
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-05-a-font-pack-names-its-mono`, which took the **first** of
+the three ways out — the field is deleted — and the finding below it is the
+reason. Read together the two say the vocabulary had one word too many and one
+too few, and
+[0084](decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md)
+answers both with one rule: *a font pack declares a face when something reads
+it.* Under that rule `monoFamily` earns its place (`monospace()` has read it
+since 21 August) and `accentFamily` does not. Nothing rendered changes — no
+registered pack set it, so no deployment ever emitted it. If a display face is
+wanted later it comes back **with its reader in the same change**, which is the
+whole point of the rule. Original status below.
+
+**Status:** open
 
 Noticed while writing seventeen font packs, none of which set it.
 
@@ -3604,6 +3617,25 @@ and a mosaic is a single column on a phone, which is deliberate
 ## 2026-08-21 — a font pack declares three families and none of them is monospace
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** closed by `framework-05-a-font-pack-names-its-mono`, built exactly as
+specified — `monoFamily` on `fontPackSchema`, emitted as `--loom-mono-family`,
+**optional**, with the reasoning for optional recorded in
+[0084](decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md):
+an undeclared colour has no universal fallback and an undeclared *face* does.
+The workaround needed nothing undone, as predicted; `src/primitives/` was not
+opened.
+
+Two things worth carrying back. **Six of the twenty packs declare one** and
+fourteen deliberately do not — pairing Garamond with an arbitrary mono asserts a
+relationship its designer never chose. And **`minimal-sans` names Geist Mono**,
+which `(docs)` already links for its own chrome, so a `loom.code` panel on the
+documentation site stops rendering in the system stack beside a `<pre>` set in
+Geist Mono. That is the seam paying for itself on the day it lands rather than
+waiting for a pack to be written for it.
+
+No `family("mono")` overload was added: that is `src/primitives/tokens.ts`, and
+`monospace()` already does the job. Original status below.
+
 **Status:** open — worked around, and the workaround needs nothing undone when
 this lands
 
@@ -4772,3 +4804,85 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-22 — one comment in `src/primitives/tokens.ts` names a field that no longer exists
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+Small, and handed back rather than fixed here because `src/primitives/` is not
+this lane's.
+
+`accentFamily` is gone
+([0084](decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md)),
+and `monoFamily` is in the schema and emitted. The doc comment above
+`MONOSPACE_STACK` still says:
+
+> A code panel and a key cap need a monospace face, and a font pack declares
+> `headingFamily`, `bodyFamily` and `accentFamily` — none of which is one.
+> Filed for `Loom daily build`, whose file `src/theme/theme.ts` is; a font pack
+> that named its own mono is a better answer than a stack chosen here …
+
+Every sentence of that was true when it was written and two of them are not now:
+there is no `accentFamily`, and the pack *does* name its own mono. **Nothing is
+broken** — `monospace()` is unchanged, it was always a `var()` with the stack as
+its fallback, and that is exactly why it now picks the theme's face up with no
+edit. Only the explanation is stale, and it is the sort of stale that reads as a
+gap the framework still has.
+
+Worth knowing while you are there: **`family("mono")` was deliberately not
+added.** The signature is `family(role: "heading" | "body")` and a third member
+would be right if you want the roles symmetrical, but `monospace()` is not the
+same shape — it carries a fallback the other two do not need, because a pack may
+decline to answer. If you widen `family`, the fallback has to survive the move.
+
+---
+
+## 2026-08-22 — two files in other lanes changed, both because their own tests said to
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing` ·
+**Status:** open — recorded, not a request
+
+The fifth and sixth instance of a shape already filed twice, and both are one
+line, so this is a note rather than a complaint.
+
+- **`app/(docs)/_lib/api/reference.generated.json`** — adding a doc comment to
+  `fontPackSchema` moved the runtime's published surface, and
+  `extract.test.ts` fails with the fix in its own message: *"Run `pnpm --filter
+  @loom/app docs:api` and commit the result."* Did exactly that; the diff is one
+  `summary` string, generated.
+- **`app/(marketing)/_lib/copy.ts`** — `FACTS.decisions` went 83 → 84, because
+  `facts.test.ts` counts the records in `decisions/` and holds the number the
+  front door prints against it. Already filed on 19 August by this lane as *the
+  marketing site's checked numbers make every other lane's run go red*, still
+  open, and it has now caught every record-writing run since.
+
+Both tests are doing their job — a generated file that drifts and a public claim
+that goes stale are worse than a red run — and neither wants changing on my
+account. Recorded so the count is visible: **six lane crossings, six one-line
+fixes, all mechanical, all caught before merge.**
+
+---
+
+## 2026-08-22 — this record is 0084 and so is #132's
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the same governance question, hit a fifth time
+
+`#132` (`Loom primitives`, opened this morning) writes **0084**. So does this
+branch, because 0084 is the next free number on `main` and the numbering guard
+refuses a gap — taking 0085 would have made `pnpm verify` red, and *"never open a
+PR on red"* is the harder rule of the two.
+
+**Merge order settles it, as it has four times before**: whichever merges second
+renames its record 0084 → 0085, `sed`s the half-dozen in-code references, and
+runs `pnpm decisions:index`. The guard catches it loudly — `duplicate-number`
+fires, and `decisions/README.md` conflicts on the same line — so it cannot merge
+silently. That is the whole cost, and it is the same cost each time.
+
+The one new datum: **both branches were green when opened**, which the earlier
+collisions were not. Taking the next free number rather than the next unclaimed
+one is what buys that, and it is worth writing into `docs/routines.md` as the
+convention rather than leaving each pair of routines to work out that the
+alternative is a red PR.

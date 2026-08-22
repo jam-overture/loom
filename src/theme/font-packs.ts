@@ -25,7 +25,8 @@ import { fontPackSchema, type FontPack } from "./theme.js"
  *
  * ## What actually distinguishes a pack
  *
- * Two families, two weights, and a ramp of eight sizes. The **ramp is where the
+ * Two families, two weights, a ramp of eight sizes, and — where the pack has an
+ * opinion about code — a third family for it. The **ramp is where the
  * feel lives**, and it is the half people skip: a pack whose top step is 96px
  * makes a hero that shouts, and one whose top step is 40px makes a page that
  * reads as an application. Three shapes recur below and are named in each
@@ -40,6 +41,16 @@ import { fontPackSchema, type FontPack } from "./theme.js"
  * The steps are px and the primitives read them through `--loom-scale-1…8`;
  * step 3 is body copy in every pack here, so a ramp that starts elsewhere would
  * re-size every paragraph in the library.
+ *
+ * ## The mono family, and why most packs decline it
+ *
+ * `monoFamily` is optional (0084), and five of the seventeen below set it: the
+ * two built out of a monospace, `typewriter`, and the two whose named face has
+ * a mono sibling a host serving one is almost certainly serving too. The rest
+ * say nothing on purpose. A pack that paired, say, Garamond with an arbitrary mono
+ * would be asserting a relationship its designer never chose — and the reader,
+ * `tokens.ts`'s `monospace()`, already falls back to the system stack, which is
+ * the same face the operating system uses for code everywhere else.
  */
 
 /** The generic tails every stack in this file ends with. */
@@ -113,6 +124,7 @@ export const monoFontPack: FontPack = fontPackSchema.parse({
     "Monospace throughout, on a functional ramp. Everything on the page sits on the same grid.",
   headingFamily: MONO,
   bodyFamily: MONO,
+  monoFamily: MONO,
   headingWeight: 600,
   bodyWeight: 400,
   scaleRamp: [12, 13, 15, 17, 21, 26, 33, 42],
@@ -125,6 +137,7 @@ export const monoDisplayFontPack: FontPack = fontPackSchema.parse({
     "Monospace headlines over a readable sans, on a dramatic ramp. Technical, and still a long read.",
   headingFamily: MONO,
   bodyFamily: `'Segoe UI', Roboto, ${SANS}`,
+  monoFamily: MONO,
   headingWeight: 700,
   bodyWeight: 400,
   scaleRamp: [12, 14, 16, 18, 24, 34, 52, 76],
@@ -194,6 +207,7 @@ export const typewriterFontPack: FontPack = fontPackSchema.parse({
     "Monospace headlines over an old-style serif, on an editorial ramp. A manuscript rather than a terminal.",
   headingFamily: `'Courier New', Courier, ${MONO}`,
   bodyFamily: `Georgia, 'Iowan Old Style', ${SERIF}`,
+  monoFamily: `'Courier New', Courier, ${MONO}`,
   headingWeight: 700,
   bodyWeight: 400,
   scaleRamp: [13, 15, 17, 19, 24, 31, 44, 62],
@@ -230,6 +244,7 @@ export const spaceFontPack: FontPack = fontPackSchema.parse({
     "Space Grotesk headlines over its mono, on a dramatic ramp. **The host must serve both**; without them, system sans over system mono.",
   headingFamily: `'Space Grotesk', system-ui, ${SANS}`,
   bodyFamily: `'Space Mono', ${MONO}`,
+  monoFamily: `'Space Mono', ${MONO}`,
   headingWeight: 700,
   bodyWeight: 400,
   scaleRamp: [12, 14, 16, 18, 24, 34, 54, 84],
@@ -242,6 +257,7 @@ export const workhorseFontPack: FontPack = fontPackSchema.parse({
     "Source Sans over Source Serif, on an editorial ramp. **The host must serve both**; without them, system sans over Georgia.",
   headingFamily: `'Source Sans 3', 'Source Sans Pro', system-ui, ${SANS}`,
   bodyFamily: `'Source Serif 4', 'Source Serif Pro', Georgia, ${SERIF}`,
+  monoFamily: `'Source Code Pro', ${MONO}`,
   headingWeight: 600,
   bodyWeight: 400,
   scaleRamp: [12, 14, 17, 19, 24, 32, 44, 62],
