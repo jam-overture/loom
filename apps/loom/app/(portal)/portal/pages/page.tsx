@@ -155,7 +155,8 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
       {storeIsDurable ? null : (
         <StateNotice tone="notice">
           <p>
-            <strong className="font-medium">Changes here won&rsquo;t be kept.</strong> No
+            <strong className="font-medium">Changes here won&rsquo;t be kept.</strong>{" "}
+            No
             database is set up, so anything you accept lives only until the server restarts.
           </p>
           <TechnicalDetail summary="What to set, and why it matters more than it sounds">

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { ChangeRecord } from "@/app/(portal)/_lib/demo/record"
+import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 
 import { RecordCard } from "./record-card"
 
@@ -103,7 +103,31 @@ describe("a record card", () => {
     render(<RecordCard record={APPLIED} />)
 
     expect(screen.getByText(/1, replacing 0/)).toBeTruthy()
-    expect(screen.getByRole("button", { name: "Undo this change" })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+  })
+
+  /**
+   * The disclosure is the plain-language rule's other half, so it is asserted
+   * as a promise rather than as styling: the sentence a visitor reads without
+   * asking is in the light, the rule code and the fingerprint are behind one
+   * click, and *both* are on the card. A change that pushed the meaning down
+   * there, or that dropped the evidence to make room, breaks this.
+   */
+  it("leads with the plain sentence and keeps the whole record one click away", () => {
+    const { container } = render(<RecordCard record={APPLIED} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.open).toBe(false)
+    expect(screen.getByText(/Show the full record/)).toBeTruthy()
+
+    /* Read without opening anything. */
+    expect(disclosure.contains(screen.getByText(/went ahead on its own/))).toBe(false)
+
+    /* Still there, and only there. */
+    expect(disclosure.contains(screen.getByText("0123456789abcdef…"))).toBe(true)
+    expect(disclosure.contains(screen.getByText("within-policy"))).toBe(true)
   })
 
   it("offers an answer, and no undo, while a change is waiting on the visitor", () => {

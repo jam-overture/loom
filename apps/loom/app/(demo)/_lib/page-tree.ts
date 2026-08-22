@@ -67,8 +67,22 @@ const hero = (ids: IdFactory): LoomNode =>
         size: "lead",
         measured: true,
       }),
+      /*
+       * Neither of these says "change this page", and the first one used to.
+       *
+       * A filled primary button reading *Change this page* — pointing at
+       * GitHub — sat six inches from the demo's actual primary control, in
+       * larger type, on a page whose whole difficulty was that a visitor could
+       * not tell the specimen from the instrument. It was the most clickable
+       * thing on screen and it led away from the demonstration.
+       *
+       * The specimen still needs a plausible pair of calls to action, because a
+       * marketing page with no buttons is not a marketing page and this tree
+       * has to stand as one (§4d builds the real site from the same
+       * vocabulary). They just must not be the *same* call the rail is making.
+       */
       buildSlot(ids, "actions", [
-        action(ids, "Change this page", "https://github.com/jam-overture/loom", {
+        action(ids, "Read the source", "https://github.com/jam-overture/loom", {
           variant: "primary",
           scale: "large",
         }),
@@ -187,7 +201,7 @@ const closing = (ids: IdFactory): LoomNode =>
     props: { tone: "accent", width: "readable" },
     children: [
       buildSlot(ids, "heading", [heading(ids, 2, "Ask it for something", true)]),
-      prose(ids, "Use the box beside the page. Whatever happens next, the record of it appears with it.", {
+      prose(ids, "The controls are beside this page. Whatever happens next, the record of it appears with it.", {
         tone: "muted",
         align: "center",
       }),

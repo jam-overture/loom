@@ -58,7 +58,17 @@ export type WriteOutcome =
       readonly inverse: TreeDelta
     }
   | { readonly kind: "held"; readonly held: HeldProposal }
-  | { readonly kind: "refused"; readonly proposal: ProposedChange; readonly disposition: Disposition }
+  | {
+      readonly kind: "refused"
+      readonly proposal: ProposedChange
+      readonly disposition: Disposition
+      /**
+       * Why no smaller change was offered instead, when a repairer was asked for
+       * one and declined. Carried straight through from the composition outcome,
+       * where the three endings a refusal can have are set out.
+       */
+      readonly repairFailure?: InterpretationError
+    }
   | { readonly kind: "not-interpreted"; readonly error: InterpretationError }
   | {
       readonly kind: "not-applicable"
@@ -77,7 +87,9 @@ export const describeWriteOutcome = (outcome: WriteOutcome): string => {
     case "held":
       return `held for confirmation: ${outcome.held.disposition.reason.detail}`
     case "refused":
-      return `refused: ${outcome.disposition.reason.detail}`
+      return outcome.repairFailure === undefined
+        ? `refused: ${outcome.disposition.reason.detail}`
+        : `refused: ${outcome.disposition.reason.detail} — asked for something smaller, and ${describeInterpretationError(outcome.repairFailure)}`
     case "not-interpreted":
       return describeInterpretationError(outcome.error)
     case "not-applicable":
@@ -230,7 +242,12 @@ export const commitIntent = async (path: WritePath, intent: EditIntent): Promise
         outcome.disposition
       )
     case "rejected":
-      return { kind: "refused", proposal: outcome.assessment.proposal, disposition: outcome.disposition }
+      return {
+        kind: "refused",
+        proposal: outcome.assessment.proposal,
+        disposition: outcome.disposition,
+        ...(outcome.repairFailure === undefined ? {} : { repairFailure: outcome.repairFailure }),
+      }
     case "not-interpreted":
       return { kind: "not-interpreted", error: outcome.error }
     case "not-applicable":

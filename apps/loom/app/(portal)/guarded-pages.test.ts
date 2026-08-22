@@ -35,18 +35,21 @@ const APP = join(process.cwd(), "app", "(portal)")
  * `portalStore` would be the failure this list exists to make visible, so the
  * test below asserts that it does not.
  *
- * `/portal/trees` is the fourth and it is here for `/portal`'s reason exactly:
- * it is the old name of `/portal/pages`, kept alive as a 308 so a bookmark or a
- * link in a report still lands somewhere. It renders nothing and reads nothing,
- * so an actor would gate a page that has no content to protect. The proxy still
- * covers it — it is under `/portal` — so a signed-out visitor is sent to sign in
- * and returned here, and only then forwarded on.
+ * `/portal/trees` and `/portal/calibration` are the fourth and fifth, and they
+ * are here for `/portal`'s reason exactly: each is the old name of a route that
+ * was renamed into a person's words — `/portal/pages` and `/portal/trust` — kept
+ * alive as a 308 so a bookmark or a link in a report still lands somewhere.
+ * Neither renders anything nor reads anything, so an actor would gate a page
+ * that has no content to protect. The proxy still covers them — both are under
+ * `/portal` — so a signed-out visitor is sent to sign in and returned here, and
+ * only then forwarded on.
  */
 const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/sign-in/page.tsx",
   "portal/page.tsx",
   "portal/demo/page.tsx",
   "portal/trees/[[...rest]]/page.tsx",
+  "portal/calibration/[[...rest]]/page.tsx",
 ]
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
@@ -74,8 +77,9 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page, the two redirects and the demo", () => {
+  it("exempts only the sign-in page, the three redirects and the demo", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
+      "portal/calibration/[[...rest]]/page.tsx",
       "portal/demo/page.tsx",
       "portal/page.tsx",
       "portal/sign-in/page.tsx",

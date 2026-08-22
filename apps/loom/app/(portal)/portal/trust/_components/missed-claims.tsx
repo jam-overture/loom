@@ -24,39 +24,41 @@ export const MissedClaims = ({
 }) => (
   <section className="flex flex-col gap-4">
     <div className="flex flex-col gap-1">
-      <h2 className="text-sm tracking-tight">where the grade was wrong</h2>
+      <h2 className="text-base tracking-tight">Where it was wrong about itself</h2>
       <p className="text-ink-muted text-xs">
-        {total} {total === 1 ? "claim" : "claims"} in this window landed on the wrong side of the
-        model&apos;s own estimate — refused after claiming it was likely, or accepted after
-        claiming it was not. The table above counts these; it cannot say which they were.
+        {total} {total === 1 ? "change" : "changes"} went the opposite way to what the AI
+        predicted — turned down after it said it was likely, or applied after it said it was
+        not. This is the part of the page worth acting on: the verdict above is a number, and
+        these name what kind of change keeps catching it out.
       </p>
     </div>
 
     {/*
-      * The one reading on this page that contradicts the table beside it, so it
-      * goes above the groups rather than as a footnote. A band whose gap is
-      * within tolerance says "on the mark" in the row above, and it is telling
+      * The one reading on this page that contradicts the table it summarises, so
+      * it goes above the groups rather than as a footnote. A band whose gap is
+      * within tolerance says "on the mark" in the band table, and it is telling
       * the truth: a rate is an average, and a well-calibrated average is exactly
       * what a mid-confidence band looks like when some of its claims went one way
       * and some the other. The row is right about the band and says nothing about
       * the claims inside it, which is the distinction nobody makes when reading a
-      * calibration table.
+      * calibration table — so the warning is on the surface and the band it is
+      * about is one disclosure down.
       */}
     {contradicted.length > 0 && (
       <div className={"flex flex-col gap-1 rounded-sm px-3 py-2 " + toneClasses("awaiting")}>
-        <span className="text-sm">a band reads as on the mark and is not</span>
+        <span className="text-sm">The table below looks better than this is</span>
         <span className="text-2xs opacity-80">
           {contradicted.map((band, index) => (
             <span key={band.bucket.lower}>
               {index > 0 && "; "}
-              {formatRange(band.bucket.lower, band.bucket.upper, band.bucket.upper === 1)} holds{" "}
-              {band.claims.length} missed {band.claims.length === 1 ? "claim" : "claims"} while its
-              rate matches its mean
+              the {formatRange(band.bucket.lower, band.bucket.upper, band.bucket.upper === 1)}{" "}
+              band holds {band.claims.length} wrong{" "}
+              {band.claims.length === 1 ? "change" : "changes"} while reading as on the mark
             </span>
           ))}
-          . The rate is correct — it is an average, and an average can sit where the model said it
-          would while individual claims underneath it went the way their own confidence said they
-          would not. A row cannot tell you that; these can.
+          . Both are true. An average can land exactly where the AI said it would while the
+          individual changes underneath it went the way their own confidence said they would
+          not. A row cannot tell you that; these can.
         </span>
       </div>
     )}

@@ -399,6 +399,56 @@ describe("composeChange when a refusal is repaired", () => {
     expect(events.types()).not.toContain("change-applied")
   })
 
+  /**
+   * The three ways a refusal ends, told apart from the return value alone. Read
+   * together rather than one at a time: the point is not what any single one
+   * carries, it is that no two of them look the same to a caller that never
+   * opens the journal.
+   */
+  describe("and the outcome says what became of the repair", () => {
+    it("carries the repairer's error when it declined", async () => {
+      const { tree } = sampleTree()
+      const { runtime } = refusedThenRepaired(
+        err({ code: "not-understood", detail: "no gentler version exists" })
+      )
+
+      const outcome = await composeChange(runtime, tree, intentFor(tree))
+      if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+      expect(outcome.repairFailure).toEqual({
+        code: "not-understood",
+        detail: "no gentler version exists",
+      })
+      expect(outcome.assessment.proposal.repairOf).toBeUndefined()
+    })
+
+    it("carries no error when a repair was made and refused in its turn", async () => {
+      const { tree, ids } = sampleTree()
+      const confident = confidentRepair(tree, ids)
+      const weak = {
+        ...confident,
+        provenance: { ...confident.provenance, confidence: 0.05 },
+      }
+      const { runtime, proposal } = refusedThenRepaired(ok(weak))
+
+      const outcome = await composeChange(runtime, tree, intentFor(tree))
+      if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+      expect(outcome.repairFailure).toBeUndefined()
+      expect(outcome.assessment.proposal.repairOf).toBe(proposal.proposalId)
+    })
+
+    it("carries no error and no repair when nothing was asked", async () => {
+      const { runtime, tree } = harnessFor({ build: tweak, confidence: 0.05 })
+
+      const outcome = await composeChange(runtime, tree, intentFor(tree))
+      if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+      expect(outcome.repairFailure).toBeUndefined()
+      expect(outcome.assessment.proposal.repairOf).toBeUndefined()
+    })
+  })
+
   it("does not repair a change the Gate merely held back for a human", async () => {
     const base = harnessFor({ build: tweak, confidence: 0.5 })
     const repairer = scriptedRepairer(err({ code: "not-understood", detail: "unused" }))

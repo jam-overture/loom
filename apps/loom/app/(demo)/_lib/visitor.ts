@@ -13,6 +13,16 @@ import { cookies } from "next/headers"
  * it.
  */
 
+/**
+ * Where the demo lives, in one place.
+ *
+ * Three things have to agree on it — the cookie's scope, the path a server
+ * action revalidates, and the link every other surface points at — and when
+ * they disagreed the symptom was not an error but a demo that silently forgot
+ * what a visitor had just done.
+ */
+export const DEMO_PATH = "/demo"
+
 export const DEMO_COOKIE = "loom-demo"
 
 export const DEMO_ACTOR = "a demo visitor"
@@ -32,7 +42,14 @@ export const rememberVisitorId = async (id: string): Promise<void> => {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/portal/demo",
+    /**
+     * Scoped to the demo and nowhere else. It moved here from `/portal/demo`
+     * with the rest of the surface, and the path is the half of that move a
+     * type checker cannot see: a cookie still scoped to the old path is sent
+     * on no request the demo makes, so every visitor would be minted a fresh
+     * session on every action and no change would ever appear to stick.
+     */
+    path: DEMO_PATH,
     maxAge: 60 * 60 * 24,
   })
 }
