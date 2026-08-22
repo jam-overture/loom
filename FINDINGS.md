@@ -3645,7 +3645,52 @@ library whose next four primitives are technical.
 ## 2026-08-21 — a code block cannot offer a copy button, and the fake would be worse than the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
-**Status:** open — not blocking, and deliberately not faked
+**Status:** **the seam is built** by
+`framework-06-a-behaviour-is-a-control-the-framework-owns`
+([0084](decisions/0084-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)).
+**The button is still yours to place**, and it is now three lines.
+
+The open question this finding could not answer from its own lane — *does the
+render seam permit a client boundary inside a primitive?* — is answered **yes**,
+and checked rather than assumed: TypeScript keeps `"use client"` at line 1 of
+the compiled module (`dist.smoke.test.ts` asserts it), and a Next build of
+`apps/loom` with the behaviour wired into `loom.code` resolves the boundary
+through the registry and emits the control into a client chunk. That wiring was
+reverted — the declaration belongs in the same change as the button.
+
+The answer is the finding's **second** shape rather than its first, for the
+reason the second one gave: the closed set. `loom.code` gains
+
+```ts
+text: { copy: "Copy", copied: "Copied" },
+interactive: "always",
+behaviours: ["copy"],
+```
+
+and places `loom.behaviours.copy` wherever it wants it — the panel's bar is the
+obvious home. Nothing in `src/primitives/` opens a client boundary, imports
+anything new, or implements a handler.
+
+Three things the registry now refuses, so none of them can be got wrong quietly:
+a behaviour name the runtime does not implement; a primitive that takes a
+control and declares no strings to name it by; and a primitive that takes a
+control and does not declare itself `interactive` — that last one matters here,
+because a code panel with a button, inside a `loom.card` with an `href`, is a
+`button` inside an `a`, and a browser silently drops one of the two. The audit
+adds a fourth check by probe: declaring the behaviour and never placing it is
+reported as `unplacedBehaviours`.
+
+What the control does, so it is not a surprise: it copies `textOf(node)` — the
+node's own text, from the tree, not from the rendered markup — so a language
+label or a caption rendered beside the listing does not land on the clipboard.
+And **it renders nothing until it knows the clipboard is there**, which is this
+finding's own bar taken literally: the server render is empty and the button
+appears from an effect, so an insecure origin or a page with scripting off shows
+no button rather than a broken one.
+
+Everything below is the finding as filed.
+
+---
 
 Every reference page a developer reads puts a copy control on its code panels,
 and `nextjs.org`'s single most load-bearing element — the `npx create-next-app`
@@ -4679,6 +4724,22 @@ hits the same wall. The first option above still looks right — a missing numbe
 on `main` is a record in flight, a repeated number is the real error — and it is
 one condition in `tools/decisions/build-index.ts`.
 
+**22 August, later — three open pull requests now claim `0084`.** #132
+(`Loom primitives`), #133 (`Loom daily build`) and
+`framework-06-a-behaviour-is-a-control-the-framework-owns` all take the next free
+number on `main`, because the alternative is a branch the guard fails. Two of the
+three get renamed on merge and their index regenerated; the guard fires loudly on
+the duplicate, so it cannot slip through silently, and no work is lost either
+way.
+
+This is the same wall from the other side. The entry above is about a lane that
+cannot write a *second* record; this is three lanes writing a *first* one on the
+same day, which the briefs already anticipate ("numbers collide — take the next
+free number after re-reading `main`"). Both disappear under the first option:
+tolerate a gap, fail on a duplicate. Recorded so the count is visible — five
+collisions on 21 August, three concurrent claims on 22 August — rather than
+because any single one of them cost anything.
+
 ---
 
 ## 2026-08-22 — a scope is now worth setting, and no surface sets one
@@ -4772,3 +4833,54 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-22 — `loom.code`'s own paragraph says the copy button cannot exist
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The module comment on `src/primitives/loom.code.ts` closes with:
+
+> There is no syntax highlighting and no copy button. The first needs a parser
+> per language, which is a registry of its own; the second needs a click a tree
+> cannot express, and is filed rather than faked — a button that looks like it
+> copies and does not is worse than no button.
+
+The second half is now wrong in its premise and right in its standard. A click
+is still not something a tree can express — and that is exactly why the runtime
+expresses it instead
+([0084](decisions/0084-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)).
+The sentence about a fake button is the bar the control was built to clear: it
+renders nothing at all until it knows the clipboard is there.
+
+It is published — that file is in the generated API reference — so a reader is
+currently told, in the runtime's own words, that a thing the runtime does cannot
+be done. Left for the same change that places the control, since rewriting it
+before the button lands would make it wrong in the other direction. Filed rather
+than fixed because it is one sentence in another lane's file, and the syntax
+highlighting half of it is still true.
+
+---
+
+## 2026-08-22 — the framework wanted nothing from another lane this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+The behaviour seam needed the tree model, the render seam, the SDK and the
+audit, all of which are this lane's, plus one empirical answer about Next that
+cost a temporary edit to `src/primitives/loom.code.ts` and a `next build`. That
+edit was reverted; it is in no commit.
+
+Two things worth saying rather than leaving as absences.
+
+**The finding's first-ranked shape works, and is still not the one that shipped.**
+Establishing that a primitive *may* open a client boundary and deciding that it
+*may not* are separate answers, and running the experiment before choosing is
+what makes the second one a decision rather than a guess. Worth repeating the
+next time a lane files something it cannot check from where it stands: check it,
+then choose.
+
+**One devDependency was added** — `jsdom`, so the one module in this package that
+runs in a browser can be tested in one. Nothing ships it: it is a test
+environment for `behaviour-copy.test.ts` and nothing else imports it.
