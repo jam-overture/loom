@@ -90,9 +90,8 @@ describe("MissedClaims", () => {
   it("says how sure the model was and what became of it", () => {
     renderMisses([group("irreversible", [claim({ id: "p_1", confidence: 0.94, cause: "irreversible" })])])
 
-    expect(screen.getByText(/claimed 94%/)).toBeTruthy()
-    expect(screen.getByText(/rejected/)).toBeTruthy()
-    expect(screen.getByText(/off by 94%/)).toBeTruthy()
+    expect(screen.getByText(/Said it was 94% sure · turned down/)).toBeTruthy()
+    expect(screen.getByText(/94% wide of the mark/)).toBeTruthy()
   })
 
   /**
@@ -106,9 +105,9 @@ describe("MissedClaims", () => {
       ]),
     ])
 
-    expect(screen.getByText(/claimed 10%/)).toBeTruthy()
-    expect(screen.getByText(/survived/)).toBeTruthy()
-    expect(screen.getByText(/off by 90%/)).toBeTruthy()
+    expect(screen.getByText(/Said it was 10% sure/)).toBeTruthy()
+    expect(screen.getByText(/went through anyway/)).toBeTruthy()
+    expect(screen.getByText(/90% wide of the mark/)).toBeTruthy()
   })
 
   /**
@@ -136,7 +135,7 @@ describe("MissedClaims", () => {
       ]),
     ])
 
-    expect(screen.getByText("sure, the Gate agreed, and a person said no")).toBeTruthy()
+    expect(screen.getByText("sure, your rules agreed, and a person said no")).toBeTruthy()
     expect(screen.getByText(/only judgment here made from outside the system/)).toBeTruthy()
     expect(screen.getByText(/answered by jo/)).toBeTruthy()
   })
@@ -182,14 +181,14 @@ describe("MissedClaims", () => {
       [{ bucket: bucket(0.6), claims: [claim({ id: "p_1", confidence: 0.65, cause: "irreversible" })] }]
     )
 
-    expect(screen.getByText("a band reads as on the mark and is not")).toBeTruthy()
-    expect(screen.getByText(/60%–<70% holds 1 missed claim/)).toBeTruthy()
+    expect(screen.getByText("The table below looks better than this is")).toBeTruthy()
+    expect(screen.getByText(/the 60%–<70% band holds 1 wrong change/)).toBeTruthy()
   })
 
   it("says nothing about bands when every band agrees with its claims", () => {
     renderMisses([group("irreversible", [claim({ id: "p_1", confidence: 0.9, cause: "irreversible" })])])
 
-    expect(screen.queryByText("a band reads as on the mark and is not")).toBeNull()
+    expect(screen.queryByText("The table below looks better than this is")).toBeNull()
   })
 
   it("counts the claims it is showing", () => {
@@ -201,12 +200,12 @@ describe("MissedClaims", () => {
       group("discarded-by-human", [claim({ id: "p_3", confidence: 0.9, cause: "discarded-by-human" })]),
     ])
 
-    expect(screen.getByText(/^3 claims in this window/)).toBeTruthy()
+    expect(screen.getByText(/^3 changes went the opposite way/)).toBeTruthy()
   })
 
   it("says claim rather than claims when there is one", () => {
     renderMisses([group("irreversible", [claim({ id: "p_1", confidence: 0.9, cause: "irreversible" })])])
 
-    expect(screen.getByText(/^1 claim in this window/)).toBeTruthy()
+    expect(screen.getByText(/^1 change went the opposite way/)).toBeTruthy()
   })
 })

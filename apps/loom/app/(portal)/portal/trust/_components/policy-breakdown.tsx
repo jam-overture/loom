@@ -1,5 +1,6 @@
 import type { CalibrationReport } from "@loom/runtime/telemetry"
 
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { poolsMoreThanOneGate } from "@/app/(portal)/_lib/calibration-view"
 
 import { PolicyRow } from "./policy-row"
@@ -25,17 +26,21 @@ const UNRECORDED_KEY = ""
  * segment whose rules changed mid-window is still a pooled page, and still gets
  * the table — with the row's own note saying why it is not the one gate it
  * appears to be (0048).
+ *
+ * Behind a disclosure since the page became `/portal/trust`, with the caveat it
+ * exists to raise moved onto the summary line so a closed disclosure still warns
+ * the reader. The warning is the part a person needs unasked; the table is the
+ * part they need once they have decided to look.
  */
-export const PolicyBreakdown =({ report }: { readonly report: CalibrationReport }) => {
+export const PolicyBreakdown = ({ report }: { readonly report: CalibrationReport }) => {
   if (!poolsMoreThanOneGate(report)) return null
 
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="text-sm tracking-tight">by the gate that judged</h2>
-      <p className="text-ink-muted text-xs">
+    <TechnicalDetail summary="Careful: your rules changed while these were judged">
+      <p className="text-ink-muted">
         {report.byPolicy.length > 1
-          ? "More than one policy judged the claims on this page, so the headline above pools gates that did not agree. Each row is the same measurement over one of them."
-          : "The policy on this page did not hold still, so the headline above pools judgments made under different rules. Each row is the same measurement over one name."}
+          ? "More than one set of rules judged the changes on this page, so the verdict above pools gates that did not agree. Each row is the same measurement over one of them."
+          : "The rules on this page did not hold still, so the verdict above pools judgments made under different ones. Each row is the same measurement over one name."}
       </p>
 
       <table className="w-full border-collapse">
@@ -54,6 +59,6 @@ export const PolicyBreakdown =({ report }: { readonly report: CalibrationReport 
           ))}
         </tbody>
       </table>
-    </section>
+    </TechnicalDetail>
   )
 }

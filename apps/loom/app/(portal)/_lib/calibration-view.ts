@@ -85,6 +85,93 @@ export const readGap = (score: CalibrationScore): GapReading => {
 }
 
 /**
+ * The same reading, one altitude up: what a person came to this page to find out.
+ *
+ * `readGap` is precise and stays exactly as it is — it is the sentence a reviewer
+ * who knows what a confidence gap is wants, and it is what the bands and the
+ * policy rows are labelled with. It is also not an answer to the question the
+ * page is named after. *"claimed more than it delivered"* describes a statistic;
+ * *"the AI has been over-sure of itself"* describes the thing the reader has to
+ * decide about, and only the second one tells them what to do next.
+ *
+ * So this is the plain-language default and `readGap` is the technical record,
+ * one click down — the portal's rule applied to a number rather than to a state.
+ * They are derived from the same `gap` and the same tolerance, so the headline
+ * and the band it summarises cannot say different things.
+ */
+export type TrustVerdict = {
+  readonly tone: OutcomeTone
+  /** What a person reads first. Never a statistic. */
+  readonly label: string
+  /** What it means for them, in one sentence. */
+  readonly meaning: string
+  /** What to do about it. Every screen answers this. */
+  readonly next: string
+}
+
+export const readTrust = (score: CalibrationScore): TrustVerdict => {
+  if (score.gap === null) {
+    return {
+      tone: "inapplicable",
+      label: "Not enough answers yet",
+      meaning:
+        "Nothing here has been settled either way, so there is no track record to read.",
+      next: "Come back once a few changes have been accepted or turned down.",
+    }
+  }
+
+  if (isOnTheMark(score)) {
+    return {
+      tone: "applied",
+      label: "The AI has been about as right as it says it is",
+      meaning:
+        "When it said it was sure, it usually turned out to be. Its confidence is worth reading.",
+      next: "Nothing to do. Carry on reviewing the way you have been.",
+    }
+  }
+
+  return score.gap > 0
+    ? {
+        tone: "rejected",
+        label: "The AI has been over-sure of itself",
+        meaning:
+          "It said it was confident more often than it turned out to be right, so a high number here is not the reassurance it looks like.",
+        next: "Read what a change would do before you accept it, however sure the AI sounds.",
+      }
+    : {
+        tone: "awaiting",
+        label: "The AI has been harder on itself than it needed to be",
+        meaning:
+          "Changes went through more often than it predicted, so it is hedging on work that turned out fine.",
+        next: "You are probably being asked about changes that did not need you. Worth loosening a rule.",
+      }
+}
+
+/**
+ * The three numbers behind the verdict, as a sentence rather than a table.
+ *
+ * A rate is the compact form and it is the wrong one for a reader meeting this
+ * page for the first place: "72%" of what, out of how many, expected by whom.
+ * Counts answer all three in one line — and the counts are the rates, rounded,
+ * so the paragraph and the table underneath it are the same measurement.
+ *
+ * `null` when nothing was judged, because a scoreline over no claims is a
+ * sentence made of zeroes and the empty state says it better.
+ */
+export const plainScoreline = (score: CalibrationScore): string | null => {
+  if (score.judged === 0 || score.observedRate === null) return null
+
+  const wentThrough = Math.round(score.observedRate * score.judged)
+  const noun = score.judged === 1 ? "change has" : "changes have"
+  const expected =
+    score.meanConfidence === null
+      ? ""
+      : ` The AI expected about ${Math.round(score.meanConfidence * score.judged)}.`
+
+  return `${score.judged} ${noun} been answered. ${wentThrough} went through.${expected}`
+}
+
+/**
  * Which gate judged a set of claims, in words a reader can act on.
  *
  * The two unknowns stay apart, because the reader's next move differs. A page
@@ -168,18 +255,23 @@ export const UNJUDGED_LABELS: Readonly<Record<UnjudgedReason, string>> = {
  * being wrong about* — and `stakes-above-ceiling` repeated nine times does not
  * answer it. These do, which is why they are sentences about the model rather
  * than translations of the code.
+ *
+ * The Gate is *this project's rules* here, the same words `vocabulary.ts` uses
+ * for it. A reader who has met the Gate loses nothing by seeing it called what
+ * it does; a reader who has not is spared a proper noun they would have to go
+ * and look up before the heading meant anything.
  */
 export const MISS_CAUSE_LABELS: Readonly<Record<MissCause, string>> = {
-  "confidence-below-floor": "sure about a change the Gate would not take on trust",
-  "stakes-at-refusal-floor": "sure about a change of a kind this policy never takes",
+  "confidence-below-floor": "sure about a change your rules would not take on trust",
+  "stakes-at-refusal-floor": "sure about a change of a kind your rules never allow",
   irreversible: "sure about a change that could not be undone",
   "discards-later-work": "sure about a change that would have thrown away later work",
-  "redirected-submission": "sure about a change that would have pointed a form somewhere else",
-  "stakes-above-ceiling": "sure about a change too big to apply unattended",
-  "confidence-below-minimum": "sure, and under the floor it had to clear anyway",
-  "within-policy": "refused with nothing in the policy against it",
-  "discarded-by-human": "sure, the Gate agreed, and a person said no",
-  "survived-anyway": "hedged on a change that was fine",
+  "redirected-submission": "sure about a change that would have sent a form somewhere else",
+  "stakes-above-ceiling": "sure about a change too big to apply without asking",
+  "confidence-below-minimum": "sure, and still under the bar it had to clear",
+  "within-policy": "turned down with nothing in your rules against it",
+  "discarded-by-human": "sure, your rules agreed, and a person said no",
+  "survived-anyway": "hedged on a change that turned out fine",
 }
 
 /**
@@ -195,23 +287,23 @@ export const MISS_CAUSE_LABELS: Readonly<Record<MissCause, string>> = {
  */
 export const MISS_CAUSE_NOTES: Readonly<Record<MissCause, string>> = {
   "confidence-below-floor":
-    "The Gate held these for a person. Either the claims are inflated for this class of change, or the floor is stricter than this host needs.",
+    "Your rules sent these to a person instead. Either the AI is over-rating itself on this kind of change, or your bar for deciding alone is stricter than you need.",
   "stakes-at-refusal-floor":
-    "This policy refuses this class outright, so no confidence would have carried them. The claim is measuring something the Gate never consults.",
+    "Your rules turn this kind of change down outright, so no amount of confidence would have carried them. The AI is grading something the rules never look at.",
   irreversible:
-    "Reversibility is assessed from the delta, not claimed. A model confident about changes it cannot undo is confident about the wrong axis.",
+    "Whether a change can be undone is worked out from the change itself, not claimed. An AI that is confident about changes it cannot undo is confident about the wrong thing.",
   "discards-later-work":
-    "These would have overwritten revisions that landed after the model read the tree (0035). The claim was made against a tree that had moved.",
+    "These would have written over work that landed after the AI read the page. It was sure about a page that had already moved on.",
   "redirected-submission":
-    "These would have moved where a form posts. Both ends were registered, so nothing left the deployment — what the model was sure about is that the next visitor's message should arrive somewhere else.",
+    "These would have moved where a form sends what people type. Both ends were registered, so nothing left your deployment — what the AI was sure about is that the next visitor's message should arrive somewhere else.",
   "stakes-above-ceiling":
-    "Size, not correctness. These may well have been right — the policy declines to apply changes this large without a person, whatever the model thinks.",
+    "Size, not correctness. These may well have been right — your rules decline to apply changes this large without a person, whatever the AI thinks.",
   "confidence-below-minimum":
-    "The claim was under the minimum and high enough to count as a miss here, which means the floor and this reading disagree about what counts as sure.",
+    "The AI was under the bar your rules set and still sure enough to count as wrong here, which means the two disagree about what counts as sure.",
   "within-policy":
-    "Nothing in the policy refused these, so the refusal came from somewhere the disposition does not name. Worth reading the episodes directly.",
+    "Nothing in your rules turned these down, so the refusal came from somewhere the record does not name. Worth reading these changes one by one.",
   "discarded-by-human":
-    "The Gate was willing and a person was not. This is the only judgment here made from outside the system, and the only one no policy change would have produced.",
+    "Your rules were willing and a person was not. This is the only judgment here made from outside the system, and the only one no change to your rules would have produced.",
   "survived-anyway":
     "These cost a reviewer's attention rather than a wrong page: each one was held or hedged and turned out fine. A queue of them is how a review surface stops being read.",
 }

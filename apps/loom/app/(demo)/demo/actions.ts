@@ -6,9 +6,9 @@ import { z } from "zod"
 import { proposalIdSchema, randomIdFactory, systemClock } from "@loom/runtime"
 import { commitIntent, confirmHeld, discardHeld, describeHoldError, revertRevision } from "@loom/runtime/write"
 
-import { demoModelInterpreter } from "@/app/(portal)/_lib/demo/interpreter"
-import { presetById, presetInterpreter } from "@/app/(portal)/_lib/demo/presets"
-import { recordFromEvents } from "@/app/(portal)/_lib/demo/record"
+import { demoModelInterpreter } from "@/app/(demo)/_lib/interpreter"
+import { presetById, presetInterpreter } from "@/app/(demo)/_lib/presets"
+import { recordFromEvents } from "@/app/(demo)/_lib/record"
 import {
   beginDemoWrite,
   demoSession,
@@ -16,9 +16,15 @@ import {
   recordAwaiting,
   rememberRecord,
   spendModelCall,
-} from "@/app/(portal)/_lib/demo/session"
-import { DEMO_ACTOR, readVisitorId, rememberVisitorId } from "@/app/(portal)/_lib/demo/visitor"
-import { reportOf, revertReportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"
+} from "@/app/(demo)/_lib/session"
+import { DEMO_ACTOR, DEMO_PATH, readVisitorId, rememberVisitorId } from "@/app/(demo)/_lib/visitor"
+import {
+  invalidReport,
+  reportOf,
+  revertReportOf,
+  stateReport,
+  type WriteReport,
+} from "@/app/(demo)/_lib/report"
 
 /**
  * The server side of the demo.
@@ -48,18 +54,8 @@ const answerSchema = z.object({ proposalId: proposalIdSchema })
 
 const revertSchema = z.object({ revision: z.coerce.number().int().positive() })
 
-/**
- * The form did not arrive in a shape the server could read, so nothing was
- * asked of the runtime at all. The plain half says that; the issue itself is
- * the technical half, because a Zod message is written for whoever wrote the
- * form rather than for whoever filled it in.
- */
-const invalid = (issue: string): WriteReport => ({
-  tone: "inapplicable",
-  headline: "Nothing was sent",
-  meaning: "That didn't reach Loom, so nothing on the page has changed.",
-  detail: issue,
-})
+/** The plain half and the technical half, both from `_lib/report`. */
+const invalid = invalidReport
 
 const firstIssue = (error: z.ZodError): string =>
   error.issues[0]?.message ?? "the form was not something the server could read"
@@ -132,7 +128,7 @@ export const askForChange = async (
   const record = recordFromEvents(write.narrated())
   if (record) rememberRecord(session, record)
 
-  revalidatePath("/portal/demo")
+  revalidatePath(DEMO_PATH)
 
   return reportOf(outcome)
 }
@@ -164,21 +160,21 @@ export const answerHeld = async (
     const refused = recordFromEvents(write.narrated(), waiting)
     if (refused) rememberRecord(session, refused)
 
-    revalidatePath("/portal/demo")
+    revalidatePath(DEMO_PATH)
 
+    /*
+     * The words come off the shared table like every other state's, rather than
+     * being written here. `discardHeld` reports only whether it worked, so this
+     * is the one place the surface picks the state itself — which is exactly
+     * where a second, drifting copy of "You said no" would appear.
+     *
+     * The declined answer is folded onto the card that was waiting, so it is
+     * recorded and the panel need not repeat it. An answer that was already
+     * given narrated nothing to fold, so it has to be said here or nowhere.
+     */
     return discarded.ok
-      ? {
-          tone: "rejected",
-          headline: "You said no",
-          meaning: "The change was turned down. The page was left as it was.",
-          detail: "The proposal was not applied.",
-        }
-      : {
-          tone: "inapplicable",
-          headline: "Already answered",
-          meaning: "Somebody has answered this one. There is nothing left to decide.",
-          detail: describeHoldError(discarded.error),
-        }
+      ? stateReport("declined", "The proposal was not applied.", refused !== undefined)
+      : stateReport("already-answered", describeHoldError(discarded.error), false)
   }
 
   const outcome = await confirmHeld(write.path, {
@@ -195,7 +191,7 @@ export const answerHeld = async (
   const record = recordFromEvents(write.narrated(), waiting)
   if (record) rememberRecord(session, record)
 
-  revalidatePath("/portal/demo")
+  revalidatePath(DEMO_PATH)
 
   return reportOf(outcome)
 }
@@ -223,7 +219,7 @@ export const undoRevision = async (
   const record = recordFromEvents(write.narrated())
   if (record) rememberRecord(session, record)
 
-  revalidatePath("/portal/demo")
+  revalidatePath(DEMO_PATH)
 
   return revertReportOf(outcome)
 }

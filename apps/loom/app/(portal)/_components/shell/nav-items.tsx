@@ -29,9 +29,10 @@ const strokeProps = {
  *
  * The labels are what a person would call these things rather than what the
  * runtime calls them: `trees` was the data structure, and `Pages` is what is
- * actually in it. `Calibration` and `Audit` keep the runtime's words for now —
- * a nav label renamed ahead of the screen it points at is a promise the screen
- * does not keep.
+ * actually in it. `Calibration` was a statistical property, and `Trust` is what
+ * somebody is trying to find out by reading it. `Audit` keeps the runtime's word
+ * for now — a nav label renamed ahead of the screen it points at is a promise
+ * the screen does not keep, so each one moves on the run that rewrites its page.
  *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
  * about what a thing can do. It comes back now that its page does — and the page
@@ -102,8 +103,8 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "Calibration",
-      href: "/portal/calibration",
+      label: "Trust",
+      href: "/portal/trust",
       icon: (
         <svg {...strokeProps}>
           <line x1="4" y1="20" x2="20" y2="4" />

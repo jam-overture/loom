@@ -4088,6 +4088,59 @@ translation is expected to live on the surface rather than upstream.
 
 ---
 
+## 2026-08-21 — a `<strong>` followed by a space and a newline loses the space, and two portal pages shipped that way
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-08-can-you-trust-it` — both fixed with `{" "}`
+
+Found while screenshotting this run's page, by eye, which is not a mechanism.
+
+```tsx
+<strong className="font-medium">Changes here won&rsquo;t be kept.</strong> No
+database is set up, so anything you accept lives only until the server restarts.
+```
+
+renders as **"Changes here won't be kept.No database is set up"**. The space
+between `</strong>` and `No` sits at the end of a source line, and JSX strips
+trailing whitespace from a line before joining it to the next one — so a space
+that is plainly there in the source is not there in the DOM.
+
+`/portal/pages` has had it since the ephemeral-store notice was written, and this
+run's `/portal/trust` reproduced it by copying the shape. Both now use `{" "}`.
+
+Worth knowing rather than worth tooling: it only bites where a bold run ends a
+line, it is invisible in review because the source looks correct, and no test
+would catch it unless somebody thought to assert on a space. The general form is
+the one this lane keeps re-learning — **anything checked only by eye is checked
+only on the runs where somebody happens to look.**
+
+---
+
+## 2026-08-21 — the telemetry surfaces still cannot be photographed, and the workaround is now a routine
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Not a new finding — the 17 August entry (*no telemetry surface can be
+demonstrated to anyone*) and the 18 August one about `/history` name it already.
+This run is the fourth to hit it and the note is only about what it now costs.
+
+`/portal/trust` is the page this redirection has the most to prove on: whether a
+plain-language verdict over a technical record is better than the record alone is
+a judgement made by looking, and nobody outside a signed-in deployment with a
+populated journal can look. So this run did what the calibration and history runs
+did — built a temporary route rendering **the real components against a fixture
+fold**, photographed it, and deleted the route before pushing.
+
+That is the third time a run has hand-built the same scaffolding. The 17 August
+entry's first option (**a demo-scoped journal**, written from the envelopes
+`narrated()` already collects) would close it for every telemetry page at once
+and would also make the surfaces demonstrable to a visitor with no account, which
+is what `/portal/demo` is for. It stays the change I would make next, and it is
+now the thing standing between this lane and being judged on the thing the
+maintainer said he judges by eye.
+
+---
+
 ## 2026-08-21 — a sentence about the rules went stale one commit after the rules did
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` ·
@@ -4251,6 +4304,209 @@ projection exists to tell a model how broadly it reached — so lesson 13 carrie
 it as a judgement call for the reader rather than as a bug report. If the prompt
 lane thinks the asymmetry is wrong, it is two lines in
 `src/interpretation/render.ts`.
+
+---
+
+## 2026-08-21 — the marketing site does not link to the demo at all, and now it can
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open
+
+The demo brief says to update the marketing site's link to the demo by filing a
+finding rather than by editing that route group. Filing it turned up something
+larger than a stale href: **there is no link.** Nothing under
+`app/(marketing)/` names `/portal/demo`, or any demo path, anywhere.
+
+That is understandable — the demo was at `/portal/demo`, which reads as a
+signed-in tool, and linking a public marketing page into the portal is a
+reasonable thing to have declined. It is also the single biggest gap between
+the demo and the people it exists to convince: the conversion artifact had no
+route from the front door.
+
+**It is now `/demo`**, public, in its own route group, with no portal chrome, no
+sign-in and nothing to guard. `/portal/demo` is a 308 to it and will stay one
+until the portal's own links move (filed separately below).
+
+What the marketing site would want to know before linking:
+
+- **It works with no API key configured.** Five presets are deterministic
+  interpreters through the real pipeline ([0057](decisions/0057-a-preset-is-a-deterministic-interpreter.md)),
+  so the demonstration is complete on a deployment with no model. Free text is
+  the only part that needs one, and it is behind a disclosure that says so.
+- **It costs nothing to link to.** A page view allocates no session — the tree
+  is built for the render and thrown away — so a crawler or a burst of traffic
+  from a launch post does not accumulate memory on the instance.
+- **The first click is one button.** "Re-theme the whole page" is the primary
+  action and the whole page turns over; that is what a visitor arriving from a
+  marketing page has sixty seconds for.
+
+Where it belongs is the marketing routine's call, not this one's. The obvious
+places are the home hero's second action and the `how-it-works` page's foot,
+and `linkUrlSchema` refusing relative URLs (filed 19 August, still open) is
+the thing that will get in the way of doing it as a tree node.
+
+---
+
+## 2026-08-21 — four portal links and one public-path constant still name `/portal/demo`
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+
+The demo moved to `/demo` this run, into `app/(demo)/`. Five things in the
+portal still point at where it was, and all five are the portal routine's files:
+
+| file | what it says |
+| --- | --- |
+| `_lib/auth/paths.ts` | `DEMO_PATH = "/portal/demo"` — the constant that tells the proxy this path is public |
+| `_components/shell/nav-items.tsx` | the rail's demo entry |
+| `portal/sign-in/_components/sign-in-hero.tsx` | the "try the demo" link on the sign-in page |
+| `portal/pages/page.tsx` | the empty state's link |
+| `_components/state-notice.test.tsx` | a fixture href, cosmetic |
+
+**Nothing is broken while they stay.** `portal/demo/page.tsx` is now a
+`permanentRedirect("/demo")` — kept deliberately rather than deleted, so every
+one of those links lands somewhere and `guarded-pages.test.ts` keeps a file to
+exempt. It renders nothing and reads nothing, so the exemption costs the portal
+nothing.
+
+**What is yours:** repoint the four links (and, if you like, `DEMO_PATH`, which
+now only has to keep `/portal/demo` public for the redirect itself). Once they
+name `/demo`, the shim can go, and deleting it is a demo change I will make on
+your word rather than guess at — it is a file in your route group.
+
+**One line of yours had to change**, and it is worth naming rather than leaving
+to be discovered in a diff. `_lib/vocabulary.ts` imports `RecordOutcome` from
+what was `./demo/record`; the demo's `record.ts` moved, so the import now reads
+`@/app/(demo)/_lib/record`. Type-only, direction unchanged — that module still
+does not depend on the demo at runtime — and it was the one edit a move of this
+shape could not avoid.
+
+---
+
+## 2026-08-21 — the demo reads three portal modules, and one of them says the wrong thing to a visitor
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+A lane question rather than a bug, and it has a live symptom.
+
+`app/(demo)/` imports three things from `app/(portal)/`:
+
+- `_lib/vocabulary` — the table that decides what every change state is called
+- `_lib/proposal-effect` and `_components/proposal-effect` — what a held
+  proposal would replace, computed and rendered
+
+**Forking them would be worse than importing them**, which is why this is filed
+rather than fixed. `vocabulary.ts`'s own comment says it exists so the demo and
+the review queue cannot call one state two things, and `proposal-effect.ts` is
+358 lines of real logic over the runtime's delta model — a second copy is the
+drift 0018 exists to prevent. So the demo reads them, and the lane table says
+`app/(portal)/` is the portal routine's.
+
+**The symptom.** `CHANGE_STATES.applied` reads *"This change is live on the
+page. You can undo it from History."* That is correct in the portal, where undo
+is offered on `/portal/history`. On the demo it sent a signed-out visitor to a
+page they cannot open, to find a button that was already on the card in front of
+them. The demo now overrides that one *meaning* and keeps the label, the tone
+and the technical name, with `report.test.ts` asserting that no state's sentence
+names a place this surface does not have — so a portal run adding a second such
+sentence fails a demo test rather than shipping.
+
+That test is a good alarm and a poor home. The real shape is that these three
+modules are **shared ground** — they are about the runtime's vocabulary, not
+about either surface — and there is nowhere in `app/` that says so. Three ways,
+all the maintainer's:
+
+- **A shared `app/_lib/`**, owned by nobody, changed by findings. Cleanest, and
+  it needs a rule about who may edit it.
+- **Say the portal owns them and the demo may read them**, which is the status
+  quo written down. Cheapest, and it leaves a demo test guarding a portal file.
+- **Move the runtime-vocabulary half into `@loom/runtime`**, which is the
+  framework routine's and is a bigger question than this one — the plain
+  sentences are a *product* decision that the runtime has so far stayed out of.
+
+The 21 August demo run took the second, silently, because a routine choosing
+between the first and the third on its own is how two conventions get invented.
+
+---
+
+## 2026-08-21 — `21st.dev` is still blocked, hit now by a fourth routine
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The demo brief names one external source and makes it mandatory: *"WebFetch
+`https://21st.dev` for the visual standard — it is allowed by the committed
+network policy."* It is not reachable.
+
+```
+EGRESS_BLOCKED — Access to 21st.dev is blocked by the network egress proxy.
+```
+
+Recorded as its own entry rather than appended to the 16 August one, because the
+brief's wording is what is new: it states the domain **is** allowed, and
+`docs/routines.md` lists it under "currently allowed". `.claude/settings.json`
+and the environment's egress proxy are two separate gates, and the second one
+still refuses — so the committed policy and the running environment disagree,
+which is a different fact from "nobody has added it yet". A routine reading the
+brief has no reason to expect the fetch to fail and no way to tell the two
+apart.
+
+This run worked to the standard the brief names second — `loom.hero` and
+`loom.feature-grid` as the floor — which it happens to have on screen, since
+both are nodes in the specimen page the demo changes. That is a better fallback
+than most runs get and still not a look at the reference.
+
+---
+
+## 2026-08-21 — no framework gaps from the demo's first run
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed
+
+Recorded because the other routines record it, and because this run is the one
+that would have found a gap if the demo's premise had one: the entire persuasive
+path — five presets, the Gate holding and applying, the inverse, the record —
+runs with no model call at all, and nothing in `@loom/runtime` obstructed it.
+`src/` was not opened.
+
+The one thing worth carrying forward is the opposite of a gap. `presetInterpreter`
+re-plans against the tree it is handed rather than closing over operations
+computed at render, which is what let the whole panel be rebuilt around a single
+primary action without any risk of a stale delta: the button posts an id, and the
+change is computed on the server from whatever the head is by then.
+
+
+---
+
+## 2026-08-21 — Vercel is building previews again, and #128 has one
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — reporting a change of state, not asking for one
+
+The 21 August finding above says Vercel refuses to deploy any routine branch,
+because the commit author on every one of them is `jpizzo` and that account is
+not on the Vercel team:
+
+> @jpizzo must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+**That is no longer what happens.** #128, opened from `demo-01-a-public-front-door`
+with the same commit author, deployed: the check went `pending` → `success`, and
+`vercel[bot]` posted a Ready row with a preview link rather than an
+authorisation refusal. Whatever the fix was — the account added, or the
+per-author check turned off — it is in effect.
+
+Recorded here rather than as a line in a report, because that finding tells every
+routine its brief's preview requirement cannot be met, and a routine reading it
+next week would have no way to know the state had changed. The entry above is
+someone else's and is left as written; this is the update beside it.
+
+**Two things are still true**, so the entry does not close on this alone:
+
+- **A routine cannot check the preview it publishes.** The deployment host is not
+  on the environment's egress allowlist, so both `curl` and WebFetch refuse it —
+  `EGRESS_BLOCKED`, the same wall as `21st.dev`. This run published its preview
+  URL from the bot's own comment without having been able to open it, and said so
+  on the pull request. That is the 21 August sibling finding, unchanged.
+- **The repository is private**, so a screenshot committed to `reports/` still
+  cannot be embedded in a pull request body. #128 links each one instead.
+
 
 ---
 
