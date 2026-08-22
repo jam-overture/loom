@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="452" viewBox="0 0 900 452" font-family="ui-sans-serif, system-ui, sans-serif" role="img" aria-label="Line chart. Characters in the tree block against page size. Rendering the whole page grows linearly from 414 characters at one section to 173,546 at five hundred. A scoped render stays between 425 and 528 characters across the same range.">
+  <rect width="900" height="452" fill="#0f1115"/>
+
+  <text x="32" y="44" fill="#e6e9ef" font-size="17">A scoped request stops growing with the page</text>
+  <text x="32" y="68" fill="#8b93a7" font-size="12.5">Characters in the tree block, measured by measurePrompt. Five nodes per section, starter catalogues wired.</text>
+
+  <line x1="32" y1="88" x2="868" y2="88" stroke="#242938"/>
+
+  <!-- legend -->
+  <rect x="112" y="104" width="10" height="10" rx="2" fill="#3e63dd"/>
+  <text x="128" y="113" fill="#c9cede" font-size="12">sending the whole page</text>
+  <rect x="300" y="104" width="10" height="10" rx="2" fill="#30a46c"/>
+  <text x="316" y="113" fill="#c9cede" font-size="12">sending the spine and the scope</text>
+
+  <!-- gridlines -->
+  <line x1="90" y1="150.0" x2="860" y2="150.0" stroke="#1c2130"/>
+  <line x1="90" y1="216.7" x2="860" y2="216.7" stroke="#1c2130"/>
+  <line x1="90" y1="283.3" x2="860" y2="283.3" stroke="#1c2130"/>
+  <line x1="90" y1="350.0" x2="860" y2="350.0" stroke="#1c2130"/>
+
+  <text x="82" y="154" fill="#6f7789" font-size="11" text-anchor="end">150k</text>
+  <text x="82" y="220" fill="#6f7789" font-size="11" text-anchor="end">100k</text>
+  <text x="82" y="287" fill="#6f7789" font-size="11" text-anchor="end">50k</text>
+  <text x="82" y="354" fill="#6f7789" font-size="11" text-anchor="end">0</text>
+
+  <!-- axis -->
+  <line x1="90" y1="358" x2="860" y2="358" stroke="#242938"/>
+
+  <!-- whole page -->
+  <polyline fill="none" stroke="#3e63dd" stroke-width="2" stroke-linejoin="round"
+    points="91.5,349.4 105.4,345.5 167.0,327.3 244.0,304.6 475.0,235.3 860.0,118.6"/>
+  <circle cx="167.0" cy="327.3" r="4" fill="#3e63dd" stroke="#0f1115" stroke-width="2"/>
+  <circle cx="244.0" cy="304.6" r="4" fill="#3e63dd" stroke="#0f1115" stroke-width="2"/>
+  <circle cx="475.0" cy="235.3" r="4" fill="#3e63dd" stroke="#0f1115" stroke-width="2"/>
+  <circle cx="860.0" cy="118.6" r="4.5" fill="#3e63dd" stroke="#0f1115" stroke-width="2"/>
+  <text x="852" y="110" fill="#3e63dd" font-size="12.5" text-anchor="end">173,546</text>
+
+  <!-- scoped -->
+  <polyline fill="none" stroke="#30a46c" stroke-width="2" stroke-linejoin="round"
+    points="91.5,349.4 105.4,349.3 167.0,349.3 244.0,349.3 475.0,349.3 860.0,349.3"/>
+  <circle cx="860.0" cy="349.3" r="4.5" fill="#30a46c" stroke="#0f1115" stroke-width="2"/>
+  <text x="852" y="340" fill="#30a46c" font-size="12.5" text-anchor="end">528</text>
+
+  <!-- x ticks -->
+  <text x="105" y="376" fill="#6f7789" font-size="11" text-anchor="middle">10</text>
+  <text x="244" y="376" fill="#6f7789" font-size="11" text-anchor="middle">100</text>
+  <text x="475" y="376" fill="#6f7789" font-size="11" text-anchor="middle">250</text>
+  <text x="860" y="376" fill="#6f7789" font-size="11" text-anchor="middle">500</text>
+  <text x="90" y="394" fill="#6f7789" font-size="11">sections on the page</text>
+
+  <line x1="32" y1="404" x2="868" y2="404" stroke="#242938"/>
+  <text x="32" y="421" fill="#8b93a7" font-size="12">The green line is flat because it is: a scope costs its spine plus its own subtree, whatever it is sitting on.</text>
+  <text x="32" y="438" fill="#8b93a7" font-size="12">Below ten sections it costs slightly more than sending everything — the marker and the two elision lines outweigh what they save.</text>
+</svg>

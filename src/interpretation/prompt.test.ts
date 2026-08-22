@@ -9,6 +9,8 @@ import type { RepairRequest } from "../runtime/interpreter.js"
 import { testRegistry } from "../testing/definitions.js"
 import { buildIntent, buildProposal } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
+import { buildElement, buildText } from "../tree/builders.js"
+import { createTree } from "../tree/tree.js"
 
 import {
   buildRepairMessage,
@@ -363,5 +365,48 @@ describe("measurePrompt", () => {
       measured.themes,
       "the starter themes now cost a model more attention than the starter primitives, which is the moment 0077's cut order was written for"
     ).toBeLessThan(measured.primitives)
+  })
+
+  /**
+   * The measurement that made this worth building, held so it stays true.
+   *
+   * On a large page the tree is the request — 91% of it at five hundred sections
+   * — and it is the one block a cache can never hold, because it changes with
+   * every revision. A scope is the only lever that bounds it, and until 0083 it
+   * did not: the whole tree was rendered with a marker, so scoping a change cost
+   * eleven characters *more* than not scoping it.
+   */
+  it("stops a scoped request from growing with the page it sits on", () => {
+    const pageOf = (sections: number) => {
+      const idFactory = sequentialIdFactory()
+      const children = Array.from({ length: sections }, (_, index) =>
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { title: `Section ${index}` },
+          children: [buildText(idFactory, `Body copy for section number ${index}.`)],
+        })
+      )
+      const root = buildElement(idFactory, { type: "loom.page", children })
+      const target = children[0]
+      if (target === undefined) throw new Error("a page needs at least one section")
+
+      return { tree: createTree(root, idFactory), targetId: target.id }
+    }
+
+    const measure = (page: ReturnType<typeof pageOf>, scoped: boolean) => {
+      const base = intentFor("soften this section")
+      const intent = scoped ? { ...base, scopeNodeId: page.targetId } : base
+
+      return measurePrompt(intent, page.tree, starterCatalogue(), createThemeRegistry().catalogue())
+    }
+
+    const small = pageOf(5)
+    const large = pageOf(500)
+
+    expect(measure(large, false).tree).toBeGreaterThan(measure(small, false).tree * 50)
+    expect(
+      measure(large, true).tree - measure(small, true).tree,
+      "a scoped request has started growing with the page again, which is the cost 0083 exists to remove"
+    ).toBeLessThan(20)
   })
 })

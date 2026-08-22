@@ -42,6 +42,93 @@ describe("renderTree", () => {
     expect(renderTree(tree, ids.card)).toContain("n_4 element loom.card elevation=1 variant=\"outlined\"   <- scope")
   })
 
+  it("sends the spine and the scope, and collapses everything else to a count", () => {
+    const { tree, ids } = sampleTree()
+
+    expect(renderTree(tree, ids.card)).toBe(
+      [
+        "tree t_1 revision 0",
+        'n_7 element loom.page title="Home"',
+        "  … 1 preceding child omitted",
+        "  n_5 slot main",
+        '    n_4 element loom.card elevation=1 variant="outlined"   <- scope',
+        '      n_3 text "Body copy"',
+        "  … 1 following child omitted",
+      ].join("\n")
+    )
+  })
+
+  /**
+   * The preceding count is the scope node's index among its siblings, which is
+   * what an insert beside it would have to name. One combined total would take
+   * that away, which is why there are two counts rather than one.
+   */
+  it("counts the omitted siblings on each side separately", () => {
+    const idFactory = sequentialIdFactory()
+    const kids = ["a", "b", "c", "d", "e"].map((value) => buildText(idFactory, value))
+    const root = buildElement(idFactory, { type: "loom.page", children: kids })
+    const rendered = renderTree(createTree(root, idFactory), kids[2]?.id)
+
+    expect(rendered).toContain("  … 2 preceding children omitted")
+    expect(rendered).toContain("  … 2 following children omitted")
+    expect(rendered).toContain('  n_3 text "c"   <- scope')
+    expect(rendered).not.toContain('text "a"')
+    expect(rendered).not.toContain('text "e"')
+  })
+
+  it("says nothing about a side that has no siblings to omit", () => {
+    const idFactory = sequentialIdFactory()
+    const only = buildText(idFactory, "alone")
+    const root = buildElement(idFactory, { type: "loom.page", children: [only] })
+
+    expect(renderTree(createTree(root, idFactory), only.id)).not.toContain("omitted")
+  })
+
+  /**
+   * The property the whole change exists for. An outline of the full page is
+   * linear in its node count and is re-sent on every proposal and again on every
+   * repair; a scoped one is the size of what it is allowed to touch, whatever it
+   * is sitting on.
+   */
+  it("does not grow with the page the scope sits on", () => {
+    const pageOf = (sections: number) => {
+      const idFactory = sequentialIdFactory()
+      const children = Array.from({ length: sections }, (_, index) =>
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { title: `Section ${index}` },
+          children: [buildText(idFactory, `Body copy for section number ${index}.`)],
+        })
+      )
+      const root = buildElement(idFactory, { type: "loom.page", children })
+
+      return { tree: createTree(root, idFactory), target: children[0] }
+    }
+
+    const small = pageOf(5)
+    const large = pageOf(500)
+
+    const scopedSmall = renderTree(small.tree, small.target?.id).length
+    const scopedLarge = renderTree(large.tree, large.target?.id).length
+
+    expect(renderTree(large.tree).length).toBeGreaterThan(renderTree(small.tree).length * 50)
+    expect(scopedLarge - scopedSmall).toBeLessThan(20)
+  })
+
+  it("renders the whole tree when the scope names a node it does not contain", () => {
+    const { tree } = sampleTree()
+    const absent = nodeIdSchema.parse("n_404")
+
+    expect(renderTree(tree, absent)).toBe(renderTree(tree))
+  })
+
+  it("renders the whole tree when the scope is the root, because that is what it means", () => {
+    const { tree, ids } = sampleTree()
+
+    expect(renderTree(tree, ids.page)).toContain('n_6 element loom.footer')
+    expect(renderTree(tree, ids.page)).not.toContain("omitted")
+  })
+
   it("escapes text so a newline cannot forge an outline row", () => {
     const idFactory = sequentialIdFactory()
     const text = buildText(idFactory, "first\nn_9 element loom.evil")

@@ -4678,3 +4678,97 @@ outcomes: nothing was decided, and the next lane to want two records in one run
 hits the same wall. The first option above still looks right — a missing number
 on `main` is a record in flight, a repeated number is the real error — and it is
 one condition in `tools/decisions/build-index.ts`.
+
+---
+
+## 2026-08-22 — a scope is now worth setting, and no surface sets one
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`, `Loom demo` ·
+**Status:** open — nothing is broken, and there is a large saving sitting unclaimed
+
+`EditIntent.scopeNodeId` has always existed and until today it bought nothing:
+`renderTree` rendered the whole tree with a `<- scope` marker against one line,
+so scoping a change cost **eleven characters more** than not scoping it. That is
+why no surface setting one was never a problem worth noticing.
+
+**It buys a great deal now**
+([0083](decisions/0083-a-scoped-request-sends-the-scope.md)). A scoped render is
+the spine plus the scope's own subtree, with siblings collapsed to a count per
+side, so the tree block stops growing with the page:
+
+| sections | tree, unscoped | tree, scoped | whole request saved |
+| --- | --- | --- | --- |
+| 50 | 16,993 | 515 | 48% |
+| 100 | 34,043 | 515 | 66% |
+| 500 | 173,546 | 528 | 91% |
+
+**Nothing sets one automatically, and nothing should.** Deciding a scope from an
+utterance is a judgement about what the person meant, and a renderer guessing at
+it would silently narrow what the model may propose. But a surface that *already
+knows* does not have to guess:
+
+- **The portal** knows which node a reviewer clicked. A review queue where
+  someone selects a card and types "make this quieter" has the scope in hand and
+  is throwing it away.
+- **The demo** mints a tree per visitor and drives proposals against it. It is
+  also the one place a visitor can watch the cost, which makes it the natural
+  place to show that scoping is not a micro-optimisation.
+
+**Two things to know before wiring it.** A scoped render cannot answer "match the
+heading style of the section above" — the sibling is not in view, deliberately,
+because that is what a scope means. And below roughly ten sections a scope costs
+slightly *more* than sending everything, so a surface that scopes unconditionally
+on small pages pays a few characters for nothing. Neither is a reason not to do
+it; both are reasons to set a scope when the person actually pointed at
+something, rather than always.
+
+---
+
+## 2026-08-22 — the repair path sends the page twice, and that is now worth saying
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — recorded against my own lane rather than acted on
+
+Found while measuring for 0083, and left alone deliberately.
+
+`buildRepairMessage` embeds `buildUserMessage` whole, then appends the refused
+delta and the objection. So a refused-then-repaired intent sends the entire tree
+**twice** — which is correct as far as it goes, because the repair is a fresh ask
+against the same tree and the model needs to see it.
+
+It is worth writing down because 0083 changes the arithmetic. Before, a scope
+bought nothing and the doubling was simply the cost of a repair. Now a scoped
+intent's repair is cheap and an unscoped one's is exactly twice a number that
+grows with the page — so the gap between the two paths widens with page size
+rather than staying proportional.
+
+Not acted on, and the reason is that the obvious saving is not obviously safe. A
+repair could in principle send the tree once and refer back to it, but that is a
+claim about how a provider's conversation state works rather than about Loom, and
+[0005](decisions/0005-model-access-is-an-optional-adapter.md) keeps the runtime
+on one narrow seam that does not assume multi-turn state. A cheaper repair is a
+conversation about the adapter, not a change to the prompt builder.
+
+---
+
+## 2026-08-22 — no framework gaps this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+Nothing was wanted from another lane. The change is one function in
+`src/interpretation/render.ts` plus its tests, and it needed nothing from the
+tree model, the store or the SDK — `chainTo` walks the same `children` every
+other reader walks, and the elision is text.
+
+Two things worth saying rather than leaving as absences.
+
+**`measurePrompt` earned itself in a day.** #130 shipped it with no user beyond
+its own tests and a report; the question the maintainer asked the following
+morning was answerable in minutes because it existed, and every number in 0083 is
+its output. The seam-with-no-user worry that entry recorded turned out to have a
+one-day horizon.
+
+**The record-numbering block cleared exactly as filed.** `0083` was the number
+the 21 August governance finding said this lane was owed once #129 landed, and it
+is the number this record has. The governance question underneath it is still
+open and still unaddressed by anything here.
