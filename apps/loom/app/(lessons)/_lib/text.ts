@@ -13,15 +13,29 @@
  * reaches into, and the queue needs it as data.
  */
 
-/** `*(04)*` and `*(07 for why measurement and judgment are kept apart)*`. */
-const REFERENCE = /\*\((\d{2})[^)]*\)\*/g
+/** `*(04)*`, `*(04, 11, 12)*`, and `*(07 for why measurement and judgment are kept apart)*`. */
+const REFERENCE = /\*\((\d{2}[^)]*)\)\*/g
+
+/**
+ * The numbers a marker opens with, all of them.
+ *
+ * A marker is a comma-separated list of lessons optionally followed by a reason
+ * — `*(12, 09 for the rule)*` — so the numbers are the leading run and the
+ * reason is whatever follows. Taking only the first was this module's original
+ * behaviour and it was quietly wrong: seven questions in the schedule reach into
+ * two or three lessons each, and the reader was being offered the first one to
+ * check against. An interleaved question whose pointer names one lesson is an
+ * interleaved question that reads as an ordinary one.
+ */
+const LEADING_NUMBERS = /^\d{2}(?:\s*,\s*\d{2})*/
 
 export const referencedLessons = (markdown: string): readonly number[] => {
   const found = new Set<number>()
 
   for (const match of markdown.matchAll(REFERENCE)) {
-    const [, lesson] = match
-    if (lesson !== undefined) found.add(Number(lesson))
+    const listed = LEADING_NUMBERS.exec(match[1] ?? "")?.[0]
+
+    for (const lesson of listed?.split(",") ?? []) found.add(Number(lesson.trim()))
   }
 
   return [...found].sort((a, b) => a - b)
