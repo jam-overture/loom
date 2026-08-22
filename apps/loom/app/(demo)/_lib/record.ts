@@ -10,6 +10,8 @@ import type {
   TreeDelta,
 } from "@loom/runtime"
 
+import { touchedBy, type TouchedNode } from "./touched"
+
 /**
  * One ask, and everything the runtime said about it, in one record.
  *
@@ -99,6 +101,12 @@ export type ChangeRecord = {
   readonly failure?: string
   /** A repair (0006) means the Gate refused once and the model tried again. */
   readonly repaired: boolean
+  /**
+   * Which nodes this change is about, so the page can be marked where it moved
+   * rather than only described in the rail. Empty until the change is assessed,
+   * and empty forever for an ask that never produced a delta.
+   */
+  readonly touched: readonly TouchedNode[]
 }
 
 const describeOperation = (operation: TreeDelta["operations"][number]): string => {
@@ -175,6 +183,7 @@ type Draft = {
   discarded: boolean
   failure?: string
   repaired: boolean
+  touched: readonly TouchedNode[]
 }
 
 const identityOf = (intent: EditIntent, askedAt: string): NonNullable<Draft["identity"]> => ({
@@ -187,7 +196,7 @@ const identityOf = (intent: EditIntent, askedAt: string): NonNullable<Draft["ide
 
 const draftFrom = (base: ChangeRecord | undefined): Draft =>
   base === undefined
-    ? { repaired: false, discarded: false }
+    ? { repaired: false, discarded: false, touched: [] }
     : {
         identity: {
           recordId: base.recordId,
@@ -205,6 +214,7 @@ const draftFrom = (base: ChangeRecord | undefined): Draft =>
         ...(base.answeredBy === undefined ? {} : { answeredBy: base.answeredBy }),
         discarded: base.outcome === "discarded",
         repaired: base.repaired,
+        touched: base.touched,
       }
 
 const failureOf = (event: RuntimeEvent): string | undefined => {
@@ -233,6 +243,13 @@ const assessed = (draft: Draft, assessment: ChangeAssessment): Draft => ({
   interpretation: interpretationOf(assessment),
   stakes: { level: assessment.stakes.level, factors: assessment.stakes.factors },
   reversibility: reversibilityOf(assessment),
+  /*
+   * The inverse travels with the delta here for one reason: it is the only place
+   * a *removed* node's parent and position survive. `assessReversibility`
+   * computes it whether or not anybody undoes anything, so pointing at the gap a
+   * removal left costs nothing beyond reading a field that already exists.
+   */
+  touched: touchedBy(assessment.proposal.delta, assessment.reversibility.inverse),
 })
 
 const fold = (draft: Draft, envelope: RuntimeEventEnvelope): Draft => {
@@ -321,5 +338,6 @@ export const recordFromEvents = (
     ...(draft.answeredBy === undefined ? {} : { answeredBy: draft.answeredBy }),
     ...(draft.failure === undefined ? {} : { failure: draft.failure }),
     repaired: draft.repaired,
+    touched: draft.touched,
   }
 }
