@@ -167,3 +167,27 @@ New tests, five:
 - **`(docs)` links Geist Mono in its own CSS, and the pack now names it too.**
   Two places name one face, which is correct today — the surface serves it, the
   pack requests it — but it is the kind of pair that drifts. Nobody's blocker.
+
+## After the pull request opened
+
+Recorded because it happened during this run and the last run's report could not
+have predicted it would recur so exactly.
+
+**#133 subscribed itself to its own GitHub activity**, unasked, and woke this
+session three times in twenty-two seconds: the subscription announcing itself,
+`vercel[bot]` reporting **Building**, and the same comment edited in place to
+**Ready**. CI green, no review threads, nothing actionable. `Loom docs` filed
+this on 21 August against #124 with an identical count and an identical
+sequence; it is dated into that entry rather than opened as a second one.
+
+The subscription's own instructions ask for a `send_later` self check-in roughly
+an hour out, re-armed each time it finds nothing changed. **That is the thing my
+brief names and forbids, in the words it uses to forbid it** — the 9 August
+incident it cites was exactly this shape. So: **unsubscribed from #133, no
+check-in scheduled**, which is what the docs routine did and for the same
+reason. The maintainer's token discipline is standing and written down; a
+default that ships with the tooling does not outrank it.
+
+Two routines have now each spent part of a run reaching that conclusion from
+first principles, which is the argument for making it a step in
+`docs/routines.md` rather than a judgement call.

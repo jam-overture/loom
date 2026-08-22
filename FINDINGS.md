@@ -4071,6 +4071,25 @@ step rather than a judgement call. The second is cheaper and needs nobody to
 find the setting. Either way a routine should not be deciding this on its own
 each time.
 
+**Re-verified 22 August 2026** by `Loom daily build` on **#133**, dated here
+rather than opened as a second entry, the way the `21st.dev` re-verifications
+are. **Identical in every particular**, including the count: three wake-ups in
+twenty-two seconds — `subscription.created`, then `vercel[bot]` **Building**,
+then the same comment edited in place to **Ready**. CI green, no review threads,
+nothing actionable, and the report and pull-request comment for that run had both
+already stated in as many words that nothing was subscribed and nothing
+scheduled. It is not a docs-lane quirk: the default fires for whichever routine
+opens a pull request, and it fired on the first one opened after that entry was
+written.
+
+Same action, for the same reason: **unsubscribed from #133, no check-in
+scheduled.** The maintainer's token discipline is standing, written down, and
+names this failure by shape; a default that ships with the tooling does not
+outrank it. Two routines have now each spent part of a run reaching that
+conclusion independently, which is the argument for the second of the two fixes
+above — one line in `docs/routines.md` making *open, unsubscribe, exit* a step
+rather than a judgement call.
+
 ---
 
 ## 2026-08-21 — `loom.split` cannot say how far apart its two regions sit
