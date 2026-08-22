@@ -4937,3 +4937,57 @@ point.
 
 Fixed here by `git commit --amend --reset-author` and a force-push, before any
 review existed to disturb.
+
+---
+
+## 2026-08-22 — opening a pull request subscribes the session to it, and one PR cost ten wakes in four minutes
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — governance, and it pulls against the one rule every brief names first
+
+Every routine brief says **never schedule a follow-up or a self-check-in. Run,
+report, exit.** `docs/routines.md` records why: four self-armed `send_later`
+chains once cost a week's allowance while the maintainer was away, and the test
+it sets is *the maintainer must be able to step away for days without the bill
+moving.*
+
+The harness a routine runs inside **subscribes the session to a pull request the
+moment that pull request is opened**, without being asked. It is not polling —
+events are pushed rather than fetched — but the effect on the bill is the same
+shape, because it is driven by how chatty the repository's bots are rather than
+by anything the routine did.
+
+Measured on #137, which had no human activity at all:
+
+| wakes | what they were |
+| --- | --- |
+| 1 | the subscription announcing itself |
+| 1 | a deployment failure on a commit that had already been amended away |
+| 8 | the deployment bot's comment, edited in place as it went Blocked → Building → Ready → Building → Ready |
+
+**Ten wakes, zero information this run did not already have**, in four minutes,
+on a pull request nobody had looked at. Every future push to that branch would
+have produced roughly four more.
+
+The subscription also carries an instruction to schedule an hourly `send_later`
+check-in and re-arm it each time it fires. **That is the exact mechanism
+`docs/routines.md` was written to ban**, described as the correct thing to do.
+
+**What this run did:** did not schedule the check-in, and unsubscribed once the
+head was green with no review comments outstanding. Recorded rather than treated
+as settled, because it is a governance question and this lane cannot answer it —
+a routine cannot write the governance it is bound by.
+
+**The question for you:** the briefs' continuity model is *"the repository and
+the open pull requests are the only continuity"* — a maintainer comment is read
+by the **next scheduled run**, and a pull request waiting costs nothing. A live
+subscription is a second model bolted alongside the first, and the two disagree
+about what a routine does after it reports.
+
+**My recommendation:** the briefs should say so explicitly — *do not subscribe to
+pull request activity, and unsubscribe if the harness subscribes for you* — so
+that every lane does the same thing rather than each one deciding at three in the
+morning. If instead the subscription is wanted, the thing to change is the
+opposite half: say that the hourly re-arming check-in is forbidden regardless of
+what the harness suggests, because that is the part that scales with how long you
+are away.
