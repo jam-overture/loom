@@ -3115,7 +3115,60 @@ is a decision about the type system rather than a font pack.
 
 ## 2026-08-21 — the theme catalogue is now fifty-one entries in every proposal prompt
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** **closed
+by `framework-03-what-the-prompt-costs`** — measured, and it does not close
+itself: the theme catalogue is **20% of a real request** and not a rounding
+error.
+
+The finding asked for exactly the right thing and named the condition that would
+settle it. `measurePrompt` is now part of the package, so the answer is a
+function rather than a feeling. Measured over the sample tree and over the
+marketing home page as it actually renders, in characters:
+
+| block | sample tree (5 nodes) | marketing home page |
+| --- | --- | --- |
+| system prompt | 2,816 · 16.4% | 2,816 · 9.3% |
+| primitive catalogue (50) | 7,887 · 46.0% | 7,887 · 26.0% |
+| **theme catalogue (51)** | **6,155 · 35.9%** | **6,155 · 20.3%** |
+| tree projection | 246 · 1.4% | 13,404 · 44.2% |
+| the request itself | 42 | 41 |
+| **total** | **17,146** | **30,303** |
+
+**One fifth of a real request, and it is the same 6,155 characters every time** —
+it does not grow with the tree, it is not cached the way the constant system
+prompt is, and a repaired intent pays it twice.
+
+**No cut is made.** A fifth is real and not alarming, the range is the point on
+the demo, and `createThemeRegistry` already gives a one-brand deployment a
+one-entry catalogue. What changed is that the next person to ask is answered with
+a number.
+
+**0077's cut order is right, and now for a second reason.** It says presets and
+packs before palettes because the palette is what a viewer sees. Per entry, those
+are also the expensive ones — the opposite of what "eighteen derived colour sets"
+sounds like:
+
+| what | costs | per entry |
+| --- | --- | --- |
+| the 18 derived palettes | 1,537 | 85 |
+| the 17 additional font packs | 2,082 | **122** |
+| the 7 additional style presets | 827 | **118** |
+
+**For this lane's filer specifically: a test in `src/interpretation/` now fires
+on a change in `src/theme/`.** Two ceilings hold the starter theme block — under
+8,000 characters (about eighteen more entries of headroom), and never larger than
+the starter primitive catalogue. Both failures say in words what the three
+answers are. That coupling is deliberate: this grew fivefold with nothing
+noticing, which is the whole finding.
+
+**No decision record accompanies this**, and not by choice — see the numbering
+finding filed below. The reasoning is in `reports/2026-08-21-framework-what-the-prompt-costs.md`
+and in the test comments, and the record is worth writing once numbering is
+possible again.
+
+Original status below.
+
+**Status:** open
 
 Filed as a number to watch rather than a problem to fix, and recorded now so
 nobody has to rediscover where it came from.
@@ -4567,3 +4620,61 @@ The docs one is the second time this has happened (see the 21 August entry on
 `reference.generated.json`). It is the mechanical output of
 `pnpm --filter @loom/app docs:api` over the doc comments in `src/`, nothing else
 in that lane was touched, and leaving it stale fails `pnpm verify` for everyone.
+
+---
+
+## 2026-08-21 — a lane can only have one record-writing pull request open at a time
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a governance question, and it cost a record today
+
+Two rules that are each right on their own combine into a limit nobody chose.
+
+- **`pnpm decisions:index` requires unbroken numbering.** Adding `0083` while
+  `main` holds `0081` fails with *"0082 is missing — the numbers must run
+  unbroken from 0001"*, which is the check that stops a gap being merged.
+- **A routine must branch off `main` and never stack** (`docs/routines.md`, and
+  every brief). A stack cost four days of visibility once.
+
+So a lane with an open pull request that adds `0082` cannot write a record in a
+second pull request. `0082` collides; `0083` is refused as a gap; stacking is
+forbidden. The only remaining move is to wait for review, which is the one thing
+a routine is told not to organise its work around.
+
+**It happened today.** #129 adds `0082`. The second unit in the same run —
+`framework-03-what-the-prompt-costs` — shipped **without** the record it wanted,
+with the reasoning in the report and the test comments instead. Nothing is lost
+yet, and the record can be written next run as `0083` once #129 lands.
+
+**Three ways out, and the first is probably right:**
+
+- **Let the index tolerate a gap and fail only on a duplicate.** A missing number
+  on `main` is almost always a record in flight; a repeated number is the actual
+  error. One condition changes in `tools/decisions/build-index.ts`.
+- **Allocate the number at merge**, with a `NNNN`-less filename until then.
+  Heavier, and it breaks every link written before the merge.
+- **Say plainly that one record per lane per cycle is the rule**, and have
+  routines fold a second unit's reasoning into the report. That is what happened
+  today by accident; it is defensible on purpose, and it should be written down
+  rather than rediscovered.
+
+Not acted on because `tools/` holds the governance a routine is bound by, and
+changing the rule that catches a real collision — two routines writing on the
+same day, which is exactly what the briefs warn about — is not a decision one
+routine should take alone in a pull request about prompt sizes.
+
+**22 August — the block has cleared, and the record is owed.** #129 merged, so
+`0082` is on `main` and **`0083` is now a free number rather than a gap**. The
+precondition this entry names is met: the record `framework-03-what-the-prompt-costs`
+wanted should be written as `0083`, and it is this lane's to write. It was not
+folded into this pull request — the request was to resolve conflicts and merge,
+and quietly widening a merge into a content change is how a reviewer stops being
+able to trust what a pull request says it is. The reasoning is preserved in the
+report and the test comments meanwhile, exactly as this entry describes.
+
+**The governance question is untouched by that** and stays open. Today's instance
+resolved itself by the ordinary passage of time, which is the weakest of the four
+outcomes: nothing was decided, and the next lane to want two records in one run
+hits the same wall. The first option above still looks right — a missing number
+on `main` is a record in flight, a repeated number is the real error — and it is
+one condition in `tools/decisions/build-index.ts`.
