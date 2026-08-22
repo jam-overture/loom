@@ -101,3 +101,31 @@ the front door, it wants a budget and a decision of its own.
 **The panel says which wrote the change, on the page, in plain words.** That the
 rules cannot tell the difference is the more interesting fact and it is stated
 rather than hidden: they weigh the change, never its author.
+
+## Amendment, 2026-08-21 — what `front-door` protects
+
+**Status is unchanged and this is not a change of direction**, which is why it is
+a note rather than a superseding record: the decision above is the stateless
+shape, and none of it moves.
+
+What moves is one illustration inside it. When this was written, `front-door`
+protected **what the site charges and the way out of it**, and the pricing band
+was where the first of those lived. Hours later the maintainer took pricing off
+the front door — the marketplace is a long way out and how to position it is
+undecided — so the thing being protected had to be something the page still has.
+
+It is now **what the site says it is for**: the band of problems Loom exists to
+solve, which the same conversation named as the core of this site. Everything the
+record argues survives intact, including the part that mattered — that a single
+rule an ordinary business would actually write produces all three answers with
+nothing staged. Moving that band still asks a person; destroying it is still
+refused outright.
+
+The choice got better for the change. A business protecting its price list is
+ordinary; a business refusing to let a machine delete the statement of what it
+does for people is the same instinct pointed at something that matters more.
+
+The list also stopped being written twice. What a visitor is told the site
+protects is now derived from the rules themselves — the phrases and the count
+both — because for one commit the page said *"what it charges"* while the rules
+had stopped saying anything of the kind.

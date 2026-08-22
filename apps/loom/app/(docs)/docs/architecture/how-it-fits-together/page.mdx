@@ -1,0 +1,65 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("architecture", "how-it-fits-together")
+
+# How it fits together
+
+This section explains less than any other section on this site, and that is
+deliberate.
+
+Loom's reasoning is already written down twice, in two places built for two
+different jobs. There is a **course**, which teaches the ideas and is meant to
+be worked through rather than read. And there is a **record** of every ruling
+that was made, written on the day it was made, saying what was rejected as well
+as what was chosen.
+
+Copying either onto a page here would make a third version to keep true — and
+the copy on a documentation site is the one that goes stale, because nothing
+breaks when it does. So this page is a map. Eight ideas, a paragraph each, and
+two doors out of every one of them.
+
+## The bargain, in one paragraph
+
+Loom lets an AI change a running interface, and the reason that is not
+terrifying is that it can only say a small number of things. A page is data, a
+change is data, and the words a change may use are a list you wrote. You give up
+the freedom to have the AI produce anything at all, and what you get back is a
+change you can read, measure, refuse and undo. **Every idea below is a
+consequence of that trade.**
+
+The other half of the same bargain: behaviour lives in the component you
+registered, not in the tree. The tree says *a checkout goes here*. What a
+checkout does is yours, and no proposal can reach it.
+
+## The two doors
+
+Under each idea are two links, and they go to different kinds of place.
+
+**Work through it** goes to a lesson. The course is built on the finding that
+rereading a clear explanation feels like learning and mostly is not, so a lesson
+asks you to answer before it explains and to recall before it moves on. It is
+slower than reading this page on purpose. Do not treat it as a longer version of
+the paragraph above it.
+
+**The ruling** goes to a decision record: what was decided, when, what it costs,
+and — the part you cannot reconstruct later — which reasonable alternative was
+turned down and why.
+
+<Callout kind="note">
+  If you only want to build something, you do not need either. Getting started
+  and Building with Loom are enough. This section is for when you want to know
+  why it is shaped like this, or you are about to argue with it.
+</Callout>
+
+## The eight ideas
+
+<ArchitectureIdeas />
+
+## Everything else that has been decided
+
+The eight above are the spine. There are far more rulings than that — on how
+identity survives a restart, on what telemetry may keep, on what a primitive is
+allowed to name — and they are all in one list.
+
+[Decision records](/docs/architecture/decision-records) is that list, with a
+note on what it means when one of them has been replaced.

@@ -1,0 +1,49 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("architecture", "decision-records")
+
+# Decision records
+
+A decision record is a short note written on the day something was settled. It
+says what the situation was, what was decided, what that costs — and which
+sensible alternative was rejected, and why.
+
+That last part is the one worth having. A codebase shows you what was built. It
+never shows you the three things that were nearly built instead, so the next
+person to have the same good idea has to rediscover on their own why it does not
+work. The records are where that is kept.
+
+Each one has a number, which is just its filename and the order it was written
+in. **Nowhere else on this site will you be shown one**, because four digits are
+a footnote to a document you have not opened. Here they are the subject, so
+here they are.
+
+## The trail is never edited
+
+When Loom changes direction, the old record is not corrected. It is marked as
+replaced, its text left exactly as it was, and a new record explains what changed
+and why the earlier reasoning no longer holds.
+
+So a record can be in one of a few states, and the wording in the table below is
+the record's own:
+
+| State | What it means |
+| --- | --- |
+| **Accepted** | In force. This is how Loom works today. |
+| **Accepted — partially superseded by …** | Still in force, except for the one part a later record took over. A record that answered several questions can be replaced in part; retiring the whole thing would lose more than it clarified. |
+| **Superseded by …** | Replaced. Worth reading anyway — the reasoning that stopped holding is usually the interesting bit. |
+| **Proposed** | Written, not settled. Waiting on a person. |
+
+<Callout kind="note">
+  A change that contradicts an accepted record is an escalation, not a
+  refactor. The replacement is written as **Proposed**, the existing record
+  stays standing, and somebody decides. That is why the list below is nearly all
+  *Accepted* — it is a trail, not a backlog.
+</Callout>
+
+## The list
+
+Newest last. The table is read from the repository when this site builds, so it
+is the same list a checkout has.
+
+<DecisionRecords />

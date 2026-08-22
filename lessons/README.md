@@ -139,7 +139,7 @@ tree. Everything else in the system follows from protecting that one property.
 | --- | --- | --- |
 | [11](11-the-model-seam.md) | The model seam | Where non-determinism enters, and how it is contained. |
 | [12](12-projection.md) | Projection | Why the model is not shown the AST, and what it is shown instead. |
-| 13 | Refusal and repair | One attempt, both halves recorded, and why that is not a loophole. |
+| [13](13-refusal-and-repair.md) | Refusal and repair | One attempt, both halves recorded, and why that is not a loophole. |
 
 ### Part IV — Making it real
 

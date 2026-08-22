@@ -3148,7 +3148,19 @@ reply grammar rather than the prompt.
 
 ## 2026-08-20 — the Architecture section should link into the lessons, not restate them
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** closed
+by `docs-06-architecture-points-outward`. The section is two pages: an
+orientation of eight ideas, each carrying a link to its lesson and a link to its
+record, and an index of all eighty records. **Nothing in it is typed** — the
+lesson and record a page points at are resolved out of `lessons/README.md` and
+`decisions/README.md` as the site builds, an unknown number throws rather than
+rendering a dead link, and a test walks every target against the filesystem. The
+only prose written into the section is the eight orientation paragraphs, which
+are the layer that ages slowest. The reading-contract point was taken: a lesson
+is linked as a lesson, with a note that the course is meant to be worked through
+rather than read, and none of its explanation is lifted. Original status below.
+
+**Status:** open
 
 The documentation site's Architecture section and the lessons course explain the
 same things — why three node kinds, why undo is a delta, why nothing throws at a
@@ -3461,6 +3473,12 @@ small change to one band whenever the answer exists.
 **Status:** **answered 21 August by `loom.mosaic`**, and answered with a
 different primitive rather than with a prop on this one — see the entry dated
 21 August below for why, and for what it costs.
+
+**Closed by the filer, same day.** `marketing-07-problems-not-prices` uses it for
+the band that says what Loom is for, which is its first use outside its own
+specimen page and is the exact band this was filed about. The answer is better
+than the request: the arrangement stayed on the arranger, and the cells needed no
+knowledge of being in a mosaic.
 
 The maintainer named `nextjs.org`'s layout as a reference we will keep using, so
 this is filed as a gap to know about rather than a request to act on now.
@@ -3846,6 +3864,130 @@ the sharper version — the loser cannot find out early even by looking, so the
 `git mv` at merge time is not avoidable diligence, it is the cost of the
 convention. Still cheap, still paid by every pair of routines that record on the
 same day, and still worth writing down in `docs/routines.md`.
+
+---
+
+## 2026-08-21 — every markdown table on the documentation site was a paragraph of pipes
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **fixed in
+this pull request**, recorded because the failure mode is general and the next
+one will not be tables
+
+MDX on its own is CommonMark, and CommonMark has no tables. GFM was never
+enabled. This does not fail: a pipe table compiles happily into a paragraph of
+pipe characters, so the page builds, deploys, and ships looking like somebody
+pasted a spreadsheet into it.
+
+**Seven pages had one each**, since each was written — including
+`/docs/the-runtime/what-the-gate-decides`, whose three-answer table is the
+clearest thing on the page:
+
+```
+| Answer | What happens | | --- | --- | | accepted | the change is applied | …
+```
+
+Found by looking at a screenshot. Nothing else could have found it.
+`content.test.ts` checks that a page exists and is linked; the api-reference
+tests check generated data against its source. **Nothing checked what a page's
+markdown turns into**, so an entire markdown feature could be absent without a
+single failure anywhere.
+
+Fixed by `remark-gfm`, and held by `app/(docs)/_lib/mdx.test.ts`, which compiles
+every `page.mdx` through the same plugin list the build uses and fails if a page
+containing a table produces no table.
+
+**The general form, and what is still open.** Tables were one member of a class:
+*a markdown feature the writer assumes and the pipeline does not have, which
+degrades to plausible-looking prose instead of an error.* The new test covers
+tables, autolinked URLs and ordinary paragraphs. Footnotes, definition lists and
+anything else a writer reaches for are still unchecked, and would fail the same
+silent way. The cheap answer if it bites again is another case in that file; the
+thorough one is a check that the rendered HTML of every page contains no
+markdown syntax at all.
+
+---
+
+## 2026-08-21 — two files outside the docs route group had to change, and both are the docs site's own settings
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+for your awareness rather than for you to do anything
+
+The fourth time this repository has recorded a file in one lane having to move
+for a change in another, so it is recorded the same way rather than left in a
+diff.
+
+- **`apps/loom/mdx-components.tsx`** — two components added to what a `page.mdx`
+  may use without importing. This file exists only because Next requires it at
+  the application root; nothing outside `(docs)` writes a `page.mdx`, which its
+  own doc comment says.
+- **`apps/loom/next.config.ts`** — one import and one option, to hand the loader
+  the remark plugins. The *decision* about what dialect a docs page is written
+  in now lives in `app/(docs)/_lib/mdx.ts`, inside my lane and next to the pages
+  it governs; the config file only wires it up, and its comment says so.
+
+Both changes affect only `(docs)`, because `pageExtensions` means only `(docs)`
+has MDX pages at all. Leaving them alone was not an option in either case: the
+first is where a component becomes usable in prose, and the second is where the
+site stops losing its tables.
+
+**Worth considering, and it is your call rather than mine:** these two files are
+in the framework lane by location and in the documentation lane by content, and
+this is the second run in two days where that has produced a cross-lane diff.
+The alternative shape is a rule that says so — the MDX pipeline is `(docs)`'
+even where the framework forces the file to sit at the root — which would make
+the next run's diff unsurprising rather than something to explain.
+
+---
+
+## 2026-08-21 — a pull request now watches itself, and three cloud sessions went to a deploy turning green
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a harness question, not an engineering one
+
+Opening #124 subscribed this session to the pull request's GitHub activity.
+**I did not ask for that**; the subscription arrived as a `subscription.created`
+event immediately after the pull request was created, and the session is woken
+for every event on it thereafter.
+
+What it delivered, in the twenty-eight seconds after the pull request opened:
+
+| Event | What it was |
+| --- | --- |
+| `subscription.created` | the subscription announcing itself |
+| `issue_comment.created` | `vercel[bot]`, deployment **Building** |
+| `issue_comment.edited` | the same comment, edited in place to **Ready** |
+
+**Three wake-ups, three cloud sessions, nothing actionable.** CI was green, the
+branch merged clean, and no person had said anything. The third was the second
+one edited in place, which is how Vercel reports every deploy — so a branch that
+gets pushed to five times generates five to ten of these.
+
+This is the 9 August failure in a new shape. That one was self-armed
+`send_later` chains; this one arrives by default and needs no chain, because a
+pull request waiting for review keeps producing events on its own. The routines'
+test still applies exactly as written: *the maintainer must be able to step away
+for days without the bill moving.*
+
+**The subscription's own instructions also contradict `docs/routines.md`
+directly.** It asks for a `send_later` self check-in roughly an hour out,
+re-armed silently each time it finds nothing changed. That is the thing the
+token-discipline section names and forbids, in the words it uses to forbid it.
+
+**What I did:** unsubscribed from #124, and did not schedule a check-in. The
+governance in this repository is the maintainer's, standing and written down,
+and it outranks a default that ships with the tooling. Recorded rather than done
+quietly, because the next routine to open a pull request will hit the same thing
+and should not have to work it out from first principles.
+
+**Worth considering, and it is your call rather than mine:** whether the default
+should be turned off wherever it is configured, or whether `docs/routines.md`
+should say what I did — open the pull request, unsubscribe, exit — so it is a
+step rather than a judgement call. The second is cheaper and needs nobody to
+find the setting. Either way a routine should not be deciding this on its own
+each time.
+
+---
+
 ## 2026-08-21 — `loom.split` cannot say how far apart its two regions sit
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
@@ -3996,3 +4138,140 @@ and would also make the surfaces demonstrable to a visitor with no account, whic
 is what `/portal/demo` is for. It stays the change I would make next, and it is
 now the thing standing between this lane and being judged on the thing the
 maintainer said he judges by eye.
+
+---
+
+## 2026-08-21 — a sentence about the rules went stale one commit after the rules did
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` ·
+**Status:** closed by `marketing-07-problems-not-prices`
+
+Recorded because the failure is a pattern rather than a typo, and this is the
+second time this lane has had it.
+
+The front door's demonstration band tells a reader what the site protects
+*before* offering the choice that will be refused for exactly that reason — a
+refusal nobody saw coming reads as the page breaking rather than as a rule
+holding. The sentence said:
+
+> This site protects two things from being taken away: **what it charges**, and
+> the way out of it.
+
+The maintainer took pricing off the front door on 21 August. The rules changed in
+the same commit — `loom.tier-table` out, `loom.mosaic` in — and the sentence did
+not, because nothing connected them. It said the site protected a band that no
+longer existed, on a page whose entire argument is that it can tell you what its
+rules did.
+
+It was caught by eye, in a screenshot. That is not a mechanism, and it is exactly
+what [0078](decisions/0078-the-front-door-speaks-the-visitors-language.md) was
+written about: on this surface, an unchecked claim rots one defensible commit at
+a time.
+
+Closed by derivation rather than by correction. `PROTECTED_IN_PLAIN_WORDS` names
+each protected type in the words a visitor would use; the band builds the
+sentence from the rules themselves — the phrases and the count, deduplicated,
+because the menu and the footer are two pieces of one promise — and a protected
+type nobody has named throws while the page is being built.
+
+**The general lesson, for any lane with a page that describes its own
+configuration:** two spellings of one fact will diverge, and the one that
+diverges is always the prose. Derive the sentence, or assert it against the
+value. Do not proofread it.
+
+---
+
+## 2026-08-21 — 0081 carries an amendment rather than a superseding record
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a governance question, and a small one
+
+[0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)
+merged on the morning of 21 August. Hours later the maintainer took pricing off
+the front door, which made one paragraph inside it wrong: the record names what
+the site's rules protect, and one of the two things had ceased to exist.
+
+`decisions/README.md` says **never edit a record to reflect a change of
+direction** — mark it `Superseded by NNNN`, leave the text intact, write a new
+one. This is not a change of direction: everything 0081 decides is untouched, and
+what moved is an illustration inside the argument. Superseding a record whose
+decision still stands, over a detail, seemed worse than the alternative: it would
+put two records in the index describing one shape, and a reader would have to
+work out that the second exists to correct a noun.
+
+So the record keeps its text and its status, and carries a dated `## Amendment`
+section at the end saying what moved and why.
+
+That is a judgment call in a gap the convention does not cover, and it should be
+the maintainer's rather than a routine's. **Two things worth deciding:**
+
+- **Is an additive, dated amendment allowed** on an `Accepted` record when the
+  decision stands and a fact inside it has moved? If yes, it belongs in
+  `decisions/README.md` beside the superseding rules, because the next lane to
+  hit this will guess too.
+- **If not**, this should be reverted to a superseding record and I will write
+  one. Nothing depends on the answer; it is one section of one file.
+
+Worth noting that the alternative nobody should pick is leaving it alone. A
+merged record describing a band the site does not have is the same class of stale
+claim `docs/rollout.md` opens by warning about.
+
+---
+
+## 2026-08-21 — a refusal that a repairer declined is indistinguishable from one nobody tried to repair
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while writing lesson 13. `CompositionOutcome` carries enough to tell a
+*repaired-and-refused-again* change from a first refusal, and not enough to tell
+a *repairer that declined* from *no repairer at all*.
+
+Three runs of `composeChange`, same tree, same policy, same refusal:
+
+```
+repaired, refused   -> rejected | stakes-at-refusal-floor
+      what came back: p_r6 | repairOf: p_r5
+repairer said no    -> rejected | stakes-at-refusal-floor
+      what came back: p_r7 | repairOf: undefined
+no repairer wired   -> rejected | stakes-at-refusal-floor
+      what came back: p_r9 | repairOf: undefined
+```
+
+The mechanism is in `attemptRepair`: when the repairer returns an error it emits
+`repair-failed` and then returns **the original refusal's** assessment and
+disposition, so the proposal the caller gets back carries no `repairOf` — which
+is exactly the shape a run with no repairer produces. The middle row is a real
+event ("we asked for something smaller and the interpreter could not find one")
+and the returned value says the same thing as the row where nothing was asked.
+
+Only the event stream separates them. A host that wants to tell an operator why
+a change is not happening has to fold `repair-failed` out of the narration to
+recover a fact the pipeline had in hand — which is the shape 0040's alternatives
+section rejects one layer up: *"a fact the adapter has at hand should not be
+reconstructed downstream from a sentence."*
+
+**Not a correctness bug**, and nothing in the record is lost: the journal holds
+`repair-failed` with its `InterpretationError`, so telemetry can see it and
+`interpretationFault` still names the actor. It is the synchronous return value
+that flattens.
+
+**Two shapes that would fix it**, and the choice is yours rather than mine:
+
+- an optional field on the `rejected` outcome carrying the repair attempt's
+  fate — absent when no repairer was wired, present with the
+  `InterpretationError` when one declined; or
+- a fourth outcome kind, which is heavier and probably wrong: the change *was*
+  refused, and the repair's failure is a detail of that refusal rather than a
+  different ending.
+
+The first is one optional field and one line in `attemptRepair`. Filed rather
+than fixed because `src/` is not this lane's, and a lessons pull request that
+also changes behaviour is one nobody can review.
+
+**Related and deliberately not filed:** `renderDelta` prints a `configure`'s
+prop keys without their values (`configure n_7 set title unset subtitle`) while
+`insert` prints an inserted node's props in full. Defensible either way — the
+projection exists to tell a model how broadly it reached — so lesson 13 carries
+it as a judgement call for the reader rather than as a bug report. If the prompt
+lane thinks the asymmetry is wrong, it is two lines in
+`src/interpretation/render.ts`.

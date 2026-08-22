@@ -476,6 +476,89 @@ receive, and the answer sits on that axis.
 
 ---
 
+## Set P — two days after lesson 13
+
+Interleaved with 03, 05, 06, 09, 10, 11 and 12, and built around one failure
+mode: **assuming that because two things end the same way, the same thing
+happened.** Four of these eight are that shape wearing different clothes, and
+they are deliberately not adjacent.
+
+1. "Exactly one repair attempt" is structural rather than a counter set to one.
+   Give the counter's failure mode concretely — who changes it, when, and what
+   the system becomes. Then name the property of the Gate that makes it safe to
+   ask the same question twice and get the same answer. *(09)*
+2. Two runs both come back `rejected` with the same reason code. In one a
+   repairer declined; in the other none was wired in. Say what in the event
+   stream separates them and what in the returned outcome does not, then name
+   the lesson-11 idea that gap is an instance of. *(11)*
+3. An inverse delta and a repair are both a delta produced in response to a
+   delta. Say what each one can be *wrong* about, what `authoredBy` reads on
+   each, and what `confidence` means on each. One of those three is the answer
+   and the other two are how you get there. *(06, 11)*
+4. `renderDelta` prints a `configure`'s prop keys without their values, and
+   prints an inserted node's props in full. Give the argument for the first,
+   then name the lesson-12 sentence you would use to decide whether the
+   asymmetry between them is a defect. *(12)*
+5. A repair is judged under the same policy as the proposal it replaced. Say
+   where in `composeChange` that is arranged, what would break if the policy
+   were resolved a second time, and which field in the stored record proves it
+   was not. *(10)*
+6. A change was refused, then repaired into something smaller that committed.
+   Give both honest answers to "how often does this system refuse changes",
+   name the field each comes from, and give the question each one answers.
+7. Why is a half-applied delta worse than a rejected one? *(03)*
+8. Nothing at the seams throws. Say what an interpreter that threw would cost
+   an audit trail, then name the one thing the runtime *does* let disappear
+   silently and say why that is not the same concession. *(05)*
+
+Question 3 is the one to do slowly and out loud. The tempting distinction —
+"one is computed and one is generated" — is a restatement rather than a
+distinction, and if that is where your answer stops, this set is the place to
+push past it rather than in a month.
+
+---
+
+## Set Q — one week after Part III
+
+Part III ends at lesson 13, so this is its consolidation set, and it is the
+counterpart to Sets E and M. Do it **out loud**, to a person or a recording.
+Three lessons that only make sense together: what may not cross the seam, what
+does and in what shape, and what happens when the answer comes back and the
+Gate says no.
+
+1. Trace one utterance from the seam to a committed revision, naming what
+   crosses each boundary and in what shape. Then trace one that was refused and
+   repaired, and say which of the three projections is sent twice, which is
+   sent once, and which never leaves the process.
+2. Part III is three lessons and one sentence: *the model is shown a view, may
+   answer in one shape, and gets one revision.* Say what each of the three is
+   protecting. Then say which one is enforced by a type, which by a grammar,
+   and which by a call graph — and which of the three is the weakest, and why
+   it is still worth having.
+3. Name every place in Part III where a value is written by someone other than
+   the party it describes. For each, say what would go wrong if the described
+   party wrote it instead. There are at least four.
+4. Set M asked you to argue both sides of a `GatePolicy` knob for repair
+   attempts. Answer it now: say why the knob is the wrong *shape* rather than
+   the wrong *value*, and say what would have to become true about the Gate
+   before any number above one could be safe.
+5. Three things in this system are called "refused". Name all three, say whose
+   problem each one is, and give the concrete case where two of them happen one
+   after the other in a single episode.
+6. Something crosses the seam and comes back wrong in a way no schema can
+   catch. Give a concrete example, say which stage catches it, what it is
+   reported as, and which of the five actors it names.
+7. The whole of Part III is a bet on one property of the record. Name the
+   property, name what has to happen afterwards for the bet to pay off, and
+   name who has to do it. Then say what this system looks like if nobody ever
+   does.
+
+Question 7 is what this set is built around, and it is the one to be least
+satisfied with a short answer to. Question 3's count is deliberately given as a
+floor rather than a number — finding a fifth is the exercise.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -505,3 +588,5 @@ renders this file rather than restating it.
 | M | 1 week after Part II | | |
 | N | 2 days after L11 | | |
 | O | 2 days after L12 | | |
+| P | 2 days after L13 | | |
+| Q | 1 week after Part III | | |
