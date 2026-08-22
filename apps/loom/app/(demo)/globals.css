@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+/* ══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — the demo's chrome
+
+   The demo has one job the other three surfaces do not: a stranger
+   arrives with no idea what Loom is, and has to be able to tell the
+   *demo* apart from the *page the demo is changing*. Both are on
+   screen at once, and in the portal both were white — so the rail
+   explaining the runtime and the marketing page being rewritten by it
+   read as one document, and the biggest words on screen belonged to
+   the specimen rather than to the demo.
+
+   So the chrome here is dark and the stage is light. That is the whole
+   reason these tokens exist as their own file rather than as an import
+   of `(portal)/globals.css`: the token *names* are the same semantic
+   vocabulary — `surface-base`, `ink-muted`, `affirm` — so a component
+   written for one renders correctly under the other, and only the
+   values differ.
+
+   Every value is taken from the registered `minimal` palette in
+   `@loom/runtime`'s theme library, used the way that palette's own dark
+   half is defined, and `globals.test.ts` pins the ones that carry a
+   decision back to the registry so the two cannot drift apart quietly.
+
+   Literals rather than `var(--loom-*)`, for the reason the portal
+   states and this surface feels harder: the stage mounts the
+   *previewed tree's* theme on the tree root (0050), and a visitor can
+   re-theme that tree with one click. A chrome token reading
+   `var(--loom-bg-canvas)` would be repainted by the demo's own first
+   preset, which is the failure 0018 exists to prevent, live, on the
+   surface whose job is a first impression.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ── Surfaces ────────────────────────────────────────────────────
+       Two grounds, and the split is the point.
+
+       `stage` is the page being changed. It is white, because the tree
+       carries its own theme and the chrome must not tint it.
+
+       Everything else is the rail: near-black, with one step up for a
+       card so a record reads as a raised thing rather than an outlined
+       one. `minimal`'s dark half is where both come from.
+       ─────────────────────────────────────────────────────────────── */
+    --surface-stage: #ffffff;
+    --surface-page: #0a0a0a;
+    --surface-base: #141416;
+    --surface-raised: #1c1c1f;
+    --surface-hover: #26262a;
+    --surface-topbar: #0a0a0a;
+    --surface-preview: #ffffff;
+
+    /* ── Edges ───────────────────────────────────────────────────────
+       On a dark ground a border is the only thing separating two
+       panels, so `subtle` is a real line rather than a whisper —
+       #26262a is the same step the hover fill uses, which keeps a card
+       and the thing you are hovering the same distance from the page.
+       ─────────────────────────────────────────────────────────────── */
+    --border-default: #3a3a40;
+    --border-subtle: #26262a;
+    --border-strong: #ffffff;
+
+    --radius-base: 6px;
+    --radius-medium: 10px;
+    --radius-large: 16px;
+
+    /* ── Ink ─────────────────────────────────────────────────────────
+       Three weights and no more, so a screen cannot invent a fourth
+       level of importance by picking a grey between two of them.
+       ─────────────────────────────────────────────────────────────── */
+    --text-primary: #fafafa;
+    --text-secondary: #b4b4bb;
+    --text-muted: #85858f;
+    --text-placeholder: #6e6e78;
+    --text-inverse: #0a0a0a;
+
+    /* ── The accent ──────────────────────────────────────────────────
+       One green, `minimal`'s own, and it appears in exactly two roles:
+       the thing to press, and the mark on a change that landed. A demo
+       that used it decoratively would have nothing left to say "here".
+       ─────────────────────────────────────────────────────────────── */
+    --accent: #72e3ad;
+    --accent-ink: #0a0a0a;
+    --accent-quiet: #1f985e;
+
+    --focus-ring: #72e3ad;
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+
+    /* ── Actions ─────────────────────────────────────────────────────
+       Affirm is the accent, because on this surface the affirmative is
+       the whole invitation. Refuse and neutral are outlines: a demo
+       with three filled buttons has told the visitor nothing about
+       which one to press first.
+       ─────────────────────────────────────────────────────────────── */
+    --action-affirm-bg: #72e3ad;
+    --action-affirm-text: #0a0a0a;
+    --action-affirm-border: #72e3ad;
+    --action-refuse-bg: transparent;
+    --action-refuse-text: #b4b4bb;
+    --action-refuse-border: #3a3a40;
+    --action-neutral-bg: transparent;
+    --action-neutral-text: #fafafa;
+    --action-neutral-border: #3a3a40;
+
+    /* ── Outcomes ────────────────────────────────────────────────────
+       The five states a change can be in, as tints dark enough to hold
+       text at the contrast the rest of the rail keeps. Same five names
+       the portal uses, because `_lib/vocabulary` decides which state a
+       record is in for both surfaces and a name that meant a different
+       colour here would be the drift that file exists to prevent.
+       ─────────────────────────────────────────────────────────────── */
+    --outcome-applied-bg: #10281d;
+    --outcome-applied-text: #72e3ad;
+    --outcome-awaiting-bg: #2b2210;
+    --outcome-awaiting-text: #f0c674;
+    --outcome-rejected-bg: #2e1614;
+    --outcome-rejected-text: #f3a49b;
+    --outcome-uninterpreted-bg: #1c1c1f;
+    --outcome-uninterpreted-text: #b4b4bb;
+    --outcome-inapplicable-bg: #1c1c1f;
+    --outcome-inapplicable-text: #85858f;
+
+    --size-2xs: 11px;
+    --size-xs: 12px;
+    --size-sm: 13px;
+    --size-base: 14px;
+    --size-md: 15px;
+    --size-lg: 17px;
+    --size-xl: 20px;
+    --size-2xl: 26px;
+    --size-3xl: 34px;
+  }
+}
+
+@theme inline {
+  --color-surface-stage: var(--surface-stage);
+  --color-surface-page: var(--surface-page);
+  --color-surface-base: var(--surface-base);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-topbar: var(--surface-topbar);
+  --color-surface-preview: var(--surface-preview);
+
+  --color-edge: var(--border-default);
+  --color-edge-subtle: var(--border-subtle);
+  --color-edge-strong: var(--border-strong);
+
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-placeholder: var(--text-placeholder);
+  --color-ink-inverse: var(--text-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-quiet: var(--accent-quiet);
+
+  --color-focus: var(--focus-ring);
+
+  --color-affirm: var(--action-affirm-bg);
+  --color-affirm-ink: var(--action-affirm-text);
+  --color-affirm-edge: var(--action-affirm-border);
+  --color-refuse: var(--action-refuse-bg);
+  --color-refuse-ink: var(--action-refuse-text);
+  --color-refuse-edge: var(--action-refuse-border);
+  --color-neutral: var(--action-neutral-bg);
+  --color-neutral-ink: var(--action-neutral-text);
+  --color-neutral-edge: var(--action-neutral-border);
+
+  --color-applied: var(--outcome-applied-bg);
+  --color-applied-ink: var(--outcome-applied-text);
+  --color-awaiting: var(--outcome-awaiting-bg);
+  --color-awaiting-ink: var(--outcome-awaiting-text);
+  --color-rejected: var(--outcome-rejected-bg);
+  --color-rejected-ink: var(--outcome-rejected-text);
+  --color-uninterpreted: var(--outcome-uninterpreted-bg);
+  --color-uninterpreted-ink: var(--outcome-uninterpreted-text);
+  --color-inapplicable: var(--outcome-inapplicable-bg);
+  --color-inapplicable-ink: var(--outcome-inapplicable-text);
+
+  --radius-DEFAULT: var(--radius-base);
+  --radius-sm: var(--radius-base);
+  --radius-md: var(--radius-medium);
+  --radius-lg: var(--radius-large);
+
+  --text-2xs: var(--size-2xs);
+  --text-xs: var(--size-xs);
+  --text-sm: var(--size-sm);
+  --text-base: var(--size-base);
+  --text-md: var(--size-md);
+  --text-lg: var(--size-lg);
+  --text-xl: var(--size-xl);
+  --text-2xl: var(--size-2xl);
+  --text-3xl: var(--size-3xl);
+}
+
+@layer base {
+  body {
+    background-color: var(--surface-page);
+    color: var(--text-primary);
+    /*
+     * The `minimal-sans` pack's family, reached through the variable the layout
+     * binds. A theme carries a family *name* and never a file, so the surface
+     * that shows the theme is the surface that has to load the face.
+     */
+    font-family: var(--font-geist-sans), ui-sans-serif, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: var(--size-base);
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE STAGE — the page being changed
+
+   Its own stacking context and its own ground, so nothing about the
+   rail leaks into a tree that is carrying its own theme. The tree is
+   the one thing on this screen the demo does not get to style.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  .loom-stage {
+    background-color: var(--surface-stage);
+    color-scheme: light;
+    isolation: isolate;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FOCUS — one ring, everywhere
+   `:focus-visible` rather than `:focus`. Applied universally because
+   the alternative is remembering it per component, and the one that
+   gets forgotten is the one a keyboard visitor needs.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SKIP LINK — straight to the control that does something
+
+   The demo's tab order starts with a bar and a paragraph. Without this
+   a keyboard visitor tabs through all of it before reaching the button
+   the whole page is asking them to press.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  .loom-skip-link {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    transform: translateY(calc(-100% - 8px - var(--focus-ring-offset) - var(--focus-ring-width)));
+    background-color: var(--surface-base);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-medium);
+    margin: 8px;
+    padding: 8px 12px;
+    font-size: var(--size-sm);
+    text-decoration: none;
+  }
+
+  .loom-skip-link:focus-visible {
+    transform: translateY(0);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   The disclosure marker. `list-none` removes the triangle everywhere
+   except Safari, which still draws `::-webkit-details-marker` and
+   would give every disclosure two arrows — its own and ours.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
