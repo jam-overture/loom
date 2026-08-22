@@ -52,8 +52,80 @@ const renderNode = (node: LoomNode, depth: number, scopeNodeId?: NodeId): readon
   return [line, ...children.flatMap((child) => renderNode(child, depth + 1, scopeNodeId))]
 }
 
-export const renderTree = (tree: LoomTree, scopeNodeId?: NodeId): string =>
-  [`tree ${tree.treeId} revision ${tree.revision}`, ...renderNode(tree.root, 0, scopeNodeId)].join("\n")
+const childrenOf = (node: LoomNode): readonly LoomNode[] => (node.kind === "text" ? [] : node.children)
+
+/**
+ * The nodes from the root down to `nodeId` inclusive, or `undefined` when the
+ * id is not in this tree.
+ *
+ * Depth-first and stopping at the first match, which is exact rather than merely
+ * adequate: an id appears at most once in a tree, and a delta that would
+ * duplicate one is refused before it can be applied (0038).
+ */
+const chainTo = (node: LoomNode, nodeId: NodeId): readonly LoomNode[] | undefined => {
+  if (node.id === nodeId) return [node]
+
+  for (const child of childrenOf(node)) {
+    const below = chainTo(child, nodeId)
+    if (below !== undefined) return [node, ...below]
+  }
+
+  return undefined
+}
+
+const omitted = (count: number, where: "preceding" | "following"): string =>
+  `… ${count} ${where} ${count === 1 ? "child" : "children"} omitted`
+
+/**
+ * The spine down to the scope, and the scope's subtree in full.
+ *
+ * Each ancestor contributes its own heading and nothing else — its other
+ * children collapse to a count, above and below, so that the elision is visible
+ * rather than silent. Two separate counts rather than one because the preceding
+ * count *is* the scope node's index among its siblings, which is what an insert
+ * beside it would have to name; a single total would take that away.
+ */
+const renderChain = (chain: readonly LoomNode[], depth: number): readonly string[] => {
+  const [node, ...rest] = chain
+  if (node === undefined) return []
+
+  const next = rest[0]
+  if (next === undefined) return renderNode(node, depth, node.id)
+
+  const children = childrenOf(node)
+  const index = children.findIndex((child) => child.id === next.id)
+  const following = children.length - index - 1
+  const childIndent = INDENT.repeat(depth + 1)
+
+  return [
+    `${INDENT.repeat(depth)}${renderHeading(node)}`,
+    ...(index > 0 ? [`${childIndent}${omitted(index, "preceding")}`] : []),
+    ...renderChain(rest, depth + 1),
+    ...(following > 0 ? [`${childIndent}${omitted(following, "following")}`] : []),
+  ]
+}
+
+/**
+ * A scoped request sends the scope, not the page it sits on.
+ *
+ * Without a scope the whole tree is rendered, which is the only honest answer to
+ * "change this page". With one, the intent has already said the change is
+ * confined to a subtree, and sending the rest costs a request that grows with a
+ * page the model has been told not to touch — the outline is linear in the node
+ * count and it is re-sent on every proposal and again on every repair
+ * ([0083](../../decisions/0083-a-scoped-request-sends-the-scope.md)).
+ *
+ * A scope naming a node this tree does not contain renders the whole tree, which
+ * is the same thing that happened before there was anything to elide. It is a
+ * caller error rather than a shape the renderer can resolve, and a total
+ * projection does not get to throw (0008).
+ */
+export const renderTree = (tree: LoomTree, scopeNodeId?: NodeId): string => {
+  const chain = scopeNodeId === undefined ? undefined : chainTo(tree.root, scopeNodeId)
+  const body = chain === undefined ? renderNode(tree.root, 0, scopeNodeId) : renderChain(chain, 0)
+
+  return [`tree ${tree.treeId} revision ${tree.revision}`, ...body].join("\n")
+}
 
 const renderCataloguedProps = (primitive: CataloguedPrimitive): string => {
   if (primitive.props === undefined) return " props: not declared"
