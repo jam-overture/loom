@@ -4772,3 +4772,110 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-22 — `new URL(…, import.meta.url)` does not survive the build, and every lane that reads a file at build time will meet it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around, and filed because the workaround is not obviously a workaround
+
+Three surfaces now read files from the repository while the site builds — the
+Architecture section reads `lessons/` and `decisions/`, the lessons surface
+resolves its own directory, and as of this branch the search index reads every
+`page.mdx`. All three want the same one line to find themselves on disk, and the
+idiomatic ESM spelling of it fails the build:
+
+```
+./apps/loom/app/(docs)/_lib/search/headings.ts:32:32
+Module not found: Can't resolve '../../docs'
+```
+
+Turbopack reads `new URL("../../docs", import.meta.url)` as **an asset this
+module imports** and tries to resolve the argument as a module specifier. The
+directory plainly exists; the build stops anyway, and the error names a module
+nobody wrote. It is not a warning and there is no partial success — `next build`
+exits.
+
+`architecture/source.ts` already avoids it, by walking up from `process.cwd()`
+for a marker file. Reading that file, the walk looks like it is there because
+vitest and `next build` run from different directories, which is *also* true and
+is what its comment says. So the repository has the fix and does not have the
+reason, and the next lane to want a file path will write the obvious line first
+and lose a build to it, exactly as this run did.
+
+Two ways to close it, both yours rather than mine: a sentence in
+`architecture/source.ts` (or wherever the walk ends up living) saying that
+`import.meta.url` is not available to a module the bundler will see, or a small
+shared helper that is the one blessed way to name a repository path. This run
+took the cheap version and imported `REPOSITORY_ROOT` rather than walking twice.
+
+---
+
+## 2026-08-22 — a third file outside the docs route group changed, and it is the same file as last time
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+for your awareness, and an update to the 21 August entry above rather than a new
+argument
+
+`apps/loom/next.config.ts` took one import and one option: the rehype list, so
+that `rehype-slug` runs and every heading on the site gets an `id`. The
+*decision* — which plugins a docs page is parsed and transformed by — is in
+`app/(docs)/_lib/mdx.ts` next to the remark list it now sits beside, and the
+config file only wires it up.
+
+`apps/loom/package.json` gained `rehype-slug` as a dependency, which is the same
+shape: the application manifest is where a dependency has to live, and this one
+is used by exactly one route group.
+
+That is three consecutive documentation runs whose diff crosses the lane
+boundary at the same two files, which is what the earlier entry predicted. The
+suggestion there stands unchanged and is worth restating in one line: **a rule
+that says the MDX pipeline belongs to `(docs)` even where the framework forces
+the file to sit at the root** would make these diffs unsurprising rather than
+something to explain each time.
+
+---
+
+## 2026-08-22 — the site's search finds its titles and its exports, and not a word of its prose
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped, recorded so it is revisited on purpose
+
+The index built by `app/(docs)/_lib/search/build.ts` holds **21 pages, 41
+headings and 751 exports**. That is the site's own table of contents plus the
+runtime's published surface — every place the site *names* something. It holds no
+body text at all.
+
+The cost is real and easy to describe. A reader who remembers the sentence *"a
+bounded vocabulary buys you a change you can review"* and searches for
+`vocabulary` finds nothing, because no page or heading is called that. The
+paragraph is on the introduction and the search cannot see it.
+
+Not done in this run for a reason that is a decision rather than an omission:
+indexing the prose means shipping the site's words to the browser a second time,
+and the index already stands at 117 KB. Doing it properly means a posting list
+rather than a list of strings — every word, once, pointing at the sections that
+contain it — which is a different piece of work with a different test suite, and
+it should be decided on rather than slipped in under "search".
+
+Two things make it cheap to add later and both are already true: the index is
+served from one static route, so its shape can change with nothing else moving;
+and every heading now carries an `id`, so a hit inside a section already has
+somewhere to land.
+
+---
+
+## 2026-08-22 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed
+
+Recorded for the reason the other routines record it. Search is chrome — the
+sidebar, the pager and the search box are named together in 0067 as application
+furniture — so nothing here was a page's content and nothing wanted a primitive
+that does not exist. No `LoomTree` was rendered by any of it and no example
+changed.
+
+The one thing this run needed from outside its own directory was an npm package
+(`rehype-slug`) rather than anything from `@loom/runtime`, which is filed above
+with the config change that goes with it.
