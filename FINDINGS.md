@@ -2858,7 +2858,12 @@ call shows it is real. They are different products and only one of them is free.
 
 ## 2026-08-20 — the audit calls a component more than once now, and one comment in the portal says otherwise
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-09-does-it-add-up`** — the comment now says "once for each shape its
+props can take (0075)" and carries the consequence the filing lane drew, which is
+that doing it at module scope is worth more now than when it was written, not
+less. The cold-start note was read and left alone: it is a measurement worth
+making and not a change worth guessing at.
 
 Nothing is broken and no test changed. This is a doc comment that became false,
 in a file whose reasoning is otherwise exactly right.
@@ -4401,7 +4406,19 @@ the thing that will get in the way of doing it as a tree node.
 
 ## 2026-08-21 — four portal links and one public-path constant still name `/portal/demo`
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** **closed by
+`portal-09-does-it-add-up`** — all four links now name `/demo`. `DEMO_PATH` stays
+`/portal/demo` on purpose and its comment now says why: it is the address of the
+308, and the exemption is what makes that redirect reach a signed-out visitor
+instead of bouncing them to sign in. **The shim is still needed, so do not delete
+`portal/demo/page.tsx`.**
+
+One thing came out of it that the finding did not anticipate. `nav-items.test.ts`
+checked every rail href against `app/(portal)/…/page.tsx`, so the moment the rail
+pointed at another surface's route group it called a working link broken. The
+check now searches every route group, with a test asserting it finds `/demo` —
+because the tempting fix for that failure is to point the rail back at the
+redirect.
 
 The demo moved to `/demo` this run, into `app/(demo)/`. Five things in the
 portal still point at where it was, and all five are the portal routine's files:
@@ -4772,3 +4789,120 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-22 — a checkup is the one review surface a stranger can actually be shown
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — as
+a correction to the 17, 18 and 21 August entries rather than a new complaint
+
+Four entries now say no portal surface can be photographed by anyone outside a
+signed-in deployment with a populated journal. **That is true of the telemetry
+pages and it is not true here**, and the difference is worth writing down because
+it changes which work is worth doing next.
+
+`/portal/checkup` needs a store and a seed. Both exist on any deployment the
+moment `ensureSeeded` runs, so this run produced **real screenshots of the real
+page against real data** — a production build, a signed-in browser, the seeded
+tree, `auditSnapshot` actually folding a log. First time in four portal runs.
+
+Two things follow.
+
+**The demo-scoped journal is still the right next change, and it is now smaller
+than it looked.** It closes `/portal/trust`, `/portal/activity`, `/portal/history`
+and `/portal/sign-ins`. It was never needed for this page, so the standing
+recommendation should have been four pages rather than "the telemetry surfaces",
+and the estimate was wrong in this lane's own favour.
+
+**What could not be photographed here is the interesting half, and no deployment
+can produce it.** `agrees` is the only verdict a healthy store yields; `diverged`
+and `unreplayable` mean the log and the snapshot have come apart, which is not a
+state anything can be asked for. Those three were photographed the way the last
+three runs photographed everything — a temporary route rendering the real
+components over a fixture fold, deleted before pushing. That workaround is not
+going away with a demo journal and should stop being counted as a symptom of one.
+
+---
+
+## 2026-08-22 — a plain sentence made a list of four differences read as one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed here, recorded because the general form will happen again
+
+The first build of the checkup verdict put each difference's plain sentence on
+the surface and the part's name and id behind a per-row disclosure. Four
+`missing` differences then rendered **four identical sentences** — *"It is on the
+page people are being served, and nothing in the recorded history put it
+there."* — with the only thing telling them apart one click down, four times.
+
+Eleven tests passed. Every one of them asserted a single difference, where the
+layout is correct.
+
+The general form, and the rule this lane should carry forward:
+
+> **Identity is not technical detail.** A plain sentence describes a *class* of
+> problem, so it is the same sentence for every member of the class. What tells
+> two rows apart is the name of the thing, and it belongs on the surface even
+> when it looks like a runtime word — `loom.prose n_shot2` is a name, the way a
+> filename is.
+
+Found by looking at a screenshot. That is now **the third defect in four runs
+across this repository that was invisible to every test and obvious in a
+picture** (the docs lane reported two). The test written from it renders four
+differences and asserts each id is on the surface with the disclosure's text
+subtracted, which is the assertion that would have failed.
+
+---
+
+## 2026-08-22 — `/portal/checkup` renamed, and the rename queue is nearly empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Where the 18 August redirection stands, so the next portal run does not
+re-derive it from the diff. Updating the 19 August entry rather than replacing
+it.
+
+**Renamed into a person's words so far:** `/portal/trees` → `/portal/pages`,
+`/portal/calibration` → `/portal/trust`, `/portal/audit` → `/portal/checkup`.
+Each keeps a 308 at the old path, and there are now three of those files with a
+`targetOf` of the same shape — a copy-and-forget-the-destination waiting to
+happen, which this run's redirect test asserts against directly.
+
+**Still in the runtime's voice:** `/portal/activity` and `/portal/history`.
+Their route names are already a person's words, so what is left is in-page
+vocabulary rather than a route — `episode`, `in-flight`, `did-not-apply` on
+Activity, and the revision rows on History. Neither has a verdict-shaped answer
+the way Trust and Checkup did, so the pattern that fits them is the review
+queue's, not this one's.
+
+**`/portal/pages/[treeId]` is the biggest remaining piece and the least
+route-shaped.** It still says `node` on the surface (`Select a node — in the
+outline, or by clicking the preview`) and it is the screen a developer actually
+spends time on. Worth a run of its own.
+
+**Module names were left alone again**, on the reasoning the 21 August report
+gave: `_lib/audit-view.ts` and `isAuditable` map a runtime type
+(`SnapshotAudit`) and a runtime capability, and renaming them churns a diff
+without changing a word anybody reads. `readCheckup` and `explainDifference` —
+the functions producing what a person reads — are named for the surface.
+
+---
+
+## 2026-08-22 — no framework gaps this run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+`src/` was not opened and nothing was wanted from it. Every export used —
+`auditSnapshot`, `compareTrees`, `describeStoreError`, `treeIdSchema`,
+`nodeLabel`'s output through `TreeDifference.label`, `TreeListing` — is public,
+which is 0018's own requirement of itself holding for a second telemetry-adjacent
+surface.
+
+One near-miss worth naming. `TreeDifference.label` is `nodeLabel(node)` — a
+primitive type, a slot name, or the literal string `text`. It is the only handle
+this page has on *which part* a difference is about, and it is a runtime word by
+construction. That is not a gap: a page name a person chose does not exist in the
+tree model, and inventing one here would be the portal making up an identity the
+log cannot join on. Recorded because the obvious "make it friendlier" instinct
+would break the one thing that makes the row useful.

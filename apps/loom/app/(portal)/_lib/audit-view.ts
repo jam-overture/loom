@@ -99,6 +99,57 @@ export const describeFacets = (facets: readonly NodeFacet[]): string =>
   facets.map((facet) => FACET_WORDS[facet]).join(", ")
 
 /**
+ * The same seven facets, for somebody who has not read a decision record.
+ *
+ * A second table rather than a rewrite of the first, and the reason is the rule
+ * this whole surface is being rebuilt under: the runtime's words are not wrong
+ * and they are not deleted. `props` is the name of a field, and a reviewer
+ * chasing a difference wants exactly that word; a person deciding whether their
+ * page is broken wants "its settings". Both are on the page, one of them behind
+ * a disclosure.
+ *
+ * Typed as a total record, so a facet added to the runtime fails the build here
+ * rather than rendering as `undefined` in a sentence.
+ */
+const PLAIN_FACET_WORDS: Readonly<Record<NodeFacet, string>> = {
+  kind: "what sort of thing it is",
+  type: "which building block it is",
+  name: "where it plugs in",
+  props: "its settings",
+  text: "its words",
+  parent: "what it sits inside",
+  position: "where it sits among the things around it",
+}
+
+export const explainFacets = (facets: readonly NodeFacet[]): string =>
+  facets.map((facet) => PLAIN_FACET_WORDS[facet]).join(", ")
+
+/**
+ * One difference, for the person who opened the page.
+ *
+ * `describeDifference` below says the same thing in the runtime's vocabulary and
+ * is kept verbatim — "the served tree", "replaying the log" — because that is
+ * the sentence a reviewer chasing this down needs. This is the sentence somebody
+ * needs to know whether to care.
+ *
+ * Both are written from the page's point of view rather than the fold's, for the
+ * reason the technical one already was: the page is the thing readers are
+ * looking at, and a difference is news about it.
+ */
+export const explainDifference = (difference: TreeDifference): string => {
+  switch (difference.code) {
+    case "missing":
+      return "It is on the page people are being served, and nothing in the recorded history put it there."
+    case "extra":
+      return "The history says this should be on the page, and it is not."
+    case "changed":
+      return `The page and the history disagree about ${explainFacets(difference.facets)}.`
+    default:
+      return assertNever(difference, "explainDifference")
+  }
+}
+
+/**
  * One difference, said from the snapshot's point of view — because the snapshot
  * is what is being served, and the fold is the check. "The log does not produce
  * this node" is a statement about the thing readers are looking at.
@@ -251,5 +302,79 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
 
     default:
       return assertNever(audit, "describeAudit")
+  }
+}
+
+/**
+ * The verdict, as an answer to the question somebody opened the page with.
+ *
+ * `describeAudit` above is unchanged and is still the technical reading: it says
+ * *"Folding 12 accepted changes from the seed reproduces the snapshot exactly"*,
+ * which is true, precise, and meaningless to anybody who has not read 0016. This
+ * is the same three outcomes said to a person, plus the one thing the technical
+ * reading has never offered — **what to do about it**.
+ *
+ * Derived from the report rather than from the runtime's `SnapshotAudit`, so the
+ * two readings cannot describe different audits, and so this one can see the
+ * findings the verdict alone does not cover.
+ *
+ * That last part is the case worth naming. A tree can agree with its own history
+ * and still have ids that name two nodes (0038) — the fold checks whether the
+ * history produces the page, and recycling is a separate question about whether
+ * the history can be *read*. So a green verdict over a warning would be a screen
+ * that says "nothing to do" above something to do. When there is recycling, the
+ * next move names it; the tone stays green, because the fold really did agree.
+ */
+export type CheckupVerdict = {
+  readonly tone: OutcomeTone
+  /** The answer, in one line. Shown unasked; never a runtime word. */
+  readonly label: string
+  /** Why that is the answer, for somebody who has read nothing. */
+  readonly meaning: string
+  /** What to do now. Every screen owes a reader this one. */
+  readonly next: string
+}
+
+const nothingToDo = (report: AuditReport): string => {
+  const found = report.recycled.length + report.recyclingOmitted
+
+  if (found === 0) return "Nothing to do."
+
+  return found === 1
+    ? "One thing to look at: a name below is used for more than one part of the page. What people see is unaffected."
+    : `One thing to look at: ${found} names below are each used for more than one part of the page. What people see is unaffected.`
+}
+
+export const readCheckup = (report: AuditReport): CheckupVerdict => {
+  switch (report.tone) {
+    case "agrees":
+      return {
+        tone: toneOfAudit("agrees"),
+        label: "Everything on this page adds up.",
+        meaning:
+          "Loom replayed every change it has recorded for this page and got back exactly the page people are being served, so nothing on it is unexplained.",
+        next: nothingToDo(report),
+      }
+
+    case "diverged":
+      return {
+        tone: toneOfAudit("diverged"),
+        label: "This page does not match its own history.",
+        meaning:
+          "Replaying the changes Loom recorded produces a different page from the one people are being served. One of the two is wrong, and until you know which, the history cannot explain what is on screen.",
+        next: "The parts listed below are where the two disagree. Start there.",
+      }
+
+    case "unreplayable":
+      return {
+        tone: toneOfAudit("unreplayable"),
+        label: "The history has a break in it, so nothing could be checked.",
+        meaning:
+          "Loom could not replay this page's changes all the way through, so there was nothing to compare the page against. That does not mean the page is wrong — it means its own history can no longer be used to check it.",
+        next: "Open the change it stopped at, below, and see what happened there.",
+      }
+
+    default:
+      return assertNever(report.tone, "readCheckup")
   }
 }
