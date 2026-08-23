@@ -164,7 +164,7 @@ tree. Everything else in the system follows from protecting that one property.
 
 | # | Lesson | You'll understand |
 | --- | --- | --- |
-| 14 | Rendering | The tree as a total, pure projection. |
+| [14](14-rendering.md) | Rendering | The tree as a total, pure projection — and why "total" is not the same discipline as `Result`. |
 | 15 | Primitives and the registry | What a primitive promises, and what the model is told it may build. |
 | 16 | Persistence | The log is the truth; the snapshot is a view you can rebuild. |
 | 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |
