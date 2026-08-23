@@ -233,11 +233,11 @@ across all five route groups. Nothing weakened, nothing skipped.
 | Suite | Files | Tests |
 | --- | --- | --- |
 | `@loom/runtime` | 103 | 1578 (untouched by this diff) |
-| `@loom/app` | 117 | 1639, up from 1578 |
+| `@loom/app` | 114 | 1641, up from 1578 across 109 files |
 
-**61 net new tests**, in six files:
+**63 net new tests**, in six files — five of them new:
 
-- `_lib/vocabulary.test.ts` — 11 new (21 → 32). `PART_KINDS` over every
+- `_lib/vocabulary.test.ts` — 11 new (21 → 32), the only existing file touched. `PART_KINDS` over every
   `NodeKind`; `pointingWords` over all seven shapes `Addressing` can take, with
   **the no-jargon property and a guard asserting the technical reading really
   does trip the regex the plain one is held against** — the pattern
