@@ -47,6 +47,16 @@ export const Example = ({ id, interactive = true }: { readonly id: string; reado
   }
 
   const [tree, setTree] = useState<LoomTree>(example.build)
+  /**
+   * Revision 0, held apart from the tree that moves.
+   *
+   * The propose-a-change box opens a store on it and the revert planner replays
+   * the log from it (0028), so it has to be the *same* tree the log's first
+   * entry applied to. Building it a second time would produce an equal one —
+   * every example is built by a deterministic id factory — and relying on that
+   * would make an invariant of what is currently a convenience.
+   */
+  const [seed] = useState<LoomTree>(example.build)
   const changed = tree.revision > 0
 
   const rendered = renderLoomTree(tree, {
@@ -88,9 +98,10 @@ export const Example = ({ id, interactive = true }: { readonly id: string; reado
         <ProposalBox
           exampleId={example.id}
           tree={tree}
+          seed={seed}
           onTree={setTree}
           changed={changed}
-          onReset={() => setTree(example.build())}
+          onReset={() => setTree(seed)}
         />
       )}
 

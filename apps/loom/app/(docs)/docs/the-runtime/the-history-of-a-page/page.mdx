@@ -1,0 +1,186 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("the-runtime", "the-history-of-a-page")
+
+# The history of a page
+
+The last two pages ended at the same place: the Gate said yes, and the change
+was applied. This page is about the sentence after that one.
+
+**Applying a change and recording it are two different steps**, and Loom does the
+second one on purpose. A page is not just its current state — it is the list of
+changes that produced it, in order, each with the plan behind it and the name of
+whoever asked. That list is called the **log**, and it is the thing that makes
+the rest of the framework worth having.
+
+Press a chip below, then look underneath the verdict. There is a row there now.
+
+<Example id="first-tree" />
+
+## The store keeps two things
+
+A **store** is where a page lives. It holds two things and the relationship
+between them is the whole idea:
+
+- **The log.** Every change that was ever applied, in order. Append-only: nothing
+  in it is edited, and nothing is taken out.
+- **The snapshot.** The page as it is right now.
+
+The log is the truth. The snapshot is a convenience — it exists so that showing
+somebody a page does not mean replaying its entire history first, which would get
+slower every time anybody changed anything. If the two ever disagree, the log is
+the one that is right, and there is a function whose whole job is to check
+(`auditSnapshot`, which replays the log and compares).
+
+<Callout>
+  This is why a **revision** is just a number that counts up. Revision 0 is a
+  page nobody has changed. Revision 4 means four entries in the log. There is
+  never a gap, so "what did revision 3 do" always has exactly one answer.
+</Callout>
+
+## What a log entry says, and what it deliberately does not
+
+Every row in the box above is one entry. Here is everything one carries:
+
+| Field | What it is |
+| --- | --- |
+| `revision` | the number this entry produced |
+| `delta` | the operations that were applied |
+| `provenance` | who asked, what planned it, and how confident that planner was |
+| `appliedAt` | when the runtime applied it |
+| `answeredBy` | who allowed it, when a person had to |
+
+Notice what is **not** there. There is no verdict, because a change the Gate
+refused never reached the log — a refusal changes nothing, so there is nothing to
+record about the page. And there is no sentence a person typed: the log records
+the change, not the conversation that produced it.
+
+### Who asked and who allowed are two different fields
+
+`provenance.actor` is the person who asked. `answeredBy` is the person who said
+yes when the Gate held the change for a human.
+
+They are separate because the whole value of holding a change is putting a second
+person in the way of it. A log with only the first field would make every
+confirmed change look like somebody waving through their own request.
+
+Try it on the example: press **demote the page's heading**, which the Gate holds,
+then answer it. The row that appears says both.
+
+<Callout>
+  A change the Gate accepted on its own has no `answeredBy` at all, and it is
+  never filled in later. The log is append-only, and a fact nobody observed does
+  not belong in it.
+</Callout>
+
+## Undo is a proposal, not a rewind
+
+Here is where most systems take a shortcut, and Loom does not.
+
+The obvious way to build undo is to reverse the last entry — pop it off, or apply
+its inverse straight to the page. It is quick, and it makes undo **the one
+operation that changes a page without being judged**, and the log **the one
+record with a hole in it**.
+
+So an undo in Loom takes the long way round, and the long way is the same way
+everything else takes:
+
+1. The runtime reads the log and computes the operations that would put the page
+   back.
+2. Those operations become an ordinary proposal, from an interpreter called
+   `loom/revert`.
+3. The Gate judges it.
+4. If it is allowed, it is applied and **appended as a new revision**.
+
+Press **Undo** on a row above and watch the revision number go *up*. The page
+looks like it did before; the history is longer than it was. Which means an undo
+is attributable to whoever asked for it, refusable by the Gate, holdable for
+confirmation — and itself undoable. Try pressing Undo on the undo.
+
+<Callout>
+  The interpreter is the only step in the pipeline that has to guess, and a
+  revert has nothing to guess about — the inverse is computed. That is the same
+  seam the model plugs into, filled by something deterministic. Everything
+  downstream cannot tell the difference, which is exactly what makes an undo
+  judged on the same terms as an AI-authored change.
+</Callout>
+
+## An undo can cost something, and it says so first
+
+Undoing the most recent change is usually clean. Undoing an older one may not be,
+because somebody may have built on it since.
+
+Suppose revision 1 adds a paragraph and revision 2 moves that paragraph to the
+top. Undoing revision 1 removes the paragraph — which throws away what revision 2
+did to it. That is not a bug and it is not a reason to refuse: it is a **cost**,
+and somebody may well want to pay it.
+
+So the plan says so. Every undo carries the list of later revisions it would
+write over, the box prints that list beside the button *before* you press it, and
+the Gate reads the same declaration and holds the change for a person instead of
+deciding on your behalf.
+
+You can produce this on the example: add a sentence, then move the last block to
+the top, then look at the row for revision 1.
+
+<Callout kind="warning">
+  Nothing about the operations shows this. Undoing revision 1 produces exactly
+  the same `remove` whether or not anybody built on it. The cost is a property of
+  the *history*, which is why it has to be computed from the log and carried on
+  the proposal rather than read off the delta.
+</Callout>
+
+## A stale ask is refused before it costs anything
+
+One more thing the store makes possible. Every ask names the revision it was
+written against — the page the person was actually looking at.
+
+Before anything is interpreted, the write path compares that number to the page
+as it stands. If they differ, the ask is refused **there**, without running an
+interpreter at all. On a real deployment that is a model call not spent on a plan
+that could only have been thrown away.
+
+This is the same rule from the other side: a proposal written for revision 3 does
+not quietly apply to revision 4.
+
+## Where this actually runs
+
+Everything on this page is real and none of it is a database. Each example on
+this site opens an in-memory store in your browser tab, and it is gone when you
+reload — the rows you are looking at were written by the runtime's own write path
+and will not outlive the page.
+
+A deployment swaps the store and changes nothing else:
+
+```ts
+import { memoryTreeStore } from "@loom/runtime/store"
+import { postgresTreeStore } from "@loom/runtime/postgres"
+
+const path = {
+  store: memoryTreeStore(),        // this site
+  store: postgresTreeStore(db),    // a deployment
+  holds,
+  runtime,
+}
+```
+
+`TreeStore` is an interface with five methods: `create`, `head`, `revisions`,
+`list` and `append`. The one this site uses keeps entries in an array; the one a
+deployment uses keeps them in Postgres. Both are held to the same contract by the
+same test suite, so "it works in the browser" and "it works in production" are
+the same claim about the same code.
+
+`holds` is the second, smaller store beside it — the custody a change sits in
+while it waits for a person to answer. It is a separate interface for a reason
+worth knowing: a held change has not been applied, so it cannot live in the log
+without breaking the rule that a revision counts entries. Today the runtime ships
+one implementation of it, in memory, which is enough for this site and for a
+server that stays up between the question and the answer. A deployment that holds
+changes across restarts writes its own; the interface is four methods.
+
+<Callout>
+  There is exactly one function that appends to a log, and it is the same
+  function that runs the Gate. That is not tidiness — it is what makes "every
+  change was judged" a property of the system rather than a rule everyone has to
+  remember.
+</Callout>

@@ -163,6 +163,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "Yes, ask a person, or no — and the two questions the runtime asks about a change before it answers.",
       },
+      {
+        slug: "the-history-of-a-page",
+        title: "The history of a page",
+        summary:
+          "Where a page lives, what the log records about every change that was applied, and why an undo is a proposal rather than a rewind.",
+      },
     ],
   },
   apiReferenceSection,
