@@ -1,4 +1,4 @@
-# 0084. A font pack declares a face when something reads it
+# 0085. A font pack declares a face when something reads it
 
 **Status:** Accepted
 **Date:** 2026-08-22

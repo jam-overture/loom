@@ -559,6 +559,51 @@ floor rather than a number — finding a fifth is the exercise.
 
 ---
 
+## Set R — two days after lesson 14
+
+Interleaved with 02, 03, 04, 05, 09, 12 and 13 — the widest mix in the course
+so far, because lesson 14 is the first one that spends decisions made in every
+earlier part. Several of these are answerable *only* by pairing 14 with an
+older lesson; if a question feels like it is missing something, that is the
+older half you are missing.
+
+1. Give the one question that decides whether a render omits a node, degrades
+   it, or merely reports. Then apply it to a fault the lesson's table does not
+   spell out for you: a tree names a theme and the render was given no theme
+   registry. Say which grade, and say why it is not either of the other two.
+2. `applyDelta` returns a `Result` and `renderLoomTree` does not. State the rule
+   that decides which shape a function gets **without using the words "error" or
+   "value"** — the rule is about a party, not about a type. *(03, 05)*
+3. Node ids are React keys. Say what that buys concretely, name the lesson that
+   paid for it, and say what that lesson thought it was buying at the time. The
+   gap between those last two is the point. *(04)*
+4. One render produced a completely empty page and returned no error. Another,
+   handed a document that was the wrong tree, returned an error and no page.
+   Name the axis that puts those two the right way round, and say what the
+   tempting axis is that puts them the wrong way round.
+5. `TreeSource.load` returns `Promise<Result<unknown, …>>`. Say what the
+   `unknown` is claiming about storage, and say what would have to become true
+   for `LoomTree` to be an honest return type there. *(05)*
+6. Why is `slot` a distinct node kind? Then say what Exercise A's rendered
+   markup shows about that answer which the tree on its own does not. *(02)*
+7. A primitive is handed a region and never places it. Say what the reader
+   sees, what the diagnostics say, and why the render seam is not the thing
+   that should be catching it.
+8. Lesson 12 defined a projection in one sentence with four clauses. Rendering
+   is the fourth projection in this system and the first whose consumer is a
+   person. Say which clause that changes the meaning of, and how. *(12)*
+9. The Gate refuses a change and the runtime will not decide what happens next.
+   A render produces diagnostics and the runtime will not decide whether to
+   serve the page. Say what those two hand-offs have in common about the *kind*
+   of decision being handed over, name the party that receives each, and say
+   what it would cost if the library made either call itself. *(09, 13)*
+
+Question 2 is the one to be least satisfied with a short answer to, and the
+constraint on it is load-bearing: "one returns an error and one does not" is
+the observation, not the rule. Question 9 is the one most worth doing out loud.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -590,3 +635,4 @@ renders this file rather than restating it.
 | O | 2 days after L12 | | |
 | P | 2 days after L13 | | |
 | Q | 1 week after Part III | | |
+| R | 2 days after L14 | | |

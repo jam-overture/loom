@@ -3089,7 +3089,7 @@ closed by `framework-05-a-font-pack-names-its-mono`, which took the **first** of
 the three ways out — the field is deleted — and the finding below it is the
 reason. Read together the two say the vocabulary had one word too many and one
 too few, and
-[0084](decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md)
+[0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)
 answers both with one rule: *a font pack declares a face when something reads
 it.* Under that rule `monoFamily` earns its place (`monospace()` has read it
 since 21 August) and `accentFamily` does not. Nothing rendered changes — no
@@ -3620,7 +3620,7 @@ and a mosaic is a single column on a phone, which is deliberate
 **Status:** closed by `framework-05-a-font-pack-names-its-mono`, built exactly as
 specified — `monoFamily` on `fontPackSchema`, emitted as `--loom-mono-family`,
 **optional**, with the reasoning for optional recorded in
-[0084](decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md):
+[0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md):
 an undeclared colour has no universal fallback and an undeclared *face* does.
 The workaround needed nothing undone, as predicted; `src/primitives/` was not
 opened.
@@ -4826,6 +4826,196 @@ open and still unaddressed by anything here.
 
 ---
 
+## 2026-08-22 — three palette pairings the comparison band renders are not in the contrast list, and two more were designed around because they fail
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** open — nothing renders below the bar, and the check that would keep
+it that way does not know about it
+
+`PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` says of itself that it is
+*read off `src/primitives` rather than imagined*, which is what makes a failure
+there worth acting on. The comparison band renders three pairings it does not
+list. All three were measured across the 39 registered palettes before shipping
+and all three pass, so this is a gap in the audit rather than a fault on a page:
+
+| Pairing | Worst of 39 | Where |
+| --- | --- | --- |
+| `fg-muted` on `accent-subtle` | 4.99:1 (`carbon`) | a note inside a featured column |
+| `fg-default` on `bg-surface-muted` | 15.76:1 (`clay`) | a comparison row under a pointer |
+| `accent-strong` on `bg-surface` | 4.83:1 (`dusk`) | the tick outside a featured column |
+
+**The two that matter more are the ones that failed**, because they are what a
+reasonable person reaches for first and they are invisible until measured:
+
+| Pairing | Worst of 39 | Verdict |
+| --- | --- | --- |
+| `accent` on `accent-subtle` | **4.43:1** (`plum`) | under the 4.5 bar 0074 sets |
+| `fg-subtle` on `accent-subtle` | **3.76:1** (`carbon`) | well under it |
+
+A tinted `accent-subtle` panel is an obvious thing to build, and `accent` and
+`fg-subtle` are the obvious inks to put on one — the first is the accent, the
+second is what every quiet note in this library already uses. Both fail, and
+nothing in the repository would have said so: the audit only checks pairings
+somebody thought to list. The band uses `accent-strong` and `fg-muted` instead,
+which is why the tick is one colour in every column rather than brightening
+inside the featured one.
+
+Recommendation: add the three passing rows to `PALETTE_TEXT_PAIRINGS`, and
+consider whether the two failing ones are worth a comment there — a list that
+records *what was tried and rejected* beside what is rendered would have saved
+this run an hour, and it is the same argument a decision record's *Alternatives
+considered* section makes.
+
+Not fixed here because `src/theme/` is not this lane's.
+
+---
+
+## 2026-08-22 — a comparison table can name a column that does not exist, and nothing can tell
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — a known bound of what shipped, and possibly not fixable
+
+[0084](decisions/0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md)
+makes `feature` an ordinal on the container: `first` through `fourth`, each a
+static class with a rule already written. A tree that sets `feature: "fourth"`
+on a table with two subjects is accepted by the schema, gated as an ordinary
+`configure`, and renders a band with nothing tinted at all.
+
+Nothing available can catch it. The render is a pure function of one node
+([0008](decisions/0008-the-renderer-is-a-total-pure-projection.md)), so the
+table cannot count the cells in a row it did not render; the schema validates one
+node's props and has no view of its children; and the Gate weighs a `configure`
+against the node it names. The failure is silent — not a wrong page, a page
+where an instruction quietly did nothing.
+
+It is the general cost of an ordinal into a sibling structure and `loom.mosaic`
+has a milder version of it (a rhythm whose cycle is longer than the number of
+cells). Worth writing down rather than fixing on one instance: three candidate
+shapes, in the order I would try them.
+
+1. **Nothing.** The blast radius is one untinted column and the author sees it
+   immediately. This is what shipped.
+2. **A diagnostic from the render.** The renderer already collects diagnostics
+   for things it cannot honour, and a primitive that could say *I was told to
+   feature a column I do not have* would surface in the portal. It needs a
+   primitive to be able to emit one, which it currently cannot.
+3. **A cross-node check in the Gate.** The most complete and the most expensive,
+   and it would make the Gate know what a primitive means by a prop — which is
+   the coupling the registry exists to avoid.
+
+My recommendation is (1) until someone hits it, then (2) if a primitive ever
+gains a way to report. Recorded so the next run in this lane does not rediscover
+it from scratch.
+
+---
+
+## 2026-08-22 — `21st.dev` is blocked for the fifth time, and the brief still says it is allowed
+
+**Filed by:** `Loom primitives` · **Owned by:** the maintainer ·
+**Status:** open — noted against the 19 and 21 August entries rather than filed
+as a sixth
+
+`WebFetch https://21st.dev` returned `EGRESS_BLOCKED` again. `docs/routines.md`
+states that `21st.dev` is on the WebFetch allowlist and it is not, so a routine
+reading its brief has no way to learn that the visual reference it is *required*
+to consult is unreachable until it spends a call finding out.
+
+This run's comparison band is the fifth primitive group built without it. It was
+calibrated against `loom.hero`, `loom.tier-table` and `loom.mosaic` instead,
+which is the honest description of where its spacing and its motion came from.
+
+Nothing new to add beyond the count. Repeating it because five is the number at
+which "worth mentioning" becomes "worth fixing or worth removing from the brief",
+and either would do — a brief that names an unreachable reference costs every run
+in this lane the same call.
+
+---
+
+## 2026-08-22 — two files in other lanes had to change, both because their own tests said to
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs` ·
+**Status:** open — nothing to fix, recorded so each owner knows their file was
+opened
+
+The same shape as 20 and 21 August, and neither is a judgement call.
+
+- `apps/loom/app/(marketing)/_lib/copy.ts` — `primitives: "50" → "53"`,
+  `decisions: "83" → "84"`. `facts.test.ts` counts the repository and fails
+  otherwise, so any lane that adds a primitive or a record turns the marketing
+  surface red until it edits that file.
+- `apps/loom/app/(docs)/_lib/api/reference.generated.json` — regenerated with
+  `pnpm --filter @loom/app docs:api`, which is what its own failure message asks
+  for.
+
+This is the third consecutive run in this lane to file this entry, which is
+probably the signal worth reading: the cost is small each time and it is paid by
+whoever happens to be adding a primitive rather than by whoever chose the check.
+
+---
+
+## 2026-08-22 — no framework gaps this run, and `src/` outside the primitives was not opened
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+
+The comparison band needed nothing the framework does not already provide. Two
+things are worth naming as *near* misses, because both were expected to be gaps
+and were not.
+
+**`loom.nodeId` was already there for the caption.** The caption had to move out
+of the `<table>` — a `<caption>` takes the width of the table it captions, and
+this table is deliberately wider than a phone, so on the screen where a caption
+matters most it was the half-sentence clipped by the panel's edge. Naming it with
+`aria-labelledby` needed an id minted from the node's own, which `loom.field`
+already does for its hint. No new seam.
+
+**A two-dimensional band needed no new slot mechanics.** The header row is a
+region and `<thead>` is where the table places it, which is
+[0051](decisions/0051-a-slot-is-a-region-the-primitive-places.md) working exactly
+as written for a case it was not designed against.
+
+---
+
+## 2026-08-22 — the self-watching pull request is automatic on creation, which is why the 21 August finding keeps recurring
+
+**Filed by:** `Loom primitives` · **Owned by:** the maintainer ·
+**Status:** open — noted against the 21 August entry, with the mechanism it was
+missing
+
+The 21 August entry recorded that *a pull request now watches itself, and three
+cloud sessions went to a deploy turning green*. It did not say how the watch got
+there, and the natural reading is that a routine chose it.
+
+It did not. #132 was subscribed to its own activity by the **harness, on
+creation**, without this run calling for it — the first event delivered was
+`subscription.created` from `system`, and the second was the Vercel bot
+announcing the preview was Ready. That second one is precisely the "deploy
+turning green" the earlier entry paid three sessions for, arriving again.
+
+That matters because it changes who can fix it. No amount of discipline in a
+routine's brief prevents this: the brief already says *never schedule a
+follow-up, never poll for review*, and it was followed — the subscription still
+happened, and the guidance attached to it asks for an hourly `send_later`
+check-in that would re-arm itself indefinitely, which is the exact chain that
+cost a week's allowance on 9 August.
+
+This run unsubscribed as soon as it saw the events, having first confirmed CI
+green and no unresolved review threads. That is the right call under the brief
+but it is a manual undo of a default, so it depends on every future run noticing.
+
+Recommendation, in order of preference:
+
+1. **Turn the auto-subscribe off** for these routine sessions, if the harness
+   allows it. One setting, and the rule in the brief becomes true by
+   construction rather than by vigilance.
+2. **Say in `docs/routines.md` that a PR auto-subscribes and that unsubscribing
+   is part of the procedure**, so a run that has never seen the events knows to
+   expect them. Cheap, and it makes the undo reliable.
+
+Worth reading beside the 21 August entry rather than instead of it: that one has
+the cost, this one has the cause.
+
+---
+
 ## 2026-08-22 — one comment in `src/primitives/tokens.ts` names a field that no longer exists
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
@@ -4834,7 +5024,7 @@ Small, and handed back rather than fixed here because `src/primitives/` is not
 this lane's.
 
 `accentFamily` is gone
-([0084](decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md)),
+([0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)),
 and `monoFamily` is in the schema and emitted. The doc comment above
 `MONOSPACE_STACK` still says:
 
