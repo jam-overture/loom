@@ -6,6 +6,7 @@ import { nodeIdSchema } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
+import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../render/behaviour.js"
 import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
@@ -56,7 +57,15 @@ const probeProps = (
   text: PrimitiveText<string>,
   props: JsonObject
 ): LoomPrimitiveProps => ({
-  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS, data: NO_DATA, text },
+  loom: {
+    nodeId: PROBE_NODE_ID,
+    type: PROBE_TYPE,
+    editable,
+    slots: NO_SLOTS,
+    data: NO_DATA,
+    text,
+    behaviours: NO_BEHAVIOURS,
+  },
   props,
   children: PROBE_CHILDREN,
 })
@@ -81,6 +90,9 @@ const DEFAULT_CONFIGURATIONS: readonly JsonObject[] = [{}]
 
 /** The marker handed to a declared slot, unique per name so a miss names itself. */
 const slotMarker = (name: string): string => `loom-probe-slot:${name}`
+
+/** The same, for a declared behaviour's control. */
+const behaviourMarker = (name: string): string => `loom-probe-behaviour:${name}`
 
 /** Whether this element, or anything it returned, carries the probe's decoration. */
 const carriesDecoration = (node: ReactNode, editable: EditableAttributes): boolean => {
@@ -177,6 +189,12 @@ export const probeEditableDecoration = (
 /**
  * The second probe: does a primitive place what it was handed?
  *
+ * A declared behaviour is a promise of the same kind and fails the same way. A
+ * primitive that asks for the copy control and never reads
+ * `loom.behaviours.copy` registers cleanly, renders correctly and simply has no
+ * copy button — the gap the behaviour was declared to close, still open, with
+ * the declaration saying otherwise.
+ *
  * A declared slot is a promise. The catalogue tells a model the region exists,
  * a proposal puts content there, and a primitive that never reads
  * `loom.slots.aside` drops it — rendering correctly, reporting nothing, with the
@@ -216,6 +234,8 @@ export type PlacementVerdict =
       readonly outcome: "probed"
       /** Declared slots that no probed configuration placed. */
       readonly unplacedSlots: readonly string[]
+      /** Declared behaviours whose control no probed configuration placed. */
+      readonly unplacedBehaviours: readonly BehaviourName[]
       /** Whether any probed configuration placed the children it was handed. */
       readonly rendersChildren: boolean
       /** The configurations that answered — `{}` alone when the schema closes over nothing. */
@@ -248,11 +268,12 @@ const containsMarker = (node: unknown, marker: string): boolean => {
   )
 }
 
-export const probeSlotPlacement = (
+export const probePlacement = (
   primitive: LoomPrimitive,
   declaredSlots: readonly string[],
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  declaredBehaviours: readonly BehaviourName[] = []
 ): PlacementVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
@@ -260,10 +281,20 @@ export const probeSlotPlacement = (
   const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   for (const name of declaredSlots) slots[name] = slotMarker(name)
 
+  const behaviours: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
+  for (const name of declaredBehaviours) behaviours[name] = behaviourMarker(name)
+
   const attempts = configurations.map((props) => ({
     props,
     result: call(probeable.value, {
-      loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots, data: NO_DATA, text },
+      loom: {
+        nodeId: PROBE_NODE_ID,
+        type: PROBE_TYPE,
+        slots,
+        data: NO_DATA,
+        text,
+        behaviours: behaviours as PrimitiveBehaviours<BehaviourName>,
+      },
       props,
       children: PROBE_CHILDREN,
     }),
@@ -284,6 +315,7 @@ export const probeSlotPlacement = (
   return {
     outcome: "probed",
     unplacedSlots: declaredSlots.filter((name) => !placed(slotMarker(name))),
+    unplacedBehaviours: declaredBehaviours.filter((name) => !placed(behaviourMarker(name))),
     rendersChildren: placed(PROBE_CHILDREN),
     probed: answered.map((attempt) => attempt.props),
     threw: attempts.flatMap((attempt) =>

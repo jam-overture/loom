@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="486" viewBox="0 0 900 486" font-family="ui-sans-serif, system-ui, sans-serif" role="img" aria-label="Five steps from a declaration to a running control. The primitives lane declares the behaviour, its strings and that it is a target. The registry refuses three things: a name the runtime does not implement, a control with no string to name it, and a target that does not say it is one. The renderer builds one control per node from the node's own tree text and the primitive's declared strings. The primitive places the finished node. One client module, and it renders nothing until the clipboard is actually there.">
+  <rect width="900" height="486" fill="#0f1115"/>
+
+  <text x="32" y="44" fill="#e6e9ef" font-size="17">A behaviour is declared in one lane and implemented in another</text>
+  <text x="32" y="68" fill="#8b93a7" font-size="12.5">The copy button, from the declaration that asks for it to the one module in the runtime that runs in a browser.</text>
+
+  <line x1="32" y1="88" x2="868" y2="88" stroke="#242938"/>
+
+  <!-- legend -->
+  <rect x="32" y="104" width="10" height="10" rx="2" fill="#30a46c"/>
+  <text x="48" y="113" fill="#c9cede" font-size="12">src/primitives/ — declares, never implements</text>
+  <rect x="322" y="104" width="10" height="10" rx="2" fill="#3e63dd"/>
+  <text x="338" y="113" fill="#c9cede" font-size="12">@loom/runtime — checks and builds</text>
+  <rect x="574" y="104" width="10" height="10" rx="2" fill="#e5a83c"/>
+  <text x="590" y="113" fill="#c9cede" font-size="12">the browser — one boundary, one module</text>
+
+  <!-- spine -->
+  <line x1="43" y1="152" x2="43" y2="416" stroke="#242938" stroke-width="2"/>
+
+  <!-- 1 -->
+  <circle cx="43" cy="152" r="7" fill="#30a46c"/>
+  <text x="70" y="149" fill="#e6e9ef" font-size="13.5">loom.code says what it wants, and what that makes it</text>
+  <text x="70" y="169" fill="#8b93a7" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">behaviours: ["copy"] · text: { copy, copied } · interactive: "always"</text>
+
+  <!-- 2 -->
+  <circle cx="43" cy="218" r="7" fill="#3e63dd"/>
+  <text x="70" y="215" fill="#e6e9ef" font-size="13.5">the registry refuses three things, before anything renders</text>
+  <text x="70" y="235" fill="#8b93a7" font-size="12">a name the runtime does not implement · a control with no string to name it · a target that does not say it is one</text>
+
+  <!-- 3 -->
+  <circle cx="43" cy="284" r="7" fill="#3e63dd"/>
+  <text x="70" y="281" fill="#e6e9ef" font-size="13.5">the renderer builds one control per node</text>
+  <text x="70" y="301" fill="#8b93a7" font-size="12">what it copies is textOf(node), read from the tree — never from the markup rendered around it</text>
+
+  <!-- 4 -->
+  <circle cx="43" cy="350" r="7" fill="#30a46c"/>
+  <text x="70" y="347" fill="#e6e9ef" font-size="13.5">the primitive places it, and that is the whole of its part</text>
+  <text x="70" y="367" fill="#8b93a7" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom.behaviours.copy — a ReactNode, with nothing left to configure</text>
+
+  <!-- 5 -->
+  <circle cx="43" cy="416" r="7" fill="#e5a83c"/>
+  <text x="70" y="413" fill="#e6e9ef" font-size="13.5">one "use client" module, and it does not show itself on faith</text>
+  <text x="70" y="433" fill="#8b93a7" font-size="12">the server render is empty; the button appears once navigator.clipboard.writeText is actually there</text>
+
+  <line x1="32" y1="456" x2="868" y2="456" stroke="#242938"/>
+  <text x="32" y="476" fill="#6f7789" font-size="11.5">A behaviour declared and never placed is reported by the audit, the way a declared slot nobody rendered already was.</text>
+</svg>

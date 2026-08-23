@@ -136,6 +136,19 @@ export type RenderDiagnostic =
       readonly code: "submit-unresolved"
       readonly nodeId: NodeId
     }
+  | {
+      /**
+       * A declared behaviour's control had no name to render under, so it was
+       * left out. The registry refuses a primitive that declares a behaviour
+       * and not its strings, so the way here is a dictionary that answers a
+       * declared key with a blank — a translation fault, in the one place that
+       * can see it, rather than an unnamed button on the page.
+       */
+      readonly code: "behaviour-unnamed"
+      readonly nodeId: NodeId
+      readonly behaviour: string
+      readonly key: string
+    }
 
 const describeIssues = (issues: readonly PropsIssue[]): string =>
   issues.map((issue) => `${issue.path}: ${issue.message}`).join("; ")
@@ -168,6 +181,8 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} posts to "${diagnostic.to}" and no target could be given for it — ${describeSubmissionUnavailable(diagnostic.unavailable)}`
     case "submit-unresolved":
       return `node ${diagnostic.nodeId} names an endpoint and this render was given no resolution, so it rendered with no target`
+    case "behaviour-unnamed":
+      return `node ${diagnostic.nodeId} takes the "${diagnostic.behaviour}" behaviour and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
     default:
       return assertNever(diagnostic, "describeRenderDiagnostic")
   }
