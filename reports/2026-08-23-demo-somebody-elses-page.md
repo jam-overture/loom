@@ -244,8 +244,28 @@ Nothing blocking. Two worth a sentence, both carried:
 | [phone](2026-08-23-demo-somebody-elses-page-phone.png) | stacked at 390×844: the disclosure survives two lines of bar, and the rail still leads |
 
 Every screenshot is this branch's `next build` output driven in Chromium — not
-the preview, which this environment cannot open. See the pull request for the
-preview URL.
+the preview, which this environment cannot open (`vercel.app` is not on the
+sandbox's egress allowlist, which is the standing 19 August finding).
+
+**Preview:**
+`https://loom-git-demo-03-somebody-el-dcc7ca-jpizzolato36-6341s-projects.vercel.app/demo`
+
+It took two pushes to get one. The first produced **no preview at all**: I set
+the commit identity to the maintainer, following the harness's standing
+instruction to attribute work to them, and that address resolves to a GitHub
+account which is not on the Vercel team — so Vercel refused to build a commit
+authored by a non-member. `Loom portal` filed exactly this trap on 22 August and
+I walked into it anyway, which is worth saying plainly rather than quietly
+amending: the finding warns against setting the identity *to something
+descriptive*, and what actually happens is subtler than carelessness. Two
+correct-looking rules point opposite ways, and the one that loses is the one
+whose failure is invisible from inside the run — every check passed, the branch
+pushed, the pull request opened, and the only symptom was a bot comment that
+arrived after this report said it was finished.
+
+Fixed by `git commit --amend --reset-author` and a force-push, before any review
+existed to disturb. Recorded as a second instance on the existing entry rather
+than filed again.
 
 **To see it yourself:** open `/demo` and press *Take the numbers off* without
 scrolling first. Read the amber chip on the page and the amber badge in the rail,
