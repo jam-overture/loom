@@ -101,6 +101,27 @@ describe("PreviewFrame", () => {
     )
   })
 
+  /**
+   * A one-character defect, and a screenshot is the only thing that shows it.
+   * Written as `{...}{" "}` followed by a literal `·`, JSX dropped the space
+   * and the line rendered `…here yet.· revision 0`. Separators are the sort of
+   * thing that survives a rewrite by being invisible in the source.
+   */
+  it("keeps a space on both sides of the separator", () => {
+    const { container } = render(
+      <PreviewFrame treeId={treeId} revision={4} diagnostics={[]}>
+        <p>rendered</p>
+      </PreviewFrame>
+    )
+
+    const line = [...container.querySelectorAll("p")].find((element) =>
+      element.textContent?.includes("4 changes have been applied")
+    )
+
+    expect(line?.textContent).toContain(" \u00b7 ")
+    expect(line?.textContent).not.toMatch(/[^ ]\u00b7|\u00b7[^ ]/u)
+  })
+
   it("says one change in the singular", () => {
     render(
       <PreviewFrame treeId={treeId} revision={1} diagnostics={[]}>

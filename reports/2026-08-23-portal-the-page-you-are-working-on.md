@@ -169,8 +169,15 @@ led and the sentence followed, so at revision 0 the line printed the same number
 twice behind the runtime's handle — on exactly the page a new person opens first,
 since a freshly seeded deployment *is* at revision 0.
 
-This is the fourth defect in five runs across this repository that was invisible
-to every test and obvious in a picture, and the second of them mine.
+**And a third, one character wide.** Written as `{…}{" "}` followed by a literal
+`·`, JSX dropped the space and the line rendered `…here yet.· revision 0`. Caught
+in the re-shot arrival screenshot, confirmed against the running server rather
+than by eye, and pinned by a test asserting the separator has a space on both
+sides. Separators survive rewrites by being invisible in the source.
+
+This is the fourth run in five across this repository to turn up a defect that
+was invisible to every test and obvious in a picture — and this one turned up
+three, two of them mine.
 
 ## The high-schooler test
 
@@ -214,9 +221,9 @@ across all five route groups. Nothing weakened, nothing skipped.
 | Suite | Files | Tests |
 | --- | --- | --- |
 | `@loom/runtime` | 103 | 1578 (untouched by this diff) |
-| `@loom/app` | 117 | 1638, up from 1578 |
+| `@loom/app` | 117 | 1639, up from 1578 |
 
-**60 net new tests**, in five files:
+**61 net new tests**, in six files:
 
 - `_lib/vocabulary.test.ts` — 11 new (21 → 32). `PART_KINDS` over every
   `NodeKind`; `pointingWords` over all seven shapes `Addressing` can take, with
@@ -224,10 +231,10 @@ across all five route groups. Nothing weakened, nothing skipped.
   does trip the regex the plain one is held against** — the pattern
   `audit-view.test.ts` set; each reason getting its own sentence; and the
   reassurance sentence asserted for all six unclickable cases.
-- `_components/preview-frame.test.tsx` — 11, new file. The page's name as the
+- `_components/preview-frame.test.tsx` — 12, new file. The page's name as the
   `h1`, both revision wordings and their order, the singular, and a diagnostic
   reading as degradation with every `describeRenderDiagnostic` line closed
-  beneath it.
+  beneath it. Plus the separator's spacing, written from the third screenshot defect.
 - `_components/tree-outline.test.tsx` — 10, new file. The heading and the count,
   every part listed *including* the ones a click cannot reach, the legend
   covering all four marks, and the row titles held against the jargon regex.

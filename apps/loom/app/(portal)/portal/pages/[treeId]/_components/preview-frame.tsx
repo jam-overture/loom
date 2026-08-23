@@ -58,8 +58,9 @@ export const PreviewFrame = ({
       <p className="text-ink-muted text-xs">
         {revision === 0
           ? "Nothing has been changed here yet."
-          : `${revision} ${revision === 1 ? "change has" : "changes have"} been applied to this page.`}{" "}
-        · <RevisionLink treeId={treeId} revision={revision} />
+          : `${revision} ${revision === 1 ? "change has" : "changes have"} been applied to this page.`}
+        {" · "}
+        <RevisionLink treeId={treeId} revision={revision} />
       </p>
     </header>
 
