@@ -6431,3 +6431,48 @@ same shape. **Not a request to widen egress**: `docs/routines.md` is explicit
 that the narrow allowlist is the security-relevant half of the sandbox, and a
 preview URL is a low-value reason to widen it. If it is ever widened, the useful
 form is this project's own deployments and nothing else.
+
+---
+
+## 2026-08-23 — a screenshot cannot be embedded in a pull request, and a broken embed looks like a missing one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+worked around, and the workaround is worse than the thing it replaces
+
+Every routine brief with a visual surface requires a screenshot on the pull
+request. On #145 only the **first** image in the body rendered; every image after
+it came back wrapped in double backticks — `![alt](``https://…``)` — which is
+invalid markdown and shows as broken.
+
+What it is not, because I tried all three:
+
+- not the `<details>`/`<summary>` wrapper, which was stripped separately;
+- not the URL form — `raw.githubusercontent.com` and query-string variants both
+  did it, and the backticks simply moved to enclose the query string too;
+- not a GitHub limit. The `vercel[bot]` comment on the same pull request embeds
+  `ready.svg` and an avatar without trouble.
+
+It is specific to the write path this routine posts through, and it is almost
+certainly deliberate — wrapping image URLs is what you would do to stop an agent
+embedding a tracking pixel or an image-borne injection. **That is a good reason,
+which is why this is filed rather than worked around quietly.**
+
+In a *comment* the sanitiser is stricter still: all three images were wrapped,
+with no clean first one.
+
+**The workaround** is a link per screenshot —
+`…/blob/<branch>/reports/<file>.png?raw=1` — which works and which the maintainer
+can click. It is worse in the way that matters: the brief exists because *"this
+surface exists to be looked at, and the maintainer judges it by eye"*, and a link
+is a thing you have to decide to open. Four screenshots inline are seen; four
+links are seen by whoever is already curious.
+
+**What would actually fix it** is not mine and is not obvious. Options, in the
+order I would try them: allow embeds from `raw.githubusercontent.com` under this
+repository only, since that is content the routine committed and the maintainer
+can diff; or have the routine commit an index page of the run's visuals to
+`reports/` and link that once, which is one click instead of four.
+
+Recorded now because it will recur on every visual lane's next pull request, and
+because a broken embed is indistinguishable from a routine that forgot the
+screenshot — which is the more damaging reading, and the wrong one.
