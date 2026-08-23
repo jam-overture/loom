@@ -1551,6 +1551,12 @@ Until then, a run outside this lane that leaves it red is blocking all four
 surfaces over two digits, so the one-digit edit is the right call and both runs
 made it.
 
+**Hit a third time, 23 August**, by `framework-08-a-hold-that-survives-the-request`
+writing 0088: 87 → 88. Same one-digit edit, made for the same reason. Recording
+the instance rather than re-arguing the finding — the count of times this has
+happened is the only new evidence, and it is now three runs across two lanes in
+five days.
+
 ---
 
 ## 2026-08-19 — 0064's interactive check has a live user, and it is the documentation site
@@ -6153,7 +6159,18 @@ rather than find out from a screenshot.
 
 ## 2026-08-23 — a held proposal has nowhere durable to live, and `held.ts` says why that matters
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-08-a-hold-that-survives-the-request`** ([0088](decisions/0088-a-hold-is-a-row-and-a-take-is-one-statement.md)).
+Both shapes built, in the order the entry recommended weighing them: the contract
+suite `describeHoldStoreContract`, and `postgresHoldStore` beside
+`postgresTreeStore` on `ensureHoldStoreSchema`. The entry was right that the
+suite is the more valuable half, and right for a reason it could not have known:
+**it failed on its first run, and the fault was in the fixtures.** Every held
+proposal the tests built carried `operations: []`, which `treeDeltaSchema`
+refuses — so the suite was building holds that were not holds. The `Map` never
+noticed, because it stores what it is handed; Postgres accepted the write and
+refused the read. A contract with one implementation had nothing to disagree
+with it.
 
 Found while writing the documentation for `@loom/runtime/store` and
 `@loom/runtime/write`, which the site now uses for real rather than describing.
@@ -6476,3 +6493,98 @@ can diff; or have the routine commit an index page of the run's visuals to
 Recorded now because it will recur on every visual lane's next pull request, and
 because a broken embed is indistinguishable from a routine that forgot the
 screenshot — which is the more damaging reading, and the wrong one.
+
+---
+
+## 2026-08-23 — the portal can now keep a hold across a request, and does not
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— nothing is broken today, and the thing that would break is invisible when it does
+
+`postgresHoldStore` exists as of
+[0088](decisions/0088-a-hold-is-a-row-and-a-take-is-one-statement.md), exported
+from `@loom/runtime/postgres`, and `db:push` creates `loom_holds` on every
+deployment that runs it. **The portal still constructs `memoryHoldStore`**, which
+is a `Map` in process memory.
+
+Why this matters more than it sounds. On Vercel the portal is serverless: the
+process that judged a change is usually gone before the reviewer opens the queue.
+So a proposal the Gate marks `requires-confirmation` is held in a process nobody
+will speak to again, and the confirmation arrives at an instance that has never
+heard of it. The reviewer sees `not-held` — whose own comment says it means
+"never held, already answered, or expired" — and there is no fourth reading for
+*the machine that was holding this went away*, which is the true one.
+
+**The change is small**, deliberately: same handle the tree store already gets,
+same place, no schema step because `db:push` has already made the table.
+
+```ts
+import { postgresHoldStore } from "@loom/runtime/postgres"
+
+const holds = database === undefined ? memoryHoldStore() : postgresHoldStore(database)
+```
+
+Not done here because `app/(portal)/_lib/` is yours and choosing a store is a
+deployment decision the surface owns, not one the runtime should make for it. The
+runtime's job was to make the choice available, and it is.
+
+One thing worth knowing before you take it: **`release` is a take**, and with
+Postgres behind it that is now enforced by the statement rather than by the
+process being single-threaded. Two reviewers pressing *confirm* at the same moment
+will produce exactly one success and one `not-held`, and the second one is correct
+rather than a fault to be smoothed over. Whatever the queue says when a
+confirmation loses that race is a sentence worth writing on purpose.
+
+---
+
+## 2026-08-23 — a hold now waits forever, and nothing decides how long it should
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a question rather than a defect
+
+`HoldError`'s `not-held` has said since it was written that it covers "never
+held, already answered, **or expired**". Nothing expires anything, in either
+implementation. That was harmless while holds died with the process; now that one
+is a row, a proposal nobody returns to waits indefinitely.
+
+Two things follow, and only the second needs you:
+
+- **The stale hold is already detectable.** `baseRevision` is stored beside the
+  delta precisely so a reader can tell a hold is out of date without parsing it,
+  and a hold judged against a revision the tree has moved past is one whose
+  confirmation should probably not apply unchallenged.
+- **How long a hold is good for is a policy question, and it is yours.** It is not
+  settled by picking a backend, and I did not want to guess it inside a migration.
+  The shapes differ in what a reviewer sees: a hold that is *deleted* after N days
+  is indistinguishable from one already answered; a hold that is *marked stale*
+  can say "this was judged against a version of the page that has since changed",
+  which is the more honest thing and costs a column.
+
+**Recommendation:** mark stale rather than delete, and derive staleness from
+`baseRevision` against the tree's head rather than from elapsed time — it is the
+fact that actually matters, it needs no clock, and it needs no column. A time
+limit can come later if holds pile up, and by then there will be a real number to
+pick it from. Not blocking: nothing accumulates until the portal adopts the
+Postgres store.
+
+---
+
+## 2026-08-23 — the docs site's generated API reference moved because the runtime's surface did
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+for your awareness, and an instance of the 21 August entry rather than a new argument
+
+`app/(docs)/_lib/api/reference.generated.json` is committed and
+`extract.test.ts` asserts the generator still produces it. 0088 added exports to
+`@loom/runtime/store` and `@loom/runtime/postgres` — `postgresHoldStore`,
+`loomHolds`, `ensureHoldStoreSchema`, `HOLD_STORE_DDL`, `heldProposalSchema`,
+`parseHeldProposal`, `isUniqueViolation`, `unavailable` — so the surface moved and
+`pnpm --filter @loom/app docs:api` was re-run and the result committed. 783
+exports across 11 entry points.
+
+**This is the design working, not failing.** The test's own message names the
+command; the generated file is checked in so a reviewer can see the surface change
+in the diff, which on this branch is the clearest summary of what the unit added.
+Filed only because it is a fourth file outside the docs route group that a
+framework run had to touch, and the tally is the evidence for whether that is
+worth changing.

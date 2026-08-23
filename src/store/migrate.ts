@@ -71,11 +71,55 @@ export const TREE_STORE_DDL: readonly string[] = [
 ]
 
 /**
+ * The hold store's schema, as statements a host can run.
+ *
+ * Its own list rather than three more entries on the one above, because the two
+ * stores are separately useful: a host that never lets the Gate hold anything
+ * has no reason to carry the table, and a host that only reviews has no reason
+ * to be told about the log. Each store owns its schema and a deployment says
+ * which it wants.
+ *
+ * The index is not decoration. `forTree` is the review queue's only read and it
+ * is the one query here that is not a primary-key lookup, so without it a queue
+ * scans every hold in the database — including every other tree's.
+ */
+export const HOLD_STORE_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS loom_holds (
+    proposal_id text PRIMARY KEY,
+    tree_id text NOT NULL,
+    base_revision integer NOT NULL,
+    intent jsonb NOT NULL,
+    proposal jsonb NOT NULL,
+    disposition jsonb NOT NULL,
+    held_at text NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS loom_holds_tree_id_held_at_idx ON loom_holds (tree_id, held_at)`,
+  /** Locked on creation for the reason the tree store's tables are — see above. */
+  `ALTER TABLE loom_holds ENABLE ROW LEVEL SECURITY`,
+]
+
+/**
  * Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so
  * running it against a populated database is a no-op rather than a hazard.
  */
 export const ensureTreeStoreSchema = async (db: LoomDatabase): Promise<void> => {
-  for (const statement of TREE_STORE_DDL) {
+  await runStatements(db, TREE_STORE_DDL)
+}
+
+/**
+ * Creates the hold table if it is absent. Idempotent on the same terms.
+ *
+ * Separate from `ensureTreeStoreSchema` rather than folded into it: a deployment
+ * that upgrades gets the table by adding this call, which is a change it made on
+ * purpose, instead of by a function whose name promises trees quietly creating
+ * something else.
+ */
+export const ensureHoldStoreSchema = async (db: LoomDatabase): Promise<void> => {
+  await runStatements(db, HOLD_STORE_DDL)
+}
+
+const runStatements = async (db: LoomDatabase, statements: readonly string[]): Promise<void> => {
+  for (const statement of statements) {
     await db.execute(sql.raw(statement))
   }
 }
