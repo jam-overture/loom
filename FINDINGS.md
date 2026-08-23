@@ -6400,3 +6400,34 @@ that looked decorative turned out to be load-bearing for the redirection. Worth
 recording only because the tempting alternative was to switch on
 `describeAddressing`'s *output string*, which would have been the portal parsing
 the runtime's prose.
+
+---
+
+## 2026-08-23 — the preview URL, unreachable from the routine that has to publish it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+noted against the 21 August entry rather than filed as a new problem
+
+`*.vercel.app` is not in `sandbox.network.allowedDomains`, so `curl` against the
+preview for #145 returns `000`. The brief requires every portal pull request to
+carry the deployed preview URL, and a routine can publish one it has never
+loaded.
+
+What makes it tolerable rather than urgent: **GitHub's own commit status is a
+second source.** Vercel posted `state: success`, *"Deployment has completed"*,
+against the head commit, so the URL in the pull request body is attested by the
+deploying service even though I could not fetch it. The body says so explicitly
+rather than implying I checked.
+
+What it costs is narrower than "cannot verify the preview" and worth naming
+precisely: a deployment can be **Ready and wrong** — the build succeeds and the
+page renders something nobody would ship — and that is exactly the class of
+defect this lane keeps finding in pictures rather than in tests. A local
+production build is the substitute and it is a good one, but it cannot catch
+anything that differs between local and the deployment.
+
+Recorded against the 21 August entry, which is a fifth or sixth sighting of the
+same shape. **Not a request to widen egress**: `docs/routines.md` is explicit
+that the narrow allowlist is the security-relevant half of the sandbox, and a
+preview URL is a low-value reason to widen it. If it is ever widened, the useful
+form is this project's own deployments and nothing else.
