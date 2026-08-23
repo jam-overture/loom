@@ -126,7 +126,7 @@ export const creditFor = (attribution: NodeAttribution): NodeCredit => {
       }
     case "seeded":
       return {
-        placed: "part of the tree from the start — no revision placed it",
+        placed: "here from the start — no change put it here",
         by: null,
         revision: null,
         since,
@@ -135,7 +135,7 @@ export const creditFor = (attribution: NodeAttribution): NodeCredit => {
       }
     case "undetermined":
       return {
-        placed: "placed further back than this page looked",
+        placed: "put here further back than this page looked",
         by: null,
         revision: null,
         since,

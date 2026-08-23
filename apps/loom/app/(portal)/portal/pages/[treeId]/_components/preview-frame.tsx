@@ -4,19 +4,31 @@ import type { TreeId } from "@loom/runtime"
 import { describeRenderDiagnostic, type RenderDiagnostic } from "@loom/runtime/react"
 
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 
 /**
- * The chrome around a rendered tree: what it is, what revision it came from, and
- * anything the renderer could not honour.
+ * The chrome around a rendered tree: whose page it is, how much has happened to
+ * it, and anything the renderer could not honour.
+ *
+ * It used to open with an `h1` reading `preview`, which named the pane rather
+ * than the thing in it. A person who has opened one of their own pages knows
+ * they are looking at a preview; what they do not know is what they can do with
+ * it. So the page's own name leads, and the sentence under it says the one
+ * thing that makes this screen different from a screenshot: **the page is
+ * clickable, and clicking it is how you point at what you want changed.**
+ *
+ * The name stays monospace and stays verbatim. It is an identifier, but the
+ * 22 August layout defect settled that identity is not technical detail — a
+ * reviewer who cannot see which page they are on cannot act, and a filename is
+ * a name even when it looks like a runtime word.
  *
  * Diagnostics are shown rather than logged because 0008 made the renderer total —
  * it degrades instead of throwing — which only helps if the degradation is
- * visible to the person who can fix it.
- *
- * The revision is the last one this preview was folded from, and it was the last
- * revision the portal named as plain text. "What did the change I am looking at
- * actually do" is the obvious next question from here, and the answer was a trip
- * to `/portal/history` and a descent through the log to find a number already on screen.
+ * visible to the person who can fix it. What that person could not do before is
+ * tell whether it mattered: `describeRenderDiagnostic`'s output arrived as a
+ * monospace list with no sentence around it, so an unregistered primitive and a
+ * prop that failed its schema both read as a wall of amber. The count and the
+ * consequence now lead, and every original sentence is one click down, unedited.
  */
 export const PreviewFrame = ({
   treeId,
@@ -30,21 +42,52 @@ export const PreviewFrame = ({
   readonly children: ReactNode
 }) => (
   <div className="flex flex-col gap-4">
-    <div className="flex items-baseline gap-3">
-      <h1 className="text-2xl tracking-tight">preview</h1>
-      <span className="text-ink-muted font-mono text-xs">
-        {treeId} · <RevisionLink treeId={treeId} revision={revision} />
-      </span>
-    </div>
+    <header className="flex flex-col gap-1">
+      <h1 className="truncate font-mono text-2xl tracking-tight">{treeId}</h1>
+      <p className="text-ink-muted text-sm">
+        This is your page as people are being served it right now. Click anything on it to point
+        at that part, then ask for a change below.
+      </p>
+      {/*
+        * The plain sentence leads and the revision follows it as a handle, not
+        * the other way round. At `revision 0` the old order read `revision 0 —
+        * 0 changes have been applied`, which opens the screen with a number
+        * twice and a runtime word first — and a page nothing has happened to
+        * yet is exactly the page a new person opens first.
+        */}
+      <p className="text-ink-muted text-xs">
+        {revision === 0
+          ? "Nothing has been changed here yet."
+          : `${revision} ${revision === 1 ? "change has" : "changes have"} been applied to this page.`}{" "}
+        · <RevisionLink treeId={treeId} revision={revision} />
+      </p>
+    </header>
 
     {diagnostics.length > 0 && (
-      <ul className="bg-awaiting text-awaiting-ink rounded-md p-3 text-xs">
-        {diagnostics.map((diagnostic, index) => (
-          <li key={index} className="font-mono">
-            {describeRenderDiagnostic(diagnostic)}
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-col gap-2">
+        <div className="bg-awaiting text-awaiting-ink flex flex-col gap-1 rounded-md p-3 text-xs">
+          <strong className="font-medium">
+            {diagnostics.length === 1
+              ? "One part of this page didn't draw."
+              : `${diagnostics.length} parts of this page didn't draw.`}
+          </strong>
+          <p>
+            The rest of the page is fine — Loom leaves out what it can&rsquo;t draw rather than
+            failing the whole page. Usually it means a piece the page asks for isn&rsquo;t set up
+            in this deployment.
+          </p>
+        </div>
+
+        <TechnicalDetail summary="What the renderer said">
+          <ul className="flex flex-col gap-1">
+            {diagnostics.map((diagnostic, index) => (
+              <li key={index} className="font-mono">
+                {describeRenderDiagnostic(diagnostic)}
+              </li>
+            ))}
+          </ul>
+        </TechnicalDetail>
+      </div>
     )}
 
     <div className="bg-surface-preview border-edge-subtle rounded-md border p-6">{children}</div>

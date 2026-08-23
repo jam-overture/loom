@@ -5,6 +5,8 @@ import { treeIdSchema } from "@loom/runtime"
 import { renderRequest } from "@loom/runtime/react"
 import { attributeTree, treeSourceFromStore } from "@loom/runtime/store"
 
+import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { portalDecoration } from "@/app/(portal)/_lib/addressing"
 import { nodeCredits } from "@/app/(portal)/_lib/attribution-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -54,10 +56,32 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
       notFound()
     }
 
+    /**
+     * The failure a reader is most likely to meet, and the one that used to say
+     * least: `could not render` over a bare error code. Both facts a reader
+     * needs were missing — that nothing has been damaged, and that this is not
+     * something they can fix by trying harder.
+     */
     return (
-      <div className="p-8">
-        <h1 className="text-2xl tracking-tight">could not render</h1>
-        <p className="text-ink-muted mt-2 font-mono text-xs">{rendered.error.code}</p>
+      <div className="flex max-w-xl flex-col gap-4 p-8">
+        <h1 className="truncate font-mono text-2xl tracking-tight">{parsed.data}</h1>
+        <StateNotice
+          tone="failure"
+          title="We couldn't draw this page."
+          action={
+            <Link href="/portal/pages" className="no-underline">
+              ← Back to your pages
+            </Link>
+          }
+        >
+          <p>
+            Nothing has been lost or changed — drawing a page only reads it. This usually means
+            the page asks for something this deployment doesn&rsquo;t have set up.
+          </p>
+          <TechnicalDetail>
+            <p className="font-mono">{rendered.error.code}</p>
+          </TechnicalDetail>
+        </StateNotice>
       </div>
     )
   }
@@ -87,12 +111,20 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
 
   return (
     <SelectionProvider rows={rows}>
-      <div className="flex flex-col gap-6 p-8 lg:flex-row-reverse lg:items-start">
-        <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">
-          <TreeOutline />
-          <SelectedNode credits={credits} treeId={rendered.value.tree.treeId} />
-        </div>
-
+      {/*
+        * The page comes first in the source, and the rail sits to its right on
+        * a wide screen because it is second rather than because the row is
+        * reversed.
+        *
+        * `lg:flex-row-reverse` put the outline first in the DOM to land it on
+        * the right, which cost two things nobody saw until a phone screenshot.
+        * A visitor on a narrow screen met `loom.page`, `loom.heading` and
+        * "Nothing picked yet" before they met their own page or its name — an
+        * address book for a thing they had not been shown. And on any screen,
+        * tab order ran right-hand column first, which is the mismatch between
+        * reading order and focus order that reversing a row always buys.
+        */}
+      <div className="flex flex-col gap-6 p-8 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           <PreviewFrame
             treeId={rendered.value.tree.treeId}
@@ -111,8 +143,13 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           <ReviewQueue changes={changes} />
 
           <Link href={`/portal/activity?tree=${encodeURIComponent(rendered.value.tree.treeId)}`} className="text-xs">
-            Everything asked of this page →
+            Everything ever asked of this page →
           </Link>
+        </div>
+
+        <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">
+          <TreeOutline />
+          <SelectedNode credits={credits} treeId={rendered.value.tree.treeId} />
         </div>
       </div>
     </SelectionProvider>

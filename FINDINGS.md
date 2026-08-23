@@ -6291,3 +6291,112 @@ options in the 21 August entry is a line in `docs/routines.md` making *open the
 pull request, unsubscribe, exit* a step rather than a judgement call. Two
 routines have now spent tokens deciding it from first principles, which is the
 smaller version of the cost being avoided.
+
+---
+
+## 2026-08-23 — a phone screenshot found a reading order eleven tests could not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-10-the-page-you-are-working-on`
+
+`/portal/pages/[treeId]` laid its two columns out with `lg:flex-row-reverse`,
+which puts the outline first in the source so it lands on the right of a wide
+screen. On a wide screen that works and it is why it was written that way.
+
+On a narrow one the row is not a row, so **the source order is the reading
+order**. A visitor on a phone met `loom.page`, `loom.heading`, `loom.card` and
+"Nothing picked yet" before they met their own page, its name, or anything they
+could do — an address book for a thing they had not been shown. The `h1` was
+roughly 700 pixels down.
+
+The same reversal costs a keyboard user on *every* width: focus follows the
+source, so tabbing into the screen began in the right-hand column.
+
+Fixed by putting the page first and letting the rail sit right because it is
+second. Recorded because the lesson generalises past this file:
+
+> **A reversed flex row is a promise that the screen will never be one column.**
+> Every responsive layout breaks that promise at some width, and the reading
+> order it was hiding is the one a phone gets.
+
+The guard is `reading-order.test.ts`, which reads the route's source and asserts
+the page precedes the list of its parts and that no row is reversed. Crude, and
+the only check that catches this without a browser at two widths.
+
+**This is the fourth defect in five runs across this repository that was
+invisible to every test and obvious in a picture**, and the second of them mine.
+Worth saying plainly: the component tests for this screen were written before the
+screenshot and all forty-six passed against the broken order, because every one
+of them renders a component rather than the page.
+
+---
+
+## 2026-08-23 — the revision line read `revision 0 — 0 changes have been applied`
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-10-the-page-you-are-working-on`
+
+Also found by the screenshot rather than by a test. The page header put the
+revision link first and the plain sentence second, which at `revision 0` printed
+the same number twice and led with the runtime's handle — on exactly the page a
+new person opens first, since a deployment that has just seeded is at revision 0
+by definition.
+
+The order is now the sentence and then the handle, and zero has its own wording.
+Recorded because the general form is worth having: **a count and an identifier
+that carry the same number are one fact, and the person's half goes first.**
+
+---
+
+## 2026-08-23 — `/portal/pages/[treeId]` renamed, and the rename queue is down to two
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Updating the 22 August entry rather than replacing it. Where the 18 August
+redirection stands after this run.
+
+**Done:** `/portal/trees` → `/portal/pages`, `/portal/calibration` →
+`/portal/trust`, `/portal/audit` → `/portal/checkup`, each with a 308 at the old
+path — and now the page screen itself, which was the biggest remaining piece and
+the least route-shaped. It needed no route rename at all; it needed `preview`,
+`outline`, `node`, `kind`, `addresses`, `scoped to`, `propose` and `composed on
+the server, gated, then written` taken off the surface and put one click down.
+
+**Still in the runtime's voice:** `/portal/activity` and `/portal/history`.
+`episode` and `in-flight` on Activity, the revision rows on History. Unchanged
+from the 22 August assessment: their route names are already a person's words,
+and neither has a verdict-shaped answer, so the pattern that fits them is the
+review queue's.
+
+**The vocabulary module now carries the page screen's words too.** `PART_KINDS`
+and `pointingWords` sit beside `CHANGE_STATES` and `STAKES` in
+`_lib/vocabulary.ts`, which is the brief's "in one place, not per component"
+holding for a second kind of word: what a thing *is*, not only what became of it.
+`PlainState` was split into `PlainWord` plus a tone to make room, because a part
+of a page has no outcome and so no tone.
+
+**One sentence in `pointingWords` is new rather than translated**, and it is the
+one worth keeping if the rest is ever reworded: *a part you cannot click is
+still a part you can change.* Pointing is about the DOM and scoping a request is
+about the tree — `PromptBox` posts the requested node, not the addressed one —
+so it was always true and the screen never said it. 0019 requires the fallback
+to be stated; it does not require the reassurance, and the reassurance is what a
+reader actually needs.
+
+---
+
+## 2026-08-23 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Every export used is public: `describeAddressing`, `addressedNodeId`,
+`Addressing`, `UnaddressableReason`, `NodeKind`, `describeRenderDiagnostic`,
+`RenderDiagnostic`, `primitiveTypeSchema`. 0018 holds for a fifth surface.
+
+`UnaddressableReason` had not been consumed by the portal before. It is exported
+from `@loom/runtime/react` and it is what makes `pointingWords` able to give each
+reason its own sentence rather than one sentence for all three — so a public type
+that looked decorative turned out to be load-bearing for the redirection. Worth
+recording only because the tempting alternative was to switch on
+`describeAddressing`'s *output string*, which would have been the portal parsing
+the runtime's prose.
