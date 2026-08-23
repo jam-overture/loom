@@ -30,14 +30,21 @@ const strokeProps = {
  * The labels are what a person would call these things rather than what the
  * runtime calls them: `trees` was the data structure, and `Pages` is what is
  * actually in it. `Calibration` was a statistical property, and `Trust` is what
- * somebody is trying to find out by reading it. `Audit` keeps the runtime's word
- * for now — a nav label renamed ahead of the screen it points at is a promise
- * the screen does not keep, so each one moves on the run that rewrites its page.
+ * somebody is trying to find out by reading it. `Audit` was a compliance word
+ * for checking that a page still adds up, and `Checkup` is what that is. Each
+ * label moved on the run that rewrote its page, never before it — a nav label
+ * renamed ahead of the screen it points at is a promise the screen does not
+ * keep.
  *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
- * about what a thing can do. It comes back now that its page does — and the page
- * keeps the claim honest, because a tree whose seed this host cannot reproduce
- * is listed as unauditable rather than quietly passing (0028).
+ * about what a thing can do. It came back once its page did — and the page keeps
+ * the claim honest, because a tree whose seed this host cannot reproduce is
+ * listed as uncheckable rather than quietly passing (0028).
+ *
+ * `Demo` is the one entry that leaves this route group. The demo moved to a
+ * public `/demo` of its own on 21 August; `/portal/demo` is now a 308 kept for
+ * old links, and a nav that routes a signed-in reviewer through a redirect is a
+ * nav pointing at where something used to be.
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
@@ -60,7 +67,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
        * can see, without having to be told the path.
        */
       label: "Demo",
-      href: "/portal/demo",
+      href: "/demo",
       icon: (
         <svg {...strokeProps}>
           <rect x="3" y="4" width="18" height="14" rx="2" />
@@ -113,8 +120,8 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "Audit",
-      href: "/portal/audit",
+      label: "Checkup",
+      href: "/portal/checkup",
       icon: (
         <svg {...strokeProps}>
           <path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h6" />

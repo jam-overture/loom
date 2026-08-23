@@ -93,8 +93,27 @@ what it adds is only the part paper cannot do:
 - **Confident and wrong**, counted. That pair is the study plan, and it is
   unmeasurable on paper because the rating is gone by the time you know.
 
+The lessons themselves run there too, at `/lessons/04` and so on, and reading
+one there differs from reading the file in exactly three ways — all of them
+things this document asks you to do and cannot check:
+
+- **The lesson does not exist until your predictions are written.** Everything
+  below Predict is the answer to Predict, and on the page below it is one scroll
+  away. There it unlocks when the last prediction is committed, one question at
+  a time, with the rating taken before you have read a word of the explanation.
+- **The printed answers are locked, and they have moved.** Lessons 01–11 end
+  with an `## Answers` section; the exercise half now stands under Try it and
+  the Self-check half under Self-check, each shut until the questions above it
+  have been attempted. Closer, and further away.
+- **Your predictions come back at Reflect**, verbatim, carrying the confidence
+  you gave them beforehand — which is what makes "which were you most
+  confidently wrong about" a question with an answer rather than a memory of
+  one.
+
 **The markdown here stays the source.** The surface reads these files; a lesson
-is still written, reviewed and versioned as text in this directory.
+is still written, reviewed and versioned as text in this directory. Reading it
+here is reading the same words with none of that enforced, which is fine — it is
+the version you can read on a train, and the honour system is the cost.
 
 ## The one-paragraph version
 
@@ -145,7 +164,7 @@ tree. Everything else in the system follows from protecting that one property.
 
 | # | Lesson | You'll understand |
 | --- | --- | --- |
-| 14 | Rendering | The tree as a total, pure projection. |
+| [14](14-rendering.md) | Rendering | The tree as a total, pure projection — and why "total" is not the same discipline as `Result`. |
 | 15 | Primitives and the registry | What a primitive promises, and what the model is told it may build. |
 | 16 | Persistence | The log is the truth; the snapshot is a view you can rebuild. |
 | 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |

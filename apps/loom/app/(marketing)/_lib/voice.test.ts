@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { RESERVED_VOCABULARY } from "./copy"
 import { treeFor } from "./render"
 import { DEFAULT_THEME, HOME, HOW_IT_WORKS, SITE_ROUTES, type SiteRoute } from "./site"
+import { uses, wordsOf } from "./words"
 
 /**
  * Who the site is written for, held to by a test.
@@ -29,49 +30,6 @@ import { DEFAULT_THEME, HOME, HOW_IT_WORKS, SITE_ROUTES, type SiteRoute } from "
  * should use them freely; what a visitor cannot be asked to do is meet them
  * cold.
  */
-
-/**
- * The prop names that hold sentences rather than settings.
- *
- * Most of the words on this site are **props, not text nodes** — a
- * `loom.feature` carries its title and body as configuration, and 0052 is why:
- * there is exactly one of each and the primitive is meaningless without them.
- * The first version of this file walked text nodes alone and reported a clean
- * front door while the entire feature grid, every FAQ answer, every stat caption
- * and the whole pricing band went unread.
- *
- * So the list is an allowlist and not a denylist. A new prose prop that nobody
- * adds here is copy this test cannot see, which is the failure it just had; a
- * new *setting* that nobody adds here is simply not scanned, which is correct.
- * `href` and `icon` are the two string props deliberately outside it.
- */
-const PROSE_PROPS: readonly string[] = [
-  "eyebrow",
-  "title",
-  "body",
-  "label",
-  "caption",
-  "question",
-  "answer",
-  "name",
-  "price",
-  "period",
-  "state",
-]
-
-/** What a reader actually reads: text nodes and prose props, in document order. */
-const wordsOf = (node: LoomNode): string => {
-  if (node.kind === "text") return node.value
-
-  const own =
-    node.kind === "element"
-      ? PROSE_PROPS.flatMap((key) =>
-          typeof node.props[key] === "string" ? [node.props[key]] : []
-        )
-      : []
-
-  return [...own, ...node.children.map(wordsOf)].join(" ")
-}
 
 const pageWords = (route: SiteRoute): string =>
   wordsOf(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root)
@@ -100,16 +58,6 @@ const heroOf = (route: SiteRoute): ElementNode => {
 
   return hero
 }
-
-/**
- * Whole words only, and never inside a longer one.
- *
- * "primitive" must not match "primitives" being absent — it should — but
- * "node" must not fire on "nodes" being fine either. Both are the same word to
- * a reader, so the boundary is around the term and a trailing `s` is part of it.
- */
-const uses = (text: string, term: string): boolean =>
-  new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}s?\\b`, "i").test(text)
 
 const firstUse = (text: string, term: string): number =>
   text.toLowerCase().indexOf(term.toLowerCase())

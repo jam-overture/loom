@@ -1,16 +1,19 @@
 import { lesson } from "./syllabus"
 
 /**
- * Where a lesson's text is, which is not here yet.
+ * Where a lesson's text is: here, now.
  *
- * The course is authored as markdown in `lessons/` and that stays true — this
- * surface is the machinery around it, and the machinery arrived first because
- * it is the half that paper cannot do at all. Until the prose is rendered here,
- * a pointer to a lesson is a pointer to the file, and saying so is better than
- * a link into a page that does not exist.
+ * The course is authored as markdown in `lessons/` and that stays true — the
+ * surface reads those files and never writes to them. What changed is where a
+ * *pointer* goes. Until this route existed, every reference the course made to
+ * a lesson left the course: a review question's "where to check" opened a raw
+ * file on GitHub, which is the one place the reader can also see the printed
+ * answers, in a tab that has none of the machinery this surface exists for.
+ *
+ * A lesson number is a route now, and `dynamicParams` is off on it, so a
+ * pointer to a lesson that has not been written is not a 404 — it is `undefined`
+ * here and never rendered as a link at all.
  */
-
-const REPOSITORY = "https://github.com/jam-overture/loom/blob/main/lessons"
 
 export type LessonPointer = {
   readonly number: number
@@ -23,7 +26,7 @@ export const lessonPointer = (number: number): LessonPointer | undefined => {
 
   if (entry?.file === undefined) return undefined
 
-  return { number, title: entry.title, href: `${REPOSITORY}/${entry.file}` }
+  return { number, title: entry.title, href: `/lessons/${String(number).padStart(2, "0")}` }
 }
 
 export const lessonPointers = (numbers: readonly number[]): readonly LessonPointer[] =>

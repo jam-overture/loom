@@ -38,14 +38,34 @@ export type SetProgress = {
   readonly completedOn: string | undefined
 }
 
+/**
+ * An answer written before the thing that answers it was read.
+ *
+ * A prediction is not an attempt and cannot be stored as one, because the field
+ * that makes an attempt an attempt — how it went — does not exist yet and will
+ * not for twenty minutes. What it has instead is a confidence rated at the only
+ * moment such a number is honest: before the lesson. Holding the pair until
+ * Reflect, and grading it there, is the one calibration measurement paper
+ * cannot make at all — on paper the rating is a memory of a rating by the time
+ * the reader knows whether they were right.
+ */
+export type Prediction = {
+  readonly question: number
+  readonly confidence: Confidence
+  readonly answer: string
+  readonly on: string
+}
+
 export type Progress = {
   /** Lesson number as a string, to the day it was worked through. */
   readonly lessons: Readonly<Record<string, string>>
   /** Set slug to what happened in it. */
   readonly sets: Readonly<Record<string, SetProgress>>
+  /** Set slug to what was written before the answer existed. */
+  readonly predictions: Readonly<Record<string, readonly Prediction[]>>
 }
 
-export const EMPTY_PROGRESS: Progress = { lessons: {}, sets: {} }
+export const EMPTY_PROGRESS: Progress = { lessons: {}, sets: {}, predictions: {} }
 
 export const EMPTY_SET_PROGRESS: SetProgress = { attempts: [], completedOn: undefined }
 
@@ -92,6 +112,19 @@ const readSetProgress = (value: unknown): SetProgress => {
   return { attempts, completedOn: readDay(value["completedOn"]) }
 }
 
+const readPrediction = (value: unknown): Prediction | undefined => {
+  if (!isObject(value)) return undefined
+
+  const question = value["question"]
+  const confidence = readConfidence(value["confidence"])
+  const on = readDay(value["on"])
+
+  if (typeof question !== "number" || !Number.isInteger(question)) return undefined
+  if (confidence === undefined || on === undefined) return undefined
+
+  return { question, confidence, on, answer: typeof value["answer"] === "string" ? value["answer"] : "" }
+}
+
 export const readProgress = (value: unknown): Progress => {
   if (!isObject(value)) return EMPTY_PROGRESS
 
@@ -112,7 +145,20 @@ export const readProgress = (value: unknown): Progress => {
     for (const [slug, record] of Object.entries(rawSets)) sets[slug] = readSetProgress(record)
   }
 
-  return { lessons, sets }
+  const predictions: Record<string, readonly Prediction[]> = {}
+  const rawPredictions = value["predictions"]
+
+  if (isObject(rawPredictions)) {
+    for (const [slug, written] of Object.entries(rawPredictions)) {
+      if (!Array.isArray(written)) continue
+
+      predictions[slug] = written
+        .map(readPrediction)
+        .filter((prediction): prediction is Prediction => prediction !== undefined)
+    }
+  }
+
+  return { lessons, sets, predictions }
 }
 
 export const setProgress = (progress: Progress, slug: string): SetProgress =>
@@ -148,6 +194,33 @@ export const withAttempt = (progress: Progress, slug: string, attempt: Attempt):
     sets: {
       ...progress.sets,
       [slug]: { ...existing, attempts: [...attempts].sort((a, b) => a.question - b.question) },
+    },
+  }
+}
+
+export const predictionsFor = (progress: Progress, slug: string): readonly Prediction[] =>
+  progress.predictions[slug] ?? []
+
+/**
+ * A prediction, written down. Rewriting one replaces it — a reader who came
+ * back to the page mid-sitting is one reader, not two — and the confidence it
+ * carries is whatever was rated at that moment, which is still before the
+ * reveal, because nothing about the lesson is on the screen yet.
+ */
+export const withPrediction = (
+  progress: Progress,
+  slug: string,
+  prediction: Prediction
+): Progress => {
+  const existing = predictionsFor(progress, slug).filter(
+    (each) => each.question !== prediction.question
+  )
+
+  return {
+    ...progress,
+    predictions: {
+      ...progress.predictions,
+      [slug]: [...existing, prediction].sort((a, b) => a.question - b.question),
     },
   }
 }

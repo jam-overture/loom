@@ -2,11 +2,13 @@ import type { LoomTree } from "@loom/runtime"
 import { renderLoomTree, type RenderOutput } from "@loom/runtime/react"
 
 import { askById } from "./adapt/asks"
+import { runHistory, type ChangeHistory } from "./adapt/history"
 import { runAsk, type AskRun } from "./adapt/run"
-import { homePageTree, type PageContext } from "./pages/home"
+import { homePageTree } from "./pages/home"
 import { howItWorksPageTree } from "./pages/how-it-works"
+import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { siteRegistry, siteThemes } from "./registry"
-import { HOME, HOW_IT_WORKS, type SiteRoute } from "./site"
+import { HOME, HOW_IT_WORKS, THE_RECORD, type SiteRoute } from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -17,15 +19,27 @@ import { HOME, HOW_IT_WORKS, type SiteRoute } from "./site"
  * forgotten on the next.
  */
 
-export type PageBuilder = (context: PageContext) => LoomTree
+/**
+ * Everything a page of this site can be handed.
+ *
+ * One type rather than one per page, because the map below is keyed by path and
+ * a builder is looked up rather than called by name. Every field past the origin
+ * and the palette is optional and belongs to one page — what the visitor asked
+ * the front door for, and the run of changes the record page is reporting on —
+ * so a page that does not read a field cannot be broken by one arriving.
+ */
+export type SitePageContext = RecordContext
+
+export type PageBuilder = (context: SitePageContext) => LoomTree
 
 export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, PageBuilder>([
   [HOME.path, homePageTree],
   [HOW_IT_WORKS.path, howItWorksPageTree],
+  [THE_RECORD.path, theRecordPageTree],
 ])
 
 /** The page as it is written, before anything the visitor asked for. */
-export const treeFor = (route: SiteRoute, context: PageContext): LoomTree => {
+export const treeFor = (route: SiteRoute, context: SitePageContext): LoomTree => {
   const build = SITE_PAGES.get(route.path)
 
   if (build === undefined) {
@@ -55,7 +69,7 @@ export const treeFor = (route: SiteRoute, context: PageContext): LoomTree => {
  * measuring a *fraction* of the page would break this, and the test is where it
  * would be found rather than on the landing page.
  */
-export const askRunFor = async (context: PageContext): Promise<AskRun | undefined> => {
+export const askRunFor = async (context: SitePageContext): Promise<AskRun | undefined> => {
   const ask = askById(context.ask)
   if (ask === undefined) return undefined
 
@@ -65,19 +79,48 @@ export const askRunFor = async (context: PageContext): Promise<AskRun | undefine
   return runAsk(staged, ask, context.approve === true)
 }
 
-export const pageTreeFor = async (route: SiteRoute, context: PageContext): Promise<LoomTree> => {
-  if (route.path !== HOME.path) return treeFor(route, context)
+/**
+ * The run of changes the record page is reporting on, replayed from the front
+ * door as it is published.
+ *
+ * The record page is *about* the front door, so the sequence starts from the
+ * page this site publishes rather than from anything the record page contains.
+ * Nothing is kept between requests: a history is a list in the address, run
+ * again from scratch every time it is read (0081), which is what lets one be
+ * sent to somebody else.
+ */
+export const historyFor = async (context: SitePageContext): Promise<ChangeHistory | undefined> => {
+  const tokens = context.changes ?? []
 
-  const run = await askRunFor(context)
+  if (tokens.length === 0) return undefined
 
-  return run === undefined ? treeFor(route, context) : run.page
+  return runHistory(treeFor(HOME, { origin: context.origin, theme: context.theme }), tokens)
+}
+
+export const pageTreeFor = async (
+  route: SiteRoute,
+  context: SitePageContext
+): Promise<LoomTree> => {
+  if (route.path === HOME.path) {
+    const run = await askRunFor(context)
+
+    return run === undefined ? treeFor(route, context) : run.page
+  }
+
+  if (route.path === THE_RECORD.path) {
+    const history = await historyFor(context)
+
+    return history === undefined ? treeFor(route, context) : treeFor(route, { ...context, history })
+  }
+
+  return treeFor(route, context)
 }
 
 /**
  * A page, rendered.
  *
- * Separate from the route lookup so that the one page whose shape depends on
- * what the visitor asked for does not make every other page's rendering
+ * Separate from the route lookup so that the two pages whose shape depends on
+ * what the visitor asked for do not make every other page's rendering
  * asynchronous. The registry that validates the props and the theme registry
  * that resolves the root are passed here and only here, so a page cannot be
  * rendered without both.
@@ -91,5 +134,5 @@ export const renderTree = (page: LoomTree): RenderOutput =>
 
 export const renderSitePage = async (
   route: SiteRoute,
-  context: PageContext
+  context: SitePageContext
 ): Promise<RenderOutput> => renderTree(await pageTreeFor(route, context))

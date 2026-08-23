@@ -6,9 +6,11 @@ import { nodeIdSchema } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
+import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../render/behaviour.js"
 import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
+import type { SubmissionOutcome } from "../submit/resolution.js"
 
 /**
  * The conformance probe (0010).
@@ -56,7 +58,15 @@ const probeProps = (
   text: PrimitiveText<string>,
   props: JsonObject
 ): LoomPrimitiveProps => ({
-  loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, editable, slots: NO_SLOTS, data: NO_DATA, text },
+  loom: {
+    nodeId: PROBE_NODE_ID,
+    type: PROBE_TYPE,
+    editable,
+    slots: NO_SLOTS,
+    data: NO_DATA,
+    text,
+    behaviours: NO_BEHAVIOURS,
+  },
   props,
   children: PROBE_CHILDREN,
 })
@@ -81,6 +91,9 @@ const DEFAULT_CONFIGURATIONS: readonly JsonObject[] = [{}]
 
 /** The marker handed to a declared slot, unique per name so a miss names itself. */
 const slotMarker = (name: string): string => `loom-probe-slot:${name}`
+
+/** The same, for a declared behaviour's control. */
+const behaviourMarker = (name: string): string => `loom-probe-behaviour:${name}`
 
 /** Whether this element, or anything it returned, carries the probe's decoration. */
 const carriesDecoration = (node: ReactNode, editable: EditableAttributes): boolean => {
@@ -177,6 +190,12 @@ export const probeEditableDecoration = (
 /**
  * The second probe: does a primitive place what it was handed?
  *
+ * A declared behaviour is a promise of the same kind and fails the same way. A
+ * primitive that asks for the copy control and never reads
+ * `loom.behaviours.copy` registers cleanly, renders correctly and simply has no
+ * copy button — the gap the behaviour was declared to close, still open, with
+ * the declaration saying otherwise.
+ *
  * A declared slot is a promise. The catalogue tells a model the region exists,
  * a proposal puts content there, and a primitive that never reads
  * `loom.slots.aside` drops it — rendering correctly, reporting nothing, with the
@@ -216,6 +235,8 @@ export type PlacementVerdict =
       readonly outcome: "probed"
       /** Declared slots that no probed configuration placed. */
       readonly unplacedSlots: readonly string[]
+      /** Declared behaviours whose control no probed configuration placed. */
+      readonly unplacedBehaviours: readonly BehaviourName[]
       /** Whether any probed configuration placed the children it was handed. */
       readonly rendersChildren: boolean
       /** The configurations that answered — `{}` alone when the schema closes over nothing. */
@@ -248,11 +269,12 @@ const containsMarker = (node: unknown, marker: string): boolean => {
   )
 }
 
-export const probeSlotPlacement = (
+export const probePlacement = (
   primitive: LoomPrimitive,
   declaredSlots: readonly string[],
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  declaredBehaviours: readonly BehaviourName[] = []
 ): PlacementVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
@@ -260,10 +282,20 @@ export const probeSlotPlacement = (
   const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   for (const name of declaredSlots) slots[name] = slotMarker(name)
 
+  const behaviours: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
+  for (const name of declaredBehaviours) behaviours[name] = behaviourMarker(name)
+
   const attempts = configurations.map((props) => ({
     props,
     result: call(probeable.value, {
-      loom: { nodeId: PROBE_NODE_ID, type: PROBE_TYPE, slots, data: NO_DATA, text },
+      loom: {
+        nodeId: PROBE_NODE_ID,
+        type: PROBE_TYPE,
+        slots,
+        data: NO_DATA,
+        text,
+        behaviours: behaviours as PrimitiveBehaviours<BehaviourName>,
+      },
       props,
       children: PROBE_CHILDREN,
     }),
@@ -284,10 +316,99 @@ export const probeSlotPlacement = (
   return {
     outcome: "probed",
     unplacedSlots: declaredSlots.filter((name) => !placed(slotMarker(name))),
+    unplacedBehaviours: declaredBehaviours.filter((name) => !placed(behaviourMarker(name))),
     rendersChildren: placed(PROBE_CHILDREN),
     probed: answered.map((attempt) => attempt.props),
     threw: attempts.flatMap((attempt) =>
       attempt.result.ok ? [] : [{ props: attempt.props, reason: attempt.result.error }]
     ),
   }
+}
+
+/**
+ * The third probe: does a primitive that posts put the address on the page?
+ *
+ * `loom.submit` is the one thing on the render context whose absence is
+ * survivable and whose *silent* absence is not (0065). A tree names an
+ * endpoint, a deployment resolves it before the walk, and the primitive is
+ * handed a target — but nothing makes it read one. A form that ignores it
+ * renders a set of fields and a submit control with no `action` at all, which a
+ * browser resolves by posting to the page the form is sitting on. Nothing
+ * throws, nothing is logged, and the first person to find out is whoever filled
+ * it in.
+ *
+ * So the probe hands the component a target whose action is a string nothing
+ * else would produce, and looks for that string in what came back. Placing the
+ * address is the claim, because the address is the whole of what the seam
+ * delivers: a primitive that reads the outcome only to choose between two
+ * sentences has not connected anything.
+ *
+ * Its false negative is the one `containsMarker` cannot avoid: a primitive that
+ * rebuilds the action — appending a query string, say — has posted somewhere
+ * real and reads here as `not-placed`. That is the same bargain the decoration
+ * probe makes with identity, and it errs towards reporting a fault that is not
+ * one, which a person reading the audit can dismiss in a second. The reverse
+ * error is the one this exists to prevent.
+ */
+
+export type SubmissionVerdict =
+  | { readonly outcome: "places" }
+  | { readonly outcome: "not-placed" }
+  | { readonly outcome: "not-probeable"; readonly reason: string }
+
+/**
+ * Absolute rather than root-relative, and on a hostname that cannot resolve.
+ * `endpoint.ts` accepts both shapes, so either would be a legal target; this one
+ * is additionally impossible to confuse with a path a primitive computed for
+ * itself, which is what makes finding it in the output evidence rather than
+ * coincidence.
+ */
+const PROBE_SUBMIT_ACTION = "https://probe.invalid/loom-probe-submit"
+
+const PROBE_SUBMISSION: SubmissionOutcome = {
+  status: "ready",
+  target: { action: PROBE_SUBMIT_ACTION, method: "post", fields: [] },
+}
+
+/**
+ * `some` rather than `every`, matching `probePlacement`. The question is
+ * whether this primitive posts at all, and a primitive that renders a form
+ * under one layout and a summary under another is answering honestly in both.
+ */
+export const probeSubmissionPlacement = (
+  primitive: LoomPrimitive,
+  text: PrimitiveText<string> = NO_TEXT,
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+): SubmissionVerdict => {
+  const probeable = asProbeable(primitive)
+  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+
+  const attempts = configurations.map((props) =>
+    call(probeable.value, {
+      loom: {
+        nodeId: PROBE_NODE_ID,
+        type: PROBE_TYPE,
+        slots: NO_SLOTS,
+        data: NO_DATA,
+        text,
+        behaviours: NO_BEHAVIOURS,
+        submit: PROBE_SUBMISSION,
+      },
+      props,
+      children: PROBE_CHILDREN,
+    })
+  )
+
+  const answered = attempts.flatMap((result) => (result.ok ? [result.value] : []))
+
+  if (answered.length === 0) {
+    const [first] = attempts
+    const reason = first && !first.ok ? first.error : "no configuration answered"
+
+    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${reason}` }
+  }
+
+  return answered.some((node) => containsMarker(node, PROBE_SUBMIT_ACTION))
+    ? { outcome: "places" }
+    : { outcome: "not-placed" }
 }

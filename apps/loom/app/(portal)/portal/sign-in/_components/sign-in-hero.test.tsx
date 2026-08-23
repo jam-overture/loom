@@ -35,11 +35,14 @@ describe("SignInHero", () => {
     const demo = screen.getByRole("link", { name: /see the live demo/i })
 
     /*
-     * `/portal/demo` is a public path (see `_lib/auth/paths.ts`), so linking
+     * `/demo` is outside the proxy's matcher (`/portal` and below), so linking
      * a signed-out visitor at it does not send them straight back through the
-     * proxy's redirector to this page.
+     * redirector to this page. It was `/portal/demo` until the demo moved to a
+     * public route of its own; that path still answers, as a 308, and sending
+     * the one visitor on this page who is *guaranteed* not to be signed in
+     * through a redirect is the one place it is least worth doing.
      */
-    expect(demo.getAttribute("href")).toBe("/portal/demo")
+    expect(demo.getAttribute("href")).toBe("/demo")
   })
 
   it("does not name environment variables in the prose a visitor reads first", () => {

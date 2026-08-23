@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process"
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
@@ -55,6 +55,20 @@ describe("the compiled package", () => {
       })
 
     expect(run().trim()).toBe("ok")
+  })
+
+  /**
+   * The whole behaviour seam rests on this one line surviving compilation. A
+   * `"use client"` that TypeScript moved below the imports, or dropped, is a
+   * boundary a bundler never opens — after which the copy control is asked to
+   * run a click handler in a server component, and the failure lands in
+   * somebody else's application build rather than here.
+   */
+  it("keeps the client directive at the top of the module that needs one", () => {
+    const control = join(DIST, "render", "behaviour-copy.js")
+
+    expect(existsSync(control)).toBe(true)
+    expect(readFileSync(control, "utf8").split("\n")[0]).toBe('"use client";')
   })
 
   it("keeps a node shebang on the binary, so the bin is runnable without a loader", () => {

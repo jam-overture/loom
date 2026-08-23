@@ -4,10 +4,12 @@ import { z } from "zod"
 
 import { primitiveTypeSchema } from "../primitive-type.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
+import { createStarterPrimitiveRegistry } from "../primitives/index.js"
 import { registryOf, testDefinitions } from "../testing/definitions.js"
 
-import { auditRegistry, decorationFromAudit, describeRegistryAudit } from "./audit.js"
+import { auditRegistry, decorationFromAudit, describeRegistryAudit, type RegistryAudit } from "./audit.js"
 import { definePrimitive } from "./definition.js"
+import { describeRegistryError } from "./registry.js"
 
 const silent = definePrimitive({
   type: "loom.silent",
@@ -64,6 +66,47 @@ const brittle = definePrimitive({
 
     return createElement("div", { ...loom.editable }, children)
   },
+})
+
+
+/** A form that does what a form does: posts where it was told to post. */
+const posting = definePrimitive({
+  type: "loom.posting",
+  description: "sends what it collected to the address the deployment resolved",
+  props: z.object({}),
+  submits: true,
+  component: ({ loom, children }: LoomPrimitiveProps) =>
+    createElement(
+      "form",
+      { ...loom.editable, ...(loom.submit?.status === "ready" ? { action: loom.submit.target.action } : {}) },
+      children
+    ),
+})
+
+/**
+ * The failure 0065 named: a submit control that renders, looks finished, and
+ * posts to whatever page the form happens to be sitting on.
+ */
+const claimingToPost = definePrimitive({
+  type: "loom.claiming-to-post",
+  description: "says it posts and never reads the target it is handed",
+  props: z.object({}),
+  submits: true,
+  component: ({ loom, children }: LoomPrimitiveProps) =>
+    createElement("form", { ...loom.editable }, children),
+})
+
+/** Posts, and never said so — which is the starter library's state today. */
+const quietlyPosting = definePrimitive({
+  type: "loom.quietly-posting",
+  description: "posts without declaring that it does",
+  props: z.object({}),
+  component: ({ loom, children }: LoomPrimitiveProps) =>
+    createElement(
+      "form",
+      { ...loom.editable, ...(loom.submit?.status === "ready" ? { action: loom.submit.target.action } : {}) },
+      children
+    ),
 })
 
 describe("auditRegistry", () => {
@@ -148,6 +191,86 @@ describe("auditRegistry", () => {
   it("has nothing to report for a library that renders under every shape it accepts", () => {
     expect(auditRegistry(registryOf(testDefinitions)).throwsOnDeclaredProps).toEqual([])
   })
+
+  it("names the primitives a deployment must register endpoints for", () => {
+    const audit = auditRegistry(registryOf([...testDefinitions, posting]))
+
+    expect(audit.submits).toEqual(["loom.posting"])
+    expect(audit.unwiredSubmitters).toEqual([])
+    expect(audit.undeclaredSubmitters).toEqual([])
+  })
+
+  it("catches the form that says it posts and places no address", () => {
+    const audit = auditRegistry(registryOf([posting, claimingToPost]))
+
+    expect(audit.unwiredSubmitters).toEqual(["loom.claiming-to-post"])
+    expect(audit.submits).toEqual(["loom.posting"])
+  })
+
+  it("names the primitive that posts without having declared it", () => {
+    const audit = auditRegistry(registryOf([posting, quietlyPosting]))
+
+    expect(audit.undeclaredSubmitters).toEqual(["loom.quietly-posting"])
+    expect(audit.submits).toEqual(["loom.posting", "loom.quietly-posting"])
+  })
+
+  /** Every other primitive in the library, and the reason this is three lists. */
+  it("says nothing about the overwhelming majority, which post nowhere", () => {
+    const audit = auditRegistry(registryOf(testDefinitions))
+
+    expect(audit.submits).toEqual([])
+    expect(audit.undeclaredSubmitters).toEqual([])
+    expect(audit.unwiredSubmitters).toEqual([])
+  })
+
+  /**
+   * The same reading `decorationFromAudit` makes: the probe declining to answer
+   * is not the probe answering no, and "this form is broken" is not a claim to
+   * make on silence.
+   */
+  it("does not call a primitive it could not call unwired", () => {
+    const declaring = definePrimitive({
+      type: "loom.hooked-form",
+      description: "posts, and cannot be called outside a renderer",
+      props: z.object({}),
+      submits: true,
+      component: ({ loom, children }: LoomPrimitiveProps) => {
+        const [open] = useState(false)
+
+        return createElement("form", { ...loom.editable, "data-open": open }, children)
+      },
+    })
+
+    const audit = auditRegistry(registryOf([declaring]))
+
+    expect(audit.unwiredSubmitters).toEqual([])
+    expect(audit.submits).toEqual([])
+  })
+})
+
+/**
+ * The audit against the library it exists to audit. `loom.form` is the one
+ * primitive in Loom that posts, and these are the two facts that hold whether
+ * or not its author has got round to declaring `submits` — so this asserts
+ * those, and leaves `undeclaredSubmitters` to be read rather than enforced.
+ * A test that demanded the declaration be missing would go red on the one-line
+ * change that fixes it.
+ */
+describe("the starter library, submissions", () => {
+  const starterAudit = (): RegistryAudit => {
+    const registry = createStarterPrimitiveRegistry()
+    if (!registry.ok) throw new Error(describeRegistryError(registry.error))
+
+    return auditRegistry(registry.value)
+  }
+
+  it("finds exactly one primitive that posts", () => {
+    expect(starterAudit().submits).toEqual(["loom.form"])
+  })
+
+  it("finds no primitive claiming to post that does not", () => {
+    expect(starterAudit().unwiredSubmitters).toEqual([])
+  })
 })
 
 describe("describeRegistryAudit", () => {
@@ -177,6 +300,20 @@ describe("describeRegistryAudit", () => {
     const described = describeRegistryAudit(auditRegistry(registryOf([brittle])))
 
     expect(described).toContain('threw on {"tone":"loud"} (no rendering for tone loud)')
+  })
+
+  it("says of a form that it posts, and of the rest of the library nothing", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([...testDefinitions, posting])))
+
+    expect(described).toContain("loom.posting: spreads loom.editable; renders its children; posts")
+    expect(described).not.toContain("loom.card: spreads loom.editable; renders its children; posts")
+  })
+
+  it("puts the two disagreements between declaration and behaviour on the line", () => {
+    const described = describeRegistryAudit(auditRegistry(registryOf([claimingToPost, quietlyPosting])))
+
+    expect(described).toContain("loom.claiming-to-post: spreads loom.editable; renders its children; declares `submits` and places no address")
+    expect(described).toContain("loom.quietly-posting: spreads loom.editable; renders its children; posts, and does not declare `submits`")
   })
 })
 

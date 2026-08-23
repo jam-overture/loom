@@ -20,6 +20,13 @@ export const SIGN_IN_PATH = "/portal/sign-in"
  * deployment. It has its own registry, its own in-memory store, its own policy
  * and no identity at all, so an anonymous visitor reaches a tree that expires
  * with the instance and never the one the portal is reviewing.
+ *
+ * **This is now the demo's old address, not the demo.** The demo moved to a
+ * public `/demo` on 21 August, which is outside the proxy's matcher altogether
+ * and needs nothing from this list. What remains here is a 308, and the
+ * exemption is what keeps it working: without it a signed-out visitor following
+ * an old link would be sent to sign in rather than forwarded on, which is a
+ * redirect that only serves the people who do not need it.
  */
 export const DEMO_PATH = "/portal/demo"
 

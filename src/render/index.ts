@@ -6,6 +6,14 @@
  */
 
 export * from "./addressing.js"
+/**
+ * `behaviour-copy.js` is deliberately not re-exported. A behaviour's
+ * implementation is reached by declaring it and reading `loom.behaviours`, and
+ * a host that imported the control directly would get one with no registration
+ * behind it — no declared name to translate, and nothing telling the Gate the
+ * page now holds a target.
+ */
+export * from "./behaviour.js"
 export * from "./diagnostics.js"
 export * from "./editable.js"
 export * from "./primitive.js"

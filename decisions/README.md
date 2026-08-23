@@ -141,3 +141,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0081](0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md) | The front door demonstrates statelessly, and the address is the whole of the state | Accepted | §4d |
 | [0082](0082-a-refusal-says-what-became-of-the-repair.md) | A refusal says what became of the repair | Accepted | §2 |
 | [0083](0083-a-scoped-request-sends-the-scope.md) | A scoped request sends the scope, not the page it sits on | Accepted | §2 |
+| [0084](0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md) | In a two-dimensional band, rows are nodes and columns are positions | Accepted | §4b |
+| [0085](0085-a-font-pack-declares-a-face-when-something-reads-it.md) | A font pack declares a face when something reads it | Accepted | §4b |
+| [0086](0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md) | A behaviour is a control the runtime builds and a primitive places | Accepted | §4b |
+| [0087](0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md) | A primitive that posts declares it, and the audit checks the declaration against what it renders | Accepted | §4b |

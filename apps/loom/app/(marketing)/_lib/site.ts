@@ -34,8 +34,16 @@ export const HOW_IT_WORKS: SiteRoute = {
     "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
 }
 
+export const THE_RECORD: SiteRoute = {
+  path: "/the-record",
+  label: "The record",
+  title: "The record — what changed, who asked, and how to put it back",
+  description:
+    "Ask the front page for one change after another and watch the list fill in: what each request turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
+}
+
 /** Every route, in nav order. A route that is not here has no way to be reached. */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS]
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RECORD]
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -62,6 +70,31 @@ export type Surface = {
   readonly blurb: string
   /** Whether a visitor who is not signed in is sent to a sign-in page first. */
   readonly guarded: boolean
+}
+
+/**
+ * The one surface that answers the hero's promise rather than arguing for it.
+ *
+ * The front door's own band lets a visitor watch a change happen, but only
+ * through five prepared choices — the hero says *ask for a change in your own
+ * words* and the band cannot offer a place to type. That gap has been the
+ * lane's standing open question since 20 August, and the recommendation each
+ * time was to send people somewhere built for it rather than put a model call
+ * on the most-loaded page the project has.
+ *
+ * It now exists. `Loom demo` moved the demonstration off `/portal/demo` — a
+ * public page at the one path that reads as private — onto a public `/demo`,
+ * and filed the finding that nothing under this route group linked to it from
+ * anywhere. Three things from that finding are why it is safe to put on the
+ * front door: it works with no model configured, a page view allocates nothing
+ * on the instance, and the first click is one button.
+ */
+export const DEMO: Surface = {
+  path: "/demo",
+  label: "Demo",
+  blurb:
+    "Ask a real page to rearrange itself — in your own words — and watch the record fill in beside it. Nothing to install and nothing to sign up for.",
+  guarded: false,
 }
 
 export const DOCS: Surface = {
@@ -91,12 +124,20 @@ export const PORTAL: Surface = {
 /**
  * Everywhere else in the product, in the order the front door offers them.
  *
- * Documentation, then the course, then the portal: what the thing is, why it is
- * that way, and where the work happens. The two open surfaces come before the
- * guarded one because a visitor who cannot sign in should still be offered
- * everywhere they *can* go before they meet a door.
+ * The demonstration, then the documentation, then the course, then the portal —
+ * which is **ascending order of what it asks of the visitor**, and that is the
+ * whole of the reasoning. The demo costs a click; the docs cost a read; the
+ * course costs an afternoon; the portal costs an account. Someone who has just
+ * arrived is offered the cheapest thing first, and the one that needs a door is
+ * offered last so that everywhere they *can* go has been named before they meet
+ * one.
+ *
+ * The demo was added on 22 August and went to the front of the list rather than
+ * the end of it. It is the only one of the four that is the product working
+ * rather than a description of it, and this site's own recorded position is
+ * that the marketing site is the demonstration and not a brochure about it.
  */
-export const PRODUCT_SURFACES: readonly Surface[] = [DOCS, LESSONS, PORTAL]
+export const PRODUCT_SURFACES: readonly Surface[] = [DEMO, DOCS, LESSONS, PORTAL]
 
 /**
  * The palettes a visitor may see the site in.
@@ -228,6 +269,34 @@ export const askHref = (
   if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
   if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
   if (options.approve === true) url.searchParams.set("approve", "1")
+
+  return url.toString()
+}
+
+/**
+ * The record page, with the run of changes it is reporting on in the address.
+ *
+ * Same argument as `askHref` and the same property: the page keeps nothing, so
+ * a history is not a session — it is a list of requests written into the URL,
+ * replayed from the front door as it is published every time the page is
+ * loaded. Two people can read the same history a week apart and get the same
+ * answer, and neither of them can move it under the other.
+ *
+ * The sequence arrives here already written out. Composing it is
+ * `adapt/history.ts`'s job and that module imports this one, so a `changes`
+ * string rather than a list of asks is what keeps the two from importing each
+ * other.
+ */
+export const recordHref = (
+  origin: string,
+  options: { readonly theme?: SiteThemeName; readonly changes?: string } = {}
+): string => {
+  const url = new URL(THE_RECORD.path, `${origin}/`)
+
+  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
+  if (options.changes !== undefined && options.changes.length > 0) {
+    url.searchParams.set("changes", options.changes)
+  }
 
   return url.toString()
 }
