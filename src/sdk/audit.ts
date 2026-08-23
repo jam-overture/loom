@@ -7,9 +7,11 @@ import {
   probeConfigurations,
   probeEditableDecoration,
   probePlacement,
+  probeSubmissionPlacement,
   type ConformanceVerdict,
   type PlacementVerdict,
   type ProbeFailure,
+  type SubmissionVerdict,
 } from "./conformance.js"
 import type { PrimitiveRegistry } from "./registry.js"
 
@@ -39,6 +41,9 @@ export type PrimitiveAudit = {
   readonly type: PrimitiveType
   readonly verdict: ConformanceVerdict
   readonly placement: PlacementVerdict
+  readonly submission: SubmissionVerdict
+  /** What the author declared, beside what the probe saw. */
+  readonly declaresSubmits: boolean
 }
 
 /** A primitive that declared a region and then did not render it. */
@@ -91,6 +96,30 @@ export type RegistryAudit = {
    * the configurations that did render.
    */
   readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[]
+  /**
+   * The registered primitives that post, as the probe observed them.
+   *
+   * This is the list a deployment holds its endpoint registry against: if
+   * anything here is registered, `renderRequest` wants `endpoints`, and a
+   * deployment that ships one without the other ships forms that render
+   * disabled. Derived rather than declared, so it is the truth about the
+   * components rather than the sum of their authors' intentions.
+   */
+  readonly submits: readonly PrimitiveType[]
+  /**
+   * Places an address and never declared it posts. Not a broken page — the
+   * form works — but the declaration is what a deployment reads to know the
+   * seam is load-bearing here, so an undeclared submitter is a form whose need
+   * for an endpoint registry is invisible until someone fills it in.
+   */
+  readonly undeclaredSubmitters: readonly PrimitiveType[]
+  /**
+   * Declared it posts and placed no address under any configuration probed.
+   * This is the failure the submission seam exists to prevent, caught one layer
+   * earlier than it would otherwise be: a submit control that goes nowhere
+   * renders, looks finished, and reports nothing until a visitor uses it.
+   */
+  readonly unwiredSubmitters: readonly PrimitiveType[]
 }
 
 const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
@@ -116,11 +145,28 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
         configurations,
         primitive.behaviours
       ),
+      submission: probeSubmissionPlacement(primitive.component, primitive.text, configurations),
+      declaresSubmits: primitive.submits,
     }
   })
 
+  const places = (audit: PrimitiveAudit): boolean => audit.submission.outcome === "places"
+
   return {
     audits,
+    submits: audits.filter(places).map((audit) => audit.type),
+    undeclaredSubmitters: audits
+      .filter((audit) => places(audit) && !audit.declaresSubmits)
+      .map((audit) => audit.type),
+    /**
+     * `not-probeable` is not counted as unwired, for the reason
+     * `decorationFromAudit` gives: the probe said it could not answer, which is
+     * not the same as answering no, and a claim of a broken form is not one to
+     * make on silence.
+     */
+    unwiredSubmitters: audits
+      .filter((audit) => audit.declaresSubmits && audit.submission.outcome === "not-placed")
+      .map((audit) => audit.type),
     notDecorated: audits.filter((audit) => audit.verdict.outcome === "not-decorated").map((audit) => audit.type),
     notProbeable: audits.filter((audit) => audit.verdict.outcome === "not-probeable").map((audit) => audit.type),
     unplacedSlots: audits
@@ -204,8 +250,26 @@ const describePlacement = (placement: PlacementVerdict): string => {
   return `${children}; threw on ${threw}`
 }
 
+/**
+ * Said only when there is something to say. Every primitive decorates and every
+ * primitive places or does not, so those two are worth a clause each on every
+ * line; posting is the exception, and a clause reading "does not post" on fifty
+ * lines would bury the one line that matters.
+ */
+const describeSubmission = (entry: PrimitiveAudit): string => {
+  if (entry.submission.outcome === "not-probeable") return ""
+  if (entry.submission.outcome === "places") {
+    return entry.declaresSubmits ? "; posts" : "; posts, and does not declare `submits`"
+  }
+
+  return entry.declaresSubmits ? "; declares `submits` and places no address" : ""
+}
+
 /** One line per primitive, for a CLI or a failing test's message. */
 export const describeRegistryAudit = (audit: RegistryAudit): string =>
   audit.audits
-    .map((entry) => `${entry.type}: ${describeVerdict(entry.verdict)}; ${describePlacement(entry.placement)}`)
+    .map(
+      (entry) =>
+        `${entry.type}: ${describeVerdict(entry.verdict)}; ${describePlacement(entry.placement)}${describeSubmission(entry)}`
+    )
     .join("\n")

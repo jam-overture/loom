@@ -5,7 +5,14 @@ import { z } from "zod"
 import type { LoomPrimitive, LoomPrimitiveProps } from "../render/primitive.js"
 import { undecoratedPrimitive } from "../testing/primitives.js"
 
-import { probeConfigurations, probeEditableDecoration, probePlacement } from "./conformance.js"
+import { NO_TEXT } from "../render/text.js"
+
+import {
+  probeConfigurations,
+  probeEditableDecoration,
+  probePlacement,
+  probeSubmissionPlacement,
+} from "./conformance.js"
 import { definePrimitive } from "./definition.js"
 
 const decorating = ({ loom, children }: LoomPrimitiveProps) =>
@@ -335,5 +342,81 @@ describe("a primitive that does not hold its promises under every shape", () => 
     expect(probeEditableDecoration(alwaysThrows, undefined, [{}, { tone: "calm" }]).outcome).toBe(
       "not-probeable"
     )
+  })
+})
+
+/**
+ * What a form does: puts the address it was handed on the element that posts.
+ * The `undefined` branch is the one the seam exists for — a target is absent far
+ * more often than it is present, and a component that throws on absence would be
+ * unprobeable rather than compliant.
+ */
+const posting = ({ loom, children }: LoomPrimitiveProps) =>
+  createElement(
+    "form",
+    { ...loom.editable, ...(loom.submit?.status === "ready" ? { action: loom.submit.target.action } : {}) },
+    children
+  )
+
+/** Reads the outcome, decides a sentence, and connects nothing. */
+const merelyNoticing = ({ loom, children }: LoomPrimitiveProps) =>
+  createElement(
+    "form",
+    { ...loom.editable },
+    loom.submit === undefined ? "not connected yet" : "ready",
+    children
+  )
+
+const ignoringTheTarget = ({ loom, children }: LoomPrimitiveProps) =>
+  createElement("form", { ...loom.editable }, children)
+
+/** Posts under one configuration and summarises under the other. */
+const postingConditionally = ({ loom, props, children }: LoomPrimitiveProps) =>
+  props["mode"] === "summary"
+    ? createElement("div", { ...loom.editable }, children)
+    : createElement(
+        "form",
+        { ...loom.editable, ...(loom.submit?.status === "ready" ? { action: loom.submit.target.action } : {}) },
+        children
+      )
+
+describe("probeSubmissionPlacement", () => {
+  it("sees a primitive put the address it was handed on its form", () => {
+    expect(probeSubmissionPlacement(posting)).toEqual({ outcome: "places" })
+  })
+
+  it("does not count reading the outcome as connecting anything", () => {
+    expect(probeSubmissionPlacement(merelyNoticing)).toEqual({ outcome: "not-placed" })
+  })
+
+  it("catches the form that would post to whatever page it sits on", () => {
+    expect(probeSubmissionPlacement(ignoringTheTarget)).toEqual({ outcome: "not-placed" })
+  })
+
+  /** `some`, not `every`: a primitive that posts under one shape posts. */
+  it("counts a primitive that posts under one configuration of its schema", () => {
+    expect(
+      probeSubmissionPlacement(postingConditionally, NO_TEXT, [{ mode: "summary" }, { mode: "form" }])
+    ).toEqual({ outcome: "places" })
+  })
+
+  it("declines rather than answering no when it cannot call the component", () => {
+    const verdict = probeSubmissionPlacement(usingAHook)
+
+    expect(verdict.outcome).toBe("not-probeable")
+  })
+
+  /**
+   * The address must reach the markup, not merely be looked at — which is what
+   * makes a `not-placed` verdict worth acting on rather than a stylistic note.
+   */
+  it("does not find an address the component only kept to itself", () => {
+    const hoarding = ({ loom, children }: LoomPrimitiveProps) => {
+      const action = loom.submit?.status === "ready" ? loom.submit.target.action : ""
+
+      return createElement("form", { ...loom.editable, "data-length": action.length }, children)
+    }
+
+    expect(probeSubmissionPlacement(hoarding)).toEqual({ outcome: "not-placed" })
   })
 })

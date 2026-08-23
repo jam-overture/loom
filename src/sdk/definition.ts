@@ -33,6 +33,10 @@ import { NO_TEXT, type PrimitiveText } from "../render/text.js"
  *   can refuse a change that puts one inside another (0064). Optional, and the
  *   only field here that is read by nothing at render time: it exists so the
  *   author who knows the component emits an anchor is the one who says so.
+ * - `submits` — whether it posts, so a deployment can be told that a primitive
+ *   which needs a destination is registered and that the seam feeding it is
+ *   wired (0065). Optional, read by nothing at render time, and the one
+ *   declaration the audit checks against behaviour rather than taking on trust.
  */
 
 export type PrimitiveDefinition<
@@ -59,6 +63,19 @@ export type PrimitiveDefinition<
    * a renamed prop cannot leave this quietly pointing at nothing.
    */
   readonly interactive?: InteractiveWhen
+  /**
+   * `true` for a primitive whose job includes sending what it collected. It
+   * takes no conditional form, unlike `interactive`: a card is a target only
+   * when the tree gives it an `href`, but a form is a form, and a primitive
+   * that posts under one prop value and not another is two primitives.
+   *
+   * Nothing reads it at render time and nothing needs it to render — a
+   * component is handed `loom.submit` whenever its node declared one, declared
+   * or not. What it buys is that the audit can tell the two silent failures
+   * apart: a primitive that says it posts and places no address, and one that
+   * places an address without ever having said it posts.
+   */
+  readonly submits?: boolean
   /**
    * The controls this primitive takes from the runtime's closed behaviour
    * vocabulary — `["copy"]` on a code panel. Optional, and empty for almost
@@ -98,6 +115,8 @@ export type PrimitiveEntry = {
   readonly text: PrimitiveText<string>
   /** Absent for the ordinary primitive, which is not a target at all. */
   readonly interactive: InteractiveWhen | undefined
+  /** `false` for the ordinary primitive, which sends nothing anywhere. */
+  readonly submits: boolean
   /** Declared behaviour names, still raw: the registry is what checks them. */
   readonly behaviours: readonly string[]
   readonly validate: (props: JsonObject) => PropsVerdict
@@ -159,6 +178,7 @@ export const definePrimitive = <
   slots: definition.slots ?? [],
   text: freezeText(definition.text),
   interactive: definition.interactive,
+  submits: definition.submits ?? false,
   behaviours: definition.behaviours ?? [],
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:

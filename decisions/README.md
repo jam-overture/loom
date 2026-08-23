@@ -144,3 +144,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0084](0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md) | In a two-dimensional band, rows are nodes and columns are positions | Accepted | §4b |
 | [0085](0085-a-font-pack-declares-a-face-when-something-reads-it.md) | A font pack declares a face when something reads it | Accepted | §4b |
 | [0086](0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md) | A behaviour is a control the runtime builds and a primitive places | Accepted | §4b |
+| [0087](0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md) | A primitive that posts declares it, and the audit checks the declaration against what it renders | Accepted | §4b |

@@ -10,6 +10,7 @@ import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../
 import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
+import type { SubmissionOutcome } from "../submit/resolution.js"
 
 /**
  * The conformance probe (0010).
@@ -322,4 +323,92 @@ export const probePlacement = (
       attempt.result.ok ? [] : [{ props: attempt.props, reason: attempt.result.error }]
     ),
   }
+}
+
+/**
+ * The third probe: does a primitive that posts put the address on the page?
+ *
+ * `loom.submit` is the one thing on the render context whose absence is
+ * survivable and whose *silent* absence is not (0065). A tree names an
+ * endpoint, a deployment resolves it before the walk, and the primitive is
+ * handed a target — but nothing makes it read one. A form that ignores it
+ * renders a set of fields and a submit control with no `action` at all, which a
+ * browser resolves by posting to the page the form is sitting on. Nothing
+ * throws, nothing is logged, and the first person to find out is whoever filled
+ * it in.
+ *
+ * So the probe hands the component a target whose action is a string nothing
+ * else would produce, and looks for that string in what came back. Placing the
+ * address is the claim, because the address is the whole of what the seam
+ * delivers: a primitive that reads the outcome only to choose between two
+ * sentences has not connected anything.
+ *
+ * Its false negative is the one `containsMarker` cannot avoid: a primitive that
+ * rebuilds the action — appending a query string, say — has posted somewhere
+ * real and reads here as `not-placed`. That is the same bargain the decoration
+ * probe makes with identity, and it errs towards reporting a fault that is not
+ * one, which a person reading the audit can dismiss in a second. The reverse
+ * error is the one this exists to prevent.
+ */
+
+export type SubmissionVerdict =
+  | { readonly outcome: "places" }
+  | { readonly outcome: "not-placed" }
+  | { readonly outcome: "not-probeable"; readonly reason: string }
+
+/**
+ * Absolute rather than root-relative, and on a hostname that cannot resolve.
+ * `endpoint.ts` accepts both shapes, so either would be a legal target; this one
+ * is additionally impossible to confuse with a path a primitive computed for
+ * itself, which is what makes finding it in the output evidence rather than
+ * coincidence.
+ */
+const PROBE_SUBMIT_ACTION = "https://probe.invalid/loom-probe-submit"
+
+const PROBE_SUBMISSION: SubmissionOutcome = {
+  status: "ready",
+  target: { action: PROBE_SUBMIT_ACTION, method: "post", fields: [] },
+}
+
+/**
+ * `some` rather than `every`, matching `probePlacement`. The question is
+ * whether this primitive posts at all, and a primitive that renders a form
+ * under one layout and a summary under another is answering honestly in both.
+ */
+export const probeSubmissionPlacement = (
+  primitive: LoomPrimitive,
+  text: PrimitiveText<string> = NO_TEXT,
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+): SubmissionVerdict => {
+  const probeable = asProbeable(primitive)
+  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+
+  const attempts = configurations.map((props) =>
+    call(probeable.value, {
+      loom: {
+        nodeId: PROBE_NODE_ID,
+        type: PROBE_TYPE,
+        slots: NO_SLOTS,
+        data: NO_DATA,
+        text,
+        behaviours: NO_BEHAVIOURS,
+        submit: PROBE_SUBMISSION,
+      },
+      props,
+      children: PROBE_CHILDREN,
+    })
+  )
+
+  const answered = attempts.flatMap((result) => (result.ok ? [result.value] : []))
+
+  if (answered.length === 0) {
+    const [first] = attempts
+    const reason = first && !first.ok ? first.error : "no configuration answered"
+
+    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${reason}` }
+  }
+
+  return answered.some((node) => containsMarker(node, PROBE_SUBMIT_ACTION))
+    ? { outcome: "places" }
+    : { outcome: "not-placed" }
 }
