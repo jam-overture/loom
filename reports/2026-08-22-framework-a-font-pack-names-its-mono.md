@@ -79,7 +79,7 @@ three options the finding offered and not the one it ranked highest. The reader
 it wanted — a display face for `loom.hero`, a pull-quote face for `loom.quote` —
 lives in `src/primitives/`, which is not this lane. Declaring the field here and
 filing the half that makes it real is precisely the state the finding was
-complaining about. Under 0084's rule a display face comes back with its reader in
+complaining about. Under 0085's rule a display face comes back with its reader in
 the same change, which is a better outcome than a field waiting for a purpose.
 
 **No `family("mono")` overload**, because `family` is in `tokens.ts` and
@@ -88,7 +88,7 @@ that lane ever widens the signature: the fallback has to survive the move.
 
 ## Records
 
-- **[0084](../decisions/0084-a-font-pack-declares-a-face-when-something-reads-it.md)
+- **[0085](../decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)
   — A font pack declares a face when something reads it.** Accepted. Records the
   three rejected alternatives, including the general `families: Record<FamilyRole,
   string>` map that is the right shape if a fourth role ever appears and is not
@@ -96,19 +96,22 @@ that lane ever widens the signature: the fallback has to survive the move.
 
 Nothing superseded.
 
-**The number collides with #132's, which also writes 0084.** Deliberate, and
-explained in the findings: 0084 is the next free number on `main`, and taking
-0085 would have failed the numbering guard's no-gap rule and made this a red PR.
-Merge order settles it as it has four times before — whichever merges second
-renames to 0085 and re-runs `pnpm decisions:index`. The guard fires loudly on the
-duplicate, so it cannot land silently.
+**The number collided with #132's, which also wrote 0084.** Deliberate, and
+explained in the findings: 0084 was the next free number on `main` when this
+branch was cut, and taking 0085 would have failed the numbering guard's no-gap
+rule and made this a red PR.
+
+**Settled by merge order, as it has been five times before: #132 landed first, so
+this record is 0085.** The rename and `pnpm decisions:index` were done at merge
+time, exactly as this paragraph predicted. The guard fires loudly on a duplicate,
+so it could not have landed silently.
 
 ## Findings
 
 **Closed** (both owned by this lane, both filed by `Loom primitives`):
 
 - *`accentFamily` is emitted as a variable no primitive reads* — closed by
-  deletion, with 0084 as the reason.
+  deletion, with 0085 as the reason.
 - *A font pack declares three families and none of them is monospace* — closed as
   specified.
 

@@ -18,6 +18,7 @@ import { action, heading, prose, section, stack } from "../nodes"
 import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
+  DEMO,
   DOCS,
   HOME,
   HOW_IT_WORKS,
@@ -104,10 +105,24 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
           internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
           { variant: "primary", scale: "large" }
         ),
-        action(ids, "Read the source", REPOSITORY_URL, {
+        /**
+         * The second action is the demo rather than the repository, as of
+         * 22 August.
+         *
+         * The sentence directly above it promises the reader they can ask for a
+         * change *in their own words*, and until today the nearest thing this
+         * site offered was a link to GitHub. Sending someone who has just read
+         * that promise to a source tree is answering "can I try it?" with "here
+         * is the code", which is the wrong answer to a question nobody asked.
+         *
+         * Nothing is lost by moving it: the repository is still the closing
+         * band's second action, a card in the facts band, and a named group in
+         * the footer. It is reachable three ways from this page and none of
+         * them is the first screen.
+         */
+        action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
           variant: "secondary",
           scale: "large",
-          external: true,
         }),
       ]),
     ],
@@ -306,6 +321,7 @@ const questions = (ids: IdFactory): LoomNode =>
  * promised it could not.
  */
 const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: string }>> = {
+  [DEMO.path]: { icon: "▶", title: "Try it yourself" },
   [DOCS.path]: { icon: "▤", title: "Read the docs" },
   [LESSONS.path]: { icon: "◍", title: "Take the course" },
   [PORTAL.path]: { icon: "◉", title: "Open the portal" },
@@ -320,40 +336,40 @@ const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: 
  * card is honest about what is behind it, which is why the portal's says that
  * signing in is required rather than pretending the whole product is one click
  * away.
+ *
+ * **It is the four surfaces and nothing else**, as of 22 August. A fifth card
+ * pointed at the repository, which was fine while there were three of them and
+ * wrong once the demo made it four: five cards in a grid that wraps at four
+ * leaves one card alone on a second row, and the odd one out would have been the
+ * only card in the band that is not a page of this product. The repository is
+ * still offered twice on this page — the facts band and the closing band — and a
+ * third time in the footer's map, so nothing was taken away from a reader.
+ *
+ * The band is now exactly `PRODUCT_SURFACES`, which is what makes the throw
+ * below the whole of its contract rather than half of it.
  */
 const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.feature-grid",
       props: { columns: "four" },
-      children: [
-        ...PRODUCT_SURFACES.map((surface) => {
-          const way = WAYS_IN[surface.path]
+      children: PRODUCT_SURFACES.map((surface) => {
+        const way = WAYS_IN[surface.path]
 
-          if (way === undefined) {
-            throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
-          }
+        if (way === undefined) {
+          throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
+        }
 
-          return buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              icon: way.icon,
-              title: way.title,
-              body: surface.blurb,
-              href: surfaceHref(context.origin, surface),
-            },
-          })
-        }),
-        buildElement(ids, {
+        return buildElement(ids, {
           type: "loom.feature",
           props: {
-            icon: "⟨⟩",
-            title: "Read the source",
-            body: "Every decision written down, every test in the open. The best way to check whether any of this is true is to look.",
-            href: REPOSITORY_URL,
+            icon: way.icon,
+            title: way.title,
+            body: surface.blurb,
+            href: surfaceHref(context.origin, surface),
           },
-        }),
-      ],
+        })
+      }),
     }),
   ])
 
