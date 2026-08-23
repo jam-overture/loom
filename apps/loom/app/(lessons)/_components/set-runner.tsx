@@ -77,8 +77,12 @@ export const SetRunner = ({ slug, letter, questions, closing }: SetRunnerProps) 
           question={current.number}
           total={questions.length}
           body={current.body}
-          checkIn={current.checkIn}
-          onRecord={(attempt) => update((state) => withAttempt(state, slug, { ...attempt, on: today() }))}
+          resolve={{
+            kind: "check",
+            checkIn: current.checkIn,
+            onRecord: (attempt) =>
+              update((state) => withAttempt(state, slug, { ...attempt, on: today() })),
+          }}
         />
       ) : (
         <section style={{ ...style.panel, ...style.column(4) }} aria-label={`Set ${letter} finished`}>

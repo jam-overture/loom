@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest"
 import { calibrationOf, sittingMisses } from "./calibration"
 import {
   EMPTY_PROGRESS,
+  predictionsFor,
   readProgress,
   setProgress,
   withAttempt,
   withLessonWorkedThrough,
+  withPrediction,
   type Attempt,
 } from "./progress"
 
@@ -119,5 +121,59 @@ describe("calibration", () => {
 
   it("says nothing at all about a reader who has done nothing", () => {
     expect(calibrationOf(EMPTY_PROGRESS)).toMatchObject({ attempts: 0, right: 0, confidentAndWrong: [] })
+  })
+})
+
+describe("predictions, which are not attempts", () => {
+  const written = withPrediction(
+    withPrediction(EMPTY_PROGRESS, "lesson-13-predict", {
+      question: 2,
+      confidence: 2,
+      answer: "The reason code and nothing else.",
+      on: "2026-08-22",
+    }),
+    "lesson-13-predict",
+    { question: 1, confidence: 4, answer: "A counter.", on: "2026-08-22" }
+  )
+
+  it("keeps them in question order however they were written", () => {
+    expect(predictionsFor(written, "lesson-13-predict").map((each) => each.question)).toEqual([1, 2])
+  })
+
+  it("replaces a rewritten prediction rather than keeping both", () => {
+    const again = withPrediction(written, "lesson-13-predict", {
+      question: 1,
+      confidence: 1,
+      answer: "Actually, no idea.",
+      on: "2026-08-22",
+    })
+
+    expect(predictionsFor(again, "lesson-13-predict")).toHaveLength(2)
+    expect(predictionsFor(again, "lesson-13-predict")[0]?.confidence).toBe(1)
+  })
+
+  /**
+   * The rating is the whole point of storing these: it was given before the
+   * lesson, and it is what the grade at Reflect is paired against.
+   */
+  it("survives a round trip through the store, rating and all", () => {
+    const back = readProgress(JSON.parse(JSON.stringify(written)))
+
+    expect(predictionsFor(back, "lesson-13-predict")[0]).toEqual({
+      question: 1,
+      confidence: 4,
+      answer: "A counter.",
+      on: "2026-08-22",
+    })
+  })
+
+  it("reads a record written before predictions existed, and one corrupted since", () => {
+    expect(readProgress({ lessons: {}, sets: {} }).predictions).toEqual({})
+    expect(
+      predictionsFor(
+        readProgress({ predictions: { "lesson-13-predict": [{ question: 1, confidence: 9 }, null] } }),
+        "lesson-13-predict"
+      )
+    ).toEqual([])
   })
 })

@@ -5302,3 +5302,73 @@ changed.
 The one thing this run needed from outside its own directory was an npm package
 (`rehype-slug`) rather than anything from `@loom/runtime`, which is filed above
 with the config change that goes with it.
+
+---
+
+## 2026-08-22 — a course of prose has no list and no table to put it in
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` ·
+**Status:** open — the lessons render, and two constructs render worse than they read
+
+The lessons surface now renders the lesson text itself, composed from registered
+primitives (0067). Thirteen lessons went through the starter library cleanly with
+one exception each way, and both are the same gap seen twice: **the library has
+no primitive for an ordinary list, and none for an ordinary table.**
+
+**A list.** There are seven list-shaped primitives — `loom.link-list`,
+`loom.perk-list`, `loom.milestone-list`, `loom.faq-list`, and the grids — and
+every one is a list *of something*. A numbered list of prose sentences, which is
+what every Warm-up and every Self-check section in this course is, has nowhere to
+go. It is currently a column of `loom.prose` nodes each carrying its own marker
+in the text:
+
+```
+prose(ids, `${index + 1}. ${text}`)
+```
+
+That renders acceptably and is wrong in a way worth naming: the number is
+content now, so a delta that reorders two questions leaves both numbers where
+they were, and nothing in the tree knows the two nodes are one list.
+
+**A table.** `loom.tier-table` is a pricing band and says so in its own doc
+comment. Lessons use ordinary two- and three-column tables — `| Where | What it
+means | Whose problem |` — and they are currently one `loom.card` per row with
+each cell labelled by its header, which is the standard responsive-table
+degradation and loses the column-wise scan that made the author write a table.
+
+**Why this is worth a primitive rather than a workaround.** The four surfaces
+are one application now, and three of them are documents: a course, a
+documentation site, a marketing page. Prose with lists and tables in it is the
+median content of all three. `loom.code` exists for exactly this argument —
+0052 calls it atomic because whitespace is the content and no other primitive can
+stand in — and a list's ordering is the same kind of fact.
+
+Not urgent. The pages are good; these two are the places a reader can tell the
+library was designed for landing pages first.
+
+---
+
+## 2026-08-22 — an internal link still cannot be expressed in a tree
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` ·
+**Status:** open — already filed 19 August, restated with a second site
+
+Not a new finding: `linkUrlSchema` refusing every relative URL was filed on
+19 August and is still open. This is a second surface hitting it, recorded
+because the first one had a workaround this one does not.
+
+Every lesson opens with a prerequisites line — `[01](01-why-a-runtime.md),
+[02](02-ui-as-data.md), …` — which is now, on the surface, a list of bare
+numbers. Each of those is a page in the same application, at `/lessons/01`, and
+`loom.link` cannot point at it: the schema requires an absolute URL, and this
+surface has no origin to build one from. The marketing lane resolves an origin
+per request (`site.ts`) and can therefore live with it. A statically exported
+course has nowhere to get one, and a link to `https://…/lessons/01` from a page
+already on that host would be a full page load out of and back into the app.
+
+The links that go *sideways* — into `src/`, into `decisions/` — resolve against
+the repository and are fine, because those really do live somewhere else.
+
+Nothing here is broken and no lesson is unreadable. The cost is that a course
+whose whole structure is "you need 04 before you read 09" cannot say so in a way
+the reader can click.
