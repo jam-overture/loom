@@ -50,6 +50,8 @@ export type RegisteredPrimitive = {
   readonly text: PrimitiveText<string>
   /** Whether it renders a target, and what makes it one. Absent for most. */
   readonly interactive: InteractiveWhen | undefined
+  /** Whether its author says it posts (0065). `false` for most. */
+  readonly submits: boolean
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -142,6 +144,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     choices: entry.choices,
     text: entry.text,
     interactive: entry.interactive,
+    submits: entry.submits,
     validate: entry.validate,
   })
 }
