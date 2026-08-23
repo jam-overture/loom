@@ -169,15 +169,27 @@ led and the sentence followed, so at revision 0 the line printed the same number
 twice behind the runtime's handle — on exactly the page a new person opens first,
 since a freshly seeded deployment *is* at revision 0.
 
-**And a third, one character wide.** Written as `{…}{" "}` followed by a literal
-`·`, JSX dropped the space and the line rendered `…here yet.· revision 0`. Caught
-in the re-shot arrival screenshot, confirmed against the running server rather
-than by eye, and pinned by a test asserting the separator has a space on both
-sides. Separators survive rewrites by being invisible in the source.
+**And a third I reported and was wrong about.** Reading the re-shot arrival
+screenshot I took the separator line for `…here yet.· revision 0` — a lost space
+— and changed `{…}{" "}` + a newline-led `·` to an explicit `{" · "}`, describing
+it in a commit message as a third screenshot-found defect.
 
-This is the fourth run in five across this repository to turn up a defect that
-was invisible to every test and obvious in a picture — and this one turned up
-three, two of them mine.
+It was not one. JSX trims the newline and indent before a literal `·`, so the
+original already rendered `yet. · revision 0`; the re-shot PNG is **byte-identical
+to the one committed before the change**, which is proof the output never moved,
+and a probe against the running server confirms the spacing directly. What I
+actually caught was a thin space at small scale in an image I was reading by eye.
+
+The change stays, because `{" · "}` says what it means where the original relied
+on a JSX whitespace rule, and so does the test — a separator's spacing is worth
+pinning whether or not it was ever broken. But it is a readability change, not a
+fix, and the claim that a third defect existed was false. Recorded rather than
+quietly dropped, because a report that inflates what a screenshot caught is worse
+than one that catches less.
+
+So: **two** defects this run that no test saw and a picture did — not three. That
+still makes this the fourth run in five across the repository to turn one up, and
+both of these are mine.
 
 ## The high-schooler test
 
@@ -234,7 +246,7 @@ across all five route groups. Nothing weakened, nothing skipped.
 - `_components/preview-frame.test.tsx` — 12, new file. The page's name as the
   `h1`, both revision wordings and their order, the singular, and a diagnostic
   reading as degradation with every `describeRenderDiagnostic` line closed
-  beneath it. Plus the separator's spacing, written from the third screenshot defect.
+  beneath it. Plus the separator's spacing — kept, though the defect I wrote it for turned out not to exist.
 - `_components/tree-outline.test.tsx` — 10, new file. The heading and the count,
   every part listed *including* the ones a click cannot reach, the legend
   covering all four marks, and the row titles held against the jargon regex.
@@ -251,8 +263,8 @@ across all five route groups. Nothing weakened, nothing skipped.
 - `reading-order.test.ts` — 3, new file. Written from the phone screenshot,
   above.
 
-The two that earn their place are `reading-order.test.ts`, which is the only one
-written from a real failure, and the reassurance-sentence test, which pins the
+The one that earns its place is `reading-order.test.ts`, the only one written
+from a real failure, and the reassurance-sentence test, which pins the
 one sentence here that is new rather than translated.
 
 A local runtime rebuild was needed once before the app suite would resolve

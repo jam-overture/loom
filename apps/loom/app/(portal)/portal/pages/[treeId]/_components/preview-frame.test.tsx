@@ -102,10 +102,17 @@ describe("PreviewFrame", () => {
   })
 
   /**
-   * A one-character defect, and a screenshot is the only thing that shows it.
-   * Written as `{...}{" "}` followed by a literal `·`, JSX dropped the space
-   * and the line rendered `…here yet.· revision 0`. Separators are the sort of
-   * thing that survives a rewrite by being invisible in the source.
+   * Not written from a failure — written from one I misread.
+   *
+   * Reading a screenshot by eye I took this line for `…here yet.· revision 0`
+   * and "fixed" a lost space. There was none: JSX trims the newline before a
+   * literal separator, so the original rendered correctly, and the re-shot PNG
+   * came back byte-identical to the one taken before the change.
+   *
+   * The assertion is kept anyway. A separator's spacing depends on a JSX
+   * whitespace rule rather than on anything visible in the source, which makes
+   * it exactly the sort of thing a later rewrite breaks without anyone
+   * noticing — and this test is now the reason somebody would notice.
    */
   it("keeps a space on both sides of the separator", () => {
     const { container } = render(
