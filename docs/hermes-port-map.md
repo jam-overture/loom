@@ -174,6 +174,21 @@ nothing in it is a key cap or an avatar reachable outside a person record, and
 `loom.avatar`, `loom.avatar-row` and `loom.mosaic` have no row above because
 there is no block they port.
 
+**Five more joined them on 23 August, and they are the largest gap of the
+three** — the layer a page is *written* in, as opposed to what it is built from.
+Hermes held its lists as fields inside other blocks (`features: string[]` inside
+a `PricingTier`, `items: FaqItem[]` inside an accordion) and its prose as a
+string, so nothing in the seventy is a plain bulleted list, an emphasised span,
+an inline code reference or a callout. `loom.list`, `loom.list-item`,
+`loom.emphasis`, `loom.code-span` and `loom.callout` have no row above for that
+reason, and their absence was invisible from this document because this document
+counts Hermes blocks: the library could draw a pricing table and a timeline and a
+comparison band while being unable to write three bullet points.
+
+Read the ledger below accordingly. **It is a measure of the port, not of the
+library**, and the gaps that have mattered most in the last three runs have all
+been outside it.
+
 ## Where this leaves the count
 
 | | Blocks |

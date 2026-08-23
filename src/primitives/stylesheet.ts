@@ -134,6 +134,17 @@ export const LIBRARY_CLASS = {
   compareFeatureSecond: "loom-compare-feature-2",
   compareFeatureThird: "loom-compare-feature-3",
   compareFeatureFourth: "loom-compare-feature-4",
+  /**
+   * A `loom.list`: its markers take the accent, and its rows carry the gap
+   * between them. Both are here rather than inline because neither is
+   * expressible on the element that needs it — `::marker` is a pseudo-element,
+   * and a row's gap is a fact about the *list* that only the row can apply.
+   */
+  list: "loom-list",
+  /** The same list set tight — points to scan rather than points to read. */
+  listTight: "loom-list-tight",
+  /** The same list set loose, for rows that are a sentence each. */
+  listLoose: "loom-list-loose",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -330,6 +341,23 @@ details[open] > summary .loom-marker {
 .loom-compare-feature-3 tr > *:nth-child(4) .loom-compare-no,
 .loom-compare-feature-4 tr > *:nth-child(5) .loom-compare-no {
   color: var(--loom-fg-muted);
+.loom-list {
+  margin: 0;
+}
+.loom-list > li::marker {
+  color: var(--loom-accent);
+}
+.loom-list > li + li {
+  margin-block-start: var(--loom-spacing-2);
+}
+.loom-list-tight > li + li {
+  margin-block-start: var(--loom-spacing-1);
+}
+.loom-list-loose > li + li {
+  margin-block-start: var(--loom-spacing-4);
+}
+.loom-list .loom-list {
+  margin-block-start: var(--loom-spacing-2);
 }
 .loom-mosaic {
   display: grid;
