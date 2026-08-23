@@ -1,7 +1,7 @@
 import createMDX from "@next/mdx"
 import type { NextConfig } from "next"
 
-import { docsRemarkPlugins } from "./app/(docs)/_lib/mdx"
+import { docsRehypePlugins, docsRemarkPlugins } from "./app/(docs)/_lib/mdx"
 
 /**
  * One application, four surfaces, and two settings between them.
@@ -25,5 +25,8 @@ const nextConfig: NextConfig = {
 }
 
 export default createMDX({
-  options: { remarkPlugins: docsRemarkPlugins.map(([name, options]) => [name, options]) },
+  options: {
+    remarkPlugins: docsRemarkPlugins.map(([name, options]) => [name, options]),
+    rehypePlugins: docsRehypePlugins.map(([name, options]) => [name, options]),
+  },
 })(nextConfig)

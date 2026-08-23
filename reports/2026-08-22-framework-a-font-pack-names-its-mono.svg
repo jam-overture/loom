@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="960" height="560" fill="#fafaf7"/>
+
+  <text x="40" y="46" font-size="21" font-weight="700" fill="#0a0a0a">A font pack declares a face when something reads it</text>
+  <text x="40" y="70" font-size="14" fill="#525252">Two findings, filed a day apart from opposite ends of one vocabulary. 0084 answers both.</text>
+
+  <line x1="40" y1="90" x2="920" y2="90" stroke="#e5e5e5" stroke-width="1"/>
+
+  <!-- LEFT: the seam with no other end -->
+  <text x="40" y="124" font-size="13" font-weight="700" fill="#8a2f2f" letter-spacing="0.6">REMOVED — A SEAM WITH NO OTHER END</text>
+
+  <rect x="40" y="140" width="200" height="52" rx="6" fill="#ffffff" stroke="#d8d4cc"/>
+  <text x="56" y="164" font-size="13" font-weight="600" fill="#0a0a0a">fontPackSchema</text>
+  <text x="56" y="182" font-size="12.5" fill="#6a6a6a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">accentFamily?</text>
+
+  <line x1="240" y1="166" x2="288" y2="166" stroke="#b8b2a8" stroke-width="1.5"/>
+  <polygon points="288,166 280,162 280,170" fill="#b8b2a8"/>
+
+  <rect x="290" y="140" width="200" height="52" rx="6" fill="#ffffff" stroke="#d8d4cc"/>
+  <text x="306" y="164" font-size="13" font-weight="600" fill="#0a0a0a">apply.ts</text>
+  <text x="306" y="182" font-size="11.5" fill="#6a6a6a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">--loom-accent-family</text>
+
+  <line x1="490" y1="166" x2="540" y2="166" stroke="#c9a0a0" stroke-width="1.5" stroke-dasharray="5 4"/>
+
+  <rect x="542" y="140" width="180" height="52" rx="6" fill="#fbf3f3" stroke="#e0bcbc" stroke-dasharray="5 4"/>
+  <text x="632" y="172" font-size="13" font-weight="600" fill="#8a2f2f" text-anchor="middle">no reader</text>
+
+  <text x="740" y="160" font-size="12.5" fill="#525252">20 packs set it: 0</text>
+  <text x="740" y="180" font-size="12.5" fill="#525252">50 primitives read it: 0</text>
+
+  <!-- RIGHT: the seam that closes -->
+  <text x="40" y="252" font-size="13" font-weight="700" fill="#2f6a4a" letter-spacing="0.6">ADDED — CLOSED ON THE DAY IT SHIPS</text>
+
+  <rect x="40" y="268" width="200" height="52" rx="6" fill="#ffffff" stroke="#d8d4cc"/>
+  <text x="56" y="292" font-size="13" font-weight="600" fill="#0a0a0a">fontPackSchema</text>
+  <text x="56" y="310" font-size="12.5" fill="#2f6a4a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">monoFamily?</text>
+
+  <line x1="240" y1="294" x2="288" y2="294" stroke="#7aa88f" stroke-width="1.5"/>
+  <polygon points="288,294 280,290 280,298" fill="#7aa88f"/>
+
+  <rect x="290" y="268" width="200" height="52" rx="6" fill="#ffffff" stroke="#d8d4cc"/>
+  <text x="306" y="292" font-size="13" font-weight="600" fill="#0a0a0a">apply.ts</text>
+  <text x="306" y="310" font-size="11.5" fill="#2f6a4a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">--loom-mono-family</text>
+
+  <line x1="490" y1="294" x2="538" y2="294" stroke="#7aa88f" stroke-width="1.5"/>
+  <polygon points="538,294 530,290 530,298" fill="#7aa88f"/>
+
+  <rect x="540" y="268" width="200" height="52" rx="6" fill="#f2f8f4" stroke="#a8ccb8"/>
+  <text x="556" y="292" font-size="13" font-weight="600" fill="#0a0a0a">tokens.ts</text>
+  <text x="556" y="310" font-size="11.5" fill="#2f6a4a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">monospace()</text>
+
+  <line x1="740" y1="294" x2="788" y2="294" stroke="#7aa88f" stroke-width="1.5"/>
+  <polygon points="788,294 780,290 780,298" fill="#7aa88f"/>
+
+  <rect x="790" y="268" width="130" height="52" rx="6" fill="#ffffff" stroke="#d8d4cc"/>
+  <text x="806" y="290" font-size="12" fill="#0a0a0a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom.code</text>
+  <text x="806" y="308" font-size="12" fill="#0a0a0a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom.kbd</text>
+
+  <text x="40" y="344" font-size="12.5" fill="#525252">The reader has existed since 21 August, addressing a variable nothing emitted. Six of twenty packs now emit it; fourteen decline, and the fallback resolves.</text>
+
+  <line x1="40" y1="372" x2="920" y2="372" stroke="#e5e5e5" stroke-width="1"/>
+
+  <!-- BOTTOM: the docs page -->
+  <text x="40" y="404" font-size="13" font-weight="700" fill="#0a0a0a" letter-spacing="0.6">WHAT IT LOOKS LIKE — A CODE PANEL ON THE DOCUMENTATION SITE</text>
+
+  <rect x="40" y="420" width="420" height="110" rx="8" fill="#ffffff" stroke="#d8d4cc"/>
+  <text x="56" y="442" font-size="11.5" fill="#8a8a8a" letter-spacing="0.5">BEFORE — three faces where the pack describes one pairing</text>
+  <text x="56" y="466" font-size="13" fill="#0a0a0a">Prose set in Geist, the surface's own</text>
+  <rect x="56" y="476" width="388" height="42" rx="5" fill="#f0eee9"/>
+  <text x="70" y="494" font-size="12.5" fill="#0a0a0a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">&lt;pre&gt; chrome — Geist Mono</text>
+  <text x="70" y="511" font-size="12.5" fill="#8a2f2f" font-family="Menlo, Consolas, monospace">loom.code — system stack</text>
+
+  <rect x="500" y="420" width="420" height="110" rx="8" fill="#ffffff" stroke="#a8ccb8"/>
+  <text x="516" y="442" font-size="11.5" fill="#8a8a8a" letter-spacing="0.5">AFTER — the face the page had already loaded</text>
+  <text x="516" y="466" font-size="13" fill="#0a0a0a">Prose set in Geist, the surface's own</text>
+  <rect x="516" y="476" width="388" height="42" rx="5" fill="#f0eee9"/>
+  <text x="530" y="494" font-size="12.5" fill="#0a0a0a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">&lt;pre&gt; chrome — Geist Mono</text>
+  <text x="530" y="511" font-size="12.5" fill="#2f6a4a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">loom.code — Geist Mono</text>
+</svg>
