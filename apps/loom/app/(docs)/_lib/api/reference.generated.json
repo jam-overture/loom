@@ -2787,7 +2787,7 @@
               "kind": "schema",
               "signature": "const fontPackSchema: z.ZodObject<…>",
               "truncated": false,
-              "summary": ""
+              "summary": "A pack declares a face for each role the library actually reads, and no others. There were three roles here and a primitive read two of them: an `accentFamily` was emitted as `--loom-accent-family` and referenced by nothing, while `loom.code` and `loom.kbd` needed a monospace face the vocabulary had no word for. A variable a host can set and no primitive consults is worse than an absent one — it looks like a seam and behaves like a comment."
             },
             {
               "name": "FontPack",

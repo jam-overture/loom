@@ -6,6 +6,8 @@ import {
   editorialPalette,
   editorialSerifFontPack,
   comfortableStylePreset,
+  minimalSansFontPack,
+  STARTER_FONT_PACKS,
   STARTER_PALETTES,
 } from "./library.js"
 import { createThemeRegistry, describeThemeError } from "./registry.js"
@@ -19,18 +21,16 @@ import { PALETTE_SLOTS, paletteSchema, themeSelectionSchema } from "./theme.js"
 
 const registry = createThemeRegistry()
 
-const resolved = () => {
+const wearing = (fontPack: string) => {
   const result = registry.resolve(
-    themeSelectionSchema.parse({
-      palette: "editorial",
-      fontPack: "editorial-serif",
-      stylePreset: "comfortable",
-    })
+    themeSelectionSchema.parse({ palette: "editorial", fontPack, stylePreset: "comfortable" })
   )
   if (!result.ok) throw new Error(result.error.code)
 
   return result.value
 }
+
+const resolved = () => wearing("editorial-serif")
 
 describe("palette schema", () => {
   it("requires every slot, so no palette can leave a primitive unstyled", () => {
@@ -60,6 +60,34 @@ describe("palette schema", () => {
   })
 })
 
+describe("the mono family a pack may declare", () => {
+  const declared = STARTER_FONT_PACKS.filter((pack) => pack.monoFamily !== undefined)
+
+  /**
+   * The seam has an other end on the day it ships, which is the whole reason
+   * this field exists and `accentFamily` did not (0084). If this ever drops to
+   * zero the field is a comment again.
+   */
+  it("is declared by at least one registered pack", () => {
+    expect(declared.length).toBeGreaterThan(0)
+  })
+
+  /**
+   * A named face is a request, not a guarantee — Loom loads no fonts. Every
+   * stack therefore has to end somewhere that exists on every machine, or a
+   * host that does not serve the face gets a proportional body face for code.
+   */
+  it("ends every stack in the generic monospace family", () => {
+    for (const pack of declared) {
+      expect(pack.monoFamily?.trim().endsWith("monospace")).toBe(true)
+    }
+  })
+
+  it("leaves the packs with no opinion about code undeclared", () => {
+    expect(declared.length).toBeLessThan(STARTER_FONT_PACKS.length)
+  })
+})
+
 describe("themeVariables", () => {
   it("emits one custom property per palette slot", () => {
     const variables = themeVariables(resolved())
@@ -86,8 +114,20 @@ describe("themeVariables", () => {
     expect(variables["--loom-density"]).toBe("comfortable")
   })
 
-  it("omits the accent family when the pack declares none", () => {
-    expect(themeVariables(resolved())["--loom-accent-family"]).toBeUndefined()
+  /**
+   * The variable name is the contract: `tokens.ts` asks for
+   * `var(--loom-mono-family, <system stack>)`, so a rename on either side
+   * silently un-themes every code panel in the library rather than failing.
+   */
+  it("emits the mono family under the name the primitives read", () => {
+    expect(themeVariables(wearing("minimal-sans"))["--loom-mono-family"]).toBe(
+      minimalSansFontPack.monoFamily
+    )
+  })
+
+  it("omits the mono family when the pack declares none, leaving the reader's fallback to resolve", () => {
+    expect(editorialSerifFontPack.monoFamily).toBeUndefined()
+    expect(themeVariables(resolved())["--loom-mono-family"]).toBeUndefined()
   })
 
   it("is pure — the same theme twice gives the same variables", () => {
