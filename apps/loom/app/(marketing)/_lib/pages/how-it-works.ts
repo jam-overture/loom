@@ -13,10 +13,10 @@ import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
   DECISIONS_URL,
-  HOME,
+  DEMO,
   HOW_IT_WORKS,
-  internalHref,
   SITE_THEMES,
+  surfaceHref,
 } from "../site"
 
 import type { PageContext } from "./home"
@@ -202,22 +202,37 @@ const questions = (ids: IdFactory): LoomNode =>
     }),
   ])
 
+/**
+ * The foot of the page, and what a reader who has got this far wants next.
+ *
+ * It said *Read the decisions behind it* and offered the repository, then home.
+ * Someone who has just read five steps of how a change travels has one obvious
+ * next question — *show me one* — and until 22 August this site had nowhere to
+ * send them: the demonstration lived at `/portal/demo`, behind a path that
+ * reads as private, and nothing here linked to it. It is `/demo` now, public,
+ * so the reader who wanted to see the five steps run can.
+ *
+ * "Back to the start" is what the demo replaced, and it was the weakest of the
+ * three: home is the wordmark, a menu item marked as such, and a link in the
+ * footer's map. A fourth way to a page nobody is looking for is not a use of
+ * the last band on a page.
+ */
 const closing = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "accent", width: "full" }, "Read the decisions behind it", [
+  section(ids, { tone: "accent", width: "full" }, "Now watch it happen to a real page", [
     prose(
       ids,
-      "Every constraint above was argued in writing before it was code, and the arguments are in the repository next to it.",
+      "The five steps above are not a diagram of something that happens elsewhere. Ask a page to change and you can read every one of them, in order, as it runs.",
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
-      action(ids, "The decision records", DECISIONS_URL, {
+      action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
         variant: "primary",
         scale: "large",
-        external: true,
       }),
-      action(ids, "Back to the start", internalHref(context.origin, HOME.path, context.theme), {
+      action(ids, "The decision records", DECISIONS_URL, {
         variant: "secondary",
         scale: "large",
+        external: true,
       }),
     ]),
   ], { align: "center" })

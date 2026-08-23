@@ -1,4 +1,4 @@
-# 0084. A behaviour is a control the runtime builds and a primitive places
+# 0086. A behaviour is a control the runtime builds and a primitive places
 
 **Status:** Accepted
 **Date:** 2026-08-22

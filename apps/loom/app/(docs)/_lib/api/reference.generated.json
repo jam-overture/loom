@@ -2787,7 +2787,7 @@
               "kind": "schema",
               "signature": "const fontPackSchema: z.ZodObject<…>",
               "truncated": false,
-              "summary": ""
+              "summary": "A pack declares a face for each role the library actually reads, and no others. There were three roles here and a primitive read two of them: an `accentFamily` was emitted as `--loom-accent-family` and referenced by nothing, while `loom.code` and `loom.kbd` needed a monospace face the vocabulary had no word for. A variable a host can set and no primitive consults is worse than an absent one — it looks like a seam and behaves like a comment."
             },
             {
               "name": "FontPack",
@@ -4290,6 +4290,48 @@
           ]
         },
         {
+          "module": "primitives/loom.comparison",
+          "title": "loom.comparison",
+          "summary": "One intersection of a comparison: what this subject does about this criterion.",
+          "symbols": [
+            {
+              "name": "loomComparison",
+              "kind": "value",
+              "signature": "const loomComparison: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.comparison-row",
+          "title": "loom.comparison-row",
+          "summary": "One criterion, answered across every subject in the table.",
+          "symbols": [
+            {
+              "name": "loomComparisonRow",
+              "kind": "value",
+              "signature": "const loomComparisonRow: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.comparison-table",
+          "title": "loom.comparison-table",
+          "summary": "The band that answers *how is this different from what I use now* — subjects across the top, criteria down the side, and a verdict at every intersection.",
+          "symbols": [
+            {
+              "name": "loomComparisonTable",
+              "kind": "value",
+              "signature": "const loomComparisonTable: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.divider",
           "title": "loom.divider",
           "summary": "The enum-driven one: `ornament` selects between three genuinely different renderings, not three values of the same property.",
@@ -4885,7 +4927,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.mosaic`: one column until there is room for six. */\n    readonly mosaic: \"loom-mosaic\";\n    /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */\n    readonly mosaicAlternating: \"loom-mosaic-alternating\";\n    readonly mosaicShowcase: \"loom-mosaic-showcase\";\n    readonly mosaicLead: \"loom-mosaic-lead\";\n}",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /** A `loom.mosaic`: one column until there is room for six. */\n    readonly mosaic: \"loom-mosaic\";\n    /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */\n    readonly mosaicAlternating: \"loom-mosaic-alternating\";\n    readonly mosaicShowcase: \"loom-mosaic-showcase\";\n    readonly mosaicLead: \"loom-mosaic-lead\";\n}",
               "truncated": false,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },

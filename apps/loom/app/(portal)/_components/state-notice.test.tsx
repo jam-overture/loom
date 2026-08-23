@@ -73,11 +73,11 @@ describe("StateNotice", () => {
 
   it("renders the action, because an empty state that names no next step is a dead end", () => {
     render(
-      <StateNotice tone="empty" title="nothing here" action={<a href="/portal/demo">try the demo</a>}>
+      <StateNotice tone="empty" title="nothing here" action={<a href="/demo">try the demo</a>}>
         body
       </StateNotice>
     )
 
-    expect(screen.getByRole("link", { name: "try the demo" }).getAttribute("href")).toBe("/portal/demo")
+    expect(screen.getByRole("link", { name: "try the demo" }).getAttribute("href")).toBe("/demo")
   })
 })

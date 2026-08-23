@@ -143,7 +143,7 @@ belongs in the same change as the button.
 ## Records
 
 **Added
-[0084](../decisions/0084-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)**
+[0086](../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)**
 — *A behaviour is a control the runtime builds and a primitive places.* Accepted.
 Nothing superseded; nothing contradicted. It extends 0055's bargain from motion
 to behaviour, and reaches the same conclusion 0053 and 0055 both reached about

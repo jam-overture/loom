@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import Link from "next/link"
 
+import { Search } from "@/app/(docs)/_components/search"
 import { ThemeScript } from "@/app/(docs)/_components/theme-script"
 import { ThemeToggle } from "@/app/(docs)/_components/theme-toggle"
 
@@ -51,6 +52,16 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
           </Link>
 
           <div className="flex items-center gap-3">
+            {/*
+             * The search sits before the badge and after the wordmark, which is
+             * where a reader's eye already goes looking for it on every
+             * reference site they have used. It is the only control here that
+             * is present at every width — the badge and the repository link
+             * both stand down on a phone, and search is the one thing a reader
+             * on a phone needs most, because the rail is behind a menu there.
+             */}
+            <Search />
+
             {/* The header's one green: a mint ring, which is where this theme
                 spends the colour it is sparing with. */}
             <span className="border-accent-ring text-ink-faint hidden rounded-full border px-2 py-0.5 text-[0.65rem] tracking-wide uppercase sm:inline">
@@ -58,7 +69,7 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
             </span>
             <a
               href="https://github.com/jam-overture/loom"
-              className="text-ink-muted hover:text-ink text-sm transition-colors"
+              className="text-ink-muted hover:text-ink hidden text-sm transition-colors sm:inline"
             >
               GitHub
             </a>

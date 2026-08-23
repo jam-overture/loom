@@ -1,16 +1,20 @@
 import { readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { PALETTE_SLOTS } from "@loom/runtime"
+import { PALETTE_SLOTS, type ElementNode, type LoomNode } from "@loom/runtime"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
+import { ASKS } from "../adapt/asks"
+import { BAND } from "../bands"
 import { PALETTE_SWITCHER_LABEL } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
-import { renderTree, SITE_PAGES, treeFor } from "../render"
+import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import {
   DEFAULT_THEME,
+  DEMO,
   HOME,
+  HOW_IT_WORKS,
   internalHref,
   PRODUCT_SURFACES,
   SITE_ROUTES,
@@ -283,6 +287,90 @@ describe("the words that are not engineering's to write", () => {
  * that could not happen. A surface added by another run is not a run that will
  * think to look here, so the assertion is the thing that has to.
  */
+/**
+ * Where the site sends someone who wants to *try* it, rather than read about it.
+ *
+ * The demonstration is the one surface that is the product working, and until
+ * 22 August nothing under this route group linked to it from anywhere — it sat
+ * at `/portal/demo`, a public page behind the one path that reads as private,
+ * and the front door had no route to the artifact that exists to convince
+ * people. `Loom demo` moved it to a public `/demo` and filed exactly that.
+ *
+ * Three placements, and each is a different reader, which is why all three are
+ * held rather than one being taken as enough:
+ *
+ * - **The opening band of the front door**, for the reader who is not going to
+ *   scroll. The sentence above the button promises they can ask for a change in
+ *   their own words, and this is the only place on the site that keeps it.
+ * - **The band that demonstrates**, for the reader who just watched the
+ *   sequence run and wants a turn.
+ * - **The foot of the mechanism page**, for the reader who has read all five
+ *   steps and wants to see one.
+ *
+ * Each is asserted where the link *is* rather than that the page contains the
+ * href somewhere: the chrome links every surface from every page, so a check of
+ * the whole markup would pass with all three of these deleted.
+ */
+describe("the way to the demonstration", () => {
+  const DEMO_HREF = surfaceHref(ORIGIN, DEMO)
+
+  const bandWith = (node: LoomNode, holds: (found: ElementNode) => boolean): ElementNode[] => [
+    ...(node.kind === "element" && holds(node) ? [node] : []),
+    ...(node.kind === "text" ? [] : node.children.flatMap((child) => bandWith(child, holds))),
+  ]
+
+  const hrefsIn = (node: LoomNode): readonly string[] =>
+    bandWith(node, () => true).flatMap((found) =>
+      typeof found.props["href"] === "string" ? [found.props["href"]] : []
+    )
+
+  const bandOf = (route: SiteRoute, holds: (found: ElementNode) => boolean): ElementNode => {
+    const found = bandWith(treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }).root, holds)[0]
+
+    if (found === undefined) throw new Error(`loom: ${route.path} has no such band`)
+
+    return found
+  }
+
+  it("is offered in the front door's opening band, before anything is scrolled", () => {
+    const hero = bandOf(HOME, (found) => found.type === "loom.hero")
+
+    expect(hrefsIn(hero)).toContain(DEMO_HREF)
+  })
+
+  it("is offered by the band that demonstrates, which is where the typing is missing", () => {
+    const band = bandOf(HOME, (found) => found.props["eyebrow"] === BAND.seeItHappen)
+
+    expect(hrefsIn(band)).toContain(DEMO_HREF)
+  })
+
+  /**
+   * Every state of that band, not the untouched one. The band is rebuilt for
+   * each choice and again when a held change is approved, and a link that
+   * survived only the state nobody arrives at having used would be worse than
+   * no link — the reader likeliest to want a turn is the one who has just had
+   * a change happen in front of them.
+   */
+  it.each([undefined, ...ASKS.map((ask) => ask.id)])(
+    "survives the front door being asked for %s",
+    async (ask) => {
+      const page = await pageTreeFor(HOME, {
+        origin: ORIGIN,
+        theme: DEFAULT_THEME,
+        ...(ask === undefined ? {} : { ask }),
+      })
+
+      expect(hrefsIn(page.root)).toContain(DEMO_HREF)
+    }
+  )
+
+  it("closes the mechanism page, for the reader who has read all five steps", () => {
+    const closing = bandOf(HOW_IT_WORKS, (found) => found.props["tone"] === "accent")
+
+    expect(hrefsIn(closing)).toContain(DEMO_HREF)
+  })
+})
+
 describe("a surface added to the product", () => {
   const home = markupOf(HOME, DEFAULT_THEME)
 
@@ -296,5 +384,39 @@ describe("a surface added to the product", () => {
 
     expect(offers).toBeGreaterThanOrEqual(2)
     expect(home).toContain(surface.blurb)
+  })
+
+  /**
+   * And the band is the surfaces exactly, rather than the surfaces plus
+   * whatever else has accumulated in it.
+   *
+   * It carried a fifth card pointing at the repository, which was fine while
+   * there were three surfaces and wrong once the demo made it four: the grid
+   * wraps at four, so the odd card sat alone on a second row — and it was the
+   * only card in the band that was not a page of this product. Removed on
+   * 22 August, and asserted so that the next thing tempted into "Where to go
+   * from here" has to be a surface or has to change this test.
+   */
+  it("is the whole of the band that invites, and nothing else is", () => {
+    const inviting = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+      .root.children.find(
+        (child) => child.kind === "element" && child.props["eyebrow"] === BAND.waysIn
+      )
+
+    expect(inviting).toBeDefined()
+
+    const offered = [...(inviting as ElementNode).children]
+      .flatMap(function hrefs(node: LoomNode): readonly string[] {
+        return [
+          ...(node.kind === "element" && typeof node.props["href"] === "string"
+            ? [node.props["href"]]
+            : []),
+          ...(node.kind === "text" ? [] : node.children.flatMap(hrefs)),
+        ]
+      })
+
+    expect([...offered].sort()).toEqual(
+      PRODUCT_SURFACES.map((surface) => surfaceHref(ORIGIN, surface)).sort()
+    )
   })
 })
