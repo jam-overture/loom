@@ -1,5 +1,10 @@
 import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
-import type { DispositionReasonCode, StakeLevel } from "@loom/runtime"
+import type { DispositionReasonCode, NodeKind, StakeLevel } from "@loom/runtime"
+import {
+  describeAddressing,
+  type Addressing,
+  type UnaddressableReason,
+} from "@loom/runtime/react"
 
 /*
  * The demo moved out of this route group to `app/(demo)` on 21 August, and this
@@ -51,13 +56,25 @@ const TONE_CLASSES: Readonly<Record<OutcomeTone, string>> = {
 
 export const toneClasses = (tone: OutcomeTone): string => TONE_CLASSES[tone]
 
-export type PlainState = {
+/**
+ * Three strings for one idea: the two a person reads, and the runtime's own.
+ *
+ * Split out of `PlainState` when the page screen needed the same treatment for
+ * things that are not a change's outcome and so have no tone — what a part of a
+ * page *is*, and whether it can be clicked. The shape is the contract the rule
+ * at the top of this file describes, and a tone is an extra a state carries
+ * rather than part of it.
+ */
+export type PlainWord = {
   /** What a person reads first. Shown unasked; never a runtime identifier. */
   readonly label: string
   /** One sentence explaining it to somebody who has read no decision record. */
   readonly meaning: string
   /** The runtime's own name for it, kept for the technical record. */
   readonly technical: string
+}
+
+export type PlainState = PlainWord & {
   readonly tone: OutcomeTone
 }
 
@@ -291,4 +308,88 @@ export const confidenceWord = (confidence: number): string => {
   if (confidence >= 0.5) return "The AI says it is not certain"
 
   return "The AI says it is unsure"
+}
+
+/**
+ * What one part of a page is.
+ *
+ * `element`, `slot` and `text` are the three kinds a tree is made of, and they
+ * are exactly the words the page screen printed at a reviewer under a heading
+ * reading `kind`. They are good names for a tree and useless names for a
+ * person: nothing about "slot" tells you it is the space a card's body goes in.
+ *
+ * The runtime's word is kept, because somebody reading the schema alongside the
+ * screen needs to know which is which — it is one click down, like everything
+ * else the runtime says.
+ */
+export const PART_KINDS: Readonly<Record<NodeKind, PlainWord>> = {
+  element: {
+    label: "A piece of the page",
+    meaning: "Something Loom knows how to draw — a heading, a card, a block of writing.",
+    technical: "element",
+  },
+  slot: {
+    label: "A space inside a piece",
+    meaning: "A named space that holds whatever has been put in it, like the body of a card.",
+    technical: "slot",
+  },
+  text: {
+    label: "Words",
+    meaning: "The words themselves, inside whatever piece they sit in.",
+    technical: "text",
+  },
+}
+
+/**
+ * Why a part of the page cannot be clicked, in a person's words.
+ *
+ * The runtime's own reasons are accurate and each one names a mechanism the
+ * reader has no reason to know: `this primitive does not spread loom.editable`
+ * is a sentence about a props helper. What a person needs is why the thing in
+ * front of them does not respond and whether that means anything is broken —
+ * and in every case here, nothing is.
+ */
+const POINTING_REASONS: Readonly<Record<UnaddressableReason, string>> = {
+  "not-an-element":
+    "Words and named spaces have no box of their own on the page, so there is nothing there to click.",
+  "undecorated-primitive":
+    "Whatever draws this doesn't mark itself as clickable, so Loom can't find it on the page.",
+  absent: "This part isn't on the page any more.",
+}
+
+/**
+ * What clicking the page would actually reach, when the reader has picked
+ * something.
+ *
+ * 0019 is explicit that a selection falling back to an ancestor must be stated
+ * rather than performed silently, and this is where that promise is kept in a
+ * person's words. The important half is the reassurance the runtime's sentence
+ * never gave: **a part you cannot click is still a part you can change.**
+ * Pointing is about the DOM; scoping a request is about the tree, and a reader
+ * told only "this node renders without an element of its own" has no way to
+ * know that asking for a change here still works.
+ */
+export const pointingWords = (addressing: Addressing): PlainWord => {
+  const technical = describeAddressing(addressing)
+
+  switch (addressing.outcome) {
+    case "addressable":
+      return {
+        label: "You can click this on the page",
+        meaning: "Clicking it in the page above picks exactly this part.",
+        technical,
+      }
+    case "delegated":
+      return {
+        label: "Clicking the page picks the part around it",
+        meaning: `${POINTING_REASONS[addressing.reason]} A click lands on the part it sits inside instead. Picking it from the list works, and a change you ask for still applies to this part.`,
+        technical,
+      }
+    case "unaddressable":
+      return {
+        label: "This one can't be clicked on the page",
+        meaning: `${POINTING_REASONS[addressing.reason]} Nothing around it can be clicked either, so the list is the only way to pick it — and a change you ask for still applies to it.`,
+        technical,
+      }
+  }
 }

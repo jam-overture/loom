@@ -1,14 +1,21 @@
 import { describe, expect, it } from "vitest"
 
-import { dispositionReasonCodeSchema, stakeLevelSchema } from "@loom/runtime"
+import { dispositionReasonCodeSchema, stakeLevelSchema, type NodeId, type NodeKind } from "@loom/runtime"
+import {
+  describeAddressing,
+  type Addressing,
+  type UnaddressableReason,
+} from "@loom/runtime/react"
 import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
 
 import {
   CANNOT_UNDO,
   CHANGE_STATES,
+  PART_KINDS,
   STAKES,
   confidenceWord,
   plainState,
+  pointingWords,
   ruleSentence,
   stateOfRevert,
   stateOfWrite,
@@ -236,5 +243,135 @@ describe("toneClasses", () => {
 
   it("gives each tone its own classes", () => {
     expect(new Set(everyTone.map(toneClasses)).size).toBe(everyTone.length)
+  })
+})
+
+/**
+ * The page screen's half of the table. `element`, `slot` and `text` were printed
+ * at a reviewer under a heading reading `kind`, which is the schema's own word
+ * for the schema's own three cases.
+ */
+describe("PART_KINDS", () => {
+  const everyKind: readonly NodeKind[] = ["element", "slot", "text"]
+
+  it("names every kind of part a tree can hold", () => {
+    for (const kind of everyKind) {
+      expect(PART_KINDS[kind].label.length, kind).toBeGreaterThan(3)
+      expect(PART_KINDS[kind].meaning, kind).toMatch(/[.]$/)
+    }
+  })
+
+  it("never leads with the runtime's own word", () => {
+    for (const kind of everyKind) {
+      expect(PART_KINDS[kind].label.toLowerCase(), kind).not.toContain(kind)
+    }
+  })
+
+  it("keeps the runtime's own word, so a reader can match the two up", () => {
+    for (const kind of everyKind) {
+      expect(PART_KINDS[kind].technical).toBe(kind)
+    }
+  })
+
+  it("gives each kind its own label", () => {
+    expect(new Set(everyKind.map((kind) => PART_KINDS[kind].label)).size).toBe(everyKind.length)
+  })
+})
+
+/**
+ * The sentence 0019 requires and the sentence it never occurred to the runtime
+ * to write. Delegation is stated — that is 0019 — but the reader's actual
+ * question is whether the thing they have picked can still be changed, and for
+ * every one of these outcomes the answer is yes.
+ */
+describe("pointingWords", () => {
+  const addressable: Addressing = { outcome: "addressable", nodeId: "n_1" as NodeId }
+
+  const delegated = (reason: UnaddressableReason): Addressing => ({
+    outcome: "delegated",
+    nodeId: "n_card" as NodeId,
+    requested: "n_text" as NodeId,
+    reason,
+  })
+
+  const unaddressable = (reason: UnaddressableReason): Addressing => ({
+    outcome: "unaddressable",
+    requested: "n_text" as NodeId,
+    reason,
+  })
+
+  const everyReason: readonly UnaddressableReason[] = [
+    "not-an-element",
+    "undecorated-primitive",
+    "absent",
+  ]
+
+  const everyAddressing: readonly Addressing[] = [
+    addressable,
+    ...everyReason.map(delegated),
+    ...everyReason.map(unaddressable),
+  ]
+
+  it("answers for every shape of addressing the runtime can produce", () => {
+    for (const addressing of everyAddressing) {
+      const plain = pointingWords(addressing)
+
+      expect(plain.label.length, addressing.outcome).toBeGreaterThan(10)
+      expect(plain.meaning, addressing.outcome).toMatch(/[.]$/)
+    }
+  })
+
+  /**
+   * The property the whole redirection is for. `loom.editable`, `primitive`,
+   * `node`, `selection` and `ancestor` are all in the runtime's sentence for
+   * one of these, and none of them may reach the surface.
+   */
+  it("keeps the runtime's vocabulary out of what a person reads", () => {
+    const jargon = /\b(node|nodes|primitive|primitives|selection|ancestor|delegat\w*|DOM|tree)\b/i
+
+    for (const addressing of everyAddressing) {
+      const plain = pointingWords(addressing)
+
+      expect(plain.label, plain.label).not.toMatch(jargon)
+      expect(plain.meaning, plain.meaning).not.toMatch(jargon)
+    }
+  })
+
+  /** Guards the guard: the technical reading must actually trip that regex. */
+  it("finds the vocabulary it bans in the reading it is kept out of", () => {
+    expect(pointingWords(delegated("undecorated-primitive")).technical).toMatch(
+      /\b(primitive|node|selection)\b/i
+    )
+  })
+
+  /**
+   * The sentence that was missing. Pointing is about the DOM and scoping is
+   * about the tree, so a part nobody can click is still a part anybody can
+   * change — and a reader told only that a click "falls back" has no way to
+   * know it.
+   */
+  it("tells a reader a part they cannot click is still a part they can change", () => {
+    for (const reason of everyReason) {
+      for (const addressing of [delegated(reason), unaddressable(reason)]) {
+        expect(pointingWords(addressing).meaning, reason).toContain("still applies")
+      }
+    }
+  })
+
+  it("says plainly when a click does reach the thing asked for", () => {
+    expect(pointingWords(addressable).meaning).toContain("exactly this part")
+  })
+
+  /** Each reason is a different fact about the page, so each gets its own words. */
+  it("gives every reason its own sentence", () => {
+    const meanings = everyReason.map((reason) => pointingWords(delegated(reason)).meaning)
+
+    expect(new Set(meanings).size).toBe(everyReason.length)
+  })
+
+  it("keeps the runtime's own description verbatim, one click down", () => {
+    for (const addressing of everyAddressing) {
+      expect(pointingWords(addressing).technical).toBe(describeAddressing(addressing))
+    }
   })
 })

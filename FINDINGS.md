@@ -6291,3 +6291,188 @@ options in the 21 August entry is a line in `docs/routines.md` making *open the
 pull request, unsubscribe, exit* a step rather than a judgement call. Two
 routines have now spent tokens deciding it from first principles, which is the
 smaller version of the cost being avoided.
+
+---
+
+## 2026-08-23 — a phone screenshot found a reading order eleven tests could not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-10-the-page-you-are-working-on`
+
+`/portal/pages/[treeId]` laid its two columns out with `lg:flex-row-reverse`,
+which puts the outline first in the source so it lands on the right of a wide
+screen. On a wide screen that works and it is why it was written that way.
+
+On a narrow one the row is not a row, so **the source order is the reading
+order**. A visitor on a phone met `loom.page`, `loom.heading`, `loom.card` and
+"Nothing picked yet" before they met their own page, its name, or anything they
+could do — an address book for a thing they had not been shown. The `h1` was
+roughly 700 pixels down.
+
+The same reversal costs a keyboard user on *every* width: focus follows the
+source, so tabbing into the screen began in the right-hand column.
+
+Fixed by putting the page first and letting the rail sit right because it is
+second. Recorded because the lesson generalises past this file:
+
+> **A reversed flex row is a promise that the screen will never be one column.**
+> Every responsive layout breaks that promise at some width, and the reading
+> order it was hiding is the one a phone gets.
+
+The guard is `reading-order.test.ts`, which reads the route's source and asserts
+the page precedes the list of its parts and that no row is reversed. Crude, and
+the only check that catches this without a browser at two widths.
+
+**This is the fourth defect in five runs across this repository that was
+invisible to every test and obvious in a picture**, and the second of them mine.
+Worth saying plainly: the component tests for this screen were written before the
+screenshot and all forty-six passed against the broken order, because every one
+of them renders a component rather than the page.
+
+---
+
+## 2026-08-23 — the revision line read `revision 0 — 0 changes have been applied`
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-10-the-page-you-are-working-on`
+
+Also found by the screenshot rather than by a test. The page header put the
+revision link first and the plain sentence second, which at `revision 0` printed
+the same number twice and led with the runtime's handle — on exactly the page a
+new person opens first, since a deployment that has just seeded is at revision 0
+by definition.
+
+The order is now the sentence and then the handle, and zero has its own wording.
+Recorded because the general form is worth having: **a count and an identifier
+that carry the same number are one fact, and the person's half goes first.**
+
+---
+
+## 2026-08-23 — `/portal/pages/[treeId]` renamed, and the rename queue is down to two
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Updating the 22 August entry rather than replacing it. Where the 18 August
+redirection stands after this run.
+
+**Done:** `/portal/trees` → `/portal/pages`, `/portal/calibration` →
+`/portal/trust`, `/portal/audit` → `/portal/checkup`, each with a 308 at the old
+path — and now the page screen itself, which was the biggest remaining piece and
+the least route-shaped. It needed no route rename at all; it needed `preview`,
+`outline`, `node`, `kind`, `addresses`, `scoped to`, `propose` and `composed on
+the server, gated, then written` taken off the surface and put one click down.
+
+**Still in the runtime's voice:** `/portal/activity` and `/portal/history`.
+`episode` and `in-flight` on Activity, the revision rows on History. Unchanged
+from the 22 August assessment: their route names are already a person's words,
+and neither has a verdict-shaped answer, so the pattern that fits them is the
+review queue's.
+
+**The vocabulary module now carries the page screen's words too.** `PART_KINDS`
+and `pointingWords` sit beside `CHANGE_STATES` and `STAKES` in
+`_lib/vocabulary.ts`, which is the brief's "in one place, not per component"
+holding for a second kind of word: what a thing *is*, not only what became of it.
+`PlainState` was split into `PlainWord` plus a tone to make room, because a part
+of a page has no outcome and so no tone.
+
+**One sentence in `pointingWords` is new rather than translated**, and it is the
+one worth keeping if the rest is ever reworded: *a part you cannot click is
+still a part you can change.* Pointing is about the DOM and scoping a request is
+about the tree — `PromptBox` posts the requested node, not the addressed one —
+so it was always true and the screen never said it. 0019 requires the fallback
+to be stated; it does not require the reassurance, and the reassurance is what a
+reader actually needs.
+
+---
+
+## 2026-08-23 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Every export used is public: `describeAddressing`, `addressedNodeId`,
+`Addressing`, `UnaddressableReason`, `NodeKind`, `describeRenderDiagnostic`,
+`RenderDiagnostic`, `primitiveTypeSchema`. 0018 holds for a fifth surface.
+
+`UnaddressableReason` had not been consumed by the portal before. It is exported
+from `@loom/runtime/react` and it is what makes `pointingWords` able to give each
+reason its own sentence rather than one sentence for all three — so a public type
+that looked decorative turned out to be load-bearing for the redirection. Worth
+recording only because the tempting alternative was to switch on
+`describeAddressing`'s *output string*, which would have been the portal parsing
+the runtime's prose.
+
+---
+
+## 2026-08-23 — the preview URL, unreachable from the routine that has to publish it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+noted against the 21 August entry rather than filed as a new problem
+
+`*.vercel.app` is not in `sandbox.network.allowedDomains`, so `curl` against the
+preview for #145 returns `000`. The brief requires every portal pull request to
+carry the deployed preview URL, and a routine can publish one it has never
+loaded.
+
+What makes it tolerable rather than urgent: **GitHub's own commit status is a
+second source.** Vercel posted `state: success`, *"Deployment has completed"*,
+against the head commit, so the URL in the pull request body is attested by the
+deploying service even though I could not fetch it. The body says so explicitly
+rather than implying I checked.
+
+What it costs is narrower than "cannot verify the preview" and worth naming
+precisely: a deployment can be **Ready and wrong** — the build succeeds and the
+page renders something nobody would ship — and that is exactly the class of
+defect this lane keeps finding in pictures rather than in tests. A local
+production build is the substitute and it is a good one, but it cannot catch
+anything that differs between local and the deployment.
+
+Recorded against the 21 August entry, which is a fifth or sixth sighting of the
+same shape. **Not a request to widen egress**: `docs/routines.md` is explicit
+that the narrow allowlist is the security-relevant half of the sandbox, and a
+preview URL is a low-value reason to widen it. If it is ever widened, the useful
+form is this project's own deployments and nothing else.
+
+---
+
+## 2026-08-23 — a screenshot cannot be embedded in a pull request, and a broken embed looks like a missing one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+worked around, and the workaround is worse than the thing it replaces
+
+Every routine brief with a visual surface requires a screenshot on the pull
+request. On #145 only the **first** image in the body rendered; every image after
+it came back wrapped in double backticks — `![alt](``https://…``)` — which is
+invalid markdown and shows as broken.
+
+What it is not, because I tried all three:
+
+- not the `<details>`/`<summary>` wrapper, which was stripped separately;
+- not the URL form — `raw.githubusercontent.com` and query-string variants both
+  did it, and the backticks simply moved to enclose the query string too;
+- not a GitHub limit. The `vercel[bot]` comment on the same pull request embeds
+  `ready.svg` and an avatar without trouble.
+
+It is specific to the write path this routine posts through, and it is almost
+certainly deliberate — wrapping image URLs is what you would do to stop an agent
+embedding a tracking pixel or an image-borne injection. **That is a good reason,
+which is why this is filed rather than worked around quietly.**
+
+In a *comment* the sanitiser is stricter still: all three images were wrapped,
+with no clean first one.
+
+**The workaround** is a link per screenshot —
+`…/blob/<branch>/reports/<file>.png?raw=1` — which works and which the maintainer
+can click. It is worse in the way that matters: the brief exists because *"this
+surface exists to be looked at, and the maintainer judges it by eye"*, and a link
+is a thing you have to decide to open. Four screenshots inline are seen; four
+links are seen by whoever is already curious.
+
+**What would actually fix it** is not mine and is not obvious. Options, in the
+order I would try them: allow embeds from `raw.githubusercontent.com` under this
+repository only, since that is content the routine committed and the maintainer
+can diff; or have the routine commit an index page of the run's visuals to
+`reports/` and link that once, which is one click instead of four.
+
+Recorded now because it will recur on every visual lane's next pull request, and
+because a broken embed is indistinguishable from a routine that forgot the
+screenshot — which is the more damaging reading, and the wrong one.
