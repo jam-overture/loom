@@ -152,8 +152,29 @@ const intentFor = (page: LoomTree, ask: Ask, runtime: CompositionRuntime): EditI
  * change the rules would now refuse stays refused however emphatically it was
  * approved.
  */
-export const runAsk = async (page: LoomTree, ask: Ask, approve = false): Promise<AskRun> => {
-  const idFactory = sequentialIdFactory("ask")
+/**
+ * The namespace the ids of anything this request adds are drawn from.
+ *
+ * One request is one run, so a fresh factory per run is right — and on the
+ * front door, where exactly one request is ever run against a page, the
+ * namespace never needs to differ. A *history* runs several against the same
+ * page, and two runs of the same namespace hand out the same ids: the second
+ * request to add a band asks the page to hold a piece it is already holding,
+ * and the page refuses it. That refusal is correct and the request was not, so
+ * the caller says which run this is rather than the page being asked to
+ * tolerate a collision.
+ *
+ * Lowercase letters and digits only, and `sequentialIdFactory` says so.
+ */
+const RUN_NAMESPACE = "ask"
+
+export const runAsk = async (
+  page: LoomTree,
+  ask: Ask,
+  approve = false,
+  namespace: string = RUN_NAMESPACE
+): Promise<AskRun> => {
+  const idFactory = sequentialIdFactory(namespace)
   const runtime: CompositionRuntime = {
     interpreter: askInterpreter(ask, idFactory, systemClock),
     policySource: fixedPolicy(FRONT_DOOR_POLICY),

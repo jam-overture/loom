@@ -34,8 +34,16 @@ export const HOW_IT_WORKS: SiteRoute = {
     "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
 }
 
+export const THE_RECORD: SiteRoute = {
+  path: "/the-record",
+  label: "The record",
+  title: "The record — what changed, who asked, and how to put it back",
+  description:
+    "Ask the front page for one change after another and watch the list fill in: what each request turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
+}
+
 /** Every route, in nav order. A route that is not here has no way to be reached. */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS]
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RECORD]
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -261,6 +269,34 @@ export const askHref = (
   if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
   if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
   if (options.approve === true) url.searchParams.set("approve", "1")
+
+  return url.toString()
+}
+
+/**
+ * The record page, with the run of changes it is reporting on in the address.
+ *
+ * Same argument as `askHref` and the same property: the page keeps nothing, so
+ * a history is not a session — it is a list of requests written into the URL,
+ * replayed from the front door as it is published every time the page is
+ * loaded. Two people can read the same history a week apart and get the same
+ * answer, and neither of them can move it under the other.
+ *
+ * The sequence arrives here already written out. Composing it is
+ * `adapt/history.ts`'s job and that module imports this one, so a `changes`
+ * string rather than a list of asks is what keeps the two from importing each
+ * other.
+ */
+export const recordHref = (
+  origin: string,
+  options: { readonly theme?: SiteThemeName; readonly changes?: string } = {}
+): string => {
+  const url = new URL(THE_RECORD.path, `${origin}/`)
+
+  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
+  if (options.changes !== undefined && options.changes.length > 0) {
+    url.searchParams.set("changes", options.changes)
+  }
 
   return url.toString()
 }

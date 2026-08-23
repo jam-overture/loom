@@ -6083,3 +6083,68 @@ Nothing was wanted from another lane to build this. The change is one probe in
 delta model, the store or the SDK's other seams. `src/submit/` was read and not
 touched — the probe borrows its `SubmissionOutcome` type and nothing else, which
 is the seam behaving as `0065` designed it.
+
+---
+
+## 2026-08-23 — `loom.card` cannot be stacked: a column of cards clips the tallest
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+`loom.card` sets `height: 100%` on itself and `overflow: hidden`. Both are right
+for the case it was built for — a card in a grid row beside two others, where
+equal heights are the point and the media region has to be clipped to the
+corners. Together they are wrong for a **column** of cards, which is what a page
+that lists things wants.
+
+Measured on `/the-record`, three cards as siblings in one `loom.section`, at a
+1440px viewport:
+
+| card | own content | rendered height | lost |
+| --- | --- | --- | --- |
+| the outline | 642px | 488px | **154px cut off** |
+| first entry | 486px | 488px | — |
+| second entry | 486px | 488px | — |
+
+All three came out the same height and the tallest lost the bottom quarter of
+itself — a heading, two rows of the list and the action under it, gone with no
+diagnostic and no scrollbar. `loom.section` lays its children out as a flex
+column, so nothing in the tree asked for equal heights; the cards asked for them
+themselves.
+
+**The front door does not show this** because it has exactly one card on it. Any
+page that lists cards does, which is most pages that would want a card.
+
+**Worked around rather than fixed**, per the rule: each card on `/the-record`
+sits inside a single-child `loom.stack`, where `height: 100%` resolves to the
+card's own height. A test holds the wrappers in place with the reason attached,
+because a run tidying them away would get a page that renders, passes every
+other assertion, and silently loses the bottom of the list.
+
+**What would close it.** Whatever the primitives lane thinks right — the
+narrowest fix is for the card to stop asserting its own height and let its
+parent decide, since a grid already stretches its items and a column already
+does not. If equal heights in a grid must survive, an `align: "stretch"` on the
+grid rather than `height: 100%` on every card is the same result from the side
+that knows the layout.
+
+---
+
+## 2026-08-23 — the site's menu is six links now, and the phone header is three rows
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+A measurement against the 19 August entry above — *a page cannot collapse its own
+menu, and probably should not try* — rather than an argument with it. That entry
+recommended accepting the wrap, and priced it at **four to six links on two
+rows**.
+
+`/the-record` is this site's third route, so the header now carries six items:
+three site routes, two open surfaces, and the sign-in action. At 390px that is
+**three rows**, about a quarter of the first screen before a visitor reads a
+word.
+
+Nothing was dropped to keep the bar short, and that is deliberate: 0070 asks for
+every surface to be reachable from every page, and a menu that hides a surface on
+a phone is a worse answer than a menu that wraps. But the trade the 19 August
+entry priced has been passed, and the lane that owns it should know the number
+rather than find out from a screenshot.
