@@ -1,39 +1,49 @@
 import {
-  composeChange,
-  confirmChange,
+  err,
   fixedPolicy,
   sequentialIdFactory,
   systemClock,
+  type ChangeAssessment,
+  type ChangeInterpreter,
   type Clock,
-  type CompositionOutcome,
   type CompositionRuntime,
-  type ConfirmationOutcome,
   type EditIntent,
   type IdFactory,
   type LoomTree,
-  type ProposedChange,
   type RuntimeEventEnvelope,
 } from "@loom/runtime"
+import { planReverts, type RevertPlan, type StoredRevision } from "@loom/runtime/store"
+import {
+  commitIntent,
+  confirmHeld,
+  revertRevision,
+  type RevertOutcome,
+  type WriteOutcome,
+  type WritePath,
+} from "@loom/runtime/write"
 
 import { docsGatePolicy } from "./policy"
 import { docsPresetInterpreter, type DocsPreset } from "./presets"
+import type { DocsSession } from "./session"
 
 /**
- * One trip through the runtime, for one chip on one example.
+ * One trip through the runtime, for one thing a reader clicked.
  *
- * This module is the whole of what the site does when a reader clicks: build an
- * intent, hand it to `composeChange`, keep what came back. There is no store, no
- * session and no server — the pipeline is a pure function of the tree and the
- * intent, so the entire sequence runs in the reader's browser and the page they
- * are looking at is the real thing rather than a recording of it.
+ * Every operation here goes through **`commitIntent`**, which is the one write
+ * path (0017): read head, refuse an intent written against a revision head has
+ * moved past, compose, and — only if the Gate allowed it — append. There is no
+ * second route. An undo goes through it too, by way of `revertRevision`, which
+ * is the whole of 0032 in one sentence: undo is a proposal, judged like any
+ * other, rather than a rewind that skips the Gate.
  *
- * That is a deliberate limit as much as a convenience. A change here is applied
- * to a tree held in React state and is gone on reload: nothing is appended to a
- * log, nothing is attributed to anybody, and undo is therefore not offered,
- * because an undo is a proposal against a stored history (0032) and this site has
- * no history to propose against. What the record below *can* show is the inverse
- * delta the runtime computed — the undo it would make, if there were somewhere to
- * put it.
+ * It still all runs in the reader's browser. The interpreter is deterministic
+ * (0057) and the store is memory, so the entire sequence — interpret, analyse,
+ * weigh, judge, apply, append — happens between the click and the next paint,
+ * with no server, no key and no network.
+ *
+ * **The site's own reader, `readDocsLog`, reads the store rather than the
+ * clicks.** It would be easier to keep an array of what happened; it would also
+ * be a second record, and the whole argument for a log is that there is one.
  */
 
 /**
@@ -52,36 +62,49 @@ import { docsPresetInterpreter, type DocsPreset } from "./presets"
 export const docsChangeNamespace = (exampleId: string, step: number): string =>
   `${exampleId.replace(/[^0-9a-z]/g, "").slice(0, 16)}c${step}`
 
-export type DocsProposalRequest = {
-  readonly exampleId: string
-  readonly tree: LoomTree
-  readonly preset: DocsPreset
-  /** How many changes this example has been asked for already. Ids read from it. */
-  readonly step: number
-  readonly clock?: Clock
-}
+/**
+ * Who the log says asked. A site with no accounts still has to name somebody,
+ * because `answeredBy` exists to stop a confirmed change looking like a person
+ * waving through their own request (0029) — and a blank there would teach the
+ * opposite of what the page is about.
+ */
+export const DOCS_READER = "the reader"
+
+/** What a reader clicked, in the site's words rather than the runtime's. */
+export type DocsAsk =
+  | { readonly kind: "preset"; readonly preset: DocsPreset }
+  | { readonly kind: "undo"; readonly revision: number }
 
 /**
- * Everything one click produced, in the order a reader meets it: what was asked,
- * what the runtime made of it, and what the Gate said.
+ * Everything one click produced, in the order a reader meets it: what was
+ * asked, what the runtime made of it, and what the Gate said.
  *
- * The intent and the events are kept rather than summarised because the site
- * shows them. A documentation page that told a reader "the runtime records every
- * stage" and then displayed a verdict would be asking them to take the
- * interesting half on trust.
+ * `intent` and `assessment` are lifted out of the events rather than out of the
+ * outcome, because a `WriteOutcome` does not carry either: the write path
+ * reports what became of the change, and the stages that produced it narrate
+ * themselves (`intent-received`, `change-assessed`). Within one request those
+ * events carry the whole assessment on purpose — what survives the request is
+ * the narrowing that telemetry owns (0023). This is one request.
+ *
+ * `undo` never hands its intent to the caller either — the utterance behind a
+ * revert is a revision number rather than a sentence someone typed, so the
+ * runtime synthesises it. Reading it back off the event is how the box can show
+ * a reader that an undo asked for something, in the same shape as everything
+ * else.
  */
-export type DocsProposal = {
+export type DocsChange = {
   readonly step: number
-  readonly preset: DocsPreset
-  readonly intent: EditIntent
-  readonly outcome: CompositionOutcome
+  readonly ask: DocsAsk
+  readonly outcome: RevertOutcome
   readonly events: readonly RuntimeEventEnvelope[]
+  readonly intent?: EditIntent
+  readonly assessment?: ChangeAssessment
 }
 
 const collectingRuntime = (
   idFactory: IdFactory,
   clock: Clock,
-  interpreter: CompositionRuntime["interpreter"]
+  interpreter: ChangeInterpreter
 ): { readonly runtime: CompositionRuntime; readonly events: RuntimeEventEnvelope[] } => {
   const events: RuntimeEventEnvelope[] = []
 
@@ -102,6 +125,63 @@ const collectingRuntime = (
   }
 }
 
+/**
+ * The interpreter for a path that does not interpret.
+ *
+ * `confirmHeld` answers a proposal that was written and judged before the
+ * reader arrived; it re-judges, it does not re-plan. The seam still has to be
+ * filled, and filling it with the preset that wrote the original would be a
+ * quiet lie about what the confirmation does. This refuses, and the refusal is
+ * unreachable — which is the point of writing it down rather than reaching for
+ * the nearest interpreter to hand.
+ */
+const nothingToInterpret: ChangeInterpreter = {
+  interpret: () =>
+    Promise.resolve(
+      err({ code: "refused", detail: "answering a held proposal does not plan a new change" })
+    ),
+}
+
+/**
+ * The three things the write path needs, named rather than spread.
+ *
+ * A `DocsSession` carries two fields `WritePath` has no use for — the seed and
+ * the tree id, which the revert planner wants — and handing them over would be
+ * passing whatever happened to be in scope rather than what the seam asks for.
+ */
+const writePath = (session: DocsSession, runtime: CompositionRuntime): WritePath => ({
+  store: session.store,
+  holds: session.holds,
+  runtime,
+})
+
+const intentOf = (events: readonly RuntimeEventEnvelope[]): EditIntent | undefined => {
+  for (const envelope of events) {
+    if (envelope.event.type === "intent-received") return envelope.event.intent
+  }
+
+  return undefined
+}
+
+/**
+ * The last assessment, not the first.
+ *
+ * A hold answered later produces a second one — `confirmChange` re-assesses
+ * against the tree as it stands — and the box merges both halves of the run
+ * into one event list. The reader is looking at what is true now.
+ */
+const assessmentOf = (
+  events: readonly RuntimeEventEnvelope[]
+): ChangeAssessment | undefined => {
+  let found: ChangeAssessment | undefined
+
+  for (const envelope of events) {
+    if (envelope.event.type === "change-assessed") found = envelope.event.assessment
+  }
+
+  return found
+}
+
 const intentFor = (
   tree: LoomTree,
   preset: DocsPreset,
@@ -119,13 +199,22 @@ const intentFor = (
    * verdict.
    */
   origin: "user-instruction",
+  actor: DOCS_READER,
   utterance: preset.utterance,
   observedAt: clock.now(),
 })
 
-export const proposeDocsChange = async (
-  request: DocsProposalRequest
-): Promise<DocsProposal> => {
+export type DocsAskRequest = {
+  readonly session: DocsSession
+  readonly exampleId: string
+  readonly tree: LoomTree
+  readonly preset: DocsPreset
+  /** How many things this example has been asked for already. Ids read from it. */
+  readonly step: number
+  readonly clock?: Clock
+}
+
+export const askDocsChange = async (request: DocsAskRequest): Promise<DocsChange> => {
   const clock = request.clock ?? systemClock
   const idFactory = sequentialIdFactory(docsChangeNamespace(request.exampleId, request.step))
   const { runtime, events } = collectingRuntime(
@@ -134,57 +223,179 @@ export const proposeDocsChange = async (
     docsPresetInterpreter(request.preset, idFactory, clock)
   )
   const intent = intentFor(request.tree, request.preset, idFactory, clock)
-  const outcome = await composeChange(runtime, request.tree, intent)
+  const outcome = await commitIntent(writePath(request.session, runtime), intent)
+  const assessment = assessmentOf(events)
 
-  return { step: request.step, preset: request.preset, intent, outcome, events }
+  return {
+    step: request.step,
+    ask: { kind: "preset", preset: request.preset },
+    outcome,
+    events,
+    intent,
+    ...(assessment === undefined ? {} : { assessment }),
+  }
 }
 
-export type DocsConfirmationRequest = {
+export type DocsAnswerRequest = {
+  readonly session: DocsSession
   readonly exampleId: string
-  readonly tree: LoomTree
-  readonly proposal: DocsProposal
-  readonly held: ProposedChange
+  readonly change: DocsChange
   readonly clock?: Clock
 }
 
 /**
  * Answering a hold, which is the half of the Gate a verdict alone cannot show.
  *
- * `confirmChange` re-assesses against the tree as it stands now rather than
- * trusting the assessment made when the change was held, so a confirmation
- * cannot smuggle in a decision made about a different page. The reader saying
- * yes is not a way past the Gate: a change it would now refuse outright stays
- * refused.
+ * `confirmHeld` releases the proposal from custody *before* it applies it, so
+ * answering happens exactly once however many times the button is pressed, and
+ * it re-assesses against the tree as it stands rather than trusting the
+ * assessment made when the change was held. The reader saying yes is not a way
+ * past the Gate: a change it would now refuse stays refused.
+ *
+ * The actor is passed, so the log records who allowed it separately from who
+ * asked (0029).
  */
-export const confirmDocsChange = (request: DocsConfirmationRequest): DocsProposal => {
+export const answerDocsHold = async (request: DocsAnswerRequest): Promise<DocsChange> => {
+  const { change } = request
+
+  if (change.outcome.kind !== "held") return change
+
   const clock = request.clock ?? systemClock
-  const idFactory = sequentialIdFactory(
-    docsChangeNamespace(request.exampleId, request.proposal.step)
-  )
-  const interpreter = docsPresetInterpreter(request.proposal.preset, idFactory, clock)
-  const { runtime, events } = collectingRuntime(idFactory, clock, interpreter)
-  const outcome: ConfirmationOutcome = confirmChange(
-    runtime,
-    request.tree,
-    request.held,
-    request.proposal.intent
-  )
+  const idFactory = sequentialIdFactory(docsChangeNamespace(request.exampleId, change.step))
+  const { runtime, events } = collectingRuntime(idFactory, clock, nothingToInterpret)
+  const outcome = await confirmHeld(writePath(request.session, runtime), {
+    proposalId: change.outcome.held.proposalId,
+    actor: DOCS_READER,
+  })
+  const all = [...change.events, ...events]
+  const assessment = assessmentOf(all)
 
   return {
-    step: request.proposal.step,
-    preset: request.proposal.preset,
-    intent: request.proposal.intent,
+    step: change.step,
+    ask: change.ask,
     outcome,
-    events: [...request.proposal.events, ...events],
+    events: all,
+    ...(change.intent === undefined ? {} : { intent: change.intent }),
+    ...(assessment === undefined ? {} : { assessment }),
   }
 }
 
-/** The tree a proposal left behind, or the one it was judged against. */
-export const treeAfter = (tree: LoomTree, proposal: DocsProposal): LoomTree =>
-  proposal.outcome.kind === "applied" ? proposal.outcome.tree : tree
+export type DocsUndoRequest = {
+  readonly session: DocsSession
+  readonly exampleId: string
+  readonly revision: number
+  readonly step: number
+  readonly clock?: Clock
+}
+
+/**
+ * Undo, taking the same route as everything else.
+ *
+ * `revertRevision` plans the inverse from the log, wraps it as an ordinary
+ * proposal from an interpreter called `loom/revert`, and hands it to
+ * `commitIntent`. So it is judged by the same policy, refusable, holdable,
+ * recorded as a new revision — and itself undoable, which a reader can try.
+ *
+ * The interpreter passed here is never consulted: `revertRevision` swaps in its
+ * own, because there is nothing to guess about an inverse.
+ */
+export const undoDocsRevision = async (request: DocsUndoRequest): Promise<DocsChange> => {
+  const clock = request.clock ?? systemClock
+  const idFactory = sequentialIdFactory(docsChangeNamespace(request.exampleId, request.step))
+  const { runtime, events } = collectingRuntime(idFactory, clock, nothingToInterpret)
+  const outcome = await revertRevision(writePath(request.session, runtime), {
+    treeId: request.session.treeId,
+    revision: request.revision,
+    seed: request.session.seed,
+    origin: "user-instruction",
+    actor: DOCS_READER,
+  })
+  const intent = intentOf(events)
+  const assessment = assessmentOf(events)
+
+  return {
+    step: request.step,
+    ask: { kind: "undo", revision: request.revision },
+    outcome,
+    events,
+    ...(intent === undefined ? {} : { intent }),
+    ...(assessment === undefined ? {} : { assessment }),
+  }
+}
+
+/**
+ * One entry in the log, and what undoing it would take.
+ *
+ * Everything above `undo` is read straight off the `StoredRevision` — this
+ * derives nothing and remembers nothing. What is *not* here is as instructive
+ * as what is: there is no utterance, because the log records the change rather
+ * than the conversation that produced it, and no verdict, because a refused
+ * change never reached the log at all.
+ */
+export type DocsLogEntry = {
+  readonly revision: number
+  readonly stored: StoredRevision
+  /** The verbs in the entry's delta, in order — the shape of what it did. */
+  readonly verbs: readonly string[]
+  readonly undo: RevertPlan
+}
+
+/** How much history a box shows. Beyond this a reader is scrolling, not reading. */
+export const DOCS_LOG_LIMIT = 12
+
+/**
+ * The log, newest first, with an undo verdict against every row.
+ *
+ * `planReverts` answers for all of them from **one** walk of the log rather
+ * than replaying it once per row, which is the read it was built for: the
+ * forward replay is shared and only the head-ward trail differs per target.
+ *
+ * A page of history is exactly where that matters, because the answer is not
+ * the same for every row — undoing the newest change is usually clean, and
+ * undoing an older one may write over what came after it. The plan says which,
+ * and the box says so before a reader presses anything.
+ */
+export const readDocsLog = async (session: DocsSession): Promise<readonly DocsLogEntry[]> => {
+  const page = await session.store.revisions(session.treeId, {
+    direction: "older",
+    limit: DOCS_LOG_LIMIT,
+  })
+
+  if (!page.ok || page.value.revisions.length === 0) return []
+
+  const revisions = page.value.revisions.map((entry) => entry.revision)
+  const plans = await planReverts(session.store, {
+    treeId: session.treeId,
+    revisions,
+    seed: session.seed,
+  })
+
+  if (!plans.ok) return []
+
+  return page.value.revisions
+    .flatMap((stored) => {
+      const undo = plans.value.get(stored.revision)
+
+      return undo === undefined
+        ? []
+        : [
+            {
+              revision: stored.revision,
+              stored,
+              verbs: stored.delta.operations.map((operation) => operation.op),
+              undo,
+            },
+          ]
+    })
+    .reverse()
+}
+
+/** The tree a change left behind, or the one it was judged against. */
+export const treeAfter = (tree: LoomTree, change: DocsChange): LoomTree =>
+  change.outcome.kind === "committed" ? change.outcome.tree : tree
 
 /** The proposal a reader may answer, when the Gate held one. */
-export const heldProposal = (proposal: DocsProposal): ProposedChange | undefined =>
-  proposal.outcome.kind === "awaiting-confirmation"
-    ? proposal.outcome.assessment.proposal
-    : undefined
+export const heldOutcome = (
+  change: DocsChange
+): Extract<WriteOutcome, { readonly kind: "held" }> | undefined =>
+  change.outcome.kind === "held" ? change.outcome : undefined

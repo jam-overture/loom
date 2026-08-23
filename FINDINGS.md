@@ -4772,3 +4772,114 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-23 — a held proposal has nowhere durable to live, and `held.ts` says why that matters
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while writing the documentation for `@loom/runtime/store` and
+`@loom/runtime/write`, which the site now uses for real rather than describing.
+
+`HoldStore`'s own doc comment states the requirement precisely:
+
+> *"A proposal the Gate marked `requires-confirmation` has to survive the request
+> that produced it, because the human who answers it arrives later."*
+
+**There is exactly one implementation of it, and it is a `Map` in process
+memory.** `memoryHoldStore` is the whole set — `grep -rn "HoldStore" src/` finds
+the interface, `commit.ts`'s use of it, the memory implementation and the test
+harness, and nothing else. `@loom/runtime/postgres` ships `postgresTreeStore`
+and no counterpart.
+
+So the log has two backends held to one contract by one suite, and the custody
+beside it has one backend that cannot keep the promise the interface was written
+to make. On a long-lived server it is fine. On the serverless hosts §3 targets —
+the ones 0024's containment was written for — a hold does not survive the request
+it was created in, which is the exact failure the comment rules out.
+
+**Not urgent for this lane**, and said plainly on the page rather than hidden:
+the documentation site's own holds are answered in the same tab that created
+them, so the memory implementation is the right one there. The page says the
+runtime ships one implementation, that it is in memory, and that a deployment
+holding changes across restarts writes its own. It does not imply a database
+that is not there.
+
+Two shapes, and the second is cheaper than it looks:
+
+- **A `postgresHoldStore`**, beside `postgresTreeStore` and on the same
+  migration. Four methods, three of which are a single row by primary key.
+- **A contract suite for `HoldStore`**, the way `testing/store-contract.ts`
+  already does for `TreeStore`. `memoryHoldStore` is called the reference
+  implementation in its own comment; there is nothing today that makes a second
+  one provably the same, and the "release is a take, not a read" property — the
+  one that makes answering happen exactly once — is exactly the kind of thing a
+  second implementation gets subtly wrong.
+
+The second is worth doing even if the first never is, because it is what turns
+"write your own" from advice into a checkable instruction.
+
+---
+
+## 2026-08-23 — a `WriteOutcome` says what became of a change, not what was measured about it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed —
+recorded because the next surface to persist will meet it too
+
+The documentation site moved off `composeChange` onto `commitIntent` this run,
+which is the one write path (0017). One thing did not come across, and it is
+worth writing down before somebody reads it as a gap and "fixes" it.
+
+`CompositionOutcome` carries the whole `ChangeAssessment` — the stakes, their
+factors, the reversibility, the analysis. `WriteOutcome` carries the proposal,
+the disposition and the inverse, and **not** the assessment. So a surface that
+persists and also wants to show a reviewer *why* the Gate said what it said
+cannot read it off the return value.
+
+It is on the events. `change-assessed` carries the assessment whole, and
+`events.ts` says why in as many words: *"these events are the runtime talking to
+itself within one request, so they carry whole assessments and whole inverse
+deltas. What survives the request is a narrowing of them (0023)."* The propose
+box collects envelopes already, so recovering it is four lines and no new
+surface.
+
+**That is the right shape and this entry is not a request to change it.** A
+return value that carried the assessment would put a second copy of it beside
+the events, and a caller reading the copy would be reading something the
+telemetry pipeline deliberately narrows. What is worth recording is that the
+route is not discoverable from the types: nothing about `WriteOutcome` suggests
+looking at the sink. The next surface that persists a change and wants to render
+its stakes will look for a field, not find one, and either denature the page or
+reach for `composeChange` and lose the log.
+
+Cheapest fix if anyone wants one: a sentence on `WriteOutcome` saying where the
+assessment went, which costs a doc comment and is exactly the kind of sentence
+the generated API reference already publishes.
+
+---
+
+## 2026-08-23 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed
+
+Recorded for the reason the other routines record it, and this run is a better
+test of the claim than most: it is the first time the documentation site has used
+`@loom/runtime/store` and `@loom/runtime/write` as a consumer rather than
+described them, and the whole of it — opening a store, committing through the one
+write path, answering a hold with an approver, planning a batch of reverts for a
+page of history, and undoing a revision — needed nothing that the published entry
+points do not already expose, and no deep import.
+
+Two things it wanted and got: `planReverts`, which answers for every row of a
+history from one walk of the log and is exactly the read a page of history makes;
+and `describeRevertPlan`, which meant the box could say *why* a revision cannot
+be undone in the runtime's words rather than the site's.
+
+The two findings above are the only two, and neither of them blocked anything.
+
+**No new primitive was wanted.** The log and its undo buttons are chrome — 0067
+names the search, the sidebar and the pager as application furniture and this is
+the same kind of thing, a control belonging to the propose-a-change box rather
+than content composed from the vocabulary. Nothing in it is a component another
+surface would want.
