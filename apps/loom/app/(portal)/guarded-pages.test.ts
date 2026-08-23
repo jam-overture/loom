@@ -27,22 +27,23 @@ const APP = join(process.cwd(), "app", "(portal)")
  * one, and `/portal` only redirects — it renders nothing and reads nothing, so
  * an actor would gate a page that has no content to protect.
  *
- * `/portal/demo` is the third and the only one that renders anything. It is public
- * because its whole purpose is to be seen by someone with no account, and it is
- * safe to be public because it reads nothing this portal protects: its own
- * registry, its own in-memory store keyed by an opaque cookie, its own policy,
- * and no identity. An exemption that grew to include a page reading
- * `portalStore` would be the failure this list exists to make visible, so the
- * test below asserts that it does not.
+ * The other four are redirects, and they are here for `/portal`'s reason
+ * exactly: each renders nothing and reads nothing, so an actor would gate a page
+ * with no content to protect.
  *
- * `/portal/trees` and `/portal/calibration` are the fourth and fifth, and they
- * are here for `/portal`'s reason exactly: each is the old name of a route that
- * was renamed into a person's words — `/portal/pages` and `/portal/trust` — kept
- * alive as a 308 so a bookmark or a link in a report still lands somewhere.
- * Neither renders anything nor reads anything, so an actor would gate a page
- * that has no content to protect. The proxy still covers them — both are under
- * `/portal` — so a signed-out visitor is sent to sign in and returned here, and
- * only then forwarded on.
+ * `/portal/demo` is where the demo lived until it moved to a public `/demo` of
+ * its own. `/portal/trees`, `/portal/calibration` and `/portal/audit` are the old
+ * names of routes renamed into a person's words — `/portal/pages`,
+ * `/portal/trust` and `/portal/checkup` — each kept alive as a 308 so a bookmark
+ * or a link written in a report still lands somewhere.
+ *
+ * The proxy still covers all four, since all are under `/portal`. That matters
+ * for the demo's: a signed-out visitor following an old link is forwarded to
+ * `/demo` rather than sent to sign in for a page that needs no account.
+ *
+ * The list is allowed to grow with renames and must not grow with pages. An
+ * exemption covering something that reads `portalStore` would be the failure it
+ * exists to make visible, so the test below asserts that none of them does.
  */
 const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/sign-in/page.tsx",
@@ -50,6 +51,7 @@ const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/demo/page.tsx",
   "portal/trees/[[...rest]]/page.tsx",
   "portal/calibration/[[...rest]]/page.tsx",
+  "portal/audit/[[...rest]]/page.tsx",
 ]
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
@@ -77,8 +79,9 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page, the three redirects and the demo", () => {
+  it("exempts only the sign-in page and the five redirects", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
+      "portal/audit/[[...rest]]/page.tsx",
       "portal/calibration/[[...rest]]/page.tsx",
       "portal/demo/page.tsx",
       "portal/page.tsx",

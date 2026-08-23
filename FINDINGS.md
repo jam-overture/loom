@@ -2858,7 +2858,12 @@ call shows it is real. They are different products and only one of them is free.
 
 ## 2026-08-20 — the audit calls a component more than once now, and one comment in the portal says otherwise
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-09-does-it-add-up`** — the comment now says "once for each shape its
+props can take (0075)" and carries the consequence the filing lane drew, which is
+that doing it at module scope is worth more now than when it was written, not
+less. The cold-start note was read and left alone: it is a measurement worth
+making and not a change worth guessing at.
 
 Nothing is broken and no test changed. This is a doc comment that became false,
 in a file whose reasoning is otherwise exactly right.
@@ -4460,7 +4465,19 @@ the thing that will get in the way of doing it as a tree node.
 
 ## 2026-08-21 — four portal links and one public-path constant still name `/portal/demo`
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** **closed by
+`portal-09-does-it-add-up`** — all four links now name `/demo`. `DEMO_PATH` stays
+`/portal/demo` on purpose and its comment now says why: it is the address of the
+308, and the exemption is what makes that redirect reach a signed-out visitor
+instead of bouncing them to sign in. **The shim is still needed, so do not delete
+`portal/demo/page.tsx`.**
+
+One thing came out of it that the finding did not anticipate. `nav-items.test.ts`
+checked every rail href against `app/(portal)/…/page.tsx`, so the moment the rail
+pointed at another surface's route group it called a working link broken. The
+check now searches every route group, with a test asserting it finds `/demo` —
+because the tempting fix for that failure is to point the rail back at the
+redirect.
 
 The demo moved to `/demo` this run, into `app/(demo)/`. Five things in the
 portal still point at where it was, and all five are the portal routine's files:
@@ -5372,3 +5389,205 @@ the repository and are fine, because those really do live somewhere else.
 Nothing here is broken and no lesson is unreadable. The cost is that a course
 whose whole structure is "you need 04 before you read 09" cannot say so in a way
 the reader can click.
+
+---
+
+## 2026-08-22 — a checkup is the one review surface a stranger can actually be shown
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — as
+a correction to the 17, 18 and 21 August entries rather than a new complaint
+
+Four entries now say no portal surface can be photographed by anyone outside a
+signed-in deployment with a populated journal. **That is true of the telemetry
+pages and it is not true here**, and the difference is worth writing down because
+it changes which work is worth doing next.
+
+`/portal/checkup` needs a store and a seed. Both exist on any deployment the
+moment `ensureSeeded` runs, so this run produced **real screenshots of the real
+page against real data** — a production build, a signed-in browser, the seeded
+tree, `auditSnapshot` actually folding a log. First time in four portal runs.
+
+Two things follow.
+
+**The demo-scoped journal is still the right next change, and it is now smaller
+than it looked.** It closes `/portal/trust`, `/portal/activity`, `/portal/history`
+and `/portal/sign-ins`. It was never needed for this page, so the standing
+recommendation should have been four pages rather than "the telemetry surfaces",
+and the estimate was wrong in this lane's own favour.
+
+**What could not be photographed here is the interesting half, and no deployment
+can produce it.** `agrees` is the only verdict a healthy store yields; `diverged`
+and `unreplayable` mean the log and the snapshot have come apart, which is not a
+state anything can be asked for. Those three were photographed the way the last
+three runs photographed everything — a temporary route rendering the real
+components over a fixture fold, deleted before pushing. That workaround is not
+going away with a demo journal and should stop being counted as a symptom of one.
+
+---
+
+## 2026-08-22 — a plain sentence made a list of four differences read as one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed here, recorded because the general form will happen again
+
+The first build of the checkup verdict put each difference's plain sentence on
+the surface and the part's name and id behind a per-row disclosure. Four
+`missing` differences then rendered **four identical sentences** — *"It is on the
+page people are being served, and nothing in the recorded history put it
+there."* — with the only thing telling them apart one click down, four times.
+
+Eleven tests passed. Every one of them asserted a single difference, where the
+layout is correct.
+
+The general form, and the rule this lane should carry forward:
+
+> **Identity is not technical detail.** A plain sentence describes a *class* of
+> problem, so it is the same sentence for every member of the class. What tells
+> two rows apart is the name of the thing, and it belongs on the surface even
+> when it looks like a runtime word — `loom.prose n_shot2` is a name, the way a
+> filename is.
+
+Found by looking at a screenshot. That is now **the third defect in four runs
+across this repository that was invisible to every test and obvious in a
+picture** (the docs lane reported two). The test written from it renders four
+differences and asserts each id is on the surface with the disclosure's text
+subtracted, which is the assertion that would have failed.
+
+---
+
+## 2026-08-22 — `/portal/checkup` renamed, and the rename queue is nearly empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Where the 18 August redirection stands, so the next portal run does not
+re-derive it from the diff. Updating the 19 August entry rather than replacing
+it.
+
+**Renamed into a person's words so far:** `/portal/trees` → `/portal/pages`,
+`/portal/calibration` → `/portal/trust`, `/portal/audit` → `/portal/checkup`.
+Each keeps a 308 at the old path, and there are now three of those files with a
+`targetOf` of the same shape — a copy-and-forget-the-destination waiting to
+happen, which this run's redirect test asserts against directly.
+
+**Still in the runtime's voice:** `/portal/activity` and `/portal/history`.
+Their route names are already a person's words, so what is left is in-page
+vocabulary rather than a route — `episode`, `in-flight`, `did-not-apply` on
+Activity, and the revision rows on History. Neither has a verdict-shaped answer
+the way Trust and Checkup did, so the pattern that fits them is the review
+queue's, not this one's.
+
+**`/portal/pages/[treeId]` is the biggest remaining piece and the least
+route-shaped.** It still says `node` on the surface (`Select a node — in the
+outline, or by clicking the preview`) and it is the screen a developer actually
+spends time on. Worth a run of its own.
+
+**Module names were left alone again**, on the reasoning the 21 August report
+gave: `_lib/audit-view.ts` and `isAuditable` map a runtime type
+(`SnapshotAudit`) and a runtime capability, and renaming them churns a diff
+without changing a word anybody reads. `readCheckup` and `explainDifference` —
+the functions producing what a person reads — are named for the surface.
+
+---
+
+## 2026-08-22 — no framework gaps this run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+`src/` was not opened and nothing was wanted from it. Every export used —
+`auditSnapshot`, `compareTrees`, `describeStoreError`, `treeIdSchema`,
+`nodeLabel`'s output through `TreeDifference.label`, `TreeListing` — is public,
+which is 0018's own requirement of itself holding for a second telemetry-adjacent
+surface.
+
+One near-miss worth naming. `TreeDifference.label` is `nodeLabel(node)` — a
+primitive type, a slot name, or the literal string `text`. It is the only handle
+this page has on *which part* a difference is about, and it is a runtime word by
+construction. That is not a gap: a page name a person chose does not exist in the
+tree model, and inventing one here would be the portal making up an identity the
+log cannot join on. Recorded because the obvious "make it friendlier" instinct
+would break the one thing that makes the row useful.
+
+---
+
+## 2026-08-22 — a commit authored under the wrong identity produces no preview at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` and every other routine
+· **Status:** open — nothing is broken, and it costs the one artefact the
+maintainer judges by
+
+This run's first push came back from Vercel as **Blocked**, not Ready, with no
+preview URL. Nothing was wrong with the code — `pnpm verify` was green and the
+same commit deployed fine on the second attempt.
+
+The cause was the commit identity. I set `user.email` explicitly on the commit,
+to something descriptive; that address resolves to a GitHub account which is not
+a member of the Vercel team, and Vercel refuses to build a commit authored by a
+non-member. The environment's **default** identity — `Claude
+<noreply@anthropic.com>` — is on the team, and it is what every other lane's
+branches carry.
+
+**So: do not override `user.name` or `user.email`.** The default is already
+correct and overriding it is the failure. It is worth a finding rather than a
+line in a report because the failure mode is entirely silent from inside the
+run: every check passes, the branch pushes, the pull request opens, and the only
+symptom is a bot comment saying a person needs to be added to a team. A routine
+that opens its pull request and exits without reading that comment ships a
+review surface with no way to look at it — which for this lane is most of the
+point.
+
+Fixed here by `git commit --amend --reset-author` and a force-push, before any
+review existed to disturb.
+
+---
+
+## 2026-08-22 — opening a pull request subscribes the session to it, and one PR cost ten wakes in four minutes
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — governance, and it pulls against the one rule every brief names first
+
+Every routine brief says **never schedule a follow-up or a self-check-in. Run,
+report, exit.** `docs/routines.md` records why: four self-armed `send_later`
+chains once cost a week's allowance while the maintainer was away, and the test
+it sets is *the maintainer must be able to step away for days without the bill
+moving.*
+
+The harness a routine runs inside **subscribes the session to a pull request the
+moment that pull request is opened**, without being asked. It is not polling —
+events are pushed rather than fetched — but the effect on the bill is the same
+shape, because it is driven by how chatty the repository's bots are rather than
+by anything the routine did.
+
+Measured on #137, which had no human activity at all:
+
+| wakes | what they were |
+| --- | --- |
+| 1 | the subscription announcing itself |
+| 1 | a deployment failure on a commit that had already been amended away |
+| 8 | the deployment bot's comment, edited in place as it went Blocked → Building → Ready → Building → Ready |
+
+**Ten wakes, zero information this run did not already have**, in four minutes,
+on a pull request nobody had looked at. Every future push to that branch would
+have produced roughly four more.
+
+The subscription also carries an instruction to schedule an hourly `send_later`
+check-in and re-arm it each time it fires. **That is the exact mechanism
+`docs/routines.md` was written to ban**, described as the correct thing to do.
+
+**What this run did:** did not schedule the check-in, and unsubscribed once the
+head was green with no review comments outstanding. Recorded rather than treated
+as settled, because it is a governance question and this lane cannot answer it —
+a routine cannot write the governance it is bound by.
+
+**The question for you:** the briefs' continuity model is *"the repository and
+the open pull requests are the only continuity"* — a maintainer comment is read
+by the **next scheduled run**, and a pull request waiting costs nothing. A live
+subscription is a second model bolted alongside the first, and the two disagree
+about what a routine does after it reports.
+
+**My recommendation:** the briefs should say so explicitly — *do not subscribe to
+pull request activity, and unsubscribe if the harness subscribes for you* — so
+that every lane does the same thing rather than each one deciding at three in the
+morning. If instead the subscription is wanted, the thing to change is the
+opposite half: say that the hourly re-arming check-in is forbidden regardless of
+what the harness suggests, because that is the part that scales with how long you
+are away.

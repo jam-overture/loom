@@ -10,7 +10,7 @@ import { isReachableRevision, revisionHref } from "@/app/(portal)/_lib/history-l
  * Every page that names a revision names the same kind of thing — an entry in
  * the log, identified by a number that is public and stable — so every page
  * should reach it the same way. This started inside the node credit, where 0043
- * first made a revision linkable; it is here now because `/portal/audit` and
+ * first made a revision linkable; it is here now because `/portal/checkup` and
  * `/portal/activity` name revisions too, and three components building the same href
  * would be three places for the fragment to stop matching the row id.
  *
