@@ -28,7 +28,7 @@ export type PressureReading = {
 
 /**
  * Borrowed from the portal's outcome palette rather than a second one, the same
- * choice `/portal/audit` made. `locking` is `rejected` because that is what is
+ * choice `/portal/checkup` made. `locking` is `rejected` because that is what is
  * happening — attempts are being turned away — and not because it is an
  * emergency; the detail is where the difference between "working" and "wrong"
  * is drawn, and colour is never the only channel.

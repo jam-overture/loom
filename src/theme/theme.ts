@@ -80,13 +80,31 @@ export const paletteSchema = z.object({
 })
 export type Palette = z.infer<typeof paletteSchema>
 
+/**
+ * A pack declares a face for each role the library actually reads, and no
+ * others. There were three roles here and a primitive read two of them: an
+ * `accentFamily` was emitted as `--loom-accent-family` and referenced by
+ * nothing, while `loom.code` and `loom.kbd` needed a monospace face the
+ * vocabulary had no word for. A variable a host can set and no primitive
+ * consults is worse than an absent one — it looks like a seam and behaves like
+ * a comment (0084).
+ *
+ * `monoFamily` is optional where the other two are required, and the asymmetry
+ * is deliberate rather than an oversight. A palette declares every slot because
+ * an undeclared colour has no universal fallback; an undeclared *face* has one,
+ * because every operating system ships a monospace. `tokens.ts` asks for
+ * `var(--loom-mono-family, <system stack>)`, so a pack with no opinion about
+ * code costs a reader nothing, and a pack built around a particular mono gets
+ * to say so.
+ */
 export const fontPackSchema = z.object({
   id: themeIdSchema,
   name: z.string().min(1),
   description: z.string().min(1),
   headingFamily: z.string().min(1),
   bodyFamily: z.string().min(1),
-  accentFamily: z.string().min(1).optional(),
+  /** Emitted as `--loom-mono-family` when declared, and omitted when not. */
+  monoFamily: z.string().min(1).optional(),
   headingWeight: z.number().int().positive(),
   bodyWeight: z.number().int().positive(),
   /** Typographic ramp in px, smallest first. Emitted as `--loom-scale-1…8`. */
