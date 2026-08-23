@@ -1,5 +1,8 @@
 import { randomIdFactory } from "@loom/runtime"
 import { renderLoomTree } from "@loom/runtime/react"
+import Link from "next/link"
+
+import { DOCS } from "@/app/(marketing)/_lib/site"
 
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
@@ -132,18 +135,28 @@ const DemoPage = async () => {
             */}
           <header className="flex flex-col gap-2">
             <p className="text-accent text-2xs tracking-wide uppercase">Live demo</p>
+            {/*
+              * "Ask *that* page", not "ask this page to change itself".
+              *
+              * The old heading was written when the specimen was Loom's own
+              * marketing page, so "this page" and "itself" had one referent and
+              * the sentence read. The specimen is now a clinic's page and the
+              * rail is Loom's, which makes "this page" the one question a
+              * stranger must never have to ask. The heading points instead.
+              */}
             <h1 className="text-2xl leading-tight tracking-tight text-balance">
-              Ask this page to change itself.
+              Ask that page for a change.
             </h1>
             <p className="text-ink-secondary text-sm">
-              The page beside you isn’t code — it’s data. An AI can rewrite it, and every rewrite
-              arrives with a record of what was asked, what Loom decided, and how to put it back.
+              It belongs to a clinic that doesn’t exist — but it isn’t a picture. It’s data, an AI
+              can rewrite it, and every rewrite arrives with a record of what was asked, what Loom
+              decided, and how to put it back.
             </p>
             {/*
-              * "Beside you" is only true on a wide screen. On a phone the page
-              * is underneath, and a visitor who presses a button without knowing
-              * that watches nothing happen — the one failure this whole surface
-              * exists to avoid.
+              * "That page" is only pointing at something on a wide screen. On a
+              * phone the page is underneath, and a visitor who presses a button
+              * without knowing that watches nothing happen — the one failure
+              * this whole surface exists to avoid.
               */}
             <p className="text-ink-muted text-xs lg:hidden">
               It’s the page below. Press something, then look for the mark Loom leaves on it.
@@ -215,7 +228,36 @@ const DemoPage = async () => {
             */}
           <WhatHappens />
 
-          <footer className="border-edge-subtle text-ink-muted mt-auto border-t pt-4 text-2xs">
+          {/*
+            * The way out, and it is the end of the rail rather than the top of
+            * it on purpose.
+            *
+            * `Loom marketing` filed on 22 August that this route group had
+            * exactly one `<a>` and it was the skip link, while the front door
+            * had just begun offering `/demo` from six places — every one of
+            * them a one-way door walked through by the visitor most likely to
+            * be interested. Its own recommendation was two links and this is
+            * the second: the wordmark goes home (`DemoBar`), and the foot of
+            * the record answers the question a visitor has only *after* they
+            * have watched a few changes land, which is how they would do this
+            * to a page of their own.
+            *
+            * `/docs` is the honest destination for that and it needs no
+            * account. The portal would be the dishonest one — it is a review
+            * queue behind a sign-in (0019), and sending somebody who has just
+            * been told "no account, nothing kept" to a sign-in page is the
+            * dead end the front door was filed for last week.
+            */}
+          <footer className="border-edge-subtle text-ink-muted mt-auto flex flex-col gap-3 border-t pt-4 text-2xs">
+            <Link
+              href={DOCS.path}
+              className="text-ink-secondary hover:text-ink group inline-flex items-center gap-1.5 text-xs transition-colors"
+            >
+              Want this on a page of your own? Read the docs
+              <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
             <p>
               Your copy of this page lives in memory for as long as you are here, and belongs to
               nobody else. No account, no sign-in, nothing kept.
