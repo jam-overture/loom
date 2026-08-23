@@ -5591,3 +5591,93 @@ morning. If instead the subscription is wanted, the thing to change is the
 opposite half: say that the hourly re-arming check-in is forbidden regardless of
 what the harness suggests, because that is the part that scales with how long you
 are away.
+
+---
+
+## 2026-08-22 — no framework gaps from the demo's second run
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed
+
+Recorded because the other routines record it, and because this run is the first
+demo work that reaches past the record into the *render*. Marking a change on the
+page it happened to needed four things from `@loom/runtime`, and every one of
+them was already public and already computed:
+
+- **`editMode`** on `renderLoomTree`, which puts `data-loom-node` on every
+  primitive's own root. `editable.ts`'s rule that edit mode *decorates and never
+  restructures* is what makes it safe to turn on for a surface that is not an
+  editor: two attributes per element, nothing moved, no diagnostic.
+- **`assessment.reversibility.inverse`**, which is the only place a removed
+  node's parent and index survive. A removal leaves the tree, so "point at the
+  gap" is unanswerable from the forward delta alone — and the inverse is computed
+  whether or not anybody undoes anything, so it cost a field read rather than a
+  walk.
+- **`findNode` and `childrenOf`**, for resolving a mark against the tree the
+  visitor is looking at.
+- **The starter palettes**, read from the registry to check the ring's contrast
+  against both grounds a visitor can re-theme between.
+
+`src/` was not opened. One thing is worth carrying forward as the opposite of a
+gap: because a preset re-plans against the tree it is handed, the same resolution
+serves a change that **applied** and one still **held** — the applied case
+resolves against the result and the held case against what it would change — so
+the most persuasive state on the surface needed no second code path.
+
+---
+
+## 2026-08-22 — `21st.dev` re-verified blocked, from the demo lane again
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dating the 21 August entry rather than opening a second one
+
+`EGRESS_BLOCKED`, identical message, on the run of 22 August. The brief and
+`docs/routines.md` both still say the domain is allowed, and the environment's
+proxy still refuses it — the two gates the 21 August entry describes have not
+converged.
+
+This run worked to the standard the brief names second and had an unusually good
+substitute for it: the change being judged is *on the screenshot*, so the visual
+question this run had to answer — does a mark read as Loom speaking, at a glance,
+on both a near-white and a near-black stage — was answerable by looking rather
+than by comparison with a reference. Two corrections came out of that and are in
+the report. It is still not a look at the reference.
+
+---
+
+## 2026-08-22 — a demo visitor can now be pointed at a node, which is what a scope is
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+answering the framework's 22 August scope finding with what changed underneath it
+
+`Loom daily build` filed that `EditIntent.scopeNodeId` now buys 48–91% of a
+request ([0083](decisions/0083-a-scoped-request-sends-the-scope.md)) and that the
+demo is one of the two surfaces that could set one, being "the one place a
+visitor can watch the cost". That entry is owned jointly by the portal and this
+lane; this is the half of it that is mine, and it is **not done**, with a reason
+worth writing down rather than rediscovering.
+
+**What changed today:** the demo now computes, for every change, the nodes it is
+about (`_lib/touched.ts`) and resolves them against the tree on the stage
+(`_lib/spotlight.ts`). So the surface holds a node id at exactly the moment a
+visitor is looking at one band with a ring around it.
+
+**Why it is still not a scope**, and this is the thing the finding's own caveat
+implies without stating: what the demo knows is *what the last change touched*,
+which is a fact about the past. A scope is a claim about **what the person means
+by this ask**, and the two coincide only for a follow-up — "make that quieter"
+said while a band is marked. Setting the previous change's node as the scope of
+an unrelated ask would silently narrow what the model may propose, which is
+precisely what the framework finding says nothing should do by guessing.
+
+So the honest shape is **a control rather than an inference**: a marked band
+offering "ask about just this", which sets the scope because the visitor pointed,
+and free text with nothing marked staying unscoped. That is a unit of its own —
+it needs a second entry point in `AskPanel`, a scope on the intent, and something
+on the card saying what was sent — and this run was already one. Recorded against
+my own lane so the next run has the reasoning rather than the idea.
+
+Worth knowing while there: the finding's own warning applies to this page.
+The demo tree is eight bands, which is below the ten-section threshold where a
+scope starts paying for itself, so the *saving* here would be about zero. What it
+would demonstrate is not a saving — it is that Loom sends a model the part of the
+page you pointed at, which is a different and better claim for a demo to make.

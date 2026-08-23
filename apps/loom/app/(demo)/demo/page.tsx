@@ -6,10 +6,12 @@ import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
+import { spotlightsFor, spotlitChange } from "@/app/(demo)/_lib/spotlight"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
 import { AskPanel } from "./_components/ask-panel"
+import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
 import { RecordCard } from "./_components/record-card"
 import { WhatHappens } from "./_components/what-happens"
@@ -50,9 +52,29 @@ const DemoPage = async () => {
     resolver: demoRegistry,
     validator: demoRegistry,
     themes: demoThemes,
+    /**
+     * On, so every primitive's own root element carries its node id.
+     *
+     * The demo is not an editor and nothing here writes through the DOM — the
+     * attributes exist so the *change* can be marked where it happened. Edit
+     * mode decorates and never restructures (`editable.ts`), so this adds two
+     * attributes per element and moves nothing on the page.
+     */
+    editMode: true,
   })
 
   const records = session?.records ?? []
+
+  /**
+   * The one change the page is currently about, and where to mark it.
+   *
+   * Read against the tree on the stage rather than against the record's own
+   * account of itself: a held proposal describes nodes that are still there, and
+   * an applied one describes the tree that is there now, so the same resolution
+   * serves both and neither can point at a node that no longer exists.
+   */
+  const spotlit = spotlitChange(records, tree)
+  const spots = spotlit ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone) : []
 
   /**
    * What each waiting proposal would replace, read against the tree on the
@@ -124,7 +146,7 @@ const DemoPage = async () => {
               * exists to avoid.
               */}
             <p className="text-ink-muted text-xs lg:hidden">
-              It’s the page below. Press something, then scroll down.
+              It’s the page below. Press something, then look for the mark Loom leaves on it.
             </p>
           </header>
 
@@ -152,6 +174,31 @@ const DemoPage = async () => {
               <h2 id="the-record" className="text-ink-muted text-2xs tracking-wide uppercase">
                 the record
               </h2>
+
+              {/*
+                * The sentence that joins the two halves of the screen.
+                *
+                * The dot is the same colour as the ring on the page and as the
+                * badge on the card underneath, and that is the whole teaching:
+                * a visitor is never told "the marks mean X", they are shown one
+                * colour in three places at once and read it in a glance. It
+                * appears only when there is a mark to explain, so it is never a
+                * legend for something that is not on screen.
+                */}
+              {spotlit && spots.length > 0 && (
+                <p className="text-ink-secondary flex items-start gap-2 text-xs">
+                  <span
+                    aria-hidden="true"
+                    className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                      spotlit.tone === "applied" ? "bg-applied-ink" : "bg-awaiting-ink"
+                    }`}
+                  />
+                  {spotlit.tone === "applied"
+                    ? "The page is marked where this happened."
+                    : "The page is marked where this would happen, if you say yes."}
+                </p>
+              )}
+
               <ul className="flex flex-col gap-2">
                 {records.map((record) => (
                   <RecordCard key={record.recordId} record={record} {...effectProps(record)} />
@@ -182,6 +229,10 @@ const DemoPage = async () => {
           * that is carrying a registered theme of its own (0050).
           */}
         <div className="loom-stage order-2 min-w-0 flex-1 lg:order-1 lg:overflow-y-auto">
+          <ChangeSpotlight
+            spots={spots}
+            token={`${tree.revision}:${spotlit?.record.recordId ?? ""}`}
+          />
           {rendered.element}
         </div>
       </div>

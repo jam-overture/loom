@@ -47,6 +47,8 @@ const ASKED: Omit<ChangeRecord, "outcome" | "revision"> = {
     confidence: 1,
   },
   repaired: false,
+  /** Where the change is, which this card does not draw — the stage does. */
+  touched: [],
 }
 
 const APPLIED: ChangeRecord = { ...ASKED, outcome: "applied", revision: { produced: 1, replaced: 0 } }
