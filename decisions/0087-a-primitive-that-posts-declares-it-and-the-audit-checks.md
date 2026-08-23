@@ -1,4 +1,4 @@
-# 0084. A primitive that posts declares it, and the audit checks the declaration against what it renders
+# 0087. A primitive that posts declares it, and the audit checks the declaration against what it renders
 
 **Status:** Accepted
 **Date:** 2026-08-23

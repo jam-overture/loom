@@ -26,8 +26,14 @@ export const themeVariables = (theme: ResolvedTheme): ThemeVariables => {
 
   variables["--loom-heading-family"] = theme.fontPack.headingFamily
   variables["--loom-body-family"] = theme.fontPack.bodyFamily
-  if (theme.fontPack.accentFamily) {
-    variables["--loom-accent-family"] = theme.fontPack.accentFamily
+  /**
+   * Omitted rather than defaulted when the pack declares none. The primitive
+   * asking for it supplies the system stack as its `var()` fallback, so an
+   * absent variable resolves to a real face; writing a default here would
+   * instead put this file's opinion about monospace above the reader's (0084).
+   */
+  if (theme.fontPack.monoFamily) {
+    variables["--loom-mono-family"] = theme.fontPack.monoFamily
   }
   variables["--loom-heading-weight"] = String(theme.fontPack.headingWeight)
   variables["--loom-body-weight"] = String(theme.fontPack.bodyWeight)

@@ -3,6 +3,7 @@ import type { ZodType, ZodTypeAny, ZodTypeDef } from "zod"
 import { catalogueFields, closedChoices, type CataloguedProp, type ClosedChoice } from "../catalogue.js"
 import type { InteractiveWhen } from "../interactivity.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
+import type { BehaviourName } from "../render/behaviour.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
@@ -41,6 +42,7 @@ import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 export type PrimitiveDefinition<
   TProps extends JsonObjectView = JsonObject,
   TText extends string = never,
+  TBehaviour extends BehaviourName = never,
 > = {
   readonly type: string
   readonly description: string
@@ -74,7 +76,20 @@ export type PrimitiveDefinition<
    * places an address without ever having said it posts.
    */
   readonly submits?: boolean
-  readonly component: LoomPrimitive<TProps, TText>
+  /**
+   * The controls this primitive takes from the runtime's closed behaviour
+   * vocabulary — `["copy"]` on a code panel. Optional, and empty for almost
+   * everything: a Loom page is data, and a behaviour is the exception that has
+   * to be asked for by name.
+   *
+   * Declaring one is a claim with two consequences the registry checks. The
+   * strings the control needs become strings this primitive must declare, so it
+   * has a name in every language the deployment serves; and a control is a
+   * target the reader aims at, so this primitive must also declare itself
+   * `interactive` or the Gate will let one sit inside an anchor.
+   */
+  readonly behaviours?: readonly TBehaviour[]
+  readonly component: LoomPrimitive<TProps, TText, TBehaviour>
 }
 
 /**
@@ -102,6 +117,8 @@ export type PrimitiveEntry = {
   readonly interactive: InteractiveWhen | undefined
   /** `false` for the ordinary primitive, which sends nothing anywhere. */
   readonly submits: boolean
+  /** Declared behaviour names, still raw: the registry is what checks them. */
+  readonly behaviours: readonly string[]
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -149,8 +166,12 @@ const verdictFor = <TProps extends JsonObjectView>(
  * declaration rather than at the point of registration — an author who reads
  * `props.titel` finds out here.
  */
-export const definePrimitive = <TProps extends JsonObjectView, TText extends string = never>(
-  definition: PrimitiveDefinition<TProps, TText>
+export const definePrimitive = <
+  TProps extends JsonObjectView,
+  TText extends string = never,
+  TBehaviour extends BehaviourName = never,
+>(
+  definition: PrimitiveDefinition<TProps, TText, TBehaviour>
 ): PrimitiveEntry => ({
   type: definition.type,
   description: definition.description,
@@ -158,6 +179,7 @@ export const definePrimitive = <TProps extends JsonObjectView, TText extends str
   text: freezeText(definition.text),
   interactive: definition.interactive,
   submits: definition.submits ?? false,
+  behaviours: definition.behaviours ?? [],
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

@@ -1,7 +1,11 @@
+import { existsSync, readdirSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+
 import { describe, expect, it } from "vitest"
 
 import {
   DEFAULT_THEME,
+  DEMO,
   DOCS,
   internalHref,
   otherThemes,
@@ -160,5 +164,76 @@ describe("the rest of the product", () => {
     for (const surface of PRODUCT_SURFACES) {
       expect(surfaceHref("https://loom.example", surface)).not.toContain("theme=")
     }
+  })
+
+  /**
+   * The demonstration is the one surface that is the product rather than a
+   * description of it, so it is offered first — and it can only be offered at
+   * all because it costs a visitor nothing.
+   *
+   * `Loom demo` moved it to a public `/demo` on 21 August and filed the three
+   * facts that make it safe to put on the busiest page the project has: it
+   * works with no model configured, a page view allocates nothing per visitor,
+   * and the first click is one button. The flag below is the only one of the
+   * three this lane can assert from here; the other two are that lane's, and
+   * they are why the link exists.
+   */
+  it("leads with the one a visitor can try without an account", () => {
+    expect(PRODUCT_SURFACES[0]).toBe(DEMO)
+    expect(DEMO.guarded).toBe(false)
+  })
+
+  /**
+   * Every surface is offered before any door, and the guarded one is last.
+   *
+   * The order is meant to ascend by what it asks of the reader, and the only
+   * part of that a test can hold is the end of it: a visitor should have been
+   * shown everywhere they can go before they are shown somewhere they cannot.
+   */
+  it("offers every open surface before the one behind a sign-in", () => {
+    const guardedAt = PRODUCT_SURFACES.findIndex((surface) => surface.guarded)
+
+    expect(guardedAt).toBeGreaterThanOrEqual(0)
+    expect(PRODUCT_SURFACES.slice(0, guardedAt).every((surface) => !surface.guarded)).toBe(true)
+    expect(PRODUCT_SURFACES.slice(guardedAt).every((surface) => surface.guarded)).toBe(true)
+  })
+})
+
+/**
+ * A surface this site points at is a page that exists on this deployment.
+ *
+ * This is the assertion the lane did not have, and the reason it is worth
+ * having is on the record. The demonstration lived at `/portal/demo` and moved
+ * to `/demo` on 21 August; the finding that reported the move discovered
+ * something larger than a stale link, which was that **there was no link at
+ * all** — so nothing here broke, and nothing here would have.
+ *
+ * A path is the whole of the contract between this lane and another one (0067):
+ * a surface is somebody else's front door and this routine may point at it and
+ * nothing more. That makes it exactly the kind of agreement that rots silently,
+ * because the lane that moves a route is not the lane that links to it, and a
+ * marketing page linking into a 404 is invisible to every test either lane has.
+ *
+ * It is checked against the route groups rather than by fetching anything: the
+ * four surfaces are one Next application (0067), a route group contributes
+ * nothing to a URL, so `/docs` is served by `(docs)/docs/page.tsx` and the file
+ * being there is the same fact as the page answering.
+ */
+describe("every surface named here", () => {
+  /** `app/`, from `app/(marketing)/_lib/`. The route groups are its children. */
+  const app = fileURLToPath(new URL("../../", import.meta.url)).replace(/\/$/, "")
+
+  const routeGroups = (): readonly string[] =>
+    readdirSync(app, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith("("))
+      .map((entry) => entry.name)
+
+  it.each(PRODUCT_SURFACES)("$label has a page on this deployment at $path", (surface) => {
+    const segment = surface.path.replace(/^\//, "")
+    const serving = routeGroups().filter((group) =>
+      existsSync(`${app}/${group}/${segment}/page.tsx`)
+    )
+
+    expect(serving).toHaveLength(1)
   })
 })

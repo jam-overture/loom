@@ -8,9 +8,18 @@ import { assertNever } from "../result.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
 import type { SubmissionOutcome, SubmissionResolution } from "../submit/resolution.js"
+import { textOf } from "../tree/navigation.js"
 import type { ElementNode, LoomNode, SlotNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
+import {
+  isBehaviourResolver,
+  NO_RESOLVED_BEHAVIOURS,
+  resolveBehaviours,
+  type BehaviourName,
+  type BehaviourResolver,
+  type PrimitiveBehaviours,
+} from "./behaviour.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { editableAttributes } from "./editable.js"
 import {
@@ -123,6 +132,13 @@ type RenderContext = {
   readonly data: DataResolution | undefined
   readonly submissions: SubmissionResolution | undefined
   readonly text: TextResolver | undefined
+  /**
+   * Absent when the resolver is not a registry, which is also the only way to
+   * have registered a primitive that declares a behaviour — so there is nothing
+   * for a host to wire here and nothing that can go missing. It is the text
+   * seam's base case with no dictionary half to lay over it (0063).
+   */
+  readonly behaviours: BehaviourResolver | undefined
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
@@ -180,6 +196,7 @@ const renderContextFor = (
   data: NodeData,
   submit: SubmissionOutcome | undefined,
   text: PrimitiveText<string>,
+  behaviours: PrimitiveBehaviours<BehaviourName>,
   context: RenderContext
 ): LoomRenderContext => {
   const isRoot = isRootNode(node, context)
@@ -191,6 +208,7 @@ const renderContextFor = (
     slots,
     data,
     text,
+    behaviours,
     ...(submit ? { submit } : {}),
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
@@ -257,6 +275,34 @@ const nodeSubmissionFor = (
   }
 
   return context.submissions.lookup(node.id)
+}
+
+/**
+ * The controls this node's primitive declared, built from the tree.
+ *
+ * The content a behaviour acts on is `textOf` the node — read from the tree
+ * rather than from the markup around it, so a copy button copies what the page
+ * says and not the language label its own primitive rendered beside it.
+ *
+ * A behaviour whose name could not be resolved is left out and reported, for
+ * the reason `resolveBehaviours` gives: a control a screen reader announces as
+ * "button" is worse than no control, and this is the only place that can say so.
+ */
+const nodeBehavioursFor = (
+  node: ElementNode,
+  text: PrimitiveText<string>,
+  context: RenderContext
+): PrimitiveBehaviours<BehaviourName> => {
+  const declared = context.behaviours?.behavioursFor(node.type) ?? []
+  if (declared.length === 0) return NO_RESOLVED_BEHAVIOURS.behaviours
+
+  const resolved = resolveBehaviours(declared, textOf(node), text)
+
+  for (const { behaviour, key } of resolved.unnamed) {
+    context.collect({ code: "behaviour-unnamed", nodeId: node.id, behaviour, key })
+  }
+
+  return resolved.behaviours
 }
 
 /**
@@ -339,11 +385,12 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
    * resolver was built.
    */
   const text = context.text?.textFor(node.type) ?? NO_TEXT
+  const behaviours = nodeBehavioursFor(node, text, context)
   const body = renderElementBody(node, context)
 
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, body.slots, data, submit, text, context),
+    loom: renderContextFor(node, body.slots, data, submit, text, behaviours, context),
     props,
     children: body.children,
   })
@@ -462,6 +509,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     data: options.data,
     submissions: options.submissions,
     text: composeText(options.resolver, options.text),
+    behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
     collect,
   })
 

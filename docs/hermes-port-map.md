@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 32 blocks, 50 primitives.**
+**Done — 33 blocks, 53 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -76,6 +76,7 @@ stands alone.
 | `products`, `digital-downloads`, `shop-categories`, `leadmagnet` | `loom.product-grid` / `loom.product` | pair ✅ |
 | `contactform`, `newsletter` | `loom.form` / `loom.field` (+ `loom.option`, `loom.button`) | pair ✅ |
 | `code-block` | `loom.code` | atomic ✅ |
+| `comparison-table` | `loom.comparison-table` / `loom.comparison-row` / `loom.comparison` | pair ✅ — a **trio**, see [0084](../decisions/0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md) |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -106,7 +107,7 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 20 blocks, 7 pairs.** Grouped by the content model they
+**Pairs to build — 19 blocks, 6 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
@@ -116,7 +117,6 @@ share, which is the order to build them in.
 | Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
 | Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
-| Comparison | `comparison-table` | `loom.comparison-table` / `loom.comparison-row` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
 
 **Atomic to build — 3 blocks.**
@@ -161,6 +161,12 @@ landed on 19 August for that reason, and they are the first primitives in the
 library with no Hermes ancestor at all. Read the count below as "of the Hermes
 catalogue", not "of the library".
 
+`comparison-table` is the exception among the ported blocks and worth noting
+here: Hermes *did* define it, and it came out three primitives rather than two
+because both of its axes are repeated content. 0084 is the record; the short
+form is that rows are nodes, columns are positions, and the singular is
+`loom.comparison` — one subject measured against one criterion.
+
 Four more joined them on 21 August, and they are the same shape of gap. Hermes
 sold a creator's *services*; nothing in the seventy is about a **tool**, so
 nothing in it is a key cap or an avatar reachable outside a person record, and
@@ -168,22 +174,37 @@ nothing in it is a key cap or an avatar reachable outside a person record, and
 `loom.avatar`, `loom.avatar-row` and `loom.mosaic` have no row above because
 there is no block they port.
 
+**Five more joined them on 23 August, and they are the largest gap of the
+three** — the layer a page is *written* in, as opposed to what it is built from.
+Hermes held its lists as fields inside other blocks (`features: string[]` inside
+a `PricingTier`, `items: FaqItem[]` inside an accordion) and its prose as a
+string, so nothing in the seventy is a plain bulleted list, an emphasised span,
+an inline code reference or a callout. `loom.list`, `loom.list-item`,
+`loom.emphasis`, `loom.code-span` and `loom.callout` have no row above for that
+reason, and their absence was invisible from this document because this document
+counts Hermes blocks: the library could draw a pricing table and a timeline and a
+comparison band while being unable to write three bullet points.
+
+Read the ledger below accordingly. **It is a measure of the port, not of the
+library**, and the gaps that have mattered most in the last three runs have all
+been outside it.
+
 ## Where this leaves the count
 
 | | Blocks |
 | --- | --- |
-| Ported | 32 |
+| Ported | 33 |
 | Need no primitive | 13 |
-| Pairs still to build | 20 (7 pairs) |
+| Pairs still to build | 19 (6 pairs) |
 | Atomic still to build | 3 |
 | Blocked on a seam | 2 |
 
-**45 of 70 are settled**, and the 20 that remain are seven pairs rather than
-twenty primitives. That is the number worth quoting, because "70 blocks"
+**46 of 70 are settled**, and the 19 that remain are six pairs rather than
+nineteen primitives. That is the number worth quoting, because "70 blocks"
 has been the shape of this job since the port started and it was never the real
 size of it.
 
-**Six of those remaining pairs are a card in a grid**, and what separates them
+**Every one of the remaining pairs is a card in a grid**, and what separates them
 is not their fields — it is what the reader aims at.
 [0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 settles it once for all of them: `loom.credential`, `loom.book` and

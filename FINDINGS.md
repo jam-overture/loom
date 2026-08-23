@@ -1635,7 +1635,26 @@ share a schema.
 
 ## 2026-08-19 — nothing in the library can say `ChangeInterpreter` inside a sentence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:**
+**closed 23 August** by `primitives-11-the-prose-vocabulary`. The diagnosis was
+exact and the fix is the pair it named: `loom.emphasis` marks a span with three
+renderings on one enum — `<strong>`, `<em>`, `<mark>` — and `loom.code-span` sets
+a symbol in monospace inside the line, tinted `accent-strong` on `accent-subtle`
+so it is neither a key cap nor a badge.
+
+Two things this entry asked about, answered rather than assumed:
+
+- **`loom.prose` needed no change at all.** The finding wondered "whether
+  `loom.prose` should accept element children" — it already does, and always
+  did: a primitive receives `children` as rendered content and the paragraph
+  marks up nothing between them. There was no schema question here, only a
+  missing pair of leaves.
+- **A delta addressing half a sentence** is an ordinary delta. The span is a
+  node, its text is a text node beneath it, and re-authoring the stressed word
+  is a `configure` on that text with its own author, history and inverse — which
+  is exactly what a run of markers stripped in `_lib/text.ts` could never have.
+
+The surface can stop stripping. `**`, `*` and `` ` `` now each have a primitive
 
 The lessons surface renders the course's prose by composing registered
 primitives, as 0067 requires. That works for headings, paragraphs, cards and
@@ -2865,7 +2884,12 @@ call shows it is real. They are different products and only one of them is free.
 
 ## 2026-08-20 — the audit calls a component more than once now, and one comment in the portal says otherwise
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-09-does-it-add-up`** — the comment now says "once for each shape its
+props can take (0075)" and carries the consequence the filing lane drew, which is
+that doing it at module scope is worth more now than when it was written, not
+less. The cold-start note was read and left alone: it is a measurement worth
+making and not a change worth guessing at.
 
 Nothing is broken and no test changed. This is a doc comment that became false,
 in a file whose reasoning is otherwise exactly right.
@@ -3091,7 +3115,20 @@ documenting something a reader cannot reach.
 
 ## 2026-08-21 — `accentFamily` is emitted as a variable no primitive reads
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-05-a-font-pack-names-its-mono`, which took the **first** of
+the three ways out — the field is deleted — and the finding below it is the
+reason. Read together the two say the vocabulary had one word too many and one
+too few, and
+[0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)
+answers both with one rule: *a font pack declares a face when something reads
+it.* Under that rule `monoFamily` earns its place (`monospace()` has read it
+since 21 August) and `accentFamily` does not. Nothing rendered changes — no
+registered pack set it, so no deployment ever emitted it. If a display face is
+wanted later it comes back **with its reader in the same change**, which is the
+whole point of the rule. Original status below.
+
+**Status:** open
 
 Noticed while writing seventeen font packs, none of which set it.
 
@@ -3611,6 +3648,25 @@ and a mosaic is a single column on a phone, which is deliberate
 ## 2026-08-21 — a font pack declares three families and none of them is monospace
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** closed by `framework-05-a-font-pack-names-its-mono`, built exactly as
+specified — `monoFamily` on `fontPackSchema`, emitted as `--loom-mono-family`,
+**optional**, with the reasoning for optional recorded in
+[0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md):
+an undeclared colour has no universal fallback and an undeclared *face* does.
+The workaround needed nothing undone, as predicted; `src/primitives/` was not
+opened.
+
+Two things worth carrying back. **Six of the twenty packs declare one** and
+fourteen deliberately do not — pairing Garamond with an arbitrary mono asserts a
+relationship its designer never chose. And **`minimal-sans` names Geist Mono**,
+which `(docs)` already links for its own chrome, so a `loom.code` panel on the
+documentation site stops rendering in the system stack beside a `<pre>` set in
+Geist Mono. That is the seam paying for itself on the day it lands rather than
+waiting for a pack to be written for it.
+
+No `family("mono")` overload was added: that is `src/primitives/tokens.ts`, and
+`monospace()` already does the job. Original status below.
+
 **Status:** open — worked around, and the workaround needs nothing undone when
 this lands
 
@@ -3652,7 +3708,52 @@ library whose next four primitives are technical.
 ## 2026-08-21 — a code block cannot offer a copy button, and the fake would be worse than the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
-**Status:** open — not blocking, and deliberately not faked
+**Status:** **the seam is built** by
+`framework-06-a-behaviour-is-a-control-the-framework-owns`
+([0086](decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)).
+**The button is still yours to place**, and it is now three lines.
+
+The open question this finding could not answer from its own lane — *does the
+render seam permit a client boundary inside a primitive?* — is answered **yes**,
+and checked rather than assumed: TypeScript keeps `"use client"` at line 1 of
+the compiled module (`dist.smoke.test.ts` asserts it), and a Next build of
+`apps/loom` with the behaviour wired into `loom.code` resolves the boundary
+through the registry and emits the control into a client chunk. That wiring was
+reverted — the declaration belongs in the same change as the button.
+
+The answer is the finding's **second** shape rather than its first, for the
+reason the second one gave: the closed set. `loom.code` gains
+
+```ts
+text: { copy: "Copy", copied: "Copied" },
+interactive: "always",
+behaviours: ["copy"],
+```
+
+and places `loom.behaviours.copy` wherever it wants it — the panel's bar is the
+obvious home. Nothing in `src/primitives/` opens a client boundary, imports
+anything new, or implements a handler.
+
+Three things the registry now refuses, so none of them can be got wrong quietly:
+a behaviour name the runtime does not implement; a primitive that takes a
+control and declares no strings to name it by; and a primitive that takes a
+control and does not declare itself `interactive` — that last one matters here,
+because a code panel with a button, inside a `loom.card` with an `href`, is a
+`button` inside an `a`, and a browser silently drops one of the two. The audit
+adds a fourth check by probe: declaring the behaviour and never placing it is
+reported as `unplacedBehaviours`.
+
+What the control does, so it is not a surprise: it copies `textOf(node)` — the
+node's own text, from the tree, not from the rendered markup — so a language
+label or a caption rendered beside the listing does not land on the clipboard.
+And **it renders nothing until it knows the clipboard is there**, which is this
+finding's own bar taken literally: the server render is empty and the button
+appears from an effect, so an insecure origin or a page with scripting off shows
+no button rather than a broken one.
+
+Everything below is the finding as filed.
+
+---
 
 Every reference page a developer reads puts a copy control on its code panels,
 and `nextjs.org`'s single most load-bearing element — the `npx create-next-app`
@@ -4046,6 +4147,25 @@ step rather than a judgement call. The second is cheaper and needs nobody to
 find the setting. Either way a routine should not be deciding this on its own
 each time.
 
+**Re-verified 22 August 2026** by `Loom daily build` on **#133**, dated here
+rather than opened as a second entry, the way the `21st.dev` re-verifications
+are. **Identical in every particular**, including the count: three wake-ups in
+twenty-two seconds — `subscription.created`, then `vercel[bot]` **Building**,
+then the same comment edited in place to **Ready**. CI green, no review threads,
+nothing actionable, and the report and pull-request comment for that run had both
+already stated in as many words that nothing was subscribed and nothing
+scheduled. It is not a docs-lane quirk: the default fires for whichever routine
+opens a pull request, and it fired on the first one opened after that entry was
+written.
+
+Same action, for the same reason: **unsubscribed from #133, no check-in
+scheduled.** The maintainer's token discipline is standing, written down, and
+names this failure by shape; a default that ships with the tooling does not
+outrank it. Two routines have now each spent part of a run reaching that
+conclusion independently, which is the argument for the second of the two fixes
+above — one line in `docs/routines.md` making *open, unsubscribe, exit* a step
+rather than a judgement call.
+
 ---
 
 ## 2026-08-21 — `loom.split` cannot say how far apart its two regions sit
@@ -4369,7 +4489,15 @@ lane thinks the asymmetry is wrong, it is two lines in
 
 ## 2026-08-21 — the marketing site does not link to the demo at all, and now it can
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** closed by
+`marketing-08-the-front-door-leads-to-the-demo` — the demo is a `Surface` in
+`site.ts`, which puts it in the header menu, the footer's map and the front
+door's invitation band, plus the three placements this finding and the lane's
+own open question named: the hero's second action, the foot of the band that
+demonstrates, and the foot of `/how-it-works`. Both of the obvious places this
+finding suggested were taken. `linkUrlSchema` refusing relative URLs did **not**
+get in the way — `surfaceHref` has built absolute origin-qualified hrefs since
+19 August, so the workaround for that finding absorbed this with no edit.
 
 The demo brief says to update the marketing site's link to the demo by filing a
 finding rather than by editing that route group. Filing it turned up something
@@ -4408,7 +4536,19 @@ the thing that will get in the way of doing it as a tree node.
 
 ## 2026-08-21 — four portal links and one public-path constant still name `/portal/demo`
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** **closed by
+`portal-09-does-it-add-up`** — all four links now name `/demo`. `DEMO_PATH` stays
+`/portal/demo` on purpose and its comment now says why: it is the address of the
+308, and the exemption is what makes that redirect reach a signed-out visitor
+instead of bouncing them to sign in. **The shim is still needed, so do not delete
+`portal/demo/page.tsx`.**
+
+One thing came out of it that the finding did not anticipate. `nav-items.test.ts`
+checked every rail href against `app/(portal)/…/page.tsx`, so the moment the rail
+pointed at another surface's route group it called a working link broken. The
+check now searches every route group, with a test asserting it finds `/demo` —
+because the tempting fix for that failure is to point the rail back at the
+redirect.
 
 The demo moved to `/demo` this run, into `app/(demo)/`. Five things in the
 portal still point at where it was, and all five are the portal routine's files:
@@ -4686,6 +4826,22 @@ hits the same wall. The first option above still looks right — a missing numbe
 on `main` is a record in flight, a repeated number is the real error — and it is
 one condition in `tools/decisions/build-index.ts`.
 
+**22 August, later — three open pull requests now claim `0084`.** #132
+(`Loom primitives`), #133 (`Loom daily build`) and
+`framework-06-a-behaviour-is-a-control-the-framework-owns` all take the next free
+number on `main`, because the alternative is a branch the guard fails. Two of the
+three get renamed on merge and their index regenerated; the guard fires loudly on
+the duplicate, so it cannot slip through silently, and no work is lost either
+way.
+
+This is the same wall from the other side. The entry above is about a lane that
+cannot write a *second* record; this is three lanes writing a *first* one on the
+same day, which the briefs already anticipate ("numbers collide — take the next
+free number after re-reading `main`"). Both disappear under the first option:
+tolerate a gap, fail on a duplicate. Recorded so the count is visible — five
+collisions on 21 August, three concurrent claims on 22 August — rather than
+because any single one of them cost anything.
+
 ---
 
 ## 2026-08-22 — a scope is now worth setting, and no surface sets one
@@ -4782,12 +4938,1057 @@ open and still unaddressed by anything here.
 
 ---
 
+## 2026-08-22 — three palette pairings the comparison band renders are not in the contrast list, and two more were designed around because they fail
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
+**Status:** open — nothing renders below the bar, and the check that would keep
+it that way does not know about it
+
+`PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` says of itself that it is
+*read off `src/primitives` rather than imagined*, which is what makes a failure
+there worth acting on. The comparison band renders three pairings it does not
+list. All three were measured across the 39 registered palettes before shipping
+and all three pass, so this is a gap in the audit rather than a fault on a page:
+
+| Pairing | Worst of 39 | Where |
+| --- | --- | --- |
+| `fg-muted` on `accent-subtle` | 4.99:1 (`carbon`) | a note inside a featured column |
+| `fg-default` on `bg-surface-muted` | 15.76:1 (`clay`) | a comparison row under a pointer |
+| `accent-strong` on `bg-surface` | 4.83:1 (`dusk`) | the tick outside a featured column |
+
+**The two that matter more are the ones that failed**, because they are what a
+reasonable person reaches for first and they are invisible until measured:
+
+| Pairing | Worst of 39 | Verdict |
+| --- | --- | --- |
+| `accent` on `accent-subtle` | **4.43:1** (`plum`) | under the 4.5 bar 0074 sets |
+| `fg-subtle` on `accent-subtle` | **3.76:1** (`carbon`) | well under it |
+
+A tinted `accent-subtle` panel is an obvious thing to build, and `accent` and
+`fg-subtle` are the obvious inks to put on one — the first is the accent, the
+second is what every quiet note in this library already uses. Both fail, and
+nothing in the repository would have said so: the audit only checks pairings
+somebody thought to list. The band uses `accent-strong` and `fg-muted` instead,
+which is why the tick is one colour in every column rather than brightening
+inside the featured one.
+
+Recommendation: add the three passing rows to `PALETTE_TEXT_PAIRINGS`, and
+consider whether the two failing ones are worth a comment there — a list that
+records *what was tried and rejected* beside what is rendered would have saved
+this run an hour, and it is the same argument a decision record's *Alternatives
+considered* section makes.
+
+Not fixed here because `src/theme/` is not this lane's.
+
+---
+
+## 2026-08-22 — a comparison table can name a column that does not exist, and nothing can tell
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — a known bound of what shipped, and possibly not fixable
+
+[0084](decisions/0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md)
+makes `feature` an ordinal on the container: `first` through `fourth`, each a
+static class with a rule already written. A tree that sets `feature: "fourth"`
+on a table with two subjects is accepted by the schema, gated as an ordinary
+`configure`, and renders a band with nothing tinted at all.
+
+Nothing available can catch it. The render is a pure function of one node
+([0008](decisions/0008-the-renderer-is-a-total-pure-projection.md)), so the
+table cannot count the cells in a row it did not render; the schema validates one
+node's props and has no view of its children; and the Gate weighs a `configure`
+against the node it names. The failure is silent — not a wrong page, a page
+where an instruction quietly did nothing.
+
+It is the general cost of an ordinal into a sibling structure and `loom.mosaic`
+has a milder version of it (a rhythm whose cycle is longer than the number of
+cells). Worth writing down rather than fixing on one instance: three candidate
+shapes, in the order I would try them.
+
+1. **Nothing.** The blast radius is one untinted column and the author sees it
+   immediately. This is what shipped.
+2. **A diagnostic from the render.** The renderer already collects diagnostics
+   for things it cannot honour, and a primitive that could say *I was told to
+   feature a column I do not have* would surface in the portal. It needs a
+   primitive to be able to emit one, which it currently cannot.
+3. **A cross-node check in the Gate.** The most complete and the most expensive,
+   and it would make the Gate know what a primitive means by a prop — which is
+   the coupling the registry exists to avoid.
+
+My recommendation is (1) until someone hits it, then (2) if a primitive ever
+gains a way to report. Recorded so the next run in this lane does not rediscover
+it from scratch.
+
+---
+
+## 2026-08-22 — `21st.dev` is blocked for the fifth time, and the brief still says it is allowed
+
+**Filed by:** `Loom primitives` · **Owned by:** the maintainer ·
+**Status:** open — noted against the 19 and 21 August entries rather than filed
+as a sixth
+
+`WebFetch https://21st.dev` returned `EGRESS_BLOCKED` again. `docs/routines.md`
+states that `21st.dev` is on the WebFetch allowlist and it is not, so a routine
+reading its brief has no way to learn that the visual reference it is *required*
+to consult is unreachable until it spends a call finding out.
+
+This run's comparison band is the fifth primitive group built without it. It was
+calibrated against `loom.hero`, `loom.tier-table` and `loom.mosaic` instead,
+which is the honest description of where its spacing and its motion came from.
+
+Nothing new to add beyond the count. Repeating it because five is the number at
+which "worth mentioning" becomes "worth fixing or worth removing from the brief",
+and either would do — a brief that names an unreachable reference costs every run
+in this lane the same call.
+
+---
+
+## 2026-08-22 — two files in other lanes had to change, both because their own tests said to
+
+---
+
+## 2026-08-23 — a design token guarantees the value comes from the theme, and nothing about it being different from the one beside it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around inside one primitive, and the general shape is not this
+lane's to fix
+
+`loom.emphasis` with `tone: "strong"` was written the way every primitive in
+this library writes a weight — `fontWeight: weight("heading")`, which is
+`var(--loom-heading-weight)`. Every test passed. It rendered **nothing** under
+`bold-sans`, whose font pack declares `headingWeight: 400` beside
+`bodyWeight: 400`.
+
+That pack is not broken. It is a legitimate design — the family carries its
+emphasis in size and colour rather than in weight — and it means a stressed word
+inside a paragraph came out identical to the words on either side of it, under
+one of the three registered packs. **The token was not wrong; it was equal.**
+
+Nothing could have caught it. The markup was correct, the variable was real,
+`0049`'s re-theme guarantee held, and the no-literal-colour assertion this lane
+runs under every palette passed. It was found in the third screenshot.
+
+Fixed here with `fontWeight: "bolder"`, which is relative to the inherited weight
+by definition and is therefore heavier than whatever it is set in under every
+pack, registered or not. That closes the instance and not the class:
+
+- **`fg-muted` on a card whose ground is already `bg-surface-muted`** is the same
+  shape one tier over, and a palette is free to make those two very close.
+- **`accent` as an eyebrow on an `accent-subtle` section** is the shape the
+  22 August contrast finding hit from the other direction, where the failure was
+  measurable. This one is not: two colours can differ by enough to clear AA and
+  still not read as *emphasis*.
+
+`PALETTE_TEXT_PAIRINGS` measures contrast between a foreground and a ground.
+What has no check at all is **difference between two foregrounds a reader is
+meant to tell apart**, or between two grounds. Whether that is worth a check or
+only worth writing down is `Loom daily build`'s call — `src/theme/` is that
+lane's — but the lesson generalises past this library: *a token is a promise
+about provenance, not about contrast.* Worth a sentence in `tokens.ts` at least,
+which is this lane's file and where the next person will look.
+
+---
+
+## 2026-08-23 — a palette has no slot that means danger, so a callout cannot be red
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — not blocking, and deliberately not faked
+
+`loom.callout` ships with two tones, `accent` and `neutral`. Every callout
+system in the world has a third, and this one cannot: `paletteSlotSchema`
+declares four surfaces, four foregrounds, three accents, two brand secondaries
+and four borders, and **none of them means danger, warning or success.**
+
+The workaround is not a hex. A literal red here would be the one thing
+`tokens.ts` exists to make impossible, and it would be worse than it looks: a
+literal survives a re-theme, so a palette designed around red — a warm brand, a
+restaurant, anything — would get a warning tone that vanishes into its own page.
+0049's guarantee is that a re-theme is one `configure` on the root and nothing
+else, and a semantic colour that ignores the palette breaks it silently.
+
+So a caveat is an `accent` callout whose marker and title say what it is, which
+is honest rather than approximate, and this entry exists so the gap is a decision
+somebody made rather than an omission somebody missed.
+
+**What it would take, and the reason it is a decision rather than a patch.**
+Adding `danger`, `warning` and `success` to `paletteSlotSchema` is not three
+slots — it is three slots *plus their subtle grounds and their strong inks*, so
+nine, in **every registered palette**, because 0049 requires every palette to
+declare every slot. Thirty-nine palettes exist. That is a migration, and it also
+asks a design question this lane cannot answer alone: whether a Loom palette is a
+*brand* (in which case semantic status colours do not belong in it and should
+come from somewhere else) or a *complete design system* (in which case they do).
+
+Not urgent. The surfaces that want a warning today are the documentation site and
+the lessons, and an accent callout with the word *Careful* in its title is doing
+the job.
+
+---
+
+## 2026-08-23 — the record-numbering block, hit by a second lane
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 21 August governance entry rather than
+opened as a rival finding
+
+The 21 August finding — *a lane can only have one record-writing pull request
+open at a time* — described the framework lane losing a record. It happened to
+this lane today, in exactly the shape that entry predicts, and it is worth one
+paragraph because the entry's closing sentence was *"the next lane to want two
+records in one run hits the same wall"*.
+
+`0084` is on `primitives-10-the-comparison-band` (#132), still open. This run's
+naming decision wanted `0085`; `pnpm decisions:index` refuses it as a gap, `0084`
+collides, and stacking is forbidden. The record was written in full and then
+deleted.
+
+Nothing is lost — the argument, the alternatives and the rejection are in
+`loom.list-item.ts`'s doc comment, which is where the next person to read the
+primitive will find them, and the precedent for doing that was set the same day
+by `framework-03-what-the-prompt-costs`. But it is the **second** time the wall
+has cost a record in three days, and the first option that entry lists still
+looks right and is still one condition in `tools/decisions/build-index.ts`: a
+missing number on `main` is a record in flight, a repeated number is the real
+error.
+
+One thing this instance adds that the first did not. The framework lane's block
+cleared *by the ordinary passage of time* — #129 merged, and `0083` became free.
+That worked because the lane's own pull request merged quickly. It is not a
+mechanism, and a lane whose pull request waits a week cannot write a record for a
+week.
+
+---
+
+## 2026-08-23 — 21st.dev, blocked for the sixth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 16, 19 and 21 August entries rather than
+opened as a rival finding
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED · Access to 21st.dev is
+blocked by the network egress proxy`. `docs/routines.md` still says, under
+**Network access**, that it is currently allowed as one of "the visual and
+structural references the primitives, marketing and docs briefs tell you to
+consult".
+
+Six runs across four lanes have now spent a call establishing this. The previous
+run in this lane recommended fixing the allowlist **or** dropping the line from
+the brief, and either would end it; recording it a sixth time rather than
+skipping it silently, because a report that omitted it would let a reader assume
+the visual standard was consulted when it was not.
+
+This run was calibrated against `loom.hero`, `loom.code`, `loom.badge` and
+`loom.kbd` instead — the in-repository floor the brief names as its second
+reference, which is a real standard and is not the same standard.
+
+---
+
+## 2026-08-23 — two files in other lanes had to change, and both are counts held against the registry
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs` ·
+**Status:** open — nothing to fix, recorded so each owner knows their file was
+opened
+
+The same shape as 20 and 21 August, and neither is a judgement call.
+
+- `apps/loom/app/(marketing)/_lib/copy.ts` — `primitives: "50" → "53"`,
+  `decisions: "83" → "84"`. `facts.test.ts` counts the repository and fails
+  otherwise, so any lane that adds a primitive or a record turns the marketing
+  surface red until it edits that file.
+- `apps/loom/app/(docs)/_lib/api/reference.generated.json` — regenerated with
+  `pnpm --filter @loom/app docs:api`, which is what its own failure message asks
+  for.
+
+This is the third consecutive run in this lane to file this entry, which is
+probably the signal worth reading: the cost is small each time and it is paid by
+whoever happens to be adding a primitive rather than by whoever chose the check.
+
+---
+
+## 2026-08-22 — no framework gaps this run, and `src/` outside the primitives was not opened
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** closed
+
+The comparison band needed nothing the framework does not already provide. Two
+things are worth naming as *near* misses, because both were expected to be gaps
+and were not.
+
+**`loom.nodeId` was already there for the caption.** The caption had to move out
+of the `<table>` — a `<caption>` takes the width of the table it captions, and
+this table is deliberately wider than a phone, so on the screen where a caption
+matters most it was the half-sentence clipped by the panel's edge. Naming it with
+`aria-labelledby` needed an id minted from the node's own, which `loom.field`
+already does for its hint. No new seam.
+
+**A two-dimensional band needed no new slot mechanics.** The header row is a
+region and `<thead>` is where the table places it, which is
+[0051](decisions/0051-a-slot-is-a-region-the-primitive-places.md) working exactly
+as written for a case it was not designed against.
+
+---
+
+## 2026-08-22 — the self-watching pull request is automatic on creation, which is why the 21 August finding keeps recurring
+
+**Filed by:** `Loom primitives` · **Owned by:** the maintainer ·
+**Status:** open — noted against the 21 August entry, with the mechanism it was
+missing
+
+The 21 August entry recorded that *a pull request now watches itself, and three
+cloud sessions went to a deploy turning green*. It did not say how the watch got
+there, and the natural reading is that a routine chose it.
+
+It did not. #132 was subscribed to its own activity by the **harness, on
+creation**, without this run calling for it — the first event delivered was
+`subscription.created` from `system`, and the second was the Vercel bot
+announcing the preview was Ready. That second one is precisely the "deploy
+turning green" the earlier entry paid three sessions for, arriving again.
+
+That matters because it changes who can fix it. No amount of discipline in a
+routine's brief prevents this: the brief already says *never schedule a
+follow-up, never poll for review*, and it was followed — the subscription still
+happened, and the guidance attached to it asks for an hourly `send_later`
+check-in that would re-arm itself indefinitely, which is the exact chain that
+cost a week's allowance on 9 August.
+
+This run unsubscribed as soon as it saw the events, having first confirmed CI
+green and no unresolved review threads. That is the right call under the brief
+but it is a manual undo of a default, so it depends on every future run noticing.
+
+Recommendation, in order of preference:
+
+1. **Turn the auto-subscribe off** for these routine sessions, if the harness
+   allows it. One setting, and the rule in the brief becomes true by
+   construction rather than by vigilance.
+2. **Say in `docs/routines.md` that a PR auto-subscribes and that unsubscribing
+   is part of the procedure**, so a run that has never seen the events knows to
+   expect them. Cheap, and it makes the undo reliable.
+
+Worth reading beside the 21 August entry rather than instead of it: that one has
+the cost, this one has the cause.
+
+---
+
+## 2026-08-22 — one comment in `src/primitives/tokens.ts` names a field that no longer exists
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+Small, and handed back rather than fixed here because `src/primitives/` is not
+this lane's.
+
+`accentFamily` is gone
+([0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)),
+and `monoFamily` is in the schema and emitted. The doc comment above
+`MONOSPACE_STACK` still says:
+
+> A code panel and a key cap need a monospace face, and a font pack declares
+> `headingFamily`, `bodyFamily` and `accentFamily` — none of which is one.
+> Filed for `Loom daily build`, whose file `src/theme/theme.ts` is; a font pack
+> that named its own mono is a better answer than a stack chosen here …
+
+Every sentence of that was true when it was written and two of them are not now:
+there is no `accentFamily`, and the pack *does* name its own mono. **Nothing is
+broken** — `monospace()` is unchanged, it was always a `var()` with the stack as
+its fallback, and that is exactly why it now picks the theme's face up with no
+edit. Only the explanation is stale, and it is the sort of stale that reads as a
+gap the framework still has.
+
+Worth knowing while you are there: **`family("mono")` was deliberately not
+added.** The signature is `family(role: "heading" | "body")` and a third member
+would be right if you want the roles symmetrical, but `monospace()` is not the
+same shape — it carries a fallback the other two do not need, because a pack may
+decline to answer. If you widen `family`, the fallback has to survive the move.
+
+---
+
+## 2026-08-22 — two files in other lanes changed, both because their own tests said to
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing` ·
+**Status:** open — recorded, not a request
+
+The fifth and sixth instance of a shape already filed twice, and both are one
+line, so this is a note rather than a complaint.
+
+- **`app/(docs)/_lib/api/reference.generated.json`** — adding a doc comment to
+  `fontPackSchema` moved the runtime's published surface, and
+  `extract.test.ts` fails with the fix in its own message: *"Run `pnpm --filter
+  @loom/app docs:api` and commit the result."* Did exactly that; the diff is one
+  `summary` string, generated.
+- **`app/(marketing)/_lib/copy.ts`** — `FACTS.decisions` went 83 → 84, because
+  `facts.test.ts` counts the records in `decisions/` and holds the number the
+  front door prints against it. Already filed on 19 August by this lane as *the
+  marketing site's checked numbers make every other lane's run go red*, still
+  open, and it has now caught every record-writing run since.
+
+Both tests are doing their job — a generated file that drifts and a public claim
+that goes stale are worse than a red run — and neither wants changing on my
+account. Recorded so the count is visible: **six lane crossings, six one-line
+fixes, all mechanical, all caught before merge.**
+
+---
+
+## 2026-08-22 — this record is 0084 and so is #132's
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the same governance question, hit a fifth time
+
+`#132` (`Loom primitives`, opened this morning) writes **0084**. So does this
+branch, because 0084 is the next free number on `main` and the numbering guard
+refuses a gap — taking 0085 would have made `pnpm verify` red, and *"never open a
+PR on red"* is the harder rule of the two.
+
+**Merge order settles it, as it has four times before**: whichever merges second
+renames its record 0084 → 0085, `sed`s the half-dozen in-code references, and
+runs `pnpm decisions:index`. The guard catches it loudly — `duplicate-number`
+fires, and `decisions/README.md` conflicts on the same line — so it cannot merge
+silently. That is the whole cost, and it is the same cost each time.
+
+The one new datum: **both branches were green when opened**, which the earlier
+collisions were not. Taking the next free number rather than the next unclaimed
+one is what buys that, and it is worth writing into `docs/routines.md` as the
+convention rather than leaving each pair of routines to work out that the
+alternative is a red PR.
+
+---
+
+## 2026-08-22 — the demo has no way out of it, and the front door now sends four streams of people in
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open
+
+Found by grepping the route group for anchors before linking to it, which is a
+thing worth doing before pointing a front door at somewhere.
+
+**`app/(demo)/` contains exactly one `<a>` and it is the skip link.** No
+`next/link`, no `href` on anything else, in the layout or in any component. The
+wordmark in `DemoBar` is a `<span>`. There is no route from the demo to the
+marketing site, the documentation, the course, the portal or the repository.
+
+That was survivable while nothing linked in — a page nobody arrives at cannot
+strand anybody. As of this branch the front door offers `/demo` from **six**
+places: the header menu on every page, the footer's map on every page, the
+hero's second action, the invitation band's card, the foot of the band that
+demonstrates, and the foot of `/how-it-works`. Every one of them is a one-way
+door, and the visitor most likely to walk through it is the one who has decided
+they are interested.
+
+The bar's own comment says it says three things and stops, and the third is
+**"where to go next"**. It currently says whose page it is and that it is live,
+and then does not say the third.
+
+What this lane would suggest, in order, and none of it is this lane's to write:
+
+- **The wordmark becomes a link home.** One attribute, and it is the convention
+  every visitor already has — the mark in the top-left goes to the front door.
+  It is also what the `(marketing)` chrome does, so the two surfaces would agree.
+- **Something at the end of the record rail**, for the visitor who has watched a
+  few changes and now wants to know how to do this to their own page. `/docs` is
+  the honest destination for that and it needs no account.
+- **Not a full site header.** The bar exists because the portal's chrome was
+  wrong here, and replacing it with the marketing chrome would make the same
+  mistake pointing the other way. The demo should stay the instrument.
+
+Worth saying plainly: this is **not a blocker for linking**, and the links are
+shipping without it. A visitor who reaches a page with no way out still has the
+back button, and a demo nobody can reach is worse than a demo that is a
+cul-de-sac. But it is the next thing that would make the route worth having, and
+it is roughly one line of the three.
+
+### One limit of the test this run added, since it touches the same seam
+
+`site.test.ts` now asserts that every `Surface` path is served by a `page.tsx` in
+some route group, which is the guard this lane did not have when `/portal/demo`
+moved. It proves **a page answers**, not that the right one does: pointed at
+`/portal/demo` it passes, because that path still exists as the
+`permanentRedirect` this lane's finding says was kept deliberately. That is the
+correct behaviour for a redirect that is meant to work, and it means the test
+catches a deleted route rather than a demoted one. Recorded so nobody reads more
+into it than it says.
+
+---
+
+## 2026-08-22 — the wrapping nav is now three rows on a phone, and the finding that accepted it was calibrated on two
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — a measurement against an existing decision, not a new complaint
+
+The 19 August entry above — *a page cannot collapse its own menu, and probably
+should not try* — lays out why `loom.nav` wraps rather than collapsing, and its
+reasoning is right and should not be undone. Its recommendation was to accept
+the wrap, on this ground:
+
+> a menu of four to six links wrapping onto a second row is what a good
+> editorial site does anyway, and the failure mode is legible rather than silent
+
+This branch added the demo to the menu, taking the front door from four items to
+five plus the sign-in action. **At 390px that is three rows, not two**, and the
+bar is roughly a quarter of the first screen before any content — the mark on
+its own row, three links, then two links and the button. The screenshot is in
+this run's report.
+
+Nothing is broken and no link is unreachable, which is why this is a
+measurement rather than a bug. But the accepted trade was priced at two rows,
+and the site has now grown past the size that argument was made about. Two things
+follow, and both are that lane's call:
+
+- **The number the finding should quote is a menu of four**, not four to six.
+  Five items plus an action is where the second row becomes a third.
+- **The `:has()`-driven checkbox toggle the finding lists as an honest option is
+  worth more than it was**, because the cost it buys down has gone up. This lane
+  has no opinion on whether it is worth building; it has a use for it if it is.
+
+What this lane will *not* do about it is drop a surface from the menu to keep
+the bar short. Every surface being reachable from every page is the property
+`pages.test.ts` holds and 0070 asks for, and a bar that omits a destination to
+look tidier is the failure that assertion exists to prevent.
+
+---
+
+## 2026-08-22 — `new URL(…, import.meta.url)` does not survive the build, and every lane that reads a file at build time will meet it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around, and filed because the workaround is not obviously a workaround
+
+Three surfaces now read files from the repository while the site builds — the
+Architecture section reads `lessons/` and `decisions/`, the lessons surface
+resolves its own directory, and as of this branch the search index reads every
+`page.mdx`. All three want the same one line to find themselves on disk, and the
+idiomatic ESM spelling of it fails the build:
+
+```
+./apps/loom/app/(docs)/_lib/search/headings.ts:32:32
+Module not found: Can't resolve '../../docs'
+```
+
+Turbopack reads `new URL("../../docs", import.meta.url)` as **an asset this
+module imports** and tries to resolve the argument as a module specifier. The
+directory plainly exists; the build stops anyway, and the error names a module
+nobody wrote. It is not a warning and there is no partial success — `next build`
+exits.
+
+`architecture/source.ts` already avoids it, by walking up from `process.cwd()`
+for a marker file. Reading that file, the walk looks like it is there because
+vitest and `next build` run from different directories, which is *also* true and
+is what its comment says. So the repository has the fix and does not have the
+reason, and the next lane to want a file path will write the obvious line first
+and lose a build to it, exactly as this run did.
+
+Two ways to close it, both yours rather than mine: a sentence in
+`architecture/source.ts` (or wherever the walk ends up living) saying that
+`import.meta.url` is not available to a module the bundler will see, or a small
+shared helper that is the one blessed way to name a repository path. This run
+took the cheap version and imported `REPOSITORY_ROOT` rather than walking twice.
+
+---
+
+## 2026-08-22 — a third file outside the docs route group changed, and it is the same file as last time
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+for your awareness, and an update to the 21 August entry above rather than a new
+argument
+
+`apps/loom/next.config.ts` took one import and one option: the rehype list, so
+that `rehype-slug` runs and every heading on the site gets an `id`. The
+*decision* — which plugins a docs page is parsed and transformed by — is in
+`app/(docs)/_lib/mdx.ts` next to the remark list it now sits beside, and the
+config file only wires it up.
+
+`apps/loom/package.json` gained `rehype-slug` as a dependency, which is the same
+shape: the application manifest is where a dependency has to live, and this one
+is used by exactly one route group.
+
+That is three consecutive documentation runs whose diff crosses the lane
+boundary at the same two files, which is what the earlier entry predicted. The
+suggestion there stands unchanged and is worth restating in one line: **a rule
+that says the MDX pipeline belongs to `(docs)` even where the framework forces
+the file to sit at the root** would make these diffs unsurprising rather than
+something to explain each time.
+
+---
+
+## 2026-08-22 — the site's search finds its titles and its exports, and not a word of its prose
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped, recorded so it is revisited on purpose
+
+The index built by `app/(docs)/_lib/search/build.ts` holds **21 pages, 41
+headings and 751 exports**. That is the site's own table of contents plus the
+runtime's published surface — every place the site *names* something. It holds no
+body text at all.
+
+The cost is real and easy to describe. A reader who remembers the sentence *"a
+bounded vocabulary buys you a change you can review"* and searches for
+`vocabulary` finds nothing, because no page or heading is called that. The
+paragraph is on the introduction and the search cannot see it.
+
+Not done in this run for a reason that is a decision rather than an omission:
+indexing the prose means shipping the site's words to the browser a second time,
+and the index already stands at 117 KB. Doing it properly means a posting list
+rather than a list of strings — every word, once, pointing at the sections that
+contain it — which is a different piece of work with a different test suite, and
+it should be decided on rather than slipped in under "search".
+
+Two things make it cheap to add later and both are already true: the index is
+served from one static route, so its shape can change with nothing else moving;
+and every heading now carries an `id`, so a hit inside a section already has
+somewhere to land.
+
+---
+
+## 2026-08-22 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed
+
+Recorded for the reason the other routines record it. Search is chrome — the
+sidebar, the pager and the search box are named together in 0067 as application
+furniture — so nothing here was a page's content and nothing wanted a primitive
+that does not exist. No `LoomTree` was rendered by any of it and no example
+changed.
+
+The one thing this run needed from outside its own directory was an npm package
+(`rehype-slug`) rather than anything from `@loom/runtime`, which is filed above
+with the config change that goes with it.
+
+---
+
+## 2026-08-22 — a course of prose has no list and no table to put it in
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` ·
+**Status:** open — the lessons render, and two constructs render worse than they read
+
+The lessons surface now renders the lesson text itself, composed from registered
+primitives (0067). Thirteen lessons went through the starter library cleanly with
+one exception each way, and both are the same gap seen twice: **the library has
+no primitive for an ordinary list, and none for an ordinary table.**
+
+**A list.** There are seven list-shaped primitives — `loom.link-list`,
+`loom.perk-list`, `loom.milestone-list`, `loom.faq-list`, and the grids — and
+every one is a list *of something*. A numbered list of prose sentences, which is
+what every Warm-up and every Self-check section in this course is, has nowhere to
+go. It is currently a column of `loom.prose` nodes each carrying its own marker
+in the text:
+
+```
+prose(ids, `${index + 1}. ${text}`)
+```
+
+That renders acceptably and is wrong in a way worth naming: the number is
+content now, so a delta that reorders two questions leaves both numbers where
+they were, and nothing in the tree knows the two nodes are one list.
+
+**A table.** `loom.tier-table` is a pricing band and says so in its own doc
+comment. Lessons use ordinary two- and three-column tables — `| Where | What it
+means | Whose problem |` — and they are currently one `loom.card` per row with
+each cell labelled by its header, which is the standard responsive-table
+degradation and loses the column-wise scan that made the author write a table.
+
+**Why this is worth a primitive rather than a workaround.** The four surfaces
+are one application now, and three of them are documents: a course, a
+documentation site, a marketing page. Prose with lists and tables in it is the
+median content of all three. `loom.code` exists for exactly this argument —
+0052 calls it atomic because whitespace is the content and no other primitive can
+stand in — and a list's ordering is the same kind of fact.
+
+Not urgent. The pages are good; these two are the places a reader can tell the
+library was designed for landing pages first.
+
+---
+
+## 2026-08-22 — an internal link still cannot be expressed in a tree
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` ·
+**Status:** open — already filed 19 August, restated with a second site
+
+Not a new finding: `linkUrlSchema` refusing every relative URL was filed on
+19 August and is still open. This is a second surface hitting it, recorded
+because the first one had a workaround this one does not.
+
+Every lesson opens with a prerequisites line — `[01](01-why-a-runtime.md),
+[02](02-ui-as-data.md), …` — which is now, on the surface, a list of bare
+numbers. Each of those is a page in the same application, at `/lessons/01`, and
+`loom.link` cannot point at it: the schema requires an absolute URL, and this
+surface has no origin to build one from. The marketing lane resolves an origin
+per request (`site.ts`) and can therefore live with it. A statically exported
+course has nowhere to get one, and a link to `https://…/lessons/01` from a page
+already on that host would be a full page load out of and back into the app.
+
+The links that go *sideways* — into `src/`, into `decisions/` — resolve against
+the repository and are fine, because those really do live somewhere else.
+
+Nothing here is broken and no lesson is unreadable. The cost is that a course
+whose whole structure is "you need 04 before you read 09" cannot say so in a way
+the reader can click.
+
+---
+
+## 2026-08-22 — a checkup is the one review surface a stranger can actually be shown
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — as
+a correction to the 17, 18 and 21 August entries rather than a new complaint
+
+Four entries now say no portal surface can be photographed by anyone outside a
+signed-in deployment with a populated journal. **That is true of the telemetry
+pages and it is not true here**, and the difference is worth writing down because
+it changes which work is worth doing next.
+
+`/portal/checkup` needs a store and a seed. Both exist on any deployment the
+moment `ensureSeeded` runs, so this run produced **real screenshots of the real
+page against real data** — a production build, a signed-in browser, the seeded
+tree, `auditSnapshot` actually folding a log. First time in four portal runs.
+
+Two things follow.
+
+**The demo-scoped journal is still the right next change, and it is now smaller
+than it looked.** It closes `/portal/trust`, `/portal/activity`, `/portal/history`
+and `/portal/sign-ins`. It was never needed for this page, so the standing
+recommendation should have been four pages rather than "the telemetry surfaces",
+and the estimate was wrong in this lane's own favour.
+
+**What could not be photographed here is the interesting half, and no deployment
+can produce it.** `agrees` is the only verdict a healthy store yields; `diverged`
+and `unreplayable` mean the log and the snapshot have come apart, which is not a
+state anything can be asked for. Those three were photographed the way the last
+three runs photographed everything — a temporary route rendering the real
+components over a fixture fold, deleted before pushing. That workaround is not
+going away with a demo journal and should stop being counted as a symptom of one.
+
+---
+
+## 2026-08-22 — a plain sentence made a list of four differences read as one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed here, recorded because the general form will happen again
+
+The first build of the checkup verdict put each difference's plain sentence on
+the surface and the part's name and id behind a per-row disclosure. Four
+`missing` differences then rendered **four identical sentences** — *"It is on the
+page people are being served, and nothing in the recorded history put it
+there."* — with the only thing telling them apart one click down, four times.
+
+Eleven tests passed. Every one of them asserted a single difference, where the
+layout is correct.
+
+The general form, and the rule this lane should carry forward:
+
+> **Identity is not technical detail.** A plain sentence describes a *class* of
+> problem, so it is the same sentence for every member of the class. What tells
+> two rows apart is the name of the thing, and it belongs on the surface even
+> when it looks like a runtime word — `loom.prose n_shot2` is a name, the way a
+> filename is.
+
+Found by looking at a screenshot. That is now **the third defect in four runs
+across this repository that was invisible to every test and obvious in a
+picture** (the docs lane reported two). The test written from it renders four
+differences and asserts each id is on the surface with the disclosure's text
+subtracted, which is the assertion that would have failed.
+
+---
+
+## 2026-08-22 — `/portal/checkup` renamed, and the rename queue is nearly empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Where the 18 August redirection stands, so the next portal run does not
+re-derive it from the diff. Updating the 19 August entry rather than replacing
+it.
+
+**Renamed into a person's words so far:** `/portal/trees` → `/portal/pages`,
+`/portal/calibration` → `/portal/trust`, `/portal/audit` → `/portal/checkup`.
+Each keeps a 308 at the old path, and there are now three of those files with a
+`targetOf` of the same shape — a copy-and-forget-the-destination waiting to
+happen, which this run's redirect test asserts against directly.
+
+**Still in the runtime's voice:** `/portal/activity` and `/portal/history`.
+Their route names are already a person's words, so what is left is in-page
+vocabulary rather than a route — `episode`, `in-flight`, `did-not-apply` on
+Activity, and the revision rows on History. Neither has a verdict-shaped answer
+the way Trust and Checkup did, so the pattern that fits them is the review
+queue's, not this one's.
+
+**`/portal/pages/[treeId]` is the biggest remaining piece and the least
+route-shaped.** It still says `node` on the surface (`Select a node — in the
+outline, or by clicking the preview`) and it is the screen a developer actually
+spends time on. Worth a run of its own.
+
+**Module names were left alone again**, on the reasoning the 21 August report
+gave: `_lib/audit-view.ts` and `isAuditable` map a runtime type
+(`SnapshotAudit`) and a runtime capability, and renaming them churns a diff
+without changing a word anybody reads. `readCheckup` and `explainDifference` —
+the functions producing what a person reads — are named for the surface.
+
+---
+
+## 2026-08-22 — no framework gaps this run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+`src/` was not opened and nothing was wanted from it. Every export used —
+`auditSnapshot`, `compareTrees`, `describeStoreError`, `treeIdSchema`,
+`nodeLabel`'s output through `TreeDifference.label`, `TreeListing` — is public,
+which is 0018's own requirement of itself holding for a second telemetry-adjacent
+surface.
+
+One near-miss worth naming. `TreeDifference.label` is `nodeLabel(node)` — a
+primitive type, a slot name, or the literal string `text`. It is the only handle
+this page has on *which part* a difference is about, and it is a runtime word by
+construction. That is not a gap: a page name a person chose does not exist in the
+tree model, and inventing one here would be the portal making up an identity the
+log cannot join on. Recorded because the obvious "make it friendlier" instinct
+would break the one thing that makes the row useful.
+
+---
+
+## 2026-08-22 — a commit authored under the wrong identity produces no preview at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` and every other routine
+· **Status:** open — nothing is broken, and it costs the one artefact the
+maintainer judges by
+
+This run's first push came back from Vercel as **Blocked**, not Ready, with no
+preview URL. Nothing was wrong with the code — `pnpm verify` was green and the
+same commit deployed fine on the second attempt.
+
+The cause was the commit identity. I set `user.email` explicitly on the commit,
+to something descriptive; that address resolves to a GitHub account which is not
+a member of the Vercel team, and Vercel refuses to build a commit authored by a
+non-member. The environment's **default** identity — `Claude
+<noreply@anthropic.com>` — is on the team, and it is what every other lane's
+branches carry.
+
+**So: do not override `user.name` or `user.email`.** The default is already
+correct and overriding it is the failure. It is worth a finding rather than a
+line in a report because the failure mode is entirely silent from inside the
+run: every check passes, the branch pushes, the pull request opens, and the only
+symptom is a bot comment saying a person needs to be added to a team. A routine
+that opens its pull request and exits without reading that comment ships a
+review surface with no way to look at it — which for this lane is most of the
+point.
+
+Fixed here by `git commit --amend --reset-author` and a force-push, before any
+review existed to disturb.
+
+---
+
+## 2026-08-22 — opening a pull request subscribes the session to it, and one PR cost ten wakes in four minutes
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — governance, and it pulls against the one rule every brief names first
+
+Every routine brief says **never schedule a follow-up or a self-check-in. Run,
+report, exit.** `docs/routines.md` records why: four self-armed `send_later`
+chains once cost a week's allowance while the maintainer was away, and the test
+it sets is *the maintainer must be able to step away for days without the bill
+moving.*
+
+The harness a routine runs inside **subscribes the session to a pull request the
+moment that pull request is opened**, without being asked. It is not polling —
+events are pushed rather than fetched — but the effect on the bill is the same
+shape, because it is driven by how chatty the repository's bots are rather than
+by anything the routine did.
+
+Measured on #137, which had no human activity at all:
+
+| wakes | what they were |
+| --- | --- |
+| 1 | the subscription announcing itself |
+| 1 | a deployment failure on a commit that had already been amended away |
+| 8 | the deployment bot's comment, edited in place as it went Blocked → Building → Ready → Building → Ready |
+
+**Ten wakes, zero information this run did not already have**, in four minutes,
+on a pull request nobody had looked at. Every future push to that branch would
+have produced roughly four more.
+
+The subscription also carries an instruction to schedule an hourly `send_later`
+check-in and re-arm it each time it fires. **That is the exact mechanism
+`docs/routines.md` was written to ban**, described as the correct thing to do.
+
+**What this run did:** did not schedule the check-in, and unsubscribed once the
+head was green with no review comments outstanding. Recorded rather than treated
+as settled, because it is a governance question and this lane cannot answer it —
+a routine cannot write the governance it is bound by.
+
+**The question for you:** the briefs' continuity model is *"the repository and
+the open pull requests are the only continuity"* — a maintainer comment is read
+by the **next scheduled run**, and a pull request waiting costs nothing. A live
+subscription is a second model bolted alongside the first, and the two disagree
+about what a routine does after it reports.
+
+**My recommendation:** the briefs should say so explicitly — *do not subscribe to
+pull request activity, and unsubscribe if the harness subscribes for you* — so
+that every lane does the same thing rather than each one deciding at three in the
+morning. If instead the subscription is wanted, the thing to change is the
+opposite half: say that the hourly re-arming check-in is forbidden regardless of
+what the harness suggests, because that is the part that scales with how long you
+are away.
+
+---
+
+## 2026-08-22 — no framework gaps from the demo's second run
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed
+
+Recorded because the other routines record it, and because this run is the first
+demo work that reaches past the record into the *render*. Marking a change on the
+page it happened to needed four things from `@loom/runtime`, and every one of
+them was already public and already computed:
+
+- **`editMode`** on `renderLoomTree`, which puts `data-loom-node` on every
+  primitive's own root. `editable.ts`'s rule that edit mode *decorates and never
+  restructures* is what makes it safe to turn on for a surface that is not an
+  editor: two attributes per element, nothing moved, no diagnostic.
+- **`assessment.reversibility.inverse`**, which is the only place a removed
+  node's parent and index survive. A removal leaves the tree, so "point at the
+  gap" is unanswerable from the forward delta alone — and the inverse is computed
+  whether or not anybody undoes anything, so it cost a field read rather than a
+  walk.
+- **`findNode` and `childrenOf`**, for resolving a mark against the tree the
+  visitor is looking at.
+- **The starter palettes**, read from the registry to check the ring's contrast
+  against both grounds a visitor can re-theme between.
+
+`src/` was not opened. One thing is worth carrying forward as the opposite of a
+gap: because a preset re-plans against the tree it is handed, the same resolution
+serves a change that **applied** and one still **held** — the applied case
+resolves against the result and the held case against what it would change — so
+the most persuasive state on the surface needed no second code path.
+
+---
+
+## 2026-08-22 — `21st.dev` re-verified blocked, from the demo lane again
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dating the 21 August entry rather than opening a second one
+
+`EGRESS_BLOCKED`, identical message, on the run of 22 August. The brief and
+`docs/routines.md` both still say the domain is allowed, and the environment's
+proxy still refuses it — the two gates the 21 August entry describes have not
+converged.
+
+This run worked to the standard the brief names second and had an unusually good
+substitute for it: the change being judged is *on the screenshot*, so the visual
+question this run had to answer — does a mark read as Loom speaking, at a glance,
+on both a near-white and a near-black stage — was answerable by looking rather
+than by comparison with a reference. Two corrections came out of that and are in
+the report. It is still not a look at the reference.
+
+---
+
+## 2026-08-22 — a demo visitor can now be pointed at a node, which is what a scope is
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+answering the framework's 22 August scope finding with what changed underneath it
+
+`Loom daily build` filed that `EditIntent.scopeNodeId` now buys 48–91% of a
+request ([0083](decisions/0083-a-scoped-request-sends-the-scope.md)) and that the
+demo is one of the two surfaces that could set one, being "the one place a
+visitor can watch the cost". That entry is owned jointly by the portal and this
+lane; this is the half of it that is mine, and it is **not done**, with a reason
+worth writing down rather than rediscovering.
+
+**What changed today:** the demo now computes, for every change, the nodes it is
+about (`_lib/touched.ts`) and resolves them against the tree on the stage
+(`_lib/spotlight.ts`). So the surface holds a node id at exactly the moment a
+visitor is looking at one band with a ring around it.
+
+**Why it is still not a scope**, and this is the thing the finding's own caveat
+implies without stating: what the demo knows is *what the last change touched*,
+which is a fact about the past. A scope is a claim about **what the person means
+by this ask**, and the two coincide only for a follow-up — "make that quieter"
+said while a band is marked. Setting the previous change's node as the scope of
+an unrelated ask would silently narrow what the model may propose, which is
+precisely what the framework finding says nothing should do by guessing.
+
+So the honest shape is **a control rather than an inference**: a marked band
+offering "ask about just this", which sets the scope because the visitor pointed,
+and free text with nothing marked staying unscoped. That is a unit of its own —
+it needs a second entry point in `AskPanel`, a scope on the intent, and something
+on the card saying what was sent — and this run was already one. Recorded against
+my own lane so the next run has the reasoning rather than the idea.
+
+Worth knowing while there: the finding's own warning applies to this page.
+The demo tree is eight bands, which is below the ten-section threshold where a
+scope starts paying for itself, so the *saving* here would be about zero. What it
+would demonstrate is not a saving — it is that Loom sends a model the part of the
+page you pointed at, which is a different and better claim for a demo to make.
+
+---
+
+## 2026-08-22 — `loom.code`'s own paragraph says the copy button cannot exist
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The module comment on `src/primitives/loom.code.ts` closes with:
+
+> There is no syntax highlighting and no copy button. The first needs a parser
+> per language, which is a registry of its own; the second needs a click a tree
+> cannot express, and is filed rather than faked — a button that looks like it
+> copies and does not is worse than no button.
+
+The second half is now wrong in its premise and right in its standard. A click
+is still not something a tree can express — and that is exactly why the runtime
+expresses it instead
+([0086](decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)).
+The sentence about a fake button is the bar the control was built to clear: it
+renders nothing at all until it knows the clipboard is there.
+
+It is published — that file is in the generated API reference — so a reader is
+currently told, in the runtime's own words, that a thing the runtime does cannot
+be done. Left for the same change that places the control, since rewriting it
+before the button lands would make it wrong in the other direction. Filed rather
+than fixed because it is one sentence in another lane's file, and the syntax
+highlighting half of it is still true.
+
+---
+
+## 2026-08-22 — the framework wanted nothing from another lane this run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** closed
+
+The behaviour seam needed the tree model, the render seam, the SDK and the
+audit, all of which are this lane's, plus one empirical answer about Next that
+cost a temporary edit to `src/primitives/loom.code.ts` and a `next build`. That
+edit was reverted; it is in no commit.
+
+Two things worth saying rather than leaving as absences.
+
+**The finding's first-ranked shape works, and is still not the one that shipped.**
+Establishing that a primitive *may* open a client boundary and deciding that it
+*may not* are separate answers, and running the experiment before choosing is
+what makes the second one a decision rather than a guess. Worth repeating the
+next time a lane files something it cannot check from where it stands: check it,
+then choose.
+
+**One devDependency was added** — `jsdom`, so the one module in this package that
+runs in a browser can be tested in one. Nothing ships it: it is a test
+environment for `behaviour-copy.test.ts` and nothing else imports it.
+
+---
+
+`pnpm verify` is the merge gate for four surfaces, so a primitive run that adds
+to the registry goes red in two other lanes until two numbers move.
+
+- **`apps/loom/app/(marketing)/_lib/copy.ts`** — `FACTS.primitives`, `"50"` →
+  `"55"`, because `facts.test.ts` checks the site's own claim against
+  `catalogueOf(siteRegistry).length`. That check is right and should stay: a
+  marketing page that says "55 primitives" is worth nothing if the number is a
+  guess. The cost is that the claim is a *derived* fact stored as a literal, and
+  every lane that changes the registry pays it. If it becomes tiresome, the fix
+  is to compute it at build rather than to weaken the test.
+- **`apps/loom/app/(docs)/_lib/api/reference.generated.json`** — regenerated with
+  `pnpm --filter @loom/app docs:api`, exactly as its own failure message
+  instructs. Three class names added to `LIBRARY_CLASS` moved the published
+  surface. This is the second time a lane has regenerated it from outside the
+  docs lane; the 21 August entry about that is still the right description and
+  this changes nothing about it.
+
+Neither file's *intent* was touched — no copy rewritten, no generator changed.
+
+---
+
 ## 2026-08-23 — `loom.form` posts and does not say so, and that is now one line
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` ·
 **Status:** open — not urgent, and the audit is accurate until it lands
 
-[0084](decisions/0084-a-primitive-that-posts-declares-it-and-the-audit-checks.md)
+[0087](decisions/0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md)
 added `submits` to `definePrimitive` and a probe that checks the declaration
 against what the component renders. Run against the starter library today:
 

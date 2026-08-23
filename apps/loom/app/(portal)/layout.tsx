@@ -29,7 +29,7 @@ export const viewport: Viewport = {
  * with `307 → /portal/sign-in`, having already been let through by the proxy.
  *
  * The pages that escaped it escaped by accident — reading `searchParams` is a
- * dynamic API, and `/portal/activity`, `/portal/audit` and `/portal/trust`
+ * dynamic API, and `/portal/activity`, `/portal/checkup` and `/portal/trust`
  * all happen to take a tree. A page whose correctness depends on which query
  * parameters it happens to accept is a page that breaks the day it stops
  * accepting one, so the property is declared here for the whole segment instead.

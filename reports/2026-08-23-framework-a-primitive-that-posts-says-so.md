@@ -95,7 +95,7 @@ intended. Recorded in 0084 alongside the two other rejections.
 
 ## Records
 
-- **Added [0084](../decisions/0084-a-primitive-that-posts-declares-it-and-the-audit-checks.md)** —
+- **Added [0087](../decisions/0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md)** —
   a primitive that posts declares it, and the audit checks the declaration
   against what it renders. Nothing superseded; 0065's deferred consequence is
   now built as 0065 sketched it, plus the derived half it did not anticipate.

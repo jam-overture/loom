@@ -246,6 +246,16 @@ export const minimalSansFontPack: FontPack = fontPackSchema.parse({
     'Geist, "Geist Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   bodyFamily:
     'Geist, "Geist Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  /**
+   * The one face in this pack a surface already serves and the library could
+   * not previously ask for. `(docs)` links Geist Mono for its own chrome, so a
+   * `loom.code` panel on that site rendered in the system stack beside prose
+   * set in Geist and a `<pre>` set in Geist Mono — three faces where the pack
+   * describes one pairing. Ordered like the other two: the served face first,
+   * a real stack behind it (0084).
+   */
+  monoFamily:
+    '"Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
   headingWeight: 700,
   bodyWeight: 400,
   /**

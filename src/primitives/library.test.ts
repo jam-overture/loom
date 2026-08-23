@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as fifty primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(50)
+  it("registers as fifty-eight primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(58)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -172,6 +172,9 @@ describe("the starter library", () => {
       "loom.tier",
       "loom.perk-list",
       "loom.perk-list-item",
+      "loom.comparison-table",
+      "loom.comparison-row",
+      "loom.comparison",
       "loom.product-grid",
       "loom.product",
       "loom.quote-grid",
@@ -192,7 +195,12 @@ describe("the starter library", () => {
       "loom.link-list",
       "loom.heading",
       "loom.prose",
+      "loom.list",
+      "loom.list-item",
+      "loom.callout",
       "loom.code",
+      "loom.code-span",
+      "loom.emphasis",
       "loom.badge",
       "loom.icon",
       "loom.avatar",
@@ -252,6 +260,19 @@ describe("the starter library", () => {
     for (const general of ["loom.stack", "loom.grid", "loom.mosaic"]) {
       expect(general.endsWith("-grid")).toBe(false)
     }
+
+    /**
+     * `loom.list` is the fourth container named for the arrangement
+     * alone, and the first of them with a child it names. It needs no
+     * exception here for the same reason `loom.grid` does not — the stem rule
+     * strips an arrangement word *with its hyphen* — and its child is named for
+     * the element it is, which is 0061 extended by one step to the primitive
+     * that has no twin.
+     */
+    expect(types).toContain("loom.list")
+    expect(types).toContain("loom.list-item")
+    expect(types).not.toContain("loom.item")
+    expect(types).not.toContain("loom.point-list")
 
     /**
      * The preference is carried by the descriptions, because a description is
@@ -759,7 +780,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the nine fixtures", () => {
+  it("covers every registered primitive across the ten fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -775,6 +796,8 @@ describe("the composed vocabulary", () => {
       ...typesIn(chromePage(EDITORIAL)),
       ...typesIn(contactPage(EDITORIAL)),
       ...typesIn(technicalPage(EDITORIAL)),
+      ...typesIn(comparisonPage(EDITORIAL)),
+      ...typesIn(prosePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -798,6 +821,8 @@ describe("the composed vocabulary", () => {
       cataloguePage,
       chromePage,
       contactPage,
+      technicalPage,
+      prosePage,
     ].flatMap((fixture) =>
       [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
         .map(([, style]) => style ?? "")
@@ -2523,7 +2548,7 @@ describe("the re-theme guarantee", () => {
      * eyebrow, kicker and disclosure marker in these eight fixtures would come
      * out at 1.6:1 with nothing failing.
      */
-    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage, contactPage, technicalPage]) {
+    for (const fixture of [samplePage, marketingPage, pricingPage, arrangedPage, portedPage, cataloguePage, chromePage, contactPage, technicalPage, comparisonPage]) {
       const { markup, diagnostics } = render(fixture(MINIMAL))
       const tree = splitStylesheet(markup).tree
       const body = tree.slice(tree.indexOf(">"))
@@ -2892,6 +2917,138 @@ const technicalPage = (theme: Record<string, string>, idFactory: IdFactory = seq
   return createTree(page, idFactory)
 }
 
+/**
+ * The tenth fixture: a page written in prose rather than assembled from bands.
+ *
+ * Every other fixture here proves that a *band* renders. This one proves the
+ * layer underneath — that a sentence can stress a word, name a symbol, make
+ * three points and stop to give a caveat — which is what the surfaces in
+ * `apps/loom` are actually made of and what the library could not do until now.
+ */
+const prosePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const symbol = (name: string) =>
+    buildElement(idFactory, { type: "loom.code-span", children: [text(name)] })
+
+  const emphasis = (tone: string, value: string) =>
+    buildElement(idFactory, { type: "loom.emphasis", props: { tone }, children: [text(value)] })
+
+  const point = (...children: readonly ReturnType<typeof text>[]) =>
+    buildElement(idFactory, { type: "loom.list-item", children: [...children] })
+
+  const headline = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "The prose layer" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 1, balance: true },
+          children: [text("A page is written, not just "), emphasis("marked", "assembled")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "lead", measured: true },
+        children: [
+          text("A change is a "),
+          emphasis("strong", "delta"),
+          text(" the runtime hands to a "),
+          symbol("ChangeInterpreter"),
+          text(", which re-plans it against the tree it is actually given — "),
+          emphasis("subtle", "not"),
+          text(" the tree it was written against."),
+        ],
+      }),
+    ],
+  })
+
+  const points = buildElement(idFactory, {
+    type: "loom.list",
+    props: { measured: true },
+    children: [
+      point(text("Every node knows who placed it.")),
+      buildElement(idFactory, {
+        type: "loom.list-item",
+        children: [
+          text("Every operation has an inverse, so "),
+          symbol("invert(delta)"),
+          text(" is always available."),
+          buildElement(idFactory, {
+            type: "loom.list",
+            props: { marker: "none", density: "tight", size: "small" },
+            children: [
+              point(text("— including the ones a preset computed")),
+              point(text("— and the ones a reviewer refused")),
+            ],
+          }),
+        ],
+      }),
+      point(text("Nothing reaches the page without being weighed first.")),
+    ],
+  })
+
+  const steps = buildElement(idFactory, {
+    type: "loom.list",
+    props: { marker: "number", density: "loose", measured: true },
+    children: [
+      point(text("The visitor asks for something.")),
+      point(text("The model proposes a delta against the tree.")),
+      point(text("The Gate weighs it on two axes and answers.")),
+    ],
+  })
+
+  const caution = buildElement(idFactory, {
+    type: "loom.callout",
+    props: { title: "Before you start" },
+    children: [
+      buildSlot(idFactory, "marker", [
+        buildElement(idFactory, {
+          type: "loom.icon",
+          props: { shape: "bare", tone: "accent", size: "medium" },
+          children: [text("\u2605")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "small" },
+        children: [
+          text("A proposal is measured before it is applied. Run "),
+          symbol("pnpm verify"),
+          text(" and read what the Gate says back."),
+        ],
+      }),
+    ],
+  })
+
+  const aside = buildElement(idFactory, {
+    type: "loom.callout",
+    props: { tone: "neutral" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "small", tone: "muted" },
+        children: [text("A callout with no title and no marker is still an aside, and still says so.")],
+      }),
+    ],
+  })
+
+  const page = buildElement(idFactory, {
+    type: "loom.page",
+    props: { [THEME_PROP_KEY]: theme, width: "readable", fills: true },
+    children: [
+      headline,
+      buildElement(idFactory, {
+        type: "loom.section",
+        children: [points, caution, steps, aside],
+      }),
+    ],
+  })
+
+  return createTree(page, idFactory)
+}
+
 describe("the technical vocabulary", () => {
   it("renders all five with nothing left unhonoured", () => {
     const { markup, diagnostics } = render(technicalPage(EDITORIAL))
@@ -3049,6 +3206,207 @@ describe("the technical vocabulary", () => {
   })
 })
 
+
+describe("the prose vocabulary", () => {
+  it("renders all five with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(prosePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<ul")
+    expect(markup).toContain("<ol")
+    expect(markup).toContain("<li")
+    expect(markup).toContain("<aside")
+    expect(markup).toContain("<mark")
+    expect(markup).toContain("ChangeInterpreter")
+  })
+
+  it("gives a numbered list an <ol> and a bulleted one a <ul>, because a reader is told which", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The element follows the `marker` prop rather than a `list-style` alone.
+     * A numbered list styled onto a `<ul>` renders identically and announces
+     * itself wrongly, which is the half of the choice a screenshot cannot show.
+     */
+    expect(markup).toMatch(/<ol[^>]*list-style-type:decimal/)
+    expect(markup).toMatch(/<ul[^>]*list-style-type:disc/)
+    expect(markup).toMatch(/<ul[^>]*list-style-type:none/)
+  })
+
+  it("keeps the gap between rows off the row, which is the coupling the pair exists to avoid", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * A row cannot know how far it should sit from a sibling it cannot see, so
+     * the gap is a rule keyed on position — the argument `loom.avatar-row`
+     * makes about its overlap. The assertion that matters is the second one: a
+     * `loom.list-item` carries no props at all and no style at all, so nothing
+     * about it can disagree with the list it is in.
+     */
+    expect(markup).toContain(".loom-list > li + li")
+    expect(markup).toContain(".loom-list-tight > li + li")
+    expect(markup).toContain(".loom-list-loose > li + li")
+    expect(propsOfType("loom.list-item")).toEqual([])
+    /** No class, no style, no attribute of its own outside edit mode. */
+    expect(markup).toContain("<li>")
+  })
+
+  it("colours the marker from the stylesheet, because ::marker cannot be reached inline", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    expect(markup).toContain(".loom-list > li::marker")
+    expect(markup).toContain("color: var(--loom-accent)")
+  })
+
+  it("leaves the indent reachable and sets no margin the nested rule would lose to", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * `stylesheet.ts`'s first mechanic: an inline style beats a rule, always.
+     * A sublist's top margin is a rule, so the list must not set `margin`
+     * inline — and the indent, which the rule never varies, must.
+     */
+    const opening = markup.slice(markup.indexOf("<ul"), markup.indexOf(">", markup.indexOf("<ul")))
+
+    expect(opening).not.toContain("margin")
+    expect(opening).toContain("padding-inline-start:1.4em")
+    expect(markup).toContain(".loom-list .loom-list")
+  })
+
+  it("drops the indent when the marker is dropped, so a plain run does not hang off nothing", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+    const start = markup.indexOf("list-style-type:none")
+
+    expect(markup.slice(start, start + 120)).toContain("padding-inline-start:0")
+  })
+
+  it("marks a span with the tinted pairing that is measured, and not with the one that fails", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The 22 August contrast finding, avoided rather than rediscovered:
+     * `fg-default` on `accent-subtle` is in `PALETTE_TEXT_PAIRINGS` and clears
+     * 0074's bar everywhere; `accent` on the same ground is the obvious ink for
+     * a tinted panel and does not. A `<mark>` needs both halves set, because
+     * the UA supplies a yellow ground and black ink of its own.
+     */
+    const mark = markup.slice(markup.indexOf("<mark"), markup.indexOf("</mark>"))
+
+    expect(mark).toContain("background:var(--loom-accent-subtle)")
+    expect(mark).toContain("color:var(--loom-fg-default)")
+    expect(mark).not.toContain("color:var(--loom-accent)")
+  })
+
+  it("gives each emphasis the element its meaning already has", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * One content model, three renderings, one enum (0052) — and the element
+     * changes with the enum because importance, stress and relevance are three
+     * things a screen reader distinguishes and a font weight is not.
+     */
+    expect(markup).toMatch(/<em[^>]*font-style:italic/)
+
+    /**
+     * `bolder` rather than `var(--loom-heading-weight)`, which is the mistake
+     * this shipped as and a screenshot caught. `bold-sans` declares
+     * `headingWeight: 400` beside `bodyWeight: 400` — a legitimate pack that
+     * carries emphasis in size and colour — so the heading token renders a
+     * stressed word identically to the words either side of it. A relative
+     * keyword is heavier than whatever it inherits under every pack, including
+     * one nobody has registered yet.
+     */
+    expect(markup).toMatch(/<strong[^>]*font-weight:bolder/)
+    expect(markup).not.toContain("<strong style=\"font-weight:var(--loom-heading-weight)")
+    expect(propsOfType("loom.emphasis")).toEqual(["tone"])
+  })
+
+  it("sets a symbol in monospace inside the sentence, with no panel and no props", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The whole of the lessons finding: a symbol named inside a paragraph. It
+     * is a `<code>` with no `<pre>` anywhere on the page, sized in `em` against
+     * the line it sits in rather than off the ramp, and tinted with the other
+     * measured pairing on `accent-subtle`.
+     */
+    const span = markup.slice(markup.indexOf("<code"), markup.indexOf("</code>"))
+
+    expect(markup).not.toContain("<pre")
+    expect(span).toContain("font-size:0.9em")
+    expect(span).toContain("background:var(--loom-accent-subtle)")
+    expect(span).toContain("color:var(--loom-accent-strong)")
+    expect(span).toContain("var(--loom-mono-family, ui-monospace")
+    expect(propsOfType("loom.code-span")).toEqual([])
+  })
+
+  it("lets a code span wrap rather than widen the aside it is in", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The 20 August scrollbar finding one level in. `white-space:nowrap` was
+     * the tempting mistake — a symbol has no break opportunity inside it and
+     * needs no help, while `pnpm verify` does and would push the panel out.
+     */
+    const span = markup.slice(markup.indexOf("<code"), markup.indexOf("</code>"))
+
+    expect(span).not.toContain("white-space:nowrap")
+    expect(markup).toMatch(/<aside[^>]*min-width:0/)
+  })
+
+  it("makes a callout an aside whose label stays out of the document outline", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The argument against building this as `loom.card` with `tone: "accent"`.
+     * A card is a `<div>`, and the label would have to be a `loom.heading` to
+     * be bold — which puts "Before you start" into the outline beside the
+     * section titles, so a reader navigating by headings gets a page whose
+     * structure is half furniture. Here it is a fixed field on a paragraph.
+     */
+    const aside = markup.slice(markup.indexOf("<aside"), markup.indexOf("</aside>"))
+
+    expect(aside).toContain("Before you start")
+    expect(aside).not.toMatch(/<h[1-6]/)
+    expect(aside).toContain("border-inline-start:3px solid var(--loom-accent)")
+    expect(propsOfType("loom.callout")).toEqual(["title", "tone"])
+  })
+
+  it("places the marker in its gutter ahead of the content it introduces", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * 0051's test: the callout puts the marker where the flow of children does
+     * not go, so "the first child is the icon" is a rule no schema states and
+     * every `move` breaks. The region is a region because of this ordering.
+     */
+    const aside = markup.slice(markup.indexOf("<aside"), markup.indexOf("</aside>"))
+
+    expect(aside.indexOf("\u2605")).toBeGreaterThan(-1)
+    expect(aside.indexOf("\u2605")).toBeLessThan(aside.indexOf("Before you start"))
+  })
+
+  it("still draws a callout that was given neither a title nor a marker", () => {
+    const { markup, diagnostics } = render(prosePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect([...markup.matchAll(/<aside/g)]).toHaveLength(2)
+    expect(markup).toContain("border-inline-start:3px solid var(--loom-border-strong)")
+  })
+
+  it("renders the same under every palette, with no colour of its own", () => {
+    for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+      const { markup, diagnostics } = render(prosePage(theme))
+      const tree = splitStylesheet(markup).tree
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+})
+
 describe("a headline on a narrow screen", () => {
   it("holds the top two steps under a fraction of the screen, and leaves the rest alone", () => {
     /**
@@ -3086,5 +3444,302 @@ describe("a headline on a narrow screen", () => {
     /** Step 6 is 32px and fits a phone with room to spare. */
     expect(markup).toContain("font-size:var(--loom-scale-6)")
     expect(markup).not.toContain("min(var(--loom-scale-6)")
+  })
+})
+
+/**
+ * The comparison band: the one page a framework's front door cannot do without,
+ * and the library's only two-dimensional structure.
+ *
+ * It renders the band twice, because 0075's probe asks a primitive what it does
+ * under every closed choice its schema names and a fixture that only ever draws
+ * the default leaves the other half of each enum drawn by nothing. Between the
+ * two tables every value of `feature`, `density`, `role` and `mark` is on the
+ * page, along with a row that has a criterion and a row that has none.
+ */
+const comparisonPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const subject = (name: string, note?: string) =>
+    buildElement(idFactory, {
+      type: "loom.comparison",
+      props: note === undefined ? { role: "subject" } : { role: "subject", note },
+      children: [buildText(idFactory, name)],
+    })
+
+  const cell = (props: JsonObject, value?: string) =>
+    buildElement(idFactory, {
+      type: "loom.comparison",
+      props,
+      children: value === undefined ? [] : [buildText(idFactory, value)],
+    })
+
+  const row = (props: JsonObject, cells: readonly ReturnType<typeof cell>[]) =>
+    buildElement(idFactory, { type: "loom.comparison-row", props, children: [...cells] })
+
+  const approaches = buildElement(idFactory, {
+    type: "loom.comparison-table",
+    props: { caption: "Loom against the two ways this is done today", feature: "first" },
+    children: [
+      buildSlot(idFactory, "columns", [
+        row({}, [
+          subject("Loom", "a runtime"),
+          subject("Code generation"),
+          subject("Hand-built", "a component per case"),
+        ]),
+      ]),
+      row({ heading: "Every change has an inverse" }, [
+        cell({ mark: "yes" }),
+        cell({ mark: "no" }),
+        cell({ mark: "no" }),
+      ]),
+      row({ heading: "Reviewed before a visitor sees it", note: "not after the fact" }, [
+        cell({ mark: "yes" }),
+        cell({ mark: "partial", note: "at the pull request" }),
+        cell({ mark: "yes" }),
+      ]),
+      row({ heading: "Adapts to the person reading it" }, [
+        cell({ mark: "yes" }),
+        cell({ mark: "no" }),
+        cell({ mark: "no" }),
+      ]),
+      row({ heading: "Who wrote this line" }, [
+        cell({ mark: "yes" }, "Every node"),
+        cell({ mark: "no" }),
+        cell({ mark: "partial" }, "The commit"),
+      ]),
+      row({ heading: "Time to the first change" }, [
+        cell({}, "Seconds"),
+        cell({}, "A build"),
+        cell({}, "A sprint"),
+      ]),
+    ],
+  })
+
+  const plans = buildElement(idFactory, {
+    type: "loom.comparison-table",
+    props: { density: "tight", feature: "none" },
+    children: [
+      buildSlot(idFactory, "columns", [row({}, [subject("Starter"), subject("Team")])]),
+      row({ heading: "Deployments" }, [cell({}, "1"), cell({}, "Unlimited")]),
+      row({ heading: "Attribution history" }, [cell({ mark: "yes" }), cell({ mark: "yes" })]),
+      row({ heading: "Single sign-on" }, [cell({ mark: "no" }), cell({ mark: "yes" })]),
+    ],
+  })
+
+  const band = (eyebrow: string, title: string, table: ReturnType<typeof row>) =>
+    buildElement(idFactory, {
+      type: "loom.section",
+      props: { eyebrow },
+      children: [
+        buildSlot(idFactory, "heading", [
+          buildElement(idFactory, {
+            type: "loom.heading",
+            props: { level: 2 },
+            children: [buildText(idFactory, title)],
+          }),
+        ]),
+        table,
+      ],
+    })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        band("Why Loom", "How it differs from generating code", approaches),
+        band("Plans", "What each plan includes", plans),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("the comparison band", () => {
+  /** Every `<tr>` in the markup, as the list of its own top-level cell tags. */
+  const rowsOf = (markup: string): readonly (readonly string[])[] =>
+    [...markup.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map(([, body]) =>
+      [...(body ?? "").matchAll(/<(t[dh])\b/g)].map(([, tag]) => tag ?? "")
+    )
+
+  it("renders as a real table, with a caption and a head", () => {
+    const { markup, diagnostics } = render(comparisonPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<thead>")
+    expect(markup).toContain("<tbody>")
+    expect(markup).toMatch(/<table aria-labelledby="[^"]+"/)
+    expect(markup).toContain("Loom against the two ways this is done today")
+    expect(markup).toContain("Every change has an inverse")
+    expect(markup).toContain("A sprint")
+  })
+
+  it("gives every row the same number of cells, which is the invariant a shifted column breaks", () => {
+    /**
+     * The reason `loom.comparison-row` emits its leading cell whether or not it
+     * has a heading. A row that skipped the empty corner would slide its
+     * answers one column left of the subjects they belong to — a table that
+     * lies rather than one that is missing a label, and nothing that merely
+     * rendered it would notice.
+     */
+    const rows = rowsOf(render(comparisonPage(EDITORIAL)).markup)
+
+    expect(rows).toHaveLength(10)
+
+    const [approaches, plans] = [rows.slice(0, 6), rows.slice(6)]
+
+    for (const row of approaches) expect(row).toHaveLength(4)
+    for (const row of plans) expect(row).toHaveLength(3)
+  })
+
+  it("names the axes, so a cell is read back as its criterion and its subject", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * The whole argument for a `<table>` over a grid of boxes. Without these a
+     * screen reader reaching the fifteenth cell announces "No"; with them it
+     * announces the question and the column it was asked of.
+     */
+    expect([...markup.matchAll(/scope="col"/g)]).toHaveLength(5)
+    expect([...markup.matchAll(/scope="row"/g)]).toHaveLength(8)
+
+    /** The corner above the criteria is a `<td>`: it heads nothing. */
+    const [header] = rowsOf(markup)
+
+    expect(header?.[0]).toBe("td")
+    expect(header?.slice(1)).toEqual(["th", "th", "th"])
+  })
+
+  it("names all three verdicts, unlike a perk's tick", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * 0060, decided the other way round from `perk-content.ts` and for a stated
+     * reason: a perk sits under a heading that says "what you get", so a named
+     * tick on every row is noise. A comparison cell has no such heading — the
+     * row and column give the *question* — so a bare glyph that is not
+     * announced is an answer a listener never receives.
+     */
+    expect(markup).toContain('aria-label="Yes"')
+    expect(markup).toContain('aria-label="No"')
+    expect(markup).toContain('aria-label="Partial"')
+    expect(markup).toContain("\u2212")
+    expect(markup).not.toMatch(/aria-hidden="true"[^>]*>✓/)
+  })
+
+  it("selects the featured column by position, because a column is not a node", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * 0084. The rule is static text with an ordinal in it and no node id, which
+     * is what 0055 requires of anything in this stylesheet — so the tree says
+     * *feature the first subject* and where that lands is the implementation's.
+     */
+    expect(markup).toContain(`class="${LIBRARY_CLASS.compare} ${LIBRARY_CLASS.compareFeatureFirst}"`)
+    expect(markup).toContain(".loom-compare-feature-1 tr > *:nth-child(2)")
+    expect(markup).toContain(".loom-compare-feature-4 tr > *:nth-child(5)")
+
+    /** The unfeatured table carries the base class and no column rule of its own. */
+    expect(markup).toContain(`class="${LIBRARY_CLASS.compare} ${LIBRARY_CLASS.compareTight}"`)
+  })
+
+  it("repaints the ink inside the featured column, because two pairings there fail AA", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * Measured across all 39 registered palettes rather than assumed. On
+     * `accent-subtle` — the tinted column's ground — `accent` bottoms out at
+     * 4.43:1 and `fg-subtle` at 3.76:1, both under the 4.5 bar 0074 holds a
+     * text slot to. `accent-strong` clears it at 4.75:1 and `fg-muted` at
+     * 4.99:1.
+     *
+     * So the tick is `accent-strong` **everywhere** rather than `accent` outside
+     * the column and `accent-strong` inside it: one slot passes on both grounds,
+     * and a tick that changed colour with its column would say something about
+     * the answer that is not true. What the column does re-ink is the two that
+     * recede, `no` and the notes, which is the rule asserted here.
+     *
+     * It is also why no mark and no note sets a colour inline. An inline colour
+     * beats a rule, so a cell that painted its own glyph would be unreachable
+     * from the column that has to re-ink it — the first trap `stylesheet.ts`
+     * names, and here it would be an accessibility failure rather than a
+     * cosmetic one.
+     */
+    expect(markup).toContain(".loom-compare-feature-1 tr > *:nth-child(2) .loom-compare-no")
+    expect(markup).toContain(".loom-compare-feature-1 tr > *:nth-child(2) .loom-compare-note")
+    expect(markup).toMatch(/\.loom-compare-yes\s*\{\s*color: var\(--loom-accent-strong\);/)
+
+    const cells = markup.slice(markup.indexOf("<tbody>"))
+
+    expect(cells).not.toMatch(/<span class="loom-compare-(yes|no|partial)"[^>]*color:/)
+  })
+
+  it("makes density a rule the table switches, not a length its cells set", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * Density is a property of the band — one comparison is a spec to scan and
+     * another is a page to read — and neither cell nor row can know which it is
+     * in. So the padding lives where the container can reach it, and no cell
+     * sets one inline for the rule to lose to.
+     */
+    expect(markup).toContain(".loom-compare th, .loom-compare td")
+    expect(markup).toContain(".loom-compare-tight th, .loom-compare-tight td")
+    expect(markup.slice(markup.indexOf("<tbody>"))).not.toMatch(/<t[dh][^>]*padding:/)
+  })
+
+  it("scrolls the band inside its own edge and keeps the criterion in view", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * Four subjects are wider than a phone and no arrangement fixes that, so
+     * the band overflows itself rather than the page — `loom.code`'s answer to
+     * the 20 August scrollbar finding. The criterion sticks to the leading edge
+     * on the way, because a row of ticks whose question has scrolled away is
+     * the phone rendering of every comparison table nobody tried on a phone.
+     */
+    expect(markup).toMatch(/<div[^>]*overflow-x:auto[^>]*min-width:0/)
+    expect(markup).toContain(".loom-compare-key")
+    expect(markup).toContain("position: sticky")
+    expect(markup).toContain("inset-inline-start: 0")
+  })
+
+  it("holds no list in any of the three schemas, which is 0052 for a two-dimensional band", () => {
+    /**
+     * The port map calls `comparison-table` a pair and it came out a trio,
+     * because both axes are repeated content: rows are nodes and so are the
+     * cells in them. What stayed a prop is what there is exactly one of — the
+     * criterion of a row, the note under an answer, the caption of the table —
+     * and nothing here decides how many of anything exists.
+     */
+    expect(propsOfType("loom.comparison-table")).toEqual(["caption", "density", "feature"])
+    expect(propsOfType("loom.comparison-row")).toEqual(["heading", "note"])
+    expect(propsOfType("loom.comparison")).toEqual(["mark", "note", "role"])
+
+    /** The header row is a region the table places in `<thead>`, not the first child (0051). */
+    expect(catalogueOf(registry).find((primitive) => primitive.type === "loom.comparison-table")?.slots)
+      .toEqual(["columns"])
+  })
+
+  it("keeps the value a child and the verdict a prop", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * 0052's third clause and its first, in one cell. "Seconds" is the whole of
+     * what that node says, so it is a text child with an author and an inverse;
+     * the tick is one of three renderings the primitive draws, so it is a prop
+     * a `configure` changes and never a glyph a proposal can choose.
+     */
+    expect(markup).toContain(">Every node<")
+    expect(markup).toContain(">Seconds<")
+    expect(propsOfType("loom.comparison")).not.toContain("glyph")
+    expect(propsOfType("loom.comparison")).not.toContain("value")
+  })
+
+  it("is a table where the pricing band is a row of cards, and neither borrowed the other", () => {
+    const comparison = render(comparisonPage(EDITORIAL)).markup
+    const pricing = render(pricingPage(EDITORIAL)).markup
+
+    expect(comparison).toContain("<table")
+    expect(pricing).not.toContain("<table")
   })
 })

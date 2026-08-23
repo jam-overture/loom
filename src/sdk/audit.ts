@@ -1,10 +1,12 @@
 import type { DecorationLookup } from "../render/addressing.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
+import type { BehaviourName } from "../render/behaviour.js"
+
 import {
   probeConfigurations,
   probeEditableDecoration,
-  probeSlotPlacement,
+  probePlacement,
   probeSubmissionPlacement,
   type ConformanceVerdict,
   type PlacementVerdict,
@@ -50,6 +52,12 @@ export type UnplacedSlots = {
   readonly slots: readonly string[]
 }
 
+/** A primitive that took a control from the runtime and then did not place it. */
+export type UnplacedBehaviours = {
+  readonly type: PrimitiveType
+  readonly behaviours: readonly BehaviourName[]
+}
+
 /** A primitive that threw under some configuration its own schema accepts. */
 export type ThrowingConfigurations = {
   readonly type: PrimitiveType
@@ -67,6 +75,13 @@ export type RegistryAudit = {
    * rather than a handle, so a host with no portal at all still wants it empty.
    */
   readonly unplacedSlots: readonly UnplacedSlots[]
+  /**
+   * Declared a behaviour and dropped its control. Like `unplacedSlots` this is
+   * a promise the registration made and the component did not keep — and unlike
+   * a slot, nothing else on the page hints that something is missing, because
+   * the content a behaviour acts on renders perfectly without it.
+   */
+  readonly unplacedBehaviours: readonly UnplacedBehaviours[]
   /**
    * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and
    * label as props and has nowhere to put a text node. It is here because it is
@@ -110,6 +125,9 @@ export type RegistryAudit = {
 const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
   placement.outcome === "probed" ? placement.unplacedSlots : []
 
+const unplacedBehavioursIn = (placement: PlacementVerdict): readonly BehaviourName[] =>
+  placement.outcome === "probed" ? placement.unplacedBehaviours : []
+
 const threwIn = (placement: PlacementVerdict): readonly ProbeFailure[] =>
   placement.outcome === "probed" ? placement.threw : []
 
@@ -120,7 +138,13 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
     return {
       type: primitive.type,
       verdict: probeEditableDecoration(primitive.component, primitive.text, configurations),
-      placement: probeSlotPlacement(primitive.component, primitive.slots, primitive.text, configurations),
+      placement: probePlacement(
+        primitive.component,
+        primitive.slots,
+        primitive.text,
+        configurations,
+        primitive.behaviours
+      ),
       submission: probeSubmissionPlacement(primitive.component, primitive.text, configurations),
       declaresSubmits: primitive.submits,
     }
@@ -148,6 +172,9 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
     unplacedSlots: audits
       .filter((audit) => unplacedIn(audit.placement).length > 0)
       .map((audit) => ({ type: audit.type, slots: unplacedIn(audit.placement) })),
+    unplacedBehaviours: audits
+      .filter((audit) => unplacedBehavioursIn(audit.placement).length > 0)
+      .map((audit) => ({ type: audit.type, behaviours: unplacedBehavioursIn(audit.placement) })),
     leaves: audits
       .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
       .map((audit) => audit.type),
@@ -198,6 +225,10 @@ const describePlacement = (placement: PlacementVerdict): string => {
   if (placement.outcome === "not-probeable") return `placement not probed (${placement.reason})`
   if (placement.unplacedSlots.length > 0) {
     return `declares ${placement.unplacedSlots.join(", ")} and does not place ${placement.unplacedSlots.length === 1 ? "it" : "them"}`
+  }
+
+  if (placement.unplacedBehaviours.length > 0) {
+    return `takes the ${placement.unplacedBehaviours.join(", ")} behaviour and does not place ${placement.unplacedBehaviours.length === 1 ? "its control" : "their controls"}`
   }
 
   const under =
