@@ -6,7 +6,7 @@ import { describeLocked, describePressure, describeSince, toneOfPressure } from 
 /**
  * What the throttle is currently absorbing.
  *
- * Colour is a second channel and never the only one, the same rule `/portal/audit`
+ * Colour is a second channel and never the only one, the same rule `/portal/checkup`
  * follows: the badge names the state in words and the headline says it again in
  * a sentence, so nothing here depends on telling the palette apart.
  *

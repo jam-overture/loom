@@ -99,7 +99,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
           title="You don't have any pages yet."
           action={
             <Link
-              href="/portal/demo"
+              href="/demo"
               className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 no-underline"
             >
               Try the demo →

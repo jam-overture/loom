@@ -79,11 +79,12 @@ export const SignInHero = ({
          * The single obvious next-action for a visitor who does not hold a
          * key, which is now the largest population reaching this page — the
          * marketing site's Sign-in action is what sends them here (0070).
-         * `/portal/demo` is a public path (0068 / `paths.ts`) so this link
-         * does not send them back through the redirector.
+         * `/demo` is outside the proxy's matcher entirely (it matches
+         * `/portal` and nothing else), so this link does not send them back
+         * through the redirector.
          */}
         <Link
-          href="/portal/demo"
+          href="/demo"
           className="border-edge-subtle bg-surface-base hover:bg-surface-hover rounded-md border px-3 py-2 text-sm"
         >
           See the live demo

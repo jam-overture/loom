@@ -19,12 +19,28 @@ const question = (onRecord = vi.fn()) => {
       question={3}
       total={8}
       body={<p>Why is a half-applied delta worse than a rejected one?</p>}
-      checkIn={[{ number: 3, title: "Change as data: the delta", href: "https://example.test/03" }]}
-      onRecord={onRecord}
+      resolve={{
+        kind: "check",
+        checkIn: [{ number: 3, title: "Change as data: the delta", href: "/lessons/03" }],
+        onRecord,
+      }}
     />
   )
 
   return onRecord
+}
+
+const prediction = (onWrite = vi.fn()) => {
+  render(
+    <Answer
+      question={1}
+      total={3}
+      body={<p>How would you enforce that AI may never touch checkout?</p>}
+      resolve={{ kind: "hold", note: "Held until Reflect.", onWrite }}
+    />
+  )
+
+  return onWrite
 }
 
 describe("answering a question", () => {
@@ -101,5 +117,34 @@ describe("answering a question", () => {
 
     /** What unlocks is a pointer to the lesson, never the answer itself. */
     expect(screen.getByText(/going and getting it is another retrieval/)).toBeTruthy()
+  })
+})
+
+describe("a prediction, which has nothing to check against yet", () => {
+  it("asks for the rating first, exactly as a review question does", () => {
+    prediction()
+
+    expect(screen.queryByRole("textbox")).toBeNull()
+    expect(screen.getByRole("group", { name: "Confidence" })).toBeTruthy()
+  })
+
+  it("hands over the rating taken before the lesson, with what was written", () => {
+    const onWrite = prediction()
+
+    fireEvent.click(screen.getByRole("button", { name: /^2 —/ }))
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "A lint rule on the diff." } })
+    fireEvent.click(screen.getByRole("button", { name: "Commit to this" }))
+
+    expect(onWrite).toHaveBeenCalledWith({ confidence: 2, answer: "A lint rule on the diff." })
+  })
+
+  it("offers nowhere to check and nothing to grade, because neither exists yet", () => {
+    prediction()
+
+    fireEvent.click(screen.getByRole("button", { name: /^4 —/ }))
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Something specific." } })
+
+    expect(screen.queryByText("Where to check")).toBeNull()
+    expect(screen.queryByRole("group", { name: "Self-grade" })).toBeNull()
   })
 })

@@ -12,6 +12,17 @@ import { RAMP_STEPS, type PaletteSlot } from "../theme/theme.js"
  * These are `var()` references, not values: the primitive never learns which
  * palette is mounted, which is what makes a re-theme one `configure` on the
  * root and nothing else (0049).
+ *
+ * **What a token does not promise.** It promises the value comes from the
+ * theme. It promises nothing about that value being *different from the one
+ * beside it*, and the difference is where this library has actually been bitten:
+ * `loom.emphasis` marked a stressed word with `weight("heading")` and rendered
+ * it identically to the sentence around it under `bold-sans`, whose pack
+ * declares `headingWeight: 400` beside `bodyWeight: 400`. Nothing was wrong —
+ * the token was *equal*. So where a primitive's whole job is to stand out from
+ * its context, reach for a value that is relative to that context (`bolder`,
+ * `em`, `currentColor`) rather than for a second token and a hope that the two
+ * differ. Filed on 23 August for the general case, which is `src/theme/`'s.
  */
 
 export type RampStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8

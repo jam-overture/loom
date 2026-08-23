@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <rect width="760" height="420" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="19" font-weight="600" fill="#111827">What the author said, against what the component does</text>
+  <text x="40" y="70" font-size="13" fill="#6b7280">Two facts per primitive. Three of the four squares are fine; one is a form that posts to whatever page it is sitting on.</text>
+
+  <!-- column headings: what the probe saw -->
+  <text x="300" y="112" font-size="12" font-weight="600" fill="#374151" text-anchor="middle">places the address</text>
+  <text x="540" y="112" font-size="12" font-weight="600" fill="#374151" text-anchor="middle">places none</text>
+  <text x="420" y="92" font-size="11" font-weight="600" fill="#9ca3af" text-anchor="middle" letter-spacing="1.2">WHAT THE PROBE SAW</text>
+
+  <!-- row headings: what was declared -->
+  <text x="150" y="168" font-size="12" font-weight="600" fill="#374151" text-anchor="end">submits: true</text>
+  <text x="150" y="268" font-size="12" font-weight="600" fill="#374151" text-anchor="end">not declared</text>
+  <text x="52" y="216" font-size="11" font-weight="600" fill="#9ca3af" text-anchor="middle" letter-spacing="1.2" transform="rotate(-90 52 216)">DECLARED</text>
+
+  <!-- top-left: declared and posts -->
+  <rect x="180" y="126" width="240" height="86" rx="8" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="300" y="156" font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">a working form</text>
+  <text x="300" y="178" font-size="12" fill="#047857" text-anchor="middle">in `submits`</text>
+  <text x="300" y="196" font-size="11" fill="#059669" text-anchor="middle">the deployment knows to wire endpoints</text>
+
+  <!-- top-right: declared, does not post -->
+  <rect x="420" y="126" width="240" height="86" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="540" y="152" font-size="13" font-weight="600" fill="#991b1b" text-anchor="middle">`unwiredSubmitters`</text>
+  <text x="540" y="173" font-size="11.5" fill="#b91c1c" text-anchor="middle">renders, looks finished, posts</text>
+  <text x="540" y="189" font-size="11.5" fill="#b91c1c" text-anchor="middle">to the page it is sitting on</text>
+  <text x="540" y="205" font-size="11" font-weight="600" fill="#dc2626" text-anchor="middle">the failure this exists to catch</text>
+
+  <!-- bottom-left: undeclared, posts -->
+  <rect x="180" y="226" width="240" height="86" rx="8" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="300" y="252" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">`undeclaredSubmitters`</text>
+  <text x="300" y="273" font-size="11.5" fill="#b45309" text-anchor="middle">works, but nothing tells a deployment</text>
+  <text x="300" y="289" font-size="11.5" fill="#b45309" text-anchor="middle">the seam is load-bearing here</text>
+  <text x="300" y="305" font-size="11" font-weight="600" fill="#d97706" text-anchor="middle">loom.form, today</text>
+
+  <!-- bottom-right: nothing -->
+  <rect x="420" y="226" width="240" height="86" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="540" y="264" font-size="13" font-weight="600" fill="#4b5563" text-anchor="middle">every other primitive</text>
+  <text x="540" y="285" font-size="11.5" fill="#6b7280" text-anchor="middle">posts nowhere, says nothing, reported nowhere</text>
+
+  <!-- footer -->
+  <line x1="40" y1="344" x2="720" y2="344" stroke="#e5e7eb"/>
+  <text x="40" y="370" font-size="12" fill="#374151"><tspan font-weight="600">The probe:</tspan> the component is handed a resolved target whose action is a string nothing else would produce,</text>
+  <text x="40" y="388" font-size="12" fill="#374151">and the audit looks for that string in what came back. Placing the address is the claim — reading the outcome is not.</text>
+  <text x="40" y="408" font-size="11.5" fill="#9ca3af">Loom · 0084 · §4b · 2026-08-23 — starter library: 1 submitter, 0 unwired</text>
+</svg>

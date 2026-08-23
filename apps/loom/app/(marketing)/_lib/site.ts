@@ -72,6 +72,31 @@ export type Surface = {
   readonly guarded: boolean
 }
 
+/**
+ * The one surface that answers the hero's promise rather than arguing for it.
+ *
+ * The front door's own band lets a visitor watch a change happen, but only
+ * through five prepared choices — the hero says *ask for a change in your own
+ * words* and the band cannot offer a place to type. That gap has been the
+ * lane's standing open question since 20 August, and the recommendation each
+ * time was to send people somewhere built for it rather than put a model call
+ * on the most-loaded page the project has.
+ *
+ * It now exists. `Loom demo` moved the demonstration off `/portal/demo` — a
+ * public page at the one path that reads as private — onto a public `/demo`,
+ * and filed the finding that nothing under this route group linked to it from
+ * anywhere. Three things from that finding are why it is safe to put on the
+ * front door: it works with no model configured, a page view allocates nothing
+ * on the instance, and the first click is one button.
+ */
+export const DEMO: Surface = {
+  path: "/demo",
+  label: "Demo",
+  blurb:
+    "Ask a real page to rearrange itself — in your own words — and watch the record fill in beside it. Nothing to install and nothing to sign up for.",
+  guarded: false,
+}
+
 export const DOCS: Surface = {
   path: "/docs",
   label: "Docs",
@@ -99,12 +124,20 @@ export const PORTAL: Surface = {
 /**
  * Everywhere else in the product, in the order the front door offers them.
  *
- * Documentation, then the course, then the portal: what the thing is, why it is
- * that way, and where the work happens. The two open surfaces come before the
- * guarded one because a visitor who cannot sign in should still be offered
- * everywhere they *can* go before they meet a door.
+ * The demonstration, then the documentation, then the course, then the portal —
+ * which is **ascending order of what it asks of the visitor**, and that is the
+ * whole of the reasoning. The demo costs a click; the docs cost a read; the
+ * course costs an afternoon; the portal costs an account. Someone who has just
+ * arrived is offered the cheapest thing first, and the one that needs a door is
+ * offered last so that everywhere they *can* go has been named before they meet
+ * one.
+ *
+ * The demo was added on 22 August and went to the front of the list rather than
+ * the end of it. It is the only one of the four that is the product working
+ * rather than a description of it, and this site's own recorded position is
+ * that the marketing site is the demonstration and not a brochure about it.
  */
-export const PRODUCT_SURFACES: readonly Surface[] = [DOCS, LESSONS, PORTAL]
+export const PRODUCT_SURFACES: readonly Surface[] = [DEMO, DOCS, LESSONS, PORTAL]
 
 /**
  * The palettes a visitor may see the site in.

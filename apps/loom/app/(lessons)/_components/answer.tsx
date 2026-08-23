@@ -39,13 +39,36 @@ export type CheckPointer = {
   readonly href: string
 }
 
+/**
+ * What happens after the writing, which is the only thing two kinds of question
+ * disagree about.
+ *
+ * A review question is *checkable*: the answer exists, somewhere the reader has
+ * to go and get, and the grade closes the loop the same sitting. A lesson's
+ * Predict question is not — the thing that would answer it is the lesson, which
+ * has not been read yet — so what it gets instead is nothing at all, held until
+ * Reflect. Steps 1 and 2 are identical in both cases and are the part worth
+ * having, so they are written once here rather than twice in two components.
+ */
+export type Resolve =
+  | {
+      readonly kind: "check"
+      readonly checkIn: readonly CheckPointer[]
+      readonly onRecord: (attempt: Omit<Attempt, "on">) => void
+    }
+  | {
+      readonly kind: "hold"
+      /** What is being waited for, said plainly rather than left as a dead end. */
+      readonly note: string
+      readonly onWrite: (written: { readonly confidence: Confidence; readonly answer: string }) => void
+    }
+
 type AnswerProps = {
   readonly question: number
   readonly total: number
-  /** The question, rendered from the schedule as a Loom fragment. */
+  /** The question, rendered from the schedule or the lesson as a Loom fragment. */
   readonly body: ReactNode
-  readonly checkIn: readonly CheckPointer[]
-  readonly onRecord: (attempt: Omit<Attempt, "on">) => void
+  readonly resolve: Resolve
 }
 
 const CONFIDENCE_LABELS: Readonly<Record<Confidence, string>> = {
@@ -62,15 +85,26 @@ const GRADE_LABELS: readonly (readonly [Grade, string])[] = [
   ["missed", "Missed it"],
 ]
 
-export const Answer = ({ question, total, body, checkIn, onRecord }: AnswerProps) => {
+export const Answer = ({ question, total, body, resolve }: AnswerProps) => {
   const [confidence, setConfidence] = useState<Confidence | undefined>(undefined)
   const [answer, setAnswer] = useState("")
   const [submitted, setSubmitted] = useState(false)
 
+  const holding = resolve.kind === "hold"
+
   const record = (grade: Grade): void => {
+    if (confidence === undefined || resolve.kind !== "check") return
+
+    resolve.onRecord({ question, confidence, answer: answer.trim(), grade })
+  }
+
+  const submit = (written: string): void => {
     if (confidence === undefined) return
 
-    onRecord({ question, confidence, answer: answer.trim(), grade })
+    setAnswer(written)
+
+    if (resolve.kind === "hold") resolve.onWrite({ confidence, answer: written.trim() })
+    else setSubmitted(true)
   }
 
   return (
@@ -110,12 +144,18 @@ export const Answer = ({ question, total, body, checkIn, onRecord }: AnswerProps
       {confidence !== undefined && !submitted ? (
         <div style={style.column(3)}>
           <label style={style.column(2)}>
-            <span style={style.label}>Your answer, closed book</span>
+            <span style={style.label}>
+              {holding ? "What you think, before you read on" : "Your answer, closed book"}
+            </span>
             <textarea
               style={style.textarea}
               value={answer}
               onChange={(event) => setAnswer(event.target.value)}
-              placeholder="Write it out. Half an answer written down beats a whole one you were sure you had."
+              placeholder={
+                holding
+                  ? "Being wrong here is the mechanism, not a waste of time. Commit to something specific enough to be wrong."
+                  : "Write it out. Half an answer written down beats a whole one you were sure you had."
+              }
             />
           </label>
 
@@ -124,21 +164,20 @@ export const Answer = ({ question, total, body, checkIn, onRecord }: AnswerProps
               type="button"
               style={{ ...style.button(true), opacity: answer.trim() === "" ? 0.4 : 1 }}
               disabled={answer.trim() === ""}
-              onClick={() => setSubmitted(true)}
+              onClick={() => submit(answer)}
             >
-              Submit, then check
+              {holding ? "Commit to this" : "Submit, then check"}
             </button>
             <button
               type="button"
               style={{ ...style.button(false), color: style.inkMuted }}
-              onClick={() => {
-                setAnswer("")
-                setSubmitted(true)
-              }}
+              onClick={() => submit("")}
             >
-              I can&rsquo;t retrieve this
+              {holding ? "I have no idea at all" : "I can’t retrieve this"}
             </button>
           </div>
+
+          {holding ? <p style={style.note}>{resolve.note}</p> : undefined}
         </div>
       ) : undefined}
 
@@ -169,7 +208,7 @@ export const Answer = ({ question, total, body, checkIn, onRecord }: AnswerProps
               another retrieval. Look up the specific point only; do not reread the lesson.
             </p>
             <div style={style.row(2)}>
-              {checkIn.map((pointer) => (
+              {(resolve.kind === "check" ? resolve.checkIn : []).map((pointer) => (
                 <a
                   key={pointer.number}
                   href={pointer.href}

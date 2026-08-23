@@ -129,6 +129,28 @@ describe("createPrimitiveRegistry over interactivity", () => {
     expect(built.ok && built.value.primitives[0]?.interactive).toBeUndefined()
   })
 
+  /**
+   * `false` rather than `undefined`, unlike `interactive`. There is no third
+   * state to express: a primitive either posts or it does not, and a reader
+   * asking "does this need an endpoint" should not have to handle "unstated".
+   */
+  it("carries a submission declaration through, and defaults it to false", () => {
+    const declared = createPrimitiveRegistry([
+      definePrimitive({
+        type: "loom.enquiry",
+        description: "posts what it collected",
+        props: z.object({}),
+        submits: true,
+        component: ({ children }: LoomPrimitiveProps) => createElement("form", null, children),
+      }),
+    ])
+
+    const undeclared = createPrimitiveRegistry([entry({ type: "loom.quiet" })])
+
+    expect(declared.ok && declared.value.primitives[0]?.submits).toBe(true)
+    expect(undeclared.ok && undeclared.value.primitives[0]?.submits).toBe(false)
+  })
+
   it("refuses a trigger naming a prop the schema does not declare", () => {
     const error = errorOf([linked({ whenProps: ["hrefs"] })])
 
