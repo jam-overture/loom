@@ -5,7 +5,7 @@ import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { BAND } from "../bands"
 import { heading, prose, stack } from "../nodes"
-import { askHref, type SiteThemeName } from "../site"
+import { askHref, DEMO, surfaceHref, type SiteThemeName } from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -194,6 +194,46 @@ const protectionNotice = (): string => {
   } from being taken away: ${listed}. Everything else a request may rearrange on its own — and one of the five above will be refused, which is the part worth watching.`
 }
 
+/**
+ * The band's own limit, said out loud, with the way past it attached.
+ *
+ * Five prepared choices are the only affordable shape for this surface — a text
+ * box on the most-loaded page the project has is a model call for every visitor
+ * and a dead button for every deployment without a key — and that leaves a real
+ * gap: the hero two bands above promises *ask for a change in your own words*,
+ * and this band offers five buttons.
+ *
+ * The gap has been the standing open question on this lane since 20 August, and
+ * the recommendation each time was the same: send people somewhere built for
+ * typing rather than put the model here. As of 22 August there is somewhere —
+ * `/demo`, public, no account, no key required for the prepared part of it.
+ *
+ * So the line is honest about *why* these are buttons rather than quietly
+ * hoping nobody notices. A visitor who has just watched the sequence run is the
+ * likeliest person on the site to want a turn at it, and this is the one moment
+ * on the front door where that is true.
+ */
+const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly LoomNode[] => [
+  stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
+    /**
+     * Measured, so the sentence and the way out sit on one line rather than the
+     * link dropping beneath a full-width paragraph and reading as a stray band
+     * of its own. The band is `wide`, and an unmeasured small line crosses all
+     * of it.
+     */
+    prose(
+      ids,
+      "These five are prepared, so the whole sequence runs here without an AI in the way. To ask for something in your own words, there is a page for that.",
+      { tone: "muted", size: "small", measured: true }
+    ),
+    buildElement(ids, {
+      type: "loom.action",
+      props: { href: surfaceHref(context.origin, DEMO), variant: "quiet" },
+      children: [buildText(ids, "Ask it for something else")],
+    }),
+  ]),
+]
+
 const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
   stack(ids, { direction: "column", gap: "snug", align: "start" }, [
     prose(ids, "What did you come here for?", { size: "lead" }),
@@ -252,5 +292,6 @@ export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): Lo
        */
       choices(ids, context),
       panel(ids, context),
+      ...typeYourOwn(ids, context),
     ],
   })

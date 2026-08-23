@@ -11,6 +11,7 @@ import {
   findParent,
   isDescendantOf,
   pathToNode,
+  textOf,
   walkTree,
 } from "./navigation.js"
 import { withChildren } from "./node.js"
@@ -74,6 +75,28 @@ describe("isDescendantOf", () => {
     expect(isDescendantOf(tree.root, ids.header, ids.card)).toBe(false)
     expect(isDescendantOf(tree.root, ids.card, ids.card)).toBe(false)
     expect(isDescendantOf(tree.root, missingId, ids.card)).toBe(false)
+  })
+})
+
+describe("textOf", () => {
+  it("reads every text node under a subtree, in tree order", () => {
+    const { tree, ids } = sampleTree()
+
+    expect(textOf(tree.root)).toBe("WelcomeBody copy")
+
+    const header = findNode(tree.root, ids.header)
+    if (!header) throw new Error("fixture missing header")
+
+    expect(textOf(header)).toBe("Welcome")
+  })
+
+  it("is empty for a node that says nothing", () => {
+    const { tree, ids } = sampleTree()
+
+    const footer = findNode(tree.root, ids.footer)
+    if (!footer) throw new Error("fixture missing footer")
+
+    expect(textOf(footer)).toBe("")
   })
 })
 

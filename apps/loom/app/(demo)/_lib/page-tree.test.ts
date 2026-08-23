@@ -109,6 +109,34 @@ describe("the demo page", () => {
     expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
   })
 
+  /**
+   * The precondition the mark on the page rests on, asserted where it can fail.
+   *
+   * `spotlight.ts` keys its rules on `data-loom-node`, which only exists because
+   * the demo renders in edit mode and every primitive spreads `loom.editable`.
+   * A primitive that stopped spreading it would be invisible to the mark and
+   * would say so in a diagnostic — which is the same banner that would appear in
+   * the rail, so it is worth failing here rather than on the surface.
+   */
+  it("gives every band on the page an addressable root, with nothing left unhonoured", () => {
+    const tree = demoPageTree()
+    const output = renderLoomTree(tree, {
+      resolver: demoRegistry,
+      validator: demoRegistry,
+      themes,
+      editMode: true,
+    })
+    const markup = renderToStaticMarkup(output.element)
+    const addressed = new Set([...markup.matchAll(/data-loom-node="([^"]+)"/g)].map(([, id]) => id))
+
+    expect(output.diagnostics).toEqual([])
+
+    for (const band of tree.root.children) {
+      if (band.kind !== "element") continue
+      expect(addressed.has(band.id), band.type).toBe(true)
+    }
+  })
+
   /** Two visitors address the same nodes by the same names, or the presets break. */
   it("builds the same tree, node for node, every time", () => {
     expect(JSON.stringify(demoPageTree())).toBe(JSON.stringify(demoPageTree()))

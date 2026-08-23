@@ -106,6 +106,34 @@ export const LIBRARY_CLASS = {
    * card's, which is a hair off and the honest limit of a static stylesheet.
    */
   cluster: "loom-cluster",
+  /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */
+  compare: "loom-compare",
+  /** The same table set as a spec to scan rather than a page to read. */
+  compareTight: "loom-compare-tight",
+  /** One `loom.comparison-row`, so the whole row can answer a pointer. */
+  compareRow: "loom-compare-row",
+  /** Its leading cell — the criterion, which stays put while the band scrolls. */
+  compareKey: "loom-compare-key",
+  /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */
+  compareNote: "loom-compare-note",
+  /**
+   * The three verdicts. Their colour is here rather than on the element because
+   * a tinted column re-inks the two that recede — `fg-subtle` on `accent-subtle`
+   * measures 3.76:1 across the registered palettes, under the bar 0074 holds a
+   * text slot to — and an inline colour would beat the rule that does it.
+   */
+  compareYes: "loom-compare-yes",
+  compareNo: "loom-compare-no",
+  comparePartial: "loom-compare-partial",
+  /**
+   * The subject column a page is steering towards, by position. A column is
+   * not a node (0084), so this is the only handle it has — and four of them,
+   * because each is a static rule rather than an interpolated index.
+   */
+  compareFeatureFirst: "loom-compare-feature-1",
+  compareFeatureSecond: "loom-compare-feature-2",
+  compareFeatureThird: "loom-compare-feature-3",
+  compareFeatureFourth: "loom-compare-feature-4",
   /**
    * A `loom.list`: its markers take the accent, and its rows carry the gap
    * between them. Both are here rather than inline because neither is
@@ -264,6 +292,55 @@ details[open] > summary .loom-marker {
 .loom-cluster > * {
   box-shadow: 0 0 0 2px var(--loom-bg-canvas);
 }
+.loom-compare th, .loom-compare td {
+  padding: var(--loom-spacing-3) var(--loom-spacing-4);
+}
+.loom-compare-tight th, .loom-compare-tight td {
+  padding: var(--loom-spacing-2) var(--loom-spacing-3);
+}
+.loom-compare thead > tr > * {
+  border-block-end: 1px solid var(--loom-border-strong);
+}
+.loom-compare tbody > tr + tr > * {
+  border-block-start: 1px solid var(--loom-border-subtle);
+}
+.loom-compare-key {
+  position: sticky;
+  inset-inline-start: 0;
+  background: var(--loom-bg-surface);
+  z-index: 1;
+}
+.loom-compare-row > * {
+  transition: background-color var(--loom-motion-medium) ease;
+}
+.loom-compare-row:hover > * {
+  background: var(--loom-bg-surface-muted);
+}
+.loom-compare-note, .loom-compare-no {
+  color: var(--loom-fg-subtle);
+}
+.loom-compare-yes {
+  color: var(--loom-accent-strong);
+}
+.loom-compare-partial {
+  color: var(--loom-fg-muted);
+}
+.loom-compare-feature-1 tr > *:nth-child(2),
+.loom-compare-feature-2 tr > *:nth-child(3),
+.loom-compare-feature-3 tr > *:nth-child(4),
+.loom-compare-feature-4 tr > *:nth-child(5) {
+  background: var(--loom-accent-subtle);
+  border-inline: 1px solid var(--loom-border-accent);
+}
+.loom-compare-feature-1 tr > *:nth-child(2) .loom-compare-note,
+.loom-compare-feature-2 tr > *:nth-child(3) .loom-compare-note,
+.loom-compare-feature-3 tr > *:nth-child(4) .loom-compare-note,
+.loom-compare-feature-4 tr > *:nth-child(5) .loom-compare-note,
+.loom-compare-feature-1 tr > *:nth-child(2) .loom-compare-no,
+.loom-compare-feature-2 tr > *:nth-child(3) .loom-compare-no,
+.loom-compare-feature-3 tr > *:nth-child(4) .loom-compare-no,
+.loom-compare-feature-4 tr > *:nth-child(5) .loom-compare-no {
+  color: var(--loom-fg-muted);
 .loom-list {
   margin: 0;
 }
@@ -321,7 +398,7 @@ details[open] > summary .loom-marker {
     opacity: 1;
     transform: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > * {
     transition: none;
   }
   .loom-lift:hover {

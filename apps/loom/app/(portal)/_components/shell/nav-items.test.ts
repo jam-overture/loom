@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs"
+import { existsSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
@@ -12,15 +12,27 @@ import { NAV_GROUPS } from "./nav-items"
  * only exists after a build, and a test that needs a build to run is a test that
  * stops being run.
  */
-const GROUP = join(process.cwd(), "app", "(portal)")
+const APP = join(process.cwd(), "app")
 
 /**
  * A route group contributes nothing to a URL, so `/portal/pages` is on disk at
  * `app/(portal)/portal/pages` — the group is where the file is, the segment is
  * what a reader types, and only the second half appears in an `href`.
+ *
+ * Which group holds it is therefore not something an `href` can be read for, and
+ * as of the demo's move to `/demo` the rail points at two of them. So the search
+ * is over every group rather than the portal's own: a nav item that left this
+ * surface is still a claim that a route exists, and checking it only where this
+ * lane's files live would report a working link as broken and — worse, the next
+ * time — a broken one as unverifiable.
  */
+const GROUPS = (): readonly string[] =>
+  readdirSync(APP, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("("))
+    .map((entry) => join(APP, entry.name))
+
 const routeExists = (href: string): boolean =>
-  existsSync(join(GROUP, href.replace(/^\//, ""), "page.tsx"))
+  GROUPS().some((group) => existsSync(join(group, href.replace(/^\//, ""), "page.tsx")))
 
 describe("NAV_GROUPS", () => {
   const items = NAV_GROUPS.flat()
@@ -41,5 +53,18 @@ describe("NAV_GROUPS", () => {
   it("detects a route that does not exist", () => {
     expect(routeExists("/nowhere")).toBe(false)
     expect(routeExists("/portal/pages")).toBe(true)
+  })
+
+  /**
+   * The reason the search widened, asserted rather than assumed. `/demo` is
+   * served by `app/(demo)/demo/page.tsx` and nothing under `(portal)`, so a
+   * check scoped to this lane's own group would call the rail's demo entry
+   * broken — and the fix for that failing test is not to point the rail back at
+   * a redirect.
+   */
+  it("finds a route served by another surface's route group", () => {
+    expect(GROUPS().length).toBeGreaterThan(1)
+    expect(routeExists("/demo")).toBe(true)
+    expect(items.some((item) => item.href === "/demo")).toBe(true)
   })
 })

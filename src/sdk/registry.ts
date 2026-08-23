@@ -8,6 +8,12 @@ import {
   type SlotName,
 } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
+import {
+  BEHAVIOURS,
+  isBehaviourName,
+  type BehaviourName,
+  type BehaviourResolver,
+} from "../render/behaviour.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
@@ -50,8 +56,12 @@ export type RegisteredPrimitive = {
   readonly text: PrimitiveText<string>
   /** Whether it renders a target, and what makes it one. Absent for most. */
   readonly interactive: InteractiveWhen | undefined
+  /** The controls it takes from the runtime's vocabulary. Empty for most. */
+  readonly behaviours: readonly BehaviourName[]
   readonly validate: (props: JsonObject) => PropsVerdict
 }
+
+const NO_BEHAVIOUR_NAMES: readonly BehaviourName[] = Object.freeze([])
 
 export type RegistryError =
   | { readonly code: "invalid-primitive-type"; readonly type: string }
@@ -59,11 +69,24 @@ export type RegistryError =
   | { readonly code: "invalid-text-key"; readonly type: string; readonly key: string }
   | { readonly code: "blank-text"; readonly type: string; readonly key: string }
   | { readonly code: "undeclared-interactive-prop"; readonly type: string; readonly prop: string }
+  | { readonly code: "unknown-behaviour"; readonly type: string; readonly behaviour: string }
+  | {
+      readonly code: "unnamed-behaviour"
+      readonly type: string
+      readonly behaviour: string
+      readonly key: string
+    }
+  | {
+      readonly code: "undeclared-interactive-behaviour"
+      readonly type: string
+      readonly behaviour: string
+    }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
   PropsValidator &
-  TextResolver & {
+  TextResolver &
+  BehaviourResolver & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
   }
@@ -80,6 +103,12 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.key}" on "${error.type}" declares an empty string; a string worth translating has something in it, and a blank one renders as a control with no name`
     case "undeclared-interactive-prop":
       return `"${error.type}" says it renders a target when "${error.prop}" is set, and its schema declares no such prop; a trigger naming a prop that cannot arrive is a target the Gate will never see`
+    case "unknown-behaviour":
+      return `"${error.type}" takes a behaviour called "${error.behaviour}" and the runtime has none; a behaviour is implemented here, not registered, so the vocabulary is the list in \`render/behaviour.ts\``
+    case "unnamed-behaviour":
+      return `"${error.type}" takes the "${error.behaviour}" behaviour and declares no "${error.key}" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent`
+    case "undeclared-interactive-behaviour":
+      return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
     case "duplicate-primitive-type":
       return `"${error.type}" is registered twice; a tree naming it would resolve to whichever registration won`
   }
@@ -105,6 +134,43 @@ const undeclaredTriggerProp = (entry: PrimitiveEntry): string | undefined => {
   const declared = new Set(declaredProps.map((prop) => prop.name))
 
   return interactive.whenProps.find((prop) => !declared.has(prop))
+}
+
+/**
+ * The declared behaviours, or the first thing wrong with them.
+ *
+ * Three checks, and each one is the whole of what can be known without calling
+ * the component: the name is in the vocabulary, the strings its control needs
+ * are strings this primitive declares, and a primitive taking a control says it
+ * renders a target. Whether the primitive actually *places* what it declared
+ * needs the component called, which is the audit's job and not this one's.
+ */
+const registeredBehaviours = (
+  entry: PrimitiveEntry
+): Result<readonly BehaviourName[], RegistryError> => {
+  const names: BehaviourName[] = []
+
+  for (const behaviour of entry.behaviours) {
+    if (!isBehaviourName(behaviour)) {
+      return err({ code: "unknown-behaviour", type: entry.type, behaviour })
+    }
+
+    const missing = BEHAVIOURS[behaviour].text.find(
+      (key) => (entry.text[key] ?? "").trim() === ""
+    )
+
+    if (missing !== undefined) {
+      return err({ code: "unnamed-behaviour", type: entry.type, behaviour, key: missing })
+    }
+
+    if (BEHAVIOURS[behaviour].rendersControl && !entry.interactive) {
+      return err({ code: "undeclared-interactive-behaviour", type: entry.type, behaviour })
+    }
+
+    names.push(behaviour)
+  }
+
+  return ok(names)
 }
 
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
@@ -133,6 +199,9 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     return err({ code: "undeclared-interactive-prop", type: entry.type, prop: undeclared })
   }
 
+  const behaviours = registeredBehaviours(entry)
+  if (!behaviours.ok) return behaviours
+
   return ok({
     type: type.data,
     description: entry.description,
@@ -142,6 +211,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     choices: entry.choices,
     text: entry.text,
     interactive: entry.interactive,
+    behaviours: behaviours.value,
     validate: entry.validate,
   })
 }
@@ -179,5 +249,7 @@ export const createPrimitiveRegistry = (
     validateProps: (type: PrimitiveType, props: JsonObject): PropsVerdict =>
       byType.get(type)?.validate(props) ?? { outcome: "undeclared" },
     textFor: (type: PrimitiveType): PrimitiveText<string> => byType.get(type)?.text ?? NO_TEXT,
+    behavioursFor: (type: PrimitiveType): readonly BehaviourName[] =>
+      byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
   })
 }

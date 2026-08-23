@@ -8,7 +8,7 @@ import { TechnicalDetail } from "./_components/technical-detail"
  *
  * Reached two ways, and they are worth telling apart because only one of them
  * is a typo. A URL nobody routes is the ordinary case. The other is
- * `notFound()`, called deliberately by `/portal/activity`, `/portal/audit`, `/portal/trust`
+ * `notFound()`, called deliberately by `/portal/activity`, `/portal/checkup`, `/portal/trust`
  * and `/portal/history` when a `tree=` parameter is not a well-formed `TreeId` — a
  * refusal to guess at an identifier rather than a missing route. Both land
  * here, so this says both.

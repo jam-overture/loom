@@ -12,6 +12,9 @@ import { loomButton } from "./loom.button.js"
 import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
 import { loomCode } from "./loom.code.js"
+import { loomComparison } from "./loom.comparison.js"
+import { loomComparisonRow } from "./loom.comparison-row.js"
+import { loomComparisonTable } from "./loom.comparison-table.js"
 import { loomCodeSpan } from "./loom.code-span.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomEmphasis } from "./loom.emphasis.js"
@@ -148,6 +151,19 @@ import { loomTierTable } from "./loom.tier-table.js"
  * ([0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
  * is the width media query it needs).
  *
+ * **The comparison three** are the band that answers *how is this different
+ * from what I already use*, and the only two-dimensional structure in the
+ * library. `comparison-table` holds a region of subjects and a row per
+ * criterion; `comparison-row` is that criterion and its answers; `comparison`
+ * itself is one answer — one subject measured against one criterion, which is
+ * what the word means — as a verdict, a value, or both. Two arrangements over
+ * one singular, which is 0054's rule read at the depth this band actually has:
+ * a row of comparisons, and a table of them. They
+ * are a real `<table>` where `loom.tier-table` is deliberately a row of cards,
+ * because a matrix a reader enters from either edge is the one band whose
+ * value *is* its markup. `feature` names a column by position rather than by
+ * id, which is the whole of
+ * [0084](../../decisions/0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md).
  * **The prose five** are the layer under all of it: what a page is *written*
  * in, as opposed to what it is built from. Fifty primitives could sell a plan
  * and prove it with a wall of quotes, and none of them could write three
@@ -192,6 +208,9 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomTier,
   loomPerkList,
   loomPerkListItem,
+  loomComparisonTable,
+  loomComparisonRow,
+  loomComparison,
   loomProductGrid,
   loomProduct,
   loomQuoteGrid,
@@ -256,6 +275,9 @@ export {
   loomCallout,
   loomCard,
   loomCode,
+  loomComparison,
+  loomComparisonRow,
+  loomComparisonTable,
   loomCodeSpan,
   loomDivider,
   loomEmphasis,
