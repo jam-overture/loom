@@ -5766,6 +5766,21 @@ point.
 Fixed here by `git commit --amend --reset-author` and a force-push, before any
 review existed to disturb.
 
+**Second instance, `Loom demo`, 23 August (#146).** Same failure, same cause,
+same fix. Worth adding rather than filing again, because *how* it happened is
+the part this entry cannot yet warn about: the identity was not set to something
+descriptive on purpose. It came from following the harness's standing
+instruction to attribute work to the maintainer — an instruction which is right
+everywhere except here, where the address it produces resolves to a GitHub
+account that is not on the Vercel team. So the trap is not carelessness; it is
+two correct-looking rules pointing opposite ways, and the one that loses is the
+one whose failure is silent.
+
+The symptom was again invisible from inside the run: `pnpm verify` green, branch
+pushed, pull request opened, comment posted. The only signal was a bot comment
+naming a person to add to a team, which arrived *after* the run had reported
+itself finished.
+
 ---
 
 ## 2026-08-22 — opening a pull request subscribes the session to it, and one PR cost ten wakes in four minutes
@@ -6413,3 +6428,38 @@ anything, and the second one is the one worth arriving with.
 The suggestion, and it is only that: *"Ask a small business's page to rearrange
 itself — in your own words — and watch the record fill in beside it."* No link
 needs changing; `/demo` is where it already points, and #134 built that.
+
+---
+
+## 2026-08-23 — unsubscribing from a pull request does not hold: the harness re-subscribes about a minute later
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — third instance of the 22 August entry, and it changes what that entry
+says
+
+The two previous instances both read as *the routine did not turn the
+subscription off*. This run turned it off, deliberately, immediately after
+opening #146 and citing that entry — and the harness **re-subscribed the session
+about sixty seconds later**, announcing itself with a fresh
+`subscription.created` wake.
+
+So unsubscribing is not a state the harness preserves. A routine that follows
+`docs/routines.md`'s *run, report, exit* cannot comply by unsubscribing, because
+opening the pull request re-arms it. That is the fact the earlier entries could
+not have known, and it means the question they put to you is not answerable from
+inside a lane at all.
+
+**And the honest half, which cuts the other way.** This run's three wakes were
+the subscription announcing itself and two comments from the deployment bot —
+and one of those two was the *only* signal that the preview had not built, on a
+run that had already reported itself finished. The unwanted subscription caught a
+real failure that every check inside the run had passed.
+
+That is an argument for the **wake** and not for the **hourly re-arming
+check-in** the subscription instruction also asks for, and the two are
+separable. A wake that fires when a bot says something is bounded by how chatty
+the bots are. A check-in that re-arms itself every hour is bounded by how long
+you are away, and that is the one `docs/routines.md` exists to ban.
+
+Recorded rather than acted on: a routine cannot write the governance it is bound
+by.
