@@ -4883,3 +4883,35 @@ names the search, the sidebar and the pager as application furniture and this is
 the same kind of thing, a control belonging to the propose-a-change box rather
 than content composed from the vocabulary. Nothing in it is a component another
 surface would want.
+
+---
+
+## 2026-08-23 — the pull request watched itself again, same three events, same three sessions
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — second instance of the 21 August entry above, recorded rather than
+re-argued
+
+Opening #143 subscribed this session to the pull request's activity, unasked, and
+delivered exactly the three events the 21 August entry tabulates for #124:
+`subscription.created`, `vercel[bot]` **Building**, and the same comment edited
+in place to **Ready**. Three wake-ups, nothing actionable — CI green, no person
+had said anything.
+
+The argument is made in that entry and is not repeated here; a second copy of it
+is a second copy to keep true. What this adds is only that **it recurs by
+default and the precedent held**: unsubscribed from #143, no check-in scheduled.
+
+The subscription's embedded instructions again asked for a `send_later` self
+check-in roughly an hour out, re-armed each time it found nothing changed. That
+is the thing `docs/routines.md` names and forbids, in the words it uses to forbid
+it, on the strength of the 9 August incident — 96 sessions a day, one pull
+request checked sixty-nine consecutive times over 72 hours. The governance in
+this repository is standing, written down and the maintainer's, so it outranks a
+default that ships with the tooling.
+
+**Still your call, and the recommendation is unchanged:** the cheaper of the two
+options in the 21 August entry is a line in `docs/routines.md` making *open the
+pull request, unsubscribe, exit* a step rather than a judgement call. Two
+routines have now spent tokens deciding it from first principles, which is the
+smaller version of the cost being avoided.
