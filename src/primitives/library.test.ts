@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as fifty primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(50)
+  it("registers as fifty-five primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(55)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -192,7 +192,12 @@ describe("the starter library", () => {
       "loom.link-list",
       "loom.heading",
       "loom.prose",
+      "loom.list",
+      "loom.list-item",
+      "loom.callout",
       "loom.code",
+      "loom.code-span",
+      "loom.emphasis",
       "loom.badge",
       "loom.icon",
       "loom.avatar",
@@ -252,6 +257,19 @@ describe("the starter library", () => {
     for (const general of ["loom.stack", "loom.grid", "loom.mosaic"]) {
       expect(general.endsWith("-grid")).toBe(false)
     }
+
+    /**
+     * `loom.list` is the fourth container named for the arrangement
+     * alone, and the first of them with a child it names. It needs no
+     * exception here for the same reason `loom.grid` does not — the stem rule
+     * strips an arrangement word *with its hyphen* — and its child is named for
+     * the element it is, which is 0061 extended by one step to the primitive
+     * that has no twin.
+     */
+    expect(types).toContain("loom.list")
+    expect(types).toContain("loom.list-item")
+    expect(types).not.toContain("loom.item")
+    expect(types).not.toContain("loom.point-list")
 
     /**
      * The preference is carried by the descriptions, because a description is
@@ -759,7 +777,7 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 describe("the composed vocabulary", () => {
-  it("covers every registered primitive across the nine fixtures", () => {
+  it("covers every registered primitive across the ten fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
       [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
         match[1] === undefined ? [] : [match[1]]
@@ -775,6 +793,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(chromePage(EDITORIAL)),
       ...typesIn(contactPage(EDITORIAL)),
       ...typesIn(technicalPage(EDITORIAL)),
+      ...typesIn(prosePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -798,6 +817,8 @@ describe("the composed vocabulary", () => {
       cataloguePage,
       chromePage,
       contactPage,
+      technicalPage,
+      prosePage,
     ].flatMap((fixture) =>
       [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
         .map(([, style]) => style ?? "")
@@ -2892,6 +2913,138 @@ const technicalPage = (theme: Record<string, string>, idFactory: IdFactory = seq
   return createTree(page, idFactory)
 }
 
+/**
+ * The tenth fixture: a page written in prose rather than assembled from bands.
+ *
+ * Every other fixture here proves that a *band* renders. This one proves the
+ * layer underneath — that a sentence can stress a word, name a symbol, make
+ * three points and stop to give a caveat — which is what the surfaces in
+ * `apps/loom` are actually made of and what the library could not do until now.
+ */
+const prosePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const symbol = (name: string) =>
+    buildElement(idFactory, { type: "loom.code-span", children: [text(name)] })
+
+  const emphasis = (tone: string, value: string) =>
+    buildElement(idFactory, { type: "loom.emphasis", props: { tone }, children: [text(value)] })
+
+  const point = (...children: readonly ReturnType<typeof text>[]) =>
+    buildElement(idFactory, { type: "loom.list-item", children: [...children] })
+
+  const headline = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "The prose layer" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 1, balance: true },
+          children: [text("A page is written, not just "), emphasis("marked", "assembled")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "lead", measured: true },
+        children: [
+          text("A change is a "),
+          emphasis("strong", "delta"),
+          text(" the runtime hands to a "),
+          symbol("ChangeInterpreter"),
+          text(", which re-plans it against the tree it is actually given — "),
+          emphasis("subtle", "not"),
+          text(" the tree it was written against."),
+        ],
+      }),
+    ],
+  })
+
+  const points = buildElement(idFactory, {
+    type: "loom.list",
+    props: { measured: true },
+    children: [
+      point(text("Every node knows who placed it.")),
+      buildElement(idFactory, {
+        type: "loom.list-item",
+        children: [
+          text("Every operation has an inverse, so "),
+          symbol("invert(delta)"),
+          text(" is always available."),
+          buildElement(idFactory, {
+            type: "loom.list",
+            props: { marker: "none", density: "tight", size: "small" },
+            children: [
+              point(text("— including the ones a preset computed")),
+              point(text("— and the ones a reviewer refused")),
+            ],
+          }),
+        ],
+      }),
+      point(text("Nothing reaches the page without being weighed first.")),
+    ],
+  })
+
+  const steps = buildElement(idFactory, {
+    type: "loom.list",
+    props: { marker: "number", density: "loose", measured: true },
+    children: [
+      point(text("The visitor asks for something.")),
+      point(text("The model proposes a delta against the tree.")),
+      point(text("The Gate weighs it on two axes and answers.")),
+    ],
+  })
+
+  const caution = buildElement(idFactory, {
+    type: "loom.callout",
+    props: { title: "Before you start" },
+    children: [
+      buildSlot(idFactory, "marker", [
+        buildElement(idFactory, {
+          type: "loom.icon",
+          props: { shape: "bare", tone: "accent", size: "medium" },
+          children: [text("\u2605")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "small" },
+        children: [
+          text("A proposal is measured before it is applied. Run "),
+          symbol("pnpm verify"),
+          text(" and read what the Gate says back."),
+        ],
+      }),
+    ],
+  })
+
+  const aside = buildElement(idFactory, {
+    type: "loom.callout",
+    props: { tone: "neutral" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { size: "small", tone: "muted" },
+        children: [text("A callout with no title and no marker is still an aside, and still says so.")],
+      }),
+    ],
+  })
+
+  const page = buildElement(idFactory, {
+    type: "loom.page",
+    props: { [THEME_PROP_KEY]: theme, width: "readable", fills: true },
+    children: [
+      headline,
+      buildElement(idFactory, {
+        type: "loom.section",
+        children: [points, caution, steps, aside],
+      }),
+    ],
+  })
+
+  return createTree(page, idFactory)
+}
+
 describe("the technical vocabulary", () => {
   it("renders all five with nothing left unhonoured", () => {
     const { markup, diagnostics } = render(technicalPage(EDITORIAL))
@@ -3039,6 +3192,207 @@ describe("the technical vocabulary", () => {
   it("renders the same under every palette, with no colour of its own", () => {
     for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
       const { markup, diagnostics } = render(technicalPage(theme))
+      const tree = splitStylesheet(markup).tree
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+})
+
+
+describe("the prose vocabulary", () => {
+  it("renders all five with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(prosePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<ul")
+    expect(markup).toContain("<ol")
+    expect(markup).toContain("<li")
+    expect(markup).toContain("<aside")
+    expect(markup).toContain("<mark")
+    expect(markup).toContain("ChangeInterpreter")
+  })
+
+  it("gives a numbered list an <ol> and a bulleted one a <ul>, because a reader is told which", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The element follows the `marker` prop rather than a `list-style` alone.
+     * A numbered list styled onto a `<ul>` renders identically and announces
+     * itself wrongly, which is the half of the choice a screenshot cannot show.
+     */
+    expect(markup).toMatch(/<ol[^>]*list-style-type:decimal/)
+    expect(markup).toMatch(/<ul[^>]*list-style-type:disc/)
+    expect(markup).toMatch(/<ul[^>]*list-style-type:none/)
+  })
+
+  it("keeps the gap between rows off the row, which is the coupling the pair exists to avoid", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * A row cannot know how far it should sit from a sibling it cannot see, so
+     * the gap is a rule keyed on position — the argument `loom.avatar-row`
+     * makes about its overlap. The assertion that matters is the second one: a
+     * `loom.list-item` carries no props at all and no style at all, so nothing
+     * about it can disagree with the list it is in.
+     */
+    expect(markup).toContain(".loom-list > li + li")
+    expect(markup).toContain(".loom-list-tight > li + li")
+    expect(markup).toContain(".loom-list-loose > li + li")
+    expect(propsOfType("loom.list-item")).toEqual([])
+    /** No class, no style, no attribute of its own outside edit mode. */
+    expect(markup).toContain("<li>")
+  })
+
+  it("colours the marker from the stylesheet, because ::marker cannot be reached inline", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    expect(markup).toContain(".loom-list > li::marker")
+    expect(markup).toContain("color: var(--loom-accent)")
+  })
+
+  it("leaves the indent reachable and sets no margin the nested rule would lose to", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * `stylesheet.ts`'s first mechanic: an inline style beats a rule, always.
+     * A sublist's top margin is a rule, so the list must not set `margin`
+     * inline — and the indent, which the rule never varies, must.
+     */
+    const opening = markup.slice(markup.indexOf("<ul"), markup.indexOf(">", markup.indexOf("<ul")))
+
+    expect(opening).not.toContain("margin")
+    expect(opening).toContain("padding-inline-start:1.4em")
+    expect(markup).toContain(".loom-list .loom-list")
+  })
+
+  it("drops the indent when the marker is dropped, so a plain run does not hang off nothing", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+    const start = markup.indexOf("list-style-type:none")
+
+    expect(markup.slice(start, start + 120)).toContain("padding-inline-start:0")
+  })
+
+  it("marks a span with the tinted pairing that is measured, and not with the one that fails", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The 22 August contrast finding, avoided rather than rediscovered:
+     * `fg-default` on `accent-subtle` is in `PALETTE_TEXT_PAIRINGS` and clears
+     * 0074's bar everywhere; `accent` on the same ground is the obvious ink for
+     * a tinted panel and does not. A `<mark>` needs both halves set, because
+     * the UA supplies a yellow ground and black ink of its own.
+     */
+    const mark = markup.slice(markup.indexOf("<mark"), markup.indexOf("</mark>"))
+
+    expect(mark).toContain("background:var(--loom-accent-subtle)")
+    expect(mark).toContain("color:var(--loom-fg-default)")
+    expect(mark).not.toContain("color:var(--loom-accent)")
+  })
+
+  it("gives each emphasis the element its meaning already has", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * One content model, three renderings, one enum (0052) — and the element
+     * changes with the enum because importance, stress and relevance are three
+     * things a screen reader distinguishes and a font weight is not.
+     */
+    expect(markup).toMatch(/<em[^>]*font-style:italic/)
+
+    /**
+     * `bolder` rather than `var(--loom-heading-weight)`, which is the mistake
+     * this shipped as and a screenshot caught. `bold-sans` declares
+     * `headingWeight: 400` beside `bodyWeight: 400` — a legitimate pack that
+     * carries emphasis in size and colour — so the heading token renders a
+     * stressed word identically to the words either side of it. A relative
+     * keyword is heavier than whatever it inherits under every pack, including
+     * one nobody has registered yet.
+     */
+    expect(markup).toMatch(/<strong[^>]*font-weight:bolder/)
+    expect(markup).not.toContain("<strong style=\"font-weight:var(--loom-heading-weight)")
+    expect(propsOfType("loom.emphasis")).toEqual(["tone"])
+  })
+
+  it("sets a symbol in monospace inside the sentence, with no panel and no props", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The whole of the lessons finding: a symbol named inside a paragraph. It
+     * is a `<code>` with no `<pre>` anywhere on the page, sized in `em` against
+     * the line it sits in rather than off the ramp, and tinted with the other
+     * measured pairing on `accent-subtle`.
+     */
+    const span = markup.slice(markup.indexOf("<code"), markup.indexOf("</code>"))
+
+    expect(markup).not.toContain("<pre")
+    expect(span).toContain("font-size:0.9em")
+    expect(span).toContain("background:var(--loom-accent-subtle)")
+    expect(span).toContain("color:var(--loom-accent-strong)")
+    expect(span).toContain("var(--loom-mono-family, ui-monospace")
+    expect(propsOfType("loom.code-span")).toEqual([])
+  })
+
+  it("lets a code span wrap rather than widen the aside it is in", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The 20 August scrollbar finding one level in. `white-space:nowrap` was
+     * the tempting mistake — a symbol has no break opportunity inside it and
+     * needs no help, while `pnpm verify` does and would push the panel out.
+     */
+    const span = markup.slice(markup.indexOf("<code"), markup.indexOf("</code>"))
+
+    expect(span).not.toContain("white-space:nowrap")
+    expect(markup).toMatch(/<aside[^>]*min-width:0/)
+  })
+
+  it("makes a callout an aside whose label stays out of the document outline", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * The argument against building this as `loom.card` with `tone: "accent"`.
+     * A card is a `<div>`, and the label would have to be a `loom.heading` to
+     * be bold — which puts "Before you start" into the outline beside the
+     * section titles, so a reader navigating by headings gets a page whose
+     * structure is half furniture. Here it is a fixed field on a paragraph.
+     */
+    const aside = markup.slice(markup.indexOf("<aside"), markup.indexOf("</aside>"))
+
+    expect(aside).toContain("Before you start")
+    expect(aside).not.toMatch(/<h[1-6]/)
+    expect(aside).toContain("border-inline-start:3px solid var(--loom-accent)")
+    expect(propsOfType("loom.callout")).toEqual(["title", "tone"])
+  })
+
+  it("places the marker in its gutter ahead of the content it introduces", () => {
+    const { markup } = render(prosePage(EDITORIAL))
+
+    /**
+     * 0051's test: the callout puts the marker where the flow of children does
+     * not go, so "the first child is the icon" is a rule no schema states and
+     * every `move` breaks. The region is a region because of this ordering.
+     */
+    const aside = markup.slice(markup.indexOf("<aside"), markup.indexOf("</aside>"))
+
+    expect(aside.indexOf("\u2605")).toBeGreaterThan(-1)
+    expect(aside.indexOf("\u2605")).toBeLessThan(aside.indexOf("Before you start"))
+  })
+
+  it("still draws a callout that was given neither a title nor a marker", () => {
+    const { markup, diagnostics } = render(prosePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect([...markup.matchAll(/<aside/g)]).toHaveLength(2)
+    expect(markup).toContain("border-inline-start:3px solid var(--loom-border-strong)")
+  })
+
+  it("renders the same under every palette, with no colour of its own", () => {
+    for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+      const { markup, diagnostics } = render(prosePage(theme))
       const tree = splitStylesheet(markup).tree
       const body = tree.slice(tree.indexOf(">"))
 

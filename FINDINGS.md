@@ -1635,7 +1635,26 @@ share a schema.
 
 ## 2026-08-19 — nothing in the library can say `ChangeInterpreter` inside a sentence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:**
+**closed 23 August** by `primitives-11-the-prose-vocabulary`. The diagnosis was
+exact and the fix is the pair it named: `loom.emphasis` marks a span with three
+renderings on one enum — `<strong>`, `<em>`, `<mark>` — and `loom.code-span` sets
+a symbol in monospace inside the line, tinted `accent-strong` on `accent-subtle`
+so it is neither a key cap nor a badge.
+
+Two things this entry asked about, answered rather than assumed:
+
+- **`loom.prose` needed no change at all.** The finding wondered "whether
+  `loom.prose` should accept element children" — it already does, and always
+  did: a primitive receives `children` as rendered content and the paragraph
+  marks up nothing between them. There was no schema question here, only a
+  missing pair of leaves.
+- **A delta addressing half a sentence** is an ordinary delta. The span is a
+  node, its text is a text node beneath it, and re-authoring the stressed word
+  is a `configure` on that text with its own author, history and inverse — which
+  is exactly what a run of markers stripped in `_lib/text.ts` could never have.
+
+The surface can stop stripping. `**`, `*` and `` ` `` now each have a primitive
 
 The lessons surface renders the course's prose by composing registered
 primitives, as 0067 requires. That works for headings, paragraphs, cards and
@@ -4772,3 +4791,166 @@ one-day horizon.
 the 21 August governance finding said this lane was owed once #129 landed, and it
 is the number this record has. The governance question underneath it is still
 open and still unaddressed by anything here.
+
+---
+
+## 2026-08-23 — a design token guarantees the value comes from the theme, and nothing about it being different from the one beside it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around inside one primitive, and the general shape is not this
+lane's to fix
+
+`loom.emphasis` with `tone: "strong"` was written the way every primitive in
+this library writes a weight — `fontWeight: weight("heading")`, which is
+`var(--loom-heading-weight)`. Every test passed. It rendered **nothing** under
+`bold-sans`, whose font pack declares `headingWeight: 400` beside
+`bodyWeight: 400`.
+
+That pack is not broken. It is a legitimate design — the family carries its
+emphasis in size and colour rather than in weight — and it means a stressed word
+inside a paragraph came out identical to the words on either side of it, under
+one of the three registered packs. **The token was not wrong; it was equal.**
+
+Nothing could have caught it. The markup was correct, the variable was real,
+`0049`'s re-theme guarantee held, and the no-literal-colour assertion this lane
+runs under every palette passed. It was found in the third screenshot.
+
+Fixed here with `fontWeight: "bolder"`, which is relative to the inherited weight
+by definition and is therefore heavier than whatever it is set in under every
+pack, registered or not. That closes the instance and not the class:
+
+- **`fg-muted` on a card whose ground is already `bg-surface-muted`** is the same
+  shape one tier over, and a palette is free to make those two very close.
+- **`accent` as an eyebrow on an `accent-subtle` section** is the shape the
+  22 August contrast finding hit from the other direction, where the failure was
+  measurable. This one is not: two colours can differ by enough to clear AA and
+  still not read as *emphasis*.
+
+`PALETTE_TEXT_PAIRINGS` measures contrast between a foreground and a ground.
+What has no check at all is **difference between two foregrounds a reader is
+meant to tell apart**, or between two grounds. Whether that is worth a check or
+only worth writing down is `Loom daily build`'s call — `src/theme/` is that
+lane's — but the lesson generalises past this library: *a token is a promise
+about provenance, not about contrast.* Worth a sentence in `tokens.ts` at least,
+which is this lane's file and where the next person will look.
+
+---
+
+## 2026-08-23 — a palette has no slot that means danger, so a callout cannot be red
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — not blocking, and deliberately not faked
+
+`loom.callout` ships with two tones, `accent` and `neutral`. Every callout
+system in the world has a third, and this one cannot: `paletteSlotSchema`
+declares four surfaces, four foregrounds, three accents, two brand secondaries
+and four borders, and **none of them means danger, warning or success.**
+
+The workaround is not a hex. A literal red here would be the one thing
+`tokens.ts` exists to make impossible, and it would be worse than it looks: a
+literal survives a re-theme, so a palette designed around red — a warm brand, a
+restaurant, anything — would get a warning tone that vanishes into its own page.
+0049's guarantee is that a re-theme is one `configure` on the root and nothing
+else, and a semantic colour that ignores the palette breaks it silently.
+
+So a caveat is an `accent` callout whose marker and title say what it is, which
+is honest rather than approximate, and this entry exists so the gap is a decision
+somebody made rather than an omission somebody missed.
+
+**What it would take, and the reason it is a decision rather than a patch.**
+Adding `danger`, `warning` and `success` to `paletteSlotSchema` is not three
+slots — it is three slots *plus their subtle grounds and their strong inks*, so
+nine, in **every registered palette**, because 0049 requires every palette to
+declare every slot. Thirty-nine palettes exist. That is a migration, and it also
+asks a design question this lane cannot answer alone: whether a Loom palette is a
+*brand* (in which case semantic status colours do not belong in it and should
+come from somewhere else) or a *complete design system* (in which case they do).
+
+Not urgent. The surfaces that want a warning today are the documentation site and
+the lessons, and an accent callout with the word *Careful* in its title is doing
+the job.
+
+---
+
+## 2026-08-23 — the record-numbering block, hit by a second lane
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 21 August governance entry rather than
+opened as a rival finding
+
+The 21 August finding — *a lane can only have one record-writing pull request
+open at a time* — described the framework lane losing a record. It happened to
+this lane today, in exactly the shape that entry predicts, and it is worth one
+paragraph because the entry's closing sentence was *"the next lane to want two
+records in one run hits the same wall"*.
+
+`0084` is on `primitives-10-the-comparison-band` (#132), still open. This run's
+naming decision wanted `0085`; `pnpm decisions:index` refuses it as a gap, `0084`
+collides, and stacking is forbidden. The record was written in full and then
+deleted.
+
+Nothing is lost — the argument, the alternatives and the rejection are in
+`loom.list-item.ts`'s doc comment, which is where the next person to read the
+primitive will find them, and the precedent for doing that was set the same day
+by `framework-03-what-the-prompt-costs`. But it is the **second** time the wall
+has cost a record in three days, and the first option that entry lists still
+looks right and is still one condition in `tools/decisions/build-index.ts`: a
+missing number on `main` is a record in flight, a repeated number is the real
+error.
+
+One thing this instance adds that the first did not. The framework lane's block
+cleared *by the ordinary passage of time* — #129 merged, and `0083` became free.
+That worked because the lane's own pull request merged quickly. It is not a
+mechanism, and a lane whose pull request waits a week cannot write a record for a
+week.
+
+---
+
+## 2026-08-23 — 21st.dev, blocked for the sixth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 16, 19 and 21 August entries rather than
+opened as a rival finding
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED · Access to 21st.dev is
+blocked by the network egress proxy`. `docs/routines.md` still says, under
+**Network access**, that it is currently allowed as one of "the visual and
+structural references the primitives, marketing and docs briefs tell you to
+consult".
+
+Six runs across four lanes have now spent a call establishing this. The previous
+run in this lane recommended fixing the allowlist **or** dropping the line from
+the brief, and either would end it; recording it a sixth time rather than
+skipping it silently, because a report that omitted it would let a reader assume
+the visual standard was consulted when it was not.
+
+This run was calibrated against `loom.hero`, `loom.code`, `loom.badge` and
+`loom.kbd` instead — the in-repository floor the brief names as its second
+reference, which is a real standard and is not the same standard.
+
+---
+
+## 2026-08-23 — two files in other lanes had to change, and both are counts held against the registry
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs` ·
+**Status:** open — nothing to fix, recorded so each owner knows their file was
+opened
+
+`pnpm verify` is the merge gate for four surfaces, so a primitive run that adds
+to the registry goes red in two other lanes until two numbers move.
+
+- **`apps/loom/app/(marketing)/_lib/copy.ts`** — `FACTS.primitives`, `"50"` →
+  `"55"`, because `facts.test.ts` checks the site's own claim against
+  `catalogueOf(siteRegistry).length`. That check is right and should stay: a
+  marketing page that says "55 primitives" is worth nothing if the number is a
+  guess. The cost is that the claim is a *derived* fact stored as a literal, and
+  every lane that changes the registry pays it. If it becomes tiresome, the fix
+  is to compute it at build rather than to weaken the test.
+- **`apps/loom/app/(docs)/_lib/api/reference.generated.json`** — regenerated with
+  `pnpm --filter @loom/app docs:api`, exactly as its own failure message
+  instructs. Three class names added to `LIBRARY_CLASS` moved the published
+  surface. This is the second time a lane has regenerated it from outside the
+  docs lane; the 21 August entry about that is still the right description and
+  this changes nothing about it.
+
+Neither file's *intent* was touched — no copy rewritten, no generator changed.

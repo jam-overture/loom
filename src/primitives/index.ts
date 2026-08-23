@@ -9,9 +9,12 @@ import { loomAvatar } from "./loom.avatar.js"
 import { loomAvatarRow } from "./loom.avatar-row.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomButton } from "./loom.button.js"
+import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
 import { loomCode } from "./loom.code.js"
+import { loomCodeSpan } from "./loom.code-span.js"
 import { loomDivider } from "./loom.divider.js"
+import { loomEmphasis } from "./loom.emphasis.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
@@ -26,6 +29,8 @@ import { loomIcon } from "./loom.icon.js"
 import { loomKbd } from "./loom.kbd.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
+import { loomList } from "./loom.list.js"
+import { loomListItem } from "./loom.list-item.js"
 import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMedia } from "./loom.media.js"
@@ -143,6 +148,24 @@ import { loomTierTable } from "./loom.tier-table.js"
  * ([0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
  * is the width media query it needs).
  *
+ * **The prose five** are the layer under all of it: what a page is *written*
+ * in, as opposed to what it is built from. Fifty primitives could sell a plan
+ * and prove it with a wall of quotes, and none of them could write three
+ * bullet points or put one word of a sentence in bold — because Hermes had no
+ * such block to port, its lists being fields inside other blocks and its prose
+ * being a string. `loom.list` and `loom.list-item` are the run of points with
+ * no marker meaning attached, which is what separates them from the three
+ * list pairs that came before. `loom.emphasis` and `loom.code-span` are the
+ * two spans a sentence can hold, and together they close the finding `Loom
+ * lessons` filed on 19 August: a course about a codebase names a symbol in
+ * almost every sentence, and until now the surface stripped the markers and
+ * lost the distinction each question turned on. `loom.callout` is the aside a
+ * page steps out of its flow to make — an `<aside>` rather than a `loom.card`,
+ * for reasons about the document outline that its own comment gives. What to
+ * call a pair whose child has no noun of its own is settled by 0062 and 0061
+ * composing, and argued in `loom.list-item`'s comment rather than in a record,
+ * for the numbering reason that comment ends on.
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -189,7 +212,12 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomLinkList,
   loomHeading,
   loomProse,
+  loomList,
+  loomListItem,
+  loomCallout,
   loomCode,
+  loomCodeSpan,
+  loomEmphasis,
   loomBadge,
   loomIcon,
   loomAvatar,
@@ -225,9 +253,12 @@ export {
   loomAvatarRow,
   loomBadge,
   loomButton,
+  loomCallout,
   loomCard,
   loomCode,
+  loomCodeSpan,
   loomDivider,
+  loomEmphasis,
   loomFaq,
   loomFaqList,
   loomFeature,
@@ -242,6 +273,8 @@ export {
   loomKbd,
   loomLink,
   loomLinkList,
+  loomList,
+  loomListItem,
   loomLogo,
   loomLogoCloud,
   loomMedia,

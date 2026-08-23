@@ -106,6 +106,17 @@ export const LIBRARY_CLASS = {
    * card's, which is a hair off and the honest limit of a static stylesheet.
    */
   cluster: "loom-cluster",
+  /**
+   * A `loom.list`: its markers take the accent, and its rows carry the gap
+   * between them. Both are here rather than inline because neither is
+   * expressible on the element that needs it — `::marker` is a pseudo-element,
+   * and a row's gap is a fact about the *list* that only the row can apply.
+   */
+  list: "loom-list",
+  /** The same list set tight — points to scan rather than points to read. */
+  listTight: "loom-list-tight",
+  /** The same list set loose, for rows that are a sentence each. */
+  listLoose: "loom-list-loose",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -252,6 +263,24 @@ details[open] > summary .loom-marker {
 }
 .loom-cluster > * {
   box-shadow: 0 0 0 2px var(--loom-bg-canvas);
+}
+.loom-list {
+  margin: 0;
+}
+.loom-list > li::marker {
+  color: var(--loom-accent);
+}
+.loom-list > li + li {
+  margin-block-start: var(--loom-spacing-2);
+}
+.loom-list-tight > li + li {
+  margin-block-start: var(--loom-spacing-1);
+}
+.loom-list-loose > li + li {
+  margin-block-start: var(--loom-spacing-4);
+}
+.loom-list .loom-list {
+  margin-block-start: var(--loom-spacing-2);
 }
 .loom-mosaic {
   display: grid;
