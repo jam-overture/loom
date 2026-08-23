@@ -21,7 +21,23 @@
  * is misspelled or a package that is not installed is a failing test rather
  * than a page that quietly loses its tables again.
  */
-export const docsRemarkPlugins = [["remark-gfm", {}]] as const satisfies readonly (readonly [
-  string,
-  Record<string, unknown>,
-])[]
+type PluginList = readonly (readonly [string, Record<string, unknown>])[]
+
+export const docsRemarkPlugins = [["remark-gfm", {}]] as const satisfies PluginList
+
+/**
+ * What happens to the tree after the markdown is parsed.
+ *
+ * One entry, and it exists so that **a heading is a place you can be sent to**.
+ * `rehype-slug` gives every heading on the site an `id` derived from its own
+ * words, which is what turns a search result into a link that lands on the
+ * paragraph rather than at the top of a page the reader then has to scan.
+ *
+ * The ids it mints are the ones GitHub mints, so they are the ids a reader
+ * already expects from every other markdown page they have ever linked into.
+ * The site computes the same ids independently when it builds its search index,
+ * and `search/anchor.test.ts` compiles every real heading through this list and
+ * asserts the two agree — because two slug algorithms that drift produce links
+ * that are silently, unfixably wrong.
+ */
+export const docsRehypePlugins = [["rehype-slug", {}]] as const satisfies PluginList
