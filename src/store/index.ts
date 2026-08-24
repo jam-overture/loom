@@ -6,6 +6,7 @@
  */
 
 export * from "./attribution.js"
+export * from "./driver.js"
 export * from "./errors.js"
 export * from "./memory.js"
 export * from "./replay.js"

@@ -2,7 +2,7 @@ import nextEnv from "@next/env"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import { ensureTreeStoreSchema } from "@loom/runtime/postgres"
+import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@loom/runtime/postgres"
 import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
 
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
@@ -49,11 +49,17 @@ const client = postgres(connectionString, { prepare: false, max: 1 })
 try {
   const db = drizzle(client)
   await ensureTreeStoreSchema(db)
+  /**
+   * The custody of what the Gate held back. Created here rather than when the
+   * portal first needs it, because a hold that cannot be written is a change a
+   * reviewer never sees — a failure with no symptom on the page that caused it.
+   */
+  await ensureHoldStoreSchema(db)
   await ensureTelemetrySchema(db)
   /** The portal's own table, not the runtime's — see `lib/auth/attempts-postgres.ts`. */
   await ensureSignInAttemptsSchema(db)
   console.log(
-    "loom: loom_trees, loom_revisions, loom_telemetry and loom_signin_attempts are present"
+    "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry and loom_signin_attempts are present"
   )
 } finally {
   await client.end()

@@ -113,9 +113,9 @@ const palette: DemoPreset = {
  */
 const backdrop: DemoPreset = {
   id: "backdrop",
-  utterance: "Swap the hero's backdrop for the other one.",
-  label: "Swap the hero backdrop",
-  promise: "The band at the top repaints. Nothing else moves.",
+  utterance: "Repaint the band at the top.",
+  label: "Repaint the top band",
+  promise: "The band behind the headline repaints. Nothing else moves.",
   rationale:
     "The hero's backdrop is one enum prop. Changing it re-paints the band without replacing the hero or any of its copy, and the motion is not reachable from the tree at all.",
   plan: (tree) => {
@@ -128,16 +128,31 @@ const backdrop: DemoPreset = {
   },
 }
 
+/**
+ * What gets added, and it no longer talks about itself.
+ *
+ * It used to read *"This band did not exist a moment ago — it arrived as an
+ * insert against the page root, was weighed by the Gate, and appended a
+ * revision."* That was the page narrating the runtime, which is the one job on
+ * this surface the page does not have: the rail records what happened and the
+ * spotlight rings the new band in green and labels it *New — just added*, forty
+ * pixels from the visitor's cursor. Saying it a third time, in the specimen's
+ * own voice, cost the fiction and taught nothing the mark had not already
+ * taught.
+ *
+ * So it is what a clinic would actually have asked for and be missing: the
+ * address and the hours.
+ */
 const bandNode = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.section",
-    props: { tone: "surface", width: "readable", eyebrow: "Added by a proposal" },
+    props: { tone: "surface", width: "readable", eyebrow: "Opening hours" },
     children: [
       buildSlot(ids, "heading", [
         buildElement(ids, {
           type: "loom.heading",
           props: { level: 2 },
-          children: [buildText(ids, "This band did not exist a moment ago")],
+          children: [buildText(ids, "Where to find us")],
         }),
       ]),
       buildElement(ids, {
@@ -146,7 +161,7 @@ const bandNode = (ids: IdFactory): LoomNode =>
         children: [
           buildText(
             ids,
-            "It arrived as an insert against the page root, was weighed by the Gate, and appended a revision. Undo puts the page back."
+            "14 Harbourline Walk, Southbank. Monday to Friday, 7am until 8pm; Saturdays, 8am until 2pm. Two minutes from the station, and there is parking behind the building."
           ),
         ],
       }),
@@ -156,9 +171,9 @@ const bandNode = (ids: IdFactory): LoomNode =>
 /** Structural, and near the root — which is exactly what the Gate escalates. */
 const band: DemoPreset = {
   id: "band",
-  utterance: "Add a new band near the bottom of the page.",
-  label: "Insert a section",
-  promise: "A section that was not there appears near the bottom.",
+  utterance: "Add a section with our address and opening hours.",
+  label: "Add the opening hours",
+  promise: "A section with the address and the hours appears near the bottom.",
   rationale:
     "Adds one section, with its heading and a line of copy, as a child of the page root. Everything already on the page keeps its node id and its position relative to the others.",
   plan: (tree, ids) => {
@@ -172,8 +187,8 @@ const band: DemoPreset = {
 const trim: DemoPreset = {
   id: "trim",
   utterance: "Take the numbers band off the page.",
-  label: "Remove the stats",
-  promise: "The three figures come off the page.",
+  label: "Take the numbers off",
+  promise: "The appointments, the years and the waiting time come off the page.",
   rationale:
     "Removes the stat grid and the three figures inside it. The inverse delta carries the whole subtree, so undoing this restores every node with the id it had.",
   plan: (tree) => {
@@ -190,9 +205,9 @@ const trim: DemoPreset = {
  */
 const promote: DemoPreset = {
   id: "promote",
-  utterance: "Move the quote up, just under the hero.",
-  label: "Move the quote up",
-  promise: "The quote jumps to just under the opening band.",
+  utterance: "Move the patient's words up, just under the top band.",
+  label: "Move the testimonial up",
+  promise: "The patient's words jump to just under the opening band.",
   rationale:
     "Relocates the quote to the second position on the page. It is a move, not a delete and a re-insert, so the node keeps its identity and its history.",
   plan: (tree) => {

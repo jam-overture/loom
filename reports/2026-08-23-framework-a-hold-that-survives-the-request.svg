@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" width="760" height="470" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <rect width="760" height="470" fill="#ffffff"/>
+
+  <text x="40" y="44" font-size="19" font-weight="600" fill="#111827">The human who answers arrives later, and on a serverless host so does the machine</text>
+  <text x="40" y="68" font-size="13" fill="#6b7280">Two requests, minutes apart. The Gate held the change in the first; the reviewer answers it in the second.</text>
+
+  <!-- column headings -->
+  <text x="250" y="104" font-size="11" font-weight="600" fill="#9ca3af" text-anchor="middle" letter-spacing="1.2">REQUEST 1 — THE GATE HOLDS IT</text>
+  <text x="600" y="104" font-size="11" font-weight="600" fill="#9ca3af" text-anchor="middle" letter-spacing="1.2">REQUEST 2 — THE REVIEWER CONFIRMS</text>
+
+  <!-- ============ row 1: memoryHoldStore ============ -->
+  <text x="126" y="152" font-size="13" font-weight="600" fill="#374151" text-anchor="end">memoryHoldStore</text>
+  <text x="126" y="171" font-size="11" fill="#9ca3af" text-anchor="end">a Map in the process</text>
+
+  <rect x="150" y="122" width="200" height="88" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="250" y="148" font-size="12" font-weight="600" fill="#374151" text-anchor="middle">instance A</text>
+  <text x="250" y="169" font-size="11.5" fill="#6b7280" text-anchor="middle">holds p_7 in memory</text>
+  <text x="250" y="187" font-size="11.5" fill="#6b7280" text-anchor="middle">responds “needs your yes”</text>
+
+  <!-- the gap -->
+  <path d="M 358 166 L 442 166" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="400" y="150" font-size="10.5" font-weight="600" fill="#9ca3af" text-anchor="middle">instance A</text>
+  <text x="400" y="186" font-size="10.5" font-weight="600" fill="#9ca3af" text-anchor="middle">is gone</text>
+
+  <rect x="450" y="122" width="200" height="88" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="550" y="148" font-size="12" font-weight="600" fill="#991b1b" text-anchor="middle">instance B</text>
+  <text x="550" y="169" font-size="11.5" fill="#b91c1c" text-anchor="middle">its Map is empty</text>
+  <text x="550" y="187" font-size="11.5" font-weight="600" fill="#dc2626" text-anchor="middle">not-held</text>
+
+  <text x="670" y="160" font-size="11" fill="#b91c1c">reads as</text>
+  <text x="670" y="176" font-size="11" fill="#b91c1c">“already</text>
+  <text x="670" y="192" font-size="11" fill="#b91c1c">answered”</text>
+
+  <!-- ============ row 2: postgresHoldStore ============ -->
+  <text x="126" y="284" font-size="13" font-weight="600" fill="#374151" text-anchor="end">postgresHoldStore</text>
+  <text x="126" y="303" font-size="11" fill="#9ca3af" text-anchor="end">a row in loom_holds</text>
+
+  <rect x="150" y="254" width="200" height="88" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="250" y="280" font-size="12" font-weight="600" fill="#374151" text-anchor="middle">instance A</text>
+  <text x="250" y="301" font-size="11.5" fill="#6b7280" text-anchor="middle">INSERT p_7</text>
+  <text x="250" y="319" font-size="11.5" fill="#6b7280" text-anchor="middle">responds “needs your yes”</text>
+
+  <path d="M 358 298 L 442 298" stroke="#a7f3d0" stroke-width="1.5"/>
+  <text x="400" y="288" font-size="10.5" font-weight="600" fill="#059669" text-anchor="middle">the row</text>
+  <text x="400" y="318" font-size="10.5" font-weight="600" fill="#059669" text-anchor="middle">outlives both</text>
+
+  <rect x="450" y="254" width="200" height="88" rx="8" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="550" y="280" font-size="12" font-weight="600" fill="#065f46" text-anchor="middle">instance B</text>
+  <text x="550" y="301" font-size="11.5" fill="#047857" text-anchor="middle">DELETE … RETURNING</text>
+  <text x="550" y="319" font-size="11.5" font-weight="600" fill="#059669" text-anchor="middle">the change applies</text>
+
+  <!-- ============ the race note ============ -->
+  <rect x="150" y="374" width="500" height="66" rx="8" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="172" y="399" font-size="12" font-weight="600" fill="#92400e">Why one statement and not two</text>
+  <text x="172" y="419" font-size="11.5" fill="#b45309">A select-then-delete lets two reviewers pressing confirm at the same moment both come</text>
+  <text x="172" y="434" font-size="11.5" fill="#b45309">away holding p_7 — and both apply it. The Map got that from being single-threaded.</text>
+
+  <text x="40" y="462" font-size="10.5" fill="#9ca3af">0088 · release is a take, not a read · both stores now run one contract suite</text>
+</svg>

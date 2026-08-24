@@ -53,3 +53,33 @@ export const loomRevisions = pgTable(
   },
   (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
 )
+
+/**
+ * The custody of what the Gate held back.
+ *
+ * A third table rather than a column on either of the two above, because a hold
+ * is not a revision: 0016 makes a revision the count of the log's entries, so a
+ * row for a change that advanced nothing would break the invariant the snapshot
+ * is checked against. `held.ts` says the same thing from the other side.
+ *
+ * `intent`, `proposal` and `disposition` are stored whole, for the reason
+ * `loom_revisions.delta` is: they are Zod-validated shapes owned by §2 and §3,
+ * and columns would duplicate those definitions and drift from them. It also
+ * keeps the promise the interface makes — a confirmation can be *re-judged*,
+ * which needs the proposal as it was, not a reconstruction of it.
+ *
+ * `held_at` is text rather than a timestamp to match `loom_revisions.applied_at`
+ * and, more to the point, to match what the in-memory store sorts on: an
+ * ISO-8601 UTC instant orders lexicographically exactly as it orders in time, so
+ * both implementations read a queue oldest-first by the same comparison rather
+ * than by two that happen to agree.
+ */
+export const loomHolds = pgTable("loom_holds", {
+  proposalId: text("proposal_id").primaryKey(),
+  treeId: text("tree_id").notNull(),
+  baseRevision: integer("base_revision").notNull(),
+  intent: jsonb("intent").notNull(),
+  proposal: jsonb("proposal").notNull(),
+  disposition: jsonb("disposition").notNull(),
+  heldAt: text("held_at").notNull(),
+})

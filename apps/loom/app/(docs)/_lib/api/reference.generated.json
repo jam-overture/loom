@@ -2118,11 +2118,25 @@
               "summary": "WCAG AA for body text — the bar this module holds every text slot to."
             },
             {
+              "name": "PALETTE_TEXT_GROUNDS",
+              "kind": "value",
+              "signature": "const PALETTE_TEXT_GROUNDS: readonly PaletteSlot[]",
+              "truncated": false,
+              "summary": "The grounds every ink in the text ramp has to be readable on."
+            },
+            {
+              "name": "PairingBasis",
+              "kind": "type",
+              "signature": "type PairingBasis = \"painted\" | \"composed\";",
+              "truncated": false,
+              "summary": "How a pairing comes about, which decides what a failure means."
+            },
+            {
               "name": "TextPairing",
               "kind": "type",
-              "signature": "type TextPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    /** Where it happens, so a failure names a page rather than two slot ids. */\n    readonly where: string;\n};",
+              "signature": "type TextPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    readonly basis: PairingBasis;\n    /** Where it happens, so a failure names a page rather than two slot ids. */\n    readonly where: string;\n};",
               "truncated": false,
-              "summary": "A foreground slot read on a background slot, and the primitives that put them together."
+              "summary": "A foreground slot read on a background slot, and where they meet."
             },
             {
               "name": "PALETTE_TEXT_PAIRINGS",
@@ -2155,14 +2169,14 @@
             {
               "name": "PaletteAudit",
               "kind": "type",
-              "signature": "type PaletteAudit = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPairing[];\n    /** Measured and under the bar. The list a host asserts empty. */\n    readonly failures: readonly MeasuredPairing[];\n    /**\n     * Neither a pass nor a failure. Separate from `failures` for the reason\n     * `notProbeable` is separate in the registry audit: a host that wants the\n     * guarantee asserts both empty, and a host whose palette is written in `hsl()`\n     * can tell \"unreadable\" from \"unmeasurable\".\n     */\n    readonly unmeasured: readonly UnmeasuredPairing[];\n};",
+              "signature": "type PaletteAudit = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPairing[];\n    /**\n     * Measured, `painted`, and under the bar. The list a host asserts empty.\n     *\n     * Painted only, because a painted failure is a page nobody can read and no\n     * tree can avoid it — both ends are one primitive's own. That is a defect in\n     * the palette with one fix, and asserting it empty is a promise a palette can\n     * keep.\n     */\n    readonly failures: readonly MeasuredPairing[];\n    /**\n     * Measured, `composed`, and under the bar — reported rather than asserted.\n     *\n     * The split is not a softer bar for the same fault, and it is worth being\n     * plain about why, because a second list is exactly where an inconvenient\n     * failure would go to be forgotten.\n     *\n     * A composed pairing needs a tree that puts the two together. It is reachable\n     * — `loom.perk` inside a `loom.section tone=\"accent\"` is an ordinary page —\n     * but whether a given deployment reaches it depends on trees nobody has\n     * written yet, and the fix is not always the palette's: an ink that fails on\n     * one ground and clears the other three may be a panel that wants moving.\n     * Loom measures and reports, and imposing is the host's call — the bargain\n     * the contrast bar already makes, applied here one level in.\n     *\n     * What keeps it honest is that nothing may be *demoted* into it. A pairing\n     * any primitive paints is `painted` in the declared list whatever else also\n     * composes it, and `library.test.ts` fails if the declared basis is softer\n     * than the derivation's.\n     */\n    readonly composedFailures: readonly MeasuredPairing[];\n    /**\n     * Neither a pass nor a failure. Separate from `failures` for the reason\n     * `notProbeable` is separate in the registry audit: a host that wants the\n     * guarantee asserts both empty, and a host whose palette is written in `hsl()`\n     * can tell \"unreadable\" from \"unmeasurable\".\n     */\n    readonly unmeasured: readonly UnmeasuredPairing[];\n};",
               "truncated": false,
               "summary": "What the bar found in one palette: what was measured, what failed, what could not be."
             },
             {
               "name": "auditPalette",
               "kind": "function",
-              "signature": "const auditPalette: (palette: Palette) => PaletteAudit",
+              "signature": "const auditPalette: (palette: Palette, pairings?: readonly TextPairing[]) => PaletteAudit",
               "truncated": false,
               "summary": "Measures every pairing the primitives render, in one palette. Refuses nothing."
             },
@@ -4948,6 +4962,48 @@
           ]
         },
         {
+          "module": "primitives/loom.table",
+          "title": "loom.table",
+          "summary": "Rows and columns of whatever it is given — the ordinary table a document is written with.",
+          "symbols": [
+            {
+              "name": "loomTable",
+              "kind": "value",
+              "signature": "const loomTable: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.table-cell",
+          "title": "loom.table-cell",
+          "summary": "One cell of a `loom.table` — a value, a label, or a sentence.",
+          "symbols": [
+            {
+              "name": "loomTableCell",
+              "kind": "value",
+              "signature": "const loomTableCell: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.table-row",
+          "title": "loom.table-row",
+          "summary": "One row of a `loom.table` — its cells, and nothing else.",
+          "symbols": [
+            {
+              "name": "loomTableRow",
+              "kind": "value",
+              "signature": "const loomTableRow: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.tier",
           "title": "loom.tier",
           "summary": "One plan: what it is called, what it costs, what it gets you, and the one thing it asks you to do.",
@@ -4997,8 +5053,8 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent, and its rows carry the gap\n     * between them. Both are here rather than inline because neither is\n     * expressible on the element that needs it — `::marker` is a pseudo-element,\n     * and a row's gap is a fact about the *list* that only the row can apply.\n     */\n    readonly list: \"loom-list\";\n    /** The same list set tight — points to scan rather than points to read. */\n    readonly listTight: \"loom-list-tight\";\n    /** The same list set loose, for rows that are a sentence each. */\n    readonly listLoose: \"loom-list-loose\";\n    /** A `loom.mosaic`: one column until there is room for six. */\n    readonly mosaic: \"loom-mosaic\";\n    /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */\n    readonly mosaicAlternating: \"loom-mosaic-alternating\";\n    readonly mosaicShowcase: \"loom-mosaic-showcase\";\n    readonly mosaicLead: \"loom-mosaic-lead\";\n}",
-              "truncated": false,
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent, and its rows carry the gap\n     * between them. Both are here rather than inline because neither is\n     * expressible on the element that needs it — `::marker` is a pseudo-element,\n     * and a row's gap is a fact about the *list* that only the row can apply.\n     */\n    readonly list: \"loom-list\";\n    /** The same list set tight — points to scan rather than points to read. */\n    readonly listTight: \"loom-list-tight\";\n    /** The same list set loose, for rows that are a sentence each. */\n    readonly listLoose: \"loom-list-loose\";\n    /**\n     * A `loom.table`: the padding its cells share, and the rules between its\n     * rows. Both are the *table's* decisions applied to cells it does not render,\n     * which is the one thing an inline style cannot reach.\n     */\n    readonly table: \"loom-table\";\n    /** The same table drawn as a bordered surface, which is what makes its heading column stick. */\n    readonly tablePanel: \"loom-table-panel\";\n    /** The same table set tight — a spec to scan — and set loose, a page to read. */\n    readonly tableTight: \"loom-table-tight\";\n    readonly tableLoose: \"loom-table-loose\";\n    /** Vertical rules as well as horizontal ones, and no rules at all. */\n    readonly tableGrid: \"loom-table-grid\";\n    readonly tableFlush: \"loom-table-flush\";\n    /** One `loom.table-row`, so the whole row can answer a pointer. */\n    readonly tableRow: \"loom-table-row\";\n    /** A row the page is pointing at, whi\n…",
+              "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
             {
@@ -5083,7 +5139,7 @@
               "kind": "value",
               "signature": "const MONOSPACE_STACK = \"ui-monospace, SFMono-Regular, Menlo, Consolas, \\\"Liberation Mono\\\", monospace\"",
               "truncated": false,
-              "summary": "The one family in this library that a font pack does not supply."
+              "summary": "The fallback for the one family a font pack is allowed not to supply."
             },
             {
               "name": "monospace",
@@ -5259,6 +5315,27 @@
               "signature": "const probeSubmissionPlacement: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly JsonObject[]) => SubmissionVerdict",
               "truncated": false,
               "summary": "`some` rather than `every`, matching `probePlacement`. The question is whether this primitive posts at all, and a primitive that renders a form under one layout and a summary under another is answering honestly in both."
+            },
+            {
+              "name": "ColourPairing",
+              "kind": "type",
+              "signature": "type ColourPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n};",
+              "truncated": false,
+              "summary": "The fourth probe: which colours does this primitive put on which grounds?"
+            },
+            {
+              "name": "ColourVerdict",
+              "kind": "type",
+              "signature": "type ColourVerdict = {\n    readonly outcome: \"probed\";\n    /** Ink and ground both set by this primitive. */\n    readonly painted: readonly ColourPairing[];\n    /** Ink set here, ground left to whatever this is placed in. */\n    readonly floating: readonly PaletteSlot[];\n    /** Grounds this primitive puts its declared children and slots on. */\n    readonly childGrounds: readonly PaletteSlot[];\n} | {\n    readonly outcome: \"not-probeable\";\n    readonly reason: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "probeColourPairings",
+              "kind": "function",
+              "signature": "const probeColourPairings: (primitive: LoomPrimitive, declaredSlots?: readonly string[], text?: PrimitiveText<string>, configurations?: readonly JsonObject[]) => ColourVerdict",
+              "truncated": false,
+              "summary": "The union across every configuration, rather than the intersection the decoration probe takes. Decoration is a promise that has to hold however the primitive is configured; a colour pairing is a fact about one configuration, and a `loom.section` that paints `accent-subtle` only under `tone: \"accent\"` renders that pairing on a real page whatever the other tones do."
             }
           ]
         },
@@ -5301,6 +5378,48 @@
               "signature": "const interactiveTypesFor: (registry: PrimitiveRegistry) => InteractiveTypes",
               "truncated": false,
               "summary": "A registry's interactivity declarations, in the shape a Gate policy takes."
+            }
+          ]
+        },
+        {
+          "module": "sdk/pairings",
+          "title": "Pairings",
+          "summary": "Every foreground-on-background a registry can put on a page, read off the components rather than listed by hand.",
+          "symbols": [
+            {
+              "name": "PairingBasis",
+              "kind": "type",
+              "signature": "type PairingBasis = \"painted\" | \"composed\";",
+              "truncated": false,
+              "summary": "Whether one primitive set both ends of a pairing, or only the ink."
+            },
+            {
+              "name": "DerivedPairing",
+              "kind": "type",
+              "signature": "type DerivedPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    readonly basis: PairingBasis;\n    /** The primitives that produce it, so a failure names components rather than two slot ids. */\n    readonly types: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "One foreground-on-background the library can put on a page, and what produces it."
+            },
+            {
+              "name": "ChildGround",
+              "kind": "type",
+              "signature": "type ChildGround = {\n    readonly ground: PaletteSlot;\n    readonly types: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "A ground a primitive puts its declared children and slots on."
+            },
+            {
+              "name": "RegistryPairings",
+              "kind": "type",
+              "signature": "type RegistryPairings = {\n    readonly pairings: readonly DerivedPairing[];\n    /** Inks a primitive sets without painting a ground of its own. */\n    readonly floating: readonly PaletteSlot[];\n    /** Every ground a primitive places children on, whether or not the ramp is held to it. */\n    readonly childGrounds: readonly ChildGround[];\n    /**\n     * Grounds children land on that the text ramp is not held to. Not a failure:\n     * `accent` is here because `loom.action` fills it and answers the ink itself.\n     * It is reported because a *new* ground appearing here is the signal that\n     * either a primitive is painting somewhere unconsidered or the declared list\n     * has fallen behind the library — the same drift this module exists to catch,\n     * one level up.\n     */\n    readonly groundsOutsideTheRamp: readonly ChildGround[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "What a registry's components paint, as the contrast bar needs to hear it."
+            },
+            {
+              "name": "registryPairings",
+              "kind": "function",
+              "signature": "const registryPairings: (registry: PrimitiveRegistry, textGrounds: readonly PaletteSlot[]) => RegistryPairings",
+              "truncated": false,
+              "summary": "Probes every primitive in a registry and assembles what they paint."
             }
           ]
         },
@@ -5683,6 +5802,27 @@
           ]
         },
         {
+          "module": "store/driver",
+          "title": "Driver",
+          "summary": "The two things every Postgres-backed store has to do with a driver's error.",
+          "symbols": [
+            {
+              "name": "isUniqueViolation",
+              "kind": "function",
+              "signature": "const isUniqueViolation: (cause: unknown) => boolean",
+              "truncated": false,
+              "summary": "Postgres reports a primary-key collision as SQLSTATE 23505, but Drizzle wraps the driver's error, so the code sits somewhere down the `cause` chain rather than on the error that was thrown. Walking the chain is what makes this work across drivers instead of against whichever one was tested first."
+            },
+            {
+              "name": "unavailable",
+              "kind": "function",
+              "signature": "const unavailable: (cause: unknown, detail: string) => {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n}",
+              "truncated": false,
+              "summary": "An outage, said in terms of what was being attempted."
+            }
+          ]
+        },
+        {
           "module": "store/errors",
           "title": "Errors",
           "summary": "What persistence can refuse, and how to say it.",
@@ -6045,6 +6185,13 @@
               "summary": ""
             },
             {
+              "name": "heldProposalSchema",
+              "kind": "schema",
+              "signature": "const heldProposalSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": "The same shape, as something a stored row can be checked against."
+            },
+            {
               "name": "HoldError",
               "kind": "type",
               "signature": "type HoldError = \n/** Nothing under this id: never held, already answered, or expired. */\n{\n    readonly code: \"not-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"already-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
@@ -6057,6 +6204,13 @@
               "signature": "const describeHoldError: (error: HoldError) => string",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "parseHeldProposal",
+              "kind": "function",
+              "signature": "const parseHeldProposal: (row: unknown) => Result<HeldProposal, HoldError>",
+              "truncated": false,
+              "summary": "Reads a hold back out of storage, or says why it could not."
             },
             {
               "name": "HoldStore",
@@ -6164,11 +6318,25 @@
               "summary": "The schema, as statements a host can run."
             },
             {
+              "name": "HOLD_STORE_DDL",
+              "kind": "value",
+              "signature": "const HOLD_STORE_DDL: readonly string[]",
+              "truncated": false,
+              "summary": "The hold store's schema, as statements a host can run."
+            },
+            {
               "name": "ensureTreeStoreSchema",
               "kind": "function",
               "signature": "const ensureTreeStoreSchema: (db: LoomDatabase) => Promise<void>",
               "truncated": false,
               "summary": "Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so running it against a populated database is a no-op rather than a hazard."
+            },
+            {
+              "name": "ensureHoldStoreSchema",
+              "kind": "function",
+              "signature": "const ensureHoldStoreSchema: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Creates the hold table if it is absent. Idempotent on the same terms."
             }
           ]
         },
@@ -6181,6 +6349,20 @@
               "name": "postgresTreeStore",
               "kind": "function",
               "signature": "const postgresTreeStore: (db: LoomDatabase) => TreeStore",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "store/postgres-holds",
+          "title": "Postgres holds",
+          "summary": "Custody of held proposals, backed by Postgres.",
+          "symbols": [
+            {
+              "name": "postgresHoldStore",
+              "kind": "function",
+              "signature": "const postgresHoldStore: (db: LoomDatabase) => HoldStore",
               "truncated": false,
               "summary": ""
             }
@@ -6204,6 +6386,13 @@
               "signature": "const loomRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_revisions\";\n    schema: undefined;\n    columns: {\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        delta: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"delta\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        provenance: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"provenance\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        appliedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"applied_at\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        answeredBy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"answered_by\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The log. The composite primary key is load-bearing rather than incidental: it makes the *database* enforce the revision sequence, so two writers racing at the same base revision cannot both commit even if both passed the base-revision check before either finished. The in-memory store gets that property from being single-threaded; here it has to come from a constraint."
+            },
+            {
+              "name": "loomHolds",
+              "kind": "value",
+              "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "truncated": false,
+              "summary": "The custody of what the Gate held back."
             }
           ]
         }

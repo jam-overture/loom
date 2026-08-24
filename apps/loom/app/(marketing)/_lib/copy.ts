@@ -20,9 +20,9 @@
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
-  primitives: "58",
+  primitives: "61",
   /** Numbered records in `decisions/`, README excluded. */
-  decisions: "87",
+  decisions: "89",
   /** Delta operations. The whole vocabulary of structural change. */
   operations: "4",
 } as const

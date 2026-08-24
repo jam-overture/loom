@@ -58,6 +58,9 @@ import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
+import { loomTable } from "./loom.table.js"
+import { loomTableCell } from "./loom.table-cell.js"
+import { loomTableRow } from "./loom.table-row.js"
 import { loomTier } from "./loom.tier.js"
 import { loomTierTable } from "./loom.tier-table.js"
 
@@ -164,6 +167,20 @@ import { loomTierTable } from "./loom.tier-table.js"
  * value *is* its markup. `feature` names a column by position rather than by
  * id, which is the whole of
  * [0084](../../decisions/0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md).
+ *
+ * **The table three** are the general case of that band, and they are
+ * registered after it on purpose: a model reading down this list meets
+ * `loom.tier-table` and `loom.comparison-table` before it has any reason to
+ * reach for `loom.table`, which is the order 0062 wants a named band and its
+ * general arranger considered in. What separates them is what a cell may hold —
+ * a tier is a plan and a comparison is one of three verdicts, and a
+ * `loom.table-cell` is whatever the tree puts in it. That is the table a course,
+ * a changelog or a spec sheet is written with, and `Loom lessons` filed its
+ * absence on 22 August after degrading thirteen lessons' tables into one card
+ * per row. Rows are still nodes and columns are still positions (0084); the
+ * heading of a *row* is a cell with `role` set rather than a prop on the row,
+ * because a general table may have two heading columns or none.
+ *
  * **The prose five** are the layer under all of it: what a page is *written*
  * in, as opposed to what it is built from. Fifty primitives could sell a plan
  * and prove it with a wall of quotes, and none of them could write three
@@ -211,6 +228,9 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomComparisonTable,
   loomComparisonRow,
   loomComparison,
+  loomTable,
+  loomTableRow,
+  loomTableCell,
   loomProductGrid,
   loomProduct,
   loomQuoteGrid,
@@ -321,6 +341,9 @@ export {
   loomStack,
   loomStat,
   loomStatGrid,
+  loomTable,
+  loomTableCell,
+  loomTableRow,
   loomTier,
   loomTierTable,
 }
