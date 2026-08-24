@@ -5352,7 +5352,8 @@ alternative is a red PR.
 
 ## 2026-08-22 — the demo has no way out of it, and the front door now sends four streams of people in
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** **closed by
+#146** — both links built, as recommended and for the reason given
 
 Found by grepping the route group for anchors before linking to it, which is a
 thing worth doing before pointing a front door at somewhere.
@@ -5764,6 +5765,21 @@ point.
 
 Fixed here by `git commit --amend --reset-author` and a force-push, before any
 review existed to disturb.
+
+**Second instance, `Loom demo`, 23 August (#146).** Same failure, same cause,
+same fix. Worth adding rather than filing again, because *how* it happened is
+the part this entry cannot yet warn about: the identity was not set to something
+descriptive on purpose. It came from following the harness's standing
+instruction to attribute work to the maintainer — an instruction which is right
+everywhere except here, where the address it produces resolves to a GitHub
+account that is not on the Vercel team. So the trap is not carelessness; it is
+two correct-looking rules pointing opposite ways, and the one that loses is the
+one whose failure is silent.
+
+The symptom was again invisible from inside the run: `pnpm verify` green, branch
+pushed, pull request opened, comment posted. The only signal was a bot comment
+naming a person to add to a team, which arrived *after* the run had reported
+itself finished.
 
 ---
 
@@ -6476,3 +6492,159 @@ can diff; or have the routine commit an index page of the run's visuals to
 Recorded now because it will recur on every visual lane's next pull request, and
 because a broken embed is indistinguishable from a routine that forgot the
 screenshot — which is the more damaging reading, and the wrong one.
+
+---
+
+## 2026-08-23 — the demo's specimen page was Loom's own marketing page, and that was the clunk
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+#146 — recorded because the diagnosis outlives the fix, and because the property
+it establishes is one nobody can see rotting
+
+The maintainer's verdict on 20 August was that the demo *"doesn't really make
+sense and is clunky"*. Two runs have answered parts of that — the move to a
+public `/demo`, one primary action instead of five grey pills, a mark on the band
+a change is about. This is the part neither of them looked at, because it was not
+in the rail: **the page on the stage.**
+
+Every band of it was about Loom. The hero read *"Your AI can change this page.
+You can see exactly what it changed."*; the logo cloud was *Proposals · The Gate ·
+Revisions · Telemetry*; the six features were *"A model emits a delta against the
+tree it was shown"* and five more like it; the three figures were **4 delta
+operations**, **2 axes the Gate weighs**, **0 lines of markup in this page**; the
+pull quote cited a decision record by number; the closing button went to the
+README. Two failures follow and they are the whole of the complaint:
+
+- **The jargon was the wallpaper.** The direction for this surface is that plain
+  language is the default and the technical record is one click away. The rail
+  obeys it. The page *behind* the rail printed *delta*, *the Gate*, *primitive*
+  and *revision* unbidden, at sixty pixels, before a visitor had pressed
+  anything. A stranger's first screen was the technical record, and their second
+  screen — one scroll — was more of it.
+- **Nothing was at stake, so the Gate had nothing to be for.** Holding a change
+  to a page about delta operations demonstrates a mechanism to somebody who
+  already wants one. Nobody minds if a footnote about delta operations
+  disappears. `docs/rollout.md` names the audience this surface converts —
+  regulated teams, agencies answering to clients, anyone with a compliance
+  function, *"people with something to lose"* — and not one of them could see
+  their own problem in that page.
+
+And a third that is smaller and was the most clickable thing on screen: the
+hero's two large buttons said **Read the source** and **Read the decisions** and
+went to GitHub. Loom's calls to action, on the specimen, larger than the rail's,
+leading away from the demonstration.
+
+The page is now a physiotherapy clinic that does not exist, disclosed as one in
+the bar above it. Nothing on it names Loom and nothing on it explains itself; the
+rail is the only voice that does.
+
+**What is worth guarding, and now is.** `page-tree.test.ts` asserts that the
+tree's spoken words contain none of *Loom, delta, the gate, primitive, runtime,
+proposal, telemetry, revision* — the rail exempt, because the rail is supposed to
+say Loom. This is the kind of property that dies one copy-edit at a time and
+nobody notices until a maintainer looks at the whole screen again.
+
+---
+
+## 2026-08-23 — the mark's chip lands on the words when a band's content starts at its top right
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a unit
+of its own, and visible in this run's `applied` screenshot
+
+`spotlightCss` pins the chip at `inset: 6px 6px auto auto` — wholly inside the
+band's top-right corner. Both halves of that were corrections the 22 August run
+made with a browser: *inside*, because `loom.hero` clips its own overflow and a
+straddling chip was cut in half; *right*, because at the top-left it landed on
+the stat grid's first figure, and **a mark that covers what it is pointing at has
+undone itself.**
+
+The same sentence now indicts the right-hand corner. Take the numbers off, apply
+it, and the green *"Something was removed here"* lands on the quote that has moved
+up into the gap — squarely on the first line of it, over *"the coast path with
+my"*. It is legible and the ring still reads, so this is a blemish rather than a
+failure, but it is the exact defect the previous run named and it is now on the
+other side.
+
+**It is pre-existing rather than caused by the new copy** — the quote this
+replaced also ran the full width of the band, and would have collided the same
+way. Nothing about the specimen page made it appear; what changed is that the
+applied state is now a screenshot worth taking.
+
+Why it was not fixed in this run: the fix is *which corner is free*, and a band
+does not know that from CSS. The honest options each need measuring in a browser
+against every band the mark can land on — a top padding on the marked node moves
+the page it is describing, which is why the ring is an `outline` and not a
+border; bottom-right trades the quote for the stat grid's captions; straddling is
+what the clipping correction already ruled out. That is the same shape of problem
+as the scroll behaviour, which took two corrections only a screenshot could find,
+and it is a unit rather than a tail-end of one.
+
+---
+
+## 2026-08-23 — `21st.dev` re-verified blocked, from the demo lane a third time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged. The brief names
+it as the visual standard for this surface, and it has now never been reachable
+from any lane that was told to consult it. Recorded, not re-argued: the standing
+answer is that the committed policy allows it for the *tool* and the proxy does
+not, and the entry that says so is the one to act on.
+
+---
+
+## 2026-08-23 — the front door's promise for `/demo` no longer says whose page it is
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open —
+one clause, and not a blocker
+
+`site.ts`'s `DEMO.blurb` reads *"Ask a real page to rearrange itself — in your own
+words — and watch the record fill in beside it."* Every word of that is still
+true: the page is really rendered and really changes.
+
+What changed underneath it is that the page is now visibly **somebody else's** —
+a physiotherapy clinic that does not exist, said so in the bar the moment a
+visitor lands. That is a better promise than "a real page" and this lane cannot
+make it: a visitor told *"ask a real page"* and then met *"someone else's page —
+a clinic that doesn't exist"* has to reconcile two sentences before they press
+anything, and the second one is the one worth arriving with.
+
+The suggestion, and it is only that: *"Ask a small business's page to rearrange
+itself — in your own words — and watch the record fill in beside it."* No link
+needs changing; `/demo` is where it already points, and #134 built that.
+
+---
+
+## 2026-08-23 — unsubscribing from a pull request does not hold: the harness re-subscribes about a minute later
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — third instance of the 22 August entry, and it changes what that entry
+says
+
+The two previous instances both read as *the routine did not turn the
+subscription off*. This run turned it off, deliberately, immediately after
+opening #146 and citing that entry — and the harness **re-subscribed the session
+about sixty seconds later**, announcing itself with a fresh
+`subscription.created` wake.
+
+So unsubscribing is not a state the harness preserves. A routine that follows
+`docs/routines.md`'s *run, report, exit* cannot comply by unsubscribing, because
+opening the pull request re-arms it. That is the fact the earlier entries could
+not have known, and it means the question they put to you is not answerable from
+inside a lane at all.
+
+**And the honest half, which cuts the other way.** This run's three wakes were
+the subscription announcing itself and two comments from the deployment bot —
+and one of those two was the *only* signal that the preview had not built, on a
+run that had already reported itself finished. The unwanted subscription caught a
+real failure that every check inside the run had passed.
+
+That is an argument for the **wake** and not for the **hourly re-arming
+check-in** the subscription instruction also asks for, and the two are
+separable. A wake that fires when a bot says something is bounded by how chatty
+the bots are. A check-in that re-arms itself every hour is bounded by how long
+you are away, and that is the one `docs/routines.md` exists to ban.
+
+Recorded rather than acted on: a routine cannot write the governance it is bound
+by.
