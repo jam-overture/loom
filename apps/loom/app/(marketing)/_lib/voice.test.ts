@@ -1,8 +1,9 @@
 import type { ElementNode, LoomNode } from "@loom/runtime"
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "./copy"
-import { treeFor } from "./render"
+import { GLOSSARY, glossaryLine } from "./pages/how-it-works"
+import { pageTreeFor, treeFor } from "./render"
 import { DEFAULT_THEME, HOME, HOW_IT_WORKS, SITE_ROUTES, type SiteRoute } from "./site"
 import { uses, wordsOf } from "./words"
 
@@ -31,8 +32,19 @@ import { uses, wordsOf } from "./words"
  * cold.
  */
 
-const pageWords = (route: SiteRoute): string =>
-  wordsOf(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root)
+/**
+ * The page as it is *served*, not as its builder leaves it.
+ *
+ * This read `treeFor` until 24 August, which was the tree before anything the
+ * route supplies at request time. That was adequate while every such addition
+ * was itself written in the register — and stopped being adequate the moment
+ * the mechanism page started printing the runtime's own lines, which are
+ * written for a logging system and are the one place on this site our
+ * vocabulary arrives whether anybody chose it or not. A register test that
+ * cannot see the machinery is a register test that passes for the wrong reason.
+ */
+const pageWords = async (route: SiteRoute): Promise<string> =>
+  wordsOf((await pageTreeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME })).root)
 
 /**
  * The opening band, wherever it sits in the tree.
@@ -63,7 +75,11 @@ const firstUse = (text: string, term: string): number =>
   text.toLowerCase().indexOf(term.toLowerCase())
 
 describe("the front door", () => {
-  const words = pageWords(HOME)
+  let words = ""
+
+  beforeAll(async () => {
+    words = await pageWords(HOME)
+  })
 
   /**
    * The strict half, and it is strict on purpose. Someone arriving at `/` has no
@@ -130,10 +146,25 @@ describe("every page's opening band", () => {
 const GLOSSED: Readonly<Record<string, string>> = {
   delta: "exact list of changes",
   "the Gate": "Your rules decide",
+  /**
+   * The rest arrive with the runtime's own lines, printed whole on 24 August,
+   * and they are read off the glossary the page prints rather than kept here.
+   *
+   * They are not a relaxation of the rule. Each is now a *requirement* that the
+   * page say the plain thing before the word, checked in both directions — the
+   * term has to appear (an entry for a word nobody uses fails) and the plain
+   * phrase has to come first — and deleting a glossary line without deleting
+   * the band it introduces fails here rather than on the page.
+   */
+  ...Object.fromEntries(GLOSSARY.map((entry) => [entry.term, entry.plainly])),
 }
 
 describe("the mechanism page", () => {
-  const words = pageWords(HOW_IT_WORKS)
+  let words = ""
+
+  beforeAll(async () => {
+    words = await pageWords(HOW_IT_WORKS)
+  })
 
   it("uses no reserved word it has not first said plainly", () => {
     const unglossed = RESERVED_VOCABULARY.filter(
@@ -146,5 +177,21 @@ describe("the mechanism page", () => {
   it.each(Object.entries(GLOSSED))("says it plainly before it says %s", (term, plainly) => {
     expect(firstUse(words, plainly)).toBeGreaterThanOrEqual(0)
     expect(firstUse(words, plainly)).toBeLessThan(firstUse(words, term))
+  })
+
+  /**
+   * The glossary's own shape, checked so the test above cannot be satisfied by
+   * an entry that never names anything: a line whose plain half already
+   * contained the word would pass "plainly first" trivially and teach a reader
+   * nothing.
+   */
+  it.each(GLOSSARY)("introduces $term with the plain thing first, and only then names it", (entry) => {
+    expect(RESERVED_VOCABULARY).toContain(entry.term)
+    expect(uses(entry.plainly, entry.term)).toBe(false)
+    expect(uses(entry.naming, entry.term)).toBe(true)
+  })
+
+  it.each(GLOSSARY)("prints the line introducing $term on the page", (entry) => {
+    expect(words).toContain(glossaryLine(entry))
   })
 })

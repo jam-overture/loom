@@ -3,9 +3,10 @@ import { renderLoomTree, type RenderOutput } from "@loom/runtime/react"
 
 import { askById } from "./adapt/asks"
 import { runHistory, type ChangeHistory } from "./adapt/history"
+import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import { runAsk, type AskRun } from "./adapt/run"
 import { homePageTree } from "./pages/home"
-import { howItWorksPageTree } from "./pages/how-it-works"
+import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { siteRegistry, siteThemes } from "./registry"
 import { HOME, HOW_IT_WORKS, THE_RECORD, type SiteRoute } from "./site"
@@ -28,7 +29,7 @@ import { HOME, HOW_IT_WORKS, THE_RECORD, type SiteRoute } from "./site"
  * the front door for, and the run of changes the record page is reporting on —
  * so a page that does not read a field cannot be broken by one arriving.
  */
-export type SitePageContext = RecordContext
+export type SitePageContext = RecordContext & MechanismContext
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
 
@@ -97,10 +98,27 @@ export const historyFor = async (context: SitePageContext): Promise<ChangeHistor
   return runHistory(treeFor(HOME, { origin: context.origin, theme: context.theme }), tokens)
 }
 
+/**
+ * The run the mechanism page prints, against the front door as it is published.
+ *
+ * Here rather than in the builder because a page builder is synchronous and a
+ * request through the whole sequence is not — the same seam, and for the same
+ * reason, as the ask the front door runs and the history the record page
+ * replays. The front door is built fresh for it: the mechanism page's claim is
+ * about *this site*, so a record of a fixture kept beside it would be a record
+ * of nothing a reader can go and check.
+ */
+export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
+  paperTrailFor(treeFor(HOME, { origin: context.origin, theme: context.theme }))
+
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<LoomTree> => {
+  if (route.path === HOW_IT_WORKS.path) {
+    return treeFor(route, { ...context, trail: await trailFor(context) })
+  }
+
   if (route.path === HOME.path) {
     const run = await askRunFor(context)
 

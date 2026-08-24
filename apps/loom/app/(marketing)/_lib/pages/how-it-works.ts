@@ -1,6 +1,7 @@
 import {
   buildElement,
   buildSlot,
+  buildText,
   createTree,
   sequentialIdFactory,
   type IdFactory,
@@ -9,6 +10,7 @@ import {
 } from "@loom/runtime"
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
+import type { PaperTrail, TrailLine } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
@@ -167,6 +169,171 @@ const record = (ids: IdFactory): LoomNode =>
     }),
   ])
 
+/**
+ * The five words a reader is about to meet, each said plainly first.
+ *
+ * The lines below are not written for a visitor — they are written for a
+ * logging system, and printing them means printing our vocabulary raw. The
+ * site's rule for a mechanism page is that a reserved word is allowed *once it
+ * has been earned*: the plain phrase doing the work, the name after it, in that
+ * order and in the same breath (`voice.test.ts`).
+ *
+ * So the glossary is not decoration and it is not an apology for the band. It
+ * is the condition on which the band may exist at all, and every entry in it is
+ * a word that genuinely appears in the run below rather than one we thought a
+ * reader might like to know.
+ */
+export type GlossaryEntry = {
+  /** The reserved word, exactly as `copy.ts` lists it. */
+  readonly term: string
+  /** The plain thing, which has to come first and has to do the work alone. */
+  readonly plainly: string
+  /** The naming half, which contains the term and nothing a reader needs. */
+  readonly naming: string
+}
+
+/**
+ * Exported because `voice.test.ts` reads it rather than keeping a second copy.
+ *
+ * This lane's own recorded lesson is that two spellings of one fact diverge and
+ * the one that diverges is the prose — so the test that enforces *plain first*
+ * is pointed at the list the page actually prints, and a line deleted here
+ * fails there instead of quietly ending the discipline.
+ */
+export const GLOSSARY: readonly GlossaryEntry[] = [
+  { term: "provenance", plainly: "Where a change came from", naming: "its provenance" },
+  {
+    term: "runtime",
+    plainly: "Worked out by the machinery rather than guessed at by an AI",
+    naming: "authored by the runtime",
+  },
+  {
+    term: "inverse",
+    plainly: "The change that reverses it, written at the same moment",
+    naming: "its inverse",
+  },
+  { term: "disposition", plainly: "The answer your rules gave, and why", naming: "the disposition" },
+  { term: "node", plainly: "A piece of the page", naming: "a node" },
+]
+
+export const glossaryLine = (entry: GlossaryEntry): string =>
+  `${entry.plainly} — ${entry.naming}.`
+
+const glossary = (ids: IdFactory): LoomNode =>
+  stack(ids, { direction: "column", gap: "snug", align: "start" }, [
+    prose(ids, "Five of our words appear in these lines. Here is each one first.", {
+      tone: "muted",
+    }),
+    buildElement(ids, {
+      type: "loom.list",
+      props: { marker: "bullet", density: "tight", size: "small", measured: true },
+      children: GLOSSARY.map((entry) =>
+        buildElement(ids, {
+          type: "loom.list-item",
+          props: {},
+          children: [buildText(ids, glossaryLine(entry))],
+        })
+      ),
+    }),
+  ])
+
+/**
+ * One stage of the run: what it is, in plain words, and then the line itself.
+ *
+ * The panel is labelled with the event's own name rather than with `json`,
+ * which `loom.code` allows for exactly this — *"a filename is just as good a
+ * label as a language"*. Seven panels all announcing the same format tell a
+ * reader nothing; seven announcing what each line *is* are a contents page.
+ */
+const stage = (ids: IdFactory, line: TrailLine, index: number): readonly LoomNode[] => [
+  heading(ids, 3, `${index + 1}. ${line.title}`),
+  prose(ids, line.plainly, { tone: "muted", measured: true }),
+  buildElement(ids, {
+    type: "loom.code",
+    props: {
+      language: `${line.type}.json`,
+      density: "compact",
+      ...(line.caption === undefined ? {} : { caption: line.caption }),
+    },
+    children: [buildText(ids, line.json)],
+  }),
+]
+
+/**
+ * The band the rest of this site can only describe.
+ *
+ * Everything above is a claim about what happens between a request and a
+ * changed page. This is that happening, to the page this site publishes at `/`,
+ * a moment before the reader loaded this one — not a fixture, not a
+ * screenshot, and not written by hand. A listener was attached to a real
+ * request and these are the lines it was handed, whole and in order.
+ *
+ * **Six lines for five steps**, and the extra one is worth the sentence it
+ * costs: which rules were in force is settled and written down *before*
+ * anything is worked out, so what judged a change is never something anybody
+ * has to reconstruct afterwards.
+ *
+ * It is long, and the length is the argument. A record you can fit on a slide
+ * is a record that left something out.
+ */
+const paperTrail = (ids: IdFactory, trail: PaperTrail): LoomNode =>
+  section(
+    ids,
+    { tone: "surface", width: "wide", eyebrow: "The record itself" },
+    "The same change, as this site wrote it down",
+    [
+      prose(
+        ids,
+        `A moment ago somebody asked the front page of this site for something — “${trail.asked}” — and this is everything the machinery said while it dealt with it. It is what a Loom site hands its own logging as a change goes through, and a deployment collects it by writing eight lines that put each one in a list.`,
+        { size: "lead", measured: true }
+      ),
+      prose(
+        ids,
+        "Six lines for the five steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards.",
+        { tone: "muted", measured: true }
+      ),
+      glossary(ids),
+      ...trail.lines.flatMap((line, index) => stage(ids, line, index)),
+    ]
+  )
+
+/**
+ * The one this site will not do, and the only line of it that differs.
+ *
+ * A refused change produces the same first four lines as an allowed one — the
+ * same request, the same rules, the same list, the same measurement — and then
+ * one answer that is not the same, followed by nothing. Printing the fifth line
+ * on its own is not an economy: the absence of a sixth is half of what this
+ * band is showing.
+ */
+const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: "And when the answer is no" },
+    "The same five lines, and then a different answer",
+    [
+      prose(
+        ids,
+        "The front page will not let anything take away the statement of what this site is for. Ask it to and the first four lines read exactly as they do above — the request, the rules, the list, the measurement. This is the fifth. There is no sixth, because nothing happened to the page.",
+        { measured: true }
+      ),
+      buildElement(ids, {
+        type: "loom.code",
+        props: {
+          language: `${trail.refused.type}.json`,
+          density: "compact",
+          caption: "Nothing follows this line, because nothing happened to the page.",
+        },
+        children: [buildText(ids, trail.refused.json)],
+      }),
+      prose(
+        ids,
+        "Nobody typed that reason. It was counted off the change — what it destroys, how much of the page it reaches, and how deep it cuts — and the name of the rules that weighed it is on the line with it.",
+        { tone: "muted", measured: true }
+      ),
+    ]
+  )
+
 const questions = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Questions" }, "About the mechanism", [
     buildElement(ids, {
@@ -237,7 +404,21 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
     ]),
   ], { align: "center" })
 
-export const howItWorksPageTree = (context: PageContext): LoomTree => {
+/**
+ * What this page needs that the others do not: the run it is about to print.
+ *
+ * Optional for the same reason the front door's `record` is — the trail is a
+ * *function of* the published front door, so the page has to be buildable
+ * before there is one, and a request against a page that does not exist yet is
+ * not a thing to arrange. `render.ts` is where the route always supplies it,
+ * and `pages.test.ts` holds the served page to carrying it rather than leaving
+ * that to whoever calls the builder next.
+ */
+export type MechanismContext = PageContext & {
+  readonly trail?: PaperTrail
+}
+
+export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
   const ids = sequentialIdFactory("how")
   const chrome: ChromeContext = { ...context, current: HOW_IT_WORKS }
 
@@ -255,6 +436,9 @@ export const howItWorksPageTree = (context: PageContext): LoomTree => {
         journey(ids),
         weighed(ids),
         record(ids),
+        ...(context.trail === undefined
+          ? []
+          : [paperTrail(ids, context.trail), refusal(ids, context.trail)]),
         questions(ids),
         closing(ids, context),
         siteFooter(ids, chrome),
