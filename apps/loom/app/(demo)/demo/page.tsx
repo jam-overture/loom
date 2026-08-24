@@ -13,6 +13,7 @@ import { spotlightsFor, spotlitChange } from "@/app/(demo)/_lib/spotlight"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
+import { AnswerInView } from "./_components/answer-in-view"
 import { AskPanel } from "./_components/ask-panel"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
@@ -78,6 +79,13 @@ const DemoPage = async () => {
    */
   const spotlit = spotlitChange(records, tree)
   const spots = spotlit ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone) : []
+
+  /**
+   * The one record, if any, that has asked the visitor something and is waiting
+   * for the answer. Newest first, so this is the question in front of them
+   * rather than one they have already dealt with.
+   */
+  const awaiting = records.find((record) => record.heldProposalId !== undefined)
 
   /**
    * What each waiting proposal would replace, read against the tree on the
@@ -147,10 +155,29 @@ const DemoPage = async () => {
             <h1 className="text-2xl leading-tight tracking-tight text-balance">
               Ask that page for a change.
             </h1>
+            {/*
+              * Whose page, and what it is. Nothing else.
+              *
+              * It used to carry a third clause — *"and every rewrite arrives
+              * with a record of what was asked, what Loom decided, and how to
+              * put it back"* — which is the demo's whole claim and was in the
+              * wrong place twice over. It was abstract, describing a record
+              * rather than being one, which is the failure `WhatHappens` was
+              * written to fix in the empty state; and it was four inches above
+              * the button, so a stranger read it before it could mean anything
+              * and had forgotten it by the time a card appeared.
+              *
+              * The claim now sits directly above the controls (`AskPanel`),
+              * where it is about to become true.
+              *
+              * The first clause went for a different reason: *"It belongs to a
+              * clinic that doesn't exist"* is what the bar says forty pixels
+              * above, in almost the same words. What is left is the half the
+              * bar does not cover and a stranger can otherwise get wrong — that
+              * the thing on the stage is data rather than a picture of a page.
+              */}
             <p className="text-ink-secondary text-sm">
-              It belongs to a clinic that doesn’t exist — but it isn’t a picture. It’s data, an AI
-              can rewrite it, and every rewrite arrives with a record of what was asked, what Loom
-              decided, and how to put it back.
+              It isn’t a picture. It’s data, and an AI can rewrite it.
             </p>
             {/*
               * "That page" is only pointing at something on a wide screen. On a
@@ -217,6 +244,22 @@ const DemoPage = async () => {
                   <RecordCard key={record.recordId} record={record} {...effectProps(record)} />
                 ))}
               </ul>
+
+              {/*
+                * The rail's own scroll, and only when the demo has asked the
+                * visitor a question it cannot proceed without.
+                *
+                * The stage scrolls itself (`ChangeSpotlight`); on a wide screen
+                * that is a different scroller, so a marked band arriving in view
+                * says nothing about whether the two buttons deciding its fate
+                * are on screen. Measured at 1440×800 they were not — sixty-nine
+                * pixels under the fold, on the first press of the primary ask.
+                * Stacked, it is further still: the whole panel of secondary
+                * asks sits between the button and the question it raised.
+                */}
+              {awaiting && (
+                <AnswerInView recordId={awaiting.recordId} token={`${tree.revision}`} />
+              )}
             </section>
           )}
 

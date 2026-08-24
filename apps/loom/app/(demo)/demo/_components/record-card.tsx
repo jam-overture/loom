@@ -67,7 +67,17 @@ export const RecordCard = ({
   const outcome = demoState(stateOfRecord(record.outcome))
 
   return (
-    <li className="border-edge-subtle bg-surface-raised flex flex-col gap-3 rounded-md border p-3.5">
+    /*
+     * The record's own id, as the element's, so a card can be addressed from
+     * outside itself — `AnswerInView` needs to find the one that is waiting on
+     * an answer, and the alternative is a ref threaded through a list the page
+     * builds by mapping. Stable across the answer, because answering a hold
+     * replaces the record rather than adding one (`session.ts`).
+     */
+    <li
+      id={record.recordId}
+      className="border-edge-subtle bg-surface-raised flex flex-col gap-3 rounded-md border p-3.5"
+    >
       <header className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           <span className={`rounded-sm px-1.5 py-0.5 text-2xs ${toneClasses(outcome.tone)}`}>
