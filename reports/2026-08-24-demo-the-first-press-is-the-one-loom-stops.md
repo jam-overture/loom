@@ -301,7 +301,15 @@ Every screenshot is this branch's `next build` output driven in Chromium — not
 the preview, which this environment cannot open (`vercel.app` is not on the
 sandbox's egress allowlist; the standing 19 August finding).
 
-**Preview:** PREVIEW_URL
+**Preview:**
+`https://loom-git-demo-04-the-first-p-be3f4b-jpizzolato36-6341s-projects.vercel.app/demo`
+
+One push, one preview. The commit identity was left alone this time, which is
+the whole of the 22 August finding's recommendation — the previous run set it to
+the maintainer, following the harness's standing instruction to attribute work
+to them, and Vercel refused to build a commit authored by a non-member of the
+team. Not doing that is a one-line rule and it is still not written down
+anywhere a fresh session reads.
 
 **To see it yourself:** open `/demo` on a laptop-sized window and press the green
 button without scrolling. Do not scroll after pressing it either — the point is
