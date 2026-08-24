@@ -10,6 +10,7 @@ import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../
 import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
+import { paletteSlotSchema, type PaletteSlot } from "../theme/theme.js"
 import type { SubmissionOutcome } from "../submit/resolution.js"
 
 /**
@@ -411,4 +412,176 @@ export const probeSubmissionPlacement = (
   return answered.some((node) => containsMarker(node, PROBE_SUBMIT_ACTION))
     ? { outcome: "places" }
     : { outcome: "not-placed" }
+}
+
+/**
+ * The fourth probe: which colours does this primitive put on which grounds?
+ *
+ * `PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` says of itself that it is
+ * *read off `src/primitives` rather than imagined*, and until now that was a
+ * promise a person kept by hand. A pairing a new primitive rendered was audited
+ * only if somebody remembered to add a row, and the audit's silence about the
+ * rest read exactly like a pass. This answers the question from the components
+ * instead, the same way `submits` stopped being a declaration and became an
+ * observation.
+ *
+ * ## Painted and floating
+ *
+ * A primitive that sets `color` under a ground it painted itself has said
+ * everything about that pair: both ends are its own and no container can change
+ * them. That is a **painted** pairing.
+ *
+ * A primitive that sets `color` and paints no ground under it — `loom.perk`'s
+ * subtle note, `loom.milestone`'s marker — has said only half. The other half
+ * is whatever it is placed in, and 0008 leaves parentage to the tree, so the
+ * ground is any ground a container puts children on. Those inks are reported
+ * as **floating**, with the grounds separately, and pairing them up is
+ * `pairings.ts`'s job because it needs the whole registry to know what the
+ * grounds are.
+ *
+ * ## What it does not see
+ *
+ * Only `children` is walked, matching `carriesDecoration`, so an element handed
+ * to another component through a prop of the primitive's own naming is not
+ * followed. Only `background`, `backgroundColor` and `color` are read, and only
+ * where the value is exactly the `var(--loom-…)` form `colour()` produces — a
+ * primitive that composes a gradient or interpolates a variable into a longhand
+ * answers nothing rather than a guess, for the reason `contrastRatio` declines
+ * a colour it would have to parse.
+ */
+
+export type ColourPairing = {
+  readonly foreground: PaletteSlot
+  readonly background: PaletteSlot
+}
+
+export type ColourVerdict =
+  | {
+      readonly outcome: "probed"
+      /** Ink and ground both set by this primitive. */
+      readonly painted: readonly ColourPairing[]
+      /** Ink set here, ground left to whatever this is placed in. */
+      readonly floating: readonly PaletteSlot[]
+      /** Grounds this primitive puts its declared children and slots on. */
+      readonly childGrounds: readonly PaletteSlot[]
+    }
+  | { readonly outcome: "not-probeable"; readonly reason: string }
+
+/** `colour()` emits `var(--loom-<slot>)` and nothing else does. */
+const SLOT_VARIABLE = /^var\(--loom-([a-z-]+)\)$/
+
+const slotOf = (value: unknown): PaletteSlot | undefined => {
+  if (typeof value !== "string") return undefined
+
+  const named = SLOT_VARIABLE.exec(value)?.[1]
+  const parsed = named === undefined ? undefined : paletteSlotSchema.safeParse(named)
+
+  return parsed?.success === true ? parsed.data : undefined
+}
+
+const groundOf = (style: Readonly<Record<string, unknown>>): PaletteSlot | undefined =>
+  slotOf(style["background"]) ?? slotOf(style["backgroundColor"])
+
+type Paint = {
+  readonly painted: ColourPairing[]
+  readonly floating: PaletteSlot[]
+  readonly childGrounds: PaletteSlot[]
+}
+
+const collectPaint = (
+  node: ReactNode,
+  ground: PaletteSlot | undefined,
+  markers: ReadonlySet<string>,
+  into: Paint
+): void => {
+  if (Array.isArray(node)) {
+    for (const child of node as readonly ReactNode[]) collectPaint(child, ground, markers, into)
+
+    return
+  }
+
+  if (typeof node === "string") {
+    if (markers.has(node) && ground !== undefined) into.childGrounds.push(ground)
+
+    return
+  }
+
+  if (!isValidElement(node)) return
+
+  const props: Readonly<Record<string, unknown>> = node.props as Readonly<Record<string, unknown>>
+  const style = props["style"]
+  const own = typeof style === "object" && style !== null ? (style as Readonly<Record<string, unknown>>) : undefined
+
+  const below = own === undefined ? ground : (groundOf(own) ?? ground)
+  const ink = own === undefined ? undefined : slotOf(own["color"])
+
+  if (ink !== undefined) {
+    if (below === undefined) into.floating.push(ink)
+    else into.painted.push({ foreground: ink, background: below })
+  }
+
+  collectPaint(props["children"] as ReactNode, below, markers, into)
+}
+
+const uniqueSlots = (slots: readonly PaletteSlot[]): readonly PaletteSlot[] => [...new Set(slots)].sort()
+
+const uniquePairings = (pairings: readonly ColourPairing[]): readonly ColourPairing[] =>
+  [...new Map(pairings.map((pairing) => [`${pairing.foreground}|${pairing.background}`, pairing])).values()].sort(
+    (a, b) => `${a.foreground}|${a.background}`.localeCompare(`${b.foreground}|${b.background}`)
+  )
+
+/**
+ * The union across every configuration, rather than the intersection the
+ * decoration probe takes. Decoration is a promise that has to hold however the
+ * primitive is configured; a colour pairing is a fact about one configuration,
+ * and a `loom.section` that paints `accent-subtle` only under `tone: "accent"`
+ * renders that pairing on a real page whatever the other tones do.
+ */
+export const probeColourPairings = (
+  primitive: LoomPrimitive,
+  declaredSlots: readonly string[] = [],
+  text: PrimitiveText<string> = NO_TEXT,
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+): ColourVerdict => {
+  const probeable = asProbeable(primitive)
+  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+
+  const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
+  for (const name of declaredSlots) slots[name] = slotMarker(name)
+
+  const markers = new Set<string>([PROBE_CHILDREN, ...declaredSlots.map(slotMarker)])
+
+  const attempts = configurations.map((props) =>
+    call(probeable.value, {
+      loom: {
+        nodeId: PROBE_NODE_ID,
+        type: PROBE_TYPE,
+        slots,
+        data: NO_DATA,
+        text,
+        behaviours: NO_BEHAVIOURS,
+      },
+      props,
+      children: PROBE_CHILDREN,
+    })
+  )
+
+  const answered = attempts.flatMap((result) => (result.ok ? [result.value] : []))
+
+  if (answered.length === 0) {
+    const [first] = attempts
+    const reason = first && !first.ok ? first.error : "no configuration answered"
+
+    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${reason}` }
+  }
+
+  const into: Paint = { painted: [], floating: [], childGrounds: [] }
+  for (const node of answered) collectPaint(node, undefined, markers, into)
+
+  return {
+    outcome: "probed",
+    painted: uniquePairings(into.painted),
+    floating: uniqueSlots(into.floating),
+    childGrounds: uniqueSlots(into.childGrounds),
+  }
 }

@@ -4941,8 +4941,15 @@ open and still unaddressed by anything here.
 ## 2026-08-22 — three palette pairings the comparison band renders are not in the contrast list, and two more were designed around because they fail
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` ·
-**Status:** open — nothing renders below the bar, and the check that would keep
-it that way does not know about it
+**Status:** closed by #149 — the list is no longer maintained by hand. A probe
+reads every pairing off the components and `pairings.test.ts` fails if the
+declared list is missing one, so the three rows are in and the class is shut.
+Both rejected pairings are recorded too, and the reason the recommendation was
+not taken as written is that they turned out **not** to be safely rejectable:
+`fg-subtle` on `accent-subtle` is reachable in an ordinary tree — a perk list
+inside an accent-toned section — and fails in eight palettes, not none. They are
+pinned by name in `contrast.test.ts` and the two candidate fixes are measured in
+[0088](decisions/0088-the-text-ramp-is-held-to-four-grounds.md).
 
 `PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` says of itself that it is
 *read off `src/primitives` rather than imagined*, which is what makes a failure
@@ -5050,8 +5057,15 @@ in this lane the same call.
 ## 2026-08-23 — a design token guarantees the value comes from the theme, and nothing about it being different from the one beside it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around inside one primitive, and the general shape is not this
-lane's to fix
+open — still open after #149, and now with a number on it. The call asked for
+was made and it was *not yet*, for a reason the record states: contrast between
+two inks is a different question from legibility of one ink on a ground, and the
+bar for it would be invented rather than borrowed from WCAG. What #149 did add
+is evidence that the shape is real and measurable — the two candidate fixes for
+the composed shortfall were rejected partly *because* one of them collapses
+`fg-subtle` into `fg-muted`, from about 1.34:1 to 1.05:1 on `carbon`. That is
+this finding, caused deliberately and measured. See the last of the alternatives
+in [0088](decisions/0088-the-text-ramp-is-held-to-four-grounds.md).
 
 `loom.emphasis` with `tone: "strong"` was written the way every primitive in
 this library writes a weight — `fontWeight: weight("heading")`, which is
@@ -6476,3 +6490,117 @@ can diff; or have the routine commit an index page of the run's visuals to
 Recorded now because it will recur on every visual lane's next pull request, and
 because a broken embed is indistinguishable from a routine that forgot the
 screenshot — which is the more damaging reading, and the wrong one.
+
+---
+
+## 2026-08-24 — two pairings a page can reach fail in eight palettes, and the fix is a choice nobody has made
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`,
+`Loom daily build` · **Status:** open — measured, pinned, and deliberately not
+fixed on an unattended run
+
+Deriving the contrast list from the components (#149) turned the 22 August
+finding's closing note inside out. That entry said `accent` on `accent-subtle`
+and `fg-subtle` on `accent-subtle` had been *designed around*, which was true of
+the comparison band and is not true of the library:
+
+| Pairing | Worst | Under 4.5:1 in |
+| --- | --- | --- |
+| `fg-subtle` on `accent-subtle` | 3.76:1 (`carbon`) | `bold`, `slate`, `midnight`, `carbon`, `plum`, `forest`, `ember`, `obsidian` |
+| `accent` on `accent-subtle` | 4.43:1 (`plum`) | `plum` |
+
+`loom.perk`, `loom.milestone` and `loom.footer` set `fg-subtle` and paint no
+ground under it. `loom.section` with `tone: "accent"`, `loom.card` and
+`loom.callout` put children on `accent-subtle`. **A perk list inside an
+accent-toned section is an ordinary page**, and on eight of twenty-one palettes
+its notes are under the bar 0074 sets. Nothing said so because nothing measured
+it.
+
+**The cause is one line.** `derive.ts` solves every ink against *"the worst of
+the three grounds it is rendered on"* — canvas, surface, muted well.
+`accent-subtle` is a fourth ground children land on. In a dark palette it sits
+at lightness 16 with the muted well at 8, so it is the **tightest ground in the
+palette** and no ink has ever been solved against it. Seven of the eight are
+dark.
+
+**Both fixes cost something, measured across all twenty-one:**
+
+- **Move the panel** — `accent-subtle` away from `fg-subtle`, 2 to 6 points of
+  lightness. In dark mode that is *darker*, and `carbon` needs about 10.4 with
+  its canvas at 10. The tint stops being distinguishable from the page.
+- **Move the ink** — solve `fg-subtle` against `accent-subtle` as the derivation
+  already solves it against the other three, 2 to 8 points. `fg-subtle` against
+  `fg-muted` falls from about 1.34:1 to between 1.05:1 and 1.25:1; at `carbon`'s
+  1.05:1 the quiet ink and the muted ink are the same colour.
+
+There is a third, and it is the one I would take if it were mine to take.
+**Light mode puts `accent-subtle` at the muted well's own lightness (94, with
+the well at 94) and dark mode puts it eight points the *other* side of the
+canvas (16, canvas 10, well 8).** The dark branch does not follow the light
+branch's rule. Making them agree fixes the cause rather than the symptom — but
+it changes every dark palette in the library, which is a look, not a contrast
+fix.
+
+Not taken on this run because it is a visual change to eight shipped palettes,
+both cheap directions cost something real, and a routine choosing between them
+unattended is a routine making a design decision on the maintainer's behalf. The
+nine are pinned by name in `contrast.test.ts`, so a tenth fails the build rather
+than joining quietly.
+
+---
+
+## 2026-08-24 — `loom.field` puts a validation message in `accent-strong` and no palette was ever asked about it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` ·
+**Status:** open — it clears the bar everywhere, and it is worth knowing why
+that is luck rather than design
+
+The derived list turned up four pairings nobody had listed, and three of them
+are `loom.field`: `accent-strong` composed onto `bg-canvas`, `bg-surface` and
+`bg-surface-muted`. It is the only primitive in the library that floats
+`accent-strong` as an ink.
+
+They pass — 4.61:1 at the worst, on `citrus` — so nothing is broken. What is
+worth a paragraph is that `accent-strong` is documented in `palettes.ts` as an
+**area** rather than an ink:
+
+> **`accent-strong` and `brand-secondary` are areas.** `loom.hero`'s aurora is
+> the one place in the library that paints a slot as a large field, and it reads
+> those two. Every palette here gives both real chroma for that reason.
+
+A palette author reading that is being told the slot does not have to carry
+text, and `derive.ts` agrees with them: `accent-strong` is solved against
+`accent-subtle` alone, not against the three page grounds. So the three pairings
+clear the bar because the accent hue happens to land there in twenty-one
+palettes, not because anything required it. A host deriving a twenty-second
+under the documented rule could put a field's validation message under the bar
+and get no warning at all — the audit now measures it, which is the half that
+changed today.
+
+Two ways out, and the choice is a primitives one because it is about what the
+field should read: either `loom.field` uses `accent` (already solved against all
+three page grounds) and the pairing becomes uninteresting, or `accent-strong`
+stops being documented as an area and joins the ramp, which is a `derive.ts`
+change on my side and I will take it if you want it. Filed rather than picked,
+because changing the colour of a validation message is a visible change in
+somebody else's lane.
+
+---
+
+## 2026-08-24 — the record-count edit, the fourth in six days
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — for the count, and because the
+cheaper of the two fixes now has four data points behind it
+
+`FACTS.decisions` in `apps/loom/app/(marketing)/_lib/copy.ts` is the string
+`"87"`, and `facts.test.ts` checks it against the number of files in
+`decisions/`. Writing record 0088 turned all four surfaces red until I edited a
+file in the marketing lane. 87 → 88.
+
+Nothing new in the shape of it — the 19 August entry named the two fixes and
+said neither was a routine's to choose. The only thing this adds is that it has
+now happened on 19, 21, 23 and 24 August, always to a lane that is not
+marketing's, and always as the last failing test in an otherwise green run. Four
+occurrences is usually where the one-line fix — deriving the count the way the
+test derives it — stops needing an argument.

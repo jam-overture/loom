@@ -2118,11 +2118,25 @@
               "summary": "WCAG AA for body text — the bar this module holds every text slot to."
             },
             {
+              "name": "PALETTE_TEXT_GROUNDS",
+              "kind": "value",
+              "signature": "const PALETTE_TEXT_GROUNDS: readonly PaletteSlot[]",
+              "truncated": false,
+              "summary": "The grounds every ink in the text ramp has to be readable on."
+            },
+            {
+              "name": "PairingBasis",
+              "kind": "type",
+              "signature": "type PairingBasis = \"painted\" | \"composed\";",
+              "truncated": false,
+              "summary": "How a pairing comes about, which decides what a failure means."
+            },
+            {
               "name": "TextPairing",
               "kind": "type",
-              "signature": "type TextPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    /** Where it happens, so a failure names a page rather than two slot ids. */\n    readonly where: string;\n};",
+              "signature": "type TextPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    readonly basis: PairingBasis;\n    /** Where it happens, so a failure names a page rather than two slot ids. */\n    readonly where: string;\n};",
               "truncated": false,
-              "summary": "A foreground slot read on a background slot, and the primitives that put them together."
+              "summary": "A foreground slot read on a background slot, and where they meet."
             },
             {
               "name": "PALETTE_TEXT_PAIRINGS",
@@ -2155,14 +2169,14 @@
             {
               "name": "PaletteAudit",
               "kind": "type",
-              "signature": "type PaletteAudit = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPairing[];\n    /** Measured and under the bar. The list a host asserts empty. */\n    readonly failures: readonly MeasuredPairing[];\n    /**\n     * Neither a pass nor a failure. Separate from `failures` for the reason\n     * `notProbeable` is separate in the registry audit: a host that wants the\n     * guarantee asserts both empty, and a host whose palette is written in `hsl()`\n     * can tell \"unreadable\" from \"unmeasurable\".\n     */\n    readonly unmeasured: readonly UnmeasuredPairing[];\n};",
+              "signature": "type PaletteAudit = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPairing[];\n    /**\n     * Measured, `painted`, and under the bar. The list a host asserts empty.\n     *\n     * Painted only, because a painted failure is a page nobody can read and no\n     * tree can avoid it — both ends are one primitive's own. That is a defect in\n     * the palette with one fix, and asserting it empty is a promise a palette can\n     * keep.\n     */\n    readonly failures: readonly MeasuredPairing[];\n    /**\n     * Measured, `composed`, and under the bar — reported rather than asserted.\n     *\n     * The split is not a softer bar for the same fault, and it is worth being\n     * plain about why, because a second list is exactly where an inconvenient\n     * failure would go to be forgotten.\n     *\n     * A composed pairing needs a tree that puts the two together. It is reachable\n     * — `loom.perk` inside a `loom.section tone=\"accent\"` is an ordinary page —\n     * but whether a given deployment reaches it depends on trees nobody has\n     * written yet, and the fix is not always the palette's: an ink that fails on\n     * one ground and clears the other three may be a panel that wants moving.\n     * Loom measures and reports, and imposing is the host's call — the bargain\n     * the contrast bar already makes, applied here one level in.\n     *\n     * What keeps it honest is that nothing may be *demoted* into it. A pairing\n     * any primitive paints is `painted` in the declared list whatever else also\n     * composes it, and `library.test.ts` fails if the declared basis is softer\n     * than the derivation's.\n     */\n    readonly composedFailures: readonly MeasuredPairing[];\n    /**\n     * Neither a pass nor a failure. Separate from `failures` for the reason\n     * `notProbeable` is separate in the registry audit: a host that wants the\n     * guarantee asserts both empty, and a host whose palette is written in `hsl()`\n     * can tell \"unreadable\" from \"unmeasurable\".\n     */\n    readonly unmeasured: readonly UnmeasuredPairing[];\n};",
               "truncated": false,
               "summary": "What the bar found in one palette: what was measured, what failed, what could not be."
             },
             {
               "name": "auditPalette",
               "kind": "function",
-              "signature": "const auditPalette: (palette: Palette) => PaletteAudit",
+              "signature": "const auditPalette: (palette: Palette, pairings?: readonly TextPairing[]) => PaletteAudit",
               "truncated": false,
               "summary": "Measures every pairing the primitives render, in one palette. Refuses nothing."
             },
@@ -5259,6 +5273,27 @@
               "signature": "const probeSubmissionPlacement: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly JsonObject[]) => SubmissionVerdict",
               "truncated": false,
               "summary": "`some` rather than `every`, matching `probePlacement`. The question is whether this primitive posts at all, and a primitive that renders a form under one layout and a summary under another is answering honestly in both."
+            },
+            {
+              "name": "ColourPairing",
+              "kind": "type",
+              "signature": "type ColourPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n};",
+              "truncated": false,
+              "summary": "The fourth probe: which colours does this primitive put on which grounds?"
+            },
+            {
+              "name": "ColourVerdict",
+              "kind": "type",
+              "signature": "type ColourVerdict = {\n    readonly outcome: \"probed\";\n    /** Ink and ground both set by this primitive. */\n    readonly painted: readonly ColourPairing[];\n    /** Ink set here, ground left to whatever this is placed in. */\n    readonly floating: readonly PaletteSlot[];\n    /** Grounds this primitive puts its declared children and slots on. */\n    readonly childGrounds: readonly PaletteSlot[];\n} | {\n    readonly outcome: \"not-probeable\";\n    readonly reason: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "probeColourPairings",
+              "kind": "function",
+              "signature": "const probeColourPairings: (primitive: LoomPrimitive, declaredSlots?: readonly string[], text?: PrimitiveText<string>, configurations?: readonly JsonObject[]) => ColourVerdict",
+              "truncated": false,
+              "summary": "The union across every configuration, rather than the intersection the decoration probe takes. Decoration is a promise that has to hold however the primitive is configured; a colour pairing is a fact about one configuration, and a `loom.section` that paints `accent-subtle` only under `tone: \"accent\"` renders that pairing on a real page whatever the other tones do."
             }
           ]
         },
@@ -5301,6 +5336,48 @@
               "signature": "const interactiveTypesFor: (registry: PrimitiveRegistry) => InteractiveTypes",
               "truncated": false,
               "summary": "A registry's interactivity declarations, in the shape a Gate policy takes."
+            }
+          ]
+        },
+        {
+          "module": "sdk/pairings",
+          "title": "Pairings",
+          "summary": "Every foreground-on-background a registry can put on a page, read off the components rather than listed by hand.",
+          "symbols": [
+            {
+              "name": "PairingBasis",
+              "kind": "type",
+              "signature": "type PairingBasis = \"painted\" | \"composed\";",
+              "truncated": false,
+              "summary": "Whether one primitive set both ends of a pairing, or only the ink."
+            },
+            {
+              "name": "DerivedPairing",
+              "kind": "type",
+              "signature": "type DerivedPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n    readonly basis: PairingBasis;\n    /** The primitives that produce it, so a failure names components rather than two slot ids. */\n    readonly types: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "One foreground-on-background the library can put on a page, and what produces it."
+            },
+            {
+              "name": "ChildGround",
+              "kind": "type",
+              "signature": "type ChildGround = {\n    readonly ground: PaletteSlot;\n    readonly types: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "A ground a primitive puts its declared children and slots on."
+            },
+            {
+              "name": "RegistryPairings",
+              "kind": "type",
+              "signature": "type RegistryPairings = {\n    readonly pairings: readonly DerivedPairing[];\n    /** Inks a primitive sets without painting a ground of its own. */\n    readonly floating: readonly PaletteSlot[];\n    /** Every ground a primitive places children on, whether or not the ramp is held to it. */\n    readonly childGrounds: readonly ChildGround[];\n    /**\n     * Grounds children land on that the text ramp is not held to. Not a failure:\n     * `accent` is here because `loom.action` fills it and answers the ink itself.\n     * It is reported because a *new* ground appearing here is the signal that\n     * either a primitive is painting somewhere unconsidered or the declared list\n     * has fallen behind the library — the same drift this module exists to catch,\n     * one level up.\n     */\n    readonly groundsOutsideTheRamp: readonly ChildGround[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n};",
+              "truncated": false,
+              "summary": "What a registry's components paint, as the contrast bar needs to hear it."
+            },
+            {
+              "name": "registryPairings",
+              "kind": "function",
+              "signature": "const registryPairings: (registry: PrimitiveRegistry, textGrounds: readonly PaletteSlot[]) => RegistryPairings",
+              "truncated": false,
+              "summary": "Probes every primitive in a registry and assembles what they paint."
             }
           ]
         },
