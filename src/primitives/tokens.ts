@@ -52,21 +52,27 @@ export const weight = (role: "heading" | "body"): string => `var(--loom-${role}-
 export const motion = (speed: "fast" | "medium" | "slow"): string => `var(--loom-motion-${speed})`
 
 /**
- * The one family in this library that a font pack does not supply.
+ * The fallback for the one family a font pack is allowed not to supply.
  *
- * A code panel and a key cap need a monospace face, and a font pack declares
- * `headingFamily`, `bodyFamily` and `accentFamily` — none of which is one.
- * Filed for `Loom daily build`, whose file `src/theme/theme.ts` is; a font pack
- * that named its own mono is a better answer than a stack chosen here, because
- * a pack built around Berkeley Mono should get to say so.
+ * A code panel and a key cap need a monospace face, and for a while no pack
+ * could name one. That is fixed: a pack declares `monoFamily`
+ * ([0085](../../decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)),
+ * it is emitted as `--loom-mono-family`, and a pack built around Berkeley Mono
+ * gets to say so. Nothing here changed when it landed, because this was written
+ * as a `var()` with the stack as its **fallback** rather than as the stack
+ * alone — which is the whole reason the seam cost one file to open.
  *
- * Written as a `var()` with the stack as its **fallback** rather than as the
- * stack alone, so the day `--loom-mono-family` is emitted every code block in
- * every deployment picks it up with nothing here to change. Until then the
- * fallback is what resolves, and it is a system stack rather than a webfont:
- * nothing to load, and identical under every palette, which is what keeps the
- * re-theme guarantee (0049) true for a primitive that needs a face the theme
- * has not got.
+ * `monoFamily` is the one face a pack may decline, so the fallback is not dead
+ * code and still resolves for every pack that does. It is a system stack rather
+ * than a webfont: nothing to load, and identical under every palette, which is
+ * what keeps the re-theme guarantee (0049) true for a primitive whose theme has
+ * not answered.
+ *
+ * **`family("mono")` is deliberately not a thing.** The signature is
+ * `family(role: "heading" | "body")`, and a third member would be right if you
+ * want the roles symmetrical — but `monospace()` is not the same shape, because
+ * it carries a fallback the other two do not need. If you widen `family`, the
+ * fallback has to survive the move.
  */
 export const MONOSPACE_STACK =
   'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace'

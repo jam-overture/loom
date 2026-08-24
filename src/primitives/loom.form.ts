@@ -145,6 +145,19 @@ export const loomForm = definePrimitive({
     "A form: loom.field children, a loom.button in its submit region, and the destination the deployment resolved.",
   props,
   slots: ["submit", "note"],
+  /**
+   * The one primitive in this library that posts, saying so
+   * ([0087](../../decisions/0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md)).
+   *
+   * It posted correctly before this line and the probe could see it, which is
+   * why nothing was broken and nothing goes red now. What the declaration buys
+   * is the *other* direction: a later refactor that reads `loom.submit` and
+   * forgets to put the action back on the `<form>` moves this out of `submits`
+   * and into `unwiredSubmitters`, and the audit says so. Undeclared, that same
+   * edit reads as a primitive that simply stopped posting — indistinguishable
+   * from one that never did.
+   */
+  submits: true,
   text: FORM_TEXT,
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, FormTextKey>) => {
     const layout: Layout = given.layout ?? "stacked"
