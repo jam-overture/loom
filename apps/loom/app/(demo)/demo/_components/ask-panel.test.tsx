@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { DEMO_PRESETS } from "@/app/(demo)/_lib/presets"
+import { DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
 
 import { AskPanel } from "./ask-panel"
 
@@ -54,9 +54,17 @@ describe("the ask panel", () => {
   it("offers only the asks this tree can honour", () => {
     render(<AskPanel revision={0} available={["palette", "trim"]} modelConfigured={false} />)
 
-    expect(screen.getByText("Re-theme the whole page")).toBeTruthy()
-    expect(screen.getByText("Remove the stats")).toBeTruthy()
-    expect(screen.queryByText("Move the quote up")).toBeNull()
+    /*
+     * Read off the table rather than written out here. What this test is about
+     * is that the panel honours `available`, and spelling the labels a second
+     * time made a retune of the *copy* fail a test about the *filter* — which
+     * it did, the run the specimen page stopped being Loom's own.
+     */
+    const labelOf = (id: DemoPresetId): string => DEMO_PRESETS.find((preset) => preset.id === id)!.label
+
+    expect(screen.getByText(labelOf("palette"))).toBeTruthy()
+    expect(screen.getByText(labelOf("trim"))).toBeTruthy()
+    expect(screen.queryByText(labelOf("promote"))).toBeNull()
   })
 
   /**
