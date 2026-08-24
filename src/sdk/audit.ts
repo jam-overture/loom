@@ -4,6 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { BehaviourName } from "../render/behaviour.js"
 
 import {
+  describeProbeFailures,
   probeConfigurations,
   probeEditableDecoration,
   probePlacement,
@@ -62,6 +63,20 @@ export type UnplacedBehaviours = {
 export type ThrowingConfigurations = {
   readonly type: PrimitiveType
   readonly failures: readonly ProbeFailure[]
+  /**
+   * Whether *nothing* the probe tried came back — the line between a fault the
+   * audit is certain of and one it is only reporting.
+   *
+   * `false`: some configurations rendered and this one threw, so the component
+   * is callable and a value its own schema accepts crashes it. Certain.
+   *
+   * `true`: every configuration threw, which is what a broken component and a
+   * hook-using one both look like from outside a renderer — and a hook-using
+   * component is a legitimate primitive (0012). A host with none of those
+   * asserts the whole list empty; one that ships them asserts the `false` half
+   * and reads the rest.
+   */
+  readonly everyConfiguration: boolean
 }
 
 export type RegistryAudit = {
@@ -94,6 +109,13 @@ export type RegistryAudit = {
    * wants to know about — a tree the validator accepts can take the page down —
    * and never a reason to distrust the rest of this audit, which is answered by
    * the configurations that did render.
+   *
+   * Every primitive that threw is here, including one that threw under *all* of
+   * them. That case used to reach only `notProbeable`, beside the class and
+   * hook-using components that are legitimate primitives (0012), so the most
+   * extreme instance of the fault this list exists for sat in the one list a
+   * host cannot assert empty. `everyConfiguration` marks it rather than hiding
+   * it.
    */
   readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[]
   /**
@@ -128,8 +150,19 @@ const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
 const unplacedBehavioursIn = (placement: PlacementVerdict): readonly BehaviourName[] =>
   placement.outcome === "probed" ? placement.unplacedBehaviours : []
 
-const threwIn = (placement: PlacementVerdict): readonly ProbeFailure[] =>
-  placement.outcome === "probed" ? placement.threw : []
+/**
+ * The throwing configurations a placement verdict saw, from whichever branch it
+ * came back on. A verdict that declined because *everything* threw holds the
+ * same failures as one that answered despite some of them; only `not-callable`
+ * has none, because nothing was called.
+ */
+const throwingIn = (type: PrimitiveType, placement: PlacementVerdict): readonly ThrowingConfigurations[] => {
+  const failures = placement.outcome === "probed" ? placement.threw : placement.failures
+
+  if (failures.length === 0) return []
+
+  return [{ type, failures, everyConfiguration: placement.outcome === "not-probeable" }]
+}
 
 export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
   const audits = registry.primitives.map((primitive) => {
@@ -178,9 +211,7 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
     leaves: audits
       .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
       .map((audit) => audit.type),
-    throwsOnDeclaredProps: audits
-      .filter((audit) => threwIn(audit.placement).length > 0)
-      .map((audit) => ({ type: audit.type, failures: threwIn(audit.placement) })),
+    throwsOnDeclaredProps: audits.flatMap((audit) => throwingIn(audit.type, audit.placement)),
   }
 }
 
@@ -239,15 +270,7 @@ const describePlacement = (placement: PlacementVerdict): string => {
 
   if (placement.threw.length === 0) return children
 
-  /**
-   * Named rather than counted. A person reading this has to reproduce it, and
-   * `{"type":"select"}` is the whole reproduction.
-   */
-  const threw = placement.threw
-    .map((failure) => `${JSON.stringify(failure.props)} (${failure.reason})`)
-    .join(", ")
-
-  return `${children}; threw on ${threw}`
+  return `${children}; threw on ${describeProbeFailures(placement.threw)}`
 }
 
 /**

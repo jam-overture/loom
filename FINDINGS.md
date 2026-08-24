@@ -7230,7 +7230,34 @@ between requests (0081).
 
 ## 2026-08-24 — a primitive that throws under every configuration is missing from the one list a host can assert empty
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by #154 — both suggested shapes were needed, and neither was sufficient alone.
+`not-probeable` now carries a `cause` (`not-callable` when nothing was called,
+`threw` when everything called threw) and the failures it saw, which is
+suggestion 2; `throwsOnDeclaredProps` now holds every primitive that threw,
+including one that threw under all of them, which is suggestion 1. Recorded as
+[0090](decisions/0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md).
+
+**Suggestion 1 taken literally would have moved the problem rather than fixed
+it**, and the reproduction shows why. A hook-using component throws when called
+outside a renderer too, so it would enter `throwsOnDeclaredProps` beside
+`loom.exploding` and that list would stop being assertable for exactly the
+reason `notProbeable` is not. No function-call probe can separate them: both are
+functions, both throw, and React's invalid-hook-call error is a message rather
+than a type.
+
+So each entry carries `everyConfiguration` — `false` means some configurations
+rendered and this one threw, which nothing legitimate does and the audit is
+certain of; `true` means nothing answered, which is a fault or a hook. A host
+with no hook-using primitives asserts the whole list empty. One that ships them
+asserts the `false` half.
+
+`loom init` now generates that assertion. It shipped `notDecorated` and
+`notProbeable` and not the list that stops a page rather than a portal, which
+seems worth naming separately: the reproduction would have been caught in a
+scaffolded host either way once the list was complete, but only because the
+scaffold happens to assert `notProbeable`, and 0012 says that list is not one to
+assert.
 
 Found while writing lesson 15's Exercise C, which registers a component that
 throws unconditionally and then audits it. I expected `throwsOnDeclaredProps`.
