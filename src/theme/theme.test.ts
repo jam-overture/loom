@@ -182,13 +182,27 @@ describe("what the library reads against what", () => {
     return ratio
   }
 
-  it("meets AA on every pairing a primitive puts together, in every registered palette", () => {
+  it("meets AA on every pairing a primitive paints, in every registered palette", () => {
     for (const palette of STARTER_PALETTES) {
       const audit = auditPalette(palette)
 
-      expect(describePaletteAudit(audit)).toBe("")
+      expect(audit.failures, palette.id).toEqual([])
+      expect(audit.unmeasured, palette.id).toEqual([])
       expect(audit.measured).toHaveLength(PALETTE_TEXT_PAIRINGS.length)
     }
+  })
+
+  /**
+   * The composed half is measured in `contrast.test.ts`, which pins the nine
+   * shortfalls by name. Here the point is narrower and about the description:
+   * a palette with nothing to report says nothing, so a reader who takes an
+   * empty string for a clean palette is right whenever it is empty (0089).
+   */
+  it("says nothing about a palette that clears both halves", () => {
+    const clean = STARTER_PALETTES.filter((palette) => auditPalette(palette).composedFailures.length === 0)
+
+    expect(clean.length).toBeGreaterThan(0)
+    for (const palette of clean) expect(describePaletteAudit(auditPalette(palette)), palette.id).toBe("")
   })
 
   it("keeps the house palette's green out of the slot that is read as text", () => {

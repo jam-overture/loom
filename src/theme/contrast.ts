@@ -24,42 +24,112 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
 export const TEXT_CONTRAST_MINIMUM = 4.5
 
 /**
- * A foreground slot read on a background slot, and the primitives that put them
- * together.
+ * The grounds every ink in the text ramp has to be readable on (0089).
+ *
+ * The one thing `registryPairings` cannot derive, and the reason it takes this
+ * as an argument. A probe can see that `loom.action` puts children on `accent`
+ * and that `loom.page` puts them on `bg-canvas`; nothing in either component
+ * says the first is a filled control that answers its own ink with
+ * `fg-on-accent` while the second is a page surface where a child brings
+ * whichever ink it likes. Both set a colour beside the ground and only one of
+ * them means it.
+ *
+ * So the four are declared here. A ground on this list is one where a palette
+ * owes the reader every ink in the ramp; a ground off it is one where the
+ * primitive painting it has already answered what colour the text is, and
+ * holding a palette to `fg-muted` on `accent` would be a bar no palette can
+ * pass — it is 1.00:1 in some palette however the palette is written.
+ */
+export const PALETTE_TEXT_GROUNDS: readonly PaletteSlot[] = [
+  "bg-canvas",
+  "bg-surface",
+  "bg-surface-muted",
+  "accent-subtle",
+]
+
+/**
+ * How a pairing comes about, which decides what a failure means (0089).
+ *
+ * **`painted`** — one primitive sets both ends. A palette that fails one has a
+ * page in it nobody can read, and no tree can avoid it, so this is the bar.
+ *
+ * **`composed`** — a primitive sets an ink and leaves the ground to whatever it
+ * is placed in. Reachable in a legal tree and reported, not asserted: see
+ * `PaletteAudit.composedFailures` for why the two are counted apart.
+ */
+export type PairingBasis = "painted" | "composed"
+
+/**
+ * A foreground slot read on a background slot, and where they meet.
  *
  * Read off `src/primitives` rather than imagined, which is what makes the check
- * worth failing over: every pairing here is one some component actually renders,
- * so a palette that fails one has a page in it that a reader cannot read. A
- * pairing nothing renders would be a bar chosen for its own sake.
+ * worth failing over: every pairing here is one some component actually
+ * renders, so a palette that fails one has a page in it that a reader cannot
+ * read. A pairing nothing renders would be a bar chosen for its own sake.
+ *
+ * That was a promise a person kept by hand until it was nine pairings out of
+ * date. Both halves of it are now checked against the components themselves —
+ * `registryPairings` derives what the library renders, and `pairings.test.ts`
+ * fails if this list is missing any of it or carries a row nothing renders.
  */
 export type TextPairing = {
   readonly foreground: PaletteSlot
   readonly background: PaletteSlot
+  readonly basis: PairingBasis
   /** Where it happens, so a failure names a page rather than two slot ids. */
   readonly where: string
 }
 
 export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
-  { foreground: "fg-default", background: "bg-canvas", where: "loom.page body copy" },
-  { foreground: "fg-default", background: "bg-surface", where: "loom.card body copy" },
-  { foreground: "fg-muted", background: "bg-canvas", where: "loom.prose tone muted" },
-  { foreground: "fg-muted", background: "bg-surface", where: "loom.feature body" },
-  { foreground: "accent", background: "bg-canvas", where: "loom.section eyebrow, loom.link current" },
-  { foreground: "accent", background: "bg-surface", where: "loom.faq marker, loom.article kicker" },
-  { foreground: "fg-on-accent", background: "accent", where: "loom.action primary label" },
-  { foreground: "accent-strong", background: "accent-subtle", where: "loom.badge accent, loom.icon soft" },
-  { foreground: "fg-default", background: "accent-subtle", where: "loom.section tone accent" },
+  // Painted: one primitive sets the ink and the ground beneath it.
+  { foreground: "fg-default", background: "bg-canvas", basis: "painted", where: "loom.page body copy" },
+  { foreground: "fg-default", background: "bg-surface", basis: "painted", where: "loom.card body copy" },
+  { foreground: "fg-default", background: "bg-surface-muted", basis: "painted", where: "loom.callout body, loom.code panel" },
+  { foreground: "fg-default", background: "accent-subtle", basis: "painted", where: "loom.section tone accent" },
+  { foreground: "fg-muted", background: "bg-surface", basis: "painted", where: "loom.feature body" },
+  { foreground: "fg-muted", background: "bg-surface-muted", basis: "painted", where: "loom.form hint, loom.badge neutral" },
+  { foreground: "fg-on-accent", background: "accent", basis: "painted", where: "loom.action primary label" },
+  { foreground: "accent", background: "bg-surface", basis: "painted", where: "loom.quote attribution" },
+  { foreground: "accent-strong", background: "accent-subtle", basis: "painted", where: "loom.badge accent, loom.icon soft" },
   /**
    * `fg-subtle` is held to the body-text bar like the rest (0074). The
    * slot recedes and none of what it carries is reliably large — a `loom.footer`
    * note row and a `loom.tier` note are ordinary small text — so a threshold of
    * 3:1 would be a bar chosen to fit the colours rather than the reader.
-   * `bg-surface-muted` is here because `loom.perk` is the one primitive that
-   * puts the pair together deliberately.
    */
-  { foreground: "fg-subtle", background: "bg-canvas", where: "loom.footer note, loom.link-list group label" },
-  { foreground: "fg-subtle", background: "bg-surface", where: "loom.tier note, loom.milestone marker" },
-  { foreground: "fg-subtle", background: "bg-surface-muted", where: "loom.perk excluded marker" },
+  { foreground: "fg-subtle", background: "bg-surface", basis: "painted", where: "loom.footer note row" },
+  { foreground: "fg-subtle", background: "bg-surface-muted", basis: "painted", where: "loom.perk excluded marker" },
+
+  /**
+   * Composed: the ink is set here and the ground comes from whatever the
+   * primitive is placed in. Every ink that floats, on every ground the ramp is
+   * held to — which is the full set rather than the ones somebody pictured,
+   * because a tree may nest any of them inside any other (0008).
+   */
+  { foreground: "fg-muted", background: "bg-canvas", basis: "composed", where: "loom.prose tone muted" },
+  { foreground: "fg-muted", background: "accent-subtle", basis: "composed", where: "loom.feature body inside an accent section" },
+  { foreground: "fg-subtle", background: "bg-canvas", basis: "composed", where: "loom.footer note, loom.link-list group label" },
+  { foreground: "accent", background: "bg-canvas", basis: "composed", where: "loom.section eyebrow, loom.link current" },
+  { foreground: "accent", background: "bg-surface-muted", basis: "composed", where: "loom.faq marker inside a muted well" },
+  { foreground: "accent-strong", background: "bg-canvas", basis: "composed", where: "loom.field validation message" },
+  { foreground: "accent-strong", background: "bg-surface", basis: "composed", where: "loom.field inside a card" },
+  { foreground: "accent-strong", background: "bg-surface-muted", basis: "composed", where: "loom.field inside a muted well" },
+  /**
+   * The two the library does not clear. Both are an ink placed on the tinted
+   * panel, both are reachable in an ordinary tree — a perk list inside a
+   * `loom.section tone="accent"` is the whole of it — and neither is a bar
+   * chosen to fit the colours: `accent` is 4.43:1 on `plum` and `fg-subtle` is
+   * 3.76:1 on `carbon`, against a 4.5 that every other pairing here clears.
+   *
+   * They are listed rather than omitted because the alternative is an audit
+   * that is silent about the pairings it would fail, which is the exact fault
+   * this list was rewritten to fix. What to move — the panel toward the canvas,
+   * or the ink toward `fg-muted` — costs something either way, both costs are
+   * measured, and until the choice is made `composedFailures` carries these two
+   * in the open (0089).
+   */
+  { foreground: "accent", background: "accent-subtle", basis: "composed", where: "loom.faq marker inside an accent section" },
+  { foreground: "fg-subtle", background: "accent-subtle", basis: "composed", where: "loom.perk note inside an accent section" },
 ]
 
 /** sRGB channel, linearised. WCAG's own curve. */
@@ -134,8 +204,36 @@ export type UnmeasuredPairing = {
 export type PaletteAudit = {
   readonly palette: ThemeId
   readonly measured: readonly MeasuredPairing[]
-  /** Measured and under the bar. The list a host asserts empty. */
+  /**
+   * Measured, `painted`, and under the bar. The list a host asserts empty.
+   *
+   * Painted only, because a painted failure is a page nobody can read and no
+   * tree can avoid it — both ends are one primitive's own. That is a defect in
+   * the palette with one fix, and asserting it empty is a promise a palette can
+   * keep.
+   */
   readonly failures: readonly MeasuredPairing[]
+  /**
+   * Measured, `composed`, and under the bar — reported rather than asserted.
+   *
+   * The split is not a softer bar for the same fault, and it is worth being
+   * plain about why, because a second list is exactly where an inconvenient
+   * failure would go to be forgotten.
+   *
+   * A composed pairing needs a tree that puts the two together. It is reachable
+   * — `loom.perk` inside a `loom.section tone="accent"` is an ordinary page —
+   * but whether a given deployment reaches it depends on trees nobody has
+   * written yet, and the fix is not always the palette's: an ink that fails on
+   * one ground and clears the other three may be a panel that wants moving.
+   * Loom measures and reports, and imposing is the host's call — the bargain
+   * the contrast bar already makes, applied here one level in (0076).
+   *
+   * What keeps it honest is that nothing may be *demoted* into it. A pairing
+   * any primitive paints is `painted` in the declared list whatever else also
+   * composes it, and `library.test.ts` fails if the declared basis is softer
+   * than the derivation's.
+   */
+  readonly composedFailures: readonly MeasuredPairing[]
   /**
    * Neither a pass nor a failure. Separate from `failures` for the reason
    * `notProbeable` is separate in the registry audit: a host that wants the
@@ -145,9 +243,19 @@ export type PaletteAudit = {
   readonly unmeasured: readonly UnmeasuredPairing[]
 }
 
-/** Measures every pairing the primitives render, in one palette. Refuses nothing. */
-export const auditPalette = (palette: Palette): PaletteAudit => {
-  const results = PALETTE_TEXT_PAIRINGS.map((pairing) => {
+/**
+ * Measures every pairing the primitives render, in one palette. Refuses nothing.
+ *
+ * `pairings` defaults to the list Loom's own library renders. A host passes its
+ * own — `registryPairings(registry, PALETTE_TEXT_GROUNDS)` derives it from the
+ * components rather than asking anyone to keep a list — and gets the bar held
+ * to the primitives it actually registered rather than to ours.
+ */
+export const auditPalette = (
+  palette: Palette,
+  pairings: readonly TextPairing[] = PALETTE_TEXT_PAIRINGS
+): PaletteAudit => {
+  const results = pairings.map((pairing) => {
     const foreground = palette.slots[pairing.foreground] ?? ""
     const background = palette.slots[pairing.background] ?? ""
     const ratio = contrastRatio(foreground, background)
@@ -158,11 +266,13 @@ export const auditPalette = (palette: Palette): PaletteAudit => {
   })
 
   const measured = results.flatMap((result) => (result.measured ? [result.measured] : []))
+  const under = measured.filter((entry) => !entry.meets)
 
   return {
     palette: palette.id,
     measured,
-    failures: measured.filter((entry) => !entry.meets),
+    failures: under.filter((entry) => entry.pairing.basis === "painted"),
+    composedFailures: under.filter((entry) => entry.pairing.basis === "composed"),
     unmeasured: results.flatMap((result) => (result.unmeasured ? [result.unmeasured] : [])),
   }
 }
@@ -170,12 +280,23 @@ export const auditPalette = (palette: Palette): PaletteAudit => {
 const describePairing = (pairing: TextPairing): string =>
   `${pairing.foreground} on ${pairing.background} (${pairing.where})`
 
-/** One line per problem, for a CLI or a failing test's message. Empty when clean. */
+/**
+ * One line per problem, for a CLI or a failing test's message. Empty when clean.
+ *
+ * Composed failures are printed too, and said to be composed. A description
+ * that showed only what is asserted would let a reader take an empty string for
+ * a clean palette, and on eight of the palettes in this library that would be
+ * false.
+ */
 export const describePaletteAudit = (audit: PaletteAudit): string =>
   [
     ...audit.failures.map(
       (entry) =>
         `${audit.palette}: ${describePairing(entry.pairing)} is ${entry.ratio.toFixed(2)}:1, under ${TEXT_CONTRAST_MINIMUM}:1`
+    ),
+    ...audit.composedFailures.map(
+      (entry) =>
+        `${audit.palette}: ${describePairing(entry.pairing)} is ${entry.ratio.toFixed(2)}:1, under ${TEXT_CONTRAST_MINIMUM}:1 — composed, reported not asserted`
     ),
     ...audit.unmeasured.map(
       (entry) =>

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560" width="920" height="560" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="560" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">Every pairing the library renders, worst of 21 palettes</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Derived by calling all 55 primitives and reading back what they paint. Nine of these were in nobody&#8217;s list.</text>
+
+  <!-- column headers -->
+  <text x="330" y="112" font-size="12" font-weight="600" fill="#15120e" text-anchor="middle">bg-canvas</text>
+  <text x="450" y="112" font-size="12" font-weight="600" fill="#15120e" text-anchor="middle">bg-surface</text>
+  <text x="570" y="112" font-size="12" font-weight="600" fill="#15120e" text-anchor="middle">bg-surface-muted</text>
+  <text x="690" y="112" font-size="12" font-weight="600" fill="#15120e" text-anchor="middle">accent-subtle</text>
+  <text x="828" y="112" font-size="12" font-weight="600" fill="#8a8178" text-anchor="middle">accent</text>
+
+  <text x="510" y="94" font-size="11" font-weight="600" fill="#7a6755" text-anchor="middle" letter-spacing="0.6">THE FOUR GROUNDS THE TEXT RAMP IS HELD TO</text>
+  <text x="828" y="94" font-size="11" font-weight="600" fill="#a89a8c" text-anchor="middle" letter-spacing="0.6">FILLED</text>
+
+  <line x1="270" y1="122" x2="750" y2="122" stroke="#d9d0c6" stroke-width="1"/>
+  <line x1="768" y1="122" x2="888" y2="122" stroke="#e5ded6" stroke-width="1"/>
+
+  <!-- row: fg-default -->
+  <text x="258" y="156" font-size="12.5" font-weight="600" fill="#15120e" text-anchor="end">fg-default</text>
+  <rect x="278" y="136" width="104" height="30" rx="5" fill="#efe7dd"/><text x="330" y="156" font-size="12.5" fill="#15120e" text-anchor="middle">15.20</text>
+  <rect x="398" y="136" width="104" height="30" rx="5" fill="#efe7dd"/><text x="450" y="156" font-size="12.5" fill="#15120e" text-anchor="middle">13.06</text>
+  <rect x="518" y="136" width="104" height="30" rx="5" fill="#efe7dd"/><text x="570" y="156" font-size="12.5" fill="#15120e" text-anchor="middle">15.76</text>
+  <rect x="638" y="136" width="104" height="30" rx="5" fill="#efe7dd"/><text x="690" y="156" font-size="12.5" fill="#15120e" text-anchor="middle">11.85</text>
+
+  <!-- row: fg-muted -->
+  <text x="258" y="196" font-size="12.5" font-weight="600" fill="#15120e" text-anchor="end">fg-muted</text>
+  <rect x="278" y="176" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="330" y="196" font-size="12.5" fill="#15120e" text-anchor="middle">6.76</text>
+  <rect x="398" y="176" width="104" height="30" rx="5" fill="#efe7dd"/><text x="450" y="196" font-size="12.5" fill="#15120e" text-anchor="middle">6.35</text>
+  <rect x="518" y="176" width="104" height="30" rx="5" fill="#efe7dd"/><text x="570" y="196" font-size="12.5" fill="#15120e" text-anchor="middle">6.35</text>
+  <rect x="638" y="176" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="690" y="196" font-size="12.5" fill="#15120e" text-anchor="middle">4.99</text>
+
+  <!-- row: fg-subtle -->
+  <text x="258" y="236" font-size="12.5" font-weight="600" fill="#15120e" text-anchor="end">fg-subtle</text>
+  <rect x="278" y="216" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="330" y="236" font-size="12.5" fill="#15120e" text-anchor="middle">5.04</text>
+  <rect x="398" y="216" width="104" height="30" rx="5" fill="#efe7dd"/><text x="450" y="236" font-size="12.5" fill="#15120e" text-anchor="middle">4.75</text>
+  <rect x="518" y="216" width="104" height="30" rx="5" fill="#efe7dd"/><text x="570" y="236" font-size="12.5" fill="#15120e" text-anchor="middle">4.59</text>
+  <rect x="638" y="216" width="104" height="30" rx="5" fill="#fbe9e3" stroke="#c0442a" stroke-width="1.8"/><text x="690" y="236" font-size="12.5" font-weight="700" fill="#a3341c" text-anchor="middle">3.76</text>
+
+  <!-- row: accent -->
+  <text x="258" y="276" font-size="12.5" font-weight="600" fill="#15120e" text-anchor="end">accent</text>
+  <rect x="278" y="256" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="330" y="276" font-size="12.5" fill="#15120e" text-anchor="middle">5.06</text>
+  <rect x="398" y="256" width="104" height="30" rx="5" fill="#efe7dd"/><text x="450" y="276" font-size="12.5" fill="#15120e" text-anchor="middle">4.75</text>
+  <rect x="518" y="256" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="570" y="276" font-size="12.5" fill="#15120e" text-anchor="middle">4.75</text>
+  <rect x="638" y="256" width="104" height="30" rx="5" fill="#fbe9e3" stroke="#c0442a" stroke-width="1.8"/><text x="690" y="276" font-size="12.5" font-weight="700" fill="#a3341c" text-anchor="middle">4.43</text>
+
+  <!-- row: accent-strong -->
+  <text x="258" y="316" font-size="12.5" font-weight="600" fill="#15120e" text-anchor="end">accent-strong</text>
+  <rect x="278" y="296" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="330" y="316" font-size="12.5" fill="#15120e" text-anchor="middle">4.91</text>
+  <rect x="398" y="296" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="450" y="316" font-size="12.5" fill="#15120e" text-anchor="middle">4.83</text>
+  <rect x="518" y="296" width="104" height="30" rx="5" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/><text x="570" y="316" font-size="12.5" fill="#15120e" text-anchor="middle">4.61</text>
+  <rect x="638" y="296" width="104" height="30" rx="5" fill="#efe7dd"/><text x="690" y="316" font-size="12.5" fill="#15120e" text-anchor="middle">4.75</text>
+
+  <!-- row: fg-on-accent -->
+  <text x="258" y="356" font-size="12.5" font-weight="600" fill="#8a8178" text-anchor="end">fg-on-accent</text>
+  <rect x="776" y="336" width="104" height="30" rx="5" fill="#efe7dd"/><text x="828" y="356" font-size="12.5" fill="#15120e" text-anchor="middle">5.25</text>
+
+  <line x1="758" y1="130" x2="758" y2="372" stroke="#e5ded6" stroke-width="1"/>
+
+  <!-- legend -->
+  <rect x="278" y="404" width="26" height="17" rx="4" fill="#efe7dd"/>
+  <text x="314" y="417" font-size="12.5" fill="#3d3831"><tspan font-weight="650">painted</tspan> — one primitive sets ink and ground. The bar: asserted empty.</text>
+
+  <rect x="278" y="432" width="26" height="17" rx="4" fill="none" stroke="#c9bdb0" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="314" y="445" font-size="12.5" fill="#3d3831"><tspan font-weight="650">composed</tspan> — ink set here, ground from whatever it is placed in. Reported.</text>
+
+  <rect x="278" y="460" width="26" height="17" rx="4" fill="#fbe9e3" stroke="#c0442a" stroke-width="1.8"/>
+  <text x="314" y="473" font-size="12.5" fill="#3d3831"><tspan font-weight="650" fill="#a3341c">under 4.5:1</tspan> — nine shortfalls across eight palettes, pinned by name so a tenth fails the build.</text>
+
+  <text x="40" y="516" font-size="12.5" fill="#5c5751">A perk list inside an accent-toned section is an ordinary tree. On <tspan font-weight="650" fill="#15120e">bold, slate, midnight, carbon, plum, forest, ember</tspan> and <tspan font-weight="650" fill="#15120e">obsidian</tspan></text>
+  <text x="40" y="536" font-size="12.5" fill="#5c5751">its notes are under the bar — because <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">derive.ts</tspan> solves every ink against three grounds and <tspan font-weight="650" fill="#15120e">accent-subtle</tspan> is a fourth.</text>
+</svg>
