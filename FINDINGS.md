@@ -7228,6 +7228,90 @@ between requests (0081).
 
 ---
 
+## 2026-08-24 — a primitive that throws under every configuration is missing from the one list a host can assert empty
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+Found while writing lesson 15's Exercise C, which registers a component that
+throws unconditionally and then audits it. I expected `throwsOnDeclaredProps`.
+
+```
+registry built? true
+loom.exploding: could not be probed (calling it outside a renderer threw: boom); placement not probed (calling it outside a renderer threw: boom)
+throwsOnDeclaredProps: []
+notProbeable: ["loom.exploding"]
+notDecorated: []
+```
+
+This is 0075 working exactly as written — "only when *no* configuration answers
+is the verdict `not-probeable`" — and it leaves a host with nowhere to put the
+assertion.
+
+- `throwsOnDeclaredProps` is the list whose documented purpose is that "a tree
+  the validator accepts can take the page down". A component that throws on
+  *every* value its schema accepts is the most extreme instance of that, and it
+  is not in the list.
+- `notProbeable` is where it lands, and that list **cannot be asserted empty**:
+  hook-using components and class components live there legitimately, and 0012
+  is explicit that both are legitimate primitives.
+
+So the audit knows the difference and a host cannot act on it. The distinction
+survives only inside the human-readable `reason` string —
+`calling it outside a renderer threw: boom` versus the reason a class component
+gets — which is prose in a CLI message, not a value.
+
+Two shapes that would fix it, both small, and the choice is a judgement about
+what `throwsOnDeclaredProps` means rather than about mechanism:
+
+1. **A configuration that throws is recorded whether or not any other
+   configuration answered.** `throwsOnDeclaredProps` then contains every
+   primitive that threw on props its own schema accepts, which is what its name
+   and its doc comment already say. `notProbeable` keeps it too, which is
+   correct: nothing was learnt about decoration either.
+2. **Give `not-probeable` a discriminated reason** — `threw` versus
+   `not-callable` — so a host can assert the first empty and tolerate the
+   second.
+
+Not fixed here: `src/sdk/` is not this lane's. Filed with the reproduction
+because it is nine lines and the lesson has it executed.
+
+---
+
+## 2026-08-24 — writing lesson 15 falsified a `(docs)` test, and the file had to be opened
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom docs` · **Status:** open —
+nothing to fix, recorded so the owner knows the file was opened and may want a
+better shape
+
+`apps/loom/app/(docs)/_components/architecture.test.tsx`, in *"says an unwritten
+lesson is unwritten instead of linking to it"*:
+
+```ts
+const unwritten = ARCHITECTURE_IDEAS.filter((idea) => idea.lesson.href === undefined)
+
+expect(unwritten.length).toBeGreaterThan(0)
+```
+
+Lesson 15 was the last of the eight architecture ideas pointing at an unwritten
+lesson — `registry` names lesson 15 — so writing it made that guard fail and
+turned the docs lane red on a lessons PR. Same shape as the marketing lane's
+`FACTS.primitives`: a surface checking its claims against the repository, which
+is the right design, and which means another lane's ordinary work turns it red.
+
+I removed the guard and left a comment saying why and when the rule comes back
+into force. The per-idea assertions are untouched, so the rule the test protects
+is unchanged — but the loop is now vacuous, and it will stay vacuous until a
+ninth idea points past the written syllabus.
+
+The owner may prefer to render `ArchitectureIdeas` against a synthetic idea with
+`lesson.href === undefined` rather than against whichever real lesson happens to
+be unwritten. That would test the component's behaviour rather than the course's
+progress, and would not go red again the next time this lane does its job. Not
+done here: it is a redesign in someone else's route group, not a mechanical
+count update.
+
+---
+
 ## 2026-08-24 — the rename queue is empty of route names and down to one screen
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open

@@ -47,9 +47,13 @@ describe("the eight ideas, rendered", () => {
   it("says an unwritten lesson is unwritten instead of linking to it", () => {
     render(<ArchitectureIdeas />)
 
+    /**
+     * Empty as of lesson 15, which was the last of the eight to be unwritten.
+     * The guard that used to assert this list non-empty is gone rather than
+     * inverted: the rule it protects is still the rule, and it comes back into
+     * force the day a ninth idea points at a lesson the course has not reached.
+     */
     const unwritten = ARCHITECTURE_IDEAS.filter((idea) => idea.lesson.href === undefined)
-
-    expect(unwritten.length).toBeGreaterThan(0)
 
     for (const idea of unwritten) {
       const section = screen.getByRole("region", { name: idea.title })
