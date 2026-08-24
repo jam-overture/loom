@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as fifty-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(58)
+  it("registers as sixty-one primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(61)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -175,6 +175,9 @@ describe("the starter library", () => {
       "loom.comparison-table",
       "loom.comparison-row",
       "loom.comparison",
+      "loom.table",
+      "loom.table-row",
+      "loom.table-cell",
       "loom.product-grid",
       "loom.product",
       "loom.quote-grid",
@@ -798,6 +801,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(technicalPage(EDITORIAL)),
       ...typesIn(comparisonPage(EDITORIAL)),
       ...typesIn(prosePage(EDITORIAL)),
+      ...typesIn(tablePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -823,6 +827,7 @@ describe("the composed vocabulary", () => {
       contactPage,
       technicalPage,
       prosePage,
+      tablePage,
     ].flatMap((fixture) =>
       [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
         .map(([, style]) => style ?? "")
@@ -3741,5 +3746,354 @@ describe("the comparison band", () => {
 
     expect(comparison).toContain("<table")
     expect(pricing).not.toContain("<table")
+  })
+})
+
+/**
+ * The general table, as the two documents that wanted one would use it.
+ *
+ * Two tables rather than one, because the primitive's whole claim is that a
+ * cell holds *whatever the tree puts in it* — and a fixture of one shape would
+ * prove that for one shape. The first is a lessons table: prose in every cell,
+ * set into running text with no panel around it. The second is a spec sheet:
+ * headings down the side, figures that have to line up, and one row the page is
+ * pointing at.
+ */
+const tablePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const symbol = (name: string) => buildElement(idFactory, { type: "loom.code-span", children: [text(name)] })
+
+  type CellChild = ReturnType<typeof text> | ReturnType<typeof symbol>
+
+  const cell = (props: JsonObject, ...children: readonly CellChild[]) =>
+    buildElement(idFactory, { type: "loom.table-cell", props, children: [...children] })
+
+  const heading = (label: string, props: JsonObject = {}) => cell({ role: "column", ...props }, text(label))
+
+  const row = (props: JsonObject, cells: readonly ReturnType<typeof cell>[]) =>
+    buildElement(idFactory, { type: "loom.table-row", props, children: [...cells] })
+
+  const glossary = buildElement(idFactory, {
+    type: "loom.table",
+    props: { caption: "Where a change is weighed, and by what", rules: "rows" },
+    children: [
+      buildSlot(idFactory, "columns", [
+        row({}, [heading("Where"), heading("What it means"), heading("Whose problem")]),
+      ]),
+      row({}, [
+        cell({}, text("The interpreter")),
+        cell({}, text("A delta is re-planned against the tree it is actually given")),
+        cell({}, text("The runtime's")),
+      ]),
+      row({}, [
+        cell({}, text("The Gate")),
+        cell({}, text("Two axes, weighed before a visitor sees anything at all")),
+        cell({}, text("The deployment's")),
+      ]),
+      row({}, [
+        cell({}, text("The record")),
+        cell({}, text("Every node knows who placed it, and "), symbol("invert(delta)"), text(" is always available")),
+        cell({}, text("Nobody's, which is the point")),
+      ]),
+    ],
+  })
+
+  const plans = buildElement(idFactory, {
+    type: "loom.table",
+    props: { caption: "What each plan carries", tone: "panel", rules: "grid", density: "tight" },
+    children: [
+      buildSlot(idFactory, "columns", [
+        row({}, [
+          heading("Plan"),
+          heading("Deployments", { align: "end" }),
+          heading("Retained changes", { align: "end" }),
+          heading("Reviewers", { align: "end" }),
+        ]),
+      ]),
+      row({}, [
+        cell({ role: "row" }, text("Starter")),
+        cell({ numeric: true }, text("1")),
+        cell({ numeric: true }, text("1,000")),
+        cell({ numeric: true }, text("1")),
+      ]),
+      row({ tone: "highlight" }, [
+        cell({ role: "row" }, text("Team")),
+        cell({ numeric: true }, text("12")),
+        cell({ numeric: true }, text("250,000")),
+        cell({ numeric: true }, text("25")),
+      ]),
+      row({}, [
+        cell({ role: "row" }, text("Enterprise")),
+        cell({ numeric: true }, text("Unlimited")),
+        cell({ numeric: true }, text("Unlimited")),
+        cell({ numeric: true }, text("Unlimited")),
+      ]),
+    ],
+  })
+
+  const band = (eyebrow: string, title: string, table: ReturnType<typeof row>) =>
+    buildElement(idFactory, {
+      type: "loom.section",
+      props: { eyebrow },
+      children: [
+        buildSlot(idFactory, "heading", [
+          buildElement(idFactory, { type: "loom.heading", props: { level: 2 }, children: [text(title)] }),
+        ]),
+        table,
+      ],
+    })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        band("The vocabulary", "Three places a change is looked at", glossary),
+        band("Plans", "What each plan carries", plans),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("the general table", () => {
+  /** Every `<tr>` in the markup, as the list of its own top-level cell tags. */
+  const cellTagsOf = (markup: string): readonly (readonly string[])[] =>
+    [...markup.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map(([, body]) =>
+      [...(body ?? "").matchAll(/<(t[dh])[\s>]/g)].flatMap((match) => (match[1] === undefined ? [] : [match[1]]))
+    )
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(tablePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(tablePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(tablePage(BOLD)).diagnostics).toEqual([])
+    expect(render(tablePage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("puts the heading row in a thead and scopes every heading cell", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    /**
+     * The reason this is a `<table>` at all. `scope="col"` is what a screen
+     * reader reads back on reaching a column six rows later, and `scope="row"`
+     * is what turns "12" into "Team, Deployments, 12". A grid of `<div>`s
+     * cannot say either at any price.
+     */
+    const [glossaryHead, ...glossaryBody] = cellTagsOf(markup)
+
+    expect(glossaryHead).toEqual(["th", "th", "th"])
+    expect(glossaryBody.slice(0, 3)).toEqual([
+      ["td", "td", "td"],
+      ["td", "td", "td"],
+      ["td", "td", "td"],
+    ])
+    expect(markup).toMatch(/<thead><tr[^>]*><th[^>]*scope="col"/)
+    expect(markup).toMatch(/<th[^>]*scope="row"[^>]*class="loom-table-key"/)
+  })
+
+  it("emits one heading row per table and never a header outside a thead", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    /**
+     * 0051's test, checked rather than asserted in a comment: the heading row is
+     * a region the table places, so a `move` cannot put it in the body and a
+     * body row cannot drift into the head.
+     */
+    const heads = [...markup.matchAll(/<thead>/g)]
+    const columnHeadings = [...markup.matchAll(/scope="col"/g)]
+    const bodies = [...markup.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)].map(([, body]) => body ?? "")
+
+    expect(heads).toHaveLength(2)
+    expect(columnHeadings).toHaveLength(7)
+    expect(bodies).toHaveLength(2)
+    for (const body of bodies) expect(body).not.toContain('scope="col"')
+  })
+
+  it("defaults a numeric cell to the trailing edge and a word to the leading one", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    /**
+     * Alignment is a fact about what a cell holds rather than a decision the
+     * column makes, which is why it is not the enumerated-ordinal machinery
+     * 0084 needs for a tint. A numeric cell also sets tabular figures, so
+     * "1,000" and "250,000" line up digit under digit instead of drifting.
+     */
+    expect(markup).toMatch(/text-align:end;[^"]*font-variant-numeric:tabular-nums[^"]*">1</)
+    expect(markup).toMatch(/text-align:start[^"]*">The interpreter</)
+    expect(markup).not.toMatch(/font-variant-numeric:tabular-nums[^"]*">The interpreter</)
+  })
+
+  it("tints a row from the row rather than from each of its cells", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    /**
+     * 0084's argument about a featured column, applied on the axis that has a
+     * node to carry it. One decision in one place — and because the row is a
+     * node, it needs no ordinal and no static rule keyed on position.
+     */
+    expect(markup).toContain(`class="${LIBRARY_CLASS.tableRow} ${LIBRARY_CLASS.tableHighlight}"`)
+    expect(markup).toContain(`.${LIBRARY_CLASS.tableHighlight} > * {`)
+    expect(markup.slice(markup.indexOf("<tbody>"))).not.toMatch(/<t[dh][^>]*background:/)
+  })
+
+  it("names the table for a screen reader without letting the caption scroll away", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    /**
+     * A `<caption>` takes the width of its table, and a table wider than a phone
+     * would clip its own name on the screen where the name matters most. The
+     * association is the one `loom.field` uses for a hint: one id minted from
+     * the node's own, announced once because only the table points at it.
+     */
+    const labelled = [...markup.matchAll(/aria-labelledby="([^"]+)"/g)].flatMap((match) =>
+      match[1] === undefined ? [] : [match[1]]
+    )
+
+    expect(labelled).toHaveLength(2)
+    expect(markup).not.toContain("<caption")
+    for (const id of labelled) expect(markup).toContain(`id="${id}"`)
+  })
+
+  it("scrolls a wide table inside its own edge and keeps the row heading in view", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    expect(markup).toMatch(/<div[^>]*overflow-x:auto[^>]*min-width:0/)
+    expect(markup).toContain(`.${LIBRARY_CLASS.tablePanel} .${LIBRARY_CLASS.tableKey} {`)
+    /** Only in a panel: a sticky cell needs an opaque ground, and a plain table has none of its own. */
+    expect(markup).not.toMatch(new RegExp(`\n\\.${LIBRARY_CLASS.tableKey} \\{`))
+  })
+
+  it("holds no list in any of the three schemas, and no count", () => {
+    /**
+     * Every prop is a rendering of however-many rows there are. Nothing here
+     * decides how many exist, which is the question `docs/primitive-granularity.md`
+     * says to ask instead of matching on a prop's name.
+     */
+    expect(propsOfType("loom.table")).toEqual(["caption", "density", "rules", "tone"])
+    expect(propsOfType("loom.table-row")).toEqual(["tone"])
+    expect(propsOfType("loom.table-cell")).toEqual(["align", "numeric", "role"])
+
+    expect(catalogueOf(registry).find((primitive) => primitive.type === "loom.table")?.slots).toEqual(["columns"])
+    for (const type of ["loom.table", "loom.table-row", "loom.table-cell"]) {
+      expect(propsOfType(type)).not.toContain("rows")
+      expect(propsOfType(type)).not.toContain("columns")
+      expect(propsOfType(type)).not.toContain("cells")
+    }
+  })
+
+  it("lets a cell hold nodes, which is the whole difference from a comparison", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    /**
+     * A comparison cell draws one of three verdicts because that is what a
+     * comparison *is*. This one holds what the tree put in it — here a
+     * `loom.code-span` inside a sentence, which no `value: string` prop could
+     * have carried without burning the markup into the content.
+     */
+    expect(markup).toMatch(/<td[^>]*>[\s\S]*?<code[^>]*>invert\(delta\)<\/code>[\s\S]*?<\/td>/)
+  })
+
+  it("sets its density on the table so a cell cannot contradict it", () => {
+    const { markup } = render(tablePage(EDITORIAL))
+
+    expect(markup).toContain(`.${LIBRARY_CLASS.tableTight} th, .${LIBRARY_CLASS.tableTight} td`)
+    expect(markup.slice(markup.indexOf("<tbody>"))).not.toMatch(/<t[dh][^>]*padding:/)
+  })
+
+  it("is a panel only when it is asked to be", () => {
+    const plain = render(tablePage(EDITORIAL)).markup
+
+    /**
+     * The default is the table set into running prose, because most of the
+     * tables this exists for are in documents and a second box around one is a
+     * card inside a card. Both tones are in the fixture, so one markup carries
+     * the presence and the absence.
+     */
+    expect(plain).toContain(LIBRARY_CLASS.tablePanel)
+    expect([...plain.matchAll(new RegExp(LIBRARY_CLASS.tablePanel, "g"))].length).toBeGreaterThan(1)
+    expect(cellTagsOf(plain)).toHaveLength(8)
+  })
+})
+
+describe("the repairs this run made", () => {
+  it("leaves a card's height to its parent, so a column of them keeps its content", () => {
+    const { markup } = render(arrangedPage(EDITORIAL), true)
+
+    /**
+     * `Loom marketing` measured three cards in a `loom.section` — a flex column
+     * — all coming out the height of the shortest, and the tallest losing a
+     * heading, two rows and the action under it to the `overflow` the media
+     * region needs. The card was asserting `height: 100%` against a parent that
+     * had asked for nothing of the kind.
+     *
+     * A grid stretches its items to the row and a flex row stretches them to the
+     * line, both without being asked, so the equal heights this was protecting
+     * survive its removal. The assertion is on the *absence*, because that is
+     * what regressed and what a well-meaning edit would put back.
+     */
+    const cards = [...markup.matchAll(/<(?:div|a)[^>]*data-loom-type="loom\.card"[^>]*>/g)].map(([tag]) => tag)
+
+    expect(cards.length).toBeGreaterThan(0)
+    for (const card of cards) expect(card).not.toMatch(/height:100%/)
+  })
+
+  it("declares that loom.form posts, so a refactor that unwires it is visible", () => {
+    const audited = auditRegistry(registry)
+
+    /**
+     * 0087's whole point. The probe reports what the component does and the
+     * declaration reports what its author meant, and they disagree in exactly
+     * two directions — the useful one being a later edit that reads
+     * `loom.submit` and forgets to put the action back, which is
+     * indistinguishable from a primitive that never posted unless somebody said
+     * it did.
+     */
+    expect(audited.submits).toEqual(["loom.form"])
+    expect(audited.undeclaredSubmitters).toEqual([])
+    expect(audited.unwiredSubmitters).toEqual([])
+  })
+
+  it("closes every block in the library stylesheet", () => {
+    const { stylesheet } = splitStylesheet(render(tablePage(EDITORIAL)).markup)
+    const css = stylesheet.replace(/^<style[^>]*>/, "").replace(/<\/style>$/, "")
+
+    /**
+     * The test that would have caught a shipped bug. `.loom-list { margin: 0 }`
+     * spent 22 and 23 August inside the comparison band's last rule, because
+     * that rule was missing its `}` — and CSS error recovery drops the swallowed
+     * rule, keeps everything around it, and renders a page that looks almost
+     * right. Every list in the library carried the browser's default margins and
+     * no assertion about markup, tokens or themes could see it.
+     *
+     * Two properties hold it. The braces balance, and no rule body contains a
+     * `{` — the second is the one that fails on a swallowed rule, because a
+     * missing `}` does not unbalance a file whose next rule supplies one.
+     */
+    let depth = 0
+    for (const character of css) {
+      if (character === "{") depth += 1
+      if (character === "}") depth -= 1
+      expect(depth).toBeGreaterThanOrEqual(0)
+    }
+    expect(depth).toBe(0)
+
+    const nestable = /@(?:media|supports|keyframes)/
+    for (const [block, prelude, body] of css.matchAll(/([^{}]*)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g)) {
+      if (nestable.test(prelude ?? "")) continue
+      expect([prelude?.trim(), body]).toEqual([prelude?.trim(), (body ?? "").replace(/[{}]/g, "")])
+      expect(block).toBeDefined()
+    }
+  })
+
+  it("still applies the margin reset the swallowed rule was carrying", () => {
+    const { stylesheet } = splitStylesheet(render(prosePage(EDITORIAL)).markup)
+
+    expect(stylesheet).toMatch(new RegExp(`\\.${LIBRARY_CLASS.list} \\{\\s*margin: 0;\\s*\\}`))
   })
 })

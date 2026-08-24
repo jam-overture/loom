@@ -42,7 +42,7 @@ import type { PrimitiveRegistry } from "./registry.js"
  * ground; only one of them means it.
  *
  * That is a palette decision rather than a component fact —
- * [0088](../../decisions/0088-the-text-ramp-is-held-to-four-grounds.md) makes
+ * [0089](../../decisions/0089-the-text-ramp-is-held-to-four-grounds.md) makes
  * it, and `PALETTE_TEXT_GROUNDS` is where it is written down. Passing it in is
  * what keeps this function free of a rule it would otherwise have to guess:
  * derive everything, declare the four grounds, and a host with its own surfaces

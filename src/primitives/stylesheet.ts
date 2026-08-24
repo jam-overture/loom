@@ -29,7 +29,8 @@ import { createElement, type ReactElement } from "react"
  * justification than `:hover` does — where a primitive sits among its siblings
  * is the browser's business, and how a primitive is styled is simply part of
  * what that primitive *is*. Two mechanics are worth knowing before writing one,
- * though, because both are easy to get wrong once and hard to see afterwards:
+ * though, because all three are easy to get wrong once and hard to see
+ * afterwards:
  *
  * 1. **An inline style beats a rule here**, always. A primitive that sets a
  *    property inline has made that property unreachable from this file, so a
@@ -38,6 +39,15 @@ import { createElement, type ReactElement } from "react"
  * 2. **Scope every selector to a library class.** `li:last-child` would reach
  *    every list on the host's page; `.loom-rail > li:last-child` reaches only
  *    the one this library drew.
+ * 3. **A missing `}` deletes the rule after it, silently.** This is a template
+ *    literal rather than a parsed stylesheet, so nothing here or in a test
+ *    noticed when the comparison band's last rule shipped unclosed on 22 August
+ *    and swallowed `.loom-list { margin: 0 }` whole — CSS error recovery treats
+ *    the next rule as one bad declaration, drops it, and carries on rendering
+ *    everything else correctly. Every list in the library carried the browser's
+ *    default margins for a day and no assertion could see it. `library.test.ts`
+ *    now parses this text and holds every block closed; do not weaken that test
+ *    to add a rule it complains about.
  *
  * So a primitive that needs any of them emits this element beside its own root.
  * It is static text: no prop reaches it, nothing is interpolated into it, and it
@@ -145,6 +155,26 @@ export const LIBRARY_CLASS = {
   listTight: "loom-list-tight",
   /** The same list set loose, for rows that are a sentence each. */
   listLoose: "loom-list-loose",
+  /**
+   * A `loom.table`: the padding its cells share, and the rules between its
+   * rows. Both are the *table's* decisions applied to cells it does not render,
+   * which is the one thing an inline style cannot reach.
+   */
+  table: "loom-table",
+  /** The same table drawn as a bordered surface, which is what makes its heading column stick. */
+  tablePanel: "loom-table-panel",
+  /** The same table set tight — a spec to scan — and set loose, a page to read. */
+  tableTight: "loom-table-tight",
+  tableLoose: "loom-table-loose",
+  /** Vertical rules as well as horizontal ones, and no rules at all. */
+  tableGrid: "loom-table-grid",
+  tableFlush: "loom-table-flush",
+  /** One `loom.table-row`, so the whole row can answer a pointer. */
+  tableRow: "loom-table-row",
+  /** A row the page is pointing at, which keeps its tint under that pointer. */
+  tableHighlight: "loom-table-highlight",
+  /** A `loom.table-cell` heading a row, which stays put while a panel scrolls. */
+  tableKey: "loom-table-key",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -341,6 +371,7 @@ details[open] > summary .loom-marker {
 .loom-compare-feature-3 tr > *:nth-child(4) .loom-compare-no,
 .loom-compare-feature-4 tr > *:nth-child(5) .loom-compare-no {
   color: var(--loom-fg-muted);
+}
 .loom-list {
   margin: 0;
 }
@@ -358,6 +389,45 @@ details[open] > summary .loom-marker {
 }
 .loom-list .loom-list {
   margin-block-start: var(--loom-spacing-2);
+}
+.loom-table th, .loom-table td {
+  padding: var(--loom-spacing-3) var(--loom-spacing-4);
+}
+.loom-table-tight th, .loom-table-tight td {
+  padding: var(--loom-spacing-2) var(--loom-spacing-3);
+}
+.loom-table-loose th, .loom-table-loose td {
+  padding: var(--loom-spacing-4) var(--loom-spacing-5);
+}
+.loom-table thead > tr > * {
+  border-block-end: 1px solid var(--loom-border-strong);
+}
+.loom-table tbody > tr + tr > * {
+  border-block-start: 1px solid var(--loom-border-subtle);
+}
+.loom-table-grid tr > * + * {
+  border-inline-start: 1px solid var(--loom-border-subtle);
+}
+.loom-table-flush thead > tr > *, .loom-table-flush tbody > tr + tr > * {
+  border-block: 0;
+}
+.loom-table-row > * {
+  transition: background-color var(--loom-motion-medium) ease;
+}
+.loom-table-row:hover > * {
+  background: var(--loom-bg-surface-muted);
+}
+.loom-table-highlight > * {
+  background: var(--loom-accent-subtle);
+}
+.loom-table-panel .loom-table-key {
+  position: sticky;
+  inset-inline-start: 0;
+  background: var(--loom-bg-surface);
+  z-index: 1;
+}
+.loom-table-panel .loom-table-highlight .loom-table-key {
+  background: var(--loom-accent-subtle);
 }
 .loom-mosaic {
   display: grid;
@@ -398,7 +468,7 @@ details[open] > summary .loom-marker {
     opacity: 1;
     transform: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > * {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > * {
     transition: none;
   }
   .loom-lift:hover {

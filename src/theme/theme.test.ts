@@ -196,7 +196,7 @@ describe("what the library reads against what", () => {
    * The composed half is measured in `contrast.test.ts`, which pins the nine
    * shortfalls by name. Here the point is narrower and about the description:
    * a palette with nothing to report says nothing, so a reader who takes an
-   * empty string for a clean palette is right whenever it is empty (0088).
+   * empty string for a clean palette is right whenever it is empty (0089).
    */
   it("says nothing about a palette that clears both halves", () => {
     const clean = STARTER_PALETTES.filter((palette) => auditPalette(palette).composedFailures.length === 0)

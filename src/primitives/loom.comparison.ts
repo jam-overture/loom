@@ -173,7 +173,22 @@ export const loomComparison = definePrimitive({
            */
           verticalAlign: subject ? "top" : "middle",
           fontFamily: subject ? family("heading") : family("body"),
-          fontWeight: subject ? weight("heading") : weight("body"),
+          /**
+           * `bolder` rather than `weight("heading")`, and it is a repair rather
+           * than a preference. A subject's name is a column heading whose whole
+           * job is to be distinguishable from the answers under it, and a token
+           * promises only that a value came from the theme — never that it
+           * differs from the one beside it. `bold-sans` declares
+           * `headingWeight: 400` beside `bodyWeight: 400`, so under that pack
+           * this row rendered identical to its own data, with `<th>`'s browser
+           * default overridden into normal on the way. `bolder` is relative to
+           * the inherited weight by definition and is therefore heavier under
+           * every pack, including one nobody has registered yet. Found by
+           * screenshotting `loom.table` under the same pack on 24 August; see
+           * `tokens.ts` for the general warning and `loom.emphasis` for the
+           * first instance of it.
+           */
+          fontWeight: subject ? "bolder" : weight("body"),
           fontSize: size(3),
           lineHeight: 1.4,
           color: colour("fg-default"),

@@ -35,13 +35,82 @@ const render = (theme: Record<string, string>) => {
   return { markup: renderToStaticMarkup(output.element), diagnostics: output.diagnostics, theme: output.theme }
 }
 
+/**
+ * What the page *says*, with the machinery it is drawn by taken out.
+ *
+ * The tree's own words are the subject of the two assertions below, and raw
+ * markup is not them: the theme's stylesheet is hoisted into it under
+ * `data-precedence="loom"`, every primitive carries `data-loom-type`, and the
+ * class names are the design system's. All of that is Loom saying Loom about
+ * itself, correctly, in a place no visitor reads.
+ */
+const spokenWordsOf = (markup: string): string =>
+  markup
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+
 describe("the demo page", () => {
   it("renders with nothing left unhonoured", () => {
     const { markup, diagnostics } = render(DEMO_STARTING_THEME as Record<string, string>)
 
     expect(diagnostics).toEqual([])
-    expect(markup).toContain("Your AI can change this page")
+    expect(markup).toContain("Back to the things you had stopped doing")
     expect(markup).toContain("<h1")
+  })
+
+  /**
+   * The property this specimen exists for, and the one that will rot silently.
+   *
+   * Every band on this page used to be about Loom — *4 delta operations*, *A
+   * model emits a delta against the tree it was shown*, a pull quote citing a
+   * decision record by number — so the first screen a stranger met was the
+   * technical record printed at sixty pixels, which is the opposite of the
+   * direction this surface is built to (plain language by default, the record
+   * one click away). The page is now a clinic's, and the only thing keeping it
+   * one is that nobody writes Loom's vocabulary back into it a copy-edit at a
+   * time.
+   *
+   * The rail is exempt and must be: it is Loom's voice and it is *supposed* to
+   * say Loom. What is asserted here is the tree only.
+   */
+  it("says nothing about Loom, in any of Loom's words", () => {
+    const { markup } = render(DEMO_STARTING_THEME as Record<string, string>)
+    const spoken = spokenWordsOf(markup).toLowerCase()
+
+    for (const word of ["loom", "delta", "the gate", "primitive", "runtime", "proposal", "telemetry", "revision"]) {
+      expect(spoken, word).not.toContain(word)
+    }
+  })
+
+  /**
+   * A specimen page must be plausible enough to stand as a real page and must
+   * never reach a real person.
+   *
+   * The clinic's calls to action are a `mailto:` and a `tel:`, because that is
+   * what a small business puts on its front page and because the alternative —
+   * the previous pair, pointing at Loom's GitHub — was Loom's own buttons on
+   * somebody else's page, and the largest clickable targets on the screen led
+   * away from the demonstration. Where they go is the point of them: the
+   * `.example` TLD is unroutable by RFC 2606 and `020 7946 0xxx` is Ofcom's
+   * drama range, so a visitor who presses one reaches nobody, by construction
+   * rather than by nobody having tried.
+   */
+  it("cannot reach a real inbox or a real telephone", () => {
+    const { markup } = render(DEMO_STARTING_THEME as Record<string, string>)
+    /* Anchors only. The hoisted stylesheet carries an `href` of its own. */
+    const hrefs = [...markup.matchAll(/<a\b[^>]*\bhref="([^"]+)"/g)].map(([, href]) => href ?? "")
+
+    expect(hrefs.length).toBe(3)
+
+    for (const href of hrefs) {
+      /** RFC 2606's reserved TLD, or Ofcom's drama range. Nothing else. */
+      const reserved = href.startsWith("mailto:")
+        ? href.endsWith(".example")
+        : href.startsWith("tel:+442079460")
+
+      expect(reserved, href).toBe(true)
+    }
   })
 
   it("renders under the other palette with no diagnostics either", () => {

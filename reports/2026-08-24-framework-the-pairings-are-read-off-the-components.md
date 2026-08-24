@@ -114,7 +114,7 @@ declared list of four with a record behind it.
 
 ## Records
 
-- **0088** — *the text ramp is held to four grounds, and a pairing is measured
+- **0089** — *the text ramp is held to four grounds, and a pairing is measured
   whether one primitive paints it or two compose it.* Accepted. Nothing
   superseded. Index regenerated.
 

@@ -52,12 +52,12 @@ describe("auditPalette", () => {
   })
 
   /**
-   * The composed shortfall, palette by palette and pairing by pairing (0088).
+   * The composed shortfall, palette by palette and pairing by pairing (0089).
    *
    * Pinned rather than skipped, and this is the assertion that stops the second
    * list becoming somewhere to put an inconvenient failure: a ninth palette
    * joining, or a third pairing dropping under the bar, fails here. The nine
-   * below are the known state of the library on the day 0088 was written, and
+   * below are the known state of the library on the day 0089 was written, and
    * they are what the record proposes moving.
    */
   it("counts the composed shortfall exactly, so a new one cannot slip in beside it", () => {

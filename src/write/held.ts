@@ -1,8 +1,10 @@
-import type { ProposalId, TreeId } from "../ids.js"
+import { z } from "zod"
+
+import { proposalIdSchema, treeIdSchema, type ProposalId, type TreeId } from "../ids.js"
 import { err, ok, type Result } from "../result.js"
-import type { Disposition } from "../runtime/disposition.js"
-import type { EditIntent } from "../runtime/intent.js"
-import type { ProposedChange } from "../runtime/proposal.js"
+import { dispositionSchema, type Disposition } from "../runtime/disposition.js"
+import { editIntentSchema, type EditIntent } from "../runtime/intent.js"
+import { proposedChangeSchema, type ProposedChange } from "../runtime/proposal.js"
 
 /**
  * Custody of the changes the Gate held back.
@@ -36,6 +38,27 @@ export type HeldProposal = {
   readonly heldAt: string
 }
 
+/**
+ * The same shape, as something a stored row can be checked against.
+ *
+ * It exists for the reason `dispositionSchema`'s comment gives: a hold outlives
+ * the process that created it, and a judgment restored from storage is validated
+ * at that boundary like anything else that crossed a wire or a year. Held here
+ * rather than in a backend so that every implementation reads a hold back the
+ * same way — a second store that parsed loosely would disagree with the first
+ * about what is storable, and the contract suite would not catch it because both
+ * would still round-trip their own writes.
+ */
+export const heldProposalSchema = z.object({
+  proposalId: proposalIdSchema,
+  treeId: treeIdSchema,
+  baseRevision: z.number().int().nonnegative(),
+  intent: editIntentSchema,
+  proposal: proposedChangeSchema,
+  disposition: dispositionSchema,
+  heldAt: z.string().datetime(),
+})
+
 export type HoldError =
   /** Nothing under this id: never held, already answered, or expired. */
   | { readonly code: "not-held"; readonly proposalId: ProposalId }
@@ -51,6 +74,27 @@ export const describeHoldError = (error: HoldError): string => {
     case "unavailable":
       return `the holding store is unavailable: ${error.detail}`
   }
+}
+
+/**
+ * Reads a hold back out of storage, or says why it could not.
+ *
+ * The assertion is about the shape of optionality and never about validity — the
+ * schema above establishes that. Zod infers an optional field as `T | undefined`,
+ * which `exactOptionalPropertyTypes` distinguishes from an absent key, while JSON
+ * has no `undefined` at all: a stored hold either carries `actor` or omits it,
+ * and never holds it as an explicit nothing. So the parsed value already has the
+ * shape the type asks for, and this is the one place that has to say so.
+ */
+export const parseHeldProposal = (row: unknown): Result<HeldProposal, HoldError> => {
+  const parsed = heldProposalSchema.safeParse(row)
+
+  return parsed.success
+    ? ok(parsed.data as HeldProposal)
+    : err<HoldError>({
+        code: "unavailable",
+        detail: `a stored hold did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
+      })
 }
 
 /**

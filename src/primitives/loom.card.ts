@@ -39,6 +39,23 @@ import { linkUrlSchema } from "./url.js"
  *   is `margin-top: auto`, which only means anything to a child the parent has
  *   singled out.
  *
+ * **The card asserts no height of its own, and that is a repair.** It set
+ * `height: 100%` until 23 August, which cost `Loom marketing` the bottom quarter
+ * of a card: three cards as siblings in a `loom.section`, which lays its
+ * children out as a flex column, all came out the height of the shortest, and
+ * the tallest lost a heading, two rows of a list and the action under it —
+ * clipped by the `overflow` this primitive needs for its media region, so with
+ * no scrollbar and no diagnostic to find it by.
+ *
+ * The height was there for the case the card was built for, a row of cards whose
+ * footers should land on one line, and it was never the thing producing that: a
+ * grid stretches its items to the row and a flex row stretches them to the line,
+ * both by default and neither needing to be asked. So the equal heights survive
+ * the removal, and a **column** of cards now takes each card's own height, which
+ * is what a page that lists things wanted. The general lesson is worth carrying
+ * to the next primitive: a child that asserts its own height has overruled the
+ * one decision its parent exists to make.
+ *
  * The padding lives on an inner element rather than on the card itself, so the
  * media region needs no negative margin to escape it. Bleeding content back out
  * of a padded box is the usual way this is done and it is brittle exactly where
@@ -117,7 +134,7 @@ export const loomCard = definePrimitive({
           ...TONES[given.tone ?? "surface"],
           display: "flex",
           flexDirection: "column",
-          height: "100%",
+          /** No height — see the note above about the column of cards. */
           /** Clips the media region to the card's corners; the reason it can be flush. */
           overflow: "hidden",
           border: "1px solid",

@@ -1,4 +1,4 @@
-# 0088. The text ramp is held to four grounds, and a pairing is measured whether one primitive paints it or two compose it
+# 0089. The text ramp is held to four grounds, and a pairing is measured whether one primitive paints it or two compose it
 
 **Status:** Accepted
 **Date:** 2026-08-24

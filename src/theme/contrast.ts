@@ -24,7 +24,7 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
 export const TEXT_CONTRAST_MINIMUM = 4.5
 
 /**
- * The grounds every ink in the text ramp has to be readable on (0088).
+ * The grounds every ink in the text ramp has to be readable on (0089).
  *
  * The one thing `registryPairings` cannot derive, and the reason it takes this
  * as an argument. A probe can see that `loom.action` puts children on `accent`
@@ -48,7 +48,7 @@ export const PALETTE_TEXT_GROUNDS: readonly PaletteSlot[] = [
 ]
 
 /**
- * How a pairing comes about, which decides what a failure means (0088).
+ * How a pairing comes about, which decides what a failure means (0089).
  *
  * **`painted`** — one primitive sets both ends. A palette that fails one has a
  * page in it nobody can read, and no tree can avoid it, so this is the bar.
@@ -126,7 +126,7 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
    * this list was rewritten to fix. What to move — the panel toward the canvas,
    * or the ink toward `fg-muted` — costs something either way, both costs are
    * measured, and until the choice is made `composedFailures` carries these two
-   * in the open (0088).
+   * in the open (0089).
    */
   { foreground: "accent", background: "accent-subtle", basis: "composed", where: "loom.faq marker inside an accent section" },
   { foreground: "fg-subtle", background: "accent-subtle", basis: "composed", where: "loom.perk note inside an accent section" },
