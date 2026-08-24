@@ -30,7 +30,15 @@ export const NodeCreditLine = ({
   if (!credit) return null
 
   return (
-    <div className="border-edge-subtle flex flex-col gap-1 border-t pt-2">
+    <div className="border-edge-subtle flex flex-col gap-1 border-t pt-2 text-xs">
+      {/*
+        * `added` and `here from the start — no change put it here` are both
+        * answers, and they arrived with no question. A screenshot is what
+        * showed it: the sentence sat under the pointing notice as an orphan
+        * paragraph, and a reader had no way to know it was about authorship
+        * rather than about the part.
+        */}
+      <p className="text-ink-muted text-2xs tracking-wide uppercase">Where it came from</p>
       <p className={credit.partial ? "text-ink-muted italic" : "text-ink-muted"}>
         {credit.placed}
         {credit.revision !== null && (
@@ -44,7 +52,7 @@ export const NodeCreditLine = ({
 
       {credit.since.length > 0 && (
         <p className="text-ink-muted">
-          since:{" "}
+          Since then:{" "}
           {credit.since.map((touch, index) => (
             <span key={touch.revision}>
               {index > 0 && ", "}
