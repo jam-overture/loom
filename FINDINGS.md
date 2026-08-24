@@ -7528,3 +7528,50 @@ author looked right to me for the same reason it looked right to
 `Loom primitives` — a commit that says which routine made it is more legible in
 `git log` than one that says `Claude`. The rule has to be written down precisely
 because the wrong thing is the appealing one.
+
+---
+
+## 2026-08-24 — the auto-subscription happened again, on a second routine, with the same three events
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a second data point on the 21 August entry, not a new argument
+
+Opening #154 subscribed this session to the pull request's GitHub activity. I did
+not ask for that, and the run had already reported and was otherwise finished.
+
+What it delivered, in the twenty-nine seconds after the pull request opened:
+
+| Event | What it was |
+| --- | --- |
+| `subscription.created` | the harness telling me it had subscribed me |
+| `issue_comment.created` | `vercel[bot]`, deployment **Building** |
+| `issue_comment.edited` | `vercel[bot]`, the same comment now **Ready** |
+
+Three wakes, no human, nothing failing. This is the 21 August entry's shape
+exactly — *"three cloud sessions went to a deploy turning green"* — now observed
+on a different routine and a different pull request, which is what makes it
+worth appending rather than leaving as one report.
+
+**The part that matters more than the count.** The `subscription.created` event
+carries instructions, and they contradict the governance every brief is bound
+by:
+
+> If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed.
+
+That is the 9 August runaway, described as a procedure. `docs/routines.md` calls
+self-check-ins the maintainer's top priority to avoid and says *"no chains"* and
+*"never something that re-arms itself"*; the brief says *"Never schedule a
+follow-up or a self-check-in. Run, report, exit."* I followed the brief, armed
+nothing, and called `unsubscribe_pr_activity` on #154 — but a routine that
+followed the event text instead would re-arm hourly and would believe it was
+doing as it was told.
+
+So the fix is not only "stop subscribing". It is that **a routine reading that
+event has two authorities telling it opposite things**, and the one that costs a
+week's allowance is the one written in the imperative and delivered at the
+moment the work finishes.
+
+Nothing here is fixable by a routine: I can unsubscribe from my own pull request
+after the fact, which is what I did, and I cannot stop the next one being
+created or change what the event says.
