@@ -10,6 +10,7 @@ import { applyDelta } from "../tree/apply.js"
 import { parseTree, type LoomTree } from "../tree/tree.js"
 
 import type { LoomDatabase } from "./database.js"
+import { isUniqueViolation, unavailable } from "./driver.js"
 import type { StoreError } from "./errors.js"
 import { loomRevisions, loomTrees } from "./schema.js"
 import {
@@ -28,6 +29,7 @@ import {
 
 export * from "./database.js"
 export * from "./migrate.js"
+export * from "./postgres-holds.js"
 export * from "./schema.js"
 
 /**
@@ -97,30 +99,6 @@ const toStoredRevision = (row: z.infer<typeof storedRevisionSchema>): StoredRevi
   return answeredBy === null || answeredBy === undefined ? entry : { ...entry, answeredBy }
 }
 
-const UNIQUE_VIOLATION = "23505"
-
-/**
- * Postgres reports a primary-key collision as SQLSTATE 23505, but Drizzle wraps
- * the driver's error, so the code sits somewhere down the `cause` chain rather
- * than on the error that was thrown. Walking the chain is what makes this work
- * across drivers instead of against whichever one was tested first.
- */
-const isUniqueViolation = (cause: unknown): boolean => {
-  for (let current = cause, depth = 0; current !== null && current !== undefined && depth < 8; depth++) {
-    if (typeof current !== "object") return false
-    if ((current as { code?: unknown }).code === UNIQUE_VIOLATION) return true
-
-    current = (current as { cause?: unknown }).cause
-  }
-
-  return false
-}
-
-const failure = (cause: unknown, detail: string): StoreError => ({
-  code: "unavailable",
-  detail: `${detail}: ${cause instanceof Error ? cause.message : String(cause)}`,
-})
-
 export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
   const readHead = async (treeId: TreeId): Promise<Result<LoomTree, StoreError>> => {
     const rows = await db
@@ -149,7 +127,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
       } catch (cause) {
         return isUniqueViolation(cause)
           ? err<StoreError>({ code: "already-exists", treeId: tree.treeId })
-          : err(failure(cause, `could not create ${tree.treeId}`))
+          : err(unavailable(cause, `could not create ${tree.treeId}`))
       }
     },
 
@@ -157,7 +135,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
       try {
         return await readHead(treeId)
       } catch (cause) {
-        return err(failure(cause, `could not read ${treeId}`))
+        return err(unavailable(cause, `could not read ${treeId}`))
       }
     },
 
@@ -228,7 +206,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
           }),
         })
       } catch (cause) {
-        return err(failure(cause, `could not read the history of ${treeId}`))
+        return err(unavailable(cause, `could not read the history of ${treeId}`))
       }
     },
 
@@ -257,7 +235,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
 
         return ok(listing)
       } catch (cause) {
-        return err(failure(cause, "could not list trees"))
+        return err(unavailable(cause, "could not list trees"))
       }
     },
 
@@ -328,7 +306,7 @@ export const postgresTreeStore = (db: LoomDatabase): TreeStore => {
               expected: request.delta.baseRevision,
               found: request.delta.baseRevision + 1,
             })
-          : err(failure(cause, `could not append to ${treeId}`))
+          : err(unavailable(cause, `could not append to ${treeId}`))
       }
     },
   }

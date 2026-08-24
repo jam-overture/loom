@@ -1,147 +1,68 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, treeIdSchema, type ProposalId, type TreeId } from "../ids.js"
-import { buildIntent, buildProposal, FIXED_INSTANT } from "../testing/doubles.js"
-import { sampleTree } from "../testing/fixtures.js"
-import type { TreeDelta } from "../tree/delta.js"
+import type { ProposalId } from "../ids.js"
+import { heldProposalFixture } from "../testing/hold-contract.js"
 
-import { describeHoldError, memoryHoldStore, type HeldProposal, type HoldError } from "./held.js"
-
-const ids = sequentialIdFactory("hold")
+import { describeHoldError, parseHeldProposal, type HoldError } from "./held.js"
 
 /**
- * `sampleTree` mints the same ids every time, so a test that needs two trees to
- * be different has to say which is which.
+ * What `memoryHoldStore` does is checked by the contract suite in
+ * `held.contract.test.ts`, alongside every other implementation. What is left
+ * here is the two things that are not a store: how a refusal reads, and what
+ * happens when a stored hold does not parse.
  */
-const heldProposal = (options?: {
-  readonly heldAt?: string
-  readonly treeId?: TreeId
-}): HeldProposal => {
-  const { tree } = sampleTree()
-  const treeId = options?.treeId ?? tree.treeId
 
-  const delta: TreeDelta = {
-    deltaId: ids.deltaId(),
-    treeId,
-    baseRevision: tree.revision,
-    operations: [],
-  }
+describe("parseHeldProposal", () => {
+  /**
+   * The round trip storage actually performs. `JSON.parse(JSON.stringify(…))` is
+   * what a jsonb column does to a value, and it is where an absent optional
+   * field and one explicitly set to nothing stop being distinguishable — so it
+   * is the shape the parse has to be checked against, rather than the object.
+   */
+  it("reads back a hold that went through JSON unchanged", () => {
+    const held = heldProposalFixture({ actor: "alex", policyFingerprint: "sha256:abc" })
 
-  const intent = buildIntent(ids, { treeId, baseRevision: tree.revision })
-  const proposal = buildProposal(ids, { intentId: intent.intentId, delta })
-
-  return {
-    proposalId: proposal.proposalId,
-    treeId,
-    baseRevision: tree.revision,
-    intent,
-    proposal,
-    disposition: {
-      kind: "requires-confirmation",
-      reason: { code: "confidence-below-minimum", detail: "0.5 is under the floor" },
-      stakes: "medium",
-      reversible: true,
-      confidence: 0.5,
-      policyId: "default",
-    },
-    heldAt: options?.heldAt ?? FIXED_INSTANT,
-  }
-}
-
-describe("memoryHoldStore", () => {
-  it("returns what it was given", async () => {
-    const store = memoryHoldStore()
-    const held = heldProposal()
-
-    expect(await store.hold(held)).toEqual({ ok: true, value: held })
-
-    const found = await store.get(held.proposalId)
-    if (!found.ok) throw new Error("expected the proposal to be held")
-
-    expect(found.value.proposal.rationale).toBe(held.proposal.rationale)
+    expect(parseHeldProposal(JSON.parse(JSON.stringify(held)))).toEqual({ ok: true, value: held })
   })
 
-  it("reports an unknown id as not-held rather than as an empty answer", async () => {
-    const store = memoryHoldStore()
+  it("leaves an optional field absent rather than filling it in", () => {
+    const held = heldProposalFixture()
 
-    const found = await store.get("p_missing" as ProposalId)
+    const parsed = parseHeldProposal(JSON.parse(JSON.stringify(held)))
+    if (!parsed.ok) throw new Error("expected the hold to parse")
 
-    expect(found).toEqual({ ok: false, error: { code: "not-held", proposalId: "p_missing" } })
-  })
-
-  it("refuses to hold the same proposal twice", async () => {
-    const store = memoryHoldStore()
-    const held = heldProposal()
-    await store.hold(held)
-
-    const again = await store.hold(held)
-
-    expect(again).toEqual({
-      ok: false,
-      error: { code: "already-held", proposalId: held.proposalId },
-    })
+    expect("actor" in parsed.value.intent).toBe(false)
+    expect("policyFingerprint" in parsed.value.disposition).toBe(false)
   })
 
   /**
-   * The whole reason `release` is a take rather than a read: two reviewers
-   * clicking confirm cannot both come away holding the same change.
+   * A judgment recorded before the Gate named its policies still parses, and
+   * reads as the unknown it is rather than claiming this host's current one.
    */
-  it("releases a proposal exactly once", async () => {
-    const store = memoryHoldStore()
-    const held = heldProposal()
-    await store.hold(held)
+  it("restores a disposition written before policies were named", () => {
+    const held = heldProposalFixture()
+    const { policyId, ...withoutPolicy } = held.disposition
 
-    const first = await store.release(held.proposalId)
-    const second = await store.release(held.proposalId)
+    const parsed = parseHeldProposal({ ...held, disposition: withoutPolicy })
+    if (!parsed.ok) throw new Error("expected the hold to parse")
 
-    expect(first.ok).toBe(true)
-    expect(second).toEqual({ ok: false, error: { code: "not-held", proposalId: held.proposalId } })
+    expect(parsed.value.disposition.policyId).toBe("unattributed")
   })
 
-  it("cannot be read after it is released", async () => {
-    const store = memoryHoldStore()
-    const held = heldProposal()
-    await store.hold(held)
-    await store.release(held.proposalId)
+  it("refuses a hold whose proposal is not one, and says where it looked", () => {
+    const held = heldProposalFixture()
 
-    const found = await store.get(held.proposalId)
+    const parsed = parseHeldProposal({ ...held, proposal: { rationale: "nothing else" } })
+    if (parsed.ok) throw new Error("expected the hold to be refused")
 
-    expect(found.ok).toBe(false)
+    expect(parsed.error.code).toBe("unavailable")
+    if (parsed.error.code !== "unavailable") throw new Error("expected an unavailable")
+    expect(parsed.error.detail).toContain("proposal")
   })
 
-  it("lists only the proposals held against the tree asked about", async () => {
-    const store = memoryHoldStore()
-    const mine = heldProposal()
-    const theirs = heldProposal({ treeId: treeIdSchema.parse("t_elsewhere") })
-    await store.hold(mine)
-    await store.hold(theirs)
-
-    const listed = await store.forTree(mine.treeId)
-    if (!listed.ok) throw new Error("expected a listing")
-
-    expect(listed.value.map((entry) => entry.proposalId)).toEqual([mine.proposalId])
-  })
-
-  it("lists a tree with nothing held as empty rather than as missing", async () => {
-    const store = memoryHoldStore()
-    const { tree } = sampleTree()
-
-    expect(await store.forTree(tree.treeId)).toEqual({ ok: true, value: [] })
-  })
-
-  /** Oldest first, because the oldest hold is the one closest to going stale. */
-  it("orders a listing by when each proposal was held", async () => {
-    const store = memoryHoldStore()
-    const later = heldProposal({ heldAt: "2026-07-30T12:00:00.000Z" })
-    const earlier = heldProposal({ heldAt: "2026-07-30T09:00:00.000Z" })
-
-    await store.hold(later)
-    await store.hold(earlier)
-
-    const listed = await store.forTree(later.treeId)
-    if (!listed.ok) throw new Error("expected a listing")
-
-    expect(listed.value.map((entry) => entry.heldAt)).toEqual([earlier.heldAt, later.heldAt])
+  it("refuses something that is not a hold at all", () => {
+    expect(parseHeldProposal(null).ok).toBe(false)
+    expect(parseHeldProposal("a hold").ok).toBe(false)
   })
 })
 
