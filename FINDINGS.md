@@ -6720,3 +6720,40 @@ for, and the filer says the same.
 
 Both findings stay open and owned as they were; this is the mechanism, offered
 so the next person to pick either one does not start from scratch.
+
+---
+
+## 2026-08-24 — the commit-identity trap, hit a second time by a routine that had read the finding
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 22 August entry, with the one change that
+would actually stop it
+
+The 22 August entry above says it exactly: *do not override `user.name` or
+`user.email`; the default is already correct and overriding it is the failure.*
+It is addressed to "every other routine". This run read `FINDINGS.md` before
+choosing work, committed as `Loom primitives <jpizzolato36@gmail.com>` anyway
+because a descriptive author looked tidier, and got the same **Blocked** with no
+preview URL — the one artefact the brief says this lane's surface has to be
+judged by.
+
+Amended with `--amend --reset-author` and force-pushed before any review existed,
+which is the same repair the filer made. Two runs, two identical failures, same
+fix.
+
+**Why it recurred, and the recommendation.** `FINDINGS.md` is read *for work* —
+"what is owed to my lane, what should I build" — and by now it is six and a half
+thousand lines. A rule about how to run `git commit` is not work; it is
+procedure, and procedure is what `docs/routines.md` is for. That file already has
+a **Network access** section and a **Credentials** section carrying exactly this
+kind of rule, and no git section at all.
+
+*Recommendation: one paragraph in `docs/routines.md` beside those two —* **never
+set `user.name` or `user.email`; the environment's default identity is the one on
+the Vercel team, and any other author produces a pull request with no preview.**
+It is three lines, it is where a routine will actually meet it, and it turns a
+recurring silent failure into a rule nobody has to rediscover.
+
+Not written here because a routine cannot write the governance it is bound by —
+`docs/routines.md`'s own preamble says so, and the portal routine's reasoning for
+that limit was accepted on 15 August.
