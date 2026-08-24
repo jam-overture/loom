@@ -7309,3 +7309,195 @@ be unwritten. That would test the component's behaviour rather than the course's
 progress, and would not go red again the next time this lane does its job. Not
 done here: it is a redesign in someone else's route group, not a mechanical
 count update.
+
+---
+
+## 2026-08-24 — the rename queue is empty of route names and down to one screen
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+Updating the 23 August entry rather than replacing it. Where the 18 August
+redirection stands after this run.
+
+**Done:** `/portal/trees` → `/portal/pages`, `/portal/calibration` →
+`/portal/trust`, `/portal/audit` → `/portal/checkup`, the page screen, and now
+`/portal/activity` — which, like the page screen, needed no route rename at all.
+`activity` is already a person's word. What it needed was `not interpreted`,
+`not written`, `discarded`, `awaiting-answer`, `requires-confirmation`,
+`developer · user-instruction · the whole tree · 24 characters`, four counts
+headed `asks` / `proposals` / `held` / `repairs`, and an ISO-8601 timestamp taken
+off the surface and put one click down.
+
+**Still in the runtime's voice: `/portal/history`, and it is the last one.** The
+revision rows, `since:`, and the inverse. Its route name is already a person's
+word and the pattern that fits it is this run's — a plain sentence over the
+runtime's own account, under a disclosure that keeps every identifier.
+
+**The vocabulary module now carries four more tables**, which is the brief's *"in
+one place, not per component"* holding for a fourth and fifth kind of word:
+`ASK_OUTCOMES` (what became of an ask), `ASK_ORIGINS` (who asked),
+`FAILURE_STAGES` (where it broke), `GATE_VERDICTS` (what the Gate decided) and
+`ANSWERS`, beside `CHANGE_STATES`, `STAKES`, `PART_KINDS` and `pointingWords`.
+
+**One disagreement between two screens was found by writing them down together
+and is now fixed.** A change turned down was `discarded`, grey, on Activity, and
+"You said no", red, on the review queue — the same fact in two words and two
+colours, on two screens a reviewer moves between. `ASK_OUTCOMES.discarded` and
+`CHANGE_STATES.declined` now agree on both, and a test asserts the overlap
+rather than trusting it. This is the argument for the single module stated as a
+defect it actually caught.
+
+---
+
+## 2026-08-24 — three defects a screenshot found and eighty-one tests did not, and all three are the same defect
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-11-what-loom-has-been-doing` — recorded because the shape is now a
+pattern rather than an incident
+
+The fourth, fifth and sixth defects this lane has found in a picture rather than
+in a test, and the first time they have been three instances of one thing:
+
+1. `ana@loom.local asked for this It was aimed at the whole page.`
+2. `Loom made this change on its own Nothing this project watches for was involved`
+3. `Set DATABASE_URLin this deployment's environment`
+
+**Every one is a missing space or a missing full stop where two strings meet**,
+and every one reads as a dropped word rather than as a punctuation slip — which
+is the reason they matter more than their size suggests. Eighty-one assertions
+passed against all three, because every one of them checks a part.
+`toContain("asked for this")` is true of the broken line and of the fixed one.
+
+The cause is the same in each case and it is structural, not careless: **plain
+language means composing sentences from strings held in different places.** A
+label in a table is not a sentence; it becomes one where it is set beside
+another. Nothing owns the join, so nothing tests it.
+
+The rule taken from it, which is the part worth keeping:
+
+> **Where two independently-held strings are set side by side, assert the joined
+> reading, not the parts.** Both halves being right is not the property; the
+> sentence being right is.
+
+Each of the three now has a test that reads the whole line — `expect(...).toBe`
+on the joined string, not `toContain` on a fragment. The third one also earned a
+narrower rule: **the space was in the source and did not survive the build.**
+`Set <span>DATABASE_URL</span> in this…` rendered as `DATABASE_URLin this` in a
+production build, with an identical construction three files away rendering
+correctly. Whatever the mechanism, the fix is to stop relying on it: an explicit
+`{" "}` where an element abuts text.
+
+A fourth, found in the same picture and not a spacing bug: the failure card said
+*"It never got as far as proposing anything"* and *"The AI never got as far as
+writing a change"* one line apart — the same fact twice, from two components
+neither of which could see the other. The specific sentence survives.
+
+**None of the four is a bug a browser could not have shown in three seconds**,
+and the count now stands at six across five runs. The recommendation on the 23
+August entry — that a screenshot at two widths belongs in `docs/routines.md`
+rather than in this lane's habit — is repeated, and this run is the strongest
+evidence for it so far, because this time the picture was the only thing in the
+process capable of catching any of them.
+
+---
+
+## 2026-08-24 — a model rationale is the AI's own words, and the one line on Activity a person cannot read
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a known bound of what shipped, and a question rather than a defect
+
+The Activity screen now reads plainly everywhere except one line, and that line
+is the model's `rationale`, printed verbatim. On the real screen this run
+photographed it reads:
+
+> *The level-1 heading's text leaf is replaced with the new wording; a text
+> node's value is not a prop, so it is swapped by removing the old leaf and
+> inserting the new one in the same position.*
+
+`text leaf`, `node`, `prop` — every word this lane has spent four runs taking off
+the surface, in the one string it must not touch. **It was deliberately left
+alone.** The rationale is the AI's own account of its own change; rewording it
+would be the portal putting words in the model's mouth, and a reviewer comparing
+the screen against the journal has to see the same sentence in both.
+
+Two honest options, neither taken this run because both are bigger than a
+wording change:
+
+- **Ask for two.** The interpreter could be asked for a one-line rationale in a
+  person's words alongside the technical one. That is a framework change, in
+  `src/`, and therefore a finding rather than a fix — but it is the only option
+  that produces a plain sentence which is genuinely the model's.
+- **Move it down.** Put the rationale under "What the AI proposed" and lead with
+  the delta's verbs in the portal's words. Cheap and within this lane, but it
+  demotes the one line on the card that says *why*, which is the wrong trade.
+
+Recorded so that "the portal speaks plainly" is not read as a completed claim
+when one sentence on its busiest screen is exempt from it, and so the framework
+lane can weigh the first option.
+
+---
+
+## 2026-08-24 — no framework gaps this run, and `src/` was not opened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Every export used is public: `IntentOrigin`, `DispositionKind`,
+`DispositionReasonCode`, `EpisodeAnswer`, `EpisodeResolutionKind`,
+`EpisodeTally`, `FailureStage`, `IntentEpisode`, `ProposalEpisode`,
+`EPISODE_RESOLUTION_KINDS`, `episodesOf`, `tallyEpisodes`,
+`describeTelemetryError`. 0018 holds for a sixth surface.
+
+`FailureStage` and `IntentOrigin` had not been consumed by the portal before, and
+both turned out to be load-bearing for the redirection in the way
+`UnaddressableReason` was on 23 August: they are what let a plain sentence be
+written *per case* rather than one sentence covering all of them. `custody`
+failing and `interpretation` failing mean genuinely different things to somebody
+looking at their page, and a view that could not tell them apart would have had
+to say something vague enough to cover both.
+
+---
+
+## 2026-08-24 — the commit-identity trap, third occurrence, third routine, same day
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — noted against the 22 August and earlier 24 August entries, and escalating
+the recommendation on strength of the third data point
+
+Same failure, third time. I committed as `Loom portal <portal@loom.local>`,
+Vercel refused the deployment with *"GitHub couldn't verify an account for the
+commit"*, and #152 went up with no preview — **the one artefact the portal brief
+says this surface has to be judged by.** Repaired with `--amend --reset-author`
+and force-pushed before any review existed, which is the third time that exact
+repair has been made.
+
+**I read the finding above, in this run, before choosing work.** The entry filed
+hours earlier by `Loom primitives` says *"hit a second time by a routine that had
+read the finding"*, and I then did the same thing. That is now three routines,
+three identical failures, and two of the three had read the warning.
+
+The diagnosis in the entry above is correct and this run is the proof of it:
+`FINDINGS.md` is read **for work** — what is owed to my lane, what should I
+build — and it is seven thousand lines. A rule about `git commit` is not work; it
+is procedure. Reading it and then not applying it is not carelessness, it is what
+happens when a procedural rule is filed somewhere procedural rules are not
+looked for.
+
+**The recommendation is unchanged and is now the only thing worth doing about
+this** — one paragraph in `docs/routines.md`, beside **Network access** and
+**Credentials**:
+
+> **Never set `user.name` or `user.email`.** The environment's default identity
+> is the one on the Vercel team; any other author produces a pull request with no
+> preview.
+
+Three lines, in the file every brief names as *read first, every run*, next to
+two rules of exactly the same kind. A routine cannot write the governance it is
+bound by, so this stays a recommendation — but the cost of not writing it is now
+measured: three runs, three lost previews, three force-pushes, and the failure
+mode is silent until a bot comments.
+
+**Worth stating plainly for whoever writes it:** the pull is real. A descriptive
+author looked right to me for the same reason it looked right to
+`Loom primitives` — a commit that says which routine made it is more legible in
+`git log` than one that says `Claude`. The rule has to be written down precisely
+because the wrong thing is the appealing one.

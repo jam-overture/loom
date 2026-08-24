@@ -9,7 +9,13 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { summariseOperations } from "@/app/(portal)/_lib/delta-summary"
 import { type WriteReport } from "@/app/(portal)/_lib/outcome"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
-import { STAKES, confidenceWord, ruleSentence, toneClasses } from "@/app/(portal)/_lib/vocabulary"
+import {
+  STAKES,
+  confidenceWord,
+  reversibilityWord,
+  ruleSentence,
+  toneClasses,
+} from "@/app/(portal)/_lib/vocabulary"
 
 import { confirmProposal, discardProposal } from "../actions"
 
@@ -65,8 +71,8 @@ export const HeldProposalCard = ({
       <header className="flex flex-col gap-1">
         <p className="text-sm">{held.proposal.rationale}</p>
         <p className="text-ink-muted text-xs">
-          {confidenceWord(held.disposition.confidence)} · {stakes.label}
-          {held.disposition.reversible ? " · you could undo it" : " · this one can't be undone"}
+          {confidenceWord(held.disposition.confidence)} · {stakes.label} ·{" "}
+          {reversibilityWord(held.disposition.reversible)}
         </p>
       </header>
 
