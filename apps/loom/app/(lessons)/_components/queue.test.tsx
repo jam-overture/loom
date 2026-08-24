@@ -29,7 +29,7 @@ describe("the review queue", () => {
     window.localStorage.clear()
   })
 
-  it("gives a reader who has done nothing fourteen sets and nothing to do", () => {
+  it("gives a reader who has done nothing three sets and nothing to do", () => {
     const { container } = render(<Queue sets={SETS} parts={PARTS} />)
 
     expect(container.textContent).toContain("Waiting on a lesson (3)")

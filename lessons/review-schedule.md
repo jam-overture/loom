@@ -604,6 +604,50 @@ the observation, not the rule. Question 9 is the one most worth doing out loud.
 
 ---
 
+## Set S — two days after lesson 15
+
+Interleaved with 01, 04, 05, 07, 09, 12 and 14, and built around the failure
+mode lesson 15 exists to name: **treating a declaration as though it were a
+guarantee.** A declaration is a claim somebody typed; four of these ask you what
+would have to happen for it to be *true*, and they are deliberately not
+adjacent.
+
+1. Name the five places a registration is acted on and the different question
+   each answers. Then name the one that prevents rather than detects, and say
+   what follows from the fact that it contains no enforcement anywhere.
+2. `z.object({})` and no schema at all differ. Name the consumer that acts on
+   the difference, then name the consumer that does not — and say which
+   decision makes the second one's indifference safe rather than lucky.
+3. Give the rule for what one render may prove. It is three sentences, one
+   about children, one about a declared slot, one about decoration, and two of
+   the three are the same sentence. Say which two, and say what the odd one out
+   would hide if it were resolved like them.
+4. Lesson 12 defined a projection in one sentence. Apply it to the catalogue:
+   source of truth, what is thrown away, and what would break if the projection
+   tried *not* to throw it away. Then say which of the four projections in this
+   course the catalogue is most alike, and on which axis. *(12)*
+5. The Gate reaches a verdict and applies nothing; the audit reaches a verdict
+   and blocks nothing. State the single rule both follow — it is about a fact,
+   not about a return type — and then find the third instance of it, which is
+   in lesson 14. *(09, 14)*
+6. A component throws under every configuration; another throws under one.
+   Name both reports, say what a host does about each, and say why the first
+   one's verdict is not a false reassurance.
+7. A model may not name the nodes it inserts. Give the reason without the word
+   "trust", then say what the catalogue adds to that reason — the two are about
+   different halves of the same proposal. *(04, 12)*
+8. `analyzeDelta` takes a tree and a delta and takes no policy. `catalogueOf`
+   takes a registry and takes no model. Say what those two separations have in
+   common, then say which of the two would be caught by a test if you got it
+   wrong and which would only be caught by someone reading a year of records.
+   *(07)*
+
+Question 3 is the slow one and the one to write in full sentences. Question 5 is
+the payoff: it reaches back six lessons, and if the connection is not there yet,
+this is a better place to build it than a month from now.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -636,3 +680,4 @@ renders this file rather than restating it.
 | P | 2 days after L13 | | |
 | Q | 1 week after Part III | | |
 | R | 2 days after L14 | | |
+| S | 2 days after L15 | | |

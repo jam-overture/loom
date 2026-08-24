@@ -37,8 +37,8 @@ export type SetStatus =
 /**
  * What the queue needs of a set: its name and when it comes round. The
  * questions stay on the server until the reader opens the set, so the page that
- * lists eighteen of them ships eighteen headings rather than a hundred and
- * twenty questions.
+ * lists nineteen of them ships nineteen headings rather than a hundred and
+ * twenty-eight questions.
  */
 export type ScheduledSet = Pick<ReviewSet, "letter" | "slug" | "timing" | "anchor" | "delayDays">
 
