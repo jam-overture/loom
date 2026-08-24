@@ -6476,3 +6476,59 @@ can diff; or have the routine commit an index page of the run's visuals to
 Recorded now because it will recur on every visual lane's next pull request, and
 because a broken embed is indistinguishable from a routine that forgot the
 screenshot — which is the more damaging reading, and the wrong one.
+
+---
+
+## 2026-08-24 — `loom.code` has its first consumer, and it is correct under all three palettes
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+for the filer to use — nothing is asked for
+
+Recorded because a primitive nothing renders is a primitive nothing has checked.
+
+`loom.code` is registered, audited and, until this branch, **used by no tree in
+the repository.** `apps/loom/app/(lessons)/_lib/blocks.ts` has a builder for it
+and no lesson currently renders one; the documentation site has its own
+`code-block.tsx` React component and does not go through the library at all.
+
+The mechanism page now renders seven of them, each holding between 500 and 2,300
+characters of JSON, and the primitive is **right**: monospace, whitespace
+preserved, the tinted surface themed from the palette in all three, `language` as
+a filename label reading exactly as its own doc comment says it should, and the
+panel scrolling inside its own edge at 390px rather than pushing the page.
+
+One thing worth knowing before the next surface reaches for it. **A panel whose
+longest line does not fit will size every ancestor that lets it**, and the
+containment has to exist above the primitive rather than in it. This surface's
+`body { display: grid }` did not have it: a grid item's automatic minimum size is
+its min-content size, so one 190-character line made the whole site 1,120px wide
+on a 390px phone — every band, not just that one. Fixed in this lane, in this
+lane's stylesheet, with `grid-template-columns: minmax(0, 1fr)`.
+
+**Nothing is asked of `src/primitives`.** `loom.code` was innocent and its
+`overflow-x: auto` was already correct; it simply was never the thing being asked
+to shrink. Recorded so the next lane to print code does not spend a run
+rediscovering it, and so this one's owner knows the primitive has been exercised
+for real.
+
+---
+
+## 2026-08-24 — no framework gaps, and `src/` was not opened
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:** closed
+
+Recorded because absence is worth knowing, and because this run had the best
+chance yet of finding a gap: it prints the runtime's own event stream on a public
+page, which is the first time anything in `apps/` has consumed `RuntimeEvent` for
+something other than a test.
+
+Nothing was wanted that `@loom/runtime` does not export. `EventSink` is an
+interface with one method and a host implements it in eight lines, which is the
+claim the band makes and therefore had to be true. Every band is composed from
+registered starter primitives — `loom.section`, `loom.heading`, `loom.prose`,
+`loom.list`, `loom.list-item`, `loom.code` — and no local component was added.
+
+The one seam that moved is inside this lane: `runAsk` takes the listener as a
+parameter with a do-nothing default, so the front door still hears nothing and
+the mechanism page can hear everything, without either of them keeping anything
+between requests (0081).

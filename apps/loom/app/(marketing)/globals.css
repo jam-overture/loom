@@ -18,4 +18,21 @@ body {
 body {
   display: grid;
   min-height: 100dvh;
+  /*
+   * The one column the page sits in, allowed to be narrower than its contents.
+   *
+   * A grid item's automatic minimum size is its *min-content* size, so the
+   * single implicit column here was sized by the widest unbreakable thing
+   * anywhere on the page. That is invisible while every band is prose, which
+   * wraps — and on 24 August the mechanism page started printing a record with
+   * a 190-character line in it, and the whole site went 1,120px wide on a
+   * 390px phone. Every band, not just that one: text columns three times the
+   * screen, and a page you read by scrolling sideways.
+   *
+   * `minmax(0, 1fr)` is the column saying it may be smaller than what is in
+   * it. Nothing below has to change: the panel that cannot fit scrolls inside
+   * its own edge, which is what it was already built to do and could not,
+   * because it was never the thing being asked to shrink.
+   */
+  grid-template-columns: minmax(0, 1fr);
 }

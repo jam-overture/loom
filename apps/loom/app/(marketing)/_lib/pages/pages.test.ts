@@ -420,3 +420,68 @@ describe("a surface added to the product", () => {
     )
   })
 })
+
+/**
+ * The mechanism page as it is *served*, which is the only form of it a reader
+ * meets.
+ *
+ * Every assertion above is made against `treeFor`, the page before the route
+ * supplies what it gathers per request — and the record this page prints is
+ * gathered per request, so none of them see it. That is the gap this block
+ * closes: the same properties, plus the one that matters most here, which is
+ * that the band is there at all. A page whose central band quietly vanishes
+ * when a caller forgets to supply it is the failure mode this site keeps
+ * finding, and it is silent every time.
+ */
+describe("the record on the mechanism page", () => {
+  const served = async (theme: SiteThemeName) =>
+    renderTree(await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme }))
+
+  it("is on the page the route serves, whether or not the builder was given one", async () => {
+    const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const eyebrows = tree.root.children.flatMap((child) =>
+      child.kind === "element" && typeof child.props["eyebrow"] === "string"
+        ? [child.props["eyebrow"]]
+        : []
+    )
+
+    expect(eyebrows).toContain("The record itself")
+    expect(eyebrows).toContain("And when the answer is no")
+  })
+
+  /**
+   * Six for the run and one for the refusal. Counted rather than looked for,
+   * because a stage the page stopped printing would otherwise show up as a
+   * slightly shorter page and nothing else.
+   */
+  it("prints one panel per line of the run, and one for the refusal", async () => {
+    const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const count = (node: LoomNode): number =>
+      (node.kind === "element" && node.type === "loom.code" ? 1 : 0) +
+      (node.kind === "text" ? 0 : node.children.reduce((total, child) => total + count(child), 0))
+
+    expect(count(tree.root)).toBe(7)
+  })
+
+  it("is a record of the page this site publishes, not of a fixture", async () => {
+    const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const front = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const words = (node: LoomNode): string =>
+      node.kind === "text" ? node.value : node.children.map(words).join(" ")
+
+    expect(words(tree.root)).toContain(`"treeId": "${front.treeId}"`)
+  })
+
+  describe.each(THEMES)("wearing %s", (theme) => {
+    it("renders with nothing the runtime could not honour", async () => {
+      expect((await served(theme)).diagnostics).toEqual([])
+    })
+
+    it("names no colour of its own, anywhere below the root", async () => {
+      const body = belowRoot(renderToStaticMarkup((await served(theme)).element))
+
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    })
+  })
+})

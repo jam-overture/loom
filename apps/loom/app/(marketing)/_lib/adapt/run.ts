@@ -9,6 +9,7 @@ import {
   systemClock,
   type CompositionRuntime,
   type EditIntent,
+  type EventSink,
   type GatePolicy,
   type LoomTree,
   type TreeDelta,
@@ -168,17 +169,32 @@ const intentFor = (page: LoomTree, ask: Ask, runtime: CompositionRuntime): EditI
  */
 const RUN_NAMESPACE = "ask"
 
+/**
+ * Who is listening, and why anyone would be.
+ *
+ * The front door itself listens to nothing: the panel it shows is built from
+ * what `composeChange` *returned*, and a landing page has nowhere to put a log.
+ * A deployment does. Every stage of the sequence narrates itself to whatever
+ * the host hands in here, including the stages that fail, and that stream is
+ * the thing this site claims exists — so the mechanism page runs one real
+ * request with an ordinary listener attached and prints what it heard.
+ *
+ * It stays a parameter with a do-nothing default rather than something this
+ * module keeps, because a listener that survived the request would be state on
+ * a page whose whole design is that it holds none (0081).
+ */
 export const runAsk = async (
   page: LoomTree,
   ask: Ask,
   approve = false,
-  namespace: string = RUN_NAMESPACE
+  namespace: string = RUN_NAMESPACE,
+  events: EventSink = noopEventSink
 ): Promise<AskRun> => {
   const idFactory = sequentialIdFactory(namespace)
   const runtime: CompositionRuntime = {
     interpreter: askInterpreter(ask, idFactory, systemClock),
     policySource: fixedPolicy(FRONT_DOOR_POLICY),
-    events: noopEventSink,
+    events,
     clock: systemClock,
     idFactory,
   }
