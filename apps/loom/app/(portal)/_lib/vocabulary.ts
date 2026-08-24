@@ -1,5 +1,16 @@
 import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
-import type { DispositionReasonCode, NodeKind, StakeLevel } from "@loom/runtime"
+import type {
+  DispositionKind,
+  DispositionReasonCode,
+  IntentOrigin,
+  NodeKind,
+  StakeLevel,
+} from "@loom/runtime"
+import type {
+  EpisodeAnswer,
+  EpisodeResolutionKind,
+  FailureStage,
+} from "@loom/runtime/telemetry"
 import {
   describeAddressing,
   type Addressing,
@@ -308,6 +319,204 @@ export const confidenceWord = (confidence: number): string => {
   if (confidence >= 0.5) return "The AI says it is not certain"
 
   return "The AI says it is unsure"
+}
+
+/**
+ * Whether a change could be taken back, as a clause rather than a boolean.
+ *
+ * `reversible: no` is a field name and a value. What a reader wants to know is
+ * whether they are about to do something they can walk away from, and the two
+ * clauses here read straight after a stakes label without a colon in sight.
+ */
+export const reversibilityWord = (reversible: boolean): string =>
+  reversible ? "you could undo it" : "this one can't be undone"
+
+/**
+ * What became of one ask, in the portal's words.
+ *
+ * The Activity screen's own table. `CHANGE_STATES` answers the same question
+ * about a *change*, and most of these land on the same sentence — deliberately,
+ * because "not allowed" must mean the same thing on both screens. They are not
+ * one table because the runtime keys them differently and an ask is not a
+ * change: an ask can end `failed`, which no change can, and an ask can end
+ * `open`, which means this page's window closed rather than anything happening.
+ *
+ * `discarded` reads "You said no" here and in `CHANGE_STATES`, and now carries
+ * the same tone in both. It was `inapplicable` on this screen and `rejected` on
+ * the review queue, so one change turned down showed grey in one place and red
+ * in the other — a difference a reader would reasonably read as meaning
+ * something.
+ */
+export const ASK_OUTCOMES: Readonly<Record<EpisodeResolutionKind, PlainState>> = {
+  committed: {
+    label: "Done",
+    meaning: "Loom made this change, and it is live on the page.",
+    technical: "committed",
+    tone: "applied",
+  },
+  refused: {
+    label: "Not allowed",
+    meaning:
+      "A rule in this project's settings blocked it, so the page was left as it was. Nothing was lost — what the AI wanted to do is still written down below.",
+    technical: "refused",
+    tone: "rejected",
+  },
+  "awaiting-answer": {
+    label: "Waiting on you",
+    meaning: "Loom wrote the change but will not apply it until somebody says yes.",
+    technical: "awaiting-answer",
+    tone: "awaiting",
+  },
+  discarded: {
+    label: "You said no",
+    meaning: "Somebody was asked about this change and turned it down.",
+    technical: "discarded",
+    tone: "rejected",
+  },
+  "not-interpreted": {
+    label: "Not understood",
+    meaning: "The AI could not turn this request into a change it knew how to make.",
+    technical: "not-interpreted",
+    tone: "uninterpreted",
+  },
+  "not-writable": {
+    label: "Not saved",
+    meaning: "The change was fine, but it could not be written down. Nothing was lost.",
+    technical: "not-writable",
+    tone: "inapplicable",
+  },
+  failed: {
+    label: "Something broke",
+    meaning: "Loom hit an error part-way through, so the page was left as it was.",
+    technical: "failed",
+    tone: "rejected",
+  },
+  open: {
+    label: "No ending recorded",
+    meaning:
+      "Nothing on this page says how this one finished. It may still be running, or it may have started further back than this page reaches.",
+    technical: "open",
+    tone: "uninterpreted",
+  },
+}
+
+/**
+ * Who or what asked, said as a person rather than as a category.
+ *
+ * The runtime keeps the origin separate from the actor on purpose (0017):
+ * `developer` and `user-instruction` are different acts and can be the same
+ * human. So these say what the *act* was, and the actor's name — when the host
+ * recorded one — is printed beside them rather than instead of them.
+ */
+export const ASK_ORIGINS: Readonly<Record<IntentOrigin, PlainWord>> = {
+  "user-instruction": {
+    label: "Somebody using the site asked for this",
+    meaning: "A visitor or a member of your team typed a request and Loom answered it.",
+    technical: "user-instruction",
+  },
+  developer: {
+    label: "Somebody working on the site asked for this",
+    meaning: "The request came from the portal or from your own code, not from a visitor.",
+    technical: "developer",
+  },
+  "system-signal": {
+    label: "Your site asked for this by itself",
+    meaning: "Something the site noticed — not a person typing — set this off.",
+    technical: "system-signal",
+  },
+  "scheduled-adaptation": {
+    label: "A schedule asked for this",
+    meaning: "Loom was set up to look at this page on a timetable, and its turn came round.",
+    technical: "scheduled-adaptation",
+  },
+}
+
+/**
+ * Where it broke, when something broke.
+ *
+ * `custody: the store rejected the write` is two technical words and a true
+ * sentence. What a reader needs from a failure is whether their page is now in
+ * a strange state, and the answer is always no — so every one of these says
+ * what stage got as far as, and none of them implies a half-applied page.
+ */
+export const FAILURE_STAGES: Readonly<Record<FailureStage, PlainWord>> = {
+  interpretation: {
+    label: "while the AI was working out what to change",
+    meaning: "It never got as far as proposing anything, so the page was never touched.",
+    technical: "interpretation",
+  },
+  assessment: {
+    label: "while Loom was weighing up the change",
+    meaning: "A change had been written but was never judged, so it was never applied.",
+    technical: "assessment",
+  },
+  repair: {
+    label: "while the AI was trying again after a refusal",
+    meaning: "The second attempt broke. The first one was already refused, so nothing changed.",
+    technical: "repair",
+  },
+  application: {
+    label: "while the change was being made to the page",
+    meaning: "Loom applies a change all at once or not at all, so the page was left as it was.",
+    technical: "application",
+  },
+  custody: {
+    label: "while the change was being put aside for you",
+    meaning: "It could not be saved for you to answer later, so there is nothing waiting.",
+    technical: "custody",
+  },
+  commit: {
+    label: "while the change was being written down",
+    meaning: "The change was good and the record of it did not save. Nothing was lost.",
+    technical: "commit",
+  },
+}
+
+/**
+ * What the Gate decided, before the reason for it.
+ *
+ * `requires-confirmation` is the one that most needs saying differently: it is
+ * the Gate's most common non-trivial answer, it is the whole of 0002, and as a
+ * hyphenated compound it reads like an error.
+ */
+export const GATE_VERDICTS: Readonly<Record<DispositionKind, PlainState>> = {
+  accepted: {
+    label: "Loom made this change on its own",
+    meaning: "Nothing in your rules said a person had to look at it first.",
+    technical: "accepted",
+    tone: "applied",
+  },
+  "requires-confirmation": {
+    label: "Loom stopped and asked first",
+    meaning: "Your rules say a change like this one needs a person to say yes.",
+    technical: "requires-confirmation",
+    tone: "awaiting",
+  },
+  rejected: {
+    label: "Loom would not make this change",
+    meaning: "Your rules do not allow it at all, so nobody was asked.",
+    technical: "rejected",
+    tone: "rejected",
+  },
+}
+
+/**
+ * What somebody said when they were asked.
+ *
+ * `confirmed` and `discarded` are the record's words for a person pressing one
+ * of two buttons, and the buttons say "Apply this change" and "No thanks".
+ */
+export const ANSWERS: Readonly<Record<EpisodeAnswer, PlainWord>> = {
+  confirmed: {
+    label: "said yes",
+    meaning: "Somebody looked at this and let it through.",
+    technical: "confirmed",
+  },
+  discarded: {
+    label: "said no",
+    meaning: "Somebody looked at this and turned it down.",
+    technical: "discarded",
+  },
 }
 
 /**
