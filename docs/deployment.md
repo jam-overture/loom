@@ -239,11 +239,12 @@ pnpm --filter @loom/app db:push
 ```
 
 Once, from a machine with `.env.local` in place. Idempotent — every statement is
-`IF NOT EXISTS`, so re-running is a no-op. It creates four tables: `loom_trees`
-and `loom_revisions` for the store, `loom_telemetry` for the journal §6 records
-into, and `loom_signin_attempts` for the sign-in throttle. The last of those
-belongs to the portal rather than to `@loom/runtime` — the runtime takes an
-actor and never asks how a host established one.
+`IF NOT EXISTS`, so re-running is a no-op. It creates five tables: `loom_trees`
+and `loom_revisions` for the store, `loom_holds` for the changes the Gate held
+back, `loom_telemetry` for the journal §6 records into, and
+`loom_signin_attempts` for the sign-in throttle. The last of those belongs to the
+portal rather than to `@loom/runtime` — the runtime takes an actor and never asks
+how a host established one.
 
 **Re-run it whenever the schema changes, not only on a new database.**
 `CREATE TABLE IF NOT EXISTS` leaves an existing table alone, columns and all, so
@@ -251,7 +252,7 @@ a column added after a deployment reaches it only through the `ALTER TABLE …
 ADD COLUMN IF NOT EXISTS` beside it. A deployment that skips the re-run keeps
 serving and fails the write that needed the column.
 
-Two so far, and the second one is the one to get right:
+Three so far, and the last two are the ones to get right:
 
 - `loom_revisions.answered_by` (0029), which every confirmation of a held
   proposal writes.
@@ -260,6 +261,13 @@ Two so far, and the second one is the one to get right:
   than allowed uncounted — so a database configured without this table admits no
   reviewer at all. The sign-in page says as much and names `db:push`; running it
   fixes it in seconds.
+- `loom_holds` (0088), which is where a change the Gate held back waits for the
+  human who answers it. **Only a deployment that uses `postgresHoldStore` needs
+  it**, and one that stays on the in-memory store keeps working without it — but
+  that store cannot hold anything across a request, so on the serverless hosts
+  described above a proposal marked *requires confirmation* is gone before the
+  confirmation arrives. `db:push` creates the table either way, so adopting the
+  Postgres store later is a code change and not a database step.
 
 ### 5. The tables are locked down for you
 

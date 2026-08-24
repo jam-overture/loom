@@ -5725,6 +5725,27 @@
           ]
         },
         {
+          "module": "store/driver",
+          "title": "Driver",
+          "summary": "The two things every Postgres-backed store has to do with a driver's error.",
+          "symbols": [
+            {
+              "name": "isUniqueViolation",
+              "kind": "function",
+              "signature": "const isUniqueViolation: (cause: unknown) => boolean",
+              "truncated": false,
+              "summary": "Postgres reports a primary-key collision as SQLSTATE 23505, but Drizzle wraps the driver's error, so the code sits somewhere down the `cause` chain rather than on the error that was thrown. Walking the chain is what makes this work across drivers instead of against whichever one was tested first."
+            },
+            {
+              "name": "unavailable",
+              "kind": "function",
+              "signature": "const unavailable: (cause: unknown, detail: string) => {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n}",
+              "truncated": false,
+              "summary": "An outage, said in terms of what was being attempted."
+            }
+          ]
+        },
+        {
           "module": "store/errors",
           "title": "Errors",
           "summary": "What persistence can refuse, and how to say it.",
@@ -6087,6 +6108,13 @@
               "summary": ""
             },
             {
+              "name": "heldProposalSchema",
+              "kind": "schema",
+              "signature": "const heldProposalSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": "The same shape, as something a stored row can be checked against."
+            },
+            {
               "name": "HoldError",
               "kind": "type",
               "signature": "type HoldError = \n/** Nothing under this id: never held, already answered, or expired. */\n{\n    readonly code: \"not-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"already-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
@@ -6099,6 +6127,13 @@
               "signature": "const describeHoldError: (error: HoldError) => string",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "parseHeldProposal",
+              "kind": "function",
+              "signature": "const parseHeldProposal: (row: unknown) => Result<HeldProposal, HoldError>",
+              "truncated": false,
+              "summary": "Reads a hold back out of storage, or says why it could not."
             },
             {
               "name": "HoldStore",
@@ -6206,11 +6241,25 @@
               "summary": "The schema, as statements a host can run."
             },
             {
+              "name": "HOLD_STORE_DDL",
+              "kind": "value",
+              "signature": "const HOLD_STORE_DDL: readonly string[]",
+              "truncated": false,
+              "summary": "The hold store's schema, as statements a host can run."
+            },
+            {
               "name": "ensureTreeStoreSchema",
               "kind": "function",
               "signature": "const ensureTreeStoreSchema: (db: LoomDatabase) => Promise<void>",
               "truncated": false,
               "summary": "Creates the tables if they are absent. Every statement is `IF NOT EXISTS`, so running it against a populated database is a no-op rather than a hazard."
+            },
+            {
+              "name": "ensureHoldStoreSchema",
+              "kind": "function",
+              "signature": "const ensureHoldStoreSchema: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Creates the hold table if it is absent. Idempotent on the same terms."
             }
           ]
         },
@@ -6223,6 +6272,20 @@
               "name": "postgresTreeStore",
               "kind": "function",
               "signature": "const postgresTreeStore: (db: LoomDatabase) => TreeStore",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "store/postgres-holds",
+          "title": "Postgres holds",
+          "summary": "Custody of held proposals, backed by Postgres.",
+          "symbols": [
+            {
+              "name": "postgresHoldStore",
+              "kind": "function",
+              "signature": "const postgresHoldStore: (db: LoomDatabase) => HoldStore",
               "truncated": false,
               "summary": ""
             }
@@ -6246,6 +6309,13 @@
               "signature": "const loomRevisions: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_revisions\";\n    schema: undefined;\n    columns: {\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        revision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"revision\";\n            tableName: \"loom_revisions\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        delta: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"delta\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        provenance: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"provenance\";\n            tableName: \"loom_revisions\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        appliedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"applied_at\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        answeredBy: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"answered_by\";\n            tableName: \"loom_revisions\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: false;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The log. The composite primary key is load-bearing rather than incidental: it makes the *database* enforce the revision sequence, so two writers racing at the same base revision cannot both commit even if both passed the base-revision check before either finished. The in-memory store gets that property from being single-threaded; here it has to come from a constraint."
+            },
+            {
+              "name": "loomHolds",
+              "kind": "value",
+              "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
+              "truncated": false,
+              "summary": "The custody of what the Gate held back."
             }
           ]
         }
