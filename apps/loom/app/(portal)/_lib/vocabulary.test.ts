@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 
-import { dispositionReasonCodeSchema, stakeLevelSchema, type NodeId, type NodeKind } from "@loom/runtime"
+import {
+  dispositionReasonCodeSchema,
+  stakeLevelSchema,
+  type DispositionKind,
+  type IntentOrigin,
+  type NodeId,
+  type NodeKind,
+} from "@loom/runtime"
+import { EPISODE_RESOLUTION_KINDS, type FailureStage } from "@loom/runtime/telemetry"
 import {
   describeAddressing,
   type Addressing,
@@ -9,13 +17,19 @@ import {
 import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
 
 import {
+  ANSWERS,
+  ASK_ORIGINS,
+  ASK_OUTCOMES,
   CANNOT_UNDO,
   CHANGE_STATES,
+  FAILURE_STAGES,
+  GATE_VERDICTS,
   PART_KINDS,
   STAKES,
   confidenceWord,
   plainState,
   pointingWords,
+  reversibilityWord,
   ruleSentence,
   stateOfRevert,
   stateOfWrite,
@@ -372,6 +386,192 @@ describe("pointingWords", () => {
   it("keeps the runtime's own description verbatim, one click down", () => {
     for (const addressing of everyAddressing) {
       expect(pointingWords(addressing).technical).toBe(describeAddressing(addressing))
+    }
+  })
+})
+
+/**
+ * The 24 August additions: the words the Activity screen needed. Four more
+ * tables of the same shape, in the same file, for the reason the file exists —
+ * a state called two things on two screens is the failure the brief names.
+ */
+
+const everyOrigin: readonly IntentOrigin[] = [
+  "user-instruction",
+  "developer",
+  "system-signal",
+  "scheduled-adaptation",
+]
+
+const everyStage: readonly FailureStage[] = [
+  "interpretation",
+  "assessment",
+  "repair",
+  "application",
+  "custody",
+  "commit",
+]
+
+const everyVerdict: readonly DispositionKind[] = ["accepted", "requires-confirmation", "rejected"]
+
+describe("the ask outcomes", () => {
+  it("names every resolution the fold can produce", () => {
+    expect(Object.keys(ASK_OUTCOMES).sort()).toEqual([...EPISODE_RESOLUTION_KINDS].sort())
+  })
+
+  it("keeps the runtime's own kind as the technical name for every one", () => {
+    for (const kind of EPISODE_RESOLUTION_KINDS) {
+      expect(ASK_OUTCOMES[kind].technical).toBe(kind)
+    }
+  })
+
+  it("puts no runtime identifier in a label a person reads", () => {
+    for (const kind of EPISODE_RESOLUTION_KINDS) {
+      const { label, meaning } = ASK_OUTCOMES[kind]
+
+      for (const word of RUNTIME_JARGON) {
+        expect(label.toLowerCase(), label).not.toContain(word)
+        expect(meaning.toLowerCase(), meaning).not.toContain(word)
+      }
+      expect(label).not.toMatch(/-/)
+    }
+  })
+
+  it("starts every label with a capital, so a badge does not read as code", () => {
+    for (const kind of EPISODE_RESOLUTION_KINDS) {
+      const { label } = ASK_OUTCOMES[kind]
+
+      expect(label[0]).toBe(label[0]?.toUpperCase())
+    }
+  })
+
+  /**
+   * The reason these are not one table with `CHANGE_STATES` — an ask can end
+   * `failed` and `open`, which no change can — is also the reason the overlap
+   * has to be checked. A change turned down was grey here and red on the review
+   * queue before this branch, and a reader would reasonably read the difference
+   * as meaning something.
+   */
+  it("agrees with the change states wherever both name the same thing", () => {
+    expect(ASK_OUTCOMES.discarded.label).toBe(CHANGE_STATES.declined.label)
+    expect(ASK_OUTCOMES.discarded.tone).toBe(CHANGE_STATES.declined.tone)
+    expect(ASK_OUTCOMES.refused.label).toBe(CHANGE_STATES.refused.label)
+    expect(ASK_OUTCOMES.refused.tone).toBe(CHANGE_STATES.refused.tone)
+    expect(ASK_OUTCOMES["awaiting-answer"].label).toBe(CHANGE_STATES.waiting.label)
+    expect(ASK_OUTCOMES["not-interpreted"].label).toBe(CHANGE_STATES.misunderstood.label)
+    expect(ASK_OUTCOMES["not-writable"].label).toBe(CHANGE_STATES["not-saved"].label)
+  })
+
+  /** Eight outcomes, eight different things to say. A shared sentence is a bug. */
+  it("gives every outcome its own meaning", () => {
+    const meanings = EPISODE_RESOLUTION_KINDS.map((kind) => ASK_OUTCOMES[kind].meaning)
+
+    expect(new Set(meanings).size).toBe(EPISODE_RESOLUTION_KINDS.length)
+  })
+})
+
+describe("the ask origins", () => {
+  it("names every origin the runtime has", () => {
+    expect(Object.keys(ASK_ORIGINS).sort()).toEqual([...everyOrigin].sort())
+  })
+
+  it("says who asked without printing the enum at anybody", () => {
+    for (const origin of everyOrigin) {
+      expect(ASK_ORIGINS[origin].label, origin).not.toContain(origin)
+      expect(ASK_ORIGINS[origin].label, origin).not.toMatch(/-/)
+      expect(ASK_ORIGINS[origin].technical).toBe(origin)
+    }
+  })
+
+  /**
+   * `developer` and `user-instruction` are different acts by the same person
+   * (0017), so the two sentences must not collapse into one.
+   */
+  it("tells the four acts apart", () => {
+    const labels = everyOrigin.map((origin) => ASK_ORIGINS[origin].label)
+
+    expect(new Set(labels).size).toBe(everyOrigin.length)
+  })
+})
+
+describe("the failure stages", () => {
+  it("names every stage the runtime can fail at", () => {
+    expect(Object.keys(FAILURE_STAGES).sort()).toEqual([...everyStage].sort())
+  })
+
+  /**
+   * The whole point of these. A reader who has been told something broke wants
+   * to know whether their page is now half-changed, and for every stage the
+   * answer is no — so every one of them says so.
+   */
+  it("reassures the reader that nothing was left half-done, at every stage", () => {
+    for (const stage of everyStage) {
+      const { meaning } = FAILURE_STAGES[stage]
+
+      expect(meaning, stage).toMatch(
+        /never (touched|applied|judged)|left as it was|nothing (changed|was lost|waiting)|nothing was lost/i
+      )
+    }
+  })
+
+  /** A clause, so a card can write "This stopped <label>." and get a sentence. */
+  it("reads as a clause rather than as a stage name", () => {
+    for (const stage of everyStage) {
+      expect(FAILURE_STAGES[stage].label, stage).toMatch(/^while /)
+      expect(FAILURE_STAGES[stage].label, stage).not.toContain(stage)
+      expect(FAILURE_STAGES[stage].technical).toBe(stage)
+    }
+  })
+})
+
+describe("the Gate's verdicts", () => {
+  it("names every verdict the Gate can reach", () => {
+    expect(Object.keys(GATE_VERDICTS).sort()).toEqual([...everyVerdict].sort())
+  })
+
+  /**
+   * `requires-confirmation` is the one that most needs saying differently: it is
+   * the whole of 0002, it is the Gate's commonest non-trivial answer, and as a
+   * hyphenated compound it reads like an error.
+   */
+  it("says what the Gate did rather than printing its enum", () => {
+    for (const verdict of everyVerdict) {
+      expect(GATE_VERDICTS[verdict].label, verdict).not.toContain(verdict)
+      expect(GATE_VERDICTS[verdict].label, verdict).not.toMatch(/-/)
+      expect(GATE_VERDICTS[verdict].technical).toBe(verdict)
+    }
+    expect(GATE_VERDICTS["requires-confirmation"].label).toBe("Loom stopped and asked first")
+  })
+
+  /** Three verdicts, three tones. A verdict nobody can tell apart is not a verdict. */
+  it("tones the three apart", () => {
+    expect(new Set(everyVerdict.map((verdict) => GATE_VERDICTS[verdict].tone)).size).toBe(3)
+  })
+})
+
+describe("the answers", () => {
+  it("says a person pressed a button rather than naming the record's field", () => {
+    expect(ANSWERS.confirmed.label).toBe("said yes")
+    expect(ANSWERS.discarded.label).toBe("said no")
+    expect(ANSWERS.confirmed.technical).toBe("confirmed")
+    expect(ANSWERS.discarded.technical).toBe("discarded")
+  })
+})
+
+describe("reversibilityWord", () => {
+  /**
+   * One place, so the review queue and the activity log cannot describe the same
+   * property in two different ways. `reversible: no` is a field name and a
+   * value; these are clauses that read after a stakes label.
+   */
+  it("says whether a change can be taken back, as a clause", () => {
+    expect(reversibilityWord(true)).toBe("you could undo it")
+    expect(reversibilityWord(false)).toBe("this one can't be undone")
+  })
+
+  it("never says the field's name", () => {
+    for (const reversible of [true, false]) {
+      expect(reversibilityWord(reversible)).not.toContain("reversible")
     }
   })
 })

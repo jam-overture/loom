@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
@@ -60,15 +60,25 @@ describe("the compiled package", () => {
   /**
    * The whole behaviour seam rests on this one line surviving compilation. A
    * `"use client"` that TypeScript moved below the imports, or dropped, is a
-   * boundary a bundler never opens — after which the copy control is asked to
-   * run a click handler in a server component, and the failure lands in
-   * somebody else's application build rather than here.
+   * boundary a bundler never opens — after which a control is asked to run a
+   * click handler in a server component, and the failure lands in somebody
+   * else's application build rather than here.
+   *
+   * Read off the directory rather than named one by one, so that the run which
+   * adds the third control cannot forget to add the assertion with it. The
+   * emptiness check is what stops that generalisation from quietly asserting
+   * nothing if the files are ever named differently.
    */
-  it("keeps the client directive at the top of the module that needs one", () => {
-    const control = join(DIST, "render", "behaviour-copy.js")
+  it("keeps the client directive at the top of every control that needs one", () => {
+    const controls = readdirSync(join(DIST, "render")).filter(
+      (file) => file.startsWith("behaviour-") && file.endsWith(".js")
+    )
 
-    expect(existsSync(control)).toBe(true)
-    expect(readFileSync(control, "utf8").split("\n")[0]).toBe('"use client";')
+    expect(controls).not.toHaveLength(0)
+
+    for (const file of controls) {
+      expect(readFileSync(join(DIST, "render", file), "utf8").split("\n")[0]).toBe('"use client";')
+    }
   })
 
   it("keeps a node shebang on the binary, so the bin is runnable without a loader", () => {

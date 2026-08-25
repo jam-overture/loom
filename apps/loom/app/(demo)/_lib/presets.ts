@@ -221,6 +221,40 @@ const promote: DemoPreset = {
 
 export const DEMO_PRESETS: readonly DemoPreset[] = [palette, backdrop, band, trim, promote]
 
+/**
+ * The one a stranger is meant to press first, and it is the removal.
+ *
+ * It used to be the re-theme, chosen because it is the change visible
+ * everywhere at once — the answer to *did something happen?* from across a
+ * room. That was the right question when the demo's problem was that nothing
+ * obviously moved. It is the wrong one now, and the cost of it is the whole
+ * surface:
+ *
+ * **The demo's policy is tuned so that a re-theme lands on its own.** That is
+ * deliberate and `session.ts` says why — `user-instruction` may auto-apply
+ * `low` here, so a restructure waits for the visitor and a re-paint does not.
+ * Which means the single control this panel was designed to be pressed first
+ * was the one preset the Gate is guaranteed to have nothing to say about. A
+ * stranger with sixty seconds pressed it, watched the page turn over, read a
+ * card saying it was done, and left having seen *an AI changed a page* — the
+ * one claim `docs/rollout.md` names as the least novel thing here and the one
+ * everybody else already shows.
+ *
+ * The removal is the opposite. It is held, so the first press produces the
+ * sentence this surface exists for — *Loom will not make this change until you
+ * say yes* — about a small business's proof that it can see you. And being
+ * held is not the end of the sixty seconds, it is the middle: answering it
+ * applies the change, moves the revision, and leaves an undo. One press to meet
+ * the Gate, one to get past it, one to put it back.
+ *
+ * Named here rather than in the panel because it is a claim about the *table* —
+ * which preset earns the primary slot — and because `pipeline.test.ts` asserts
+ * the property it depends on: that this preset is one the demo's policy holds.
+ * A policy retune that quietly let it through would otherwise take the demo's
+ * best moment with it, and every test would still pass.
+ */
+export const DEMO_LEADING_PRESET: DemoPresetId = "trim"
+
 export const presetById = (id: string): DemoPreset | undefined =>
   DEMO_PRESETS.find((preset) => preset.id === id)
 

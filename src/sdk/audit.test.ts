@@ -68,6 +68,22 @@ const brittle = definePrimitive({
   },
 })
 
+/**
+ * `brittle` taken to its limit, and the reproduction the lessons routine filed
+ * on 24 August: every value the schema accepts throws, so no configuration
+ * answers and the placement probe declines. It used to appear only under
+ * `notProbeable` — the one list a host cannot assert empty, because a
+ * hook-using primitive lives there legitimately.
+ */
+const exploding = definePrimitive({
+  type: "loom.exploding",
+  description: "throws under every configuration its schema accepts",
+  props: z.object({}),
+  component: () => {
+    throw new Error("boom")
+  },
+})
+
 
 /** A form that does what a form does: posts where it was told to post. */
 const posting = definePrimitive({
@@ -175,6 +191,7 @@ describe("auditRegistry", () => {
       {
         type: "loom.brittle",
         failures: [{ props: { tone: "loud" }, reason: "no rendering for tone loud" }],
+        everyConfiguration: false,
       },
     ])
   })
@@ -186,6 +203,51 @@ describe("auditRegistry", () => {
     expect(audit.notDecorated).toEqual([])
     expect(audit.notProbeable).toEqual([])
     expect(audit.leaves).toEqual([])
+  })
+
+  it("names a primitive that threw under every configuration, not only some", () => {
+    const audit = auditRegistry(registryOf([exploding]))
+
+    expect(audit.throwsOnDeclaredProps).toEqual([
+      {
+        type: "loom.exploding",
+        failures: [{ props: {}, reason: "boom" }],
+        everyConfiguration: true,
+      },
+    ])
+  })
+
+  /**
+   * The limit of a function-call probe, asserted rather than described.
+   *
+   * A hook-using primitive and a broken one are the same observation from
+   * outside a renderer: a function that throws. So the throwing list holds both,
+   * and `everyConfiguration` is where the honesty is — a host reads it to know
+   * whether the audit is *certain* this is a fault or merely reporting what it
+   * saw. What the probe can always tell apart is a component it never called,
+   * which `conformance.test.ts` asserts on a class.
+   */
+  it("cannot tell a hook-using primitive from a broken one, and does not pretend to", () => {
+    const audit = auditRegistry(registryOf([hooked, exploding]))
+
+    expect(audit.notProbeable).toEqual(["loom.hooked", "loom.exploding"])
+    expect(audit.throwsOnDeclaredProps.map((entry) => entry.type)).toEqual([
+      "loom.hooked",
+      "loom.exploding",
+    ])
+    expect(audit.throwsOnDeclaredProps.every((entry) => entry.everyConfiguration)).toBe(true)
+  })
+
+  /**
+   * So the assertion a host with hook-using primitives can still make: the
+   * certain half. `brittle` rendered under one shape and threw under another,
+   * which no legitimate primitive does.
+   */
+  it("leaves the certain half of the throwing list assertable by any host", () => {
+    const audit = auditRegistry(registryOf([hooked, brittle]))
+    const certain = audit.throwsOnDeclaredProps.filter((entry) => !entry.everyConfiguration)
+
+    expect(certain.map((entry) => entry.type)).toEqual(["loom.brittle"])
   })
 
   it("has nothing to report for a library that renders under every shape it accepts", () => {

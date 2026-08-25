@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@loom/runtime"
 import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@loom/runtime/write"
 
-import { presetById, presetInterpreter } from "./presets"
+import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
 
@@ -78,6 +78,33 @@ describe("a preset asked for through the demo's write path", () => {
     expect(record.disposition?.kind).toBe("requires-confirmation")
     expect(record.disposition?.ruleCode).toBe("stakes-above-ceiling")
     expect(record.heldProposalId).toBeDefined()
+    expect((await headOf(session)).revision).toBe(0)
+  })
+
+  /**
+   * The property the whole surface's ranking rests on, and the one that would
+   * rot without a word of warning.
+   *
+   * The panel's primary control is `DEMO_LEADING_PRESET` and it is nominated
+   * *because* the Gate holds it: the first press is meant to produce "Loom will
+   * not make this change until you say yes", which is the sentence this demo
+   * exists to put in front of a stranger. Nothing about that survives a policy
+   * retune on its own. Raise `user-instruction`'s auto-apply ceiling back to
+   * the shipped default and every existing test still passes, the demo still
+   * works, the page still changes — and the first press silently stops meeting
+   * the Gate at all, which is the exact state this run was opened to fix.
+   *
+   * So the nomination is asserted against the real policy, over the real write
+   * path, rather than trusted to the comment that explains it.
+   */
+  it("holds the preset the panel leads with, which is why it leads", async () => {
+    const session = await sessionFor("leading")
+    const record = await ask(session, DEMO_LEADING_PRESET)
+
+    expect(record.outcome).toBe("awaiting-you")
+    expect(record.disposition?.kind).toBe("requires-confirmation")
+    expect(record.heldProposalId).toBeDefined()
+    /** Held means held: the page a visitor is looking at has not moved. */
     expect((await headOf(session)).revision).toBe(0)
   })
 
