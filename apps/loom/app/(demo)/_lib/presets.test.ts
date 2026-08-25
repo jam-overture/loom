@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest"
 import { applyDelta, sequentialIdFactory, systemClock, type LoomTree, type TreeOperation } from "@loom/runtime"
 
 import { DEMO_ALTERNATE_THEME, DEMO_THEME_NODE_PROP, demoPageTree } from "./page-tree"
-import { availablePresets, DEMO_PRESETS, presetById, presetInterpreter, PRESET_INTERPRETER } from "./presets"
+import {
+  availablePresets,
+  DEMO_LEADING_PRESET,
+  DEMO_PRESETS,
+  presetById,
+  presetInterpreter,
+  PRESET_INTERPRETER,
+} from "./presets"
 
 /**
  * The presets, as planning functions.
@@ -63,6 +70,22 @@ describe("every preset", () => {
     const ops = new Set(DEMO_PRESETS.flatMap((preset) => (preset.plan(tree, ids) ?? []).map((op) => op.op)))
 
     expect([...ops].sort()).toEqual(["configure", "insert", "move", "remove"])
+  })
+})
+
+describe("the preset that leads", () => {
+  /**
+   * The panel falls back to whatever is first in `offered` when the nominated
+   * preset is not among them, so a lead the starting tree cannot honour would
+   * not throw or render an empty slot — it would quietly promote the re-theme
+   * and take the demo's best moment with it, on the arrival screen only, where
+   * nobody would see a failing test.
+   */
+  it("is one this page can actually honour on arrival", () => {
+    const tree = demoPageTree()
+
+    expect(presetById(DEMO_LEADING_PRESET)).toBeDefined()
+    expect(availablePresets(tree, ids)).toContain(DEMO_LEADING_PRESET)
   })
 })
 
