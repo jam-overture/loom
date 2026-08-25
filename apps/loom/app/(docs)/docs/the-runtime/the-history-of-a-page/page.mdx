@@ -173,10 +173,15 @@ the same claim about the same code.
 `holds` is the second, smaller store beside it — the custody a change sits in
 while it waits for a person to answer. It is a separate interface for a reason
 worth knowing: a held change has not been applied, so it cannot live in the log
-without breaking the rule that a revision counts entries. Today the runtime ships
-one implementation of it, in memory, which is enough for this site and for a
-server that stays up between the question and the answer. A deployment that holds
-changes across restarts writes its own; the interface is four methods.
+without breaking the rule that a revision counts entries. It ships in the same
+two shapes as the tree store — memory, which is what this site uses, and
+Postgres — and the same contract suite is run against both.
+
+Which one you want is decided by a question about your host rather than about
+your scale: **can the process that judged a change still be spoken to when the
+answer arrives?** On a long-lived server, usually. On a serverless one, usually
+not — so a change held in one instance's memory would be confirmed against
+another instance that has never heard of it.
 
 <Callout>
   There is exactly one function that appends to a log, and it is the same

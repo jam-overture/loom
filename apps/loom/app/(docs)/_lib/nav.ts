@@ -169,6 +169,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "Where a page lives, what the log records about every change that was applied, and why an undo is a proposal rather than a rewind.",
       },
+      {
+        slug: "connecting-a-model",
+        title: "Connecting a model",
+        summary:
+          "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
+      },
     ],
   },
   apiReferenceSection,
