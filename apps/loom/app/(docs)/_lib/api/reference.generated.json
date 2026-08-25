@@ -3576,7 +3576,7 @@
             {
               "name": "BEHAVIOUR_NAMES",
               "kind": "value",
-              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\"]",
+              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\"]",
               "truncated": false,
               "summary": ""
             },
@@ -3586,6 +3586,13 @@
               "signature": "type BehaviourName = (typeof BEHAVIOUR_NAMES)[number];",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "DISCLOSED_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const DISCLOSED_ATTRIBUTE = \"data-loom-disclosed\"",
+              "truncated": false,
+              "summary": "The attribute a disclosure control stamps on its own button: `\"true\"` when the region it names is open, `\"false\"` when it is closed."
             },
             {
               "name": "BEHAVIOURS",

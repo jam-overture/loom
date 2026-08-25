@@ -230,6 +230,43 @@ const cardWithAControl = (): LoomTree => {
   ])
 }
 
+/**
+ * The same shape again, wearing three ids nobody on this project chose by hand.
+ *
+ * `tide` is one of the eighteen palettes in `palettes.ts` that were *derived*
+ * — three hues and a mode through `derivePalette`, solved against the contrast
+ * bar, looked at, and committed. `grotesque` and `technical` are likewise none of the
+ * three the four surfaces wear.
+ *
+ * That is the whole argument of the page it sits on, made by the example rather
+ * than by a sentence: the reader is looking at a combination this repository
+ * has never rendered anywhere else, produced by typing three strings, and it
+ * looks deliberate because a palette that clears the bar looks deliberate.
+ */
+const derivedTheme = (): LoomTree => {
+  const ids = sequentialIdFactory("derivedtheme")
+
+  return page(ids, { palette: "tide", fontPack: "grotesque", stylePreset: "technical" }, { width: "readable" }, [
+    heading(ids, 1, "Hello from a tree"),
+    prose(ids, "Nothing here was written as markup."),
+    buildElement(ids, {
+      type: "loom.card",
+      props: { tone: "surface", padding: "loose" },
+      children: [
+        heading(ids, 2, "A palette nobody painted"),
+        prose(ids, "Three hues went in. Seventeen slots came out, each measured against the ink it has to carry.", {
+          tone: "muted",
+        }),
+        buildElement(ids, {
+          type: "loom.action",
+          props: { href: "https://example.com/archive", variant: "primary", scale: "small" },
+          children: [buildText(ids, "Read the archive")],
+        }),
+      ],
+    }),
+  ])
+}
+
 const entries: readonly DocsExample[] = [
   {
     id: "first-tree",
@@ -258,6 +295,13 @@ const entries: readonly DocsExample[] = [
     caption:
       "A feature grid arranges feature nodes. The repeated thing is a node, so a proposal can add one — a fixed field would have needed a new primitive.",
     build: containerAndChildren,
+  },
+  {
+    id: "a-derived-theme",
+    title: "Three ids nobody chose by hand",
+    caption:
+      "The palette on this one was derived from three hues and checked against the contrast bar rather than picked. The font pack and the style preset are two more of the registered set, and no component knows which.",
+    build: derivedTheme,
   },
   {
     id: "a-card-and-a-control",

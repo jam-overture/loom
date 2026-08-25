@@ -16,6 +16,17 @@ import { dirname, join, resolve } from "node:path"
  * the callers stand in different places: `next build` runs from `apps/loom` and
  * vitest can be invoked from either there or the repository root. The lessons
  * surface resolves its own directory the same way, for the same reason.
+ *
+ * **It is also the only spelling that survives the build, and that is the part
+ * worth knowing before you write the obvious line.** `new URL("../../x",
+ * import.meta.url)` is the idiomatic ESM way to name a neighbouring path and it
+ * fails here: Turbopack reads it as an asset this module imports and tries to
+ * resolve the argument as a module specifier, so `next build` stops with
+ * `Module not found: Can't resolve '../../x'` naming a module nobody wrote. The
+ * directory is plainly there; the bundler is not asking the filesystem. Any
+ * module the bundler will see has to find its files at run time, from
+ * `process.cwd()`, which is what this does. Import `REPOSITORY_ROOT` rather
+ * than walking a second time.
  */
 
 const MARKER = join("decisions", "README.md")

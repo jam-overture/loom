@@ -648,6 +648,47 @@ this is a better place to build it than a month from now.
 
 ---
 
+## Set T — two days after lesson 16
+
+Interleaved with 03, 04, 06, 07, 09, 12 and 15, and built around the failure
+mode lesson 16 exists to name: **trusting a check without asking what it
+compares.** Three of these are about a mechanism that reports something
+reassuring for a reason that has nothing to do with the thing you wanted
+reassurance about, and they are deliberately not adjacent.
+
+1. Reads are free. Give the argument for storing the current tree beside the log
+   that still works. Then say what it means that the argument is about the code
+   which reads the data rather than about the data.
+2. Name what a store holds, and say why neither of the two things is a starting
+   point for a fold. Then say what a host that cannot produce one must do, and
+   why the obvious shortcut is worse than not auditing at all.
+3. Undo stores nothing; the current tree is stored. Give the single test that
+   admits one and excludes the other — both halves of it — and say which half a
+   proposed cache is most likely to pass while failing the other. *(06)*
+4. An `append` can be refused two ways. Name both, say which is worth trying
+   again, and say what trying again has to mean given what a delta names. Then
+   say what a refused append leaves in the log, and what that costs. *(03, 10)*
+5. An audit reports `agrees`. Give two different situations in which that is true
+   and something is still wrong. One of them is about what a later revision
+   deleted.
+6. Lesson 12 defined a projection in one sentence. `compareTrees` turns two trees
+   into a list of differences and deliberately cannot be applied to anything.
+   Say which clause of the projection sentence that restriction is protecting,
+   and what would have entered the log without it. *(12)*
+7. A bounded walk answers `placed`, `seeded` or `undetermined`. Say what
+   collapsing the last two would claim, then find the four earlier places in this
+   course where a two-valued answer was rejected for the same reason. *(15)*
+8. `analyzeDelta` measures and does not judge; the audit reports and does not
+   block; the store refuses a stale delta and does not decide what happens next.
+   State what all three hand back and to whom, then say which one of the three
+   would be the most tempting to get wrong and why. *(07, 09)*
+
+Question 3 is the slow one and the one to write in full sentences. Question 5 is
+the payoff: it is the question that decides whether you would believe a green
+dashboard.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -681,3 +722,4 @@ renders this file rather than restating it.
 | Q | 1 week after Part III | | |
 | R | 2 days after L14 | | |
 | S | 2 days after L15 | | |
+| T | 2 days after L16 | | |

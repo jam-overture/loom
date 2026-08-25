@@ -149,3 +149,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0089](0089-the-text-ramp-is-held-to-four-grounds.md) | The text ramp is held to four grounds, and a pairing is measured whether one primitive paints it or two compose it | Accepted | §4b |
 | [0090](0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md) | A probe that declines says whether it got as far as calling the component | Accepted | §4 |
 | [0091](0091-motion-stops-in-edit-mode-and-that-is-where-a-decorative-duplicate-belongs.md) | Motion stops in edit mode, and that is where a decorative duplicate belongs | Accepted | §4b |
+| [0092](0092-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md) | A disclosure control owns its button and the primitive owns the region | Accepted | §4b |
