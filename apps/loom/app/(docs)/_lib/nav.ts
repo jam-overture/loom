@@ -144,6 +144,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "How a primitive holds other primitives: an ordered list of children, and named regions the primitive places itself.",
       },
+      {
+        slug: "theming",
+        title: "Making it look like yours",
+        summary:
+          "A palette, a font pack and a style preset, named by id on the root — and how to get your own brand colour into one without shipping a page nobody can read.",
+      },
     ],
   },
   {
@@ -168,6 +174,12 @@ const orderedSections: readonly DocsSection[] = [
         title: "The history of a page",
         summary:
           "Where a page lives, what the log records about every change that was applied, and why an undo is a proposal rather than a rewind.",
+      },
+      {
+        slug: "connecting-a-model",
+        title: "Connecting a model",
+        summary:
+          "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
       },
     ],
   },

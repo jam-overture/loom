@@ -8,6 +8,7 @@ import { loomArticleGrid } from "./loom.article-grid.js"
 import { loomAvatar } from "./loom.avatar.js"
 import { loomAvatarRow } from "./loom.avatar-row.js"
 import { loomBadge } from "./loom.badge.js"
+import { loomBeforeAfter } from "./loom.before-after.js"
 import { loomButton } from "./loom.button.js"
 import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
@@ -17,6 +18,7 @@ import { loomComparisonRow } from "./loom.comparison-row.js"
 import { loomComparisonTable } from "./loom.comparison-table.js"
 import { loomCodeSpan } from "./loom.code-span.js"
 import { loomDivider } from "./loom.divider.js"
+import { loomEmbed } from "./loom.embed.js"
 import { loomEmphasis } from "./loom.emphasis.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
@@ -36,6 +38,7 @@ import { loomList } from "./loom.list.js"
 import { loomListItem } from "./loom.list-item.js"
 import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
+import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
@@ -213,6 +216,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomStack,
   loomGrid,
   loomMosaic,
+  loomMarquee,
   loomCard,
   loomHero,
   loomFeatureGrid,
@@ -264,6 +268,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPerk,
   loomDivider,
   loomMedia,
+  loomEmbed,
+  loomBeforeAfter,
   loomAction,
   loomButton,
   loomLink,
@@ -291,6 +297,7 @@ export {
   loomAvatar,
   loomAvatarRow,
   loomBadge,
+  loomBeforeAfter,
   loomButton,
   loomCallout,
   loomCard,
@@ -300,6 +307,7 @@ export {
   loomComparisonTable,
   loomCodeSpan,
   loomDivider,
+  loomEmbed,
   loomEmphasis,
   loomFaq,
   loomFaqList,
@@ -319,6 +327,7 @@ export {
   loomListItem,
   loomLogo,
   loomLogoCloud,
+  loomMarquee,
   loomMedia,
   loomMilestone,
   loomMilestoneList,

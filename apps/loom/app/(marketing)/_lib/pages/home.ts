@@ -169,6 +169,25 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  * finding this lane filed on 20 August: eight identical rectangles read as a
  * table of specifications, and the band that says what a product is for should
  * not look like a kit list. The primitives lane shipped exactly that on #121.
+ *
+ * **The copy is written to the rhythm, and that is the thing worth knowing
+ * about this primitive.** `alternating` is wide, narrow, narrow, wide — the
+ * spans are the container's and the children are untouched, which is the whole
+ * of 0062's argument and is right. What follows from it is a job the tree has
+ * to do: a wide cell is twice the column width of a narrow one, so four bodies
+ * of roughly equal length come out as two full cells and two cells running
+ * better than a third empty. That is what this band looked like until today,
+ * and it read as unfinished rather than as composed.
+ *
+ * So the two wide cells carry the two long arguments and the narrow cells carry
+ * the short ones, at roughly twice the characters. `pages.test.ts` holds the
+ * ratio rather than the wording, because the wording will be edited by someone
+ * who is not thinking about spans and the ratio is the part that breaks
+ * silently.
+ *
+ * The glyphs went with it — `◇ ◈ ◆ ◊`, four diamonds distinguishable only by
+ * fill, which is decoration that survived four rewrites without ever meaning
+ * anything. See the note on `WAYS_IN` for the general version.
  */
 const problems = (ids: IdFactory): LoomNode =>
   section(
@@ -188,33 +207,29 @@ const problems = (ids: IdFactory): LoomNode =>
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              icon: "◇",
               title: "It writes code, and somebody has to read all of it",
-              body: "A tool that generates components hands you work. Every line has to be reviewed, tested and owned before it is safe to ship. Loom never writes code into your page — it can only rearrange the pieces you already built and trust, so there is no new code to review.",
+              body: "A tool that generates components hands you work rather than taking it away. Every line it produces has to be read, reviewed, tested and owned by whoever is on call the night it breaks. Loom never writes code into your page: it only rearranges pieces you built and already trust.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              icon: "◈",
               title: "Nobody can say what changed, or why",
-              body: "Ask most tools what happened to a page last Tuesday and the honest answer is a diff, if you are lucky. Every change here is written down: who asked, in their own words, what moved, and which rule allowed it.",
+              body: "Ask most tools what happened to a page last Tuesday and the best answer is a diff. Here it is a sentence.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              icon: "◆",
               title: "It is live before anyone has looked at it",
-              body: "Changes land because a model was confident, which is not the same as being right. Here every change is weighed against rules you write — how much of the page moves, what it touches, whether it can be taken back — and anything past your line waits for a person.",
+              body: "Changes land because a model was confident, which is not the same as being right. Anything past the line you drew waits for a person.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
-              icon: "◊",
               title: "Undoing it means finding the commit and hoping",
-              body: "A change you cannot reverse cleanly is a change you should never have let land. Every change here arrives with the change that reverses it, written at the same moment. Putting it back is one step, and it is recorded like anything else.",
+              body: "A change you cannot reverse cleanly is a change you should never have allowed to land. Every change here arrives with the change that reverses it, worked out at the same moment and kept beside it. Putting the page back is one step, and that step is recorded like any other.",
             },
           }),
         ],
@@ -314,17 +329,25 @@ const questions = (ids: IdFactory): LoomNode =>
  * surface's: a card invites, so it says *Read the docs* where a menu item says
  * *Docs*.
  *
+ * **The glyph is gone**, and it is the one thing this record lost. Four cards
+ * carried `▶ ▤ ◍ ◉` — a triangle, a page, a disc and a dot, chosen one at a
+ * time and reading as four unrelated marks rather than a set. An icon set is a
+ * registry of its own and this lane does not have one, which `loom.feature`'s
+ * own note says plainly; picking single glyphs out of Unicode until they look
+ * about right is that note being ignored. The cards are stronger with a verb
+ * and a cost than with a decoration nobody can read.
+ *
  * Keyed by path and held total by a test. The band enumerated its three cards by
  * hand until 21 August, and the merge that added the lessons course to
  * `PRODUCT_SURFACES` proved why that was wrong: the course appeared in the
  * header and in the footer and silently not here, in a band whose own comment
  * promised it could not.
  */
-const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: string }>> = {
-  [DEMO.path]: { icon: "▶", title: "Try it yourself" },
-  [DOCS.path]: { icon: "▤", title: "Read the docs" },
-  [LESSONS.path]: { icon: "◍", title: "Take the course" },
-  [PORTAL.path]: { icon: "◉", title: "Open the portal" },
+const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
+  [DEMO.path]: { title: "Try it yourself" },
+  [DOCS.path]: { title: "Read the docs" },
+  [LESSONS.path]: { title: "Take the course" },
+  [PORTAL.path]: { title: "Open the portal" },
 }
 
 /**
@@ -347,12 +370,31 @@ const WAYS_IN: Readonly<Record<string, { readonly icon: string; readonly title: 
  *
  * The band is now exactly `PRODUCT_SURFACES`, which is what makes the throw
  * below the whole of its contract rather than half of it.
+ *
+ * **It is `loom.card` rather than `loom.feature` as of 25 August, and the
+ * reason is the bottom of the cards.** `loom.feature`'s interior is its props —
+ * a glyph, a title, a sentence — stacked from the top, so four cards holding
+ * four sentences of four different lengths are four cards that stop at four
+ * different heights inside one row that stretches them all to the tallest. Two
+ * of the four were running better than a third empty, and the band that exists
+ * to send a visitor onward was the worst-composed thing on the page.
+ *
+ * Evening the sentences up would have been treating the symptom, and it does
+ * not survive the next surface anyway. `loom.card`'s `footer` is *pinned to the
+ * bottom and ruled off* — the region exists for exactly this, and its own note
+ * says so: a row of cards of unequal length still has its footers on one line.
+ * So the sentence may be whatever length it honestly needs to be, and the four
+ * costs land on a single line across the row, which is also the line a reader
+ * comparing four destinations is actually reading along.
+ *
+ * Nothing was added to the library to do it. A card, a heading, a sentence, a
+ * rule and four words, all registered before this run started.
  */
 const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
-      type: "loom.feature-grid",
-      props: { columns: "four" },
+      type: "loom.grid",
+      props: { columns: "four", gap: "snug" },
       children: PRODUCT_SURFACES.map((surface) => {
         const way = WAYS_IN[surface.path]
 
@@ -361,13 +403,13 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
         }
 
         return buildElement(ids, {
-          type: "loom.feature",
-          props: {
-            icon: way.icon,
-            title: way.title,
-            body: surface.blurb,
-            href: surfaceHref(context.origin, surface),
-          },
+          type: "loom.card",
+          props: { href: surfaceHref(context.origin, surface) },
+          children: [
+            heading(ids, 3, way.title),
+            prose(ids, surface.blurb, { tone: "muted" }),
+            buildSlot(ids, "footer", [prose(ids, surface.cost, { size: "small", tone: "muted" })]),
+          ],
         })
       }),
     }),

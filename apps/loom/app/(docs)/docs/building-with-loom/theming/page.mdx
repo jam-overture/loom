@@ -1,0 +1,200 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { BrandColour } from "@/app/(docs)/_components/brand-colour"
+import { ContrastAudit } from "@/app/(docs)/_components/contrast-audit"
+import { PaletteSlots } from "@/app/(docs)/_components/palette-slots"
+
+export const metadata = pageMetadata("building-with-loom", "theming")
+
+# Making it look like yours
+
+You do not style a Loom page by writing CSS for it. You **name three things on
+the root node**, and every primitive underneath changes appearance without being
+touched.
+
+The three are a **palette** — the colours — a **font pack** — the typefaces and
+the sizes they step through — and a **style preset** — the corners, the spacing
+and how fast anything moves. Each is a registered thing with an id, and the tree
+carries the ids and nothing else.
+
+<Example id="a-derived-theme" />
+
+The tree above is the same handful of nodes as everywhere else on this site. The
+only difference is three strings.
+
+## The three ids, and where they go
+
+```ts
+props: {
+  "loom:theme": {
+    palette: "tide",
+    fontPack: "grotesque",
+    stylePreset: "technical",
+  },
+}
+```
+
+`loom:theme` is a reserved prop — the `loom:` prefix marks props the runtime
+reads rather than props your primitive declared. Rendering resolves those three
+ids against the **theme registry** you passed, and hands the result to the
+**root primitive**, which mounts them as CSS custom properties on its own
+element. Everything below is styled from `var(--loom-*)` and never learns which
+theme it is wearing.
+
+<Callout kind="warning">
+  Mounting is the *root* primitive's job. `loom.page` is the one in the starter
+  library that does it, so a tree rooted at something else renders with none of
+  those properties set — legal, silent, and indistinguishable from a stylesheet
+  that failed to load.
+</Callout>
+
+Two things follow, and both are why it is done this way.
+
+A **re-theme is an ordinary change**. Swapping the palette is a `configure`
+against one node, judged by the Gate and recorded in the log like any other
+([0049](/docs/architecture/decision-records)). There is no second mechanism for
+appearance.
+
+And the registry is an **allowlist**. A proposal may only name a palette you
+registered, so *"make it look different"* has a bounded set of answers instead
+of an open one. Press the re-theme chip above and watch a whole page change from
+a delta that touches one node.
+
+## Every palette declares every slot
+
+A palette is not a few brand colours. It is **seventeen named slots, all of them
+filled**, and the completeness is the point rather than bureaucracy: a tree
+themed with one palette has to be re-themable with any other, and a slot some
+palette left undefined would be a hole that only shows up on the page that used
+it.
+
+<PaletteSlots />
+
+The names are jobs, not colours. `fg-muted` is *the ink that recedes*, so a
+primitive asks for it without knowing whether today's answer is grey, warm brown
+or pale blue. Nothing in a tree ever says `#0a0a0a`.
+
+`brand-secondary` is worth a second look, because it is the slot that catches
+people out. It is reserved even in palettes that have only one accent — those
+mirror their accent into it — so that **every palette has the same shape**, and
+a primitive that paints an area with the second brand colour cannot be handed a
+palette where that slot is missing.
+
+The type ramp and the spacing scale work the same way, and for the same reason:
+both have exactly **eight steps**, in every font pack and every style preset. A
+primitive that reads `--loom-spacing-7` must get a length back from whichever
+preset is registered, or a re-theme quietly unstyles it.
+
+## Can it actually be read?
+
+This is the question a palette has to answer, and the one a brand deck never
+asks. Loom answers it with a function you can run rather than a promise it makes.
+
+`auditPalette` measures every place a primitive puts ink on a ground — read off
+the components themselves, not imagined — and reports the contrast ratio of each
+against the **4.5:1** bar that WCAG sets for body text.
+
+Here is that audit, run against every palette this runtime registers, as this
+page was built:
+
+<ContrastAudit />
+
+Two kinds of failure, and the difference matters.
+
+A **painted** failure is one primitive setting both the ink and the ground
+beneath it — `loom.card` putting body copy on its own surface. No tree can avoid
+it, so it is a defect in the palette with exactly one fix, and it is the list a
+host asserts empty.
+
+A **composed** failure is an ink set by one primitive on a ground set by
+whatever it was placed in. It is reachable in an ordinary page and it is
+reported, not asserted, because whether your deployment reaches it depends on
+trees nobody has written yet, and the fix is not always the palette's — an ink
+that fails on one ground and clears the other three may be a panel that wants
+moving ([0089](/docs/architecture/decision-records)).
+
+<Callout kind="note">
+  Loom measures and reports; it does not refuse to register a palette that fails
+  ([0076](/docs/architecture/decision-records)). The audit is something you run
+  in your own tests, which is why it returns data rather than throwing. What it
+  will not do is stay quiet: the description above prints the composed failures
+  too, so an empty string means clean.
+</Callout>
+
+## Where your brand colour actually goes
+
+Now the part that surprises people, and the reason this page exists rather than
+a paragraph on another one.
+
+`accent` is **ink**. It is the eyebrow above a section, the current item in a
+nav, the marker on a disclosure, the label on a filled button. So a hue you give
+Loom for that slot is darkened — or lightened, in a dark palette — until it can
+carry text, and a pale mint or a bright yellow comes back a long way from where
+the brand book left it.
+
+`derivePalette` takes three hues and a mode and solves the rest, searching for a
+lightness that clears the bar with a margin rather than picking one and hoping.
+Here it is, run on a mint:
+
+<BrandColour />
+
+That is not the tool being clumsy. It is the only honest answer to *"can we put
+our green on white and write on it?"* — and `canCarryText` will give you that
+answer for one colour in one call, before you have built anything.
+
+The brand colour is not thrown away when the answer is no. It goes to
+`border-accent` and `brand-secondary`, where it is a rule, a ring or a tinted
+field — **an area rather than a letterform** — and `accent` takes a near-neutral
+ink instead. That is not a workaround; it is what the `minimal` palette this site
+wears reached by hand before the derivation existed.
+
+<Callout kind="warning">
+  `derivePalette` is a **build-time tool**. Derive, look at it, paste the result
+  in — never call it in a render. A palette is reviewed by seeing it and diffed
+  by reading it, and a page whose colours are computed at import time is a page
+  whose colours nobody approved.
+</Callout>
+
+## Registering your own
+
+```ts
+import { createThemeRegistry } from "@loom/runtime"
+
+const themes = createThemeRegistry({
+  palettes: [ourLightPalette, ourDarkPalette],
+  fontPacks: [ourFontPack],
+  stylePresets: [ourStylePreset],
+})
+```
+
+Pass it to `renderLoomTree` or `renderRequest` alongside your primitive registry
+and you are done.
+
+One thing to know before you do: each list **replaces** the starter set rather
+than adding to it. Register two palettes and two palettes is what a proposal may
+name — which is usually what a deployment wants, because shipping your brand
+plus twenty-one others is a menu, not a design system. Spread `STARTER_PALETTES`
+in if you want both.
+
+```ts
+import { STARTER_PALETTES } from "@loom/runtime"
+
+createThemeRegistry({ palettes: [...STARTER_PALETTES, ourLightPalette] })
+```
+
+<Callout kind="note">
+  Leave the registry out of the render entirely and a tree that names a theme
+  says so in a `theme-unresolved` diagnostic and renders unstyled — less than
+  was asked for, and never silently.
+</Callout>
+
+## What a model gets shown
+
+`themes.catalogue()` is the theme half of what a model is sent before it
+proposes anything: every registered id with its name and its one-line
+description, and no hex at all. A model choosing an appearance is choosing from
+a list, exactly as it chooses a primitive from the registry.
+
+Which means the `description` you write on a palette is not documentation. It is
+the sentence a model reads when someone types *"make this feel calmer"*, and it
+is the difference between getting the palette you would have picked and getting
+a coin toss.
