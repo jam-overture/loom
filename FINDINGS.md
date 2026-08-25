@@ -8680,6 +8680,132 @@ instance down, which is now three days of that.
 
 ---
 
+## 2026-08-25 — the demo's failures are machinery that does not reach the screen, twice now
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a shape
+worth having in the channel, recorded because it has now recurred
+
+Two runs, two units, one diagnosis underneath both, and it is not the one a fresh
+session would look for.
+
+**24 August.** The primary button never demonstrated the Gate. Nothing was broken:
+`session.ts` tuned the policy so a hold would be visible, `ask-panel.tsx` ranked the
+control that answers "did something happen?" first, and both files were right on
+their own. The defect lived in the space between them.
+
+**25 August (this run).** The card could not tell a change Loom made alone from one
+it refused to make until the visitor allowed it. Again nothing was broken.
+`hold-confirmed` carries the actor. `recordFromEvents` folds it onto `answeredBy`.
+`_lib/record.ts` documents what the field is for, citing 0029. `pipeline.test.ts`
+has asserted since day one that it arrives. `src/write/commit.ts` sets it in one
+place so *"the two records cannot disagree about who allowed this"*. Four other
+surfaces render it — the portal's history (*allowed by*), its activity screen
+(*`{who}` said yes.*), its trust screen (*answered by*), the docs' proposal box
+(*allowed by*). The demo held it and printed nothing.
+
+So the general form, for whoever runs this lane next:
+
+> **When this surface fails, the machinery is almost always already there and
+> correct. What is missing is the last hop onto the screen.** Read the record's own
+> type before reading the components: a field the runtime computes, every other
+> surface prints, and a card does not is a defect that no test in this repository
+> will catch, because every file involved is right.
+
+`grep` is the tool this rewards more than reasoning does. `grep -rn answeredBy`
+found in one call what a careful read of `record-card.tsx` had not: the field is
+real, is populated, and has four consumers and one non-consumer.
+
+---
+
+## 2026-08-25 — "Put it back" does not put it back on the first press, and the frame beside it says it does
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a unit
+of its own, and the recommended next one
+
+Press the primary ask, answer it, then press **Put it back**. The page does not
+move. What appears is a second card: *"Undo revision 1." · Waiting on you · Loom
+will not make this change until you say yes.*
+
+That is **correct behaviour** and it is 0028 working: an undo is a change of its
+own rather than a rewind, so it is interpreted, assessed and gated like any other,
+and this one restructures the page near the root exactly as the change it reverses
+did. Nothing here is a bug in the runtime and nothing should be exempted from the
+Gate to make the demo tidier.
+
+What is wrong is that two things on the same screen promise otherwise:
+
+- The button says **Put it back**, unqualified, and is the only control on an
+  applied card.
+- `WhatHappens` step three promises *"a button that really puts the page back,
+  because undoing is a change of its own rather than a rewind."* The word *really*
+  is doing the opposite of its job: it is there to say *a real change, not a
+  rewind*, and a stranger reads it as *immediately*.
+
+**This is the same defect the 24 August run fixed one control earlier**, and that
+is why it is filed rather than left. A lead the Gate holds moves nothing on the
+page, and a visitor who has not been told that has pressed a button and watched it
+do nothing — which reads as broken for the two seconds before they find the amber
+card. The fix there was one sentence above the controls saying *some asks wait for
+an answer*. That sentence sits in `AskPanel` and an applied card is nowhere near
+it.
+
+Three options, and the third is the one I would take:
+
+1. **Reword the button** — *Ask to put it back*. Honest, and it makes the one
+   control on the payoff card sound tentative.
+2. **Reword step three** of `WhatHappens`. Cheapest, and it fixes the frame while
+   leaving the button making the promise.
+3. **Say it where it is about to become true**, the way `AskPanel` does: the
+   applied card's undo carries the same *"some changes wait for you"* claim, in
+   fewer words, directly under the button. It costs one line on a card that has
+   just gained one, so it is worth measuring the payoff screen before adding it —
+   which is why it is a unit rather than a tail.
+
+Not taken in this run because it is a second change to what a card says about a
+control, in the same run as the first, and the two would have had to be argued
+about together.
+
+---
+
+## 2026-08-25 — `21st.dev` re-verified blocked, from the demo lane a fifth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged, on the run of
+25 August. The standing answer is on the 21 August entry and is not re-argued here:
+the committed policy allows the domain for the *tool* and the proxy does not.
+
+The cost this run was small and is worth stating honestly, because it has not
+always been. The unit was one sentence and one left rule on an existing card, and
+what decided it was a before/after of two cards in the same rail — answerable by
+looking, and looked at. A reference gallery would not have changed the call. It is
+still five runs of a named standard that has never been reachable from a lane told
+to consult it.
+
+---
+
+## 2026-08-25 — `docs/rollout.md` and the `Loom demo` brief still describe work that landed four days ago
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dating the 24 August entry, which is unchanged and still true
+
+Verified again this morning on `main`:
+
+- `docs/rollout.md:19` — *"the demo is live at `apps/loom/app/(portal)/portal/demo`"*.
+  That path has been a 308 since 21 August; the demo is `apps/loom/app/(demo)` and
+  serves `/demo`.
+- The `Loom demo` brief still opens with **"Two problems to fix before anything
+  else"**, the first of which — moving off `/portal/demo` — was this lane's first
+  unit and landed on 21 August. A fresh session with no memory reads that as its
+  headline instruction and spends its opening minutes establishing that it is
+  already done.
+
+Both are one-line edits and neither belongs to a routine: a routine cannot rewrite
+the brief it is bound by, and `docs/rollout.md` is the plan a routine is supposed
+to find its position in. Recorded a second time because the count is the only new
+evidence — this is now two consecutive runs of this lane paying the same opening
+cost.
 ## 2026-08-25 — the rename queue is empty, and what that did and did not buy
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by

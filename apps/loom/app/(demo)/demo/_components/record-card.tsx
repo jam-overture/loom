@@ -6,6 +6,7 @@ import { ProposalEffectView } from "@/app/(portal)/_components/proposal-effect"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 
+import { answerNote } from "@/app/(demo)/_lib/answer"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
 
@@ -65,6 +66,7 @@ export const RecordCard = ({
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
   const report = answerReport ?? undoReport
   const outcome = demoState(stateOfRecord(record.outcome))
+  const answered = answerNote(record)
 
   return (
     /*
@@ -115,6 +117,31 @@ export const RecordCard = ({
         */}
       {record.disposition && (
         <p className="text-ink-secondary text-xs">{ruleSentence(record.disposition.ruleCode)}</p>
+      )}
+
+      {/*
+        * And what the visitor did about it, which is the sentence above's
+        * other half.
+        *
+        * The rule sentence on a held change says why Loom stopped and then
+        * stops itself — so on a card that has since been answered *yes* it sat
+        * under an "Applied" badge explaining why the change should not have
+        * been applied, with nothing between the two. The reader was the
+        * missing term: they pressed the button, and the record of the change
+        * they allowed did not mention them.
+        *
+        * It is placed directly under the rule rather than beside the undo,
+        * because it is the end of the account and not a control. Marked in the
+        * applied tone and set off by a rule of its own, because everything
+        * else on the card is Loom talking about the change and this is the one
+        * line about the person reading it. `_lib/answer.ts` decides when there
+        * is anything to say — on four of the five outcomes there is not.
+        */}
+      {answered && (
+        <p className="border-applied-ink text-ink-secondary border-l-2 pl-2.5 text-xs">
+          <strong className="text-applied-ink font-medium">{answered.label}.</strong>{" "}
+          {answered.meaning}
+        </p>
       )}
 
       {/*
@@ -222,6 +249,15 @@ export const RecordCard = ({
             {record.disposition.policyFingerprint && (
               <Row label="fingerprint">{record.disposition.policyFingerprint.slice(0, 16)}…</Row>
             )}
+            {/*
+              * The runtime's own word for the answer, and the actor it wrote
+              * down — the same shape the portal's activity screen prints
+              * (`describeAnswer`), so the two surfaces cannot end up naming
+              * the same event differently. The plain sentence is above; this
+              * is the evidence for it, which is the rule the whole disclosure
+              * follows.
+              */}
+            {answered && <Row label="answered">{answered.technical}</Row>}
           </Section>
         )}
 
