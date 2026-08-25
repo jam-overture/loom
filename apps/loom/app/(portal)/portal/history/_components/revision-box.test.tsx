@@ -51,21 +51,25 @@ describe("RevisionBox", () => {
     expect(fieldsOf(container)["at"]).toBe("elevn")
   })
 
-  it("labels the field and explains what a revision is without needing sight of it", () => {
+  it("labels the field and explains what a revision is, in sight and to a reader", () => {
     const { container } = render(<RevisionBox treeId={treeId} typed={undefined} />)
-    const field = screen.getByLabelText("go to revision")
+    const field = screen.getByLabelText("Jump to revision")
     const hint = field.getAttribute("aria-describedby")
 
     expect(field.getAttribute("name")).toBe("at")
     expect(hint).not.toBeNull()
-    expect(container.querySelector(`#${hint ?? ""}`)?.textContent).toContain(
-      "A whole number from 1 up"
-    )
+    const described = container.querySelector(`#${hint ?? ""}`)
+    expect(described?.textContent).toContain("A whole number from 1 up")
+    /*
+     * The hint used to be `sr-only`, which meant the one sentence saying what
+     * the box is for was withheld from everybody who could see the screen.
+     */
+    expect(described?.className).not.toContain("sr-only")
   })
 
   it("offers a way to submit it", () => {
     render(<RevisionBox treeId={treeId} typed={undefined} />)
 
-    expect(screen.getByRole("button", { name: "go" }).getAttribute("type")).toBe("submit")
+    expect(screen.getByRole("button", { name: "Go" }).getAttribute("type")).toBe("submit")
   })
 })

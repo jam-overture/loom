@@ -1,5 +1,7 @@
 import type { TreeDelta } from "@loom/runtime"
 
+import { namedList, partPhrase, type PlainLine } from "./vocabulary"
+
 /**
  * What a delta did, in the words a reviewer uses.
  *
@@ -73,6 +75,72 @@ export const describeOperation = (
         verb,
         subject: operation.nodeId,
         detail: configureDetail(operation.set, operation.unset),
+      }
+  }
+}
+
+/**
+ * The same operation, said to somebody who has not read the delta model.
+ *
+ * `describeOperation` above is the reviewer's reading and it is a good one, but
+ * it is still the delta talking: `reconfigure n_head title, width (cleared)` is
+ * three of the schema's own words and a comma-separated list. This is the
+ * sentence that leads on the History screen, and the reviewer's reading moves
+ * one click down beside the raw operation rather than being dropped.
+ *
+ * The verbs are the ordinary ones for what happened to a page. `configure` in
+ * particular is not a word anybody uses about their own site — the thing that
+ * happened is that a setting changed, so that is what it says.
+ */
+const PLAIN_VERBS: Readonly<Record<TreeDelta["operations"][number]["op"], string>> = {
+  insert: "Added ",
+  remove: "Deleted ",
+  move: "Moved ",
+  configure: "Changed ",
+}
+
+/**
+ * What a reconfigure did to a node's settings.
+ *
+ * Set and unset are two different acts and the schema is right to separate
+ * them, but a reader meets one sentence. Clearing is spelled out because
+ * "changed its width" and "removed its width" are not the same news.
+ */
+const settingWords = (set: Readonly<Record<string, unknown>>, unset: readonly string[]): string => {
+  const changed = Object.keys(set)
+
+  if (changed.length === 0 && unset.length === 0) return " — it changed no settings."
+  if (changed.length === 0) return `, clearing its ${namedList(unset)}.`
+  if (unset.length === 0) return `'s ${namedList(changed)}.`
+
+  return `'s ${namedList(changed)}, and cleared its ${namedList(unset)}.`
+}
+
+export const plainOperation = (operation: TreeDelta["operations"][number]): PlainLine => {
+  switch (operation.op) {
+    case "insert":
+      return {
+        before: PLAIN_VERBS.insert,
+        subject: operation.node.id,
+        after: `, ${partPhrase(operation.node)}, inside ${operation.parentId}.`,
+      }
+    case "remove":
+      return {
+        before: PLAIN_VERBS.remove,
+        subject: operation.nodeId,
+        after: " and everything inside it.",
+      }
+    case "move":
+      return {
+        before: PLAIN_VERBS.move,
+        subject: operation.nodeId,
+        after: ` inside ${operation.parentId}.`,
+      }
+    case "configure":
+      return {
+        before: PLAIN_VERBS.configure,
+        subject: operation.nodeId,
+        after: settingWords(operation.set, operation.unset),
       }
   }
 }

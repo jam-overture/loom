@@ -38,7 +38,7 @@ export const RevisionBox = ({
     <input type="hidden" name="tree" value={treeId} />
 
     <label htmlFor="at" className="text-ink-muted text-xs">
-      go to revision
+      Jump to revision
     </label>
 
     <input
@@ -57,10 +57,16 @@ export const RevisionBox = ({
       type="submit"
       className="border-edge-subtle bg-surface-base hover:bg-surface-hover rounded-md border px-3 py-1 text-xs"
     >
-      go
+      Go
     </button>
 
-    <span id="at-hint" className="sr-only">
+    {/*
+     * Visible rather than `sr-only`. It was written for a screen reader and it
+     * is the sentence that says what the box is *for* — a revision number
+     * arrives from somewhere else, a report or a message, and without this the
+     * box reads as a search field for something a reader cannot name.
+     */}
+    <span id="at-hint" className="text-ink-muted text-xs">
       A whole number from 1 up. Leave it empty for the newest changes.
     </span>
   </Form>

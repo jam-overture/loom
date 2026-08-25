@@ -4,6 +4,8 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
+import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import {
   anchorOf,
@@ -69,7 +71,13 @@ const HistoryPage = async ({
   if (tree === undefined) {
     return (
       <div className="flex max-w-3xl flex-col gap-6 p-8">
-        <h1 className="text-2xl tracking-tight">history</h1>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl tracking-tight">History</h1>
+          <p className="text-ink-muted text-sm">
+            Every change that has actually been made to one of your pages, newest first &mdash; and,
+            for each one, exactly what undoing it would put back.
+          </p>
+        </div>
         <TreeChooser />
       </div>
     )
@@ -89,9 +97,21 @@ const HistoryPage = async ({
     if (page.error.code === "not-found") notFound()
 
     return (
-      <div className="flex max-w-3xl flex-col gap-3 p-8">
-        <h1 className="text-2xl tracking-tight">history</h1>
-        <p className="text-ink-muted text-sm">{describeStoreError(page.error)}</p>
+      <div className="flex max-w-3xl flex-col gap-4 p-8">
+        <h1 className="text-2xl tracking-tight">History</h1>
+        <StateNotice tone="failure" title="We couldn&rsquo;t read this page&rsquo;s history.">
+          <p>
+            Nothing has been lost and nothing has changed &mdash; this is a screen that could not
+            load, not a record that went missing. Your page is exactly as it was.
+          </p>
+          <p>
+            Try again in a moment. If you came here to check whether a change was kept, this screen
+            cannot answer that until the read works.
+          </p>
+          <TechnicalDetail summary="What went wrong">
+            <p className="font-mono">{describeStoreError(page.error)}</p>
+          </TechnicalDetail>
+        </StateNotice>
       </div>
     )
   }
@@ -145,16 +165,23 @@ const HistoryPage = async ({
 
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h1 className="text-2xl tracking-tight">history</h1>
-        <div className="flex gap-4">
-          <Link href={`/portal/activity?${scopeQuery}`} className="text-xs">
-            what was asked →
-          </Link>
-          <Link href={`/portal/pages/${scope.data}`} className="font-mono text-xs">
-            {scope.data}
-          </Link>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h1 className="text-2xl tracking-tight">History</h1>
+          <div className="flex gap-4">
+            <Link href={`/portal/activity?${scopeQuery}`} className="text-xs">
+              What was asked for →
+            </Link>
+            <Link href={`/portal/pages/${scope.data}`} className="font-mono text-xs">
+              {scope.data} →
+            </Link>
+          </div>
         </div>
+        <p className="text-ink-muted text-sm">
+          Every change that has actually been made to this page, newest first &mdash; and, for each
+          one, what undoing it would put back. The page as it stands keeps no record of what it
+          replaced; this does.
+        </p>
       </div>
 
       <RevisionBox treeId={scope.data} typed={echoOf(named)} />
@@ -162,10 +189,20 @@ const HistoryPage = async ({
       {anchorMiss && <p className="text-ink-muted text-sm">{anchorMiss}</p>}
 
       {newestFirst.length === 0 ? (
-        <p className="text-ink-muted text-sm">
-          This tree has never been changed. It is at revision 0 — the shape it was created
-          with, and nothing has been accepted into it since.
-        </p>
+        <StateNotice
+          tone="empty"
+          title="Nothing has been changed on this page yet."
+          action={<Link href={`/portal/pages/${scope.data}`}>Open this page →</Link>}
+        >
+          <p>
+            It is exactly as it was created &mdash; revision 0. Open it, click any part of it, and
+            ask for a change; whatever Loom does about it turns up here.
+          </p>
+          <p>
+            An empty history never means a change was made and not kept. Every accepted change lands
+            here, in order, and none of them is ever edited or removed.
+          </p>
+        </StateNotice>
       ) : (
         <ul className="flex flex-col gap-3">
           {newestFirst.map((stored) => (
@@ -190,30 +227,46 @@ const HistoryPage = async ({
       <div className="flex gap-4">
         {page.value.older !== null && (
           <Link href={historyPageHref(scope.data, { older: page.value.older })} className="text-xs">
-            ← earlier
+            ← Show earlier changes
           </Link>
         )}
         {page.value.newer !== null && (
           <Link href={historyPageHref(scope.data, { newer: page.value.newer })} className="text-xs">
-            later →
+            Show later changes →
           </Link>
         )}
         {(older !== undefined || newer !== undefined || anchor !== undefined) && (
           <Link href={historyPageHref(scope.data)} className="text-xs">
-            latest →
+            Jump to the newest →
           </Link>
         )}
         <Link href="/portal/history" className="text-ink-muted text-xs">
-          another tree
+          ← Pick a different page
         </Link>
       </div>
 
       {storeIsDurable ? null : (
-        <p className="text-ink-muted text-xs">
-          No database is configured, so this log lives in the server process and holds only
-          what this instance has accepted. Set <span className="font-mono">DATABASE_URL</span>{" "}
-          to make it durable.
-        </p>
+        <StateNotice tone="notice">
+          <p>
+            This history is being kept in memory rather than in a database, so it holds only what
+            has happened since this server last started and it will be empty again after a restart.
+            Everything on this page is real; there is just less of it than there will be once a
+            database is connected.
+          </p>
+          <TechnicalDetail summary="How to make it permanent">
+            <p>
+              {/*
+               * The space is explicit because the implicit one did not survive a
+               * production build on 24 August: this construction rendered as
+               * `DATABASE_URLin this deployment's`, and a screenshot is what
+               * caught it.
+               */}
+              Set <span className="font-mono">DATABASE_URL</span>{" "}
+              in this deployment&rsquo;s environment and restart. Nothing already written is
+              migrated &mdash; the history starts from the moment the database is connected.
+            </p>
+          </TechnicalDetail>
+        </StateNotice>
       )}
     </div>
   )
