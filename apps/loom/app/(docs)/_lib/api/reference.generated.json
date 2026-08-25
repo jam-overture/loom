@@ -4181,6 +4181,27 @@
               "signature": "const COLUMN_MINIMUMS: Readonly<Record<ColumnName, string>>",
               "truncated": false,
               "summary": "A **floor for each column, never a count** — the distinction the granularity doc names as the easiest one to get wrong. Fed to `auto-fit`, so `three` means \"columns no narrower than this, which is three of them at a common page width and one of them on a phone\". Nothing here truncates a list, so changing it changes no node, which is what keeps it a prop."
+            },
+            {
+              "name": "ASPECT_NAMES",
+              "kind": "value",
+              "signature": "const ASPECT_NAMES: readonly [\"square\", \"wide\", \"portrait\"]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "AspectName",
+              "kind": "type",
+              "signature": "type AspectName = (typeof ASPECT_NAMES)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ASPECT_RATIOS",
+              "kind": "value",
+              "signature": "const ASPECT_RATIOS: Readonly<Record<AspectName, string>>",
+              "truncated": false,
+              "summary": "The shapes a fixed-ratio frame may take."
             }
           ]
         },
@@ -4263,6 +4284,20 @@
               "name": "loomBadge",
               "kind": "value",
               "signature": "const loomBadge: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.before-after",
+          "title": "loom.before-after",
+          "summary": "Two states of one thing, superimposed, with a hard edge between them — the redesign over the old page, the room staged and unstaged, the photograph before the retouch.",
+          "symbols": [
+            {
+              "name": "loomBeforeAfter",
+              "kind": "value",
+              "signature": "const loomBeforeAfter: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -4389,6 +4424,20 @@
               "name": "loomDivider",
               "kind": "value",
               "signature": "const loomDivider: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.embed",
+          "title": "loom.embed",
+          "summary": "Somebody else's document, framed and held to a shape — a product video, a map, a prototype, a track.",
+          "symbols": [
+            {
+              "name": "loomEmbed",
+              "kind": "value",
+              "signature": "const loomEmbed: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -4655,6 +4704,20 @@
               "name": "loomLogoCloud",
               "kind": "value",
               "signature": "const loomLogoCloud: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.marquee",
+          "title": "loom.marquee",
+          "summary": "A band whose children travel past, forever — the logo wall that drifts, the ticker of quotes, the strip of shots under a hero.",
+          "symbols": [
+            {
+              "name": "loomMarquee",
+              "kind": "value",
+              "signature": "const loomMarquee: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

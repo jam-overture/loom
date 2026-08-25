@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { ASPECT_NAMES, ASPECT_RATIOS, type AspectName } from "./layout.js"
 import { colour, family, radius, size, space } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
@@ -30,7 +31,7 @@ const props = z
     src: mediaUrlSchema,
     alt: z.string().max(280),
     decorative: z.boolean().optional(),
-    aspect: z.enum(["auto", "square", "wide", "portrait"]).optional(),
+    aspect: z.enum(["auto", ...ASPECT_NAMES]).optional(),
     fit: z.enum(["cover", "contain"]).optional(),
     corners: z.enum(["none", "sm", "md", "lg"]).optional(),
     caption: z.string().min(1).max(240).optional(),
@@ -43,12 +44,17 @@ const props = z
 
 type Props = z.infer<typeof props>
 
-const ASPECTS = {
+/**
+ * The three named shapes come from `layout.ts`, which `loom.embed` and
+ * `loom.before-after` read too — a frame that says `wide` has to mean the same
+ * ratio wherever it is said. `auto` stays here because it belongs to a
+ * photograph and to nothing else in the library: an image has a natural shape
+ * and an embedded document does not.
+ */
+const ASPECTS: Readonly<Record<"auto" | AspectName, string | undefined>> = {
   auto: undefined,
-  square: "1 / 1",
-  wide: "16 / 9",
-  portrait: "3 / 4",
-} as const
+  ...ASPECT_RATIOS,
+}
 
 export const loomMedia = definePrimitive({
   type: "loom.media",

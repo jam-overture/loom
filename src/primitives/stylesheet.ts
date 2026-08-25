@@ -175,6 +175,24 @@ export const LIBRARY_CLASS = {
   tableHighlight: "loom-table-highlight",
   /** A `loom.table-cell` heading a row, which stays put while a panel scrolls. */
   tableKey: "loom-table-key",
+  /**
+   * A `loom.marquee`. The band that clips; the track that travels; the run of
+   * items; the second, decorative run that makes the loop seamless; the
+   * direction, the edge fade, and the still rendering the band takes while
+   * somebody is editing it.
+   *
+   * Everything about the track is here rather than on the element, and that is
+   * load-bearing rather than tidy: its duration is chosen by how many items the
+   * run holds, its width and its animation are cancelled by the still variant
+   * and again by reduced motion, and an inline style would beat all three.
+   */
+  marquee: "loom-marquee",
+  marqueeTrack: "loom-marquee-track",
+  marqueeRun: "loom-marquee-run",
+  marqueeEcho: "loom-marquee-echo",
+  marqueeReverse: "loom-marquee-reverse",
+  marqueeFaded: "loom-marquee-faded",
+  marqueeStill: "loom-marquee-still",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -429,6 +447,63 @@ details[open] > summary .loom-marker {
 .loom-table-panel .loom-table-highlight .loom-table-key {
   background: var(--loom-accent-subtle);
 }
+@keyframes loom-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.loom-marquee {
+  container-type: inline-size;
+}
+.loom-marquee-run > * {
+  max-inline-size: min(32rem, 80cqi);
+}
+.loom-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: loom-marquee calc(var(--loom-motion-slow) * 9) linear infinite;
+}
+.loom-marquee-run {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+.loom-marquee-reverse {
+  animation-direction: reverse;
+}
+.loom-marquee-faded {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+}
+.loom-marquee:hover .loom-marquee-track, .loom-marquee:focus-within .loom-marquee-track {
+  animation-play-state: paused;
+}
+.loom-marquee-track:has(> * > :nth-child(2)) { animation-duration: calc(var(--loom-motion-slow) * 18); }
+.loom-marquee-track:has(> * > :nth-child(3)) { animation-duration: calc(var(--loom-motion-slow) * 27); }
+.loom-marquee-track:has(> * > :nth-child(4)) { animation-duration: calc(var(--loom-motion-slow) * 36); }
+.loom-marquee-track:has(> * > :nth-child(5)) { animation-duration: calc(var(--loom-motion-slow) * 45); }
+.loom-marquee-track:has(> * > :nth-child(6)) { animation-duration: calc(var(--loom-motion-slow) * 54); }
+.loom-marquee-track:has(> * > :nth-child(7)) { animation-duration: calc(var(--loom-motion-slow) * 63); }
+.loom-marquee-track:has(> * > :nth-child(8)) { animation-duration: calc(var(--loom-motion-slow) * 72); }
+.loom-marquee-track:has(> * > :nth-child(9)) { animation-duration: calc(var(--loom-motion-slow) * 81); }
+.loom-marquee-track:has(> * > :nth-child(10)) { animation-duration: calc(var(--loom-motion-slow) * 90); }
+.loom-marquee-track:has(> * > :nth-child(11)) { animation-duration: calc(var(--loom-motion-slow) * 99); }
+.loom-marquee-track:has(> * > :nth-child(12)) { animation-duration: calc(var(--loom-motion-slow) * 108); }
+.loom-marquee-track:has(> * > :nth-child(13)) { animation-duration: calc(var(--loom-motion-slow) * 117); }
+.loom-marquee-track:has(> * > :nth-child(14)) { animation-duration: calc(var(--loom-motion-slow) * 126); }
+.loom-marquee-track:has(> * > :nth-child(15)) { animation-duration: calc(var(--loom-motion-slow) * 135); }
+.loom-marquee-track:has(> * > :nth-child(16)) { animation-duration: calc(var(--loom-motion-slow) * 144); }
+.loom-marquee-still {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.loom-marquee-still .loom-marquee-track {
+  animation: none;
+  display: block;
+  width: auto;
+}
+.loom-marquee-still .loom-marquee-run {
+  flex-wrap: wrap;
+}
 .loom-mosaic {
   display: grid;
   grid-template-columns: 1fr;
@@ -467,6 +542,21 @@ details[open] > summary .loom-marker {
     animation: none;
     opacity: 1;
     transform: none;
+  }
+  .loom-marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .loom-marquee-track {
+    animation: none;
+    display: block;
+    width: auto;
+  }
+  .loom-marquee-run {
+    flex-wrap: wrap;
+  }
+  .loom-marquee-echo {
+    display: none;
   }
   .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > * {
     transition: none;

@@ -68,6 +68,21 @@ export type Surface = {
   readonly label: string
   /** One sentence for the front door's band, in the same plain words. */
   readonly blurb: string
+  /**
+   * What it asks of the visitor, in three or four words.
+   *
+   * The order `PRODUCT_SURFACES` is offered in has always been *ascending cost
+   * to the visitor*, and that reasoning has lived in a comment below since the
+   * list was written — visible to whoever edits this file and to nobody who
+   * reads the site. It is the most useful thing the band can say. Someone
+   * deciding where to click next is deciding how much of their afternoon to
+   * spend, and a card that answers that before they click is worth more than a
+   * card that makes them find out.
+   *
+   * Kept short and to one shape across the four, because they are pinned to the
+   * bottom of four cards standing side by side and a long one would wrap alone.
+   */
+  readonly cost: string
   /** Whether a visitor who is not signed in is sent to a sign-in page first. */
   readonly guarded: boolean
 }
@@ -89,11 +104,21 @@ export type Surface = {
  * front door: it works with no model configured, a page view allocates nothing
  * on the instance, and the first click is one button.
  */
+/**
+ * *"A real page"* was true and it stopped being the best thing to say. `Loom
+ * demo` rebuilt the demonstration around a small business's site — a
+ * physiotherapy clinic that does not exist, and says so in its own bar the
+ * moment a visitor lands — and filed that a visitor promised *a real page* has
+ * to reconcile two sentences before pressing anything. The second one is the
+ * one worth arriving with, so it is the one this says. Closes their finding of
+ * 23 August; the wording is theirs.
+ */
 export const DEMO: Surface = {
   path: "/demo",
   label: "Demo",
   blurb:
-    "Ask a real page to rearrange itself — in your own words — and watch the record fill in beside it. Nothing to install and nothing to sign up for.",
+    "Ask a small business's page to rearrange itself — in your own words — and watch the record fill in beside it.",
+  cost: "Costs you a click",
   guarded: false,
 }
 
@@ -101,7 +126,8 @@ export const DOCS: Surface = {
   path: "/docs",
   label: "Docs",
   blurb:
-    "How to install it, connect your own components, and get your first change approved. Nothing to sign up for.",
+    "How to install it, hand it the components you already have, and get your first change approved on a page of your own.",
+  cost: "Costs you a read",
   guarded: false,
 }
 
@@ -109,7 +135,8 @@ export const LESSONS: Surface = {
   path: "/lessons",
   label: "Lessons",
   blurb:
-    "A course on why Loom works the way it does. You answer before you read, and it tells you when to come back — slower than skimming, and the reason it stays with you.",
+    "A course on why Loom works the way it does. You answer before you read, and it tells you when to come back.",
+  cost: "Costs you an afternoon",
   guarded: false,
 }
 
@@ -117,7 +144,8 @@ export const PORTAL: Surface = {
   path: "/portal",
   label: "Portal",
   blurb:
-    "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts it back. Signing in is required, and who may sign in is set by whoever runs the deployment.",
+    "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts any of it back.",
+  cost: "Costs you an account",
   guarded: true,
 }
 
@@ -126,11 +154,17 @@ export const PORTAL: Surface = {
  *
  * The demonstration, then the documentation, then the course, then the portal —
  * which is **ascending order of what it asks of the visitor**, and that is the
- * whole of the reasoning. The demo costs a click; the docs cost a read; the
- * course costs an afternoon; the portal costs an account. Someone who has just
- * arrived is offered the cheapest thing first, and the one that needs a door is
- * offered last so that everywhere they *can* go has been named before they meet
- * one.
+ * whole of the reasoning. Someone who has just arrived is offered the cheapest
+ * thing first, and the one that needs a door is offered last so that everywhere
+ * they *can* go has been named before they meet one.
+ *
+ * **That reasoning is on the page now**, as each surface's `cost`, rather than
+ * being a rule this file follows silently. It is what moved the portal's *"who
+ * may sign in is set by whoever runs the deployment"* out of its blurb: the
+ * band's own promise is that every card is honest about what is behind it, and
+ * *costs you an account* is that same honesty said in four words, in the place
+ * a reader is already comparing the four. `cardCosts` in `pages.test.ts` holds
+ * the order against the list so a surface cannot be slotted in out of turn.
  *
  * The demo was added on 22 August and went to the front of the list rather than
  * the end of it. It is the only one of the four that is the product working

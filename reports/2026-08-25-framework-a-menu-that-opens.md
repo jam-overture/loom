@@ -88,7 +88,7 @@ boundary without carrying an opinion with it. Three shapes would have let the
 runtime hold both halves — a wrapper component, a ref into the primitive's
 markup, or an id the seam mints and the primitive places — and each one requires
 the runtime to have a view about a layout it cannot see.
-[0091](../decisions/0091-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md)
+[0091](../decisions/0092-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md)
 records all three and why each was rejected.
 
 ### The property the whole thing rests on
@@ -176,7 +176,7 @@ handed over, not the menu.
 
 ## Records
 
-- **[0091](../decisions/0091-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md)
+- **[0091](../decisions/0092-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md)
   — A disclosure control owns its button and the primitive owns the region.**
   Accepted. Nothing superseded; 0086 is extended rather than changed, and both
   of its registration checks apply unchanged.

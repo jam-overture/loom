@@ -1,4 +1,4 @@
-# 0091. A disclosure control owns its button and the primitive owns the region
+# 0092. A disclosure control owns its button and the primitive owns the region
 
 **Status:** Accepted
 **Date:** 2026-08-25
