@@ -7908,6 +7908,53 @@ created or change what the event says.
 
 ---
 
+## 2026-08-25 — an `agrees` audit is described as a fact about the page's history
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** open
+
+Found while writing lesson 16, which teaches `auditSnapshot`. Not fixed here —
+`apps/loom/app/(portal)/` is not this routine's lane, and this is a wording
+change with an argument behind it rather than a typo.
+
+`_lib/audit-view.ts` describes an `agrees` outcome twice, at two altitudes, and
+only one of them is exact:
+
+| Where | Text |
+| --- | --- |
+| `describeAudit` → `detail` | "Folding *N* changes from the seed reproduces the snapshot exactly, so the record of what happened and the thing readers see are still the same tree." |
+| `readCheckup` → `label` / `meaning` | "Everything on this page adds up." / "…so nothing on it is unexplained." |
+
+The first is precisely what the audit proved. The second generalises it into a
+claim about the page's history, and the audit cannot support that claim, because
+**it compares end states rather than histories.**
+
+The counterexample is nine lines and is Exercise D of the lesson, executed:
+
+1. Create a tree, append one delta removing the footer.
+2. Audit it against a seed that is *wrong* — one text node differs from the real
+   revision 0. Outcome `diverged`, with the node named. Correct.
+3. Append a second delta removing the header, which is where that text node
+   lived.
+4. Audit again, same wrong seed. Outcome **`agrees`**.
+
+Nothing was fixed between steps 2 and 4. The seed is exactly as wrong as it was;
+the revision that exposed it deleted the evidence. A host whose `seedFor` entry
+has quietly drifted from the tree it actually created can therefore sit on a
+green audit indefinitely, and "nothing on it is unexplained" is what it will be
+told.
+
+This is not a defect in `auditSnapshot` — folding a seed and a log and comparing
+to the snapshot is exactly what 0016 and 0028 say it does, and the `detail` line
+says so. It is that the plain-language layer promises the thing a reader wants
+(the history is intact) rather than the thing that was checked (this tree is the
+fold of this seed and this log).
+
+Suggested shape of the fix, for whoever owns the wording: keep the reassurance
+and bound it — something closer to *"this page is exactly what its recorded
+changes produce, starting from the seed this deployment holds"* — so that the
+two things a green audit depends on, the seed and the log, stay visible in the
+sentence. `unauditable` already does this well on the same page, which is why
+the gap is worth closing rather than shrugging at.
 ## 2026-08-25 — one pairing is eight of the nine composed contrast failures in the library
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open —
