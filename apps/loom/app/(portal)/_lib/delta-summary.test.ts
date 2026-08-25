@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import { nodeIdSchema, primitiveTypeSchema, type TreeDelta } from "@loom/runtime"
 
-import { describeOperation, summariseOperations } from "./delta-summary"
+import { describeOperation, plainOperation, summariseOperations } from "./delta-summary"
+import { readingOf } from "./vocabulary"
 
 const nodeId = (id: string) => nodeIdSchema.parse(id)
 
@@ -100,5 +101,107 @@ describe("describeOperation", () => {
     expect(
       describeOperation({ op: "configure", nodeId: nodeId("n_card"), set: {}, unset: [] }).detail
     ).toBe("no props")
+  })
+})
+
+/**
+ * The plain reading, which is what `/portal/history` leads with. Every case is
+ * asserted as the joined sentence rather than by its parts, because the parts
+ * being right is not the property — three defects on 24 August were both halves
+ * correct and the join wrong, and each of them passed a `toContain`.
+ */
+describe("plainOperation", () => {
+  const reading = (operation: TreeDelta["operations"][number]): string =>
+    readingOf(plainOperation(operation))
+
+  it("names what an insert added, as a thing rather than as a kind", () => {
+    expect(
+      reading({
+        op: "insert",
+        parentId: nodeId("n_root"),
+        index: 2,
+        node: {
+          kind: "element",
+          id: nodeId("n_new"),
+          type: primitiveTypeSchema.parse("loom.heading"),
+          props: {},
+          children: [],
+        },
+      })
+    ).toBe("Added n_new, a loom.heading, inside n_root.")
+  })
+
+  /** Text has no name of its own, and "text" is the runtime's word for it. */
+  it("calls inserted text the words", () => {
+    expect(
+      reading({
+        op: "insert",
+        parentId: nodeId("n_head"),
+        index: 0,
+        node: { kind: "text", id: nodeId("n_t"), value: "Welcome" },
+      })
+    ).toBe("Added n_t, the words, inside n_head.")
+  })
+
+  it("says a deletion takes everything under it", () => {
+    expect(reading({ op: "remove", nodeId: nodeId("n_gone") })).toBe(
+      "Deleted n_gone and everything inside it."
+    )
+  })
+
+  it("says where a move landed", () => {
+    expect(
+      reading({ op: "move", nodeId: nodeId("n_a"), parentId: nodeId("n_b"), index: 1 })
+    ).toBe("Moved n_a inside n_b.")
+  })
+
+  /**
+   * `reconfigure n_head title, width (cleared)` was the line this replaces:
+   * three of the schema's own words and a parenthesis doing the work of a verb.
+   */
+  it("reads a reconfigure as a possessive, and spells out what was cleared", () => {
+    expect(
+      reading({
+        op: "configure",
+        nodeId: nodeId("n_head"),
+        set: { title: "Welcome", level: 1 },
+        unset: ["subtitle"],
+      })
+    ).toBe("Changed n_head's title and level, and cleared its subtitle.")
+  })
+
+  it("says a reconfigure that only clears, without pretending it set something", () => {
+    expect(
+      reading({ op: "configure", nodeId: nodeId("n_head"), set: {}, unset: ["subtitle", "width"] })
+    ).toBe("Changed n_head, clearing its subtitle and width.")
+  })
+
+  it("says a no-op reconfigure changed nothing rather than rendering a blank", () => {
+    expect(reading({ op: "configure", nodeId: nodeId("n_head"), set: {}, unset: [] })).toBe(
+      "Changed n_head — it changed no settings."
+    )
+  })
+
+  /**
+   * The one property that holds across every operation: nothing a reader meets
+   * here is one of the delta model's own verbs. Those are still on the row,
+   * under the disclosure, which is where `describeOperation` above is rendered.
+   */
+  it("never leads with a word from the delta model", () => {
+    const every: TreeDelta["operations"] = [
+      {
+        op: "insert",
+        parentId: nodeId("n_root"),
+        index: 0,
+        node: { kind: "text", id: nodeId("n_t"), value: "Hi" },
+      },
+      { op: "remove", nodeId: nodeId("n_gone") },
+      { op: "move", nodeId: nodeId("n_a"), parentId: nodeId("n_b"), index: 0 },
+      { op: "configure", nodeId: nodeId("n_c"), set: { title: "x" }, unset: [] },
+    ]
+
+    for (const operation of every) {
+      expect(reading(operation)).not.toMatch(/\b(insert|reconfigure|configure|op|delta|node)\b/i)
+    }
   })
 })

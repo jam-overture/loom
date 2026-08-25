@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 
 import {
   dispositionReasonCodeSchema,
+  primitiveTypeSchema,
+  slotNameSchema,
   stakeLevelSchema,
   type DispositionKind,
   type IntentOrigin,
@@ -27,7 +29,10 @@ import {
   PART_KINDS,
   STAKES,
   confidenceWord,
+  namedList,
+  partPhrase,
   plainState,
+  readingOf,
   pointingWords,
   reversibilityWord,
   ruleSentence,
@@ -573,5 +578,75 @@ describe("reversibilityWord", () => {
     for (const reversible of [true, false]) {
       expect(reversibilityWord(reversible)).not.toContain("reversible")
     }
+  })
+})
+
+/**
+ * The shape three defects came through on 24 August, made explicit so a test can
+ * see it. Every one of those was a missing space or full stop where two
+ * independently-held strings met, and every one passed an assertion on either
+ * half.
+ */
+describe("readingOf", () => {
+  it("joins a line exactly as a reader meets it, with nothing added between", () => {
+    expect(
+      readingOf({ before: "Deleted ", subject: "n_gone", after: " and everything inside it." })
+    ).toBe("Deleted n_gone and everything inside it.")
+  })
+
+  /**
+   * The failure mode, pinned. A `before` that has lost its trailing space still
+   * satisfies every `toContain` a component test would write about either half,
+   * and reads as a dropped word.
+   */
+  it("shows a lost space as a broken sentence rather than as two correct halves", () => {
+    const broken = readingOf({ before: "Deleted", subject: "n_gone", after: " and so on." })
+
+    expect(broken).toContain("n_gone")
+    expect(broken).toContain("Deleted")
+    expect(broken).toBe("Deletedn_gone and so on.")
+  })
+})
+
+describe("namedList", () => {
+  it("reads one, two and three names the way somebody says them aloud", () => {
+    expect(namedList(["title"])).toBe("title")
+    expect(namedList(["title", "width"])).toBe("title and width")
+    expect(namedList(["title", "width", "gap"])).toBe("title, width and gap")
+  })
+
+  /** An empty list never reaches a sentence; it comes back empty rather than "undefined". */
+  it("comes back empty rather than naming nothing", () => {
+    expect(namedList([])).toBe("")
+  })
+})
+
+describe("partPhrase", () => {
+  /** A registered primitive's name says what appeared, and no rewording says more (0013). */
+  it("keeps a primitive's own name, with its article attached", () => {
+    expect(
+      partPhrase({
+        kind: "element",
+        id: "n_h" as NodeId,
+        type: primitiveTypeSchema.parse("loom.heading"),
+        props: {},
+        children: [],
+      })
+    ).toBe("a loom.heading")
+  })
+
+  it("calls text the words, because it is the one kind with no name of its own", () => {
+    expect(partPhrase({ kind: "text", id: "n_t" as NodeId, value: "Welcome" })).toBe("the words")
+  })
+
+  it("keeps a slot's name and says what a slot is", () => {
+    expect(partPhrase({
+        kind: "slot",
+        id: "n_s" as NodeId,
+        name: slotNameSchema.parse("body"),
+        children: [],
+      })).toBe(
+      "the body space"
+    )
   })
 })

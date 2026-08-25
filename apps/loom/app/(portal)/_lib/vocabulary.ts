@@ -3,6 +3,7 @@ import type {
   DispositionKind,
   DispositionReasonCode,
   IntentOrigin,
+  LoomNode,
   NodeKind,
   StakeLevel,
 } from "@loom/runtime"
@@ -87,6 +88,72 @@ export type PlainWord = {
 
 export type PlainState = PlainWord & {
   readonly tone: OutcomeTone
+}
+
+/**
+ * A sentence with a name in the middle of it.
+ *
+ * Every plain reading of a change runs into the same problem: the sentence is
+ * the portal's and the node in it is not. `n_head` has to stay a name — it is
+ * what tells one row from another, and 22 August settled that names stay on the
+ * surface — but it also has to be set in monospace, which means the sentence
+ * arrives at a component in pieces.
+ *
+ * That is exactly the shape that produced three defects on 24 August, all of
+ * them a missing space or full stop where two independently-held strings met,
+ * and all of them invisible to a test that checked either half. So the pieces
+ * are named rather than implied, and `readingOf` is the joined sentence a test
+ * asserts whole.
+ */
+export type PlainLine = {
+  /** Everything before the name, ending in whatever space the sentence needs. */
+  readonly before: string
+  /** The name itself. Rendered monospace; never reworded. */
+  readonly subject: string
+  /** Everything after it, including the full stop. */
+  readonly after: string
+}
+
+/** The whole sentence, as a reader meets it. Assert this, not the parts. */
+export const readingOf = (line: PlainLine): string => `${line.before}${line.subject}${line.after}`
+
+/**
+ * "title", "title and width", "title, width and gap".
+ *
+ * A comma-separated list is what a schema prints and an "and" before the last
+ * item is what a person reads. Here rather than in either caller because a
+ * delta's settings and an inverse's restorations are the same list read twice,
+ * and the two disagreeing by a conjunction is the small kind of wrong that makes
+ * a screen feel machine-written.
+ */
+export const namedList = (names: readonly string[]): string =>
+  names.length <= 1
+    ? (names[0] ?? "")
+    : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`
+
+/**
+ * One part of a page, named as a thing rather than as a kind.
+ *
+ * `PART_KINDS` below answers "what is this?" for a reader inspecting one node.
+ * This answers the different question a sentence asks — what to call it in the
+ * middle of a line about something that happened to it — and it is a noun phrase
+ * with its article attached, because the alternative is every caller guessing
+ * between "a" and "the" and two of them guessing differently.
+ *
+ * A registered primitive's own name survives (0013): `a loom.heading` says what
+ * appeared, and no rewording of it would say more. A slot's name survives for
+ * the same reason. Only `text` has no name of its own, and "the words" is what
+ * anybody would call it.
+ */
+export const partPhrase = (node: LoomNode): string => {
+  switch (node.kind) {
+    case "element":
+      return `a ${node.type}`
+    case "slot":
+      return `the ${node.name} space`
+    case "text":
+      return "the words"
+  }
 }
 
 /**
