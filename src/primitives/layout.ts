@@ -79,3 +79,22 @@ export const COLUMN_MINIMUMS: Readonly<Record<ColumnName, string>> = {
   three: "17rem",
   four: "13rem",
 }
+
+export const ASPECT_NAMES = ["square", "wide", "portrait"] as const
+export type AspectName = (typeof ASPECT_NAMES)[number]
+
+/**
+ * The shapes a fixed-ratio frame may take.
+ *
+ * `loom.media` had these three and an `auto` beside them, because a photograph
+ * has a natural shape and honouring it is the sane default. Nothing else that
+ * frames content does: an `<iframe>` collapses to 150px tall with no ratio at
+ * all, and two superimposed layers have no intrinsic size to inherit. So the
+ * three named shapes live here and `auto` stays where it means something,
+ * rather than a second copy of `16 / 9` drifting a rewrite away from the first.
+ */
+export const ASPECT_RATIOS: Readonly<Record<AspectName, string>> = {
+  square: "1 / 1",
+  wide: "16 / 9",
+  portrait: "3 / 4",
+}

@@ -430,7 +430,24 @@
     color: var(--ink-muted);
   }
 
-  .prose table {
+  /*
+   * A table somebody wrote in markdown, and deliberately not one a component
+   * built.
+   *
+   * `:not(.not-prose *)` is what makes that distinction, and it is load-bearing
+   * rather than tidy. `display: block` is how a markdown table gets to scroll
+   * sideways on a phone instead of widening the page — but a block-level table
+   * shrinks to its content, so a generated table with three narrow columns sat
+   * in a full-width border with dead space to the right of it, and every one of
+   * its cells wore prose's borders and padding on top of its own. Both were
+   * invisible to every test and obvious in the first screenshot.
+   *
+   * Narrowing the selector is the fix rather than resetting inside `.not-prose`:
+   * a reset would need higher specificity than the rule it undoes, which is
+   * higher than a utility class, so it would win against the very declarations
+   * the component wrote. A rule that never matches leaves them unopposed.
+   */
+  .prose table:not(.not-prose *) {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
@@ -438,15 +455,15 @@
     overflow-x: auto;
   }
 
-  .prose th,
-  .prose td {
+  .prose th:not(.not-prose *),
+  .prose td:not(.not-prose *) {
     border: 1px solid var(--edge);
     padding: 0.5rem 0.75rem;
     text-align: left;
     vertical-align: top;
   }
 
-  .prose th {
+  .prose th:not(.not-prose *) {
     color: var(--ink);
     font-weight: 600;
     background: var(--surface-muted);

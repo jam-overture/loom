@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 33 blocks, 53 primitives.**
+**Done — 36 blocks, 64 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -77,6 +77,9 @@ stands alone.
 | `contactform`, `newsletter` | `loom.form` / `loom.field` (+ `loom.option`, `loom.button`) | pair ✅ |
 | `code-block` | `loom.code` | atomic ✅ |
 | `comparison-table` | `loom.comparison-table` / `loom.comparison-row` / `loom.comparison` | pair ✅ — a **trio**, see [0084](../decisions/0084-in-a-two-dimensional-band-rows-are-nodes-and-columns-are-positions.md) |
+| `marquee` | `loom.marquee` | **container** ✅ — the verdict below was wrong, see the note |
+| `embed` | `loom.embed` | atomic ✅ |
+| `before-after` | `loom.before-after` | atomic ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -119,13 +122,24 @@ share, which is the order to build them in.
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
 
-**Atomic to build — 3 blocks.**
+**Atomic to build — none. The table is empty**, closed on 25 August by
+`primitives-13-the-band-that-moves`.
 
-| Hermes block | Why it cannot decompose |
-| --- | --- |
-| `marquee` | continuous animation over its content; splitting produces nodes that mean nothing alone. **Its content is a binding** — see below |
-| `embed` | a third-party `iframe` with an aspect ratio it must maintain |
-| `before-after` | two images and a divider position — self-measuring if it is ever draggable |
+One of its three verdicts was wrong, and the correction is worth keeping because
+it is the kind of mistake this ledger exists to stop being made twice.
+`marquee` was called atomic on the grounds that "splitting produces nodes that
+mean nothing alone". That is true of the **motion** and false of the
+**content**: a logo in a marquee is a logo, and it means the same thing standing
+still. So it is 0054's shape — a container named for the arrangement it puts its
+children in — and it needed no new child type, because every child type it wants
+was already registered. The rule the row got wrong: *indivisible behaviour makes
+a primitive atomic only when the thing the behaviour acts on is also
+indivisible.*
+
+The other two were right. `embed` frames a document with no interior this
+library can address; `before-after` superimposes two regions rather than
+arranging them, so there is no arrangement to name. Both ship with slots or props
+and no repeated child.
 
 **Blocked — 2 blocks.** `contactform` and `newsletter` left this table on 18
 August, when [0065](../decisions/0065-a-submission-names-a-destination-and-never-carries-one.md)

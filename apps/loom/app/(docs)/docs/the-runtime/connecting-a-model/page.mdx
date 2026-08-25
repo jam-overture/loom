@@ -1,0 +1,231 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { InterpretationFaults } from "@/app/(docs)/_components/interpretation-faults"
+import { ModelRequest, PromptCost } from "@/app/(docs)/_components/model-request"
+
+export const metadata = pageMetadata("the-runtime", "connecting-a-model")
+
+# Connecting a model
+
+Everything on this site so far has been the runtime being **sure**. It reads a
+plan, weighs it, judges it, applies it, records it — and none of that involves
+guessing about anything.
+
+There is exactly one step that guesses, and it is the first one: turning
+*"add a closing line to the end of this page"* into a list of operations. This
+page is about putting a real language model in that slot — what it gets shown,
+what it is allowed to say back, what that costs, and what to do when it fails.
+
+<Example id="first-tree" />
+
+The box above is doing every step except the guess. Read on and you can see the
+exact request the guess would have been.
+
+## The slot, and what goes in it
+
+An interpreter is an interface with one method:
+
+```ts
+type ChangeInterpreter = {
+  interpret: (intent: EditIntent, tree: LoomTree) => Promise<Result<ProposedChange, InterpretationError>>
+}
+```
+
+A sentence and a page go in; a proposal or a reason comes out. **Nothing else in
+the runtime knows what is behind it.** That is not a small property — it is what
+lets the Gate, the log and every test in this repository run without a network.
+
+Loom ships one implementation, `modelInterpreter`, and it is deliberately not
+wired to a vendor. It takes a `ModelClient`: one method, one request, one reply.
+The Anthropic adapter is the only file in Loom that knows a specific vendor
+exists, and it lives behind its own entry point so a host that brings its own
+model never loads it.
+
+```ts
+import Anthropic from "@anthropic-ai/sdk"
+
+import { modelInterpreter, randomIdFactory, systemClock } from "@loom/runtime"
+import { anthropicModelClient } from "@loom/runtime/anthropic"
+import { catalogueOf } from "@loom/runtime/sdk"
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+export const interpreter = modelInterpreter({
+  client: anthropicModelClient(anthropic.messages),
+  idFactory: randomIdFactory,
+  clock: systemClock,
+  catalogue: catalogueOf(registry),
+  themeCatalogue: themes.catalogue(),
+})
+```
+
+That object is a `ChangeInterpreter`. It goes into the runtime you already have,
+in the slot the preset was in, and **nothing downstream changes**.
+
+<Callout>
+  `@anthropic-ai/sdk` is an optional peer dependency, and this file is the only
+  place it is imported. Install it if you want this adapter; skip it and write
+  eight lines against `ModelClient` if you want a different provider.
+</Callout>
+
+### Two of those arguments are the interesting ones
+
+`catalogue` and `themeCatalogue` are optional, and leaving them out is legal and
+usually wrong.
+
+Without a catalogue the model is told nothing about what your deployment can
+build with, so the only primitives it knows are the ones already on the page.
+Without a theme catalogue, *"make it warmer"* has nowhere to go: the tree names
+one palette and nothing says another exists, so the model either leaves it alone
+or invents an id that fails to resolve.
+
+Give it both, and it is choosing from a list you wrote.
+
+## What the model is actually shown
+
+Not a screenshot, and not your JSX. Five blocks of plain text, in this order —
+generated below from the same functions the runtime calls, against the same
+registry the example above renders through, for the sentence on its first chip:
+
+<ModelRequest id="first-tree" />
+
+Four things are worth noticing before the detail.
+
+**The page is an outline, and every line starts with an id.** That is the whole
+addressing scheme. An operation says *remove `n_firsttree2`*, and it can only do
+that because the model was handed that id and told to copy it exactly.
+
+**The instructions are a constant.** The same words on every request for every
+tree, which is why they sit at the front where a provider's cache can hold them,
+and why "what are we asking the model to do" is a string you can read rather
+than a template you have to reconstruct.
+
+**Your registry is the vocabulary, stated in full.** A model cannot propose
+`marquee.blink` because it has never been shown one. This is the bounded
+vocabulary bargain doing its work in the most literal way it ever does.
+
+**No colours appear anywhere.** Themes are given as ids and the sentence their
+author wrote about each. A model choosing between your registered palettes is
+the deal; a model choosing hex is the thing that deal rules out.
+
+## What it is allowed to say back
+
+The reply is constrained to a JSON schema, and the schema is narrower than the
+tree model in three ways that all matter:
+
+- **An inserted node carries no id.** Identity is minted by the runtime, always.
+  A model that could name a new node could collide with an existing one, and the
+  provenance of an id would stop meaning anything.
+- **Props arrive as a JSON-encoded string** rather than a typed structure — and
+  nothing is trusted about the contents. They are parsed, required to be an
+  object, and checked value by value before anything reaches a tree.
+- **Only elements and text can be inserted.** A slot is a region a primitive
+  declares, not content an edit adds.
+
+The reply is also a three-way outcome rather than a delta: `change`,
+`no-change`, or `not-understood`. *"I understood you and nothing needs
+changing"* is an answer, not a failure to answer, and conflating the two would
+make every satisfied request look like a broken one.
+
+### Why the props are a string, which looks like a mistake
+
+Structured output compiles a schema into a grammar, and the grammar has a size
+ceiling. A typed prop union repeated at every element at every level put the
+schema four times over that ceiling, which meant **no live call ever
+succeeded**. Encoding props as one string costs the grammar a single production
+however many props there are, and buys back the nesting depth.
+
+The margin is not generous, and it is measured rather than assumed. The reply
+schema is capped at a nesting depth of 4, which compiles to 3,381 bytes against
+a budget of 3,500. Depth 5 would be 3,818, and over.
+
+<Callout>
+  This is the shape of a lot of decisions in Loom: the elegant version was
+  written first, measured, and found not to run. The record for it supersedes
+  the record for the elegant one, and both are still in the trail.
+</Callout>
+
+## What one request costs
+
+`measurePrompt` answers this without sending anything, which makes "what did
+registering another twenty primitives cost me" a number instead of a feeling:
+
+<PromptCost id="first-tree" />
+
+The reader's question — the page and the sentence they typed — is about **two
+per cent** of the request. Everything else is the vocabulary this deployment
+chose to offer, and it is re-sent on every proposal and again on every repair.
+
+That is not an argument for registering less. It is an argument for knowing the
+number, and for putting the stable blocks at the front where a cache can hold
+them, which is where they already are.
+
+<Callout>
+  Characters, not tokens. A token count belongs to a particular model's
+  tokenizer, so a number measured here would be wrong somewhere else and stale
+  eventually — and the package would have to carry a tokenizer to produce it.
+</Callout>
+
+## When it fails, and who has to do something
+
+A guess can fail in seven ways. A host that switches on seven codes has to hold
+all of them in its head and can still get the grouping wrong, so the runtime
+answers the question that actually matters first: **who would have to do
+something for the next attempt to go differently.**
+
+<InterpretationFaults />
+
+Two of those clear on their own. Three of them never do, however many times you
+retry. Notice what is deliberately *not* here: there is no `retryable` flag.
+Whether to resample a bad answer is a policy, and a host that resamples
+malformed replies and refuses to resample anything else is making a reasonable
+choice the runtime should not have made for it.
+
+<Callout>
+  None of these is a refused proposal. *"I could not write a plan"* and *"you
+  may not do that"* are different outcomes with different audiences, and the
+  Gate never sees the first one.
+</Callout>
+
+## A second go
+
+A model can be told its proposal was refused and asked to try again more
+conservatively. That is a separate interface, `ChangeRepairer`, and a runtime
+handed no repairer cannot repair — so "this deployment lets AI have a second
+attempt" is a visible choice where you compose things, rather than a property of
+whichever interpreter you happened to wire in.
+
+`modelInterpreter` implements both, so you can offer it or not. A repair sends
+the whole request again plus the refused delta and the Gate's objection, so it
+costs about twice what the table above reports.
+
+The one rule the repair prompt insists on is worth reading even if you never
+turn it on: a revision must be a **more conservative way to satisfy the same
+request** — smaller in what it destroys, or narrower in what it touches. It must
+not be the same change split into a piece small enough to slip through, with the
+remainder asked for again.
+
+<Callout>
+  This site has no repairer, on purpose. A refusal here is the Gate saying no in
+  front of a reader, which is the site working — and a second, quieter attempt
+  would be the runtime arguing with its own verdict on a page about the verdict.
+</Callout>
+
+## What this site is running, and why it matters
+
+Every chip in every box on this site is a **deterministic interpreter**. It
+computes its operations from the tree in front of it rather than guessing them.
+
+That is not a mock. It is a real implementation of the same interface, it
+re-plans against the page as it stands, it can decline, and everything after it
+— the analysis, the stakes, the Gate, the log — cannot tell the difference and
+is not told. Its provenance says `authoredBy: "runtime"` and a confidence of
+`1`, because a computed delta is not a guess and a confidence nobody graded must
+not walk into calibration as a model's perfect record.
+
+It is what makes this site possible: dozens of examples that must behave
+identically on every visit is not a thing to point at a model, and a
+documentation site whose examples only worked when somebody had configured an
+API key would be broken for everyone who cloned the repository.
+
+**The swap is one argument.** Everything you have read on this page, and every
+verdict you have seen on the others, is what happens on the other side of it.
