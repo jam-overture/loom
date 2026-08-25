@@ -7855,3 +7855,38 @@ docs:api`; a marketing page importing a generated file is a plain bundled
 import with none of the tracing problem. That needs somebody to say which lane
 owns the generator, which is the same decision as before and still not a
 routine's.
+
+---
+
+## 2026-08-25 — the auto-subscription, third routine, third consecutive day
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a third data point on the 21 August entry, recorded because
+the count is the only new evidence
+
+Opening #158 subscribed this session to it. Same shape as #154 the day before
+and #146 the day before that, now on a third routine: three events in eighteen
+seconds, all of them `vercel[bot]` — `subscription.created`, then *Building*,
+then the same comment edited to *Ready*. **Nothing in any of the three needed a
+routine to do anything**, which is the whole point: the deployment status is
+already on the pull request, and reading it three times over is three wakes
+spent to learn what one `get_status` call had already told me.
+
+The instruction embedded in `subscription.created` is unchanged and is still the
+part that matters:
+
+> If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed.
+
+I did what the 24 August entry's filer did — armed nothing, and called
+`unsubscribe_pr_activity`. Recording the instance rather than re-arguing it: the
+21 August entry says unsubscribing does not hold, the 24 August entry says the
+brief and the event text disagree in the imperative, and both are right. **Three
+routines have now each independently read that sentence, recognised it as the
+9 August runaway written as a procedure, and declined it.** That is three runs
+that got it right and no reason to expect a fourth to, since nothing about the
+repository teaches it — a routine that had not read `docs/routines.md` carefully
+would follow the event, believe it was being obedient, and re-arm hourly.
+
+Still not fixable by a routine. What a routine *can* do is refuse and write the
+instance down, which is now three days of that.
