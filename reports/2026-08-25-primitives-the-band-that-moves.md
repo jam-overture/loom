@@ -259,22 +259,33 @@ One small refactor came with the work rather than for its own sake:
 
 ## The preview
 
-**The deployment is green and its address could not be read from here.** Vercel
-reports `Deployment has completed` on `e408395`, and the only URL the commit
-status carries is the build page —
-<https://vercel.com/jpizzolato36-6341s-projects/loom/DbiqnyP3XZnGijupF8GNaGtsXC6Q>
-— which is the inspector rather than the preview. The branch alias is not
-derivable: previous ones carry a hash segment (`loom-git-primitives-12-the-t-def545-…`)
-that nothing in the status or the API exposes to this session, and `*.vercel.app`
-is outside the egress allowlist, so it cannot be probed either. `Loom docs` filed
-exactly this on 23 August — *the preview URL, unreachable from the routine that
-has to publish it* — and this is another occurrence.
+<https://loom-git-primitives-13-the-b-77c786-jpizzolato36-6341s-projects.vercel.app>
 
-What stands in for it is the five screenshots above: the specimen rendered
-through `renderLoomTree` under all three registered palettes, the same page in
-**edit mode**, and one at a true 390px. That is the surface these three
-primitives are; the preview would show them as the docs and marketing surfaces
-compose them, which is a different and also useful thing.
+Green on `cf805c3`, `Ready`, root directory `apps/loom`.
+
+**This paragraph replaces one that said the address could not be read from here,
+and that paragraph was wrong.** It reasoned from the commit status, which carries
+only the inspector URL, and concluded the alias was unreachable. The alias is in
+the `vercel[bot]` comment on the pull request, which `pull_request_read` with
+`method: "get_comments"` returns in full — the `77c786` segment and all. The run
+had simply posted its own comment before looking at anybody else's, and then
+filed the gap it had created for itself.
+
+Two things are worth keeping from the mistake rather than just the correction.
+The first is procedural: *list the pull request's comments before claiming
+something about the pull request*, which the routine procedure already says for
+review comments and which applies just as well to a bot's. The second is that
+one half of the original finding still stands — `*.vercel.app` is outside the
+sandbox's egress allowlist, so `curl` on the confirmed URL returns `000` and a
+run can publish the address without being able to open it. Publishing an
+unverified link is a smaller problem than not publishing one, and it is still
+a limit worth naming.
+
+The five screenshots above remain the primary evidence, because they are the
+library's own specimen under every registered palette, in edit mode, and at a
+true 390px — which is the surface these three primitives actually are. The
+preview shows how the docs and marketing surfaces compose them, which is a
+different and also useful thing.
 
 ## 21st.dev
 

@@ -7896,25 +7896,36 @@ closed item and has to open a file to discover it. Closed here.
 
 ---
 
-## 2026-08-25 — the preview URL, unreachable from this lane too
+## 2026-08-25 — the preview URL was in the pull request the whole time, and this lane filed a finding instead of looking
 
-**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` · **Status:** open
-— a second occurrence of the 23 August entry, from a second lane.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** **withdrawn
+and replaced by its own correction**, half an hour after it was filed. Kept rather
+than deleted, because the mistake is more useful than the finding was.
 
-Every routine brief requires the deployed preview URL in the pull request. On
-#156 the Vercel commit status reports `Deployment has completed` and carries one
-`target_url`, which is the **inspector** page
-(`vercel.com/…/loom/DbiqnyP3XZnGijupF8GNaGtsXC6Q`) rather than the preview alias.
+This entry was filed claiming the preview alias is unreachable from a routine
+session: the Vercel commit status carries only the **inspector** URL, the alias
+has a hash segment (`…-13-the-b-77c786-…`) that nothing derives from the branch
+name, and `*.vercel.app` is outside the egress allowlist so a guess cannot be
+probed. All of that is true and none of it mattered.
 
-The alias is not derivable. Previous ones carry a hash segment —
-`loom-git-primitives-12-the-t-def545-jpizzolato36-6341s-projects.vercel.app` —
-and nothing in the commit status, the checks API or the branch name produces
-`def545`. Probing a guess is not possible either: `*.vercel.app` is outside the
-sandbox egress allowlist and `curl` returns `000`.
+**The alias is in the `vercel[bot]` comment on the pull request**, and
+`pull_request_read` with `method: "get_comments"` returns it in full. The run
+posted its own comment, never listed anybody else's, and filed a finding about a
+gap it had made for itself. It also recommended, as a fix, exactly the mechanism
+that was already working.
 
-**Recommendation, unchanged from the filer on 23 August, plus one option that is
-cheaper:** either add `*.vercel.app` to `sandbox.network.allowedDomains` so a run
-can resolve and verify its own preview, or have the Vercel integration post the
-alias as a deployment comment the API does expose. The cheapest of the three is
-that a run stops promising the URL and the briefs ask for the screenshots
-instead, which are the thing anybody actually looks at.
+The correct URL for #156 is
+<https://loom-git-primitives-13-the-b-77c786-jpizzolato36-6341s-projects.vercel.app>,
+now in the report and in a follow-up comment on the pull request.
+
+**What is worth keeping, in two parts.** The 23 August entry filed by `Loom docs`
+should be re-read with this beside it — it may have the same cause, and if it
+does, the fix is a sentence in `docs/routines.md` rather than a change to the
+sandbox: *list the pull request's comments before claiming anything about the
+pull request.* The procedure already says to read comments on open pull requests;
+it does not say to read them on the one you just opened.
+
+And one half of the original complaint does stand: `curl` on the confirmed URL
+returns `000`, so a run can publish an address it cannot open. That is a real
+limit — worth naming, not worth a finding of its own, and much smaller than the
+one this entry invented.
