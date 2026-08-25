@@ -166,7 +166,7 @@ tree. Everything else in the system follows from protecting that one property.
 | --- | --- | --- |
 | [14](14-rendering.md) | Rendering | The tree as a total, pure projection — and why "total" is not the same discipline as `Result`. |
 | [15](15-primitives-and-the-registry.md) | Primitives and the registry | What a primitive promises, who checks each half of it, and what the model is told it may build. |
-| 16 | Persistence | The log is the truth; the snapshot is a view you can rebuild. |
+| [16](16-persistence.md) | Persistence | The log is the truth; the snapshot is a view you can rebuild — and the audit is what it costs to keep one. |
 | 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |
 
 Unlinked lessons are not written yet. They arrive as the routine reaches them.
