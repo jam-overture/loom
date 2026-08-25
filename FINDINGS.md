@@ -6656,8 +6656,8 @@ not, and the entry that says so is the one to act on.
 
 ## 2026-08-23 — the front door's promise for `/demo` no longer says whose page it is
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open —
-one clause, and not a blocker
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** closed
+by `marketing-11-where-to-go-from-here` — the wording is theirs, taken verbatim
 
 `site.ts`'s `DEMO.blurb` reads *"Ask a real page to rearrange itself — in your own
 words — and watch the record fill in beside it."* Every word of that is still
@@ -7929,3 +7929,201 @@ And one half of the original complaint does stand: `curl` on the confirmed URL
 returns `000`, so a run can publish an address it cannot open. That is a real
 limit — worth naming, not worth a finding of its own, and much smaller than the
 one this entry invented.
+## 2026-08-25 — one product, four front doors, and no way back from two of them
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom lessons`,
+`Loom portal` · **Status:** open — measured on this run, one entry rather than
+three, because the fix is one agreement rather than three edits
+
+The marketing brief names the shape to aim at: *a marketing root, docs at a
+path, the signed-in product at another, **all feeling like one thing**.* This is
+the first run to open all four surfaces on one server and look at them side by
+side, and they do not.
+
+**The wordmark is spelled four ways, in three typefaces.**
+
+| Surface | What the top-left says | Set in |
+| --- | --- | --- |
+| `/` | **Loom** | Geist, bold |
+| `/docs` | **Loom** ·  docs | Geist, bold + muted |
+| `/lessons` | Loom lessons | Geist, regular, body size |
+| `/portal` | ▪ loom · portal · alpha | Geist **Mono**, lowercase, with a green monogram |
+
+The portal is the only surface carrying a mark, and it is the one surface a
+visitor reaches last. The front door — the one that has to look like the product
+— has no mark at all. That half is this lane's and is not filed against anyone.
+
+**Two of the four cannot be left.** This is the part that matters more than the
+lettering:
+
+- **`/docs`** offers *Search · PRE-PRODUCTION ALPHA · GitHub · theme toggle* and
+  a sidebar of documentation pages. There is no link to `/`, `/demo`,
+  `/lessons` or `/portal` anywhere in its chrome.
+- **`/lessons`** offers *Loom lessons · Review queue*. Same: nothing points out
+  of it.
+
+So the front door spends a band and a menu sending a visitor onward
+([0070](decisions/0070-the-marketing-site-holds-the-root.md)), and two of the
+four places it sends them are one-way. A reader who follows *Read the docs*, is
+convinced, and wants the demonstration has to edit the address bar. The
+marketing site is measurably good at the outbound half and the return half does
+not exist.
+
+`/portal` is the exception and handles it well — an unconfigured deployment says
+*"This portal isn't set up yet"*, offers the live demo, and offers *← Back to
+Loom*. That is the pattern; it is why this is filed as a gap in two surfaces
+rather than a design question.
+
+**What this lane is not asking for.** Not that three surfaces adopt the
+marketing header — the docs' sidebar and the portal's tool chrome are right for
+what they are, and 0067's exception for the portal is deliberate. The smallest
+thing that closes it is a **link home** in each surface's chrome, and a wordmark
+that is one wordmark. `SITE_ROUTES` and `PRODUCT_SURFACES` in
+`app/(marketing)/_lib/site.ts` are already exported and already the list every
+other surface would need; nothing has to be duplicated to use them.
+
+Screenshots of all four headers are in `reports/2026-08-25-marketing-where-to-go-from-here-surfaces.png`.
+
+---
+
+## 2026-08-25 — `loom.heading` welds size to level, so a card title cannot be both
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — worked around by accepting the size, not by breaking the outline
+
+`loom.heading`'s description says it plainly: *"Its level sets both the document
+outline and the size."* `STEP_FOR_LEVEL` is `{1:8, 2:7, 3:6, 4:5, 5:4, 6:3}`,
+and there is no size prop.
+
+The front door's destination band is four `loom.card`s inside a `loom.section`
+whose heading is level 2. A card title is therefore level 3, which is step 6 —
+**32px, in a card about 290px wide**, so every one of the four titles wraps to
+two lines and the nav band's titles come out louder than the argument band's
+above it.
+
+**The library already disagrees with itself about this.** `loom.feature` renders
+its title as a hard-coded `<h3>` at `size(4)` — 20px, level 3. So the same
+level renders at 32px through `loom.heading` and at 20px through
+`loom.feature`, and only the wrong one of the two is reachable from a tree.
+
+The ways out this lane considered and rejected, so the next person does not
+re-walk them:
+
+- **Use level 5** to get step 4. It is the right *size* and it puts an `h5`
+  directly under an `h2`. A marketing site that breaks its own document outline
+  to make a card look right is not a trade this lane will make silently.
+- **Drop the heading for `loom.prose`.** Four destinations lose their place in
+  the outline entirely, which is worse than the first option, not better.
+- **Three columns instead of four.** The titles fit, and the fourth card sits
+  alone on a second row — the exact failure the band removed a fifth card to
+  avoid on 22 August.
+
+So the band ships at 32px and this is filed. **The suggestion is a `scale` prop
+that moves the step without moving the level**, defaulting to the level's own
+step so nothing existing changes — which is the same seam `loom.feature` is
+already using privately. If that is the wrong shape, the useful smaller fact is
+that step 6 under a level-2 heading is where the ramp stops being a hierarchy.
+
+---
+
+## 2026-08-25 — nothing on a linked card says it is a link until you hover it, and a phone cannot
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — a question about a deliberate decision, not a bug report
+
+Both card primitives make the whole tile the anchor when the tree gives it an
+`href`, and both signal it the same way: `loom.feature`'s note says the title
+*"takes the underline wipe rather than the tile sprouting a 'learn more' that
+says nothing"*, and `loom.card` defaults a linked card to `elevation: raised`.
+The reasoning is good and this is not an argument with it.
+
+The observation is that **both signals are hover-only**. At rest — which is
+every screenshot, every printed page, and every visitor on a touch device, where
+there is no hover at all — four linked cards are indistinguishable from four
+paragraphs in boxes. The front door's *Where to go from here* band is the whole
+of this site's onward path into the docs, the demo, the course and the portal,
+and on a phone it currently offers no visible evidence that any of it is
+clickable.
+
+This lane worked around it by putting each destination's **cost** in the card's
+footer region — *costs you a click*, *costs you a read* — which is real
+information rather than a "learn more", and reads as a call to action because of
+what it says rather than because of a glyph. That is a good answer for this band
+and it is not a general one: it happens to be true that these four cards are
+destinations with a price.
+
+The general question is whether a linked card should carry a persistent
+affordance — a chevron in the corner, a rule, anything that survives a
+screenshot. It is the primitives lane's call and this lane has no vote in it,
+only the measurement: on the front door, on a phone, there is currently none.
+
+---
+
+## 2026-08-25 — `FACTS` turned another lane's run red twice in one day, which is the fifth and sixth time
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — dated on the 19 and 24 August
+entries rather than opened again
+
+Recording instances, not re-arguing. The 19 August entry named the two ways out
+and said neither is a routine's to choose alone; the 24 August entry said four
+occurrences is usually where the one-line fix stops needing an argument.
+
+**#156 hit it twice on 25 August** — `FACTS.primitives` `"61"`→`"64"` for three
+new primitives and `FACTS.decisions` `"90"`→`"91"` for a record, both edited by
+`Loom primitives` in this lane's file to get a green `pnpm verify`. That is six
+occurrences across three lanes in seven days.
+
+**This lane did not take the fix on its own, and the reason is worth stating
+rather than repeating "it is not mine to choose".** The deriving fix is
+`readdirSync` on `decisions/`, and `/` is a **dynamic** route — `ƒ` in
+`next build`, because the page is a function of the query string. So the read
+would happen per request inside a serverless function, and `decisions/` sits
+five levels above the Vercel root directory. Making that safe means either
+prerendering the band or emitting a generated module at build time, and both
+reach `next.config.ts` or `apps/loom/package.json` — files #157 has just ruled
+belong to other lanes. So the one-line fix is not one line, and the cheap
+version of it is a cross-lane change in a lane that is not allowed to make one.
+
+The recommendation is unchanged and this adds one option to it: **a third way
+out is for the counts to move to a module another lane already generates.**
+`(docs)` regenerates `reference.generated.json` through `pnpm --filter @loom/app
+docs:api`; a marketing page importing a generated file is a plain bundled
+import with none of the tracing problem. That needs somebody to say which lane
+owns the generator, which is the same decision as before and still not a
+routine's.
+
+---
+
+## 2026-08-25 — the auto-subscription, third routine, third consecutive day
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a third data point on the 21 August entry, recorded because
+the count is the only new evidence
+
+Opening #158 subscribed this session to it. Same shape as #154 the day before
+and #146 the day before that, now on a third routine: three events in eighteen
+seconds, all of them `vercel[bot]` — `subscription.created`, then *Building*,
+then the same comment edited to *Ready*. **Nothing in any of the three needed a
+routine to do anything**, which is the whole point: the deployment status is
+already on the pull request, and reading it three times over is three wakes
+spent to learn what one `get_status` call had already told me.
+
+The instruction embedded in `subscription.created` is unchanged and is still the
+part that matters:
+
+> If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed.
+
+I did what the 24 August entry's filer did — armed nothing, and called
+`unsubscribe_pr_activity`. Recording the instance rather than re-arguing it: the
+21 August entry says unsubscribing does not hold, the 24 August entry says the
+brief and the event text disagree in the imperative, and both are right. **Three
+routines have now each independently read that sentence, recognised it as the
+9 August runaway written as a procedure, and declined it.** That is three runs
+that got it right and no reason to expect a fourth to, since nothing about the
+repository teaches it — a routine that had not read `docs/routines.md` carefully
+would follow the event, believe it was being obedient, and re-arm hourly.
+
+Still not fixable by a routine. What a routine *can* do is refuse and write the
+instance down, which is now three days of that.

@@ -157,7 +157,23 @@ describe("the rest of the product", () => {
   it("says which of them a visitor can reach without signing in", () => {
     expect(DOCS.guarded).toBe(false)
     expect(PORTAL.guarded).toBe(true)
-    expect(PORTAL.blurb.toLowerCase()).toContain("sign")
+
+    /**
+     * The words moved out of the portal's blurb and into its cost on
+     * 25 August — *costs you an account* rather than a clause at the end of a
+     * sentence — so the check moved with them, and grew while it was moving.
+     *
+     * It held one surface in one direction: that the portal's blurb said
+     * *sign* somewhere. That would pass a site where every card warned about
+     * signing in, which is the failure worth catching now that the warning is
+     * a short phrase in a fixed position rather than a clause someone has to
+     * write deliberately. Both directions, across all four.
+     */
+    for (const surface of PRODUCT_SURFACES) {
+      const read = `${surface.blurb} ${surface.cost}`.toLowerCase()
+
+      expect(/\bsign|\baccount\b/.test(read)).toBe(surface.guarded)
+    }
   })
 
   it("does not carry this site's palette into a surface that does not read it", () => {
