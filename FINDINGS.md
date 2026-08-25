@@ -8014,3 +8014,49 @@ Two options, neither taken because both are outside this lane:
 
 **Recommendation: the first.** The second is a fix for a problem the maintainer
 may not have.
+
+---
+
+## 2026-08-25 — the auto-subscription, fourth consecutive day, and the sentence it makes untrue
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a fourth data point on the 21 August entry, with one thing on
+it that the previous three did not have
+
+Opening #161 subscribed this session to it. Identical to #158, #154 and #146:
+three events in twenty seconds, all `vercel[bot]` —
+`subscription.created`, then *Building*, then the same comment edited to
+*Ready*. **Nothing in any of the three needed a routine to do anything.** The
+deployment status was already on the pull request and I had already read it with
+one `get_status` call before the first wake arrived.
+
+Unsubscribed, and armed nothing. The 21 August entry says the unsubscribe does
+not hold; recording the instance rather than re-arguing it.
+
+**What is new, and the reason this is worth a fourth entry.** My run report and
+the notification I sent the maintainer both said, in as many words, *"not
+subscribed to the PR, per the brief's token discipline."* **That was false when I
+wrote it**, and I did not know it: the subscription is created by the harness at
+the moment the pull request is opened, before a routine gets a turn in which it
+could decline.
+
+So the cost is no longer only the wakes. The brief instructs this lane:
+
+> **Never schedule a follow-up or a self-check-in. Run, report, exit. Do not poll
+> for review.**
+
+A routine can comply with the first two sentences and **cannot comply with the
+third**, because being subscribed is not its decision. It can only unsubscribe
+afterwards, from a subscription the 21 August entry says re-establishes itself.
+The honest statement a report can make is therefore *"I scheduled nothing and
+unsubscribed"* — not *"I am not subscribed"* — and the three previous entries all
+recorded the wakes without noticing that the routines were also, in good faith,
+telling the maintainer something untrue about them.
+
+That is the part worth fixing rather than counting. **Recommendation, unchanged
+in substance from 21 August and narrowed in scope:** the subscription is a
+harness default, so a routine cannot turn it off from inside its own lane. Either
+the default is changed for this repository, or `docs/routines.md` says plainly
+that pull requests are subscribed automatically and that a routine should report
+*"unsubscribed"* rather than *"not subscribed"*. The second is three lines and
+makes four days of reports accurate; the first removes the cost.
