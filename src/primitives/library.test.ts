@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-one primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(61)
+  it("registers as sixty-four primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(64)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -160,6 +160,7 @@ describe("the starter library", () => {
       "loom.stack",
       "loom.grid",
       "loom.mosaic",
+      "loom.marquee",
       "loom.card",
       "loom.hero",
       "loom.feature-grid",
@@ -211,6 +212,8 @@ describe("the starter library", () => {
       "loom.perk",
       "loom.divider",
       "loom.media",
+      "loom.embed",
+      "loom.before-after",
       "loom.action",
       "loom.button",
       "loom.link",
@@ -356,6 +359,13 @@ describe("the starter library", () => {
        */
       "loom.perk",
       "loom.divider",
+      /**
+       * The two new frames. An `<iframe>` has no interior this library can
+       * address, and a wipe places two *slots* rather than a run of children —
+       * so neither has anywhere to put a child node, and both say so.
+       */
+      "loom.embed",
+      "loom.before-after",
     ])
   })
 
@@ -802,6 +812,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(comparisonPage(EDITORIAL)),
       ...typesIn(prosePage(EDITORIAL)),
       ...typesIn(tablePage(EDITORIAL)),
+      ...typesIn(motionPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -3098,13 +3109,17 @@ describe("the technical vocabulary", () => {
      * renderings, and the difference is markup rather than a colour — a
      * terminal that were merely a darker panel would be unreadable under a
      * palette that has no dark surface.
+     *
+     * The *bar* stopped being part of that difference on 25 August, when the
+     * copy control landed and needed somewhere to sit that is not on top of the
+     * first line of the code. Every panel has one now; what still separates the
+     * two tones is the window dots and where the label sits.
      */
     const panels = [...markup.matchAll(/<pre/g)]
-    const bars = [...markup.matchAll(/border-block-end:1px solid var\(--loom-border-subtle\)/g)]
+    const dots = [...markup.matchAll(/border-radius:var\(--loom-radius-full\);background:var\(--loom-border-strong\)/g)]
 
     expect(panels).toHaveLength(3)
-    /** Two bars: the terminal, and the source listing that carries a filename. */
-    expect(bars).toHaveLength(2)
+    expect(dots).toHaveLength(3)
     expect(markup).toContain("loom.tree.json")
   })
 
@@ -4095,5 +4110,384 @@ describe("the repairs this run made", () => {
     const { stylesheet } = splitStylesheet(render(prosePage(EDITORIAL)).markup)
 
     expect(stylesheet).toMatch(new RegExp(`\\.${LIBRARY_CLASS.list} \\{\\s*margin: 0;\\s*\\}`))
+  })
+})
+
+/**
+ * The three primitives a still page could not have: a band that travels, a
+ * document somebody else serves, and two pictures wiped against each other.
+ *
+ * The marquee appears three times on purpose — a logo wall, a wall of quotes
+ * running the other way, and a two-item band — because the thing most likely to
+ * be wrong about it is a function of how many items it holds.
+ */
+const motionPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const logo = (name: string) =>
+    buildElement(idFactory, {
+      type: "loom.logo",
+      props: { name, image: `https://example.com/${name.toLowerCase()}.svg` },
+    })
+
+  const quote = (body: string, author: string) =>
+    buildElement(idFactory, { type: "loom.quote", props: { quote: body, author } })
+
+  const shot = (src: string, alt: string) =>
+    buildElement(idFactory, {
+      type: "loom.media",
+      props: { src, alt, aspect: "wide", corners: "none" },
+    })
+
+  const wall = buildElement(idFactory, {
+    type: "loom.marquee",
+    props: { density: "roomy" },
+    children: [
+      logo("Meridian"),
+      logo("Halcyon"),
+      logo("Kestrel"),
+      logo("Ardent"),
+      logo("Northwind"),
+      logo("Perihelion"),
+      logo("Talisman"),
+    ],
+  })
+
+  const voices = buildElement(idFactory, {
+    type: "loom.marquee",
+    props: { direction: "end", density: "loose", edges: "faded" },
+    children: [
+      quote("Undo is a proposal, and that ended a category of incident for us.", "Ren Okafor"),
+      quote("We can answer what the assistant changed, and who approved it.", "Sofia Lindqvist"),
+      quote("The page adapts and the diff is still readable.", "Amara Diallo"),
+    ],
+  })
+
+  const pair = buildElement(idFactory, {
+    type: "loom.marquee",
+    props: { edges: "hard", density: "tight" },
+    children: [logo("Meridian"), logo("Halcyon")],
+  })
+
+  const film = buildElement(idFactory, {
+    type: "loom.embed",
+    props: {
+      src: "https://player.example.com/embed/loom-in-ninety-seconds",
+      title: "Loom in ninety seconds",
+      caption: "The whole pipeline, from request to revision.",
+    },
+  })
+
+  const flush = buildElement(idFactory, {
+    type: "loom.embed",
+    props: {
+      src: "https://maps.example.com/embed?place=studio",
+      title: "Where the studio is",
+      aspect: "square",
+      frame: "flush",
+    },
+  })
+
+  const wipe = buildElement(idFactory, {
+    type: "loom.before-after",
+    props: { position: 42, beforeLabel: "Revision 3", afterLabel: "Revision 4" },
+    children: [
+      buildSlot(idFactory, "before", [shot("https://example.com/before.png", "The page at revision three")]),
+      buildSlot(idFactory, "after", [shot("https://example.com/after.png", "The page at revision four")]),
+    ],
+  })
+
+  const framed = buildElement(idFactory, {
+    type: "loom.before-after",
+    props: { aspect: "wide" },
+    children: [
+      buildSlot(idFactory, "before", [shot("https://example.com/staged.png", "The room, staged")]),
+      buildSlot(idFactory, "after", [shot("https://example.com/empty.png", "The room, empty")]),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Trusted by" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1 },
+                children: [text("A page that moves, and still says what it is")],
+              }),
+            ]),
+            wall,
+            voices,
+            pair,
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          children: [film, flush, wipe, framed],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("the band that moves", () => {
+  it("renders all three, with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(motionPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("<iframe")
+    expect(markup).toContain("Loom in ninety seconds")
+    expect(markup).toContain("Revision 3")
+    expect([...markup.matchAll(/class="loom-marquee[ "]/g)]).toHaveLength(3)
+  })
+
+  it("runs the row twice when the page is published, and once when it is being edited", () => {
+    /**
+     * The property the whole design turns on, asserted from both sides. A
+     * seamless loop needs the run rendered twice, and `loom.logo-cloud` refused
+     * to scroll for exactly that reason: two copies of a node mean two elements
+     * carrying one `data-loom-node`, which is what 0051 rejected.
+     *
+     * The echo therefore exists only where identity attributes do not.
+     */
+    const published = render(motionPage(EDITORIAL)).markup
+    const editing = render(motionPage(EDITORIAL), true).markup
+
+    expect([...splitStylesheet(published).tree.matchAll(/loom-marquee-echo/g)]).toHaveLength(3)
+    expect([...splitStylesheet(editing).tree.matchAll(/loom-marquee-echo/g)]).toHaveLength(0)
+    expect([...splitStylesheet(editing).tree.matchAll(/loom-marquee-still/g)]).toHaveLength(3)
+  })
+
+  it("never renders one node id twice, on any fixture, in edit mode", () => {
+    /**
+     * The invariant the still rendering exists to protect, held against every
+     * fixture in this file rather than against the marquee alone — a second
+     * primitive that decided to duplicate its children would fail here.
+     */
+    for (const page of [motionPage, samplePage, marketingPage, cataloguePage, technicalPage]) {
+      const ids = [...render(page(EDITORIAL), true).markup.matchAll(/data-loom-node="([^"]+)"/g)].map(
+        (match) => match[1]
+      )
+
+      expect(ids.length).toBeGreaterThan(0)
+      expect(new Set(ids).size).toBe(ids.length)
+    }
+  })
+
+  it("hides the echo from assistive technology and from the tab order", () => {
+    const markup = render(motionPage(EDITORIAL)).markup
+    const echoes = [...markup.matchAll(/<div class="loom-marquee-run loom-marquee-echo"[^>]*>/g)].map(
+      ([tag]) => tag
+    )
+
+    expect(echoes).toHaveLength(3)
+    for (const echo of echoes) {
+      expect(echo).toContain('aria-hidden="true"')
+      expect(echo).toContain("inert")
+    }
+  })
+
+  it("takes its pace from the item count rather than from a prop in the tree", () => {
+    const { markup } = render(motionPage(EDITORIAL))
+    const { stylesheet } = splitStylesheet(markup)
+
+    /**
+     * 0055 refuses a duration in the tree, and a fixed duration makes six logos
+     * drift while twenty sprint. `:has(> * > :nth-child(n))` is the only thing
+     * in CSS that can count, so the duration is enumerated once per count and
+     * the last matching rule wins.
+     */
+    expect(propsOfType("loom.marquee")).toEqual(["density", "direction", "edges"])
+    expect(stylesheet).toContain(".loom-marquee-track:has(> * > :nth-child(7))")
+    expect(stylesheet).toContain(".loom-marquee-track:has(> * > :nth-child(16))")
+    expect(stylesheet).not.toContain(":nth-child(17)")
+    /** Every duration is a multiple of a theme variable, never a literal. */
+    expect(stylesheet).not.toMatch(/animation-duration:\s*\d/)
+  })
+
+  it("sets nothing about the track inline, because three rules have to reach it", () => {
+    const { tree } = splitStylesheet(render(motionPage(EDITORIAL)).markup)
+    const track = tree.slice(tree.indexOf('class="loom-marquee-track'))
+    const opening = track.slice(0, track.indexOf(">"))
+
+    /**
+     * The trap `stylesheet.ts` names, in the primitive that would suffer most
+     * from it: the duration is chosen by the item count, and the width and the
+     * animation are cancelled twice over — by the still variant and by reduced
+     * motion. An inline style beats all three.
+     */
+    expect(opening).not.toContain("style=")
+  })
+
+  it("stops the band under a pointer and under a focus, and stops it entirely for reduced motion", () => {
+    const { stylesheet } = splitStylesheet(render(motionPage(EDITORIAL)).markup)
+
+    expect(stylesheet).toContain(".loom-marquee:focus-within .loom-marquee-track")
+    expect(stylesheet).toContain("animation-play-state: paused")
+    /**
+     * Reduced motion does not merely stop the loop: a stopped loop is a row
+     * clipped at the band's edge showing whichever items happened to be inside
+     * it. The run wraps, the echo goes, and the edge fade goes with it, because
+     * a horizontal fade across wrapped rows is not what it meant.
+     */
+    const reduced = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion"))
+    expect(reduced).toContain(".loom-marquee-echo")
+    expect(reduced).toContain("mask-image: none")
+  })
+
+  it("fades its edges with a mask, so it does not have to know what it is sitting on", () => {
+    const { stylesheet, tree } = splitStylesheet(render(motionPage(EDITORIAL)).markup)
+
+    /**
+     * The 24 August finding about `loom.table`'s scroll edge, answered here
+     * rather than there: a gradient to the page's colour needs a ground a
+     * primitive cannot know, and a mask fades opacity instead. So a band inside
+     * a card fades to the card.
+     */
+    expect(stylesheet).toContain(".loom-marquee-faded")
+    expect(stylesheet).toContain("mask-image: linear-gradient")
+    expect([...tree.matchAll(/loom-marquee-faded/g)]).toHaveLength(2)
+  })
+
+  it("caps an item against the band it is in rather than against the viewport", () => {
+    const { stylesheet } = splitStylesheet(render(motionPage(EDITORIAL)).markup)
+
+    /**
+     * A quote card's natural width is around 580px, which on a 390px phone is a
+     * card whose borders are both off-screen and which reads as loose text on
+     * the page. The cap is in `cqi` against the band's own inline size, not in
+     * `vw`: `loom.mosaic` reads the viewport where it should read its container
+     * and this lane filed that against itself on 21 August, so the second
+     * primitive to want a container measurement takes the container.
+     */
+    expect(stylesheet).toContain("container-type: inline-size")
+    expect(stylesheet).toContain("max-inline-size: min(32rem, 80cqi)")
+    expect(stylesheet).not.toContain("vw)")
+  })
+
+  it("draws every overlay on the wipe as a fill with a ring, because it cannot see what is under it", () => {
+    const { tree } = splitStylesheet(render(motionPage(EDITORIAL)).markup)
+
+    /**
+     * The defect this shipped with for an hour on 25 August: a single line in
+     * `bg-surface`, which under `bold` is near-black and vanished against a
+     * dark screenshot. No palette slot contrasts with a photograph, so the
+     * divider, the handle and the two chips are all a surface fill inside an
+     * ink ring — one of the two always reads.
+     */
+    const rings = [...tree.matchAll(/box-shadow:0 0 0 1px var\(--loom-fg-default\)/g)]
+
+    /** Two dividers, two handles, and the two chips on the labelled one. */
+    expect(rings).toHaveLength(6)
+  })
+
+  it("frames a third-party document with a name, a sandbox and a ratio", () => {
+    const { markup } = render(motionPage(EDITORIAL))
+    const frames = [...markup.matchAll(/<iframe[^>]*>/g)].map(([tag]) => tag)
+
+    expect(frames).toHaveLength(2)
+    for (const frame of frames) {
+      expect(frame).toContain('title="')
+      expect(frame).toContain('sandbox="allow-scripts allow-same-origin allow-presentation"')
+      /** HTML attribute names are case-insensitive, which is why React's camel spelling is correct here. */
+      expect(frame).toContain('referrerPolicy="strict-origin-when-cross-origin"')
+      expect(frame).toContain("allowFullScreen")
+      expect(frame).toContain('loading="lazy"')
+    }
+
+    /** The ratio is the wrapper's, so the box holds its shape before the document arrives. */
+    expect(markup).toMatch(/aspect-ratio:16 \/ 9/)
+    expect(markup).toMatch(/aspect-ratio:1 \/ 1/)
+  })
+
+  it("refuses a frame with no accessible name and one with a scheme that is not http", () => {
+    const embed = registry.primitives.find((primitive) => primitive.type === "loom.embed")
+
+    expect(embed?.validate({ src: "https://example.com/x", title: "" }).outcome).toBe("invalid")
+    expect(embed?.validate({ src: "javascript:alert(1)", title: "A frame" }).outcome).toBe("invalid")
+    expect(embed?.validate({ src: "https://example.com/x", title: "A frame" }).outcome).toBe("valid")
+  })
+
+  it("clips the before side rather than narrowing it, and takes its height from the after side", () => {
+    const { tree } = splitStylesheet(render(motionPage(EDITORIAL)).markup)
+
+    /**
+     * A width would squeeze or crop the before picture and the two would no
+     * longer be the same picture at the same scale, which is the entire point
+     * of superimposing them.
+     */
+    expect(tree).toContain("clip-path:inset(0 58% 0 0)")
+    expect(tree).toContain("clip-path:inset(0 50% 0 0)")
+    expect(propsOfType("loom.before-after")).toEqual([
+      "afterLabel",
+      "aspect",
+      "beforeLabel",
+      "position",
+    ])
+  })
+
+  it("bounds the wipe well inside its own ends, because a wipe at nothing is one picture", () => {
+    const wipe = registry.primitives.find((primitive) => primitive.type === "loom.before-after")
+
+    expect(wipe?.validate({ position: 0 }).outcome).toBe("invalid")
+    expect(wipe?.validate({ position: 100 }).outcome).toBe("invalid")
+    expect(wipe?.validate({ position: 42.5 }).outcome).toBe("invalid")
+    expect(wipe?.validate({ position: 5 }).outcome).toBe("valid")
+  })
+
+  it("places the copy control it declares, and declares the strings that name it", () => {
+    const audited = auditRegistry(registry)
+    const code = registry.primitives.find((primitive) => primitive.type === "loom.code")
+
+    /**
+     * 0086's first consumer in this library, closing the finding this lane
+     * filed on 21 August. The control is built by the runtime and placed here;
+     * a declared behaviour nobody places is reported the same way a declared
+     * slot nobody renders is.
+     */
+    expect(code?.behaviours).toEqual(["copy"])
+    expect(Object.keys(code?.text ?? {}).sort()).toEqual(["copied", "copy"])
+    expect(audited.unplacedBehaviours).toEqual([])
+  })
+
+  it("gives every code panel a bar, because that is where the button goes", () => {
+    const { markup } = render(technicalPage(EDITORIAL))
+
+    /**
+     * It used to appear only for a terminal or a named language. A button
+     * floated over the code would sit on the first line of a snippet whose
+     * whitespace is its content, so the bar arrives with the button — and a
+     * copyable panel now always has somewhere to say what it is.
+     */
+    const bars = [...markup.matchAll(/border-block-end:1px solid var\(--loom-border-subtle\)/g)]
+    expect([...markup.matchAll(/<pre/g)]).toHaveLength(3)
+    expect(bars).toHaveLength(3)
+  })
+
+  it("renders the same under every palette, with no colour of its own", () => {
+    for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+      const { markup, diagnostics } = render(motionPage(theme))
+      const tree = splitStylesheet(markup).tree
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+
+  it("changes nothing but the root's variables when the palette changes", () => {
+    const editorial = splitStylesheet(render(motionPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(motionPage(BOLD)).markup).tree
+    const strip = (markup: string): string => markup.slice(markup.indexOf("</style>") + 1).replace(/style="[^"]*"/, "")
+
+    expect(strip(editorial)).toBe(strip(bold))
   })
 })
