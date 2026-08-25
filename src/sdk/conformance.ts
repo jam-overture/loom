@@ -39,10 +39,72 @@ import type { SubmissionOutcome } from "../submit/resolution.js"
  * is why the verdict is a value.
  */
 
+/** A configuration the schema accepts that the component threw on. */
+export type ProbeFailure = {
+  readonly props: JsonObject
+  readonly reason: string
+}
+
+/**
+ * Why a probe declined to answer.
+ *
+ * 0012 made `not-probeable` a third answer rather than a failure, because a
+ * hook-using component and a class component are both legitimate primitives the
+ * probe cannot judge. That is still true, and it was hiding a second population
+ * that is never legitimate: a component that is perfectly callable and throws on
+ * every configuration its own schema accepts.
+ *
+ * The two are told apart by whether anything was called at all.
+ *
+ * - `not-callable` — nothing was called. Not a function, or a class component.
+ *   `failures` is empty because there is nothing to report.
+ * - `threw` — it was called under every configuration and threw under all of
+ *   them, and `failures` carries each one.
+ *
+ * A hook-using component lands in `threw` alongside a broken one, and no
+ * function-call probe can separate them: both are functions, both throw, and the
+ * error React raises for a hook outside a render is a message rather than a
+ * type. So this does not say *which* fault it is. It says the probe got as far
+ * as calling the component, which is the line a host can act on.
+ */
+export type NotProbeableCause = "not-callable" | "threw"
+
+export type NotProbeable = {
+  readonly outcome: "not-probeable"
+  readonly cause: NotProbeableCause
+  readonly reason: string
+  /** Every configuration that threw. Empty exactly when nothing was called. */
+  readonly failures: readonly ProbeFailure[]
+}
+
+const notCallable = (reason: string): NotProbeable => ({
+  outcome: "not-probeable",
+  cause: "not-callable",
+  reason,
+  failures: [],
+})
+
+/**
+ * Named rather than counted. Whoever reads this has to reproduce it, and
+ * `{"type":"select"}` is the whole reproduction.
+ */
+export const describeProbeFailures = (failures: readonly ProbeFailure[]): string =>
+  failures.map((failure) => `${JSON.stringify(failure.props)} (${failure.reason})`).join(", ")
+
+const threwThroughout = (failures: readonly ProbeFailure[]): NotProbeable => ({
+  outcome: "not-probeable",
+  cause: "threw",
+  reason:
+    failures.length === 0
+      ? "no configuration answered"
+      : `threw under every configuration probed: ${describeProbeFailures(failures)}`,
+  failures,
+})
+
 export type ConformanceVerdict =
   | { readonly outcome: "decorates" }
   | { readonly outcome: "not-decorated" }
-  | { readonly outcome: "not-probeable"; readonly reason: string }
+  | NotProbeable
 
 const PROBE_NODE_ID = nodeIdSchema.parse("n_probe")
 const PROBE_TYPE = primitiveTypeSchema.parse("loom.probe")
@@ -150,13 +212,23 @@ const call = (probeable: ProbeableComponent, props: LoomPrimitiveProps): Result<
   }
 }
 
+type ProbeAttempt = {
+  readonly props: JsonObject
+  readonly result: Result<ReactNode, string>
+}
+
+const failuresIn = (attempts: readonly ProbeAttempt[]): readonly ProbeFailure[] =>
+  attempts.flatMap((attempt) =>
+    attempt.result.ok ? [] : [{ props: attempt.props, reason: attempt.result.error }]
+  )
+
 /**
  * Decoration is a promise that holds however the primitive is configured, so
  * one configuration that fails to decorate makes the answer `not-decorated`
  * even if the rest pass. A configuration that throws answers nothing either
- * way and is skipped; when none of them answer, the reason from the first is
- * what the caller gets, because the default configuration is first and its
- * failure is the one worth reading.
+ * way and is skipped; when none of them answer, every failure is carried on the
+ * verdict, so the reason the probe declined is a value rather than the prose of
+ * whichever configuration happened to be first.
  */
 export const probeEditableDecoration = (
   primitive: LoomPrimitive,
@@ -164,24 +236,20 @@ export const probeEditableDecoration = (
   configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
 ): ConformanceVerdict => {
   const probeable = asProbeable(primitive)
-  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+  if (!probeable.ok) return notCallable(probeable.error)
 
   const editable: EditableAttributes = {
     [LOOM_NODE_ATTRIBUTE]: PROBE_NODE_ID,
     [LOOM_TYPE_ATTRIBUTE]: PROBE_TYPE,
   }
 
-  const called = configurations.map((props) => call(probeable.value, probeProps(editable, text, props)))
-  const answered = called.flatMap((result) => (result.ok ? [result.value] : []))
+  const attempts = configurations.map((props) => ({
+    props,
+    result: call(probeable.value, probeProps(editable, text, props)),
+  }))
+  const answered = attempts.flatMap((attempt) => (attempt.result.ok ? [attempt.result.value] : []))
 
-  if (answered.length === 0) {
-    const [first] = called
-
-    return {
-      outcome: "not-probeable",
-      reason: `calling it outside a renderer threw: ${first && !first.ok ? first.error : "no configuration answered"}`,
-    }
-  }
+  if (answered.length === 0) return threwThroughout(failuresIn(attempts))
 
   return answered.every((node) => carriesDecoration(node, editable))
     ? { outcome: "decorates" }
@@ -225,12 +293,6 @@ export const probeEditableDecoration = (
  * primitive.
  */
 
-/** A configuration the schema accepts that the component threw on. */
-export type ProbeFailure = {
-  readonly props: JsonObject
-  readonly reason: string
-}
-
 export type PlacementVerdict =
   | {
       readonly outcome: "probed"
@@ -250,7 +312,7 @@ export type PlacementVerdict =
        */
       readonly threw: readonly ProbeFailure[]
     }
-  | { readonly outcome: "not-probeable"; readonly reason: string }
+  | NotProbeable
 
 /**
  * Whether the marker string appears anywhere in what the component returned.
@@ -278,7 +340,7 @@ export const probePlacement = (
   declaredBehaviours: readonly BehaviourName[] = []
 ): PlacementVerdict => {
   const probeable = asProbeable(primitive)
-  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+  if (!probeable.ok) return notCallable(probeable.error)
 
   const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   for (const name of declaredSlots) slots[name] = slotMarker(name)
@@ -304,12 +366,7 @@ export const probePlacement = (
 
   const answered = attempts.flatMap((attempt) => (attempt.result.ok ? [attempt] : []))
 
-  if (answered.length === 0) {
-    const [first] = attempts
-    const reason = first && !first.result.ok ? first.result.error : "no configuration answered"
-
-    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${reason}` }
-  }
+  if (answered.length === 0) return threwThroughout(failuresIn(attempts))
 
   const placed = (marker: string): boolean =>
     answered.some((attempt) => attempt.result.ok && containsMarker(attempt.result.value, marker))
@@ -320,9 +377,7 @@ export const probePlacement = (
     unplacedBehaviours: declaredBehaviours.filter((name) => !placed(behaviourMarker(name))),
     rendersChildren: placed(PROBE_CHILDREN),
     probed: answered.map((attempt) => attempt.props),
-    threw: attempts.flatMap((attempt) =>
-      attempt.result.ok ? [] : [{ props: attempt.props, reason: attempt.result.error }]
-    ),
+    threw: failuresIn(attempts),
   }
 }
 
@@ -355,7 +410,7 @@ export const probePlacement = (
 export type SubmissionVerdict =
   | { readonly outcome: "places" }
   | { readonly outcome: "not-placed" }
-  | { readonly outcome: "not-probeable"; readonly reason: string }
+  | NotProbeable
 
 /**
  * Absolute rather than root-relative, and on a hostname that cannot resolve.
@@ -382,10 +437,11 @@ export const probeSubmissionPlacement = (
   configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
 ): SubmissionVerdict => {
   const probeable = asProbeable(primitive)
-  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+  if (!probeable.ok) return notCallable(probeable.error)
 
-  const attempts = configurations.map((props) =>
-    call(probeable.value, {
+  const attempts = configurations.map((props) => ({
+    props,
+    result: call(probeable.value, {
       loom: {
         nodeId: PROBE_NODE_ID,
         type: PROBE_TYPE,
@@ -397,17 +453,12 @@ export const probeSubmissionPlacement = (
       },
       props,
       children: PROBE_CHILDREN,
-    })
-  )
+    }),
+  }))
 
-  const answered = attempts.flatMap((result) => (result.ok ? [result.value] : []))
+  const answered = attempts.flatMap((attempt) => (attempt.result.ok ? [attempt.result.value] : []))
 
-  if (answered.length === 0) {
-    const [first] = attempts
-    const reason = first && !first.ok ? first.error : "no configuration answered"
-
-    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${reason}` }
-  }
+  if (answered.length === 0) return threwThroughout(failuresIn(attempts))
 
   return answered.some((node) => containsMarker(node, PROBE_SUBMIT_ACTION))
     ? { outcome: "places" }
@@ -465,7 +516,7 @@ export type ColourVerdict =
       /** Grounds this primitive puts its declared children and slots on. */
       readonly childGrounds: readonly PaletteSlot[]
     }
-  | { readonly outcome: "not-probeable"; readonly reason: string }
+  | NotProbeable
 
 /** `colour()` emits `var(--loom-<slot>)` and nothing else does. */
 const SLOT_VARIABLE = /^var\(--loom-([a-z-]+)\)$/
@@ -544,15 +595,16 @@ export const probeColourPairings = (
   configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
 ): ColourVerdict => {
   const probeable = asProbeable(primitive)
-  if (!probeable.ok) return { outcome: "not-probeable", reason: probeable.error }
+  if (!probeable.ok) return notCallable(probeable.error)
 
   const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   for (const name of declaredSlots) slots[name] = slotMarker(name)
 
   const markers = new Set<string>([PROBE_CHILDREN, ...declaredSlots.map(slotMarker)])
 
-  const attempts = configurations.map((props) =>
-    call(probeable.value, {
+  const attempts = configurations.map((props) => ({
+    props,
+    result: call(probeable.value, {
       loom: {
         nodeId: PROBE_NODE_ID,
         type: PROBE_TYPE,
@@ -563,17 +615,12 @@ export const probeColourPairings = (
       },
       props,
       children: PROBE_CHILDREN,
-    })
-  )
+    }),
+  }))
 
-  const answered = attempts.flatMap((result) => (result.ok ? [result.value] : []))
+  const answered = attempts.flatMap((attempt) => (attempt.result.ok ? [attempt.result.value] : []))
 
-  if (answered.length === 0) {
-    const [first] = attempts
-    const reason = first && !first.ok ? first.error : "no configuration answered"
-
-    return { outcome: "not-probeable", reason: `calling it outside a renderer threw: ${reason}` }
-  }
+  if (answered.length === 0) return threwThroughout(failuresIn(attempts))
 
   const into: Paint = { painted: [], floating: [], childGrounds: [] }
   for (const node of answered) collectPaint(node, undefined, markers, into)

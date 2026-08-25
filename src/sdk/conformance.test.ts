@@ -88,22 +88,32 @@ describe("probeEditableDecoration", () => {
     expect(probeEditableDecoration(passingACopyDownwards)).toEqual({ outcome: "not-decorated" })
   })
 
-  it("declines to judge a primitive it cannot call", () => {
+  /**
+   * Both decline, and they decline for different reasons: the class was never
+   * called and the hook-using one was called and threw. That difference is the
+   * whole of what a host has to go on, so it is a field rather than prose.
+   */
+  it("declines to judge a primitive it cannot call, saying whether it got as far as calling it", () => {
     const hooked = probeEditableDecoration(usingAHook)
     const classed = probeEditableDecoration(ClassPrimitive)
 
     expect(hooked.outcome).toBe("not-probeable")
-    expect(hooked.outcome === "not-probeable" && hooked.reason).toContain("threw")
+    expect(hooked.outcome === "not-probeable" && hooked.cause).toBe("threw")
+    expect(hooked.outcome === "not-probeable" && hooked.failures).toHaveLength(1)
     expect(classed).toEqual({
       outcome: "not-probeable",
+      cause: "not-callable",
       reason: "class components cannot be called outside a renderer",
+      failures: [],
     })
   })
 
   it("declines to judge something that is not a component at all", () => {
     expect(probeEditableDecoration({} as unknown as LoomPrimitive)).toEqual({
       outcome: "not-probeable",
+      cause: "not-callable",
       reason: "not a function component",
+      failures: [],
     })
   })
 })
@@ -342,6 +352,41 @@ describe("a primitive that does not hold its promises under every shape", () => 
     expect(probeEditableDecoration(alwaysThrows, undefined, [{}, { tone: "calm" }]).outcome).toBe(
       "not-probeable"
     )
+  })
+
+  /**
+   * The failures survive the decision to decline. A verdict that answered
+   * nothing still saw every throw, and dropping them was how a component that
+   * throws under *every* shape its schema accepts — the worst case of the fault
+   * `throwsOnDeclaredProps` exists to name — went unreported by it.
+   */
+  it("carries every failure on a verdict it declined to answer", () => {
+    const alwaysThrows = ({ loom }: LoomPrimitiveProps) => {
+      throw new Error(`boom for ${String(loom.type)}`)
+    }
+
+    const verdict = probePlacement(alwaysThrows, [], undefined, [{}, { tone: "calm" }])
+
+    expect(verdict.outcome === "not-probeable" && verdict.cause).toBe("threw")
+    expect(verdict.outcome === "not-probeable" && verdict.failures).toEqual([
+      { props: {}, reason: "boom for loom.probe" },
+      { props: { tone: "calm" }, reason: "boom for loom.probe" },
+    ])
+  })
+
+  /**
+   * A class component reaches the same outcome by a different route, and the
+   * route is what a host acts on: nothing was called, so nothing is a fault.
+   */
+  it("separates a primitive that threw from one that was never called", () => {
+    const verdict = probePlacement(ClassPrimitive, [])
+
+    expect(verdict).toEqual({
+      outcome: "not-probeable",
+      cause: "not-callable",
+      reason: "class components cannot be called outside a renderer",
+      failures: [],
+    })
   })
 })
 

@@ -27,4 +27,17 @@ describe("the primitive registry", () => {
 
     expect(audit.notProbeable, describeRegistryAudit(audit)).toEqual([])
   })
+
+  /**
+   * The one that stops a page rather than a portal: a component that throws on a
+   * value its own schema accepts is one a tree the validator *accepted* can take
+   * down. If you add a hook-using primitive, the probe cannot tell it from a
+   * broken one and it will appear here — narrow this to the entries with
+   * `everyConfiguration: false`, which are the ones the audit is certain of.
+   */
+  it("has no primitives that throw on props their own schema accepts", () => {
+    const audit = auditRegistry(registry)
+
+    expect(audit.throwsOnDeclaredProps, describeRegistryAudit(audit)).toEqual([])
+  })
 })

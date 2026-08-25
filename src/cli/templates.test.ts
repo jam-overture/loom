@@ -89,6 +89,7 @@ describe("conformanceTest", () => {
     expect(generated).toContain("auditRegistry(registry)")
     expect(generated).toContain("audit.notDecorated")
     expect(generated).toContain("audit.notProbeable")
+    expect(generated).toContain("audit.throwsOnDeclaredProps")
     expect(generated).toContain("describeRegistryAudit(audit)")
   })
 })

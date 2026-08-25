@@ -147,3 +147,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0087](0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md) | A primitive that posts declares it, and the audit checks the declaration against what it renders | Accepted | §4b |
 | [0088](0088-a-hold-is-a-row-and-a-take-is-one-statement.md) | A hold is a row, and taking it is one statement | Accepted | §3 |
 | [0089](0089-the-text-ramp-is-held-to-four-grounds.md) | The text ramp is held to four grounds, and a pairing is measured whether one primitive paints it or two compose it | Accepted | §4b |
+| [0090](0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md) | A probe that declines says whether it got as far as calling the component | Accepted | §4 |

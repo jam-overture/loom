@@ -7230,7 +7230,34 @@ between requests (0081).
 
 ## 2026-08-24 — a primitive that throws under every configuration is missing from the one list a host can assert empty
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by #154 — both suggested shapes were needed, and neither was sufficient alone.
+`not-probeable` now carries a `cause` (`not-callable` when nothing was called,
+`threw` when everything called threw) and the failures it saw, which is
+suggestion 2; `throwsOnDeclaredProps` now holds every primitive that threw,
+including one that threw under all of them, which is suggestion 1. Recorded as
+[0090](decisions/0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md).
+
+**Suggestion 1 taken literally would have moved the problem rather than fixed
+it**, and the reproduction shows why. A hook-using component throws when called
+outside a renderer too, so it would enter `throwsOnDeclaredProps` beside
+`loom.exploding` and that list would stop being assertable for exactly the
+reason `notProbeable` is not. No function-call probe can separate them: both are
+functions, both throw, and React's invalid-hook-call error is a message rather
+than a type.
+
+So each entry carries `everyConfiguration` — `false` means some configurations
+rendered and this one threw, which nothing legitimate does and the audit is
+certain of; `true` means nothing answered, which is a fault or a hook. A host
+with no hook-using primitives asserts the whole list empty. One that ships them
+asserts the `false` half.
+
+`loom init` now generates that assertion. It shipped `notDecorated` and
+`notProbeable` and not the list that stops a page rather than a portal, which
+seems worth naming separately: the reproduction would have been caught in a
+scaffolded host either way once the list was complete, but only because the
+scaffold happens to assert `notProbeable`, and 0012 says that list is not one to
+assert.
 
 Found while writing lesson 15's Exercise C, which registers a component that
 throws unconditionally and then audits it. I expected `throwsOnDeclaredProps`.
@@ -7615,3 +7642,50 @@ Suggested replacements, offered only so the edit is cheap:
 - brief: replace the first of the two problems with what is actually left, which
   is the second one — *"It is clunky. That is the real work and it is yours to
   diagnose."*
+
+---
+
+## 2026-08-24 — the auto-subscription happened again, on a second routine, with the same three events
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a second data point on the 21 August entry, not a new argument
+
+Opening #154 subscribed this session to the pull request's GitHub activity. I did
+not ask for that, and the run had already reported and was otherwise finished.
+
+What it delivered, in the twenty-nine seconds after the pull request opened:
+
+| Event | What it was |
+| --- | --- |
+| `subscription.created` | the harness telling me it had subscribed me |
+| `issue_comment.created` | `vercel[bot]`, deployment **Building** |
+| `issue_comment.edited` | `vercel[bot]`, the same comment now **Ready** |
+
+Three wakes, no human, nothing failing. This is the 21 August entry's shape
+exactly — *"three cloud sessions went to a deploy turning green"* — now observed
+on a different routine and a different pull request, which is what makes it
+worth appending rather than leaving as one report.
+
+**The part that matters more than the count.** The `subscription.created` event
+carries instructions, and they contradict the governance every brief is bound
+by:
+
+> If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed.
+
+That is the 9 August runaway, described as a procedure. `docs/routines.md` calls
+self-check-ins the maintainer's top priority to avoid and says *"no chains"* and
+*"never something that re-arms itself"*; the brief says *"Never schedule a
+follow-up or a self-check-in. Run, report, exit."* I followed the brief, armed
+nothing, and called `unsubscribe_pr_activity` on #154 — but a routine that
+followed the event text instead would re-arm hourly and would believe it was
+doing as it was told.
+
+So the fix is not only "stop subscribing". It is that **a routine reading that
+event has two authorities telling it opposite things**, and the one that costs a
+week's allowance is the one written in the imperative and delivered at the
+moment the work finishes.
+
+Nothing here is fixable by a routine: I can unsubscribe from my own pull request
+after the fact, which is what I did, and I cannot stop the next one being
+created or change what the event says.
