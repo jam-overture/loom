@@ -259,13 +259,22 @@ One small refactor came with the work rather than for its own sake:
 
 ## The preview
 
-**Not included, and this is the one thing in the procedure this run did not do.**
-The preview URL comes from Vercel building the pushed branch, which happens after
-the push; the screenshots above are of the library's own specimen rendered
-through `renderLoomTree` under all three registered palettes, in edit mode, and
-at a true phone width, which is the surface these three primitives actually are.
-The preview link will be added to the pull request comment once the deployment
-reports.
+**The deployment is green and its address could not be read from here.** Vercel
+reports `Deployment has completed` on `e408395`, and the only URL the commit
+status carries is the build page —
+<https://vercel.com/jpizzolato36-6341s-projects/loom/DbiqnyP3XZnGijupF8GNaGtsXC6Q>
+— which is the inspector rather than the preview. The branch alias is not
+derivable: previous ones carry a hash segment (`loom-git-primitives-12-the-t-def545-…`)
+that nothing in the status or the API exposes to this session, and `*.vercel.app`
+is outside the egress allowlist, so it cannot be probed either. `Loom docs` filed
+exactly this on 23 August — *the preview URL, unreachable from the routine that
+has to publish it* — and this is another occurrence.
+
+What stands in for it is the five screenshots above: the specimen rendered
+through `renderLoomTree` under all three registered palettes, the same page in
+**edit mode**, and one at a true 390px. That is the surface these three
+primitives are; the preview would show them as the docs and marketing surfaces
+compose them, which is a different and also useful thing.
 
 ## 21st.dev
 

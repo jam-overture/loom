@@ -7893,3 +7893,28 @@ filer suggested would have fixed the smudge by making the field vanish.
 
 Its Status line still said open, so a run reading the queue for work finds a
 closed item and has to open a file to discover it. Closed here.
+
+---
+
+## 2026-08-25 — the preview URL, unreachable from this lane too
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+— a second occurrence of the 23 August entry, from a second lane.
+
+Every routine brief requires the deployed preview URL in the pull request. On
+#156 the Vercel commit status reports `Deployment has completed` and carries one
+`target_url`, which is the **inspector** page
+(`vercel.com/…/loom/DbiqnyP3XZnGijupF8GNaGtsXC6Q`) rather than the preview alias.
+
+The alias is not derivable. Previous ones carry a hash segment —
+`loom-git-primitives-12-the-t-def545-jpizzolato36-6341s-projects.vercel.app` —
+and nothing in the commit status, the checks API or the branch name produces
+`def545`. Probing a guess is not possible either: `*.vercel.app` is outside the
+sandbox egress allowlist and `curl` returns `000`.
+
+**Recommendation, unchanged from the filer on 23 August, plus one option that is
+cheaper:** either add `*.vercel.app` to `sandbox.network.allowedDomains` so a run
+can resolve and verify its own preview, or have the Vercel integration post the
+alias as a deployment comment the API does expose. The cheapest of the three is
+that a run stops promising the URL and the briefs ask for the screenshots
+instead, which are the thing anybody actually looks at.
