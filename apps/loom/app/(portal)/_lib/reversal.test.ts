@@ -15,6 +15,7 @@ import {
 import { memoryTreeStore, type AppendRequest, type RevertPlan } from "@loom/runtime/store"
 
 import { describeRestoration, previewReversal, reversalOf } from "./reversal"
+import { readingOf } from "./vocabulary"
 import { seedTree } from "./seed"
 
 const nodeId = (id: string): NodeId => nodeIdSchema.parse(id)
@@ -72,21 +73,21 @@ describe("describeRestoration", () => {
         },
       })
     ).toEqual({
-      verb: "restores",
+      before: "Puts ",
       subject: "n_card",
-      detail: "loom.card, with the 2 nodes it held, back into n_page",
+      after: ", a loom.card with the 2 things that were inside it, back inside n_page.",
     })
   })
 
   it("counts a leaf restore as bringing nothing else with it", () => {
     expect(
-      describeRestoration({
+      readingOf(describeRestoration({
         op: "insert",
         parentId: nodeId("n_page"),
         index: 0,
         node: { kind: "text", id: nodeId("n_t"), value: "Welcome" },
-      }).detail
-    ).toBe("text, back into n_page")
+      }))
+    ).toBe("Puts n_t, the words, back inside n_page.")
   })
 
   /**
@@ -102,41 +103,46 @@ describe("describeRestoration", () => {
         unset: ["subtitle"],
       })
     ).toEqual({
-      verb: "restores",
+      before: "Puts ",
       subject: "n_card",
-      detail: "variant to “outlined”, level to 2, subtitle (removes it)",
+      after:
+        "'s variant back to “outlined”, level back to 2 and subtitle back to nothing at all.",
     })
   })
 
   it("says a restore of a no-op configure puts no props back", () => {
     expect(
-      describeRestoration({ op: "configure", nodeId: nodeId("n_card"), set: {}, unset: [] }).detail
-    ).toBe("no props")
+      readingOf(
+        describeRestoration({ op: "configure", nodeId: nodeId("n_card"), set: {}, unset: [] })
+      )
+    ).toBe("Puts n_card back as it was, though it had no settings to restore.")
   })
 
   it("reads the inverse of an insert as removing what was added", () => {
-    expect(describeRestoration({ op: "remove", nodeId: nodeId("n_new") })).toEqual({
-      verb: "removes",
-      subject: "n_new",
-      detail: "what this change added, and anything under it",
-    })
+    expect(readingOf(describeRestoration({ op: "remove", nodeId: nodeId("n_new") }))).toBe(
+      "Takes n_new back out again, along with anything now inside it."
+    )
   })
 
   it("reads the inverse of a move as putting it back where it came from", () => {
     expect(
-      describeRestoration({ op: "move", nodeId: nodeId("n_a"), parentId: nodeId("n_b"), index: 1 })
-    ).toEqual({ verb: "moves back", subject: "n_a", detail: "into n_b at 1" })
+      readingOf(
+        describeRestoration({ op: "move", nodeId: nodeId("n_a"), parentId: nodeId("n_b"), index: 1 })
+      )
+    ).toBe("Moves n_a back inside n_b, where it was.")
   })
 
   it("previews a container value without spelling it out", () => {
     expect(
-      describeRestoration({
-        op: "configure",
-        nodeId: nodeId("n_x"),
-        set: { items: [1, 2, 3], meta: { a: 1 } },
-        unset: [],
-      }).detail
-    ).toBe("items to a list of 3, meta to an object")
+      readingOf(
+        describeRestoration({
+          op: "configure",
+          nodeId: nodeId("n_x"),
+          set: { items: [1, 2, 3], meta: { a: 1 } },
+          unset: [],
+        })
+      )
+    ).toBe("Puts n_x's items back to a list of 3 and meta back to an object.")
   })
 })
 
@@ -150,8 +156,10 @@ describe("reversalOf", () => {
     )
 
     if (reversal.kind !== "revertable") throw new Error("a clean plan should read as revertable")
-    expect(reversal.restores.map((restoration) => restoration.verb)).toEqual(["restores", "removes"])
-    expect(reversal.restores[0]?.detail).toBe("variant to “outlined”")
+    expect(reversal.restores.map(readingOf)).toEqual([
+      "Puts n_card's variant back to “outlined”.",
+      "Takes n_added back out again, along with anything now inside it.",
+    ])
   })
 
   it("keeps the revisions a contested undo would write over", () => {
@@ -177,6 +185,7 @@ describe("reversalOf", () => {
     if (reversal.kind !== "blocked") throw new Error("out-of-range is a blocked reversal")
     expect(reversal.reason).toContain("revision 2")
     expect(reversal.reason).toContain("revision 5")
+    expect(reversal.technical).toBe("out-of-range: revision 2, earliest 5")
   })
 
   it("says a log that no longer replays cannot be inverted", () => {
@@ -187,7 +196,8 @@ describe("reversalOf", () => {
 
     const reversal = reversalOf(plan)
     if (reversal.kind !== "blocked") throw new Error("unreplayable is a blocked reversal")
-    expect(reversal.reason).toContain("no longer replays")
+    expect(reversal.reason).toContain("couldn’t rebuild this page")
+    expect(reversal.technical).toContain("unreplayable")
   })
 
   it("names the error when a delta will not invert", () => {
@@ -196,7 +206,7 @@ describe("reversalOf", () => {
 
     const reversal = reversalOf(plan)
     if (reversal.kind !== "blocked") throw new Error("uninvertible is a blocked reversal")
-    expect(reversal.reason).toContain("node-not-found")
+    expect(reversal.technical).toContain("node-not-found")
   })
 })
 
@@ -258,7 +268,9 @@ describe("previewReversal, end to end", () => {
     expect(reversal.restores).toHaveLength(1)
     expect(reversal.restores[0]?.subject).toBe(card.id)
     // The seed set variant to "outlined"; undoing the change puts that back.
-    expect(reversal.restores[0]?.detail).toBe("variant to “outlined”")
+    expect(reversal.restores[0] && readingOf(reversal.restores[0])).toBe(
+      `Puts ${card.id}'s variant back to “outlined”.`
+    )
     expect(reversal.discards).toEqual([])
   })
 
@@ -278,7 +290,9 @@ describe("previewReversal, end to end", () => {
 
     if (reversal?.kind !== "revertable") throw new Error("removing a leaf card is revertable")
     // The card holds a heading (with text) and a prose (with text): four nodes under it.
-    expect(reversal.restores[0]?.detail).toBe("loom.card, with the 4 nodes it held, back into " + seed.root.id)
+    expect(reversal.restores[0] && readingOf(reversal.restores[0])).toBe(
+      `Puts ${card.id}, a loom.card with the 4 things that were inside it, back inside ${seed.root.id}.`
+    )
   })
 
   it("names the later revision a contested undo would write over", async () => {

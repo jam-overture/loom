@@ -237,16 +237,45 @@ describe("describeAnchorMiss", () => {
   it("says how far the log actually reaches when the revision is beyond it", () => {
     expect(
       describeAnchorMiss({ kind: "named", revision: 900 }, { ...ARRIVED, onPage: false })
-    ).toBe("Nothing on this page is revision 900 — this log reaches revision 12.")
+    ).toBe(
+      "Revision 900 isn’t among the changes shown here — this page has only got as far as revision 12."
+    )
   })
 
-  it("says a log has nothing in it rather than naming an end it has not got", () => {
+  it("says a history with nothing in it rather than naming an end it has not got", () => {
     expect(
       describeAnchorMiss(
         { kind: "named", revision: 9 },
         { ...ARRIVED, onPage: false, newestOnPage: undefined }
       )
-    ).toContain("no accepted changes yet")
+    ).toBe("Revision 9 isn’t among the changes shown here, because nothing has been changed on this page yet.")
+  })
+
+  /**
+   * Two words this screen stopped using. "Log" is the runtime's name for what a
+   * reader calls their history. And "this page" used to mean the *batch of
+   * changes on screen* — `Nothing on this page is revision 9` — while the
+   * heading three lines above used the same words for the page being read, so a
+   * reader had two referents and no way to pick. Every miss now leads with the
+   * revision instead.
+   */
+  it("never says log, and leads with the revision rather than with a page", () => {
+    const said = [
+      describeAnchorMiss({ kind: "malformed", typed: "elevn" }, ARRIVED),
+      describeAnchorMiss({ kind: "named", revision: 900 }, { ...ARRIVED, onPage: false }),
+      describeAnchorMiss(
+        { kind: "named", revision: 9 },
+        { ...ARRIVED, onPage: false, newestOnPage: undefined }
+      ),
+      describeAnchorMiss({ kind: "named", revision: 9 }, { ...ARRIVED, onPage: false, older: "4" }),
+      describeAnchorMiss({ kind: "named", revision: 9 }, { ...ARRIVED, onPage: false, newer: "4" }),
+    ]
+
+    for (const one of said) {
+      expect(one).toBeDefined()
+      expect(one).not.toMatch(/\blog\b/)
+      expect(one).not.toMatch(/Nothing on this page/)
+    }
   })
 
   /**
@@ -284,6 +313,6 @@ describe("describeAnchorMiss", () => {
       describeAnchorMiss({ kind: "named", revision: 9 }, { ...ARRIVED, onPage: false }),
     ]
 
-    for (const said of misses) expect(said).toContain("revision 9")
+    for (const said of misses) expect(said).toContain("Revision 9")
   })
 })

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { describeStoreError } from "@loom/runtime/store"
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { portalStore } from "@/app/(portal)/_lib/store"
 
 /**
@@ -19,9 +20,14 @@ export const TreeChooser = async () => {
 
   if (!page.ok) {
     return (
-      <StateNotice tone="failure" title="The store could not be listed.">
-        <p>{describeStoreError(page.error)}</p>
-        <p>There may well be logs to read; this page could not find out which.</p>
+      <StateNotice tone="failure" title="We couldn&rsquo;t list your pages.">
+        <p>
+          There may well be history to read; this screen could not find out which pages have any.
+          Nothing has been lost &mdash; a list that would not load is not a page that went missing.
+        </p>
+        <TechnicalDetail summary="What went wrong">
+          <p className="font-mono">{describeStoreError(page.error)}</p>
+        </TechnicalDetail>
       </StateNotice>
     )
   }
@@ -35,10 +41,15 @@ export const TreeChooser = async () => {
         title="You don&rsquo;t have any pages yet, so there is no history to read."
         action={<Link href="/portal/pages">Your pages →</Link>}
       >
+        {/*
+         * The reason is 0016 — the log is the truth and the tree is a view of it
+         * — and the record number used to be printed at the reader, on a screen
+         * whose whole test is whether somebody who has read no decision record
+         * can follow it. The fact survives; the citation belongs here.
+         */}
         <p>
-          A log is the truth and the tree is a view of it (0016), so a log begins the moment a
-          tree does — there is no separate thing to switch on. Store a tree and its history is
-          already here.
+          There is nothing to switch on. A page&rsquo;s history starts the moment the page does, so
+          the first page you make already has one.
         </p>
       </StateNotice>
     )
@@ -47,7 +58,7 @@ export const TreeChooser = async () => {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-ink-muted text-sm">
-        A log belongs to a tree. Pick one to read what has been accepted into it.
+        Each page keeps its own history. Pick one to read what has been changed on it.
       </p>
 
       <ul className="flex flex-col gap-2">
@@ -59,7 +70,9 @@ export const TreeChooser = async () => {
             >
               <span className="font-mono text-sm">{listing.treeId}</span>
               <span className="text-ink-muted mt-1 block text-xs">
-                {listing.revision} {listing.revision === 1 ? "accepted change" : "accepted changes"}
+                {listing.revision === 0
+                  ? "No changes yet"
+                  : `${listing.revision} ${listing.revision === 1 ? "change" : "changes"} so far`}
               </span>
             </Link>
           </li>

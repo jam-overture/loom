@@ -7890,3 +7890,127 @@ would follow the event, believe it was being obedient, and re-arm hourly.
 
 Still not fixable by a routine. What a routine *can* do is refuse and write the
 instance down, which is now three days of that.
+
+---
+
+## 2026-08-25 — the rename queue is empty, and what that did and did not buy
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-12-what-undoing-would-put-back` — the 18 August redirection, as it stands
+across the whole surface
+
+Closing the 24 August entry rather than replacing it, because the queue it tracked
+is now empty.
+
+**Done, in order:** `/portal/trees` → `/portal/pages`, `/portal/calibration` →
+`/portal/trust`, `/portal/audit` → `/portal/checkup`, the page screen,
+`/portal/activity`, and now **`/portal/history`** — which, like the page screen
+and Activity, needed no route rename at all. What it needed was `revision 4` over
+an ISO instant, `reconfigure n_head title, width (cleared)`, five monospace pairs
+headed `asked by` / `allowed by` / `interpreted by` / `confidence` / `proposal`,
+`undoing this would`, `restores n_card variant to “outlined”`, and
+`This change cannot be inverted (node-not-found)` — all of it taken off the
+surface and put one click down.
+
+**Every screen in the portal now leads in a person's words**, and the rule the
+brief set — *plain language is the default, the technical record is one click
+away, nothing is ever removed* — holds on all of them. On History, three fields
+the row used to drop (`origin`, `authored by`, `applied`) were **added** to the
+disclosure in the same pass, along with the delta's raw operations and the inverse
+an undo would apply, so the technical record is strictly larger than it was.
+
+**What it did not buy.** The queue being empty is not the same as the job being
+done. Two things stay in the runtime's voice by deliberate choice, both recorded
+elsewhere: the model's own `rationale` on Activity (24 August, open), and node,
+tree and revision **names** everywhere, which stay on the surface on the 22 August
+reasoning. A third — `loom.card`, `loom.heading` and the other registered
+primitive names — is arguably jargon and is arguably the most useful string on the
+line; this run kept them and named the reasoning in `partPhrase`. That is a
+judgement worth overruling if it reads wrong.
+
+---
+
+## 2026-08-25 — three more defects a screenshot found, taking the count to nine across six runs
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-12-what-undoing-would-put-back` — recorded for the count, which is the
+argument
+
+1. **`asked by system-signal` printed beside `origin system-signal`.** The
+   `asked by` pair fell back to the origin when no actor was recorded, and the
+   pair next to it prints the origin anyway — so a system-authored revision showed
+   the same value twice, under two labels that promise different things. A reader
+   would reasonably conclude the two were separate facts that happened to agree.
+2. **"Your site asked for this by itself. Loom worked this change out itself…"** —
+   two *itselfs* in one line, from two sentences held in two different tables
+   neither of which can see the other. The same structural cause as the 24 August
+   duplication, in a milder form.
+3. **A revision row's header stacked inconsistently between rows on a phone.**
+   `flex-wrap items-baseline justify-between` put the timestamp beside the heading
+   on one row and beneath it on the next, at the same width, in the same list.
+
+**None of the three was findable by a test that renders a component**, and eighty
+tests passed against all three. Defects (1) and (2) are both *two independently
+held strings meeting*, which is now the third and fourth instance of that shape
+this lane has shipped and photographed.
+
+**The count is nine across six runs.** The recommendation on the 23 and 24 August
+entries — that a screenshot at two widths belongs in `docs/routines.md` rather
+than in this lane's habit — is **not repeated a third time**. It has been made,
+the evidence is in three consecutive reports, and it is the maintainer's call.
+
+What this run added instead, because it is within the lane: **the join is a type
+now.** `PlainLine` is `{ before, subject, after }` and `readingOf` is the joined
+sentence, so a plain reading with a name in the middle of it cannot be composed
+without something to assert whole. `vocabulary.test.ts` pins the failure mode
+directly — a lost space still satisfies `toContain` on either half and comes back
+as `Deletedn_gone and so on.` That does not replace looking at the screen. It
+narrows what looking at the screen has to catch.
+
+---
+
+## 2026-08-25 — a portal screen that only a model can populate cannot be photographed without a key
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+constraint on the routine, with a recommendation
+
+`ANTHROPIC_API_KEY` was absent from this run's environment. The portal degrades
+honestly when that happens — `isInterpreterConfigured` is false and the prompt box
+says so, which is the right behaviour — but it means **no change can be composed,
+so no revision can be accepted, so `/portal/history` cannot be populated through
+the user interface at all.** The screen this run rewrote could not be photographed
+against real data by any route the portal offers.
+
+The 24 August run had a key and drove the real pipeline against a live model. Four
+findings before that said a portal surface could not be photographed against real
+data. So this is now **intermittent** rather than settled, and the routine has no
+way to know which kind of run it is in until it looks.
+
+What this run did, stated so nobody has to reverse-engineer it from the pictures:
+a **temporary, uncommitted** patch to `ensureSeeded` appended three revisions
+through the store's own `append` contract behind an env var, the screenshots were
+taken, and the patch was reverted before committing. `store.ts` is untouched in
+the diff. The screen, the store, the read path and the components in the pictures
+are all real; only the origin of the data is a scripted append rather than a
+model.
+
+That is honest and it is not repeatable discipline — the next run has to
+reconstruct it, and a run that forgot to revert would ship a seeded log.
+
+Two options, neither taken because both are outside this lane:
+
+- **Make the key's presence visible to the routine.** The brief tells this lane to
+  publish a preview and a screenshot; a run that cannot know in advance whether it
+  can produce data spends tokens finding out. A line in `docs/routines.md` saying
+  which secrets a routine can rely on would settle it.
+- **A seeded log behind a documented flag.** `LOOM_SEED_LOG` as a supported,
+  tested, committed capability of the portal would make every read screen
+  photographable and demoable without a model, and would serve the demo and
+  marketing lanes too. It is a real feature with a real cost — a second seeding
+  path to keep honest — and it is a portal decision, so it is mine to make. **I
+  have not made it**, because "the screenshots are easier" is a weak reason to add
+  a code path a user never asks for, and I would rather be told the picture
+  matters more than the purity.
+
+**Recommendation: the first.** The second is a fix for a problem the maintainer
+may not have.

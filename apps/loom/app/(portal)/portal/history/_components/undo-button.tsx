@@ -36,7 +36,7 @@ export const UndoButton = ({
         disabled={pending}
         className="border-edge bg-neutral text-neutral-ink w-fit rounded-sm border px-2 py-1 text-2xs disabled:opacity-60"
       >
-        {pending ? "undoing…" : "undo this change"}
+        {pending ? "Undoing…" : "Undo this change"}
       </button>
 
       {report === null ? null : (

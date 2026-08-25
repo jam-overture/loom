@@ -1,11 +1,21 @@
-import type { DiscardedWork, JsonValue, LoomNode, LoomTree, TreeId, TreeOperation } from "@loom/runtime"
-import { childrenOf, nodeLabel } from "@loom/runtime"
+import type {
+  DiscardedWork,
+  JsonValue,
+  LoomNode,
+  LoomTree,
+  TreeDelta,
+  TreeId,
+  TreeOperation,
+} from "@loom/runtime"
+import { childrenOf } from "@loom/runtime"
 import {
   planRevert,
   type RevertPlan,
   type TreeReader,
   type UnrevertablePlan,
 } from "@loom/runtime/store"
+
+import { namedList, partPhrase, type PlainLine } from "./vocabulary"
 
 /**
  * What a revision replaced, and what undoing it would cost — before anyone
@@ -27,20 +37,27 @@ import {
  * the reading of it that lets a reviewer decide before they act.
  */
 
-/** One inverse operation, phrased as what undoing the change restores. */
-export type Restoration = {
-  /** "restores", "removes", "moves back" — the reader's verb, not the delta's. */
-  readonly verb: string
-  /** The node undoing touches — the one to look for in the tree. */
-  readonly subject: string
-  /** What comes back, in full: the prior prop value, the destroyed subtree, the origin. */
-  readonly detail: string
-}
+/**
+ * One inverse operation, phrased as what undoing the change would put back.
+ *
+ * A `PlainLine` rather than a verb/subject/detail triple, because a reader meets
+ * one sentence with a node's name in the middle of it and the three-part shape
+ * left the grammar to whoever set the pieces side by side. `restores n_head
+ * title to “Welcome”` was both halves being right and the sentence being wrong.
+ */
+export type Restoration = PlainLine
 
 export type Reversal =
   | {
       readonly kind: "revertable"
       readonly restores: readonly Restoration[]
+      /**
+       * The inverse operations themselves, unread. The sentences above are the
+       * portal's reading of them; a reviewer checking that reading against the
+       * delta model needs the operations, and nothing else on the screen carries
+       * them (0018 — this is the runtime's own plan, consumed, not restated).
+       */
+      readonly inverse: TreeDelta["operations"]
       /**
        * Revisions after this one that changed nodes the undo touches, so applying
        * it writes over what they did (0035). Empty for a clean undo. Carried
@@ -50,7 +67,13 @@ export type Reversal =
       readonly discards: readonly DiscardedWork[]
     }
   /** No undo can be computed here, with the reason a reader can act on. */
-  | { readonly kind: "blocked"; readonly reason: string }
+  | {
+      readonly kind: "blocked"
+      /** Why, in words a reader who has read no decision record can act on. */
+      readonly reason: string
+      /** The runtime's own account of the same thing, kept for the record. */
+      readonly technical: string
+    }
 
 /**
  * A value a change wrote over, short enough to sit on a line. A prior
@@ -83,37 +106,41 @@ export const describeRestoration = (operation: TreeOperation): Restoration => {
   switch (operation.op) {
     case "insert": {
       const under = countUnder(operation.node)
-      const carried = under === 0 ? "" : `, with the ${under} node${under === 1 ? "" : "s"} it held`
+      const carried =
+        under === 0 ? "" : ` with the ${under} thing${under === 1 ? "" : "s"} that were inside it`
 
       return {
-        verb: "restores",
+        before: "Puts ",
         subject: operation.node.id,
-        detail: `${nodeLabel(operation.node)}${carried}, back into ${operation.parentId}`,
+        after: `, ${partPhrase(operation.node)}${carried}, back inside ${operation.parentId}.`,
       }
     }
     case "remove":
       return {
-        verb: "removes",
+        before: "Takes ",
         subject: operation.nodeId,
-        detail: "what this change added, and anything under it",
+        after: " back out again, along with anything now inside it.",
       }
     case "move":
       return {
-        verb: "moves back",
+        before: "Moves ",
         subject: operation.nodeId,
-        detail: `into ${operation.parentId} at ${operation.index}`,
+        after: ` back inside ${operation.parentId}, where it was.`,
       }
     case "configure": {
       const restored = Object.entries(operation.set).map(
-        ([key, value]) => `${key} to ${valuePreview(value)}`
+        ([key, value]) => `${key} back to ${valuePreview(value)}`
       )
-      const cleared = operation.unset.map((key) => `${key} (removes it)`)
+      const cleared = operation.unset.map((key) => `${key} back to nothing at all`)
       const named = [...restored, ...cleared]
 
       return {
-        verb: "restores",
+        before: "Puts ",
         subject: operation.nodeId,
-        detail: named.length === 0 ? "no props" : named.join(", "),
+        after:
+          named.length === 0
+            ? " back as it was, though it had no settings to restore."
+            : `'s ${namedList(named)}.`,
       }
     }
   }
@@ -125,21 +152,37 @@ export const describeRestoration = (operation: TreeOperation): Restoration => {
  * no longer replays, a delta that will not invert — and collapsing them would
  * turn an answer into a shrug.
  */
-const blockedReason = (plan: UnrevertablePlan): string => {
+const blockedReason = (plan: UnrevertablePlan): { reason: string; technical: string } => {
   switch (plan.outcome) {
     case "out-of-range":
-      return `This host cannot replay the log back to revision ${plan.revision} — it reaches revision ${plan.earliest} at the earliest — so what undoing it would restore cannot be shown here.`
+      return {
+        reason: `This deployment’s copy of the record only goes back as far as revision ${plan.earliest}, so it can’t work out what undoing revision ${plan.revision} would put back.`,
+        technical: `out-of-range: revision ${plan.revision}, earliest ${plan.earliest}`,
+      }
     case "unreplayable":
-      return "The log no longer replays cleanly up to this change, so what undoing it would restore cannot be computed."
+      return {
+        reason:
+          "Loom couldn’t rebuild this page up to this change, so it can’t say what undoing it would put back. Nothing is wrong with the page as it stands.",
+        technical: "unreplayable: the log does not replay cleanly to this revision",
+      }
     case "uninvertible":
-      return `This change cannot be inverted (${plan.error.code}), so it cannot be undone.`
+      return {
+        reason:
+          "This one can’t be undone. Loom has no way to work out what the page looked like before it.",
+        technical: `uninvertible: ${plan.error.code}`,
+      }
   }
 }
 
 export const reversalOf = (plan: RevertPlan): Reversal =>
   plan.outcome === "revertable"
-    ? { kind: "revertable", restores: plan.operations.map(describeRestoration), discards: plan.discards }
-    : { kind: "blocked", reason: blockedReason(plan) }
+    ? {
+        kind: "revertable",
+        restores: plan.operations.map(describeRestoration),
+        inverse: plan.operations,
+        discards: plan.discards,
+      }
+    : { kind: "blocked", ...blockedReason(plan) }
 
 /**
  * The reversal of one revision, read from the log.

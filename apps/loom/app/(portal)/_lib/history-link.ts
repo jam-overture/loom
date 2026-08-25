@@ -192,21 +192,27 @@ export const describeAnchorMiss = (
   if (param.kind === "absent") return undefined
 
   if (param.kind === "malformed") {
-    return `“${param.typed}” is not a revision — a revision is a whole number from 1 up, so this is the newest page instead.`
+    return `“${param.typed}” is not a revision — a revision is a whole number from 1 up — so these are the newest changes instead.`
   }
 
   if (onPage) return undefined
 
-  const opening = `Nothing on this page is revision ${param.revision}`
+  /*
+   * "This page" means two different things on this screen — the page whose
+   * history is being read, and the batch of changes currently shown — and these
+   * sentences used to say it of the second while the heading above them said it
+   * of the first. So they say "these changes" instead, and never "log".
+   */
+  const opening = `Revision ${param.revision} isn’t among the changes shown here`
 
-  if (newer !== undefined) return `${opening}, which is further back than this page.`
-  if (older !== undefined) return `${opening}, which is further along than this page.`
+  if (newer !== undefined) return `${opening} — it is further back. Keep going back to reach it.`
+  if (older !== undefined) return `${opening} — it is further along. Keep going forward to reach it.`
 
-  if (newestOnPage === undefined) return `${opening} — this log has no accepted changes yet.`
+  if (newestOnPage === undefined) return `${opening}, because nothing has been changed on this page yet.`
 
   if (param.revision > newestOnPage) {
-    return `${opening} — this log reaches revision ${newestOnPage}.`
+    return `${opening} — this page has only got as far as revision ${newestOnPage}.`
   }
 
-  return `${opening} — this log has not reached it, or has not kept it.`
+  return `${opening}, and this deployment’s copy of the record does not reach back to it.`
 }
