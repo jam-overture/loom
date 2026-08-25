@@ -7260,6 +7260,190 @@ between requests (0081).
 
 ---
 
+## 2026-08-25 — every line of the catalogue a model reads ends in two full stops
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+cosmetic in isolation, and it is in the one string this system exists to send
+
+Printing the real request on a documentation page is how this was found, which
+is the argument for printing it. `renderCatalogue` in `src/interpretation/render.ts`
+composes each line as:
+
+```ts
+`- ${primitive.type} — ${primitive.description}.${renderCataloguedProps(primitive)}…`
+```
+
+Every one of the starter library's **61** descriptions already ends in a full
+stop, so every line a model reads is:
+
+```
+- loom.page — The root of a page. Mounts the theme and stacks its children in one column.. props: fills?, width?
+```
+
+Sixty-one of those, on every proposal and again on every repair.
+
+**Why it is worth a line rather than a shrug.** Nothing renders this — it is
+read by a model, so there is no reader to notice and no snapshot to look wrong.
+It is the same shape as the missing brace in the primitives stylesheet on
+24 August: a string nothing parses absorbs a defect and keeps working.
+
+Two ways to fix it and they are in two lanes, which is why this is filed rather
+than taken:
+
+- **`render.ts` stops appending**, and the description carries its own
+  punctuation. One line, in the framework lane, and it makes the renderer agree
+  with what every author already wrote.
+- **`definePrimitive` requires a description without terminal punctuation**, in
+  the SDK, which is a registration-time rule and a breaking one for 61 existing
+  definitions.
+
+The first is the one I would take. Not taken here because `src/` is not this
+lane's, and the assertion worth adding beside it — that no rendered catalogue
+line contains `..` — belongs in the same commit as the fix.
+
+---
+
+## 2026-08-25 — the prose stylesheet reached into every table the site generates
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-09-connecting-a-model`, and recorded because the **class** of bug is
+everyone's
+
+`globals.css` has said since 21 August:
+
+```css
+.prose table { width: 100%; display: block; overflow-x: auto; }
+.prose th, .prose td { border: 1px solid var(--edge); padding: 0.5rem 0.75rem; }
+```
+
+`display: block` is deliberate and correct — it is how a markdown table scrolls
+sideways on a phone instead of widening the page, which is what the 20 August
+phone-scrollbar finding settled.
+
+**`.not-prose` does not stop it.** In this sheet `.not-prose` resets a colour and
+a margin; it is not a cascade barrier. So every table a *component* built —
+`EntryPoints`, `DecisionRecords`, `ArchitectureIdeas`, and the two added on this
+branch — was `display: block` too. A block-level table shrinks to its content, so
+a generated table with three narrow columns sat inside a full-width rounded
+border with a hand's width of dead space beside it, looking exactly like a fourth
+column nobody had filled in. Each of its cells also wore prose's border and
+padding underneath its own utilities.
+
+**Nothing could see it.** Every test passed; the components have had render tests
+since they were written. jsdom parses no stylesheet, so a DOM test in this suite
+asserts nothing about any of this and reads as though it does. It was found by
+looking at a screenshot — the fourth docs defect in six runs found that way.
+
+The fix is to **narrow the selector rather than reset inside `.not-prose`**, and
+the reason is worth keeping: a reset needs higher specificity than the rule it
+undoes, and that is already higher than a single utility class — so the reset
+would win against the very declarations the component wrote. `.prose
+table:not(.not-prose *)` simply never matches there, and leaves them unopposed.
+
+**The general shape, for any lane with a prose stylesheet and generated markup:**
+a descendant selector rooted at your prose class reaches everything inside it,
+including markup that asked not to be styled. Assert the boundary in the source,
+because the suite that renders those components cannot see stylesheets at all.
+
+---
+
+## 2026-08-25 — a page said the hold store had one implementation, and it had two since 0088
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** fixed on
+`docs-09-connecting-a-model`; the **recommendation** in it is open and is the
+maintainer's
+
+*The history of a page* has said since 23 August that the runtime "ships one
+implementation of it, in memory". `postgresHoldStore` landed the same week
+([0088](decisions/0088-a-hold-is-a-row-and-a-take-is-one-statement.md)), with a
+shared contract suite run against both. The paragraph was true when it was
+written and false four days later. Corrected here, and the correction says the
+thing that actually decides which one you want — whether the process that judged
+a change can still be spoken to when the answer arrives.
+
+**The part that is not fixed is the mechanism.** Nothing failed. The site's
+generated halves — the API reference, the entry-point map, the decision index —
+are held to the repository by tests, and this sentence was in none of them
+because it is *prose about the runtime*, which is most of what a documentation
+site is.
+
+Two candidate answers, and I did not pick one because both are larger than a
+page:
+
+- **Fewer sentences of that kind.** Where a page states a countable fact about
+  the runtime, generate it. That is what this run did for the prompt, the cost
+  table and the fault list — three components and one claims test that hold nine
+  numbers to the runtime rather than to my memory of it.
+- **A claims test per page**, the way the marketing lane holds `FACTS`. Cheap,
+  and only ever as good as the list of claims somebody remembered to write down.
+
+**Recommendation:** the first, and treat the second as the fallback for
+sentences that cannot be generated. Filed because "how does a documentation site
+stay true when the thing it documents moves" is the §4c question, and it is
+worth an explicit answer rather than a habit.
+
+---
+
+## 2026-08-25 — the theme vocabulary is a third of every request, and nobody has ever seen that number
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives`,
+`@jonathanbravecredit` · **Status:** open — a measurement, not a complaint
+
+Printing `measurePrompt` for a real deployment gives, for the smallest tree on
+the site and its shortest utterance:
+
+| Block | Characters | Share |
+| --- | --- | --- |
+| Standing instructions | 2,816 | 15% |
+| Primitives (61 registered) | 9,697 | 51% |
+| Themes (51 registered ids) | 6,155 | 32% |
+| The tree | 367 | 2% |
+| The request | 71 | 0% |
+| **Total** | **19,106** | |
+
+**Nothing here is wrong.** Both blocks earn their place — 0049 is why a model
+picks a registered palette instead of inventing hex, and the catalogue is the
+whole bounded-vocabulary bargain. And the two largest blocks are the two most
+stable, sitting at the front of the message where a provider's cache can hold
+them, which is exactly where `prompt.ts` put them on purpose.
+
+What is new is that it is a **number**. Twenty-one palettes, sixteen font packs
+and fourteen style presets each carry a name and a sentence, and the sentences
+are the part a model actually chooses on — so they are worth writing well and
+worth writing *once*. A palette added is about 120 characters on every request
+this deployment ever makes.
+
+Recorded for two reasons rather than one. For `Loom primitives`: the description
+field is prompt surface, not documentation, and its cost is now measurable. For
+the maintainer: if a deployment ever wants a *subset* of the library in front of
+a model, the seam for it already exists — `catalogue` and `themeCatalogue` are
+plain arguments to `modelInterpreter` and nothing requires them to be the whole
+registry. Nobody has asked for that and I am not proposing it; it is worth
+knowing that it costs nothing to reach for later.
+
+---
+
+## 2026-08-25 — no framework gaps, and `src/` was not opened
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed
+
+Recorded because absence is worth knowing, and because this run had a better
+chance of finding a gap than most: it is the first thing in `apps/` to consume
+the interpretation seam's own projections — `renderTree`, `renderCatalogue`,
+`renderThemeCatalogue`, `measurePrompt`, `interpretationFault`,
+`describeInterpretationError`, `draftSchemaByteSize` — for something other than
+assembling a request.
+
+Every one of them is exported from `@loom/runtime`, is pure, and returns a value
+rather than a formatted line, which is what made printing them on a page possible
+at all. No deep import, no new primitive, no local component beyond the three
+this page needs, and `src/` was not opened except to read.
+
+The one thing worth saying to the runtime's owner: `measurePrompt`'s doc comment
+names "a host deciding what to register" as its intended caller. It has a second
+one now — a page explaining the cost to somebody who has not decided yet — and
+the shape suits both because it returns the parts rather than a sentence about
+them.
 ## 2026-08-24 — a primitive that throws under every configuration is missing from the one list a host can assert empty
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
