@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
+import { DEMO_LEADING_PRESET, DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
 
 import { AskPanel } from "./ask-panel"
 
@@ -29,13 +29,39 @@ vi.mock("../actions", () => ({
 
 const ALL = DEMO_PRESETS.map((preset) => preset.id)
 
+const labelOf = (id: DemoPresetId): string => DEMO_PRESETS.find((preset) => preset.id === id)!.label
+
 describe("the ask panel", () => {
-  it("leads with the re-theme, because it is the one change visible everywhere at once", () => {
+  it("gives the primary slot to the preset the table nominates", () => {
     render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
 
     const buttons = screen.getAllByRole("button")
 
-    expect(buttons[0]?.textContent).toBe("Re-theme the whole page")
+    expect(buttons[0]?.textContent).toBe(labelOf(DEMO_LEADING_PRESET))
+  })
+
+  /**
+   * The lead is a change the Gate holds, so the first press moves nothing on
+   * the page — and a stranger who was not told that has pressed the one control
+   * this surface invited them to press and watched it do nothing.
+   *
+   * What is asserted is the claim rather than the sentence: that before any
+   * button exists to press, the panel has already said some asks wait for an
+   * answer. `pipeline.test.ts` holds the other half — that the lead really is
+   * one of them — and the two together are the whole of this run.
+   */
+  it("says some asks will wait for you, before offering anything to press", () => {
+    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+
+    const frame = screen.getByText(/won’t make without asking you/i)
+    const primary = screen.getAllByRole("button")[0]
+
+    expect(frame).toBeTruthy()
+    expect(primary).toBeDefined()
+    expect(
+      frame.compareDocumentPosition(primary!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+    expect(container.textContent).toContain("it writes down what it did")
   })
 
   it("tells a visitor what pressing each one will do to the page", () => {
@@ -55,13 +81,12 @@ describe("the ask panel", () => {
     render(<AskPanel revision={0} available={["palette", "trim"]} modelConfigured={false} />)
 
     /*
-     * Read off the table rather than written out here. What this test is about
-     * is that the panel honours `available`, and spelling the labels a second
-     * time made a retune of the *copy* fail a test about the *filter* — which
-     * it did, the run the specimen page stopped being Loom's own.
+     * The labels are read off the table rather than written out here — see
+     * `labelOf` above. What this test is about is that the panel honours
+     * `available`, and spelling the labels a second time made a retune of the
+     * *copy* fail a test about the *filter*, which it did the run the specimen
+     * page stopped being Loom's own.
      */
-    const labelOf = (id: DemoPresetId): string => DEMO_PRESETS.find((preset) => preset.id === id)!.label
-
     expect(screen.getByText(labelOf("palette"))).toBeTruthy()
     expect(screen.getByText(labelOf("trim"))).toBeTruthy()
     expect(screen.queryByText(labelOf("promote"))).toBeNull()
@@ -106,9 +131,9 @@ describe("the ask panel", () => {
 
     expect(disclosure.open).toBe(false)
     expect(disclosure.contains(screen.getByRole("textbox"))).toBe(true)
-    expect(disclosure.contains(screen.getByRole("button", { name: "Re-theme the whole page" }))).toBe(
-      false
-    )
+    expect(
+      disclosure.contains(screen.getByRole("button", { name: labelOf(DEMO_LEADING_PRESET) }))
+    ).toBe(false)
   })
 
   /**

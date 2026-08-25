@@ -7531,6 +7531,120 @@ because the wrong thing is the appealing one.
 
 ---
 
+## 2026-08-24 — the demo's primary button was the one preset its own policy never holds
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+this run's pull request — recorded because the diagnosis outlives the fix, and
+because the property that replaces it is one nobody can see rotting
+
+Three runs of this lane have answered parts of the maintainer's 20 August
+verdict: the demo moved to a public `/demo`, the rail got one primary action
+instead of five grey pills, and the page on the stage stopped being Loom's own
+marketing page. This is the one none of them looked at, because each of them was
+looking at a different thing: **which** preset the primary action fires.
+
+`session.ts` tunes the demo's Gate policy deliberately, and says why:
+
+> `user-instruction` may auto-apply `low` here rather than `medium`, which is
+> what makes the Gate visible: a re-theme lands on its own, and anything that
+> restructures the page waits for the visitor to answer it. Under the shipped
+> default every one of the demo's changes would auto-apply and **the hold — the
+> most interesting thing the runtime does — would never appear on screen.**
+
+And `ask-panel.tsx` set its one primary control to the re-theme, for a reason
+that was correct when it was written — it is the only change visible everywhere
+at once, the answer to *did something happen?* from across a room.
+
+Put those two files side by side and the demo's central failure is in the seam
+between them. **A policy was tuned to make the hold visible, and then the single
+control the surface was designed to be pressed first was set to the one preset
+that policy is guaranteed to let straight through.** A stranger with sixty
+seconds pressed the big green button, watched the page turn over, read a card
+saying it was done, and left having seen *an AI changed a page* — which
+`docs/rollout.md` names as the least novel thing here and the thing everybody
+else already shows. The Gate was three clicks away, behind the third item in a
+secondary list, reached only by a visitor who kept playing past the payoff.
+
+**Neither file was wrong on its own, and that is why it survived three runs.**
+The rail's ranking was reviewed as a ranking question and the policy was
+reviewed as a policy question. Nothing in either review had to ask what the
+*first press* actually demonstrates, and no test could fail, because both halves
+were behaving exactly as documented.
+
+**What replaces it, and what now guards it.** `DEMO_LEADING_PRESET` is the
+removal, and it lives in `presets.ts` rather than in the panel because it is a
+claim about the table. `pipeline.test.ts` asserts the property the nomination
+rests on — that asking for it through the real write path under the real demo
+policy comes back `awaiting-you`. Raise `user-instruction`'s ceiling back to the
+shipped default and that test fails and says why; without it, every other test
+would still pass, the demo would still work, the page would still change, and
+the first press would silently stop meeting the Gate again.
+
+**The general shape, for any lane with a demonstrative surface:** a control's
+prominence is a claim about what it demonstrates, and that claim is settled by
+code somewhere else — here, a policy ceiling two files away. Ranking reviewed
+without the thing it ranks against is how a surface ends up leading with its
+weakest moment while every file involved reads correctly.
+
+---
+
+## 2026-08-24 — `21st.dev` re-verified blocked, from the demo lane a fourth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged, on 24 August.
+The brief names it as the visual standard for this surface and it has still
+never been reachable from any lane told to consult it. The standing answer is on
+the 21 August entry — the committed policy allows it for the *tool* and the
+proxy refuses it — and that entry is the one to act on.
+
+Worth adding, because this run is the first where it cost something specific.
+The unit was a **ranking** decision, not a component: which control earns the
+primary slot, and what one sentence has to say above it. That is a question a
+reference gallery genuinely answers — the whole convention of a hero with one
+committing action and a line of qualifying copy above it is what `21st.dev`
+catalogues. The substitute was this repo's own `loom.hero`, which is the floor
+the brief names second and is one example rather than a survey.
+
+---
+
+## 2026-08-24 — two documents still point at the demo's old address, and the brief still opens with a finished task
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — small, and it costs a run's opening minutes every time
+
+Neither of these is wrong about anything that matters; both are stale in a way
+that reads as current, which is the expensive kind.
+
+**`docs/rollout.md`, "Where we are":** *"Eighteen primitives are registered and
+the demo is live at `apps/loom/app/(portal)/portal/demo`."* That path has been a
+308 redirect since 21 August (#128) and the demo has had a public `/demo` and a
+route group of its own since. The file warns about exactly this at the top —
+*"anything below that reads as a status claim goes stale quickly"* — so this is
+the warning coming true rather than a defect.
+
+**The `Loom demo` brief** opens with *"Two problems to fix before anything
+else"*, and the first is *"It is in the wrong place… move it to a public path of
+its own — `/demo` — in its own route group."* That was the first run's whole
+unit and it landed on 21 August. A fresh session reading the brief cold has to
+go and establish that the surface's stated top priority is already done before
+it can start, and the cost is paid again on every run.
+
+Both are one-line edits and neither belongs to a routine: a routine cannot
+rewrite the brief it is bound by, and `docs/rollout.md` is a plan rather than a
+lane. Recorded here rather than acted on, and this lane's runs will keep working
+it out for themselves in the meantime.
+
+Suggested replacements, offered only so the edit is cheap:
+
+- rollout: *"…and the demo is live at `/demo`, in `apps/loom/app/(demo)`."*
+- brief: replace the first of the two problems with what is actually left, which
+  is the second one — *"It is clunky. That is the real work and it is yours to
+  diagnose."*
+
+---
+
 ## 2026-08-24 — the auto-subscription happened again, on a second routine, with the same three events
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:**

@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 
-import { DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
+import { DEMO_LEADING_PRESET, DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
 import { toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
 
 import { askForChange } from "../actions"
@@ -23,6 +23,13 @@ import { askForChange } from "../actions"
  * thing here that can be unavailable, and a surface that leads with the control
  * it might not have is a surface that fails on its own front door.
  *
+ * **Which one is primary is `presets.ts`'s call** (`DEMO_LEADING_PRESET`), and
+ * the reasoning is there because it is a claim about the table rather than
+ * about this markup. What this file owes it is the sentence above the buttons:
+ * the lead is now a change the Gate *holds*, so the panel has to say before the
+ * first press that some asks wait for an answer, or the first press reads as a
+ * button that did nothing.
+ *
  * Two ways in, and they are not two systems. A chip posts a preset id and the
  * change is computed from the tree; the box posts a sentence and a model
  * interprets it. Everything after that point — assessment, Gate, application,
@@ -35,19 +42,28 @@ import { askForChange } from "../actions"
  */
 
 /**
- * The first thing to press.
+ * What is true of every button below, said once, before any of them is pressed.
  *
- * The re-theme, and it is chosen rather than arbitrary: it is the only preset
- * whose effect is visible everywhere at once, so it is the one that answers
- * "did something happen?" from across a room. It is also the change that makes
- * the strongest claim about the model — the whole page turns over and not one
- * primitive is touched, because a theme is three ids on the root node (0049).
+ * This is the line that makes the primary control legible, and it had to be
+ * added the moment the lead became a change the Gate holds
+ * (`DEMO_LEADING_PRESET`). Press *Take the numbers off* without it and the page
+ * does not move: a stranger has pressed the one thing this surface invited them
+ * to press and watched nothing happen, which reads as a broken button for the
+ * two seconds before they find the amber card. Told first that some asks wait
+ * for them, the same two seconds read as the product working.
  *
- * `presets.ts` is the authority on the label and the promise; this names which
- * of them leads, so a run that retunes the copy does not have to remember to
- * retune it twice.
+ * It says *some* and never *which*, for the reason `presets.ts` gives about
+ * every promise on this panel: the verdict is computed at assessment time
+ * against the tree as it stands, and a surface that predicted it would be wrong
+ * the first time the policy or the page moved.
+ *
+ * It is also where "the record" now enters the demo, because the sentence it
+ * replaced in the rail's header was an abstract list of what a record contains —
+ * and this one lands three inches above the first card, which is the moment it
+ * becomes true rather than promised.
  */
-const LEADING_PRESET: DemoPresetId = "palette"
+const WHAT_EVERY_ASK_MEETS =
+  "Loom weighs every ask before it lands: some changes it makes on its own, some it won’t make without asking you first. Either way, it writes down what it did."
 
 export const AskPanel = ({
   revision,
@@ -61,11 +77,13 @@ export const AskPanel = ({
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
   const offered = DEMO_PRESETS.filter((preset) => available.includes(preset.id))
-  const leading = offered.find((preset) => preset.id === LEADING_PRESET) ?? offered[0]
+  const leading = offered.find((preset) => preset.id === DEMO_LEADING_PRESET) ?? offered[0]
   const rest = offered.filter((preset) => preset.id !== leading?.id)
 
   return (
     <div id="ask" className="flex flex-col gap-4">
+      <p className="text-ink-secondary text-sm">{WHAT_EVERY_ASK_MEETS}</p>
+
       {leading && (
         <form action={submit} className="flex flex-col gap-1.5">
           <input type="hidden" name="baseRevision" value={revision} />
