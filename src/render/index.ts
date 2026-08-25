@@ -14,6 +14,7 @@ export * from "./addressing.js"
  * page now holds a target.
  */
 export * from "./behaviour.js"
+export * from "./decorative.js"
 export * from "./diagnostics.js"
 export * from "./editable.js"
 export * from "./primitive.js"

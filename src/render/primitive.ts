@@ -7,6 +7,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { SubmissionOutcome } from "../submit/resolution.js"
 
 import type { BehaviourName, PrimitiveBehaviours } from "./behaviour.js"
+import type { DecorativeChildren } from "./decorative.js"
 import type { EditableAttributes } from "./editable.js"
 import type { PrimitiveText } from "./text.js"
 
@@ -118,6 +119,20 @@ export type LoomRenderContext<
    * `behaviour.ts`.
    */
   readonly behaviours: PrimitiveBehaviours<TBehaviour>
+  /**
+   * This node's children again, rendered as a copy nothing resolves to a node —
+   * for the arrangements that have to say the same content twice (see
+   * `decorative.ts`).
+   *
+   * Always present, and cheap to ignore: nothing is rendered until it is
+   * called, so the primitives that will never want a copy pay one closure for
+   * it. Calling it twice within one render returns the same elements.
+   *
+   * The copy is not marked and is not inert. It carries no identity, which is
+   * the half the primitive could not arrange for itself; announcing it as
+   * decoration — `aria-hidden`, `inert` — is the half the seam cannot.
+   */
+  readonly decorative: DecorativeChildren
 }
 
 /**
