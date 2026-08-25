@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">Where the line falls in a disclosure</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">The runtime owns one button and publishes a state. The primitive owns the region and decides what the state means.</text>
+
+  <!-- ================= LEFT: THE RUNTIME BUILDS ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE RUNTIME BUILDS</text>
+
+  <rect x="40" y="130" width="392" height="196" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+
+  <text x="60" y="158" font-size="13" font-weight="650" fill="#15120e">loom.behaviours.disclose</text>
+  <text x="60" y="177" font-size="11.5" fill="#5c5751">a ReactNode, already built &#8212; one &lt;button&gt; and nothing else</text>
+
+  <rect x="60" y="191" width="352" height="62" rx="7" fill="#ffffff" stroke="#c9bfb2"/>
+  <rect x="76" y="209" width="14" height="2" rx="1" fill="#5c5751"/>
+  <rect x="76" y="216" width="14" height="2" rx="1" fill="#5c5751"/>
+  <text x="100" y="217" font-size="12.5" fill="#15120e">Menu</text>
+  <text x="76" y="240" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">aria-expanded="false"  data-loom-disclosed="false"</text>
+
+  <text x="60" y="277" font-size="11.5" fill="#5c5751">It does not wrap the region. It holds no ref into it.</text>
+  <text x="60" y="295" font-size="11.5" fill="#5c5751">It is never told where the region is.</text>
+  <text x="60" y="313" font-size="11.5" fill="#5c5751">Its name is the primitive&#8217;s declared text, one key.</text>
+
+  <!-- arrow -->
+  <path d="M 440 228 L 476 228" stroke="#c9bfb2" stroke-width="1.5" fill="none"/>
+  <path d="M 470 223 L 477 228 L 470 233 Z" fill="#c9bfb2"/>
+  <text x="458" y="216" font-size="10" fill="#a09488" text-anchor="middle" letter-spacing="0.04em">places</text>
+
+  <!-- ================= RIGHT: THE PRIMITIVE PLACES ================= -->
+  <text x="488" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE PRIMITIVE PLACES</text>
+
+  <rect x="488" y="130" width="392" height="196" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+
+  <text x="508" y="158" font-size="13" font-weight="650" fill="#15120e">loom.nav</text>
+  <text x="508" y="177" font-size="11.5" fill="#5c5751">the button as a sibling, then the region it owns</text>
+
+  <rect x="508" y="191" width="352" height="62" rx="7" fill="#ffffff" stroke="#e4ded5"/>
+  <text x="524" y="212" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">{loom.behaviours.disclose}</text>
+  <text x="524" y="232" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">&lt;ul class="links"&gt; &#8230; &lt;/ul&gt;</text>
+
+  <rect x="508" y="266" width="352" height="42" rx="7" fill="#ffffff" stroke="#c9bfb2"/>
+  <text x="524" y="292" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#15120e">[data-loom-disclosed="false"] ~ .links { display:none }</text>
+
+  <text x="508" y="322" font-size="11" fill="#a09488" font-style="italic">the whole of the contract &#8212; one attribute, one rule</text>
+
+  <!-- ================= BOTTOM: THREE STATES ================= -->
+  <line x1="40" y1="364" x2="880" y2="364" stroke="#eee8e0"/>
+  <text x="40" y="398" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT A VISITOR GETS</text>
+  <text x="40" y="420" font-size="11.5" fill="#5c5751">The control renders from an effect, so the region must default to <tspan font-weight="650" fill="#15120e">visible</tspan> and the rule must hide it. Written the other way round, the first column loses every link.</text>
+
+  <!-- state 1 -->
+  <rect x="40" y="440" width="268" height="180" rx="10" fill="#f3f7f2" stroke="#c8ddc4"/>
+  <text x="60" y="468" font-size="12.5" font-weight="650" fill="#2f5c2a">no scripting, or before hydration</text>
+  <text x="60" y="487" font-size="11" fill="#4f6b4c">no button &#8594; no attribute &#8594; no rule matches</text>
+  <rect x="60" y="500" width="228" height="100" rx="7" fill="#ffffff" stroke="#d6e6d3"/>
+  <text x="76" y="522" font-size="11.5" fill="#15120e">Product</text>
+  <text x="76" y="542" font-size="11.5" fill="#15120e">Docs</text>
+  <text x="76" y="562" font-size="11.5" fill="#15120e">Lessons</text>
+  <text x="76" y="582" font-size="11.5" fill="#15120e">Demo</text>
+  <text x="200" y="522" font-size="10.5" fill="#4f6b4c" font-style="italic">the menu it has today</text>
+
+  <!-- state 2 -->
+  <rect x="326" y="440" width="268" height="180" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="346" y="468" font-size="12.5" font-weight="650" fill="#15120e">closed</text>
+  <text x="346" y="487" font-size="11" fill="#5c5751">out of the layout and the accessibility tree</text>
+  <rect x="346" y="500" width="228" height="100" rx="7" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="362" y="516" width="72" height="28" rx="5" fill="#ffffff" stroke="#c9bfb2"/>
+  <rect x="372" y="527" width="11" height="2" rx="1" fill="#5c5751"/>
+  <rect x="372" y="533" width="11" height="2" rx="1" fill="#5c5751"/>
+  <text x="392" y="534" font-size="11" fill="#15120e">Menu</text>
+  <text x="362" y="570" font-size="10.5" fill="#a09488" font-style="italic">one row, not three</text>
+
+  <!-- state 3 -->
+  <rect x="612" y="440" width="268" height="180" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="632" y="468" font-size="12.5" font-weight="650" fill="#15120e">open</text>
+  <text x="632" y="487" font-size="11" fill="#5c5751">aria-expanded="true" &#183; a real button with real state</text>
+  <rect x="632" y="500" width="228" height="100" rx="7" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="648" y="512" width="72" height="24" rx="5" fill="#f0ece6" stroke="#c9bfb2"/>
+  <rect x="658" y="521" width="11" height="2" rx="1" fill="#15120e"/>
+  <rect x="658" y="527" width="11" height="2" rx="1" fill="#15120e"/>
+  <text x="678" y="528" font-size="11" fill="#15120e">Menu</text>
+  <text x="648" y="556" font-size="11" fill="#15120e">Product</text>
+  <text x="648" y="574" font-size="11" fill="#15120e">Docs</text>
+  <text x="648" y="592" font-size="11" fill="#15120e">Lessons</text>
+  <text x="760" y="556" font-size="11" fill="#15120e">Demo</text>
+  <text x="760" y="574" font-size="11" fill="#15120e">Pricing</text>
+</svg>

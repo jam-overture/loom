@@ -87,6 +87,24 @@ directory and everything under it — a surface's components and its non-route c
 live inside its own route group, so `app/(docs)/_lib/nav.ts` is the documentation
 routine's and nobody else has to be told so.
 
+**Where the framework forces a file to sit at the application root, the lane
+follows the content and not the location.** The MDX pipeline is the case that
+established this: `apps/loom/next.config.ts` and `apps/loom/mdx-components.tsx`
+must be at the root because Next requires them there, and everything they say is
+about how a `(docs)` page is parsed and rendered. They belong to `Loom docs`,
+along with the dependency lines in `apps/loom/package.json` that only `(docs)`
+imports. Three consecutive documentation runs produced a diff crossing the lane
+boundary at those files and explained it each time; this is that explanation,
+written down once. Added by the framework routine on 25 August at the
+maintainer's instruction on #154, after the documentation routine filed it three
+times.
+
+The rule generalises and the exception does not: a file is another lane's
+because of what it *decides*, not where the framework makes it live. It does not
+license editing a surface's routes or components from outside its lane, and a
+cross-lane diff of this kind still gets a line in the report saying which file
+and why.
+
 `Loom demo` was split out of the framework routine on 20 August. The demo had
 been built by the routine that owns the runtime, which judged it done because by
 its own standard it was — the pipeline runs, the record is complete, the tests
