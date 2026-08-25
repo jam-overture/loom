@@ -7908,6 +7908,87 @@ created or change what the event says.
 
 ---
 
+## 2026-08-25 — one pairing is eight of the nine composed contrast failures in the library
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` · **Status:** open —
+a pattern in numbers that were already true, now on a public page
+
+Building *Making it look like yours* meant running `auditPalette` over all
+twenty-one registered palettes and printing the result. The painted result is
+clean — **0 palettes of 21 have a painted failure**, across 11 painted pairings
+each. The composed result has a shape worth naming:
+
+| palette | pairing | ratio |
+| --- | --- | --- |
+| `bold` | `fg-subtle` on `accent-subtle` (`loom.perk` note) | 3.80:1 |
+| `slate` | same | 4.46:1 |
+| `midnight` | same | 3.99:1 |
+| `carbon` | same | 3.76:1 |
+| `plum` | same | 4.42:1 |
+| `plum` | `accent` on `accent-subtle` (`loom.faq` marker) | 4.43:1 |
+| `forest` | `fg-subtle` on `accent-subtle` | 4.27:1 |
+| `ember` | `fg-subtle` on `accent-subtle` | 4.23:1 |
+| `obsidian` | `fg-subtle` on `accent-subtle` | 4.32:1 |
+
+**Eight of the nine failures are the same pairing**, and eight of the twenty-one
+palettes carry it. Thirteen palettes fail nothing at all.
+
+0089 already names the two the library did not clear and says the choice — move
+the panel toward the canvas, or move the ink toward `fg-muted` — costs something
+either way and had not been made. This is not a new argument; it is the count
+that the argument was missing. One pairing repeating across eight palettes,
+several of them derived by `derivePalette` from different hues, is evidence that
+the fix is in **`accent-subtle`'s lightness rule or in `loom.perk`'s ink
+choice**, not in eight palettes each getting a hand adjustment. Four of the eight
+are within 0.3 of the bar.
+
+Not fixed here: `src/theme/` and `src/primitives/` are not this lane's, and the
+choice 0089 left open is a design decision rather than a number to nudge. What
+changed is the visibility — the audit is now printed on `/docs/building-with-loom/theming`,
+in `describePaletteAudit`'s own words, so these nine lines are something a reader
+of the documentation sees rather than something a test comment mentions.
+
+**Recommendation:** decide 0089's open choice once, in `accent-subtle`, and let
+the derivation carry it to all eighteen derived palettes at once.
+
+---
+
+## 2026-08-25 — `.not-prose` is not a cascade barrier, and this is the second component it caught
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — fixed
+locally in two components, and the general shape is still open
+
+Both new components on the theming page shipped their first render with a
+defect from the same cause, and neither was visible to any test:
+
+- the audit list is a `<ul>` of `<pre>` blocks and carried **the browser's own
+  bullets**, plus the user agent's `pre` margin, so every row sat in a column of
+  dead space
+- the hex labels were `<code>` and picked up the site's inline-code pill, so each
+  one looked like a small disabled input field
+
+`.not-prose` on the wrapper does not stop either. This is the same root cause as
+the phantom fourth column on every generated table, filed on #155 and fixed there
+by narrowing `.prose table { display: block }`.
+
+Fixed here by being explicit in the two components — `list-none pl-0` on the
+list, `m-0 p-0 bg-transparent` on the `pre`, and `font-mono` on a plain `<span>`
+instead of `<code>`, which is what `EntryPoints` already does and is why that
+table never had the pill.
+
+**What stays open** is that every generated component on this site is one
+un-reset element away from the next instance, and the failure mode is always the
+same: it renders, it passes, and it looks wrong. Two shapes worth considering,
+neither done here because both are a redesign rather than a fix:
+
+1. a small set of shared primitives-for-chrome — a `Mono`, a `Swatch`, a `Figure`
+   — so the reset is written once rather than remembered per component
+2. a source assertion in `house-theme.test.ts`'s style, holding that the sheet
+   resets list markers and `pre` padding inside `.not-prose`
+
+The second is cheaper and catches the class rather than the instance. My
+recommendation is to wait until #155 lands so the narrowed selector and any reset
+are decided together, rather than adding a second fix for one cause now.
 ## 2026-08-25 — the disclosure seam exists, and `loom.nav` is one declaration and one CSS rule from a phone menu
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**

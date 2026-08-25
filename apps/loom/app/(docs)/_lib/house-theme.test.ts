@@ -37,22 +37,42 @@ const themeOf = (id: string): Record<string, unknown> => {
   return declared as Record<string, unknown>
 }
 
+/**
+ * The examples that exist *because* they are not the house theme.
+ *
+ * `themed-tree` shows that three ids on the root change everything below them,
+ * and `a-derived-theme` shows a combination nobody on this project chose by
+ * hand. Neither can make its point while matching the page around it, so both
+ * are exempt from the rule below — and the assertion after it holds them to the
+ * opposite rule instead, so an exemption is a claim rather than a hole. Adding
+ * an id here without a page that turns on the difference is how this list stops
+ * meaning anything.
+ */
+const DELIBERATELY_OTHER = ["themed-tree", "a-derived-theme"] as const
+
 describe("the theme the examples wear", () => {
-  it("is the house theme on every example but the one about themes", () => {
+  it("is the house theme on every example but the ones about themes", () => {
     for (const id of docsExamples.keys()) {
-      if (id === "themed-tree") continue
+      if (DELIBERATELY_OTHER.some((exempt) => exempt === id)) continue
 
       expect(themeOf(id), `"${id}" is not on the house theme`).toEqual(HOUSE)
     }
   })
 
+  it("is deliberately not the house theme on the examples about themes", () => {
+    for (const id of DELIBERATELY_OTHER) {
+      expect(themeOf(id), `"${id}" is exempt but wears the house theme anyway`).not.toEqual(HOUSE)
+    }
+  })
+
   /**
-   * The themed example exists to show that three ids on the root change
-   * everything below them. It can only do that by being different from the
-   * page around it, so this is the one example the rule above must not reach.
+   * The exemption list is a list of ids, and an id that stops naming an example
+   * would exempt nothing while still looking like it does.
    */
-  it("is deliberately not the house theme on the themed example", () => {
-    expect(themeOf("themed-tree")).not.toEqual(HOUSE)
+  it("exempts only examples that exist", () => {
+    for (const id of DELIBERATELY_OTHER) {
+      expect(docsExamples.has(id), `"${id}" is exempt and is not registered`).toBe(true)
+    }
   })
 
   /**

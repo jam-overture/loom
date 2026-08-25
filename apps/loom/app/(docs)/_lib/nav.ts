@@ -144,6 +144,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "How a primitive holds other primitives: an ordered list of children, and named regions the primitive places itself.",
       },
+      {
+        slug: "theming",
+        title: "Making it look like yours",
+        summary:
+          "A palette, a font pack and a style preset, named by id on the root — and how to get your own brand colour into one without shipping a page nobody can read.",
+      },
     ],
   },
   {
