@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@loom/runtime"
 import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@loom/runtime/write"
 
+import { answerNote } from "./answer"
 import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
@@ -156,6 +157,46 @@ describe("answering a hold", () => {
     expect(record?.recordId).toBe(held.recordId)
     expect(record?.utterance).toBe(held.utterance)
     expect((await headOf(session)).revision).toBe(1)
+  })
+
+  /**
+   * The end of the demo's argument, asserted through the real write path rather
+   * than off a fixture.
+   *
+   * Two changes both end `applied` on this policy, and only one of them was
+   * ever put to the visitor. The card can only tell them apart if the pipeline
+   * hands it a record that does — so this asserts the two ends of that: an
+   * unasked change carries no answer at all, and an answered one carries the
+   * words the rail prints about it.
+   *
+   * It is here rather than only beside `answerNote` because the property that
+   * rots is not the function, it is the *supply*. Change how a confirmation is
+   * narrated, or stop passing an actor to `confirmHeld`, and `answer.test.ts`
+   * still passes on its fixture while the demo silently goes back to reporting
+   * a change the visitor allowed as one Loom made alone.
+   */
+  it("hands the rail an answer to print, and only where somebody was asked", async () => {
+    const session = await sessionFor("answer-note")
+
+    const unasked = await ask(session, "palette")
+    expect(unasked.outcome).toBe("applied")
+    expect(answerNote(unasked)).toBeUndefined()
+
+    const held = await ask(session, "band")
+    const proposalId = held.heldProposalId
+    if (!proposalId) throw new Error("nothing was held")
+
+    const write = beginDemoWrite(session)
+    await confirmHeld(write.path, {
+      proposalId: proposalIdSchema.parse(proposalId),
+      actor: "a demo visitor",
+    })
+    const answered = recordFromEvents(write.narrated(), held)
+    if (!answered) throw new Error("the runtime narrated nothing")
+
+    expect(answered.outcome).toBe("applied")
+    expect(answerNote(answered)?.label).toBe("You said yes")
+    expect(answerNote(answered)?.technical).toBe("confirmed by a demo visitor")
   })
 
   it("keeps the ask on the card when the visitor says no", async () => {

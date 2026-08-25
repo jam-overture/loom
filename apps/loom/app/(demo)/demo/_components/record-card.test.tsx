@@ -73,6 +73,18 @@ const HELD: ChangeRecord = {
   heldProposalId: "p_9",
 }
 
+/**
+ * The same held ask, after the visitor pressed *Apply this change*: the hold is
+ * gone, a revision exists, the Gate's own verdict still says it stopped — and
+ * `answeredBy` is the only field that says why it went ahead anyway.
+ */
+const ANSWERED: ChangeRecord = (({ heldProposalId: _answered, ...rest }) => ({
+  ...rest,
+  outcome: "applied" as const,
+  revision: { produced: 1, replaced: 0 },
+  answeredBy: "a demo visitor",
+}))(HELD)
+
 describe("a record card", () => {
   it("shows the ask, the rationale and the provenance of the proposal", () => {
     render(<RecordCard record={APPLIED} />)
@@ -147,5 +159,58 @@ describe("a record card", () => {
 
     expect(screen.getByText("shallow-structural-change")).toBeTruthy()
     expect(screen.getByText("stakes-above-ceiling")).toBeTruthy()
+  })
+
+  /**
+   * The demo's whole argument, as an assertion.
+   *
+   * Both of these cards say **Applied**, both say the change is live on the
+   * page, and both are produced by the same three files. One of them Loom made
+   * on its own; the other it refused to make until the person reading the card
+   * allowed it. If the two read the same, this surface has demonstrated
+   * "an AI changed a page" — which `docs/rollout.md` names as the least novel
+   * thing here — and nothing else.
+   *
+   * It is asserted as a *difference* rather than as a sentence, because the
+   * sentence is not the property worth guarding. Any wording that leaves the
+   * unasked card silent and the answered one saying a person let it through
+   * passes; anything that renders the two alike fails, however good it reads.
+   */
+  it("does not let a change the visitor allowed read like one Loom made alone", () => {
+    const alone = render(<RecordCard record={APPLIED} />).container.textContent ?? ""
+    const allowed = render(<RecordCard record={ANSWERED} />).container.textContent ?? ""
+
+    expect(alone).toMatch(/went ahead on its own/)
+    expect(alone).not.toMatch(/You said yes/)
+
+    expect(allowed).toMatch(/You said yes/)
+    expect(allowed).toMatch(/nothing on the page would have moved/)
+  })
+
+  /**
+   * The plain-language rule, applied to the newest thing on the card: the
+   * sentence is in the light and the runtime's own word for it is one click
+   * down. Both, never one.
+   */
+  it("keeps the runtime's word for the answer in the record, under the disclosure", () => {
+    const { container } = render(<RecordCard record={ANSWERED} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText(/You said yes/))).toBe(false)
+    expect(disclosure.contains(screen.getByText("confirmed by a demo visitor"))).toBe(true)
+  })
+
+  /**
+   * Answering a hold ends it. A card still offering the two buttons after the
+   * decision was made would be offering a decision that no longer exists.
+   */
+  it("stops asking once the visitor has answered, and offers the undo instead", () => {
+    render(<RecordCard record={ANSWERED} />)
+
+    expect(screen.queryByRole("button", { name: "Apply this change" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "No thanks" })).toBeNull()
+    expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
   })
 })
