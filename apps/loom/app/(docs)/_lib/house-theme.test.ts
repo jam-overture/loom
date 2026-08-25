@@ -146,3 +146,45 @@ describe("the chrome around them", () => {
     expect(globals()).toContain("--accent: #0a0a0a")
   })
 })
+
+/**
+ * The boundary between prose and the things the site generates.
+ *
+ * Markdown tables need `display: block` to scroll on a phone rather than widen
+ * the page. A table a component built needs the opposite, and needs its own
+ * borders and padding rather than prose's on top of them. Both were true for a
+ * fortnight and nothing failed, because "it rendered" is true of a table with
+ * dead space beside it and two sets of borders inside it.
+ *
+ * Held as a source assertion rather than a rendered one on purpose: the suite
+ * that renders these components runs in jsdom, which parses no stylesheet, so a
+ * DOM test here would assert nothing and read as though it did.
+ */
+describe("what prose styling is allowed to reach", () => {
+  const GUARD = ":not(.not-prose *)"
+
+  /**
+   * Both directions, because either one alone passes on a broken sheet: the
+   * guarded selector could be added and the unguarded one left in place beside
+   * it, and the unguarded one would still win everything it used to.
+   */
+  it("guards every prose table rule against generated markup", () => {
+    const source = globals()
+
+    for (const selector of [".prose table", ".prose th", ".prose td"]) {
+      expect(source).toContain(`${selector}${GUARD}`)
+
+      const unguarded = new RegExp(`\\${selector.replace(" ", "\\s+")}\\s*[,{]`)
+
+      expect(source).not.toMatch(unguarded)
+    }
+  })
+
+  it("still lets a markdown table scroll rather than widen the page", () => {
+    const source = globals()
+    const rule = source.slice(source.indexOf(`.prose table${GUARD}`))
+
+    expect(rule.slice(0, rule.indexOf("}"))).toContain("overflow-x: auto")
+    expect(rule.slice(0, rule.indexOf("}"))).toContain("display: block")
+  })
+})

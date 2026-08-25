@@ -37,10 +37,31 @@ import { colour, monospace, radius, size, space, weight } from "./tokens.js"
  * it is, rather than a `remove` and an `insert` that loses the snippet's
  * identity and its text node's history along with it.
  *
- * There is no syntax highlighting and no copy button. The first needs a parser
- * per language, which is a registry of its own; the second needs a click a tree
- * cannot express, and is filed rather than faked — a button that looks like it
- * copies and does not is worse than no button.
+ * There is no syntax highlighting. It needs a parser per language, which is a
+ * registry of its own.
+ *
+ * **There is now a copy button, and this is the paragraph that used to say
+ * there could not be.** The finding this lane filed on 21 August was that a
+ * click is not something a tree can express, and faking one would be worse than
+ * the gap;
+ * [0086](../../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)
+ * answered it by making a behaviour something the runtime builds and a
+ * primitive places. So this primitive declares `copy`, declares the two strings
+ * its control needs a name from, declares itself `interactive` because a
+ * control is a target, and places what it is handed. It implements nothing:
+ * the whole of its part is deciding *where the button goes*, which is in the
+ * panel's bar, at the trailing edge, beside the language label.
+ *
+ * That decision has one consequence worth stating. A panel with neither a
+ * `language` nor a terminal `tone` has no bar to put a button in — and rather
+ * than float one over the code, where it would sit on top of the first line of
+ * a snippet whose whitespace is its content, the bar appears when the button
+ * does. So a copyable panel always has somewhere to say what it is, which is
+ * what a reader wants beside a command anyway.
+ *
+ * What the button copies comes from the *tree*, not from this markup: 0086's
+ * ruling, and the reason a panel that renders a language chip does not put the
+ * word `bash` on somebody's clipboard.
  */
 
 const props = z
@@ -70,6 +91,8 @@ const props = z
 
 type Props = z.infer<typeof props>
 
+type CodeTextKey = "copy" | "copied"
+
 /**
  * The bar is `border-subtle` against a `bg-surface-muted` panel in both tones,
  * so a terminal is not a *darker* panel — no palette slot means "dark", and one
@@ -90,59 +113,82 @@ export const loomCode = definePrimitive({
     "A code snippet or a terminal command, in monospace on a tinted surface, with an optional language label and caption. Its code is a child.",
   props,
   slots: [],
-  component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
+  /**
+   * The two strings the `copy` control needs a name from. They are the
+   * primitive's own rather than the tree's — a model writes no part of a
+   * button's label — and they travel with it into every deployment, where a
+   * dictionary may translate them and nothing has to remember to (0063).
+   */
+  text: { copy: "Copy", copied: "Copied" },
+  behaviours: ["copy"],
+  /**
+   * Unconditionally, because the control is unconditional. `{ whenProps }` is
+   * for the primitive that is a target only under some configuration — a card
+   * with an `href` — and there is no `copy` prop here to name: a snippet you
+   * cannot take with you is not a thing this library offers as an option.
+   */
+  interactive: "always",
+  component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, CodeTextKey, "copy">) => {
     const terminal = given.tone === "terminal"
     const compact = given.density === "compact"
-    const barred = terminal || given.language !== undefined
 
-    const bar = !barred
-      ? null
-      : createElement(
-          "div",
-          {
-            key: "bar",
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: space(2),
-              paddingBlock: space(2),
-              paddingInline: space(3),
-              borderBlockEnd: `1px solid ${colour("border-subtle")}`,
-              background: colour("bg-surface"),
+    const bar = createElement(
+      "div",
+      {
+        key: "bar",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: space(2),
+          paddingBlock: space(2),
+          paddingInline: space(3),
+          borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+          background: colour("bg-surface"),
+        },
+      },
+      !terminal
+        ? null
+        : createElement(
+            "span",
+            {
+              key: "dots",
+              "aria-hidden": true,
+              style: { display: "flex", gap: space(1), flex: "0 0 auto" },
             },
-          },
-          !terminal
-            ? null
-            : createElement(
-                "span",
-                {
-                  key: "dots",
-                  "aria-hidden": true,
-                  style: { display: "flex", gap: space(1), flex: "0 0 auto" },
-                },
-                createElement("span", { key: "a", style: DOT }),
-                createElement("span", { key: "b", style: DOT }),
-                createElement("span", { key: "c", style: DOT })
-              ),
-          given.language === undefined
-            ? null
-            : createElement(
-                "span",
-                {
-                  key: "language",
-                  style: {
-                    /** Centred in a terminal bar, leading in a source bar — where a filename goes. */
-                    marginInline: terminal ? "auto" : undefined,
-                    fontFamily: monospace(),
-                    fontSize: size(1),
-                    fontWeight: weight("body"),
-                    letterSpacing: "0.06em",
-                    color: colour("fg-muted"),
-                  },
-                },
-                given.language
-              )
-        )
+            createElement("span", { key: "a", style: DOT }),
+            createElement("span", { key: "b", style: DOT }),
+            createElement("span", { key: "c", style: DOT })
+          ),
+      given.language === undefined
+        ? null
+        : createElement(
+            "span",
+            {
+              key: "language",
+              style: {
+                /** Centred in a terminal bar, leading in a source bar — where a filename goes. */
+                marginInline: terminal ? "auto" : undefined,
+                fontFamily: monospace(),
+                fontSize: size(1),
+                fontWeight: weight("body"),
+                letterSpacing: "0.06em",
+                color: colour("fg-muted"),
+              },
+            },
+            given.language
+          ),
+      /**
+       * Last, and pushed to the trailing edge whatever else is in the bar. The
+       * `auto` margin does the pushing rather than a `justify-content` on the
+       * bar, because a terminal's label is centred by its own `auto` margins
+       * and one distribution cannot do both.
+       */
+      createElement(
+        "span",
+        { key: "copy", style: { display: "flex", marginInlineStart: "auto", flex: "0 0 auto" } },
+        loom.behaviours.copy
+      )
+    )
 
     const listing = createElement(
       "pre",
