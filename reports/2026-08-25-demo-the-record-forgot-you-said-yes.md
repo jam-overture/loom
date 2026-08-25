@@ -297,7 +297,12 @@ Every screenshot is this branch's `next build` output driven in Chromium — not
 preview, which this environment cannot open (`vercel.app` is not on the sandbox's
 egress allowlist; the standing 19 August finding).
 
-**Preview:** on the pull request.
+**Preview:**
+`https://loom-git-demo-05-the-record-f4dc70-jpizzolato36-6341s-projects.vercel.app/demo`
+
+One push, one preview, built `Ready` on the first attempt. The commit identity was
+left alone again, which is the whole of the 22 August finding's recommendation and
+now three runs of it holding.
 
 **To see it yourself:** open `/demo`, press the green button, then press **Apply
 this change**, and read the card without scrolling. The green line under the rule
