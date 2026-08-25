@@ -221,6 +221,37 @@ three ways out and a recommendation.
   the last red test in five consecutive runs, never once in the lane that owns
   the file.
 - **three files in other lanes changed** — recorded per the rule added this run.
+- **the commit-identity trap, fourth occurrence** (for `@jonathanbravecredit`) —
+  see below.
+
+## What went wrong in this run
+
+The first commit went up authored as `jonathanbravecredit
+<jpizzolato36@gmail.com>`, Vercel refused the deployment, and #157 went up with
+**no preview**. Repaired with `--amend --reset-author` and force-pushed before
+any review existed.
+
+This is the fourth occurrence of a failure filed three times, and **I had read
+the 24 August entry about it in this run, before choosing work** — which is what
+that entry itself says happened to the routine before me. The rule is filed in
+`FINDINGS.md`, which is read for *work*; a `git commit` flag is procedure, and
+procedure is not what anyone is looking for in seven thousand lines.
+
+What my occurrence adds is that the appealing wrong thing has a worse variant.
+The three before me used a *descriptive* author and got "GitHub couldn't verify
+an account". I used **the maintainer's own name and email**, reasoning that it
+looked more correct than `Claude` — and `jpizzolato36@gmail.com` resolves to
+GitHub account **`jpizzo`**, which is a different account from
+`jonathanbravecredit`. So the commit was attributed to a real third party who is
+not on the Vercel team, and briefly claimed the maintainer wrote it. A
+descriptive author is merely unverifiable; this one was wrong about who did the
+work.
+
+The recommendation every previous entry makes — one paragraph in
+`docs/routines.md` beside **Network access** and **Credentials** — is unchanged,
+now with a clause about the maintainer's email. I did not write it myself for the
+reason those entries give, but this run did add a rule to that file at the
+maintainer's instruction, so it takes one word on a pull request.
 
 ## Open questions
 
