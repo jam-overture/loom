@@ -15,6 +15,7 @@ import { BAND } from "../bands"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
 import { action, heading, prose, section, stack } from "../nodes"
+import { answerBand } from "./answer"
 import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
@@ -456,6 +457,28 @@ export const homePageTree = (context: PageContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
+        /**
+         * The answer, before the pitch, and only for a visitor who asked.
+         *
+         * It sits above the opening band rather than inside it because the
+         * opening band is one of the things a request may configure — *Turn it
+         * down* changes its backdrop and how tall it stands — and a band whose
+         * props are a demonstration must not also be a status display. Above it
+         * the notice is the first thing under the menu in every state, which is
+         * where a browser leaves a reader who has just followed a link.
+         *
+         * Nothing is spread here when there is no record: the arrival page is
+         * the tree it has always been, node for node.
+         */
+        ...(context.record === undefined
+          ? []
+          : [
+              answerBand(ids, {
+                origin: context.origin,
+                theme: context.theme,
+                record: context.record,
+              }),
+            ]),
         hero(ids, context),
         vocabulary(ids),
         /**
