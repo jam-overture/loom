@@ -6731,7 +6731,11 @@ by.
 
 ## 2026-08-23 — the portal can now keep a hold across a request, and does not
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**closed by `portal-13-what-this-would-do`** (26 August) — taken exactly as
+written, with what taking it turned up recorded in the 26 August entry. Original
+status below.
+
 — nothing is broken today, and the thing that would break is invisible when it does
 
 `postgresHoldStore` exists as of
@@ -9031,3 +9035,223 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-26 — the review queue was empty by construction on the one deployment anybody looks at
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**closed by `portal-13-what-this-would-do`** — closing the framework routine's
+23 August entry, with what taking it turned up
+
+`portalHolds` is `postgresHoldStore(portalDatabase)` when a database is
+configured and `memoryHoldStore()` when not. Two lines, exactly as the finding
+said, and no schema step because `db:push` already creates `loom_holds`.
+
+**Three things are worth recording beyond "done".**
+
+**The shape was already in the file next door, twice.** `telemetry.ts` and
+`store.ts` both choose on `portalDatabase` with the same ternary and both explain
+why in a comment. The hold store was the one of the three that did not — added
+before `postgresHoldStore` existed and never revisited when it did. A divergence
+of this kind is invisible in review precisely because the two neighbours are
+right: nothing about `memoryHoldStore()` on its own line looks like an omission.
+
+**What it cost is larger than a backend.** The review queue is the first item the
+portal brief names under *where the value is*, and a held proposal is the one
+artefact in this system that exists in no repository, no log and no build output.
+On the deployment the maintainer actually opens, that queue could never contain
+anything: the instance that judged a change was gone before a reviewer arrived,
+and a confirmation came back `not-held` — which the card reads as *"Somebody has
+answered this one"* and which was, in truth, *the machine that was holding this
+went away*. **Six runs of this lane polished a screen that production could not
+show.** Nothing on it would ever have said so.
+
+**The race the finding warned about is now real, and the wording was already
+right.** `release` is a take, enforced by the statement rather than by the process
+being single-threaded, so two reviewers pressing *Apply this change* together
+produce one success and one `not-held`. "Already answered · Somebody has answered
+this one. There is nothing left to decide." was written when that could not
+happen and is correct now that it can — the loser of that race is right, not
+faulty. Recorded because it is the rare case where a sentence written for one
+reason turned out to be the sentence the other reason needed.
+
+The durability notice on `/portal/pages` now names holds, which is the half that
+is worse without a database and the half nothing on screen gave away.
+
+---
+
+## 2026-08-26 — the review queue's middle was the last screen in the runtime's voice, and the 25 August entry said the queue was empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-13-what-this-would-do` — a correction to my own 25 August entry
+
+That entry closed the rename queue with *"every screen in the portal now leads in
+a person's words"*, and hedged correctly that an empty queue is not the same as a
+finished job. It was righter than it knew, and the miss has a shape worth naming.
+
+**The rename queue was tracked by screen, and this was not a screen.**
+`ProposalEffectView` is a *section* inside the hold card. The card was rewritten
+on 21 August; the queue moved on to the next route; and the section in the middle
+of it — the one that answers the only question a reviewer has, *what would this do
+to my page* — was never on the list. It printed `reconfigure` in a monospace
+chip, `2 values, 1 already set this way`, `within loom.band, position 0 → 2`,
+`not in this tree`, `its words:`, and, on the line that decides whether somebody
+presses a button, `The tree has moved on: judged against revision 4, now at 7.`
+
+**A per-screen queue cannot see a shared component**, and this one is shared: the
+demo renders it too. So the generalisable rule is that the unit of a rename pass
+is *what a reader meets*, not *what a route is called* — and a component reachable
+from two surfaces is the likeliest thing to be missed by a pass organised the
+other way.
+
+Everything is one click down under *What the change record says*, and the record
+is **strictly larger** than it was: the composed detail, the path, the runtime's
+own obstacle sentence and both revision numbers, where before the obstacle was
+dropped for a stale proposal and the revision pair was printed only when it was
+the problem.
+
+---
+
+## 2026-08-26 — two more defects a screenshot found, and one of them was inside a closed disclosure
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-13-what-this-would-do` — recorded for the count, which is the argument
+
+**Eleven across seven runs.** The recommendation that a screenshot at two widths
+belongs in `docs/routines.md` was made on 23, 24 and 25 August and is not made
+again; it is the maintainer's call.
+
+1. **One fact printed twice, in two near-identical sentences, inside a
+   disclosure.** The stale-proposal record read `the change was judged against
+   revision 0; this page is at revision 1` directly above `judged against
+   revision 0 · this page is at revision 1`. Worse than the duplication: to make
+   room for the restatement, the obstacle's technical half had **replaced**
+   `describeTreeError`'s own sentence — so for a stale proposal, the one string a
+   disclosure exists to carry was the one string it dropped. The runtime's
+   sentence is the technical half in both cases now, and the pair is printed
+   once beneath it.
+2. **`and the 1 piece inside it`, `It brings 1 more piece with it`, `1 of these 2
+   steps write`.** All correct; all read as a machine filling a slot.
+
+**What is new in this pair is where the first one was.** Every previous entry of
+this kind was a defect on the surface. This one was behind a closed `<details>`,
+and the only reason it was seen is that this lane photographs the screen a second
+time with every disclosure opened. **A plain-language pass moves material into
+disclosures, so from now on the disclosures are where the un-looked-at strings
+accumulate** — the technical record is not exempt from being read, it is just
+read second.
+
+The component test now reads the surface and the record **separately**, by
+cloning the container and stripping `<details>`. A closed disclosure is still in
+the DOM — deliberately, so find-in-page reaches it — which means every previous
+`document.body.textContent` assertion about "on the surface" in this lane was
+weaker than it looked. That is fixed here for this component and is true of
+others.
+
+---
+
+## 2026-08-26 — a portal screen that only a model can populate could not be photographed, for the second run running
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+second occurrence, and the recommendation has changed
+
+`ANTHROPIC_API_KEY` was absent again. The portal degrades honestly and says so,
+which is right, and it means no change can be composed, so no proposal can be
+held, so **the review queue this run rewrote cannot be populated through the user
+interface at all**.
+
+Same workaround as 25 August: a temporary, uncommitted module calling
+`portalStore.append` and `portalHolds.hold` — the real contracts — behind an env
+var, deleted before committing. The screen, the store, the hold store, the read
+path and the components in the pictures are all real; only the origin of the data
+is scripted.
+
+**On 25 August I declined to build `LOOM_SEED_LOG`**, on the reasoning that "the
+screenshots are easier" is a weak argument for a code path a user never asks for.
+Two things have changed my mind:
+
+- **It is not intermittent enough to wait out.** Two consecutive runs, both
+  without a key, both hand-rolling the same scaffolding from scratch because a
+  fresh session inherits nothing but the repository.
+- **The scaffolding nearly shipped a wrong picture.** This run's first attempt
+  set `tone: "default"` on a `loom.prose`, which the portal's registry does not
+  accept, and the preview correctly reported *"One part of this page didn't
+  draw."* It was caught because the screenshot was looked at. A run that
+  hand-rolls throwaway data under time pressure will eventually not catch it, and
+  the failure mode is a report whose pictures argue for something that is not
+  true.
+
+**Recommendation: build it.** A documented, tested, committed seeding capability
+behind a flag, owned here, serving the demo and marketing lanes too. The cost is
+a second seeding path to keep honest; the cost of not having it is now measured
+at two runs of reconstruction and one near miss. Not done this run because it is
+a feature and this run already had one; **one word on the pull request and the
+next run writes it.**
+
+---
+
+## 2026-08-26 — the portal previews with four primitives and the product ships sixty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+question rather than a defect, and nothing was changed
+
+Found sideways. A scaffolding delta set `tone: "default"` on a `loom.prose` and
+the preview reported one part omitted, with the renderer's own sentence one click
+down:
+
+> `node n_seed4 does not satisfy the props declared by "loom.prose" … tone: Invalid enum value. Expected 'normal' | 'muted', received 'default'`
+
+`src/primitives/loom.prose.ts` declares `default | muted`. The portal declares
+`normal | muted`, in `app/(portal)/_lib/primitives/loom.prose.ts`, because the
+portal registers **four local primitives** — `loom.page`, `loom.card`,
+`loom.heading`, `loom.prose` — and not the starter library.
+
+**This is deliberate and it is not a bug.** 0018 makes the portal a consumer that
+registers through the public SDK like any host would, the four are internally
+consistent, and the registry is both the renderer's resolver and what bounds what
+a model may build here (0013) — so a model asked for a change on `/portal/pages`
+is told about those four and cannot propose anything else. Nothing was changed.
+
+What is worth someone's attention is the consequence: **the surface where changes
+are reviewed previews pages built from four primitives, while `§4b` has spent a
+month building sixty.** A reviewer cannot see a `loom.hero`, a `loom.form` or a
+`loom.table` on the one screen whose job is showing them what a change would do,
+and the four local definitions have already drifted from their library namesakes
+by at least one enum value.
+
+Three shapes, none taken, because which is right is a product question rather
+than a portal one:
+
+- **Leave it.** The four are a self-contained specimen and the seed tree is built
+  from them; a portal that registered sixty would be previewing a catalogue
+  rather than a customer's page.
+- **Register the starter library instead**, and seed a page that uses more of it.
+  Closest to what a real host does, and it makes the preview the deployment's
+  renderer rather than a smaller one.
+- **Register both**, which is the worst of the three: two definitions of
+  `loom.prose` cannot both win, and the registry would refuse the duplicate.
+
+**Recommendation: the second**, if the portal is meant to look like what a
+customer gets. It is a decision, not a fix, so it is a finding.
+
+---
+
+## 2026-08-26 — the framework wanted nothing from this lane, and `src/` was not opened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+
+Every export used is public and reached through a published entry point:
+`postgresHoldStore` and `LoomDatabase` from `@loom/runtime/postgres`, `HoldStore`
+and `HeldProposal` from `@loom/runtime/write`, `applyDelta`, `applyOperation`,
+`findNode`, `findParent`, `nodeLabel`, `nodePath`, `walkTree`,
+`describeTreeError` and `configurationOf` from `@loom/runtime`.
+
+Two things the runtime already had turned out to be exactly what a plain sentence
+needed, and both are worth naming because they were not designed for it.
+`OperationEffect.carries` counting the node itself is what lets *"and the 4
+pieces inside it"* be right rather than off by one. And `HeldProposal` keeping
+`baseRevision` **beside** the delta rather than inside it — "so a reader can tell
+a hold is stale without parsing the delta", says its own comment — is what makes
+*"This was worked out on an older version of this page"* a sentence the portal
+can write without unpacking anything.
