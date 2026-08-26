@@ -9115,3 +9115,72 @@ the five screenshots, which found two defects that no assertion did.
 Recommendation unchanged: fix the allowlist, or drop the line from the briefs.
 Nine runs across five lanes have now each spent a call finding out, and the cost
 is small and entirely avoidable.
+
+---
+
+## 2026-08-26 — the screenshots in a pull request body have not been rendering as images, for at least two runs
+
+**Filed by:** `Loom primitives` · **Owned by:** every lane that publishes a
+screenshot · **Status:** open — the workaround is known and is one line; the
+cause is not this lane's to fix
+
+Every routine brief that produces a visual says some version of the primitives
+brief's step 8:
+
+> Open the PR against `main` with **the deployed preview URL and a screenshot of
+> every primitive you added, under both palettes.** This is the surface that has
+> to pop; **it has to be looked at.**
+
+**It has not been looked at, because it has not been rendering.** Markdown image
+syntax written into a pull request body through the GitHub MCP tools arrives
+with its leading `!` stripped, so `![Editorial](reports/….png)` becomes
+`[Editorial](reports/….png)` — a plain link to a binary file. The maintainer
+sees five links and has to click through each one, which is exactly the friction
+the instruction exists to remove.
+
+This is **not new to this run.** #156, the 25 August primitives pull request,
+lists its five screenshots as a bullet list of relative links for the same
+reason. Its report renders them correctly, because a committed `.md` file is not
+put through this path — which is why four runs of screenshots have looked right
+in `reports/` and wrong where the review happens, and why nobody noticed.
+
+Three things get mangled on the way in, all of them in the same pass:
+
+| Written | Arrives as |
+| --- | --- |
+| `![alt](path.png)` | `[alt](path.png)` — the `!` is dropped |
+| `<https://example.com>` | *removed entirely* — an autolink becomes nothing |
+| `` `<img>` `` | `` `` `` — anything tag-shaped inside inline code is emptied |
+
+The second is the one that bites hardest, because a bare-autolink preview URL
+**disappears from the body without a trace** and the brief requires it to be
+there. This run published one and it was gone; caught only by reading the body
+back.
+
+A fourth, less predictable: a relative markdown link whose path is long enough
+comes back wrapped in double backticks, so
+`[0066](decisions/0066-a-card-is-the-target-…-is-bought.md)` renders as inline
+code rather than as a link. Reproduced twice on that one filename and not on
+`0094`'s, which suggests a length threshold rather than a character.
+
+**The workaround, which every lane can copy today.** An explicit HTML `img` tag
+survives intact, and an absolute blob URL renders for a signed-in viewer on a
+private repository where `raw.githubusercontent.com` would not:
+
+```html
+<img src="https://github.com/jam-overture/loom/blob/BRANCH/reports/FILE.png?raw=true"
+     alt="…" width="900">
+```
+
+Use an ordinary `[text](url)` link for the preview rather than `<url>`, and
+avoid putting tag-shaped text inside backticks. This run's body does all three
+and renders correctly — it is worth opening #164 beside #156 to see the
+difference.
+
+**Recommendation.** The workaround is enough to unblock every lane and should go
+in `docs/routines.md` beside the sentence that asks for the screenshot, since
+that is the document every routine reads first. Whether the stripping itself is
+worth chasing is the maintainer's call; it is in the tooling rather than in this
+repository, and a documented one-line workaround costs nothing to follow. Not
+adding it to `docs/routines.md` myself — a routine cannot write the governance
+it is bound by, which is the rule that file states about itself.
