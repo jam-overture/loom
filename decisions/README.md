@@ -151,3 +151,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0091](0091-motion-stops-in-edit-mode-and-that-is-where-a-decorative-duplicate-belongs.md) | Motion stops in edit mode, and that is where a decorative duplicate belongs | Accepted | §4b |
 | [0092](0092-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md) | A disclosure control owns its button and the primitive owns the region | Accepted | §4b |
 | [0093](0093-a-decorative-copy-is-the-same-children-without-identity.md) | A decorative copy is the same children without identity | Accepted | §4b |
+| [0094](0094-a-behaviour-may-publish-a-number-into-a-scope-the-primitive-marks.md) | A behaviour may publish a number into a scope the primitive marks | Accepted | §4b |

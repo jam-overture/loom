@@ -6,7 +6,7 @@ import { nodeIdSchema } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
-import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../render/behaviour.js"
+import { BEHAVIOURS, NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../render/behaviour.js"
 import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
@@ -312,6 +312,18 @@ export type PlacementVerdict =
       readonly unplacedSlots: readonly string[]
       /** Declared behaviours whose control no probed configuration placed. */
       readonly unplacedBehaviours: readonly BehaviourName[]
+      /**
+       * Declared behaviours that need a scope on the primitive's own markup and
+       * did not get one under any probed configuration.
+       *
+       * A different fault from an unplaced control and a worse one to find on a
+       * page, because the control is *there*: it renders, it takes focus, it
+       * follows the pointer, and the number it publishes lands on an element no
+       * rule of the primitive's reads. Placed and unscoped is a handle that
+       * moves and moves nothing, which is the defect the behaviour seam exists
+       * to keep out.
+       */
+      readonly unscopedBehaviours: readonly BehaviourName[]
       /** Whether any probed configuration placed the children it was handed. */
       readonly rendersChildren: boolean
       /** The configurations that answered — `{}` alone when the schema closes over nothing. */
@@ -342,6 +354,26 @@ const containsMarker = (node: unknown, marker: string): boolean => {
   return Object.values(node.props as Readonly<Record<string, unknown>>).some((value) =>
     containsMarker(value, marker)
   )
+}
+
+/**
+ * Whether the attribute appears on any element in what the component returned.
+ *
+ * Presence is the whole test, and the value is deliberately not looked at: a
+ * scope is marked with an empty string, `true`, or the name of the thing it
+ * encloses, and none of those is the runtime's business. Every prop is searched
+ * for the same reason `containsMarker` searches them all — a primitive that
+ * hands its scoped box to another component as a prop has still marked one.
+ */
+const carriesAttribute = (node: unknown, attribute: string): boolean => {
+  if (Array.isArray(node)) return node.some((child: unknown) => carriesAttribute(child, attribute))
+  if (!isValidElement(node)) return false
+
+  const props: Readonly<Record<string, unknown>> = node.props as Readonly<Record<string, unknown>>
+
+  if (attribute in props && props[attribute] !== undefined && props[attribute] !== false) return true
+
+  return Object.values(props).some((value) => carriesAttribute(value, attribute))
 }
 
 export const probePlacement = (
@@ -384,10 +416,18 @@ export const probePlacement = (
   const placed = (marker: string): boolean =>
     answered.some((attempt) => attempt.result.ok && containsMarker(attempt.result.value, marker))
 
+  const scoped = (attribute: string): boolean =>
+    answered.some((attempt) => attempt.result.ok && carriesAttribute(attempt.result.value, attribute))
+
   return {
     outcome: "probed",
     unplacedSlots: declaredSlots.filter((name) => !placed(slotMarker(name))),
     unplacedBehaviours: declaredBehaviours.filter((name) => !placed(behaviourMarker(name))),
+    unscopedBehaviours: declaredBehaviours.filter((name) => {
+      const attribute = BEHAVIOURS[name].scope
+
+      return attribute !== undefined && !scoped(attribute)
+    }),
     rendersChildren: placed(PROBE_CHILDREN),
     probed: answered.map((attempt) => attempt.props),
     threw: failuresIn(attempts),

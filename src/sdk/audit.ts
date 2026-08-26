@@ -59,6 +59,12 @@ export type UnplacedBehaviours = {
   readonly behaviours: readonly BehaviourName[]
 }
 
+/** A primitive that took a control needing a scope and marked no element as one. */
+export type UnscopedBehaviours = {
+  readonly type: PrimitiveType
+  readonly behaviours: readonly BehaviourName[]
+}
+
 /** A primitive that threw under some configuration its own schema accepts. */
 export type ThrowingConfigurations = {
   readonly type: PrimitiveType
@@ -97,6 +103,14 @@ export type RegistryAudit = {
    * the content a behaviour acts on renders perfectly without it.
    */
   readonly unplacedBehaviours: readonly UnplacedBehaviours[]
+  /**
+   * Placed a control that publishes into a scope, and marked no scope for it to
+   * publish into. Separate from `unplacedBehaviours` because the two need
+   * different repairs and only one of them is visible on the page: an unplaced
+   * control is a control that is not there, and an unscoped one is a control
+   * that is there, moves, and does nothing.
+   */
+  readonly unscopedBehaviours: readonly UnscopedBehaviours[]
   /**
    * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and
    * label as props and has nowhere to put a text node. It is here because it is
@@ -149,6 +163,9 @@ const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
 
 const unplacedBehavioursIn = (placement: PlacementVerdict): readonly BehaviourName[] =>
   placement.outcome === "probed" ? placement.unplacedBehaviours : []
+
+const unscopedBehavioursIn = (placement: PlacementVerdict): readonly BehaviourName[] =>
+  placement.outcome === "probed" ? placement.unscopedBehaviours : []
 
 /**
  * The throwing configurations a placement verdict saw, from whichever branch it
@@ -208,6 +225,9 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
     unplacedBehaviours: audits
       .filter((audit) => unplacedBehavioursIn(audit.placement).length > 0)
       .map((audit) => ({ type: audit.type, behaviours: unplacedBehavioursIn(audit.placement) })),
+    unscopedBehaviours: audits
+      .filter((audit) => unscopedBehavioursIn(audit.placement).length > 0)
+      .map((audit) => ({ type: audit.type, behaviours: unscopedBehavioursIn(audit.placement) })),
     leaves: audits
       .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
       .map((audit) => audit.type),
@@ -260,6 +280,10 @@ const describePlacement = (placement: PlacementVerdict): string => {
 
   if (placement.unplacedBehaviours.length > 0) {
     return `takes the ${placement.unplacedBehaviours.join(", ")} behaviour and does not place ${placement.unplacedBehaviours.length === 1 ? "its control" : "their controls"}`
+  }
+
+  if (placement.unscopedBehaviours.length > 0) {
+    return `places the ${placement.unscopedBehaviours.join(", ")} control and marks no scope for it to publish into`
   }
 
   const under =

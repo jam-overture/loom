@@ -4,6 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 
 import { CopyControl } from "./behaviour-copy.js"
 import { DiscloseControl } from "./behaviour-disclose.js"
+import { DragControl } from "./behaviour-drag.js"
 import type { PrimitiveText } from "./text.js"
 
 /**
@@ -62,7 +63,7 @@ import type { PrimitiveText } from "./text.js"
  * *says* rather than whatever text happened to render beside it.
  */
 
-export const BEHAVIOUR_NAMES = ["copy", "disclose"] as const
+export const BEHAVIOUR_NAMES = ["copy", "disclose", "drag"] as const
 
 export type BehaviourName = (typeof BEHAVIOUR_NAMES)[number]
 
@@ -96,6 +97,53 @@ export type BehaviourName = (typeof BEHAVIOUR_NAMES)[number]
  */
 export const DISCLOSED_ATTRIBUTE = "data-loom-disclosed"
 
+/**
+ * The attribute a primitive stamps on the element a drag control publishes
+ * into, and the custom property the number arrives as.
+ *
+ * These two are the whole of the contract for `drag`, and they are a pair
+ * rather than one thing because they answer different halves of the same
+ * question. `disclose` could stamp its state on its own button, because a
+ * sibling or `:has()` selector reads *downwards and sideways* from an ancestor
+ * and that is where the region it hides lives. A number cannot travel that way:
+ * a custom property set on an element is visible to that element and its
+ * descendants and to nothing else, and the layer a wipe clips is the control's
+ * *uncle*, not its child.
+ *
+ * So the primitive names the box it wants the number in — the one enclosing both
+ * the control and whatever moves with it — and the runtime writes there:
+ *
+ * ```tsx
+ * createElement("div", { [DRAG_SCOPE_ATTRIBUTE]: "", style: { [DRAG_VALUE_PROPERTY]: position } },
+ *   // clipped from the inline start at the published number, per cent
+ *   createElement("div", { style: { clipPath: `inset(0 calc(100% - var(${DRAG_VALUE_PROPERTY}) * 1%) 0 0)` } }, …),
+ *   loom.behaviours.drag)
+ * ```
+ *
+ * Three properties of that shape are what make it safe, and each is the reason
+ * for a piece of it:
+ *
+ * - **The number is unitless**, 0 to 100, so a rule can multiply it — by `1%`
+ *   for a clip, by `1px` for anything else — instead of being handed a length
+ *   the runtime guessed the meaning of.
+ * - **The primitive writes the value first**, from whatever prop it renders the
+ *   still version at, and the control overwrites it. So the server's markup is
+ *   already correct, a page with scripting off keeps it, and the control starts
+ *   where the page looks rather than snapping somewhere on the first press.
+ * - **The scope is marked by an attribute, not inferred.** The control's parent
+ *   is the primitive's business and might be a chip, a wrapper or the layer
+ *   itself; walking up to a *declared* box is the only version of this where the
+ *   primitive still owns its own box model — the same objection 0086 raised
+ *   against reading the DOM for the copy text.
+ *
+ * A control that finds no scope renders nothing at all, and the conformance
+ * probe reports the omission as `unscopedBehaviours` long before that.
+ */
+export const DRAG_SCOPE_ATTRIBUTE = "data-loom-drag"
+
+/** @see DRAG_SCOPE_ATTRIBUTE */
+export const DRAG_VALUE_PROPERTY = "--loom-drag"
+
 type Behaviour = {
   /** One line, for the reference. A behaviour is never shown to a model. */
   readonly description: string
@@ -112,6 +160,20 @@ type Behaviour = {
    * renders nothing, and the first of those is a question of when, not if.
    */
   readonly rendersControl: boolean
+  /**
+   * The attribute the primitive must stamp on an element of its own for this
+   * control to have anywhere to publish to. Absent for a behaviour that is
+   * complete in itself — `copy` acts on the tree and `disclose` acts on its own
+   * button, and neither needs a word from the primitive to work.
+   *
+   * It exists to be *checked*: a control that publishes into nothing renders,
+   * takes focus, moves under the pointer and changes nothing on the page, which
+   * is the exact defect the behaviour seam was written to keep out of this
+   * library. The probe
+   * looks for the attribute in what the primitive returned and reports its
+   * absence the same way it reports a control nobody placed.
+   */
+  readonly scope?: string
   readonly build: (content: string, text: PrimitiveText<string>) => ReactNode
 }
 
@@ -147,6 +209,33 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
     build: (_content, text) =>
       createElement(DiscloseControl, {
         label: text.disclose ?? "",
+      }),
+  },
+  /**
+   * The third member, and the first that hands something *back*.
+   *
+   * `copy` takes from the tree and `disclose` publishes a state on itself. A
+   * drag produces a number the primitive's own layout is a function of, which
+   * neither of those shapes can carry — so it is the first behaviour where the
+   * primitive has to say something first, by marking the scope the number lands
+   * in. `DRAG_SCOPE_ATTRIBUTE` is that sentence, and the whole of it.
+   *
+   * The case that forced it is `loom.before-after`, whose divider sits where a
+   * prop puts it and stays there. Both pure-CSS routes to moving it are worse
+   * than the gap — `resize: horizontal` gives a grab area of sixteen corner
+   * pixels drawn by the browser that no palette can reach, and CSS cannot read
+   * an `<input type="range">` at all — which is the argument that made this a
+   * behaviour rather than a trick.
+   */
+  drag: {
+    description:
+      "A control that publishes a number from 0 to 100 into a scope the primitive marks, moved by pointer or by the arrow keys.",
+    text: ["drag"],
+    rendersControl: true,
+    scope: DRAG_SCOPE_ATTRIBUTE,
+    build: (_content, text) =>
+      createElement(DragControl, {
+        label: text.drag ?? "",
       }),
   },
 }

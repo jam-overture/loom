@@ -8335,8 +8335,16 @@ says so, rather than framing it.
 
 ## 2026-08-25 — a wipe cannot be dragged, and the behaviour vocabulary has one member
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— the still version ships and is what most pages using this actually are.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-14-a-control-that-hands-back-a-number`** — the seam is
+built and `drag` is the vocabulary's third member (the second, `disclose`,
+landed the day this was filed). The design question it raised is answered in
+[0094](decisions/0094-a-behaviour-may-publish-a-number-into-a-scope-the-primitive-marks.md):
+the control hands its number back through a **custom property on a scope the
+primitive marks**, not through a callback, because a callback would put state
+and a client boundary in the primitive — the thing 0086 exists to prevent.
+Adopting it in `loom.before-after` is filed for your lane below, with the
+markup.
 
 `loom.before-after` places its divider where `position` says and leaves it
 there. Dragging it needs a pointer handler, and
@@ -9031,3 +9039,67 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-26 — the drag seam is built, and `loom.before-after` is the primitive it was built for
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` ·
+**Status:** open
+
+Your 25 August finding asked for a second member of `BEHAVIOUR_NAMES` so a wipe
+could be dragged, and said the open question was that a drag has to hand
+something *back* to the primitive that placed it. It is built, and the answer to
+that question is a two-part contract rather than a callback —
+[0094](decisions/0094-a-behaviour-may-publish-a-number-into-a-scope-the-primitive-marks.md)
+has the reasoning and the rejected alternatives.
+
+**What you write.** Mark the box the number moves things inside, seed it with
+the position you already render, and place the control:
+
+```tsx
+import { DRAG_SCOPE_ATTRIBUTE, DRAG_VALUE_PROPERTY } from "@loom/runtime/react"
+
+// on the root the two layers are absolute inside
+{ ...loom.editable, [DRAG_SCOPE_ATTRIBUTE]: "", style: { [DRAG_VALUE_PROPERTY]: position, … } }
+
+// the before layer, clipped at whatever the number currently is
+clipPath: `inset(0 calc(100% - var(${DRAG_VALUE_PROPERTY}) * 1%) 0 0)`
+
+// the divider
+insetInlineStart: `calc(var(${DRAG_VALUE_PROPERTY}) * 1%)`
+
+// and somewhere over the divider
+loom.behaviours.drag
+```
+
+Plus `behaviours: ["drag"]`, `text: { drag: … }` and `interactive` on the
+definition — the registry refuses all three omissions with a sentence saying
+which.
+
+**Four things worth knowing before you take it**, because each is a decision you
+may want to overrule rather than inherit:
+
+1. **The still version keeps working, unchanged, with scripting off.** The
+   number is in the markup from the server; the control overwrites it and
+   publishes nothing on mount. A page that never hydrates is the wipe you ship
+   today, at the position the prop says.
+2. **The runtime draws the grip**, two-tone for the reason your own divider is —
+   a fill in the palette's surface with a one-pixel ring of ink, because the
+   thing under it is a photograph no palette can predict. Your chevron circle
+   and the control's grip would be two handles in one place, so placing this
+   almost certainly means dropping that circle. **If the runtime's grip is wrong
+   for the primitive, say so and I will reshape it** — this is the ergonomics
+   test the seam has not had, and now is the cheap time.
+3. **The control sweeps 0 to 100**, wider than your `position` prop's 5–95. The
+   prop bounds what a *proposal* may write; a reader dragging to the end is
+   looking at one picture on purpose. Nothing writes the reader's number back to
+   the tree — this is a view, not an edit.
+4. **The audit will tell you if you get it wrong.** A declared `drag` whose
+   control you never place reports as `unplacedBehaviours`; one you place inside
+   no marked scope reports as `unscopedBehaviours`, which is the worse fault
+   because the handle is there and moves nothing.
+
+The `drag` name is deliberately not `before-after`: it publishes a number
+between 0 and 100 into a scope, and a split-pane or a range-shaped comparison
+would take exactly the same control.

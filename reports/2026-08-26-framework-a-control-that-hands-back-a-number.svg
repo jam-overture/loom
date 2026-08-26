@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 776" width="920" height="776" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="776" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">A number that only travels downwards</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">The layer a wipe clips is the control's uncle. CSS has no way up, so the primitive marks a box and the runtime writes into that.</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#15120e"/>
+    </marker>
+    <marker id="arrow-dead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b4462f"/>
+    </marker>
+  </defs>
+
+  <!-- ================= LEFT: WHAT DOES NOT WORK ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT A CONTROL CANNOT DO</text>
+
+  <rect x="40" y="130" width="392" height="300" rx="10" fill="#fdf7f5" stroke="#e8cfc6"/>
+
+  <rect x="62" y="152" width="348" height="256" rx="8" fill="#ffffff" stroke="#c9bfb2"/>
+  <text x="78" y="174" font-size="12" font-weight="650" fill="#15120e">&#60;div&#62;</text>
+  <text x="122" y="174" font-size="11" fill="#8a8178">the primitive's root</text>
+
+  <rect x="78" y="188" width="316" height="72" rx="7" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="94" y="210" font-size="12" font-weight="650" fill="#15120e">&#60;div&#62; the before layer</text>
+  <text x="94" y="230" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">clip-path: inset(0 calc(100% - var(--loom-drag)</text>
+  <text x="94" y="245" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">                              * 1%) 0 0)</text>
+
+  <rect x="78" y="274" width="316" height="30" rx="7" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="94" y="294" font-size="12" fill="#5c5751">&#60;div&#62; the after layer</text>
+
+  <rect x="78" y="318" width="316" height="72" rx="7" fill="#ffffff" stroke="#c9bfb2"/>
+  <text x="94" y="340" font-size="12" font-weight="650" fill="#15120e">loom.behaviours.drag</text>
+  <text x="94" y="360" font-size="11.5" fill="#5c5751">the control, one element, owned by the runtime</text>
+  <text x="94" y="378" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">--loom-drag: 62</text>
+
+  <path d="M 404 336 C 428 336 428 224 404 224" fill="none" stroke="#b4462f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-dead)"/>
+  <text x="40" y="452" font-size="11.5" fill="#b4462f">A custom property reaches its own element and everything inside it.</text>
+  <text x="40" y="470" font-size="11.5" fill="#b4462f">Never a sibling's subtree, which is where the clip lives.</text>
+
+  <!-- ================= RIGHT: WHAT IT DOES ================= -->
+  <text x="488" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT IT DOES INSTEAD</text>
+
+  <rect x="488" y="130" width="392" height="300" rx="10" fill="#f5f8f5" stroke="#cfe0d2"/>
+
+  <rect x="510" y="152" width="348" height="256" rx="8" fill="#ffffff" stroke="#8fae95" stroke-width="1.6"/>
+  <text x="526" y="174" font-size="12" font-weight="650" fill="#15120e">&#60;div data-loom-drag&#62;</text>
+  <text x="712" y="174" font-size="11" fill="#5f7a64">the marked scope</text>
+  <text x="526" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#5f7a64">style="--loom-drag: 35"  &#8592; the still position</text>
+
+  <rect x="526" y="204" width="316" height="72" rx="7" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="542" y="226" font-size="12" font-weight="650" fill="#15120e">&#60;div&#62; the before layer</text>
+  <text x="542" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">clip-path: inset(0 calc(100% - var(--loom-drag)</text>
+  <text x="542" y="261" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">                              * 1%) 0 0)</text>
+
+  <rect x="526" y="290" width="316" height="30" rx="7" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="542" y="310" font-size="12" fill="#5c5751">&#60;div&#62; the after layer</text>
+
+  <rect x="526" y="334" width="316" height="56" rx="7" fill="#ffffff" stroke="#c9bfb2"/>
+  <text x="542" y="356" font-size="12" font-weight="650" fill="#15120e">loom.behaviours.drag</text>
+  <text x="542" y="376" font-size="11.5" fill="#5c5751">walks up to the marked box and writes there</text>
+
+  <path d="M 852 352 C 876 352 876 186 852 186" fill="none" stroke="#3f6b48" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <text x="488" y="452" font-size="11.5" fill="#3f6b48">Set on the scope, it inherits down to every layer inside it,</text>
+  <text x="488" y="470" font-size="11.5" fill="#3f6b48">the clipped one included. One write moves the edge.</text>
+
+  <!-- ================= THE CONTRACT ================= -->
+  <text x="40" y="530" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE CONTRACT, BOTH HALVES</text>
+
+  <rect x="40" y="544" width="418" height="90" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="60" y="570" font-size="13" font-weight="650" fill="#15120e">The primitive marks and seeds</text>
+  <text x="60" y="592" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#5c5751">data-loom-drag  &#8212;  presence is the whole signal</text>
+  <text x="60" y="612" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#5c5751">--loom-drag: &#60;position&#62;  &#8212;  what the server sends</text>
+
+  <rect x="478" y="544" width="402" height="90" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="498" y="570" font-size="13" font-weight="650" fill="#15120e">The runtime publishes</text>
+  <text x="498" y="592" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#5c5751">--loom-drag: 0&#8230;100, unitless</text>
+  <text x="498" y="612" font-size="11.5" fill="#5c5751">a slider: pointer, arrows, page keys, Home and End</text>
+
+  <!-- ================= THE THREE STATES ================= -->
+  <text x="40" y="674" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT THE PROBE SEES, AND WHICH ONE LOOKS LIKE IT WORKS</text>
+
+  <rect x="40" y="688" width="272" height="48" rx="9" fill="#ffffff" stroke="#e4ded5"/>
+  <text x="58" y="710" font-size="12" font-weight="650" fill="#15120e">declared, never placed</text>
+  <text x="58" y="727" font-size="11" fill="#7a6f62">unplacedBehaviours &#8212; no handle at all</text>
+
+  <rect x="324" y="688" width="272" height="48" rx="9" fill="#fdf7f5" stroke="#e8cfc6"/>
+  <text x="342" y="710" font-size="12" font-weight="650" fill="#b4462f">placed, no scope</text>
+  <text x="342" y="727" font-size="11" fill="#b4462f">unscopedBehaviours &#8212; drags, moves nothing</text>
+
+  <rect x="608" y="688" width="272" height="48" rx="9" fill="#f5f8f5" stroke="#cfe0d2"/>
+  <text x="626" y="710" font-size="12" font-weight="650" fill="#3f6b48">placed and scoped</text>
+  <text x="626" y="727" font-size="11" fill="#3f6b48">nothing reported &#8212; the edge follows the drag</text>
+</svg>

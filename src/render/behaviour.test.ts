@@ -13,7 +13,13 @@ import { registryOf } from "../testing/definitions.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
-import { BEHAVIOURS, isBehaviourName, resolveBehaviours } from "./behaviour.js"
+import {
+  BEHAVIOURS,
+  DRAG_SCOPE_ATTRIBUTE,
+  DRAG_VALUE_PROPERTY,
+  isBehaviourName,
+  resolveBehaviours,
+} from "./behaviour.js"
 import { staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 import { NO_TEXT } from "./text.js"
@@ -82,6 +88,31 @@ const panelDefinition: PrimitiveEntry = definePrimitive({
     ),
 })
 
+/**
+ * The primitive the third behaviour exists for: a wipe that marks the box its
+ * number moves things inside, and places the control within it. `loom.before-after`'s
+ * shape rather than that file, which is another lane's.
+ */
+const wipeDefinition: PrimitiveEntry = definePrimitive({
+  type: "loom.wipe",
+  description: "Two pictures superimposed, wiped at a draggable edge",
+  props: z.object({}),
+  text: { drag: "Move the edge" },
+  interactive: "always",
+  behaviours: ["drag"],
+  component: ({ loom, children }) =>
+    createElement(
+      "div",
+      { ...loom.editable, [DRAG_SCOPE_ATTRIBUTE]: "", style: { [DRAG_VALUE_PROPERTY]: 50 } },
+      createElement("div", {
+        key: "before",
+        style: { clipPath: `inset(0 calc(100% - var(${DRAG_VALUE_PROPERTY}) * 1%) 0 0)` },
+      }),
+      children,
+      loom.behaviours.drag
+    ),
+})
+
 /** Declares nothing, and is here to prove it is handed nothing. */
 const proseDefinition: PrimitiveEntry = definePrimitive({
   type: "loom.prose",
@@ -113,6 +144,7 @@ describe("the behaviour vocabulary", () => {
   it("is closed, and a name outside it is not one", () => {
     expect(isBehaviourName("copy")).toBe(true)
     expect(isBehaviourName("disclose")).toBe(true)
+    expect(isBehaviourName("drag")).toBe(true)
     expect(isBehaviourName("paste")).toBe(false)
     expect(isBehaviourName("constructor")).toBe(false)
   })
@@ -122,8 +154,19 @@ describe("the behaviour vocabulary", () => {
    * for the friction of adding to it. This is that list, asserted rather than
    * described, so growing it is a visible edit here as well as there.
    */
-  it("is the two controls the runtime implements, and no others", () => {
-    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose"])
+  it("is the three controls the runtime implements, and no others", () => {
+    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose", "drag"])
+  })
+
+  /**
+   * A scope is the one thing a behaviour can require of the primitive that
+   * takes it, so which behaviours require one is worth asserting rather than
+   * describing: it decides which of them the probe holds to a second check.
+   */
+  it("says which controls need somewhere of the primitive\'s to publish into", () => {
+    expect(BEHAVIOURS.copy.scope).toBeUndefined()
+    expect(BEHAVIOURS.disclose.scope).toBeUndefined()
+    expect(BEHAVIOURS.drag.scope).toBe(DRAG_SCOPE_ATTRIBUTE)
   })
 
   it("says of every behaviour which strings its control needs", () => {
@@ -337,6 +380,27 @@ describe("registering a primitive that takes a behaviour", () => {
     expect(errorOf(entry)).toContain("renders a target")
   })
 
+  it("accepts a wipe that declares the one string its drag control needs", () => {
+    expect(createPrimitiveRegistry([wipeDefinition]).ok).toBe(true)
+  })
+
+  it("refuses a drag control with no string to be named by", () => {
+    const entry: PrimitiveEntry = { ...wipeDefinition, text: {} }
+
+    expect(errorOf(entry)).toContain('declares no "drag" text')
+  })
+
+  /**
+   * A slider takes focus and swallows the arrow keys, so it is as much a target
+   * as a button — and the check is per behaviour, so a third one that forgot to
+   * say so would register happily.
+   */
+  it("refuses a wipe that takes a drag control and does not call itself interactive", () => {
+    const entry: PrimitiveEntry = { ...wipeDefinition, interactive: undefined }
+
+    expect(errorOf(entry)).toContain("renders a target")
+  })
+
   it("answers for a type it knows, and for one it does not", () => {
     const registry = registryOf([codeDefinition, proseDefinition, panelDefinition])
 
@@ -402,5 +466,47 @@ describe("the audit", () => {
     expect(auditRegistry(registryOf([half])).unplacedBehaviours).toEqual([
       { type: "loom.panel", behaviours: ["copy"] },
     ])
+  })
+
+  it("has nothing to report about a wipe that places its control and marks its scope", () => {
+    const audit = auditRegistry(registryOf([wipeDefinition]))
+
+    expect(audit.unplacedBehaviours).toEqual([])
+    expect(audit.unscopedBehaviours).toEqual([])
+  })
+
+  /**
+   * The fault the second check exists for, and the reason it is not folded into
+   * the first: everything the placement probe asks is satisfied. The control is
+   * there, it renders, it takes focus, it follows the pointer — and it writes
+   * its number onto an element no rule of this primitive reads, so the picture
+   * does not move. Placed and unscoped is the worst of the three states to find
+   * on a page, because it is the only one that looks like it works.
+   */
+  it("names a wipe that places the control and marks nothing for it to publish into", () => {
+    const unscoped = definePrimitive({
+      type: "loom.wipe",
+      description: "A wipe that forgot to say where its number goes",
+      props: z.object({}),
+      text: { drag: "Move the edge" },
+      interactive: "always",
+      behaviours: ["drag"],
+      component: ({ loom, children }: LoomPrimitiveProps<Record<string, never>, string, "drag">) =>
+        createElement("div", { ...loom.editable }, children, loom.behaviours.drag),
+    })
+
+    const audit = auditRegistry(registryOf([unscoped]))
+
+    expect(audit.unplacedBehaviours).toEqual([])
+    expect(audit.unscopedBehaviours).toEqual([{ type: "loom.wipe", behaviours: ["drag"] }])
+  })
+
+  /**
+   * Behaviours that need no scope must not be reported for lacking one, which
+   * is what would happen if the check keyed off the behaviour being declared
+   * rather than off the vocabulary saying it needs a scope.
+   */
+  it("does not ask a copy button or a disclosure for a scope", () => {
+    expect(auditRegistry(registryOf([panelDefinition])).unscopedBehaviours).toEqual([])
   })
 })
