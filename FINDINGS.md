@@ -9031,3 +9031,87 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-26 — the three counts in the port map disagreed with each other, and one of them is derived twice
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-14-what-you-can-book` — recorded because the *shape* of it
+is open and is not mine to close
+
+`docs/hermes-port-map.md` carried three numbers for the same fact and all three
+were stale in different directions before this run: the ledger heading said
+**36 blocks**, the summary table said **Ported 33**, and the table still listed
+**3 atomic blocks to build** under a section that had said "the table is empty"
+since 25 August. All three are corrected in this run's diff.
+
+That is the third document in this repository to hold a count that has to be
+edited by hand in more than one place, and the second one this lane has had to
+fix. The other is `FACTS.primitives` and `FACTS.decisions` in
+`apps/loom/app/(marketing)/_lib/copy.ts`, which every primitives run has now
+bumped by hand for seven consecutive days and which two other lanes have already
+filed. **This run bumped both again — 64 → 68 and 93 → 94.**
+
+The recommendation is unchanged from the 25 August entry and this is a second
+data point for it: derive `FACTS.primitives` from `STARTER_PRIMITIVES.length`
+and `FACTS.decisions` from a directory listing, which ends both edits forever.
+The port map's own totals could be derived from its ledger rows by the same
+kind of small tool. Neither is this lane's file. Filing rather than reaching
+across the boundary.
+
+---
+
+## 2026-08-26 — a container query is the second thing a primitive wants to ask about its own width, and there is still no seam for the first
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is broken; this is a pattern worth naming before a third
+primitive reaches for it
+
+`loom.offering` reads as a full-width menu row past 40rem and as a card below
+it, decided by one `@container` rule rather than by a prop. That is the right
+answer here and it is the **third** primitive in the library to want a
+measurement of its own container rather than of the viewport — after
+`loom.marquee`'s `cqi` item cap and `loom.mosaic`, which reads the *viewport*
+where it should read its container and has been filed against this lane since 21
+August.
+
+Two things are worth writing down before a fourth one arrives.
+
+**The mechanic that is easy to get wrong once.** A container query reads its
+*ancestor*, never the element that declared the containment. So a primitive that
+wants to flip its own layout has to emit an inner element for the rule to reach,
+and `loom.offering` does — a `loom-offering-frame` `<div>` that is markup rather
+than a node. That is fine and it is invisible from the tree, but it is a second
+element per card and it is the kind of thing that gets refactored away by
+someone who does not know why it is there. It is commented in both the primitive
+and the stylesheet.
+
+**`loom.mosaic` is now the odd one out.** Two primitives measure their
+container and one measures the screen, which means a mosaic inside a `loom.split`
+column still lays out as though it had the whole page. The 21 August finding
+stands and this run did not close it, because it is a change to a shipped
+primitive's rendering under a width nobody has photographed and it belongs in a
+run of its own with the screenshots to prove it. Naming it here so the next
+primitives run picks it up with the pattern already established rather than
+re-deriving it.
+
+---
+
+## 2026-08-26 — 21st.dev is still blocked, ninth consecutive run, five lanes
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a ninth data point on an entry that has not changed
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED`. `docs/routines.md`
+still lists the domain under `permissions.allow`, and the primitives brief still
+names it as *the* visual standard to calibrate against.
+
+Recorded rather than quietly skipped, so nobody reads this run's report and
+assumes the reference was consulted. Calibration was against `loom.hero`,
+`loom.feature-grid` and `loom.tier` — the floor the brief names — and against
+the five screenshots, which found two defects that no assertion did.
+
+Recommendation unchanged: fix the allowlist, or drop the line from the briefs.
+Nine runs across five lanes have now each spent a call finding out, and the cost
+is small and entirely avoidable.
