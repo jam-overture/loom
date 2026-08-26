@@ -315,7 +315,10 @@ Every screenshot is this branch's `next build` output driven in Chromium at
 finding). The before/after pair is the same script against the two builds, so the
 only difference in the frame is the change.
 
-**Preview:** _added to the pull request once Vercel reports the deployment._
+**Preview:**
+`https://loom-git-demo-06-put-it-back-8b679f-jpizzolato36-6341s-projects.vercel.app/demo`
+
+One push, one preview, built `Ready` on the first attempt.
 
 **To see it yourself:** open `/demo`, press the green button, press **Apply this
 change**, and then read the line under **Put it back** before pressing it. Press
