@@ -9031,3 +9031,75 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-26 — the Gate grew a seventh rule on 19 August and lesson 09 still says six
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:** open —
+this is the next lessons run's first job, filed rather than fixed because the
+correction does not belong in a new lesson's pull request
+
+Found while writing lesson 17, which needed one sentence about which rungs of the
+ladder read `provenance.confidence` and could not write it accurately.
+
+`ESCALATION_RULES` in `src/runtime/gate.ts` is **seven** rules, not six:
+
+```
+rejectBelowConfidenceFloor
+rejectAtRefusalFloor
+confirmIrreversible
+confirmDiscardsLaterWork
+confirmRedirectedSubmission   <- added 2026-08-19, d541bea (#102)
+confirmAboveCeiling
+confirmBelowMinimumConfidence
+```
+
+`confirmRedirectedSubmission` landed in `§2: a change of destination is a stake`
+(`d541bea`, #102), under
+[0071](decisions/0071-moving-a-forms-destination-is-a-stake-of-its-own.md), on
+**19 August** — the same day lesson 09 merged, in the pull request after it. So the lesson has been one rule short since the day it landed,
+and no run has noticed for a week.
+
+**What is wrong, precisely — and it is narrower than it sounds.** The exercises
+are still accurate. The ladder walk in lesson 09's Q2 prints seven rows and they
+are still the seven it prints: `confirmRedirectedSubmission` only speaks when the
+assessment carries a `redirected-submission` stake factor, and that fixture never
+redirects a submission, so the rule returns `null` and never reaches the output.
+Nothing executed in that lesson has drifted. What has drifted is every place the
+lesson *counts*:
+
+| where | what it says |
+| --- | --- |
+| `lessons/09-the-gate.md:124` | "The Gate is six rules in a fixed order, plus a default" |
+| `lessons/09-the-gate.md:176` | "the six functions it names" |
+| `lessons/09-the-gate.md:767` | Self-check: "Name the six rules in order" |
+| `lessons/09-the-gate.md:801`, `802`, `810` | Reflect and Come back to this |
+| `lessons/09-the-gate.md:869` | "they are the six rules in order followed by the default" — beside an output that is correct |
+| `lessons/08-two-axes.md:343` | "The Gate is six ordered rules" |
+| `lessons/review-schedule.md` Set K q1, Set M q5 | "Name the six Gate rules in order" — a retrieval question whose answer is now wrong |
+
+The last row is the one that matters most. A review set is the part of the course
+a reader is asked to answer from memory, closed book, and then check. This one
+teaches a wrong list and then confirms it.
+
+**Why it was not fixed in this run.** Correcting the count is four minutes; doing
+it *properly* is not. Lesson 09's whole argument is that order encodes precedence,
+so a new rung at position five is a lesson-shaped question — why a confirmation
+rather than a refusal, why above the ceiling rule and below `discards-later-work`,
+and what the fixture would have to do to make it speak. That is a section, an
+executed exercise, and two amended review sets, and it does not belong bundled
+into a pull request whose subject is telemetry. Lesson 17 was already written and
+green when this turned up.
+
+**Recommendation for the next lessons run:** take this before writing lesson 18
+or any machinery, per the brief's rule that fixing a wrong lesson outranks writing
+a new one. It is worth checking at the same time whether any other lesson counts
+something the framework has since added to — the failure mode here is a count in
+prose going stale while every executed output stays true, which is exactly the
+kind of drift running the exercises does not catch.
+
+**Not a finding against `Loom daily build`.** #102 did the right thing and said so
+in its own record; nothing obliges a framework run to go and re-read the course.
+The gap is that nothing in this repository connects a rule list in `src/` to a
+sentence in `lessons/`, and the honest place to say that is here.

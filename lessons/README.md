@@ -167,9 +167,11 @@ tree. Everything else in the system follows from protecting that one property.
 | [14](14-rendering.md) | Rendering | The tree as a total, pure projection — and why "total" is not the same discipline as `Result`. |
 | [15](15-primitives-and-the-registry.md) | Primitives and the registry | What a primitive promises, who checks each half of it, and what the model is told it may build. |
 | [16](16-persistence.md) | Persistence | The log is the truth; the snapshot is a view you can rebuild — and the audit is what it costs to keep one. |
-| 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |
+| [17](17-telemetry.md) | Telemetry | How a self-graded confidence number eventually gets calibrated — and why the thing that measures it is not allowed to act on it. |
 
-Unlinked lessons are not written yet. They arrive as the routine reaches them.
+That is the syllabus, complete. What is left is the [review
+schedule](review-schedule.md), which is where seventeen separate ideas become one
+system you can hold at once.
 
 ## Pacing
 
