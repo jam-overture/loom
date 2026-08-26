@@ -9097,3 +9097,67 @@ right one.
   its own tests. If reading `loom.frames.src` is awkward in practice, say so
   rather than working around it — a seam with one consumer is still cheap to
   reshape.
+
+---
+
+## 2026-08-26 — the commit-identity trap, fifth occurrence, and the fourth one was mine
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — fifth data point, and the first repeat by the *same* routine
+
+Same failure, fifth time. I committed #165 with
+`-c user.name="Loom daily build" -c user.email="jpizzolato36@gmail.com"`, Vercel
+refused the deployment — *"Git author jpizzo must have access to the project on
+Vercel to create deployments"* — and the pull request went up **Blocked**, with
+no preview URL. Repaired with `--amend --reset-author` and force-pushed before
+any review existed. Fifth time that exact repair has been made.
+
+**What this occurrence adds, and it is not a happy addition.** The 25 August
+entry directly above is *this lane's own*, filed by me, about this exact email
+resolving to this exact wrong account. I read `FINDINGS.md` before choosing work
+this run, as every brief requires. I read my own entry. I then made the same
+mistake, with the same email, four runs later, and the bot said the same
+sentence about the same stranger's username.
+
+So the tally is now five failures across four routines, and **the routine that
+filed the most detailed analysis of the trap walked into it again with that
+analysis in its context.** That is as clean a demonstration as the record is
+going to produce that the problem is not attention. The 22 August diagnosis has
+been right every time: `FINDINGS.md` is read *for work* — what is owed to my
+lane, what should I build — and it is now well past seven thousand lines. A rule
+about how to invoke `git commit` is procedure, and procedure filed among findings
+is procedure that gets read and not applied.
+
+Worth being precise about the pull, because it is not laziness either. Both
+overrides I have made were *deliberate*: on 25 August I set the maintainer's
+identity because a commit authored by the person whose repository this is looked
+more correct than one authored by `Claude`, and today I set a descriptive one
+because a commit that says which routine made it is more legible in `git log`.
+Both times the reasoning was about making the history better. The rule has to be
+written down precisely because **the wrong thing is the appealing one and it is
+appealing for a different reason each time** — so "remember the specific bad
+value" does not generalise, and only "never set it at all" does.
+
+**The recommendation is unchanged, and I am not going to restate it as though it
+were new.** One paragraph in `docs/routines.md`, beside **Network access** and
+**Credentials**, in the words the 25 August entry already proposed:
+
+> **Never set `user.name` or `user.email`, and never author a commit as the
+> maintainer.** The environment's default identity is the one on the Vercel team;
+> any other author produces a pull request with no preview, and the maintainer's
+> email resolves to a different GitHub account than his.
+
+For the record, the default identity is `Claude <noreply@anthropic.com>`, and it
+is on the Vercel team: #164 deployed a preview from a commit whose author email
+was that and whose *name* was overridden to `Loom primitives`. So it is the
+**email** that Vercel resolves, and a routine that wants a legible `git log` can
+have `-c user.name` alone — which is worth writing into the rule, because it
+gives the appealing thing a safe form instead of only forbidding it.
+
+A routine cannot write the governance it is bound by, so this stays a
+recommendation. The 25 August entry says one word from you on any pull request is
+enough and the next run will write it; that offer stands, and after five
+occurrences I would rather be told to write it than file a sixth entry.
+
+Cost to date: five runs, five lost previews, five force-pushes, and one commit
+that briefly claimed the maintainer wrote it.
