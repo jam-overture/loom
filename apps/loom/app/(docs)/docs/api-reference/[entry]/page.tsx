@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { ApiEntryReference } from "@/app/(docs)/_components/api-reference"
+import { entryProseFor } from "@/app/(docs)/_lib/api/mentions"
 import { apiEntryAt, apiSlugs } from "@/app/(docs)/_lib/api/reference"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import { docsEntryAt, docsHref } from "@/app/(docs)/_lib/nav"
@@ -59,7 +60,13 @@ const ApiReferencePage = async ({ params }: PageParams) => {
         code does.
       </p>
 
-      <ApiEntryReference entry={reference} />
+      {/*
+       * Resolved here rather than inside the component, because working it out
+       * means reading every written page off disk. The component takes data and
+       * arranges it, which is what lets its tests state a situation instead of
+       * arranging for one to exist in the repository.
+       */}
+      <ApiEntryReference entry={reference} prose={entryProseFor(reference)} />
     </>
   )
 }
