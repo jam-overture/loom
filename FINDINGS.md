@@ -8297,9 +8297,18 @@ It is `src/render/`'s, which is why it is filed rather than built.
 
 ## 2026-08-25 — an `iframe` src is a whole document, and the only check on it is its scheme
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— shipped with the narrowest defaults a primitive can set alone; the check that
-would matter is a deployment's, not a schema's.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by #165 — both halves built, as
+[0094](decisions/0094-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+The origin registry is `createFrameOriginRegistry`, wired at `renderRequest` as
+`origins`; a primitive declares `frames: ["src"]` and reads `loom.frames.src`,
+which is `allowed` or `refused` and never the raw prop. The second half — notice
+when the sandbox is inert — is answered by registering an origin as `self`, which
+is permitted and raises `frame-same-origin`. The recommendation was followed with
+one change: the registry holds **origins**, not whole URLs, because which video
+goes on a page is a content decision and a URL registry would make it a server
+operator's. `loom.embed` does not use the seam yet; that is filed below for the
+lane that owns it.
 
 Every URL in this library reaches an `href` or an `img src`, which is why
 [0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)'s
@@ -9031,3 +9040,60 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-26 — the framing seam exists, and `loom.embed` still frames whatever the tree says
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The gap `loom.embed`'s own doc comment described — *"what cannot be done here is
+the check that would actually matter: which origins this deployment is willing
+to frame"* — is built, in #165 and
+[0094](decisions/0094-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+This is the half that lives in your lane.
+
+**What to change, concretely.** Two lines and a branch:
+
+```ts
+export const loomEmbed = definePrimitive({
+  type: "loom.embed",
+  frames: ["src"],                        // ← the declaration
+  …
+  component: ({ loom, props: given }) => {
+    const frame = loom.frames.src         // ← allowed | refused, never the prop
+    …
+  },
+})
+```
+
+`frames` names props the schema declares; the registry refuses one that has
+drifted, so a rename cannot silently stop the check. The outcome is two states
+and the `allowed` one carries `url` (normalised, and the string to put in the
+`src`), `origin`, and `sameOrigin`.
+
+**What it changes on the page, and why it is a decision rather than a patch.**
+Today `loom.embed` frames anything that passes `mediaUrlSchema`. After this it
+frames only what the deployment registered, and **a deployment that registered
+nothing frames nothing**. That is the seam failing closed on purpose (0094), and
+it means the refusal path is not an edge case — it is what every deployment sees
+until somebody writes an allowlist. So the interesting work here is not the
+declaration, it is *what a refused embed looks like*. A blank box is the worst
+answer. `loom.code` refusing to fake a copy button is the precedent for the
+right one.
+
+**Three things worth knowing before you build it:**
+
+- **`sameOrigin` is `true` for a permitted frame.** It is not a refusal. It says
+  the `sandbox` the primitive sets is inert, because `allow-scripts` beside
+  `allow-same-origin` is only a boundary between two origins. Whether the
+  primitive shows anything for it is your call; the render already reports it.
+- **The refusal reason is worth showing differently.** `no-registry` is *this
+  deployment has not been configured*, which is a message for whoever runs it.
+  `unlisted-origin` is *nobody permitted this host*, which is a message about
+  the page. `unframeable` is a prop that is not a URL at all.
+- **Nothing else in the library declares a framable prop**, so `loom.embed` is
+  the seam's only consumer and its ergonomics have been tested by nothing but
+  its own tests. If reading `loom.frames.src` is awkward in practice, say so
+  rather than working around it — a seam with one consumer is still cheap to
+  reshape.

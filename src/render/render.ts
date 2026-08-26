@@ -1,6 +1,8 @@
 import { createElement, Fragment, type CSSProperties, type ReactNode } from "react"
 
 import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
+import type { FrameOriginRegistry } from "../frame/origin.js"
+import { NO_FRAMES, type NodeFrames } from "../frame/resolution.js"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
@@ -23,6 +25,7 @@ import {
 import type { DecorativeChildren } from "./decorative.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { editableAttributes } from "./editable.js"
+import { isFrameResolver, resolveNodeFrames, type FrameResolver } from "./frame.js"
 import {
   NO_SLOTS,
   type LoomPrimitive,
@@ -92,6 +95,17 @@ export type RenderOptions = {
    */
   readonly submissions?: SubmissionResolution
   /**
+   * The origins this deployment is willing to frame (0094). Absent means every
+   * framable prop is refused, and each one says so in a diagnostic — the seam
+   * fails closed, because the registry *is* the allowlist and a deployment that
+   * has not written one has not agreed to run anybody's script inside its
+   * pages.
+   *
+   * Unlike `data` and `submissions` there is nothing to resolve first: an
+   * allowlist is static, so the check happens in the walk.
+   */
+  readonly origins?: FrameOriginRegistry
+  /**
    * The host's answer for the strings primitives declared — a dictionary, in the
    * language this deployment serves. Absent means the declared strings render as
    * their authors wrote them, which is what an untranslated deployment wants and
@@ -132,6 +146,9 @@ type RenderContext = {
   readonly theme: CSSProperties | undefined
   readonly data: DataResolution | undefined
   readonly submissions: SubmissionResolution | undefined
+  readonly origins: FrameOriginRegistry | undefined
+  /** Absent for the same reason `behaviours` is: a plain map declares nothing. */
+  readonly frames: FrameResolver | undefined
   readonly text: TextResolver | undefined
   /**
    * Absent when the resolver is not a registry, which is also the only way to
@@ -235,6 +252,7 @@ const renderContextFor = (
   slots: SlotChildren,
   data: NodeData,
   submit: SubmissionOutcome | undefined,
+  frames: NodeFrames,
   text: PrimitiveText<string>,
   behaviours: PrimitiveBehaviours<BehaviourName>,
   context: RenderContext
@@ -247,6 +265,7 @@ const renderContextFor = (
     type: node.type,
     slots,
     data,
+    frames,
     text,
     behaviours,
     decorative: decorativeChildrenFor(node, context),
@@ -316,6 +335,47 @@ const nodeSubmissionFor = (
   }
 
   return context.submissions.lookup(node.id)
+}
+
+/**
+ * The verdict on every framable prop this node's primitive declared, and a
+ * diagnostic for each one that will not be framed.
+ *
+ * Read from the node's own props rather than from a plan, because there is
+ * nothing to plan: the allowlist is already in hand and the check is a URL
+ * parse. That is the whole of what makes this seam synchronous where the data
+ * and submission seams are not.
+ *
+ * `frame-same-origin` is reported for a frame that *is* permitted, which no
+ * other diagnostic here does. It is not a complaint about the tree — a host
+ * registered that origin deliberately — it is the only place in the system that
+ * can notice a sandbox is inert, and noticing silently would be the same as not
+ * noticing.
+ */
+const nodeFramesFor = (
+  node: ElementNode,
+  props: JsonObject,
+  context: RenderContext
+): NodeFrames => {
+  const declared = context.frames?.framePropsFor(node.type) ?? []
+  if (declared.length === 0) return NO_FRAMES
+
+  return resolveNodeFrames(props, declared, context.origins, (prop, outcome) => {
+    if (outcome.status === "refused") {
+      context.collect({ code: "frame-refused", nodeId: node.id, prop, refusal: outcome.refusal })
+
+      return
+    }
+
+    if (outcome.sameOrigin) {
+      context.collect({
+        code: "frame-same-origin",
+        nodeId: node.id,
+        prop,
+        origin: outcome.origin,
+      })
+    }
+  })
 }
 
 /**
@@ -425,13 +485,15 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
    * whatever dictionary this deployment supplied happened once, when the
    * resolver was built.
    */
+  const frames = nodeFramesFor(node, props, context)
+
   const text = context.text?.textFor(node.type) ?? NO_TEXT
   const behaviours = nodeBehavioursFor(node, text, context)
   const body = renderElementBody(node, context)
 
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, body.slots, data, submit, text, behaviours, context),
+    loom: renderContextFor(node, body.slots, data, submit, frames, text, behaviours, context),
     props,
     children: body.children,
   })
@@ -549,6 +611,8 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     theme: theme ? themeStyle(theme) : undefined,
     data: options.data,
     submissions: options.submissions,
+    origins: options.origins,
+    frames: isFrameResolver(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),
     behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
     collect,

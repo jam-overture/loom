@@ -37,6 +37,10 @@ import { NO_TEXT, type PrimitiveText } from "../render/text.js"
  *   which needs a destination is registered and that the seam feeding it is
  *   wired (0065). Optional, read by nothing at render time, and the one
  *   declaration the audit checks against behaviour rather than taking on trust.
+ * - `frames` — which of its props reach an `iframe`, so the render seam can
+ *   hold each one against the origins the deployment permits (0094). Optional,
+ *   and unlike `submits` it is read at render time: nothing else in the system
+ *   can tell a `src` bound for a frame from a `src` bound for an image.
  */
 
 export type PrimitiveDefinition<
@@ -76,6 +80,20 @@ export type PrimitiveDefinition<
    * places an address without ever having said it posts.
    */
   readonly submits?: boolean
+  /**
+   * The props whose values this primitive puts in an `iframe` — `["src"]` on an
+   * embed. Empty for everything else, which is every other primitive there is.
+   *
+   * A list of prop names rather than a `true`, because the runtime has to know
+   * *which* string to check and there is nothing it could infer that from: a
+   * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.
+   * The named props must be props the schema declares; the registry refuses a
+   * declaration that names one it does not, the same way it refuses an
+   * `interactive` trigger that has been renamed out from under it — the drift
+   * that actually happens is a prop renamed and a declaration left pointing at
+   * nothing, which would silently stop checking the URL rather than fail.
+   */
+  readonly frames?: readonly string[]
   /**
    * The controls this primitive takes from the runtime's closed behaviour
    * vocabulary — `["copy"]` on a code panel. Optional, and empty for almost
@@ -117,6 +135,8 @@ export type PrimitiveEntry = {
   readonly interactive: InteractiveWhen | undefined
   /** `false` for the ordinary primitive, which sends nothing anywhere. */
   readonly submits: boolean
+  /** Declared framable prop names, still raw: the registry is what checks them. */
+  readonly frames: readonly string[]
   /** Declared behaviour names, still raw: the registry is what checks them. */
   readonly behaviours: readonly string[]
   readonly validate: (props: JsonObject) => PropsVerdict
@@ -179,6 +199,7 @@ export const definePrimitive = <
   text: freezeText(definition.text),
   interactive: definition.interactive,
   submits: definition.submits ?? false,
+  frames: definition.frames ?? [],
   behaviours: definition.behaviours ?? [],
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
