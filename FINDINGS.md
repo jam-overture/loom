@@ -7262,8 +7262,16 @@ between requests (0081).
 
 ## 2026-08-25 — every line of the catalogue a model reads ends in two full stops
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-cosmetic in isolation, and it is in the one string this system exists to send
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-12-a-copy-nothing-resolves-to`.** Diagnosis exact, and
+the count had grown: **64** of 64 starter descriptions end in a full stop, so
+every line was doubled. Fixed in the framework lane as recommended, with one
+change to the recommendation — `renderCatalogue` appends a full stop only when
+the description does not already end in `.`, `!` or `?`, rather than never. Not
+appending at all is right for this library and wrong for the case it does not
+control: a host's own primitive described as `A banner` would render
+`— A banner props: tone?`, running the sentence into the props. The assertion
+asked for is there, against the starter library rather than a fixture.
 
 Printing the real request on a documentation page is how this was found, which
 is the argument for printing it. `renderCatalogue` in `src/interpretation/render.ts`
@@ -8251,10 +8259,19 @@ one commit that briefly claimed you wrote it.
 ---
 ## 2026-08-25 — a seamless loop needs a decorative duplicate, and the render seam has no way to make one
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— worked around inside the primitive by [0091](decisions/0091-motion-stops-in-edit-mode-and-that-is-where-a-decorative-duplicate-belongs.md),
-which is a good answer rather than a patch; this is the seam that would make the
-workaround unnecessary, not a blocker.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-12-a-copy-nothing-resolves-to`.** The seam is built:
+`loom.decorative()` is on every render context and renders the node's children
+again with identity off, decided in
+[0093](decisions/0093-a-decorative-copy-is-the-same-children-without-identity.md).
+Two of the three things this asked for are declined there with reasons — the
+copy is not marked and is not made inert, because the renderer wraps nothing and
+there is no element to put either on that the primitive did not create itself,
+and it does not reach slot regions, because a region may hold content the host
+projected and that is not this tree's to render again. The guarantee is
+therefore stated about the tree: no node of this tree carries its identity twice.
+One thing this finding expected does **not** follow — the marquee still holds
+still in edit mode, because 0091's motive was never the id collision.
 
 `loom.marquee` renders its run twice so the loop has no visible seam. Children
 arrive as already-rendered React elements carrying their own `data-loom-node`
@@ -8973,3 +8990,44 @@ the default is changed for this repository, or `docs/routines.md` says plainly
 that pull requests are subscribed automatically and that a routine should report
 *"unsubscribed"* rather than *"not subscribed"*. The second is three lines and
 makes four days of reports accurate; the first removes the cost.
+
+---
+
+## 2026-08-25 — the render seam can make a decorative copy now, and two primitives declined to scroll before it existed
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is broken, and this is a capability arriving rather than a defect
+
+`loom.decorative()` is on every render context as of
+`framework-12-a-copy-nothing-resolves-to`
+([0093](decisions/0093-a-decorative-copy-is-the-same-children-without-identity.md)).
+It renders a node's children again with identity off: the same nodes, in the
+same order, with the same props, and no `data-loom-node` anywhere in the copy.
+Placing it beside `children` no longer puts one node id on two elements.
+
+Two primitives in your lane were shaped by the absence of it, and neither is
+obliged to change:
+
+- **`loom.marquee`** builds its echo from `children` directly. Passing
+  `loom.decorative()` instead makes the published echo unresolvable by
+  construction rather than by the happy accident that a published render carries
+  no identity at all. Nothing visible changes.
+- **`loom.logo-cloud`** declines to scroll, and the paragraph saying why is the
+  duplicate-id argument. That argument is now answerable. Whether it *should*
+  scroll is a design question this lane cannot make for you.
+
+**What has not changed, and is the thing worth reading twice.** 0093 does not
+reopen [0091](decisions/0091-motion-stops-in-edit-mode-and-that-is-where-a-decorative-duplicate-belongs.md).
+The marquee still holds still while the page is being edited, because 0091's
+motive was never the id collision — it says so, and it says why the ordering
+matters. A moving target is hostile to editing whatever the DOM looks like. If
+this lane wants the band to travel in edit mode, that is a new record superseding
+0091 and an argument about review ergonomics, not a consequence of the seam.
+
+Two limits, stated so they are not discovered:
+
+- The copy is **not marked and not inert**. The renderer wraps nothing, so
+  `aria-hidden` and `inert` on whatever you wrapped the copy in stay yours.
+- It reaches **children only**, not slot regions — a region may hold content the
+  host projected, which is not the tree's to render again. If a primitive wants a
+  decorative copy of a region, file it and say which primitive.

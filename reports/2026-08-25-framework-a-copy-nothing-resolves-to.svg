@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 620" width="920" height="620" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="620" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">The same children, twice, and only one of them is a node</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">A band in edit mode. Placing <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">children</tspan> twice puts one id on two elements; <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">loom.decorative()</tspan> renders it again without one.</text>
+
+  <!-- ================= THE TREE ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE TREE</text>
+  <rect x="40" y="130" width="212" height="128" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="60" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">n_1 loom.marquee</text>
+  <text x="76" y="180" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">n_2 loom.logo</text>
+  <text x="76" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">n_3 loom.logo</text>
+  <text x="60" y="232" font-size="11.5" fill="#5c5751">One node per logo. There is</text>
+  <text x="60" y="248" font-size="11.5" fill="#5c5751">no node that is &#8220;the echo&#8221;.</text>
+
+  <path d="M 262 194 L 300 194" stroke="#c9bfb2" stroke-width="1.5" fill="none"/>
+  <path d="M 294 189 L 301 194 L 294 199 Z" fill="#c9bfb2"/>
+
+  <!-- ================= THE RENDER ================= -->
+  <text x="312" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT THE PRIMITIVE PLACES</text>
+
+  <!-- run -->
+  <rect x="312" y="130" width="268" height="128" rx="10" fill="#ffffff" stroke="#c9bfb2"/>
+  <text x="330" y="153" font-size="11.5" font-weight="650" fill="#15120e">the run &#8212; <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="400">children</tspan></text>
+  <rect x="330" y="164" width="232" height="30" rx="6" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="344" y="183" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#3f7d52">data-loom-node="n_2"</text>
+  <rect x="330" y="200" width="232" height="30" rx="6" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="344" y="219" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#3f7d52">data-loom-node="n_3"</text>
+  <text x="330" y="248" font-size="11" fill="#5c5751">Addressable. A click resolves here.</text>
+
+  <!-- echo -->
+  <rect x="608" y="130" width="272" height="128" rx="10" fill="#ffffff" stroke="#e4ded5" stroke-dasharray="4 3"/>
+  <text x="626" y="153" font-size="11.5" font-weight="650" fill="#15120e">the echo &#8212; <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="400">loom.decorative()</tspan></text>
+  <rect x="626" y="164" width="236" height="30" rx="6" fill="#fbfaf8" stroke="#efeae2"/>
+  <text x="640" y="183" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#a09488">&#8212; no node attribute &#8212;</text>
+  <rect x="626" y="200" width="236" height="30" rx="6" fill="#fbfaf8" stroke="#efeae2"/>
+  <text x="640" y="219" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#a09488">&#8212; no node attribute &#8212;</text>
+  <text x="626" y="248" font-size="11" fill="#5c5751">Same content, same order, same props.</text>
+
+  <path d="M 590 194 L 598 194" stroke="#e4ded5" stroke-width="1.5" fill="none"/>
+
+  <!-- ================= THE RULE ================= -->
+  <rect x="40" y="290" width="840" height="72" rx="10" fill="#f6f2ec" stroke="#e4ded5"/>
+  <text x="64" y="322" font-size="15" font-weight="650" fill="#15120e">A decorative duplicate exists only where identity attributes do not.</text>
+  <text x="64" y="345" font-size="12" fill="#5c5751">0091 observed this and arranged for it by not duplicating in edit mode. 0093 makes the seam guarantee it instead.</text>
+
+  <!-- ================= WHAT IT DOES NOT DO ================= -->
+  <text x="40" y="400" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT THE SEAM DOES NOT DO</text>
+
+  <rect x="40" y="414" width="268" height="118" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="60" y="440" font-size="12.5" font-weight="650" fill="#15120e">It does not mark the copy</text>
+  <text x="60" y="462" font-size="11.5" fill="#5c5751">The renderer wraps nothing, so there</text>
+  <text x="60" y="479" font-size="11.5" fill="#5c5751">is no element to put a marker on that</text>
+  <text x="60" y="496" font-size="11.5" fill="#5c5751">the primitive did not create itself.</text>
+  <text x="60" y="518" font-size="11.5" fill="#7a6f62"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">aria-hidden</tspan>, <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">inert</tspan> stay the primitive&#8217;s.</text>
+
+  <rect x="326" y="414" width="268" height="118" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="346" y="440" font-size="12.5" font-weight="650" fill="#15120e">It does not reach slot regions</text>
+  <text x="346" y="462" font-size="11.5" fill="#5c5751">A region may hold content the host</text>
+  <text x="346" y="479" font-size="11.5" fill="#5c5751">projected, which is not this tree&#8217;s to</text>
+  <text x="346" y="496" font-size="11.5" fill="#5c5751">render again. So the guarantee is</text>
+  <text x="346" y="518" font-size="11.5" fill="#5c5751">stated about nodes <tspan font-weight="650">of this tree</tspan>.</text>
+
+  <rect x="612" y="414" width="268" height="118" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="632" y="440" font-size="12.5" font-weight="650" fill="#15120e">It does not reopen 0091</text>
+  <text x="632" y="462" font-size="11.5" fill="#5c5751">The marquee still holds still while the</text>
+  <text x="632" y="479" font-size="11.5" fill="#5c5751">page is edited. That was never about</text>
+  <text x="632" y="496" font-size="11.5" fill="#5c5751">ids &#8212; you cannot click a logo that is</text>
+  <text x="632" y="518" font-size="11.5" fill="#5c5751">sliding past, seam or no seam.</text>
+
+  <text x="40" y="572" font-size="11" fill="#a09488">Loom &#183; 0093 &#183; framework-12-a-copy-nothing-resolves-to</text>
+</svg>

@@ -140,6 +140,26 @@ const renderCataloguedSlots = (primitive: CataloguedPrimitive): string =>
   primitive.slots.length === 0 ? "" : ` slots: ${primitive.slots.join(", ")}`
 
 /**
+ * A description ends its own sentence, and the renderer finishes one that does
+ * not.
+ *
+ * Every description in the starter library already ends in a full stop, so
+ * appending one unconditionally gave the model sixty-one lines reading
+ * `…in one column.. props: fills?` on every proposal and again on every repair.
+ * Nothing renders this string and no snapshot can look wrong, which is why it
+ * survived until a documentation page printed the real request.
+ *
+ * Refusing to append at all was the other way, and it is worse for the case
+ * this does not control: a host's own primitive may be described without
+ * terminal punctuation, and `— A banner props: tone?` runs the sentence into
+ * the props with nothing between them.
+ */
+const TERMINAL_PUNCTUATION = new Set([".", "!", "?"])
+
+const renderCataloguedDescription = (description: string): string =>
+  TERMINAL_PUNCTUATION.has(description.slice(-1)) ? description : `${description}.`
+
+/**
  * The catalogue as the model sees it: one line per primitive, in registration
  * order, so the deployment's own ordering is what the model reads first.
  *
@@ -151,7 +171,7 @@ export const renderCatalogue = (catalogue: PrimitiveCatalogue): string =>
   catalogue
     .map(
       (primitive) =>
-        `- ${primitive.type} — ${primitive.description}.${renderCataloguedProps(primitive)}${renderCataloguedSlots(primitive)}`
+        `- ${primitive.type} — ${renderCataloguedDescription(primitive.description)}${renderCataloguedProps(primitive)}${renderCataloguedSlots(primitive)}`
     )
     .join("\n")
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, treeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
+import { createStarterPrimitiveRegistry } from "../primitives/index.js"
 import { catalogueOf } from "../sdk/catalogue.js"
 import { testRegistry } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
@@ -253,5 +254,59 @@ describe("renderCatalogue", () => {
     ])
 
     expect(rendered).toContain("props: not declared")
+  })
+
+  it("does not end a line in two full stops when its author wrote one", () => {
+    const rendered = renderCatalogue([
+      {
+        type: primitiveTypeSchema.parse("loom.written"),
+        description: "The root of a page. Stacks its children in one column.",
+        props: [],
+        slots: [],
+      },
+    ])
+
+    expect(rendered).toBe(
+      "- loom.written — The root of a page. Stacks its children in one column. props: none"
+    )
+  })
+
+  it("leaves a description that ends in a question or an exclamation alone", () => {
+    const rendered = renderCatalogue([
+      {
+        type: primitiveTypeSchema.parse("loom.asking"),
+        description: "Have you tried the other one?",
+        props: [],
+        slots: [],
+      },
+    ])
+
+    expect(rendered).toContain("the other one? props: none")
+  })
+
+  it("finishes the sentence for a description written without one", () => {
+    const rendered = renderCatalogue([
+      {
+        type: primitiveTypeSchema.parse("loom.terse"),
+        description: "A banner",
+        props: [],
+        slots: [],
+      },
+    ])
+
+    expect(rendered).toContain("- loom.terse — A banner. props: none")
+  })
+
+  /**
+   * The regression, against the library the defect was found in rather than
+   * against a fixture that could be written either way.
+   */
+  it("renders no line of the starter library with doubled punctuation", () => {
+    const registry = createStarterPrimitiveRegistry()
+    if (!registry.ok) throw new Error("the starter library failed to register")
+
+    for (const line of renderCatalogue(catalogueOf(registry.value)).split("\n")) {
+      expect(line).not.toMatch(/[.!?][.!?]/)
+    }
   })
 })

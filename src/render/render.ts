@@ -20,6 +20,7 @@ import {
   type BehaviourResolver,
   type PrimitiveBehaviours,
 } from "./behaviour.js"
+import type { DecorativeChildren } from "./decorative.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { editableAttributes } from "./editable.js"
 import {
@@ -190,6 +191,45 @@ const renderElementBody = (node: ElementNode, context: RenderContext): ElementBo
   return { children: rest.length === 0 ? null : rest, slots: Object.freeze(slots) }
 }
 
+/**
+ * A decorative render walks nodes the primary render has already walked, so
+ * every diagnostic it could raise is one the caller has been told. Dropping
+ * them is what keeps `renderLoomTree`'s output a function of the tree rather
+ * than of which primitives happened to ask for a copy.
+ */
+const discardDiagnostic = (): void => undefined
+
+/**
+ * The node's children again, with identity off — see `decorative.ts` for what
+ * that buys and what it does not.
+ *
+ * Rendered on the first call and kept, so a primitive that places the copy in
+ * two arrangements gets the same elements both times, and one that never asks
+ * pays a closure. The cache lives in this closure rather than at module scope,
+ * for the reason `composeText` keeps its map here: two renders of the same tree
+ * must not be able to disagree because one of them ran first.
+ */
+const decorativeChildrenFor = (
+  node: ElementNode,
+  context: RenderContext
+): DecorativeChildren => {
+  let copy: ReactNode
+  let rendered = false
+
+  return () => {
+    if (!rendered) {
+      copy = renderChildren(node.children, {
+        ...context,
+        editMode: false,
+        collect: discardDiagnostic,
+      })
+      rendered = true
+    }
+
+    return copy
+  }
+}
+
 const renderContextFor = (
   node: ElementNode,
   slots: SlotChildren,
@@ -209,6 +249,7 @@ const renderContextFor = (
     data,
     text,
     behaviours,
+    decorative: decorativeChildrenFor(node, context),
     ...(submit ? { submit } : {}),
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }

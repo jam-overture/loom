@@ -111,6 +111,17 @@ const PROBE_TYPE = primitiveTypeSchema.parse("loom.probe")
 const PROBE_CHILDREN = "loom-probe-children"
 
 /**
+ * A probe has no tree, so there is nothing for `loom.decorative()` to render
+ * again; it answers with a marker instead.
+ *
+ * A *distinct* marker, deliberately. A primitive that placed only the
+ * decorative copy would render its whole content unaddressable, and if the copy
+ * answered with `PROBE_CHILDREN` the placement probe would call that primitive
+ * one that renders its children.
+ */
+const PROBE_DECORATIVE = (): ReactNode => "loom-probe-decorative"
+
+/**
  * A probe is handed the primitive's own declared strings rather than an empty
  * map. A component that reads `loom.text.excluded` and formats it would throw on
  * `undefined` and read as `not-probeable` — a false negative produced entirely
@@ -129,6 +140,7 @@ const probeProps = (
     data: NO_DATA,
     text,
     behaviours: NO_BEHAVIOURS,
+    decorative: PROBE_DECORATIVE,
   },
   props,
   children: PROBE_CHILDREN,
@@ -358,6 +370,7 @@ export const probePlacement = (
         data: NO_DATA,
         text,
         behaviours: behaviours as PrimitiveBehaviours<BehaviourName>,
+        decorative: PROBE_DECORATIVE,
       },
       props,
       children: PROBE_CHILDREN,
@@ -450,6 +463,7 @@ export const probeSubmissionPlacement = (
         text,
         behaviours: NO_BEHAVIOURS,
         submit: PROBE_SUBMISSION,
+        decorative: PROBE_DECORATIVE,
       },
       props,
       children: PROBE_CHILDREN,
@@ -612,6 +626,7 @@ export const probeColourPairings = (
         data: NO_DATA,
         text,
         behaviours: NO_BEHAVIOURS,
+        decorative: PROBE_DECORATIVE,
       },
       props,
       children: PROBE_CHILDREN,
