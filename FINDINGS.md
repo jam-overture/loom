@@ -9587,3 +9587,73 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-27 — `main` is red: the marketing site's decision count is one behind, and every lane's PR is failing on it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open —
+**blocking the merge gate for every surface**, one-line fix, not this lane's file
+to edit
+
+`pnpm verify` fails on `main` at `3a57feb`, and therefore on every branch merged
+up to it:
+
+```
+FAIL |node| app/(marketing)/_lib/facts.test.ts
+     > what the site says about the repository > counts the decision records
+AssertionError: expected '94' to be '95'
+  app/(marketing)/_lib/facts.test.ts:31
+    expect(FACTS.decisions).toBe(String(records.length))
+```
+
+**Reproduced on `origin/main` itself**, in a clean worktree, not only on the
+branch that found it: `decisions/` holds 95 records (excluding `README.md`) and
+`apps/loom/app/(marketing)/_lib/copy.ts:25` says `decisions: "94"`.
+
+**The proposed patch is one character.** `copy.ts:25`, `"94"` → `"95"`.
+
+It is not applied here because `apps/loom/app/(marketing)/` is `Loom marketing`'s
+route group and this is `Loom demo`. That is the rule this file exists to serve,
+and a red `main` is not a reason to break it — but it is a reason to say so
+loudly, which is what this entry is.
+
+### How it broke, and why it will break again
+
+Two records landed on 26 August:
+
+- **0094** (`a card's prose is a child when the card has a flow`) arrived with
+  #164, `Loom primitives`. That PR **also bumped `FACTS.decisions` to `94`** —
+  a `Loom marketing` file edited from the primitives lane.
+- **0095** (`a frame carries its url and the deployment carries the origins`)
+  arrived with #165, `Loom daily build`. That PR **did not** bump the counter.
+
+So the counter is only correct when the routine adding a record happens to also
+edit another lane's file, and it is wrong the moment one does not. #164 got it
+right by crossing a lane boundary; #165 stayed inside its lane and left `main`
+red. **Neither behaved badly.** The coupling is the defect.
+
+`facts.test.ts` is right and should not be weakened — its own comment is the
+reason it exists:
+
+> A marketing site claiming "37 primitives" is worth nothing if the number is
+> something someone typed once. […] When either grows, this fails and the page is
+> updated — which is the only way a number on a marketing page stays true.
+
+That reasoning holds. What it did not anticipate is **four routines writing
+decision records in parallel, none of whom own the page carrying the count.**
+`FACTS.primitives` does not have this problem: it is counted through
+`catalogueOf(siteRegistry)` at test time, so it cannot go stale — it is derived,
+not typed.
+
+**Recommended, for `Loom marketing` to decide:** derive `decisions` the way
+`primitives` is already derived, rather than typing it. The test already reads
+the directory; if the copy read it too — at build time, through a generated
+constant like `(docs)` does for its API reference — the number could not drift
+and no lane would ever have to reach into `(marketing)` to add a record. The
+one-character bump unblocks today; the derivation is what stops this recurring
+on record 96.
+
+Filed by the demo lane because its PR #170 is one of the four this is failing.
+It is not #170's failure: that branch's diff touches `(demo)` only, and the same
+test fails identically on `origin/main` with no branch in the picture.
