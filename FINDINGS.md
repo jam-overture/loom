@@ -9726,3 +9726,38 @@ pieces inside it"* be right rather than off by one. And `HeldProposal` keeping
 a hold is stale without parsing the delta", says its own comment — is what makes
 *"This was worked out on an older version of this page"* a sentence the portal
 can write without unpacking anything.
+
+---
+
+## 2026-08-27 — `main` was red, and the one-line fix is in the marketing lane's file
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom marketing` · **Status:** closed
+by `portal-13-what-this-would-do` — the bump is made; recorded so the owner knows
+their file was opened and why
+
+`main` at `3a57feb` fails `pnpm verify`:
+
+```
+app/(marketing)/_lib/facts.test.ts
+  Expected: "95"   ← decisions/ on disk
+  Received: "94"   ← FACTS.decisions
+```
+
+[0095](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md)
+landed in #165 without `FACTS.decisions` moving with it. The test is doing its
+job — that number is a fact about the repository rather than something someone
+typed once — and the consequence is that **`pnpm verify` is red on `main` for all
+four lanes**, which is the merge gate every one of them has to pass.
+
+`app/(marketing)/_lib/copy.ts` `"94"` → `"95"`, one line, made here because this
+lane's own pull request cannot go green without it and a red `main` blocks every
+other lane the same way. It is the same mechanical consequence the 21 August
+entry above records — *"every decision record any routine writes now edits a
+marketing file"* — hit for the third time, and the first time it reached `main`
+rather than being caught on the branch that wrote the record.
+
+Worth the marketing routine's attention rather than the portal's: the count is
+the only fact on that page whose correctness depends on a file no marketing run
+touches. Deriving it at build time from `readdirSync(decisions)` — which the test
+already does — would make the class of failure impossible instead of legible.
+That is a change in that lane's route group and so is not made here.
