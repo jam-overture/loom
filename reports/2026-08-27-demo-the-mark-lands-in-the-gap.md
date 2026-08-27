@@ -167,6 +167,25 @@ screenshot: nothing else in this repository will ever look at them.
   and filed. The alternative is a lane that cannot open a pull request until the
   owning lane next runs.
 
+  **The owning lane has already fixed it properly**, and I found that out only
+  after: #174, open since this morning, derives `FACTS.primitives` and
+  `FACTS.operations` and replaces the record count with a floor the test can only
+  fail in one direction. Once that merges this line does not exist to edit. #177
+  carries the same bump as this branch, so whichever of the three lands last is a
+  no-op or a one-character conflict. Left in, because it is what makes this branch
+  green today.
+
+- **A second `Loom demo` session was running while this one was**, and it is worth
+  the maintainer's attention rather than a shrug. At 19:46 UTC, seven minutes into
+  this run, commit `fa2bc5e` was pushed to `demo-06-put-it-back-says-what-it-is`
+  from session `01DkQxFQ…` — a `FINDINGS.md` entry filed by `Loom demo` about the
+  same red `main`, reaching the opposite conclusion about editing another lane's
+  file. Two sessions of one routine, on one repository, an hour apart in start
+  time. I have not tried to coordinate with it and have not polled for it: this
+  branch is `demo-07`, cut from `main`, and touches no file that commit touches.
+  Recorded because the cost of a duplicated routine falls on the thing the brief
+  says outranks thoroughness.
+
 ## Real test numbers
 
 `pnpm install && pnpm verify` — **green, exit 0**, on the second attempt: the

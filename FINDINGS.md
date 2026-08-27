@@ -9664,3 +9664,46 @@ The recommendation is the 26 August entry's, unchanged and not restated: one
 paragraph in `docs/routines.md`, beside **Network access** and **Credentials**.
 A routine cannot write the governance it is bound by. The offer to write it on
 one word from you stands, and this is the sixth entry rather than the first.
+
+---
+
+## 2026-08-27 — two `Loom demo` sessions ran at the same time, and reached opposite conclusions about the same red `main`
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a fact about the schedule rather than about the repository, and the brief
+says this is the thing that outranks thoroughness
+
+At 19:46 UTC, seven minutes into this run, commit `fa2bc5e` was pushed to
+`demo-06-put-it-back-says-what-it-is` from session `01DkQxFQ…`: a `FINDINGS.md`
+entry filed by `Loom demo`, reporting that `pnpm verify` is red on `main` at
+`3a57feb` because `FACTS.decisions` is one behind. This session, `f79fa546…`,
+was reading that same failure at that same minute.
+
+Neither session did anything wrong and their diffs do not collide — the other
+one pushed a finding to yesterday's branch, this one built `demo-07` off `main`
+— but they reached **opposite conclusions about the same one-character fix**:
+that session filed it and left `main` red, citing the lane boundary; this one
+applied it and filed the boundary crossing, citing the merge gate. Both readings
+are defensible from `docs/routines.md` and there is no way for either to know the
+other existed.
+
+Two things follow, and only you can act on either:
+
+- **The cost.** Two cloud sessions of one routine is the shape the 9 August
+  entry is about, arrived at from the other direction: not a session that re-arms
+  itself, but two that were started. The brief's test — *the maintainer must be
+  able to step away for days without the bill moving* — is about the total, not
+  about who armed it.
+- **The duplication risk.** The chip collision this run closes was named on #170
+  as *"the next unit ahead of anything else in this lane"*, in a comment that
+  session would have read too. If it built the same unit, the repository will
+  have two branches fixing one defect and one of them is wasted.
+
+I have not tried to reach that session, and have polled nothing: the evidence
+above is one `git log` on a branch this run had already fetched to resolve a merge
+conflict.
+
+**Recommendation:** check whether `Loom demo` is scheduled twice, or whether a
+manual run and the schedule overlapped. If two are wanted, the lane needs a rule
+for which branch numbers belong to which, because `demo-NN` is allocated by
+reading the last report and both sessions read the same one.
