@@ -9503,3 +9503,128 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-27 — the rename queue was empty and one route was never on it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-14-what-loom-can-put-on-your-page` — correcting the 25 August entry,
+which said the queue was empty and was right about the thing it was counting
+
+The 25 August entry closed the rename queue after six screens: `/portal/trees` →
+`/portal/pages`, `/portal/calibration` → `/portal/trust`, `/portal/audit` →
+`/portal/checkup`, the page screen, `/portal/activity` and `/portal/history`.
+
+**`/portal/primitives` was not on it, and had never been.** The queue tracked
+screens that printed the runtime's *states* — `did-not-apply`, `not-interpreted`,
+`held` — and this is a screen that prints the runtime's *vocabulary*. Different
+kind of jargon, same reader, and nothing in the way the queue was kept would have
+surfaced it. *Primitive* is in the marketing lane's own `RESERVED_VOCABULARY`,
+which is the list of words a visitor has never heard, so the word was already
+recorded as a problem in another lane while this lane's own queue read empty.
+
+It is `/portal/pieces` now, with a 308 from the old path, and *piece* is the word
+the rest of the portal has used in the middle of a sentence since 19 August.
+
+**The generalisation, which is the part worth keeping.** A rename queue kept as a
+list of screens is a list somebody has to remember to add to. The two categories
+this lane has now found — state words and vocabulary words — are both derivable
+from something that already exists: `RESERVED_VOCABULARY` in
+`app/(marketing)/_lib/copy.ts` is a list of exactly these words, and the docs
+lane already holds its own site to it with a substring check. Nothing holds the
+portal to it. A test in this lane asserting that no reserved word reaches a
+portal surface unasked would have found this route on the day the list was
+written, and would find the next one. Not built this run — it is a sweep across
+every screen in the route group and this run was one screen — but it is the
+right shape and it is this lane's to build.
+
+Two words stay on the portal's surface and would have to be exempted rather than
+fixed: `primitive`'s type name (`loom.card`, on the 22 August reasoning that a
+name is what tells one row from another) and `tree` inside `treeId`. Both are
+identifiers rather than prose, which is a distinction a substring check cannot
+make on its own and a reason to build it carefully rather than quickly.
+
+---
+
+## 2026-08-27 — three more defects a screenshot found, and one of them was in the same file as its own duplicate
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-14-what-loom-can-put-on-your-page` — recorded for the count and for the
+one that breaks the pattern
+
+Fourteen across eight runs, counting the two on #169. All three below were caught
+by looking at the rendered page; thirty-one passing tests were not capable of any
+of them.
+
+1. **The notation was explained on a card that had none.** Every disclosure ended
+   *"A trailing `?` marks a setting that can be left out"*, including the one whose
+   line reads `props: none` and holds no `?` at all.
+2. **The empty state's lead said what the notice under it said.** *"…so the AI has
+   nothing it can build with"* directly above *"There is nothing here for the AI to
+   build with."*
+3. **Three of the four descriptions were sentence fragments on the surface and
+   whole sentences in the record**, one line apart, because
+   `renderCataloguedDescription` appends a terminal stop for the model and nothing
+   did for the reader.
+
+**(2) is the one worth reading.** It is the fourth instance in this lane of *two
+independently held strings meeting*, and the first where they were not
+independently held: both halves were in one component, twenty lines apart, in a
+file one person wrote in one sitting. Every previous instance was blamed on the
+strings living in different tables that could not see each other, and the fix
+each time was to join them somewhere assertable. This one had nothing to join —
+it is a lead and a heading that are allowed to be different sentences and happened
+to be the same one.
+
+So the rule taken from the earlier three — *assert the joined reading, not the
+parts* — is necessary and is not sufficient. What catches this class is reading
+the whole screen as a screen, which is what looking at it does and what no
+component test in this lane has ever done. That is the same conclusion the 23, 24
+and 25 August entries reached about screenshots, arrived at from a different
+direction, and it is not repeated as a recommendation here: it has been made
+three times and it is the maintainer's.
+
+(3) is a different animal and the cheapest of the three to stop: it is now a test
+over the deployment's own registry, asserting every registered description is a
+whole sentence. That one generalises to any host — a registry whose descriptions
+are fragments produces a page of fragments — and it is four lines.
+
+---
+
+## 2026-08-27 — the portal's own four pieces are now a claim on a heading
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — restating the question #169 asked, with what this run changed about its
+weight
+
+#169 filed this as a question rather than a defect: the portal registers its own
+`loom.page`, `loom.card`, `loom.heading` and `loom.prose` rather than the starter
+library, which now ships sixty-eight primitives, and the two have already drifted
+by one enum value. It is deliberate under
+[0018](decisions/0018-the-portal-is-a-consumer-not-an-insider.md) — the portal is
+a consumer and registers what it needs — and nothing was changed about it here.
+
+**What changed is what the screen claims.** `/portal/pieces` is headed *"What
+Loom can put on your page"* and its lead says the AI is handed this exact list and
+can build nothing else. Both sentences are true of this deployment and both read,
+to somebody evaluating Loom, as a statement about Loom. A reviewer opening the
+portal to see what the product can do now sees four pieces on a page that says
+that is all of them.
+
+Three ways out, in ascending order of commitment, all the maintainer's:
+
+- **Register the starter library in the portal.** The screen then shows what a
+  customer gets, and `/portal/pages`'s preview renders a `loom.hero` rather than a
+  div. Largest change, most honest picture, and it makes the portal's preview a
+  real demonstration of the library rather than of four local stand-ins.
+- **Say on the screen that this deployment registered four and the library ships
+  sixty-eight.** One sentence, no behaviour change, and it turns a misleading
+  impression into a demonstration of the actual point — that the list is the
+  deployment's rather than the framework's.
+- **Leave it.** Defensible for an alpha whose portal nobody outside the repository
+  has opened, and it stops being defensible on the day one does.
+
+Recorded rather than chosen: which of the three is right depends on whether the
+portal is meant to look like what a customer gets, which is a positioning question
+and not a portal one.
