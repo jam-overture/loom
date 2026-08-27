@@ -5,6 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { GAP_NAMES, GAPS } from "./layout.js"
+import { linkMark, LINK_MARK_CLEARANCE } from "./link-mark.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, radius, space } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
@@ -60,6 +61,49 @@ import { linkUrlSchema } from "./url.js"
  * media region needs no negative margin to escape it. Bleeding content back out
  * of a padded box is the usual way this is done and it is brittle exactly where
  * this is not: it depends on the two values staying equal.
+ *
+ * **A linked card says so at rest, which it did not until 27 August.** It used
+ * to signal the link by defaulting to `elevation: raised`, and that reasoning
+ * was sound as far as it went — the whole tile is the target, so the whole tile
+ * responds. What `Loom marketing` measured is that the response is *hover-only*,
+ * and hover is absent from every screenshot, every printed page and every
+ * visitor on a touch device. Four linked cards on the front door were four
+ * paragraphs in boxes to anybody holding a phone, on the one band that is the
+ * site's whole onward path.
+ *
+ * So a linked card carries a corner mark it keeps when nothing is pointing at
+ * it, and the hover treatment becomes the second half of a signal rather than
+ * the whole of it. Two decisions inside that:
+ *
+ * - **It is a chip, not a bare glyph.** A card with a media region puts this
+ *   over a photograph the primitive did not choose and cannot sample, which is
+ *   exactly what beat `loom.before-after`'s divider under `bold` on 25 August. A
+ *   solid fill inside a ring reads on a light photograph and on a dark one, and
+ *   neither reading depends on knowing the ground.
+ * - **The fill is the accent and not the surface**, which the first screenshot
+ *   of this decided. Drawn in `bg-surface` inside `border-subtle` the chip is
+ *   correct, contrasts with everything, and is nearly invisible on a card that
+ *   is itself `bg-surface` — the fill disappears into the card and only a
+ *   hairline is left. The accent is the palette's own word for *this responds
+ *   to you*, it differs from every card tone by construction, and under `bold`
+ *   it is the difference between a mark you find and a mark you notice.
+ * - **The glyph inside it is the ink, not the accent**, which the *second*
+ *   screenshot decided. An accent arrow on an accent tint is one hue at two
+ *   lightnesses, and under `minimal` — whose accent is a pale mint — the arrow
+ *   all but vanished inside its own chip. `tokens.ts` says this in general and
+ *   it keeps being the thing that bites: where a mark's whole job is to stand
+ *   out, reach for a value that contrasts with its ground rather than for a
+ *   second token from the same family and a hope that the two differ.
+ * - **It reserves its own room rather than floating over the words.** Where
+ *   there is no media above it the body takes extra trailing padding, so a
+ *   heading's first line stops short of the mark instead of running under it.
+ *   Where there is media the mark sits on the picture and the body is untouched,
+ *   because a picture has no line to collide with.
+ *
+ * The glyph points the way a Latin script reads. There is no logical-property
+ * equivalent of an arrow, and this library has no right-to-left rendering to be
+ * wrong in yet; a page in Arabic would want it mirrored and nothing here does
+ * that.
  *
  * A linked card should not contain a link. The renderer is total (0008) and
  * will happily nest one, and the browser will render something no one can
@@ -135,6 +179,8 @@ export const loomCard = definePrimitive({
           display: "flex",
           flexDirection: "column",
           /** No height — see the note above about the column of cards. */
+          /** The ground the corner mark is positioned against, and only when there is one. */
+          ...(linked ? { position: "relative" } : {}),
           /** Clips the media region to the card's corners; the reason it can be flush. */
           overflow: "hidden",
           border: "1px solid",
@@ -164,6 +210,15 @@ export const loomCard = definePrimitive({
               alignItems: "stretch",
               gap: BODY_GAP,
               padding,
+              /**
+               * Room for the corner mark, and only where the mark would
+               * otherwise land on the words. A card with a media region draws
+               * it over the picture instead, so the body keeps its own padding
+               * and the four sides stay even.
+               */
+              ...(linked && media === undefined
+                ? { paddingInlineEnd: LINK_MARK_CLEARANCE }
+                : {}),
               /** Takes the slack, so a footer below it lands on the card's floor. */
               flex: "1 1 auto",
             },
@@ -182,7 +237,14 @@ export const loomCard = definePrimitive({
               borderTop: `1px solid ${colour("border-subtle")}`,
             },
             footer
-          )
+          ),
+      /**
+       * Last in the markup and first in the corner. It is absolutely
+       * positioned, so where it sits among its siblings decides only what it
+       * paints over — and painting over the media region is the case it has to
+       * win.
+       */
+      linked ? linkMark() : null
     )
   },
 })

@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { linkMark, LINK_MARK_CLEARANCE } from "./link-mark.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
@@ -26,6 +27,12 @@ import { linkUrlSchema } from "./url.js"
  * When `href` is set the whole tile is the link — the target a reader actually
  * aims at — and the title takes the underline wipe rather than the tile
  * sprouting a "learn more" that says nothing.
+ *
+ * **It also carries the corner mark, for the reason `loom.card` gives at
+ * length**: the underline wipe is hover-only, and a phone has no hover. The
+ * argument against a "learn more" is untouched by this and is the reason the
+ * mark is a mark rather than a row of words — it says *this is a target*
+ * without pretending to say anything about where it goes.
  */
 
 const props = z
@@ -135,10 +142,20 @@ export const loomFeature = definePrimitive({
           textDecoration: "none",
           color: colour("fg-default"),
           ...(card ? CARD : PLAIN),
+          /** The ground the corner mark is positioned against, and only when there is one. */
+          ...(linked ? { position: "relative" as const } : {}),
+          /**
+           * Unlike a card, a tile has no media region to hide the mark behind:
+           * its content starts at the top of the box on every configuration. So
+           * the room is reserved unconditionally when it is a link, and a title
+           * that wraps stops short of the corner instead of running under it.
+           */
+          ...(linked ? { paddingInlineEnd: LINK_MARK_CLEARANCE } : {}),
         },
       },
       libraryStylesheet(),
-      ...body
+      ...body,
+      linked ? linkMark() : null
     )
   },
 })

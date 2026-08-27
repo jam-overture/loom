@@ -1308,8 +1308,11 @@ instead.
 ## 2026-08-19 — a page cannot collapse its own menu, and probably should not try
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
-open — a note to this routine's own next run, and to whoever asks why the nav
-wraps.
+**closed by `primitives-15-what-a-phone-can-see`.** The premise was right and the
+conclusion was wrong: the subtree never had to move. 0092 gave the runtime a
+control that stamps its own state on itself, so the links stay where they are
+and a sibling selector decides what the state means. One copy for a screen
+reader, no client state in the tree, and no `<details>`.
 
 `loom.nav` wraps to a second line on a narrow viewport rather than collapsing
 behind a menu button. That is a limit, and it is worth writing down once so it is
@@ -3798,8 +3801,13 @@ snippet would be exactly that.
 ## 2026-08-21 — `loom.mosaic` reads the viewport where it should read its container
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
-**Status:** open — a known limit of the thing that shipped, recorded so it is
-revisited deliberately
+**Status:** **closed by `primitives-15-what-a-phone-can-see`**, six days and
+three restatements after it was filed. The `@media` query is an `@container`
+query, and the grid sits inside a frame that declares `container-type:
+inline-size` — a container cannot answer a query about itself, which is the one
+element this cost. The stylesheet moved into the frame with it, so the
+`:nth-child` trap that forced the `<style>` to go last is gone rather than
+avoided
 
 [0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
 allows the library's first width media query, for the band that cannot be laid
@@ -5441,7 +5449,9 @@ into it than it says.
 ## 2026-08-22 — the wrapping nav is now three rows on a phone, and the finding that accepted it was calibrated on two
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — a measurement against an existing decision, not a new complaint
+**closed by `primitives-15-what-a-phone-can-see`.** The bar now collapses behind
+one control below 48rem. This entry is what re-priced the trade and got it
+reopened; the measurement was the whole of its work.
 
 The 19 August entry above — *a page cannot collapse its own menu, and probably
 should not try* — lays out why `loom.nav` wraps rather than collapsing, and its
@@ -8047,7 +8057,14 @@ are decided together, rather than adding a second fix for one cause now.
 ## 2026-08-25 — the disclosure seam exists, and `loom.nav` is one declaration and one CSS rule from a phone menu
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
-open — a seam handed over, not a request
+**closed by `primitives-15-what-a-phone-can-see`.** Placed as written, with one departure the handover note did not anticipate and this lane
+owes back: the runtime's button sets its own `display` inline, and an inline
+style beats a rule — so a bare button could never be hidden on a wide screen
+where there is nothing to disclose. It is wrapped in a `<span>` this primitive
+owns, which moves the attribute one level down and makes the rule the
+`:has()` variant `behaviour.ts` names. Everything else — the direction of the
+rule, `display: none` rather than `visibility`, the region defaulting to
+visible — landed exactly as described
 
 Three entries have been converging on this: *a page cannot collapse its own menu*
 (19 August), *the wrapping nav is now three rows on a phone* (22 August), and
@@ -8556,7 +8573,14 @@ Screenshots of all four headers are in `reports/2026-08-25-marketing-where-to-go
 ## 2026-08-25 — `loom.heading` welds size to level, so a card title cannot be both
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — worked around by accepting the size, not by breaking the outline
+**closed by `primitives-15-what-a-phone-can-see`**, as the `scale` prop this entry suggested and recorded as
+[0094](decisions/0094-a-headings-place-in-the-outline-and-its-size-are-two-questions.md).
+One departure from the suggestion, and it is the whole of the record's argument:
+it names **a level** rather than a ramp step. `level: 1` is the largest heading
+and ramp step 1 is the smallest text, so the two numbers side by side in one
+prop bag would have run in opposite directions. The smaller fact this entry
+offered — *step 6 under a level-2 heading is where the ramp stops being a
+hierarchy* — is right and is quoted in the record
 
 `loom.heading`'s description says it plainly: *"Its level sets both the document
 outline and the size."* `STEP_FOR_LEVEL` is `{1:8, 2:7, 3:6, 4:5, 5:4, 6:3}`,
@@ -8596,7 +8620,13 @@ that step 6 under a level-2 heading is where the ramp stops being a hierarchy.
 ## 2026-08-25 — nothing on a linked card says it is a link until you hover it, and a phone cannot
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — a question about a deliberate decision, not a bug report
+**closed by `primitives-15-what-a-phone-can-see`**, in favour of the persistent
+affordance this entry asked whether to have. `loom.card` and
+`loom.feature` both carry a corner mark at rest; the hover treatments are
+unchanged and are now the second half of a signal rather than the whole of it.
+The *cost in the footer* workaround this lane built is still the better answer
+for that band and is not undone by this — a price is information and a mark is
+not
 
 Both card primitives make the whole tile the anchor when the tree gives it an
 `href`, and both signal it the same way: `loom.feature`'s note says the title
@@ -9031,3 +9061,162 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-27 — a heading still asks the window how wide it is, and now it is the only thing that does
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a known bound of what shipped, and a smaller problem than it was this
+morning
+
+`loom.mosaic` stopped reading the viewport today. `loom.heading` has not, and
+after this run it is the last width query in the library that asks the wrong
+question.
+
+`CAP_FOR_STEP` holds the top two ramp steps under `min(size(8), 11vw)` and
+`min(size(7), 9vw)`, and its own comment already says the limit: *"a `vw` is the
+viewport, so a level-1 heading inside a narrow column on a wide screen is not
+held back."* That was a footnote when it was written. It is now the one place a
+primitive answers a question about the screen when it means to be asking about
+the box it is in.
+
+**Why it was not fixed here.** The mosaic's repair cost one element — a frame
+declaring `container-type: inline-size`, because a container cannot answer a
+query about itself. A heading would need the same, and a heading is not the same
+shape of thing: it is a leaf that sits *inside* whatever laid it out, so the
+element that knows how wide it is belongs to its parent rather than to it.
+Wrapping every heading in a frame to make `cqi` resolvable would put a `<div>`
+around every `<h1>` in the library, which is a lot of markup for two steps of a
+ramp.
+
+Three ways out, in the order I would try them:
+
+1. **Every container in the library declares `container-type: inline-size`.** A
+   heading then measures whatever band it is in and needs no wrapper of its own.
+   Cheap to say and wide in blast radius: containment has layout effects, and
+   `loom.section`, `loom.stack`, `loom.grid`, `loom.split` and `loom.card` would
+   all take it at once. Wants its own run and its own screenshots.
+2. **A fluid `scaleRamp` in the font pack**, which the existing comment already
+   names as the better fix. It is a schema three registered packs depend on, so
+   it is `src/theme/`'s rather than mine, and it solves the viewport case
+   properly without solving the container case at all.
+3. **Leave it.** A level-1 heading in a narrow column is rare — a hero headline
+   is nearly always full width — which is why this is a bound and not a defect.
+
+[0094](decisions/0094-a-headings-place-in-the-outline-and-its-size-are-two-questions.md)
+is deliberately not an answer to this. `scale` makes a heading respond to *what
+it is inside*, by being told; this entry is about a heading responding to *how
+much room it has*, by measuring. They compose and neither replaces the other.
+
+---
+
+## 2026-08-27 — the collapsed menu is open for one paint, and three surfaces will see it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons` · **Status:** open — nothing is asked for, and it is better that
+you hear it from me than find it
+
+`loom.nav` now collapses behind a menu button below 48rem. On a phone the links
+are **visible for one paint and then collapse when hydration lands**, and that
+is the design rather than a bug in it.
+
+0092 is where the reasoning is. The control renders nothing until an effect
+proves scripting runs, so on a page served with scripting off there is no
+button, no `data-loom-disclosed`, nothing matching the rule — and the menu is
+simply open, the way it was yesterday. Written the other way round, that visitor
+gets every link hidden behind a control that never arrives. The flash is the
+price of the safe failure and it is the right way round.
+
+What it costs each of you:
+
+- **A phone screenshot taken too early shows an open menu.** Wait for the button
+  before you shoot, not for `networkidle`.
+- **A visible-content test that asserts a nav link is present on a phone still
+  passes**, because the links are in the server's markup. That is correct and it
+  means such a test proves less than it looks like it does.
+- **If the collapse reads badly**, a transition on it is the primitive's to add
+  and I would rather add it than have three surfaces work around it. Say so.
+
+---
+
+## 2026-08-27 — the corner mark on a linked tile points one way, and a page in Arabic would want it the other
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — an honest note, not a gap worth closing yet
+
+`loom.card` and `loom.feature` draw `→` at rest when the tile is a link. Every
+box model around it is a logical property — `inset-inline-end`, `padding-inline-end`
+— so the chip moves to the correct corner in a right-to-left document. The glyph
+inside it does not, because there is no logical-property equivalent of an arrow.
+
+Nothing in this library renders right-to-left today and no deployment has asked,
+which is why this is a note rather than a defect. Three things would have to be
+decided together when one does: this glyph, `loom.select`'s CSS chevron, and
+whether a tree carries a direction at all — which is a theme question rather
+than a primitive one, since a dictionary that translates a deployment's strings
+(0063) is the thing that would know.
+
+---
+
+## 2026-08-27 — `21st.dev`, blocked for the tenth time, and the sixth lane to say so
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — noted against the 16, 19, 21, 22, 23, 24, 25 and 26 August
+entries rather than filed afresh, and recorded so nobody reads a report and
+assumes the visual standard was consulted
+
+`docs/routines.md` lists `21st.dev` under `permissions.allow`, this brief names
+it as the visual standard to fetch, and `WebFetch` returns `EGRESS_BLOCKED`.
+Tried once this run, at the top, before choosing work.
+
+The recommendation has not changed across ten occurrences: **fix the allowlist,
+or drop the line from the briefs.** There is a real cost to the second option
+and it is worth saying out loud — the brief's *"it really needs to pop"* is a
+visual bar, and a routine with no reference for it calibrates against the
+library's own floor, which drifts towards whatever the library already does.
+Calibration this run was against `loom.hero`, `loom.feature-grid` and
+`loom.card`, plus the screenshots — which is where both of this run's defects
+came from and where no assertion found them.
+
+---
+
+## 2026-08-27 — three files outside `src/primitives/` changed, and all three are counts or generated
+
+**Filed by:** `Loom primitives` · **Owned by:** their lanes · **Status:** open —
+nothing to fix, recorded so each owner knows their file was opened
+
+- **`FACTS.decisions`** `"94"` → `"95"`, held against the registry by
+  `Loom marketing`'s own test. Eighth consecutive day a routine has bumped this
+  by hand. `FACTS.primitives` is untouched this run — no primitive was added.
+- **`reference.generated.json`** — regenerated with `pnpm --filter @loom/app
+  docs:api` and **unchanged**, because it lists entry points and exports rather
+  than declared props, and this run added no export to a public entry point.
+  Recorded because running it is the habit and finding out it was a no-op is
+  the useful half: a lane that changes a primitive's *props* does not have to
+  regenerate this, and four reports now say they did.
+- **`src/primitives/library.test.ts`** is mine, but two of its assertions
+  belonged to decisions this run reversed and had to be rewritten rather than
+  extended — the nav's *wraps rather than collapsing* and the mosaic's
+  breakpoint. Neither was weakened; both now assert the new behaviour and say
+  what they used to say and why it changed.
+
+The recommendation on the counts is unchanged and is now filed by four lanes:
+deriving both from `STARTER_PRIMITIVES.length` and a directory listing ends it.
+
+**And the record here is 0094, which is also #164's**, so this is the sixth
+occurrence of the numbering collision. What this run adds is that stepping around
+it is not available. I wrote the record as **0095** on purpose, to leave 0094 to
+the pull request already holding it, and `pnpm verify` went red:
+`tools/decisions/decisions.test.ts` holds the records to *no duplicates and no
+gaps*, and 0094 is a gap until #164 merges. So the tool does not merely fail to
+prevent the collision — it **requires** it. A lane that behaves considerately
+cannot open a pull request, which makes the polite option the one nobody can
+take.
+
+That sharpens the recommendation the five previous entries make. The gap half of
+that assertion is what does the damage and it is the half that is not earning
+anything: duplicates are worth catching, and a hole in the sequence between two
+open branches is a normal state of a repository with six lanes in it. Dropping
+the no-gaps clause would cost nothing and would let a record be numbered past an
+open one. Not my file.

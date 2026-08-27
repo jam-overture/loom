@@ -24,6 +24,7 @@ import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
 import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
+import { LINK_MARK, LINK_MARK_SIZE } from "./link-mark.js"
 import { LIBRARY_CLASS } from "./stylesheet.js"
 
 const registryOf = (): PrimitiveRegistry => {
@@ -2024,21 +2025,27 @@ describe("the page chrome", () => {
     expect(auditRegistry(registry).leaves).not.toContain("loom.link")
   })
 
-  it("wraps the bar rather than collapsing it, because no render reads a viewport", () => {
+  it("collapses the bar behind one control, with the links left where they were", () => {
     const { markup } = render(chromePage(EDITORIAL))
 
     const bar = markup.slice(markup.indexOf("<nav"), markup.indexOf("</nav>"))
 
     /**
-     * The limit, asserted so it stays a decision. A disclosure menu would need
-     * one subtree inside a `<details>` on a phone and outside it on a laptop;
-     * the alternatives are two copies for a screen reader to read, or client
-     * state the runtime does not have. Flex wrapping is what a pure render can
-     * honestly do, and it is `loom.split`'s call.
+     * This assertion used to say the opposite, and the replaced version is
+     * worth remembering: it held that a disclosure would need one subtree
+     * inside a `<details>` on a phone and outside it on a laptop, so the only
+     * ways out were two copies for a screen reader to read or client state the
+     * runtime did not have. 0092 gave the runtime a control that stamps its own
+     * state on itself, and the subtree never had to move.
+     *
+     * So: still one copy of the menu, still no `<details>`, and still wrapping
+     * — which is now what the collapsed rendering is *built on* rather than the
+     * whole of the responsive behaviour.
      */
     expect(bar).toContain("flex-wrap:wrap")
     expect(bar).not.toContain("<details")
-    expect(bar).not.toContain("@media")
+    expect([...bar.matchAll(/class="loom-nav-menu"/g)]).toHaveLength(1)
+    expect([...bar.matchAll(/class="loom-nav-toggle"/g)]).toHaveLength(1)
   })
 
   it("survives the re-theme with no literal colour below the root", () => {
@@ -2506,9 +2513,22 @@ describe("the targets the library declares", () => {
   })
 
   it("declares nothing on a container, since a container is not a target", () => {
-    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
+    for (const type of ["loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
       expect(declarationOf(type)).toBeUndefined()
     }
+  })
+
+  it("declares the one container that holds a control, which is what keeps a menu out of a card", () => {
+    /**
+     * `loom.nav` was in the list above until 27 August and left it by taking
+     * the disclosure control. A container is not a target *because of what it
+     * arranges*; a container that places a `<button>` is one anyway, and the
+     * registry refuses the `disclose` declaration without this — which is the
+     * check that stops a menu button ending up inside a linked card, where a
+     * browser silently drops one of the two.
+     */
+    expect(declarationOf("loom.nav")).toBe("always")
+    expect(declarationOf("loom.code")).toBe("always")
   })
 
   it("names only props the schema declares, which the registry is what enforces", () => {
@@ -3151,7 +3171,7 @@ describe("the technical vocabulary", () => {
     expect(markup).toMatch(/class="loom-cluster"[^>]*><img/)
   })
 
-  it("switches the mosaic's rhythm off below the breakpoint, and counts from the first cell", () => {
+  it("switches the mosaic's rhythm off in a narrow band, and counts from the first cell", () => {
     const { markup } = render(technicalPage(EDITORIAL))
 
     /**
@@ -3159,13 +3179,49 @@ describe("the technical vocabulary", () => {
      * markup is identical either side of the breakpoint. The cycles are
      * asserted because a span that did not sum to six would leave a hole in
      * every row and no test that only renders would see it.
+     *
+     * **The question is asked of the band and not of the window**, which is
+     * this run's repair of the 21 August finding. A `@media` here answered for
+     * the viewport, so a mosaic in a split's end region or inside a card laid
+     * six columns across four hundred pixels.
      */
-    expect(markup).toContain("@media (min-width: 48rem)")
-    expect(markup).toContain("grid-template-columns: repeat(6, 1fr)")
+    const sixColumns = markup.indexOf("grid-template-columns: repeat(6, 1fr)")
+    const query = markup.lastIndexOf("@container (min-width: 48rem)", sixColumns)
+
+    expect(sixColumns).toBeGreaterThan(-1)
+    /** The rule is *inside* the container query, not merely near one. */
+    expect(markup.slice(query, sixColumns)).not.toContain("}")
     expect(markup).toContain(".loom-mosaic-showcase > *:nth-child(5n + 1)")
     expect(markup).toContain(".loom-mosaic-lead > *:first-child")
 
-    expect(markup).toMatch(/class="loom-mosaic loom-mosaic-showcase"[^>]*><figure/)
+    /** The frame declares the containment; nothing else in the library may answer for it. */
+    expect(markup).toMatch(/\.loom-mosaic \{\s*container-type: inline-size;\s*\}/)
+    expect(markup).toMatch(/class="loom-mosaic-grid loom-mosaic-showcase"[^>]*><figure/)
+  })
+
+  it("puts the frame outside the cells, and keeps one node id on one element", () => {
+    const { markup } = render(technicalPage(EDITORIAL), true)
+
+    /**
+     * The frame is an element the *tree* does not have, which is the one thing
+     * an extra wrapper can get wrong: 0051's failure, where a portal resolves
+     * an id and highlights something that is not the node the reviewer clicked.
+     * The identity stays on the frame and the grid carries none, so the count
+     * is unchanged by this run.
+     *
+     * The stylesheet's position among the cells is deliberately *not* asserted
+     * here — React hoists it out of the markup entirely, which is why the old
+     * arrangement could only be defended in a comment. It is now in the frame,
+     * one level above the cells, where a renderer that does not hoist cannot
+     * count it as `:nth-child(1)` either. The trap is gone rather than avoided.
+     */
+    const frames = [...markup.matchAll(/<div[^>]*class="loom-mosaic"[^>]*>/g)]
+    const grids = [...markup.matchAll(/<div[^>]*class="loom-mosaic-grid[^"]*"[^>]*>/g)]
+
+    expect(frames).toHaveLength(3)
+    expect(grids).toHaveLength(3)
+    expect(frames.every(([opening]) => opening.includes("data-loom-node"))).toBe(true)
+    expect(grids.some(([opening]) => opening.includes("data-loom-node"))).toBe(false)
   })
 
   it("sets no column count inline, because the rule is what has to change it", () => {
@@ -3174,9 +3230,9 @@ describe("the technical vocabulary", () => {
     /**
      * The trap `stylesheet.ts` names: an inline style beats a rule, so a
      * `display:grid` or a `grid-template-columns` set on the element would make
-     * the media query inert and the band would be six columns on a phone.
+     * the container query inert and the band would be six columns on a phone.
      */
-    const root = markup.slice(markup.indexOf('class="loom-mosaic'))
+    const root = markup.slice(markup.indexOf('class="loom-mosaic-grid'))
     const opening = root.slice(0, root.indexOf(">"))
 
     expect(opening).not.toContain("grid-template-columns")
@@ -3188,7 +3244,7 @@ describe("the technical vocabulary", () => {
     const { diagnostics, markup } = render(technicalPage(EDITORIAL))
 
     expect(diagnostics).toEqual([])
-    expect([...markup.matchAll(/class="loom-mosaic /g)]).toHaveLength(3)
+    expect([...markup.matchAll(/class="loom-mosaic-grid /g)]).toHaveLength(3)
   })
 
   it("takes its monospace from a variable the theme does not yet set, and falls back", () => {
@@ -4098,7 +4154,7 @@ describe("the repairs this run made", () => {
     }
     expect(depth).toBe(0)
 
-    const nestable = /@(?:media|supports|keyframes)/
+    const nestable = /@(?:media|container|supports|keyframes)/
     for (const [block, prelude, body] of css.matchAll(/([^{}]*)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g)) {
       if (nestable.test(prelude ?? "")) continue
       expect([prelude?.trim(), body]).toEqual([prelude?.trim(), (body ?? "").replace(/[{}]/g, "")])
@@ -4486,6 +4542,380 @@ describe("the band that moves", () => {
   it("changes nothing but the root's variables when the palette changes", () => {
     const editorial = splitStylesheet(render(motionPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(motionPage(BOLD)).markup).tree
+    const strip = (markup: string): string => markup.slice(markup.indexOf("</style>") + 1).replace(/style="[^"]*"/, "")
+
+    expect(strip(editorial)).toBe(strip(bold))
+  })
+})
+
+/**
+ * A page built to be looked at where nothing can hover and the window is a
+ * phone: a bar with more links than fit, four linked cards, a linked tile, and
+ * a mosaic inside a column much narrower than the screen.
+ *
+ * Every band in it is one this library already had. What is new is the
+ * question — *what does this say to somebody who cannot point at it* — which is
+ * the one three separate lanes filed against this one and no fixture asked.
+ */
+const phonePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const nav = buildElement(idFactory, {
+    type: "loom.nav",
+    props: { position: "sticky", tone: "surface", align: "end" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.link",
+        props: { href: "https://example.com/product", scale: "small", current: true },
+        children: [text("Product")],
+      }),
+      buildElement(idFactory, {
+        type: "loom.link",
+        props: { href: "https://example.com/docs", scale: "small" },
+        children: [text("Documentation")],
+      }),
+      buildElement(idFactory, {
+        type: "loom.link",
+        props: { href: "https://example.com/demo", scale: "small" },
+        children: [text("The demo")],
+      }),
+      buildSlot(idFactory, "brand", [
+        buildElement(idFactory, { type: "loom.logo", props: { name: "Loom", href: "https://example.com/" } }),
+      ]),
+      buildSlot(idFactory, "actions", [
+        buildElement(idFactory, {
+          type: "loom.action",
+          props: { href: "https://example.com/start", variant: "primary", scale: "small" },
+          children: [text("Start building")],
+        }),
+      ]),
+    ],
+  })
+
+  /** A card title: level 3 under a level-2 section, sized as though it were level 5. */
+  const destination = (title: string, blurb: string, href: string, media: boolean) =>
+    buildElement(idFactory, {
+      type: "loom.card",
+      props: { href, tone: "surface" },
+      children: [
+        ...(media
+          ? [
+              buildSlot(idFactory, "media", [
+                buildElement(idFactory, {
+                  type: "loom.media",
+                  props: { src: "https://example.com/shot.png", alt: `A screenshot of ${title}`, aspect: "wide" },
+                }),
+              ]),
+            ]
+          : []),
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 3, scale: 5 },
+          children: [text(title)],
+        }),
+        buildElement(idFactory, {
+          type: "loom.prose",
+          props: { size: "small", tone: "muted" },
+          children: [text(blurb)],
+        }),
+      ],
+    })
+
+  const destinations = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Where to go" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("Four ways in")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.grid",
+        props: { columns: "two" },
+        children: [
+          destination("Read the thesis", "Why a tree and a delta.", "https://example.com/thesis", false),
+          destination("Watch it change", "One page, adapting.", "https://example.com/demo", true),
+          buildElement(idFactory, {
+            type: "loom.feature",
+            props: {
+              title: "Take the course",
+              body: "Seventeen lessons, each one a running page.",
+              icon: "📘",
+              href: "https://example.com/course",
+            },
+          }),
+          buildElement(idFactory, {
+            type: "loom.feature",
+            props: { title: "Nothing to click", body: "A tile that is not a link, for contrast.", icon: "🧱" },
+          }),
+        ],
+      }),
+    ],
+  })
+
+  /** The mosaic that used to lay six columns across a column this narrow. */
+  const narrow = buildElement(idFactory, {
+    type: "loom.split",
+    props: { ratio: "start-wide", align: "start" },
+    children: [
+      buildSlot(idFactory, "start", [
+        buildElement(idFactory, {
+          type: "loom.prose",
+          children: [text("The band beside this one is measured against the column it was given.")],
+        }),
+      ]),
+      buildSlot(idFactory, "end", [
+        buildElement(idFactory, {
+          type: "loom.mosaic",
+          props: { rhythm: "lead" },
+          children: [
+            buildElement(idFactory, { type: "loom.stat", props: { value: "4", label: "operations" } }),
+            buildElement(idFactory, { type: "loom.stat", props: { value: "2", label: "axes" } }),
+            buildElement(idFactory, { type: "loom.stat", props: { value: "1", label: "tree" } }),
+          ],
+        }),
+      ]),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [nav, destinations, narrow],
+    }),
+    idFactory
+  )
+}
+
+describe("what a phone can see", () => {
+  const openingOf = (markup: string, pattern: RegExp): string => (pattern.exec(markup) ?? [""])[0] ?? ""
+
+  it("places the disclosure control before the links, which is what the rule requires", () => {
+    const { markup, diagnostics } = render(phonePage(EDITORIAL))
+    const bar = markup.slice(markup.indexOf("<nav"), markup.indexOf("</nav>"))
+
+    expect(diagnostics).toEqual([])
+
+    /**
+     * A sibling combinator only looks forward, so the order in the markup is
+     * load-bearing rather than incidental. Where the button *appears* is the
+     * stylesheet's business — it carries an `order` — which is the whole reason
+     * the two can differ.
+     */
+    expect(bar.indexOf(`class="${LIBRARY_CLASS.navToggle}"`)).toBeLessThan(
+      bar.indexOf(`class="${LIBRARY_CLASS.navMenu}"`)
+    )
+    expect(markup).toContain(`.${LIBRARY_CLASS.navToggle}:has([data-loom-disclosed="false"]) ~ .${LIBRARY_CLASS.navMenu}`)
+  })
+
+  it("renders no button on the server, so a page with no scripting keeps its menu", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+    const bar = markup.slice(markup.indexOf("<nav"), markup.indexOf("</nav>"))
+
+    /**
+     * 0092's bargain, and the direction of the rule is the whole safety
+     * argument. The control appears from an effect once scripting is proven, so
+     * the server's markup has an empty wrapper: no button, no attribute,
+     * nothing matching the rule, and every link reachable. Written the other way
+     * round — hidden by default, revealed by the button — that visitor gets a
+     * menu behind a control that never arrives.
+     */
+    expect(bar).toContain(`<span class="${LIBRARY_CLASS.navToggle}"></span>`)
+    expect(bar).not.toContain("data-loom-disclosed")
+    expect(bar).toContain("Documentation")
+  })
+
+  it("keeps the menu's display in the stylesheet, because the rule has to take it away", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+    const menu = openingOf(markup, new RegExp(`<div class="${LIBRARY_CLASS.navMenu}"[^>]*>`))
+
+    /**
+     * Mechanic 1 in `stylesheet.ts`, met head on. An inline `display:flex` here
+     * would beat every rule in the file and the menu could never be collapsed —
+     * which is exactly why the runtime's own button, which does set its display
+     * inline, had to be wrapped rather than placed bare.
+     */
+    expect(menu).not.toContain("display:flex")
+    expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.navMenu} \\{[^}]*display: flex`))
+  })
+
+  it("puts the menu back and the button away once there is room for the bar", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+    const wide = markup.slice(markup.indexOf("@media (min-width: 48rem)"))
+    const block = wide.slice(0, wide.indexOf("\n}"))
+
+    expect(block).toMatch(new RegExp(`\\.${LIBRARY_CLASS.navToggle} \\{\\s*display: none;`))
+    expect(block).toContain(`.${LIBRARY_CLASS.navMenu} {`)
+    /** The closed state loses to the width, or a laptop would show a menu it cannot open. */
+    expect(block).toMatch(/~ \.loom-nav-menu \{\s*display: flex;/)
+  })
+
+  it("declares one name for the control and says the bar is a target", () => {
+    const nav = registry.primitives.find((primitive) => primitive.type === "loom.nav")
+
+    /** One name open and closed; `aria-expanded` carries the state (0092). */
+    expect(nav?.behaviours).toEqual(["disclose"])
+    expect(nav?.text["disclose"]).toBe("Menu")
+    expect(nav?.text["closed"]).toBeUndefined()
+    expect(nav?.interactive).toBe("always")
+  })
+
+  it("sizes a card title off one level and outlines it at another", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+
+    /**
+     * The marketing lane's finding, closed. Level 3 is step 6 — 32px in a card
+     * about 290px wide, where all four titles wrapped to two lines and the
+     * navigation band came out louder than the argument above it. `scale: 5`
+     * takes step 4 and leaves the `h3` alone, so the outline is unharmed.
+     */
+    const title = openingOf(markup, /<h3[^>]*>/)
+
+    expect(title).toContain("var(--loom-scale-4)")
+    expect(title).not.toContain("var(--loom-scale-6)")
+    expect(markup).toContain("Read the thesis")
+  })
+
+  it("changes nothing for a heading that does not ask, which is what a default has to mean", () => {
+    const withScale = buildElement(sequentialIdFactory(), { type: "loom.heading", props: { level: 2 } })
+
+    expect(withScale.props["scale"]).toBeUndefined()
+
+    /** The section heading sets no `scale`, so it is still its level's own step. */
+    const { markup } = render(phonePage(EDITORIAL))
+    const section = openingOf(markup, /<h2[^>]*>/)
+
+    expect(section).toContain("var(--loom-scale-7)")
+  })
+
+  it("refuses a scale the ramp of levels does not hold", () => {
+    const heading = registry.primitives.find((primitive) => primitive.type === "loom.heading")
+
+    /**
+     * Bounded to the same 1–6 as `level`, on purpose. The obvious alternative —
+     * naming the ramp step directly, 1 to 8 — reads backwards beside the prop
+     * above it, because `level: 1` is the largest heading and step 1 is the
+     * smallest text on the ramp.
+     */
+    expect(heading?.validate({ level: 3, scale: 8 }).outcome).toBe("invalid")
+    expect(heading?.validate({ level: 3, scale: 0 }).outcome).toBe("invalid")
+    expect(heading?.validate({ level: 3, scale: 5 }).outcome).toBe("valid")
+  })
+
+  it("marks a linked tile at rest, and leaves an unlinked one unmarked", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+
+    /**
+     * Two linked cards and one linked feature tile; the fourth tile is not a
+     * link and must stay unmarked, or the mark means nothing. Hover is not in
+     * this assertion at all, which is the point of the run: this is what a
+     * screenshot and a touch device see.
+     */
+    expect([...markup.matchAll(new RegExp(`class="${LIBRARY_CLASS.arrow}"`, "g"))]).toHaveLength(3)
+    expect(markup).toContain("Nothing to click")
+    expect(markup).toContain(`>${LINK_MARK}</span>`)
+  })
+
+  it("draws the mark as a fill inside a ring, so it reads over a photograph", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+    const rule = markup.slice(markup.indexOf(`.${LIBRARY_CLASS.arrow} {`))
+    const block = rule.slice(0, rule.indexOf("}"))
+
+    /**
+     * `loom.before-after`'s lesson, reused. A card with a media region puts this
+     * over an image the primitive did not choose and cannot sample, and no
+     * palette slot contrasts with a photograph — so the chip carries both a
+     * solid fill and a ring, and one of the two always reads.
+     *
+     * The fill is the **accent** rather than the surface, which the first
+     * screenshot decided: `bg-surface` inside `border-subtle` vanishes into a
+     * card that is itself `bg-surface`, leaving a hairline. The accent differs
+     * from every card tone by construction.
+     */
+    expect(block).toContain("background: var(--loom-accent-subtle)")
+    expect(block).toContain("border: 1px solid var(--loom-border-accent)")
+    /**
+     * And the glyph is the **ink**, not the accent. An accent arrow on an
+     * accent tint is one hue at two lightnesses, and under `minimal` — a pale
+     * mint — it vanished inside its own chip. `tokens.ts` warns about exactly
+     * this: a token promises the value comes from the theme and promises
+     * nothing about it differing from the one beside it.
+     */
+    expect(block).toContain("color: var(--loom-fg-default)")
+    expect(block).not.toContain("color: var(--loom-accent-strong)")
+    expect(block).toContain(`width: ${LINK_MARK_SIZE}`)
+    expect(block).toContain("pointer-events: none")
+  })
+
+  it("never lets the mark become a second target inside the first", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+    const mark = openingOf(markup, new RegExp(`<span[^>]*class="${LIBRARY_CLASS.arrow}"[^>]*>`))
+
+    /** The anchor is already named by the card's content; an arrow after it is noise. */
+    expect(mark).toContain('aria-hidden="true"')
+    expect(mark).not.toContain("href")
+  })
+
+  it("reserves room for the mark over words, and not over a picture", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+
+    /**
+     * The card with a media region draws the mark on the picture, where there
+     * is no line to collide with, so its body keeps even padding on four sides.
+     * The card without one draws it over the body and buys the room first.
+     */
+    const bodies = [...markup.matchAll(/padding-inline-end:calc\(1\.75rem \+ var\(--loom-spacing-3\)\)/g)]
+
+    /** Two: the card with no media, and the linked feature tile, which never has any. */
+    expect(bodies).toHaveLength(2)
+  })
+
+  it("keeps the mark under reduced motion and takes only its movement", () => {
+    const { markup } = render(phonePage(EDITORIAL))
+    const calmed = markup.slice(markup.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    /**
+     * The one hover treatment in that block which is also present at rest.
+     * Switching it off entirely would take the affordance away from the reader
+     * most likely to be on a device that cannot hover in the first place.
+     */
+    expect(calmed).toContain(`.${LIBRARY_CLASS.arrow} {\n    transition: none;`)
+    expect(calmed).toMatch(/a:hover > \.loom-arrow[^{]*\{\s*transform: none;/)
+  })
+
+  it("measures the mosaic against the column it was given, not against the window", () => {
+    const { markup, diagnostics } = render(phonePage(EDITORIAL))
+
+    /**
+     * The 21 August finding this lane filed against itself, closed. This mosaic
+     * sits in the end region of a `loom.split`, which is a fraction of the page
+     * — under a `@media` query it laid six columns there because the *window*
+     * was wide.
+     */
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("@container (min-width: 48rem)")
+    expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.mosaic} \\{\\s*container-type: inline-size;`))
+  })
+
+  it("renders under every palette with no literal colour below the root", () => {
+    for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+      const { markup, diagnostics } = render(phonePage(theme))
+      const tree = splitStylesheet(markup).tree
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+
+  it("changes nothing but the root's variables when the palette changes", () => {
+    const editorial = splitStylesheet(render(phonePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(phonePage(BOLD)).markup).tree
     const strip = (markup: string): string => markup.slice(markup.indexOf("</style>") + 1).replace(/style="[^"]*"/, "")
 
     expect(strip(editorial)).toBe(strip(bold))

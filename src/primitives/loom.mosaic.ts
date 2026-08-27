@@ -42,12 +42,34 @@ import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
  *
  * The layout cannot be said inline, for two reasons and the second is new here:
  * a span belongs to a child this primitive does not style, and **the whole
- * rhythm has to switch off on a narrow screen**. Below the breakpoint every
+ * rhythm has to switch off when the band is narrow**. Below the breakpoint every
  * cell is full width, because six columns on a phone is six columns of four
- * characters. That is the first width media query in this library, and
+ * characters.
  * [0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
- * is where it is argued: the markup is unchanged by it, so the render stays the
- * pure function of the tree that 0008 requires.
+ * is where that is argued: the markup is unchanged by it, so the render stays
+ * the pure function of the tree that 0008 requires.
+ *
+ * **What it measures is the band, not the screen, and that is a repair.** It
+ * asked a `@media` query until 27 August, which is a question about the
+ * *viewport* — so a mosaic dropped into the end region of a `loom.split`, or
+ * into a card, or into any column narrower than the window, laid six columns
+ * across four hundred pixels and read as a filing cabinet. This lane filed that
+ * against itself on 21 August and restated it on 26 August, when `loom.offering`
+ * became the third primitive to want a container measurement and the second to
+ * take one.
+ *
+ * The fix is `@container`, and it costs one element: a container cannot answer
+ * a query about *itself*, only about an ancestor, so the grid now sits inside a
+ * frame that declares `container-type: inline-size` and the query is asked of
+ * the frame. Two things fall out of that, one of them free:
+ *
+ * - The rhythm selectors are unchanged. They were always `> *:nth-child(…)` on
+ *   the element holding the cells, and that element is still the grid.
+ * - **The stylesheet no longer has to go last.** It used to, because a leading
+ *   `<style>` is `:nth-child(1)` to any renderer that does not hoist it and
+ *   would have shifted every cell in the cycle by one. It now lives in the
+ *   frame, where it is not among the grid's children at all and cannot be
+ *   counted however it is rendered. The trap is gone rather than avoided.
  */
 
 const RHYTHMS = ["alternating", "showcase", "lead"] as const
@@ -93,27 +115,27 @@ export const loomMosaic = definePrimitive({
       "div",
       {
         ...loom.editable,
-        className: `${LIBRARY_CLASS.mosaic} ${RHYTHM_CLASS[given.rhythm ?? "alternating"]}`,
-        style: {
-          /**
-           * `display` and `grid-template-columns` are **not** here, and that is
-           * load-bearing rather than an omission: an inline style beats a rule,
-           * so a column count set here would be unreachable from the media
-           * query that has to change it. The gap has no breakpoint, so it stays.
-           */
-          gap: GAPS[given.gap ?? "normal"],
-          width: "100%",
-        },
+        /** The frame. It holds no layout of its own beyond being the thing the cells measure. */
+        className: LIBRARY_CLASS.mosaic,
+        style: { width: "100%" },
       },
-      children,
-      /**
-       * Last, unlike every other emitter in this library, because this is the
-       * first primitive whose rules **count its children**. A leading `<style>`
-       * is `:nth-child(1)` to any renderer that does not hoist it, which would
-       * shift every cell in the cycle by one. `loom.article-grid` sidesteps the
-       * same trap with `:first-of-type`; a mosaic holds children of no
-       * particular type, so it has to move the element instead.
-       */
-      libraryStylesheet()
+      libraryStylesheet(),
+      createElement(
+        "div",
+        {
+          className: `${LIBRARY_CLASS.mosaicGrid} ${RHYTHM_CLASS[given.rhythm ?? "alternating"]}`,
+          style: {
+            /**
+             * `display` and `grid-template-columns` are **not** here, and that
+             * is load-bearing rather than an omission: an inline style beats a
+             * rule, so a column count set here would be unreachable from the
+             * container query that has to change it. The gap has no breakpoint,
+             * so it stays.
+             */
+            gap: GAPS[given.gap ?? "normal"],
+          },
+        },
+        children
+      )
     ),
 })

@@ -15,15 +15,51 @@ import { colour, family, size, weight, type RampStep } from "./tokens.js"
  * is a delta against the sentence rather than a `configure` that replaces the
  * whole heading's props.
  *
- * `level` is the document outline; the visual size follows from it and is not
- * separately settable. A model that wants a smaller headline picks a lower
- * level, which keeps the outline honest rather than letting a page look
- * structured while its heading levels say otherwise.
+ * `level` is the document outline. The size follows from it by default and can
+ * now be moved off it, which is a change of position and worth saying why.
+ *
+ * **The old rule was that a model wanting a smaller headline picks a lower
+ * level.** That keeps the outline honest in the case it was written for — a
+ * page whose headings are all the page's own — and it fails the case that
+ * actually turned up. `Loom marketing` built a band of four `loom.card`s under
+ * a level-2 section heading, so each card title is level 3, which is step 6 —
+ * **32px in a card about 290px wide**. All four wrapped to two lines and the
+ * navigation band came out louder than the argument band above it. The three
+ * ways out available at the time were: use level 5 and put an `h5` under an
+ * `h2`; drop the headings for prose and lose four destinations from the
+ * outline; or show three cards and leave the fourth alone on a second row. The
+ * band shipped at 32px and the lane filed this instead, which was the right
+ * call.
+ *
+ * The library was also already disagreeing with itself. `loom.feature` renders
+ * its title as a hard-coded `<h3>` at step 4 — 20px — so the *same level* came
+ * out at 32px through this primitive and at 20px through that one, and only the
+ * wrong one of the two was reachable from a tree. `scale` is that private seam
+ * made public.
+ *
+ * **It is expressed as a level rather than as a ramp step, and that is not
+ * cosmetic.** The obvious shape is `scale: 1–8` naming the step directly, and it
+ * has an inversion a model would fall into: `level: 1` is the *largest* heading
+ * and step 1 is the *smallest* text on the ramp, so the two numbers beside each
+ * other in one prop bag run in opposite directions. Saying *size this as though
+ * it were level 5* borrows a vocabulary the model already has, points the same
+ * way as the prop above it, and cannot name a size the ramp does not hold.
+ *
+ * It stays a prop under 0052 and under the granularity doc's sharper question:
+ * changing it adds no node, removes none and reorders none. It is `align` and
+ * `balance`'s kind of thing — a rendering of fixed content — not a `move` in
+ * disguise.
  */
 
 const props = z
   .object({
     level: z.number().int().min(1).max(6),
+    /**
+     * Size this heading as though it were at this level, without moving it in
+     * the document outline. Defaults to the heading's own level, so a tree that
+     * does not set it renders exactly as it did before this existed.
+     */
+    scale: z.number().int().min(1).max(6).optional(),
     align: z.enum(["start", "center"]).optional(),
     balance: z.boolean().optional(),
   })
@@ -72,7 +108,8 @@ const headingSize = (step: RampStep): string => {
 
 export const loomHeading = definePrimitive({
   type: "loom.heading",
-  description: "A heading. Its level sets both the document outline and the size.",
+  description:
+    "A heading. Its level sets the document outline, and the size unless `scale` names another level to take it from.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
@@ -84,7 +121,7 @@ export const loomHeading = definePrimitive({
           margin: "0",
           fontFamily: family("heading"),
           fontWeight: weight("heading"),
-          fontSize: headingSize(STEP_FOR_LEVEL[given.level] ?? 5),
+          fontSize: headingSize(STEP_FOR_LEVEL[given.scale ?? given.level] ?? 5),
           lineHeight: 1.15,
           color: colour("fg-default"),
           textAlign: given.align ?? "start",
