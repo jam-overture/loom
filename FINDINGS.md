@@ -9043,6 +9043,111 @@ Two limits, stated so they are not discovered:
 
 ---
 
+## 2026-08-26 — a tree cannot point at a band of its own page, and the front door needed to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+— nothing is broken, and this is a capability that does not exist rather than one
+that misbehaves
+
+The front door now answers a visitor's request above the opening band, because
+the answer was landing two screens below the fold (see the report of the same
+date). The band it puts there wanted one more control than it has: **read the
+whole record**, pointing at the panel further down the same page.
+
+It cannot. The two halves of an in-page link are:
+
+- **The address.** `linkUrlSchema` allowlists schemes and parses with `new URL`,
+  so `https://host/?ask=problem#see-it-happen` passes without complaint today.
+  Nothing needs to change here.
+- **The target.** No primitive in the library renders an `id`. `loom.editable`
+  spreads `data-loom-node`, which is identity for the renderer and the portal
+  rather than a fragment target, and nothing else emits one.
+
+So a Loom page can hold a link to any document on the web except itself.
+
+**What was done instead**, so the shape of the gap is clear: the band offers
+`/the-record?changes=…`, which replays the same request from the published front
+door and is a genuinely better destination for a *shareable* record. It is not a
+substitute for "the panel is 1,200px below you, here it is".
+
+**Recommendation: an `anchor` prop, on the band primitives rather than on
+everything.** `loom.section`, `loom.hero` and `loom.callout` are what a page's
+own navigation points at, and a slug the tree supplies is a prop by 0052 — one
+of them, fixed, labelling the node rather than being its content. Three things
+worth deciding with it, none of which are this lane's:
+
+- **Whether it is validated as a fragment** (`[a-z0-9-]+`), which it should be:
+  an author-supplied `id` is markup the tree writes into the document, and the
+  one place a model writes freely is the place to keep narrow.
+- **Whether two nodes may carry the same anchor.** Duplicate ids are the
+  `loom.marquee` problem again in a different dress, and the honest answer is
+  probably a render diagnostic rather than a schema rule, since the schema
+  cannot see two nodes at once.
+- **Whether `loom.decorative()` strips it**, which it must — 0093 exists so a
+  copy carries no identity, and an anchor is identity.
+
+Not urgent. The site is correct without it and says so; this is filed because
+three surfaces compose these primitives and every one of them will eventually
+want to link to its own subheading.
+
+---
+
+## 2026-08-26 — the front door's opening band takes the whole of a laptop's first screen, measured
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — a measurement and a request for a lever, not a bug report
+
+Numbers first, taken from the deployed tree at a 1440×900 viewport in the
+`minimal` palette:
+
+| | |
+| --- | --- |
+| Menu | 48 → 108px |
+| Opening band | 156 → 1036px (**880px**), `min-height` 702px, padding 112px each side |
+| Both calls to action | ~866 → 926px |
+| The fold | 900px |
+
+**So neither call to action on this site's front door is visible when it
+loads**, and the band below the opening one begins at 1083px. This is what made
+the answer band above necessary rather than merely nice: a change the page made
+*directly under the headline* was off the bottom of the screen.
+
+The 880px is content rather than the `tall` floor — `min-height: 78vh` is 702px
+and never binds. It is roughly: eyebrow 32px, the level-1 heading at three lines
+**~400px**, the lead at four centred lines ~190px, the actions ~60px, the gaps
+between them, and 224px of the primitive's own padding.
+
+**This lane has no lever on any of it**, which is the reason this is filed
+rather than fixed:
+
+- The **headline** is the maintainer's line, verbatim, and its size is welded to
+  its level — the 25 August entry from this lane on `loom.heading`'s
+  `STEP_FOR_LEVEL`, one level up. A level-1 heading is one size everywhere.
+- The **text measure** is `TEXT_MEASURE = "44rem"`, a module constant in
+  `loom.hero` with a good comment saying why it is not a theme value. It is also
+  not a prop, so a hero cannot be told to set its headline wider and shorter.
+- The **padding** is `space(8)` on both statures, and `stature` is the one prop
+  here — but it may not be touched from the tree conditionally, because *Turn it
+  down* is a demonstrated request whose whole content is configuring
+  `backdrop` and `stature` on this exact node. A page that pre-set them would
+  make that choice a no-op.
+
+Three ways out, in the order this lane would take them, and all three are yours:
+
+1. **A `measure` prop on `loom.hero`** (`readable` | `wide`), defaulting to
+   today's 44rem. A hero told to set its headline across 60rem gets two lines
+   instead of three and gives back ~130px, and it is a prop about layout on the
+   one primitive whose layout is the page's first impression.
+2. **A third `stature`.** `compact` between `standard` and `tall`, trimming the
+   112px padding. Cheapest, smallest gain, and it widens the enum *Turn it down*
+   configures, which is fine.
+3. **`scale` on `loom.heading`**, which is the 25 August entry and would answer
+   both this and the card titles. Biggest change, most useful, most yours to
+   judge.
+
+**Nothing is broken and the page is not ugly** — it is a confident hero and it
+reads well. The cost is specific and worth a number: the first screen of the
+most-read page this project has carries a claim and no way to act on it.
 ## 2026-08-26 — the framing seam exists, and `loom.embed` still frames whatever the tree says
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
