@@ -8301,9 +8301,18 @@ It is `src/render/`'s, which is why it is filed rather than built.
 
 ## 2026-08-25 — an `iframe` src is a whole document, and the only check on it is its scheme
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— shipped with the narrowest defaults a primitive can set alone; the check that
-would matter is a deployment's, not a schema's.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by #165 — both halves built, as
+[0094](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+The origin registry is `createFrameOriginRegistry`, wired at `renderRequest` as
+`origins`; a primitive declares `frames: ["src"]` and reads `loom.frames.src`,
+which is `allowed` or `refused` and never the raw prop. The second half — notice
+when the sandbox is inert — is answered by registering an origin as `self`, which
+is permitted and raises `frame-same-origin`. The recommendation was followed with
+one change: the registry holds **origins**, not whole URLs, because which video
+goes on a page is a content decision and a URL registry would make it a server
+operator's. `loom.embed` does not use the seam yet; that is filed below for the
+lane that owns it.
 
 Every URL in this library reaches an `href` or an `img src`, which is why
 [0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)'s
@@ -9036,6 +9045,468 @@ Two limits, stated so they are not discovered:
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
 
+---
+
+## 2026-08-26 — five per cent of the published surface is named in prose, and four doors are not named at all
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+measurement this run made possible, and the queue it points at
+
+Linking the generated reference back to the written pages meant working out,
+for the first time, **which exports the prose actually names**. The answer is
+now computed on every build and printed on every reference page, so it can be
+read off the site rather than out of this file:
+
+**43 of 801 published names** appear in code on a written page. Per door:
+
+| Import | Named | Exports | Pages that name one |
+| --- | --- | --- | --- |
+| `@loom/runtime` | 29 | 429 | 9 |
+| `@loom/runtime/sdk` | 5 | 45 | 4 |
+| `@loom/runtime/react` | 3 | 62 | 3 |
+| `@loom/runtime/store` | 3 | 45 | 1 |
+| `@loom/runtime/primitives` | 1 | 104 | 3 |
+| `@loom/runtime/postgres` | 1 | 10 | 1 |
+| `@loom/runtime/anthropic` | 1 | 2 | 1 |
+| `@loom/runtime/cli` | **0** | 23 | — |
+| `@loom/runtime/write` | **0** | 21 | — |
+| `@loom/runtime/telemetry` | **0** | 62 | — |
+| `@loom/runtime/telemetry/postgres` | **0** | 4 | — |
+
+**The four zeroes are the finding.** A reader who reaches `runtime/cli`,
+`runtime/write` or `runtime/telemetry` from search gets signatures and the
+sentence each author left on the declaration, and there is nothing else on this
+site to send them to — 110 exports with no prose anywhere. Those pages now say
+so in a band at the top rather than leaving a reader to hunt through a sidebar
+that was never going to have it.
+
+**The low percentage is not, by itself, a defect.** A reference exists so that
+the prose does not have to name everything; a page that mentioned all 429
+exports of the root door would be a worse page. What the numbers say is narrower
+and it is about the four zeroes: `write` is how a host persists an accepted
+change, and `telemetry` is how it finds out what the model cost — both are things
+somebody standing up a deployment has to do, and neither has a paragraph. `cli`
+is the scaffolding a stranger would meet first if they knew it existed.
+
+Recommended next units for this lane, in this order, and recorded here so a
+later run does not have to re-derive them:
+
+1. **A page on writing an accepted change back**, in *The runtime*, covering
+   `@loom/runtime/write` and closing the largest of the three real gaps.
+2. **A page on what a deployment can see afterwards** — `telemetry` — which the
+   portal already renders and the docs have never described.
+3. `cli` is smaller and may belong as a section of *Installation* rather than a
+   page, since it is scaffolding rather than a subject.
+
+Nothing here is asked of another lane, and the count is not a test: the site
+prints whatever it measures, so this table goes out of date without anything
+going red, which is the correct behaviour for a fact about how much has been
+written.
+
+---
+
+## 2026-08-26 — a mention is evidence a page is worth reading, and the wording had to stop short of claiming more
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped, recorded so it is revisited on purpose rather than
+rediscovered
+
+The link from a signature back to the prose is derived by looking for the export's
+name in code on a written page — a fenced block, or a span between backticks.
+That is the strongest evidence available without a person writing a map, and it
+is genuinely weaker than what a reader might infer:
+
+- **It cannot tell an explanation from an appearance.** A name in a code block on
+  a page about something else would be offered exactly as loudly as a name in a
+  paragraph explaining it. Every one of the 43 today is a real discussion, checked
+  by hand; nothing keeps that true.
+- **It only finds names the prose spells.** A page that says *"the registry"* and
+  means `createPrimitiveRegistry` is invisible to it, and that is most of how good
+  prose talks about code.
+
+The wording is what carries the limit: the page says **"Shown in use on"**, which
+is exactly what was measured, rather than *explained on*, which was not. A link
+promising an explanation and delivering a code block would be worse than the
+silence it replaced.
+
+The shape that would close it properly is a front-matter list on each written
+page naming the exports it teaches, checked against the reference by a test — a
+small hand-maintained map with a red test behind it, rather than a large one with
+nothing. Not done here: it is worth doing only once there are enough pages for the
+derived version to be wrong, and today it is not.
+## 2026-08-26 — a tree cannot point at a band of its own page, and the front door needed to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+— nothing is broken, and this is a capability that does not exist rather than one
+that misbehaves
+
+The front door now answers a visitor's request above the opening band, because
+the answer was landing two screens below the fold (see the report of the same
+date). The band it puts there wanted one more control than it has: **read the
+whole record**, pointing at the panel further down the same page.
+
+It cannot. The two halves of an in-page link are:
+
+- **The address.** `linkUrlSchema` allowlists schemes and parses with `new URL`,
+  so `https://host/?ask=problem#see-it-happen` passes without complaint today.
+  Nothing needs to change here.
+- **The target.** No primitive in the library renders an `id`. `loom.editable`
+  spreads `data-loom-node`, which is identity for the renderer and the portal
+  rather than a fragment target, and nothing else emits one.
+
+So a Loom page can hold a link to any document on the web except itself.
+
+**What was done instead**, so the shape of the gap is clear: the band offers
+`/the-record?changes=…`, which replays the same request from the published front
+door and is a genuinely better destination for a *shareable* record. It is not a
+substitute for "the panel is 1,200px below you, here it is".
+
+**Recommendation: an `anchor` prop, on the band primitives rather than on
+everything.** `loom.section`, `loom.hero` and `loom.callout` are what a page's
+own navigation points at, and a slug the tree supplies is a prop by 0052 — one
+of them, fixed, labelling the node rather than being its content. Three things
+worth deciding with it, none of which are this lane's:
+
+- **Whether it is validated as a fragment** (`[a-z0-9-]+`), which it should be:
+  an author-supplied `id` is markup the tree writes into the document, and the
+  one place a model writes freely is the place to keep narrow.
+- **Whether two nodes may carry the same anchor.** Duplicate ids are the
+  `loom.marquee` problem again in a different dress, and the honest answer is
+  probably a render diagnostic rather than a schema rule, since the schema
+  cannot see two nodes at once.
+- **Whether `loom.decorative()` strips it**, which it must — 0093 exists so a
+  copy carries no identity, and an anchor is identity.
+
+Not urgent. The site is correct without it and says so; this is filed because
+three surfaces compose these primitives and every one of them will eventually
+want to link to its own subheading.
+
+---
+
+## 2026-08-26 — the front door's opening band takes the whole of a laptop's first screen, measured
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — a measurement and a request for a lever, not a bug report
+
+Numbers first, taken from the deployed tree at a 1440×900 viewport in the
+`minimal` palette:
+
+| | |
+| --- | --- |
+| Menu | 48 → 108px |
+| Opening band | 156 → 1036px (**880px**), `min-height` 702px, padding 112px each side |
+| Both calls to action | ~866 → 926px |
+| The fold | 900px |
+
+**So neither call to action on this site's front door is visible when it
+loads**, and the band below the opening one begins at 1083px. This is what made
+the answer band above necessary rather than merely nice: a change the page made
+*directly under the headline* was off the bottom of the screen.
+
+The 880px is content rather than the `tall` floor — `min-height: 78vh` is 702px
+and never binds. It is roughly: eyebrow 32px, the level-1 heading at three lines
+**~400px**, the lead at four centred lines ~190px, the actions ~60px, the gaps
+between them, and 224px of the primitive's own padding.
+
+**This lane has no lever on any of it**, which is the reason this is filed
+rather than fixed:
+
+- The **headline** is the maintainer's line, verbatim, and its size is welded to
+  its level — the 25 August entry from this lane on `loom.heading`'s
+  `STEP_FOR_LEVEL`, one level up. A level-1 heading is one size everywhere.
+- The **text measure** is `TEXT_MEASURE = "44rem"`, a module constant in
+  `loom.hero` with a good comment saying why it is not a theme value. It is also
+  not a prop, so a hero cannot be told to set its headline wider and shorter.
+- The **padding** is `space(8)` on both statures, and `stature` is the one prop
+  here — but it may not be touched from the tree conditionally, because *Turn it
+  down* is a demonstrated request whose whole content is configuring
+  `backdrop` and `stature` on this exact node. A page that pre-set them would
+  make that choice a no-op.
+
+Three ways out, in the order this lane would take them, and all three are yours:
+
+1. **A `measure` prop on `loom.hero`** (`readable` | `wide`), defaulting to
+   today's 44rem. A hero told to set its headline across 60rem gets two lines
+   instead of three and gives back ~130px, and it is a prop about layout on the
+   one primitive whose layout is the page's first impression.
+2. **A third `stature`.** `compact` between `standard` and `tall`, trimming the
+   112px padding. Cheapest, smallest gain, and it widens the enum *Turn it down*
+   configures, which is fine.
+3. **`scale` on `loom.heading`**, which is the 25 August entry and would answer
+   both this and the card titles. Biggest change, most useful, most yours to
+   judge.
+
+**Nothing is broken and the page is not ugly** — it is a confident hero and it
+reads well. The cost is specific and worth a number: the first screen of the
+most-read page this project has carries a claim and no way to act on it.
+## 2026-08-26 — the framing seam exists, and `loom.embed` still frames whatever the tree says
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The gap `loom.embed`'s own doc comment described — *"what cannot be done here is
+the check that would actually matter: which origins this deployment is willing
+to frame"* — is built, in #165 and
+[0094](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+This is the half that lives in your lane.
+
+**What to change, concretely.** Two lines and a branch:
+
+```ts
+export const loomEmbed = definePrimitive({
+  type: "loom.embed",
+  frames: ["src"],                        // ← the declaration
+  …
+  component: ({ loom, props: given }) => {
+    const frame = loom.frames.src         // ← allowed | refused, never the prop
+    …
+  },
+})
+```
+
+`frames` names props the schema declares; the registry refuses one that has
+drifted, so a rename cannot silently stop the check. The outcome is two states
+and the `allowed` one carries `url` (normalised, and the string to put in the
+`src`), `origin`, and `sameOrigin`.
+
+**What it changes on the page, and why it is a decision rather than a patch.**
+Today `loom.embed` frames anything that passes `mediaUrlSchema`. After this it
+frames only what the deployment registered, and **a deployment that registered
+nothing frames nothing**. That is the seam failing closed on purpose (0094), and
+it means the refusal path is not an edge case — it is what every deployment sees
+until somebody writes an allowlist. So the interesting work here is not the
+declaration, it is *what a refused embed looks like*. A blank box is the worst
+answer. `loom.code` refusing to fake a copy button is the precedent for the
+right one.
+
+**Three things worth knowing before you build it:**
+
+- **`sameOrigin` is `true` for a permitted frame.** It is not a refusal. It says
+  the `sandbox` the primitive sets is inert, because `allow-scripts` beside
+  `allow-same-origin` is only a boundary between two origins. Whether the
+  primitive shows anything for it is your call; the render already reports it.
+- **The refusal reason is worth showing differently.** `no-registry` is *this
+  deployment has not been configured*, which is a message for whoever runs it.
+  `unlisted-origin` is *nobody permitted this host*, which is a message about
+  the page. `unframeable` is a prop that is not a URL at all.
+- **Nothing else in the library declares a framable prop**, so `loom.embed` is
+  the seam's only consumer and its ergonomics have been tested by nothing but
+  its own tests. If reading `loom.frames.src` is awkward in practice, say so
+  rather than working around it — a seam with one consumer is still cheap to
+  reshape.
+
+---
+
+## 2026-08-26 — the commit-identity trap, fifth occurrence, and the fourth one was mine
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — fifth data point, and the first repeat by the *same* routine
+
+Same failure, fifth time. I committed #165 with
+`-c user.name="Loom daily build" -c user.email="jpizzolato36@gmail.com"`, Vercel
+refused the deployment — *"Git author jpizzo must have access to the project on
+Vercel to create deployments"* — and the pull request went up **Blocked**, with
+no preview URL. Repaired with `--amend --reset-author` and force-pushed before
+any review existed. Fifth time that exact repair has been made.
+
+**What this occurrence adds, and it is not a happy addition.** The 25 August
+entry directly above is *this lane's own*, filed by me, about this exact email
+resolving to this exact wrong account. I read `FINDINGS.md` before choosing work
+this run, as every brief requires. I read my own entry. I then made the same
+mistake, with the same email, four runs later, and the bot said the same
+sentence about the same stranger's username.
+
+So the tally is now five failures across four routines, and **the routine that
+filed the most detailed analysis of the trap walked into it again with that
+analysis in its context.** That is as clean a demonstration as the record is
+going to produce that the problem is not attention. The 22 August diagnosis has
+been right every time: `FINDINGS.md` is read *for work* — what is owed to my
+lane, what should I build — and it is now well past seven thousand lines. A rule
+about how to invoke `git commit` is procedure, and procedure filed among findings
+is procedure that gets read and not applied.
+
+Worth being precise about the pull, because it is not laziness either. Both
+overrides I have made were *deliberate*: on 25 August I set the maintainer's
+identity because a commit authored by the person whose repository this is looked
+more correct than one authored by `Claude`, and today I set a descriptive one
+because a commit that says which routine made it is more legible in `git log`.
+Both times the reasoning was about making the history better. The rule has to be
+written down precisely because **the wrong thing is the appealing one and it is
+appealing for a different reason each time** — so "remember the specific bad
+value" does not generalise, and only "never set it at all" does.
+
+**The recommendation is unchanged, and I am not going to restate it as though it
+were new.** One paragraph in `docs/routines.md`, beside **Network access** and
+**Credentials**, in the words the 25 August entry already proposed:
+
+> **Never set `user.name` or `user.email`, and never author a commit as the
+> maintainer.** The environment's default identity is the one on the Vercel team;
+> any other author produces a pull request with no preview, and the maintainer's
+> email resolves to a different GitHub account than his.
+
+For the record, the default identity is `Claude <noreply@anthropic.com>`, and it
+is on the Vercel team: #164 deployed a preview from a commit whose author email
+was that and whose *name* was overridden to `Loom primitives`. So it is the
+**email** that Vercel resolves, and a routine that wants a legible `git log` can
+have `-c user.name` alone — which is worth writing into the rule, because it
+gives the appealing thing a safe form instead of only forbidding it.
+
+A routine cannot write the governance it is bound by, so this stays a
+recommendation. The 25 August entry says one word from you on any pull request is
+enough and the next run will write it; that offer stands, and after five
+occurrences I would rather be told to write it than file a sixth entry.
+
+Cost to date: five runs, five lost previews, five force-pushes, and one commit
+that briefly claimed the maintainer wrote it.
+## 2026-08-26 — the three counts in the port map disagreed with each other, and one of them is derived twice
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-14-what-you-can-book` — recorded because the *shape* of it
+is open and is not mine to close
+
+`docs/hermes-port-map.md` carried three numbers for the same fact and all three
+were stale in different directions before this run: the ledger heading said
+**36 blocks**, the summary table said **Ported 33**, and the table still listed
+**3 atomic blocks to build** under a section that had said "the table is empty"
+since 25 August. All three are corrected in this run's diff.
+
+That is the third document in this repository to hold a count that has to be
+edited by hand in more than one place, and the second one this lane has had to
+fix. The other is `FACTS.primitives` and `FACTS.decisions` in
+`apps/loom/app/(marketing)/_lib/copy.ts`, which every primitives run has now
+bumped by hand for seven consecutive days and which two other lanes have already
+filed. **This run bumped both again — 64 → 68 and 93 → 94.**
+
+The recommendation is unchanged from the 25 August entry and this is a second
+data point for it: derive `FACTS.primitives` from `STARTER_PRIMITIVES.length`
+and `FACTS.decisions` from a directory listing, which ends both edits forever.
+The port map's own totals could be derived from its ledger rows by the same
+kind of small tool. Neither is this lane's file. Filing rather than reaching
+across the boundary.
+
+---
+
+## 2026-08-26 — a container query is the second thing a primitive wants to ask about its own width, and there is still no seam for the first
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is broken; this is a pattern worth naming before a third
+primitive reaches for it
+
+`loom.offering` reads as a full-width menu row past 40rem and as a card below
+it, decided by one `@container` rule rather than by a prop. That is the right
+answer here and it is the **third** primitive in the library to want a
+measurement of its own container rather than of the viewport — after
+`loom.marquee`'s `cqi` item cap and `loom.mosaic`, which reads the *viewport*
+where it should read its container and has been filed against this lane since 21
+August.
+
+Two things are worth writing down before a fourth one arrives.
+
+**The mechanic that is easy to get wrong once.** A container query reads its
+*ancestor*, never the element that declared the containment. So a primitive that
+wants to flip its own layout has to emit an inner element for the rule to reach,
+and `loom.offering` does — a `loom-offering-frame` `<div>` that is markup rather
+than a node. That is fine and it is invisible from the tree, but it is a second
+element per card and it is the kind of thing that gets refactored away by
+someone who does not know why it is there. It is commented in both the primitive
+and the stylesheet.
+
+**`loom.mosaic` is now the odd one out.** Two primitives measure their
+container and one measures the screen, which means a mosaic inside a `loom.split`
+column still lays out as though it had the whole page. The 21 August finding
+stands and this run did not close it, because it is a change to a shipped
+primitive's rendering under a width nobody has photographed and it belongs in a
+run of its own with the screenshots to prove it. Naming it here so the next
+primitives run picks it up with the pattern already established rather than
+re-deriving it.
+
+---
+
+## 2026-08-26 — 21st.dev is still blocked, ninth consecutive run, five lanes
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a ninth data point on an entry that has not changed
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED`. `docs/routines.md`
+still lists the domain under `permissions.allow`, and the primitives brief still
+names it as *the* visual standard to calibrate against.
+
+Recorded rather than quietly skipped, so nobody reads this run's report and
+assumes the reference was consulted. Calibration was against `loom.hero`,
+`loom.feature-grid` and `loom.tier` — the floor the brief names — and against
+the five screenshots, which found two defects that no assertion did.
+
+Recommendation unchanged: fix the allowlist, or drop the line from the briefs.
+Nine runs across five lanes have now each spent a call finding out, and the cost
+is small and entirely avoidable.
+
+---
+
+## 2026-08-26 — the screenshots in a pull request body have not been rendering as images, for at least two runs
+
+**Filed by:** `Loom primitives` · **Owned by:** every lane that publishes a
+screenshot · **Status:** open — the workaround is known and is one line; the
+cause is not this lane's to fix
+
+Every routine brief that produces a visual says some version of the primitives
+brief's step 8:
+
+> Open the PR against `main` with **the deployed preview URL and a screenshot of
+> every primitive you added, under both palettes.** This is the surface that has
+> to pop; **it has to be looked at.**
+
+**It has not been looked at, because it has not been rendering.** Markdown image
+syntax written into a pull request body through the GitHub MCP tools arrives
+with its leading `!` stripped, so `![Editorial](reports/….png)` becomes
+`[Editorial](reports/….png)` — a plain link to a binary file. The maintainer
+sees five links and has to click through each one, which is exactly the friction
+the instruction exists to remove.
+
+This is **not new to this run.** #156, the 25 August primitives pull request,
+lists its five screenshots as a bullet list of relative links for the same
+reason. Its report renders them correctly, because a committed `.md` file is not
+put through this path — which is why four runs of screenshots have looked right
+in `reports/` and wrong where the review happens, and why nobody noticed.
+
+Three things get mangled on the way in, all of them in the same pass:
+
+| Written | Arrives as |
+| --- | --- |
+| `![alt](path.png)` | `[alt](path.png)` — the `!` is dropped |
+| `<https://example.com>` | *removed entirely* — an autolink becomes nothing |
+| `` `<img>` `` | `` `` `` — anything tag-shaped inside inline code is emptied |
+
+The second is the one that bites hardest, because a bare-autolink preview URL
+**disappears from the body without a trace** and the brief requires it to be
+there. This run published one and it was gone; caught only by reading the body
+back.
+
+A fourth, less predictable: a relative markdown link whose path is long enough
+comes back wrapped in double backticks, so
+`[0066](decisions/0066-a-card-is-the-target-…-is-bought.md)` renders as inline
+code rather than as a link. Reproduced twice on that one filename and not on
+`0094`'s, which suggests a length threshold rather than a character.
+
+**The workaround, which every lane can copy today.** An explicit HTML `img` tag
+survives intact, and an absolute blob URL renders for a signed-in viewer on a
+private repository where `raw.githubusercontent.com` would not:
+
+```html
+<img src="https://github.com/jam-overture/loom/blob/BRANCH/reports/FILE.png?raw=true"
+     alt="…" width="900">
+```
+
+Use an ordinary `[text](url)` link for the preview rather than `<url>`, and
+avoid putting tag-shaped text inside backticks. This run's body does all three
+and renders correctly — it is worth opening #164 beside #156 to see the
+difference.
+
+**Recommendation.** The workaround is enough to unblock every lane and should go
+in `docs/routines.md` beside the sentence that asks for the screenshot, since
+that is the document every routine reads first. Whether the stripping itself is
+worth chasing is the maintainer's call; it is in the tooling rather than in this
+repository, and a documented one-line workaround costs nothing to follow. Not
+adding it to `docs/routines.md` myself — a routine cannot write the governance
+it is bound by, which is the rule that file states about itself.
 ---
 
 ## 2026-08-26 — the review queue was empty by construction on the one deployment anybody looks at

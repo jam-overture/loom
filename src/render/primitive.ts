@@ -1,6 +1,7 @@
 import type { ComponentType, CSSProperties, ReactNode } from "react"
 
 import type { NodeData } from "../data/resolution.js"
+import type { NodeFrames } from "../frame/resolution.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
@@ -88,6 +89,25 @@ export type LoomRenderContext<
    * a delta, a revision, or the diff a reviewer reads.
    */
   readonly submit?: SubmissionOutcome
+  /**
+   * Whether the URLs this primitive said it frames may be framed (0094), by the
+   * prop name that carried each one.
+   *
+   * Always present, empty for the primitive that declared no framable prop —
+   * which is all but one of them — so a primitive reads `loom.frames.src`
+   * without first proving the map exists. An entry appears for every declared
+   * prop the node actually carries, so a primitive that has a `src` to frame
+   * always has an answer about it, and one whose optional `src` was left out
+   * has nothing to frame and no entry.
+   *
+   * Unlike `data` and `submit`, no part of this waits on anything: an allowlist
+   * is a static fact about a deployment, so the check happens inside the walk
+   * and there is nothing for a host to resolve first. What a host *does* have
+   * to wire is the allowlist itself — absent, every frame is refused, because a
+   * deployment that has not said whose documents it will run has not agreed to
+   * run anybody's.
+   */
+  readonly frames: NodeFrames
   /**
    * The strings this primitive declared, resolved for this deployment.
    *
