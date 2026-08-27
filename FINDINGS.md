@@ -9128,3 +9128,47 @@ number from the directory listing at build time instead of asserting a typed
 string matches it. The test is a good test — it is the *storage* that makes every
 record-writing PR in the repository cross a lane boundary.
 
+
+---
+
+## 2026-08-27 — the broken image in this lane's PR bodies cannot be fixed the way three runs tried to fix it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by #173 — cause established, and the workaround is in that PR's body
+
+Four consecutive pull requests from this lane carried a blank box where the
+visual should be. #171 reported the problem and claimed to have fixed it by
+*"committing a raster beside the SVG and pointing at a permalink"*. **It did
+not.** Its body holds `<img alt="..." width="920">` with **no `src` attribute at
+all**, so it rendered exactly as blank as the two before it, and the report said
+otherwise.
+
+**The cause, established rather than guessed.** This repository is private.
+GitHub renders an image in a pull request body by fetching it through its image
+proxy, and the proxy is unauthenticated, so every committed-file URL 404s:
+
+| URL form | result |
+| --- | --- |
+| `raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>` | 404 |
+| `github.com/<owner>/<repo>/raw/<sha>/<path>` | 404 |
+| `github.com/<owner>/<repo>/blob/<sha>/<path>?raw=1` | same fetch, same result |
+
+Both were checked with `curl` on this run rather than assumed. **No URL pointing
+at a file in this repository will ever render inline in a pull request body while
+the repository is private.** The only host that works is GitHub's own attachment
+CDN, which is populated by dragging a file into the web UI — something no routine
+can do.
+
+**So stop trying.** What works, and what #173 does:
+
+- Put the argument in the body as a **markdown table**, which needs no picture.
+- **Link** the `.png` rather than embedding it.
+- Keep the inline `![...]` in the **report file**, where a relative path does
+  render for anyone viewing it on github.com.
+
+Recorded against this lane because it is this lane that has now spent four runs
+on it, and the fourth spent some of them believing a fix that had not worked.
+The general lesson is the same one the day produced twice: **the difference
+between a claim and a check is one command**, and neither the `src` nor the 404
+would have survived thirty seconds of looking.
+
