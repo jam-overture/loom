@@ -127,7 +127,7 @@ the size of `src/submit/`.
 ## Records
 
 - **Added:** [0094 — A frame carries its URL, and the deployment carries the
-  origins](../decisions/0094-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md),
+  origins](../decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md),
   Accepted. Index regenerated.
 - **Superseded:** none. 0053 is unchanged and still correct — a scheme allowlist
   is the right check for an `href`; this is the check it was never going to make.

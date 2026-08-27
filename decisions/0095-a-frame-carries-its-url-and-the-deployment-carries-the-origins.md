@@ -1,4 +1,4 @@
-# 0094. A frame carries its URL, and the deployment carries the origins
+# 0095. A frame carries its URL, and the deployment carries the origins
 
 **Status:** Accepted
 **Date:** 2026-08-26

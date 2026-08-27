@@ -4598,6 +4598,34 @@
           ]
         },
         {
+          "module": "primitives/loom.credential",
+          "title": "loom.credential",
+          "summary": "One reason to be believed: a mark, what it is called, who granted it, when, and a line about it.",
+          "symbols": [
+            {
+              "name": "loomCredential",
+              "kind": "value",
+              "signature": "const loomCredential: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.credential-grid",
+          "title": "loom.credential-grid",
+          "summary": "A wall of `loom.credential` cells — the awards, the certifications, the memberships, the tools.",
+          "symbols": [
+            {
+              "name": "loomCredentialGrid",
+              "kind": "value",
+              "signature": "const loomCredentialGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.divider",
           "title": "loom.divider",
           "summary": "The enum-driven one: `ornament` selects between three genuinely different renderings, not three values of the same property.",
@@ -4970,6 +4998,34 @@
               "name": "loomNav",
               "kind": "value",
               "signature": "const loomNav: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.offering",
+          "title": "loom.offering",
+          "summary": "One thing a reader can book, join, order or give to: what it is called, what it costs, the qualifiers that narrow it, what it includes, and the control that does the deed.",
+          "symbols": [
+            {
+              "name": "loomOffering",
+              "kind": "value",
+              "signature": "const loomOffering: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.offering-grid",
+          "title": "loom.offering-grid",
+          "summary": "A band of `loom.offering` cells — the services page, the packages, the class schedule, the menu, the ways to give.",
+          "symbols": [
+            {
+              "name": "loomOfferingGrid",
+              "kind": "value",
+              "signature": "const loomOfferingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
