@@ -306,4 +306,25 @@ plus the screenshots, which found both defects when no assertion did.
 
 ## The preview
 
-PREVIEW_URL
+<https://loom-git-primitives-15-what-ca2719-jpizzolato36-6341s-projects.vercel.app>
+
+Read out of the `vercel[bot]` comment on #172 rather than guessed, which is the
+procedural note the 25 August run left for itself: *list the pull request's
+comments before claiming something about the pull request.* `Building` at the
+time of writing; `*.vercel.app` is outside the sandbox's egress allowlist, so a
+run can publish this address without being able to open it.
+
+**The screenshots above are the primary evidence and two of them are stronger
+than the preview.** The phone shots are the real marketing front door, in a
+**production build** served locally, at a true 390px with hydration — not the
+library's specimen and not a dev server. That matters because the whole subject
+of this run is behaviour that only exists after hydration and only below a
+breakpoint, and a static render cannot show either. Measured rather than eyeballed:
+client width 390, the control hydrated with `aria-expanded="false"`, the menu's
+computed `display` `none` closed and `flex` open, and the control's own computed
+`display` `none` at 1280.
+
+A note for the next run that wants this: `next dev` **does not hydrate** in this
+sandbox — the HMR socket fails and React never attaches, so the control never
+appears and it looks exactly like a broken primitive. `next build && next start`
+works. That cost twenty minutes and a wrong hypothesis.
