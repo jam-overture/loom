@@ -2,6 +2,8 @@ import { isValidElement, type ReactNode } from "react"
 
 import type { ClosedChoice } from "../catalogue.js"
 import { NO_DATA } from "../data/resolution.js"
+import { NO_FRAMES, type FrameOutcome, type NodeFrames } from "../frame/resolution.js"
+import { frameOriginSchema } from "../frame/origin.js"
 import { nodeIdSchema } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
@@ -130,7 +132,8 @@ const PROBE_DECORATIVE = (): ReactNode => "loom-probe-decorative"
 const probeProps = (
   editable: EditableAttributes,
   text: PrimitiveText<string>,
-  props: JsonObject
+  props: JsonObject,
+  frames: NodeFrames = NO_FRAMES
 ): LoomPrimitiveProps => ({
   loom: {
     nodeId: PROBE_NODE_ID,
@@ -138,6 +141,7 @@ const probeProps = (
     editable,
     slots: NO_SLOTS,
     data: NO_DATA,
+    frames,
     text,
     behaviours: NO_BEHAVIOURS,
     decorative: PROBE_DECORATIVE,
@@ -163,6 +167,37 @@ export const probeConfigurations = (choices: readonly ClosedChoice[]): readonly 
 ]
 
 const DEFAULT_CONFIGURATIONS: readonly JsonObject[] = [{}]
+
+/**
+ * A probe has no allowlist, so a declared framable prop is answered `allowed`
+ * against an origin that does not exist.
+ *
+ * `allowed` rather than `refused`, deliberately, and it is the same choice
+ * `PROBE_DECORATIVE` makes for the opposite reason. A primitive that declares a
+ * frame renders a refusal when it is told no — that is the whole point of the
+ * seam — and a probe that always said no would be probing every embed's error
+ * state and calling it the primitive. The URL is a marker origin nobody can
+ * register, so one that escapes into real markup is recognisable on sight
+ * rather than being a plausible-looking video that silently never loads.
+ */
+const PROBE_FRAME_ORIGIN = frameOriginSchema.parse("https://probe.loom.invalid")
+
+const probeFrames = (declared: readonly string[]): NodeFrames => {
+  if (declared.length === 0) return NO_FRAMES
+
+  const frames: Record<string, FrameOutcome> = Object.create(null) as Record<string, FrameOutcome>
+
+  for (const prop of declared) {
+    frames[prop] = {
+      status: "allowed",
+      url: `${PROBE_FRAME_ORIGIN}/${prop}`,
+      origin: PROBE_FRAME_ORIGIN,
+      sameOrigin: false,
+    }
+  }
+
+  return Object.freeze(frames)
+}
 
 /** The marker handed to a declared slot, unique per name so a miss names itself. */
 const slotMarker = (name: string): string => `loom-probe-slot:${name}`
@@ -245,7 +280,8 @@ const failuresIn = (attempts: readonly ProbeAttempt[]): readonly ProbeFailure[] 
 export const probeEditableDecoration = (
   primitive: LoomPrimitive,
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  declaredFrames: readonly string[] = []
 ): ConformanceVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return notCallable(probeable.error)
@@ -257,7 +293,7 @@ export const probeEditableDecoration = (
 
   const attempts = configurations.map((props) => ({
     props,
-    result: call(probeable.value, probeProps(editable, text, props)),
+    result: call(probeable.value, probeProps(editable, text, props, probeFrames(declaredFrames))),
   }))
   const answered = attempts.flatMap((attempt) => (attempt.result.ok ? [attempt.result.value] : []))
 
@@ -349,7 +385,8 @@ export const probePlacement = (
   declaredSlots: readonly string[],
   text: PrimitiveText<string> = NO_TEXT,
   configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
-  declaredBehaviours: readonly BehaviourName[] = []
+  declaredBehaviours: readonly BehaviourName[] = [],
+  declaredFrames: readonly string[] = []
 ): PlacementVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return notCallable(probeable.error)
@@ -368,6 +405,7 @@ export const probePlacement = (
         type: PROBE_TYPE,
         slots,
         data: NO_DATA,
+        frames: probeFrames(declaredFrames),
         text,
         behaviours: behaviours as PrimitiveBehaviours<BehaviourName>,
         decorative: PROBE_DECORATIVE,
@@ -447,7 +485,8 @@ const PROBE_SUBMISSION: SubmissionOutcome = {
 export const probeSubmissionPlacement = (
   primitive: LoomPrimitive,
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  declaredFrames: readonly string[] = []
 ): SubmissionVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return notCallable(probeable.error)
@@ -460,6 +499,7 @@ export const probeSubmissionPlacement = (
         type: PROBE_TYPE,
         slots: NO_SLOTS,
         data: NO_DATA,
+        frames: probeFrames(declaredFrames),
         text,
         behaviours: NO_BEHAVIOURS,
         submit: PROBE_SUBMISSION,
@@ -606,7 +646,8 @@ export const probeColourPairings = (
   primitive: LoomPrimitive,
   declaredSlots: readonly string[] = [],
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS
+  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  declaredFrames: readonly string[] = []
 ): ColourVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return notCallable(probeable.error)
@@ -624,6 +665,7 @@ export const probeColourPairings = (
         type: PROBE_TYPE,
         slots,
         data: NO_DATA,
+        frames: probeFrames(declaredFrames),
         text,
         behaviours: NO_BEHAVIOURS,
         decorative: PROBE_DECORATIVE,

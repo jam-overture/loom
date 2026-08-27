@@ -1,6 +1,8 @@
 import { describeDataUnavailable, type DataUnavailable } from "../data/adapter.js"
 import { describeBindingError, type BindingError } from "../data/binding.js"
 import type { BindingName, SourceId } from "../data/source.js"
+import type { FrameOrigin } from "../frame/origin.js"
+import { describeFrameRefusal, type FrameRefusal } from "../frame/resolution.js"
 import type { NodeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { assertNever } from "../result.js"
@@ -138,6 +140,33 @@ export type RenderDiagnostic =
     }
   | {
       /**
+       * A framable prop whose URL will not be framed: no allowlist was wired,
+       * nobody registered its origin, or it is not an absolute http(s) URL at
+       * all. The node still renders — its props are its own — and what it does
+       * with a refusal is the primitive's business, which for a frame is
+       * usually to render the refusal rather than an empty box.
+       */
+      readonly code: "frame-refused"
+      readonly nodeId: NodeId
+      readonly prop: string
+      readonly refusal: FrameRefusal
+    }
+  | {
+      /**
+       * A permitted frame whose document comes from this deployment's own
+       * origin, so the primitive's `sandbox` is inert: `allow-scripts` beside
+       * `allow-same-origin` is only a boundary between two origins, and between
+       * one and itself it is nothing. Not a refusal — a host that registered
+       * its own origin meant to — and reported anyway, because it is the one
+       * thing about a frame that looks contained and is not.
+       */
+      readonly code: "frame-same-origin"
+      readonly nodeId: NodeId
+      readonly prop: string
+      readonly origin: FrameOrigin
+    }
+  | {
+      /**
        * A declared behaviour's control had no name to render under, so it was
        * left out. The registry refuses a primitive that declares a behaviour
        * and not its strings, so the way here is a dictionary that answers a
@@ -181,6 +210,10 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} posts to "${diagnostic.to}" and no target could be given for it — ${describeSubmissionUnavailable(diagnostic.unavailable)}`
     case "submit-unresolved":
       return `node ${diagnostic.nodeId} names an endpoint and this render was given no resolution, so it rendered with no target`
+    case "frame-refused":
+      return `node ${diagnostic.nodeId} frames "${diagnostic.prop}" and it will not be framed — ${describeFrameRefusal(diagnostic.refusal)}`
+    case "frame-same-origin":
+      return `node ${diagnostic.nodeId} frames "${diagnostic.prop}" from "${diagnostic.origin}", which this deployment registered as its own, so the frame's sandbox grants it nothing it did not already have`
     case "behaviour-unnamed":
       return `node ${diagnostic.nodeId} takes the "${diagnostic.behaviour}" behaviour and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
     default:
