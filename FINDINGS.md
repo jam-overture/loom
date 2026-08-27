@@ -1155,7 +1155,17 @@ entry, the way the primitives routine dates its `21st.dev` re-verifications.
 ## 2026-08-19 — a Loom site cannot link to its own next page
 
 **Filed by:** `Loom daily build` (marketing) · **Owned by:** `Loom daily build` ·
-**Status:** open
+**Status:** open — **built, and blocked on one decision that is the maintainer's.**
+The implementation is on `framework-15-a-tree-that-links-to-itself` with 13 tests,
+and it stays open because it cannot be closed by the lane that built it: accepting
+it contradicts a clause of `0053`, which is `Accepted`.
+[0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
+proposed the same thing on 19 August and has been `Proposed —
+ARCHITECTURAL, needs review` ever since;
+[0094](decisions/0094-a-same-origin-path-is-decided-by-resolving-it.md) revises
+its mechanism and is `Proposed` for the same reason. **Do not read this as
+shipped.** See the 27 August entry on 0069's rule for what changed and why it
+matters.
 
 `linkUrlSchema` (0053) allowlists schemes by parsing with `new URL(value)` and
 refusing anything that does not parse — which is every relative URL. So
@@ -9031,3 +9041,90 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-27 — 0069's rule for a same-origin path admits three ways out of the origin
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the correction is written and proposed; the decision it
+depends on is still yours
+
+[0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
+has been `Proposed — ARCHITECTURAL, needs review` since 19 August. This is not a
+reminder that it is unreviewed. It is that **its decision text, implemented as
+written, would have shipped an open redirect into every `href` a model writes.**
+
+0069 states the rule as *"begins with `/`, and does not begin with `//`"* and
+says *"`//host` stays refused, and that is the whole of the care needed."*
+Measured against the URL parser rather than reasoned about:
+
+| value | 0069's rule | where a browser goes |
+| --- | --- | --- |
+| `/pricing` | accepted | the page's own origin ✓ |
+| `//evil.example` | refused | `evil.example` ✓ |
+| `/\evil.example` | **accepted** | `evil.example` ✗ |
+| `/⇥/evil.example` | **accepted** | `evil.example` ✗ |
+| `/⏎/evil.example` | **accepted** | `evil.example` ✗ |
+
+A backslash is a slash under a special scheme, and tabs, newlines and carriage
+returns are stripped *before* the parser decides where the authority begins. So
+the one case 0069 guarded is the only one of the four its guard catches.
+
+**The part worth keeping even if the answer is no.** A test suite written from
+0069's text would assert that `//evil.example` is refused, pass, and never think
+to try a backslash. The reason this was caught is that the four values were run
+through `new URL` instead of argued about — and the fix that follows is not a
+longer pattern but *not a pattern*: resolve the value and ask the parser whether
+the origin moved. That is
+[0094](decisions/0094-a-same-origin-path-is-decided-by-resolving-it.md), and it
+is `Proposed` for exactly the reason 0069 is — it contradicts the same `Accepted`
+clause of `0053`, and this lane does not get to decide that alone.
+
+**What is in front of you** is one decision, not two: *may a tree hold a
+root-relative path?* If yes, 0094 is the mechanism and 0069's should be marked
+superseded. If no, both close and `(marketing)/_lib/site.ts` stays, at the cost
+0069 records. Either answer is cheap now and gets more expensive as more surfaces
+work around it.
+
+---
+
+## 2026-08-27 — `(marketing)/_lib/site.ts` is the seam a same-origin path would delete
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+open — **conditional, and not yet actionable.** Do not delete anything on the
+strength of this entry.
+
+If [0094](decisions/0094-a-same-origin-path-is-decided-by-resolving-it.md) and
+[0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
+are accepted, `apps/loom/app/(marketing)/_lib/site.ts` — `siteOrigin()`, its
+callers and its test — becomes unnecessary: `href: "/pricing"` would be a value
+the schema takes, and the per-request origin (`LOOM_SITE_ORIGIN`, else
+`VERCEL_URL`, else localhost) exists only to avoid needing it.
+
+Filed now rather than after, so the lane that owns the file is not the last to
+hear. It is a small deletion by the filing routine's own account — one function
+and one test — and it restores the property both records are actually about: a
+stored tree stops carrying one deployment's hostname into another's.
+
+**Both records are `Proposed`.** Until they are not, the seam is doing real work
+and removing it would break the site.
+
+---
+
+## 2026-08-27 — `FACTS.decisions` bumped by hand for the seventh recorded time
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+open — same entry, one more instance, no new argument
+
+`apps/loom/app/(marketing)/_lib/copy.ts` holds `decisions: "93"` and
+`facts.test.ts` counts the files in `decisions/`. Adding a record therefore turns
+`main` red for four surfaces unless a routine outside the marketing lane edits a
+marketing file in the same PR. This run bumped it 93 → 94, which is at least the
+seventh time a lane has done that.
+
+The fix has been the same in every previous entry and is one line: derive the
+number from the directory listing at build time instead of asserting a typed
+string matches it. The test is a good test — it is the *storage* that makes every
+record-writing PR in the repository cross a lane boundary.
+

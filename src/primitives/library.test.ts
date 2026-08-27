@@ -2627,9 +2627,12 @@ describe("the schemas the seam enforces", () => {
     const action = propsOf("loom.action")
 
     expect(action({ href: "javascript:alert(1)" }).outcome).toBe("invalid")
-    expect(action({ href: "/relative" }).outcome).toBe("invalid")
+    expect(action({ href: "//evil.example" }).outcome).toBe("invalid")
     expect(action({ href: "https://example.com" }).outcome).toBe("valid")
     expect(action({ href: "mailto:hello@example.com" }).outcome).toBe("valid")
+
+    /** 0094: a site links to its own next page. `url.test.ts` holds the rest. */
+    expect(action({ href: "/pricing" }).outcome).toBe("valid")
   })
 
   it("refuses a tier that tries to carry its own list of features again", () => {
