@@ -6626,8 +6626,18 @@ nobody notices until a maintainer looks at the whole screen again.
 
 ## 2026-08-23 — the mark's chip lands on the words when a band's content starts at its top right
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a unit
-of its own, and visible in this run's `applied` screenshot
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-07-the-mark-lands-in-the-gap`** (27 August), after four runs of being
+deferred — and the answer was not a fourth corner
+
+The question this entry asks is *which corner is free*, and every candidate was
+measured and rejected here for good reasons. The answer is that on the band the
+chip collides with, **no corner is free, because the chip is on the wrong
+element**: the quote it lands on did not change. It is the neighbour of a gap,
+borrowed to carry a mark about the empty space above it, and that space is free
+by construction — a band left it. A chip that names a *place* is now drawn in the
+place; a chip that names a *thing* keeps the corner, where the clipping
+correction still applies. See the 27 August entry below.
 
 `spotlightCss` pins the chip at `inset: 6px 6px auto auto` — wholly inside the
 band's top-right corner. Both halves of that were corrections the 22 August run
@@ -9503,3 +9513,123 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-27 — the mark pointed at a bystander, and four runs looked for a free corner instead of a free space
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-07-the-mark-lands-in-the-gap` — recorded because the *shape* is the fourth
+instance of this lane's standing diagnosis and the first one where the diagnosis
+named the fix in advance
+
+The 23 August entry above is the defect: apply *Take the numbers off* and the
+green chip *"Something was removed here"* lands on the first line of the
+testimonial, over *"the coast path with my"*. It was filed as a question about
+corners — top-left lands on the stat grid's first figure, straddling is cut in
+half by a clipping primitive, a padding would move the page the mark is
+describing — and with every corner spoken for it was deferred on 24, 25 and
+26 August, each time behind a defect that broke the argument rather than the
+finish.
+
+**The question had no answer because it was the wrong question.** The chip is
+not in the wrong corner of the right band; it is on a band that did not change.
+`spotFor` has always known this — its `placed === "near"` branch exists because a
+removed node has left the tree, so the mark is borrowed onto a *neighbour* and
+the label softens from *"This was removed"* to *"Something was removed here"*.
+The label carried the distinction and the geometry did not: both kinds of mark
+were drawn in the same corner, so a chip about a gap was placed on the one
+surface near it that is guaranteed to be occupied.
+
+The free space was never a corner. **It is the gap itself** — the height a band
+vacated, or the height a band is about to fill — and it is empty by definition.
+
+Three things this turned up that were not in the earlier entry:
+
+- **Which side of the neighbour the gap is on is not a constant.** `neighbourOf`
+  resolved a position to *the band now standing there*, which is the band below
+  the gap — except when the missing node was the last child, where the clamp
+  silently returns the band *above* it instead. Same function, opposite side, no
+  way to tell them apart from the outside. The two cases are now distinguished
+  at the point they are computed, which is the only place the information
+  exists.
+- **`index` counts children and the old walk counted elements.** It filtered to
+  elements and then indexed with a number that had counted slots and text nodes
+  too. On the demo page every child of the root is an element, so it has never
+  been wrong here and would be wrong on a tree whose bands are interleaved with
+  anything else.
+- **Above the first band there is no gap to draw in**, so the chip stays in the
+  corner there. The top of the stage cannot be scrolled to, and `loom.hero`
+  clips its own overflow, so a chip drawn above it is not imprecise but absent.
+  Imprecise and legible beats exact and invisible; the label still says *here*.
+
+**The diagnosis, now four for four.** 24 Aug: a policy ceiling two files from
+the button it silenced. 25 Aug: a field four surfaces print and this one carried
+unread. 26 Aug: a string the runtime is right to compose and this surface was
+wrong to quote. Today: a distinction this surface's own code already drew in
+words and did not draw in pixels. Nothing was broken in any of the four.
+
+**What is left, for whoever takes the mark next.** For a `near` mark **the ring
+still encircles a band that did not change.** The chip now says where the change
+was and the ring still says *look here*, and those are no longer the same place,
+which is an improvement and is not the whole answer. The honest version is to
+drop the ring for a `near` mark and draw a rule along the seam instead — and it
+needs a mechanism this run did not have. `::before` is not available: on this
+page it is the testimonial's own quotation glyph, and several primitives
+decorate with it, so claiming it would delete content from the specimen.
+`box-shadow` would silently replace a card's own. `outline` cannot be
+one-sided. It is a unit of its own and it starts with *what can a stylesheet add
+to a node it is forbidden to restructure*, which is a question the runtime's
+`editable.ts` may have a better answer to than this surface does.
+
+---
+
+## 2026-08-27 — `FACTS.decisions` turned this lane's run red, and this lane had never met it before
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — for the count only; the shape is the
+19, 21, 23, 24 and 25 August entries and nothing is added to it
+
+`pnpm verify` on a branch that adds no decision record failed
+`(marketing)/_lib/facts.test.ts`: `FACTS.decisions` said `"94"` and
+`decisions/` holds 95. Bumped to `"95"` in this run's diff — **one line in
+another lane's file**, taken rather than filed because the alternative is a
+routine that cannot open a pull request until the owning lane next runs.
+
+The standing entries count the occurrences and I am not adding a number I would
+have to guess: what this run adds is that it has now reached a lane that had not
+seen it before, on a branch containing no decision record and no marketing
+change. The one-line fix named on 19 August — derive the count the way
+`facts.test.ts` derives it — would have prevented every one of them.
+
+---
+
+## 2026-08-27 — `21st.dev` re-verified blocked, from the demo lane a seventh time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged, on the run of
+27 August. The standing answer is on the 21 August entry: the committed policy
+allows the domain for the tool and the proxy does not.
+
+The cost this run was nil and it is worth saying so plainly rather than claiming
+otherwise. The unit was a chip's position, decided by driving the built page in
+a browser and looking at where the chip landed. No reference gallery could have
+answered *does this cover the testimonial* — only the screenshot could. Seven
+runs of a named standard that has never been reachable is still worth recording,
+but this is not the run it cost anything.
+
+---
+
+## 2026-08-27 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the 24, 25 and 26 August entries rather than opened again
+
+Fourth consecutive run opening by establishing that its headline instruction —
+*"Two problems to fix before anything else"*, the first being the move off
+`/portal/demo` — describes this lane's first unit, landed six days ago.
+`docs/rollout.md:19` still points at the old path. Neither is fixable by a
+routine: a routine cannot rewrite the brief it is bound by, and this file says
+that about itself.
