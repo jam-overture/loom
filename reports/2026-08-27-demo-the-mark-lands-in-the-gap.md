@@ -261,6 +261,18 @@ branch's and `main`'s — so the only difference in the frame is the change. Not
 preview, which this environment cannot open (`vercel.app` is not on the sandbox's
 egress allowlist; the standing 19 August finding).
 
+**Preview:**
+`https://loom-git-demo-07-the-mark-la-f6764e-jpizzolato36-6341s-projects.vercel.app/demo`
+
+One push, one preview. The commit identity was set and then reset before the push
+rather than left alone — see the finding above; the pushed commits carry the
+environment's default author, which is the one on the Vercel team.
+
 **To see it yourself:** open `/demo`, press the green button, press **Apply this
 change**, and look at the gap between the diamond divider and the testimonial.
 Then press *Add the opening hours* and look at the space just above the last band.
+
+Nothing is scheduled and nothing is watching this pull request. The harness
+subscribes a session to a pull request it opens before the routine gets a turn;
+this one was **unsubscribed** immediately, which is the accurate word rather than
+"not subscribed" (the 25 August finding).
