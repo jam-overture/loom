@@ -1,5 +1,6 @@
 import type { DataRegistry } from "../data/adapter.js"
 import { resolveTreeData } from "../data/resolve.js"
+import type { FrameOriginRegistry } from "../frame/origin.js"
 import type { TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { err, ok, type Result } from "../result.js"
@@ -65,6 +66,15 @@ export type RenderDependencies = {
    * no form that posts anywhere (0065).
    */
   readonly endpoints?: EndpointRegistry
+  /**
+   * The origins this deployment will frame — see `RenderOptions.origins`.
+   * Absent means every framable prop is refused with a diagnostic (0094).
+   *
+   * It sits here beside the other three registries and, unlike them, adds no
+   * `await`: an allowlist is a static fact, so it is passed straight through to
+   * the walk rather than resolved first.
+   */
+  readonly origins?: FrameOriginRegistry
   /**
    * Absent means primitives render the strings their authors declared — see
    * `RenderOptions.text`. A host serving one language in the library's own
@@ -142,6 +152,7 @@ export const renderRequest = async (
     ...(dependencies.themes ? { themes: dependencies.themes } : {}),
     ...(data ? { data } : {}),
     ...(submissions ? { submissions } : {}),
+    ...(dependencies.origins ? { origins: dependencies.origins } : {}),
     ...(dependencies.text ? { text: dependencies.text } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
   })

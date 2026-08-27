@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 36 blocks, 64 primitives.**
+**Done — 47 blocks, 68 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -80,6 +80,8 @@ stands alone.
 | `marquee` | `loom.marquee` | **container** ✅ — the verdict below was wrong, see the note |
 | `embed` | `loom.embed` | atomic ✅ |
 | `before-after` | `loom.before-after` | atomic ✅ |
+| `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-grid` / `loom.offering` | pair ✅ — seven blocks, one record |
+| `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-grid` / `loom.credential` | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -110,17 +112,33 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 19 blocks, 6 pairs.** Grouped by the content model they
+**Pairs to build — 8 blocks, 4 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
-| Things booked | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-list` / `loom.offering` |
-| Credentials | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-list` / `loom.credential` |
 | Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
 | Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
+
+**Two proposed names changed when they were built**, and the change is 0054
+being applied rather than overruled. `loom.offering-list` and
+`loom.credential-list` both shipped as `-grid`, because the arrangement word
+names *what the container does with its children* and what both of them do is
+`repeat(auto-fit, minmax(…))`. 0054's own consequence is the reason to get it
+right before it ships: a container that changes its arrangement changes its
+name, and a rename is a breaking change to every stored tree. The four rows
+above are proposals until the run that builds them looks at the markup — read
+the arrangement word as a prediction, not a commitment.
+
+`loom.offering-grid` also carries a **local** column vocabulary, `auto | one |
+two | three`, where `loom.credential-grid` takes the shared `COLUMN_NAMES`. That
+is not a preference: three of the seven blocks the offering pair ports —
+`class-schedule`, `volunteer-opportunities`, `restaurant-menu` — are a single
+column of full-width rows, an arrangement the shared names cannot say, and a
+`loom.offering` reads as a row rather than a card exactly when it is given that
+width. `loom.perk-list` set the precedent and gave the same reason.
 
 **Atomic to build — none. The table is empty**, closed on 25 August by
 `primitives-13-the-band-that-moves`.
@@ -207,16 +225,22 @@ been outside it.
 
 | | Blocks |
 | --- | --- |
-| Ported | 33 |
+| Ported | 47 |
 | Need no primitive | 13 |
-| Pairs still to build | 19 (6 pairs) |
-| Atomic still to build | 3 |
+| Pairs still to build | 8 (4 pairs) |
+| Atomic still to build | 0 |
 | Blocked on a seam | 2 |
 
-**46 of 70 are settled**, and the 19 that remain are six pairs rather than
-nineteen primitives. That is the number worth quoting, because "70 blocks"
-has been the shape of this job since the port started and it was never the real
-size of it.
+**62 of 70 are settled**, and the 8 that remain are four pairs rather than eight
+primitives. That is the number worth quoting, because "70 blocks" has been the
+shape of this job since the port started and it was never the real size of it.
+
+*The three counts above were internally inconsistent before 26 August* — the
+ledger said 36 done while this table said 33, and the table still listed three
+atomic blocks the 25 August run had closed. Both are corrected here. A count
+that has to be updated in three places is a count that will disagree with itself
+again; deriving the ported figure from the ledger's own rows is a small tool
+nobody has written.
 
 **Every one of the remaining pairs is a card in a grid**, and what separates them
 is not their fields — it is what the reader aims at.
@@ -226,3 +250,15 @@ settles it once for all of them: `loom.credential`, `loom.book` and
 `loom.listing` and `loom.event` are **acted on**, so a control is. That is the
 one question the article/product pair had to answer that the granularity rules
 did not already answer.
+
+**A second question turned out to be waiting behind it**, found when the
+offering and credential pairs were built on the same day and gave opposite
+answers to it: *where does the card's own sentence live?*
+[0094](../decisions/0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md)
+settles that one the same way — ask whether the port turns any field of the
+record into child nodes. An offering has an includes list, so it has a flow and
+its prose is a node in it; a credential has no repeated part at all, so its one
+line is a prop and 0059's multi-string leaf applies unchanged. `loom.book` and
+`loom.listing` have repeated parts and take their prose as children;
+`loom.episode` and `loom.event` are to be read against their own shapes at port
+time.

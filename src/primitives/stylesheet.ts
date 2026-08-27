@@ -193,6 +193,22 @@ export const LIBRARY_CLASS = {
   marqueeReverse: "loom-marquee-reverse",
   marqueeFaded: "loom-marquee-faded",
   marqueeStill: "loom-marquee-still",
+  /**
+   * A `loom.offering`. The card declares the containment; the frame inside it
+   * is what the `@container` rule flips from a column into a row, because a
+   * container query reads its *ancestor* and never the element that declared it.
+   *
+   * Everything about the frame's direction, the body's growth and the action's
+   * `auto` start margin is here rather than on the element, and that is
+   * load-bearing rather than tidy: the row layout cancels the margin, and an
+   * inline style would beat the rule that does it.
+   */
+  offering: "loom-offering",
+  offeringFrame: "loom-offering-frame",
+  offeringBody: "loom-offering-body",
+  offeringAction: "loom-offering-action",
+  /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
+  credential: "loom-credential",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -503,6 +519,37 @@ details[open] > summary .loom-marker {
 }
 .loom-marquee-still .loom-marquee-run {
   flex-wrap: wrap;
+}
+.loom-offering {
+  container-type: inline-size;
+}
+.loom-offering-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-4);
+  height: 100%;
+}
+.loom-offering-body {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-offering-action {
+  display: grid;
+  margin-block-start: auto;
+}
+@container (min-width: 40rem) {
+  .loom-offering-frame {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--loom-spacing-5);
+  }
+  .loom-offering-action {
+    flex: 0 0 auto;
+    margin-block-start: 0;
+  }
+}
+.loom-credential {
+  position: relative;
 }
 .loom-mosaic {
   display: grid;
