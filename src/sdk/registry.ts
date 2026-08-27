@@ -14,6 +14,7 @@ import {
   type BehaviourName,
   type BehaviourResolver,
 } from "../render/behaviour.js"
+import type { FrameResolver } from "../render/frame.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
@@ -58,6 +59,8 @@ export type RegisteredPrimitive = {
   readonly interactive: InteractiveWhen | undefined
   /** Whether its author says it posts (0065). `false` for most. */
   readonly submits: boolean
+  /** The props it puts in a frame (0094). Empty for all but one primitive. */
+  readonly frames: readonly string[]
   /** The controls it takes from the runtime's vocabulary. Empty for most. */
   readonly behaviours: readonly BehaviourName[]
   readonly validate: (props: JsonObject) => PropsVerdict
@@ -65,12 +68,15 @@ export type RegisteredPrimitive = {
 
 const NO_BEHAVIOUR_NAMES: readonly BehaviourName[] = Object.freeze([])
 
+const NO_FRAME_PROPS: readonly string[] = Object.freeze([])
+
 export type RegistryError =
   | { readonly code: "invalid-primitive-type"; readonly type: string }
   | { readonly code: "invalid-slot-name"; readonly type: string; readonly slot: string }
   | { readonly code: "invalid-text-key"; readonly type: string; readonly key: string }
   | { readonly code: "blank-text"; readonly type: string; readonly key: string }
   | { readonly code: "undeclared-interactive-prop"; readonly type: string; readonly prop: string }
+  | { readonly code: "undeclared-frame-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "unknown-behaviour"; readonly type: string; readonly behaviour: string }
   | {
       readonly code: "unnamed-behaviour"
@@ -88,7 +94,8 @@ export type RegistryError =
 export type PrimitiveRegistry = PrimitiveResolver &
   PropsValidator &
   TextResolver &
-  BehaviourResolver & {
+  BehaviourResolver &
+  FrameResolver & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
   }
@@ -103,6 +110,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.key}" is not a valid text key on "${error.type}" — expected camelCase with no dots, like "notIncluded"`
     case "blank-text":
       return `"${error.key}" on "${error.type}" declares an empty string; a string worth translating has something in it, and a blank one renders as a control with no name`
+    case "undeclared-frame-prop":
+      return `"${error.type}" says it frames "${error.prop}", which its props schema does not declare; the seam would then check nothing and the frame would render whatever the tree said`
     case "undeclared-interactive-prop":
       return `"${error.type}" says it renders a target when "${error.prop}" is set, and its schema declares no such prop; a trigger naming a prop that cannot arrive is a target the Gate will never see`
     case "unknown-behaviour":
@@ -136,6 +145,28 @@ const undeclaredTriggerProp = (entry: PrimitiveEntry): string | undefined => {
   const declared = new Set(declaredProps.map((prop) => prop.name))
 
   return interactive.whenProps.find((prop) => !declared.has(prop))
+}
+
+/**
+ * A framable prop that the schema does not declare, if there is one.
+ *
+ * The same check `undeclaredTriggerProp` makes and with more riding on it. An
+ * interactivity declaration that has drifted makes the Gate wrong about the
+ * page; a frame declaration that has drifted makes the origin allowlist stop
+ * applying to a URL that still reaches an `iframe` — and it fails *open*, which
+ * is the direction a security check must never fail in silence.
+ *
+ * A schema whose fields cannot be enumerated answers `undefined` and is left
+ * alone, for the reason given there: "I cannot tell you" is not "there are
+ * none".
+ */
+const undeclaredFrameProp = (entry: PrimitiveEntry): string | undefined => {
+  const { frames, declaredProps } = entry
+  if (frames.length === 0 || !declaredProps) return undefined
+
+  const declared = new Set(declaredProps.map((prop) => prop.name))
+
+  return frames.find((prop) => !declared.has(prop))
 }
 
 /**
@@ -201,6 +232,11 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     return err({ code: "undeclared-interactive-prop", type: entry.type, prop: undeclared })
   }
 
+  const unframeable = undeclaredFrameProp(entry)
+  if (unframeable !== undefined) {
+    return err({ code: "undeclared-frame-prop", type: entry.type, prop: unframeable })
+  }
+
   const behaviours = registeredBehaviours(entry)
   if (!behaviours.ok) return behaviours
 
@@ -214,6 +250,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     text: entry.text,
     interactive: entry.interactive,
     submits: entry.submits,
+    frames: entry.frames,
     behaviours: behaviours.value,
     validate: entry.validate,
   })
@@ -254,5 +291,7 @@ export const createPrimitiveRegistry = (
     textFor: (type: PrimitiveType): PrimitiveText<string> => byType.get(type)?.text ?? NO_TEXT,
     behavioursFor: (type: PrimitiveType): readonly BehaviourName[] =>
       byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
+    framePropsFor: (type: PrimitiveType): readonly string[] =>
+      byType.get(type)?.frames ?? NO_FRAME_PROPS,
   })
 }

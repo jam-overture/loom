@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">Two URLs a scheme check cannot tell apart</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Both are <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">https:</tspan>. One is a document this deployment agreed to run inside its own pages; the other is not.</text>
+
+  <!-- ================= THE TREE ================= -->
+  <text x="40" y="118" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE TREE — WRITTEN BY A MODEL</text>
+
+  <rect x="40" y="132" width="322" height="76" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">loom.embed</text>
+  <text x="58" y="178" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">src: &#34;https://player.vimeo.com/video/42&#34;</text>
+  <text x="58" y="196" font-size="11.5" fill="#5c5751">a product video</text>
+
+  <rect x="40" y="222" width="322" height="76" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">loom.embed</text>
+  <text x="58" y="268" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">src: &#34;https://evil.example/steal?t=abc&#34;</text>
+  <text x="58" y="286" font-size="11.5" fill="#5c5751">a whole document, with a script host in it</text>
+
+  <!-- ================= THE ALLOWLIST ================= -->
+  <text x="40" y="346" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE DEPLOYMENT — WRITTEN BY A PERSON</text>
+  <rect x="40" y="360" width="322" height="118" rx="10" fill="#f5f8fa" stroke="#d5e0e6"/>
+  <text x="58" y="386" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">createFrameOriginRegistry([</text>
+  <text x="74" y="406" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">{ origin: &#34;https://player.vimeo.com&#34; },</text>
+  <text x="74" y="426" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">{ origin: &#34;https://app.example&#34;, self: true },</text>
+  <text x="58" y="446" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">])</text>
+  <text x="58" y="468" font-size="11.5" fill="#5c5751">Scheme, host, port. No path, and never a whole URL.</text>
+
+  <!-- arrows -->
+  <path d="M 372 170 L 412 170" stroke="#c9bfb2" stroke-width="1.5" fill="none"/>
+  <path d="M 406 165 L 413 170 L 406 175 Z" fill="#c9bfb2"/>
+  <path d="M 372 260 L 412 260" stroke="#c9bfb2" stroke-width="1.5" fill="none"/>
+  <path d="M 406 255 L 413 260 L 406 265 Z" fill="#c9bfb2"/>
+
+  <!-- ================= WHAT THE PRIMITIVE IS TOLD ================= -->
+  <text x="424" y="118" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT THE PRIMITIVE IS TOLD — loom.frames.src</text>
+
+  <rect x="424" y="132" width="456" height="76" rx="10" fill="#f4faf4" stroke="#cfe3cf"/>
+  <text x="442" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2c5a2c">status: &#34;allowed&#34;</text>
+  <text x="442" y="178" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#4a7a4a">url: &#34;https://player.vimeo.com/video/42&#34;  sameOrigin: false</text>
+  <text x="442" y="196" font-size="11.5" fill="#5c5751">The frame renders. No diagnostic.</text>
+
+  <rect x="424" y="222" width="456" height="76" rx="10" fill="#fdf5f3" stroke="#ebd3cb"/>
+  <text x="442" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a3a24">status: &#34;refused&#34;</text>
+  <text x="442" y="268" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#a35a44">refusal.reason: &#34;unlisted-origin&#34;</text>
+  <text x="442" y="286" font-size="11.5" fill="#5c5751">The URL never reaches the markup. One <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">frame-refused</tspan> diagnostic.</text>
+
+  <!-- ================= THE THIRD CASE ================= -->
+  <text x="424" y="346" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">AND THE ONE NOBODY WOULD FIND ALONE</text>
+  <rect x="424" y="360" width="456" height="118" rx="10" fill="#fdfaf1" stroke="#e8ddc2"/>
+  <text x="442" y="386" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6320">src: &#34;https://app.example/tour&#34;  &#8594;  allowed, sameOrigin: true</text>
+  <text x="442" y="412" font-size="11.5" fill="#5c5751">The primitive sets <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">sandbox=&#34;allow-scripts allow-same-origin&#34;</tspan>, which is</text>
+  <text x="442" y="430" font-size="11.5" fill="#5c5751">only a boundary <tspan font-style="italic">between two origins</tspan>. Between one and itself it is nothing.</text>
+  <text x="442" y="456" font-size="11.5" fill="#5c5751">Permitted &#8212; the host meant it &#8212; and reported: <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">frame-same-origin</tspan>.</text>
+
+  <!-- ================= FOOTER ================= -->
+  <line x1="40" y1="522" x2="880" y2="522" stroke="#e4ded5"/>
+  <text x="40" y="552" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHERE THE CHECK HAPPENS</text>
+  <text x="40" y="578" font-size="12.5" fill="#5c5751">No plan, no resolve, no second walk. An allowlist is a static list and a URL parse, so the check runs <tspan font-style="italic">inside</tspan> the render &#8212;</text>
+  <text x="40" y="598" font-size="12.5" fill="#5c5751">unlike a binding, which a host's adapter answers, or a form's target, which is minted per request. Both of those must wait.</text>
+  <text x="40" y="626" font-size="12.5" fill="#5c5751">A deployment that registers no origins frames nothing. The registry <tspan font-style="italic">is</tspan> the allowlist, so an empty one is not a default &#8212; it is an answer.</text>
+</svg>
