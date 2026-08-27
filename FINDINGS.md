@@ -8297,9 +8297,18 @@ It is `src/render/`'s, which is why it is filed rather than built.
 
 ## 2026-08-25 — an `iframe` src is a whole document, and the only check on it is its scheme
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— shipped with the narrowest defaults a primitive can set alone; the check that
-would matter is a deployment's, not a schema's.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by #165 — both halves built, as
+[0094](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+The origin registry is `createFrameOriginRegistry`, wired at `renderRequest` as
+`origins`; a primitive declares `frames: ["src"]` and reads `loom.frames.src`,
+which is `allowed` or `refused` and never the raw prop. The second half — notice
+when the sandbox is inert — is answered by registering an origin as `self`, which
+is permitted and raises `frame-same-origin`. The recommendation was followed with
+one change: the registry holds **origins**, not whole URLs, because which video
+goes on a page is a content decision and a URL registry would make it a server
+operator's. `loom.embed` does not use the seam yet; that is filed below for the
+lane that owns it.
 
 Every URL in this library reaches an `href` or an `img src`, which is why
 [0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)'s
@@ -9034,6 +9043,124 @@ Two limits, stated so they are not discovered:
 
 ---
 
+## 2026-08-26 — the framing seam exists, and `loom.embed` still frames whatever the tree says
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The gap `loom.embed`'s own doc comment described — *"what cannot be done here is
+the check that would actually matter: which origins this deployment is willing
+to frame"* — is built, in #165 and
+[0094](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+This is the half that lives in your lane.
+
+**What to change, concretely.** Two lines and a branch:
+
+```ts
+export const loomEmbed = definePrimitive({
+  type: "loom.embed",
+  frames: ["src"],                        // ← the declaration
+  …
+  component: ({ loom, props: given }) => {
+    const frame = loom.frames.src         // ← allowed | refused, never the prop
+    …
+  },
+})
+```
+
+`frames` names props the schema declares; the registry refuses one that has
+drifted, so a rename cannot silently stop the check. The outcome is two states
+and the `allowed` one carries `url` (normalised, and the string to put in the
+`src`), `origin`, and `sameOrigin`.
+
+**What it changes on the page, and why it is a decision rather than a patch.**
+Today `loom.embed` frames anything that passes `mediaUrlSchema`. After this it
+frames only what the deployment registered, and **a deployment that registered
+nothing frames nothing**. That is the seam failing closed on purpose (0094), and
+it means the refusal path is not an edge case — it is what every deployment sees
+until somebody writes an allowlist. So the interesting work here is not the
+declaration, it is *what a refused embed looks like*. A blank box is the worst
+answer. `loom.code` refusing to fake a copy button is the precedent for the
+right one.
+
+**Three things worth knowing before you build it:**
+
+- **`sameOrigin` is `true` for a permitted frame.** It is not a refusal. It says
+  the `sandbox` the primitive sets is inert, because `allow-scripts` beside
+  `allow-same-origin` is only a boundary between two origins. Whether the
+  primitive shows anything for it is your call; the render already reports it.
+- **The refusal reason is worth showing differently.** `no-registry` is *this
+  deployment has not been configured*, which is a message for whoever runs it.
+  `unlisted-origin` is *nobody permitted this host*, which is a message about
+  the page. `unframeable` is a prop that is not a URL at all.
+- **Nothing else in the library declares a framable prop**, so `loom.embed` is
+  the seam's only consumer and its ergonomics have been tested by nothing but
+  its own tests. If reading `loom.frames.src` is awkward in practice, say so
+  rather than working around it — a seam with one consumer is still cheap to
+  reshape.
+
+---
+
+## 2026-08-26 — the commit-identity trap, fifth occurrence, and the fourth one was mine
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — fifth data point, and the first repeat by the *same* routine
+
+Same failure, fifth time. I committed #165 with
+`-c user.name="Loom daily build" -c user.email="jpizzolato36@gmail.com"`, Vercel
+refused the deployment — *"Git author jpizzo must have access to the project on
+Vercel to create deployments"* — and the pull request went up **Blocked**, with
+no preview URL. Repaired with `--amend --reset-author` and force-pushed before
+any review existed. Fifth time that exact repair has been made.
+
+**What this occurrence adds, and it is not a happy addition.** The 25 August
+entry directly above is *this lane's own*, filed by me, about this exact email
+resolving to this exact wrong account. I read `FINDINGS.md` before choosing work
+this run, as every brief requires. I read my own entry. I then made the same
+mistake, with the same email, four runs later, and the bot said the same
+sentence about the same stranger's username.
+
+So the tally is now five failures across four routines, and **the routine that
+filed the most detailed analysis of the trap walked into it again with that
+analysis in its context.** That is as clean a demonstration as the record is
+going to produce that the problem is not attention. The 22 August diagnosis has
+been right every time: `FINDINGS.md` is read *for work* — what is owed to my
+lane, what should I build — and it is now well past seven thousand lines. A rule
+about how to invoke `git commit` is procedure, and procedure filed among findings
+is procedure that gets read and not applied.
+
+Worth being precise about the pull, because it is not laziness either. Both
+overrides I have made were *deliberate*: on 25 August I set the maintainer's
+identity because a commit authored by the person whose repository this is looked
+more correct than one authored by `Claude`, and today I set a descriptive one
+because a commit that says which routine made it is more legible in `git log`.
+Both times the reasoning was about making the history better. The rule has to be
+written down precisely because **the wrong thing is the appealing one and it is
+appealing for a different reason each time** — so "remember the specific bad
+value" does not generalise, and only "never set it at all" does.
+
+**The recommendation is unchanged, and I am not going to restate it as though it
+were new.** One paragraph in `docs/routines.md`, beside **Network access** and
+**Credentials**, in the words the 25 August entry already proposed:
+
+> **Never set `user.name` or `user.email`, and never author a commit as the
+> maintainer.** The environment's default identity is the one on the Vercel team;
+> any other author produces a pull request with no preview, and the maintainer's
+> email resolves to a different GitHub account than his.
+
+For the record, the default identity is `Claude <noreply@anthropic.com>`, and it
+is on the Vercel team: #164 deployed a preview from a commit whose author email
+was that and whose *name* was overridden to `Loom primitives`. So it is the
+**email** that Vercel resolves, and a routine that wants a legible `git log` can
+have `-c user.name` alone — which is worth writing into the rule, because it
+gives the appealing thing a safe form instead of only forbidding it.
+
+A routine cannot write the governance it is bound by, so this stays a
+recommendation. The 25 August entry says one word from you on any pull request is
+enough and the next run will write it; that offer stands, and after five
+occurrences I would rather be told to write it than file a sixth entry.
+
+Cost to date: five runs, five lost previews, five force-pushes, and one commit
+that briefly claimed the maintainer wrote it.
 ## 2026-08-26 — the three counts in the port map disagreed with each other, and one of them is derived twice
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
