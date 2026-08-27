@@ -9043,6 +9043,93 @@ Two limits, stated so they are not discovered:
 
 ---
 
+## 2026-08-26 — five per cent of the published surface is named in prose, and four doors are not named at all
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+measurement this run made possible, and the queue it points at
+
+Linking the generated reference back to the written pages meant working out,
+for the first time, **which exports the prose actually names**. The answer is
+now computed on every build and printed on every reference page, so it can be
+read off the site rather than out of this file:
+
+**43 of 801 published names** appear in code on a written page. Per door:
+
+| Import | Named | Exports | Pages that name one |
+| --- | --- | --- | --- |
+| `@loom/runtime` | 29 | 429 | 9 |
+| `@loom/runtime/sdk` | 5 | 45 | 4 |
+| `@loom/runtime/react` | 3 | 62 | 3 |
+| `@loom/runtime/store` | 3 | 45 | 1 |
+| `@loom/runtime/primitives` | 1 | 104 | 3 |
+| `@loom/runtime/postgres` | 1 | 10 | 1 |
+| `@loom/runtime/anthropic` | 1 | 2 | 1 |
+| `@loom/runtime/cli` | **0** | 23 | — |
+| `@loom/runtime/write` | **0** | 21 | — |
+| `@loom/runtime/telemetry` | **0** | 62 | — |
+| `@loom/runtime/telemetry/postgres` | **0** | 4 | — |
+
+**The four zeroes are the finding.** A reader who reaches `runtime/cli`,
+`runtime/write` or `runtime/telemetry` from search gets signatures and the
+sentence each author left on the declaration, and there is nothing else on this
+site to send them to — 110 exports with no prose anywhere. Those pages now say
+so in a band at the top rather than leaving a reader to hunt through a sidebar
+that was never going to have it.
+
+**The low percentage is not, by itself, a defect.** A reference exists so that
+the prose does not have to name everything; a page that mentioned all 429
+exports of the root door would be a worse page. What the numbers say is narrower
+and it is about the four zeroes: `write` is how a host persists an accepted
+change, and `telemetry` is how it finds out what the model cost — both are things
+somebody standing up a deployment has to do, and neither has a paragraph. `cli`
+is the scaffolding a stranger would meet first if they knew it existed.
+
+Recommended next units for this lane, in this order, and recorded here so a
+later run does not have to re-derive them:
+
+1. **A page on writing an accepted change back**, in *The runtime*, covering
+   `@loom/runtime/write` and closing the largest of the three real gaps.
+2. **A page on what a deployment can see afterwards** — `telemetry` — which the
+   portal already renders and the docs have never described.
+3. `cli` is smaller and may belong as a section of *Installation* rather than a
+   page, since it is scaffolding rather than a subject.
+
+Nothing here is asked of another lane, and the count is not a test: the site
+prints whatever it measures, so this table goes out of date without anything
+going red, which is the correct behaviour for a fact about how much has been
+written.
+
+---
+
+## 2026-08-26 — a mention is evidence a page is worth reading, and the wording had to stop short of claiming more
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped, recorded so it is revisited on purpose rather than
+rediscovered
+
+The link from a signature back to the prose is derived by looking for the export's
+name in code on a written page — a fenced block, or a span between backticks.
+That is the strongest evidence available without a person writing a map, and it
+is genuinely weaker than what a reader might infer:
+
+- **It cannot tell an explanation from an appearance.** A name in a code block on
+  a page about something else would be offered exactly as loudly as a name in a
+  paragraph explaining it. Every one of the 43 today is a real discussion, checked
+  by hand; nothing keeps that true.
+- **It only finds names the prose spells.** A page that says *"the registry"* and
+  means `createPrimitiveRegistry` is invisible to it, and that is most of how good
+  prose talks about code.
+
+The wording is what carries the limit: the page says **"Shown in use on"**, which
+is exactly what was measured, rather than *explained on*, which was not. A link
+promising an explanation and delivering a code block would be worse than the
+silence it replaced.
+
+The shape that would close it properly is a front-matter list on each written
+page naming the exports it teaches, checked against the reference by a test — a
+small hand-maintained map with a red test behind it, rather than a large one with
+nothing. Not done here: it is worth doing only once there are enough pages for the
+derived version to be wrong, and today it is not.
 ## 2026-08-26 — a tree cannot point at a band of its own page, and the front door needed to
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
