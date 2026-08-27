@@ -221,6 +221,13 @@ corner.
   which no reference gallery could answer.
 - `@jonathanbravecredit`: **the brief still opens with a task that landed on
   21 August**, fourth consecutive run. Dated on the existing entries.
+- `@jonathanbravecredit`: **the commit-identity trap, sixth time.** I committed
+  this unit as `jonathanbravecredit <jpizzolato36@gmail.com>` — the exact pair
+  behind five blocked deployments — and caught it before pushing, on a glance at
+  `git log`. Amended, no force-push, no preview lost. Filed because *how* it
+  happened is the evidence: I had read the 26 August entry about it, in this
+  session, twenty minutes earlier, and the appealing wrong thing was appealing
+  again for its own fresh reason.
 
 ## The one thing I did not fix, said plainly
 

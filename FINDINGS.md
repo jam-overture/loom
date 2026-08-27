@@ -9633,3 +9633,34 @@ Fourth consecutive run opening by establishing that its headline instruction —
 `docs/rollout.md:19` still points at the old path. Neither is fixable by a
 routine: a routine cannot rewrite the brief it is bound by, and this file says
 that about itself.
+
+---
+
+## 2026-08-27 — the commit-identity trap, sixth time, and the first one caught before it cost a preview
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a sixth data point for the 22, 25 and 26 August entries; nothing new is
+argued here
+
+I committed this run's unit with
+`-c user.name="jonathanbravecredit" -c user.email="jpizzolato36@gmail.com"` —
+the exact pair that has produced five blocked deployments — and caught it
+**before pushing**, on a check of the last three commits' authors. Repaired with
+`--amend --reset-author`, no force-push, no lost preview.
+
+That it was caught is not evidence the problem is solved, and it is worth being
+precise about why. The reasoning that produced it was the same appealing one the
+26 August entry names: a commit authored by the person whose repository this is
+looks more correct than one authored by `Claude`. **I had read that entry, in
+this session, twenty minutes earlier.** That is now two routines that have walked
+into the trap with the analysis of the trap in their context.
+
+What caught it was not memory. It was a habit of reading `git log` after
+committing and noticing the author line differed from the two commits under it —
+which works only because the branch is fresh off `main` and the contrast is right
+there. On a branch with a few commits of its own it would not have looked odd.
+
+The recommendation is the 26 August entry's, unchanged and not restated: one
+paragraph in `docs/routines.md`, beside **Network access** and **Credentials**.
+A routine cannot write the governance it is bound by. The offer to write it on
+one word from you stands, and this is the sixth entry rather than the first.
