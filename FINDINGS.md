@@ -9220,3 +9220,64 @@ anything: duplicates are worth catching, and a hole in the sequence between two
 open branches is a normal state of a repository with six lanes in it. Dropping
 the no-gaps clause would cost nothing and would let a record be numbered past an
 open one. Not my file.
+
+---
+
+## 2026-08-27 — the pull-request body tooling does not merely mangle links, it deletes the text around them
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an escalation of the 26 August entry, with a reproduction and
+a workaround that holds
+
+#164 filed that markdown written into a pull request body arrives with the
+leading `!` stripped from an image, and that a bare autolink is removed
+entirely. Both are true. **The failure is worse than that entry knew**, and it
+was found by reading #172's body back after posting — the procedural note that
+same entry left for itself, which is now the second time it has paid for itself
+in two days.
+
+Three observed behaviours, in the order I hit them, all on `#172`:
+
+1. **On create.** Three of five ordinary `[text](url)` links came back wrapped
+   in stray double backticks — <code>[0094](``https://…md)'s``</code> — so they
+   render as code rather than as links, and one swallowed the two words after
+   it. The other two links in the same paragraph were untouched. I have no
+   theory for which ones it picks.
+2. **On update, with HTML anchors.** Replacing those links with `<a href>` tags
+   was much worse: the tags were stripped **together with the surrounding
+   prose**. Four sections disappeared, one of them mid-sentence — the body ended
+   at *"and that is the whole argument of"* followed by an unrelated image, then
+   the words `Full pages:` and `bold ·`, and nothing else. Roughly two-thirds of
+   the body was gone. Nothing reported an error; the call returned success.
+3. **Inside code spans.** In the note I wrote *about* this bug, the sequence
+   `` `<a href>` `` and `` `<img>` `` came back as empty code spans, so the
+   sentence explaining the failure was itself censored by it. That one is
+   almost funny and it is also the clearest reproduction: an angle-bracketed tag
+   name is removed even where it is unambiguously inert.
+
+**What survives, tested rather than assumed:** `<img src="…" width="…" />`
+passes through untouched, including a `…/blob/BRANCH/…?raw=true` URL. Plain
+prose, code spans without angle brackets, headings, lists, blockquotes and bold
+are all fine.
+
+**The workaround this run settled on, and I recommend it be written into
+`docs/routines.md` beside the sentence that asks for a screenshot:**
+
+> In a pull request body, use `img` tags for pictures and **no links at all**.
+> Write paths as paths in code spans. Put URLs a reader needs — the preview
+> address — in the follow-up comment instead, which does not appear to be
+> affected. Then read the body back and check it is all still there.
+
+The last clause is the important one. A body that loses two-thirds of itself
+looks, to whoever posted it, exactly like a body that posted correctly.
+
+**Why this matters beyond tidiness.** The briefs ask every lane for a pull
+request "described clearly", with a preview URL and screenshots, because that is
+the surface review actually happens on. A tool that silently deletes the
+description defeats the instruction, and four of this repository's reports now
+describe screenshots that were never visible where they were meant to be. The
+cost is not the markdown; it is that a maintainer stepping through six open
+pull requests sees less than each routine believes it published.
+
+Chasing it upstream is your call — it is in the tooling rather than in this
+repository, and I cannot see it from here.
