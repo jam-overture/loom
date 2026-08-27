@@ -9031,3 +9031,71 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-27 — `WriteOutcome` has seven kinds and no list of them, and telemetry solved this once already
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+a small addition, with the shape already settled elsewhere in `src/`
+
+`commitIntent` can end seven ways, and the seven are a union of string literals
+on `WriteOutcome["kind"]`. A `switch` over them is exhaustive at compile time,
+which is the case the runtime was designed for and it works. What has no answer
+is **enumeration**: anything that wants to walk the endings rather than react to
+one has to keep its own copy of the list, in its own order, with nothing to fail
+when an eighth lands.
+
+Three things want exactly that, and only the first is this lane's:
+
+- the documentation page that describes what a host must handle — it now keeps
+  `WRITE_ENDING_ORDER` and a `Record` keyed by the kind, so a new ending is at
+  least a type error here rather than a silent omission
+- an operations dashboard counting how requests end, which needs every bucket to
+  exist before the first request rather than discovering them as they occur
+- anything writing a runbook or a conformance check against the write path
+
+**The shape is not a question.** `src/telemetry/episode.ts` exports
+`EPISODE_RESOLUTION_KINDS` for this reason, and uses it to seed a zeroed record
+of every kind — the same two uses, in the same repository, already argued and
+accepted. `PALETTE_SLOTS` is the same pattern a second time.
+
+So the ask is one exported line beside the type, ordered however the runtime
+prefers, plus the type-level check that keeps it complete. This lane will
+consume it and delete its own copy, and the page's reading order becomes a
+statement about pedagogy rather than a second opinion about what the endings are.
+
+Filed rather than done: `src/` is not this lane's, and a list of kinds belongs
+next to the type it enumerates rather than in a documentation directory.
+
+---
+
+## 2026-08-27 — three of the four zeroes are still zero, and `write` is off the list
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+queue this lane is working through, one door per run
+
+This lane measured how much of the published surface the prose names on
+26 August, and named four entry points with **no prose anywhere on this site**.
+That entry is on #167 and has not merged, so the counts are repeated here rather
+than pointed at. This run wrote the first of the four.
+
+| Import | Exports | Prose |
+| --- | --- | --- |
+| `@loom/runtime/write` | 21 | **a page**, as of this run |
+| `@loom/runtime/telemetry` | 62 | none |
+| `@loom/runtime/cli` | 23 | none |
+| `@loom/runtime/telemetry/postgres` | 4 | none |
+
+**89 exports across three doors, and the order to take them in is not the order
+of those numbers.** `telemetry` is next and it is not close: *Connecting a model*
+ends by telling a reader a request has a cost, and there is nowhere on this site
+that says what a deployment does with a month of those costs. `cli` is a
+different kind of gap — it is tooling, its help text is already written, and a
+page about it is worth less than a page about anything a deployment has to
+operate. `telemetry/postgres` is four exports and belongs inside whatever the
+telemetry page becomes rather than beside it.
+
+Worth stating because the count on each reference page is derived and will move
+on its own as prose is written. What will not move on its own is the judgement
+about which door matters most, and this is it.
