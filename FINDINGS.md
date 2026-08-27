@@ -1512,7 +1512,10 @@ routine's directory, and #97 reports having taken both.
 
 ## 2026-08-19 — the marketing site's checked numbers make every other lane's run go red
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-13-numbers-that-count-themselves`** — the primitive count
+is derived, the record count is a floor, and neither can be turned red by a run
+outside this lane. See the 27 August entry for what was and was not solved.
 
 Recorded here rather than left in a pull-request thread, because a merged PR's
 comments are not something the next run reads — and this one has now been hit
@@ -7187,8 +7190,9 @@ somebody else's lane.
 ## 2026-08-24 — the record-count edit, the fourth in six days
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`,
-`@jonathanbravecredit` · **Status:** open — for the count, and because the
-cheaper of the two fixes now has four data points behind it
+`@jonathanbravecredit` · **Status:** **closed by
+`marketing-13-numbers-that-count-themselves`**, with the 19 August entry it is
+an instance of — writing a record no longer touches this lane at all
 
 `FACTS.decisions` in `apps/loom/app/(marketing)/_lib/copy.ts` is the string
 `"87"`, and `facts.test.ts` checks it against the number of files in
@@ -8629,8 +8633,9 @@ only the measurement: on the front door, on a phone, there is currently none.
 ## 2026-08-25 — `FACTS` turned another lane's run red twice in one day, which is the fifth and sixth time
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`,
-`@jonathanbravecredit` · **Status:** open — dated on the 19 and 24 August
-entries rather than opened again
+`@jonathanbravecredit` · **Status:** **closed by
+`marketing-13-numbers-that-count-themselves`** — six occurrences was enough, and
+the fix turned out not to need the decision this entry was waiting on
 
 Recording instances, not re-arguing. The 19 August entry named the two ways out
 and said neither is a routine's to choose alone; the 24 August entry said four
@@ -9031,3 +9036,68 @@ Two limits, stated so they are not discovered:
 - It reaches **children only**, not slot regions — a region may hold content the
   host projected, which is not the tree's to render again. If a primitive wants a
   decorative copy of a region, file it and say which primitive.
+
+---
+
+## 2026-08-27 — the counts derive themselves now, and the half that is still not exact is one decision
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit`,
+`Loom daily build` · **Status:** open — a narrow question, replacing the six-times-filed
+one it came out of
+
+The 19 August finding — *the marketing site's checked numbers make every other
+lane's run go red* — is **closed**, along with its 24 and 25 August instances.
+What closed it is worth recording, because five reports in a row said the fix
+was not a routine's to choose and that turned out to be true of only half of it.
+
+**Two of the three numbers are now counted rather than typed**, in
+`app/(marketing)/_lib/copy.ts`:
+
+- `FACTS.primitives` is `catalogueOf(siteRegistry).length` — the registry the
+  page already builds to render with, so it costs a request nothing and no run
+  that registers a primitive touches this lane again.
+- `FACTS.operations` counts `DELTA_OPERATIONS`, which is the keys of
+  `treeOperationSchema.optionsMap` — read off the schema the runtime validates
+  deltas against, so the four names are available to a test as well as the
+  count. The caption beside the number claims *"that is the whole list"*, and a
+  fifth operation now takes **this** lane red rather than passing silently. That
+  asymmetry is deliberate: a number that moves without changing the claim should
+  need nobody, and a number that moves *because* the claim changed should need
+  this lane.
+
+Both were available all along and no previous run reached for them, because the
+finding had been framed as one problem with one filesystem-shaped fix. Neither
+of these needs a filesystem.
+
+**The record count is a floor**: the page says `90+` and the test holds it in
+one direction only — the floor may never be higher than the truth. Verified both
+ways on this branch: adding a file to `decisions/` fails `facts.test.ts` on
+`main` and is a no-op here.
+
+### What is still not solved
+
+**A marketing page cannot state an exact count of anything outside the bundle**,
+and `decisions/` is outside it: `/` is a dynamic route, so a `readdirSync` would
+run per request in a serverless function against a directory five levels above
+the Vercel root that nothing traced. So `90+` understates by three today and
+will understate by more, and raising the floor is this lane's periodic work.
+
+**The decision that would fix it is one question**, and it is narrower than the
+one the previous entries asked:
+
+> May a surface add its own generation script to `apps/loom/package.json` — a
+> `marketing:facts` beside the existing `docs:api` — emitting a committed module
+> the page imports?
+
+`docs:api` is the precedent: `(docs)` already regenerates
+`reference.generated.json` through a script line in that file, and the 25 August
+ruling in `docs/routines.md` put the MDX root files in the documentation lane on
+the principle that **a file belongs to the lane whose content it decides, not to
+the directory it sits in.** A `marketing:facts` line decides marketing content by
+the same test. But that ruling says in terms that *"the rule generalises and the
+exception does not"*, so this lane is not going to read itself a second
+exception. One sentence either way closes it.
+
+Until then the floor is the answer, and the answer is honest — which is more
+than the exact number was, since the exact number was only ever kept true by
+three other lanes remembering to edit a file that was not theirs.
