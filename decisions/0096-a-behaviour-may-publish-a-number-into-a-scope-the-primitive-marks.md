@@ -1,4 +1,4 @@
-# 0094. A behaviour may publish a number into a scope the primitive marks
+# 0096. A behaviour may publish a number into a scope the primitive marks
 
 **Status:** Accepted
 **Date:** 2026-08-26

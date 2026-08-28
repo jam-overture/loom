@@ -45,6 +45,8 @@ export type PrimitiveAudit = {
   readonly submission: SubmissionVerdict
   /** What the author declared, beside what the probe saw. */
   readonly declaresSubmits: boolean
+  /** The props this primitive declared it frames (0094). Empty for almost all. */
+  readonly framesProps: readonly string[]
 }
 
 /** A primitive that declared a region and then did not render it. */
@@ -156,6 +158,25 @@ export type RegistryAudit = {
    * renders, looks finished, and reports nothing until a visitor uses it.
    */
   readonly unwiredSubmitters: readonly PrimitiveType[]
+  /**
+   * The registered primitives that put a prop in a frame.
+   *
+   * This is the list a deployment holds its framable-origin registry against,
+   * exactly as `submits` is held against its endpoint registry: if anything
+   * here is registered, `renderRequest` wants `origins`, and a deployment that
+   * ships one without the other ships embeds that render a refusal.
+   *
+   * Declared rather than probed, which is the one place this audit takes an
+   * author's word for something it could in principle check. It could not
+   * check this one usefully: the seam already refuses to register a `frames`
+   * naming a prop the schema does not declare, and the failure left over — a
+   * primitive that puts a URL in an `iframe` and never said so — is invisible
+   * to a probe, because an `iframe` a primitive built out of a prop it did not
+   * declare looks exactly like one it did. What would catch that is a lint over
+   * the markup, not a call of the component. Named here rather than left as a
+   * gap somebody discovers.
+   */
+  readonly frames: readonly PrimitiveType[]
 }
 
 const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
@@ -187,16 +208,28 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
 
     return {
       type: primitive.type,
-      verdict: probeEditableDecoration(primitive.component, primitive.text, configurations),
+      verdict: probeEditableDecoration(
+        primitive.component,
+        primitive.text,
+        configurations,
+        primitive.frames
+      ),
       placement: probePlacement(
         primitive.component,
         primitive.slots,
         primitive.text,
         configurations,
-        primitive.behaviours
+        primitive.behaviours,
+        primitive.frames
       ),
-      submission: probeSubmissionPlacement(primitive.component, primitive.text, configurations),
+      submission: probeSubmissionPlacement(
+        primitive.component,
+        primitive.text,
+        configurations,
+        primitive.frames
+      ),
       declaresSubmits: primitive.submits,
+      framesProps: primitive.frames,
     }
   })
 
@@ -205,6 +238,7 @@ export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
   return {
     audits,
     submits: audits.filter(places).map((audit) => audit.type),
+    frames: audits.filter((audit) => audit.framesProps.length > 0).map((audit) => audit.type),
     undeclaredSubmitters: audits
       .filter((audit) => places(audit) && !audit.declaresSubmits)
       .map((audit) => audit.type),

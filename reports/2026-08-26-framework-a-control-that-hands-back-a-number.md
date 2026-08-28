@@ -102,23 +102,24 @@ Two defences, not one: a control that finds no scope at runtime stays the inert
   a split pane or any range-shaped comparison would take the identical control.
 
 All five are recorded in
-[0094](../decisions/0094-a-behaviour-may-publish-a-number-into-a-scope-the-primitive-marks.md)
+[0096](../decisions/0096-a-behaviour-may-publish-a-number-into-a-scope-the-primitive-marks.md)
 with what was rejected.
 
 ## Records
 
-- **0094 — A behaviour may publish a number into a scope the primitive marks.**
+- **0096 — A behaviour may publish a number into a scope the primitive marks.**
   Accepted. Index regenerated.
 - Nothing superseded. 0086 is extended by it, not contradicted: a behaviour is
   still a control the runtime builds and a primitive places, and this is the
   first one that also needs the primitive to say a word first.
-- **The number collided again, and again it was forced.** `main` carries records
-  through 0093, so 0094 is the next free number there, which is what the brief
-  says to take. #164 and #165 are both open with an 0094 of their own. Taking
-  0095 is not available: `pnpm decisions:index` fails on a gap, so the PR would
-  open on red. Whichever of the three merges after the first has to renumber.
-  Sixth or seventh instance; the finding proposing a fix is open and owned by the
-  maintainer.
+- **The number collided, and the renumber has now happened.** This record was
+  written as 0094 when `main` carried records through 0093, which is the number
+  the brief says to take; #164 and #165 were open with an 0094 of their own and
+  one of them merged. On 28 August `main` was merged into this branch and the
+  record became **0096**, the next free number there. Nothing else about it
+  changed. Sixth or seventh instance of the collision; the finding proposing a
+  fix is open and owned by the maintainer, and this is the first time the cost
+  has actually been paid rather than predicted.
 
 ## Findings
 
