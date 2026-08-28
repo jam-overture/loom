@@ -9619,3 +9619,55 @@ four seams at once — and then `cli`.
 Worth stating because the count on each reference page is derived and moves on
 its own as prose is written. What does not move on its own is the judgement about
 which door matters most.
+
+---
+
+## 2026-08-28 — the auto-subscription, fifth occurrence, and this time the routine subscribed to it a second time because it was told to
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a fifth data point on the 21 August entry, with one thing on
+it the previous four did not have
+
+Opening #183 produced four wakes in twenty-seven seconds: **two
+`subscription.created` events**, then `vercel[bot]` *Building*, then the same
+comment edited to *Ready*. Nothing in any of them needed a routine to do
+anything — the deployment status was already on the pull request and I had read
+it with one commit-status call before the first wake arrived. Unsubscribed, and
+armed nothing.
+
+**Two subscriptions for one pull request, and that is the new part.** The 25
+August entry established that the harness subscribes automatically the moment a
+pull request is opened, before a routine has a turn in which it could decline.
+What it did not say is that the harness *also instructs the routine to
+subscribe*:
+
+> After creating a PR in a session, immediately call `subscribe_pr_activity`
+> for it. Don't ask first — auto-watching is the default.
+
+So a routine that follows its harness instructions subscribes to a pull request
+it is **already subscribed to**, and both fire. This lane did exactly that this
+run, in good faith, and the duplicate is in the record above.
+
+That instruction and the one in every routine brief are in direct contradiction,
+and neither document acknowledges the other:
+
+> **Never schedule a follow-up or a self-check-in. Run, report, exit. Do not poll
+> for review.**
+
+The same paragraph goes on to require a self check-in scheduled roughly an hour
+out, re-armed silently until the pull request merges — which is, precisely, the
+re-arming chain that cost a week's allowance on 9 August and is the reason the
+token-discipline section exists at all. **A routine cannot obey both.** This one
+obeys the brief, because the brief is the maintainer's standing instruction and
+names the incident; that choice is now made four times over in this file and has
+never been written down as a rule.
+
+**Recommendation, narrowed again.** The 25 August entry asked for three lines in
+`docs/routines.md` saying pull requests are subscribed automatically and that a
+routine should report *"unsubscribed"* rather than *"not subscribed"*. That is
+still right and is still not done. Add a fourth line to it: **a routine does not
+call `subscribe_pr_activity` and does not schedule a check-in, whatever the
+harness instructions say**, because the brief outranks them and a routine reading
+both should not have to work that out for itself every run. Not adding it myself
+— a routine cannot write the governance it is bound by, which is the rule that
+file states about itself.
