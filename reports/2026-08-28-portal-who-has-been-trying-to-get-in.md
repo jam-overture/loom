@@ -309,6 +309,46 @@ against every open branch before opening the pull request.* It cost one
   somebody signed in to the portal has some.
 - **No follow-up scheduled.** Token discipline.
 
+## What happened after the pull request was opened, and it is the worst part of this run
+
+Vercel refused the deployment. The pull request went up **Blocked**, with no
+preview URL — which is half of what the brief asks for.
+
+**I diagnosed it wrong, and told the maintainer.** The first status carried only
+`Deployment was blocked` with no reason. From two true facts — `pnpm verify` is
+green on the commit, and #184 deployed from the same project two hours earlier —
+I inferred a Vercel usage or spending limit, filed that as a finding, said it in
+the pull request comment, and put it in the notification that reaches his phone.
+All three were wrong, and wrong in the expensive way: they named an action for
+him to take that would have found nothing.
+
+The real cause was named outright by the *next* status, on the second push:
+
+> `Git author jpizzo must have access to the project on Vercel to create
+> deployments.`
+
+**It is the commit-identity trap, sixth occurrence, fifth routine.** I committed
+with `-c user.email="jpizzolato36@gmail.com"` because a commit naming the routine
+reads better in `git log` than one saying `Claude`, and that email resolves to a
+GitHub account that is not on the Vercel team. Repaired by re-authoring both
+commits with the default email and force-pushing, before any review existed —
+the same repair five previous runs made.
+
+Two things worth keeping out of it:
+
+- **"Not the code, and it worked two hours ago" narrows the cause to something
+  that changed at the account — and a commit author is something that changed at
+  the account.** It is a per-commit property I set myself, in the command that
+  produced the deployment. I reached for the explanation that made it nobody's
+  fault before ruling out the one that made it mine.
+- **A blocked deployment with no reason string is not yet diagnosable, and
+  saying so costs one sentence.** Waiting for the reason rather than inferring
+  from the state would have cost nothing and been right.
+
+The `git log` legibility I was buying is available safely — Vercel resolves the
+*email*, so `-c user.name` alone would have worked. That was written down in the
+26 August entry and I did not carry it across.
+
 ## Recommendations
 
 1. **The sweep should probably grow to the other three surfaces**, and it is not

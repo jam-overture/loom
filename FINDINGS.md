@@ -9678,44 +9678,77 @@ added by one lane is a promise the other three have not read.
 
 ---
 
-## 2026-08-28 — the preview deployment was blocked, and this lane's brief cannot be satisfied without one
+## 2026-08-28 — the commit-identity trap, sixth occurrence, and I diagnosed it as something else first
 
 **Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open — needs an account-level action nobody inside a routine can take
+**Status:** open — sixth data point, and the second by a routine that had read
+the entry
 
-Vercel reports **`Deployment was blocked`** on #185, with no build log, no
-preview URL, and a `failure` commit status. The portal brief says, in as many
-words:
+Same failure, sixth time, fifth routine. I committed #185 with
+`-c user.name="Loom portal" -c user.email="jpizzolato36@gmail.com"`, Vercel
+refused the deployment, and the pull request went up **Blocked** with no preview
+URL. Repaired by re-authoring both commits with the default email and
+force-pushing, before any review existed. Sixth time that repair has been made.
 
-> Open the PR against `main` with **the deployed preview URL and a screenshot** —
-> this surface exists to be looked at, and the maintainer judges it by eye.
+**Two things this occurrence adds, and both are worse than a sixth tally mark.**
 
-**Half of that instruction cannot be followed on this run**, and the half that
-can was: four screenshots from a production build of the exact commit are in the
-pull request and the report.
+**First, the same demonstration the 26 August entry made, repeated.** That entry
+— filed by the framework routine about *its own* repeat — states the rule in one
+line and says the wrong thing is appealing for a different reason each time. I
+read `FINDINGS.md` before choosing work, as the brief requires. I did not read
+9,700 lines of it; I read the recent portal-owned entries and grepped for what my
+lane owed. The identity rule was not among them, because it is procedure and it
+is owned by somebody else. The 22 August diagnosis holds and is now six for six:
+`FINDINGS.md` is read *for work*, and procedure filed among findings is procedure
+that gets read and not applied.
 
-**It is not this pull request's failure, and the evidence is on the repository
-rather than in an assertion.** `pnpm verify` is green on `065277b` — which
-includes `next build` across all five route groups — and #184, opened at 16:06
-today, deployed successfully from the same project. Mine at 18:17 did not.
-Something changed at the account between those two times; the most likely
-candidate is a usage or spend limit for the billing period, since "blocked" is
-the wording Vercel uses when it declines to start a build rather than when a
-build fails.
+My own appealing reason, for the record and for the pattern: a commit that names
+which routine made it is more legible in `git log` than one that says `Claude`.
+That is the same pull the 26 August entry describes, and the safe form — 
+`-c user.name` alone, since Vercel resolves the **email** — was written down in
+that entry and I did not carry it across.
 
-**There is nothing for a routine to re-run.** This repository has no GitHub
-Actions workflow at all — `.github/` does not exist — so Vercel is the only
-check, and a routine has no way to trigger a Vercel redeploy through the tools it
-has. Pushing an empty commit to kick it is out; that is a rule, and it would not
-work here anyway, because the block is upstream of the build.
+**Second, and this is the new part: I got the diagnosis wrong and told the
+maintainer.** The first status carried only `Deployment was blocked` with no
+reason. I inferred a usage or spending limit from two true facts — `pnpm verify`
+is green on the commit, and #184 deployed from the same project two hours
+earlier — filed that as a finding, said it in the pull request comment, and put
+it in the notification that reaches the maintainer's phone. **All three were
+wrong**, and the wrongness was expensive in the specific way a false diagnosis
+is: it named an action for him to take (go and check the Vercel billing limits)
+that would have found nothing.
 
-**What every lane should know, because every lane's brief asks for the preview
-URL:** if this is a billing-period limit, it will affect the next run of all six
-routines equally, and each will spend tokens discovering it. Recording it once
-here is cheaper than six identical discoveries.
+The reason the inference was wrong is worth keeping, because the two facts were
+sound and the conclusion still did not follow. "It is not the code, and it worked
+two hours ago" narrows the cause to *something that changed at the account*, and
+a commit author is something that changed at the account — a per-commit property
+I had set myself, in the very command that produced the deployment. I reached for
+the explanation that made it nobody's fault before I had ruled out the one that
+made it mine.
 
-**Recommendation:** check the Vercel project's usage and spending limits. If the
-cap is deliberate, `docs/routines.md` should say what a routine does when the
-preview is unavailable — this run's answer was to publish the screenshots, say
-plainly that the URL is missing and why, and not fabricate one, which is the
-right answer but is currently a judgement call rather than a written rule.
+**What would have prevented the wrong diagnosis is cheaper than what would have
+prevented the failure**: the second push produced a status that named the cause
+outright — `Git author jpizzo must have access to the project on Vercel` — and
+a routine that waits for the *reason* rather than the *state* would have had it.
+A blocked deployment with no reason string is not yet diagnosable, and saying so
+costs one sentence.
+
+**The recommendation is unchanged and I will not restate it as new.** One
+paragraph in `docs/routines.md`, beside **Network access** and **Credentials**,
+in the words the 25 and 26 August entries already proposed:
+
+> **Never set `user.email`, and never author a commit as the maintainer.** The
+> environment's default identity is the one on the Vercel team; any other author
+> produces a pull request with no preview, and the maintainer's email resolves to
+> a different GitHub account than his. `-c user.name` alone is safe if a routine
+> wants a legible `git log`.
+
+A routine cannot write the governance it is bound by. The offer three entries
+running has been that one word from you on any pull request is enough and the
+next run writes it. **I would rather be told to write it than file a seventh
+entry**, and this run has demonstrated that reading the sixth does not prevent
+the seventh.
+
+Cost to date: six runs, six lost previews, six force-pushes, one commit that
+briefly claimed the maintainer wrote it, and now one wrong diagnosis delivered to
+the maintainer's phone.
