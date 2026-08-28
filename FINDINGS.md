@@ -1155,7 +1155,24 @@ entry, the way the primitives routine dates its `21st.dev` re-verifications.
 ## 2026-08-19 — a Loom site cannot link to its own next page
 
 **Filed by:** `Loom daily build` (marketing) · **Owned by:** `Loom daily build` ·
-**Status:** open
+**Status:** open — **escalated on 28 August as ARCHITECTURAL.**
+[0096](decisions/0096-a-same-origin-path-is-not-a-scheme.md) is `Proposed` and
+carries the analysis, the exact predicate and the four rejected alternatives.
+Nothing is built and 0053 is untouched, because accepting a same-origin path
+contradicts an `Accepted` clause and that is a decision rather than a fix.
+
+Nine days open, and the reason is worth naming so the next one does not sit as
+long: this finding is **owned by** `Loom daily build` and the change lands in
+`src/primitives/url.ts`, which is `Loom primitives`' directory. Each lane reads
+it as the other's. It needs the maintainer to say yes or no, after which either
+lane can land it in an afternoon.
+
+Two things found while escalating, both in `src/submit/` and both shipped:
+`submissionTargetSchema` has accepted root-relative paths since it was written,
+which is a precedent inside the runtime for exactly what this asks — and its
+check was `value.startsWith("/")`, which accepted `//evil.example` and
+`/\evil.example`, both of which resolve to another origin. Fixed, with tests
+that fail without the fix. That predicate is the one 0096 proposes reusing.
 
 `linkUrlSchema` (0053) allowlists schemes by parsing with `new URL(value)` and
 refusing anything that does not parse — which is every relative URL. So
@@ -8339,6 +8356,40 @@ Two things it cannot do, and both are the deployment's:
 `loom.embed` receiving a resolved outcome the way `loom.form` receives
 `loom.submit` — so a tree that names an unlisted origin renders a refusal that
 says so, rather than framing it.
+
+---
+
+## 2026-08-28 — a form action that starts with a slash could still leave the origin
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed by `framework-18-a-same-origin-path-is-not-a-scheme` — filed
+and fixed in the same run, and recorded here because the shape generalises past
+the one file.
+
+`submissionTargetSchema` accepted any action beginning `/`. That accepts
+`//evil.example/collect`, which is scheme-relative, and `/\evil.example/collect`,
+which browsers normalise to the same thing — both resolve to another origin.
+A form action is where a visitor's typed data is sent, so the guard whose stated
+job is that *a host's own composition mistake does not become a live
+`javascript:` form action* was letting through the more expensive mistake of the
+two, in the form least likely to be caught in review: it looks like a path.
+
+Fixed by testing for a same-origin path rather than a leading slash, with tests
+that fail without it. Crossing an origin is still allowed and now has to be said
+out loud, as a full `https://` URL.
+
+**The general shape, for anyone writing one of these:** `startsWith("/")` is not
+"stays on this origin". The predicate is
+
+```ts
+value.startsWith("/") && value[1] !== "/" && value[1] !== "\\"
+```
+
+`src/submit/endpoint.ts` was the only occurrence in `src/` on 28 August, and it
+is now the only definition. Anywhere that needs the same test should import the
+idea from there rather than write the three-character version again — including
+`linkUrlSchema`, if
+[0096](decisions/0096-a-same-origin-path-is-not-a-scheme.md) is accepted.
 
 ---
 
