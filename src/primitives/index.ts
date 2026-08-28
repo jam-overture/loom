@@ -17,6 +17,8 @@ import { loomComparison } from "./loom.comparison.js"
 import { loomComparisonRow } from "./loom.comparison-row.js"
 import { loomComparisonTable } from "./loom.comparison-table.js"
 import { loomCodeSpan } from "./loom.code-span.js"
+import { loomCredential } from "./loom.credential.js"
+import { loomCredentialGrid } from "./loom.credential-grid.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomEmbed } from "./loom.embed.js"
 import { loomEmphasis } from "./loom.emphasis.js"
@@ -44,6 +46,8 @@ import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
 import { loomMosaic } from "./loom.mosaic.js"
 import { loomNav } from "./loom.nav.js"
+import { loomOffering } from "./loom.offering.js"
+import { loomOfferingGrid } from "./loom.offering-grid.js"
 import { loomOption } from "./loom.option.js"
 import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
@@ -202,6 +206,22 @@ import { loomTierTable } from "./loom.tier-table.js"
  * composing, and argued in `loom.list-item`'s comment rather than in a record,
  * for the numbering reason that comment ends on.
  *
+ * **The two bands that ask for the sale** are the largest collapse left in the
+ * Hermes port and the two halves of one question: *what can I book*, and *why
+ * should I believe you*. `offering-grid` over `offering` is seven blocks —
+ * services, coaching packages, mentorship tracks, donation tiers, a class
+ * schedule, volunteer roles and a restaurant menu — which are one record wearing
+ * seven sets of words; `credential-grid` over `credential` is four more, and a
+ * favourite tool turns out to be a certification with the words changed. They
+ * are the second pair of pairs to sit on either side of 0066: an offering is
+ * acted on, so the control is the target and the card carries no overlay; a
+ * credential is read, so the whole surface is. What is new in them is
+ * [0094](../../decisions/0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md),
+ * which is why one of the two holds its sentence as a node and the other holds
+ * it as a prop, and a `loom.offering` that reads as a menu row when it is given
+ * the width and as a card when it is not — one `@container` rule rather than two
+ * primitives or a prop nobody should have to set twice.
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -229,6 +249,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomTier,
   loomPerkList,
   loomPerkListItem,
+  loomOfferingGrid,
+  loomOffering,
   loomComparisonTable,
   loomComparisonRow,
   loomComparison,
@@ -246,6 +268,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomArticle,
   loomLogoCloud,
   loomLogo,
+  loomCredentialGrid,
+  loomCredential,
   loomFaqList,
   loomFaq,
   loomForm,
@@ -306,6 +330,8 @@ export {
   loomComparisonRow,
   loomComparisonTable,
   loomCodeSpan,
+  loomCredential,
+  loomCredentialGrid,
   loomDivider,
   loomEmbed,
   loomEmphasis,
@@ -333,6 +359,8 @@ export {
   loomMilestoneList,
   loomMosaic,
   loomNav,
+  loomOffering,
+  loomOfferingGrid,
   loomOption,
   loomPage,
   loomPerk,

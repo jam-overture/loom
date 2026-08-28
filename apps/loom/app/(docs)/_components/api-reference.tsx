@@ -1,3 +1,6 @@
+import Link from "next/link"
+
+import type { EntryProse, ProseMention } from "@/app/(docs)/_lib/api/mentions"
 import {
   apiAnchorFor,
   apiSymbolCount,
@@ -80,7 +83,44 @@ const Signature = ({ symbol }: { readonly symbol: ApiSymbol }) => (
   </pre>
 )
 
-const SymbolEntry = ({ symbol }: { readonly symbol: ApiSymbol }) => (
+/**
+ * Where a name is shown in use, under the name.
+ *
+ * A signature answers *what shape is this*. A reader who arrived from search
+ * having never seen Loom before is asking something else — *what is this for*,
+ * and *what does the sentence around it look like* — and the written pages
+ * answer that. Nothing on this page could reach them until now.
+ *
+ * **"Shown in use on" is the strongest thing the evidence supports**, and the
+ * wording is deliberate. What the site knows is that the page prints this name
+ * in code; whether the page teaches the export is a judgement nobody made. A
+ * link that promised an explanation and delivered a code block would be worse
+ * than the silence it replaced.
+ */
+const ShownInUse = ({ mentions }: { readonly mentions: readonly ProseMention[] }) => (
+  <p className="text-ink-muted mt-2 text-sm">
+    <span className="text-ink-faint">Shown in use on </span>
+    {mentions.map((mention, index) => (
+      <span key={mention.href}>
+        {index === 0 ? "" : index === mentions.length - 1 ? " and " : ", "}
+        <Link href={mention.href} className="text-ink underline underline-offset-2 hover:no-underline">
+          {mention.pageTitle}
+        </Link>
+        {mention.headingText === "" ? null : (
+          <span className="text-ink-faint"> — {mention.headingText}</span>
+        )}
+      </span>
+    ))}
+  </p>
+)
+
+const SymbolEntry = ({
+  symbol,
+  mentions,
+}: {
+  readonly symbol: ApiSymbol
+  readonly mentions: readonly ProseMention[]
+}) => (
   <div id={apiAnchorFor(symbol.name)} className="scroll-mt-24 py-6">
     <h3 className="text-ink flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.9375rem] font-semibold">
       {symbol.name}
@@ -93,6 +133,8 @@ const SymbolEntry = ({ symbol }: { readonly symbol: ApiSymbol }) => (
       </p>
     )}
 
+    {mentions.length === 0 ? null : <ShownInUse mentions={mentions} />}
+
     <Signature symbol={symbol} />
 
     {symbol.truncated ? (
@@ -103,7 +145,13 @@ const SymbolEntry = ({ symbol }: { readonly symbol: ApiSymbol }) => (
   </div>
 )
 
-const Group = ({ group }: { readonly group: ApiGroup }) => (
+const Group = ({
+  group,
+  prose,
+}: {
+  readonly group: ApiGroup
+  readonly prose: EntryProse
+}) => (
   <section id={apiGroupAnchor(group.module)} className="scroll-mt-24">
     <h2 className="text-ink border-edge mt-14 border-t pt-8 text-[1.375rem] leading-tight font-bold tracking-tight">
       {group.title}
@@ -119,7 +167,11 @@ const Group = ({ group }: { readonly group: ApiGroup }) => (
 
     <div className="divide-edge mt-1 divide-y">
       {group.symbols.map((symbol) => (
-        <SymbolEntry key={symbol.name} symbol={symbol} />
+        <SymbolEntry
+          key={symbol.name}
+          symbol={symbol}
+          mentions={prose.byName.get(symbol.name) ?? []}
+        />
       ))}
     </div>
   </section>
@@ -155,7 +207,94 @@ const Contents = ({ entry }: { readonly entry: ApiEntry }) => (
   </nav>
 )
 
-export const ApiEntryReference = ({ entry }: { readonly entry: ApiEntry }) => (
+/**
+ * The prose before the names, and the size of the gap between them.
+ *
+ * This is the first thing on the most intimidating page on the site — a door
+ * with three hundred and sixty exports behind it — and it exists because a
+ * reader who lands here from search has almost certainly arrived at the wrong
+ * place first. The written pages are where the reading is; this says which of
+ * them talk about this door, and how much of it each one reaches.
+ *
+ * **The count is stated rather than hidden**, and that is the part worth
+ * defending. A band that only listed the pages would let a reader take three
+ * links for a documented entry point. Naming the fraction is the same rule the
+ * theming page's contrast audit follows: printing only what clears the bar is
+ * how a page tells a comfortable lie without writing a false sentence.
+ *
+ * Which is also why the band is here **when no page names anything**, rather
+ * than quietly absent. Three of the eleven doors are in that state today. A
+ * reader who is told so stops looking; a reader shown nothing goes hunting
+ * through a sidebar that was never going to have it.
+ *
+ * The list is not capped. Nine pages is the most any door draws and they are one
+ * line each — and a cap here would be the site deciding, silently, which of its
+ * own pages a reader is allowed to hear about.
+ */
+const ProseFirst = ({
+  entry,
+  prose,
+}: {
+  readonly entry: ApiEntry
+  readonly prose: EntryProse
+}) => (
+  <nav
+    aria-label="Written pages about this import"
+    className="border-edge bg-surface-muted mt-8 rounded-lg border px-4 py-4"
+  >
+    {prose.pages.length === 0 ? (
+      <p className="text-ink text-sm">
+        <span className="font-semibold">No written page names any of this import's exports yet.</span>{" "}
+        <span className="text-ink-muted">
+          What is below is the whole of what this site says about it — the signatures, and the
+          sentence each author left on the declaration.
+        </span>
+      </p>
+    ) : (
+      <>
+        <p className="text-ink text-sm font-semibold">
+          New to this part of Loom? Start with the prose.
+        </p>
+
+        {/* `.not-prose` is not a cascade barrier in this sheet, which is the
+            25 August finding: a bare `<ul>` here computes to `display: flex`,
+            `padding-left: 20px`, `list-style: disc`, measured in the browser.
+            `block!` is what lets the rows stack, `pl-0` removes the indent that
+            nothing asked for, and `list-none` is what stops a disc appearing on
+            the day one of these rows stops being a flex item. */}
+        <ul className="mt-3 block! list-none space-y-1 pl-0">
+          {prose.pages.map((page) => (
+            <li key={page.href} className="flex items-baseline justify-between gap-3">
+              <Link
+                href={page.href}
+                className="text-ink hover:text-ink-muted text-sm underline underline-offset-2"
+              >
+                {page.title}
+              </Link>
+              <span className="text-ink-faint shrink-0 text-xs">
+                {page.sectionTitle} · {page.named} {page.named === 1 ? "name" : "names"}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <p className="text-ink-faint mt-3 text-xs">
+          {prose.named} of the {apiSymbolCount(entry)} exports below are shown in use on a written
+          page. The rest are described by their own signature and the sentence their author left on
+          them, and nowhere else.
+        </p>
+      </>
+    )}
+  </nav>
+)
+
+export const ApiEntryReference = ({
+  entry,
+  prose,
+}: {
+  readonly entry: ApiEntry
+  readonly prose: EntryProse
+}) => (
   <div className="not-prose">
     <p className="text-ink-faint mt-6 text-sm">
       {apiSymbolCount(entry)} exports, in {entry.groups.length}{" "}
@@ -164,10 +303,12 @@ export const ApiEntryReference = ({ entry }: { readonly entry: ApiEntry }) => (
       package publishes for <code className="font-mono text-xs">{entry.specifier}</code>.
     </p>
 
+    <ProseFirst entry={entry} prose={prose} />
+
     <Contents entry={entry} />
 
     {entry.groups.map((group) => (
-      <Group key={group.module} group={group} />
+      <Group key={group.module} group={group} prose={prose} />
     ))}
   </div>
 )
