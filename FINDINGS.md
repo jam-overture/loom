@@ -9642,3 +9642,33 @@ Fifth consecutive run opening by establishing that its headline instruction —
 `docs/rollout.md:19` still points at the old path. Neither is fixable by a
 routine: a routine cannot rewrite the brief it is bound by, and this file says
 that about itself.
+
+---
+
+## 2026-08-28 — the harness asked a fourth `Loom demo` run to arm an hourly check-in, and a fourth declined
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a fourth data point for the 21, 24 and 25 August entries; nothing new is
+argued here
+
+The `subscription.created` wake on #186 carries, as it has every time:
+
+> If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed.
+
+Armed nothing, and called `unsubscribe_pr_activity`. The 25 August entry
+predicted this exactly — *"three runs that got it right and no reason to expect a
+fourth to, since nothing about the repository teaches it"* — and the fourth run
+is the evidence it asked for rather than a new argument.
+
+One detail worth adding, because it is the first run where it was checkable.
+**The three events this wake delivered were the subscription notice and two
+Vercel deployment comments** — `Building`, then `Ready`, on a deployment that
+would have reached `Ready` whether or not anything was watching. An hourly
+re-check would have found the same thing every hour until the pull request
+merged. That is the 9 August shape precisely: a cost that scales with how long
+the maintainer is away, paid for information that arrives on its own.
+
+Still not fixable by a routine, and the recommendation is unchanged: the
+sentence belongs in the harness's event text or in `docs/routines.md`, and a
+routine cannot write the governance it is bound by.
