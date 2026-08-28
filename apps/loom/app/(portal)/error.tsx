@@ -32,7 +32,7 @@ const ErrorBoundary = ({
   readonly reset: () => void
 }) => (
   <div className="flex max-w-2xl flex-col gap-4 p-8">
-    <h1 className="text-2xl tracking-tight">something here failed</h1>
+    <h1 className="text-2xl tracking-tight">Something here failed</h1>
 
     <StateNotice
       tone="failure"
@@ -43,14 +43,21 @@ const ErrorBoundary = ({
           onClick={reset}
           className="border-neutral-edge bg-neutral text-neutral-ink hover:bg-surface-active cursor-pointer rounded-md border px-3 py-1.5"
         >
-          try again
+          Try again
         </button>
       }
     >
+      {/*
+       * The citation this sentence used to carry — 0017, the record that says
+       * every write goes through one server-side path — was printed at a reader
+       * on the one screen somebody reaches while something is already going
+       * wrong. The fact it supported is the reassurance, so the fact stays and
+       * the number is here.
+       */}
       <p>
-        Nothing was written. Every write in this portal goes through one server-side path
-        (0017) and a request that failed on the way in never reached it, so whatever you were
-        looking at is in the state you left it.
+        Nothing was written. Every change in this portal is made in one place on the server, and
+        a request that failed on the way in never got that far — so whatever you were looking at
+        is in the state you left it.
       </p>
       {error.digest !== undefined && (
         <p>

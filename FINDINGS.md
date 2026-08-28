@@ -9503,3 +9503,175 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-28 — the rename queue missed a screen for the second time, and it was never going to be the last
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-15-who-has-been-trying-to-get-in` — the queue is a check now
+
+On 25 August this lane wrote that the rename queue was empty. On 27 August
+`/portal/primitives` turned out to still be on it, and the note filed with that
+run named the real defect rather than the screen:
+
+> A rename queue kept as a list of screens is a list somebody has to remember to
+> add to.
+
+**`/portal/sign-ins` is the second screen the list forgot**, and it had been in
+the runtime's voice since day 32 — through six consecutive runs that each
+declared the queue shorter. Nobody added it because the queue counted screens
+that print the runtime's *states*, and this one prints the portal's own
+machinery: a `throttle`, a `survey`, a keyed `digest`. It is the same class of
+miss as `/portal/primitives`, which printed the registry's *vocabulary* rather
+than its states, and the two together are the argument that the class is
+open-ended. There will be a third.
+
+What was on it, all of which is now one click down rather than gone:
+
+- `<h1>sign-ins</h1>` — lower-case, naming its own route. That is the tell every
+  screen on the queue shared: `trees`, `calibration`, `primitives`, `sign-ins`.
+- A lead sentence opening *"Failed sign-ins the throttle is still holding against
+  somebody"* — a sentence about a mechanism, addressed to a reader who has to
+  already know the mechanism.
+- **`(0034)`, a decision-record number printed at a reader**, and the privacy
+  claim made in terms of a keyed digest of an address (0039). The 25 August run
+  called the one citation it found on the history chooser "the clearest single
+  instance of the brief's principle I have found in my own lane". It was not the
+  only one. `error.tsx` carried `(0017)` as well, on the screen somebody reaches
+  when something has *already* gone wrong and the records are the last thing
+  they are in a position to read.
+- The store's own error string in monospace, at the same altitude as the
+  sentence explaining it.
+- Six numbers labelled `callers counted`, `failures held`, `locked now`,
+  `longest wait`, `most recent`, `oldest held` — the same "five monospace pairs"
+  shape the history row was fixed for on 25 August, in a screen that had never
+  been looked at for it.
+
+**The queue is now `plain-language.test.ts`**, which parses every `.tsx` in the
+route group and refuses a reserved word, a decision-record citation, or a
+lower-case `<h1>` anywhere a reader meets it unasked. It covers a route added
+tomorrow without anybody deciding that it should, which is the property a list
+does not have.
+
+---
+
+## 2026-08-28 — a jargon sweep written as a regular expression is wrong seven times out of eight
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-15-who-has-been-trying-to-get-in` — recorded because the failure mode is
+general
+
+The first draft of the sweep matched JSX text as "the characters between a `>`
+and the next `<`". It reported eight leaks. **Seven were code**: `disposition`
+destructured from a proposal, `cursor` passed back through a URL,
+`@loom/runtime/telemetry` in an import line.
+
+The cause is one character. `=>` ends in a `>`, so every arrow function in the
+route group looked to the check like the start of a text node, and everything
+following it until the next tag was read as prose.
+
+That is not a bug to fix by adding exceptions. A check that cries wolf seven
+times out of eight does not get obeyed, it gets deleted — and the run that
+deletes it will be right to, because at that ratio it is costing more attention
+than it saves. The rewrite asks the TypeScript compiler which characters are JSX
+text and which are program. Zero false positives across 42 files, and the five
+real findings above are what was left.
+
+**The general form, for any lane tempted by the same shortcut:** a check on
+source that a reader will act on has to parse. `typescript` is already a
+dev dependency of both packages, `ts.createSourceFile` needs no program, no
+config and no type information, and the whole sweep runs in 350ms.
+
+---
+
+## 2026-08-28 — every "this is on the surface" test in this lane was weaker than it looked, and now there is one that is not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-15-who-has-been-trying-to-get-in` — the 26 August observation, turned
+into a function
+
+#169 recorded the observation and could not act on it beyond one component:
+
+> A closed `<details>` is still in the DOM, deliberately, so `body.textContent`
+> can't tell "unasked" from "one click down".
+
+`surfaceText` in `_lib/plain-language.ts` is that, generalised: it walks the
+rendered tree, takes a shut `<details>`'s `<summary>` and stops, skips `hidden`
+and `aria-hidden`, and **keeps `sr-only`** — because the readers who reach text
+that way are the ones for whom a plain-language failure has no visual context to
+fall back on.
+
+It matters more than a tidying, because it is what makes the rule falsifiable in
+both directions at once. A screen can now be asserted plain on the surface *and*
+complete underneath in the same test, which is the only way to stop a
+plain-language pass from being satisfiable by deletion — the failure mode the
+brief warns about in as many words.
+
+One honest limitation, stated where the next run will find it: `surfaceText`
+inserts a space at every element boundary, because the DOM does not and two
+adjacent paragraphs come back as `waiting.Technical`. That makes it possible to
+hide a leak by splitting a word across two elements. The error is in the safe
+direction — it can miss, never invent — and the alternative flags every screen
+whose two paragraphs happen to abut.
+
+---
+
+## 2026-08-28 — the answer to "what do I do now" was on this screen the whole time, in a comment
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-15-who-has-been-trying-to-get-in` — recorded because it is a shape, not
+an incident
+
+`/portal/sign-ins` reports that people are locked out and has no button. That is
+correct and it is not obvious, and the reason it is correct was written down —
+above the page component, addressed to whoever edited the file next:
+
+> There is nothing here to act on and nothing to click, deliberately. Unlocking a
+> caller would mean a way to clear a count from a browser, which is a way to
+> defeat the throttle from a browser.
+
+An operator looking at *"2 of 3 callers are locked out right now"* with nothing
+under it reads a page that forgot to have a button, and spends their next ten
+minutes looking for one. The paragraph that would have saved them was four lines
+above the code, in the one place they will never see.
+
+**The shape worth naming: the best sentence on a screen is often already in the
+file, in a comment.** A design decision that has to be explained to the next
+programmer usually has to be explained to the reader too, and the second
+explanation is the one nobody writes. It is worth a pass on any screen whose
+comments are better than its copy — this lane's are, everywhere, by construction.
+
+---
+
+## 2026-08-28 — a check added on one branch can be violated by another, and this one nearly was
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+mechanical hazard of the branching rule, with a data point in its favour
+
+`plain-language.test.ts` is a repository-wide invariant added on a branch cut
+from `main`. #177 is open, unmerged, and rewrites two of the five files the
+sweep flagged. Two failure modes follow from the lane's own rules — never stack,
+never merge to `main` yourself — and neither is anybody's mistake:
+
+- **The check lands and the other branch violates it.** Both merge green
+  individually and `main` goes red, because neither branch ever ran the other's
+  tests against its own files. This is the same class as the record-count
+  collision that has now turned another lane's run red six times.
+- **The check lands and the other branch is fixed for it twice.** Which is what
+  happened here in miniature: `/portal/primitives/page.tsx` needed a heading, and
+  #177 deletes that file, so the edit exists only to be discarded.
+
+**This run checked rather than assumed**, and the answer is worth having: #177's
+`/portal/pieces` was fetched into a scratch worktree, the sweep was run against
+its head, and it **passes clean** — no reserved word, no citation, a
+sentence-case heading. So the two are compatible in either merge order, and the
+only cost is one delete/modify conflict on a file whose resolution is "take
+#177".
+
+**Recommendation:** none for the maintainer, and one for this lane, followed
+here — *when you add a repository-wide check, run it against every open branch
+before opening the pull request.* It cost one `git worktree add` and it turned an
+unknown into a sentence in the pull request body. It is the cheap half of the
+problem; the expensive half is that nothing does this automatically, and a check
+added by one lane is a promise the other three have not read.

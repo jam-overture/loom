@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
+import { citationsIn, surfaceText, unplainWordsIn } from "./_lib/plain-language"
+
 import ErrorBoundary from "./error"
 
 const reset = () => {}
@@ -44,7 +46,7 @@ describe("the error boundary", () => {
     const onReset = vi.fn()
 
     render(<ErrorBoundary error={new Error("boom")} reset={onReset} />)
-    screen.getByRole("button", { name: "try again" }).click()
+    screen.getByRole("button", { name: "Try again" }).click()
 
     expect(onReset).toHaveBeenCalledTimes(1)
   })
@@ -54,5 +56,21 @@ describe("the error boundary", () => {
 
     expect(document.body.textContent).toContain("Nothing was written")
     expect(screen.getByRole("status")).toBeInstanceOf(HTMLElement)
+  })
+
+  /**
+   * This screen cited 0017 at a reader — the record saying every write goes
+   * through one server-side path — on the one surface somebody reaches while
+   * something has already gone wrong, and the record is the last thing they are
+   * in a position to go and read. The reassurance the citation supported is
+   * still the first sentence; the number is in a comment.
+   */
+  it("reassures without citing a document the reader has not read", () => {
+    const { container } = render(<ErrorBoundary error={new Error("boom")} reset={reset} />)
+    const surface = surfaceText(container)
+
+    expect(surface).toContain("Nothing was written")
+    expect(citationsIn(surface)).toEqual([])
+    expect(unplainWordsIn(surface)).toEqual([])
   })
 })

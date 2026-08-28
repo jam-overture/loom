@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import type { AuthResult } from "./auth/config"
 import type { SignInPressure } from "./auth/pressure"
 import { DEFAULT_THROTTLE_POLICY } from "./auth/throttle"
+import { unplainWordsIn } from "./plain-language"
 import {
   authReadout,
   describeLocked,
@@ -128,10 +129,64 @@ describe("describePolicy", () => {
   it("states the numbers a reader would otherwise have to find in the source", () => {
     const described = describePolicy(DEFAULT_THROTTLE_POLICY)
 
-    expect(described).toContain("5 failures")
+    expect(described).toContain("5 failed sign-ins")
     expect(described).toContain("60 minutes")
     expect(described).toContain("1 minute")
     expect(described).toContain("15 minutes")
+  })
+
+  /**
+   * The rewording is only worth anything if it did not quietly become a
+   * different claim. Every number is asserted above; this pins the two verbs
+   * that changed, so a future edit cannot drift the sentence back into
+   * describing a mechanism.
+   */
+  it("says what a person does rather than what the counter counts", () => {
+    const described = describePolicy(DEFAULT_THROTTLE_POLICY)
+
+    expect(described).toContain("Getting the key right clears the count.")
+    expect(unplainWordsIn(described)).toEqual([])
+  })
+})
+
+/**
+ * The question every screen is meant to answer, on the screen that had never
+ * answered it. The answer was in a source comment for a month: there is nothing
+ * to press, and there is a reason.
+ */
+describe("what to do about it", () => {
+  it("tells a reader with a lockout why there is no button, rather than leaving them to hunt", () => {
+    const reading = describePressure(pressure({ subjects: 3, failures: 17, locked: 2, counted: 3 }), NOW)
+
+    expect(reading.next).toContain("deliberately nothing to press")
+    expect(reading.next).toContain("in front of this app")
+  })
+
+  it("gives the two quiet states an answer as well, because 'nothing' still has to be said", () => {
+    expect(describePressure(pressure(), NOW).next).toContain("Nothing to do.")
+    expect(
+      describePressure(pressure({ subjects: 1, failures: 1, counted: 1 }), NOW).next
+    ).toContain("Nothing to do.")
+  })
+
+  /**
+   * Every state, swept — so a fourth tone added later cannot ship without an
+   * answer to the question, which is exactly how `/portal/sign-ins` came to
+   * have no answer at all.
+   */
+  it("answers the question in a person's words in every state", () => {
+    const readings = [
+      describePressure(pressure(), NOW),
+      describePressure(pressure({ subjects: 2, failures: 3, counted: 2 }), NOW),
+      describePressure(pressure({ subjects: 3, failures: 17, locked: 2, counted: 3 }), NOW),
+    ]
+
+    for (const reading of readings) {
+      expect(reading.next.length).toBeGreaterThan(0)
+      expect(unplainWordsIn(reading.next)).toEqual([])
+      expect(unplainWordsIn(reading.headline)).toEqual([])
+      expect(unplainWordsIn(reading.detail)).toEqual([])
+    }
   })
 })
 

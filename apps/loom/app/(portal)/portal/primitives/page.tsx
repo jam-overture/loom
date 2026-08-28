@@ -21,7 +21,15 @@ const PrimitivesPage = async () => {
   return (
     <div className="flex max-w-3xl flex-col gap-4 p-8">
       <div>
-        <h1 className="text-2xl tracking-tight">primitives</h1>
+        {/*
+         * The heading was `primitives`, lower-case, naming its own route — and
+         * the sweep in `plain-language.test.ts` refuses both the case and the
+         * word. This is the smallest edit that satisfies it, and it is
+         * deliberately the same sentence the open rename of this screen leads
+         * with, so that when that lands and deletes this file the two do not
+         * have to be reconciled. Everything else here is left alone.
+         */}
+        <h1 className="text-2xl tracking-tight">What Loom can put on your page</h1>
         <p className="text-ink-muted mt-1 text-sm">
           {catalogue.length} registered. This is exactly what a model is told it may build.
         </p>

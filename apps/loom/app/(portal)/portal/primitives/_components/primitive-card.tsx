@@ -19,7 +19,9 @@ export const PrimitiveCard = ({ primitive }: { readonly primitive: CataloguedPri
     <p className="text-ink-secondary mt-1 text-sm">{primitive.description}</p>
 
     {primitive.props === undefined ? (
-      <p className="text-ink-muted mt-2 text-xs">Props cannot be enumerated from this schema.</p>
+      <p className="text-ink-muted mt-2 text-xs">
+        Loom can&rsquo;t list what this one can be given.
+      </p>
     ) : primitive.props.length === 0 ? (
       <p className="text-ink-muted mt-2 text-xs">No props.</p>
     ) : (

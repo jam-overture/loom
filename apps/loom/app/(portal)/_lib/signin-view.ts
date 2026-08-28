@@ -24,6 +24,19 @@ export type PressureReading = {
   readonly tone: PressureTone
   readonly headline: string
   readonly detail: string
+  /**
+   * What the reader should do about it, which is the question every screen is
+   * supposed to answer and the one this screen had never answered out loud.
+   *
+   * The answer existed. It was in a comment above the page component — *"There
+   * is nothing here to act on and nothing to click, deliberately. Unlocking a
+   * caller would mean a way to clear a count from a browser, which is a way to
+   * defeat the throttle from a browser"* — addressed to the next programmer
+   * rather than to the operator staring at a number that says three people are
+   * locked out. A reader who does not know that will spend their next ten
+   * minutes looking for the button.
+   */
+  readonly next: string
 }
 
 /**
@@ -96,8 +109,8 @@ const headlineFor = (pressure: SignInPressure, tone: PressureTone): string => {
 const detailFor = (pressure: SignInPressure, tone: PressureTone, now: number): string => {
   if (tone === "quiet") {
     return (
-      "Every failure the throttle remembers has been forgiven or has aged out, so the next " +
-      "attempt from anywhere starts from zero."
+      "Every failed sign-in Loom was still counting has either been forgiven or has aged out, " +
+      "so the next attempt from anywhere starts from zero."
     )
   }
 
@@ -116,13 +129,36 @@ const detailFor = (pressure: SignInPressure, tone: PressureTone, now: number): s
   }
 
   return (
-    `The throttle is doing its job: ${pressure.failures} failed ` +
+    `Loom is doing exactly what it is meant to: ${pressure.failures} failed ` +
     `${pressure.failures === 1 ? "attempt" : "attempts"} across ` +
     `${subjectCount(pressure.subjects)}, and the longest wait still owed is ` +
     `${describeWait(pressure.longestWaitMs)}.${since} ` +
     "A caller who changes address gets a fresh count, so this is a floor on what is being " +
     "tried rather than a measure of it."
   )
+}
+
+/**
+ * The three answers to "what do I do now?", which are two kinds of nothing and
+ * one kind of nothing that has to be explained.
+ *
+ * The last one is the whole reason this belongs on the screen. A page reporting
+ * that somebody is locked out, with no button anywhere, reads as a page that
+ * forgot to have one. It did not: a control that cleared a count from a browser
+ * would be a way to clear a count from a browser, which is the same thing the
+ * caller doing the guessing wants. Saying so turns a missing feature into a
+ * decision the reader can agree with.
+ */
+const NEXT_STEPS: Readonly<Record<PressureTone, string>> = {
+  quiet: "Nothing to do. This is the page you want to be boring.",
+  counting:
+    "Nothing to do. A count on its own is usually somebody mistyping their own key, and it " +
+    "clears itself once they get it right or once enough time passes.",
+  locking:
+    "If the person locked out is you, wait it out — getting the key right clears the count. " +
+    "If it is not, there is deliberately nothing to press here: anything that could let a " +
+    "caller back in from a browser would let whoever is guessing do the same. Turning them " +
+    "away for good belongs in whatever sits in front of this app.",
 }
 
 export const describePressure = (pressure: SignInPressure, now: number): PressureReading => {
@@ -132,18 +168,26 @@ export const describePressure = (pressure: SignInPressure, now: number): Pressur
     tone,
     headline: headlineFor(pressure, tone),
     detail: detailFor(pressure, tone, now),
+    next: NEXT_STEPS[tone],
   }
 }
 
 /**
- * The policy in force, spelled out. A page that said "3 locked out" without
- * saying what locks anyone would leave an operator to read the source to know
- * whether that is alarming.
+ * The rule in force, spelled out. A page that said "3 locked out" without
+ * saying what locks anyone would leave an operator to read the source to find
+ * out whether that is alarming.
+ *
+ * It read `5 failures within 60 minutes locks a caller out for 1 minute,
+ * doubling with each further failure up to 15 minutes. A correct key clears the
+ * count.` Every number is unchanged; what moved is that the sentence now names
+ * the thing a person typed (a sign-in) rather than the thing the code counts
+ * (a failure), and says "getting the key right" where it said "a correct key",
+ * because one of those is something you do and the other is a state of affairs.
  */
 export const describePolicy = (policy: ThrottlePolicy): string =>
-  `${policy.threshold} failures within ${describeWait(policy.windowMs)} locks a caller out for ` +
-  `${describeWait(policy.lockoutMs)}, doubling with each further failure up to ` +
-  `${describeWait(policy.maxLockoutMs)}. A correct key clears the count.`
+  `${policy.threshold} failed sign-ins within ${describeWait(policy.windowMs)} lock somebody ` +
+  `out for ${describeWait(policy.lockoutMs)}. Each further failure doubles the wait, up to ` +
+  `${describeWait(policy.maxLockoutMs)}. Getting the key right clears the count.`
 
 /**
  * The sign-in page in two altitudes: what a visitor reads, and what an operator
