@@ -9503,3 +9503,146 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-28 — a primitive cannot paint an ink the theme's list carries only as composed, and the promotion is one word in a file this lane may not touch
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (owns
+`src/theme/`) · **Status:** open — worked around, and the workaround was free
+this time
+
+`loom.event` paints its own `bg-surface` card and set its date in
+`accent-strong`. `pnpm verify` went **red**, and correctly:
+`pairings.test.ts`'s *never declares a painted pairing as the softer composed*
+caught it. `PALETTE_TEXT_PAIRINGS` carries `accent-strong on bg-surface` as
+**composed** — "loom.field inside a card" — and painting it would have demoted a
+row the audit *asserts* to a row it merely *reports*, without deleting anything.
+That is exactly the edit that test exists to catch, and it did its job.
+
+**The friction is that the repair is not available to this lane.** The honest
+fix is one word — `composed` → `painted` on that row — in `src/theme/contrast.ts`,
+which the primitives brief puts out of bounds. So a primitive's choice of ink is
+constrained not by the palette but by which tier somebody wrote down first, and
+the constraint is invisible until a test fails.
+
+**Measured before working around it, so the answer is on the record.** Across
+all 21 registered palettes the worst `accent-strong on bg-surface` is **4.83:1**
+and the worst `accent on bg-surface` is **4.75:1** — both clear 0074's 4.5.
+**The promotion would be safe today.** `loom.event` uses `accent`, which was
+already declared painted, and the card lost nothing; that is luck rather than
+design, and the next primitive that wants `fg-subtle` or `accent-strong` on a
+surface it paints may not have a declared neighbour to fall back to.
+
+Two things would each end this, and they are for the owning lane to choose:
+
+1. **Promote the row.** One word, safe by the numbers above, and it makes the
+   audit strictly stronger — a pairing the library paints is asserted rather
+   than reported.
+2. **Derive the basis instead of declaring it.** `registryPairings` already
+   computes which pairings are painted by walking the components. The declared
+   `basis` is a second copy of a fact the prober knows, which is the shape of
+   the `FACTS.primitives` problem filed eight days running: a hand-maintained
+   number beside a derivable one. Deriving `basis` and keeping the list for
+   `where` alone would delete this class of failure permanently.
+
+Recorded rather than fixed. A lane that reaches across the boundary to make its
+own test pass is the failure mode the boundaries exist to prevent.
+
+---
+
+## 2026-08-28 — `FACTS.decisions` was one behind `main` before this run, and this is the eighth consecutive day it has been edited by hand
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — eighth data point, and the first where the number was *already wrong on
+`main`* rather than only wrong on a branch
+
+`apps/loom/app/(marketing)/_lib/copy.ts` said `decisions: "94"`. `main` carries
+**95** records, because #165 added `0095` without bumping the count and #164 had
+bumped it to 94 for its own record. So `main`'s own `pnpm verify` fails
+`facts.test.ts` — not this branch's doing, and this branch is where it surfaced.
+
+That is worth stating precisely because it changes the argument. For seven days
+this has been filed as *tedium*: every lane bumps two numbers by hand and one of
+them is always this one. It is now a **correctness** problem — the marketing
+page has been claiming a number that was one short, the test that exists to keep
+it honest has been red on the default branch, and nobody noticed because the
+lane that broke it was not the lane that runs `pnpm verify` last.
+
+This run set both: `primitives` 68 → **72**, `decisions` 94 → **96** (the 95 on
+`main` plus this run's `0096`).
+
+The recommendation has not changed since 21 August and is now overdue rather
+than nice-to-have: **derive `FACTS.primitives` from `STARTER_PRIMITIVES.length`
+and `FACTS.decisions` from a directory listing.** `facts.test.ts` already does
+both computations — it reads `catalogueOf(siteRegistry).length` and
+`readdirSync(decisions)` — so the derivation is written, tested, and sitting in
+the test file rather than in the source it is testing. Moving those two
+expressions from the assertion into `copy.ts` ends eight days of this and closes
+a hole that has already let `main` go red.
+
+Not this lane's file. Filed, with the observation that the cost has stopped
+being hypothetical.
+
+---
+
+## 2026-08-28 — the phone screenshot found a collision no assertion could have, and it set two constants
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-16-press-play-and-turn-up` — recorded because it is the
+fifth consecutive run in this lane to say the same thing
+
+`loom.episode` shipped its first render with an artwork floor of `4.5rem` for a
+square cover and `7rem` for a 16:9 still. Both are perfectly reasonable numbers
+and both are wrong, and the reason is geometry that only exists once the page is
+drawn: the frame holds two overlays — a centred play glyph and a corner duration
+chip — and the frame's *height* is its width times its aspect ratio. On a 390px
+screen a 7rem still is 65px tall, and `41:07` sat across the play button.
+
+Nothing in the markup is wrong. Every value is a token, every pairing is
+declared, the row reflows correctly, no test could see it, and it would have
+shipped. The floors are now `5.5rem` and `9rem` — **the widths at which the two
+overlays clear each other**, which is a defensible way to pick a `clamp()`'s
+outer terms and the only one this run could defend.
+
+A second defect from the same source, and it is the more embarrassing one: a row
+with no artwork among rows that had some started its title at the page's left
+edge while its neighbours started theirs a hundred and forty pixels in. The
+repair is that the frame follows *either* a picture or a destination. And inside
+that repair was a third: the duration chip is drawn on `bg-canvas` so it
+survives an unknown photograph, and off the photograph a `bg-canvas` chip on a
+`bg-canvas` page is **invisible** — `tokens.ts`'s adjacency warning, made again,
+five days after the last run made it twice in one afternoon.
+
+Five runs, five sets of screenshots, and every one of them has found something
+no assertion did. That is now a strong enough pattern to be worth saying as a
+rule rather than as an observation: **in this library, a primitive is not
+reviewed until it has been photographed at a phone width.** Whether that belongs
+in `docs/routines.md` is the maintainer's call; a routine cannot write the
+governance it is bound by.
+
+---
+
+## 2026-08-28 — 21st.dev is still blocked, eleventh consecutive run
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an eleventh data point on an entry that has not changed
+
+`WebFetch("https://21st.dev")` was not attempted this run, and that is itself
+the finding. Ten consecutive runs across six lanes have each spent a call
+discovering that `docs/routines.md` lists the domain under `permissions.allow`
+and that the fetch returns `EGRESS_BLOCKED`. The eleventh did not spend the
+call, because the entry directly above in this file already answers what it
+would have found.
+
+Saying so rather than quietly skipping it, so nobody reads this run's report and
+assumes the visual standard was consulted. Calibration was against `loom.hero`,
+`loom.feature-grid`, `loom.article` and `loom.offering` — the floor the brief
+names — and against five screenshots, which found three defects.
+
+The recommendation is unchanged and the choice is binary: fix the allowlist, or
+drop the line from the briefs. There is a real cost to dropping it, named by the
+last run and worth repeating — a routine with no external reference calibrates
+against the library's own floor, which is how a library drifts into being
+internally consistent and externally dated. But eleven runs of finding out is
+not calibration either.

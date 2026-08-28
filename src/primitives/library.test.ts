@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(68)
+  it("registers as seventy-two primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(72)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -190,6 +190,10 @@ describe("the starter library", () => {
       "loom.avatar-row",
       "loom.article-grid",
       "loom.article",
+      "loom.episode-list",
+      "loom.episode",
+      "loom.event-list",
+      "loom.event",
       "loom.logo-cloud",
       "loom.logo",
       "loom.credential-grid",
@@ -350,6 +354,13 @@ describe("the starter library", () => {
       "loom.quote",
       "loom.person",
       "loom.article",
+      /**
+       * Both of this run's cards, and both by 0094 read the same way as
+       * `loom.credential`: neither content model has a repeated part, so
+       * neither has a children flow, so each holds its one sentence in a prop.
+       */
+      "loom.episode",
+      "loom.event",
       "loom.logo",
       /**
        * A credential is a leaf and an offering is not, which is 0094 read from
@@ -824,6 +835,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(tablePage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
+      ...typesIn(programmePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -4874,5 +4886,402 @@ describe("what you can book, and why you should be believed", () => {
      */
     expect(stylesheet).toContain(".loom-offering-action {\n  display: grid;\n  margin-block-start: auto;\n}")
     expect(render(bookablePage(EDITORIAL)).markup).toContain("align-items:stretch")
+  })
+})
+
+const programmePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const chip = (label: string, tone?: string) =>
+    buildElement(idFactory, {
+      type: "loom.badge",
+      props: tone === undefined ? {} : { tone },
+      children: [text(label)],
+    })
+
+  const control = (label: string, href: string, variant = "primary") =>
+    buildElement(idFactory, {
+      type: "loom.action",
+      props: { href, variant },
+      children: [text(label)],
+    })
+
+  /** Hermes' `podcast-episodes`: square art, a number, a date, a running time. */
+  const listen = buildElement(idFactory, {
+    type: "loom.episode-list",
+    props: { separators: "rule" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.episode",
+        props: {
+          title: "The Gate is not a linter",
+          summary: "Why a proposal is measured on two axes before anybody sees it, and what happens to the ones that fail.",
+          artwork: "https://example.com/episodes/41.png",
+          duration: "48 min",
+          href: "https://example.com/listen/41",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Episode 41", "accent"), chip("5 March 2026", "neutral")])],
+      }),
+      buildElement(idFactory, {
+        type: "loom.episode",
+        props: {
+          title: "A delta is a sentence you can take back",
+          summary: "Inversion, attribution, and the day we stopped shipping code generation.",
+          artwork: "https://example.com/episodes/40.png",
+          duration: "36 min",
+          href: "https://example.com/listen/40",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Episode 40", "accent"), chip("19 February 2026", "neutral")])],
+      }),
+      /** No artwork but somewhere to go: the frame is drawn anyway, so the list keeps one leading edge. */
+      buildElement(idFactory, {
+        type: "loom.episode",
+        props: {
+          title: "Bonus: reading the audit out loud",
+          duration: "12 min",
+          href: "https://example.com/listen/bonus",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Bonus", "outline")])],
+      }),
+      /** Neither a picture nor anywhere to go: no frame, and the running time falls into the strip. */
+      buildElement(idFactory, {
+        type: "loom.episode",
+        props: {
+          title: "Trailer: what this show is",
+          duration: "2 min",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Trailer", "neutral")])],
+      }),
+    ],
+  })
+
+  /** Hermes' `video-playlist` and `video`: the same primitive, given a wider frame. */
+  const watch = buildElement(idFactory, {
+    type: "loom.episode-list",
+    props: { density: "loose", separators: "none" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.episode",
+        props: {
+          title: "Building a page nobody wrote",
+          summary: "Forty minutes from an empty tree to a marketing site, with every operation shown.",
+          artwork: "https://example.com/videos/keynote.jpg",
+          aspect: "wide",
+          duration: "41:07",
+          href: "https://example.com/watch/keynote",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Conference talk")])],
+      }),
+      buildElement(idFactory, {
+        type: "loom.episode",
+        props: {
+          title: "The projection a model actually sees",
+          artwork: "https://example.com/videos/projection.jpg",
+          aspect: "wide",
+          duration: "8:02",
+          href: "https://example.com/watch/projection",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Screencast")])],
+      }),
+    ],
+  })
+
+  /** Hermes' `events`. */
+  const upcoming = buildElement(idFactory, {
+    type: "loom.event-list",
+    props: { gap: "snug" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.event",
+        props: {
+          date: "12 March 2026",
+          name: "The Gate, in public",
+          location: "Kraftwerk, Berlin",
+          summary: "An afternoon running real proposals against a real tree, with the refusals left in.",
+          href: "https://example.com/events/berlin",
+        },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Workshop"), chip("Free", "outline")]),
+          buildSlot(idFactory, "action", [control("Get tickets", "https://example.com/events/berlin/tickets")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.event",
+        props: {
+          date: "Q2 2026",
+          name: "Loom, and the interfaces nobody wrote",
+          location: "Moscone West, San Francisco",
+        },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Talk", "neutral")]),
+          buildSlot(idFactory, "action", [control("Add to calendar", "https://example.com/events/config", "secondary")]),
+        ],
+      }),
+      /** No control and no venue: a date, a name and a sentence still read. */
+      buildElement(idFactory, {
+        type: "loom.event",
+        props: {
+          date: "4–6 May 2026",
+          name: "Three days of AI-authored interfaces",
+          summary: "A residency for the six teams building on this, wherever they are by then.",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Retreat"), chip("12 places", "outline")])],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Listen" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1 },
+                children: [text("What you press play on, and what you turn up for")],
+              }),
+            ]),
+            listen,
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Watch" },
+          children: [watch],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Coming up" },
+          children: [upcoming],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("what you press play on, and what you turn up for", () => {
+  it("renders both pairs, with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(programmePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("The Gate is not a linter")
+    expect(markup).toContain("Building a page nobody wrote")
+    expect(markup).toContain("The Gate, in public")
+    expect(markup).toContain("Kraftwerk, Berlin")
+    expect([...markup.matchAll(/class="loom-episode"/g)]).toHaveLength(6)
+    expect([...markup.matchAll(/class="loom-event /g)]).toHaveLength(3)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(programmePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(programmePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(programmePage(BOLD)).diagnostics).toEqual([])
+    expect(render(programmePage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("turns an open set of qualifiers into badges and keeps the closed set as props", () => {
+    /**
+     * 0052's opening clause, applied by the test the granularity doc sharpens
+     * rather than by counting occurrences. There is exactly one artist and
+     * exactly one date on a record — but the *set* of qualifiers is open, and a
+     * fifth Hermes block would arrive with a sixth word for it. So the
+     * qualifiers are nodes and what is left on the props side is the fields no
+     * second one is imaginable for.
+     */
+    expect(propsOfType("loom.episode")).toEqual(["artwork", "aspect", "duration", "href", "summary", "title"])
+    expect(propsOfType("loom.event")).toEqual(["date", "href", "location", "name", "summary"])
+  })
+
+  it("holds both cards' prose as a prop, because neither has a flow to move it in", () => {
+    /**
+     * 0094 from the audit's side, which is the record's second and third
+     * application and its first outside the pair that forced it. Neither
+     * content model has a repeated part — no includes list, no chapter run — so
+     * neither card has a children flow, so a sentence held as a node could not
+     * be reordered against anything and 0059's multi-string leaf applies.
+     */
+    const leaves = auditRegistry(registry).leaves
+
+    expect(leaves).toContain("loom.episode")
+    expect(leaves).toContain("loom.event")
+    expect(propsOfType("loom.episode")).toContain("summary")
+    expect(propsOfType("loom.event")).toContain("summary")
+  })
+
+  it("stretches an episode's title over the whole row and nothing over an event's", () => {
+    /**
+     * 0066, and the two pairs in this run sit on opposite sides of it. An
+     * episode is consumed — playing is reading with your ears — so the whole
+     * row is the target. An event is acted on, so the control is the only
+     * target and no overlay is emitted, because a card clickable *under* its own
+     * ticket button is a defect no screenshot shows.
+     */
+    const { tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+    const events = tree.slice(tree.indexOf("loom-event"))
+
+    expect([...tree.matchAll(/loom-cover-link/g)]).toHaveLength(5)
+    expect(events).not.toContain("loom-cover-link")
+    expect(events).toContain("The Gate, in public")
+  })
+
+  it("gives the running time the artwork's corner, and the strip when there is no artwork", () => {
+    /**
+     * The prop this pair had to argue for. A duration is a short qualifier
+     * beside a name and by the paragraph above it should be a badge — it is a
+     * prop because it has a home in the markup no node could occupy, and the
+     * observable proof is that the primitive puts it in two different places
+     * depending on what else the card has.
+     */
+    const { tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+    const rowFrom = (title: string): string => {
+      const from = tree.slice(tree.lastIndexOf("<article", tree.indexOf(title)))
+
+      return from.slice(0, from.indexOf("</article>"))
+    }
+
+    const trailer = rowFrom("Trailer: what this show is")
+
+    expect([...tree.matchAll(/position:absolute;inset-block-end/g)]).toHaveLength(5)
+    /** The one row with neither a picture nor a destination carries it unpositioned, before the title. */
+    expect(trailer.indexOf("2 min")).toBeLessThan(trailer.indexOf("Trailer: what this show is"))
+    expect(trailer.slice(0, trailer.indexOf("2 min"))).not.toContain("inset-block-end")
+    expect(trailer).not.toContain("<img")
+    /** And it is a quiet label rather than a chip, because off the picture a bg-canvas chip is invisible. */
+    expect(trailer).not.toContain("background:var(--loom-bg-canvas)")
+  })
+
+  it("draws the frame for a playable row with no cover, so the list keeps one leading edge", () => {
+    /**
+     * The defect the screenshots found and eleven assertions did not. A row
+     * without artwork among rows that have some started its title at the page's
+     * left edge while its neighbours started theirs a hundred and forty pixels
+     * in, and a list with two leading edges reads as a mistake before anybody
+     * works out which row is the odd one.
+     *
+     * So the frame follows *either* a picture or a destination — tinted, with
+     * the glyph and nothing behind it, which is what every podcast client does
+     * with a missing cover. It disappears only when there is neither, because
+     * then there is genuinely nothing to draw.
+     */
+    const { tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+    const rowFrom = (title: string): string => {
+      const from = tree.slice(tree.lastIndexOf("<article", tree.indexOf(title)))
+
+      return from.slice(0, from.indexOf("</article>"))
+    }
+
+    const bonus = rowFrom("Bonus: reading the audit")
+
+    expect(bonus).not.toContain("<img")
+    expect(bonus).toContain("aspect-ratio:1 / 1")
+    expect(bonus).toContain("loom-episode-play")
+    /** And the row that has neither gets no frame at all — there is nothing to draw. */
+    expect(rowFrom("Trailer: what this show is")).not.toContain("aspect-ratio")
+  })
+
+  it("sizes the artwork with a clamp against the row rather than with a container query", () => {
+    const { stylesheet, tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+
+    /**
+     * The fourth primitive in the library to want a measurement of its own
+     * container, and the first that did not need `@container` for it: a
+     * `clamp()` whose middle term is a percentage resolves against the flex
+     * container, so the artwork is a continuous function of the row's width
+     * rather than two sizes either side of a threshold somebody picked.
+     *
+     * Asserted rather than argued because the failure it prevents is the one
+     * `loom.mosaic` has been carrying since 21 August — a band that measures
+     * the *screen* lays out as though it had the whole page when it is dropped
+     * into a `loom.split` column.
+     */
+    expect(tree).toContain("flex:0 0 clamp(5.5rem, 24%, 8rem)")
+    expect(tree).toContain("flex:0 0 clamp(9rem, 34%, 14rem)")
+    expect(stylesheet.slice(stylesheet.indexOf(".loom-episode"))).not.toContain("vw")
+    expect(stylesheet).not.toContain(".loom-episode-frame")
+  })
+
+  it("rules between rows without a row having to know it is first", () => {
+    const { stylesheet } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+
+    /**
+     * Where a row sits among its siblings is the browser's business — a render
+     * is a pure function of one node — so the flush ends and the hairlines are
+     * the stylesheet's, exactly as `loom.milestone-list`'s are.
+     *
+     * `:first-of-type` rather than `:first-child` is load-bearing: a primitive
+     * emits the library stylesheet as its own first child, and a renderer that
+     * does not hoist it leaves a `<style>` element precisely where
+     * `:first-child` looks.
+     */
+    expect(stylesheet).toContain(".loom-episode-list-ruled > article + article")
+    expect(stylesheet).toContain(".loom-episode-list > article:first-of-type")
+    expect(stylesheet).toContain(".loom-episode-list > article:last-of-type")
+    expect(stylesheet).not.toContain(".loom-episode-list > article:first-child")
+  })
+
+  it("sets no block padding inline that the list's rhythm would lose to", () => {
+    /**
+     * The trap `stylesheet.ts` names. An inline style beats a rule in that
+     * file, so the row's block padding — which `density` varies and the first
+     * and last rows drop — must not also be set on the element.
+     */
+    const { tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+    const row = tree.slice(tree.indexOf('class="loom-episode"'))
+    const opening = row.slice(0, row.indexOf(">"))
+
+    expect(opening).not.toContain("padding")
+    expect(tree).toContain('class="loom-episode-list loom-episode-list-ruled"')
+    expect(tree).toContain('class="loom-episode-list loom-episode-list-loose"')
+  })
+
+  it("keeps the play glyph decorative, so a row is one target and not two", () => {
+    const { tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+
+    /**
+     * The title anchor is the accessible name and the target. A play control
+     * announced beside it would be a second thing to tab to that goes to the
+     * same place, which is 0066's stretched-anchor technique undone by the
+     * affordance that makes the card read as a player.
+     */
+    expect([...tree.matchAll(/class="loom-episode-play"/g)]).toHaveLength(5)
+    expect(tree).toContain('class="loom-episode-play" aria-hidden="true"')
+    expect(tree).toContain('alt=""')
+    expect(tree).not.toContain("aria-label=\"Play\"")
+  })
+
+  it("stops the glyph and the card's edge moving when motion is turned down", () => {
+    const { stylesheet } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+    const reduced = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    /**
+     * 0055's bargain, held for the two things this run added that move: the
+     * glyph that grows under a pointer and the card edge that takes the accent.
+     * Reduced motion removes movement and never feedback — the border still
+     * changes colour, it just stops easing into it.
+     */
+    expect(reduced).toContain(".loom-episode-play")
+    expect(reduced).toContain(".loom-event")
+    expect(reduced).toContain(".loom-episode:hover .loom-episode-play")
+  })
+
+  it("pins an event's control to the trailing edge and lets it keep the edge when it wraps", () => {
+    const { tree } = splitStylesheet(render(programmePage(EDITORIAL)).markup)
+    const card = tree.slice(tree.indexOf("The Gate, in public"))
+
+    expect(card).toContain("margin-inline-start:auto")
+    /** The row wraps rather than overflowing, which is what keeps a 390px card readable. */
+    const opening = tree.slice(tree.indexOf('class="loom-event '))
+    expect(opening.slice(0, opening.indexOf(">"))).toContain("flex-wrap:wrap")
   })
 })

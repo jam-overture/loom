@@ -209,6 +209,28 @@ export const LIBRARY_CLASS = {
   offeringAction: "loom-offering-action",
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
+  /**
+   * A `loom.episode`: the positioned ancestor its stretched title anchor needs,
+   * and the hover target the play glyph is scaled by.
+   */
+  episode: "loom-episode",
+  episodePlay: "loom-episode-play",
+  /**
+   * A `loom.episode-list`. The rhythm between rows, the flush first and last,
+   * and the hairline between are all things a row cannot know from its own
+   * node — where it sits among its siblings is the browser's business.
+   *
+   * Every selector matches on `article` rather than on `*`, because a primitive
+   * emits the library stylesheet as its own first child and a renderer that
+   * does not hoist it leaves a `<style>` element exactly where `:first-child`
+   * looks.
+   */
+  episodeList: "loom-episode-list",
+  episodeListTight: "loom-episode-list-tight",
+  episodeListLoose: "loom-episode-list-loose",
+  episodeListRuled: "loom-episode-list-ruled",
+  /** A `loom.event`: the card whose edge answers when it is pointed at. */
+  event: "loom-event",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -551,6 +573,39 @@ details[open] > summary .loom-marker {
 .loom-credential {
   position: relative;
 }
+.loom-episode {
+  position: relative;
+}
+.loom-episode-play {
+  transition: transform var(--loom-motion-medium) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.loom-episode:hover .loom-episode-play {
+  transform: scale(1.12);
+}
+.loom-episode-list > article {
+  padding-block: var(--loom-spacing-4);
+}
+.loom-episode-list-tight > article {
+  padding-block: var(--loom-spacing-3);
+}
+.loom-episode-list-loose > article {
+  padding-block: var(--loom-spacing-5);
+}
+.loom-episode-list > article:first-of-type {
+  padding-block-start: 0;
+}
+.loom-episode-list > article:last-of-type {
+  padding-block-end: 0;
+}
+.loom-episode-list-ruled > article + article {
+  border-block-start: 1px solid var(--loom-border-subtle);
+}
+.loom-event {
+  transition: border-color var(--loom-motion-medium) ease;
+}
+.loom-event:hover {
+  border-color: var(--loom-border-accent);
+}
 .loom-mosaic {
   display: grid;
   grid-template-columns: 1fr;
@@ -605,10 +660,10 @@ details[open] > summary .loom-marker {
   .loom-marquee-echo {
     display: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > * {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-episode-play, .loom-event {
     transition: none;
   }
-  .loom-lift:hover {
+  .loom-lift:hover, .loom-episode:hover .loom-episode-play {
     transform: none;
   }
 }

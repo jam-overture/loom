@@ -153,3 +153,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0093](0093-a-decorative-copy-is-the-same-children-without-identity.md) | A decorative copy is the same children without identity | Accepted | §4b |
 | [0094](0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) | A card's prose is a child when the card has a flow, and a prop when it does not | Accepted | §4b |
 | [0095](0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | A frame carries its URL, and the deployment carries the origins | Accepted | §3, §4b |
+| [0096](0096-a-container-query-is-for-what-cannot-be-interpolated.md) | A container query is for what cannot be interpolated; a size that varies with width is a function | Accepted | §4b |

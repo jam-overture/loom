@@ -4668,6 +4668,62 @@
           ]
         },
         {
+          "module": "primitives/loom.episode",
+          "title": "loom.episode",
+          "summary": "One thing a reader presses play on: artwork, what it is called, how long it runs, the qualifiers that place it, and a sentence about it.",
+          "symbols": [
+            {
+              "name": "loomEpisode",
+              "kind": "value",
+              "signature": "const loomEpisode: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.episode-list",
+          "title": "loom.episode-list",
+          "summary": "A run of `loom.episode` rows — a podcast back-catalogue, a video playlist, a mixtape, a reel.",
+          "symbols": [
+            {
+              "name": "loomEpisodeList",
+              "kind": "value",
+              "signature": "const loomEpisodeList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.event",
+          "title": "loom.event",
+          "summary": "One dated thing a reader can turn up to: when it is, what it is called, where it happens, and the control that gets them a place.",
+          "symbols": [
+            {
+              "name": "loomEvent",
+              "kind": "value",
+              "signature": "const loomEvent: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.event-list",
+          "title": "loom.event-list",
+          "summary": "A run of `loom.event` cards — what is coming up, and where to get a place.",
+          "symbols": [
+            {
+              "name": "loomEventList",
+              "kind": "value",
+              "signature": "const loomEventList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.faq",
           "title": "loom.faq",
           "summary": "One question and its answer, as a disclosure that needs no JavaScript.",

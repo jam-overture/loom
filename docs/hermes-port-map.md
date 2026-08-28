@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 47 blocks, 68 primitives.**
+**Done — 52 blocks, 72 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -82,6 +82,8 @@ stands alone.
 | `before-after` | `loom.before-after` | atomic ✅ |
 | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-grid` / `loom.offering` | pair ✅ — seven blocks, one record |
 | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-grid` / `loom.credential` | pair ✅ |
+| `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` | pair ✅ — a **list**, not a grid; see the note |
+| `events` | `loom.event-list` / `loom.event` | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -112,15 +114,36 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 8 blocks, 4 pairs.** Grouped by the content model they
+**Pairs to build — 3 blocks, 2 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
-| Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
 | Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
-| Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
+
+**A third proposed name changed when it was built, and this one changed the
+arrangement rather than only the word.** The playable-media row was predicted as
+`loom.episode-list` and shipped as one — but the prediction was a guess that
+happened to be right, and the reason is worth keeping. A back-catalogue is
+*scanned for one of its rows*, which wants every title at a single leading edge,
+so the container stacks in one column with a hairline between and the child is a
+row rather than a card. That is a list under 0054, and it is deliberately **not**
+`repeat(auto-fit, minmax(…))` like every `-grid` here.
+
+The cost is stated so a later run does not have to discover it: **there is no
+three-across band of episodes and there cannot be one with this child.** A grid
+of playable cards is a different arrangement of a different shape. Giving
+`loom.episode-list` a `columns` prop would produce three squeezed rows, not
+three cards — the arrangement-versus-count confusion `primitive-granularity.md`
+warns about, arriving from the container's side.
+
+`events` was predicted as "its own pair" on the grounds that an `EventItem`
+carries a venue and a ticket link a milestone has nowhere to put. That held, and
+building it found a second and better reason: **tense.** A milestone-list is a
+history, whose arrangement is a sequence and whose rail says the entries are one
+story. An events band is a set of independent offers to act on, and a connector
+line between two things a reader is choosing *between* is a lie about them.
 
 **Two proposed names changed when they were built**, and the change is 0054
 being applied rather than overruled. `loom.offering-list` and
@@ -128,7 +151,7 @@ being applied rather than overruled. `loom.offering-list` and
 names *what the container does with its children* and what both of them do is
 `repeat(auto-fit, minmax(…))`. 0054's own consequence is the reason to get it
 right before it ships: a container that changes its arrangement changes its
-name, and a rename is a breaking change to every stored tree. The four rows
+name, and a rename is a breaking change to every stored tree. The two rows
 above are proposals until the run that builds them looks at the markup — read
 the arrangement word as a prediction, not a commitment.
 

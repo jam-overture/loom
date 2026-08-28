@@ -22,6 +22,10 @@ import { loomCredentialGrid } from "./loom.credential-grid.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomEmbed } from "./loom.embed.js"
 import { loomEmphasis } from "./loom.emphasis.js"
+import { loomEpisode } from "./loom.episode.js"
+import { loomEpisodeList } from "./loom.episode-list.js"
+import { loomEvent } from "./loom.event.js"
+import { loomEventList } from "./loom.event-list.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
@@ -266,6 +270,10 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomAvatarRow,
   loomArticleGrid,
   loomArticle,
+  loomEpisodeList,
+  loomEpisode,
+  loomEventList,
+  loomEvent,
   loomLogoCloud,
   loomLogo,
   loomCredentialGrid,
@@ -335,6 +343,10 @@ export {
   loomDivider,
   loomEmbed,
   loomEmphasis,
+  loomEpisode,
+  loomEpisodeList,
+  loomEvent,
+  loomEventList,
   loomFaq,
   loomFaqList,
   loomFeature,
