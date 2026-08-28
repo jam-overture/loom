@@ -106,11 +106,17 @@ const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
  * The bar across the top: the mark, the menu, and the one thing the page wants
  * you to do.
  *
- * The menu is this site's pages and the documentation, because those are the
- * two a visitor can read without an account. The portal is the action rather
- * than a menu item, and its word is **Sign in** rather than its name: a
- * stranger has no idea what a portal is, and the bar's right-hand action is
- * where every site they have used puts the way in.
+ * The menu is this site's pages and the surfaces marked `inMenu` — today the
+ * demonstration and the documentation. The portal is the action rather than a
+ * menu item, and its word is **Sign in** rather than its name: a stranger has
+ * no idea what a portal is, and the bar's right-hand action is where every site
+ * they have used puts the way in.
+ *
+ * It used to take *every unguarded surface*, which is a rule about permissions
+ * deciding a question about attention, and it grew by one every time another
+ * lane shipped a front door. `inMenu` in `site.ts` carries that decision now,
+ * with the reasoning beside it; the footer below still carries the complete map,
+ * so this bar can be short without anything becoming unreachable.
  */
 export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
   buildElement(ids, {
@@ -119,7 +125,7 @@ export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
     children: [
       buildSlot(ids, "brand", [wordmark(ids, context)]),
       ...SITE_ROUTES.map((route) => menuLink(ids, context, route)),
-      ...PRODUCT_SURFACES.filter((surface) => !surface.guarded).map((surface) =>
+      ...PRODUCT_SURFACES.filter((surface) => surface.inMenu).map((surface) =>
         link(ids, surface.label, surfaceHref(context.origin, surface), { scale: "medium" })
       ),
       buildSlot(ids, "actions", [

@@ -9503,3 +9503,105 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-28 — `main` was red when this branch was cut, and it is the `FACTS` problem for the seventh time
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — the fix is written and waiting on review, not on work
+
+`pnpm verify` fails on `main` itself. `facts.test.ts` counts the numbered
+records in `decisions/` and holds `FACTS.decisions` against them; a ninety-fifth
+record landed and the literal still said ninety-four. Since 0067 that is not one
+surface red, it is **four**, and every lane that cut a branch afterwards
+inherited it.
+
+This is the seventh occurrence in ten days of the finding filed on 19 August and
+closed on #174. It is worth recording separately only because of what is new:
+the earlier six were caught in another lane's run and fixed there before merge.
+This one **reached `main`**, so the shared gate has been failing for anyone who
+looked, and a lane that trusted a red build to be its own would have spent a run
+finding out otherwise.
+
+**Bumped to `95` on `marketing-14`**, because a branch may not be opened on red
+and that is the whole of the fix. It is not *the* fix: #174 deletes the literal
+and derives the two counts that can be derived, and is open, green and
+conflict-free as of today. If #174 merges first this line will not exist to
+conflict with; if `marketing-14` merges first, resolve in favour of #174.
+
+**Nothing for another lane to do.** Recorded so that the next run to find `main`
+red recognises it rather than diagnosing it again, and so the cost of leaving
+#174 unmerged is written down somewhere other than in a pull request comment.
+
+---
+
+## 2026-08-28 — the Gate asks its rules in an order nothing outside the runtime can read
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open
+
+`/the-rules` lists the seven questions the rules ask of every change. The **set**
+is derived and safe: `dispositionReasonCodeSchema` is exported, and the page's
+list is held against it minus `within-policy`, so an eighth rule takes the
+marketing lane red rather than leaving a page quietly claiming there are seven.
+
+The **order** cannot be. `ESCALATION_RULES` in `src/runtime/gate.ts` is a module
+constant and is not exported, and the order is the thing the page most needs to
+be right about: the whole point of that band is *the first no wins*, which is a
+claim about precedence. Today the page repeats the order by hand, so a
+reordering in the runtime would leave a correct list of seven questions in a
+stale sequence, with no test anywhere that could notice.
+
+The enum in `disposition.ts` happens to be declared in the same order today, and
+this lane is deliberately not relying on that — nothing states it as a
+guarantee, and a coincidence a page depends on is a coincidence somebody will
+tidy up.
+
+**What would close it**, smallest first:
+
+1. **Export the ordered reason codes** — `export const ESCALATION_ORDER:
+   readonly DispositionReasonCode[]` beside the rules, with `ESCALATION_RULES`
+   asserted against it in `gate.test.ts` so the two cannot drift. A host gets
+   the precedence without getting the implementation.
+2. **Export the rules themselves**, as an ordered list of `{ code, rule }`. More
+   than a page needs, and it makes the escalation list part of the public
+   surface — which may be right for a runtime whose whole claim is that its
+   judgment is inspectable.
+3. **Say in `disposition.ts` that the enum is declared in escalation order**, and
+   have `gate.test.ts` hold it. Cheapest, and it makes an ordering guarantee out
+   of what is currently a coincidence.
+
+Option 1 is this lane's recommendation. The consumer is
+`app/(marketing)/_lib/pages/the-rules.ts`, which will derive the order the day
+it can and drop its hand-written list.
+
+---
+
+## 2026-08-28 — the course left the top bar, and its owner should know before a reader tells them
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom lessons`,
+`@jonathanbravecredit` · **Status:** open — a decision to confirm or reverse,
+not a defect
+
+The header used to carry every surface a visitor could reach without an account,
+which is a rule about permissions answering a question about attention. It had
+grown to eight items — a mark, six links and the way in — and the maintainer
+asked on #166 whether that was too many. This run added a fourth page to the
+site, which would have made nine.
+
+So `Surface.inMenu` now decides it, and **`Loom lessons` is the surface that
+came out**: of the four it asks the most of a visitor, and the top bar is for
+the first ten seconds. The count is unchanged rather than reduced — that was the
+constraint, not the ambition.
+
+**Nothing was hidden.** The course keeps all three of its other placements: the
+footer's map on every page of this site, the front door's band of cards where it
+is named with what it costs, and the closing band of the mechanism page. What it
+lost is one placement of four, and `inMenu: true` in
+`app/(marketing)/_lib/site.ts` puts it back in one word.
+
+Filed rather than merely done because it changes where another lane's traffic
+comes from, and that lane should hear it from a finding rather than from a chart.
+If the course wants the bar back, this lane will take something else out — the
+number, not the membership, is what the maintainer questioned.
