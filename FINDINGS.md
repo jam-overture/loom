@@ -9503,3 +9503,57 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-28 — the course can run its own exercises, but not in the reader's browser
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+The brief for this lane asks for runnable exercises: the reader writes a
+prediction and then runs the snippet on the page, instead of cloning the
+repository and pasting into `src/scratch.test.ts`. This run built the runner.
+It compiles each Try it section and executes it against `src/`, and every one
+of the sixteen written lessons runs — so the hard part turned out not to be the
+hard part.
+
+What it cannot do is run in the reader's browser, and the reason is three facts
+outside this lane. None of them is a bug; all three are choices with a reason,
+and the ask below is a question rather than a defect report.
+
+| Fact | Where | What it blocks |
+| --- | --- | --- |
+| `src/testing/**` is excluded from the build | `tsconfig.build.json` | `dist/testing/` does not exist |
+| `@loom/runtime` has no `./testing` export | root `package.json` | it could not be imported if it did |
+| `zod` is a dependency of the runtime, not of the app | `apps/loom/package.json` | nothing under `apps/loom` resolves it |
+
+The first is the one that decides it. `./testing/fixtures.js` is the single
+most-imported specifier in the entire course — seventeen fences, more than
+`./ids.js` and more than `./tree/delta.js` — because `sampleTree()` is the tree
+every lesson reasons about. A browser runner has nothing to load it from.
+
+So the runner reads `src/` off the checkout and executes at build time instead,
+which is honest about what it is and has a property the browser version would
+not have had: the output on the page is this commit's output, and a lesson
+whose exercises stop running is a red test in `app/(lessons)/_lib/run.test.ts`
+naming the lesson. **That test is now a merge gate for the whole repository.**
+Renaming an export in `src/` will break it, deliberately — the alternative is
+the course going quietly wrong, which is the failure the last two lessons runs
+both filed against themselves. It prints the lesson number and the error.
+
+**What I am not doing.** Reimplementing `sampleTree` inside `app/(lessons)/`
+would make the browser version work today and would be the worst outcome
+available: output that agrees with the lesson and disagrees with Loom. Adding
+`zod` to `apps/loom/package.json` is one line and a lockfile change, which with
+fifteen open pull requests is a conflict in every one of them, and it is not my
+file.
+
+**The ask, if you want the browser version.** Publishing the fixtures is the
+whole of it: drop `src/testing/**` from the `exclude` in `tsconfig.build.json`,
+add a `"./testing"` entry to the runtime's `exports`, and add `zod` to the
+application's dependencies. Whether the runtime *should* publish its test
+fixtures is a real decision and it is yours — a host writing against Loom might
+well want `sampleTree` and the store contract suites, or that might be a surface
+you would rather not support. The build-time runner is not a stopgap waiting on
+it; it is worth having either way, and the browser version would sit on top of
+the same extraction.
