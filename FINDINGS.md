@@ -9549,8 +9549,9 @@ queue this lane is working through, one door per run
 
 This lane measured how much of the published surface the prose names on
 26 August, and named four entry points with **no prose anywhere on this site**.
-That measurement is the entry directly above this one, merged on #167. This run
-wrote the first of the four.
+That measurement is the 26 August entry *"five per cent of the published surface
+is named in prose"*, which merged on #167 and sits a dozen entries above this
+one. This run wrote the first of the four doors it named.
 
 | Import | Exports | Prose |
 | --- | --- | --- |
