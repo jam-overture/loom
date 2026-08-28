@@ -9503,3 +9503,142 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-28 — the demo asked a stranger to approve `delete loom.stat-grid`, and on a phone the page was not on the screen
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-08-what-allowing-it-would-do` — recorded because the *shape* is the fifth
+instance of this lane's standing diagnosis and the first where the thing in the
+wrong voice was a whole component
+
+Press the leading ask. Loom stops and asks. The card is good until its last line
+before the buttons, which reads, in the light and unasked:
+
+> **what this would change** · `delete` `loom.stat-grid` · `loom.page` · *and 3
+> nodes under it*
+
+That is `(portal)/_components/proposal-effect`, borrowed whole, and **in the
+portal it is exactly right**: a reviewer knows what a stat grid is, has the tree
+outline open beside them, and is being asked about a delta. Here it was the one
+place on the surface where the technical record stood in the light, in a route
+group built end to end on the rule that *plain language is the default and the
+technical record is one click away*.
+
+**What made it more than a wording complaint is the phone.** At 1440px a visitor
+who cannot read `loom.stat-grid` can look left: the band is ringed in amber with
+*This would be removed* on it. At 390px they cannot. The two panes stack;
+`SpotlightScroll` declines to carry a held change's scroller to the mark, because
+that would carry the visitor away from these very buttons; `AnswerInView` brings
+the card up instead. Both decisions are right and both were argued out in earlier
+runs of this lane. Together they produced the demo's worst frame: **a stranger
+asked to allow `delete loom.stat-grid` with the page nowhere on the screen.** The
+Gate's whole claim is that a person decides; a person who cannot read the
+proposal has consented rather than decided.
+
+Two things this turned up that are worth having in the channel:
+
+- **A plain-name table for primitive types is a trap, and it is the obvious
+  fix.** The starter registry holds sixty-eight primitives and `Loom primitives`
+  ships more most weeks, so a `loom.stat-grid` → "the numbers band" table is
+  stale by construction — and the test that would keep it honest would turn
+  *another lane's* pull requests red. **A change is named by the words it would
+  take, bring or move**, which no registry can outgrow and which a visitor
+  recognises because they were reading them a moment ago.
+- **Which props are words is already in the registry.** `RegisteredPrimitive.
+  choices` names every prop whose values are a closed vocabulary — `tone`,
+  `align`, `backdrop`, `variant` — so excluding them is a read rather than a
+  list, and a primitive that gains a choice is excluded on the next render with
+  nothing to maintain. A primitive that declares none contributes every string it
+  carries, and `loom.stat` is why that is right: `value`, `label` and `caption`
+  are all printed on the page.
+
+**The diagnosis, five for five, and sharper than it was.** 24 Aug: a policy
+ceiling two files from the button it silenced. 25 Aug: a field four surfaces
+print and this one carried unread. 26 Aug: a string the runtime is right to
+compose and this surface was wrong to quote. 27 Aug: a distinction this surface's
+own code drew in words and not in pixels. Today: a whole component another
+surface is right to render, rendered here, at the moment a stranger has to act.
+Nothing was broken in any of the five, and the question that finds them is not
+*is this string true* but **whose sentence is it, and is this the place that
+sentence is spoken.**
+
+---
+
+## 2026-08-28 — `OperationEffect.text` finds no words on a primitive that carries its content in props
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+
+`(portal)/_lib/proposal-effect.ts`'s `textIn` walks a subtree for **text nodes**
+and previews the first three. On `loom.stat-grid` it finds none — the three
+figures, three labels and three captions are `value`, `label` and `caption` props
+on `loom.stat` children, every one of them printed on the page — so *its words*
+is empty and a reviewer answering that hold is shown a verb, a subject, a count
+and nothing they could recognise.
+
+It is not wrong about anything; it is looking in one of the two places a Loom
+page keeps its content. The same is true of `loom.feature` (`title`, `body`),
+`loom.faq` (`question`, `answer`), `loom.quote` (`quote`, `author`, `role`) and
+`loom.logo` (`name`) — which between them are most of a marketing page.
+
+**Not fixed here.** It is the portal's file and the portal's reviewers, and the
+harvest this lane built for the same problem
+(`(demo)/_lib/plain-change.ts`, closed by the entry above) is tuned for a
+stranger rather than for a reviewer: one string per node so three quotes are
+three things, closed choices excluded via the registry, addresses dropped. The
+mechanism transfers if `Loom portal` wants it; the tuning probably should not.
+
+**Recommendation:** read props as well as text nodes, and use
+`RegisteredPrimitive.choices` to tell a setting from a sentence. The demo's
+`settingsOf` is nine lines and is the whole of it.
+
+---
+
+## 2026-08-28 — `FACTS.decisions` red on `main`, the third lane in two days
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — for the count only; the shape is the
+19, 21, 23, 24, 25 and 27 August entries and nothing is added to it
+
+`pnpm verify` on `origin/main` at `3a57feb` fails
+`(marketing)/_lib/facts.test.ts`: `FACTS.decisions` says `"94"` and `decisions/`
+holds 95. Bumped to `"95"` on this branch, as #177 and #178 already carry it, so
+whichever of the three lands last is a no-op or a one-character conflict.
+
+**`main` has been red for two days and it is the stated merge gate for all
+seven surfaces.** #174 fixes it properly — deriving the count rather than typing
+it — and is open. Nothing new is argued here; the number of lanes that have paid
+for it is the only new evidence.
+
+---
+
+## 2026-08-28 — `21st.dev` re-verified blocked, from the demo lane an eighth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged, on the run of
+28 August. The standing answer is on the 21 August entry: the committed policy
+allows the domain for the tool and the proxy does not.
+
+The cost this run was small and worth stating precisely. The unit was a sentence
+and its position on a card, and what decided both was driving the built page and
+reading the card as a stranger would — plus one typed ask through the live model,
+which is the only way to see the sentence on a delta nobody in this repository
+wrote. A reference gallery would not have answered either. Eight runs of a named
+standard that has never been reachable from a lane told to consult it.
+
+---
+
+## 2026-08-28 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the 24, 25, 26 and 27 August entries rather than opened again
+
+Fifth consecutive run opening by establishing that its headline instruction —
+*"Two problems to fix before anything else"*, the first being the move off
+`/portal/demo` — describes this lane's first unit, landed seven days ago.
+`docs/rollout.md:19` still points at the old path. Neither is fixable by a
+routine: a routine cannot rewrite the brief it is bound by, and this file says
+that about itself.

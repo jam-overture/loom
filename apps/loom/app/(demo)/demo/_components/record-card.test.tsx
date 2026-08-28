@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+
+import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 
 import { RecordCard } from "./record-card"
@@ -85,6 +88,41 @@ const ANSWERED: ChangeRecord = (({ heldProposalId: _answered, ...rest }) => ({
   answeredBy: "a demo visitor",
 }))(HELD)
 
+/**
+ * The two readings of one held proposal that the card has to keep apart: the
+ * review tool's, which names the primitive and counts the nodes, and the plain
+ * one, which quotes what is printed on the page.
+ */
+const EFFECT: ProposalEffect = {
+  operations: [
+    {
+      verb: "delete",
+      subject: "loom.stat-grid",
+      place: ["loom.page"],
+      detail: "and 3 nodes under it",
+      changes: [],
+      text: [],
+      carries: 4,
+      missing: false,
+      inert: false,
+    },
+  ],
+  applies: true,
+  obstacle: null,
+  baseRevision: 0,
+  treeRevision: 0,
+  stale: false,
+  inertCount: 0,
+}
+
+const PLAIN: readonly PlainChange[] = [
+  {
+    sentence: "This comes off the page, and everything under it goes too.",
+    words: ["3,400", "24", "92%"],
+    more: 0,
+  },
+]
+
 describe("a record card", () => {
   it("shows the ask, the rationale and the provenance of the proposal", () => {
     render(<RecordCard record={APPLIED} />)
@@ -159,6 +197,54 @@ describe("a record card", () => {
 
     expect(screen.getByText("shallow-structural-change")).toBeTruthy()
     expect(screen.getByText("stakes-above-ceiling")).toBeTruthy()
+  })
+
+  /**
+   * The plain-language rule at the one moment it costs something to break: the
+   * card is asking the visitor to allow a change, and what it tells them it
+   * would do must be checkable against the page rather than against the tree.
+   *
+   * `loom.stat-grid` and `delete` are still on the card — they are the review
+   * tool's reading of the same proposal and nothing has been removed — and they
+   * are behind the click, with the fingerprint and the inverse.
+   */
+  it("asks in the words on the page, and keeps the delta's own words one click down", () => {
+    const { container } = render(<RecordCard record={HELD} effect={EFFECT} plain={PLAIN} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText(/This comes off the page/))).toBe(false)
+    expect(disclosure.contains(screen.getByText("“3,400”"))).toBe(false)
+
+    expect(disclosure.contains(screen.getByText("loom.stat-grid"))).toBe(true)
+    expect(disclosure.contains(screen.getByText("delete"))).toBe(true)
+  })
+
+  /**
+   * Above the buttons and not below them. A visitor deciding whether to allow
+   * something reads down to the control and presses it; a description that
+   * arrives after the press has arrived too late.
+   */
+  it("says what would happen before it offers the two answers", () => {
+    const { container } = render(<RecordCard record={HELD} effect={EFFECT} plain={PLAIN} />)
+
+    const said = screen.getByText(/This comes off the page/)
+    const answer = screen.getByRole("button", { name: "Apply this change" })
+
+    expect(said.compareDocumentPosition(answer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(container.contains(said)).toBe(true)
+  })
+
+  /**
+   * An applied change has no proposal left to picture, and a card that kept
+   * saying what a change *would* do after it had done it would be describing a
+   * page that no longer exists.
+   */
+  it("stops describing a change once it has happened", () => {
+    render(<RecordCard record={ANSWERED} />)
+
+    expect(screen.queryByText(/This comes off the page/)).toBeNull()
   })
 
   /**

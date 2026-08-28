@@ -7,11 +7,13 @@ import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 
 import { answerNote } from "@/app/(demo)/_lib/answer"
+import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
+import { WhatWouldHappen } from "./what-would-happen"
 
 /**
  * One ask, and the whole account of what became of it.
@@ -52,6 +54,7 @@ const Section = ({ title, children }: { readonly title: string; readonly childre
 export const RecordCard = ({
   record,
   effect,
+  plain = [],
 }: {
   readonly record: ChangeRecord
   /**
@@ -61,6 +64,16 @@ export const RecordCard = ({
    * useful.
    */
   readonly effect?: ProposalEffect
+  /**
+   * The same proposal in the words on the page, for the same reason and under
+   * the same condition: only a change nobody has answered yet is a change a
+   * visitor is being asked to picture.
+   *
+   * Defaulted rather than required, because a card whose proposal has been
+   * answered has nothing to say here and should not have to pass an empty list
+   * to say so.
+   */
+  readonly plain?: readonly PlainChange[]
 }) => {
   const [answerReport, answer, answering] = useActionState<WriteReport | null, FormData>(answerHeld, null)
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
@@ -145,6 +158,20 @@ export const RecordCard = ({
       )}
 
       {/*
+        * What allowing it would do to the page, in the words on the page, the
+        * line before the buttons that allow it.
+        *
+        * This is where `(portal)/_components/proposal-effect` used to sit — the
+        * review tool's answer to the same question, above the disclosure and
+        * unasked, reading `delete loom.stat-grid · loom.page · and 3 nodes under
+        * it`. It has not been removed: it is in the disclosure below, in the
+        * section of technical account it always belonged to. What stands here
+        * instead is the plain half, which is the order the rest of this card is
+        * built in and the rule this whole surface follows.
+        */}
+      {plain.length > 0 && <WhatWouldHappen lines={plain} />}
+
+      {/*
         * The two buttons a held change is waiting on, immediately under the
         * sentence that says it is waiting. They were below the technical record
         * before, which put the whole delta between a visitor being told a
@@ -190,8 +217,6 @@ export const RecordCard = ({
         </form>
       )}
 
-      {effect && <ProposalEffectView effect={effect} />}
-
       <TechnicalDetail summary="Show the full record">
         {record.interpretation && (
           <Section title="the proposal">
@@ -208,6 +233,20 @@ export const RecordCard = ({
             </Row>
           </Section>
         )}
+
+        {/*
+          * The review tool's reading of the same proposal, unaltered and
+          * complete, next to the rest of the technical account.
+          *
+          * It is the portal's component and it stays the portal's — the two
+          * surfaces must not end up with two answers to "what would this
+          * replace", and the portal's is the one with the before-and-after of
+          * every prop on it. What was wrong was never the view; it was that a
+          * stranger met it before they had asked for anything technical. Here it
+          * is one click down, which is where this surface has always said the
+          * evidence goes.
+          */}
+        {effect && <ProposalEffectView effect={effect} />}
 
         {record.stakes && record.reversibility && (
           <Section title="what the gate weighed">

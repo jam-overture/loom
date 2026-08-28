@@ -6,6 +6,7 @@ import { DOCS } from "@/app/(marketing)/_lib/site"
 
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
+import { plainChange, settingsOf, type PlainChange } from "@/app/(demo)/_lib/plain-change"
 import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
@@ -96,18 +97,44 @@ const DemoPage = async () => {
    * produce a confident and wrong "before".
    */
   const holds = session === undefined ? undefined : await session.holds.forTree(tree.treeId)
+  const held = holds?.ok ? holds.value : []
+
   const effects = new Map<string, ProposalEffect>(
-    (holds?.ok ? holds.value : []).map((held) => [
-      held.proposalId,
-      describeProposalEffect(tree, held.proposal.delta),
-    ])
+    held.map((one) => [one.proposalId, describeProposalEffect(tree, one.proposal.delta)])
   )
 
-  /** Absent rather than `undefined`: the prop is optional, not nullable. */
-  const effectProps = (record: (typeof records)[number]): { readonly effect?: ProposalEffect } => {
-    const found = record.heldProposalId === undefined ? undefined : effects.get(record.heldProposalId)
+  /**
+   * And the same proposals in the words on the page.
+   *
+   * Two readings of one delta, both computed here, because the card shows one
+   * of them unasked and the other one click down — the plain half above the two
+   * buttons, the review tool's half inside the disclosure. Which is which is
+   * `record-card`'s to place; that both exist is this page's, because the tree
+   * and the held delta are only in hand together here.
+   *
+   * The settings are read from the registry once per render rather than per
+   * proposal: which props are a closed choice is a fact about the registry, and
+   * it cannot change between two cards on one page.
+   */
+  const settings = settingsOf(demoRegistry)
+  const plains = new Map<string, readonly PlainChange[]>(
+    held.map((one) => [one.proposalId, plainChange(tree, one.proposal.delta, settings)])
+  )
 
-    return found === undefined ? {} : { effect: found }
+  /** Absent rather than `undefined`: the props are optional, not nullable. */
+  const heldProps = (
+    record: (typeof records)[number]
+  ): { readonly effect?: ProposalEffect; readonly plain?: readonly PlainChange[] } => {
+    const id = record.heldProposalId
+    if (id === undefined) return {}
+
+    const effect = effects.get(id)
+    const plain = plains.get(id)
+
+    return {
+      ...(effect === undefined ? {} : { effect }),
+      ...(plain === undefined ? {} : { plain }),
+    }
   }
 
   return (
@@ -241,7 +268,7 @@ const DemoPage = async () => {
 
               <ul className="flex flex-col gap-2">
                 {records.map((record) => (
-                  <RecordCard key={record.recordId} record={record} {...effectProps(record)} />
+                  <RecordCard key={record.recordId} record={record} {...heldProps(record)} />
                 ))}
               </ul>
 
