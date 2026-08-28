@@ -84,7 +84,7 @@ covers the fifth case nobody has thought of.
 
 ## Records
 
-- **[0094](../decisions/0094-a-same-origin-path-is-decided-by-resolving-it.md)** —
+- **[0096](../decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md)** —
   *A same-origin path is decided by resolving it, not by matching it.*
   **`Proposed` — ARCHITECTURAL, needs review.** Nothing superseded.
 
@@ -108,7 +108,7 @@ that built it does not get to close it.
 ## Open questions
 
 1. **The one that blocks everything else:** may a tree hold a root-relative path?
-   If yes, 0094 is the mechanism and 0069's should be marked superseded. If no,
+   If yes, 0096 is the mechanism and 0069's should be marked superseded. If no,
    both close and the origin seam stays, at the cost 0069 records. Either answer
    is cheap now.
 2. **`loom.embed`'s `src` may become a path**, which is a same-origin frame. The
@@ -163,8 +163,10 @@ next run writes the `docs/routines.md` paragraph forbidding `user.email`
 overrides. Five occurrences, and a routine cannot write the governance it is
 bound by.
 
-**The record number collided for the fourth day running.** `main` is at 0093, so
-0094 is the next free number, which the brief says to take; #164, #165, #171 and
-this one all carry an 0094. 0095 is not available — `pnpm decisions:index` fails
-on a gap, so the pull request would open on red. Three of the four renumber on
-merge. The finding proposing a fix is open and owned by the maintainer.
+**The record number collided for the fourth day running, and the renumber has
+now happened.** This record was written as 0094 when `main` was at 0093, which is
+the number the brief says to take; #164, #165 and #171 all carried an 0094 too,
+and one of them merged. On 28 August `main` was merged into this branch and the
+record became **0096**, the next free number there. Nothing about the record
+changed. The finding proposing a fix is open and owned by the maintainer, and
+this is the cost it predicted being paid rather than forecast.

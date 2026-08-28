@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-four primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(64)
+  it("registers as sixty-eight primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(68)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -173,6 +173,8 @@ describe("the starter library", () => {
       "loom.tier",
       "loom.perk-list",
       "loom.perk-list-item",
+      "loom.offering-grid",
+      "loom.offering",
       "loom.comparison-table",
       "loom.comparison-row",
       "loom.comparison",
@@ -190,6 +192,8 @@ describe("the starter library", () => {
       "loom.article",
       "loom.logo-cloud",
       "loom.logo",
+      "loom.credential-grid",
+      "loom.credential",
       "loom.faq-list",
       "loom.faq",
       "loom.form",
@@ -347,6 +351,12 @@ describe("the starter library", () => {
       "loom.person",
       "loom.article",
       "loom.logo",
+      /**
+       * A credential is a leaf and an offering is not, which is 0094 read from
+       * the audit's side: the card with a repeated part has a flow, and the card
+       * without one holds its sentence in a prop.
+       */
+      "loom.credential",
       "loom.faq",
       /** The face on its own, which is a leaf for the reason `loom.person` is. */
       "loom.avatar",
@@ -813,6 +823,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(prosePage(EDITORIAL)),
       ...typesIn(tablePage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
+      ...typesIn(bookablePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -4101,7 +4112,7 @@ describe("the repairs this run made", () => {
     }
     expect(depth).toBe(0)
 
-    const nestable = /@(?:media|supports|keyframes)/
+    const nestable = /@(?:media|supports|keyframes|container)/
     for (const [block, prelude, body] of css.matchAll(/([^{}]*)\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g)) {
       if (nestable.test(prelude ?? "")) continue
       expect([prelude?.trim(), body]).toEqual([prelude?.trim(), (body ?? "").replace(/[{}]/g, "")])
@@ -4492,5 +4503,379 @@ describe("the band that moves", () => {
     const strip = (markup: string): string => markup.slice(markup.indexOf("</style>") + 1).replace(/style="[^"]*"/, "")
 
     expect(strip(editorial)).toBe(strip(bold))
+  })
+})
+
+const bookablePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const chip = (label: string, tone?: string) =>
+    buildElement(idFactory, {
+      type: "loom.badge",
+      props: tone === undefined ? {} : { tone },
+      children: [text(label)],
+    })
+
+  const book = (label: string, href: string, variant = "primary") =>
+    buildElement(idFactory, {
+      type: "loom.action",
+      props: { href, variant },
+      children: [text(label)],
+    })
+
+  const includes = (...lines: readonly string[]) =>
+    buildElement(idFactory, {
+      type: "loom.perk-list",
+      props: { density: "tight" },
+      children: lines.map((label) =>
+        buildElement(idFactory, { type: "loom.perk-list-item", props: { label } })
+      ),
+    })
+
+  /** Hermes' `coaching-packages` and `mentorship-tracks`, as a grid of cards. */
+  const packages = buildElement(idFactory, {
+    type: "loom.offering-grid",
+    props: { columns: "three", gap: "normal" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.offering",
+        props: { name: "Single session", price: "£180" },
+        children: [
+          buildSlot(idFactory, "meta", [chip("90 minutes"), chip("Remote")]),
+          buildElement(idFactory, {
+            type: "loom.prose",
+            children: [text("One conversation about one problem, with notes afterwards.")],
+          }),
+          buildSlot(idFactory, "action", [book("Book a session", "https://example.com/book/single", "secondary")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.offering",
+        props: { name: "Six-week track", price: "£950", emphasis: "featured", href: "https://example.com/track" },
+        children: [
+          buildSlot(idFactory, "meta", [chip("6 sessions", "accent"), chip("Fortnightly"), chip("For staff engineers")]),
+          buildElement(idFactory, {
+            type: "loom.prose",
+            children: [text("A structured path from senior to staff, with the writing to prove it.")],
+          }),
+          includes("Six 90-minute sessions", "A written review of every artefact", "Async questions between sessions"),
+          buildSlot(idFactory, "action", [book("Apply for the track", "https://example.com/book/track")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.offering",
+        props: { name: "Team workshop", price: "From £3,200" },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Full day"), chip("On site")]),
+          buildElement(idFactory, {
+            type: "loom.prose",
+            children: [text("A day with your whole team, run against your own codebase.")],
+          }),
+          buildSlot(idFactory, "action", [book("Enquire", "mailto:studio@example.com", "secondary")]),
+        ],
+      }),
+    ],
+  })
+
+  /** Hermes' `class-schedule` and `restaurant-menu`: the same primitive, given the width. */
+  const schedule = buildElement(idFactory, {
+    type: "loom.offering-grid",
+    props: { columns: "one", gap: "snug" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.offering",
+        props: { name: "Morning vinyasa", price: "£14" },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Tue & Thu"), chip("6:30 AM"), chip("All levels"), chip("Studio 2")]),
+          buildSlot(idFactory, "action", [book("Reserve", "https://example.com/classes/vinyasa", "secondary")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.offering",
+        props: { name: "Restorative evening", price: "£14" },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Sunday"), chip("7:00 PM"), chip("Beginners")]),
+          buildSlot(idFactory, "action", [book("Reserve", "https://example.com/classes/restorative", "secondary")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.offering",
+        props: { name: "Give monthly", price: "£25/mo" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.prose",
+            children: [text("Covers a week of hot meals for one family.")],
+          }),
+          buildSlot(idFactory, "action", [book("Give", "https://example.com/give", "secondary")]),
+        ],
+      }),
+    ],
+  })
+
+  /** Hermes' `awards`, `certifications`, `affiliations` and `favorite-tools`. */
+  const credentials = buildElement(idFactory, {
+    type: "loom.credential-grid",
+    props: { columns: "three", gap: "snug" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.credential",
+        props: {
+          name: "Solutions Architect, Professional",
+          issuer: "Amazon Web Services",
+          year: "2024",
+          href: "https://example.com/verify/saa",
+        },
+        children: [
+          buildSlot(idFactory, "mark", [
+            buildElement(idFactory, {
+              type: "loom.logo",
+              props: { name: "AWS", image: "https://example.com/aws.svg" },
+            }),
+          ]),
+          buildSlot(idFactory, "meta", [chip("Cloud", "neutral")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.credential",
+        props: { name: "Interaction of the Year", issuer: "The Webbys", year: "2023" },
+        children: [
+          buildSlot(idFactory, "mark", [
+            buildElement(idFactory, { type: "loom.icon", props: { shape: "soft", tone: "accent" } }),
+          ]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.credential",
+        props: { name: "Design Guild", year: "2019–present" },
+        children: [
+          buildSlot(idFactory, "mark", [
+            buildElement(idFactory, {
+              type: "loom.avatar",
+              props: { name: "The Design Guild", image: "https://example.com/guild.png", shape: "soft" },
+            }),
+          ]),
+          buildSlot(idFactory, "meta", [chip("Board member"), chip("Chair, ethics")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.credential",
+        props: {
+          name: "Figma",
+          note: "Every diagram in this repository started as a frame in it.",
+          href: "https://example.com/tools/figma",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Design"), chip("Prototyping")])],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Work with me" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1 },
+                children: [text("What you can book, and why you should believe me")],
+              }),
+            ]),
+            packages,
+            schedule,
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Vouched for" },
+          children: [credentials],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("what you can book, and why you should be believed", () => {
+  it("renders both pairs, with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(bookablePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Six-week track")
+    expect(markup).toContain("Morning vinyasa")
+    expect(markup).toContain("Solutions Architect, Professional")
+    expect(markup).toContain("Every diagram in this repository started as a frame in it.")
+    expect([...markup.matchAll(/class="loom-offering /g)]).toHaveLength(6)
+    expect([...markup.matchAll(/class="loom-credential /g)]).toHaveLength(4)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(bookablePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(bookablePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(bookablePage(BOLD)).diagnostics).toEqual([])
+    expect(render(bookablePage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("turns nine Hermes qualifier fields into badges rather than into nine props", () => {
+    /**
+     * The 0052 call this pair turns on. `duration`, `format`, `day`, `time`,
+     * `level`, `location`, `instructor`, `dietary` and `skills` are nine fields
+     * across seven blocks and there is never exactly one of them on a record —
+     * a class has a day *and* a time *and* a level *and* a room. So they are
+     * nodes in a region, and what is left on the props side is three fields
+     * that are genuinely one-per-record.
+     */
+    expect(propsOfType("loom.offering")).toEqual(["emphasis", "href", "name", "price"])
+    expect(propsOfType("loom.credential")).toEqual(["href", "issuer", "name", "note", "year"])
+  })
+
+  it("holds an offering's prose as a node and a credential's as a prop", () => {
+    /**
+     * 0094, asserted from both sides in one fixture. An offering has a
+     * repeated part — its includes list — so it has a children flow and its
+     * sentence belongs in it, movable below the list. A credential has no
+     * repeated part, so there is no flow for a sentence to be a node *among*,
+     * and 0059's multi-string leaf applies unchanged.
+     */
+    const { markup } = render(bookablePage(EDITORIAL), true)
+    const offering = markup.slice(markup.indexOf("Six-week track"))
+    const credential = markup.slice(markup.indexOf("Figma"))
+
+    expect(offering.slice(0, offering.indexOf("</article>"))).toContain('data-loom-type="loom.prose"')
+    expect(credential.slice(0, credential.indexOf("</article>"))).not.toContain('data-loom-type="loom.prose"')
+    expect(propsOfType("loom.credential")).toContain("note")
+    expect(propsOfType("loom.offering")).not.toContain("note")
+  })
+
+  it("takes the mark as a region, so a wordmark, a glyph and a face are all sayable", () => {
+    /**
+     * Hermes holds it three ways and every one of them is a bare URL, which can
+     * express exactly one rendering. The region holds whichever the content
+     * actually is — and `loom.avatar`'s alt text survives, which a `badge: url`
+     * prop on the card could never have carried.
+     */
+    const { markup } = render(bookablePage(EDITORIAL), true)
+    const placed = [...markup.matchAll(/inline-size:var\(--loom-spacing-8\)/g)]
+
+    expect(placed).toHaveLength(3)
+    expect(markup).toContain('data-loom-type="loom.logo"')
+    expect(markup).toContain('data-loom-type="loom.icon"')
+    expect(markup).toContain('data-loom-type="loom.avatar"')
+    /** The face keeps its own accessible name, which a `badge: url` prop could not carry. */
+    expect(markup).toContain('alt="The Design Guild"')
+  })
+
+  it("stretches a credential's name over the whole card and nothing over an offering's", () => {
+    /**
+     * 0066, decided in advance for both and asserted here because the failure it
+     * prevents is invisible: a card whose surface is clickable *under* its own
+     * booking button. A credential is read, so its name carries the overlay; an
+     * offering is acted on, so no overlay is emitted at all and the control is
+     * the only target.
+     */
+    const { tree } = splitStylesheet(render(bookablePage(EDITORIAL)).markup)
+    const offerings = tree.slice(tree.indexOf("loom-offering"), tree.indexOf("loom-credential"))
+
+    expect([...tree.matchAll(/loom-cover-link/g)]).toHaveLength(2)
+    expect(offerings).not.toContain("loom-cover-link")
+    expect(offerings).toContain("Six-week track")
+  })
+
+  it("reads as a row or as a card by asking how wide it is, not by being told", () => {
+    const { stylesheet, tree } = splitStylesheet(render(bookablePage(EDITORIAL)).markup)
+
+    /**
+     * The design's whole claim. Seven Hermes blocks want two bands — a grid of
+     * cards, and full-width rows with the control at the end — and that is a
+     * question about available width rather than two primitives or a prop an
+     * author would have to keep in step with the grid's own `columns`.
+     *
+     * The mechanic that caught it once: a container query reads its *ancestor*,
+     * never the element that declared the containment, so the flipping element
+     * has to sit inside the card rather than be it.
+     */
+    expect(stylesheet).toContain(".loom-offering {\n  container-type: inline-size;\n}")
+    expect(stylesheet).toContain("@container (min-width: 40rem)")
+    expect(tree).toContain('class="loom-offering-frame"')
+    /** The query is against the card, so nothing here may measure the viewport. */
+    expect(stylesheet.slice(stylesheet.indexOf(".loom-offering"))).not.toContain("vw")
+  })
+
+  it("sets nothing inline that the row layout has to cancel", () => {
+    const { tree } = splitStylesheet(render(bookablePage(EDITORIAL)).markup)
+    const frame = tree.slice(tree.indexOf('class="loom-offering-frame"'))
+    const action = tree.slice(tree.indexOf('class="loom-offering-action"'))
+
+    /**
+     * The trap `stylesheet.ts` names, in the primitive that would suffer most
+     * from it. An inline style beats a rule in that file, so the frame's
+     * direction and the action's `auto` start margin — both cancelled by the
+     * `@container` rule — must not also be set on the element.
+     */
+    const opening = action.slice(0, action.indexOf(">"))
+
+    expect(frame.slice(0, frame.indexOf(">"))).not.toContain("style=")
+    expect(opening).not.toContain("margin-block-start")
+    expect(opening).not.toContain("display:grid")
+    /** The gap is not one of the cancelled values, so it stays where it reads best. */
+    expect(opening).toContain("gap:var(--loom-spacing-2)")
+  })
+
+  it("gives every mark the same square, so a wall of them has one leading edge", () => {
+    const { tree } = splitStylesheet(render(bookablePage(EDITORIAL)).markup)
+
+    /**
+     * The defect a shrink-to-fit box ships with: a wordmark, a round badge and a
+     * glyph are three different widths, so four credentials in a row start their
+     * names at four different places and the ragged column is the first thing
+     * anyone sees.
+     */
+    const boxes = [...tree.matchAll(/inline-size:var\(--loom-spacing-8\);block-size:var\(--loom-spacing-8\)/g)]
+    expect(boxes).toHaveLength(3)
+  })
+
+  it("puts a credential's year above its name rather than beside it", () => {
+    const { tree } = splitStylesheet(render(bookablePage(EDITORIAL)).markup)
+    const card = tree.slice(tree.indexOf("Solutions Architect"))
+
+    /**
+     * The defect the screenshots found and nine assertions did not. The year
+     * was a trailing chip on the name's own line — a résumé's arrangement, and
+     * a good-looking one — until a three-column wall put it beside a name with
+     * about 240px to share. Every credential whose name ran past three words
+     * wrapped to three lines, and nothing shrinks its way out of that: wrapping
+     * is decided before shrinking.
+     *
+     * So the year is a kicker, which is `loom.article`'s rhythm reached for the
+     * second time. Asserted by order rather than by pixels, because the order
+     * is the fix.
+     */
+    const year = tree.indexOf("2024")
+    const name = tree.indexOf("Solutions Architect")
+
+    expect(year).toBeGreaterThan(-1)
+    expect(year).toBeLessThan(name)
+    expect(card.slice(0, card.indexOf("</article>"))).not.toContain("text-wrap:nowrap")
+  })
+
+  it("pins the control to the card's floor so a row of offerings lines its buttons up", () => {
+    const { stylesheet } = splitStylesheet(render(bookablePage(EDITORIAL)).markup)
+
+    /**
+     * Three packages with descriptions of different lengths, and a fourth with
+     * an includes list. The `auto` margin only means something if the cell
+     * fills the row's height, which is what the grid's `stretch` is for.
+     */
+    expect(stylesheet).toContain(".loom-offering-action {\n  display: grid;\n  margin-block-start: auto;\n}")
+    expect(render(bookablePage(EDITORIAL)).markup).toContain("align-items:stretch")
   })
 })

@@ -1,4 +1,4 @@
-# 0094. A same-origin path is decided by resolving it, not by matching it
+# 0096. A same-origin path is decided by resolving it, not by matching it
 
 **Status:** Proposed — **ARCHITECTURAL, needs review.** It shares
 [0069](0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)'s

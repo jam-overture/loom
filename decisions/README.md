@@ -151,4 +151,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0091](0091-motion-stops-in-edit-mode-and-that-is-where-a-decorative-duplicate-belongs.md) | Motion stops in edit mode, and that is where a decorative duplicate belongs | Accepted | §4b |
 | [0092](0092-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md) | A disclosure control owns its button and the primitive owns the region | Accepted | §4b |
 | [0093](0093-a-decorative-copy-is-the-same-children-without-identity.md) | A decorative copy is the same children without identity | Accepted | §4b |
-| [0094](0094-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
+| [0094](0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) | A card's prose is a child when the card has a flow, and a prop when it does not | Accepted | §4b |
+| [0095](0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | A frame carries its URL, and the deployment carries the origins | Accepted | §3, §4b |
+| [0096](0096-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
