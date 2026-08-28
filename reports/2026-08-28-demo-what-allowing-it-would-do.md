@@ -301,6 +301,13 @@ branch's and `main`'s — so the only difference in the frame is the change. Not
 the preview, which this environment cannot open (`vercel.app` is not on the
 sandbox's egress allowlist; the standing 19 August finding).
 
+**Preview:**
+`https://loom-git-demo-08-what-allowi-01d70c-jpizzolato36-6341s-projects.vercel.app/demo`
+
+One push, one preview, built `Ready` on the first attempt. The commit identity
+was left alone, which is the whole of the 22 August finding's recommendation and
+now four runs of it holding.
+
 **To see it yourself:** open `/demo`, press the green button, and read the amber
 line directly above *Apply this change* — then look left at the ringed band and
 find the same three figures. Then open *or type your own*, ask for something the
