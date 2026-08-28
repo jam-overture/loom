@@ -165,13 +165,51 @@ edit from here produces a conflict and no record.
    proposing a fix is open and owned by you. Thirteen open pull requests is the
    thing actually generating these collisions.
 
+## The two conflicted pull requests this lane owned
+
+Found after the unit was pushed, by looking at the whole queue rather than at
+this branch: **#171 and #173 were both `dirty`** — unmergeable against a `main`
+that had moved twice under them. A conflicted pull request is not waiting on
+review, so both were resolved.
+
+The file conflicts were the same three each time and none of them was
+interesting: `FINDINGS.md`, where both sides had appended and both sides were
+kept; `decisions/README.md` and `reference.generated.json`, both generated and so
+both regenerated from `main`'s content with the repo's own tooling rather than
+merged by hand; and one line of `(marketing)/_lib/copy.ts`.
+
+**What was interesting is that both had to renumber.** Each carried an `0094`,
+taken because 0094 was the next free number on `main` the day it was written, and
+`main` has since merged an 0094 of its own. Two records renamed to **0096**, with
+every reference in the findings and the reports moved with them and a paragraph
+in each report saying the renumber happened rather than quietly showing the new
+number. Neither record's content or status changed — #173's is still `Proposed`.
+
+Both are green on the merged head and both are now `clean`:
+
+| | runtime | app | state |
+| --- | --- | --- | --- |
+| #171 | 1763 / 112 files | 1963 / 134 files | `clean` |
+| #173 | 1754 / 112 files | 1963 / 134 files | `clean`, still blocked on its decision |
+
+**This is the collision finding's predicted cost being paid rather than
+forecast**, and it is worth naming plainly: three of this lane's four open pull
+requests now carry an `0096`, and the first to merge takes it. The other two will
+need this pass again. That is not a case for doing the renumber differently — it
+is what a queue of fourteen branches cut from one unmoving `main` costs, per
+merge.
+
 ## Scope
 
-`src/closed-set.ts` (new), `src/record-claims.test.ts` (new),
+This run's unit: `src/closed-set.ts` (new), `src/record-claims.test.ts` (new),
 `src/runtime/gate.ts`, `src/write/commit.ts`, `src/telemetry/episode.ts` and
 their tests. `decisions/` — 0096 added, 0002 and 0007 amended, README and index
 updated. `FINDINGS.md`, this report. Two files outside this lane, both named
 above with the reason: the generated API reference, and one line in
 `(marketing)/_lib/copy.ts`. `src/primitives/` was not opened.
+
+Separately, and on their own branches: the merge commits on
+`framework-14-a-control-that-hands-back-a-number` and
+`framework-15-a-tree-that-links-to-itself`, described above.
 
 Nothing was scheduled and no self-check-in was armed.
