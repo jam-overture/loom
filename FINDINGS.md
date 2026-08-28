@@ -9503,3 +9503,119 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-28 — `TelemetryEvent` has eighteen types and no list of them, which is the third module with this hole
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+one exported line, with the shape already accepted twice inside `src/telemetry/`
+
+A page about telemetry has to say **how much of the vocabulary it is showing**.
+Ten ordinary asks against a three-node tree produce twelve distinct event types;
+the runtime can write eighteen. Printing "twelve" alone would let a reader take
+twelve for the whole set, which is the same comfortable lie a table that hides
+its zeroes tells.
+
+There is no exported way to ask for eighteen. `TelemetryEvent` is a discriminated
+union of string literals — exhaustive in a `switch`, which is the case it was
+built for and it works — and **enumeration has no answer**. What this lane did
+instead is read `telemetryEventSchema.options.length`, and that is the finding:
+a documentation site is now depending on the *internal shape of a Zod schema* to
+count a runtime vocabulary. It is correct today, it is checked by a test, and it
+breaks on a Zod major version for a reason that has nothing to do with Loom.
+
+**This is the third instance of one hole, and `src/telemetry/` has already
+solved it twice.** `EPISODE_RESOLUTION_KINDS` is right beside this type;
+`UNJUDGED_REASONS` is one file over; `PALETTE_SLOTS` is the same pattern outside
+§6. The `WriteOutcome` version of this was filed by this lane on 27 August and is
+still open. So the ask is not a design question:
+
+```ts
+export const TELEMETRY_EVENT_TYPES: readonly TelemetryEvent["type"][] = [ ... ]
+```
+
+ordered however the runtime prefers, with the type-level check that keeps it
+complete. Three things want it and only the first is this lane's: a page that
+says what fraction of the vocabulary it demonstrates; an operations dashboard
+that needs every bucket to exist before the first request rather than
+discovering them; and a conformance check written against §6.
+
+Filed rather than done: a list of a type's members belongs next to the type.
+
+---
+
+## 2026-08-28 — this site can never show a filled-in calibration report, and that is a consequence of 0057 rather than a gap
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+question for the maintainer, not a defect
+
+*What every ask leaves behind* explains calibration and then shows this site's
+own report, which is **empty**: `overall.judged` is `0` and `runtimeAuthored` is
+`8`. That is `calibrationOf` behaving exactly as designed — every proposal here
+was authored by a deterministic interpreter that stamps `confidence: 1`, and a
+confidence nobody graded must not be scored. The page makes that its argument,
+and it is the strongest paragraph on the page.
+
+It is also a ceiling. **A reader finishes that section without ever seeing what
+a calibration gap looks like.** The prose does the arithmetic in words — a
+hundred claims at 0.9, seventy survive, the gap is 0.2 — and words are not the
+same as a table with ten bands in it.
+
+The three ways to close it, and why none is obviously right:
+
+- **A fixture.** Fastest, and it is the thing §4c exists to refuse: a rendered
+  block that is not a real trip through the runtime is a stale snapshot with
+  extra steps, and this page's whole claim is that its numbers were produced
+  rather than typed.
+- **A docs-local interpreter that claims varied confidences.** Real code through
+  the real pipeline, and a lie in the record: it would stamp `authoredBy: "model"`
+  on a computed delta, which is precisely the misattribution 0057 forbids and
+  this page praises the runtime for refusing.
+- **A live model behind an API key at build time.** Honest, and it makes the
+  documentation site fail to build for anybody who clones the repository without
+  a key — the failure mode `docs/routines.md` already rules out for tests.
+
+The one shape that might work is a **fourth `authoredBy`** — something like
+`"simulated"`, scored by calibration and marked as not a real model's record —
+and that is a change to the provenance vocabulary, which is an Accepted
+decision's territory. Not proposing it unasked.
+
+**Recommendation: leave it.** The empty report teaches the more important half
+(a confidence is a claim, and an ungraded one is not one), and the missing half
+is a shape a reader will meet the first time they point this at a real model.
+Worth reopening only if the maintainer wants the bands visible on the site.
+
+---
+
+## 2026-08-28 — two of the four zeroes are left, and `cli` is deliberately last
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+queue this lane is working through, one door per run
+
+The 26 August measurement named four published entry points with **no prose
+anywhere on this site**. `write` was written on 27 August (#175, open) and
+`telemetry` is written by this run.
+
+| Import | Exports | Prose |
+| --- | --- | --- |
+| `@loom/runtime/write` | 21 | a page, on #175 |
+| `@loom/runtime/telemetry` | 62 | **a page**, as of this run |
+| `@loom/runtime/telemetry/postgres` | 4 | named on this run's page, no page of its own |
+| `@loom/runtime/cli` | 23 | none |
+
+`telemetry/postgres` is four exports and it is now **named and shown in a code
+block** on the telemetry page, which is where it belongs — a page of its own
+would be three sentences about swapping one constructor. Treating it as closed
+rather than as a zero.
+
+That leaves `cli`, 23 exports, and it is last on purpose. It is **tooling whose
+help text is already written**, and a page about it is worth less than a page
+about anything a deployment has to operate. What this lane would write instead,
+in order: a *Deploying* page that puts the store, the hold store, the journal and
+the retention run in one place — there is no page today that shows a reader all
+four seams at once — and then `cli`.
+
+Worth stating because the count on each reference page is derived and moves on
+its own as prose is written. What does not move on its own is the judgement about
+which door matters most.

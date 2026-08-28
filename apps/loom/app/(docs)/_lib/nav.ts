@@ -181,6 +181,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
       },
+      {
+        slug: "what-every-ask-leaves-behind",
+        title: "What every ask leaves behind",
+        summary:
+          "The record of what was asked rather than of what happened: what a telemetry record keeps, the eight ways an ask can end, whether a confidence was worth anything, and how a journal is allowed to forget.",
+      },
     ],
   },
   apiReferenceSection,
