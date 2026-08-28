@@ -9675,3 +9675,47 @@ before opening the pull request.* It cost one `git worktree add` and it turned a
 unknown into a sentence in the pull request body. It is the cheap half of the
 problem; the expensive half is that nothing does this automatically, and a check
 added by one lane is a promise the other three have not read.
+
+---
+
+## 2026-08-28 — the preview deployment was blocked, and this lane's brief cannot be satisfied without one
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — needs an account-level action nobody inside a routine can take
+
+Vercel reports **`Deployment was blocked`** on #185, with no build log, no
+preview URL, and a `failure` commit status. The portal brief says, in as many
+words:
+
+> Open the PR against `main` with **the deployed preview URL and a screenshot** —
+> this surface exists to be looked at, and the maintainer judges it by eye.
+
+**Half of that instruction cannot be followed on this run**, and the half that
+can was: four screenshots from a production build of the exact commit are in the
+pull request and the report.
+
+**It is not this pull request's failure, and the evidence is on the repository
+rather than in an assertion.** `pnpm verify` is green on `065277b` — which
+includes `next build` across all five route groups — and #184, opened at 16:06
+today, deployed successfully from the same project. Mine at 18:17 did not.
+Something changed at the account between those two times; the most likely
+candidate is a usage or spend limit for the billing period, since "blocked" is
+the wording Vercel uses when it declines to start a build rather than when a
+build fails.
+
+**There is nothing for a routine to re-run.** This repository has no GitHub
+Actions workflow at all — `.github/` does not exist — so Vercel is the only
+check, and a routine has no way to trigger a Vercel redeploy through the tools it
+has. Pushing an empty commit to kick it is out; that is a rule, and it would not
+work here anyway, because the block is upstream of the build.
+
+**What every lane should know, because every lane's brief asks for the preview
+URL:** if this is a billing-period limit, it will affect the next run of all six
+routines equally, and each will spend tokens discovering it. Recording it once
+here is cheaper than six identical discoveries.
+
+**Recommendation:** check the Vercel project's usage and spending limits. If the
+cap is deliberate, `docs/routines.md` should say what a routine does when the
+preview is unavailable — this run's answer was to publish the screenshots, say
+plainly that the URL is missing and why, and not fabricate one, which is the
+right answer but is currently a judgement call rather than a written rule.
