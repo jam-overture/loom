@@ -6,7 +6,8 @@ import { formTree, sampleTree, type FormTree, type SampleTree } from "../testing
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 
 import { assessChange, type ChangeAssessment } from "./assessment.js"
-import { gate } from "./gate.js"
+import { dispositionReasonCodeSchema } from "./disposition.js"
+import { ESCALATION_LADDER, gate } from "./gate.js"
 import type { IntentOrigin } from "./intent.js"
 import type { DiscardedWork } from "./proposal.js"
 import { policyFingerprintOf } from "./policy-fingerprint.js"
@@ -477,5 +478,44 @@ describe("a change of destination", () => {
     })
 
     expect(disposition.kind).toBe("accepted")
+  })
+})
+
+/**
+ * The ladder as a published list, which is what four surfaces describe in prose.
+ *
+ * A record states how many rungs there are, a lesson teaches them in order, a
+ * documentation page names them and a portal shows a reader which one fired.
+ * Each of those was a count taken by reading this file, and a count taken by
+ * reading a file is wrong from the first time the file changes — which has now
+ * happened twice, once unnoticed for a week.
+ */
+describe("the escalation ladder, published", () => {
+  it("is the rules themselves, in the order they are consulted", () => {
+    expect(ESCALATION_LADDER).toEqual([
+      "confidence-below-floor",
+      "stakes-at-refusal-floor",
+      "irreversible",
+      "discards-later-work",
+      "redirected-submission",
+      "stakes-above-ceiling",
+      "confidence-below-minimum",
+    ])
+  })
+
+  /**
+   * The check that would have caught the stale count: every reason code the
+   * schema declares is either a rung or the acceptance, and every rung appears
+   * once. A rule added without a code, or a code added without a rule, fails
+   * here rather than a week later in somebody's lesson.
+   */
+  it("accounts for every reason code a disposition can carry", () => {
+    expect([...ESCALATION_LADDER].sort()).toEqual(
+      dispositionReasonCodeSchema.options.filter((code) => code !== "within-policy").sort()
+    )
+  })
+
+  it("names each rung once", () => {
+    expect(new Set(ESCALATION_LADDER).size).toBe(ESCALATION_LADDER.length)
   })
 })

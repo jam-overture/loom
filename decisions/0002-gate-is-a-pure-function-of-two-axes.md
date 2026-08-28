@@ -8,6 +8,12 @@
 > decision shipped with §2; this record exists because the two-axis separation
 > is a contract the renderer, the portal, and telemetry all depend on.
 
+> **Amended 2026-08-28**, under [0096](0096-a-record-is-amended-when-only-the-count-moved.md).
+> The rule count below read *six* and the ladder has had seven rungs since 19
+> August: 0035 added the sixth and 0071 the seventh, and neither reverses
+> anything here. The number is now held against `ESCALATION_LADDER` by
+> `src/record-claims.test.ts`, so this sentence cannot go stale again.
+
 ## Context
 
 Something has to decide whether a proposed change may be applied, and that
@@ -32,7 +38,7 @@ mark the change irreversible, and vice versa. Stakes are recorded as named
 factors rather than collapsed to a number, so a disposition can say "removes 14
 nodes and destroys `commerce.cart`" instead of "high".
 
-The decision is six ordered rules, first match wins; the order encodes
+The decision is seven ordered rules, first match wins; the order encodes
 precedence. Irreversibility is escalated **before** the stakes ceiling is
 consulted, so a small permanent change is never quietly auto-applied.
 

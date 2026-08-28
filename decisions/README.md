@@ -41,6 +41,25 @@ A change that contradicts an `Accepted` record is an escalation, not a
 refactor: write the replacement with status `Proposed`, flag it for review, and
 leave the existing record standing until someone decides.
 
+## Correcting a record that is still right
+
+The other thing that happens to a record: the decision stands, and a fact about
+the shape it produced moves underneath it. 0002 records that the Gate is an
+ordered list of rules and says how many — the first half is still exactly true
+and the second was wrong for three weeks.
+
+Superseding that would be false, because nothing was reversed. So **a record is
+amended in place when only the shape moved** (0096): a dated block under the
+header, before `## Context`, naming what moved, which records moved it, and
+saying that nothing is reversed. The record keeps its number, its status and its
+trail. The test is what a reader would do differently — a reader who would now
+*act* differently needs a superseding record; a reader who would write down the
+wrong number needs an amendment.
+
+A count a record states about a list in `src/` is registered in
+`src/record-claims.test.ts` and held against that list, so it fails `pnpm verify`
+rather than a reader.
+
 ## The index below is generated
 
 Write the record, then run `pnpm decisions:index`. Do not edit the table by
@@ -153,3 +172,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0093](0093-a-decorative-copy-is-the-same-children-without-identity.md) | A decorative copy is the same children without identity | Accepted | §4b |
 | [0094](0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) | A card's prose is a child when the card has a flow, and a prop when it does not | Accepted | §4b |
 | [0095](0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | A frame carries its URL, and the deployment carries the origins | Accepted | §3, §4b |
+| [0096](0096-a-record-is-amended-when-only-the-count-moved.md) | A record is amended in place when only the count moved | Accepted | §2 |

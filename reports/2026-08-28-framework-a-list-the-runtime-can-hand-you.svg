@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 456" width="900" height="456" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="900" height="456" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="700" fill="#111827">The same event, before and after</text>
+  <text x="40" y="70" font-size="14" fill="#6b7280">A rule is inserted into the Gate. Everything downstream counts it in prose.</text>
+
+  <!-- BEFORE -->
+  <rect x="40" y="94" width="820" height="152" rx="10" fill="#fdf2f2" stroke="#e5c9c9"/>
+  <text x="60" y="120" font-size="12" font-weight="700" fill="#9b2c2c" letter-spacing="1.2">BEFORE — 4 AUGUST, AND AGAIN ON 19 AUGUST</text>
+
+  <rect x="60" y="134" width="150" height="46" rx="7" fill="#ffffff" stroke="#d6bcbc"/>
+  <text x="135" y="153" font-size="12.5" text-anchor="middle" fill="#111827">a rung is inserted</text>
+  <text x="135" y="169" font-size="11.5" text-anchor="middle" fill="#9ca3af">gate.ts</text>
+
+  <path d="M214 157 H252" stroke="#c0a5a5" stroke-width="1.5" marker-end="url(#dull)"/>
+
+  <rect x="256" y="134" width="150" height="46" rx="7" fill="#ffffff" stroke="#d6bcbc"/>
+  <text x="331" y="153" font-size="12.5" text-anchor="middle" fill="#111827">pnpm verify</text>
+  <text x="331" y="169" font-size="11.5" text-anchor="middle" fill="#15803d">green</text>
+
+  <path d="M410 157 H448" stroke="#c0a5a5" stroke-width="1.5" marker-end="url(#dull)"/>
+
+  <rect x="452" y="134" width="180" height="46" rx="7" fill="#ffffff" stroke="#d6bcbc"/>
+  <text x="542" y="153" font-size="12.5" text-anchor="middle" fill="#111827">0002 still says “six”</text>
+  <text x="542" y="169" font-size="11.5" text-anchor="middle" fill="#9ca3af">and 0007, unnoticed</text>
+
+  <path d="M636 157 H674" stroke="#c0a5a5" stroke-width="1.5" marker-end="url(#dull)"/>
+
+  <rect x="678" y="134" width="162" height="46" rx="7" fill="#ffffff" stroke="#d6bcbc"/>
+  <text x="759" y="153" font-size="12.5" text-anchor="middle" fill="#9b2c2c">lesson 09, ×11</text>
+  <text x="759" y="169" font-size="11.5" text-anchor="middle" fill="#9ca3af">wrong for a week</text>
+
+  <text x="60" y="212" font-size="12.5" fill="#6b7280">Nothing was wrong with the runtime, and nothing was wrong with the decision.</text>
+  <text x="60" y="231" font-size="12.5" fill="#6b7280">What was wrong was a number in a sentence, in the record four surfaces read first.</text>
+
+  <!-- AFTER -->
+  <rect x="40" y="266" width="820" height="176" rx="10" fill="#f1f7f3" stroke="#c6ddcd"/>
+  <text x="60" y="292" font-size="12" font-weight="700" fill="#15803d" letter-spacing="1.2">AFTER — THIS RUN</text>
+
+  <rect x="60" y="306" width="150" height="46" rx="7" fill="#ffffff" stroke="#bfd6c6"/>
+  <text x="135" y="325" font-size="12.5" text-anchor="middle" fill="#111827">a rung is inserted</text>
+  <text x="135" y="341" font-size="11.5" text-anchor="middle" fill="#9ca3af">gate.ts</text>
+
+  <path d="M214 329 H252" stroke="#9fbcaa" stroke-width="1.5" marker-end="url(#live)"/>
+
+  <rect x="256" y="306" width="150" height="46" rx="7" fill="#ffffff" stroke="#bfd6c6"/>
+  <text x="331" y="325" font-size="12.5" text-anchor="middle" fill="#111827">ESCALATION_LADDER</text>
+  <text x="331" y="341" font-size="11.5" text-anchor="middle" fill="#9ca3af">derived, not declared</text>
+
+  <path d="M410 329 H448" stroke="#9fbcaa" stroke-width="1.5" marker-end="url(#live)"/>
+
+  <rect x="452" y="306" width="180" height="46" rx="7" fill="#ffffff" stroke="#bfd6c6"/>
+  <text x="542" y="325" font-size="12.5" text-anchor="middle" fill="#111827">record-claims.test.ts</text>
+  <text x="542" y="341" font-size="11.5" text-anchor="middle" fill="#9ca3af">the registry of counts</text>
+
+  <path d="M636 329 H674" stroke="#9fbcaa" stroke-width="1.5" marker-end="url(#live)"/>
+
+  <rect x="678" y="306" width="162" height="46" rx="7" fill="#fff5f5" stroke="#e0b4b4"/>
+  <text x="759" y="325" font-size="12.5" text-anchor="middle" font-weight="600" fill="#9b2c2c">verify fails</text>
+  <text x="759" y="341" font-size="11.5" text-anchor="middle" fill="#9ca3af">naming the record</text>
+
+  <rect x="60" y="368" width="780" height="56" rx="7" fill="#ffffff" stroke="#d8e3db"/>
+  <text x="76" y="390" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#9b2c2c">0002-gate-is-a-pure-function-of-two-axes.md counts a list in src/, and the list has moved:</text>
+  <text x="76" y="410" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#9b2c2c">expected 'seven' to be 'eight'</text>
+
+
+  <defs>
+    <marker id="dull" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#c0a5a5"/>
+    </marker>
+    <marker id="live" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#9fbcaa"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import type { IntentId, ProposalId, TreeId } from "../ids.js"
 import { assertNever } from "../result.js"
 import type { Disposition } from "../runtime/disposition.js"
@@ -79,16 +80,17 @@ export type EpisodeResolution =
 
 export type EpisodeResolutionKind = EpisodeResolution["kind"]
 
-export const EPISODE_RESOLUTION_KINDS: readonly EpisodeResolutionKind[] = [
-  "committed",
-  "refused",
-  "awaiting-answer",
-  "discarded",
-  "not-interpreted",
-  "not-writable",
-  "failed",
-  "open",
-]
+export const EPISODE_RESOLUTION_KINDS: readonly EpisodeResolutionKind[] =
+  everyMemberOf<EpisodeResolutionKind>()([
+    "committed",
+    "refused",
+    "awaiting-answer",
+    "discarded",
+    "not-interpreted",
+    "not-writable",
+    "failed",
+    "open",
+  ])
 
 export type IntentEpisode = {
   readonly intentId: IntentId
