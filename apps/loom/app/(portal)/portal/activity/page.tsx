@@ -4,10 +4,13 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeTelemetryError, episodesOf, tallyEpisodes } from "@loom/runtime/telemetry"
 
+import { PageViews } from "@/app/(portal)/_components/page-views"
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { unattributedNote } from "@/app/(portal)/_lib/episode-view"
+import { scopedLead } from "@/app/(portal)/_lib/page-views"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { storeIsDurable } from "@/app/(portal)/_lib/store"
 
@@ -79,21 +82,29 @@ const ActivityPage = async ({
 
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="text-2xl tracking-tight">Activity</h1>
-          {scope?.success && (
-            <Link href="/portal/activity" className="text-xs">
-              Show every page →
-            </Link>
-          )}
-        </div>
+      <header className="flex flex-col gap-2">
+        <h1 className="text-2xl tracking-tight">Activity</h1>
+        {/*
+         * Scoped, this screen used to make the deployment's claim over one
+         * page's rows: the heading said `Activity`, the sentence said
+         * "Everything anyone has asked Loom to change", and the only thing that
+         * said otherwise was a link in the corner. The sentence names the page
+         * now, and the corner link has become the strip below.
+         */}
         <p className="text-ink-muted text-sm">
-          Everything anyone has asked Loom to change, newest first — including the changes it
-          wasn&rsquo;t allowed to make and the requests it didn&rsquo;t understand. Those leave no
-          other trace anywhere.
+          {scope?.success ? (
+            <PlainSentence line={scopedLead("asked", scope.data)} />
+          ) : (
+            <>
+              Everything anyone has asked Loom to change, newest first — including the changes it
+              wasn&rsquo;t allowed to make and the requests it didn&rsquo;t understand. Those leave
+              no other trace anywhere.
+            </>
+          )}
         </p>
-      </div>
+      </header>
+
+      {scope?.success && <PageViews treeId={scope.data} current="asked" />}
 
       {episodes.length === 0 ? (
         <StateNotice
@@ -101,7 +112,12 @@ const ActivityPage = async ({
           title="Nothing has been asked for yet."
           action={
             scope?.success ? (
-              <Link href="/portal/activity">Show every page →</Link>
+              /*
+               * Scoped and empty, the answer to "what do I do now" is not
+               * "look at every page" — it is to open this one and ask it for
+               * something, which is what puts the first row here.
+               */
+              <Link href={`/portal/pages/${scope.data}`}>Open this page →</Link>
             ) : (
               <Link href="/portal/pages">Open one of your pages →</Link>
             )
@@ -122,7 +138,11 @@ const ActivityPage = async ({
 
           <ul className="flex flex-col gap-3">
             {newestFirst.map((episode) => (
-              <EpisodeCard key={episode.intentId} episode={episode} />
+              <EpisodeCard
+                key={episode.intentId}
+                episode={episode}
+                scoped={scope?.success === true}
+              />
             ))}
           </ul>
         </>
