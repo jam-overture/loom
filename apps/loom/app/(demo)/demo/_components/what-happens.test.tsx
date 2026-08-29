@@ -45,6 +45,25 @@ describe("the three steps", () => {
     expect(screen.getByText(/can it be taken back/i)).toBeTruthy()
   })
 
+  /**
+   * The frame must not promise on behalf of a control that frequently produces
+   * a question instead. Step three used to say the page had *"a button that
+   * really puts the page back"* — *really* meaning *a real change rather than a
+   * rewind*, and read by a stranger as *immediately*. Three of the five changes
+   * this surface offers are held when a visitor asks for them back.
+   *
+   * Asserted as the promise rather than as the sentence: what must survive is
+   * that the frame says undoing is weighed, and never says it is instant.
+   */
+  it("does not promise the undo is instant, and says it is weighed", () => {
+    const { container } = render(<WhatHappens />)
+    const words = container.textContent ?? ""
+
+    expect(words).toMatch(/change of its own/)
+    expect(words).toMatch(/weighs that one too/)
+    expect(words).not.toMatch(/really puts the page back/)
+  })
+
   it("uses no vocabulary it has not earned", () => {
     const { container } = render(<WhatHappens />)
     const words = (container.textContent ?? "").toLowerCase()

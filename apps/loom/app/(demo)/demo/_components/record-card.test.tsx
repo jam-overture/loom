@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
+import { UNDO_IS_A_CHANGE } from "@/app/(demo)/_lib/undo"
 
 import { RecordCard } from "./record-card"
 
@@ -118,6 +119,34 @@ describe("a record card", () => {
 
     expect(screen.getByText(/1, replacing 0/)).toBeTruthy()
     expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+  })
+
+  /**
+   * The undo does not promise the page will move, because three of the five
+   * changes this surface offers come back held when a visitor asks for them
+   * back — the panel's primary one included. Without this line a stranger
+   * presses the only control on the payoff card and watches nothing happen.
+   *
+   * It is asserted here as *on the card, under the button that needs it*: the
+   * words themselves and the reason for them are `_lib/undo.ts`'s, and are
+   * held there.
+   */
+  it("says what the undo is before it is pressed, next to it", () => {
+    render(<RecordCard record={APPLIED} />)
+
+    const note = screen.getByText(UNDO_IS_A_CHANGE)
+    const button = screen.getByRole("button", { name: "Put it back" })
+
+    expect(note).toBeTruthy()
+    /* The two are one control: a caption elsewhere on the card is not this. */
+    expect(note.parentElement?.contains(button)).toBe(true)
+  })
+
+  /** No revision, nothing to put back, and nothing to explain about putting it back. */
+  it("does not explain an undo it is not offering", () => {
+    render(<RecordCard record={HELD} />)
+
+    expect(screen.queryByText(UNDO_IS_A_CHANGE)).toBeNull()
   })
 
   /**

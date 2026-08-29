@@ -281,6 +281,54 @@ describe("undo", () => {
     /** Nothing was written: the page is still where the second change left it. */
     expect((await headOf(session)).revision).toBe(2)
   })
+
+  /**
+   * Why the payoff card's undo carries a sentence saying Loom may ask first.
+   *
+   * The demo's primary control asks for a band to be taken off the page. Putting
+   * it back restructures the page at the same depth, so the Gate weighs the undo
+   * exactly as it weighed the change and stops it for the same reason — which
+   * means the last press in the demo's best sixty seconds produces a question
+   * and moves nothing. The button said *Put it back* and nothing qualified it.
+   *
+   * This is the property the sentence is written against, and it is not a fact
+   * about a fixture: retune the policy and the sentence stops being necessary,
+   * change what a preset does and it may stop being true. Either way somebody
+   * should be told here rather than by a stranger pressing the button.
+   */
+  it("weighs the undo of the panel's primary ask, and holds that too", async () => {
+    const session = await sessionFor("undo-leading")
+    const held = await ask(session, DEMO_LEADING_PRESET)
+    const proposalId = held.heldProposalId
+    if (!proposalId) throw new Error("nothing was held")
+
+    const answering = beginDemoWrite(session)
+    await confirmHeld(answering.path, {
+      proposalId: proposalIdSchema.parse(proposalId),
+      actor: "a demo visitor",
+    })
+    const applied = recordFromEvents(answering.narrated(), held)
+    const revision = applied?.revision?.produced
+    if (revision === undefined) throw new Error("nothing was applied")
+
+    const undoing = beginDemoWrite(session)
+    const outcome = await revertRevision(undoing.path, {
+      treeId: session.seed.treeId,
+      revision,
+      seed: session.seed,
+      origin: "user-instruction",
+      actor: "a demo visitor",
+    })
+
+    expect(outcome.kind).toBe("held")
+
+    const undo = recordFromEvents(undoing.narrated())
+
+    expect(undo?.outcome).toBe("awaiting-you")
+    expect(undo?.disposition?.ruleCode).toBe("stakes-above-ceiling")
+    /** The press moved nothing: the page is still where the change left it. */
+    expect((await headOf(session)).revision).toBe(1)
+  })
 })
 
 describe("the demo's policy", () => {

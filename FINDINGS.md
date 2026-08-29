@@ -6627,7 +6627,13 @@ nobody notices until a maintainer looks at the whole screen again.
 ## 2026-08-23 — the mark's chip lands on the words when a band's content starts at its top right
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a unit
-of its own, and visible in this run's `applied` screenshot
+of its own, and visible in this run's `applied` screenshot. **Deferred a fourth
+time on 29 August**, and it is now the oldest open thing in this lane. It is
+visible again in that run's `question` screenshot, on the same quote, on the
+same line. The 25 August entry left it a measured proposal — the collision is
+always on a `near` mark, and the free space is the gap the missing node left,
+directly above the neighbour — so what is left is a browser and an hour. It is
+the next unit unless a maintainer comment outranks it.
 
 `spotlightCss` pins the chip at `inset: 6px 6px auto auto` — wholly inside the
 band's top-right corner. Both halves of that were corrections the 22 August run
@@ -8745,8 +8751,11 @@ real, is populated, and has four consumers and one non-consumer.
 
 ## 2026-08-25 — "Put it back" does not put it back on the first press, and the frame beside it says it does
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a unit
-of its own, and the recommended next one
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+#168 — option 3 taken, and option 2 with it. The measurements the entry was
+missing are on the 29 August entry below: it is three undos in five, the primary
+one included, not an edge. The same run found a second half nobody had noticed —
+the button was *withdrawn* by the press that held it — and fixed that too.
 
 Press the primary ask, answer it, then press **Put it back**. The page does not
 move. What appears is a second card: *"Undo revision 1." · Waiting on you · Loom
@@ -9503,3 +9512,163 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-29 — a record does not say which change an undo is undoing, so a surface cannot pair the two
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open
+
+An undo is a change of its own (0028), interpreted by `loom/revert`, assessed,
+gated and logged like any other. That is right, and it leaves the two changes
+**unrelated in the record**. Nothing on the undo's record names the revision it
+was planned against: `ChangeRecord` carries `revision: { produced, replaced }`
+for what the undo itself did, `interpretation.interpreter` (`loom/revert`), and
+an utterance the runtime writes — `"Undo revision 1."` — which is the only place
+the target number appears at all, as prose.
+
+What that costs a surface, concretely, on the demo's payoff card:
+
+- The card for change *A* wants to know whether an undo of *A* is currently
+  waiting on an answer, so it can stop offering a second one and say where the
+  question went. It cannot ask: the held undo's record is in the same list, and
+  there is no field to match on short of parsing `"Undo revision 1."`.
+- So this run fell back to the client's own action state — what *this* card's
+  last press came back as — which is correct for the press and cannot survive a
+  reload, and goes stale the moment the visitor answers the question elsewhere.
+  That is why the fix that shipped is "keep offering the undo" rather than
+  "point at the question": the honest sentence needs a fact the record does not
+  carry.
+
+**Recommendation.** A revert's proposal already knows the revision it inverts —
+`revertRevision` is handed it and `revertInterpreter` checks it. Carrying it
+onto the change as a field (`inverts: number`, or a reference to the intent it
+undoes) would make "what became of this change" answerable by every surface
+rather than by none. The portal's history screen wants the same pair for the
+same reason: it lists a revert and the revision it reverted as two unconnected
+rows.
+
+Filed rather than built: it is a field on the record the runtime narrates, so it
+is `src/`, and this lane does not open `src/`.
+
+---
+
+## 2026-08-29 — a card says a change is live on the page after the page has been put back
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
+unit of its own, measured here, and the recommended next one after the chip
+
+Found while fixing the undo's promise, and left alone deliberately: it is a
+claim about what a record's *state* means rather than about what a control
+promises, and this run had already changed one thing the payoff card says.
+
+Press the primary ask, allow it, press **Put it back**, and answer *Apply this
+change*. The page goes back — and the first card still reads:
+
+> **Applied** · *This change is live on the page beside you. “Put it back”
+> undoes it.*
+
+Every word of that was true and one of them has stopped being. The record is
+right: the change *was* applied, at revision 1, and a log that forgot it would
+be worse than one that over-claims. What is wrong is the demo's own override of
+`applied`'s meaning in `_lib/report.ts`, which says where the change is *now* —
+and "now" moved.
+
+Three things make it awkward rather than obvious, which is why it is a unit:
+
+1. **The card's own undo is already handled.** `undoStillOffered` withdraws the
+   button on exactly this outcome (`moved`), so the card offers nothing false.
+   It only *says* something false.
+2. **Pairing the two changes is not currently possible** — see the finding above.
+   Without a field naming what an undo undid, a card cannot know its own change
+   was reverted; the client-side answer goes stale on reload.
+3. **The shared table cannot fix it.** `CHANGE_STATES.applied` is the portal's
+   and says *"You can undo it from History"*; the demo overrides it because it
+   has no History. A third sentence for "applied, then put back" is not a state
+   the runtime has.
+
+**Recommendation.** Wait for `inverts` (the finding above) rather than guessing.
+With it, this is two lines: a card whose revision a later record inverted reads
+*"This change was applied, and you have since put it back."* Without it, the
+only honest short-term move is to soften the override to *"This change was
+applied at revision 1"* and stop asserting where it is — which loses a good
+sentence to fix a rare one, and is not worth it yet.
+
+---
+
+## 2026-08-29 — the loudest jargon on the demo is a sentence the runtime wrote, in the slot reserved for the visitor's own words
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+The record card leads with `record.utterance`, in quotes, at the largest size on
+the card, and the comment above it says why: *"the one line on the card a
+visitor wrote themselves, or pressed."* On every preset that is true — *“Take
+the numbers band off the page.”* On the undo it is not. `revertRevision`
+composes the utterance and it reads:
+
+> **“Undo revision 1.”**
+
+`revision` is on `what-happens.test.tsx`'s list of vocabulary the frame may not
+use because a stranger has not earned it — and here it is, quoted, on the card a
+stranger reaches at the end of the demo's best sixty seconds, attributed to
+them (*asked by a demo visitor*, which is accurate: they pressed the button).
+
+Not fixed here, and the reason is worth stating rather than deferring silently:
+**the demo must not invent words for a record.** Overriding the utterance would
+put a sentence in quotation marks that nothing in the log ever said, on the one
+surface whose argument is that the account is the runtime's own. Two honest
+routes exist and both belong to somebody:
+
+- **This lane.** Print the visitor's *act* rather than the runtime's utterance
+  when they are not the same — the card already knows this is a revert
+  (`interpretation.interpreter === "loom/revert"`) — and keep the runtime's
+  utterance in the disclosure verbatim. Cheap, honest, and one more thing the
+  card decides.
+- **`Loom daily build`.** Have `revertRevision` compose an utterance a person
+  would recognise, since it is the one utterance in the system with no human
+  author. It reaches the portal's history and activity screens too, where it
+  reads exactly as oddly.
+
+The second is better if it is wanted; the first is this lane's to take and does
+not wait on anyone.
+
+---
+
+## 2026-08-29 — the decisions count, sixth occurrence, and it is red on `main` right now
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — dated on the 19, 21, 23, 24 and
+25 August entries rather than argued again
+
+`FACTS.decisions` is `"94"`. `decisions/` holds 95 records. `facts.test.ts`
+fails on a clean checkout of `main` with nothing of this branch applied —
+verified by stashing this run's diff and running that file alone — so **every
+lane's merge gate is red before its own work starts**, and every lane's report
+this week has to explain a failure it did not cause.
+
+Nothing new in the shape. The sixth data point, the first one where the count
+was already stale on `main` rather than being made stale by the run that found
+it, and the same one-line fix the 19 August entry named: derive the number the
+way `facts.test.ts` derives it, and there is nothing left to forget.
+
+This run did not edit `copy.ts`. It is `Loom marketing`'s file, the number is
+its lane's claim, and a demo run reaching into the marketing route group to fix
+its own merge gate is the boundary this repository is careful about.
+
+---
+
+## 2026-08-29 — `21st.dev` re-verified blocked, tenth consecutive run, sixth lane
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged, on 29 August.
+The standing answer is on the 21 August entry: the committed policy allows the
+domain for the tool and the proxy does not.
+
+The cost this run, honestly: nil. What was designed was one muted line under an
+existing button, in the same shape `AskPanel` already uses for the promise under
+its primary ask, and the thing that decided it was a before/after of the same
+card in a browser. But that is ten runs of a named visual standard that no lane
+told to consult it has ever been able to reach, and the entry should be dated
+until it is either opened or removed from the briefs.

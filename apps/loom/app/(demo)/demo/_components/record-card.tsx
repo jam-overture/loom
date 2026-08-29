@@ -9,6 +9,7 @@ import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 import { answerNote } from "@/app/(demo)/_lib/answer"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
+import { UNDO_IS_A_CHANGE, undoStillOffered } from "@/app/(demo)/_lib/undo"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
@@ -177,17 +178,37 @@ export const RecordCard = ({
         </div>
       )}
 
-      {record.revision && !undoReport && (
-        <form action={undo}>
-          <input type="hidden" name="revision" value={record.revision.produced} />
-          <button
-            type="submit"
-            disabled={undoing}
-            className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover w-full rounded-md border px-3 py-1.5 text-xs transition-colors disabled:opacity-60"
-          >
-            {undoing ? "Undoing…" : "Put it back"}
-          </button>
-        </form>
+      {/*
+        * The inverse, as a button — and, since this run, as a button that says
+        * what it is.
+        *
+        * Three of the five changes this surface offers come back from the Gate
+        * *held* when a visitor asks for them back, including the one the panel
+        * leads with, because putting a band back restructures the page just as
+        * taking it off did. So the press that a stranger reads as "undo" is
+        * frequently a press that produces a question and moves nothing, and
+        * the card said nothing about that in advance.
+        *
+        * `_lib/undo.ts` owns both halves: the sentence, and whether the button
+        * is still on offer at all. The line goes under the control rather than
+        * inside it, which is the same shape `AskPanel` uses for the promise
+        * under its primary ask — what the button says is the ask, what the line
+        * says is what asking means here.
+        */}
+      {undoStillOffered(record, undoReport) && record.revision && (
+        <div className="flex flex-col gap-1.5">
+          <form action={undo}>
+            <input type="hidden" name="revision" value={record.revision.produced} />
+            <button
+              type="submit"
+              disabled={undoing}
+              className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover w-full rounded-md border px-3 py-1.5 text-xs transition-colors disabled:opacity-60"
+            >
+              {undoing ? "Undoing…" : "Put it back"}
+            </button>
+          </form>
+          <p className="text-ink-muted text-2xs">{UNDO_IS_A_CHANGE}</p>
+        </div>
       )}
 
       {effect && <ProposalEffectView effect={effect} />}

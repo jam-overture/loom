@@ -23,6 +23,17 @@
  * The steps stay after the first change lands rather than disappearing, because
  * they are the frame a visitor reads the cards through. What changes is that
  * step three stops being a promise and becomes the cards underneath it.
+ *
+ * **Step three said *really* and it was doing the opposite of its job.** *"A
+ * button that really puts the page back, because undoing is a change of its own
+ * rather than a rewind"* was written to mean *a real change, not a rewind* —
+ * and a stranger reads *really* as *immediately*. It is the frame, so it was
+ * promising on behalf of a control three inches below it that frequently
+ * produces a question instead: three of the five changes this surface offers
+ * are held when a visitor asks for them back, the primary one included
+ * (`_lib/undo.ts` has the measurements). The claim it was reaching for is
+ * better than the one it made, so the sentence keeps it and drops the word:
+ * undoing is a change of its own, which is *why* Loom weighs that one too.
  */
 
 const STEPS: readonly { readonly title: string; readonly body: string }[] = [
@@ -36,7 +47,7 @@ const STEPS: readonly { readonly title: string; readonly body: string }[] = [
   },
   {
     title: "The record appears",
-    body: "What you asked for, what was decided and why it was decided that way — and a button that really puts the page back, because undoing is a change of its own rather than a rewind.",
+    body: "What you asked for, what was decided and why it was decided that way — and a button that puts the page back. Undoing is a change of its own, so Loom weighs that one too.",
   },
 ]
 

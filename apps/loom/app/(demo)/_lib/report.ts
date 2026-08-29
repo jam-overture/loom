@@ -70,6 +70,34 @@ export const demoState = (state: ChangeState): PlainState => {
   return override === undefined ? shared : { ...shared, meaning: override }
 }
 
+/**
+ * Whether the tree on the stage is different from the one that was there before
+ * the press — one answer for every state, and `applied` is the only yes.
+ *
+ * A total record rather than `state === "applied"`, so a state added to the
+ * shared table stops this file compiling until somebody has said which of the
+ * two it is. The alternative silently defaults a new state to "the page moved",
+ * which is the answer that makes a control withdraw itself, and the answer that
+ * is wrong for every state on this list but one.
+ *
+ * `waiting` is the entry worth reading twice: the runtime did everything it was
+ * asked to and the page did not move, which is the whole of what *Put it back*
+ * gets wrong when nobody writes this down.
+ */
+const MOVED_THE_PAGE: Readonly<Record<ChangeState, boolean>> = {
+  applied: true,
+  waiting: false,
+  refused: false,
+  declined: false,
+  misunderstood: false,
+  "no-change": false,
+  "not-saved": false,
+  "already-answered": false,
+  unfinished: false,
+}
+
+const movedThePage = (state: ChangeState): boolean => MOVED_THE_PAGE[state]
+
 export type WriteReport = {
   readonly tone: OutcomeTone
   /** The plain name of the state. Shown unasked. */
@@ -94,6 +122,22 @@ export type WriteReport = {
    * it is not said at all.
    */
   readonly recorded: boolean
+  /**
+   * Whether the page a visitor is looking at moved because of this.
+   *
+   * The distinction `recorded` cannot make, and the one *Put it back* turns on.
+   * A held undo is a complete success by every measure the runtime keeps — the
+   * proposal was written, custody was taken, the question was asked, and there
+   * is a card for all of it — and the page is exactly where it was. A control
+   * deciding whether it has anything left to offer is asking about the page,
+   * not about the write, so it gets a field that says so rather than inferring
+   * it from a tone or a headline.
+   *
+   * Derived from the state in every case, never asserted at a call site: it is
+   * a fact about the outcome the runtime handed back, and a second opinion
+   * about it is the drift `stateReport` exists to prevent.
+   */
+  readonly moved: boolean
 }
 
 /**
@@ -112,11 +156,19 @@ export const stateReport = (
 ): WriteReport => {
   const plain = demoState(state)
 
-  return { tone: plain.tone, headline: plain.label, meaning: plain.meaning, detail, recorded }
+  return {
+    tone: plain.tone,
+    headline: plain.label,
+    meaning: plain.meaning,
+    detail,
+    recorded,
+    moved: movedThePage(state),
+  }
 }
 
 export const reportOf = (outcome: WriteOutcome): WriteReport => {
-  const plain = demoState(stateOfWrite(outcome.kind))
+  const state = stateOfWrite(outcome.kind)
+  const plain = demoState(state)
 
   return {
     tone: plain.tone,
@@ -124,6 +176,7 @@ export const reportOf = (outcome: WriteOutcome): WriteReport => {
     meaning: plain.meaning,
     detail: describeWriteOutcome(outcome),
     recorded: true,
+    moved: movedThePage(state),
   }
 }
 
@@ -147,6 +200,8 @@ export const revertReportOf = (outcome: RevertOutcome): WriteReport =>
         meaning: CANNOT_UNDO.meaning,
         detail: describeRevertOutcome(outcome),
         recorded: true,
+        /** Loom could not work out what putting it back would mean, so nothing was put back. */
+        moved: false,
       }
     : reportOf(outcome)
 
@@ -162,4 +217,5 @@ export const invalidReport = (issue: string): WriteReport => ({
   meaning: "That didn't reach Loom, so nothing on the page has changed.",
   detail: issue,
   recorded: false,
+  moved: false,
 })

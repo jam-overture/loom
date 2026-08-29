@@ -99,6 +99,23 @@ describe("a state the runtime does not hand back as an outcome", () => {
   })
 })
 
+describe("whether the page moved", () => {
+  /**
+   * The field the payoff card's undo turns on, and the reason it is not
+   * `recorded`. A held undo is recorded, narrated, carded — and the page a
+   * visitor is looking at is exactly where it was.
+   */
+  it("is true of the one state that means the tree on the stage is different", () => {
+    const moved = STATES.filter((state) => stateReport(state, "", true).moved)
+
+    expect(moved).toEqual(["applied"])
+  })
+
+  it("is false for anything that never reached the runtime", () => {
+    expect(invalidReport("nothing was sent").moved).toBe(false)
+  })
+})
+
 describe("what the panel repeats", () => {
   /**
    * Everything the runtime narrated has a card under the panel carrying the
