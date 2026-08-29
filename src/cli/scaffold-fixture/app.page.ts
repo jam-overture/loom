@@ -13,10 +13,10 @@ const props = z.object({}).strict()
 
 type Props = z.infer<typeof props>
 
-export const loomPage = definePrimitive({
-  type: "loom.page",
+export const appPage = definePrimitive({
+  type: "app.page",
   /** One line. This is what a model reads when choosing between primitives. */
-  description: "Describe what loom.page is for",
+  description: "Describe what app.page is for",
   props,
   /** Name a slot here for every region this primitive projects children into. */
   slots: [],

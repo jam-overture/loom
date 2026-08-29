@@ -1,6 +1,7 @@
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 
+import { isFrameworkNamespaced } from "./namespace.js"
 import type { CliCommand, CliError } from "./plan.js"
 import { RESERVED_PRIMITIVE_TYPES } from "./templates.js"
 
@@ -89,6 +90,16 @@ export const parseArguments = (argv: readonly string[]): Result<CliCommand, CliE
 
     if (RESERVED_PRIMITIVE_TYPES.includes(type)) {
       return err({ code: "reserved-primitive-type", type })
+    }
+
+    /**
+     * Refused here rather than at planning, because a name belonging to the
+     * framework is a property of the string — the same reason a malformed type
+     * is refused here. It costs a directory read the host was never going to
+     * benefit from.
+     */
+    if (isFrameworkNamespaced(type)) {
+      return err({ code: "framework-namespace", type })
     }
 
     return ok({ kind: "add-primitive", directory: options.value.directory, type })

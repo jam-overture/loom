@@ -2,6 +2,7 @@ import { assertNever, err, ok, type Result } from "../result.js"
 
 import { DEFAULT_DIRECTORY, parseArguments } from "./args.js"
 import type { FileSystem } from "./filesystem.js"
+import { FRAMEWORK_NAMESPACE, hostAlternativeFor, HOST_NAMESPACE } from "./namespace.js"
 import { planCommand, PRIMITIVES_DIRECTORY, type CliError } from "./plan.js"
 
 /**
@@ -24,7 +25,9 @@ init writes a starter primitive, a generated registry, and a conformance test
 into <directory>/${PRIMITIVES_DIRECTORY}. add primitive declares one more and
 regenerates the registry from the directory's contents.
 
-A type is dot-namespaced kebab-case: loom.card, commerce.product-card.`
+A type is dot-namespaced kebab-case: ${HOST_NAMESPACE}.card, commerce.product-card.
+${FRAMEWORK_NAMESPACE}.* is the framework's own namespace and is refused — those
+names belong to the primitives @loom/runtime already registers.`
 
 export type CliReport = {
   readonly written: readonly string[]
@@ -44,6 +47,8 @@ export const describeCliError = (error: CliError): string => {
       return `"${error.type}" is not a valid primitive type — expected dot-namespaced kebab-case, like commerce.product-card`
     case "reserved-primitive-type":
       return `"${error.type}" is reserved: its module would overwrite the generated registry`
+    case "framework-namespace":
+      return `"${error.type}" is in the framework's namespace — @loom/runtime registers ${FRAMEWORK_NAMESPACE}.* and a registry refuses two definitions with one type. Try "${hostAlternativeFor(error.type)}"`
     case "already-registered":
       return `"${error.type}" is already declared — edit its definition rather than regenerating it`
     case "file-exists":

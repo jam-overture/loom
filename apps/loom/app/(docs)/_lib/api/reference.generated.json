@@ -5921,7 +5921,7 @@
             {
               "name": "CliError",
               "kind": "type",
-              "signature": "type CliError = {\n    readonly code: \"unknown-command\";\n    readonly given: string;\n} | {\n    readonly code: \"missing-argument\";\n    readonly argument: string;\n} | {\n    readonly code: \"unexpected-argument\";\n    readonly given: string;\n} | {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"reserved-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"already-registered\";\n    readonly type: string;\n} | {\n    readonly code: \"file-exists\";\n    readonly path: string;\n} | {\n    readonly code: \"filesystem-failed\";\n    readonly path: string;\n    readonly detail: string;\n};",
+              "signature": "type CliError = {\n    readonly code: \"unknown-command\";\n    readonly given: string;\n} | {\n    readonly code: \"missing-argument\";\n    readonly argument: string;\n} | {\n    readonly code: \"unexpected-argument\";\n    readonly given: string;\n} | {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"reserved-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"framework-namespace\";\n    readonly type: string;\n} | {\n    readonly code: \"already-registered\";\n    readonly type: string;\n} | {\n    readonly code: \"file-exists\";\n    readonly path: string;\n} | {\n    readonly code: \"filesystem-failed\";\n    readonly path: string;\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -5970,7 +5970,7 @@
             {
               "name": "CLI_USAGE",
               "kind": "value",
-              "signature": "const CLI_USAGE = \"loom \\u2014 scaffolding for the Loom primitive registry\\n\\nUsage:\\n  loom init [--dir <directory>]\\n  loom add primitive <type> [--dir <directory>]\\n  loom --help\\n\\nOptions:\\n  --dir <directory>   Where the Loom source lives (default: loom)\\n\\ninit writes a starter primitive, a generated registry, and a conformance test\\ninto <directory>/primitives. add primitive declares one more and\\nregenerates the registry from the directory's contents.\\n\\nA type is dot-namespaced kebab-case: loom.card, commerce.product-card.\"",
+              "signature": "const CLI_USAGE = \"loom \\u2014 scaffolding for the Loom primitive registry\\n\\nUsage:\\n  loom init [--dir <directory>]\\n  loom add primitive <type> [--dir <directory>]\\n  loom --help\\n\\nOptions:\\n  --dir <directory>   Where the Loom source lives (default: loom)\\n\\ninit writes a starter primitive, a generated registry, and a conformance test\\ninto <directory>/primitives. add primitive declares one more and\\nregenerates the registry from the directory's contents.\\n\\nA type is dot-namespaced kebab-case: app.card, commerce.product-card.\\nloom.* is the framework's own namespace and is refused \\u2014 those\\nnames belong to the primitives @loom/runtime already registers.\"",
               "truncated": false,
               "summary": ""
             },
