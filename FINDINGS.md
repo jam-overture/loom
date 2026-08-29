@@ -5071,7 +5071,19 @@ in this lane the same call.
 ## 2026-08-23 — a design token guarantees the value comes from the theme, and nothing about it being different from the one beside it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — still open after #149, and now with a number on it. The call asked for
+**closed by `framework-19-two-inks-a-reader-tells-apart`.** The call this asked
+for is made: it is worth a check, and the objection that stopped it — that the
+bar would have to be invented — is answered by measuring in a space where a
+threshold can be borrowed. `src/theme/separation.ts` measures CIELAB ΔE between
+the pairs the library asks a reader to distinguish and holds them to the
+just-noticeable difference, which is a published property of vision rather than
+a number chosen to fit these palettes. It found three palettes where a link in a
+paragraph is the paragraph's own colour; both new findings of 29 August are its
+output. The original text is kept below because its reasoning is what the fix
+had to answer.
+
+The state before the fix, for the record: still open after #149, and now with a
+number on it. The call asked for
 was made and it was *not yet*, for a reason the record states: contrast between
 two inks is a different question from legibility of one ink on a ground, and the
 bar for it would be invented rather than borrowed from WCAG. What #149 did add
@@ -9503,3 +9515,125 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-29 — a link inside a paragraph is the paragraph's own colour, in the palette all four surfaces wear
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`,
+`@jonathanbravecredit` · **Status:** open — measured and pinned, not fixed,
+because both candidate fixes belong to somebody else
+
+`minimal` sets `accent: "#0a0a0a"`, which is its own `fg-default`, and says why
+in a comment: *"Black, so the green is a highlight and not the biggest thing on
+the page."* That is a defensible palette decision and it has a consequence
+nobody had measured.
+
+`loom.link` with `tone: "accent"` — documented as *"the one link in a paragraph
+that is the point of the paragraph"* — renders that colour, at rest, with
+`weight("body")` and no underline: the `loom-underline` rule wipes in on hover
+and focus only. Inside a `loom.prose`, which paints `fg-default`, the link is
+**the same colour, the same weight and unmarked**. It is a link a reader cannot
+see until the pointer is already on it, and a reader using a keyboard or a touch
+screen never finds it at all.
+
+Two more palettes land inside a just-noticeable difference of the same thing:
+`graphite` at ΔE 0.86 and `obsidian` at ΔE 1.03. Eighteen are clear, most of
+them by a wide margin.
+
+**Three fixes, none of them this lane's to choose.**
+
+- **`loom.link` marks itself.** An underline at rest for `tone: "accent"`, which
+  is what a link in running text has looked like since 1993, with the wipe
+  reserved for the nav rows the primitive was written for. This is the fix I
+  would take and it is `src/primitives/`, so it is `Loom primitives`' call.
+- **`minimal` moves its `accent`.** It clears the collapse and costs the palette
+  the thing its comment is about. Not a routine's decision to make on the
+  palette every published surface wears.
+- **Nothing, deliberately** — `tone: "accent"` is documented for one link in a
+  paragraph and a deployment that never uses it never meets this. Then the entry
+  stands as the reason the pin in `separation.test.ts` names three palettes.
+
+Not fixed here on either count, and the check that found it is pinned to exactly
+these three, so a fourth palette cannot join them quietly.
+
+---
+
+## 2026-08-29 — a surface-toned band is invisible on six palettes, and a card in the same six is not
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — a consequence of a decision that was made on purpose, surfacing somewhere
+the decision did not look
+
+The same audit as the entry above. `bg-canvas` and `bg-surface` are within a
+just-noticeable difference on six of twenty-one palettes, `minimal` at ΔE 0.00
+exactly — and that is deliberate, stated in the palette's own comment: *"setting
+it to the page colour means every one of those is defined by its border instead
+of by a change of background."*
+
+It works for every primitive that draws a border. `loom.card` outlines its
+surface with `border-subtle` and the audit confirms the outline is visible on
+all twenty-one. **`loom.section` does not.** `tone: "surface"` paints
+`bg-surface` full-bleed with no border at all, so on those six palettes a
+surface-toned band is the page it sits on, and the tree says something the page
+does not show.
+
+`tone: "accent"` is the same shape and comes closer than it looks: `linen` puts
+`accent-subtle` at ΔE 2.57 from its canvas, which clears the threshold by a
+quarter of a point.
+
+**Recommendation, for the lane that owns the primitive:** a `loom.section` with
+a tone could take the same hairline `loom.card` takes, which costs nothing on a
+palette that fills and saves the band on a palette that does not. It is a change
+to a shipped primitive's rendering, so it wants the screenshots this lane cannot
+take for it. Recorded rather than fixed for that reason, and pinned by name so
+a seventh palette fails the build.
+
+---
+
+## 2026-08-29 — `main` was red on `FACTS.decisions` again, tenth occurrence, and every lane opened on red
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — hand-patched for the tenth time; the
+fix that ends it is written and unmerged
+
+`pnpm verify` on `main` at the head of this run: **1 failed, 1962 passed.**
+`app/(marketing)/_lib/facts.test.ts` counts the files in `decisions/` and holds
+`FACTS.decisions` against them; #167 merged a record and the number stayed at
+94. Patched to 95 on this branch, which is the same one-line patch four previous
+runs made.
+
+The cost is not the line. It is that **every routine that started work today
+opened on a red `main`**, and each one spends part of its run establishing that
+the failure is not its own before it can trust its own build. Five lanes, twice
+a day.
+
+**#174 ends the class**, by deriving the number from the delta operations rather
+than storing it. It has been open since 27 August. Recommendation unchanged from
+the last four entries: merge it. Nothing else in this repository needs
+inventing to fix this.
+
+---
+
+## 2026-08-29 — `derivePalette` calls a palette clean without looking at whether its slots are distinguishable
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — deliberately not changed on an unattended run
+
+`derive.ts` returns `{ palette, clean: auditPalette(palette).failures.length === 0 }`.
+`clean` now means *"every ink is legible on its grounds"* and does not mean
+*"every pair a reader has to tell apart is distinguishable"*, which is a second
+thing a host deriving a palette from a brand colour would reasonably assume it
+covered.
+
+Five of the palettes `derive.ts` produced are in the pin `separation.test.ts`
+now carries — `graphite`, `harbour`, `slate`, `blush`, `lilac` — so folding
+`auditSeparation` into `clean` would flip five shipped palettes from clean to
+not, which is a change to what the function promises rather than a bug fix.
+
+Left alone for that reason. The honest options are to widen `clean` and accept
+that five palettes stop being clean, to return the two audits separately so a
+caller chooses, or to leave it and say in the doc comment what `clean` does not
+cover. **The third is done already**; the choice between the first two is worth
+a maintainer's word, since it changes what a host is told about its own brand
+colour.
