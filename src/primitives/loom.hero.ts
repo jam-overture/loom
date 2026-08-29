@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { GROUND_NAMES, groundLayers } from "./ground.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, motion, radius, size, space } from "./tokens.js"
 
@@ -32,14 +33,22 @@ import { colour, motion, radius, size, space } from "./tokens.js"
  * a proposal.
  */
 
+const BACKDROP_NAMES = [...GROUND_NAMES, "panel"] as const
+
 const props = z
   .object({
     /**
-     * What is painted behind the content. Four genuinely different renderings,
-     * not four shades of one: nothing, two drifting colour fields, a ruled
-     * grid that fades at the edges, or a bordered surface panel.
+     * What is painted behind the content. Genuinely different renderings rather
+     * than shades of one: nothing, two drifting colour fields, a ruled grid, a
+     * dot matrix, a fan of beams, or a bordered surface panel.
+     *
+     * Four of the six are `ground.ts`'s, shared with `loom.backdrop` — which is
+     * why `dots` and `rays` arrived here without anybody writing them for a
+     * hero. `panel` stays local: it is a *surface* the band paints on itself
+     * rather than a layer behind it, and it is the one member of this enum that
+     * changes the band's own padding and border.
      */
-    backdrop: z.enum(["none", "aurora", "grid", "panel"]).optional(),
+    backdrop: z.enum(BACKDROP_NAMES).optional(),
     align: z.enum(["start", "center"]).optional(),
     /** `tall` holds the fold — a landing hero — rather than sizing to its copy. */
     stature: z.enum(["standard", "tall"]).optional(),
@@ -70,106 +79,43 @@ const rise = (order: number, content: ReactNode, extra: CSSProperties = {}): Rea
       )
 
 /**
- * Backdrop layers are `aria-hidden` and `pointer-events: none` decoration
- * behind the content, never a background on the section itself: `aurora` needs
- * two independently animated fields, and `grid` needs to fade out at the edges,
- * neither of which a single background property can express.
+ * The backdrop, as decoration behind the content rather than as a background on
+ * the section itself: `aurora` needs two independently animated fields and the
+ * ruled grounds need to fade out before their own edges, neither of which a
+ * single background property can express.
+ *
+ * The layers themselves moved to `ground.ts` on 29 August, unchanged, so that
+ * `loom.backdrop` could put any band on the same ground. What stayed here is
+ * `panel`, which is not a layer at all — see the note on the enum.
  */
-const backdropLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly ReactNode[] => {
-  if (backdrop === "aurora") {
-    /**
-     * A solid colour behind a radial *mask*, rather than a radial gradient that
-     * fades to `transparent`. Fading to `transparent` interpolates towards
-     * transparent black, so an accent field greys out on its way to nothing and
-     * the element's own square edge stays visible where the gradient has not
-     * finished. A mask fades opacity alone, so the colour is the palette's to
-     * the last pixel and the field is genuinely round.
-     */
-    const FADE = "radial-gradient(closest-side, black 0%, transparent 100%)"
-
-    /**
-     * Each field sits *inside* the band and its mask reaches zero at its own
-     * edges, so the section's `overflow: hidden` never cuts through anything
-     * still bright. A field hung off the corner on negative insets is the
-     * obvious way to write this and it renders as a rectangle with two hard
-     * sides — the clip crossing the middle of the glow.
-     */
-    const field = (slot: "accent-strong" | "brand-secondary", position: CSSProperties): ReactNode =>
-      createElement("div", {
-        key: slot,
-        className: LIBRARY_CLASS.aurora,
-        "aria-hidden": true,
-        style: {
-          position: "absolute",
-          width: "min(46rem, 78%)",
-          height: "min(46rem, 100%)",
-          background: colour(slot),
-          maskImage: FADE,
-          WebkitMaskImage: FADE,
-          opacity: 0.32,
-          pointerEvents: "none",
-          ...position,
-        },
-      })
-
-    /**
-     * **`accent-strong`, not `accent`**, and the difference is a finding the
-     * marketing routine filed on 20 August. A slot cannot be both near-black
-     * text and a tinted field: `minimal` sets `accent` to `#0a0a0a` on purpose,
-     * because the library reads that slot as *ink* — eyebrows, kickers, the
-     * disclosure marker, the current nav item — far more often than as a fill.
-     * This is the one place in the library that reads a slot as a large area of
-     * colour, so it is this that has to move. On the white-paper palette the
-     * hero was rendering a grey cloud across its top-left corner.
-     *
-     * The finding suggested `accent-subtle`, and it would fix the smudge by
-     * making the field vanish: that slot is a *tile background* — `#e6ebf2` and
-     * `#effbf5` — which at 32% on a light canvas is nothing at all.
-     * `accent-strong` is the slot that must hold up as a glyph against
-     * `accent-subtle`, so every palette gives it real chroma: `#34425a`,
-     * `#e0b800`, `#176e44`. Bold keeps its gold-and-red glow, editorial gains a
-     * second blue where it previously painted one colour twice, and minimal
-     * gets Hyperion's green over its mint.
-     */
-    return [
-      field("accent-strong", { insetInlineStart: "0", insetBlockStart: "0" }),
-      /** Started part-way through the cycle so the two fields never move in step. */
-      field("brand-secondary", {
-        insetInlineEnd: "0",
-        insetBlockEnd: "0",
-        animationDelay: `calc(${motion("slow")} * -8)`,
-      }),
-    ]
-  }
-
-  if (backdrop === "grid") {
-    const lines = `repeating-linear-gradient(to right, ${colour("border-subtle")} 0 1px, transparent 1px 5rem), repeating-linear-gradient(to bottom, ${colour("border-subtle")} 0 1px, transparent 1px 5rem)`
-    const fade = "radial-gradient(ellipse at 50% 0%, black 0%, transparent 72%)"
-
-    return [
-      createElement("div", {
-        key: "grid",
-        "aria-hidden": true,
-        style: {
-          position: "absolute",
-          inset: "0",
-          background: lines,
-          maskImage: fade,
-          WebkitMaskImage: fade,
-          pointerEvents: "none",
-        },
-      }),
-    ]
-  }
-
-  return []
-}
+const backdropLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly ReactNode[] =>
+  backdrop === "panel" ? [] : groundLayers(backdrop)
 
 const PANEL: CSSProperties = {
   background: colour("bg-surface"),
   border: `1px solid ${colour("border-subtle")}`,
   borderRadius: radius("lg"),
 }
+
+/**
+ * **The content is positioned, and until 29 August it was not — which meant the
+ * ground was painted over the headline rather than behind it.**
+ *
+ * CSS paints positioned descendants after the inline content of unpositioned
+ * ones, whatever their document order. So an `aurora` field — absolutely
+ * positioned, and given a stacking context of its own by its `opacity` — landed
+ * *on top of* a text column that asked for no position at all, and the hero's
+ * headline was reading through a 32% wash of `accent-strong`. Under `bold`,
+ * whose `accent-strong` is a saturated gold, that is a visible tint across the
+ * first thing on the page; a contrast measurement of the palette slots would
+ * never find it, because nothing is wrong with the two colours.
+ *
+ * One declaration fixes it, and the fix is exactly what the word means: the
+ * content is positioned too, so document order decides, and the content comes
+ * last. Nothing about the layout moves — `position: relative` with no offsets
+ * changes no box.
+ */
+const ABOVE_THE_GROUND: CSSProperties = { position: "relative" }
 
 export const loomHero = definePrimitive({
   type: "loom.hero",
@@ -186,6 +132,7 @@ export const loomHero = definePrimitive({
       "div",
       {
         style: {
+          ...ABOVE_THE_GROUND,
           display: "flex",
           flexDirection: "column",
           alignItems: centred ? "center" : "flex-start",
@@ -256,7 +203,11 @@ export const loomHero = definePrimitive({
       text,
       media === undefined
         ? null
-        : rise(3, media, { flex: "1 1 22rem", minWidth: "min(100%, 18rem)" })
+        : rise(3, media, {
+            ...ABOVE_THE_GROUND,
+            flex: "1 1 22rem",
+            minWidth: "min(100%, 18rem)",
+          })
     )
   },
 })

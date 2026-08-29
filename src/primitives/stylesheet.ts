@@ -209,6 +209,22 @@ export const LIBRARY_CLASS = {
   offeringAction: "loom-offering-action",
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
+  /**
+   * A `loom.reveal`. Its children arrive as the reader scrolls to them, which
+   * is one property and a range rather than a script — see the primitive for
+   * why the range is anchored to `entry` and what happens in a browser that has
+   * never heard of a scroll timeline.
+   *
+   * The animation is on the *children*, so nothing here can be set inline: the
+   * primitive does not render them and has nothing to set it on. That is the
+   * one case where this file is not merely the tidier place for a rule.
+   */
+  reveal: "loom-reveal",
+  /** The same arrival with no movement in it, and with a little of it. */
+  revealFade: "loom-reveal-fade",
+  revealSettle: "loom-reveal-settle",
+  /** A `loom.mockup` lifted off the band behind it. */
+  mockup: "loom-mockup",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -228,6 +244,14 @@ const CSS = `
   from { opacity: 0; transform: translate3d(0, 0.9rem, 0); }
   to { opacity: 1; transform: none; }
 }
+@keyframes loom-reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes loom-reveal-settle {
+  from { opacity: 0; transform: scale(0.965); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes loom-aurora {
   0% { transform: translate3d(-6%, -4%, 0) scale(1); }
   50% { transform: translate3d(6%, 4%, 0) scale(1.25); }
@@ -235,6 +259,20 @@ const CSS = `
 }
 .loom-rise {
   animation: loom-rise calc(var(--loom-motion-slow) * 1.6) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.loom-reveal > * {
+  animation: loom-rise calc(var(--loom-motion-slow) * 1.2) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 100%;
+}
+.loom-reveal-fade > * {
+  animation-name: loom-reveal-fade;
+}
+.loom-reveal-settle > * {
+  animation-name: loom-reveal-settle;
+}
+.loom-mockup {
+  box-shadow: 0 24px 48px -38px var(--loom-fg-default);
 }
 .loom-lift {
   transition: transform var(--loom-motion-medium) ease, box-shadow var(--loom-motion-medium) ease, border-color var(--loom-motion-medium) ease;
@@ -585,7 +623,7 @@ details[open] > summary .loom-marker {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .loom-rise, .loom-aurora {
+  .loom-rise, .loom-aurora, .loom-reveal > * {
     animation: none;
     opacity: 1;
     transform: none;

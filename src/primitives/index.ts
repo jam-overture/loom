@@ -7,6 +7,7 @@ import { loomArticle } from "./loom.article.js"
 import { loomArticleGrid } from "./loom.article-grid.js"
 import { loomAvatar } from "./loom.avatar.js"
 import { loomAvatarRow } from "./loom.avatar-row.js"
+import { loomBackdrop } from "./loom.backdrop.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomBeforeAfter } from "./loom.before-after.js"
 import { loomButton } from "./loom.button.js"
@@ -44,6 +45,7 @@ import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
+import { loomMockup } from "./loom.mockup.js"
 import { loomMosaic } from "./loom.mosaic.js"
 import { loomNav } from "./loom.nav.js"
 import { loomOffering } from "./loom.offering.js"
@@ -60,6 +62,7 @@ import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
 import { loomQuote } from "./loom.quote.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
+import { loomReveal } from "./loom.reveal.js"
 import { loomSection } from "./loom.section.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
@@ -222,6 +225,21 @@ import { loomTierTable } from "./loom.tier-table.js"
  * the width and as a card when it is not — one `@container` rule rather than two
  * primitives or a prop nobody should have to set twice.
  *
+ * **The ground three** are the first primitives here that decorate rather than
+ * arrange, and they exist because a library that can lay out any page and makes
+ * every one of them look laid out has answered half of what it was asked for.
+ * `loom.backdrop` is `loom.hero`'s private backdrop turned into a surface any
+ * band can stand on — the layers moved to `ground.ts` unchanged and gained two,
+ * so a hero can now stand on a dot matrix nobody wrote for it. `loom.reveal` is
+ * the library's existing entrance driven by where the reader *is* rather than
+ * by when the document parsed, in one CSS property and no script at all
+ * ([0096](../../decisions/0096-a-scroll-driven-entrance-is-anchored-to-entry.md)
+ * is the range it is anchored to and the reason a page can never end up with a
+ * hole in it). `loom.mockup` is the browser or the phone a product shot sits
+ * inside, which is the one image a marketing page cannot do without and the one
+ * this library could previously only get by baking somebody's real browser into
+ * a screenshot.
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -237,6 +255,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomGrid,
   loomMosaic,
   loomMarquee,
+  loomBackdrop,
+  loomReveal,
   loomCard,
   loomHero,
   loomFeatureGrid,
@@ -292,6 +312,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPerk,
   loomDivider,
   loomMedia,
+  loomMockup,
   loomEmbed,
   loomBeforeAfter,
   loomAction,
@@ -314,12 +335,14 @@ export * from "./tokens.js"
 export * from "./control.js"
 export * from "./stylesheet.js"
 export * from "./layout.js"
+export * from "./ground.js"
 export {
   loomAction,
   loomArticle,
   loomArticleGrid,
   loomAvatar,
   loomAvatarRow,
+  loomBackdrop,
   loomBadge,
   loomBeforeAfter,
   loomButton,
@@ -357,6 +380,7 @@ export {
   loomMedia,
   loomMilestone,
   loomMilestoneList,
+  loomMockup,
   loomMosaic,
   loomNav,
   loomOffering,
@@ -373,6 +397,7 @@ export {
   loomProse,
   loomQuote,
   loomQuoteGrid,
+  loomReveal,
   loomSection,
   loomSplit,
   loomStack,

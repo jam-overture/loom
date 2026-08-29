@@ -4276,6 +4276,34 @@
           ]
         },
         {
+          "module": "primitives/ground",
+          "title": "Ground",
+          "summary": "What is painted *behind* a band, as layers rather than as a background.",
+          "symbols": [
+            {
+              "name": "GROUND_NAMES",
+              "kind": "value",
+              "signature": "const GROUND_NAMES: readonly [\"none\", \"aurora\", \"grid\", \"dots\", \"rays\"]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "GroundName",
+              "kind": "type",
+              "signature": "type GroundName = (typeof GROUND_NAMES)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "groundLayers",
+              "kind": "function",
+              "signature": "const groundLayers: (ground: GroundName) => readonly ReactNode[]",
+              "truncated": false,
+              "summary": "The layers for one ground, in paint order."
+            }
+          ]
+        },
+        {
           "module": "primitives/layout",
           "title": "Layout",
           "summary": "The arrangement vocabulary the compose-and-arrange primitives share.",
@@ -4452,6 +4480,20 @@
               "name": "loomAvatarRow",
               "kind": "value",
               "signature": "const loomAvatarRow: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.backdrop",
+          "title": "loom.backdrop",
+          "summary": "A ground for whatever is put on it: drifting colour fields, a ruled grid, a dot matrix, or a fan of beams behind an ordinary band of a page.",
+          "symbols": [
+            {
+              "name": "loomBackdrop",
+              "kind": "value",
+              "signature": "const loomBackdrop: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -4976,6 +5018,20 @@
           ]
         },
         {
+          "module": "primitives/loom.mockup",
+          "title": "loom.mockup",
+          "summary": "The browser or phone a product shot sits inside.",
+          "symbols": [
+            {
+              "name": "loomMockup",
+              "kind": "value",
+              "signature": "const loomMockup: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.mosaic",
           "title": "loom.mosaic",
           "summary": "Whatever it is given, in cells of deliberately unequal width — the band a page uses when a grid of identical rectangles would read as a table.",
@@ -5194,6 +5250,20 @@
               "name": "loomQuoteGrid",
               "kind": "value",
               "signature": "const loomQuoteGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.reveal",
+          "title": "loom.reveal",
+          "summary": "A run of content that arrives as the reader scrolls to it.",
+          "symbols": [
+            {
+              "name": "loomReveal",
+              "kind": "value",
+              "signature": "const loomReveal: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

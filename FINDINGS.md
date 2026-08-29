@@ -9503,3 +9503,124 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-29 — a `border` shorthand after a tone's `borderColor` had every card and every badge outlined in the text colour
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-17-the-ground-you-stand-on` — recorded because the *class*
+of it is open and is not only this lane's
+
+`loom.card` and `loom.badge` both spread a tone's `borderColor` into a style
+object and then wrote `border: "1px solid"` after it. A style object is
+serialised in key order, and the `border` shorthand **resets `border-color` to
+`currentColor`** — so four card tones and three badge tones were all drawing the
+same rectangle, in the page's *text* colour, and every `border-subtle`,
+`border-default`, `border-accent` and `transparent` those tones named was dead.
+
+**Nothing could see it.** The render is correct, the diagnostics are empty, the
+re-theme guarantee holds because `currentColor` is not a literal, and the
+audit's business is placement rather than paint. On the two light palettes a
+near-black hairline around a card reads as a design decision. It took a **dark**
+palette and a photograph: under `bold`, a near-white rectangle drawn inside a
+`loom.mockup` whose tone said `transparent`.
+
+Both are repaired with longhands — `borderWidth` and `borderStyle`, which cannot
+be reordered into the same mistake — and `library.test.ts` now holds the general
+invariant across six fixtures rather than the two repairs: in any serialised
+style, a `border:` shorthand must come *before* any `border-color:`.
+
+The class of it is worth naming for every lane that writes inline styles, which
+is all of them: **a CSS shorthand in a style object is a reset with a source
+order nobody reads.** The same trap is available with `background`, `font`,
+`margin`, `padding`, `inset` and `flex`. `loom.icon` gets it right by accident of
+having been written the other way round. Recommending nothing beyond the
+invariant, which is cheap and now exists.
+
+---
+
+## 2026-08-29 — a palette has no shadow slot, so an elevation on a dark palette is a bloom rather than a shade
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+`.loom-lift` and the new `.loom-mockup` both draw their elevation as
+`box-shadow: … var(--loom-fg-default)`, because that is the darkest slot a
+palette is guaranteed to have. On the two light palettes it is right. On `bold`
+it is a **near-white blur under the element**, which reads as a light source
+rather than as a shadow — and at the first blur radius I tried (80px) it read as
+a smear under the handset.
+
+That is luck rather than design, and it happens to be lucky in a direction dark
+UIs often want, so nothing here is broken today. What it means is that a
+primitive cannot ask for *depth*: it can only ask for ink and hope the palette's
+ink contrasts with its ground in the direction it needs.
+
+The shape of the answer is a **`shadow` slot in `PaletteSlot`** — a colour a
+palette author chooses knowing whether their canvas is light or dark, which is
+exactly the knowledge `fg-default` does not carry. It is `src/theme/`'s file and
+not this lane's. Twenty-one palettes would each need one value; a sensible
+default is derivable from the existing slots, which is the same argument
+`registryPairings`' `basis` got on 28 August.
+
+Until then this lane keeps every elevation at one blur (`0 24px 48px -38px`) so
+that two things at the same height look the same height, and says so where it is
+written.
+
+---
+
+## 2026-08-29 — `overflow: hidden` is a scroll container, and a scroll-driven animation inside one never moves
+
+**Filed by:** `Loom primitives` · **Owned by:** every lane · **Status:** open —
+nothing is broken; this is a mechanic worth knowing before the second primitive
+reaches for it
+
+`loom.reveal` drives its children's entrance with `animation-timeline: view()`,
+which resolves against the element's **nearest scroll container**. Any
+`overflow: hidden` ancestor is one, whether or not it can actually scroll.
+
+`loom.backdrop` was written with `overflow: hidden` — a rounded band with a
+ground in it wants to clip — and the specimen page for this run put a
+`loom.reveal` inside one. Every child of that reveal sat at a fixed timeline
+progress of **81.4%**, unchanged at every scroll position on the page, and never
+animated. Nothing rendered wrong, no assertion failed, no screenshot showed it,
+and the primitive looked exactly like a primitive that works. It took reading
+`element.getAnimations()[0].timeline.currentTime` off the live page.
+
+Two things follow that are not only this lane's.
+
+**The mechanic.** A clip and a scrollport are the same declaration in CSS, so any
+primitive that clips has silently taken ownership of what a scroll-driven
+animation inside it measures against. This library clips in four places —
+`loom.card`, `loom.marquee`, `loom.mockup` and `loom.hero` — and each of them is
+now a place a reveal will not animate.
+[0096](decisions/0096-a-scroll-driven-entrance-is-anchored-to-entry.md) is why
+that degrades to *visible and still* rather than to a hole in the page.
+`loom.backdrop` stopped clipping: its ground layers carry
+`border-radius: inherit`, and `aurora`, whose fields grow past their own box,
+clips itself.
+
+**The method, which is the part worth copying.** Four consecutive runs in this
+lane have reported that screenshots find defects assertions do not. This one was
+found by neither. A rendered page can be *interrogated* — computed styles,
+`getAnimations()`, `getBoundingClientRect()` — and a five-line probe answered in
+one run a question no amount of looking would have. Worth a line in
+`docs/routines.md` beside the screenshot instruction, which is the maintainer's
+to write.
+
+---
+
+## 2026-08-29 — 21st.dev is still blocked, tenth run, six lanes
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — another data point on an entry that has not changed
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED`. `docs/routines.md`
+still lists the domain under `permissions.allow`, and the primitives brief still
+names it as *the* visual standard — which stings more this run than most, since
+the unit is the one the brief describes in 21st.dev's own terms.
+
+Calibration was against `loom.hero`, `loom.feature-grid` and `loom.tier`, and
+against the six screenshots, which found three defects that no assertion did.
+
+Recommendation unchanged: fix the allowlist, or drop the line from the briefs.

@@ -85,7 +85,19 @@ export const loomBadge = definePrimitive({
            */
           paddingBlock: space(1),
           paddingInline: space(3),
-          border: "1px solid",
+          /**
+           * Longhands, not the `border` shorthand, and the difference is a
+           * defect this library shipped rather than a preference. A style
+           * object is serialised in key order, so a `border: "1px solid"`
+           * written *after* a tone's `borderColor` resets the colour back to
+           * `currentColor` — every one of these was rendering its outline in
+           * the page's *text* colour, whatever its tone said, and the tone's
+           * own border slot was dead. Found by a screenshot on 29 August, in a
+           * dark palette where a near-white rectangle around a card is not
+           * subtle. The longhands cannot be reordered into the same mistake.
+           */
+          borderWidth: "1px",
+          borderStyle: "solid",
           borderRadius: radius("full"),
           fontFamily: family("body"),
           fontWeight: weight("heading"),

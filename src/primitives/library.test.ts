@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(68)
+  it("registers as seventy-one primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(71)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -161,6 +161,8 @@ describe("the starter library", () => {
       "loom.grid",
       "loom.mosaic",
       "loom.marquee",
+      "loom.backdrop",
+      "loom.reveal",
       "loom.card",
       "loom.hero",
       "loom.feature-grid",
@@ -216,6 +218,7 @@ describe("the starter library", () => {
       "loom.perk",
       "loom.divider",
       "loom.media",
+      "loom.mockup",
       "loom.embed",
       "loom.before-after",
       "loom.action",
@@ -824,6 +827,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(tablePage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
+      ...typesIn(groundPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -4874,5 +4878,316 @@ describe("what you can book, and why you should be believed", () => {
      */
     expect(stylesheet).toContain(".loom-offering-action {\n  display: grid;\n  margin-block-start: auto;\n}")
     expect(render(bookablePage(EDITORIAL)).markup).toContain("align-items:stretch")
+  })
+})
+
+/**
+ * A page that stands on something.
+ *
+ * Every band here is one the library could already lay out, and none of them
+ * could be *decorated* until this run: a hero over drifting colour fields is
+ * the only backdrop the library had, and it belonged to the one primitive a
+ * page uses once. The fixture puts the four grounds under four ordinary bands,
+ * a product shot inside the browser and the phone that the library previously
+ * could only get by baking a real browser into a screenshot, and a column that
+ * arrives as it is scrolled to.
+ */
+const groundPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const heading = (level: number, value: string) =>
+    buildElement(idFactory, { type: "loom.heading", props: { level }, children: [text(value)] })
+
+  const prose = (value: string) =>
+    buildElement(idFactory, { type: "loom.prose", props: { tone: "muted" }, children: [text(value)] })
+
+  const shot = (alt: string) =>
+    buildElement(idFactory, {
+      type: "loom.media",
+      props: { src: "https://example.com/console.png", alt, aspect: "wide", corners: "none" },
+    })
+
+  const banner = buildElement(idFactory, {
+    type: "loom.backdrop",
+    props: { ground: "aurora", shape: "bleed" },
+    children: [
+      heading(1, "The ground you stand on"),
+      prose("Four grounds, a shell for the product shot, and a column that arrives as you reach it."),
+    ],
+  })
+
+  const ruled = buildElement(idFactory, {
+    type: "loom.backdrop",
+    props: { ground: "grid", shape: "panel", padding: "roomy" },
+    children: [
+      heading(2, "Ruled"),
+      buildElement(idFactory, {
+        type: "loom.mockup",
+        props: { shell: "browser", address: "loom.dev/demo" },
+        children: [shot("The Loom console, mid-revision")],
+      }),
+    ],
+  })
+
+  const dotted = buildElement(idFactory, {
+    type: "loom.backdrop",
+    props: { ground: "dots", shape: "panel" },
+    children: [
+      heading(2, "Dotted"),
+      buildElement(idFactory, {
+        type: "loom.mockup",
+        props: { shell: "phone" },
+        children: [shot("The same page on a handset")],
+      }),
+    ],
+  })
+
+  const beamed = buildElement(idFactory, {
+    type: "loom.backdrop",
+    props: { ground: "rays", shape: "panel", padding: "normal" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.mockup",
+        props: { shell: "plain", elevation: "flat" },
+        children: [shot("A dashboard with no chrome around it")],
+      }),
+    ],
+  })
+
+  const arriving = buildElement(idFactory, {
+    type: "loom.reveal",
+    props: { effect: "settle", gap: "roomy" },
+    children: [
+      heading(2, "Arriving"),
+      prose("Each row is finished the moment it has fully entered the screen."),
+      buildElement(idFactory, {
+        type: "loom.reveal",
+        props: { effect: "fade" },
+        children: [prose("A nested run, appearing in place rather than lifting.")],
+      }),
+    ],
+  })
+
+  const plain = buildElement(idFactory, {
+    type: "loom.backdrop",
+    props: { ground: "none", shape: "panel", padding: "none" },
+    children: [prose("A ground that paints nothing is still a band, and still says so.")],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        banner,
+        buildElement(idFactory, {
+          type: "loom.hero",
+          props: { backdrop: "dots", align: "center", eyebrow: "New" },
+          children: [text("A hero on a ground nobody wrote for it")],
+        }),
+        ruled,
+        dotted,
+        beamed,
+        arriving,
+        plain,
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("the ground a page stands on", () => {
+  it("renders all three, under both palettes, with nothing left unhonoured", () => {
+    for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+      const { markup, diagnostics } = render(groundPage(theme))
+      const tree = splitStylesheet(markup).tree
+      /** The root carries the palette as literals (0077); everything below it may not. */
+      const body = tree.slice(tree.indexOf(">"))
+
+      expect(diagnostics).toEqual([])
+      expect(body).toContain("loom.dev/demo")
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+
+  it("paints a ground behind the content rather than over it", () => {
+    /**
+     * The defect this run found in `loom.hero`, asserted where it was fixed.
+     * CSS paints positioned descendants after the inline content of
+     * unpositioned ones whatever their document order, so a ground layer left
+     * to itself lands *on top of* the words — the hero had been reading through
+     * a 32% wash of `accent-strong` since the library's first band, which under
+     * `bold` is a saturated gold across the headline.
+     *
+     * The fix is that the content is positioned too, so document order decides
+     * and the content is last. Asserted as: every ground layer is followed by a
+     * positioned wrapper, and the layers themselves are the only absolutely
+     * positioned things in the band.
+     */
+    const { tree } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const layers = [...tree.matchAll(/position:absolute/g)]
+    const above = [...tree.matchAll(/position:relative/g)]
+
+    expect(layers.length).toBeGreaterThan(0)
+    expect(above.length).toBeGreaterThan(layers.length)
+
+    for (const layer of [...tree.matchAll(/<div aria-hidden="true" style="position:absolute[^"]*"/g)]) {
+      expect(tree.slice((layer.index ?? 0) + layer[0].length)).toMatch(/position:relative/)
+    }
+  })
+
+  it("gives a hero the two grounds nobody wrote for it", () => {
+    /**
+     * `dots` and `rays` were written for `loom.backdrop` and arrived in
+     * `loom.hero` because both read the same list. The catalogue is the thing
+     * that has to say so — a model choosing a hero's backdrop reads that and
+     * nothing else.
+     */
+    const hero = registry.primitives.find((primitive) => primitive.type === "loom.hero")
+    const backdrop = hero?.choices.find((choice) => choice.name === "backdrop")
+
+    expect(backdrop?.options).toEqual(["none", "aurora", "grid", "dots", "rays", "panel"])
+  })
+
+  it("anchors the arrival on entry, so nothing can be left holding an empty box", () => {
+    /**
+     * 0096, asserted rather than trusted. `cover` and `contain` both leave a
+     * range in which the element is held at the animation's start, and an
+     * element whose scrollport is a clipped box no taller than itself never
+     * leaves it — which is a page with a hole in it rather than a page that
+     * looks wrong. `entry 100%` is complete the moment the element has fully
+     * entered, which is immediately true of exactly that case.
+     */
+    const { stylesheet } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const rule = stylesheet.slice(
+      stylesheet.indexOf(".loom-reveal > *"),
+      stylesheet.indexOf(".loom-reveal-fade")
+    )
+
+    expect(rule).toContain("animation-timeline: view();")
+    expect(rule).toContain("animation-range: entry 0% entry 100%;")
+    expect(rule).not.toContain("cover")
+    expect(rule).not.toContain("contain")
+  })
+
+  it("orders the fallback before the timeline, because the shorthand resets it", () => {
+    /**
+     * The mechanic that is easy to get wrong once and invisible afterwards: the
+     * `animation` shorthand resets `animation-timeline` and `animation-range`
+     * to their initial values. Written the other way round the timeline is
+     * silently discarded, every child animates on load, and the primitive is a
+     * slower `loom.hero` that nobody notices is broken.
+     */
+    const { stylesheet } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const rule = stylesheet.slice(stylesheet.indexOf(".loom-reveal > *"))
+
+    expect(rule.indexOf("animation:")).toBeLessThan(rule.indexOf("animation-timeline:"))
+  })
+
+  it("holds the arrival still while the page is being edited, and duplicates no node", () => {
+    /**
+     * 0091. Unlike `loom.marquee` there is nothing to compromise about — the
+     * classes are simply not applied — so the still rendering is the published
+     * one minus one attribute, and there is no second copy of anything.
+     */
+    const editing = splitStylesheet(render(groundPage(EDITORIAL), true).markup).tree
+    const published = splitStylesheet(render(groundPage(EDITORIAL)).markup).tree
+
+    expect(published).toContain(`class="${LIBRARY_CLASS.reveal}`)
+    expect(editing).not.toContain(`class="${LIBRARY_CLASS.reveal}`)
+    expect([...editing.matchAll(/data-loom-node="[^"]+"/g)].length).toBe(
+      new Set([...editing.matchAll(/data-loom-node="([^"]+)"/g)].map(([, id]) => id)).size
+    )
+  })
+
+  it("caps a phone at a phone's width and lets a browser take the band", () => {
+    const { tree } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const phone = tree.slice(tree.indexOf("The same page on a handset"))
+
+    expect(tree).toContain("max-width:22rem")
+    expect(tree).toContain("border-radius:2rem")
+    expect(phone).not.toContain("loom.dev/demo")
+  })
+
+  it("draws a shell in the page's own ink, with no colour of its own", () => {
+    /**
+     * No traffic lights. A vendor's red, amber and green would be the one part
+     * of a Loom page that does not re-theme (0049), so the dots are
+     * `border-default` and there are three of them.
+     */
+    const { tree } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const chrome = tree.slice(tree.indexOf("loom-mockup"), tree.indexOf("loom.dev/demo"))
+
+    expect([...chrome.matchAll(/background:var\(--loom-border-default\)/g)]).toHaveLength(3)
+  })
+
+  it("leaves a band a reader can scroll through, so a reveal inside one is driven", () => {
+    /**
+     * The defect a probe found and no screenshot could. `overflow: hidden` makes
+     * an element a **scroll container**, and a `view()` timeline resolves against
+     * the nearest one — so a `loom.backdrop` that clipped turned every
+     * `loom.reveal` inside it into an animation measured against a box that
+     * never scrolls. Every child sat at a fixed 81.4% progress, past the end of
+     * its range, at every scroll position on the page (0096).
+     *
+     * The clip belongs to the ground: the layers carry `border-radius: inherit`,
+     * and `aurora` — the one ground whose fields grow past their own box —
+     * clips itself. Asserted on the band's own element rather than on the
+     * stylesheet, because it is an inline style that would come back.
+     */
+    const { tree } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const bands = [...tree.matchAll(/<div style="position:relative;isolation:isolate[^"]*"/g)]
+
+    expect(bands.length).toBeGreaterThan(0)
+    for (const [band] of bands) expect(band).not.toContain("overflow:hidden")
+
+    /** And the ground still rounds itself off, which is what the clip was for. */
+    expect(tree).toContain("border-radius:inherit")
+  })
+
+  it("never lets a border shorthand undo the colour a tone just set", () => {
+    /**
+     * The defect the screenshots found this run, asserted across every fixture
+     * rather than on the two primitives that had it. A style object is
+     * serialised in key order and the `border` shorthand resets `border-color`
+     * to `currentColor`, so `loom.card` and `loom.badge` — both of which spread
+     * a tone's `borderColor` and then wrote `border: "1px solid"` — were
+     * drawing every outline in the page's *text* colour, with the tone's border
+     * slot doing nothing at all. Four card tones and three badge tones, all of
+     * them the same rectangle.
+     *
+     * Nothing could see it: the render is correct, the diagnostics are empty,
+     * the re-theme check passes because `currentColor` is not a literal, and on
+     * a light palette a near-black hairline reads as a design decision. It took
+     * a dark palette and a photograph.
+     *
+     * The invariant is the general one rather than the two repairs, so the next
+     * primitive to reach for a shorthand after a longhand fails here.
+     */
+    const fixtures = [samplePage, marketingPage, pricingPage, arrangedPage, cataloguePage, groundPage]
+
+    for (const fixture of fixtures) {
+      for (const [, style] of render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)) {
+        const colourAt = (style ?? "").indexOf("border-color:")
+        const shorthandAt = (style ?? "").search(/(^|;)border:/)
+
+        if (colourAt === -1 || shorthandAt === -1) continue
+
+        expect(shorthandAt).toBeLessThan(colourAt)
+      }
+    }
+  })
+
+  it("keeps a ground that paints nothing a band all the same", () => {
+    /**
+     * `none` is a member of the enum rather than the absence of one, so a band
+     * that says which ground it stands on and a band that has not decided yet
+     * are the same markup. Nothing renders, and the wrapper still does.
+     */
+    const { tree } = splitStylesheet(render(groundPage(EDITORIAL)).markup)
+    const plain = tree.slice(tree.indexOf("A ground that paints nothing"))
+
+    expect(plain).not.toContain("aria-hidden")
   })
 })

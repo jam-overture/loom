@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 47 blocks, 68 primitives.**
+**Done — 47 blocks, 71 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -192,6 +192,15 @@ whole page is data. `loom.nav`, `loom.footer`, `loom.link` and `loom.link-list`
 landed on 19 August for that reason, and they are the first primitives in the
 library with no Hermes ancestor at all. Read the count below as "of the Hermes
 catalogue", not "of the library".
+
+There is a second such group and it is the one the maintainer's brief names
+last: **decoration.** Hermes' blocks are all content models, because a creator's
+profile got its look from a theme the app shipped; nothing in the seventy paints
+a ground, frames a screenshot, or moves as you scroll. `loom.marquee` was the
+library's only member of the brief's *atomic complex* tier for a week.
+`loom.backdrop`, `loom.reveal` and `loom.mockup` landed on 29 August as the rest
+of it — the first primitives here that decorate rather than arrange, and, like
+the chrome four, they have no Hermes row to port and never will.
 
 `comparison-table` is the exception among the ported blocks and worth noting
 here: Hermes *did* define it, and it came out three primitives rather than two
