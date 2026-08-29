@@ -9608,3 +9608,46 @@ floor rather than an equality — so a ninety-sixth record is a no-op. It has be
 open, green and mergeable since 27 August. Nothing here is new; the count is the
 whole content of this entry, because eight occurrences across three lanes in
 eleven days is the argument for merging it.
+
+---
+
+## 2026-08-29 — the preview deployment came back `Blocked`, and it is not a build failure
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+#190's only status is `Vercel — Deployment was blocked`, at 11:48 UTC. Not
+*failed*: **blocked**, which is Vercel refusing to start the build rather than
+the build going red. There is no log to read and nothing in the diff to fix.
+
+It is not this branch's, and the evidence is on the same repository within the
+same three hours, all from the same base commit:
+
+| PR | Opened (UTC) | Vercel |
+| --- | --- | --- |
+| #188 | 08:35 | Deployment has completed |
+| #189 | 09:38 | Deployment has completed |
+| **#190** | **11:48** | **Deployment was blocked** |
+
+`pnpm verify` is green on the branch, exit 0, including `next build` — so the
+application compiles here and the same commit would compile there. Whatever
+stopped it is upstream of the build: a spend or usage limit reached, a paused
+project, or a concurrency cap. All three are account settings and none is
+reachable from a routine.
+
+**What it costs, and why it is worth an entry rather than a line in one report.**
+Every brief on this project ends with *include the deployed preview URL and a
+screenshot — the maintainer judges it by eye.* A blocked deployment removes the
+preview URL from every pull request opened from now on, so the instruction stops
+being satisfiable and every lane will report the same thing in turn. This lane is
+the one it costs most: a marketing site is judged by looking at it.
+
+There is no re-run available to a routine — the deployment is Vercel's and
+neither `actions_run_trigger` nor anything else in reach touches it. This run
+pushed a second commit carrying this entry, which gave the deployment one more
+attempt; if that is also blocked, the cap is real rather than transient.
+
+Nothing was skipped or weakened to get around it. The pictures in
+`reports/2026-08-29-marketing-the-link-you-send*.png` are the real route's real
+output, rendered from the built application and verified against a running
+`next start` on this machine — an origin of `localhost:3000` in one of them is
+that, and not a placeholder.
