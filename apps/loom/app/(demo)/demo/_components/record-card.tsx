@@ -9,6 +9,7 @@ import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 import { answerNote } from "@/app/(demo)/_lib/answer"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
+import { undoStillOffered } from "@/app/(demo)/_lib/undo"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
@@ -177,7 +178,23 @@ export const RecordCard = ({
         </div>
       )}
 
-      {record.revision && !undoReport && (
+      {/*
+        * The undo, offered for as long as there is something to put back.
+        *
+        * This was `!undoReport`, which withdrew the button on *any* answer from
+        * the server. Right for the undo that landed and wrong for every other
+        * outcome — and on the primary path the undo does not land, it is held,
+        * because an undo is a change of its own (0032) and this one restructures
+        * the page as much as the change it reverses. So the press left a card
+        * still reading *"“Put it back” undoes it"* with no such button on it,
+        * and a visitor who then answered *No thanks* had turned down their own
+        * undo and lost the only way to ask again.
+        *
+        * `_lib/undo.ts` owns the rule and `_lib/report.ts`'s `moved` is what it
+        * asks: not whether the write succeeded — a held undo succeeded — but
+        * whether the page went back.
+        */}
+      {undoStillOffered(record, undoReport) && record.revision && (
         <form action={undo}>
           <input type="hidden" name="revision" value={record.revision.produced} />
           <button

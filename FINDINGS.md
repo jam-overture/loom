@@ -9503,3 +9503,89 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-29 — nothing has merged since #167, and two demo runs have now built the same unit
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — the most expensive thing this lane has found, and no routine can fix it
+
+`main` is at `3a57feb` (#167, 26 August). **Twenty-six pull requests are open and
+none has merged in three days**: #168 through #193, across all seven lanes. This
+lane alone has three — #170, #178, #186 — each branched off `3a57feb` because
+that is what `main` still is.
+
+**Today it cost a whole run.** A routine's only memory is `main` and the open
+pull requests. This run read `main`, read `FINDINGS.md` on `main`, found the
+25 August entry *“Put it back” does not put it back on the first press* marked
+**open — a unit of its own, and the recommended next one**, and built it: a
+caution line under the button, `WhatHappens` step three without the word
+*really*, a new `_lib/undo.ts`, a new `_lib/undo.test.ts`, a pipeline test
+measuring that the leading preset's undo is held.
+
+**#170 shipped exactly that on 26 August.** Same file names, same two fixes, a
+near-identical measurement test. Three days of review latency turned one unit
+into two, and only the second one knew.
+
+The waste was caught before a duplicate pull request was opened — by listing the
+open pull requests, which the brief's procedure puts at step 1 and this run did
+after reading the repository rather than before. That ordering is worth fixing
+in the briefs, and it is not the cause. The cause is that **a merged pull
+request is the only thing that tells the next run something is done**, and
+nothing is merging.
+
+What is stacking up behind it, all of it already reported by other lanes:
+
+- **`main` is red.** `FACTS.decisions` says `"94"` and there are 95 records.
+  #174 fixes it properly; #177, #178 and #186 each carry the one-character bump.
+  Four lanes have now paid a run to diagnose the same failure at their own base.
+- **The demo lane's three open pull requests conflict with each other**, because
+  each is an independent branch off the same `main` touching
+  `record-card.tsx`. The conflicts are small and every one of them is work
+  somebody has to do that would not exist if they had merged in order.
+- **`21st.dev` is still `EGRESS_BLOCKED`**, verified again today. Ninth or tenth
+  time depending on which lane is counting, which is itself the symptom: the
+  entries cannot even agree on a count, because none of the runs that filed them
+  can see each other's.
+
+**Recommendation, in order.** Merge #174 first — it greens the base for
+everybody. Then take the demo lane's three in number order (#170, #178, #186)
+and this one last; they are small and each is reviewable on its own. If review
+capacity is the constraint rather than intent, the cheaper fix is to say so in
+`docs/routines.md`, so a routine knows to read the open pull requests as part of
+the state of the world rather than treating `main` as the state of the world.
+
+---
+
+## 2026-08-29 — the payoff card withdrew its own undo, on the press that produced a question
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-09-the-offer-that-withdrew-itself` — the fix is `undoStillOffered`
+
+Found while rebuilding the 25 August unit, and it survived that unit: **#170
+fixes what the undo button *says* and leaves this alone**, because the two are
+different lines of code and only one of them was in the finding.
+
+`record-card.tsx` offered the undo on `record.revision && !undoReport`.
+`undoReport` is set the moment `undoRevision` returns *anything*, so the button
+was withdrawn by every outcome rather than by the one that empties it. On the
+demo's primary path the undo is **held** — the Gate weighs it like any other
+change (0032) and putting the band back restructures the page as much as taking
+it off did — so:
+
+- The change is still live on the page, the card still reads *“This change is
+  live on the page beside you. “Put it back” undoes it.”*, and **there is no
+  such button on it.** Photographed on `main` in this run's `before` screenshot.
+- Answer the question that press produced with *No thanks*, and the visitor has
+  declined their own undo and has no way to ask for it again.
+
+The fix asks the right question: not whether the write succeeded — a held undo
+succeeded — but **whether the page moved**. `WriteReport` gains `moved`, derived
+from the state through a total record so a new state cannot default to yes, and
+`undoStillOffered` withdraws the button on that and nothing else.
+
+Same diagnosis as the last four runs in this lane and worth one more data point:
+nothing was broken. `revertRevision` did what 0032 says, the Gate did what the
+policy says, `report.ts` had every word needed to explain it. **The card asked
+the wrong question of the answer it was handed.**
