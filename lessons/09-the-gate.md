@@ -825,7 +825,7 @@ ones that quietly break your model later.
 - [`decisions/0035`](../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) — the rule a level could not have been
 - [`decisions/0048`](../decisions/0048-a-name-is-checked-by-a-fingerprint-beside-it.md) — the digest beside the name
 - [`src/runtime/gate.test.ts`](../src/runtime/gate.test.ts) — the `rule precedence` block is the order, written down as assertions
-- Next: 10 — The pipeline *(not yet written)*
+- Next: [10 — The pipeline](10-the-pipeline.md)
 
 ---
 

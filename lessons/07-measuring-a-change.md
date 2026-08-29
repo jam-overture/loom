@@ -2,9 +2,10 @@
 
 **After this lesson you will be able to** say what `analyzeDelta` extracts and
 what it deliberately refuses to know, give the rule that decides whether
-something belongs in a measurement or in a judgment, explain why a move counts as
-one node when a removal counts as a subtree, and say what a record has to contain
-before "the Gate got stricter" and "the changes got bigger" can be told apart.
+something belongs in a measurement or in a judgment, explain why one move is
+counted twice over — once as a node and once as a subtree — and say what a record
+has to contain before "the Gate got stricter" and "the changes got bigger" can be
+told apart.
 
 **Prerequisites:** [01](01-why-a-runtime.md), [02](02-ui-as-data.md),
 [03](03-change-as-data.md), [04](04-identity.md),
@@ -184,8 +185,65 @@ The subtree that rides along is the same subtree, with the same ids, in the same
 order (lesson 04 — a `move` does not touch identity), so counting it would be
 counting nodes that are exactly as they were.
 
-That is a coherent definition and you should hold onto it, because exercise D is
-going to charge you for it.
+That is a coherent definition and you should hold onto it, because the next
+section is going to charge you for it.
+
+### The same change, worded twice
+
+Here is the situation that definition does not survive on its own, and it is
+worth stopping on because it is a whole class of problem rather than one bug.
+
+A page has a slot, `main`, and inside it a card the host has declared protected.
+A change moves that card up beside the header. There are two deltas that do it:
+
+```
+move main → header      one operation, and the card rides along inside it
+move card → header      one operation, and it names the card
+```
+
+They are not quite the same physical change — the first also relocates the slot —
+but on the question the host cares about, *is the protected card somewhere it
+was not*, they are identical. A person looking at the two pages afterwards
+cannot tell which delta produced which.
+
+Now recall who writes the delta. **A model chose between those two spellings**,
+and nothing in the system told it which to prefer. So if the measurement answers
+differently depending on which node the delta names, the verdict downstream moves
+with a choice that carries no information — and 0044 states the consequence in
+the sharpest available form: *a Gate whose verdict moves with that choice is not
+gateable in the sense the project claims. The same proposal, worded twice, gets
+two answers.*
+
+That is not a subtlety about moves. It is the general requirement on any
+measurement whose input is authored by something that has freedom of expression.
+
+Loom's answer is a fourth counting rule and one definition that holds for all four
+operations:
+
+- **`touchedPrimitiveTypes` means created, destroyed, or reconfigured.** A move
+  contributes nothing to it, whichever node it names.
+- **`relocatedPrimitiveTypes`** carries element types from the *whole moved
+  subtree*, and **`relocatedNodeCount`** carries its size — the named node
+  included.
+- **`movedNodeCount` keeps its old meaning**: nodes a `move` operation *named*.
+  One operation relocating two hundred nodes is a fact that now has a field
+  instead of being invisible.
+- **`affectedNodeIds` stays shallow.** It is the input to a breadth rule, and the
+  breadth of a relocation is a different question from the breadth of a rewrite —
+  which is exactly why it got its own number rather than being folded into this
+  one.
+
+Read that list as one move, not four. Every phrasing-independent reading of a
+change forces a choice between two answers, and the rule for picking is
+conservative: **where the two spellings disagree, take the reading that raises
+the estimate.** Reversibility applies it too — it reads touched *and* relocated
+types against the out-of-tree list, because a change wrongly called irreversible
+is merely offered for confirmation, while one wrongly called reversible is
+applied.
+
+Exercise D is those two deltas, run. You will be asked to predict the numbers and
+the levels before you see them, and there is more than one thing in that output
+worth being wrong about first.
 
 ### Depth, and why the shallowest
 
@@ -264,13 +322,26 @@ month later hold one still and watch the other move — which is exactly the
 question Predict 3 asked, and the reason lesson 17 on calibration is possible at
 all.
 
-Seven of the ten analysis fields cross into telemetry. Three do not:
+Ten of the fourteen analysis fields cross into telemetry. Four do not:
 `affectedNodeIds` (unbounded, and identifying), `configuredPropKeys` (host
-vocabulary that shades into content), and `removedPrimitiveTypes`. Work out for
-yourself which of those three you would defend, and note that nothing is lost
+vocabulary that shades into content), and `nestedTargets` and
+`redirectedSubmissions` (both carry node ids and host endpoint names). Work out
+for yourself which of the four you would defend, and note that nothing is lost
 outright either way: `change-proposed` retains the whole delta, so any of it can
 be recomputed against the log. What the summary buys is a column you can group
 by, and what it costs is a column you cannot.
+
+Three of those ten arrived after records already existed, and the shape they
+arrived in is worth one paragraph because it is a rule rather than a courtesy.
+`relocatedPrimitiveTypes`, `relocatedNodeCount` and `removedPrimitiveTypes` are
+**optional and never defaulted** (0045). A `.default([])` would have been the
+obvious way to add them, and it would have put a sentence in the mouth of every
+record written before the field existed: *no types were relocated*. That record
+did not decline to name a relocated type — it could not name one. `undefined` and
+`[]` are different claims, and a consumer that cannot tell "recorded as none"
+from "not recorded" computes a rate whose older half silently reads as zero.
+Which is the same failure as *The problem*, one layer down: the record has to
+stay honest about what it was in a position to say.
 
 ---
 
@@ -278,7 +349,7 @@ by, and what it costs is a column you cannot.
 
 | What | Where |
 | --- | --- |
-| The measurement, and the ten fields | [`src/runtime/analysis.ts`](../src/runtime/analysis.ts) |
+| The measurement, and the fourteen fields | [`src/runtime/analysis.ts`](../src/runtime/analysis.ts) |
 | Facts plus policy, out comes a level | [`src/runtime/stakes.ts`](../src/runtime/stakes.ts) |
 | Where the two are stitched together | [`src/runtime/assessment.ts`](../src/runtime/assessment.ts) |
 | The knobs, and which kind each is | [`src/runtime/policy.ts`](../src/runtime/policy.ts) |
@@ -420,11 +491,15 @@ describe("C", () => {
 
 **D — the one to slow down on.** Three deltas. In all three the card ends up
 somewhere it was not, and the policy has been told `loom.card` is protected.
-**Write down all three stake levels before running this.**
+
+**Write down, for each of the three: the stake level, and `relocatedNodes`.**
+Six numbers. The last two rows are the pair from *The same change, worded twice*,
+so you have the definitions — what you do not have is `stakes.ts`, and composing
+the two is the exercise.
 
 ```ts
 describe("D", () => {
-  it("removes a subtree, then relocates the same subtree", () => {
+  it("removes a subtree, then relocates the same subtree two ways", () => {
     const { tree, ids } = sampleTree()
 
     const report = (label: string, operations: TreeOperation[]) => {
@@ -432,9 +507,12 @@ describe("D", () => {
       if (!r.ok) return console.log(label, JSON.stringify(r.error))
 
       console.log(label, JSON.stringify({
-        touchedPrimitiveTypes: r.value.touchedPrimitiveTypes,
-        removedPrimitiveTypes: r.value.removedPrimitiveTypes,
-        affectedNodeIds: r.value.affectedNodeIds,
+        touched: r.value.touchedPrimitiveTypes,
+        removed: r.value.removedPrimitiveTypes,
+        relocated: r.value.relocatedPrimitiveTypes,
+        moved: r.value.movedNodeCount,
+        relocatedNodes: r.value.relocatedNodeCount,
+        affected: r.value.affectedNodeIds,
       }))
       console.log("  under strict:", JSON.stringify(
         assessStakes({ analysis: r.value, discards: [] }, strict)))
@@ -443,9 +521,10 @@ describe("D", () => {
     report("remove main:", [{ op: "remove", nodeId: ids.main }])
     report("move main:  ", [{ op: "move", nodeId: ids.main, parentId: ids.header, index: 0 }])
     report("move card:  ", [{ op: "move", nodeId: ids.card, parentId: ids.header, index: 0 }])
-    // Q4: explain the one you got wrong. Then the part that matters: say whether
-    //     you would change the measurement or the rule, and name what your change
-    //     would break. There is a defensible answer for "neither".
+    // Q4: the last two rows come out at the same level. Say what makes them
+    //     agree — and then find the three places in that output where they still
+    //     differ, and say for each one whether the difference is a fact about the
+    //     change or an artefact of how it was worded.
   })
 })
 ```
@@ -510,12 +589,30 @@ months of journal would stop being comparable at the moment somebody edits a
 config file — and re-judging an old change under a new policy would require
 re-walking a tree you may no longer be storing.
 
-**Count a move as its whole subtree.** This would close exercise D's blind spot,
-which is a real argument for it. It costs the definition:
-`inserted + removed + moved` would stop meaning "content churn", and moving a
-large slot two positions up would measure the same as deleting it. Whether that
-trade is worth making is an open question this lesson does not settle — see the
-answer to Q4.
+**Widen `touchedPrimitiveTypes` to include the moved subtree.** One line, and it
+makes exercise D's last two rows agree, which is the whole objective. Rejected
+because it makes "touched" mean created, destroyed, reconfigured **or**
+relocated, and then the factor a reviewer reads says *touches protected
+loom.card* about a card nothing wrote to. It also collapses a distinction
+telemetry has to keep for good: a corpus asking how often the runtime rewrites
+protected primitives would count relocations among them for ever, with no field
+left to separate them again. That is the asymmetry from *Policy-free is not
+purpose-free*, arriving with a bill attached — the cheap fix is the one that
+loses information, and lost information does not come back.
+
+**Make `affectedNodeIds` subtree-wide for moves too.** Consistent-looking, and
+rejected on what reads it: it is the input to `broad-change`, so every relocation
+of a large subtree would become a broad change. Breadth of relocation and breadth
+of rewriting are two questions, and answering them with one number means
+answering neither.
+
+**A `large-relocation` stake factor, mirroring `large-removal`.** Symmetry, and
+rejected for now: a relocation destroys nothing and is fully reversible, so it is
+not damage in the sense stakes measure. Note the shape of that refusal, because
+it is the healthy one — `relocatedNodeCount` is recorded anyway, so if a host
+ever demonstrates that moving enough of a page is dangerous on size alone, the
+evidence is already in the corpus and the factor is a small addition. Measure
+now, judge later, is available precisely because the two were separated.
 
 **Record the whole `ChangeAnalysis` on the disposition.** Rejected for the reason
 lesson 06 gave for storing the inverse: it puts a derived value in the record
@@ -571,8 +668,13 @@ ones that quietly break your model later.
    refusal. Then say what goes wrong in a monthly report that treats them alike.
 
 4. A change relocates a protected primitive by moving the slot that contains it.
-   Say what the damage estimate sees, and why. Then argue that this is correct,
-   and then argue that it is a gap — properly, both times.
+   Name every field that sees it and every field that does not, then give the
+   level. Then the part that matters: the same relocation written as a move of
+   the card itself is a *different delta with different numbers* and comes out at
+   the *same level*. Say what has to be true of a measurement for that to be by
+   design rather than by luck — and name the property of **who writes the delta**
+   that makes it a requirement here and merely tidy in a framework a person types
+   into.
 
 ---
 
@@ -583,9 +685,12 @@ ones that quietly break your model later.
   "destructive: true" is a **J** in an **F**'s clothing, and it is the most
   common thing to put on that list.
 - Predict 2 asked how many nodes a slot-move affects and which types it touches.
-  Exercise D printed both. If you said "the checkout and everything under it",
-  you gave the answer a person would give and not the one the program gives —
-  and the interesting question is which of you is right.
+  Exercise D printed both, and the honest answer is that the question has three
+  numbers in it, not two: one field counts what the operation named, one counts
+  what travelled, and one — the one whose name you probably used — reports
+  nothing at all. If you defended a single number to somebody who gave you a
+  different one, go back and check whether the two of you were answering the same
+  question.
 - Predict 3: your answer probably included the policy id, which is genuinely
   necessary and genuinely not sufficient. What else did you list, and did you
   list anything that is a fact about the change rather than about the decision?
@@ -601,11 +706,12 @@ ones that quietly break your model later.
 ## Come back to this
 
 - **In 2 days:** Self-check 1 and 3, closed book.
-- **In 1 week:** From memory, write the ten fields of `ChangeAnalysis` and mark
-  each one with what it is *for* — the downstream rule that wants it. Any field
-  you cannot justify, look up.
+- **In 1 week:** From memory, write the fourteen fields of `ChangeAnalysis` and
+  mark each one with what it is *for* — the downstream rule that wants it. Any
+  field you cannot justify, look up. Then mark the four that do not reach
+  telemetry, and say what each would have cost the corpus.
 - **In 1 month:** Redo exercise D from memory: predict all three stake levels and
-  all three `touchedPrimitiveTypes` before running it.
+  all three `relocatedNodeCount`s before running it.
 - See [`review-schedule.md`](review-schedule.md).
 
 ---
@@ -615,7 +721,9 @@ ones that quietly break your model later.
 - [`decisions/0002`](../decisions/0002-gate-is-a-pure-function-of-two-axes.md) — the Gate as a pure function, and the score it rejects
 - [`decisions/0023`](../decisions/0023-telemetry-narrows-the-stream-and-never-copies-the-log.md) — why the summary is a narrowing rather than a copy
 - [`decisions/0007`](../decisions/0007-confidence-is-self-graded-and-must-be-calibrated.md) — the thing the retained measurement is eventually for
-- Next: 08 — Two axes: stakes and reversibility *(not yet written)*
+- [`decisions/0044`](../decisions/0044-a-move-relocates-a-subtree-and-the-analysis-measures-the-subtree.md) — the measurement answers the same for the same change, whichever node the delta names
+- [`decisions/0045`](../decisions/0045-a-telemetry-field-added-later-is-optional-forever.md) — why 0044's new fields are optional and never defaulted
+- Next: [08 — Two axes: stakes and reversibility](08-two-axes.md)
 
 ---
 
@@ -651,7 +759,7 @@ the target, and slot and text nodes are nodes.
 **Q2** One measurement, two verdicts:
 
 ```
-analysis: {"operationCount":1,"insertedNodeCount":0,"removedNodeCount":2,"movedNodeCount":0,"configuredNodeCount":0,"affectedNodeIds":["n_4","n_3"],"touchedPrimitiveTypes":["loom.card"],"removedPrimitiveTypes":["loom.card"],"configuredPropKeys":[],"shallowestAffectedDepth":2}
+analysis: {"operationCount":1,"insertedNodeCount":0,"removedNodeCount":2,"movedNodeCount":0,"configuredNodeCount":0,"relocatedNodeCount":0,"affectedNodeIds":["n_4","n_3"],"touchedPrimitiveTypes":["loom.card"],"removedPrimitiveTypes":["loom.card"],"relocatedPrimitiveTypes":[],"configuredPropKeys":[],"nestedTargets":[],"redirectedSubmissions":[],"shallowestAffectedDepth":2}
 default:  {"level":"low","factors":[]}
 strict:   {"level":"critical","factors":[{"code":"protected-type-removed","level":"critical","detail":"destroys protected loom.card"},{"code":"protected-type-touched","level":"high","detail":"touches protected loom.card"}]}
 ```
@@ -717,71 +825,99 @@ the general form of this — a bug caught by a check aimed at something else has
 been postponed, not caught. Here there is no bug to postpone, only a field that
 would start lying the moment a second reader appeared.
 
-**Q4** Three deltas, and the middle one is the surprise:
+**Q4** Three deltas:
 
 ```
-remove main: {"touchedPrimitiveTypes":["loom.card"],"removedPrimitiveTypes":["loom.card"],"affectedNodeIds":["n_5","n_4","n_3"]}
+remove main: {"touched":["loom.card"],"removed":["loom.card"],"relocated":[],"moved":0,"relocatedNodes":0,"affected":["n_5","n_4","n_3"]}
   under strict: {"level":"critical","factors":[{"code":"protected-type-removed","level":"critical","detail":"destroys protected loom.card"},{"code":"protected-type-touched","level":"high","detail":"touches protected loom.card"},{"code":"large-removal","level":"medium","detail":"removes 3 nodes"},{"code":"shallow-structural-change","level":"medium","detail":"restructures at depth 1"}]}
-move main:   {"touchedPrimitiveTypes":[],"removedPrimitiveTypes":[],"affectedNodeIds":["n_5"]}
-  under strict: {"level":"medium","factors":[{"code":"shallow-structural-change","level":"medium","detail":"restructures at depth 1"}]}
-move card:   {"touchedPrimitiveTypes":["loom.card"],"removedPrimitiveTypes":[],"affectedNodeIds":["n_4"]}
-  under strict: {"level":"high","factors":[{"code":"protected-type-touched","level":"high","detail":"touches protected loom.card"}]}
+move main:   {"touched":[],"removed":[],"relocated":["loom.card"],"moved":1,"relocatedNodes":3,"affected":["n_5"]}
+  under strict: {"level":"high","factors":[{"code":"protected-type-relocated","level":"high","detail":"relocates protected loom.card"},{"code":"shallow-structural-change","level":"medium","detail":"restructures at depth 1"}]}
+move card:   {"touched":[],"removed":[],"relocated":["loom.card"],"moved":1,"relocatedNodes":2,"affected":["n_4"]}
+  under strict: {"level":"high","factors":[{"code":"protected-type-relocated","level":"high","detail":"relocates protected loom.card"}]}
 ```
 
-Three levels: **critical**, **medium**, **high**.
+Three levels: **critical**, **high**, **high**.
 
-Moving the slot that contains the card reports that the change touched **no
-primitive types at all**. Not "a card was moved" — an empty list. The host has
-declared `loom.card` protected, the card travels from one side of the page to the
-other, and the damage estimate is `medium` on the strength of a factor that never
-mentions it. Move the card directly and you get `high`.
+**What makes the last two agree.** Neither of them touches anything — `touched`
+is empty on both, and the card is not rewritten by either. What names the card is
+`relocated`, and it names it in both rows, because that field is collected over
+the whole moved subtree rather than at the node the operation happened to point
+at. The factor that fires is `protected-type-relocated`, and it sits at `high` —
+the same level `protected-type-touched` carries. That choice of level is the
+part worth noticing: it means a delta naming the card directly keeps exactly the
+stakes it always had, and the delta naming its container gains them. Nothing was
+lowered to make the two meet.
 
-The mechanism is three lines of `tallyOperation`'s `move` case: it adds
-`operation.nodeId` to `affected`, and adds the target's type to `types` **only if
-the target is an element**. A slot is not an element, so the second line does
-nothing at all, and neither line looks inside the subtree.
+**Now the three places they still differ**, which is the half of the question
+that separates a reader who looked from one who inferred:
 
-*The case that it is correct.* "Touched" means named by an operation or created
-or destroyed by one. Under that definition `move main` genuinely does not touch
-the card: the card's parent is unchanged, its props are unchanged, its id is
-unchanged, and the subtree rooted at the card is byte-identical before and after.
-The definition is the same one that makes `movedNodeCount` 1 in exercise A, and
-it is applied consistently here.
+1. **`relocatedNodes` is 3 and 2.** A *fact*. Moving `main` relocates the slot,
+   the card and the text; moving the card relocates the card and the text. The
+   slot really does travel in one and not the other, and the number says so.
+   These are not two spellings of one change — they are two changes that agree
+   about the only thing the policy asked about.
+2. **`affected` is `["n_5"]` and `["n_4"]`.** A *fact*, and a narrow one on
+   purpose: `affectedNodeIds` reports the nodes an operation named, which is what
+   a breadth rule wants. It is the field that would have been most tempting to
+   widen and the one that was most firmly left alone.
+3. **`move main` carries a second factor, `shallow-structural-change`.** A fact
+   again — `main` sits at depth 1 and the card at depth 2, so the slot-move is
+   the shallower restructuring. It does not change the level, because the
+   `high` factor already dominates it. Which means the two rows land on the same
+   verdict by *different* routes, and the level is equal without the assessments
+   being equal.
 
-*The case that it is a gap.* A rule named `protected-type-touched` exists to
-notice when something the host cares about is disturbed, and a `loom.card` that
-was below the fold and is now the first thing on the page has been disturbed by
-any standard a host would recognise. Worse, the two ways of expressing that
-relocation — move the card, or move its container — differ in the damage estimate
-by a whole level, so the measurement is sensitive to a choice of phrasing that
-makes no difference to the reader of the page.
+There is a fourth difference and it is the one to be honest about: the *codes*
+differ between the removal and the relocations. `remove main` still reports
+`protected-type-touched`, because a removal genuinely destroys and rewrites. So
+"touched" has one meaning across all four operations — created, destroyed, or
+reconfigured — and a move is outside it by definition rather than by omission.
 
-Both readings are honest, which is why the exercise asks which you would change
-rather than telling you. Two directions and their prices:
+**Why this is a requirement and not tidiness.** A person writing a delta by hand
+would pick one spelling and stick to it, and a framework serving that person
+could ship the inconsistent version for years without anyone noticing. Loom's
+deltas are drafted by a model, which has a free and unforced choice between
+naming the slot and naming the card — so a measurement that answers differently
+per spelling produces a Gate whose verdict is partly a function of the model's
+prose style. That is not a rounding error in an audit trail; it is the audit
+trail describing something other than the change.
 
-- **Change the measurement** — have a `move` collect element types from the whole
-  moved subtree. Closes the gap, and costs the definition: `touchedPrimitiveTypes`
-  would then mean two different things depending on the operation that put an
-  entry there, and it is the field telemetry retains.
-- **Change the rule** — leave analysis alone and give stakes a factor about
-  relocating a container. Keeps the measurement's meaning intact but needs a field
-  that does not exist yet, because the types under a moved subtree are nowhere in
-  `ChangeAnalysis`.
+The general rule, which is worth more than this instance: **a measurement whose
+input is authored by something with freedom of expression must be invariant under
+that freedom.** And where invariance forces a choice between two answers, take
+the more conservative one — the reason reversibility now reads relocated types as
+well as touched ones is that a change wrongly called irreversible is merely
+offered for confirmation, while one wrongly called reversible is applied.
 
-And the case for **neither**: a move destroys nothing, and every protected thing
-is still there afterwards, so a host that wants moves watched should be turning up
-`shallowDepthThreshold`, which already fired here. That is the answer that
-requires no code and it is not obviously wrong.
+### What this lesson used to say here
 
-What is not defensible is the current state of the *documentation*, which is
-where this leaves the code: nothing in `ChangeAnalysis`'s comments defines
-"touched" tightly enough for a host reading the field name to predict this
-output. That has been reported rather than fixed here.
+Until 0044, `move main` came out at **`medium`** with `touchedPrimitiveTypes:
+[]`, and `move card` at **`high`** with `["loom.card"]` — the same relocation, a
+whole level apart, decided by which node the delta named. This lesson taught that
+as an open question with three defensible answers and asked you which you would
+pick.
+
+It was not a hypothetical for long. The exercise you just ran is the one that
+found it: it was executed while this lesson was being written, handed over as a
+finding, and 0044 is the answer. That record's *Alternatives considered* section
+opens with this lesson's own recommendation — document it and change nothing —
+and rejects it, on the grounds that the problem was never that the field was
+misnamed. This lesson reasoned from the field's **name** and reached "explain it
+better"; the record reasoned from the **verdict** and reached "the verdict must
+not move". The second is the one that has to be defensible.
+
+Two things that are easier to see with both versions in front of you. The first
+is that the exercise did its job and the lesson did not: running the code found
+a real defect, and then this page went on describing the defect for three weeks
+after it was fixed. The second is what a resolved question costs a course —
+before 0044, Q4 asked you to hold two honest readings at once, which is a better
+exercise than any settled design can offer. Some of that difficulty is gone
+because the system got better. That is the correct trade and it is still a loss.
 
 **Q5** The same two operations, in two orders:
 
 ```
-in order:  {"operationCount":2,"insertedNodeCount":1,"removedNodeCount":0,"movedNodeCount":0,"configuredNodeCount":1,"affectedNodeIds":["n_x5"],"touchedPrimitiveTypes":["loom.banner"],"removedPrimitiveTypes":[],"configuredPropKeys":["tone"],"shallowestAffectedDepth":2}
+in order:  {"operationCount":2,"insertedNodeCount":1,"removedNodeCount":0,"movedNodeCount":0,"configuredNodeCount":1,"relocatedNodeCount":0,"affectedNodeIds":["n_x5"],"touchedPrimitiveTypes":["loom.banner"],"removedPrimitiveTypes":[],"relocatedPrimitiveTypes":[],"configuredPropKeys":["tone"],"nestedTargets":[],"redirectedSubmissions":[],"shallowestAffectedDepth":2}
 reversed:  {"code":"node-not-found","nodeId":"n_x5"}
 absent:    {"code":"node-not-found","nodeId":"n_nowhere"}
 ```
@@ -823,6 +959,12 @@ existence or destroyed**, and a move does neither. Everything that rides along a
 move is the same node with the same id in the same order, so counting it would be
 counting nodes that did not change.
 
+If you gave a fourth rule — a move is *also* measured over its whole subtree,
+into `relocatedNodeCount` and `relocatedPrimitiveTypes` — that is right and it is
+a different sentence. Those fields answer *what travelled*, which is not content
+churn and is not measured to be added to it. Two questions, two sets of fields,
+and the reason there are two is the answer to question 4.
+
 **2** It buys a record that stays comparable. The `ChangeAnalysis` for a change
 made in January means exactly what the one from a change made in December means,
 so a verdict recorded beside it can be attributed to the policy — which is what
@@ -848,21 +990,33 @@ counts them together has one number that rises for two unrelated reasons, so it
 can never be used to argue that anything in particular got better or worse — and
 that number is exactly the one somebody will put in a slide.
 
-**4** It sees nothing about that primitive: `touchedPrimitiveTypes` is empty,
-because `tallyOperation`'s `move` case records the moved node's own type only
-when the node is an element, and never looks inside the subtree.
+**4** *Sees it:* `relocatedPrimitiveTypes` (`["loom.card"]`, collected over the
+whole moved subtree), `relocatedNodeCount` (3 — slot, card, text),
+`movedNodeCount` (1, the operation named one node), and
+`shallowestAffectedDepth`. *Does not see it:* `touchedPrimitiveTypes`,
+`removedPrimitiveTypes` and `insertedNodeCount`/`removedNodeCount`, because
+nothing was created, destroyed or reconfigured; and `affectedNodeIds`, which
+holds the slot's id alone. The level is **`high`**, from
+`protected-type-relocated`.
 
-*Correct:* a move creates and destroys nothing, the subtree is unchanged
-including its ids, and "touched" throughout `analysis.ts` means named-by,
-created-by or destroyed-by an operation. The measurement is consistent with
-itself and with the counting rule that makes `movedNodeCount` 1.
+*Why the agreement is by design.* The two deltas are different — different
+`relocatedNodeCount`, different `affectedNodeIds`, and one of them carries an
+extra depth factor. What has to be invariant is not the record but **the answer
+to the question the policy asked**: is a protected type somewhere it was not.
+That is invariant because the field the rule reads is collected over the moved
+subtree rather than at the named node, so both spellings put `loom.card` in it.
+A measurement is phrasing-independent when the fields the rules read are
+functions of the resulting tree, not of the operation's grammar — everything
+else may differ freely, and here it does.
 
-*A gap:* the host declared that type consequential, the primitive has been
-relocated across the page, and the same relocation expressed as a move of the
-card rather than of its container comes out a whole level higher. A damage
-estimate that depends on which of two equivalent phrasings the interpreter chose
-is measuring the proposal's grammar rather than its effect.
+*Why it is a requirement.* Because the delta is drafted by a model, and choosing
+between "move the slot" and "move the card" is a free choice it makes with no
+information behind it. A framework a person types into can tolerate a verdict
+that moves with phrasing, because the person picks one phrasing and keeps it,
+and because the person is also the one being gated. Loom cannot: the thing being
+gated is the author, so a Gate sensitive to how the author phrases itself is
+gating the wrong variable. Say that and you have question 4.
 
-If you gave one of these confidently and could not construct the other, that is
-the answer to re-do in a week — the point of the question is holding both, because
-lesson 09 turns on being able to say which side of that line a rule sits on.
+If you produced the level and not the invariance argument, the level was the easy
+half — re-do this one in a week from the argument end, because lesson 09 turns on
+being able to say what a rule is a function of.
