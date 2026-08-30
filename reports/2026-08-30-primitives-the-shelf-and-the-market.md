@@ -272,6 +272,28 @@ the other two renumber.
 This is a **fifth** consecutive day of nothing merging, and it is the mechanical
 cost of that rather than a mistake by any of the three runs. Filed.
 
+## The preview, and the commit that did not get one
+
+The address is in the pull request, from the `vercel[bot]` comment's alias
+rather than from the commit status — the correction the 25 August report made,
+which still holds.
+
+**The first push got no preview at all**, and the failure is quiet enough to be
+worth a paragraph. The commit was made with `git -c user.name="Loom primitives"
+-c user.email=…`, which looked like better attribution than every lane's work
+reading as `Claude`. Vercel resolves that address to a GitHub account that is
+not on the Vercel team, so the deployment came back `BLOCKED` and `previewUrl`
+was the empty string. No check failed and nothing else looked wrong; the only
+symptom was the absent link the brief requires.
+
+Repaired with `git commit --amend --reset-author` and a force-with-lease push to
+a branch with no other contributors, after which it built normally. The rule for
+the next lane is one line: **commit as the repository's configured identity**,
+and put the routine's name in the commit message, the report and the `reports/`
+filename — all of which are already in place, and none of which Vercel reads.
+Filed, with the recommendation that it goes in `docs/routines.md` beside the
+sentence that asks for the URL.
+
 ## 21st.dev
 
 **Blocked for the eleventh time**, across six lanes. `docs/routines.md` still

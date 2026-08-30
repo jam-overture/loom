@@ -9572,3 +9572,42 @@ why three lanes have now filed the same thing and why it keeps drifting.
 
 Not fixing it here; `apps/loom/app/(marketing)/_lib/copy.ts` is not this lane's
 file, and this run only updates the two numbers its own diff makes false.
+
+---
+
+## 2026-08-30 — a commit made under any identity but the configured one gets no Vercel preview, and the brief requires one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around here; the workaround belongs in `docs/routines.md`
+
+Every primitives brief ends by requiring **the deployed preview URL** in the
+pull request. This run's first commit produced none, and the failure is quiet
+enough to be worth writing down.
+
+The commit was made with `git -c user.name="Loom primitives" -c
+user.email="<the maintainer's address>"`, which looked like good attribution —
+the routine says who it is, rather than every lane's work reading as `Claude`.
+Vercel resolves that address to the GitHub account **`jpizzo`**, which is not on
+the Vercel team, so the deployment came back **`BLOCKED`** with:
+
+> `@jpizzo must be a member of the jpizzolato36-6341's projects team on Vercel to deploy.`
+
+`previewUrl` in the bot's comment was the empty string. No CI check failed, no
+error appeared anywhere else, and the pull request looked entirely normal — the
+only symptom is the absent link the brief asks for.
+
+**The rule, stated plainly for the next lane:** commit as the repository's
+configured identity — `Claude <noreply@anthropic.com>` — which is what
+`primitives-16`, `primitives-17` and every other deploying branch used. Do not
+set `user.name` or `user.email` per-commit to name the routine. The routine's
+identity belongs in the commit *message*, the report and the `reports/`
+filename, all of which are already in place and none of which Vercel reads.
+
+Fixed here with `git commit --amend --reset-author` and a `--force-with-lease`
+push to a branch with no other contributors, after which the deployment built
+normally. That is the whole repair, and it costs nothing if it is known in
+advance — which is the reason for the entry.
+
+**Recommendation:** one sentence in `docs/routines.md` beside the instruction
+that asks for the preview URL. Not adding it myself; a routine cannot write the
+governance it is bound by.
