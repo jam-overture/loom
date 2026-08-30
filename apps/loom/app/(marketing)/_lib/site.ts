@@ -308,6 +308,39 @@ export const askHref = (
 }
 
 /**
+ * The mechanism page, with the request whose record it should print.
+ *
+ * Same property as `askHref` and for the same reason: the page keeps nothing,
+ * so what it prints is a function of its address. `/how-it-works` on its own is
+ * the page it has always been — the record of the quietest of the five choices,
+ * chosen because it is the one whose lines fit on a screen. With an ask in the
+ * address it prints the record of *that* request instead, run against the same
+ * published front door, which is what lets the front door hand a visitor the
+ * raw record of the change they just watched rather than of a different one.
+ *
+ * `approve` travels with it for the same reason it travels on the front door: a
+ * change the rules held and the visitor then allowed has a sixth line, and a
+ * page that dropped the approval would print five and contradict the panel the
+ * visitor followed the link from.
+ */
+export const mechanismHref = (
+  origin: string,
+  options: {
+    readonly theme?: SiteThemeName
+    readonly ask?: string
+    readonly approve?: boolean
+  } = {}
+): string => {
+  const url = new URL(HOW_IT_WORKS.path, `${origin}/`)
+
+  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
+  if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
+  if (options.approve === true) url.searchParams.set("approve", "1")
+
+  return url.toString()
+}
+
+/**
  * The record page, with the run of changes it is reporting on in the address.
  *
  * Same argument as `askHref` and the same property: the page keeps nothing, so

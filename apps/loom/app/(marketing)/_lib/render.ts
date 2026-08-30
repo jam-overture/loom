@@ -107,9 +107,19 @@ export const historyFor = async (context: SitePageContext): Promise<ChangeHistor
  * replays. The front door is built fresh for it: the mechanism page's claim is
  * about *this site*, so a record of a fixture kept beside it would be a record
  * of nothing a reader can go and check.
+ *
+ * **The front door it is built against carries no ask**, and that is the whole
+ * of the arrangement rather than an oversight. The request is run here, so the
+ * page it is run against has to be the one this site publishes at `/` — not
+ * that page with the answer already standing on it. What the visitor's `ask`
+ * decides is *which request to run*, never which page to run it against.
  */
 export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
-  paperTrailFor(treeFor(HOME, { origin: context.origin, theme: context.theme }))
+  paperTrailFor(
+    treeFor(HOME, { origin: context.origin, theme: context.theme }),
+    context.ask,
+    context.approve === true
+  )
 
 export const pageTreeFor = async (
   route: SiteRoute,
