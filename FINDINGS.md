@@ -9503,3 +9503,72 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-30 — three open branches all claim decision `0096`, and the index tool forbids the gap that would avoid it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+`decisions/0096` is claimed by **three unmerged branches** as of this morning:
+
+| Branch | PR | Record |
+| --- | --- | --- |
+| `framework-15-a-tree-that-links-to-itself` | #173 | proposed, titled in the PR as "0069/0096" |
+| `primitives-17-the-ground-you-stand-on` | #188 | shipped, a motion-timeline record |
+| `primitives-18-the-shelf-and-the-market` | this run | shipped, a card-picture record |
+
+**There is no way for a run to avoid this.** `tools/decisions/build-index.ts`
+refuses a gap — `0096 is missing — the numbers must run unbroken from 0001`,
+exit 1 — so a run that sees 0096 taken on another branch and reaches for 0097
+fails its own index build. The only two options are *take the number and
+collide* or *do not write the record*, and the second is worse: the whole point
+of 0094 and of this run's record is that the argument gets written down before
+five more cards re-derive it differently.
+
+This run took 0096 knowingly. Whichever of the three merges first keeps it; the
+other two renumber, which is a one-file rename plus the references in the
+primitives that cite it.
+
+**It is a symptom rather than a cause.** Nothing has merged since **#167**, and
+there are now **twenty-eight** open pull requests across six lanes. Every lane
+branches off `main` as its brief instructs, so every lane sees the same next
+free number, and the collision rate grows with the size of the queue rather than
+with anything a run does. Five consecutive days of no merges is the actual
+finding; the number clash is what it looks like from inside a routine.
+
+**Recommendations, in the order they would help:**
+
+1. **Merge something.** The queue is the problem and every other fix is a
+   workaround for it.
+2. **Let the index tolerate a gap**, reporting it rather than failing. The
+   tool's own comment already says "a problem with the numbering is reported and
+   still written", which is the behaviour the check contradicts. A gap in a
+   decision log is an ordinary thing; a collision is not.
+3. **Or allocate by date rather than by sequence** — `2026-08-30-a-cards-picture-…`
+   — which cannot collide at all. That is a change to how every record is named
+   and cited, so it is the maintainer's call rather than a routine's.
+
+Not fixing any of the three here: `tools/` and the merge queue are both outside
+`src/primitives/`.
+
+---
+
+## 2026-08-30 — `FACTS.decisions` is still wrong on `main`, for the third consecutive day
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open —
+already filed by #180 and #188; this is a third confirmation rather than a new entry
+
+`main` at `3a57feb` carries `FACTS.decisions: "94"` against **95** records in
+`decisions/`, so `main`'s own `pnpm verify` fails `facts.test.ts` independently
+of any branch. Set to `96` here alongside `FACTS.primitives` `68` → `72`.
+
+The recommendation is unchanged from the two runs that filed it before, and it
+is small: **derive both counts.** `facts.test.ts` already computes them — it
+reads `decisions/` and calls `catalogueOf(siteRegistry)` — so the test knows the
+right answer and asserts a string beside it. Every routine that adds a primitive
+or a record has to edit a file in another lane to keep a green build, which is
+why three lanes have now filed the same thing and why it keeps drifting.
+
+Not fixing it here; `apps/loom/app/(marketing)/_lib/copy.ts` is not this lane's
+file, and this run only updates the two numbers its own diff makes false.

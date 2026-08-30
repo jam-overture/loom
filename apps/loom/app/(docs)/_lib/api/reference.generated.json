@@ -4486,6 +4486,34 @@
           ]
         },
         {
+          "module": "primitives/loom.book",
+          "title": "loom.book",
+          "summary": "One book: its cover, what it is called, who wrote it, when, and a line about why it is here.",
+          "symbols": [
+            {
+              "name": "loomBook",
+              "kind": "value",
+              "signature": "const loomBook: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.book-grid",
+          "title": "loom.book-grid",
+          "summary": "A shelf of `loom.book` cells — what someone wrote, recommends, or is reading right now.",
+          "symbols": [
+            {
+              "name": "loomBookGrid",
+              "kind": "value",
+              "signature": "const loomBookGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.button",
           "title": "loom.button",
           "summary": "The control that sends a `loom.form`. Its label is child text.",
@@ -4886,6 +4914,34 @@
               "name": "loomListItem",
               "kind": "value",
               "signature": "const loomListItem: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.listing",
+          "title": "loom.listing",
+          "summary": "One property on the market: a photograph of it, what it costs, where it is, what it measures, and the control that arranges a viewing.",
+          "symbols": [
+            {
+              "name": "loomListing",
+              "kind": "value",
+              "signature": "const loomListing: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.listing-grid",
+          "title": "loom.listing-grid",
+          "summary": "A wall of `loom.listing` cells — what is on the market.",
+          "symbols": [
+            {
+              "name": "loomListingGrid",
+              "kind": "value",
+              "signature": "const loomListingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

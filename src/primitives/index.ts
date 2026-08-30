@@ -9,6 +9,8 @@ import { loomAvatar } from "./loom.avatar.js"
 import { loomAvatarRow } from "./loom.avatar-row.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomBeforeAfter } from "./loom.before-after.js"
+import { loomBook } from "./loom.book.js"
+import { loomBookGrid } from "./loom.book-grid.js"
 import { loomButton } from "./loom.button.js"
 import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
@@ -36,6 +38,8 @@ import { loomIcon } from "./loom.icon.js"
 import { loomKbd } from "./loom.kbd.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
+import { loomListing } from "./loom.listing.js"
+import { loomListingGrid } from "./loom.listing-grid.js"
 import { loomList } from "./loom.list.js"
 import { loomListItem } from "./loom.list-item.js"
 import { loomLogo } from "./loom.logo.js"
@@ -222,6 +226,18 @@ import { loomTierTable } from "./loom.tier-table.js"
  * the width and as a card when it is not — one `@container` rule rather than two
  * primitives or a prop nobody should have to set twice.
  *
+ * **The two bands that close the port** are `book-grid` over `book` and
+ * `listing-grid` over `listing`, and between them they empty the *pairs to
+ * build* table in `docs/hermes-port-map.md`. Neither is a new argument: 0094
+ * named both of them in advance as cards with a repeated part, so both hold
+ * their prose as a child, and 0066 had already put them on opposite sides of
+ * itself — a book is read, so the whole card is the target; a listing is acted
+ * on, so the viewing button is. What they added was the question
+ * [0096](../../decisions/0096-a-cards-picture-is-a-prop-when-the-model-names-one-kind-of-picture.md)
+ * answers, which had been asked twice with two different answers and no rule:
+ * a `loom.credential`'s mark is a region and a `loom.book`'s cover is a prop,
+ * and the difference is how many kinds of picture the content model names.
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -259,6 +275,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomTableCell,
   loomProductGrid,
   loomProduct,
+  loomListingGrid,
+  loomListing,
   loomQuoteGrid,
   loomQuote,
   loomPersonGrid,
@@ -266,6 +284,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomAvatarRow,
   loomArticleGrid,
   loomArticle,
+  loomBookGrid,
+  loomBook,
   loomLogoCloud,
   loomLogo,
   loomCredentialGrid,
@@ -322,6 +342,8 @@ export {
   loomAvatarRow,
   loomBadge,
   loomBeforeAfter,
+  loomBook,
+  loomBookGrid,
   loomButton,
   loomCallout,
   loomCard,
@@ -350,6 +372,8 @@ export {
   loomLink,
   loomLinkList,
   loomList,
+  loomListing,
+  loomListingGrid,
   loomListItem,
   loomLogo,
   loomLogoCloud,

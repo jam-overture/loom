@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 47 blocks, 68 primitives.**
+**Done — 50 blocks, 72 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -82,6 +82,8 @@ stands alone.
 | `before-after` | `loom.before-after` | atomic ✅ |
 | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-grid` / `loom.offering` | pair ✅ — seven blocks, one record |
 | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-grid` / `loom.credential` | pair ✅ |
+| `book-list`, `currently-reading` | `loom.book-grid` / `loom.book` | pair ✅ — Hermes' two shapes are one record |
+| `property-listings` | `loom.listing-grid` / `loom.listing` | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -112,25 +114,32 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 8 blocks, 4 pairs.** Grouped by the content model they
+**Pairs to build — 5 blocks, 2 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
 | Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
-| Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
-| Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
 | Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
 
-**Two proposed names changed when they were built**, and the change is 0054
-being applied rather than overruled. `loom.offering-list` and
-`loom.credential-list` both shipped as `-grid`, because the arrangement word
-names *what the container does with its children* and what both of them do is
-`repeat(auto-fit, minmax(…))`. 0054's own consequence is the reason to get it
+Both remaining rows are in flight in **#180**, which was opened on 28 August and
+has not merged. Read this table as *what `main` does not yet have* rather than
+as *what nobody has written*; when #180 lands, the table is empty and the port's
+buildable remainder is zero.
+
+**Three proposed names changed when they were built**, and the change is 0054
+being applied rather than overruled. `loom.offering-list`,
+`loom.credential-list` and `loom.book-shelf` all shipped as `-grid`, because the
+arrangement word names *what the container does with its children* and what all
+three of them do is `repeat(auto-fit, minmax(…))` with `align-items: stretch`.
+`-shelf` was the most tempting of the three and would have been the plainest lie
+about the layout: a real shelf is a wrapping row of natural-width covers with a
+ragged last row, and if the library ever wants one it is a different container
+rather than this one with a prop. 0054's own consequence is the reason to get it
 right before it ships: a container that changes its arrangement changes its
-name, and a rename is a breaking change to every stored tree. The four rows
-above are proposals until the run that builds them looks at the markup — read
-the arrangement word as a prediction, not a commitment.
+name, and a rename is a breaking change to every stored tree. The rows above are
+proposals until the run that builds them looks at the markup — read the
+arrangement word as a prediction, not a commitment.
 
 `loom.offering-grid` also carries a **local** column vocabulary, `auto | one |
 two | three`, where `loom.credential-grid` takes the shared `COLUMN_NAMES`. That
@@ -225,15 +234,16 @@ been outside it.
 
 | | Blocks |
 | --- | --- |
-| Ported | 47 |
+| Ported | 50 |
 | Need no primitive | 13 |
-| Pairs still to build | 8 (4 pairs) |
+| Pairs still to build | 5 (2 pairs, both in flight in #180) |
 | Atomic still to build | 0 |
 | Blocked on a seam | 2 |
 
-**62 of 70 are settled**, and the 8 that remain are four pairs rather than eight
-primitives. That is the number worth quoting, because "70 blocks" has been the
-shape of this job since the port started and it was never the real size of it.
+**65 of 70 are settled**, and the 5 that remain are two pairs rather than five
+primitives — both of them written and waiting in #180. That is the number worth
+quoting, because "70 blocks" has been the shape of this job since the port
+started and it was never the real size of it.
 
 *The three counts above were internally inconsistent before 26 August* — the
 ledger said 36 done while this table said 33, and the table still listed three
@@ -259,6 +269,20 @@ settles that one the same way — ask whether the port turns any field of the
 record into child nodes. An offering has an includes list, so it has a flow and
 its prose is a node in it; a credential has no repeated part at all, so its one
 line is a prop and 0059's multi-string leaf applies unchanged. `loom.book` and
-`loom.listing` have repeated parts and take their prose as children;
-`loom.episode` and `loom.event` are to be read against their own shapes at port
-time.
+`loom.listing` have repeated parts and take their prose as children — which both
+did when they were built on 30 August, so the prediction held and cost that run
+nothing; `loom.episode` and `loom.event` are to be read against their own shapes
+at port time.
+
+**A third question was waiting behind that one**, and the book and listing pairs
+found it the way the offering and credential pairs found 0094: *where does the
+card's own picture live?* `loom.credential` holds its mark as a **region** and
+`loom.article` holds its image as a **prop**, both correctly, and the two
+arguments generalise in opposite directions — read either one alone and it
+decides every card in the library, wrongly.
+[0096](../decisions/0096-a-cards-picture-is-a-prop-when-the-model-names-one-kind-of-picture.md)
+settles it: ask how many kinds of picture the content model names, since one
+kind is a prop and several are a region. A book cover and a property photograph
+are one kind each, so both are props; a credential's mark is three Hermes fields
+over four renderings, so it is a region. It decides `loom.episode`'s artwork and
+`loom.event`'s poster in advance, the way 0094 decided their prose.

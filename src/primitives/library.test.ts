@@ -150,8 +150,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(68)
+  it("registers as seventy-two primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(72)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -183,6 +183,8 @@ describe("the starter library", () => {
       "loom.table-cell",
       "loom.product-grid",
       "loom.product",
+      "loom.listing-grid",
+      "loom.listing",
       "loom.quote-grid",
       "loom.quote",
       "loom.person-grid",
@@ -190,6 +192,8 @@ describe("the starter library", () => {
       "loom.avatar-row",
       "loom.article-grid",
       "loom.article",
+      "loom.book-grid",
+      "loom.book",
       "loom.logo-cloud",
       "loom.logo",
       "loom.credential-grid",
@@ -824,6 +828,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(tablePage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
+      ...typesIn(shelfAndMarketPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -2495,7 +2500,7 @@ describe("the targets the library declares", () => {
     /** The submit control: the whole of it is what a reader presses (0068). */
     expect(declarationOf("loom.button")).toBe("always")
 
-    for (const type of ["loom.card", "loom.feature", "loom.logo", "loom.article"]) {
+    for (const type of ["loom.card", "loom.feature", "loom.logo", "loom.article", "loom.book"]) {
       expect(declarationOf(type)).toEqual({ whenProps: ["href"] })
     }
   })
@@ -2509,6 +2514,7 @@ describe("the targets the library declares", () => {
      * which is how a check ends up switched off everywhere.
      */
     expect(declarationOf("loom.product")).toBeUndefined()
+    expect(declarationOf("loom.listing")).toBeUndefined()
 
     const { diagnostics, markup } = render(cataloguePage(EDITORIAL))
 
@@ -2517,7 +2523,7 @@ describe("the targets the library declares", () => {
   })
 
   it("declares nothing on a container, since a container is not a target", () => {
-    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
+    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.book-grid", "loom.listing-grid", "loom.form", "loom.field"]) {
       expect(declarationOf(type)).toBeUndefined()
     }
   })
@@ -4874,5 +4880,401 @@ describe("what you can book, and why you should be believed", () => {
      */
     expect(stylesheet).toContain(".loom-offering-action {\n  display: grid;\n  margin-block-start: auto;\n}")
     expect(render(bookablePage(EDITORIAL)).markup).toContain("align-items:stretch")
+  })
+})
+
+/**
+ * The last two pairs in `docs/hermes-port-map.md` — `book-list` and
+ * `currently-reading` over one pair, `property-listings` over the other — and
+ * the fixture is built to make the *pairs* argue with each other rather than to
+ * exercise either one alone. A book has a cover and a listing has a
+ * photograph; one is a prop for the same reason the other is, and the reason is
+ * 0096. Both cards hold their prose as a node, which is 0094 deciding them by
+ * name before either was written. They sit on opposite sides of 0066, so one
+ * carries an overlay and the other must not.
+ */
+const shelfAndMarketPage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory()
+): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const tag = (label: string, tone?: string) =>
+    buildElement(idFactory, {
+      type: "loom.badge",
+      props: tone === undefined ? {} : { tone },
+      children: [text(label)],
+    })
+
+  const note = (value: string) =>
+    buildElement(idFactory, { type: "loom.prose", children: [text(value)] })
+
+  /** Hermes' `book-list` and `currently-reading`, which are one record. */
+  const shelf = buildElement(idFactory, {
+    type: "loom.book-grid",
+    props: { columns: "three", gap: "normal" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.book",
+        props: {
+          title: "The Dispossessed",
+          author: "Ursula K. Le Guin",
+          year: "1974",
+          cover: "https://example.com/covers/dispossessed.jpg",
+          href: "https://example.com/books/dispossessed",
+        },
+        children: [
+          note("The one I hand to anyone who says a system has to be the way it is."),
+          buildSlot(idFactory, "meta", [tag("Halfway", "accent"), tag("Re-reading")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.book",
+        props: {
+          title: "A Pattern Language",
+          author: "Christopher Alexander",
+          year: "1977",
+          cover: "https://example.com/covers/pattern-language.jpg",
+        },
+        children: [buildSlot(idFactory, "meta", [tag("Reference")])],
+      }),
+      /** No cover at all: the jacket, which is the hole this design refuses to leave. */
+      buildElement(idFactory, {
+        type: "loom.book",
+        props: {
+          title: "Notes on the Synthesis of Form",
+          author: "Christopher Alexander",
+          year: "1964",
+        },
+        children: [note("Out of print, and worth the hunt.")],
+      }),
+    ],
+  })
+
+  /** Hermes' `property-listings`, whose three metric fields are one list. */
+  const market = buildElement(idFactory, {
+    type: "loom.listing-grid",
+    props: { columns: "two", gap: "normal" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.listing",
+        props: {
+          address: "Flat 4, 128 Grafton Terrace, Kentish Town",
+          price: "£675,000",
+          status: "For sale",
+          cover: "https://example.com/listings/grafton.jpg",
+          href: "https://example.com/listings/grafton",
+        },
+        children: [
+          note("A top-floor conversion with the original roof lights kept."),
+          buildElement(idFactory, {
+            type: "loom.perk-list",
+            props: { density: "tight" },
+            children: [
+              buildElement(idFactory, {
+                type: "loom.perk-list-item",
+                props: { label: "Share of freehold" },
+              }),
+              buildElement(idFactory, {
+                type: "loom.perk-list-item",
+                props: { label: "Residents' parking" },
+              }),
+            ],
+          }),
+          buildSlot(idFactory, "meta", [tag("2 beds"), tag("1 bath"), tag("642 sq ft")]),
+          buildSlot(idFactory, "action", [
+            buildElement(idFactory, {
+              type: "loom.action",
+              props: { href: "https://example.com/listings/grafton/viewing", variant: "primary" },
+              children: [text("Book a viewing")],
+            }),
+          ]),
+        ],
+      }),
+      /**
+       * A commercial unit: no beds, no baths, a fourth metric Hermes could not
+       * hold at all, and no photograph — so the flag has to reach the flow.
+       */
+      buildElement(idFactory, {
+        type: "loom.listing",
+        props: {
+          address: "Unit 7, The Bond Works, Digbeth",
+          price: "£2,400 pcm",
+          status: "Under offer",
+        },
+        children: [
+          note("Ground-floor workshop with a roller shutter onto the yard."),
+          buildSlot(idFactory, "meta", [
+            tag("1,850 sq ft"),
+            tag("3.9m ceilings"),
+            tag("EPC B"),
+            tag("Loading bay"),
+          ]),
+          buildSlot(idFactory, "action", [
+            buildElement(idFactory, {
+              type: "loom.action",
+              props: { href: "https://example.com/listings/bond-works", variant: "secondary" },
+              children: [text("Request details")],
+            }),
+          ]),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "On the shelf" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1 },
+                children: [text("What I am reading, and what is on the market")],
+              }),
+            ]),
+            shelf,
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "On the market" },
+          children: [market],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("what is on the shelf, and what is on the market", () => {
+  it("renders both pairs, with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(shelfAndMarketPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("The Dispossessed")
+    expect(markup).toContain("Notes on the Synthesis of Form")
+    expect(markup).toContain("Flat 4, 128 Grafton Terrace, Kentish Town")
+    expect(markup).toContain("Unit 7, The Bond Works, Digbeth")
+    expect([...markup.matchAll(/class="loom-book /g)]).toHaveLength(3)
+    expect([...markup.matchAll(/class="loom-cover /g)]).toHaveLength(2)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(shelfAndMarketPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(shelfAndMarketPage(BOLD)).diagnostics).toEqual([])
+    expect(render(shelfAndMarketPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("turns a property's three metric fields into however-many nodes", () => {
+    /**
+     * The 0052 call this pair turns on, and the same one the record itself
+     * makes about `hours-of-operation`'s seven weekday fields: `beds`, `baths`
+     * and `sqft` are repeated content that never got to be a list. The fixture
+     * proves it by holding a listing with **four** metrics and none of them a
+     * bed — a shape Hermes could not express without shipping another field.
+     */
+    expect(propsOfType("loom.listing")).toEqual(["address", "cover", "href", "price", "status"])
+    expect(propsOfType("loom.book")).toEqual(["author", "cover", "href", "title", "year"])
+
+    const { markup } = render(shelfAndMarketPage(EDITORIAL))
+    const commercial = markup.slice(markup.indexOf("The Bond Works"))
+
+    expect(commercial).toContain("1,850 sq ft")
+    expect(commercial).toContain("Loading bay")
+    expect(commercial).not.toContain("beds")
+  })
+
+  it("holds both cards' prose as a node, which 0094 decided before either was written", () => {
+    /**
+     * 0094 names these two cards: both have a repeated part — a shelf entry's
+     * tags, a property's metrics — so both have a children flow and the
+     * sentence belongs in it, movable against the list rather than pinned above
+     * it forever. Asserted as the absence of the prop *and* the presence of the
+     * node, because either alone would pass on a card that had neither.
+     */
+    const { markup } = render(shelfAndMarketPage(EDITORIAL), true)
+
+    expect(propsOfType("loom.book")).not.toContain("description")
+    expect(propsOfType("loom.listing")).not.toContain("description")
+
+    const book = markup.slice(markup.indexOf("The Dispossessed"))
+    const listing = markup.slice(markup.indexOf("Grafton Terrace"))
+
+    expect(book.slice(0, book.indexOf("</article>"))).toContain('data-loom-type="loom.prose"')
+    expect(listing.slice(0, listing.indexOf("</article>"))).toContain('data-loom-type="loom.prose"')
+    /** The flow the prose sits in is also where an amenities list goes. */
+    expect(listing.slice(0, listing.indexOf("</article>"))).toContain("Share of freehold")
+  })
+
+  it("takes both pictures as props, where a credential's mark is a region", () => {
+    /**
+     * 0096, asserted across the two cards that disagree. A credential's mark is
+     * held three ways in Hermes and can honestly be a wordmark, a face, a glyph
+     * or a photograph, so no URL prop could express it and the card places a
+     * region. A book cover and a property photograph are each one kind of
+     * picture, so the prop says everything a region would and costs no node.
+     */
+    const { markup } = render(shelfAndMarketPage(EDITORIAL), true)
+
+    expect(catalogueOf(registry).find((entry) => entry.type === "loom.book")?.slots).toEqual(["meta"])
+    expect(catalogueOf(registry).find((entry) => entry.type === "loom.listing")?.slots).toEqual([
+      "meta",
+      "action",
+    ])
+    expect(markup).toContain('src="https://example.com/covers/dispossessed.jpg"')
+    /** Empty alt: the title is in the same card. `loom.article`'s call. */
+    expect(markup).toContain('alt="" loading="lazy"')
+  })
+
+  it("draws a jacket where there is no cover, rather than leaving a hole in the shelf", () => {
+    /**
+     * A shelf where three books have covers and two do not is a shelf with two
+     * holes in it, and the hole is worse than anything that could be put in it:
+     * the rows stop lining up and the eye reads the gap as a loading failure.
+     * So the box is always drawn — three boxes for three books, one of which has
+     * no picture to put in it.
+     */
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+
+    expect([...tree.matchAll(/class="loom-book-cover"/g)]).toHaveLength(3)
+    expect([...tree.matchAll(/<img/g)]).toHaveLength(3)
+  })
+
+  it("sets the title on the bare jacket, and not the initials a name would give", () => {
+    /**
+     * The defect the screenshots found and every assertion above missed. The
+     * jacket drew `monogramOf(title)` for one render, because that is
+     * `loom.avatar`'s fallback and reusing it looked like consistency — and
+     * *Notes on the Synthesis of Form* came out as **"NO"**, in 24pt, on a blank
+     * cover, on the demo page.
+     *
+     * The helper is not wrong. It is built for *names*, where the first letters
+     * of the first two words are the convention a reader recognises. A title
+     * starts with an article half the time and its first two words carry no
+     * information. Nothing about `monogramOf` needed changing; it needed not
+     * calling, which is why this asserts the absence of its output rather than
+     * some new behaviour of it.
+     *
+     * The jacket's copy is `aria-hidden`, so the title is announced once from
+     * the heading below — 0093's bargain for a decorative duplicate, reached
+     * from a prop rather than from children.
+     */
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+    const jacket = tree.slice(tree.indexOf('aria-hidden="true"'))
+
+    expect(jacket.slice(0, jacket.indexOf("</span>"))).toContain("Notes on the Synthesis of Form")
+    expect(tree).not.toContain(">NO<")
+    /** Twice on the coverless book, once everywhere else: the jacket and the heading. */
+    expect([...tree.matchAll(/Notes on the Synthesis of Form/g)]).toHaveLength(2)
+    expect([...tree.matchAll(/The Dispossessed/g)]).toHaveLength(1)
+  })
+
+  it("gives a cover its spine from the stylesheet, because no inline style has a ::before", () => {
+    const { stylesheet } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+    const spine = stylesheet.slice(stylesheet.indexOf(".loom-book-cover::before"))
+
+    expect(stylesheet).toContain(".loom-book-cover {\n  position: relative;\n  aspect-ratio: 2 / 3;")
+    expect(spine.slice(0, spine.indexOf("}"))).toContain("var(--loom-fg-default)")
+    /** Drawn from a token at low opacity, so it shades a light palette and lights a dark one. */
+    expect(spine.slice(0, spine.indexOf("}"))).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+  })
+
+  it("stretches a book's title over the whole card and nothing over a listing's", () => {
+    /**
+     * 0066, decided in advance for both. A book is read, so the card is the
+     * target and its title carries the overlay; a listing is acted on, so no
+     * overlay is emitted at all and the viewing button is the only target — the
+     * failure that prevents being a card whose surface is clickable *under* its
+     * own button, which no reader can see and no markup check would name.
+     */
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+    const listings = tree.slice(tree.indexOf("Grafton Terrace"))
+
+    expect([...tree.matchAll(/loom-cover-link/g)]).toHaveLength(1)
+    expect(listings).not.toContain("loom-cover-link")
+    expect(listings).toContain("Book a viewing")
+  })
+
+  it("declares the book a target and leaves the listing undeclared, which is 0068", () => {
+    const declarationOf = (type: string) =>
+      registry.primitives.find((primitive) => primitive.type === type)?.interactive
+
+    expect(declarationOf("loom.book")).toEqual({ whenProps: ["href"] })
+    expect(declarationOf("loom.listing")).toBeUndefined()
+  })
+
+  it("puts the price above the address, so neither has to win a line", () => {
+    /**
+     * `loom.product` sets its name and price on one baseline with
+     * `space-between`, which is right for a shop and wrong twice here. A buyer
+     * scans by price first; and an address is routinely eight words, so a price
+     * sharing its line loses in a three-column grid exactly the way
+     * `loom.credential`'s year did, and for the same reason — a wrapping row
+     * decides wrapping before it decides shrinking. Asserted by document order,
+     * because the order is the design.
+     */
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+
+    expect(tree.indexOf("£675,000")).toBeLessThan(tree.indexOf("Grafton Terrace"))
+    expect(tree.indexOf("£2,400 pcm")).toBeLessThan(tree.indexOf("Bond Works"))
+  })
+
+  it("draws the listing's box with or without a photograph, and flags it either way", () => {
+    /**
+     * The second defect the screenshots found. A wall where two listings have
+     * pictures and one does not is a wall with a hole in it — the rows stop
+     * lining up and the gap reads as a photograph that failed to load rather
+     * than a listing that has none yet, which is most of an agent's wall on any
+     * given Tuesday. So the box is always drawn: two boxes, one `<img>`.
+     *
+     * It keeps the flag honest as a side effect. A status is one per record and
+     * the card *places* it, over the picture, where no `meta` badge could reach
+     * — and a card that sometimes had nowhere to place it would need a second
+     * arrangement for the same prop, which is a branch that exists only to be
+     * got wrong. This asserts it is the same arrangement on both.
+     */
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+    const market = tree.slice(tree.indexOf("Grafton Terrace") - 4000)
+    const plate = tree.slice(tree.indexOf("Under offer") - 900, tree.indexOf("Under offer"))
+
+    expect([...market.matchAll(/class="loom-cover-media"/g)]).toHaveLength(2)
+    expect(plate).toContain("position:absolute")
+    expect(plate).toContain("background:var(--loom-bg-surface-muted)")
+    /** The flag is above the price on both, because it is on the box above both. */
+    expect(tree.indexOf("For sale")).toBeLessThan(tree.indexOf("£675,000"))
+    expect(tree.indexOf("Under offer")).toBeLessThan(tree.indexOf("£2,400 pcm"))
+  })
+
+  it("pins the viewing button to the card's floor so a wall of listings lines them up", () => {
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+    const action = tree.slice(tree.indexOf("Book a viewing"))
+
+    /**
+     * Two listings whose blurbs differ by a whole paragraph and an amenities
+     * list. The `auto` margin means nothing unless the cell fills the row's
+     * height, which is what the grid's `stretch` is for.
+     */
+    expect(tree).toContain("margin-block-start:auto")
+    expect(tree).toContain("align-items:stretch")
+    expect(action.length).toBeGreaterThan(0)
+  })
+
+  it("floors a book's tags too, so unequal notes still line their chips up", () => {
+    const { tree } = splitStylesheet(render(shelfAndMarketPage(EDITORIAL)).markup)
+    const shelf = tree.slice(tree.indexOf("loom-book "), tree.indexOf("Grafton Terrace"))
+
+    expect([...shelf.matchAll(/margin-block-start:auto/g)].length).toBeGreaterThanOrEqual(2)
   })
 })

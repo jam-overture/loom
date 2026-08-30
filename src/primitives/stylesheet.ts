@@ -209,6 +209,18 @@ export const LIBRARY_CLASS = {
   offeringAction: "loom-offering-action",
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
+  /** A `loom.book`: the positioned ancestor its stretched title anchor needs. */
+  book: "loom-book",
+  /**
+   * A `loom.book`'s jacket. The portrait ratio and the spine are both here
+   * rather than inline, and the spine is the reason: it is a `::before`, which
+   * no inline style can reach, and it is what stops a wall of covers reading as
+   * a wall of thumbnails. The gradient is drawn from `--loom-fg-default` at low
+   * opacity rather than from a literal, so a dark palette gets a lit edge where
+   * a light one gets a shaded one — which is what a spine does under a light
+   * source, and is the correct answer under both rather than a lucky one.
+   */
+  bookCover: "loom-book-cover",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -550,6 +562,23 @@ details[open] > summary .loom-marker {
 }
 .loom-credential {
   position: relative;
+}
+.loom-book {
+  position: relative;
+}
+.loom-book-cover {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+}
+.loom-book-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.28;
+  background: linear-gradient(to right, var(--loom-fg-default) 0, transparent 7%, transparent 96%, var(--loom-fg-default) 100%);
 }
 .loom-mosaic {
   display: grid;
