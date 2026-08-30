@@ -37,8 +37,13 @@ entries; so did four other lanes; git cannot tell whose paragraph goes first.
 
 Resolved by keeping both sides in full, separated by the `---` the file already
 uses between entries. Nothing was dropped, reworded or reordered on either side.
-That is the same resolution the 23 August merge on this branch line made, and it
-is recorded there as *"both sides' findings kept"*.
+
+That is not a new resolution. Three commits already in this repository's history
+carry the message *"both sides' findings kept"* — `af02844`, `4602480` and
+`cd8cd62`, all on 24 August, from more than one lane. This is the fourth and
+fifth time the same conflict has been resolved the same way, and that is worth
+more than any of the individual resolutions: it keeps happening, and nobody has
+written down that it keeps happening.
 
 **The structural point is worth more than the fix.** I tested all six pairs of
 the four open pull requests against each other:
