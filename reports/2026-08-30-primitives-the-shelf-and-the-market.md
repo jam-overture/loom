@@ -9,13 +9,13 @@ answered differently both times without anybody noticing. Two defects found by
 screenshots and by nothing else, one of them the kind that would have shipped
 onto the demo page in 24-point type.
 
-![The specimen under editorial](2026-08-30-primitives-the-shelf-and-the-market-editorial.png)
+![The specimen under editorial](2026-08-30-shelf-and-market-editorial.png)
 
-![The same page under bold](2026-08-30-primitives-the-shelf-and-the-market-bold.png)
+![The same page under bold](2026-08-30-shelf-and-market-bold.png)
 
-![And under the house palette](2026-08-30-primitives-the-shelf-and-the-market-minimal.png)
+![And under the house palette](2026-08-30-shelf-and-market-minimal.png)
 
-![At a true 390px, in a real 390px viewport](2026-08-30-primitives-the-shelf-and-the-market-phone.png)
+![At a true 390px, in a real 390px viewport](2026-08-30-shelf-and-market-phone.png)
 
 ## Which primitives, and why those
 
@@ -271,6 +271,43 @@ the other two renumber.
 
 This is a **fifth** consecutive day of nothing merging, and it is the mechanical
 cost of that rather than a mistake by any of the three runs. Filed.
+
+## The screenshot that did not render, and the threshold behind it
+
+The four images are named `2026-08-30-shelf-and-market-*.png` rather than
+matching the report's own stem, and the reason is a measurement rather than a
+preference.
+
+`FINDINGS.md` has an entry from 26 August about GitHub mangling pull request
+bodies on the way in — `!` dropped from markdown images, autolinks removed
+entirely, tag-shaped text emptied inside backticks — and it ends on a fourth,
+less predictable case: *"a relative markdown link whose path is long enough
+comes back wrapped in double backticks … which suggests a length threshold
+rather than a character."*
+
+It is a length threshold, and this run measured it. The `<img>` workaround that
+entry recommends works — except that **the `src` attribute is stripped from any
+image whose URL is long enough**, silently, leaving a valid `<img>` tag with no
+source and a body that looks correct until you look at it. With the original
+filenames:
+
+| Image | URL length | Survived |
+| --- | --- | --- |
+| `…-the-market-bold.png?raw=true` | 153 | yes |
+| `…-the-market-phone.png?raw=true` | 154 | yes |
+| `…-the-market-minimal.png?raw=true` | 156 | yes |
+| `…-the-market-editorial.png?raw=true` | **158** | **no** |
+
+So the threshold is between 156 and 158 characters, and the editorial shot — the
+first one, the one a reviewer sees first — was the only one over it. Confirmed by
+reproducing it three times: re-posting the body did not fix it, and adding a
+sacrificial first image stripped *both* editorial URLs while the other three
+survived, which is what ruled out "the first image" and pointed at the URL.
+
+The fix is to keep the URL short, which means keeping the *filename* short,
+which is why these four do not repeat the report's slug. Roughly: with this
+repository's blob prefix and a branch name of about forty characters, a
+screenshot filename over about fifty characters will not render.
 
 ## The preview, and the commit that did not get one
 

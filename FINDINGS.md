@@ -9611,3 +9611,60 @@ advance — which is the reason for the entry.
 **Recommendation:** one sentence in `docs/routines.md` beside the instruction
 that asks for the preview URL. Not adding it myself; a routine cannot write the
 governance it is bound by.
+
+---
+
+## 2026-08-30 — the `<img>` workaround for mangled pull request bodies has a URL length limit, measured
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open —
+extends the 26 August entry rather than replacing it; the workaround still works
+below the threshold
+
+The 26 August entry documents GitHub mangling pull request bodies on the way in
+and recommends an explicit `<img src="…blob/BRANCH/reports/FILE.png?raw=true">`
+in place of a markdown image. That workaround is correct and this run used it.
+It has a limit the entry guessed at and did not measure — it ends on *"a
+relative markdown link whose path is long enough comes back wrapped in double
+backticks … which suggests a length threshold rather than a character."*
+
+**It is a length threshold, and it applies to the `<img>` workaround too.** The
+`src` attribute is stripped from any image whose URL is long enough, leaving a
+syntactically valid `<img>` with no source. Nothing fails, no check complains,
+and the body reads correctly in the source you posted — the picture is simply
+not there.
+
+Measured on this run's four screenshots, which differed only in the last word of
+the filename:
+
+| URL | Length | `src` survived |
+| --- | --- | --- |
+| `…-the-shelf-and-the-market-bold.png?raw=true` | 153 | yes |
+| `…-the-shelf-and-the-market-phone.png?raw=true` | 154 | yes |
+| `…-the-shelf-and-the-market-minimal.png?raw=true` | 156 | yes |
+| `…-the-shelf-and-the-market-editorial.png?raw=true` | **158** | **no** |
+
+So the threshold sits between **156 and 158** characters for the whole URL.
+
+Two false leads, recorded because both are the obvious first guess:
+
+- **It is not "the first image".** Re-posting the identical body stripped the
+  same one again, and inserting a sacrificial first image stripped *both* copies
+  of the editorial URL while the three shorter ones beside them survived.
+- **It is not the `?raw=true` query or the `blob/` form**, since three URLs with
+  both rendered fine.
+
+**The workaround for the workaround** is to keep the filename short, since the
+rest of the URL is fixed by the repository and the branch name. With this
+repository's blob prefix (`https://github.com/jam-overture/loom/blob/`) and a
+branch name of about forty characters, a `reports/` screenshot filename over
+roughly **fifty** characters will not render. This run's images are named
+`2026-08-30-shelf-and-market-*.png` rather than repeating the report's own slug
+for exactly that reason, which is worth knowing before naming the next set —
+`reports/` filenames have been getting longer, and the four in #188 are within
+ten characters of the limit.
+
+**Recommendation:** add the number to `docs/routines.md` beside the `<img>`
+workaround the 26 August entry already recommends putting there. A one-line
+"keep the screenshot filename under about fifty characters" is the whole fix,
+and it costs nothing if it is known before the files are committed. Not adding
+it myself; a routine cannot write the governance it is bound by.
