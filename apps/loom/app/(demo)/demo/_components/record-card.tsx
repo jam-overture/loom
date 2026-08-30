@@ -9,9 +9,11 @@ import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 import { answerNote } from "@/app/(demo)/_lib/answer"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
+import { weighedOf } from "@/app/(demo)/_lib/weighed"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
+import { Weighed } from "./weighed"
 
 /**
  * One ask, and the whole account of what became of it.
@@ -67,6 +69,7 @@ export const RecordCard = ({
   const report = answerReport ?? undoReport
   const outcome = demoState(stateOfRecord(record.outcome))
   const answered = answerNote(record)
+  const weighed = weighedOf(record)
 
   return (
     /*
@@ -107,6 +110,19 @@ export const RecordCard = ({
           {record.repaired ? " · refused once, then repaired" : ""}
         </p>
       </header>
+
+      {/*
+        * What the Gate weighed, before the rule that read it.
+        *
+        * The rail promises two questions and then a named rule; this is the
+        * card keeping that promise in that order. Both answers were already on
+        * the record and both were behind the disclosure in the runtime's
+        * shorthand — `stakes: medium`, `undo carries: 4 nodes` — so a visitor
+        * met the verdict and never met the weighing. `_lib/weighed.ts` decides
+        * the words, and returns nothing for an ask that never reached
+        * assessment.
+        */}
+      {weighed && <Weighed answers={weighed} />}
 
       {/*
         * The verdict, in the words of the rule that produced it, above the

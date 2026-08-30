@@ -9503,3 +9503,73 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-30 — three surfaces each translate the Gate into plain English, from three private tables
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal`, `Loom marketing` ·
+**Status:** open — found while building #NN, not fixed because both halves are
+another lane's file
+
+Building the demo's answer to *"how much damage could this do, and can it be
+taken back?"* meant looking for the words rather than inventing them. They
+exist, and they exist **three times**:
+
+| Where | Covers | Exported? |
+| --- | --- | --- |
+| `(portal)/_lib/vocabulary.ts` | `STAKES` per `StakeLevel`, `ruleSentence` per `DispositionReasonCode`, `reversibilityWord` | yes |
+| `(marketing)/_lib/adapt/record.ts` | `WEIGHT` per `StakeLevel`, `BECAUSE` per `DispositionReasonCode`, `RAISED_BY` per `StakeFactorCode` | no — module-private `const` |
+| `(docs)/_components/proposal-box.tsx` | `STAKE_WORDS` per `StakeLevel` | no |
+
+So one `stakes-above-ceiling` verdict is *"Riskier than a request from here is
+allowed to be without asking"* on two surfaces and *"This weighs more than your
+rules let a request through on its own, so it waits for a person to say yes"* on
+a third, and one `medium` level is *"Some risk"*, *"middling"* and whatever
+`STAKE_WORDS` says, depending which page a reader is on. None of them is wrong.
+They are three products' worth of vocabulary for one runtime.
+
+**This run took the portal's, deliberately**, and the demo now reads `STAKES` and
+`reversibilityWord` rather than growing a fourth table. That is the whole of what
+one lane can do about it.
+
+The gap the portal's table does not cover is `StakeFactorCode` — the ten codes
+that say *what* raised the weight. `RAISED_BY` in the marketing lane is a
+complete, well-written translation of exactly that closed union and it is
+`const`, reachable by nobody. The demo prints the codes and the runtime's own
+`detail` (`large-removal` · *removes 4 nodes*) inside its disclosure, which is
+right for evidence and wrong for a sentence.
+
+**Recommendation, and it is two small moves rather than one big one:**
+
+1. `Loom marketing` exports `RAISED_BY` — or, better, moves it to
+   `(portal)/_lib/vocabulary.ts`, which already holds the sibling tables for the
+   other two unions and is already imported across route groups by `(demo)` and
+   `(docs)`. Nothing about the words needs to change.
+2. `Loom portal` takes `WEIGHT`/`STAKE_WORDS` and `STAKES` down to one entry per
+   level, or writes down why a marketing page and a review queue want different
+   words for the same verdict. Either answer is fine; two tables and no note is
+   the state that drifts.
+
+**Why this is worth a finding rather than a shrug.** All three unions are closed
+and exported from the runtime, so a `satisfies Record<Code, string>` table cannot
+silently go stale — the compiler fails the lane that owns the table when the
+runtime adds a code. That is the property that makes sharing safe here and it is
+the reason the objection raised on #186 against a *primitive-type* table does not
+apply: `PrimitiveType` is open and growing weekly, `StakeFactorCode` is ten
+entries and has not moved.
+
+---
+
+## 2026-08-30 — `21st.dev` re-verified blocked, ninth time from the demo lane
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`, unchanged, this run.
+`docs/routines.md` lists the domain as allowed and the demo brief names it as
+the visual standard this surface is held to; it has never once been reachable
+from this lane. Every judgement about how this surface looks has been made
+against the two committed references — `loom.hero` and `loom.feature-grid` — and
+a browser, and that is worth knowing when reading any report from here that
+claims to have matched a standard it could not open.
