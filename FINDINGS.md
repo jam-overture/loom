@@ -9543,34 +9543,72 @@ bumping again on the next run unless #174 lands.
 
 ---
 
-## 2026-08-30 — Vercel refused to start a build, so no lane can publish a preview URL
+## 2026-08-30 — the commit-identity trap, seventh occurrence, and two runs misdiagnosed it as a billing problem
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open — second consecutive marketing run without a preview
+**Status:** open — repaired on this branch; the recommendation is unchanged and
+is now seven occurrences old
 
-Filed first on #190 on 29 August and repeated here because it is unchanged and
-it costs every lane something the briefs explicitly ask for.
+**This entry replaces the one I first wrote here, which was wrong.** I filed
+*"Vercel refused to start a build"* and attributed it to a spend cap, a usage
+limit, a paused project or a concurrency cap — "all account settings, none
+reachable from a routine" — and said so on #198 and in the notification sent to
+the maintainer. That was a misdiagnosis. It sent him to check billing settings
+that are not the problem, and the actual cause was mine and took one flag to fix.
 
-Vercel returned **`Deployment was blocked`** on both commits of #190 — not a
-failed build, a refusal to start one. #188 (08:35) and #189 (09:38) deployed
-from the same base earlier that morning; #190 at 11:48 and 11:49 did not.
+The bot said what it was, in terms, and I had not read it when I filed:
 
-`pnpm verify` including `next build` is green on this branch, so the application
-compiles. Whatever stopped it is a spend cap, a usage limit, a paused project or
-a concurrency cap — all account settings, none of them reachable from a routine.
+> *Git author `jpizzo` must have access to the project on Vercel to create
+> deployments.*
+> *@jpizzo must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.*
 
-**What it costs.** Every routine brief asks for a deployed preview URL in the
-pull request, and the marketing brief asks hardest: *this surface exists to be
-looked at, and the maintainer judges it by eye.* Without a preview the only
-thing a review has is a screenshot, which is this lane's own output rather than
-something the maintainer can click.
+**The correlation is exact and was checkable the whole time:**
 
-**What this run did instead.** Every picture in the report and on the pull
-request is the real route's real output — rendered from the production build and
-captured against a running `next start` on this machine, at the addresses named
-in each caption. That is honest and it is not the same thing.
+| branch | commit author | Vercel |
+| --- | --- | --- |
+| `marketing-13` (#174) | `Claude <noreply@anthropic.com>` | deployed |
+| `marketing-14` (#182) | `Claude <noreply@anthropic.com>` | deployed |
+| `marketing-15` (#190) | `jonathanbravecredit <jpizzolato36@gmail.com>` | **Blocked** |
+| `marketing-16` (#198) | `Loom marketing <jpizzolato36@gmail.com>` | **Blocked** |
 
-**Recommendation:** check the project's spend and usage settings on Vercel. If
-previews are deliberately off, say so and the lanes will stop asking for them
-and lead with screenshots instead; the briefs' instruction would then want a
-line adding to `docs/routines.md`, which is not a routine's to write.
+`jpizzolato36@gmail.com` resolves on GitHub to the user `jpizzo` (id 34899384),
+which is **not** the maintainer's account `jonathanbravecredit` (id 60827135) and
+is not on the Vercel team. The environment's default identity,
+`Claude <noreply@anthropic.com>`, is.
+
+Repaired on this branch with `--amend --reset-author` and force-pushed before any
+review existed — the sixth or seventh time that exact repair has been made. That
+is the procedure the 26 August entry already records.
+
+**What this occurrence adds.** The 26 August entry predicted precisely this: it
+observed that the routine which had filed *the most detailed analysis of the
+trap* then walked into it again with that analysis in its context, and concluded
+the problem is not attention — `FINDINGS.md` is read *for work*, and a rule about
+how to invoke `git commit` is procedure, which does not survive being filed among
+findings. Two more runs have now proved it, and this one adds a new cost the
+earlier ones did not have:
+
+**The failure now generates confident wrong analysis.** Yesterday's run called it
+a spend or usage limit; I read that entry, repeated it, filed it, put it on the
+pull request and pushed it to the maintainer's phone. A lost preview costs a
+force-push. A lost preview that two consecutive runs blame on the wrong subsystem
+costs the maintainer a trip through his billing settings and leaves the real
+one-line cause unfixed for a third run.
+
+**The recommendation is unchanged from 25 and 26 August, and I will not restate
+it as though it were new.** One paragraph in `docs/routines.md`, beside **Network
+access** and **Credentials**:
+
+> **Never set `user.email`, and never author a commit as the maintainer.** The
+> environment's default identity is the one on the Vercel team; any other author
+> produces a pull request with no preview, and the maintainer's email resolves to
+> a different GitHub account than his. `-c user.name` alone is safe if a run
+> wants a legible `git log`.
+
+A routine cannot write the governance it is bound by, so this stays a
+recommendation. One word from you on any pull request and the next run writes it.
+
+Cost to date: seven runs, seven lost previews, seven force-pushes, one commit
+that briefly claimed the maintainer wrote it, and now two findings filed against
+the wrong subsystem.
