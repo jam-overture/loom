@@ -7918,7 +7918,9 @@ created or change what the event says.
 
 ## 2026-08-25 — an `agrees` audit is described as a fact about the page's history
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-17-what-a-checkup-proves`** — the overclaiming clause is gone, and the
+limit it was papering over is now a number on the screen rather than a caveat
 
 Found while writing lesson 16, which teaches `auditSnapshot`. Not fixed here —
 `apps/loom/app/(portal)/` is not this routine's lane, and this is a wording
@@ -9503,3 +9505,143 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-30 — the queue has stopped moving, and the arithmetic has changed since the last time a lane said so
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — nothing is broken, and every day this holds makes the eventual merge
+worse rather than merely later
+
+`main` is at #167, merged **25 August**. There are **33 open pull requests**
+across seven lanes. The portal lane alone has four — #169, #177, #185, #193 —
+and this run makes five.
+
+The previous portal run filed this on 29 August with twenty-five open. It is
+thirty-three now, so the queue is growing by roughly eight a day against zero
+merged: **the lanes are producing faster than review, and the gap is compounding.**
+
+Two consequences that are already real rather than predicted:
+
+- **Every lane cuts from a `main` that is five days behind its own work.** This
+  unit could not see #169's durable holds, #177's `/portal/pieces` rename,
+  #185's plain-language sweep or #193's page strip. I chose work that avoids
+  all four rather than work that follows from them, which is a worse basis for
+  choosing than the plan is.
+- **`main` was red again**, the same `FACTS.decisions` count, and this lane has
+  now carried that one-line fix across a lane boundary on four consecutive runs.
+  Each carry is its own commit and each is a merge conflict for whichever of the
+  four lands second.
+
+**The recommendation is unchanged and I will not restate the arithmetic a third
+time.** Merge one per lane, oldest first. If the queue is going to stay long,
+whether *never stack* still serves is a governance question and a routine cannot
+answer it — the rule exists because a fourteen-PR stack once cost four days of
+visibility, and the current state is costing more than that without the stack.
+
+---
+
+## 2026-08-30 — a portal screen was making a claim the runtime cannot support, and the plain-language pass is what introduced it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-17-what-a-checkup-proves` — recorded because the *shape* is general and
+will recur in every lane doing this redirection
+
+`Loom lessons` filed the defect on 25 August and it is closed above. What is
+worth keeping is how it got there, because it is not a typo and it is not
+carelessness.
+
+The checkup screen's technical layer said, correctly:
+
+> Folding 12 accepted changes from the seed reproduces the snapshot exactly.
+
+The plain layer, written to make that intelligible, said:
+
+> Everything on this page adds up … so nothing on it is unexplained.
+
+The first is a statement about **two trees**. The second is a statement about
+**a history**, and an audit compares end states rather than histories — so a
+starting shape that is wrong about some part, plus a later change that removes
+that part, is a verdict of `agrees` over evidence that no longer exists.
+
+**The general shape: a plain-language pass rewrites a precise sentence into a
+useful one, and "useful" is exactly the direction that overclaims.** Nobody
+writes a friendlier sentence that promises *less*. This lane has now hit it
+twice and caught the other one before it shipped — the 25 August note about
+`Allowed by nobody`, where the warm rewrite ("nobody had to approve this") was a
+claim the record could not support either.
+
+Two things that generalise, for `Loom docs`, `Loom demo`, `Loom lessons` and
+`Loom marketing`, all of which are doing the same rewriting:
+
+1. **Test the absence.** A test that a sentence is *gone* is the only thing that
+   stops the warm wording returning in the next pass by somebody trying to be
+   kind. Both instances in this lane are now asserted as absences.
+2. **Where the technical sentence is a claim about a narrower thing than the
+   reader wants, say what it was measured from rather than hedging.** "Starting
+   from the shape it has on file" costs eight words, names the assumption, and
+   does not weaken anything the fold actually proved.
+
+Not recommending a repository-wide check for this: the failure is semantic and a
+word list cannot see it. #185's sweep catches runtime vocabulary reaching a
+reader, which is a different and mechanisable problem.
+
+---
+
+## 2026-08-30 — a screenshot found the twelfth defect no assertion did, and this one was in the layout the plain language forced
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+data point on an unchanged recommendation, not a request
+
+Two defects this run, neither visible to thirty-six passing assertions.
+
+**The one that matters.** The coverage sentence — *"5 parts of the 10 this page
+started with have been removed since. Those are the parts this check cannot
+vouch for"* — shipped as an unweighted grey paragraph directly beneath a green
+box reading **"Nothing to do."** Every assertion passed, including one checking
+the sentence was on the surface rather than behind a disclosure. It was on the
+surface and the eye still skipped it, because a green panel above unweighted
+text is read as reassurance with a footnote. It is inside a `notice` block now.
+
+The instructive part: the assertion I wrote was *"it is not behind a click"*,
+and the property I actually wanted was *"a reader cannot take the verdict
+without meeting its limit"*. Those are not the same, and only one of them is
+checkable by a test.
+
+**The second**, found in the same pass and unrelated to this unit: on a fresh
+deployment the verdict read *"Loom replayed every change it has recorded for
+this page"* directly above the runtime's own *"Folding 0 accepted changes"*.
+Revision 0 is the state every new reader meets first, and the screen was
+describing work it had not done. Fixed here, with the count carried onto
+`AuditReport` so the reading can tell the two cases apart.
+
+**Twelve defects across seven runs that a browser found and the assertions did
+not.** The 23, 24, 25 and 29 August recommendation — a screenshot at two widths
+named in `docs/routines.md` rather than kept as this lane's habit — stands. I
+have made it five times and will not make it a sixth; it is the maintainer's
+call and a routine cannot write the governance it is bound by.
+
+---
+
+## 2026-08-30 — a portal screen that only a model can populate still cannot be photographed, sixth run
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — unchanged from 25 August, and this run worked around it the same way
+
+No `ANTHROPIC_API_KEY` in this run's environment, so the prompt box cannot
+produce a change and no portal screen that reads a log can be populated through
+the front door.
+
+**How this run's pictures were made, stated plainly.** The screen, the store,
+the audit and the components are all real, and the two revisions in the
+screenshots were appended through the store's own `append` contract by a
+temporary, uncommitted patch to `ensureSeeded` — one `configure`, one `remove`
+— then reverted before committing. `store.ts` is untouched in this diff. The
+fresh-deployment screenshot needed no patch at all and is the unmodified page.
+
+That is honest and it is not repeatable discipline: it depends on each run
+remembering to revert, and on a reader believing the report. `LOOM_SEED_LOG`,
+first asked for on #169 and now **six runs overdue**, is still one word from the
+maintainer and would end it.
+

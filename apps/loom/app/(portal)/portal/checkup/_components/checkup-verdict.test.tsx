@@ -62,7 +62,7 @@ const diverged = (count: number) =>
  */
 describe("CheckupVerdictPanel", () => {
   it("leads with the answer and the next move, not with the runtime's headline", () => {
-    render(<CheckupVerdictPanel report={diverged(2)} treeId={TREE} />)
+    render(<CheckupVerdictPanel report={diverged(2)} treeId={TREE} coverage={null} />)
 
     expect(screen.getByText("This page does not match its own history.")).toBeInstanceOf(
       HTMLElement
@@ -74,7 +74,7 @@ describe("CheckupVerdictPanel", () => {
 
   it("keeps the runtime's own reading, one click down and word for word", () => {
     const report = diverged(2)
-    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} />)
+    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} coverage={null} />)
 
     const disclosure = container.querySelector("details")
 
@@ -90,7 +90,7 @@ describe("CheckupVerdictPanel", () => {
    */
   it("says what is wrong in a sentence, and keeps the runtime's phrasing behind it", () => {
     const report = diverged(1)
-    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} />)
+    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} coverage={null} />)
 
     expect(container.textContent).toContain(
       "It is on the page people are being served, and nothing in the recorded history put it there."
@@ -107,7 +107,7 @@ describe("CheckupVerdictPanel", () => {
    */
   it("names which part on the surface, not behind a click", () => {
     const report = diverged(4)
-    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} />)
+    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} coverage={null} />)
 
     const open = container.querySelector("details > summary")?.parentElement
     const surface = container.textContent ?? ""
@@ -120,7 +120,7 @@ describe("CheckupVerdictPanel", () => {
   })
 
   it("keeps one disclosure for the whole list rather than one per row", () => {
-    const { container } = render(<CheckupVerdictPanel report={diverged(4)} treeId={TREE} />)
+    const { container } = render(<CheckupVerdictPanel report={diverged(4)} treeId={TREE} coverage={null} />)
 
     /* The verdict's own reading, plus one for the list. Never one per row. */
     expect(container.querySelectorAll("details")).toHaveLength(2)
@@ -128,7 +128,7 @@ describe("CheckupVerdictPanel", () => {
 
   it("says how many differences it did not list, in a person's noun", () => {
     const report = { ...diverged(2), omitted: 7 }
-    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} />)
+    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} coverage={null} />)
 
     expect(container.textContent).toContain("7 further parts differ")
   })
@@ -140,7 +140,7 @@ describe("CheckupVerdictPanel", () => {
    */
   it("does not claim there is nothing to do while it is showing a warning", () => {
     const { container } = render(
-      <CheckupVerdictPanel report={agreeing([recyclingOf("n_4")])} treeId={TREE} />
+      <CheckupVerdictPanel report={agreeing([recyclingOf("n_4")])} treeId={TREE} coverage={null} />
     )
 
     expect(screen.getByText("Everything on this page adds up.")).toBeInstanceOf(HTMLElement)
@@ -152,7 +152,7 @@ describe("CheckupVerdictPanel", () => {
 
   it("keeps the term for it, and why it is not the verdict, one click down", () => {
     const { container } = render(
-      <CheckupVerdictPanel report={agreeing([recyclingOf("n_4")])} treeId={TREE} />
+      <CheckupVerdictPanel report={agreeing([recyclingOf("n_4")])} treeId={TREE} coverage={null} />
     )
 
     expect(container.textContent).toContain("recycled ids")
@@ -160,9 +160,103 @@ describe("CheckupVerdictPanel", () => {
   })
 
   it("says nothing to do when a clean fold found nothing to look at", () => {
-    render(<CheckupVerdictPanel report={agreeing()} treeId={TREE} />)
+    render(<CheckupVerdictPanel report={agreeing()} treeId={TREE} coverage={null} />)
 
     expect(screen.getByText("Nothing to do.")).toBeInstanceOf(HTMLElement)
+  })
+
+  /**
+   * Coverage qualifies a green verdict, and a green verdict is the one a reader
+   * stops at — so the number goes on the surface and the mechanism behind it
+   * goes one click down. A limit that needs a click is a limit nobody meets.
+   */
+  it("says on the surface how much of the starting shape it could check", () => {
+    const { container } = render(
+      <CheckupVerdictPanel
+        report={agreeing()}
+        treeId={TREE}
+        coverage={{ started: 12, checked: 9, dropped: 3 }}
+      />
+    )
+
+    const disclosures = Array.from(container.querySelectorAll("details"))
+    const hidden = disclosures.map((element) => element.textContent ?? "").join("")
+    const surface = (container.textContent ?? "").replace(hidden, "")
+
+    expect(surface).toContain("3 parts of the 12 this page started with have been removed since")
+    expect(surface).toContain("cannot vouch for")
+  })
+
+  it("says so when the whole starting shape was still there to check", () => {
+    render(
+      <CheckupVerdictPanel
+        report={agreeing()}
+        treeId={TREE}
+        coverage={{ started: 12, checked: 12, dropped: 0 }}
+      />
+    )
+
+    expect(
+      screen.getByText("All 12 parts this page started with are still on it, and every one was checked.")
+    ).toBeInstanceOf(HTMLElement)
+  })
+
+  /**
+   * A coverage figure this run could not establish is left out rather than
+   * guessed at — the same rule the verdict follows. What must survive its
+   * absence is the sentence naming the starting shape as an assumption, because
+   * that is the half that stops the screen overclaiming on its own.
+   */
+  it("prints no coverage line when it could not be established", () => {
+    const { container } = render(
+      <CheckupVerdictPanel report={agreeing()} treeId={TREE} coverage={null} />
+    )
+
+    expect(container.textContent).not.toContain("this page started with")
+    expect(container.textContent).toContain("starting from the shape it has on file")
+  })
+
+  /**
+   * The finding this unit closes, asserted at the surface. `Loom lessons` filed
+   * it on 25 August: an audit compares two end states, so the screen must not
+   * promise the reader a fact about the page's history.
+   */
+  it("never tells a reader that a clean checkup leaves nothing unexplained", () => {
+    const { container } = render(
+      <CheckupVerdictPanel
+        report={agreeing()}
+        treeId={TREE}
+        coverage={{ started: 4, checked: 4, dropped: 0 }}
+      />
+    )
+
+    expect(container.textContent).not.toContain("nothing on it is unexplained")
+  })
+
+  it("explains behind a disclosure how a wrong starting shape can pass", () => {
+    const { container } = render(
+      <CheckupVerdictPanel
+        report={agreeing()}
+        treeId={TREE}
+        coverage={{ started: 4, checked: 4, dropped: 0 }}
+      />
+    )
+
+    const opened = Array.from(container.querySelectorAll("details"))
+
+    expect(opened.every((element) => element.open === false)).toBe(true)
+    expect(container.textContent).toContain("What a checkup cannot tell you")
+    expect(container.textContent).toContain("It does not compare two histories")
+    expect(container.textContent).toContain("seed.ts")
+  })
+
+  /** Only an agreeing verdict gets the caveat; the other two have worse news. */
+  it("does not offer the caveat where nothing was compared", () => {
+    const { container } = render(
+      <CheckupVerdictPanel report={diverged(2)} treeId={TREE} coverage={null} />
+    )
+
+    expect(container.textContent).not.toContain("What a checkup cannot tell you")
   })
 
   /**
@@ -177,6 +271,7 @@ describe("CheckupVerdictPanel", () => {
           mismatch: { code: "revision-gap", expected: 3, found: 7 },
         })}
         treeId={TREE}
+        coverage={null}
       />
     )
 
@@ -197,6 +292,7 @@ describe("CheckupVerdictPanel", () => {
           ],
         })}
         treeId={TREE}
+        coverage={null}
       />
     )
 

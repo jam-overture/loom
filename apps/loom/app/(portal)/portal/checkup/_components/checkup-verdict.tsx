@@ -1,6 +1,7 @@
 import type { TreeId } from "@loom/runtime"
 
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
+import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import {
   describeDifference,
@@ -11,6 +12,7 @@ import {
   type AuditReport,
 } from "@/app/(portal)/_lib/audit-view"
 import { toneClasses } from "@/app/(portal)/_lib/outcome"
+import { readCoverage, type SeedCoverage } from "@/app/(portal)/_lib/seed-coverage"
 
 /**
  * The answer, then what it rests on, then the runtime's own account of it.
@@ -41,9 +43,20 @@ import { toneClasses } from "@/app/(portal)/_lib/outcome"
 export const CheckupVerdictPanel = ({
   report,
   treeId,
+  coverage,
 }: {
   readonly report: AuditReport
   readonly treeId: TreeId
+  /**
+   * How much of the original shape the fold actually compared, or `null` when
+   * this run could not establish it — a diverged or unreplayable verdict, or a
+   * head that moved between the audit and the count.
+   *
+   * Omitted rather than guessed. A coverage figure over a tree other than the
+   * one the verdict describes is worse than none, and it is the same rule the
+   * verdict itself follows: a checkup that could not run is not one that passed.
+   */
+  readonly coverage: SeedCoverage | null
 }) => {
   const verdict = readCheckup(report)
 
@@ -55,6 +68,66 @@ export const CheckupVerdictPanel = ({
           <span className="text-xs opacity-90">{verdict.meaning}</span>
           <span className="mt-1 text-xs opacity-80">{verdict.next}</span>
         </div>
+
+        {/*
+         * How much the verdict covers, and what it cannot, in one block directly
+         * under the verdict it qualifies.
+         *
+         * The number is on the surface and the mechanism is behind the click,
+         * which is the argument this unit makes: a green verdict is the one a
+         * reader stops at, so a limit on it that needs a click is a limit nobody
+         * meets — while *why* an end-state comparison has that hole in it is
+         * genuinely detail.
+         *
+         * The first build had the sentence as a bare paragraph with the
+         * disclosure floating below it, and a screenshot is what killed that: a
+         * line reading "5 parts of the 10 this page started with have been
+         * removed since" rendered as unweighted grey text under a green box
+         * saying "Nothing to do.", so the eye took the reassurance and skipped
+         * the limit. `notice` is the tone written for exactly this — a condition
+         * worth knowing that is not a failure, quiet enough not to compete with
+         * the verdict.
+         *
+         * Both readings live in the block rather than only the limiting one. A
+         * caveat that appears only when there is something to caveat teaches a
+         * reader to read its absence as nothing having been checked.
+         */}
+        {report.tone === "agrees" && (
+          <StateNotice tone="notice">
+            {coverage !== null && (
+              <p className="text-ink-secondary text-sm">{readCoverage(coverage)}</p>
+            )}
+            <TechnicalDetail summary="What a checkup cannot tell you">
+              <p>
+                A checkup compares two <em>end results</em> — the page being served, and the page
+                you get by replaying the record from the shape on file. It does not compare two
+                histories, and nothing here can.
+              </p>
+              <p>
+                So there is one way a page can pass that is worth knowing about. If the shape on
+                file is wrong about some part, and a later change removed that part, there is
+                nothing left for the two to disagree about — and the checkup says the page adds
+                up. It is not lying: it is reporting that everything it could compare, matched.
+              </p>
+              <p>
+                That is not hypothetical on a deployment like this one.{" "}
+                <span className="font-mono">seedFor</span> rebuilds the starting shape from source
+                rather than reading a stored copy, so editing{" "}
+                <span className="font-mono">seed.ts</span> after a page already exists changes
+                what a checkup starts from without changing the page. With a database attached,
+                that is a checkup whose starting point drifted and whose verdict never said so.
+              </p>
+              <p className="text-ink-muted">
+                0016 makes the log the truth and the snapshot a view of it, and 0028 is why the
+                seed is a parameter rather than something the store keeps. Neither is a defect —
+                folding a seed and a log and comparing to the snapshot is exactly what{" "}
+                <span className="font-mono">auditSnapshot</span> claims to do. What was wrong was
+                this screen promising the thing a reader wants (the history is intact) over the
+                thing that was checked.
+              </p>
+            </TechnicalDetail>
+          </StateNotice>
+        )}
 
         {report.stoppedAt !== null && (
           <p className="text-ink-secondary text-sm">

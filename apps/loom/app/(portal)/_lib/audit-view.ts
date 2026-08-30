@@ -58,6 +58,17 @@ export type AuditReport = {
    * beside a fault would read as a list of faults.
    */
   readonly restored: number
+  /**
+   * How many changes the fold had to replay, and `null` when there was no fold
+   * to speak of — an unreplayable audit carries no revision, because it never
+   * established which one it was looking at.
+   *
+   * Carried so the plain reading can tell a page that has been changed from one
+   * that has not. Zero is a real and common state — every fresh deployment
+   * starts there — and a screen telling that reader it "replayed every change"
+   * describes work it did not do.
+   */
+  readonly revision: number | null
 }
 
 /**
@@ -266,6 +277,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         differences: [],
         omitted: 0,
         stoppedAt: null,
+        revision: audit.revision,
         ...identityFindings(audit.idReturns),
       }
 
@@ -279,6 +291,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         differences: found.slice(0, DIFFERENCE_LIMIT),
         omitted: Math.max(found.length - DIFFERENCE_LIMIT, 0),
         stoppedAt: null,
+        revision: audit.revision,
         ...identityFindings(audit.idReturns),
       }
     }
@@ -296,6 +309,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         differences: [],
         omitted: 0,
         stoppedAt: stoppedAt(audit.mismatch),
+        revision: null,
         /** A fold that stopped saw part of the log, and part of a history is not one. */
         ...NO_FINDINGS,
       }
@@ -351,8 +365,42 @@ export const readCheckup = (report: AuditReport): CheckupVerdict => {
       return {
         tone: toneOfAudit("agrees"),
         label: "Everything on this page adds up.",
+        /**
+         * This used to end *"so nothing on it is unexplained"*, and that clause
+         * was a claim the check cannot support — filed by `Loom lessons` on 25
+         * August with an executed counterexample, which `seed-coverage.ts`
+         * carries in full.
+         *
+         * The short of it: a checkup compares two end states, not two
+         * histories. A wrong starting shape, followed by a change that removed
+         * the part it was wrong about, leaves nothing to disagree. So the
+         * sentence now names the starting shape as the assumption it is, in
+         * words rather than as a caveat: *"starting from the shape it has on
+         * file"*. Nothing is hedged away — what the fold proved is stated as
+         * flatly as before — but the reader is told what it was measured from.
+         *
+         * This is the shape of mistake a plain-language pass invites rather
+         * than one it inherits. The warm sentence and the true one came apart,
+         * and the warm one had been shipping.
+         */
         meaning:
-          "Loom replayed every change it has recorded for this page and got back exactly the page people are being served, so nothing on it is unexplained.",
+          report.revision === 0
+            ? /*
+               * Nothing has been replayed, because there is nothing to replay,
+               * and the sentence above would be describing work that did not
+               * happen. Found by looking at the screen: the fresh deployment
+               * every new reader meets first sits at revision 0, and the
+               * runtime's own line under the disclosure read "Folding 0
+               * accepted changes" directly beneath a claim to have replayed
+               * every one of them.
+               *
+               * The check at revision 0 is real and is worth saying plainly —
+               * it is the strongest form this page ever reports, because the
+               * served page is being compared with the starting shape itself
+               * rather than with a reconstruction of it.
+               */
+              "Nothing has ever been changed on this page, so there was nothing to replay. Loom compared the page people are being served straight against the shape it has on file for the day it was made, and the two are identical."
+            : "Loom replayed every change it has recorded for this page, starting from the shape it has on file for the day the page was made, and got back exactly the page people are being served.",
         next: nothingToDo(report),
       }
 

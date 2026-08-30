@@ -331,6 +331,72 @@ describe("readCheckup", () => {
     expect(verdict.tone).toBe("applied")
   })
 
+  /**
+   * The clause this asserts the absence of shipped for a week: *"so nothing on
+   * it is unexplained"*. `Loom lessons` filed it on 25 August with an executed
+   * counterexample — an audit compares two end states, so a wrong seed plus a
+   * later removal of what it was wrong about is an `agrees` over evidence that
+   * no longer exists.
+   *
+   * Asserted as an absence rather than only as the replacement sentence,
+   * because the failure mode is a *future* plain-language pass reaching for the
+   * warmer wording again. "Nothing on it is unexplained" is exactly what
+   * somebody trying to be friendly writes, and it is the same sin as `Allowed by
+   * nobody` in kinder words.
+   */
+  it("does not claim a clean fold explains the page", () => {
+    const { meaning } = readCheckup(agreeing())
+
+    expect(meaning).not.toContain("unexplained")
+    expect(meaning).not.toContain("nothing on it")
+  })
+
+  /**
+   * The starting shape is an assumption and has to be visible as one. A reader
+   * cannot judge how much a verdict is worth without knowing what it was
+   * measured from, and "on file" is that, said without the word `seed`.
+   */
+  it("names the shape it started from, in a person's words", () => {
+    const { meaning } = readCheckup(agreeing())
+
+    expect(meaning).toContain("starting from the shape it has on file")
+    expect(meaning).not.toContain("seed")
+    expect(meaning).not.toContain("snapshot")
+  })
+
+  /**
+   * Found by looking at the screen rather than by a failing assertion: a fresh
+   * deployment sits at revision 0, and the verdict claimed to have replayed
+   * every change directly above the runtime's own "Folding 0 accepted changes".
+   *
+   * It is the state a new reader meets first, so it is the worst place in the
+   * portal to describe work that did not happen.
+   */
+  it("does not claim to have replayed anything on a page nobody has changed", () => {
+    const { meaning } = readCheckup(
+      describeAudit({ outcome: "agrees", revision: 0, idReturns: [] })
+    )
+
+    expect(meaning).not.toContain("replayed")
+    expect(meaning).toContain("Nothing has ever been changed on this page")
+    expect(meaning).toContain("shape it has on file")
+  })
+
+  it("does say it replayed once there is something to replay", () => {
+    expect(readCheckup(agreeing()).meaning).toContain("replayed every change")
+  })
+
+  /** An unreplayable audit never established a revision, so it carries none. */
+  it("carries the revision the fold covered, and none where there was no fold", () => {
+    expect(agreeing().revision).toBe(4)
+    expect(
+      describeAudit({
+        outcome: "unreplayable",
+        mismatch: { code: "revision-gap", expected: 3, found: 7 },
+      }).revision
+    ).toBeNull()
+  })
+
   it("says the page and its history disagree, and where to start", () => {
     const { stored, replayed } = drifted(2)
     const verdict = readCheckup(

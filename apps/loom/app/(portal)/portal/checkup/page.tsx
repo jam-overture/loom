@@ -8,6 +8,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { coverageOf } from "@/app/(portal)/_lib/seed-coverage"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
@@ -74,6 +75,32 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
   const problem = [found, audit].find((result) => result !== undefined && !result.ok)
   if (problem !== undefined && !problem.ok && problem.error.code === "not-found") notFound()
 
+  /**
+   * How much of the seed the fold actually compared, for an `agrees` verdict
+   * only — the one verdict whose plain reading a reader stops at, and so the
+   * one an unstated limit does damage on.
+   *
+   * `agrees` does not carry the trees it compared, deliberately: it has nothing
+   * to report beyond the fact that they matched. So the served tree costs one
+   * further read — and that read can land after a write, which is why the
+   * revision is checked rather than assumed. A count over a head that moved
+   * would qualify a verdict about some earlier tree, and a wrong qualifier on a
+   * green verdict is exactly the failure this unit exists to remove.
+   */
+  const servedNow =
+    seed !== undefined && audit?.ok && audit.value.outcome === "agrees"
+      ? await portalStore.head(scope.data)
+      : undefined
+
+  const coverage =
+    seed !== undefined &&
+    audit?.ok &&
+    audit.value.outcome === "agrees" &&
+    servedNow?.ok &&
+    servedNow.value.revision === audit.value.revision
+      ? coverageOf(seed, servedNow.value)
+      : null
+
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   return (
@@ -105,7 +132,11 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
           </TechnicalDetail>
         </StateNotice>
       ) : audit !== undefined && audit.ok ? (
-        <CheckupVerdictPanel report={describeAudit(audit.value)} treeId={scope.data} />
+        <CheckupVerdictPanel
+          report={describeAudit(audit.value)}
+          treeId={scope.data}
+          coverage={coverage}
+        />
       ) : (
         <StateNotice tone="notice" title="This page can't be checked here.">
           <p>
