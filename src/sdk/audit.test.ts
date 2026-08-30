@@ -254,6 +254,61 @@ describe("auditRegistry", () => {
     expect(auditRegistry(registryOf(testDefinitions)).throwsOnDeclaredProps).toEqual([])
   })
 
+  /**
+   * The same list a deployment holds its endpoint registry against, for the
+   * other registry: if anything is here, `renderRequest` wants `origins`, and a
+   * deployment shipping one without the other ships embeds that render a
+   * refusal.
+   */
+  it("names the primitives a deployment must register framable origins for", () => {
+    const framing = definePrimitive({
+      type: "loom.framing",
+      description: "puts a prop in a frame",
+      props: z.object({ src: z.string() }).strict(),
+      frames: ["src"],
+      component: ({ loom }: LoomPrimitiveProps<{ src: string }>) => {
+        const frame = loom.frames.src
+
+        return createElement("iframe", {
+          ...loom.editable,
+          src: frame?.status === "allowed" ? frame.url : undefined,
+          title: "",
+        })
+      },
+    })
+
+    const audit = auditRegistry(registryOf([...testDefinitions, framing]))
+
+    expect(audit.frames).toEqual(["loom.framing"])
+  })
+
+  it("has no framers to report for a library where nothing frames", () => {
+    expect(auditRegistry(registryOf(testDefinitions)).frames).toEqual([])
+  })
+
+  /**
+   * A probe has no allowlist, so a declared frame is answered `allowed` — a
+   * probe that always refused would be probing every embed's error state and
+   * reporting it as the primitive.
+   */
+  it("probes a framing primitive under an allowed frame rather than a refused one", () => {
+    const strict = definePrimitive({
+      type: "loom.strictly-framing",
+      description: "renders nothing at all when its frame is refused",
+      props: z.object({ src: z.string() }).strict(),
+      frames: ["src"],
+      component: ({ loom }: LoomPrimitiveProps<{ src: string }>) =>
+        loom.frames.src?.status === "allowed"
+          ? createElement("iframe", { ...loom.editable, title: "" })
+          : null,
+    })
+
+    const audit = auditRegistry(registryOf([...testDefinitions, strict]))
+
+    expect(audit.notDecorated).toEqual([])
+    expect(audit.frames).toEqual(["loom.strictly-framing"])
+  })
+
   it("names the primitives a deployment must register endpoints for", () => {
     const audit = auditRegistry(registryOf([...testDefinitions, posting]))
 
