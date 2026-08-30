@@ -9503,3 +9503,128 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-30 — the third vocabulary the runtime could not hand you, and the two beside it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-21-the-closed-sets-the-runtime-knows`
+
+Closes the entry `Loom docs` filed on 28 August — *`TelemetryEvent` has eighteen
+types and no list of them, which is the third module with this hole* — which is
+on #183 rather than on `main`, because `main` has not moved since #167. It is
+quoted here so the closure is legible from either side of that merge.
+
+`TELEMETRY_EVENT_TYPES` is exported from `src/telemetry/event.ts`, eighteen long,
+in the order the runtime writes them rather than alphabetically: an episode reads
+top to bottom, so a list printed in lifecycle order is a story and a list sorted
+by name is eighteen strings. `event.test.ts` holds it against
+`telemetryEventSchema` — completeness *and* order in one assertion — so the docs
+site can stop reading `telemetryEventSchema.options.length` and stop depending on
+the internal shape of a Zod schema to count a Loom vocabulary.
+
+**Two more were built in the same shape, because the third instance of a hole is
+the one that says it is a class.**
+
+- **`TREE_OPERATIONS`** (`src/tree/delta.ts`) — the four delta operations, held
+  against `treeOperationSchema`. Four is a number this project states in prose on
+  the front door, in the course and in the reference, and in every one of those
+  places it is a digit somebody typed. See the entry below.
+- **`COMPOSITION_OUTCOME_KINDS`** (`src/runtime/pipeline.ts`) — the five ways an
+  ask can end. The same addition `WRITE_OUTCOME_KINDS` is for the write path, one
+  level up, and it was going to be filed by the next surface that documented the
+  pipeline. `CompositionOutcome` never crosses a boundary so it has no schema;
+  completeness is a `Record<CompositionOutcomeKind, true>` in the test, which
+  fails to compile rather than fails to notice.
+
+No record written. The shape was argued and accepted four times already
+(`EPISODE_RESOLUTION_KINDS`, `UNJUDGED_REASONS`, `PALETTE_SLOTS`, `STAKE_ORDER`),
+so a fifth instance is a line of code rather than a decision — and `main` carries
+eight open branches all claiming `0096`, which is a reason not to add a ninth for
+something nothing turns on.
+
+**Not closed by this: the general version.** `Loom lessons` put it in one
+sentence on 27 August — *nothing in this repository connects a list in `src/` to
+a sentence that counts it* — and that is still true of prose. What these five
+exports do is make the connection *possible*; making it *compulsory* is a
+different piece of work, and #181's `record-claims.test.ts` is the first half of
+it for decision records specifically.
+
+---
+
+## 2026-08-30 — `FACTS.operations` is the third hand-typed number on the front door, and it now has something to count
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+
+`FACTS.operations: "4"` is asserted by `facts.test.ts` against the string `"4"`,
+under a comment calling it *the number that should not move*. That is the only
+one of the three facts held against a literal rather than against the
+repository — `primitives` is counted through the registry and `decisions` off
+disk — and its test is therefore a tautology: it checks that `"4"` is `"4"`.
+
+`TREE_OPERATIONS` is now exported from `@loom/runtime` (entry above). The test
+can become
+
+```ts
+expect(FACTS.operations).toBe(String(TREE_OPERATIONS.length))
+```
+
+and the claim on the page stops being a promise and starts being a fact, which is
+what `copy.ts`'s own doc comment says the difference between the two is.
+
+**Deliberately not done here.** It is one line in another lane's test, this lane
+has hand-patched `copy.ts` twice already for `FACTS.decisions`, and doing it
+uninvited would put a third framework edit in a marketing file in five days. It
+is also not urgent in the way the other two are: a fifth operation would be a
+change to what Loom *is*, so unlike the primitive count and the record count this
+number genuinely does not move. That is precisely why it is worth deriving — a
+number nobody expects to move is the one nobody re-checks.
+
+---
+
+## 2026-08-30 — the pairing basis cannot be repaired from `main`, and the finding that asks for it is right anyway
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — blocked on #180, and the analysis is here so the next run does not repeat it
+
+`Loom primitives` filed on 28 August that `loom.event` could not paint
+`accent-strong on bg-surface` because `PALETTE_TEXT_PAIRINGS` declares that row
+`composed`, and that the one-word repair sits in `src/theme/contrast.ts`, out of
+that lane. It offered two remedies. **Neither can be applied from `main` today**,
+and the reason is worth writing down.
+
+**Remedy 1, promote the row.** `pairings.test.ts` fails a declared row that
+nothing renders — a bar chosen for its own sake is the fault the derivation
+exists to prevent. `loom.event` is the primitive that paints this pairing and it
+exists only on #180. Promoting the row on `main` would declare `painted` a
+pairing no component paints, which is red for a different reason. **The
+promotion is correct and lands the moment #180 merges** — the measurement in the
+finding was re-read and not re-taken.
+
+**Remedy 2, derive the basis rather than declare it, is not available at all** as
+described, and this is the part that needed establishing. `derivePalette` in
+`src/theme/derive.ts` calls `auditPalette` on every derived palette, on an
+ordinary code path, and `auditPalette` defaults to `PALETTE_TEXT_PAIRINGS`.
+`registryPairings` gets `basis` by *calling every registered component*, which is
+why its own doc comment says it belongs in a test or a build step. So `src/theme`
+cannot ask for the derivation without making palette derivation depend on
+rendering the primitive library — a dependency in the wrong direction, and
+0049's guarantee that a re-theme is one `configure` would be paying for a probe.
+
+What is left is a real choice with a real cost on each side, and it is the
+maintainer's rather than this lane's:
+
+1. **Leave the declaration and accept the friction**, which is one word per
+   promotion, in a file the lane that needs it may not touch.
+2. **Generate the basis column** into a committed artefact with a drift test, the
+   shape `reference.generated.json` already has. It ends the class and it adds a
+   generated file to `src/`, which nothing in `src/` currently is.
+3. **Give the basis column to `Loom primitives`** in `docs/routines.md`, on the
+   rule that file already states — *a file is another lane's because of what it
+   decides, not where the framework makes it live*. Cheapest by far, and it is
+   governance, so not this lane's to write.
+
+**Recommendation: 3, then 1.** The column is a fact about primitives that happens
+to be stored in a theme file, which is exactly the case the MDX-pipeline rule was
+written for.
