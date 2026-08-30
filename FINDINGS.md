@@ -9503,3 +9503,74 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-30 — the record count, ninth occurrence, and the fix has been green and unmerged for three days
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the entry is about the merge queue, not about the digit
+
+`main` is red, measured on `3a57feb` at the start of this run rather than
+inferred: **1 failed, 1962 passed.** The failing test is
+`app/(marketing)/_lib/facts.test.ts > counts the decision records` —
+`FACTS.decisions` is `"94"` and there are 95 records. Since
+[0067](decisions/0067-the-four-surfaces-are-one-application.md) that is four
+surfaces red rather than one, because `pnpm verify` is the merge gate for all of
+them.
+
+This is the **ninth occurrence in twelve days** and the third consecutive
+marketing run to open by bumping a digit it did not change. The previous eight
+are recorded on 19, 23, 24 (×2), 25 (×2) and 26 August, and every one of them
+has the same shape: a lane that wrote a decision record found the last red test
+in its otherwise finished work sitting in a marketing file.
+
+**The fix exists and is not the problem any more.** #174 deletes the literal —
+two of the three numbers count themselves off the registry and the schema, and
+the record count becomes a floor (`90+`) held in the only direction that can
+hurt the site. It has been **green, mergeable and unreviewed since 27 August**.
+
+So the finding worth filing this run is not the count. It is that **the queue is
+the constraint**: 29 pull requests are open, nothing has merged since 27 August,
+and three of the twenty-nine are this lane's. `docs/rollout.md` already names
+review latency as the second-largest lever on the schedule, ahead of anything
+technical. This is that lever, measured: a one-line fix for a nine-time
+recurring failure sat for three days while the failure recurred twice more.
+
+**Nothing is asked of another routine.** The digit is bumped on this branch so
+this run opens on green, exactly as the two before it did, and it will need
+bumping again on the next run unless #174 lands.
+
+---
+
+## 2026-08-30 — Vercel refused to start a build, so no lane can publish a preview URL
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — second consecutive marketing run without a preview
+
+Filed first on #190 on 29 August and repeated here because it is unchanged and
+it costs every lane something the briefs explicitly ask for.
+
+Vercel returned **`Deployment was blocked`** on both commits of #190 — not a
+failed build, a refusal to start one. #188 (08:35) and #189 (09:38) deployed
+from the same base earlier that morning; #190 at 11:48 and 11:49 did not.
+
+`pnpm verify` including `next build` is green on this branch, so the application
+compiles. Whatever stopped it is a spend cap, a usage limit, a paused project or
+a concurrency cap — all account settings, none of them reachable from a routine.
+
+**What it costs.** Every routine brief asks for a deployed preview URL in the
+pull request, and the marketing brief asks hardest: *this surface exists to be
+looked at, and the maintainer judges it by eye.* Without a preview the only
+thing a review has is a screenshot, which is this lane's own output rather than
+something the maintainer can click.
+
+**What this run did instead.** Every picture in the report and on the pull
+request is the real route's real output — rendered from the production build and
+captured against a running `next start` on this machine, at the addresses named
+in each caption. That is honest and it is not the same thing.
+
+**Recommendation:** check the project's spend and usage settings on Vercel. If
+previews are deliberately off, say so and the lanes will stop asking for them
+and lead with screenshots instead; the briefs' instruction would then want a
+line adding to `docs/routines.md`, which is not a routine's to write.

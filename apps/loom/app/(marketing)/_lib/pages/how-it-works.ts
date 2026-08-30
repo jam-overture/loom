@@ -245,8 +245,30 @@ const glossary = (ids: IdFactory): LoomNode =>
  * label as a language"*. Seven panels all announcing the same format tell a
  * reader nothing; seven announcing what each line *is* are a contents page.
  */
-const stage = (ids: IdFactory, line: TrailLine, index: number): readonly LoomNode[] => [
-  heading(ids, 3, `${index + 1}. ${line.title}`),
+/**
+ * The one stage whose title is about a person, and who that person is.
+ *
+ * Every other stage narrates the machinery — the rules were settled, the change
+ * was measured — and reads the same whoever is looking at it. The first one
+ * names whoever asked, and it said *"Somebody asked for something"* two
+ * paragraphs under a lead sentence that had just told the reader they were the
+ * somebody. The front door's own panel says *"You asked for something"* for the
+ * same line, so the page a visitor arrives from and the page they arrive at
+ * disagreed about who they were.
+ *
+ * Only the title is ours to vary. The line under it is the runtime's and says
+ * `"actor": "a visitor"` whoever is reading, which is correct and stays.
+ */
+const titleOf = (line: TrailLine, theirs: boolean): string =>
+  theirs && line.type === "intent-received" ? "You asked for something" : line.title
+
+const stage = (
+  ids: IdFactory,
+  line: TrailLine,
+  index: number,
+  theirs: boolean
+): readonly LoomNode[] => [
+  heading(ids, 3, `${index + 1}. ${titleOf(line, theirs)}`),
   prose(ids, line.plainly, { tone: "muted", measured: true }),
   buildElement(ids, {
     type: "loom.code",
@@ -276,24 +298,44 @@ const stage = (ids: IdFactory, line: TrailLine, index: number): readonly LoomNod
  * It is long, and the length is the argument. A record you can fit on a slide
  * is a record that left something out.
  */
-const paperTrail = (ids: IdFactory, trail: PaperTrail): LoomNode =>
+/**
+ * How many lines there are, and what the extra one is — read off the run.
+ *
+ * It said *"Six lines for the five steps above"* while the page could only ever
+ * print one request. It can print any of the five now, and three of them stop
+ * at the answer: a held change and a refused one produce five lines, because
+ * the sixth line is the page changing and the page did not change. A sentence
+ * that kept saying six would be wrong on exactly the two runs a visitor most
+ * wants to read — so it is counted rather than typed.
+ */
+const lineCount = (trail: PaperTrail): string =>
+  trail.landed
+    ? "Six lines for the five steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards."
+    : "Five lines for the five steps above, and no sixth. The last line is the answer, and nothing follows it because nothing happened to the page. One of the five is the rules themselves, written down before anything was worked out."
+
+/**
+ * Whose request this is the record of.
+ *
+ * *"Somebody asked"* is true of the default and wrong of the interesting case.
+ * A visitor arriving from the front door's panel has just made this exact
+ * request and watched it happen; telling them somebody did is the page failing
+ * to notice the one reader it was worth writing for.
+ */
+const whoAsked = (trail: PaperTrail, theirs: boolean): string =>
+  theirs
+    ? `You have just asked the front page of this site for something — “${trail.asked}” — and this is everything the machinery said while it dealt with it. It is what a Loom site hands its own logging as a change goes through, and a deployment collects it by writing eight lines that put each one in a list.`
+    : `A moment ago somebody asked the front page of this site for something — “${trail.asked}” — and this is everything the machinery said while it dealt with it. It is what a Loom site hands its own logging as a change goes through, and a deployment collects it by writing eight lines that put each one in a list.`
+
+const paperTrail = (ids: IdFactory, trail: PaperTrail, theirs: boolean): LoomNode =>
   section(
     ids,
     { tone: "surface", width: "wide", eyebrow: "The record itself" },
-    "The same change, as this site wrote it down",
+    theirs ? "Your change, as this site wrote it down" : "The same change, as this site wrote it down",
     [
-      prose(
-        ids,
-        `A moment ago somebody asked the front page of this site for something — “${trail.asked}” — and this is everything the machinery said while it dealt with it. It is what a Loom site hands its own logging as a change goes through, and a deployment collects it by writing eight lines that put each one in a list.`,
-        { size: "lead", measured: true }
-      ),
-      prose(
-        ids,
-        "Six lines for the five steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards.",
-        { tone: "muted", measured: true }
-      ),
+      prose(ids, whoAsked(trail, theirs), { size: "lead", measured: true }),
+      prose(ids, lineCount(trail), { tone: "muted", measured: true }),
       glossary(ids),
-      ...trail.lines.flatMap((line, index) => stage(ids, line, index)),
+      ...trail.lines.flatMap((line, index) => stage(ids, line, index, theirs)),
     ]
   )
 
@@ -314,7 +356,7 @@ const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode =>
     [
       prose(
         ids,
-        "The front page will not let anything take away the statement of what this site is for. Ask it to and the first four lines read exactly as they do above — the request, the rules, the list, the measurement. This is the fifth. There is no sixth, because nothing happened to the page.",
+        "The front page will not let anything take away the statement of what this site is for. Ask it to and it reaches the same four kinds of line as the run above — the request, the rules, the list, the measurement — and then this one. There is no line after it, because nothing happened to the page.",
         { measured: true }
       ),
       buildElement(ids, {
@@ -436,9 +478,22 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
         journey(ids),
         weighed(ids),
         record(ids),
+        /**
+         * The record, and — unless the record *is* one — the refusal beside it.
+         *
+         * `isRefusal` is the only thing that takes the contrast band away, and
+         * it takes it away for the one visitor who does not need it: somebody
+         * who asked the front door for the change this site refuses has the
+         * refusal in front of them already, and a band captioned "and when the
+         * answer is no" printing that same answer a second time reads as the
+         * page having lost track of what it just said.
+         */
         ...(context.trail === undefined
           ? []
-          : [paperTrail(ids, context.trail), refusal(ids, context.trail)]),
+          : [
+              paperTrail(ids, context.trail, context.ask !== undefined),
+              ...(context.trail.isRefusal ? [] : [refusal(ids, context.trail)]),
+            ]),
         questions(ids),
         closing(ids, context),
         siteFooter(ids, chrome),
