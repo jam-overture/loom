@@ -9503,3 +9503,105 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-30 — `StoreError` has five codes and no way to list them, which is the fourth union with this hole
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+the same small addition asked for on #175 and #183, now with a fourth name on it
+
+A store operation returns `Result<_, StoreError>`, and `StoreError` is a union of
+five object types keyed by `code`. Handling one is exactly right: a `switch` is
+exhaustive at compile time and `describeStoreError` already proves it. What has
+no answer is **enumeration** — a page that describes all five, or an operations
+dashboard that counts how failures divide, has to keep its own list with nothing
+to fail when a sixth arrives.
+
+This is the fourth time a documentation run has met it in eight days:
+
+| union | where | filed on |
+| --- | --- | --- |
+| `WriteOutcome` | `src/write/commit.ts` | #175 |
+| `TelemetryEvent` | `src/telemetry/event.ts` | #183 |
+| `CliError` | `src/cli/` | #191 |
+| `StoreError` | `src/store/errors.ts` | this run |
+
+The shape is not a question and was settled inside `src/` before any of these:
+`src/telemetry/episode.ts` exports `EPISODE_RESOLUTION_KINDS` for this reason.
+A `readonly StoreError["code"][]` beside the union, with a `Record` keyed by it
+somewhere in the runtime's own tests, costs one line and one test.
+
+**What this lane did instead**, for the fourth time:
+`app/(docs)/_lib/deployment/failures.ts` keeps a `Record<StoreError["code"], …>`,
+so a sixth code stops the documentation build rather than quietly leaving a row
+off a table. That works, and it is a workaround that four pages now carry
+independently — which is the argument for doing it once in `src/`.
+
+Nothing is blocked. The page shipped and is correct today.
+
+---
+
+## 2026-08-30 — `.prose h3` outranks a utility class, so a generated block cannot size its own labels
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — this
+lane's own, filed rather than fixed because the fix changes a component this
+run did not otherwise touch
+
+`app/(docs)/globals.css` narrows its **table** selectors with
+`:not(.not-prose *)` — the fix #155 made after the 25 August finding that
+`.not-prose` is not a cascade barrier in this sheet. The **heading** selectors
+were not narrowed, and they have the same problem with worse odds of being
+noticed:
+
+```css
+.prose h3 { font-size: 1.25rem; margin-top: 2.5rem; }
+```
+
+`.prose h3` is (0,1,1); a Tailwind `text-sm` is (0,1,0). So an element-level
+prose rule wins over the utility class a component wrote on purpose, **inside
+`.not-prose`**, where a component author has every reason to think it would not.
+`architecture-ideas.tsx` asks for `text-lg` and renders at 1.25rem today; it is
+close enough to look intended, which is why nobody has caught it.
+
+This run avoided it by using a paragraph rather than a heading for the labels in
+`deployment-tables.tsx`, which is also the right markup — those labels belong to
+a generated block rather than to the page's outline, and a heading there would
+have appeared in the search index and in an anchor nobody wrote. So the
+workaround cost nothing here and will not always.
+
+**Recommendation:** narrow `.prose h1, h2, h3, h4` with `:not(.not-prose *)`,
+exactly as the table selectors are, and take the one visual change it causes in
+`architecture-ideas.tsx` deliberately rather than by accident. Worth its own run
+because it is a change to every page's headings and wants looking at, not a line
+smuggled into a page's pull request.
+
+---
+
+## 2026-08-30 — the decisions count has been red on `main` for five days, and it is now five consecutive docs runs
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing` · **Status:** open —
+a fifth data point, with the cost stated in runs rather than in principle
+
+`(marketing)/_lib/facts.test.ts > counts the decision records` fails on a clean
+`main`: `FACTS.decisions` says `94` and there are `95` records. Measured this
+run at `3a57feb`, with nothing of this branch on disk.
+
+That is **the merge gate for four surfaces**, red since 25 August. Every branch
+cut since inherits it, and this is the fifth consecutive documentation run to
+open a pull request whose only failing check is a test in a lane it does not
+own. #175, #183 and #191 each say so; so does this one.
+
+The fix exists twice and neither has merged: **#174** derives the number, which
+is the one that stops this recurring, and **#182** bumps the literal, which buys
+until the ninety-sixth record. Not ported here for the reason the three runs
+before this one gave — `copy.ts` belongs to `Loom marketing`, and a third copy
+of the same one-line change would conflict with both of the maintainer's own
+open fixes rather than help.
+
+**Recommendation: merge #174.** The interesting number is no longer 94 versus
+95; it is that a one-line literal has held four lanes' merge gate for five days,
+and that four routines in a row correctly declined to fix it because the rule
+they all read says work in another lane is filed rather than done. The rule is
+right. What is missing is anything that makes a red `main` louder than a line in
+a report nobody is reading while they are away.

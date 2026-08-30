@@ -181,6 +181,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
       },
+      {
+        slug: "going-to-production",
+        title: "Going to production",
+        summary:
+          "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
+      },
     ],
   },
   apiReferenceSection,
