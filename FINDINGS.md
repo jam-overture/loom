@@ -8010,8 +8010,11 @@ the derivation carry it to all eighteen derived palettes at once.
 
 ## 2026-08-25 — `.not-prose` is not a cascade barrier, and this is the second component it caught
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — fixed
-locally in two components, and the general shape is still open
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+`docs-16-a-real-cascade-barrier`** — the second of the two shapes below is what
+shipped, generalised from a reset to a guard on every rule. The diagnosis in this
+entry was right and the mechanism it assumed was not; the 31 August entry has the
+measurement.
 
 Both new components on the theming page shipped their first render with a
 defect from the same cause, and neither was visible to any test:
@@ -9503,3 +9506,117 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-31 — the documentation site was drawing on its own examples, and one of them was a border
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-16-a-real-cascade-barrier` — recorded because the *way* it survived is the
+part worth keeping
+
+`globals.css` opens by saying that none of it reaches an example:
+
+> *None of this reaches an example. A primitive styles itself from the theme
+> mounted on the tree it belongs to (0049/0050), so everything inside a
+> `<figure data-example>` is drawn from `--loom-*` custom properties this file
+> never sets and **must never set** — a docs site that tinted its own examples
+> would be showing the reader a page they cannot reproduce.*
+
+That was written as a description of the file and it was **false**. Measured in
+Chromium across all 24 pages of the site: **17 headings inside 9 rendered
+`LoomTree` examples were taking declarations from the documentation site's own
+prose rules.** Every one of them took `letter-spacing: -0.02em`, and three took
+more than that:
+
+| Example | Page | Taken from `.prose h2` |
+| --- | --- | --- |
+| `a-slot-and-its-children` | Children and slots | `border-top: 1px solid var(--edge)`, `padding-top: 2rem` |
+| `a-derived-theme` | Making it look like yours | the same |
+| `a-card-and-a-control` | What the Gate decides | the same |
+
+**A visible horizontal rule, drawn across a Loom tree by the page documenting
+it.** A reader who copied that tree got no line, and nothing on the site said so.
+
+**Why nothing caught it, which is the useful half.** Every check this site has
+was passing and was right to pass. The example rendered, so the registry's own
+"an example that cannot render is a failing test" holds. Eighty-one assertions
+about the page passed, because none of them is about a computed style. The
+screenshots looked fine, because a rule above a heading looks like a design
+decision — it is the same rule the *prose* on that page uses, which is exactly
+why it looked intended.
+
+**The mechanism, and it is not the one the 25 August entry assumed.** That entry
+and my own comment on #199 both said a `.prose` rule outranks a utility class.
+It does not, and this is worth stating plainly because I published the wrong
+version of it four days ago:
+
+> Tailwind v4 orders the cascade `theme, base, components, utilities`. A later
+> layer beats an earlier one **whatever the specificity**, so `.text-lg` — one
+> class — beats `.prose h3` — a class and a type. A utility always wins.
+>
+> **What leaks is every property the component does not name.** A component
+> asking for `text-lg` gets 18px, and also gets prose's `margin-top`,
+> `font-weight` and `letter-spacing`, which nobody chose for it.
+
+So the failure is quiet by construction, and both of the workarounds the
+codebase had grown were aimed at the wrong thing: `block!` in
+`api-reference.tsx` carried an `!` it never needed, and
+`.prose .not-prose > * + *` was a margin reset for a leak rather than a layout
+decision. Both are gone; removing the second moved **0 of 1,957** elements.
+
+**What shipped:** `:not(.not-prose *)` on every element-scoped rule in the
+block, which is #155's table guard generalised, plus `prose-barrier.test.ts`
+holding it for rules nobody has written yet.
+
+**What is worth knowing for the next lane that meets this.** Three surfaces
+render Loom trees inside their own chrome — docs, marketing and lessons. The
+guard here is this stylesheet's, and nothing checks the other two. I have not
+looked at them: it is not my lane and a measurement made from outside it would
+be a guess. The method transfers cheaply though, and it is two files in
+`scratchpad` rather than anything clever — walk every page in a headless
+browser, record the computed value of every property your sheet sets on every
+element inside your tree wrapper, change the sheet, and diff. It found this in
+one pass and it found the three false workarounds with it.
+
+---
+
+## 2026-08-31 — `main` has been red for six days and 38 pull requests are behind it
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a count rather than a new diagnosis, filed because the number is now the
+finding
+
+On a clean `main` at `3a57feb`, `pnpm verify` fails one test and passes 1,962:
+
+```
+app/(marketing)/_lib/facts.test.ts > counts the decision records
+expected '94' to be '95'
+```
+
+`main` last moved on **26 August** (#167). **#168 through #205 are all open** —
+38 pull requests, every routine, six days. `pnpm verify` green is the merge gate
+for four surfaces, so the gate has been shut the entire time.
+
+**This is the sixth consecutive documentation run to report it and the fifth to
+report it as the only red check on its own branch.** I am not going to restate
+the analysis; #191 and #199 have it. What this entry adds is the count, because
+the count is what changed:
+
+- the fix is **already written and already open**. #174 derives both figures
+  instead of holding them as literals, and it reports `mergeable_state: clean`.
+- #182 raises the literal, which buys until the ninety-sixth record.
+- four routines have now declined to port the one-line fix, each correctly:
+  `(marketing)/_lib/copy.ts` belongs to `Loom marketing`, and `docs/routines.md`
+  says another lane's work is filed rather than done.
+
+**The rule is right and it is not the problem.** The problem is that a red
+`main` is reported in a document nobody is reading while they are away, and the
+cost of that compounds at one full run per routine per day. Six days is roughly
+forty runs of work that cannot land, and every one of them was cut from a base
+that was already red.
+
+Recommendation, unchanged and now urgent rather than tidy: **merge #174.** I
+have also sent this to your phone rather than only writing it here, which is the
+one thing five previous reports of it did not do.
+

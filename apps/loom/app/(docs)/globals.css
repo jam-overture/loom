@@ -348,27 +348,66 @@
   }
 
   /*
+   * ── `:not(.not-prose *)` on every rule below, and why it is on every one ──
+   *
+   * `.not-prose` marks a region a component draws itself. It only works if the
+   * rules in this block do not reach inside it, and until now most of them did.
+   *
+   * The measured rule, taken in Chromium rather than reasoned about, because
+   * the obvious guess is wrong in both directions:
+   *
+   *   A utility class always wins. Tailwind v4 orders the cascade
+   *   `theme, base, components, utilities`, and a later layer beats an earlier
+   *   one whatever the specificity — so `.text-lg` (one class) beats
+   *   `.prose h3` (a class and a type) because of where it sits, not how it
+   *   scores. What leaks is every property the component does not name.
+   *
+   * So the failure is quiet by construction. A component that says `text-lg`
+   * gets 18px and also gets prose's `margin-top: 2.5rem`, `font-weight: 700`
+   * and `letter-spacing: -0.02em`, none of which anybody chose for it. Nothing
+   * looks broken; the values are simply not the component's.
+   *
+   * The case that matters most is not a component at all. Every rendered
+   * `LoomTree` on this site sits inside a `.not-prose` figure, so these rules
+   * were reaching into the examples — and the level-2 heading in three of them
+   * was wearing a `border-top` this file drew across a tree that never asked
+   * for one. The comment at the top of this stylesheet says that must never
+   * happen. It says so as a description, and it was not true.
+   *
+   * That also retires a workaround rather than adding one: `block!` was written
+   * in `api-reference.tsx` on the belief that a utility loses here. It does
+   * not, and the `!` is gone.
+   *
+   * `:not(.not-prose *)` is the same guard #155 put on the table rules for the
+   * same reason, generalised to the rest of the block. It is preferred over
+   * resetting inside `.not-prose` because a reset needs to outrank what it
+   * undoes, which would then also outrank the component's own declarations —
+   * a rule that never matches leaves them unopposed. `prose-barrier.test.ts`
+   * holds it, so the fourteenth rule added here cannot quietly reopen this.
+   */
+
+  /*
    * 700, which is the pack's `headingWeight`. One family at two weights is the
    * typographic half of this theme: there is no second face to carry
    * hierarchy, so weight and size carry all of it.
    */
-  .prose h1,
-  .prose h2,
-  .prose h3,
-  .prose h4 {
+  .prose h1:not(.not-prose *),
+  .prose h2:not(.not-prose *),
+  .prose h3:not(.not-prose *),
+  .prose h4:not(.not-prose *) {
     color: var(--ink);
     font-weight: 700;
     letter-spacing: -0.02em;
     scroll-margin-top: 5rem;
   }
 
-  .prose h1 {
+  .prose h1:not(.not-prose *) {
     font-size: 2.75rem;
     line-height: 1.1;
     margin-top: 0;
   }
 
-  .prose h2 {
+  .prose h2:not(.not-prose *) {
     font-size: 1.625rem;
     line-height: 1.3;
     margin-top: 3.5rem;
@@ -376,12 +415,12 @@
     border-top: 1px solid var(--edge);
   }
 
-  .prose h3 {
+  .prose h3:not(.not-prose *) {
     font-size: 1.25rem;
     margin-top: 2.5rem;
   }
 
-  .prose strong {
+  .prose strong:not(.not-prose *) {
     color: var(--ink);
     font-weight: 600;
   }
@@ -393,38 +432,38 @@
    * palette's `border-strong`.
    */
 
-  .prose a {
+  .prose a:not(.not-prose *) {
     color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-color: var(--accent-ring);
   }
 
-  .prose a:hover {
+  .prose a:hover:not(.not-prose *) {
     text-decoration-color: var(--ink);
   }
 
-  .prose ul,
-  .prose ol {
+  .prose ul:not(.not-prose *),
+  .prose ol:not(.not-prose *) {
     padding-left: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .prose ul {
+  .prose ul:not(.not-prose *) {
     list-style: disc;
   }
 
-  .prose ol {
+  .prose ol:not(.not-prose *) {
     list-style: decimal;
   }
 
-  .prose li::marker {
+  .prose li:not(.not-prose *)::marker {
     color: var(--ink-faint);
   }
 
-  .prose blockquote {
+  .prose blockquote:not(.not-prose *) {
     border-left: 2px solid var(--edge-strong);
     padding-left: 1rem;
     color: var(--ink-muted);
@@ -469,7 +508,20 @@
     background: var(--surface-muted);
   }
 
-  .prose :not(pre) > code {
+  /*
+   * The chip, defined once and reachable two ways.
+   *
+   * Markdown gets it without asking, because a page full of backticks should
+   * not have to. A component inside `.not-prose` asks for it by name, which is
+   * the difference the barrier above exists to make: `api-reference.tsx` renders
+   * the same backtick spans and used to get this by accident, through a rule
+   * about markdown that happened to reach it.
+   *
+   * One block rather than a class and a copy of its declarations, so the chip
+   * cannot drift between the two places it appears.
+   */
+  .code-chip,
+  .prose :not(pre) > code:not(.not-prose *) {
     background: var(--code-surface);
     color: var(--code-ink);
     border: 1px solid var(--edge);
@@ -479,11 +531,50 @@
     font-family: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   }
 
-  .prose .not-prose {
-    color: var(--ink);
+  /*
+   * A `.not-prose` region whose *content* is authored prose.
+   *
+   * `Callout` is the only case and it is a real one: the component draws the
+   * box and the tone, and then a person writes markdown inside it. The barrier
+   * is right to keep prose's rules out — but a link with no underline and a
+   * backtick span with no chip are losses rather than wins, so the region asks
+   * for exactly those two back.
+   *
+   * They come back in the callout's own colour rather than prose's.
+   * `currentColor` is what makes that work: the amber callout gets an amber
+   * chip and the green one a green chip, where the shared `--code-surface` grey
+   * sat on both and belonged to neither.
+   */
+  .callout-prose a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  .prose .not-prose > * + * {
-    margin-top: 0;
+  .callout-prose :not(pre) > code {
+    background: color-mix(in oklab, currentColor 8%, transparent);
+    border: 1px solid color-mix(in oklab, currentColor 22%, transparent);
+    border-radius: 4px;
+    padding: 0.1em 0.32em;
+    font-size: 0.85em;
+    font-family: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /*
+   * Colour is the one thing the barrier cannot keep out, because it is
+   * inherited rather than matched: `.prose` sets `--ink-muted` on the container
+   * and every descendant takes it, `.not-prose` or not. So the region says what
+   * its own default ink is and its components override from there.
+   *
+   * The rule that used to sit under this one — `.prose .not-prose > * + *`,
+   * zeroing the top margin of every direct child — was a workaround for the
+   * leak rather than a layout decision, and it is gone. `.prose > * + *` is a
+   * direct-child selector and never reached in here; what it was really
+   * undoing was `.prose h2`'s `margin-top: 3.5rem` landing on a component's
+   * heading. Removing it moves nothing, which is what a census of all 1,957
+   * elements across the site's 24 pages says, and is the check that it was
+   * dead.
+   */
+  .prose .not-prose {
+    color: var(--ink);
   }
 }
