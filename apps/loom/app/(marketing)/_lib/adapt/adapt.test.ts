@@ -356,8 +356,39 @@ describe("the panel and the mechanism page", () => {
     )
   })
 
-  it("shows no steps at all before the visitor has asked for anything", () => {
-    expect(countOf(basePage(), "loom.milestone")).toBe(0)
+  /**
+   * The waiting panel, which is the state every visitor meets first.
+   *
+   * This asserted `0` until 31 August, and that was a fact about the old panel
+   * rather than a property of the site: before the visitor asks, the panel now
+   * shows the record's own shape with every rung unlit. So the assertion moves
+   * to the two things that were never checked and can actually go wrong — that
+   * the shape a visitor is shown is the shape they get, and that showing it
+   * claims nothing.
+   *
+   * The first is why `PANEL_STEPS` exists and is worth holding through the
+   * *rendered page* rather than against that table: a test that read the table
+   * for both sides would pass however either panel was built.
+   */
+  const milestonesOf = (page: LoomTree): readonly ElementNode[] =>
+    elementsOf(page.root).filter((element) => element.type === "loom.milestone")
+
+  it("names the same steps, in the same order, before the visitor has asked", async () => {
+    const run = await askRunFor(contextFor("calmer"))
+
+    expect(run).toBeDefined()
+    expect(milestonesOf(basePage()).map((step) => step.props["title"])).toEqual(
+      run === undefined ? [] : milestonesOf(run.page).map((step) => step.props["title"])
+    )
+  })
+
+  it("claims nothing about a change that has not happened", () => {
+    const waiting = milestonesOf(basePage())
+
+    expect(waiting.length).toBeGreaterThan(0)
+    expect(waiting.map((step) => ({ state: step.props["state"], body: step.props["body"] }))).toEqual(
+      waiting.map(() => ({ state: "planned", body: undefined }))
+    )
   })
 })
 

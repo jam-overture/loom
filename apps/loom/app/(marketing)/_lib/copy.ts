@@ -21,8 +21,20 @@
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
   primitives: "68",
-  /** Numbered records in `decisions/`, README excluded. */
-  decisions: "94",
+  /**
+   * Numbered records in `decisions/`, README excluded.
+   *
+   * **Bumped by hand for the tenth time**, and by the fourth consecutive
+   * marketing run to open by changing a digit it did not cause. `main` has been
+   * red on this one assertion since 27 August, which means it is red for all
+   * four surfaces. #174 deletes the literal — the two numbers the process
+   * already holds count themselves, and this one becomes a floor it cannot
+   * overstate — and it has been green, mergeable and unreviewed since the 27th.
+   * That branch is not stacked on and not duplicated here: a competing
+   * derivation in this file would make the pull request that fixes it properly
+   * un-mergeable, which is a worse outcome than a digit.
+   */
+  decisions: "95",
   /** Delta operations. The whole vocabulary of structural change. */
   operations: "4",
 } as const
