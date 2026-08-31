@@ -24,12 +24,18 @@ const APP = join(process.cwd(), "app", "(portal)")
 
 /**
  * `/portal/sign-in` must be reachable without a session or nobody could ever get
- * one, and `/portal` only redirects — it renders nothing and reads nothing, so
- * an actor would gate a page that has no content to protect.
+ * one.
  *
- * The other four are redirects, and they are here for `/portal`'s reason
- * exactly: each renders nothing and reads nothing, so an actor would gate a page
- * with no content to protect.
+ * The other four are redirects: each renders nothing and reads nothing, so an
+ * actor would gate a page with no content to protect.
+ *
+ * **`/portal` came off this list on 31 August**, and it is the case the list was
+ * shaped by. It was exempt for the redirect's reason — nothing to protect — and
+ * the moment it became a screen that reads the store and the hold queue, that
+ * reason stopped holding. The exemption did not notice; the test below did,
+ * because it asserts what an exempt page may *import* rather than trusting the
+ * list to stay true. That is the property worth keeping: an exemption written
+ * for a page that no longer exists is exactly the door this check is for.
  *
  * `/portal/demo` is where the demo lived until it moved to a public `/demo` of
  * its own. `/portal/trees`, `/portal/calibration` and `/portal/audit` are the old
@@ -47,7 +53,6 @@ const APP = join(process.cwd(), "app", "(portal)")
  */
 const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/sign-in/page.tsx",
-  "portal/page.tsx",
   "portal/demo/page.tsx",
   "portal/trees/[[...rest]]/page.tsx",
   "portal/calibration/[[...rest]]/page.tsx",
@@ -79,15 +84,27 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page and the five redirects", () => {
+  it("exempts only the sign-in page and the four redirects", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
       "portal/audit/[[...rest]]/page.tsx",
       "portal/calibration/[[...rest]]/page.tsx",
       "portal/demo/page.tsx",
-      "portal/page.tsx",
       "portal/sign-in/page.tsx",
       "portal/trees/[[...rest]]/page.tsx",
     ])
+  })
+
+  /**
+   * Every exemption still has to be the thing it was exempted for. All four
+   * redirects are exempt because they render nothing, and the front door was on
+   * this list for the same reason until it stopped being a redirect — so the
+   * reason is asserted rather than remembered.
+   */
+  it("exempts nothing that renders a screen", () => {
+    const rendering = UNGUARDED_BY_DESIGN.filter((page) => page !== "portal/sign-in/page.tsx")
+      .filter((page) => !readFileSync(join(APP, page), "utf8").includes("permanentRedirect("))
+
+    expect(rendering).toEqual([])
   })
 
   /**

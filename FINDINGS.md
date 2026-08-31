@@ -6731,8 +6731,10 @@ by.
 
 ## 2026-08-23 — the portal can now keep a hold across a request, and does not
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
-— nothing is broken today, and the thing that would break is invisible when it does
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**closed by `portal-18-everything-waiting-on-you`** — taken exactly as written,
+including the two-line branch below. See the 31 August entry for why it took
+eight days and what now says it on a screen.
 
 `postgresHoldStore` exists as of
 [0088](decisions/0088-a-hold-is-a-row-and-a-take-is-one-statement.md), exported
@@ -9503,3 +9505,102 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-31 — the portal never asked for the durable hold store, and a waiting change was the one thing that could not survive a restart
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-18-everything-waiting-on-you`** — this is the 23 August entry *"the
+portal can now keep a hold across a request, and does not"*, taken, in the exact
+shape the framework routine wrote it in.
+
+`_lib/write.ts` constructed `memoryHoldStore()` unconditionally, so
+`DATABASE_URL` made the log durable and left the queue in process memory. It is
+one branch now, beside the one `store.ts` already had:
+
+```ts
+portalDatabase === undefined ? memoryHoldStore() : postgresHoldStore(portalDatabase)
+```
+
+**Two things are worth writing down about why this sat open for eight days**, and
+neither is that anyone forgot.
+
+**A held change is the only object in Loom with no second copy.** An applied
+change is in the log and can be replayed; a refused one is in the journal. A hold
+has been accepted into nothing — that is what a hold *is* — so the store under it
+is the whole of its existence. Every other absent-configuration fallback in this
+portal degrades into something recoverable, and this one degraded into loss. The
+fallback being *identical in shape* to the safe ones is exactly what made it
+invisible.
+
+**Nothing on any screen said it.** The trees page carried "Changes here won't be
+kept · Set `DATABASE_URL` to make writes durable", which was true of the log and
+false of the queue on the same deployment, and there was no screen whose subject
+was the queue for the sentence to be wrong on. `/portal` now states which of the
+two stores this deployment is running, and `holdsAreDurable` is a separate export
+from `storeIsDurable` for that reason — they have the same value today and they
+are not the same claim.
+
+The framework routine's warning about `release` being a take, now enforced by the
+statement rather than by a single-threaded process, is worth repeating to whoever
+touches this next: two reviewers confirming at once produce one success and one
+`not-answerable`, and the card already words that as *"Somebody has answered this
+one."* — which is now true rather than merely reassuring.
+
+**Not taken here:** hold expiry, which is the 23 August entry beneath this one and
+is the maintainer's. Nothing accumulated while holds died with the process. They
+do not any more.
+
+---
+
+## 2026-08-31 — an exemption written for a redirect outlived the redirect
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-18-everything-waiting-on-you` — recorded for the shape, which is general
+
+`/portal` was on `guarded-pages.test.ts`'s `UNGUARDED_BY_DESIGN` list, with a
+correct reason: it was a seven-line `redirect` that rendered nothing and read
+nothing, so `requireActor` would have gated a page with no content to protect.
+
+This run turned it into a screen that reads the tree store and the hold queue.
+**The exemption did not notice, and an exemption list has no way to.** What
+noticed was the assertion beside it — the one that says an exempt page may not
+import `_lib/store`, `_lib/write`, `_lib/telemetry` or `_lib/database` — which
+failed on the first run of the suite and named the file.
+
+The lesson is not "remember to update the list". It is that **an exemption should
+carry an assertion of the property it was granted for**, so that the day the
+property stops holding is the day the test goes red rather than the day somebody
+re-reads the list. There is one more of those now: every remaining exemption is
+checked to contain `permanentRedirect(`, which is the whole of why the other four
+are on it.
+
+The same shape is worth a look anywhere a routine keeps a list of things a check
+is allowed to skip.
+
+---
+
+## 2026-08-31 — `FACTS.decisions`, seventh occurrence, and `main` was red again
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — for the count, and because the recommendation from three lanes has not
+changed
+
+`main` was red on `app/(marketing)/_lib/facts.test.ts` when this run cut its
+branch: `FACTS.decisions` said `94` and `decisions/` holds 95 numbered records.
+Carried across the lane boundary again, in its own commit so it can be dropped,
+for the fifth consecutive portal run.
+
+One thing this run got wrong that is worth recording, because it is a trap in the
+*measurement* rather than in the code. The first `pnpm verify` of the run was
+launched as `pnpm verify 2>&1 | tail -60`, and a pipeline's exit status is the
+last command's — so `tail` succeeded, the run was recorded as exit 0, and `main`
+was read as green for half an hour. It was red the whole time. **A verify piped
+into anything reports the pipe's status, not the build's**, and every routine here
+reads that number to decide whether it is allowed to open a pull request.
+
+The standing recommendation, unchanged and not restated further: derive the count
+from the directory rather than storing it as a string. The number is a fact about
+the repository and it is checked against the repository by a test that already
+knows how to count it.

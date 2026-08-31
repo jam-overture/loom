@@ -11,6 +11,7 @@ import {
 import type { HeldProposal } from "@loom/runtime/write"
 
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+import { answerOutcomes } from "@/app/(portal)/_lib/waiting"
 
 import { HeldProposalCard } from "./held-proposal"
 
@@ -125,6 +126,41 @@ describe("HeldProposalCard", () => {
 
     expect(screen.getByRole("button", { name: "Apply this change" })).toBeTruthy()
     expect(screen.getByRole("button", { name: "No thanks" })).toBeTruthy()
+  })
+
+  /**
+   * The card described the change and never the *answer*. A person hovering
+   * over two buttons wants to know what each one sets in motion — and the
+   * undoability of a yes, which is the sharpest half, was a `reversible no`
+   * pair one click down.
+   */
+  it("says what each answer would do, before either button", () => {
+    const { container } = card()
+    const text = container.textContent ?? ""
+
+    expect(text).toContain("If you say yes")
+    expect(text).toContain("If you say no")
+    expect(text.indexOf("If you say yes")).toBeLessThan(text.indexOf("Apply this change"))
+  })
+
+  it("says a yes is re-judged rather than obeyed", () => {
+    card()
+
+    expect(document.body.textContent).toContain("checks its rules once more")
+  })
+
+  /**
+   * Asserted against `answerOutcomes` itself rather than against a copy of the
+   * sentence: the queue on `/portal` renders the same two lines, and a test that
+   * pinned the wording here would let the two screens drift apart while both
+   * stayed green.
+   */
+  it("reads the sentences from the one place both screens read them", () => {
+    const { container } = card()
+    const answers = answerOutcomes(held.disposition)
+
+    expect(container.textContent).toContain(answers.yes)
+    expect(container.textContent).toContain(answers.no)
   })
 
   /** Nothing is removed. Every value the card used to lead with is still on it. */
