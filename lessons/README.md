@@ -92,6 +92,11 @@ what it adds is only the part paper cannot do:
   and going to get one is another retrieval.
 - **Confident and wrong**, counted. That pair is the study plan, and it is
   unmeasurable on paper because the rating is gone by the time you know.
+- **The questions you missed, coming back.** Not as a list to look at — as the
+  same question, asked again a day later, a week after you get it, and a month
+  after that. Three clean retrievals retire one; missing it once sends it back
+  to the start. This is the schedule's own instruction after a miss, which is
+  the hardest thing in this document to do by hand and the easiest to drop.
 
 The lessons themselves run there too, at `/lessons/04` and so on, and reading
 one there differs from reading the file in exactly three ways — all of them
