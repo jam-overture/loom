@@ -9503,3 +9503,113 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-31 — five demo pull requests are open at once, four of them editing one card, and this run could use none of them
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a merge-order question, not a defect
+
+`main` carries this surface as of #162 (25 August). Since then the lane has
+opened five and merged none:
+
+| PR | branch | what it adds |
+| --- | --- | --- |
+| #170 | `demo-06-put-it-back-says-what-it-is` | the undo's own name and caution, and the card stops quoting `“Undo revision 1.”` |
+| #178 | `demo-07-the-mark-lands-in-the-gap` | the spotlight chip stops landing on the quote |
+| #186 | `demo-08-what-allowing-it-would-do` | *what this would change*, in plain words instead of `delete loom.stat-grid` |
+| #194 | `demo-09-the-offer-that-withdrew-itself` | the undo stays offered while there is something to put back |
+| #202 | `demo-10-the-two-questions-it-promised` | the two axes the Gate weighed, answered on the card |
+
+Four of the five edit `record-card.tsx`, and this one makes six. The lane is
+told to branch off `main` and never stack, which is the right rule — a stack
+once cost four days of visibility — so each run rediscovers the same card in the
+state it was in on 25 August and adds to *that*. Nothing here is wasted work and
+none of the five overlap in substance, but three consequences are worth stating
+plainly before the pile grows again:
+
+- **Every run since 26 August has been diagnosing a screen no visitor will
+  ever see.** The clunk this run measured — a raw `user-instruction` in the
+  corner of the light — sits next to four other raw strings that #186 and #170
+  already fix on their own branches. A run that could see those would have
+  found a different worst thing.
+- **The merges will conflict, cheaply but repeatedly.** They are all additive
+  and all in the same three regions of one component. In number order — #170,
+  #178, #186, #194, #202, then this — each is a small hand-resolve at worst.
+- **The card is about to gain five sentences in one week.** Individually every
+  one is the missing term of something the surface already promised. Together
+  they are a card that has never been looked at whole. **Recommendation: merge
+  the five in number order, then let this lane's next run's first job be to
+  measure the merged card as a stranger and cut whatever the five made
+  redundant.** That is a job this lane cannot do until they land.
+
+Nothing is blocked. This run built the one thing that was still true on `main`
+and left the four sentences it could not see alone.
+
+---
+
+## 2026-08-31 — the demo's failures are machinery that does not reach the screen: seventh instance, and this one had a sentence pointing at it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — dated
+on the 25 August entry rather than opened again
+
+Unchanged in substance and worth one line of evidence. The origin was on the
+record from the day the surface was built (`EditIntent["origin"]`), the runtime
+documents in `policy.ts` why it exists — *"An explicit human instruction earns
+more latitude than an adaptation nobody requested"* — the Gate keys
+`autoApplyCeiling` on it, `ceilingFor` is exported for anybody who wants to ask
+what the Gate asked, and the portal has had `ASK_ORIGINS` translating all four
+values into sentences for weeks. This surface printed the raw enum in a
+monospace span in the corner of the light and translated nothing.
+
+What is new is that the *rule sentence had a hole in it shaped exactly like the
+missing hop*: `stakes-above-ceiling` reads "Riskier than a request **from here**
+is allowed to be without asking", and nothing on the card said what *here* was.
+A defect that a sentence on the same card is already asking about is the cheapest
+kind to find, and it took seven runs. `grep` for what the runtime exports and
+nothing in this route group imports is still the tool that finds these fastest.
+
+---
+
+## 2026-08-31 — `main` still red on `FACTS.decisions`, fourth consecutive day
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the 25 August `FACTS` entry rather than opened again
+
+`pnpm verify` on `main` at `3a57feb` fails one test: `FACTS.decisions` says
+`"94"` and `decisions/` holds 95 records. Runtime 1741 tests green, application
+1962 of 1963. It is the merge gate for all seven surfaces and has been red since
+28 August.
+
+Not fixed here: `(marketing)/_lib/copy.ts` is another lane's file and #174
+already carries the bump. The standing recommendation on the 26 August entry —
+derive both counts rather than editing them — is still the fix that ends it.
+This run's own lane is green; the pull request is opened on a red `main` with
+that said in its title, which is what the last five runs across four lanes have
+done.
+
+---
+
+## 2026-08-31 — `21st.dev` re-verified blocked, from the demo lane a sixth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the existing entries rather than opened again
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED` on 31 August, unchanged.
+The brief names it as this surface's visual standard. Calibration was against
+`loom.hero` and `loom.feature-grid`, the floor the brief names second, and
+against this run's own screenshots at 1440×900 and 390×844.
+
+---
+
+## 2026-08-31 — `docs/rollout.md` and the `Loom demo` brief still describe work that landed ten days ago
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dated on the 24 August entry rather than opened again
+
+`docs/rollout.md:19` still places the demo at `apps/loom/app/(portal)/portal/demo`,
+and the brief still opens with *"Two problems to fix before anything else"*,
+the first of which — move it to `/demo` — landed on 21 August in #146's line of
+work. Eighth consecutive run. Each costs a fresh session the minutes it spends
+establishing that its opening instruction is already done.

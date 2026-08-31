@@ -203,6 +203,55 @@ describe("a record card", () => {
   })
 
   /**
+   * The rule sentence on this path ends *"riskier than a request from here is
+   * allowed to be without asking"*, and until this run nothing on the card said
+   * what *here* was. The one thing that came close was the origin code in the
+   * corner, which is a token rather than a claim — so the assertion is that the
+   * card now answers the question in the light and keeps the code, one click
+   * down, rather than that it says any particular words.
+   */
+  it("says what an ask from here may do on its own, under the rule that read it", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    const said = screen.getByText(/will not let an ask like that land on its own/)
+
+    expect(disclosure.contains(said)).toBe(false)
+    expect(disclosure.contains(screen.getByText("low, for user-instruction"))).toBe(true)
+  })
+
+  /**
+   * And it is said only where the ceiling decided. A change that went ahead
+   * because nothing this project watches for was involved has no ceiling in its
+   * story, and a card that explained one anyway would be reasoning about a
+   * comparison the Gate never made.
+   */
+  it("says nothing about a ceiling on a change the ceiling did not decide", () => {
+    render(<RecordCard record={APPLIED} />)
+
+    expect(screen.queryByText(/land on its own above/)).toBeNull()
+  })
+
+  /**
+   * The plain-language rule applied to the oldest jargon on this card. The
+   * origin was a monospace `user-instruction` in the top right corner of every
+   * card, in the light, unexplained — the runtime's word for what kind of act
+   * the ask was. It is evidence, so it belongs with the evidence; and nothing is
+   * ever removed, so it is still on the card.
+   */
+  it("keeps the runtime's code for the ask in the record, not in the light", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText("user-instruction"))).toBe(true)
+    expect(disclosure.contains(screen.getByText("2026-08-12T09:00:00.000Z"))).toBe(true)
+  })
+
+  /**
    * Answering a hold ends it. A card still offering the two buttons after the
    * decision was made would be offering a decision that no longer exists.
    */
