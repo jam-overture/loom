@@ -4,10 +4,13 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { auditSnapshot, describeStoreError } from "@loom/runtime/store"
 
+import { PageViews } from "@/app/(portal)/_components/page-views"
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { scopedLead } from "@/app/(portal)/_lib/page-views"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
@@ -78,17 +81,19 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
 
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-wrap items-baseline justify-between gap-3">
+      <header className="flex flex-col gap-2">
         <h1 className="text-2xl tracking-tight">Does this page add up?</h1>
-        <div className="flex gap-4">
-          <Link href={`/portal/history?${scopeQuery}`} className="text-xs">
-            See what changed →
-          </Link>
-          <Link href={`/portal/pages/${scope.data}`} className="font-mono text-xs">
-            {scope.data}
-          </Link>
-        </div>
+        {/*
+         * The heading asks about "this page" and the only thing that said which
+         * page was a bare monospace id in the corner, doing double duty as a
+         * link. The id is in the sentence now and the links are the strip.
+         */}
+        <p className="text-ink-muted text-sm">
+          <PlainSentence line={scopedLead("checkup", scope.data)} />
+        </p>
       </header>
+
+      <PageViews treeId={scope.data} current="checkup" />
 
       {problem !== undefined && !problem.ok ? (
         <StateNotice tone="failure" title="We couldn't check this page.">
@@ -128,9 +133,6 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
       <div className="flex gap-4">
         <Link href={`/portal/checkup?${scopeQuery}`} className="text-xs">
           Check again →
-        </Link>
-        <Link href="/portal/checkup" className="text-ink-muted text-xs">
-          Check a different page
         </Link>
       </div>
 

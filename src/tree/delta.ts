@@ -83,6 +83,30 @@ export type ConfigureOperation = {
 
 export type TreeOperation = InsertOperation | RemoveOperation | MoveOperation | ConfigureOperation
 
+export type TreeOperationName = TreeOperation["op"]
+
+/**
+ * The whole vocabulary of structural change, in the order the doc comment above
+ * argues it.
+ *
+ * Four is a claim this project makes about itself in prose — on the front door,
+ * in the course, in the reference — and until now every one of those was a digit
+ * somebody typed. A sentence that counts a list in `src/` and cannot be checked
+ * against it is the shape that has broken the build eleven times over a
+ * different number; the remedy is the same one `EPISODE_RESOLUTION_KINDS` and
+ * `UNJUDGED_REASONS` already are, and it costs a line.
+ *
+ * A fifth operation would be a change to what Loom is rather than an addition to
+ * it, so this list is not expected to grow. That is exactly why it is worth
+ * exporting: a number nobody expects to move is the one nobody re-checks.
+ */
+export const TREE_OPERATIONS: readonly TreeOperationName[] = [
+  "insert",
+  "remove",
+  "move",
+  "configure",
+]
+
 export const treeDeltaSchema = z.object({
   deltaId: deltaIdSchema,
   treeId: treeIdSchema,

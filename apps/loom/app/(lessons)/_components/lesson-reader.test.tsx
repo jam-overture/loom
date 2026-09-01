@@ -147,3 +147,119 @@ describe("reading a lesson", () => {
     expect(screen.getByText(/The queue knows what that makes due/)).toBeTruthy()
   })
 })
+
+const EXERCISES: readonly LessonPart[] = [
+  {
+    kind: "exercises",
+    id: "try-it",
+    heading: <h2>Try it</h2>,
+    slug: "lesson-99-try-it",
+    total: 2,
+    failure: undefined,
+    units: [
+      { kind: "prose", id: "intro", node: <p>The preamble is shared by both exercises.</p> },
+      { kind: "code", id: "preamble", node: <pre>const spare = idFactory()</pre>, run: undefined },
+      {
+        kind: "code",
+        id: "a",
+        node: <pre>console.log(inverse)</pre>,
+        run: {
+          number: 1,
+          prompt: <p>Exercise 1. Write down what this prints.</p>,
+          transcript: <pre>the first transcript</pre>,
+        },
+      },
+      {
+        kind: "code",
+        id: "b",
+        node: <pre>console.log(second)</pre>,
+        run: {
+          number: 2,
+          prompt: <p>Exercise 2. Write down what this prints.</p>,
+          transcript: <pre>the second transcript</pre>,
+        },
+      },
+    ],
+  },
+  {
+    kind: "answers",
+    id: "try-it-answers",
+    heading: <h2>The exercise answers</h2>,
+    node: <p>Q1 is about what the inverse does not have to say.</p>,
+    gate: { kind: "written", slug: "lesson-99-try-it", count: 2, prompt: undefined },
+  },
+]
+
+const exercises = () => render(<LessonReader lesson={99} parts={EXERCISES} />)
+
+describe("running a lesson's exercises", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("shows the code and holds every transcript back", () => {
+    exercises()
+
+    expect(screen.getByText(/console.log\(inverse\)/)).toBeTruthy()
+    expect(screen.getByText(/console.log\(second\)/)).toBeTruthy()
+    expect(screen.queryByText("the first transcript")).toBeNull()
+    expect(screen.queryByText("the second transcript")).toBeNull()
+  })
+
+  it("asks for nothing against a fence that prints nothing", () => {
+    exercises()
+
+    expect(screen.getByText(/const spare = idFactory\(\)/)).toBeTruthy()
+    expect(screen.getAllByText(/Write down what this prints/)).toHaveLength(1)
+  })
+
+  /**
+   * The lesson says "predict every output in writing before you run anything",
+   * and revealing the first transcript when the first prediction lands would
+   * quietly make exercise 2 a different question.
+   */
+  it("reveals nothing until the last exercise has been predicted against", () => {
+    exercises()
+    predict("3", "A remove, naming the node.")
+
+    expect(screen.queryByText("the first transcript")).toBeNull()
+    expect(screen.getByText(/Exercise 2. Write down what this prints/)).toBeTruthy()
+
+    predict("2", "Two lines, and the second is empty.")
+
+    expect(screen.getByText("the first transcript")).toBeTruthy()
+    expect(screen.getByText("the second transcript")).toBeTruthy()
+  })
+
+  it("keeps the printed answers behind the same predictions", () => {
+    exercises()
+
+    expect(screen.queryByText(/what the inverse does not have to say/)).toBeNull()
+    expect(screen.getByText(/Locked until every exercise above has a prediction/)).toBeTruthy()
+
+    predict("3", "A remove, naming the node.")
+    predict("2", "Two lines, and the second is empty.")
+
+    expect(screen.getByText(/what the inverse does not have to say/)).toBeTruthy()
+  })
+
+  it("says so, rather than showing an empty panel, when the exercises did not run", () => {
+    render(
+      <LessonReader
+        lesson={99}
+        parts={[
+          {
+            ...(EXERCISES[0] as Extract<LessonPart, { kind: "exercises" }>),
+            total: 0,
+            failure: "ReferenceError: buildElement is not defined",
+            units: [{ kind: "code", id: "a", node: <pre>console.log(inverse)</pre>, run: undefined }],
+          },
+        ]}
+      />
+    )
+
+    expect(screen.getByText(/These exercises did not run/)).toBeTruthy()
+    expect(screen.getByText(/buildElement is not defined/)).toBeTruthy()
+    expect(screen.queryByText(/Write down what this prints/)).toBeNull()
+  })
+})

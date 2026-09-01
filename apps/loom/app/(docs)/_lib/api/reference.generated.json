@@ -1565,6 +1565,20 @@
               "summary": ""
             },
             {
+              "name": "CompositionOutcomeKind",
+              "kind": "type",
+              "signature": "type CompositionOutcomeKind = CompositionOutcome[\"kind\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "COMPOSITION_OUTCOME_KINDS",
+              "kind": "value",
+              "signature": "const COMPOSITION_OUTCOME_KINDS: readonly CompositionOutcomeKind[]",
+              "truncated": false,
+              "summary": "The five ways an ask can end, in the order a host meets them."
+            },
+            {
               "name": "composeChange",
               "kind": "function",
               "signature": "const composeChange: (runtime: CompositionRuntime, tree: LoomTree, intent: EditIntent) => Promise<CompositionOutcome>",
@@ -2286,6 +2300,13 @@
               "summary": ""
             },
             {
+              "name": "channelsOf",
+              "kind": "function",
+              "signature": "const channelsOf: (colour: string) => readonly [number, number, number] | undefined",
+              "truncated": false,
+              "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
+            },
+            {
               "name": "contrastRatio",
               "kind": "function",
               "signature": "const contrastRatio: (a: string, b: string) => number | undefined",
@@ -2813,6 +2834,83 @@
           ]
         },
         {
+          "module": "theme/separation",
+          "title": "Separation",
+          "summary": "Whether two slots a reader is meant to tell apart are far enough apart to be told apart. The other half of what a palette owes a page.",
+          "symbols": [
+            {
+              "name": "JUST_NOTICEABLE_DIFFERENCE",
+              "kind": "value",
+              "signature": "const JUST_NOTICEABLE_DIFFERENCE = 2.3",
+              "truncated": false,
+              "summary": "ΔE below which two colours are the same colour to a reader."
+            },
+            {
+              "name": "colourDifference",
+              "kind": "function",
+              "signature": "const colourDifference: (a: string, b: string) => number | undefined",
+              "truncated": false,
+              "summary": "The CIE76 colour difference between two colours, or `undefined` when either is a form `channelsOf` declines to guess at."
+            },
+            {
+              "name": "PeerBasis",
+              "kind": "type",
+              "signature": "type PeerBasis = \"colour-only\" | \"also-marked\";",
+              "truncated": false,
+              "summary": "How the reader is told the two apart, which decides what a collapse means."
+            },
+            {
+              "name": "PeerPairing",
+              "kind": "type",
+              "signature": "type PeerPairing = (PeerBase & {\n    readonly basis: \"colour-only\";\n}) | (PeerBase & {\n    readonly basis: \"also-marked\";\n    readonly mark: PaletteSlot;\n});",
+              "truncated": false,
+              "summary": "Two slots a reader is meant to tell apart, and what tells them apart."
+            },
+            {
+              "name": "PALETTE_PEER_PAIRINGS",
+              "kind": "value",
+              "signature": "const PALETTE_PEER_PAIRINGS: readonly PeerPairing[]",
+              "truncated": false,
+              "summary": "The pairs the library actually asks a reader to distinguish."
+            },
+            {
+              "name": "MeasuredPeer",
+              "kind": "type",
+              "signature": "type MeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly difference: number;\n    /**\n     * How far the mark is from whichever of the two it is nearer to — the mark's\n     * worst case, since it has to be visible against both.\n     *\n     * `undefined` for a `colour-only` peer, which has no mark, and for a mark\n     * written in a form this cannot measure. The second case judges the pair on\n     * its colours alone, which is the safe direction: a defence that cannot be\n     * measured is not counted as one.\n     */\n    readonly markDifference: number | undefined;\n    readonly separated: boolean;\n};",
+              "truncated": false,
+              "summary": "A peer that was measured, whether or not it came apart."
+            },
+            {
+              "name": "UnmeasuredPeer",
+              "kind": "type",
+              "signature": "type UnmeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly first: string;\n    readonly second: string;\n};",
+              "truncated": false,
+              "summary": "A peer whose colours could not be measured, and which colour stopped it."
+            },
+            {
+              "name": "PaletteSeparation",
+              "kind": "type",
+              "signature": "type PaletteSeparation = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPeer[];\n    /**\n     * Colour-only peers under the threshold: two things that look like one thing,\n     * with nothing else to go on. The list a host asserts empty.\n     */\n    readonly collapsed: readonly MeasuredPeer[];\n    /**\n     * Marked peers whose colours have collapsed **and** whose mark has too — a\n     * card that is neither filled nor outlined. Separate from `collapsed` because\n     * it is a different defect with a different fix, and because a marked pair\n     * whose mark is doing its job is not a defect at all.\n     */\n    readonly unmarked: readonly MeasuredPeer[];\n    /** Neither separated nor collapsed: a colour this cannot measure. */\n    readonly unmeasured: readonly UnmeasuredPeer[];\n};",
+              "truncated": false,
+              "summary": "What one palette does with the pairs its reader has to tell apart."
+            },
+            {
+              "name": "auditSeparation",
+              "kind": "function",
+              "signature": "const auditSeparation: (palette: Palette, peers?: readonly PeerPairing[]) => PaletteSeparation",
+              "truncated": false,
+              "summary": "Measures every declared peer in one palette. Refuses nothing."
+            },
+            {
+              "name": "describeSeparationAudit",
+              "kind": "function",
+              "signature": "const describeSeparationAudit: (audit: PaletteSeparation) => string",
+              "truncated": false,
+              "summary": "One line per problem, for a CLI or a failing test's message. Empty when clean."
+            }
+          ]
+        },
+        {
           "module": "theme/style-presets",
           "title": "Style presets",
           "summary": "The seven style presets the starter library ships beyond the first three, and the reason there are seven rather than seventeen.",
@@ -3173,6 +3271,20 @@
               "signature": "type TreeOperation = InsertOperation | RemoveOperation | MoveOperation | ConfigureOperation;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TreeOperationName",
+              "kind": "type",
+              "signature": "type TreeOperationName = TreeOperation[\"op\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TREE_OPERATIONS",
+              "kind": "value",
+              "signature": "const TREE_OPERATIONS: readonly TreeOperationName[]",
+              "truncated": false,
+              "summary": "The whole vocabulary of structural change, in the order the doc comment above argues it."
             },
             {
               "name": "treeDeltaSchema",
@@ -6960,6 +7072,20 @@
               "signature": "type TelemetryEvent = {\n    readonly type: \"intent-received\";\n    readonly intent: IntentSummary;\n} | {\n    readonly type: \"policy-resolved\";\n    readonly intentId: IntentId;\n    readonly policyId: string;\n    /** Absent on a record written before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n} | {\n    readonly type: \"interpretation-failed\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-proposed\";\n    readonly proposal: ProposedChange;\n} | {\n    readonly type: \"assessment-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-assessed\";\n    readonly assessment: AssessmentSummary;\n} | {\n    readonly type: \"disposition-decided\";\n    readonly proposalId: ProposalId;\n    readonly disposition: Disposition;\n} | {\n    readonly type: \"repair-requested\";\n    readonly refusedProposalId: ProposalId;\n    readonly reason: DispositionReason;\n} | {\n    readonly type: \"repair-failed\";\n    readonly refusedProposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-applied\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"application-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"intent-not-writable\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"proposal-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly type: \"hold-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"hold-confirmed\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"hold-discarded\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"change-committed\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"commit-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TelemetryEventType",
+              "kind": "type",
+              "signature": "type TelemetryEventType = TelemetryEvent[\"type\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TELEMETRY_EVENT_TYPES",
+              "kind": "value",
+              "signature": "const TELEMETRY_EVENT_TYPES: readonly TelemetryEventType[]",
+              "truncated": false,
+              "summary": "Every event the journal can hold, in the order the runtime writes them."
             },
             {
               "name": "telemetryRecordSchema",
