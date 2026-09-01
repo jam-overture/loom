@@ -14,6 +14,7 @@ import type { ChangeRecord } from "../adapt/record"
 import { BAND } from "../bands"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
+import { PLAIN_WORDS, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
 import { seeItHappenBand } from "./see-it-happen"
@@ -130,7 +131,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
   })
 
 /**
- * The four steps every change takes, in four words.
+ * What happens to every change, in four words.
  *
  * This band used to read *Proposals · The Gate · Revisions · Inverses* under the
  * heading "The four things underneath" — our four nouns, taught to a stranger in
@@ -139,12 +140,26 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
  * 20 August reading the page against `nextjs.org`.
  *
  * The four words below are the same four things. Nobody has to be taught them.
+ *
+ * **They are not four steps, and the label said they were.** Until this run it
+ * read *Every change takes the same four steps* — one screen above a button
+ * that leads to a page headed *Five steps, every time, in the same order*. Both
+ * sentences were defensible on their own, which is why sixteen runs and every
+ * test on this site passed over them: the four words are the four nouns and the
+ * five steps are the pipeline, and *Undo* was never a step in it. A stranger
+ * does not know that. They read four, click the button under it, and read five.
+ *
+ * On a site whose entire argument is that it can tell you exactly what
+ * happened, being unable to count its own steps on the first screen is the
+ * cheapest possible way to lose somebody. The words were right; the noun was
+ * not. `journey.ts` owns both lists now and `journey.test.ts` holds this band
+ * to naming neither a step nor a number of its own.
  */
 const vocabulary = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.logo-cloud",
-    props: { label: "Every change takes the same four steps", align: "center" },
-    children: ["Ask", "Check", "Record", "Undo"].map((name) =>
+    props: { label: PLAIN_WORDS_LABEL, align: "center" },
+    children: PLAIN_WORDS.map((name) =>
       buildElement(ids, { type: "loom.logo", props: { name } })
     ),
   })

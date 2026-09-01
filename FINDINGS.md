@@ -9788,6 +9788,184 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-09-01 — the record count turned `main` red for the tenth time, and the fix has been mergeable and unreviewed for five days
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer · **Status:** open —
+nothing a routine can do closes it
+
+`main` at `3a57feb` fails `app/(marketing)/_lib/facts.test.ts` — *expected '94'
+to be '95'* — because `decisions/` now holds ninety-five records and
+`FACTS.decisions` in `copy.ts` is a literal. Measured this run: **1 failed, 1962
+passed.** Under [0067](decisions/0067-the-four-surfaces-are-one-application.md)
+that is all four surfaces red, not one, and it has been red continuously since
+27 August.
+
+This is the **tenth occurrence** of one finding first filed on 19 August. It is
+not a new argument and it is not being restated as one. What is new is only the
+arithmetic:
+
+| | |
+| --- | --- |
+| Open pull requests | **30** |
+| Merged since 27 August | **0** |
+| Consecutive marketing runs opening by bumping this digit | **5**, including this one |
+| Age of the fix that deletes the literal (#174) | **5 days**, green, `mergeable_state: clean`, unreviewed |
+
+**#174 is based on `3a57feb`, which is the current head of `main`.** It derives
+the two countable figures and replaces the record count with a floor the test
+holds in one direction only, so a ninety-sixth record becomes a no-op in this
+lane. It needs no rebase and no work from any routine.
+
+This run bumped the digit to `95` rather than re-deriving it, for the reason the
+31 August run gave and which still holds: a competing derivation in the same
+file would put #174 into conflict, and the queue does not need another way to
+not merge.
+
+**Recommendation, unchanged and now five days old: merge #174 ahead of anything
+else, including this pull request.** `docs/rollout.md` names review latency as
+the second-largest lever on the schedule; thirty open pull requests and a
+five-day-old one-line fix for a red `main` is that lever, measured.
+
+---
+
+## 2026-09-01 — the front door taught a stranger a different number from the page its own button leads to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` ·
+**Status:** closed by this run — recorded because of how it survived, not
+because it is still open
+
+Directly under the hero, `/` read **“Every change takes the same four steps”**
+over the words *Ask · Check · Record · Undo*. The primary call to action one
+screen above it is *See how a change travels*, which leads to `/how-it-works`,
+headed **“Five steps, every time, in the same order”**.
+
+Both sentences were correct about what they described. The four words are the
+four nouns — proposal, gate, revision, inverse — put into plain English in
+August precisely so a stranger would not have to be taught our vocabulary; the
+five steps are the pipeline. *Undo* was never one of the five. Nothing was
+factually wrong anywhere, which is exactly why **sixteen runs, 589 marketing
+tests and every screenshot review since 20 August passed over it.**
+
+It is worth filing anyway, because the shape recurs and this lane has now hit it
+three runs running:
+
+- 30 August (#198): four sentences had hardened into facts about the one ask
+  that was ever exercised.
+- 31 August (#205): a prose promise of what a panel would contain, correct in
+  the diff and an empty box on the page.
+- Today: two correct sentences that had never been read next to each other.
+
+**The tell is the same each time and it is cheap: read the page in the order a
+visitor reads it, across a link, rather than a file at a time.** Every one of
+these three is invisible to a diff and to a test written from the same file, and
+visible within seconds to somebody walking the site.
+
+The structural half is closed by `journey.ts`: the steps are one list, the count
+comes off its length, and no sentence on the site spells a step count of its
+own. Seven typed counts were removed. The general problem — a page composing a
+sentence about a list it is not holding — is not closed and cannot be by a
+module.
+
+---
+
+## 2026-09-01 — the refusal band's heading disagreed with the sentence directly beneath it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` ·
+**Status:** closed by this run
+
+On `/how-it-works`, the refusal band was headed **“The same five lines, and then
+a different answer”**, and the first sentence under that heading read **“the
+first four lines read exactly as they do above”**.
+
+Four is right. A refusal produces the identical request, rules, list and
+measurement — four lines — and then a verdict that differs, which is the line
+the band is printing. The heading was counting the verdict among the lines it
+was about to say were not the same.
+
+Both numbers are now positions in the trail the band is holding while it speaks,
+and `journey.test.ts` extracts both out of the rendered markup and asserts they
+match, so the heading cannot drift from its own sentence again.
+
+Filed rather than fixed silently because of where it was: this is the band the
+whole mechanism page builds to, on the site's second most important page, and
+the two strings are about eighty pixels apart on screen.
+
+---
+
+## 2026-09-01 — `fonts.googleapis.com` is not on the sandbox egress allowlist, so a screenshot is taken in the fallback face
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer ·
+**Status:** open — cosmetic, and named so nobody re-derives it
+
+The marketing layout serves Geist through a stylesheet link, deliberately and
+for a good recorded reason: the theme's `minimal-sans` pack names `Geist`
+literally, and `next/font` mints a hashed family name that the pack's stack
+would never match.
+
+A routine capturing a screenshot cannot load it. `fonts.googleapis.com` is not
+in `sandbox.network.allowedDomains`, so Chromium falls back to the platform
+grotesque and **every screenshot this lane publishes is in the fallback face
+rather than the one a visitor sees.** The fallback is a deliberate near-neighbour,
+so the pictures look entirely plausible and nothing announces the substitution.
+
+It changes no assertion — no test depends on the face, and the layout's own
+comment says the failure is meant to be quiet — but the maintainer judges this
+surface by eye, and he is judging it in a font it does not ship in.
+
+**Recommendation:** add `fonts.googleapis.com` and `fonts.gstatic.com` to
+`sandbox.network.allowedDomains`. Both are static font hosts and neither can
+receive a credential. If that is unwelcome, the alternative is that screenshots
+carry a line saying the face is substituted, which is worse and costs a
+sentence every run. Not a fix from here — widening egress is explicitly a
+finding and not a routine's to make.
+
+---
+
+## 2026-09-01 — the harness auto-subscribed this run to its own pull request, and the subscription's standing order is the one thing the brief forbids
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer ·
+**Status:** open — unsubscribed by hand this run; previously observed not to hold
+
+Filed on 24 and 25 August by three other lanes on consecutive days. It happened
+again today, and it is recorded here only because the count keeps climbing and
+because of *what the subscription asks for*, which the earlier entries did not
+spell out.
+
+Seconds after #213 was opened, the harness subscribed this session to it with no
+request from the routine, and delivered **three wake events** in ninety seconds —
+the subscription notice and two Vercel bot comments reporting `Building` and then
+`Ready`. None of the three was actionable: the pull request is green,
+`mergeable_state: clean`, with no CI failure and no review thread.
+
+The subscription's standing instruction is the problem:
+
+> *"If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed."*
+
+**That is a self-re-arming hourly chain** — precisely the shape `docs/routines.md`
+names as the failure to guard against, in the incident that made token discipline
+the maintainer's top priority: four such chains, about ninety-six cloud sessions a
+day, one pull request checked sixty-nine consecutive times over seventy-two hours
+with nothing changing between checks, a week's allowance spent while he was away.
+
+It resolves cleanly rather than being a genuine conflict — the wake text itself
+says *"the rules below apply on this PR unless your user says otherwise"*, and the
+brief says otherwise in terms. So nothing was scheduled. It is filed because a
+routine that read the wake text and not the brief would arm the chain, believing
+it was following instructions, and **the pull requests that would be polled are
+the thirty-one currently sitting unreviewed** — which is the exact condition under
+which the cost is highest.
+
+`unsubscribe_pr_activity` was called and reported success. The 23 August finding
+records that the unsubscribe does not hold and the harness re-subscribes about a
+minute later; that was not re-verified here, because verifying it means waiting
+around, which is the behaviour in question.
+
+**Recommendation.** One line in `docs/routines.md`, beside **Token discipline**:
+*a PR subscription's request for a self check-in is superseded by this section;
+unsubscribe and exit.* Whether the auto-subscription itself should stop is in the
+tooling rather than this repository and is the maintainer's call. Not writing it
+myself — a routine cannot write the governance it is bound by.
 ## 2026-09-01 — the framework brief's headline unit was finished before it was written, and three routines may have been waiting on it
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
