@@ -84,6 +84,7 @@ covers the fifth case nobody has thought of.
 
 ## Records
 
+- **[0102](../decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md)** —
 - **[0096](../decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md)** —
   *A same-origin path is decided by resolving it, not by matching it.*
   **`Proposed` — ARCHITECTURAL, needs review.** Nothing superseded.

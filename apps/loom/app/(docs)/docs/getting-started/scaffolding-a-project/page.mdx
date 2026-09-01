@@ -68,14 +68,6 @@ Leave it off and the primitive still renders, still validates, still passes
 every check you would think to run — and cannot be edited by anyone, with no
 error anywhere to say so.
 
-<Callout kind="note">
-  The starter file is typed `loom.page`, and so is a primitive in
-  [the starter library](/docs/building-with-loom/primitives). They are two
-  different components with one name, so registering both is refused rather than
-  resolved — `createPrimitiveRegistry` returns a `duplicate-primitive-type`
-  error and builds nothing. Rename yours, or delete it and use theirs.
-</Callout>
-
 ## The registry rewrites itself
 
 The second command declares another primitive.
