@@ -34,7 +34,7 @@ const contentsOf = (plan: WritePlan, path: string): string => {
 describe("planCommand — init", () => {
   it("plans a primitive, a registry, and the conformance test", () => {
     expect(pathsOf(planOf({ kind: "init", directory: "loom" }))).toEqual([
-      "loom/primitives/loom.page.ts",
+      "loom/primitives/app.page.ts",
       "loom/primitives/registry.ts",
       "loom/primitives/registry.test.ts",
     ])
@@ -42,14 +42,14 @@ describe("planCommand — init", () => {
 
   it("honours the directory it was given", () => {
     expect(pathsOf(planOf({ kind: "init", directory: "app/ui" }))[0]).toBe(
-      "app/ui/primitives/loom.page.ts"
+      "app/ui/primitives/app.page.ts"
     )
   })
 
   /** Re-running init over a populated directory would discard every registration. */
   it("refuses when any file it would write already exists", () => {
     for (const existing of [
-      "loom/primitives/loom.page.ts",
+      "loom/primitives/app.page.ts",
       "loom/primitives/registry.ts",
       "loom/primitives/registry.test.ts",
     ]) {
@@ -76,13 +76,13 @@ describe("planCommand — add primitive", () => {
   })
 
   it("regenerates the registry from the whole directory, not just the new primitive", () => {
-    const plan = planOf(command, ["loom/primitives/loom.page.ts", "loom/primitives/registry.ts"])
+    const plan = planOf(command, ["loom/primitives/app.page.ts", "loom/primitives/registry.ts"])
     const registry = contentsOf(plan, "loom/primitives/registry.ts")
 
-    expect(registry).toContain(`import { loomPage } from "./loom.page.js"`)
+    expect(registry).toContain(`import { appPage } from "./app.page.js"`)
     expect(registry).toContain(`import { commerceProductCard } from "./commerce.product-card.js"`)
     expect(registry).toContain("commerceProductCard,")
-    expect(registry).toContain("loomPage,")
+    expect(registry).toContain("appPage,")
   })
 
   it("refuses a type that is already declared rather than overwriting its definition", () => {

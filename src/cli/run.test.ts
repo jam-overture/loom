@@ -40,7 +40,7 @@ describe("runCli", () => {
     const report = await reportOf(["init"], filesystem)
 
     expect(report.written).toEqual([
-      "loom/primitives/loom.page.ts",
+      "loom/primitives/app.page.ts",
       "loom/primitives/registry.ts",
       "loom/primitives/registry.test.ts",
     ])
@@ -51,10 +51,10 @@ describe("runCli", () => {
   it("adds a primitive to a scaffolded directory", async () => {
     const filesystem = memoryFileSystem()
     await reportOf(["init"], filesystem)
-    await reportOf(["add", "primitive", "loom.card"], filesystem)
+    await reportOf(["add", "primitive", "app.card"], filesystem)
 
-    expect(filesystem.files.get("loom/primitives/registry.ts")).toContain("loomCard")
-    expect(filesystem.files.get("loom/primitives/registry.ts")).toContain("loomPage")
+    expect(filesystem.files.get("loom/primitives/registry.ts")).toContain("appCard")
+    expect(filesystem.files.get("loom/primitives/registry.ts")).toContain("appPage")
   })
 
   /**
@@ -89,7 +89,7 @@ describe("runCli", () => {
       path: "loom/primitives/registry.ts",
       detail: "permission denied",
     })
-    expect([...filesystem.files.keys()]).toEqual(["loom/primitives/loom.page.ts"])
+    expect([...filesystem.files.keys()]).toEqual(["loom/primitives/app.page.ts"])
   })
 
   it("passes an argument refusal through without reading anything", async () => {
@@ -109,7 +109,8 @@ describe("describeCliError", () => {
     expect(describeCliError({ code: "unexpected-argument", given: "extra" })).toContain("extra")
     expect(describeCliError({ code: "invalid-primitive-type", type: "X" })).toContain("kebab-case")
     expect(describeCliError({ code: "reserved-primitive-type", type: "registry" })).toContain("overwrite")
-    expect(describeCliError({ code: "already-registered", type: "loom.card" })).toContain("already")
+    expect(describeCliError({ code: "framework-namespace", type: "loom.card" })).toContain(`"app.card"`)
+    expect(describeCliError({ code: "already-registered", type: "app.card" })).toContain("already")
     expect(describeCliError({ code: "file-exists", path: "a/b.ts" })).toContain("nothing was written")
     expect(describeCliError({ code: "filesystem-failed", path: "a", detail: "EACCES" })).toContain("EACCES")
   })

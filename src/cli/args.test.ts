@@ -77,10 +77,25 @@ describe("parseArguments", () => {
     }
   })
 
+  /**
+   * The scaffold used to write `loom.page`, which is also a starter primitive —
+   * so following the documentation in order produced a registry that refused
+   * itself. The namespace is refused whole rather than the names taken today.
+   */
+  it("refuses the framework's namespace, and offers a name of the host's own", () => {
+    for (const type of ["loom", "loom.page", "loom.product-card"]) {
+      expect(errorOf("add", "primitive", type)).toEqual({ code: "framework-namespace", type })
+    }
+  })
+
+  it("leaves a name that merely begins with the same letters alone", () => {
+    expect(commandOf("add", "primitive", "loomish.card").kind).toBe("add-primitive")
+  })
+
   /** Silently ignoring a stray argument is how someone loses a typo'd type name. */
   it("refuses arguments it has no use for", () => {
     expect(errorOf("init", "extra")).toEqual({ code: "unexpected-argument", given: "extra" })
-    expect(errorOf("add", "primitive", "loom.card", "extra")).toEqual({
+    expect(errorOf("add", "primitive", "app.card", "extra")).toEqual({
       code: "unexpected-argument",
       given: "extra",
     })

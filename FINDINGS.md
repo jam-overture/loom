@@ -9855,6 +9855,109 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-29 — the scaffold no longer collides, and the callout describing the collision is now describing a fix
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+one paragraph to delete, and nothing is broken until it is
+
+`Loom docs` filed *`loom init` scaffolds a primitive the starter library already
+registers* on 29 August, on the `docs-14-scaffolding-a-project` branch. It is
+**closed by `framework-20-a-scaffold-that-cannot-collide`** — recorded here
+rather than edited in place because that entry is not on `main` yet, so there is
+nothing on `main` to edit. Whoever merges both will find the two halves.
+
+The finding offered two shapes and preferred the first. The first was taken and
+then widened, which is the part worth knowing:
+
+| | |
+| --- | --- |
+| asked for | `STARTER_TYPE` moves out of `loom.` |
+| shipped | `loom` and everything under it is refused by the CLI, [0096](decisions/0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md) |
+
+The instance was `loom.page`. The class is one predicate wider: `loom add
+primitive loom.card` scaffolded a module that was dead on arrival for exactly
+the same reason, and the CLI's own usage text was offering `loom.card` as its
+example of a well-formed type. Both are refused now, with `app.card` named back
+as the alternative.
+
+**What this lane has to do:** delete the callout on *Scaffolding a project* that
+describes the collision, and change the scaffolded name where the page shows it —
+`loom.page.ts` is now `app.page.ts` and the export is `appPage`. The page is
+otherwise still correct. `CLI_USAGE` changed, so
+`app/(docs)/_lib/api/reference.generated.json` was regenerated with
+`pnpm --filter @loom/app docs:api` from this branch; that file is this lane's and
+the diff is two lines.
+
+Nothing else is asked. The exit condition the finding named — *a stranger can
+install Loom, register a primitive and get a proposal accepted working only from
+the site* — is now asserted rather than described: `starter-collision.test.ts`
+builds a registry out of the scaffold's committed output and the starter library
+together, which is what following pages 1, 2 and 3 in order produces.
+
+---
+
+## 2026-08-29 — eight open branches now carry a record numbered 0096, and this run made it eight
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a count, and a recommendation I am not able to act on alone
+
+`main` has not moved since #167 on 26 August. Every routine since has branched
+from a `main` whose highest record is `0095`, and every routine that wrote a
+record therefore took `0096`, which is what the briefs instruct: *take the next
+free number after re-reading `main`.* The rule is right and the queue is what
+broke it.
+
+Eight different records now claim the number, across seven branches:
+
+| branch | 0096 |
+| --- | --- |
+| `framework-14` | a behaviour may publish a number into a scope the primitive marks |
+| `framework-15` | a same-origin path is decided by resolving it |
+| `framework-16` | an anchor is a reserved key the runtime checks and a primitive places |
+| `framework-17` | a record is amended when only the count moved |
+| `framework-18` | a same-origin path is not a scheme |
+| `primitives-16` | a container query is for what cannot be interpolated |
+| `primitives-17` | a scroll-driven entrance is anchored to entry |
+| `framework-20` | the `loom.` namespace is the framework's *(this run)* |
+
+The 29 August framework run saw five and **declined to write a record at all**
+for that reason, leaving the reasoning in a doc comment. I have written one,
+because a namespace reservation is a permanent public contract and a doc comment
+is not where a host looks for one — but the cost is real and it is now eight.
+
+**What I did not do:** invent a numbering scheme. Skipping to `0103` to dodge the
+collision would leave gaps, would be a unilateral change to a documented
+convention, and would be wrong the moment the queue moves. The convention is
+fine; nothing is merging.
+
+**Recommendation, in order of how much it fixes.** Merge the queue — every one of
+these is green and the collision evaporates with any merge order, since renumbering
+a record is a file rename and one index regeneration. Failing that, a sentence in
+`docs/routines.md` saying what a routine should do when `main` is stale would let
+the next eight runs stop each rediscovering this. It is governance, so it is not
+a routine's to write.
+
+---
+
+## 2026-08-29 — `FACTS.decisions` was hand-patched again, eleventh occurrence, and the fix is still open
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an instance, dated against the existing entries rather than
+re-argued
+
+`main` was red on arrival: `FACTS.decisions` in
+`apps/loom/app/(marketing)/_lib/copy.ts` said `"94"` against 95 records on disk.
+Writing 0096 made it 96. Patched on this branch, which is the eleventh time a run
+outside `Loom marketing` has edited that lane's file to get `pnpm verify` green.
+
+Nothing new to add to the diagnosis — the 19, 24 and 25 August entries have it,
+and **the fix is written and open**: `marketing-13-numbers-that-count-themselves`
+(#174) makes the count a floor no other lane can move, and has been sitting since
+27 August. Recorded only so the instance count stays honest, and because it is
+now the clearest measure of what the merge queue is costing: a fix for a
+recurring interruption has itself been waiting through four more occurrences of
+the interruption.
+
 ## 2026-08-28 — `main` was red when this branch was cut, and it is the `FACTS` problem for the seventh time
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**

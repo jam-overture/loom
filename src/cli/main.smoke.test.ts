@@ -74,11 +74,19 @@ describe("the loom executable", () => {
 
     const written = await readdir(join(directory, "primitives"))
     expect([...written].sort()).toEqual([
+      "app.page.ts",
       "commerce.product-card.ts",
-      "loom.page.ts",
       "registry.test.ts",
       "registry.ts",
     ])
+  }, 30_000)
+
+  it("refuses a name in the framework's namespace, and names one it would take", async () => {
+    const run = await loom("add", "primitive", "loom.card", "--dir", directory)
+
+    expect(run.code).toBe(1)
+    expect(run.stderr).toContain(`"app.card"`)
+    expect(await readdir(join(directory, "primitives"))).not.toContain("loom.card.ts")
   }, 30_000)
 
   it("refuses a second init on the same directory, on stderr and with a non-zero exit", async () => {

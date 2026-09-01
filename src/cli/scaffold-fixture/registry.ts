@@ -5,10 +5,10 @@
 
 import { createPrimitiveRegistry, describeRegistryError } from "@loom/runtime/sdk"
 
-import { loomPage } from "./loom.page.js"
+import { appPage } from "./app.page.js"
 
 const built = createPrimitiveRegistry([
-  loomPage,
+  appPage,
 ])
 
 if (!built.ok) {
