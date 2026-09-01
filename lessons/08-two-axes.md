@@ -348,8 +348,8 @@ declared what it writes over — and the difference between `accepted` and
 
 ### What the Gate does with two of them
 
-Briefly, because it is lesson 09's subject. The Gate is six ordered rules, first
-match wins, and two of the orderings matter here:
+Briefly, because it is lesson 09's subject. The Gate is seven ordered rules,
+first match wins, and two of the orderings matter here:
 
 - Irreversibility is escalated **before** the stakes ceiling is consulted. The
   ceiling is per-origin — a developer may auto-apply `high` stakes, a scheduled

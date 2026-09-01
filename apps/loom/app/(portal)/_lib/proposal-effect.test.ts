@@ -241,6 +241,115 @@ describe("describeProposalEffect", () => {
   })
 
   /**
+   * `detail` above composes the same facts into one string, which is exactly the
+   * shape a plain sentence cannot be built from without parsing it back apart.
+   * These are the pieces `effect-view` words a sentence out of, so they are
+   * asserted against a real tree rather than against a fixture that could agree
+   * with the view module and disagree with the page.
+   */
+  describe("the pieces a sentence is built from", () => {
+    it("names the part an insert lands in and the one it lands above", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [
+          {
+            op: "insert",
+            parentId: PAGE,
+            index: 1,
+            node: { kind: "text", id: nodeIdSchema.parse("n_ins1"), value: "New band" },
+          },
+        ])
+      )
+
+      expect(effect.operations[0]).toMatchObject({
+        op: "insert",
+        into: "loom.page",
+        before: "loom.card",
+        from: null,
+      })
+    })
+
+    it("names nothing to land above when an insert lands at the end", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [
+          {
+            op: "insert",
+            parentId: PAGE,
+            index: 3,
+            node: { kind: "text", id: nodeIdSchema.parse("n_tail3"), value: "Footnote" },
+          },
+        ])
+      )
+
+      expect(effect.operations[0]).toMatchObject({ into: "loom.page", before: null })
+    })
+
+    it("names both ends of a move that leaves where it was", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [{ op: "move", nodeId: HEADING_TEXT, parentId: FIRST_CARD, index: 0 }])
+      )
+
+      expect(effect.operations[0]).toMatchObject({
+        op: "move",
+        from: "loom.heading",
+        into: "loom.card",
+      })
+    })
+
+    /**
+     * A reorder inside one parent has no elsewhere to name, and saying "out of
+     * the page and into the page" would read as a change of address that is not
+     * happening.
+     */
+    it("names no origin for a move that stays where it is", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [{ op: "move", nodeId: FIRST_CARD, parentId: PAGE, index: 2 }])
+      )
+
+      expect(effect.operations[0]).toMatchObject({ from: null, into: "loom.page" })
+    })
+
+    it("names no destination when the part an insert would go inside is gone", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [
+          {
+            op: "insert",
+            parentId: nodeIdSchema.parse("n_absent"),
+            index: 0,
+            node: { kind: "text", id: nodeIdSchema.parse("n_ins2"), value: "Nowhere" },
+          },
+        ])
+      )
+
+      expect(effect.operations[0]).toMatchObject({ into: null, before: null, missing: true })
+    })
+
+    /**
+     * The delta model's own name, carried through beside the display verb. A
+     * plain reading is chosen by what an operation *is*, and choosing it by the
+     * verb would make rewording the verb silently change the sentence.
+     */
+    it("carries the operation's own name beside the portal's verb", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [{ op: "remove", nodeId: FIRST_CARD }])
+      )
+
+      expect(effect.operations[0]).toMatchObject({ op: "remove", verb: "delete" })
+    })
+  })
+
+  /**
    * The reviewer needs this *before* they press apply. A hold answered against a
    * tree that has moved is refused by the runtime, and a queue that only says so
    * afterwards has spent the reviewer's decision on nothing.
