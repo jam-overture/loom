@@ -3828,7 +3828,7 @@
             {
               "name": "BEHAVIOUR_NAMES",
               "kind": "value",
-              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\"]",
+              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\", \"adjust\"]",
               "truncated": false,
               "summary": ""
             },
@@ -3845,6 +3845,34 @@
               "signature": "const DISCLOSED_ATTRIBUTE = \"data-loom-disclosed\"",
               "truncated": false,
               "summary": "The attribute a disclosure control stamps on its own button: `\"true\"` when the region it names is open, `\"false\"` when it is closed."
+            },
+            {
+              "name": "ADJUST_PROPERTY",
+              "kind": "value",
+              "signature": "const ADJUST_PROPERTY = \"--loom-adjust\"",
+              "truncated": false,
+              "summary": "The custom property an adjust control publishes its value on: a plain number between {@link ADJUST_MINIMUM} and {@link ADJUST_MAXIMUM}, no unit."
+            },
+            {
+              "name": "ADJUST_MINIMUM",
+              "kind": "value",
+              "signature": "const ADJUST_MINIMUM = 0",
+              "truncated": false,
+              "summary": "The bottom of an adjust control's range."
+            },
+            {
+              "name": "ADJUST_MAXIMUM",
+              "kind": "value",
+              "signature": "const ADJUST_MAXIMUM = 100",
+              "truncated": false,
+              "summary": "The top of an adjust control's range."
+            },
+            {
+              "name": "ADJUST_RESTING",
+              "kind": "value",
+              "signature": "const ADJUST_RESTING = 50",
+              "truncated": false,
+              "summary": "Where the control sits before anybody moves it."
             },
             {
               "name": "BEHAVIOURS",

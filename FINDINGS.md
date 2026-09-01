@@ -8381,8 +8381,40 @@ says so, rather than framing it.
 
 ## 2026-08-25 — a wipe cannot be dragged, and the behaviour vocabulary has one member
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— the still version ships and is what most pages using this actually are.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-24-a-behaviour-that-hands-back-a-number`**
+([0096](decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)).
+The behaviour is built and is called **`adjust`**, and the entry was right about
+the thing that made it hard: handing a value *back* is a different shape from
+either existing member, and the reason is inheritance. `disclose` stamps a
+boolean on its own button because a sibling selector reads *sideways*; `var()`
+resolves *downwards*, so a property set on the control's own element would be
+readable by nothing — least of all the sibling region it exists to drive. So the
+control writes `--loom-adjust` to **the element the primitive placed it in**, and
+that — the runtime touching an element it did not create, for the first time — is
+what 0096 records and bounds.
+
+Two corrections to the entry, neither of which changes what it asked for. The
+vocabulary had grown to **two** members before this, not one; `disclose` landed
+on 25 August. And the range input is not ruled out: it cannot drive a clip *in
+CSS alone*, which is what was tested and is true, but a behaviour reads the value
+in a component and writes it where a stylesheet can reach it — so the real
+control, with dragging, arrow keys, Home and End and an announced value, is what
+ships rather than a hand-built handle.
+
+**The still version is untouched, deliberately.** The property is absent until
+the control mounts and absent again when it unmounts, so the primitive reads it
+as `var(--loom-adjust, <its own position>)` and a page served with scripting off
+renders exactly what it renders today. Nothing is hidden behind a control that
+may never arrive.
+
+**Placing it is `Loom primitives`' and it is three lines** — declare `adjust` in
+`behaviours` and an `adjust` text key, place `loom.behaviours.adjust` inside the
+element that should read the value, and put `var(--loom-adjust, …)` into the clip
+`loom.before-after` already writes. The primitive must also declare `interactive`,
+which the registry enforces rather than assumes.
+
+The original entry follows, unchanged.
 
 `loom.before-after` places its divider where `position` says and leaves it
 there. Dragging it needs a pointer handler, and
@@ -9756,6 +9788,42 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-09-01 — the framework brief's headline unit was finished before it was written, and three routines may have been waiting on it
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — nothing is broken by it, which is why it has survived
+
+The `Loom daily build` brief opens with a section marked **"⚠ Your next unit: the
+one-application migration"**, says it "outranks everything below it except
+maintainer review comments", and states that **three other routines are blocked
+on the shape it produces**. It describes scaffolding `apps/loom` with four route
+groups, moving `apps/portal` and `apps/docs` into them, and retiring both
+packages.
+
+**All of it is done and has been for some time.** On `main` at `3a57feb`:
+
+| the brief says | `main` |
+| --- | --- |
+| scaffold `apps/loom` with four route groups | present — `(marketing)`, `(docs)`, `(lessons)`, `(portal)`, and a fifth, `(demo)` |
+| move `apps/portal` in, retire the package | done — `apps/` contains exactly one workspace, `loom` |
+| move `apps/docs` in, retire the package | done — same |
+| one deployment | done — `apps/loom/vercel.json`, `pnpm-workspace.yaml` is `apps/*` with one member |
+
+The brief also says "**until `apps/loom` exists**, the portal keeps working in
+`apps/portal` and docs in `apps/docs`", and neither directory exists.
+
+This is filed rather than fixed because a routine may not rewrite the brief it is
+bound by, and it costs something real every run: the section is marked as
+outranking the whole rest of the queue, so each run spends its opening
+establishing that its highest-priority instruction is already satisfied before it
+can choose work. If three routines were genuinely gated on this shape, they have
+been clear to start for days and their briefs may say otherwise too.
+
+**Recommendation:** delete the ⚠ section from the `Loom daily build` brief and
+promote the list under *After the migration* — open findings owned by the lane,
+framework depth behind the surfaces, the demo, then §7 — to be the queue. If the
+other three briefs carry a matching "blocked until the migration" clause, they
+need the same edit.
 ## 2026-09-01 — a runtime control carries inline styles, so a primitive cannot hide its own control with its own rule
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open

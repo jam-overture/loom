@@ -113,6 +113,7 @@ describe("the behaviour vocabulary", () => {
   it("is closed, and a name outside it is not one", () => {
     expect(isBehaviourName("copy")).toBe(true)
     expect(isBehaviourName("disclose")).toBe(true)
+    expect(isBehaviourName("adjust")).toBe(true)
     expect(isBehaviourName("paste")).toBe(false)
     expect(isBehaviourName("constructor")).toBe(false)
   })
@@ -122,8 +123,8 @@ describe("the behaviour vocabulary", () => {
    * for the friction of adding to it. This is that list, asserted rather than
    * described, so growing it is a visible edit here as well as there.
    */
-  it("is the two controls the runtime implements, and no others", () => {
-    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose"])
+  it("is the three controls the runtime implements, and no others", () => {
+    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose", "adjust"])
   })
 
   it("says of every behaviour which strings its control needs", () => {
@@ -215,6 +216,33 @@ describe("resolveBehaviours", () => {
 
     expect(named("")).toEqual(["disclose"])
     expect(named("a bar full of words")).toEqual(["disclose"])
+  })
+
+  /**
+   * The same property, asserted separately rather than folded into the test
+   * above, because the two behaviours reach it for different reasons: a
+   * disclosure ignores the content because it acts on layout, and an adjust
+   * ignores it because it acts on a number nobody typed into the tree.
+   */
+  it("builds an adjust the same way whatever the node says", () => {
+    const named = (content: string): readonly string[] =>
+      Object.keys(resolveBehaviours(["adjust"], content, { adjust: "Reveal" }).behaviours)
+
+    expect(named("")).toEqual(["adjust"])
+    expect(named("a caption under the pictures")).toEqual(["adjust"])
+  })
+
+  /**
+   * A slider announced as a bare "slider" is the failure the text seam exists to
+   * prevent, and it is worse here than for a button: a reader who cannot tell
+   * what the number means cannot recover by looking at what happened, because
+   * what happens is somewhere else on the page.
+   */
+  it("drops an adjust whose name is blank rather than rendering it nameless", () => {
+    const resolved = resolveBehaviours(["adjust"], "", { adjust: "  " })
+
+    expect(Object.keys(resolved.behaviours)).toEqual([])
+    expect(resolved.unnamed).toEqual([{ behaviour: "adjust", key: "adjust" }])
   })
 })
 
