@@ -201,7 +201,9 @@ fails in. Answer them in the order printed.
 
 1. Give the three counting rules — insert, remove, move — and then the one
    sentence all three follow from. If you can give the rules and not the
-   sentence, you have the surface.
+   sentence, you have the surface. Then: a move is measured a second time, by two
+   other fields, under a *different* sentence. Name the fields and give that
+   sentence too, and say why the two sets of numbers must not be added together.
 2. `analyzeDelta` takes a tree and a delta. `assessStakes` takes an analysis and
    a policy. Neither takes both. Say what that symmetry buys a person reading a
    year of records, and name what it costs at runtime.
@@ -233,7 +235,10 @@ Four of the seven questions are that shape in different costumes, and they are
 deliberately not adjacent.
 
 1. Give the test for whether two axes are really two, then apply it to `stakes`
-   and `reversibility` and name the two `ChangeAnalysis` fields they both read.
+   and `reversibility` and name **every** `ChangeAnalysis` field they both read —
+   there are three, and one of them arrived after both axes already existed. Then
+   say what the fact that it could be added without touching either axis is
+   evidence for.
 2. A delta removes 2 nodes. Write down a policy under which its stakes are `low`
    and it is irreversible, and a second policy under which its stakes are
    `medium` and it is reversible. Actual field names and values.
