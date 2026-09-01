@@ -180,9 +180,9 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0094](0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) | A card's prose is a child when the card has a flow, and a prop when it does not | Accepted | §4b |
 | [0095](0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | A frame carries its URL, and the deployment carries the origins | Accepted | §3, §4b |
 | [0096](0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md) | A behaviour publishes a value on the element the primitive placed it in | Accepted | §4b |
-| [0096](0096-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
 | [0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md) | A hole in the decision numbering is reported, and a clash is fatal | Accepted | §1 (process) |
 | [0098](0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md) | An anchor is a reserved key the runtime checks and a primitive places | Accepted | §4b |
-| 0099 | *No record on this branch* | — | — |
+| [0099](0099-a-record-is-amended-when-only-the-count-moved.md) | A record is amended in place when only the count moved | Accepted | §2 |
 | [0100](0100-a-same-origin-path-is-not-a-scheme.md) | A same-origin path is not a scheme | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |
 | [0101](0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md) | The `loom.` namespace is the framework's, and the CLI will not write in it | Accepted | §4 (CLI), §4c |
+| [0102](0102-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |

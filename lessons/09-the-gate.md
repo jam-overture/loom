@@ -521,7 +521,7 @@ import { gate } from "./runtime/gate.js"
 import type { IntentOrigin } from "./runtime/intent.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./runtime/policy.js"
 import type { DiscardedWork, ProposedChange } from "./runtime/proposal.js"
-import { sampleTree } from "./testing/fixtures.js"
+import { formTree, sampleTree } from "./testing/fixtures.js"
 import type { TreeDelta, TreeOperation } from "./tree/delta.js"
 
 const spare = sequentialIdFactory("x")

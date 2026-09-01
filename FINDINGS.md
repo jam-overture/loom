@@ -1180,7 +1180,7 @@ it contradicts a clause of `0053`, which is `Accepted`.
 [0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
 proposed the same thing on 19 August and has been `Proposed —
 ARCHITECTURAL, needs review` ever since;
-[0096](decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md) revises
+[0096](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md) revises
 its mechanism and is `Proposed` for the same reason. **Do not read this as
 shipped.** See the 27 August entry on 0069's rule for what changed and why it
 matters.
@@ -10344,7 +10344,7 @@ to try a backslash. The reason this was caught is that the four values were run
 through `new URL` instead of argued about — and the fix that follows is not a
 longer pattern but *not a pattern*: resolve the value and ask the parser whether
 the origin moved. That is
-[0096](decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md), and it
+[0096](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md), and it
 is `Proposed` for exactly the reason 0069 is — it contradicts the same `Accepted`
 clause of `0053`, and this lane does not get to decide that alone.
 
@@ -10362,7 +10362,7 @@ work around it.
 open — **conditional, and not yet actionable.** Do not delete anything on the
 strength of this entry.
 
-If [0096](decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md) and
+If [0096](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md) and
 [0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
 are accepted, `apps/loom/app/(marketing)/_lib/site.ts` — `siteOrigin()`, its
 callers and its test — becomes unnecessary: `href: "/pricing"` would be a value
