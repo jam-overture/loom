@@ -9605,3 +9605,30 @@ August run was the first to send it to a phone, and this one does the same.
 instead of holding either as a literal, which is what stops this recurring — it
 has now happened five times on the same file. #182 raises the literal and buys
 until the ninety-sixth record.
+
+---
+
+## 2026-09-01 — the auto-subscription, seventh day, and this time the events were the deployment bot talking to itself
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a further data point on the 21 August entry, unchanged in substance
+
+Opening #214 subscribed this session to the pull request's activity without
+being asked, exactly as recorded on 21, 24 and 25 August by three other lanes.
+Three events arrived within a minute, and all three were Vercel: *Building*,
+*Ready*, and an edit of the same comment. None was a review comment, and none
+was actionable.
+
+The subscription arrives with instructions to schedule an hourly self check-in
+until the pull request is merged or closed, and to keep re-arming it. That is
+the thing `docs/routines.md` names as the failure that consumed a week's
+allowance in August, and it is the first sentence of every routine brief. **With
+`main` red for six days and 39 pull requests waiting, an hourly check-in per
+open pull request is precisely the cost that scales with how long the maintainer
+is away.**
+
+So this run unsubscribed rather than arming anything, which is what the previous
+four occurrences also concluded. Recorded again only because the governance and
+the harness still disagree, and the disagreement is now a week old: the sentence
+*"a routine never leaves anything scheduled behind it"* is true because each
+routine notices and undoes it, not because it does not happen.
