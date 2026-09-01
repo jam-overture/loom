@@ -9726,6 +9726,102 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-30 — the framework lane rebuilt a unit that had been finished and open for four days
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a consequence of the review queue, not something a lane can
+fix from inside its own run
+
+This run built the third member of the behaviour vocabulary — a control that
+hands a number back to the primitive that placed it — with a client control, a
+custom property the primitive's stylesheet reads, a registry check, a probe
+check and thirteen passing tests. It then discovered
+`framework-14-a-control-that-hands-back-a-number`, **#171, open since 26
+August**, which does the same thing with a decision record, a 315-line test
+suite, keyboard support, right-to-left mirroring and pointer capture. The work
+was thrown away. Nothing of it is in the pull request this entry ships on.
+
+**The mechanism is exact and it will happen again.** Every brief says to read
+`FINDINGS.md` *before choosing work*. A finding is closed by editing its
+**Status**, and that edit lands on the branch that closed it. `main` has not
+moved since 26 August, so `main`'s `FINDINGS.md` is a snapshot of what was true
+before eight of this lane's own pull requests were written. The 25 August entry
+*a wipe cannot be dragged, and the behaviour vocabulary has one member* is still
+marked **open** on `main`, and it is the top of this lane's queue by every rule
+in the brief. There is no reading of the brief under which this run should have
+skipped it.
+
+Two properties make it worse than an ordinary stale queue:
+
+- **It is silent.** A duplicated finding does not fail a test or conflict with
+  anything. It costs a whole run and produces a pull request that looks
+  perfectly reasonable next to the one it duplicates.
+- **It compounds with the number of open pull requests**, and there are
+  thirty-five. Roughly a quarter of the entries near the end of this file are
+  answered on a branch, so any lane reading its queue has about that chance of
+  picking work that is already done.
+
+**Recommendation, and it is the same one this lane has now made four runs
+running, with a new kind of evidence behind it: merge the queue.** Until then a
+routine cannot tell a finding that is open from one that was closed on Tuesday.
+The narrower mitigation a routine *can* apply is to check open branches before
+building — this run's report carries a manifest of what every open pull request
+already contains, for exactly that purpose — but that is a habit each fresh
+session has to rediscover, and this one only did it by accident, while looking
+for a free decision-record number.
+
+Cost this run: one unit built and discarded, and a report in place of a feature.
+
+---
+
+## 2026-08-30 — thirty-five pull requests merge cleanly one at a time, and almost none of them merge second
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — measured, not estimated
+
+Measured with `git merge-tree` against `origin/main` at `3a57feb`:
+
+| | |
+| --- | --- |
+| Open pull requests | **35** (#168–#202), oldest 26 August |
+| Merge cleanly into `main` **today** | **34 of 35** — only #172 conflicts |
+| Still merge cleanly **after any one of them lands** | **2 of 33** |
+
+Every branch is clean against today's `main` and almost none is clean against
+any other. Three files carry the whole of it:
+
+| File | How many | Why |
+| --- | --- | --- |
+| `FINDINGS.md` | **every one** | six routines append to the end of one file |
+| `apps/loom/app/(marketing)/_lib/copy.ts` | **21** | each hand-bumps `FACTS.decisions` to stay green |
+| `decisions/README.md`, plus a duplicate record number | **9** | nine branches each numbered a record `0096` |
+
+So the queue is not thirty-five reviews. It is one review and thirty-four
+rebases, each a hand-resolution of a file past nine thousand lines. That is a
+better explanation of four still days than anything in the pull requests
+themselves, and it is worth stating plainly because from the outside — thirty-four
+green, thirty-four mergeable — the pile looks like it is only waiting.
+
+**Two of the three shrink on their own, in a known order.**
+
+1. **`copy.ts` ends the moment #174 merges.** It derives the two countable
+   figures and states the record count as a floor the test can only hold
+   downward, so a new record stops being everyone's problem. #174 is
+   `mergeable_state: clean`, adds no decision record, and collides with nothing.
+   **It is the one to merge first**, and this is the third consecutive framework
+   run to say so.
+2. **The nine `0096` records** each need a rename, a renumber and a rewrite of
+   every reference, eight times over. `checkNumbering` detects the duplicate
+   correctly and cannot possibly see another branch; the fix is a convention —
+   ranges per lane, numbering by date, renumbering at merge — and a routine may
+   not write the governance it is bound by.
+3. **`FINDINGS.md` does not shrink**, and it is the largest of the three. The
+   shape that causes it is that six writers append to one file; `decisions/`
+   already demonstrates the fix, which is one file per finding and a generated
+   index. **Deliberately not built this run:** moving nine thousand lines into a
+   directory would conflict with all thirty-five open pull requests at once and
+   make the present problem permanent. It is worth doing on an empty queue and
+   only then.
 ## 2026-08-30 — the third vocabulary the runtime could not hand you, and the two beside it
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
