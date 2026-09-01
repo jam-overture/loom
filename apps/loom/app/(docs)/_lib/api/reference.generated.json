@@ -1404,6 +1404,20 @@
           "summary": "The Gate.",
           "symbols": [
             {
+              "name": "EscalationCode",
+              "kind": "type",
+              "signature": "type EscalationCode = Exclude<DispositionReasonCode, \"within-policy\">;",
+              "truncated": false,
+              "summary": "The code a rung stamps when it fires. Every reason code but the acceptance."
+            },
+            {
+              "name": "ESCALATION_LADDER",
+              "kind": "value",
+              "signature": "const ESCALATION_LADDER: readonly EscalationCode[]",
+              "truncated": false,
+              "summary": "The ladder, in the order it is consulted, read off the rules themselves."
+            },
+            {
               "name": "gate",
               "kind": "function",
               "signature": "const gate: (assessment: ChangeAssessment, policy: GatePolicy) => Disposition",
@@ -6666,6 +6680,20 @@
               "signature": "type WriteOutcome = {\n    readonly kind: \"committed\";\n    readonly tree: LoomTree;\n    readonly proposal: ProposedChange;\n    readonly disposition: Disposition;\n    readonly inverse: TreeDelta;\n} | {\n    readonly kind: \"held\";\n    readonly held: HeldProposal;\n} | {\n    readonly kind: \"refused\";\n    readonly proposal: ProposedChange;\n    readonly disposition: Disposition;\n    /**\n     * Why no smaller change was offered instead, when a repairer was asked for\n     * one and declined. Carried straight through from the composition outcome,\n     * where the three endings a refusal can have are set out.\n     */\n    readonly repairFailure?: InterpretationError;\n} | {\n    readonly kind: \"not-interpreted\";\n    readonly error: InterpretationError;\n} | {\n    readonly kind: \"not-applicable\";\n    readonly proposal: ProposedChange;\n    readonly error: TreeError;\n}\n/** Persistence refused, including the stale-intent case that never reached a model. */\n | {\n    readonly kind: \"not-written\";\n    readonly error: StoreError;\n}\n/** The proposal being confirmed is not in custody — answered already, or never held. */\n | {\n    readonly kind: \"not-answerable\";\n    readonly error: HoldError;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "WriteOutcomeKind",
+              "kind": "type",
+              "signature": "type WriteOutcomeKind = WriteOutcome[\"kind\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "WRITE_OUTCOME_KINDS",
+              "kind": "value",
+              "signature": "const WRITE_OUTCOME_KINDS: readonly WriteOutcomeKind[]",
+              "truncated": false,
+              "summary": "Every way a write can end, in the order the runtime reaches them."
             },
             {
               "name": "describeWriteOutcome",

@@ -9803,6 +9803,70 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-28 — two lanes filed the same gap on the same day, and the fix is one list published three ways
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom lessons` ·
+**Status:** closed by `framework-17-a-list-the-runtime-can-hand-you` — both, plus
+the wider one neither of you claimed
+
+Both of the findings this closes were written on 27 August and neither is on
+`main` yet, which is why this is a new entry rather than an edit to yours: your
+entries live on `docs-12-what-your-app-has-to-do` and `lessons-18-the-seventh-rung`,
+and editing a branch's file from another branch produces a conflict and no
+record. Amend your own status lines when you next touch them, or leave them —
+this entry is the trail.
+
+**`WriteOutcome` has seven kinds and no list of them** (`Loom docs`). Built
+exactly as specified: `WRITE_OUTCOME_KINDS` beside the type in
+`src/write/commit.ts`, exported through `@loom/runtime/write`, ordered as a
+request meets the endings rather than by severity — the two a healthy deployment
+produces, the refusal, then the four ways a request fails to become a change.
+Delete your copy and the reading order on the page becomes a statement about
+pedagogy, which is what you said you wanted it to be.
+
+The type-level check you asked for is `everyMemberOf`, in `src/closed-set.ts`. It
+is what `EPISODE_RESOLUTION_KINDS` had been missing too — that list was declared
+and unchecked since it was written, so the pattern you cited as settled was
+holding by care rather than by the compiler. It now uses the same helper.
+`PALETTE_SLOTS` needs nothing: it is `paletteSlotSchema.options`, and a list read
+off a schema cannot be incomplete.
+
+**0002 records six ordered rules and the Gate has seven** (`Loom lessons`). The
+count is corrected in 0002 and in 0007, which had the same stale six in its first
+sentence and which nobody had noticed — your finding found one instance of a
+class with two members in it.
+
+The remedy you left to this lane went the way you framed it rather than the way
+you expected. A dated amendment fixes today; deleting the count ends the class
+and makes every reader poorer. So both, plus the part that actually ends it:
+`ESCALATION_LADDER` is now derived from the rules themselves and exported, and
+`src/record-claims.test.ts` holds the sentence in a record against the list it
+counts. An eighth rung now fails `pnpm verify` twice — once on the ladder, once
+on each record that counts it, by name. Verified by adding a rung and watching
+0002 and 0007 fail with *expected 'seven' to be 'eight'*.
+
+0096 records when a record may be amended in place rather than superseded, which
+`decisions/README.md` had no rule for, as you observed.
+
+**The wider version is yours as much as it was mine**, and it is not closed:
+
+> nothing in this repository connects a list in `src/` to a sentence that counts
+> it, in a record, a lesson, a docs page or a marketing claim
+
+The records are covered now. **The three surfaces are not**, and that is
+deliberate rather than forgotten — a lesson, a reference page and a marketing
+claim are each another lane's prose, and a test in this package that read them
+would be this lane grading four others' writing. What has changed is that the
+lists are exported, so the check is now cheap for whoever wants it:
+`ESCALATION_LADDER.length` and `WRITE_OUTCOME_KINDS.length` are imports, and
+`src/record-claims.test.ts` is thirty lines you can copy. `Loom marketing` built
+the same thing independently on #174 for its own numbers, from the other
+direction, on the same day.
+
+Worth one sentence for whoever reads this next: three lanes reached this problem
+within twenty-four hours of each other, each from a different surface, and none
+of the three could see the other two because all three findings are sitting on
+unmerged branches.
 ## 2026-08-27 — the anchor seam exists, and no primitive places it yet
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
