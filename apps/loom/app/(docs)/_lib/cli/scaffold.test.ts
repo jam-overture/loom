@@ -72,7 +72,7 @@ describe("the session the page walks through", () => {
     const [init] = session.steps
 
     expect(init?.written).toEqual([
-      `${SCAFFOLD_DIRECTORY}/primitives/loom.page.ts`,
+      `${SCAFFOLD_DIRECTORY}/primitives/app.page.ts`,
       `${SCAFFOLD_DIRECTORY}/primitives/registry.ts`,
       `${SCAFFOLD_DIRECTORY}/primitives/registry.test.ts`,
     ])
@@ -98,13 +98,13 @@ describe("the session the page walks through", () => {
 
     const imported = [...registry.matchAll(/from "\.\/(.+)\.js"/g)].map((match) => match[1])
 
-    expect(imported).toEqual([`${ADDED_PRIMITIVE_TYPE}`, "loom.page"])
+    expect(imported).toEqual(["app.page", `${ADDED_PRIMITIVE_TYPE}`])
   })
 
   /** The `loom.editable` paragraph is about a line that is really in the file. */
   it("writes a starter that spreads the edit-mode contract", async () => {
     const session = await scaffoldSession()
-    const starter = session.files.get(`${SCAFFOLD_DIRECTORY}/primitives/loom.page.ts`) ?? ""
+    const starter = session.files.get(`${SCAFFOLD_DIRECTORY}/primitives/app.page.ts`) ?? ""
 
     expect(starter).toContain("...loom.editable")
   })
@@ -135,7 +135,7 @@ describe("the refusals the page tabulates", () => {
    */
   it("reads every refusal the CLI can produce, once each", () => {
     expect([...REFUSAL_ORDER].sort()).toEqual([...new Set(REFUSAL_ORDER)].sort())
-    expect(REFUSAL_ORDER).toHaveLength(8)
+    expect(REFUSAL_ORDER).toHaveLength(9)
   })
 
   /**
@@ -206,19 +206,4 @@ describe("the claims the page makes about the runtime", () => {
     expect(audit).toHaveProperty("throwsOnDeclaredProps")
   })
 
-  /**
-   * The callout warning that the scaffolded starter collides with the starter
-   * library's own `loom.page`. Both halves are checked, because the callout is
-   * only worth printing while both remain true.
-   */
-  it("scaffolds a type the starter library already registers", async () => {
-    const built = createStarterPrimitiveRegistry()
-
-    if (!built.ok) throw new Error(describeRegistryError(built.error))
-
-    const session = await scaffoldSession()
-
-    expect(built.value.primitives.map((primitive) => primitive.type)).toContain("loom.page")
-    expect([...session.files.keys()]).toContain(`${SCAFFOLD_DIRECTORY}/primitives/loom.page.ts`)
-  })
 })

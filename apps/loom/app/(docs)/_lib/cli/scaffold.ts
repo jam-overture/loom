@@ -156,7 +156,7 @@ type RefusalSpec = {
 }
 
 const REGISTRY_PATH = `${SCAFFOLD_DIRECTORY}/primitives/registry.ts`
-const STARTER_PATH = `${SCAFFOLD_DIRECTORY}/primitives/loom.page.ts`
+const STARTER_PATH = `${SCAFFOLD_DIRECTORY}/primitives/app.page.ts`
 
 /**
  * Every way the CLI says no, and the command that provokes it.
@@ -193,8 +193,13 @@ const REFUSAL_SPECS: Record<CliError["code"], RefusalSpec> = {
     protects:
       "A primitive really could be typed registry, and its module would land exactly where the generated registry lives.",
   },
+  "framework-namespace": {
+    argv: ["add", "primitive", "loom.card"],
+    protects:
+      "@loom/runtime registers the loom.* types itself, and a registry refuses two definitions of one type — so a primitive scaffolded there would be unreachable in the app that wrote it.",
+  },
   "already-registered": {
-    argv: ["add", "primitive", "loom.page"],
+    argv: ["add", "primitive", "app.page"],
     existing: [STARTER_PATH],
     protects: "Re-running the command over a primitive you have written would throw your definition away.",
   },
@@ -220,6 +225,7 @@ const REFUSAL_SPECS: Record<CliError["code"], RefusalSpec> = {
  */
 export const REFUSAL_ORDER: readonly CliError["code"][] = [
   "file-exists",
+  "framework-namespace",
   "already-registered",
   "reserved-primitive-type",
   "invalid-primitive-type",

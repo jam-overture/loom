@@ -1,4 +1,4 @@
-# 0096 — A record is amended in place when only the count moved
+# 0099 — A record is amended in place when only the count moved
 
 **Status:** Accepted
 **Date:** 2026-08-28

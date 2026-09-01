@@ -17,26 +17,38 @@
  * visitor has never heard. See `RESERVED_VOCABULARY`.
  */
 
+/**
+ * The four operations, named rather than counted to a literal.
+ *
+ * This is the whole vocabulary of structural change, so the page's "kinds of
+ * change there are" is `DELTA_OPERATIONS.length` and cannot drift from it. A
+ * fifth operation would move the number on the page by existing.
+ */
+export const DELTA_OPERATIONS = ["insert", "remove", "move", "configure"] as const
+
+/**
+ * A floor under the decision count, never the count itself.
+ *
+ * The literal was bumped by hand ten times in eleven days, by runs that had not
+ * caused it: writing a decision record in any lane left the marketing site red,
+ * so `pnpm verify` failed for all five surfaces until someone came and changed a
+ * digit. That is the 19 August finding, and it was still happening on the 27th.
+ *
+ * A floor removes the coupling. `facts.test.ts` asserts only that the records on
+ * disk are **at least** this many, so writing a record can never make this file
+ * wrong — it can only make the claim more conservative. Raise it deliberately,
+ * in round numbers, when the true count has moved well past it.
+ */
+export const DECISIONS_AT_LEAST = 100
+
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
-  primitives: "64",
-  /**
-   * Numbered records in `decisions/`, README excluded.
-   *
-   * **Bumped by hand for the tenth time**, and by the fourth consecutive
-   * marketing run to open by changing a digit it did not cause. `main` has been
-   * red on this one assertion since 27 August, which means it is red for all
-   * four surfaces. #174 deletes the literal — the two numbers the process
-   * already holds count themselves, and this one becomes a floor it cannot
-   * overstate — and it has been green, mergeable and unreviewed since the 27th.
-   * That branch is not stacked on and not duplicated here: a competing
-   * derivation in this file would make the pull request that fixes it properly
-   * un-mergeable, which is a worse outcome than a digit.
-   */
-  decisions: "102",
+  primitives: "70",
+  /** A floor, not a count. See `DECISIONS_AT_LEAST`. */
+  decisions: `${DECISIONS_AT_LEAST}+`,
   /** Delta operations. The whole vocabulary of structural change. */
-  operations: "4",
+  operations: String(DELTA_OPERATIONS.length),
 } as const
 
 /**
