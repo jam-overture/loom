@@ -19,7 +19,7 @@ const VARIANTS = {
 
 export const loomCard = definePrimitive({
   type: "loom.card",
-  description: "A block of related content, optionally outlined",
+  description: "A block of related content, optionally outlined.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>

@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 47 blocks, 68 primitives.**
+**Done — 47 blocks, 70 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -217,8 +217,25 @@ reason, and their absence was invisible from this document because this document
 counts Hermes blocks: the library could draw a pricing table and a timeline and a
 comparison band while being unable to write three bullet points.
 
+**Two more joined them on 31 August, and they are the first gap this document
+predicted rather than discovered.** Hermes sold a person; a page that sells a
+*product* has two bands it never needed — *how it works*, and *what it works
+with*. `loom.milestone-row` is the second, and neither of them is a new content
+model: it is the entries a `loom.milestone-list` runs down a rail, laid across
+as numbered steps, which is 0054 producing a container rather than a fourth set
+of words for a marker, a title and a sentence. `loom.orbit` is children circling
+a mark the primitive places, which is the claim a logo wall cannot make and the
+fourth general arranger. Neither has a row above, and the count below is
+unmoved by either — which is the point of the paragraph above.
+
+The same run gave `loom.section`, `loom.hero` and `loom.callout` an `anchor`, so
+a band can be linked to from the page it is on. Hermes never needed one: a
+profile was a single screen with an app shell above it. A marketing site is not,
+and until 31 August a Loom page could link to any document on the web except
+itself.
+
 Read the ledger below accordingly. **It is a measure of the port, not of the
-library**, and the gaps that have mattered most in the last three runs have all
+library**, and the gaps that have mattered most in the last four runs have all
 been outside it.
 
 ## Where this leaves the count

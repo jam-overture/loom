@@ -210,7 +210,9 @@ fails in. Answer them in the order printed.
 
 1. Give the three counting rules — insert, remove, move — and then the one
    sentence all three follow from. If you can give the rules and not the
-   sentence, you have the surface.
+   sentence, you have the surface. Then: a move is measured a second time, by two
+   other fields, under a *different* sentence. Name the fields and give that
+   sentence too, and say why the two sets of numbers must not be added together.
 2. `analyzeDelta` takes a tree and a delta. `assessStakes` takes an analysis and
    a policy. Neither takes both. Say what that symmetry buys a person reading a
    year of records, and name what it costs at runtime.
@@ -242,7 +244,10 @@ Four of the seven questions are that shape in different costumes, and they are
 deliberately not adjacent.
 
 1. Give the test for whether two axes are really two, then apply it to `stakes`
-   and `reversibility` and name the two `ChangeAnalysis` fields they both read.
+   and `reversibility` and name **every** `ChangeAnalysis` field they both read —
+   there are three, and one of them arrived after both axes already existed. Then
+   say what the fact that it could be added without touching either axis is
+   evidence for.
 2. A delta removes 2 nodes. Write down a policy under which its stakes are `low`
    and it is irreversible, and a second policy under which its stakes are
    `medium` and it is reversible. Actual field names and values.
@@ -275,9 +280,11 @@ system starts keeping records: **mistaking what was decided for what was true.**
 A verdict names one reason; several were true at the moment it was reached, and
 four of these questions are about the gap between those two things.
 
-1. Name the six Gate rules in order. Then name the pair that reads the same
+1. Name the seven Gate rules in order. Then name the pair that reads the same
    input, say where each sits, and say what that pair proves about how a rule's
-   position is chosen.
+   position is chosen. Then name the *other* pair — two rules that read different
+   inputs and sit next to each other because they share an argument — and give
+   that argument once, covering both.
 2. A change is irreversible *and* above its origin's ceiling. Give the reason
    recorded on the disposition. Then say what a count of that reason code across
    a month of records is actually a count of, and name the one thing that would
@@ -377,8 +384,12 @@ written notes let you skate over — you cannot silently mean the right thing.
 4. Somebody proposes a `GatePolicy` knob for how many repair attempts a refusal
    gets. Argue against it using only what is in Part II, then argue for it as
    strongly as you can, then say which argument would have to be answered first.
-5. Write the six Gate rules in order from memory. Beside each, write the
-   disposition kind it produces, and mark the two that read the same input.
+5. Write the seven Gate rules in order from memory. Beside each, write the
+   disposition kind it produces, and mark the two that read the same input. Then:
+   one of the seven was added a month after the other six, and the position it
+   was given is the only part of that change anyone had to argue about. Say which
+   rule, say what its position buys above and below, and name the one neighbour
+   the choice between them barely matters against.
 6. A change is applied at revision 7 and undone at revision 8. Say what the
    disposition on revision 8 can say, what it cannot, and which of Part II's
    separations is the reason.
@@ -698,6 +709,94 @@ dashboard.
 
 ---
 
+## Set U — two days after lesson 17
+
+Interleaved with 05, 07, 09, 10, 13 and 16, and built around the failure mode
+lesson 17 exists to name: **a number that is about something other than what it
+appears to be about.** Question 7 is a question you were asked once already and
+could not answer then.
+
+1. Three rules decide what a telemetry record contains, and a fourth governs all
+   three of them. State the fourth. Then say which of the other three could be
+   broken while leaving the damage visible, and which one would leave a hole
+   nobody could find afterwards.
+2. `failed` is deliberately not `rejected`. Give both reasons — one about what
+   the resulting number would measure, one about who could tell. Then name the
+   two other places lesson 17 keeps a count out of a denominator, and say what
+   all three have in common.
+3. A report over a live deployment says the model claimed 0.4 more than it
+   delivered. Give three states of the world that produce that number, only one
+   of which is about the model. Then the harder half: a segment that carries one
+   policy *name* can still be pooling two different gates. Say how that happens
+   and what in the report catches it.
+4. `append` writes the log entry and the snapshot in a single step; retention
+   refuses to forget half an episode. State the one rule both are instances of,
+   without naming either mechanism — then say what each would manufacture if it
+   broke. *(16)*
+5. A change is committed, the response returns, and the process dies before
+   anything else runs. Say what is in the revision log and what is in the
+   journal. Then name the decision that made that possible and give the argument
+   for it that is specific to where this runs. *(05, 10)*
+6. Lesson 07 separated measurement from judgment. Lesson 17 separated
+   measurement from control. Say what the two separations have in common, and
+   then say what is different about *who* each one is protecting — because it is
+   not the same party. *(07, 09)*
+7. Set Q asked what the whole of Part III is a bet on, what has to happen
+   afterwards for the bet to pay off, who has to do it, and what the system looks
+   like if nobody ever does. Answer it again now that you know. Then say whether
+   the answer reassures you, and be honest. *(11, 13)*
+8. Name the four facts 0007 required §6 to capture, and where each one comes
+   from. Then say which of the four could not have been added retroactively, and
+   state the general principle — the one that has nothing to do with Loom — in a
+   single sentence. *(09, 10)*
+
+Question 4 is the one to write in full sentences; it is the most transferable
+thing in the course. Question 7 is the point of the set.
+
+---
+
+## Set V — one week after Part IV
+
+Part IV ends at lesson 17, which is the end of the syllabus, so this is the last
+scheduled set and the counterpart to Sets E, M and Q. Do it **out loud**, and do
+not do it the same day as Set U. It reaches into all four parts on purpose:
+everything before this asked you to hold one part in your head, and the thing
+worth having at the end is the system.
+
+1. Trace one utterance from the moment somebody types it to a row in a
+   calibration report, naming every artefact that gets written down and every one
+   that is deliberately not. There are at least four of each, and the second list
+   is the one to be least satisfied with.
+2. Part IV is four lessons and one sentence: *the tree becomes pixels, only out
+   of a declared vocabulary, stored so it survives, and recorded so it can be
+   checked.* Say what each of the four is protecting — and for each, name the
+   Part I property it is protecting it *for*.
+3. This course rejected a two-valued answer at least six times in favour of a
+   third case. Name five of them, say what the third value is in each, and say
+   which one you would personally be most tempted to collapse — then say what
+   collapsing it would claim.
+4. Three times now, a mechanism has been forbidden from being able to produce its
+   own detector's signal. Name the three. Then say which of the three failures
+   would be hardest to notice from outside, and why.
+5. Name every value in this system that the log already determines and that is
+   stored a second time anyway. The list has one entry. Give the two-part rule
+   that admits it, and name two facts that fail each half. *(06, 16)*
+6. Lesson 01 said Loom exists because AI-written code produces change nobody can
+   review, gate, attribute or undo. Take the four words one at a time: name the
+   artefact that delivers each, and the lesson where it arrived. One of the four
+   is delivered by two artefacts that have to agree with each other — say which,
+   and what happens when they do not.
+7. The whole system is a bet that a person turns up. Name every place a person is
+   *required*, every place one is *offered* and may decline, and the one place a
+   person is deliberately not given a button at all. Then say what this system
+   becomes if nobody ever turns up — and whether that is a design flaw or the
+   design.
+
+Question 6 is the one that tells you whether the course worked. Question 7 is the
+one to still be thinking about tomorrow.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -732,3 +831,5 @@ renders this file rather than restating it.
 | R | 2 days after L14 | | |
 | S | 2 days after L15 | | |
 | T | 2 days after L16 | | |
+| U | 2 days after L17 | | |
+| V | 1 week after Part IV | | |

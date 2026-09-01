@@ -60,8 +60,13 @@ Running the exercises: put the snippet in `src/scratch.test.ts` and run
 pnpm vitest run src/scratch.test.ts
 ```
 
-That file is gitignored, so scribble freely. Every exercise in these lessons was
-executed before it was written down.
+That file is gitignored, so scribble freely.
+
+Every exercise in these lessons was executed before it was written down. That
+used to be a promise; it is now a build step. Each Try it section is compiled
+and run against `src/` whenever this course is built, so a lesson whose
+exercises have stopped working is a failing test naming the lesson — and the
+outputs shown at `/lessons` are that run's, not a transcript somebody typed up.
 
 ## The spaced review schedule
 
@@ -114,6 +119,15 @@ things this document asks you to do and cannot check:
   you gave them beforehand — which is what makes "which were you most
   confidently wrong about" a question with an answer rather than a memory of
   one.
+- **The exercises have already run, and you cannot see what they printed.**
+  Every fence in Try it that prints something takes a prediction first, one at a
+  time, and every transcript appears at once when the last one is committed —
+  because this section asks you to predict every output before running anything,
+  and revealing them one by one would make each prediction easier than the last.
+  What appears is the output of that code executed against `src/` when the page
+  was built. The paste-into-a-checkout route still works and is still worth it
+  if you want to change something and see what happens; what it is no longer for
+  is finding out what the printed answer was.
 
 **The markdown here stays the source.** The surface reads these files; a lesson
 is still written, reviewed and versioned as text in this directory. Reading it
@@ -172,9 +186,11 @@ tree. Everything else in the system follows from protecting that one property.
 | [14](14-rendering.md) | Rendering | The tree as a total, pure projection — and why "total" is not the same discipline as `Result`. |
 | [15](15-primitives-and-the-registry.md) | Primitives and the registry | What a primitive promises, who checks each half of it, and what the model is told it may build. |
 | [16](16-persistence.md) | Persistence | The log is the truth; the snapshot is a view you can rebuild — and the audit is what it costs to keep one. |
-| 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |
+| [17](17-telemetry.md) | Telemetry | How a self-graded confidence number eventually gets calibrated — and why the thing that measures it is not allowed to act on it. |
 
-Unlinked lessons are not written yet. They arrive as the routine reaches them.
+That is the syllabus, complete. What is left is the [review
+schedule](review-schedule.md), which is where seventeen separate ideas become one
+system you can hold at once.
 
 ## Pacing
 
