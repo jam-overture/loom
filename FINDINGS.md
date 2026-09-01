@@ -1180,7 +1180,7 @@ it contradicts a clause of `0053`, which is `Accepted`.
 [0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
 proposed the same thing on 19 August and has been `Proposed —
 ARCHITECTURAL, needs review` ever since;
-[0096](decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md) revises
+[0102](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md) revises
 its mechanism and is `Proposed` for the same reason. **Do not read this as
 shipped.** See the 27 August entry on 0069's rule for what changed and why it
 matters.
@@ -10344,7 +10344,7 @@ to try a backslash. The reason this was caught is that the four values were run
 through `new URL` instead of argued about — and the fix that follows is not a
 longer pattern but *not a pattern*: resolve the value and ask the parser whether
 the origin moved. That is
-[0096](decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md), and it
+[0102](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md), and it
 is `Proposed` for exactly the reason 0069 is — it contradicts the same `Accepted`
 clause of `0053`, and this lane does not get to decide that alone.
 
@@ -10362,7 +10362,7 @@ work around it.
 open — **conditional, and not yet actionable.** Do not delete anything on the
 strength of this entry.
 
-If [0096](decisions/0096-a-same-origin-path-is-decided-by-resolving-it.md) and
+If [0102](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md) and
 [0069](decisions/0069-a-root-relative-path-is-a-destination-a-tree-may-name.md)
 are accepted, `apps/loom/app/(marketing)/_lib/site.ts` — `siteOrigin()`, its
 callers and its test — becomes unnecessary: `href: "/pricing"` would be a value
@@ -12636,3 +12636,99 @@ already does — would make the class of failure impossible instead of legible.
 That is a change in that lane's route group and so is not made here.
 it is bound by, which is the rule that file states about itself.
 >>>>>>> origin/main
+
+---
+
+## 2026-09-01 — `main` went red three ways at once when the queue merged, and no single pull request could have seen any of them
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` (causes 1 and 2),
+`Loom marketing` (cause 3) · **Status:** closed for all three by
+`framework-21-a-clash-main-could-not-see`
+
+The twenty-seven-deep queue merged on 1 September. Every branch in it was green
+against the `main` it was cut from, and the result was red. Three independent
+causes, none of them anybody's mistake and none of them visible to CI:
+
+**1. Two records numbered `0096`, which [0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)
+had just made fatal.** `a-behaviour-publishes-a-value` (#212, merged first) and
+`a-same-origin-path-is-decided-by-resolving-it` (#173) both claimed it, and
+`0099-a-record-is-amended` still carried the heading `# 0096` from a rename that
+did not reach inside the file. `pnpm verify` died before a single test ran. The
+later claimant is now `0102` and its three citations were repointed. 0097 is
+right and this is not an argument against it — it is the first time it fired, and
+it fired correctly.
+
+**2. Five failures in `(docs)`, caused by my own #195.** The scaffold now writes
+`app.page` and adds a `framework-namespace` refusal.
+`(docs)/_lib/cli/scaffold.ts` types its refusal table as an exhaustive
+`Record<CliError["code"], RefusalSpec>` — deliberately, so that a new refusal is
+a type error in the documentation rather than a page that quietly describes eight
+of nine. **The design worked exactly as intended**; it simply fired on `main`
+rather than on a branch, because the two pull requests were written against
+different bases and merged in sequence.
+
+Repaired here: the table gained its ninth entry, `already-registered` is
+provoked with `app.page` (it was provoked with `loom.page`, which now returns a
+different code), `STARTER_PATH` and the MDX paths follow the rename, and the
+callout warning about the collision is **deleted** — it described something that
+can no longer happen, and a first-contact page stating something false is worse
+than the bug it was describing. The test that asserted the collision existed is
+inverted rather than removed: what a reader needs guaranteed is that this page
+and *Rendering a tree* combine into a registry that builds.
+
+**3. Six failures in `(marketing)`: #174 was half-lost.** Its `facts.test.ts`
+landed and its `copy.ts` did not — `#179`, the very next merge, carried an older
+copy of that file over the top, and the four merges after it (mine included)
+carried the reverted version forward. So the suite imported `DELTA_OPERATIONS`
+and `DECISIONS_AT_LEAST` from a module that no longer had them, and
+`FACTS.primitives` read `64` against 70. Restored from `ab4a7f2`, which is
+`Loom marketing`'s own committed work rather than anything reinvented here.
+
+**What this costs, and it is worth stating once.** Every one of these is a
+squash-merge of a branch cut from an older `main`. A lane's file is silently
+reverted by any later branch that also touched it, and a type or a test that
+binds two lanes together fails only once both halves are on one commit. Twelve
+failures and one fatal error is what twenty-seven of those in a row produces.
+Nothing here argues for merging less; it argues that the first run after a large
+merge should expect to be a repair run, which this one was.
+
+---
+
+## 2026-09-01 — lesson 09's preamble does not import what exercise G uses, and the runner executes fences rather than instructions
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:** open
+— **`main` is still red on this one test.** Diagnosed, not taken: both fixes are
+pedagogical choices rather than repairs.
+
+`app/(lessons)/_lib/run.test.ts > runs the exercises in lesson 9` fails with
+`ReferenceError: formTree is not defined`. It is the one failure left on `main`
+after `framework-21`.
+
+The cause is two merged pull requests that are each correct alone. #176 wrote
+exercise G against a `formTree` fixture; #184 added the runner that executes a
+lesson's code fences **as one program**. Between them sits a sentence:
+
+> `lessons/09-the-gate.md:806` — Add `formTree` to the preamble's fixtures import
+> — `import { formTree, sampleTree } from "./testing/fixtures.js"` — and
+> everything else here is the preamble's.
+
+That is an instruction **to the reader**, and the preamble fence at line 524 still
+reads `import { sampleTree } from "./testing/fixtures.js"`. A human following the
+lesson does the right thing; the runner does not, because a runner executes
+fences and not prose.
+
+**Two fixes, and choosing between them is this lane's call rather than mine:**
+
+| | |
+| --- | --- |
+| **A** — add `formTree` to the preamble fence at line 524 | one token, goes green immediately, and makes the instruction at 806 tell the reader to add something already there |
+| **B** — teach the runner that a fence may be amended by a later step | larger, keeps the exercise's pedagogy intact, and is the general answer if any other lesson does this |
+
+I did not take A. It is a change to what a lesson teaches, not a rename, and the
+sentence it falsifies is one somebody wrote on purpose — which is exactly the
+kind of edit a lane's own run should make. Recorded with the diagnosis complete
+so that run is short.
+
+**If nothing takes it, `main` stays red on one test for every lane.** That is the
+reason this is filed rather than left in a pull-request thread.
+

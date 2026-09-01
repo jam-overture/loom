@@ -39,14 +39,14 @@ true.
 
 Three files, and they are three different kinds of thing:
 
-`loom/primitives/loom.page.ts` is **a component of your own** — a real one, with
+`loom/primitives/app.page.ts` is **a component of your own** — a real one, with
 nothing in it yet. `registry.ts` is **the list of what AI may use**, and the CLI
 writes it rather than you. `registry.test.ts` is **a test**, and the rest of this
 page is largely about why the scaffold insists on giving you one.
 
 ## What a primitive looks like before you have written anything
 
-<ScaffoldedFile path="loom/primitives/loom.page.ts" />
+<ScaffoldedFile path="loom/primitives/app.page.ts" />
 
 That file is mostly a shape to fill in, and three parts of the shape are the
 whole contract between your code and the runtime.
@@ -67,14 +67,6 @@ element you return is how the portal finds this node on the rendered page.
 Leave it off and the primitive still renders, still validates, still passes
 every check you would think to run — and cannot be edited by anyone, with no
 error anywhere to say so.
-
-<Callout kind="note">
-  The starter file is typed `loom.page`, and so is a primitive in
-  [the starter library](/docs/building-with-loom/primitives). They are two
-  different components with one name, so registering both is refused rather than
-  resolved — `createPrimitiveRegistry` returns a `duplicate-primitive-type`
-  error and builds nothing. Rename yours, or delete it and use theirs.
-</Callout>
 
 ## The registry rewrites itself
 

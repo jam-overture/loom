@@ -65,7 +65,7 @@ describe("a terminal block", () => {
 
 describe("a scaffolded file", () => {
   it("prints the contents the run produced, byte for byte", async () => {
-    const path = `${SCAFFOLD_DIRECTORY}/primitives/loom.page.ts`
+    const path = `${SCAFFOLD_DIRECTORY}/primitives/app.page.ts`
     const session = await scaffoldSession()
 
     const { container } = render(await ScaffoldedFile({ path }))
