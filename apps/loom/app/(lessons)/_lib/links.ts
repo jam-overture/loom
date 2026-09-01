@@ -1,3 +1,4 @@
+import type { ReviewAnchor } from "./schedule"
 import { lesson } from "./syllabus"
 
 /**
@@ -34,3 +35,18 @@ export const lessonPointers = (numbers: readonly number[]): readonly LessonPoint
     .sort((a, b) => a - b)
     .map(lessonPointer)
     .filter((pointer): pointer is LessonPointer => pointer !== undefined)
+
+/**
+ * Where to check a review question: the lesson its set follows, plus every
+ * lesson the schedule marks that question as reaching back into. Interleaved
+ * sets reach into four or five, which is the point of them.
+ *
+ * One definition, because a question asked in its set and the same question
+ * asked again a week later must send the reader to the same places — and a
+ * correction that pointed somewhere else would be a different question.
+ */
+export const reviewPointers = (
+  anchor: ReviewAnchor,
+  refs: readonly number[]
+): readonly LessonPointer[] =>
+  lessonPointers([...(anchor.kind === "lesson" ? [anchor.lesson] : []), ...refs])

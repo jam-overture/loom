@@ -299,4 +299,46 @@ describe("EpisodeCard", () => {
     expect(unasked(container)).toContain("further back than this page reaches")
     expect(screen.queryByRole("link", { name: /^revision/ })).toBeNull()
   })
+
+  /**
+   * Found by looking at a scoped Activity rather than by any assertion: the id
+   * was printed once in the lead sentence, once on the strip's "The page", and
+   * again on every card — three cards, five printings of one fact.
+   */
+  it("names the page on every card when the screen could be about any page", () => {
+    const { container } = render(
+      <ul>
+        <EpisodeCard episode={episode()} />
+      </ul>
+    )
+
+    expect(unasked(container)).toContain(treeId)
+  })
+
+  it("stops repeating the page's name once the screen has already said it", () => {
+    const { container } = render(
+      <ul>
+        <EpisodeCard episode={episode()} scoped />
+      </ul>
+    )
+
+    expect(unasked(container)).not.toContain(treeId)
+    expect(cardDisclosure(container)?.textContent).toContain(treeId)
+  })
+
+  /**
+   * The repeat goes; the way to the page does not. Dropping the link outright
+   * would strand a reader on a screen full of changes to a page they cannot
+   * open, which is why this asserts the card is the *only* thing that changed.
+   */
+  it("keeps everything else it says when it stops naming the page", () => {
+    const { container } = render(
+      <ul>
+        <EpisodeCard episode={episode()} scoped />
+      </ul>
+    )
+
+    expect(unasked(container)).toContain("Loom made this change, and it is live on the page")
+    expect(screen.getByText("Done")).toBeTruthy()
+  })
 })

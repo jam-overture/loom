@@ -4,9 +4,12 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { calibrationOf, describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
 
+import { PageViews } from "@/app/(portal)/_components/page-views"
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { scopedLead } from "@/app/(portal)/_lib/page-views"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { storeIsDurable } from "@/app/(portal)/_lib/store"
 
@@ -112,21 +115,30 @@ const TrustPage = async ({
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="text-2xl tracking-tight">Can you trust the AI?</h1>
-          {scope?.success && (
-            <Link href="/portal/trust" className="text-xs">
-              All pages →
-            </Link>
-          )}
-        </div>
+        <h1 className="text-2xl tracking-tight">Can you trust the AI?</h1>
 
+        {/*
+         * This screen has read a `tree` parameter since it was written and
+         * nothing in the portal had ever linked to it, so the scoped view was
+         * reachable only by typing a URL — and when somebody did, the page
+         * said nothing about being scoped. Both halves are fixed by the same
+         * strip: it is what links here, and the sentence beside it is what says
+         * so on arrival.
+         */}
         <p className="text-ink-muted text-sm">
-          Every time the AI proposes a change it says how sure it is. This page checks those
-          claims against what actually happened, so you can tell whether &ldquo;I&rsquo;m
-          sure&rdquo; from this AI is worth anything on your project.
+          {scope?.success ? (
+            <PlainSentence line={scopedLead("trust", scope.data)} />
+          ) : (
+            <>
+              Every time the AI proposes a change it says how sure it is. This page checks those
+              claims against what actually happened, so you can tell whether &ldquo;I&rsquo;m
+              sure&rdquo; from this AI is worth anything on your project.
+            </>
+          )}
         </p>
       </header>
+
+      {scope?.success && <PageViews treeId={scope.data} current="trust" />}
 
       {nothingScored ? (
         <StateNotice
