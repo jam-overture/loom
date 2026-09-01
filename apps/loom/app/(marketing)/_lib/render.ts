@@ -8,8 +8,9 @@ import { runAsk, type AskRun } from "./adapt/run"
 import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
+import { theRulesPageTree } from "./pages/the-rules"
 import { siteRegistry, siteThemes } from "./registry"
-import { HOME, HOW_IT_WORKS, THE_RECORD, type SiteRoute } from "./site"
+import { HOME, HOW_IT_WORKS, THE_RECORD, THE_RULES, type SiteRoute } from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -36,6 +37,7 @@ export type PageBuilder = (context: SitePageContext) => LoomTree
 export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, PageBuilder>([
   [HOME.path, homePageTree],
   [HOW_IT_WORKS.path, howItWorksPageTree],
+  [THE_RULES.path, theRulesPageTree],
   [THE_RECORD.path, theRecordPageTree],
 ])
 

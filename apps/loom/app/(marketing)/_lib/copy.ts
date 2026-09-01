@@ -21,7 +21,18 @@
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
   primitives: "64",
-  /** Numbered records in `decisions/`, README excluded. */
+  /**
+   * Numbered records in `decisions/`, README excluded.
+   *
+   * **Seventh hand-edit in ten days, and `main` was red when this branch was
+   * cut** — a ninety-fifth record landed and `pnpm verify` has been failing on
+   * `main` since, which now blocks four surfaces rather than one. Bumped here
+   * because a branch may not be opened on red and this is the whole of the fix.
+   *
+   * It is not *the* fix. #174 deletes this literal and derives the number, and
+   * that branch is open and green. If it merges first, this line will not exist
+   * to conflict with; if this merges first, resolve in favour of #174.
+   */
   decisions: "100",
   /** Delta operations. The whole vocabulary of structural change. */
   operations: "4",
