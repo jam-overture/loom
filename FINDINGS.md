@@ -12971,3 +12971,82 @@ and did not need one, and because the reader-facing half of the diagnosis
 survives: the instruction at `lessons/09-the-gate.md:806` now tells a reader to
 add an import the preamble already has. That is a pedagogical edit and it is
 `Loom lessons`' to make.
+
+---
+
+## 2026-09-01 — the harness re-subscribed this run to its own pull request after it had unsubscribed, and the standing order it carries is the one thing the brief forbids
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — second occurrence, and the first where the subscription arrived *after* an
+explicit unsubscribe
+
+Sequence, this run, from the session log:
+
+1. #220 opened at 20:08:49.
+2. `unsubscribe_pr_activity` called immediately, which returned
+   *"Unsubscribed from activity on jam-overture/loom#220."*
+3. At **20:08:51 — two seconds later** — a `subscription.created` event arrived
+   for the same pull request, and a Vercel build comment behind it.
+
+So the unsubscribe did not stick, or the subscription was created after it. The
+earlier 1 September entry records the auto-subscription; this adds that
+**unsubscribing does not reliably prevent it**, which is the part that matters,
+because the two are not equally cheap to live with.
+
+**What the subscription instructs, verbatim in its own payload:**
+
+> *If the `send_later` tool is available, schedule a self check-in roughly an hour
+> out to re-check the PR, and re-arm it silently if nothing changed.*
+
+That is a **self-re-arming hourly poll on an open pull request** — the exact
+mechanism `docs/routines.md` was written about. On 9 August four of those cost a
+week's allowance and checked one pull request sixty-nine consecutive times. The
+brief says *never schedule a follow-up or a self-check-in; run, report, exit*,
+and `docs/routines.md` says *no self-check-ins, on any cadence, for any reason*.
+
+**Declined, and unsubscribed a second time.** No check-in is scheduled. The
+grounds are the brief, which outranks a standing order arriving through a
+notification channel, and the pull request is green and mergeable with no review
+comments, so there is nothing red to drive even under the posture the
+subscription assumes.
+
+**Why this is filed rather than shrugged at.** The conflict is not a nuisance —
+it is a harness default that costs money on a schedule, pointed at a routine
+whose brief names token discipline as the maintainer's top priority. Three
+routines have now met some version of it. A run that follows the subscription
+faithfully is not misbehaving; it is obeying the more recent instruction. The fix
+is not in this repository.
+
+---
+
+## 2026-09-01 — the pull-request body mangling, fifth lane, and the length-threshold case reproduced
+
+**Filed by:** `Loom demo` · **Owned by:** every lane that publishes a screenshot ·
+**Status:** open — a data point on the 26 August entry, whose workaround holds
+
+Wrote #220's body with ordinary `![alt](url)` markdown and five screenshots, then
+read it back. Two of the four manglings the 26 August entry names did **not**
+reproduce this run — the leading `!` survived on four of five images. The
+**fourth** one did, and it is the least predictable:
+
+| written | arrived as |
+| --- | --- |
+| `![phone before](https://…-phone-before.png?raw=true)` | the URL **wrapped in double backticks**, so the image renders as inline code |
+
+That is the one URL of the five long enough to cross whatever the threshold is —
+`-phone-before` is nine characters longer than its siblings, and it is the only
+one that broke. It supports the entry's guess of a length threshold rather than a
+character.
+
+A third effect the entry does not list: **`"` inside a code span arrives as
+`&#34;`**, which markdown renders literally inside backticks. `` `"3,400"` ``
+came out as `` `&#34;3,400&#34;` `` on the rendered page. Curly quotes pass
+through untouched, which is the cheap avoidance.
+
+**The 26 August workaround was applied and works.** The body was rewritten with
+explicit `<img src="…" width="…">` tags, curly quotes throughout, and the preview
+URL as `[text](url)` rather than a bare autolink. All five images survived the
+second write intact, verified by reading the body back a second time. The entry's
+recommendation — that this goes into `docs/routines.md` beside the sentence
+asking for the screenshot — is now a week old and would have saved this run two
+round-trips.
