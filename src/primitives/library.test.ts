@@ -190,8 +190,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(68)
+  it("registers as seventy primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(70)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -201,11 +201,13 @@ describe("the starter library", () => {
       "loom.grid",
       "loom.mosaic",
       "loom.marquee",
+      "loom.orbit",
       "loom.card",
       "loom.hero",
       "loom.feature-grid",
       "loom.feature",
       "loom.milestone-list",
+      "loom.milestone-row",
       "loom.milestone",
       "loom.stat-grid",
       "loom.stat",
@@ -864,6 +866,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(tablePage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
+      ...typesIn(explainerPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -3514,7 +3517,7 @@ describe("the prose vocabulary", () => {
     expect(aside).toContain("Before you start")
     expect(aside).not.toMatch(/<h[1-6]/)
     expect(aside).toContain("border-inline-start:3px solid var(--loom-accent)")
-    expect(propsOfType("loom.callout")).toEqual(["title", "tone"])
+    expect(propsOfType("loom.callout")).toEqual(["anchor", "title", "tone"])
   })
 
   it("places the marker in its gutter ahead of the content it introduces", () => {
@@ -5099,5 +5102,287 @@ describe("what you can book, and why you should be believed", () => {
      */
     expect(stylesheet).toContain(".loom-offering-action {\n  display: grid;\n  margin-block-start: auto;\n}")
     expect(render(bookablePage(EDITORIAL)).markup).toContain("align-items:stretch")
+  })
+})
+
+/**
+ * The two bands that explain rather than sell, and the anchor that lands a
+ * reader on either of them.
+ */
+const explainerPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const step = (props: JsonObject) => buildElement(idFactory, { type: "loom.milestone", props })
+
+  const steps = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "how-it-works", eyebrow: "How it works" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "Four steps from a request to a page")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.milestone-row",
+        props: {},
+        children: [
+          step({ marker: "01", title: "Ask", body: "A visitor says what they came for.", state: "done" }),
+          step({ marker: "02", title: "Propose", body: "The model answers in operations, never in code.", state: "done" }),
+          step({ marker: "03", title: "Gate", body: "Every operation is weighed before it lands.", state: "current" }),
+          step({ marker: "04", title: "Apply", body: "The page changes, and the change has an inverse.", state: "planned" }),
+        ],
+      }),
+    ],
+  })
+
+  const logo = (name: string) => buildElement(idFactory, { type: "loom.logo", props: { name } })
+
+  const worksWith = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "works-with", eyebrow: "Works with" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.orbit",
+        props: { rings: "two", direction: "anticlockwise" },
+        children: [
+          buildSlot(idFactory, "mark", [
+            buildElement(idFactory, {
+              type: "loom.icon",
+              props: { label: "Loom", shape: "circle", tone: "strong", size: "large" },
+              children: [buildText(idFactory, "◈")],
+            }),
+          ]),
+          logo("Postgres"),
+          logo("Vercel"),
+          logo("Next.js"),
+          logo("Anthropic"),
+          logo("Drizzle"),
+          logo("Supabase"),
+        ],
+      }),
+    ],
+  })
+
+  const caveat = buildElement(idFactory, {
+    type: "loom.callout",
+    props: { anchor: "the-caveat", title: "Before you start" },
+    children: [buildText(idFactory, "A gate you have not configured refuses everything, which is the safe direction.")],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [steps, worksWith, caveat],
+    }),
+    idFactory
+  )
+}
+
+describe("how it works, and what it works with", () => {
+  it("renders both bands with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(explainerPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Four steps from a request to a page")
+    expect(markup).toContain("The model answers in operations, never in code.")
+    expect([...markup.matchAll(/class="loom-milestone"/g)]).toHaveLength(4)
+    expect([...markup.matchAll(/class="loom-orbit-seat/g)]).toHaveLength(6)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(explainerPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(explainerPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(explainerPage(BOLD)).diagnostics).toEqual([])
+    expect(render(explainerPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("lays one child two ways, because its layout is in the stylesheet and not on it", () => {
+    /**
+     * The whole argument for a second container rather than a `loom.step`. An
+     * inline style beats a rule, so a milestone that set its own grid columns
+     * could only ever have been drawn down a rail — the arrangement would have
+     * been unreachable from every parent, and the reachable answer would have
+     * been a second child type rendering the same three fields.
+     *
+     * Asserted from both ends: the entry carries no layout of its own, and the
+     * stylesheet carries both arrangements of it.
+     */
+    const { markup } = render(explainerPage(EDITORIAL))
+    const { stylesheet, tree } = splitStylesheet(markup)
+    const entry = tree.slice(tree.indexOf('class="loom-milestone"'))
+
+    expect(entry.slice(0, entry.indexOf(">"))).not.toContain("grid-template-columns")
+    expect(stylesheet).toContain(".loom-milestone {\n  display: grid;\n  grid-template-columns: 5.5rem auto 1fr;")
+    expect(stylesheet).toContain(".loom-milestone-row > .loom-milestone {\n  flex: 1 1 14rem;\n  grid-template-columns: 1fr;")
+    expect(stylesheet).toContain(".loom-milestone-row > li:last-child .loom-rail-line")
+  })
+
+  it("keeps one vocabulary across the two arrangements, rather than two words for one thing", () => {
+    /**
+     * `rail: "none"` means the same thing on the row as on the list, and it is
+     * the *same class*: the rule is scoped to a library class rather than to
+     * the list, so the two containers cannot drift apart on what it means.
+     */
+    const idFactory = sequentialIdFactory()
+    const rowOf = (props: JsonObject): string =>
+      splitStylesheet(
+        render(
+          createTree(
+            buildElement(idFactory, {
+              type: "loom.milestone-row",
+              props,
+              children: [buildElement(idFactory, { type: "loom.milestone", props: { title: "One" } })],
+            }),
+            idFactory
+          )
+        ).markup
+      ).tree
+
+    expect(propsOfType("loom.milestone-row")).toEqual(propsOfType("loom.milestone-list"))
+    expect(rowOf({ rail: "none" })).toContain(LIBRARY_CLASS.railNone)
+    expect(rowOf({})).not.toContain(LIBRARY_CLASS.railNone)
+    expect(rowOf({ density: "tight" })).toContain("gap:var(--loom-spacing-4)")
+    expect(rowOf({ density: "loose" })).toContain("gap:var(--loom-spacing-6)")
+  })
+
+  it("seats each child by its angle, and leaves every radius to the stylesheet", () => {
+    /**
+     * The split this band turns on. An **angle** is a fact about one child
+     * among its siblings — the third of six — which no static rule can say, so
+     * it is computed per node. A **radius** is a fact about the arrangement, so
+     * it is in the stylesheet where a `@container` rule can open the inner ring
+     * out on a narrow band. If a radius were inline it would beat that rule,
+     * and the phone rendering would be the one the screenshots caught: half the
+     * marks drawn on top of the thing they circle.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    const seats = [
+      ...tree.matchAll(
+        new RegExp(`class="${LIBRARY_CLASS.orbitSeat}[^"]*" style="--loom-orbit-x:(-?[0-9.]+);--loom-orbit-y:(-?[0-9.]+)"`, "g")
+      ),
+    ]
+
+    expect(seats).toHaveLength(6)
+    /** The first seat is at twelve o'clock: no horizontal offset, a full radius up. */
+    expect(seats[0]?.slice(1, 3)).toEqual(["0.0000", "-1.0000"])
+    expect(new Set(seats.map((seat) => `${seat[1]}/${seat[2]}`)).size).toBe(6)
+    /** Alternating seats take the inner ring, which is all `rings: "two"` means. */
+    expect([...tree.matchAll(new RegExp(`${LIBRARY_CLASS.orbitSeat} ${LIBRARY_CLASS.orbitInner}`, "g"))]).toHaveLength(3)
+    expect(tree).not.toContain("--loom-orbit-radius")
+    expect(stylesheet).toContain("@container (max-width: 26rem) {\n  .loom-orbit-inner {\n    --loom-orbit-radius: 38%;\n  }")
+    /** Nothing about the motion is on an element either: the tree carries no duration at all. */
+    expect(tree).not.toContain("animation")
+  })
+
+  it("turns the ring one way and every mark on it the other, at one duration", () => {
+    /**
+     * A ring that rotates rotates everything on it, so the counter-rotation is
+     * what keeps a wordmark the right way up. The two have to run at the same
+     * rate — a mismatch is a logo tumbling slowly rather than staying upright —
+     * which is why they are one multiple written twice in one file rather than
+     * two numbers in two.
+     */
+    const { stylesheet } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    const duration = "calc(var(--loom-motion-slow) * 80)"
+
+    expect(stylesheet).toContain(`.loom-orbit-spinner {\n  position: absolute;\n  inset: 0;\n  animation: loom-orbit ${duration} linear infinite;`)
+    expect(stylesheet).toContain(`animation: loom-orbit ${duration} linear infinite reverse;`)
+    expect(stylesheet).toContain(".loom-orbit-reverse .loom-orbit-spinner {\n  animation-direction: reverse;\n}")
+    expect(stylesheet).toContain(".loom-orbit-spinner, .loom-orbit-item {\n    animation: none;\n  }")
+  })
+
+  it("holds still while the page is being edited, the way a marquee does", () => {
+    /**
+     * `loom.marquee`'s rule for a second primitive: a moving target is hostile
+     * to the one activity edit mode exists for, and `loom.editable` being
+     * present only in edit mode is the whole test.
+     */
+    expect(splitStylesheet(render(explainerPage(EDITORIAL), true).markup).tree).toContain(LIBRARY_CLASS.orbitStill)
+    expect(splitStylesheet(render(explainerPage(EDITORIAL)).markup).tree).not.toContain(LIBRARY_CLASS.orbitStill)
+  })
+
+  it("places the mark by its own middle, so it is not a sheet lying over the ring", () => {
+    /**
+     * The defect a full-inset overlay makes invisibly: the mark is centred in
+     * the band, so `inset: 0` with `place-items: center` draws it in the right
+     * place *and* covers every logo on the ring with a transparent box that
+     * eats the pointer. Asserted because both renderings look identical.
+     */
+    const { tree } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    const glyph = tree.indexOf("◈")
+    const mark = tree.slice(tree.lastIndexOf("<div", glyph - 200), glyph)
+
+    expect(tree).not.toMatch(/position:absolute;inset:0;display:grid;place-items:center/)
+    expect(mark).toContain("position:absolute;inset-inline-start:50%;inset-block-start:50%")
+    expect(mark).toContain("transform:translate(-50%, -50%)")
+  })
+
+  it("renders an id where a band was named, and only on the bands a menu points at", () => {
+    /**
+     * The 26 August finding: a Loom page could link to any document on the web
+     * except its own second screen, because nothing in the library rendered an
+     * `id`. It is three primitives rather than seventy for the reason 0014
+     * gives — a prop on every schema to serve the three things a table of
+     * contents lists is a cost, and a tree that needs to point at something
+     * finer wraps it in a section.
+     */
+    const { markup } = render(explainerPage(EDITORIAL))
+
+    expect(markup).toContain('id="how-it-works"')
+    expect(markup).toContain('id="works-with"')
+    expect(markup).toContain('id="the-caveat"')
+    expect(markup).toContain("scroll-margin-block-start:var(--loom-spacing-6)")
+
+    for (const type of ["loom.section", "loom.hero", "loom.callout"]) {
+      expect(propsOfType(type)).toContain("anchor")
+    }
+    for (const type of ["loom.card", "loom.milestone-row", "loom.orbit", "loom.stack"]) {
+      expect(propsOfType(type)).not.toContain("anchor")
+    }
+  })
+
+  it("refuses a fragment that is not one, rather than quietly rewriting it", () => {
+    /**
+     * An anchor is the one value in this library a model writes straight into
+     * the document as markup, so it is the one place to keep narrow: `id="my
+     * section"` is two attributes to a parser. A sanitiser would leave every
+     * link pointing at a name nobody wrote, so the seam reports it instead
+     * (0011) and the band renders without an id.
+     */
+    const idFactory = sequentialIdFactory()
+    const { markup, diagnostics } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { anchor: "How It Works" },
+          children: [buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, "Body")] })],
+        }),
+        idFactory
+      )
+    )
+
+    expect(diagnostics).toEqual([
+      {
+        code: "invalid-props",
+        nodeId: "n_3",
+        type: "loom.section",
+        issues: [{ path: "anchor", message: "an anchor is lower-case words joined by single hyphens" }],
+      },
+    ])
+    /**
+     * And the band does not render, which is worth asserting rather than
+     * assuming: the seam refuses a node whose props do not validate, so a
+     * mistyped anchor costs the whole section and not just its id. That is
+     * every prop's rule (0011) rather than something an anchor makes worse,
+     * and it is the reason the message says what a valid one looks like.
+     */
+    expect(markup).toBe("")
   })
 })

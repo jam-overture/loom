@@ -60,7 +60,7 @@ export const Prose = ({ text }: { readonly text: string }) => (
       index % 2 === 0 ? (
         part
       ) : (
-        <code key={`${index}-${part}`} className="font-mono text-[0.85em]">
+        <code key={`${index}-${part}`} className="code-chip font-mono">
           {part}
         </code>
       )
@@ -191,13 +191,18 @@ const Contents = ({ entry }: { readonly entry: ApiEntry }) => (
 
     {/*
      * Columns rather than a two-column grid: a list is read down, then across.
-     * The `block!` is load-bearing — `.prose ul` forces `display: flex`, and a
-     * flex container ignores `columns`, so the reset has to win the cascade.
+     * This carried a `block!` while `.prose ul` reached in here and forced
+     * `display: flex`, which a flex container would have made `columns`
+     * ignore. The barrier keeps that rule out now, so the list is a block
+     * because a `ul` is one.
      */}
-    <ul className="mt-3 block! sm:columns-2 sm:gap-x-8">
+    <ul className="mt-3 sm:columns-2 sm:gap-x-8">
       {entry.groups.map((group) => (
         <li key={group.module} className="flex items-baseline justify-between gap-3 py-0.5">
-          <a href={`#${apiGroupAnchor(group.module)}`} className="text-ink hover:text-ink-muted text-sm">
+          <a
+            href={`#${apiGroupAnchor(group.module)}`}
+            className="text-ink hover:text-ink-muted text-sm underline underline-offset-2"
+          >
             {group.title}
           </a>
           <span className="text-ink-faint shrink-0 font-mono text-xs">{group.symbols.length}</span>
@@ -256,13 +261,13 @@ const ProseFirst = ({
           New to this part of Loom? Start with the prose.
         </p>
 
-        {/* `.not-prose` is not a cascade barrier in this sheet, which is the
-            25 August finding: a bare `<ul>` here computes to `display: flex`,
-            `padding-left: 20px`, `list-style: disc`, measured in the browser.
-            `block!` is what lets the rows stack, `pl-0` removes the indent that
-            nothing asked for, and `list-none` is what stops a disc appearing on
-            the day one of these rows stops being a flex item. */}
-        <ul className="mt-3 block! list-none space-y-1 pl-0">
+        {/* `.not-prose` is a cascade barrier now, so this is a plain list
+            wearing Tailwind's preflight reset and nothing else. The `block!`
+            that used to be here was written against `.prose ul`'s
+            `display: flex`, on the belief that a utility class loses to it;
+            measured, a utility always wins — what leaked was every property
+            the component did not name. Neither is true inside the barrier. */}
+        <ul className="mt-3 space-y-1">
           {prose.pages.map((page) => (
             <li key={page.href} className="flex items-baseline justify-between gap-3">
               <Link
@@ -299,8 +304,8 @@ export const ApiEntryReference = ({
     <p className="text-ink-faint mt-6 text-sm">
       {apiSymbolCount(entry)} exports, in {entry.groups.length}{" "}
       {entry.groups.length === 1 ? "module" : "modules"}. Generated from{" "}
-      <code className="font-mono text-xs">{entry.types}</code>, which is the declaration file this
-      package publishes for <code className="font-mono text-xs">{entry.specifier}</code>.
+      <code className="code-chip font-mono text-xs">{entry.types}</code>, which is the declaration file this
+      package publishes for <code className="code-chip font-mono text-xs">{entry.specifier}</code>.
     </p>
 
     <ProseFirst entry={entry} prose={prose} />

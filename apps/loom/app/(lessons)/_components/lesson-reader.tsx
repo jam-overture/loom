@@ -50,7 +50,41 @@ export type PromptQuestion = {
 /** What has to have happened before a printed answer is on the screen. */
 export type AnswerGate =
   | { readonly kind: "attempted"; readonly slug: string; readonly count: number; readonly of: string }
-  | { readonly kind: "written"; readonly slug: string; readonly prompt: ReactNode }
+  | {
+      readonly kind: "written"
+      readonly slug: string
+      readonly count: number
+      /**
+       * The one thing to write, for a lesson with nothing runnable to predict
+       * against. Where the exercises do run, the predictions have already been
+       * taken one fence at a time and this gate only counts them.
+       */
+      readonly prompt: ReactNode | undefined
+    }
+
+/**
+ * A fence in Try it, and what it printed.
+ *
+ * The code is the lesson's own text and is always on the page. The transcript
+ * under it is this build's, and is held until every fence in the section has a
+ * prediction against it — which is what the lesson has always asked for in
+ * prose ("predict every output in writing before you run anything") and has
+ * never been able to check.
+ *
+ * `run` is absent for a fence that registers no test. A shared preamble of
+ * imports and helpers is part of the program and prints nothing, and asking a
+ * reader to predict its output would be asking a question with no answer.
+ */
+export type ExerciseUnit =
+  | { readonly kind: "prose"; readonly id: string; readonly node: ReactNode }
+  | {
+      readonly kind: "code"
+      readonly id: string
+      readonly node: ReactNode
+      readonly run:
+        | { readonly number: number; readonly prompt: ReactNode; readonly transcript: ReactNode }
+        | undefined
+    }
 
 export type LessonPart =
   | { readonly kind: "prose"; readonly id: string; readonly node: ReactNode }
@@ -87,6 +121,17 @@ export type LessonPart =
       readonly node: ReactNode
       readonly slug: string
       readonly questions: readonly PromptQuestion[]
+    }
+  | {
+      readonly kind: "exercises"
+      readonly id: string
+      readonly heading: ReactNode
+      readonly slug: string
+      readonly units: readonly ExerciseUnit[]
+      /** How many fences have something to predict, which is what the gate counts. */
+      readonly total: number
+      /** Set when the program did not run, in which case there is nothing to hold back. */
+      readonly failure: string | undefined
     }
 
 type LessonReaderProps = {
@@ -186,7 +231,7 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
     const open =
       gate.kind === "attempted"
         ? attempts(gate.slug).length >= gate.count
-        : written(gate.slug).length > 0
+        : written(gate.slug).length >= gate.count
 
     if (open) {
       return (
@@ -209,6 +254,14 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
               this is the same page it always was, with the order enforced.
             </p>
           </div>
+        ) : gate.prompt === undefined ? (
+          <div style={{ ...style.panel, ...style.column(2) }}>
+            <p style={style.note}>
+              Locked until every exercise above has a prediction against it. These answers explain
+              output you have already been shown, and read in the other order they explain output you
+              have not looked at yet — which is a paragraph you agree with rather than a correction.
+            </p>
+          </div>
         ) : (
           <Answer
             question={1}
@@ -221,6 +274,90 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
                 hold(gate.slug, { question: 1, confidence, answer }),
             }}
           />
+        )}
+      </section>
+    )
+  }
+
+  /**
+   * Try it, with the outputs where the outputs belong.
+   *
+   * Two things change against the paper version and neither of them is the
+   * words. The transcript is *here*, under the fence that produced it, instead
+   * of in a paragraph of the Answers section describing it — and it is held
+   * until every fence has been predicted against, so the reader who scrolls is
+   * not handed the result of the exercise they are about to attempt. The
+   * predictions are taken one fence at a time, in order, for the same reason
+   * Predict is: a rating given after the reader has seen the next fence's output
+   * is a rating about a different question.
+   */
+  const renderExercises = (part: Extract<LessonPart, { kind: "exercises" }>): ReactNode => {
+    const done = new Set(written(part.slug).map((each) => each.question))
+    const complete = done.size >= part.total
+    const next = part.units.find(
+      (unit) => unit.kind === "code" && unit.run !== undefined && !done.has(unit.run.number)
+    )
+
+    return (
+      <section key={part.id} style={style.column(4)}>
+        {part.heading}
+
+        {part.units.map((unit) => {
+          if (unit.kind === "prose" || unit.run === undefined) {
+            return <div key={unit.id}>{unit.node}</div>
+          }
+
+          const run = unit.run
+
+          return (
+            <div key={unit.id} style={style.column(3)}>
+              {unit.node}
+
+              {complete ? (
+                <div style={style.column(2)}>
+                  <p style={style.label}>What it printed — exercise {run.number}</p>
+                  {run.transcript}
+                </div>
+              ) : unit === next ? (
+                <Answer
+                  question={run.number}
+                  total={part.total}
+                  body={run.prompt}
+                  resolve={{
+                    kind: "hold",
+                    note: "Nothing is revealed by this. Every transcript on this page appears at once, when the last exercise has a prediction against it — because the lesson asks you to predict every output before running anything, and revealing them one at a time would make each prediction a little easier than the last.",
+                    onWrite: ({ confidence, answer }) =>
+                      hold(part.slug, { question: run.number, confidence, answer }),
+                  }}
+                />
+              ) : (
+                <p style={style.note}>
+                  Exercise {run.number} of {part.total} — predict the ones above it first.
+                </p>
+              )}
+            </div>
+          )
+        })}
+
+        {part.failure === undefined ? (
+          <div style={{ ...style.panel, ...style.column(2) }}>
+            <p style={style.label}>Where these outputs came from</p>
+            <p style={style.note}>
+              {complete
+                ? "Every transcript above was produced by compiling this section and running it against src/ when this page was built. It is not a record of what the code printed when the lesson was written — a lesson whose exercises stop running is a red test, and this page would be telling you so instead."
+                : "The exercises have already run. They were compiled and executed against src/ when this page was built, so what you are predicting against is this commit's behaviour and not a transcript somebody typed up. You still have to say what you think it is."}
+            </p>
+          </div>
+        ) : (
+          <div style={{ ...style.panel, ...style.column(2) }}>
+            <p style={style.label}>These exercises did not run</p>
+            <p style={style.note}>
+              This section no longer runs against `src/` in this build, so there is nothing to show
+              you and nothing to predict against. That is a defect in the course rather than in your
+              understanding of it, and it is worth knowing before you spend twenty minutes on the
+              paste-and-run version. The error was: {part.failure}
+            </p>
+          </div>
         )}
       </section>
     )
@@ -317,6 +454,8 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
             return renderRun(part)
           case "answers":
             return renderAnswers(part)
+          case "exercises":
+            return renderExercises(part)
           case "reflect":
             return renderReflect(part)
         }

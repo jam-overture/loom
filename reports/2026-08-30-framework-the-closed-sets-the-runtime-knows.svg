@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 620" width="920" height="620" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="620" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">A union answers &#8220;which one&#8221;. Nothing answered &#8220;how many&#8221;.</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">A <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">switch</tspan> over a closed set is exhaustive at compile time. Walking one had no answer, so four surfaces each kept a copy.</text>
+
+  <!-- ================= BEFORE ================= -->
+  <text x="40" y="118" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">BEFORE &#8212; EVERY CONSUMER KEEPS ITS OWN LIST</text>
+
+  <rect x="40" y="132" width="250" height="96" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">type TelemetryEvent =</text>
+  <text x="58" y="176" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">| { type: &#34;intent-received&#34; &#8230; }</text>
+  <text x="58" y="192" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#7a6f62">| &#8230; seventeen more</text>
+  <text x="58" y="216" font-size="11.5" fill="#5c5751">Exhaustive in a switch. Not enumerable.</text>
+
+  <path d="M 300 180 L 344 180" stroke="#c9bfb2" stroke-width="1.5" fill="none"/>
+  <path d="M 344 180 l -7 -4 v 8 z" fill="#c9bfb2"/>
+
+  <rect x="356" y="132" width="238" height="42" rx="8" fill="#fdf6f2" stroke="#eccfc0"/>
+  <text x="372" y="150" font-size="11.5" fill="#8a4b28">docs page</text>
+  <text x="372" y="166" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a8664a">telemetryEventSchema.options.length</text>
+
+  <rect x="356" y="182" width="238" height="42" rx="8" fill="#fdf6f2" stroke="#eccfc0"/>
+  <text x="372" y="200" font-size="11.5" fill="#8a4b28">a dashboard&#8217;s buckets</text>
+  <text x="372" y="216" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a8664a">its own array, in its own order</text>
+
+  <rect x="356" y="232" width="238" height="42" rx="8" fill="#fdf6f2" stroke="#eccfc0"/>
+  <text x="372" y="250" font-size="11.5" fill="#8a4b28">a &#167;6 conformance check</text>
+  <text x="372" y="266" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a8664a">a third copy, unwritten</text>
+
+  <text x="620" y="152" font-size="11.5" fill="#5c5751">Each copy is correct on the day</text>
+  <text x="620" y="169" font-size="11.5" fill="#5c5751">it is written, and nothing fails</text>
+  <text x="620" y="186" font-size="11.5" fill="#5c5751">when a nineteenth type lands.</text>
+  <text x="620" y="214" font-size="11.5" fill="#a8664a">A documentation site reading the</text>
+  <text x="620" y="231" font-size="11.5" fill="#a8664a">internal shape of a Zod schema</text>
+  <text x="620" y="248" font-size="11.5" fill="#a8664a">to count a Loom vocabulary.</text>
+
+  <line x1="40" y1="312" x2="880" y2="312" stroke="#ece7e0" stroke-width="1"/>
+
+  <!-- ================= AFTER ================= -->
+  <text x="40" y="352" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">AFTER &#8212; THE LIST SITS BESIDE THE TYPE, AND A TEST KEEPS IT COMPLETE</text>
+
+  <rect x="40" y="368" width="404" height="128" rx="10" fill="#f5f8fa" stroke="#d5e0e6"/>
+  <text x="58" y="394" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">TELEMETRY_EVENT_TYPES</text>
+  <text x="250" y="394" font-size="11" fill="#6b8494">18 &#183; lifecycle order</text>
+  <text x="58" y="418" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">TREE_OPERATIONS</text>
+  <text x="250" y="418" font-size="11" fill="#6b8494">4 &#183; the whole vocabulary of change</text>
+  <text x="58" y="442" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#15120e">COMPOSITION_OUTCOME_KINDS</text>
+  <text x="290" y="442" font-size="11" fill="#6b8494">5 &#183; how an ask ends</text>
+  <text x="58" y="472" font-size="11.5" fill="#5c5751">Beside the type it enumerates, exported from the surface</text>
+  <text x="58" y="488" font-size="11.5" fill="#5c5751">a host already imports.</text>
+
+  <path d="M 454 432 L 498 432" stroke="#c9bfb2" stroke-width="1.5" fill="none"/>
+  <path d="M 498 432 l -7 -4 v 8 z" fill="#c9bfb2"/>
+
+  <rect x="510" y="368" width="370" height="128" rx="10" fill="#f4f8f4" stroke="#cfe0cf"/>
+  <text x="528" y="394" font-size="12" font-weight="650" fill="#2f5b36">What keeps each one complete</text>
+  <text x="528" y="418" font-size="11.5" fill="#41684a">&#8226; two of them against their Zod schema &#8212; the boundary</text>
+  <text x="540" y="434" font-size="11.5" fill="#41684a">a record has to cross, so it cannot drift quietly</text>
+  <text x="528" y="456" font-size="11.5" fill="#41684a">&#8226; the third has no schema and never crosses one, so</text>
+  <text x="540" y="472" font-size="11.5" fill="#41684a">a <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">Record&#60;Kind, true&#62;</tspan> fails to <tspan font-style="italic">compile</tspan> instead</text>
+
+  <text x="40" y="544" font-size="12.5" fill="#5c5751">The fifth and sixth instances of one shape: <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">EPISODE_RESOLUTION_KINDS</tspan>, <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">UNJUDGED_REASONS</tspan>, <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">PALETTE_SLOTS</tspan> and</text>
+  <text x="40" y="562" font-size="12.5" fill="#5c5751"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">STAKE_ORDER</tspan> already argued it. The third instance of a hole is the one that says it is a class &#8212; so no record was written.</text>
+
+  <text x="40" y="594" font-size="11.5" fill="#8a8178">Loom daily build &#183; 30 August 2026 &#183; framework-21-the-closed-sets-the-runtime-knows</text>
+</svg>
