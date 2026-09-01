@@ -1,6 +1,7 @@
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 
+import { HOST_NAMESPACE } from "./namespace.js"
 import {
   CONFORMANCE_TEST_MODULE,
   conformanceTest,
@@ -31,6 +32,7 @@ export type CliError =
   | { readonly code: "unexpected-argument"; readonly given: string }
   | { readonly code: "invalid-primitive-type"; readonly type: string }
   | { readonly code: "reserved-primitive-type"; readonly type: string }
+  | { readonly code: "framework-namespace"; readonly type: string }
   | { readonly code: "already-registered"; readonly type: string }
   | { readonly code: "file-exists"; readonly path: string }
   | { readonly code: "filesystem-failed"; readonly path: string; readonly detail: string }
@@ -70,7 +72,16 @@ export const existingPrimitives = (paths: readonly string[]): readonly Primitive
     return primitiveTypeSchema.safeParse(type).success ? [namesFor(type)] : []
   })
 
-const STARTER_TYPE = "loom.page"
+/**
+ * The one primitive `init` writes, named in the host's namespace rather than the
+ * framework's.
+ *
+ * It was `loom.page` until 29 August, which is also the name of the starter
+ * primitive that mounts a theme — so a host who scaffolded a project and then
+ * built a registry the way *Rendering a tree* documents got
+ * `duplicate-primitive-type` and a name they had not chosen. See `namespace.ts`.
+ */
+const STARTER_TYPE = `${HOST_NAMESPACE}.page`
 
 const planInit = (directory: string, existing: readonly string[]): Result<WritePlan, CliError> => {
   const primitives = join(directory, PRIMITIVES_DIRECTORY)

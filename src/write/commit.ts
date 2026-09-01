@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import type { ProposalId } from "../ids.js"
 import { err, ok, type Result } from "../result.js"
 import type { Disposition } from "../runtime/disposition.js"
@@ -79,6 +80,33 @@ export type WriteOutcome =
   | { readonly kind: "not-written"; readonly error: StoreError }
   /** The proposal being confirmed is not in custody — answered already, or never held. */
   | { readonly kind: "not-answerable"; readonly error: HoldError }
+
+export type WriteOutcomeKind = WriteOutcome["kind"]
+
+/**
+ * Every way a write can end, in the order the runtime reaches them.
+ *
+ * A `switch` over an outcome is exhaustive without this and always was. What
+ * needs a list is everything that walks the endings instead of reacting to one:
+ * a page that tells a host what it has to handle, a dashboard that wants a
+ * bucket per ending to exist before the first request arrives, a conformance
+ * check written against the write path. Each of those otherwise keeps its own
+ * copy, and a copy is a list that is silently wrong the day an eighth ending
+ * lands.
+ *
+ * The order is the order a request meets them rather than an order of severity:
+ * the two endings a healthy deployment produces, then the refusal, then the four
+ * ways a request fails to become a change at all.
+ */
+export const WRITE_OUTCOME_KINDS: readonly WriteOutcomeKind[] = everyMemberOf<WriteOutcomeKind>()([
+  "committed",
+  "held",
+  "refused",
+  "not-interpreted",
+  "not-applicable",
+  "not-written",
+  "not-answerable",
+])
 
 export const describeWriteOutcome = (outcome: WriteOutcome): string => {
   switch (outcome.kind) {

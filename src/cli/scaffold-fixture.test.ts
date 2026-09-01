@@ -42,7 +42,7 @@ describe("the committed scaffold fixture", () => {
 
   it("covers every file init writes, so none goes unchecked", () => {
     expect(planned().map((file) => file.basename)).toEqual([
-      "loom.page.ts",
+      "app.page.ts",
       "registry.ts",
       "registry.test.ts",
     ])

@@ -1,12 +1,40 @@
 import type { Metadata } from "next"
 
-import { readAskId } from "@/app/(marketing)/_lib/adapt/asks"
+import { askById, readAskId } from "@/app/(marketing)/_lib/adapt/asks"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { pageMetadata } from "@/app/(marketing)/_lib/share"
 import { HOME, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = { title: HOME.title, description: HOME.description }
-
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+/**
+ * What this address unfurls as when somebody sends it to somebody else.
+ *
+ * A function rather than the constant it was, because the front door is not one
+ * page: `/?ask=problem&approve=1` is the front door with a band lifted under the
+ * headline, and the one thing this site can show that nothing else can is that
+ * the arrangement has an address. A card that showed the published page for both
+ * would be silent at exactly the moment the claim is being made.
+ *
+ * The rules are run to draw it, so the verdict on the card is the verdict on the
+ * page rather than a description of one — but not here. `generateMetadata` only
+ * writes the address of the picture; the run happens once, inside the route that
+ * answers it, and only if somebody actually asks for the image.
+ */
+export const generateMetadata = async ({
+  searchParams,
+}: {
+  readonly searchParams: SearchParams
+}): Promise<Metadata> => {
+  const params = await searchParams
+  const ask = askById(readAskId(params["ask"]))
+
+  return pageMetadata(HOME, {
+    origin: siteOrigin(),
+    theme: readThemeName(params["theme"]),
+    ...(ask === undefined ? {} : { ask, approve: params["approve"] === "1" }),
+  })
+}
 
 /**
  * The landing page: one tree, rendered.

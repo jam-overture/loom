@@ -4,6 +4,7 @@ import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageHeadings } from "./headings"
 import type { SearchEntry, SearchIndex } from "./model"
+import { readPageProse } from "./prose"
 
 /**
  * The index, assembled from what the site already knows.
@@ -15,7 +16,9 @@ import type { SearchEntry, SearchIndex } from "./model"
  * from the runtime's own declaration files. So a page that is renamed, a
  * heading that is rewritten and an export that is removed all change what is
  * findable **in the same commit that changes the thing**, with nobody
- * remembering to update a list.
+ * remembering to update a list. The prose is read the same way, off the same
+ * pages, so a paragraph that is rewritten is searchable in its new words and
+ * unsearchable in its old ones from that commit onward.
  *
  * Built on the server and served as one static file. `build.test.ts` holds the
  * result against the site — every href it offers is a page that exists, every
@@ -23,15 +26,45 @@ import type { SearchEntry, SearchIndex } from "./model"
  * people to a 404 is worse than no search box.
  */
 
+/**
+ * The prose of every written page, read once and keyed by page.
+ *
+ * Read here rather than inside each list below, because two of them want the
+ * same thirteen files and reading a page twice to ask two questions about it is
+ * the kind of thing that is free today and is not at fifty pages.
+ */
+const proseByHref = new Map(
+  writtenDocsSections.flatMap((section) =>
+    section.pages.map(
+      (page) => [docsHref(section.slug, page.slug), readPageProse(section.slug, page.slug)] as const
+    )
+  )
+)
+
+/** The prose under one anchor of one page, or nothing where a generated page has none. */
+const bodyAt = (href: string, anchor: string): string => proseByHref.get(href)?.get(anchor) ?? ""
+
+/**
+ * A page, carrying the paragraphs above its first heading.
+ *
+ * That is the page's own introduction, and it belongs to the page for the same
+ * reason the rest belongs to a heading: it is the part a reader would be
+ * scrolled to. A generated page has no file to read and so has none.
+ */
 const pageEntries = (): readonly SearchEntry[] =>
   docsSections.flatMap((section) =>
-    section.pages.map((page) => ({
-      href: docsHref(section.slug, page.slug),
-      title: page.heading ?? page.title,
-      context: section.title,
-      kind: "page" as const,
-      summary: page.summary,
-    }))
+    section.pages.map((page) => {
+      const href = docsHref(section.slug, page.slug)
+
+      return {
+        href,
+        title: page.heading ?? page.title,
+        context: section.title,
+        kind: "page" as const,
+        summary: page.summary,
+        body: bodyAt(href, ""),
+      }
+    })
   )
 
 /**
@@ -50,6 +83,7 @@ const headingEntries = (): readonly SearchEntry[] =>
         context: page.title,
         kind: "heading" as const,
         summary: "",
+        body: bodyAt(docsHref(section.slug, page.slug), heading.anchor),
       }))
     )
   )
@@ -75,6 +109,7 @@ const exportEntries = (): readonly SearchEntry[] =>
         context: entry.specifier,
         kind: "export" as const,
         summary: "",
+        body: "",
       }))
     )
   )

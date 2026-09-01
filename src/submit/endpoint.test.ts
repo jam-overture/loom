@@ -80,6 +80,48 @@ describe("defineEndpoint", () => {
     }
   })
 
+  /**
+   * The one a leading-slash check accepts and should not.
+   *
+   * `//evil.example` is scheme-relative and `/\evil.example` is the backslash
+   * spelling browsers normalise to it — both begin with `/`, both resolve to
+   * another origin, and both look like paths. A form action is where a
+   * visitor's typed data is sent, so this is the composition mistake worth
+   * failing over rather than the one worth a comment.
+   */
+  it("refuses a path-shaped action that resolves to another origin", async () => {
+    for (const action of [
+      "//evil.example/collect",
+      "/\\evil.example/collect",
+      "//evil.example",
+      "/\\\\evil.example",
+    ]) {
+      const resolved = await answering("contact.enquiry", { action, method: "post" }).resolve(
+        undefined
+      )
+
+      expect(resolved.ok, action).toBe(false)
+      if (resolved.ok) continue
+
+      expect(resolved.error.reason).toBe("invalid-target")
+    }
+  })
+
+  /**
+   * The guard is about crossing an origin silently, not about crossing one. A
+   * host that means to post somewhere else says so with a full URL, and the
+   * test above and this one are the two halves of that rule.
+   */
+  it("still accepts an ordinary same-origin path", async () => {
+    for (const action of ["/contact", "/api/contact", "/a//b", "/"]) {
+      const resolved = await answering("contact.enquiry", { action, method: "post" }).resolve(
+        undefined
+      )
+
+      expect(resolved.ok, action).toBe(true)
+    }
+  })
+
   it("refuses a method that is not one HTML forms have", async () => {
     const resolved = await answering("contact.enquiry", {
       action: "/api/contact",

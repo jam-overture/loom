@@ -53,17 +53,39 @@ export type SubmissionTarget = {
 }
 
 /**
- * An action is either a root-relative path or an absolute `http(s)` URL.
+ * A path that stays on this origin, as distinct from one that merely starts
+ * with a slash.
+ *
+ * `//host` is scheme-relative: it begins with `/` and reaches another origin
+ * entirely, so a check for a leading slash accepts it. `/\host` is the same
+ * thing with a backslash, which browsers normalise to `//host` when resolving —
+ * `new URL("/\\evil.example", "https://site.example")` is `https://evil.example/`.
+ *
+ * Both are refused here. A form action is where a visitor's typed data is sent,
+ * so a target that quietly leaves the origin is the most costly version of the
+ * composition mistake this schema exists to catch, and the one least likely to
+ * be noticed in review: it looks like a path.
+ */
+const isSameOriginPath = (value: string): boolean =>
+  value.startsWith("/") && value[1] !== "/" && value[1] !== "\\"
+
+/**
+ * An action is either a same-origin path or an absolute `http(s)` URL.
  *
  * The host wrote it, so this is not the check `linkUrlSchema` makes about
  * AI-authored URLs — it is the check that a host's own composition mistake does
- * not become a live `javascript:` form action, and that an empty string does not
- * silently mean "post to this page". A relative path with no leading `/` is
- * refused for the same reason: it resolves against whatever route the form
- * happens to be rendered on, which is not a decision anybody made.
+ * not become a live `javascript:` form action, that an empty string does not
+ * silently mean "post to this page", and that a path-shaped action does not post
+ * off the origin. A relative path with no leading `/` is refused for a related
+ * reason: it resolves against whatever route the form happens to be rendered on,
+ * which is not a decision anybody made.
+ *
+ * Leaving the origin is still allowed — but only by saying so, as a full
+ * `https://` URL. The rule is that crossing an origin is explicit, not that it
+ * is forbidden.
  */
 const actionSchema = z.string().superRefine((value, context) => {
-  if (value.startsWith("/")) return
+  if (isSameOriginPath(value)) return
 
   const parsed = ((): URL | undefined => {
     try {
@@ -76,7 +98,7 @@ const actionSchema = z.string().superRefine((value, context) => {
   if (!parsed || !["http:", "https:"].includes(parsed.protocol)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "must be a root-relative path or an absolute http(s) URL",
+      message: "must be a same-origin path or an absolute http(s) URL",
     })
   }
 })

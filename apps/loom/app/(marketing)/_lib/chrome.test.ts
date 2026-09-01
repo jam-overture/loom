@@ -81,15 +81,53 @@ describe("the header", () => {
     expect(ofType(slot(header(), "actions") as LoomNode, "loom.link")).toHaveLength(0)
   })
 
-  it("offers every page of this site, and the surfaces a visitor can read without an account", () => {
+  it("offers every page of this site, and the surfaces the bar is meant to carry", () => {
     const hrefs = hrefsIn(header())
 
     for (const route of SITE_ROUTES) {
       expect(hrefs).toContain(internalHref(ORIGIN, route.path, DEFAULT_THEME))
     }
 
-    for (const surface of PRODUCT_SURFACES.filter((one) => !one.guarded)) {
+    for (const surface of PRODUCT_SURFACES.filter((one) => one.inMenu)) {
       expect(hrefs).toContain(surfaceHref(ORIGIN, surface))
+    }
+  })
+
+  /**
+   * The bar was *every unguarded surface* until 28 August, and this pair is what
+   * replaced that with a decision.
+   *
+   * The old rule was a permission answering a question about attention, and it
+   * grew the bar by one every time another lane shipped a front door — eight
+   * items by the time the maintainer asked on #166 whether that was too many.
+   * `inMenu` in `site.ts` carries the choice now, with the reasoning beside it.
+   *
+   * Two assertions rather than one, and the second is the one that matters. A
+   * surface kept out of the bar must still be reachable, and the footer's map is
+   * where it is reachable from — so *not in the menu* is held to mean exactly
+   * that and never *not on the page*. Without it, `inMenu: false` would be a
+   * quiet way to delete a surface from the site.
+   *
+   * The **menu** rather than the whole bar, because the portal is `inMenu:
+   * false` and is nonetheless in the header — as the action, under the word a
+   * stranger recognises. That is the distinction the flag is drawing, so a check
+   * that could not see it would be checking the wrong thing.
+   */
+  it("leaves a surface out of the menu only by that decision, never by accident", () => {
+    const menu = ofType(header(), "loom.link").flatMap((item) =>
+      typeof item.props["href"] === "string" ? [item.props["href"]] : []
+    )
+
+    for (const surface of PRODUCT_SURFACES) {
+      expect(menu.includes(surfaceHref(ORIGIN, surface))).toBe(surface.inMenu)
+    }
+  })
+
+  it("still reaches every surface it left out, from the foot of the page", () => {
+    const foot = hrefsIn(footer())
+
+    for (const surface of PRODUCT_SURFACES.filter((one) => !one.inMenu)) {
+      expect(foot).toContain(surfaceHref(ORIGIN, surface))
     }
   })
 
@@ -109,7 +147,7 @@ describe("the header", () => {
   })
 
   it("marks the page the reader is on, and keeps it in the menu", () => {
-    const open = PRODUCT_SURFACES.filter((surface) => !surface.guarded).length
+    const carried = PRODUCT_SURFACES.filter((surface) => surface.inMenu).length
 
     for (const route of SITE_ROUTES) {
       const menu = ofType(header(route), "loom.link")
@@ -118,7 +156,7 @@ describe("the header", () => {
       expect(marked).toHaveLength(1)
       expect(labelOf(marked[0] as LoomNode)).toBe(route.label)
       /** The menu is the same length on every page: marked, never dropped. */
-      expect(menu).toHaveLength(SITE_ROUTES.length + open)
+      expect(menu).toHaveLength(SITE_ROUTES.length + carried)
     }
   })
 

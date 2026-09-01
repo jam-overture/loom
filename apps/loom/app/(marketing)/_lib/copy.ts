@@ -20,7 +20,7 @@
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
-  primitives: "68",
+  primitives: "64",
   /**
    * Numbered records in `decisions/`, README excluded.
    *
@@ -34,7 +34,7 @@ export const FACTS = {
    * derivation in this file would make the pull request that fixes it properly
    * un-mergeable, which is a worse outcome than a digit.
    */
-  decisions: "95",
+  decisions: "102",
   /** Delta operations. The whole vocabulary of structural change. */
   operations: "4",
 } as const

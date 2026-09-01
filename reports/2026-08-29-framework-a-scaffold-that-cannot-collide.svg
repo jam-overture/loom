@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" width="900" height="460" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <rect width="900" height="460" fill="#fbfbfa"/>
+
+  <text x="40" y="42" font-size="17" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="600" fill="#191817">Three pages of Getting started, followed in order</text>
+  <text x="40" y="64" font-size="13" font-family="ui-sans-serif, system-ui, sans-serif" fill="#6b6864">Installation → Scaffolding a project → Rendering a tree. Combine what each one hands you.</text>
+
+  <!-- BEFORE -->
+  <rect x="40" y="90" width="390" height="330" rx="8" fill="#ffffff" stroke="#e4e1dc"/>
+  <rect x="40" y="90" width="390" height="34" rx="8" fill="#f4f1ec"/>
+  <rect x="40" y="112" width="390" height="12" fill="#f4f1ec"/>
+  <text x="58" y="112" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="600" fill="#7a6a52">BEFORE — every host, at first contact</text>
+
+  <text x="58" y="154" font-size="12.5" fill="#6b6864">$ <tspan fill="#191817">loom init</tspan></text>
+  <text x="58" y="178" font-size="12.5" fill="#8a8580">wrote primitives/<tspan fill="#b03a2e" font-weight="600">loom.page</tspan>.ts</text>
+
+  <line x1="58" y1="198" x2="412" y2="198" stroke="#eeebe6"/>
+
+  <text x="58" y="224" font-size="12.5" fill="#6b6864">createStarterPrimitiveRegistry([<tspan fill="#191817">loomPage</tspan>])</text>
+
+  <text x="58" y="256" font-size="12.5" fill="#8a8580">@loom/runtime registers</text>
+  <text x="58" y="276" font-size="12.5" fill="#b03a2e" font-weight="600">loom.page</text>
+  <text x="132" y="276" font-size="12.5" fill="#8a8580">— the primitive that mounts a theme</text>
+
+  <rect x="58" y="300" width="354" height="52" rx="6" fill="#fdf2f0" stroke="#f0d3cd"/>
+  <text x="74" y="322" font-size="12.5" fill="#b03a2e" font-weight="600">duplicate-primitive-type</text>
+  <text x="74" y="341" font-size="12" fill="#8a5a52">the registry cannot be built at all</text>
+
+  <text x="58" y="382" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif" fill="#6b6864">Two different components. One name.</text>
+  <text x="58" y="401" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif" fill="#6b6864">Neither of them chosen by the reader.</text>
+
+  <!-- AFTER -->
+  <rect x="470" y="90" width="390" height="330" rx="8" fill="#ffffff" stroke="#e4e1dc"/>
+  <rect x="470" y="90" width="390" height="34" rx="8" fill="#eef3ee"/>
+  <rect x="470" y="112" width="390" height="12" fill="#eef3ee"/>
+  <text x="488" y="112" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="600" fill="#41684a">AFTER — 0096</text>
+
+  <text x="488" y="154" font-size="12.5" fill="#6b6864">$ <tspan fill="#191817">loom init</tspan></text>
+  <text x="488" y="178" font-size="12.5" fill="#8a8580">wrote primitives/<tspan fill="#2f6b3d" font-weight="600">app.page</tspan>.ts</text>
+
+  <line x1="488" y1="198" x2="842" y2="198" stroke="#eeebe6"/>
+
+  <text x="488" y="224" font-size="12.5" fill="#6b6864">createStarterPrimitiveRegistry([<tspan fill="#191817">appPage</tspan>])</text>
+
+  <rect x="488" y="244" width="354" height="40" rx="6" fill="#f1f6f1" stroke="#d3e2d5"/>
+  <text x="504" y="269" font-size="12.5" fill="#2f6b3d" font-weight="600">accepted — 68 + 1 primitives</text>
+
+  <line x1="488" y1="304" x2="842" y2="304" stroke="#eeebe6"/>
+
+  <text x="488" y="330" font-size="12.5" fill="#6b6864">$ <tspan fill="#191817">loom add primitive loom.card</tspan></text>
+  <text x="488" y="354" font-size="12" fill="#8a5a52">"loom.card" is in the framework's namespace</text>
+  <text x="488" y="373" font-size="12" fill="#8a5a52">— Try <tspan fill="#2f6b3d" font-weight="600">"app.card"</tspan></text>
+
+  <text x="488" y="403" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif" fill="#6b6864">A namespace, not a list of taken names.</text>
+
+  <text x="40" y="448" font-size="11.5" font-family="ui-sans-serif, system-ui, sans-serif" fill="#8a8580">starter-collision.test.ts holds the two halves together: every type the starter library registers is one the CLI refuses.</text>
+</svg>

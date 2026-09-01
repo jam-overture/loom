@@ -7,6 +7,7 @@ import type { JsonObject, JsonObjectView } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { SubmissionOutcome } from "../submit/resolution.js"
 
+import type { AnchorAttributes } from "./anchor.js"
 import type { BehaviourName, PrimitiveBehaviours } from "./behaviour.js"
 import type { DecorativeChildren } from "./decorative.js"
 import type { EditableAttributes } from "./editable.js"
@@ -36,6 +37,22 @@ export type LoomRenderContext<
    * but becomes invisible to the portal.
    */
   readonly editable?: EditableAttributes
+  /**
+   * The `id` this node answers to, so a link on the same page can point at it.
+   *
+   * Present only when the tree named an anchor that is usable and that no
+   * earlier node claimed; absent otherwise, including inside a decorative copy,
+   * which carries no identity. Spread onto the primitive's own root element,
+   * beside `editable` — a primitive that drops it renders correctly and cannot
+   * be linked to.
+   *
+   * There is nothing here to distinguish "the tree named none" from "the tree
+   * named one and it was refused", which every other seam on this context takes
+   * care to keep apart. The difference is real and it is in the diagnostics; it
+   * is not here because a primitive would do the same thing with both, and a
+   * shape that offers a choice nobody can act on invites one to be invented.
+   */
+  readonly anchor?: AnchorAttributes
   /**
    * The tree's theme, flattened into CSS custom properties. Present on the
    * **root node only**, and only when the tree names a theme the render could

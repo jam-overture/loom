@@ -6,6 +6,7 @@
  */
 
 export * from "./addressing.js"
+export * from "./anchor.js"
 /**
  * The `behaviour-*.js` controls are deliberately not re-exported. A behaviour's
  * implementation is reached by declaring it and reading `loom.behaviours`, and
