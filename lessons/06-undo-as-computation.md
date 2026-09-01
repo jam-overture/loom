@@ -250,12 +250,13 @@ import { describe, it } from "vitest"
 import { sequentialIdFactory, type NodeId } from "./ids.js"
 import { sampleTree } from "./testing/fixtures.js"
 import { applyDelta } from "./tree/apply.js"
-import { buildText } from "./tree/builders.js"
+import { buildElement, buildText } from "./tree/builders.js"
 import { configurationOf } from "./tree/configuration.js"
 import type { TreeDelta, TreeOperation } from "./tree/delta.js"
 import { describeTreeError } from "./tree/errors.js"
 import { invertDelta, invertOperation, invertOperations } from "./tree/inverse.js"
 import { findNode, walkTree } from "./tree/navigation.js"
+import { childrenOf } from "./tree/node.js"
 
 const spare = sequentialIdFactory("x")
 
@@ -391,9 +392,6 @@ describe("B2", () => {
   })
 })
 ```
-
-`buildElement` and `childrenOf` come from `./tree/builders.js` and
-`./tree/node.js`.
 
 **C — configure, which is the one people get wrong.** The card's props are
 `{ variant: "outlined", elevation: 1 }`. Write the inverse out in full before

@@ -7,6 +7,7 @@ import { answerNote } from "./answer"
 import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
+import { askedLine } from "./undo"
 
 /**
  * The demo, end to end, with nothing stubbed but the browser.
@@ -280,6 +281,55 @@ describe("undo", () => {
     expect(record?.stakes?.factors.map((factor) => factor.code)).toContain("discards-later-work")
     /** Nothing was written: the page is still where the second change left it. */
     expect((await headOf(session)).revision).toBe(2)
+  })
+
+  /**
+   * The demo's third press, end to end, and the two things the surface says
+   * about it.
+   *
+   * A visitor presses the leading ask, is held, allows it, and then presses the
+   * one control the payoff card offers. What they get is *another hold* — the
+   * undo of a restructure is a restructure — so the page does not move and the
+   * caution under the button is describing the ordinary case rather than an
+   * edge one. If a policy retune ever let this through, the caution would be
+   * hedging about something that cannot happen and would be worth removing.
+   *
+   * And the record it produces is the one `askedLine` substitutes for, which is
+   * the property that rots: `undo.test.ts` holds the substitution against a
+   * fixture, and a `revertRevision` that stopped stamping its own interpreter
+   * would leave that passing while the card went back to quoting
+   * `Undo revision 1.` at a stranger.
+   */
+  it("is held on the demo's leading ask, and hands the rail an undo it can name", async () => {
+    const session = await sessionFor("undo-of-the-lead")
+    const held = await ask(session, DEMO_LEADING_PRESET)
+    const proposalId = held.heldProposalId
+    if (!proposalId) throw new Error("the leading preset was not held")
+
+    const allowing = beginDemoWrite(session)
+    await confirmHeld(allowing.path, {
+      proposalId: proposalIdSchema.parse(proposalId),
+      actor: "a demo visitor",
+    })
+
+    const write = beginDemoWrite(session)
+    const outcome = await revertRevision(write.path, {
+      treeId: session.seed.treeId,
+      revision: 1,
+      seed: session.seed,
+      origin: "user-instruction",
+      actor: "a demo visitor",
+    })
+
+    expect(outcome.kind).toBe("held")
+    /** The press moved nothing, which is exactly what the caution promises. */
+    expect((await headOf(session)).revision).toBe(1)
+
+    const record = recordFromEvents(write.narrated())
+    if (!record) throw new Error("the runtime narrated nothing")
+
+    expect(record.utterance).toBe("Undo revision 1.")
+    expect(askedLine(record)).toEqual({ plain: "Put it back.", technical: "Undo revision 1." })
   })
 })
 

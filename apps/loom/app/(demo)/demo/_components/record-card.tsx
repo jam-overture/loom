@@ -9,6 +9,7 @@ import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 import { answerNote } from "@/app/(demo)/_lib/answer"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
+import { askedLine, UNDO_CAUTION, UNDO_LABEL } from "@/app/(demo)/_lib/undo"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
@@ -67,6 +68,7 @@ export const RecordCard = ({
   const report = answerReport ?? undoReport
   const outcome = demoState(stateOfRecord(record.outcome))
   const answered = answerNote(record)
+  const asked = askedLine(record)
 
   return (
     /*
@@ -92,8 +94,14 @@ export const RecordCard = ({
           * What was asked, in the words it was asked in. It leads because it is
           * the one line on the card a visitor wrote themselves, or pressed — the
           * anchor everything below is an answer to.
+          *
+          * Which is why an undo is quoted as *“Put it back.”* and not as
+          * `Undo revision 1.`: the second is a true sentence about the log and
+          * a sentence no visitor said, in the one position on the card reserved
+          * for the words they recognise. `_lib/undo.ts` owns the substitution
+          * and the runtime's utterance is under the disclosure, unaltered.
           */}
-        <p className="text-md">“{record.utterance}”</p>
+        <p className="text-md">“{asked.plain}”</p>
 
         {/*
           * The state in a sentence, under the badge that names it. "Refused" is
@@ -177,16 +185,29 @@ export const RecordCard = ({
         </div>
       )}
 
+      {/*
+        * The undo, and — the part that was missing — what pressing it will
+        * actually do.
+        *
+        * An undo is a change of its own (0032), so this one is gated like any
+        * other and this one is held: the page does not move, and a second card
+        * appears asking the visitor to allow it. Correct, and for the two
+        * seconds before they find that card it reads as a button that did
+        * nothing. It is the same defect `AskPanel` fixed one control earlier,
+        * with the same fix — say it before the press, in one line, under the
+        * control it is about.
+        */}
       {record.revision && !undoReport && (
-        <form action={undo}>
+        <form action={undo} className="flex flex-col gap-1.5">
           <input type="hidden" name="revision" value={record.revision.produced} />
           <button
             type="submit"
             disabled={undoing}
             className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover w-full rounded-md border px-3 py-1.5 text-xs transition-colors disabled:opacity-60"
           >
-            {undoing ? "Undoing…" : "Put it back"}
+            {undoing ? "Undoing…" : UNDO_LABEL}
           </button>
+          <p className="text-ink-muted text-2xs">{UNDO_CAUTION}</p>
         </form>
       )}
 
@@ -195,6 +216,14 @@ export const RecordCard = ({
       <TechnicalDetail summary="Show the full record">
         {record.interpretation && (
           <Section title="the proposal">
+            {/*
+              * The intent's own utterance, and only when the card is not
+              * already quoting it. On an undo that is `Undo revision 1.` — the
+              * runtime's sentence, whole, where the technical half of this
+              * surface goes. On every other card it would be the line three
+              * inches above, said twice.
+              */}
+            {asked.technical && <Row label="asked">{asked.technical}</Row>}
             <p className="text-ink-secondary text-2xs italic">{record.interpretation.rationale}</p>
             <Row label="interpreter">{record.interpretation.interpreter}</Row>
             <Row label="authored by">{record.interpretation.authoredBy}</Row>
