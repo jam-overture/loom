@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { REVERT_INTERPRETER } from "@loom/runtime/write"
+
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
+import { UNDO_CAUTION } from "@/app/(demo)/_lib/undo"
 
 import { RecordCard } from "./record-card"
 
@@ -85,6 +88,26 @@ const ANSWERED: ChangeRecord = (({ heldProposalId: _answered, ...rest }) => ({
   answeredBy: "a demo visitor",
 }))(HELD)
 
+/**
+ * The card the third press produces: an undo, whose utterance the runtime
+ * synthesised out of the revision number it was given (`revertRevision`).
+ */
+const UNDONE: ChangeRecord = {
+  ...ASKED,
+  recordId: "i_3",
+  outcome: "awaiting-you",
+  utterance: "Undo revision 1.",
+  interpretation: {
+    rationale: "the inverse of revision 1, node for node",
+    interpreter: REVERT_INTERPRETER,
+    authoredBy: "runtime",
+    confidence: 1,
+    interpretedAt: "2026-08-12T09:00:00.000Z",
+    operations: ["insert element into n_1 at 3"],
+  },
+  heldProposalId: "p_11",
+}
+
 describe("a record card", () => {
   it("shows the ask, the rationale and the provenance of the proposal", () => {
     render(<RecordCard record={APPLIED} />)
@@ -118,6 +141,59 @@ describe("a record card", () => {
 
     expect(screen.getByText(/1, replacing 0/)).toBeTruthy()
     expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+  })
+
+  /**
+   * The undo is gated like any other change (0032), so pressing it can move
+   * nothing at all until a second question is answered. A visitor who has not
+   * been told that has pressed the one control on the payoff card and watched
+   * it do nothing.
+   */
+  it("says the undo may wait for an answer, next to the undo", () => {
+    const { container } = render(<RecordCard record={APPLIED} />)
+
+    const caution = screen.getByText(new RegExp(UNDO_CAUTION.slice(0, 40)))
+
+    expect(caution).toBeTruthy()
+    expect(container.querySelector("details")?.contains(caution)).toBe(false)
+    expect(screen.getByRole("button", { name: "Put it back" }).closest("form")?.contains(caution)).toBe(
+      true
+    )
+  })
+
+  /**
+   * The reserved line at the top of a card is the one a visitor is meant to
+   * recognise as their own, and an undo's utterance is synthesised by the
+   * runtime out of a revision number. `revision` is on the list of words this
+   * surface may not put in front of a stranger before it has earned them
+   * (`what-happens.test.tsx`), and the third press of the demo put it in
+   * quotation marks at the top of a card.
+   */
+  it("quotes an undo as the button that produced it, not as the runtime's revision number", () => {
+    const { container } = render(<RecordCard record={UNDONE} />)
+
+    const quoted = screen.getByText(/“Put it back\.”/)
+
+    expect(container.querySelector("details")?.contains(quoted)).toBe(false)
+    expect(quoted.textContent).not.toContain("revision")
+  })
+
+  /** And nothing is removed: the runtime's sentence is one click down. */
+  it("keeps the undo's own utterance under the disclosure", () => {
+    const { container } = render(<RecordCard record={UNDONE} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText("Undo revision 1."))).toBe(true)
+  })
+
+  /** An ordinary ask is quoted once, not once in the light and again below. */
+  it("does not repeat an ordinary ask inside the record", () => {
+    render(<RecordCard record={APPLIED} />)
+
+    expect(screen.getAllByText(/Switch this page to the other palette/).length).toBe(1)
+    expect(screen.queryByText("asked")).toBeNull()
   })
 
   /**

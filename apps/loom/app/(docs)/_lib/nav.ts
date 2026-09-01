@@ -181,6 +181,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
       },
+      {
+        slug: "what-your-app-has-to-do",
+        title: "What your app has to do",
+        summary:
+          "The one function that writes, the seven ways a write can end, and what your own code owes a person for each of them.",
+      },
     ],
   },
   apiReferenceSection,

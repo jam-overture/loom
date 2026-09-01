@@ -127,10 +127,57 @@ describe("HeldProposalCard", () => {
     expect(screen.getByRole("button", { name: "No thanks" })).toBeTruthy()
   })
 
+  /**
+   * A reviewer decides on what a change would do, not on how it was judged. So
+   * the effect arrives before the two buttons, and the Gate's own record arrives
+   * after them — the fourth guard of this shape in the portal, and the one that
+   * would catch a later refactor moving the section for layout reasons.
+   */
+  it("says what the change would do before it offers the two buttons", () => {
+    const { container } = card()
+
+    const effect = Array.from(container.querySelectorAll("h4")).find((one) =>
+      one.textContent?.includes("What this would do to your page")
+    )
+    const apply = screen.getByRole("button", { name: "Apply this change" })
+
+    expect(effect).toBeTruthy()
+    expect(
+      (effect as Element).compareDocumentPosition(apply) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  /**
+   * Two disclosures, two subjects: what the change says, and how the Gate judged
+   * it. `TechnicalDetail`'s own note says a screen with two must name which is
+   * which rather than making a reader open both to find out.
+   */
+  it("names both disclosures, and opens neither", () => {
+    const { container } = card()
+    const disclosures = Array.from(container.querySelectorAll("details"))
+
+    expect(disclosures.map((one) => one.querySelector("summary")?.textContent?.trim())).toEqual([
+      "What the change record says",
+      "How Loom decided this",
+    ])
+    expect(disclosures.every((one) => one.open)).toBe(false)
+  })
+
+  /**
+   * The card carries two disclosures and they are about different subjects: how
+   * the Gate judged the change, and what the change itself says. Selected by
+   * name rather than by position, because "the first `details`" stopped being
+   * this one the moment the effect grew a record of its own.
+   */
+  const decisionRecord = (container: HTMLElement): HTMLDetailsElement | undefined =>
+    Array.from(container.querySelectorAll("details")).find((one) =>
+      one.querySelector("summary")?.textContent?.includes("How Loom decided this")
+    )
+
   /** Nothing is removed. Every value the card used to lead with is still on it. */
   it("keeps the whole technical record, behind one disclosure", () => {
     const { container } = card()
-    const details = container.querySelector("details")
+    const details = decisionRecord(container)
 
     expect(details?.open).toBe(false)
     expect(details?.textContent).toContain("medium")
@@ -142,8 +189,7 @@ describe("HeldProposalCard", () => {
 
   it("puts the rule code nowhere a reader meets it unasked", () => {
     const { container } = card()
-    const details = container.querySelector("details")
-    details?.remove()
+    for (const details of Array.from(container.querySelectorAll("details"))) details.remove()
 
     expect(container.textContent).not.toContain("confidence-below-minimum")
   })
