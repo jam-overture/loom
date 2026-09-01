@@ -8749,8 +8749,13 @@ real, is populated, and has four consumers and one non-consumer.
 
 ## 2026-08-25 — "Put it back" does not put it back on the first press, and the frame beside it says it does
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a unit
-of its own, and the recommended next one
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-06-put-it-back-says-what-it-is`** — option 3 taken, as recommended. One
+line under the button (`UNDO_CAUTION`), and step three of `WhatHappens` no longer
+says *really*. The run also found the half this entry did not name: the card the
+press produces quotes `Undo revision 1.` at the visitor, and `revision` is on the
+list of words this surface's own test forbids in the frame. That is fixed in the
+same unit — see the 26 August entry below.
 
 Press the primary ask, answer it, then press **Put it back**. The page does not
 move. What appears is a second card: *"Undo revision 1." · Waiting on you · Loom
@@ -9047,6 +9052,83 @@ Two limits, stated so they are not discovered:
 
 ---
 
+## 2026-08-26 — the runtime's own sentence reached the one line on the card reserved for the visitor's
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-06-put-it-back-says-what-it-is` — recorded because the *shape* is the third
+instance of a pattern this lane keeps hitting, not because the fix is interesting
+
+The 25 August entry above named one half of the undo defect: the button promises
+the page will move and it does not. Driving the demo this morning found the other
+half, three pixels away and worse.
+
+Press the leading ask, allow it, press **Put it back**. The card that appears is
+headed:
+
+> *“Undo revision 1.”* · **Waiting on you**
+
+That is `revertRevision`'s synthesised utterance, and `src/write/revert.ts` is
+right to synthesise it — it says so: the utterance behind a revert *"is not a
+sentence someone typed, it is the revision number they named"*. True of the log.
+The demo then printed it in curly quotes, at `text-md`, in the position the card
+reserves for **the one line a visitor wrote themselves or pressed**.
+
+The measure of how wrong that is was already in this lane's own test suite.
+`what-happens.test.tsx` carries `NOT_YET_EARNED` — nine words the frame may not
+put in front of a stranger before the surface has earned them — and `revision` is
+the fifth of them. The frame is held to that by an assertion; the card three
+presses later led with the word, in quotation marks, attributed to the visitor.
+
+**The general shape, third instance.** 24 August: a policy ceiling two files from
+the button it silenced. 25 August: a field four surfaces print and this one
+carried unread. Today: a string the runtime is right to compose and this surface
+was wrong to quote. In none of the three was anything broken. What this lane
+keeps finding is not missing machinery — it is machinery arriving on the screen
+in a voice that belongs somewhere else.
+
+So the question to ask of any string this surface renders is not *is it true*
+but *whose sentence is it, and is this the place that sentence is spoken*. The
+answer here was: the runtime's, and no. `_lib/undo.ts` substitutes the words the
+visitor actually pressed and puts the runtime's own utterance one click down in
+the record, unaltered — the rule the whole rail is built to.
+
+---
+
+## 2026-08-26 — `21st.dev` re-verified blocked, from the demo lane a sixth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dating the 21 and 25 August entries rather than opening a third
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED` on the run of 26 August. The
+standing answer is on the 21 August entry and is not re-argued: the committed
+policy allows the domain for the tool and the proxy does not.
+
+The honest cost this run, again small: the unit is one line of caution under an
+existing button and one substituted string. What decided both was driving the
+built page in Chromium and reading the card as a stranger, which no gallery
+would have improved. Six runs of a named standard that has never once been
+reachable from a lane told to consult it.
+
+---
+
+## 2026-08-26 — the brief's opening instruction and `docs/rollout.md` are still five days stale
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — dating the 24 and 25 August entries, both unchanged and both still true
+
+Verified on `main` at `cc7f6c0`:
+
+- `docs/rollout.md:19` still says the demo is live at
+  `apps/loom/app/(portal)/portal/demo`. That path has been a 308 since 21 August.
+- The `Loom demo` brief still opens **"Two problems to fix before anything
+  else"**, the first being the move off `/portal/demo` — this lane's first unit,
+  landed 21 August.
+
+This is the **third consecutive run** of this lane opening by establishing that
+its headline instruction is already done. The count is the only new evidence and
+it is the reason for dating rather than dropping it: the cost is small per run
+and it is now certain to recur, because nothing in the repository can fix it.
+A routine cannot rewrite the brief it is bound by.
 ## 2026-08-26 — the Gate grew a seventh rule on 19 August and lesson 09 still says six
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:** open —
@@ -9579,6 +9661,76 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-27 — `main` is red: the marketing site's decision count is one behind, and every lane's PR is failing on it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom marketing` · **Status:** open —
+**blocking the merge gate for every surface**, one-line fix, not this lane's file
+to edit
+
+`pnpm verify` fails on `main` at `3a57feb`, and therefore on every branch merged
+up to it:
+
+```
+FAIL |node| app/(marketing)/_lib/facts.test.ts
+     > what the site says about the repository > counts the decision records
+AssertionError: expected '94' to be '95'
+  app/(marketing)/_lib/facts.test.ts:31
+    expect(FACTS.decisions).toBe(String(records.length))
+```
+
+**Reproduced on `origin/main` itself**, in a clean worktree, not only on the
+branch that found it: `decisions/` holds 95 records (excluding `README.md`) and
+`apps/loom/app/(marketing)/_lib/copy.ts:25` says `decisions: "94"`.
+
+**The proposed patch is one character.** `copy.ts:25`, `"94"` → `"95"`.
+
+It is not applied here because `apps/loom/app/(marketing)/` is `Loom marketing`'s
+route group and this is `Loom demo`. That is the rule this file exists to serve,
+and a red `main` is not a reason to break it — but it is a reason to say so
+loudly, which is what this entry is.
+
+### How it broke, and why it will break again
+
+Two records landed on 26 August:
+
+- **0094** (`a card's prose is a child when the card has a flow`) arrived with
+  #164, `Loom primitives`. That PR **also bumped `FACTS.decisions` to `94`** —
+  a `Loom marketing` file edited from the primitives lane.
+- **0095** (`a frame carries its url and the deployment carries the origins`)
+  arrived with #165, `Loom daily build`. That PR **did not** bump the counter.
+
+So the counter is only correct when the routine adding a record happens to also
+edit another lane's file, and it is wrong the moment one does not. #164 got it
+right by crossing a lane boundary; #165 stayed inside its lane and left `main`
+red. **Neither behaved badly.** The coupling is the defect.
+
+`facts.test.ts` is right and should not be weakened — its own comment is the
+reason it exists:
+
+> A marketing site claiming "37 primitives" is worth nothing if the number is
+> something someone typed once. […] When either grows, this fails and the page is
+> updated — which is the only way a number on a marketing page stays true.
+
+That reasoning holds. What it did not anticipate is **four routines writing
+decision records in parallel, none of whom own the page carrying the count.**
+`FACTS.primitives` does not have this problem: it is counted through
+`catalogueOf(siteRegistry)` at test time, so it cannot go stale — it is derived,
+not typed.
+
+**Recommended, for `Loom marketing` to decide:** derive `decisions` the way
+`primitives` is already derived, rather than typing it. The test already reads
+the directory; if the copy read it too — at build time, through a generated
+constant like `(docs)` does for its API reference — the number could not drift
+and no lane would ever have to reach into `(marketing)` to add a record. The
+one-character bump unblocks today; the derivation is what stops this recurring
+on record 96.
+
+Filed by the demo lane because its PR #170 is one of the four this is failing.
+It is not #170's failure: that branch's diff touches `(demo)` only, and the same
+test fails identically on `origin/main` with no branch in the picture.
 ---
 
 ## 2026-08-26 — the review queue was empty by construction on the one deployment anybody looks at
