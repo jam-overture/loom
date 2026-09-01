@@ -1,0 +1,162 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  CliUsage,
+  CommandRefusals,
+  DirectoryOption,
+  ScaffoldTranscript,
+  ScaffoldedFile,
+} from "@/app/(docs)/_components/scaffold"
+
+export const metadata = pageMetadata("getting-started", "scaffolding-a-project")
+
+# Scaffolding a project
+
+You have the package installed. What you do not have yet is anywhere to put the
+components AI is allowed to use on your pages — and that list, more than
+anything else you will write, is the thing that decides what Loom can and cannot
+do to your site.
+
+One command makes the place and puts three files in it.
+
+```bash
+loom init
+```
+
+<Callout kind="warning">
+  Pre-production alpha: the package is not on a public registry yet, so there is
+  no `npx` to run it with. From inside this repository the same command is
+  `pnpm loom init`.
+</Callout>
+
+Everything on this page is that command and its neighbours actually running.
+The paths, the closing lines, the file contents and the refusals below were all
+produced by the CLI as this page was built, so none of it can quietly stop being
+true.
+
+## One command, three files
+
+<ScaffoldTranscript command="loom init" />
+
+Three files, and they are three different kinds of thing:
+
+`loom/primitives/loom.page.ts` is **a component of your own** — a real one, with
+nothing in it yet. `registry.ts` is **the list of what AI may use**, and the CLI
+writes it rather than you. `registry.test.ts` is **a test**, and the rest of this
+page is largely about why the scaffold insists on giving you one.
+
+## What a primitive looks like before you have written anything
+
+<ScaffoldedFile path="loom/primitives/loom.page.ts" />
+
+That file is mostly a shape to fill in, and three parts of the shape are the
+whole contract between your code and the runtime.
+
+**`props` is the schema, and it is a fence.** A model proposing a change to your
+page may set the props declared here and nothing else. An empty `z.object({})`
+means a model may set nothing at all — which is a perfectly good place to start,
+because you can widen it later and narrowing it afterwards is the change that
+breaks pages.
+
+**`description` is read by a model, not just by you.** It is the one line the
+runtime shows when something has to choose between your primitives. A
+description that says *"Describe what commerce.product-card is for"* will be
+chosen by a model exactly as badly as that reads.
+
+**`loom.editable` is what makes the component reachable.** Spreading it onto the
+element you return is how the portal finds this node on the rendered page.
+Leave it off and the primitive still renders, still validates, still passes
+every check you would think to run — and cannot be edited by anyone, with no
+error anywhere to say so.
+
+<Callout kind="note">
+  The starter file is typed `loom.page`, and so is a primitive in
+  [the starter library](/docs/building-with-loom/primitives). They are two
+  different components with one name, so registering both is refused rather than
+  resolved — `createPrimitiveRegistry` returns a `duplicate-primitive-type`
+  error and builds nothing. Rename yours, or delete it and use theirs.
+</Callout>
+
+## The registry rewrites itself
+
+The second command declares another primitive.
+
+<ScaffoldTranscript command="loom add primitive commerce.product-card" />
+
+Notice what it says it did to the file it had already written: it **regenerated**
+it. The registry is not appended to. It is rebuilt from whatever `.ts` files are
+sitting in that directory, every time.
+
+<ScaffoldedFile path="loom/primitives/registry.ts" />
+
+Two consequences worth holding on to. **Do not edit that file** — the next
+`loom add primitive` will overwrite whatever you put there, which is why it says
+so at the top of itself. And **a primitive is registered by existing**: delete
+the module and run the command again, and the registration goes with it. There
+is no second list to keep in step.
+
+The filename is the type verbatim, dots included — `commerce.product-card.ts`,
+not `commerce-product-card.ts`. That is deliberate rather than untidy. The
+registry is rebuilt *from the filenames*, and folding a dot into a dash throws
+away the information needed to fold it back: nothing could tell whether
+`commerce-product-card` had been `commerce.product-card` or
+`commerce-product.card`.
+
+## The third file is the point
+
+The scaffold could have written two files and left you to test your own code.
+It writes three, because there is one failure in this system that reports
+nothing at all.
+
+A primitive that ignores `loom.editable` renders perfectly. Its schema is valid,
+its props typecheck, the page looks right, and no diagnostic anywhere mentions
+it. The only symptom is that when somebody tries to edit that part of the page,
+nothing happens — which they will discover long after you have moved on.
+
+The runtime can find it. `auditRegistry` walks a registry, renders each
+primitive with props built from its own schema, and reports what it saw. But it
+only **reports** — it never refuses a registry, and never stops a build. So it is
+worth nothing unless something runs it, and a host is far more likely to keep a
+test that was in the first commit than to add one later. That is the whole
+argument for the third file.
+
+<ScaffoldedFile path="loom/primitives/registry.test.ts" />
+
+Three checks, and they are not the same severity:
+
+**Not decorated** is the invisible failure above: registered, renders, cannot be
+edited. **Not probeable** is neither a pass nor a failure — a component that uses
+hooks cannot be called outside a renderer, so the audit declines to judge it
+rather than guessing. **Throws on declared props** is the one that takes a page
+down: a component that crashes on a value its own schema accepts can be crashed
+by a tree the validator was right to accept.
+
+## It refuses rather than half-writing
+
+Both commands decide everything they would write **before** they write anything,
+by reading what is already in the directory. So a command that would clash
+writes nothing at all, rather than leaving you half a scaffold to clean up.
+
+<CommandRefusals />
+
+Four of those are ordinary mistakes at the keyboard. The other four are the
+command protecting work you have already done, and the one worth reading twice
+is `registry`: it is a perfectly legal primitive type, and a module named for it
+would land exactly where the generated registry lives and erase it. There is no
+`--force`, on purpose — the recovery from a wrong `--force` here is retyping
+every registration you had.
+
+## Putting it somewhere else
+
+`--dir` is the only option, and it moves the whole directory.
+
+<DirectoryOption />
+
+## The whole surface
+
+Two commands and one option is all of it.
+
+<CliUsage />
+
+The CLI is scaffolding and stops there. It does not build trees, call a model,
+or know anything about a running page — everything after this point is library
+code you call yourself, starting with the next page.

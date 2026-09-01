@@ -3,9 +3,10 @@
 **After this lesson you will be able to** name the three outcomes and say why
 there is no fourth, explain what "first match wins" buys and what it costs a
 person reading a year of records, give the argument behind each ordering in the
-ladder that carries one, say why one rule exists that no stake level could
-replace, predict which reason a change trips when four rules are true at once,
-and say what makes a rung of the ladder unreachable.
+ladder that carries one, state in one sentence the argument that two of the
+rules share and that no stake level could replace, predict which reason a change
+trips when four rules are true at once, say what makes a rung of the ladder
+unreachable, and say what an executed walk of the ladder does not prove.
 
 **Prerequisites:** [01](01-why-a-runtime.md), [02](02-ui-as-data.md),
 [03](03-change-as-data.md), [04](04-identity.md),
@@ -57,10 +58,21 @@ In writing, before reading on.
 >    host sets the first one lower than the second. Write down what you think
 >    happens, and then write down whether the system should have let them save
 >    it.
+>
+> 4. A proposal changes one prop, on one node, and nothing else. Nothing is
+>    removed. It undoes cleanly. The interpreter is 99% sure, and a developer
+>    asked for it. The prop says which of the deployment's own registered
+>    endpoints a form posts to, and after the change it names a different one.
+>    The page looks identical. Write down what your system does with that change.
+>    Then, supposing you decide it should not go through without a person, write
+>    down which part of the design you reach for to make that happen — and be
+>    specific, because the whole question is *which* part.
 
 Question 1 is the one to spend real time on; the count you write down is the
 argument in *The problem*. Question 3 is the one this lesson ends on, and it is
-worth committing to an answer you would defend.
+worth committing to an answer you would defend. Question 4 is a change that was
+actually proposed against this runtime, and the second half of it is the one to
+write in full: name the mechanism you would use, not the outcome you want.
 
 ---
 
@@ -121,7 +133,7 @@ So the real question is not how to combine four inputs. It is:
 
 ## The idea
 
-> **The Gate is six rules in a fixed order, plus a default. The first rule that
+> **The Gate is seven rules in a fixed order, plus a default. The first rule that
 > fires produces the whole verdict, and each rule's position in the list is
 > itself a decision somebody made.**
 
@@ -173,7 +185,7 @@ return accept(assessment, policy)
 ```
 
 The loop holds no policy of its own. Everything the Gate believes is in the
-order of one array and in the six functions it names.
+order of one array and in the seven functions it names.
 
 ### The ladder, and which rungs carry an argument
 
@@ -199,20 +211,25 @@ Change B from lesson 08 — one prop, 99% confident, developer origin, sends an
 email — is auto-applied by any rule that consults the ceiling first.
 
 **4. `confirmDiscardsLaterWork`** — the assessment carries a
-`discards-later-work` stake factor. The rule with the sharpest argument of the
-six, and the subject of its own section below.
+`discards-later-work` stake factor.
 
-**5. `confirmAboveCeiling`** — stakes above `ceilingFor(policy, origin)`. The
+**5. `confirmRedirectedSubmission`** — the assessment carries a
+`redirected-submission` stake factor: a form that posted to one of the host's
+registered endpoints now posts to another. Rungs 4 and 5 share one argument,
+they are the two rules in the ladder that a stake level could not have been, and
+they are the subject of their own section below.
+
+**6. `confirmAboveCeiling`** — stakes above `ceilingFor(policy, origin)`. The
 only rule in the system that reads who asked.
 
-**6. `confirmBelowMinimumConfidence`** — confidence under `minimumConfidence`
+**7. `confirmBelowMinimumConfidence`** — confidence under `minimumConfidence`
 (default 0.7). Last, so that when something about the *change* is also true, the
 change gets the wording. "This removes your checkout" is a better thing to show
 a person than "the model was 60% sure".
 
 Then the default: `accept`, with reason `within-policy`.
 
-Now notice what rungs 1 and 6 have in common. **The same input — one number,
+Now notice what rungs 1 and 7 have in common. **The same input — one number,
 `provenance.confidence` — is read by the first rule and by the last, and they are
 as far apart as the ladder allows.** Position is not a property of which input a
 rule reads. It is a property of what the rule *concludes*, and the two confidence
@@ -230,7 +247,7 @@ from one change. Run it before reading on; the rest of this section is about one
 detail in its output that is easy to miss.
 
 The interpreter's confidence is 0.5 on rows 2 through 6. The policy's minimum is
-0.7. So rule 6 was *true on five consecutive rows*, and named on exactly one of
+0.7. So rule 7 was *true on five consecutive rows*, and named on exactly one of
 them.
 
 That is not a bug — it is the design working. But it has a consequence, and it
@@ -256,10 +273,12 @@ turns out to move the ordering problem into the host rather than solve it.
 But "tolerable" is not "free", and a course that told you the ladder had no cost
 would be lying to you about the most-used artefact in the system.
 
-### The rule a level could not have been
+### The rules a level could not have been
 
-Rung 4 is the one to understand properly, because it is the clearest case in
-Loom of a decision that a *value* cannot express and a *rule* can.
+Rungs 4 and 5 are the ones to understand properly, because between them they are
+the clearest case in Loom of a decision that a *value* cannot express and a
+*rule* can. Take rung 4 first; rung 5 is the same argument made a second time,
+which is what turns it from a special case into a shape.
 
 Discarding work already in the log produces a stake factor at level `high`
 (lesson 08). Suppose you stop there — no rule, just the factor — and let the
@@ -292,6 +311,103 @@ stakes, both from a developer, one accepted and one held. The difference is not
 in the level — the level is identical — it is in *which factor* produced it, and
 that is a distinction only a rule positioned above the ceiling can make.
 
+### The same argument, a second time
+
+Rung 5 is Predict 4. A `configure` moves one node's `loom:submit` from
+`newsletter.subscribe` to `contact.enquiry`. Both endpoints are ones the host
+registered on purpose, so nothing left the deployment and no address was
+authored — the seam that keeps addresses out of the tree is untouched, and it
+was never the thing at risk. What changed is that the next visitor's name, email
+address and message now arrive somewhere else, and nothing on the page says so.
+
+Run that through everything the last two lessons built and watch it come out
+clean. One prop, on one node: not a large removal, not a broad change, not
+structural. Reversible — set the prop back. Confident. And from a developer, so
+`high` sits at the ceiling rather than above it. The obvious instrument is
+`protectedPropKeys`, and it fails in three ways worth naming, because the shape
+of the right instrument falls out of them: it is opt-in, so the default is
+silence about the one prop nobody should be silent about; it fires on any touch
+of the key, so a form *acquiring* a destination is escalated identically to one
+being moved; and its sentence is *configures protected `loom:submit`*, which
+tells a reviewer that a key changed and not where anyone's data now goes.
+
+So `redirected-submission` is a factor of its own, and then the whole of rung 4's
+argument runs again without a word altered. Why not `critical`? Because
+`nested-target` — the factor that *is* `critical` — measures a change that is
+wrong however it was meant, and this one measures a change that is often exactly
+right: a deployment splitting one mailing list into two repoints its forms, and
+a refusal would mean no proposal may ever move a form at all. Why not leave it to
+the ceiling, then? Because `high` is at a developer's ceiling, and where a
+stranger's data goes must not depend on who asked for it to move.
+
+Two different facts, a fortnight apart — 0035 on 4 August, 0071 on the 19th —
+arriving at the same position in the ladder for the same reason. State it once
+and it covers both:
+
+> **When the thing that must not happen is *silently*, a level cannot say so and
+> a rule above the ceiling can.** A level is a claim about how much damage a
+> change does; "never without a person" is a claim about who decides, and the
+> ceiling has already made that answer depend on the origin.
+
+There is a second thing rung 5 does that is worth the ten seconds. It is
+measured **between the two trees**, not off the operations — the destinations
+declared before the delta, compared by node id with the ones declared after. So a
+delta that moves a destination and moves it back reports nothing, because nothing
+moved. And a node that *gains* a declaration it did not have is a new form rather
+than a moved one: nobody's expectation about where their message goes is being
+relocated, so escalating it would make the reviewer's sentence false half the
+time. Exercise G is both of those, and the second is the one people get wrong.
+
+### The rung that arrived after the ladder was written
+
+0002 wrote down what it would cost to add a rule to this design, in one line of
+consequences: *adding a rule means choosing its position in the precedence order,
+which is a visible decision rather than a weight nudge.*
+
+On 19 August that bill came due, and it is worth looking at what was actually
+paid. `redirection.ts` was new. `stakes.ts` gained a factor. `disposition.ts`
+gained a reason code. And `gate.ts` gained one function and **one line in the
+middle of an array** — `confirmRedirectedSubmission,` between
+`confirmDiscardsLaterWork` and `confirmAboveCeiling`. Not one existing rule
+changed. Not one existing verdict changed, except for changes that move a form.
+
+Compare that with the decision table from *The problem*, which was at a hundred
+and ninety-two rows and would now be at three hundred and eighty-four — every one
+of the old rows needing a decision about what its twin says. That is the whole
+argument for the ladder, and it has now been paid out twice in a fortnight:
+`discards-later-work` on the 4th of August, `redirected-submission` on the 19th.
+Two new inputs, two new lines, nothing re-decided.
+
+But the position was still a decision, and the diff does not argue for it. Why
+fifth? Below rung 2, so a host that has declared this much damage refusable still
+gets a refusal — the floor stays sovereign, which is the same sentence rung 4
+gets. Above rung 6, or the whole thing is pointless. And after rung 4 rather than
+before it, which is the one place there was a genuine choice and the one place
+nothing much turns on it: a change that both discards later work and moves a form
+is held either way, and the only question is which sentence the person is shown
+first. Exercise G's third row is that tie being broken, and it is broken by the
+array's order and by nothing else.
+
+**Now the part that cost something.** The ladder absorbed a rule in one line, and
+the prose about the ladder did not. This lesson said "six rules" for a week after
+there were seven, and gave every rung below the new one a number one too low;
+lesson 08 repeated the count once; and two review-set questions
+asked you to write the six rules from memory and then checked your recall against
+a list with a rung missing. Nothing connects an array in `src/` to a sentence in
+`lessons/`, and nothing ever will.
+
+Notice what did *not* catch it. Every exercise in this lesson is executed before
+it is written down, and every printed output was correct the whole time — because
+the fixture they run against has no form in it, so rung 5 returns `null` on every
+row and never speaks. Exercise B walks the ladder from outside by removing one
+true thing at a time, and it walked past a rung without printing a wrong line.
+That generalises past this course:
+
+> **An executed example proves what it reached. It says nothing about what it
+> did not reach, and the second kind of claim is the one prose likes to make.**
+
+Which is why Exercise G exists, and why it is the exercise to do slowly.
+
 ### Who asked, and where that stops mattering
 
 Origin is load-bearing in exactly one place: `ceilingFor`. Everywhere else it is
@@ -313,7 +429,7 @@ rung 2 tests `isAtLeast`. So:
 
 > **Under every policy that can be written, a `critical` change is refused.** Not
 > "usually", not "by default" — there is no policy in which a critical change
-> reaches rung 5.
+> reaches rung 6.
 
 Which means the four ceiling values have three distinct behaviours: a ceiling of
 `critical` and a ceiling of `high` are the same policy, because the level that
@@ -332,13 +448,13 @@ under some policies the answer is no.
 Two knobs sit on the confidence scale: `confidenceFloor` (reject below) and
 `minimumConfidence` (confirm below). The schema validates each as a number
 between 0 and 1, and does not compare them. Set the floor at 0.9 and the minimum
-at 0.5, and rung 6 becomes unreachable: to fire it, a change would have to be at
+at 0.5, and rung 7 becomes unreachable: to fire it, a change would have to be at
 or above 0.9 and below 0.5.
 
 The same shape shows up on the stakes scale. Set `refusalFloor` to `medium` and
-give an origin a ceiling of `high`, and rung 5 can never fire for that origin —
+give an origin a ceiling of `high`, and rung 6 can never fire for that origin —
 anything above `high` is `critical` and is refused at rung 2, and anything at or
-above `medium` is refused there too, so the only levels that reach rung 5 are
+above `medium` is refused there too, so the only levels that reach rung 6 are
 below every ceiling.
 
 Exercise E runs both, and the result is stronger than "a rule goes quiet". The
@@ -383,8 +499,8 @@ spent its whole argument on, arriving here as something you can use.
 
 | What | Where |
 | --- | --- |
-| Six rules, the order, and the loop | [`src/runtime/gate.ts`](../src/runtime/gate.ts) |
-| Three kinds, seven reason codes, and what a verdict carries | [`src/runtime/disposition.ts`](../src/runtime/disposition.ts) |
+| Seven rules, the order, and the loop | [`src/runtime/gate.ts`](../src/runtime/gate.ts) |
+| Three kinds, eight reason codes, and what a verdict carries | [`src/runtime/disposition.ts`](../src/runtime/disposition.ts) |
 | The ceilings, the floors, and `ceilingFor` | [`src/runtime/policy.ts`](../src/runtime/policy.ts) |
 | `isAbove` and `isAtLeast` — where strictness lives | [`src/runtime/stake-level.ts`](../src/runtime/stake-level.ts) |
 | What a policy contained, as one comparable string | [`src/runtime/policy-fingerprint.ts`](../src/runtime/policy-fingerprint.ts) |
@@ -679,6 +795,79 @@ describe("F", () => {
 //     `gate.ts` would, and name the lesson-05 property it is an instance of.
 ```
 
+**G — the rung the ladder walk never reached.** Exercise B relaxed one true thing
+at a time and produced seven codes, and one rung stayed silent through all of it,
+because `sampleTree` has no form in it. This is the fixture that does. Six rows;
+`detail` is printed this time, because on two of them it is the point.
+
+Predict all six before running, and give rows 5 and 6 more than a moment — one of
+them is the same change as row 1 and the other very nearly is.
+
+Add `formTree` to the preamble's fixtures import — `import { formTree, sampleTree }
+from "./testing/fixtures.js"` — and everything else here is the preamble's.
+
+```ts
+describe("G", () => {
+  it("finds the rung the ladder walk never reached", () => {
+    /** The shared helper above is bound to `sampleTree`; this is it, on a form. */
+    const onForm = (
+      label: string,
+      policy: GatePolicy,
+      build: (ids: ReturnType<typeof formTree>["ids"]) => TreeOperation[],
+      ask: (ids: ReturnType<typeof formTree>["ids"]) => Ask = () => ({})
+    ) => {
+      const { tree, ids } = formTree()
+      const proposal = proposalOf(deltaOf(tree.treeId, build(ids)), ask(ids))
+
+      const assessed = assessChange(tree, proposal, policy, spare.deltaId())
+      if (!assessed.ok) throw new Error(assessed.error.code)
+
+      const disposition = gate(assessed.value, policy)
+
+      console.log(label, JSON.stringify({
+        stakes: disposition.stakes,
+        kind: disposition.kind,
+        reason: disposition.reason.code,
+        detail: disposition.reason.detail,
+      }))
+    }
+
+    const repoint = (ids: ReturnType<typeof formTree>["ids"]): TreeOperation[] => [
+      { op: "configure", nodeId: ids.form, set: { "loom:submit": { to: "contact.enquiry" } }, unset: [] },
+    ]
+
+    const trusting = gatePolicySchema.parse({
+      policyId: "trusting",
+      autoApplyCeiling: {
+        developer: "critical", "user-instruction": "critical",
+        "system-signal": "critical", "scheduled-adaptation": "critical",
+      },
+    })
+    const strict = gatePolicySchema.parse({ policyId: "strict", refusalFloor: "high" })
+
+    onForm("1 moved, user asked:   ", defaultGatePolicy, repoint)
+    onForm("2 moved, developer, no ceiling:", trusting, repoint, () => ({ origin: "developer" }))
+    onForm("3 moved, and discards: ", defaultGatePolicy, repoint, (ids) => ({
+      discards: [{ revision: 4, nodeIds: [ids.aside] }],
+    }))
+    onForm("4 moved, floor at high:", strict, repoint)
+    onForm("5 the aside gains one: ", defaultGatePolicy, (ids) => [
+      { op: "configure", nodeId: ids.aside, set: { "loom:submit": { to: "contact.enquiry" } }, unset: [] },
+    ])
+    onForm("6 moved, and moved back:", defaultGatePolicy, (ids) => [
+      { op: "configure", nodeId: ids.form, set: { "loom:submit": { to: "contact.enquiry" } }, unset: [] },
+      { op: "configure", nodeId: ids.form, set: { "loom:submit": { to: "newsletter.subscribe" } }, unset: [] },
+    ])
+  })
+})
+// Q7: rows 1 and 4 have the same `detail` and different codes, and neither rule
+//     wrote that sentence. Say who did, and what that tells you about what a
+//     reason code is for. Then: rows 5 and 6 are both accepted, for two
+//     different reasons. Give both — and for row 6, say what would have to be
+//     true of the *delta* for the answer to change, then say whether any delta
+//     can make it true.
+```
+
 ---
 
 ## It could have been otherwise
@@ -686,9 +875,22 @@ describe("F", () => {
 **A decision table over every combination of inputs.** The shape most people
 reach for, and the one *The problem* counts: thirty-two rows before confidence,
 ninety-six with it banded, one hundred and ninety-two once `discards` arrived in
-August. The fatal property is not the size, it is that adding an input obliges
-you to re-decide every row you already wrote — so in practice nobody does, and
-the table quietly stops describing the system.
+August, three hundred and eighty-four a fortnight later when a moved form
+destination arrived. The fatal property is not the size, it is that adding an
+input obliges you to re-decide every row you already wrote — so in practice
+nobody does, and the table quietly stops describing the system.
+
+**An existing knob instead of a new rule.** A host worried about forms being
+repointed can list `loom:submit` in `protectedPropKeys` today, which is why this
+is the alternative to argue with rather than the one to dismiss: it needs no new
+code at all. It fails three ways. It is opt-in, so a deployment that never
+thought about it is silent about the one prop whose meaning is *where a
+stranger's data goes*. It cannot tell a form acquiring a destination from a form
+being moved, so ordinary new forms are escalated identically. And the sentence a
+reviewer gets names a key rather than a destination. The general form is worth
+keeping: **a knob that can be made to produce the right outcome is not the same
+as one that produces the right sentence**, and on a system whose whole claim is
+reviewability the sentence is half the feature.
 
 **Every true reason, returned together.** The most serious alternative, and the
 one to argue against carefully, because it looks strictly more informative. Three
@@ -708,8 +910,8 @@ detour, and the detour hides the decision.
 
 **A severity number per rule, sorted at runtime.** The same idea with the
 ordering made explicit as data. Worse than a list, for a reason worth
-generalising: an array is reviewed as a whole, in one diff, in one screen. Six
-numbers scattered across six declarations are each reviewed alone, and nobody
+generalising: an array is reviewed as a whole, in one diff, in one screen. Seven
+numbers scattered across seven declarations are each reviewed alone, and nobody
 ever sees the order they add up to. 0002 puts this precisely — adding a rule
 means choosing its position, *which is a visible decision rather than a weight
 nudge*.
@@ -750,7 +952,12 @@ Closed book.
    something that is not a fact about the change at all, and say why that is not
    a violation.
 
-4. Find an approval or escalation system you have used where several rules could
+4. Rungs 4 and 5 exist for the same reason, and the reason is one sentence. Say
+   it once, so that it covers both without naming either. Then invent a third
+   fact that would qualify — something a future Loom might measure — and say
+   which of the two tests it passes and how you know it passes the other.
+
+5. Find an approval or escalation system you have used where several rules could
    fire at once — an alerting policy, a code-review requirement, a fraud check.
    What did it tell you when two fired? If it told you one thing, could you find
    out which rule chose it? If it told you everything, what did you do with the
@@ -764,8 +971,9 @@ Write your answer, rate your confidence 1–5, **then** reveal. The confidence
 rating is not decoration: the answers you are confident and wrong about are the
 ones that quietly break your model later.
 
-1. Name the six rules in order. Then, for each of the three orderings that carry
-   an argument, give the argument in one sentence.
+1. Name the seven rules in order. Then, for every ordering in the ladder that
+   carries an argument, give that argument in one sentence — and where two rules
+   share one argument, give it once and say why it covers both.
 
 2. `confidence` is read by the first rule and by the last. Say what each
    concludes, and say what that pair proves about how position in the ladder is
@@ -780,6 +988,11 @@ ones that quietly break your model later.
    "high" }`. Say which rung that makes unreachable for that origin, whether the
    schema rejects it, and what you would do about it. Then give the general
    statement of which this is one instance.
+
+5. Exercise B removes one true thing at a time and prints a verdict for each,
+   and every line it has ever printed has been correct. Say what it nevertheless
+   failed to show for a week, why running it more often would not have helped,
+   and what kind of claim an executed example cannot support.
 
 ---
 
@@ -798,34 +1011,45 @@ ones that quietly break your model later.
   should win between a host's configuration and a runtime's opinion — and check
   that against what you concluded in lesson 08 about a type listed in two
   vocabularies. If those two answers disagree, one of them is worth revisiting.
-- Lesson 08 said the Gate "is six ordered rules and lesson 09 gets an argument
-  rather than a mention". Which of the six turned out to have the argument you
-  did not expect?
+- Predict 4 asked which part of the design you would reach for. If you wrote
+  `protectedPropKeys`, you reached for the instrument the maintainers reached for
+  first, and *It could have been otherwise* is the three reasons they put it
+  down. If you wrote "make the level `critical`", check that against what you
+  wrote for Self-check 3 about `discards-later-work` — it is the same answer to
+  the same shape, and you have now rejected it twice.
+- Lesson 08 promised that this is where the ladder "gets an argument rather than
+  a mention". Which of the seven turned out to have the argument you did not
+  expect?
+- This lesson said "six" for a week after there were seven, and the exercises
+  that would have caught it all passed. Before you file that as somebody's
+  sloppiness: say what you would put in place to catch the next one, then say
+  what that thing costs and who pays it.
 
 ---
 
 ## Come back to this
 
 - **In 2 days:** Self-check 1 and 3, closed book.
-- **In 1 week:** Write the six rules in order from memory, and beside each one
+- **In 1 week:** Write the seven rules in order from memory, and beside each one
   write the disposition kind it produces. Then say which rules could swap
   positions without changing any verdict — only the wording — and which could
   not.
 - **In 1 month:** Redo exercise B from memory: predict all seven reason codes,
   then say for each row which *other* rules were also true at the moment it was
-  decided.
+  decided — and name the one that was true on none of them and say how you know.
 - See [`review-schedule.md`](review-schedule.md).
 
 ---
 
 ## Deeper
 
-- [`decisions/0002`](../decisions/0002-gate-is-a-pure-function-of-two-axes.md) — six ordered rules, and why position beats weight
+- [`decisions/0002`](../decisions/0002-gate-is-a-pure-function-of-two-axes.md) — the ladder, and why position beats weight. It records six rules, which is what the ladder had in July
 - [`decisions/0033`](../decisions/0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md) — where the policy comes from, and why the verdict names it
-- [`decisions/0035`](../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) — the rule a level could not have been
+- [`decisions/0035`](../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) — rung 4, the first rule a level could not have been
+- [`decisions/0071`](../decisions/0071-moving-a-forms-destination-is-a-stake-of-its-own.md) — rung 5, the second one, and the three ways the existing knob was wrong
 - [`decisions/0048`](../decisions/0048-a-name-is-checked-by-a-fingerprint-beside-it.md) — the digest beside the name
 - [`src/runtime/gate.test.ts`](../src/runtime/gate.test.ts) — the `rule precedence` block is the order, written down as assertions
-- Next: 10 — The pipeline *(not yet written)*
+- Next: [10 — The pipeline](10-the-pipeline.md)
 
 ---
 
@@ -866,12 +1090,20 @@ between an ordering over reasons and an ordering over answers.
 7 confidence up to 0.9:     {"stakes":"low","reversible":true,"kind":"accepted","reason":"within-policy"}
 ```
 
-Seven rows, seven reason codes, and they are the six rules in order followed by
-the default. Nothing here reads `gate.ts`: the ladder is fully observable from
-outside, by removing one true thing at a time and watching what speaks next.
+Seven rows, seven reason codes, in ladder order and ending at the default.
+Nothing here reads `gate.ts`: the ladder is observable from outside, by removing
+one true thing at a time and watching what speaks next.
+
+Observable, but not *fully* — and this is the line that was wrong in this lesson
+for a week. Seven codes out of a ladder of seven rules plus a default is eight
+possible answers, so one is missing, and it is rung 5. `sampleTree` contains no
+`loom:submit` anywhere, so `redirectedSubmissionsBetween` finds no destinations
+in the tree before the change, returns an empty list on every row, and
+`confirmRedirectedSubmission` returns `null` seven times without ever being
+noticed. Exercise G is the row this exercise cannot produce.
 
 Row 6 is the answer to the question. Confidence was 0.5 on rows 2 through 6, and
-the policy's minimum is 0.7, so rung 6 was true on **five** rows and named on
+the policy's minimum is 0.7, so rung 7 was true on **five** rows and named on
 **one**. Something above it always had something to say.
 
 So: what would you report? Not the count of `confidence-below-minimum` in the
@@ -941,7 +1173,7 @@ mode of the other direction is a change nobody saw.
 
 The last two rows: `refusalFloor` cannot exceed `critical`, since `critical` is
 the top of `STAKE_ORDER`, and rung 2 fires on `isAtLeast`. So a `critical`
-change is refused under **every** policy, and rung 5 never sees one. Which
+change is refused under **every** policy, and rung 6 never sees one. Which
 means `autoApplyCeiling` has three behaviourally distinct values, not four:
 `critical` and `high` differ only in what they say about critical changes, and
 critical changes never reach the rule that reads them.
@@ -965,7 +1197,7 @@ floor medium, ceiling critical: {"stakes":"medium","reversible":true,"kind":"rej
 ```
 
 The policy parses — the first line is there so you cannot suspect an exception
-was swallowed — and rung 6 is gone. Firing it needs a confidence at or above 0.9
+was swallowed — and rung 7 is gone. Firing it needs a confidence at or above 0.9
 *and* below 0.5. Every paired row is identical, which is the stronger claim: the
 inverted policy is not merely missing a rung, it is **the same gate** as one with
 both knobs at 0.9. `minimumConfidence: 0.5` reads like a setting and is not one.
@@ -973,7 +1205,7 @@ both knobs at 0.9. `minimumConfidence: 0.5` reads like a setting and is not one.
 The stakes half has the same shape and needs the extra row the comment asks for.
 All four ceilings refuse this `medium` change, because rung 2 fires first. Add a
 low-stakes change and all four accept it, because `low` is at or below every
-ceiling. The levels reaching rung 5 are those strictly below `medium`, and only
+ceiling. The levels reaching rung 6 are those strictly below `medium`, and only
 `low` qualifies, and `low` is under every ceiling — so no setting of
 `autoApplyCeiling` changes any verdict under this floor. The knob is inert for
 that origin, whatever it says.
@@ -1019,3 +1251,59 @@ its two arguments — lesson 05's rule, arriving as a capability rather than a
 constraint. "Would this change have been held under the policy we run today?" is
 answerable for every decision the system has ever made, because the inputs to
 that decision are all still on the record.
+
+**Q7** The rung the ladder walk never reached:
+
+```
+1 moved, user asked:    {"stakes":"high","kind":"requires-confirmation","reason":"redirected-submission","detail":"redirects a submission: n_form1 from newsletter.subscribe to contact.enquiry"}
+2 moved, developer, no ceiling: {"stakes":"high","kind":"requires-confirmation","reason":"redirected-submission","detail":"redirects a submission: n_form1 from newsletter.subscribe to contact.enquiry"}
+3 moved, and discards:  {"stakes":"high","kind":"requires-confirmation","reason":"discards-later-work","detail":"discards work from revision 4 at 1 node"}
+4 moved, floor at high: {"stakes":"high","kind":"rejected","reason":"stakes-at-refusal-floor","detail":"redirects a submission: n_form1 from newsletter.subscribe to contact.enquiry"}
+5 the aside gains one:  {"stakes":"low","kind":"accepted","reason":"within-policy","detail":"reversible, within the stakes ceiling, and confidently interpreted"}
+6 moved, and moved back: {"stakes":"low","kind":"accepted","reason":"within-policy","detail":"reversible, within the stakes ceiling, and confidently interpreted"}
+```
+
+Row 1 is the rung, with both endpoint ids in the sentence: a reviewer is told
+where the messages were going and where they will go instead, which is what
+`protectedPropKeys` could not have said.
+
+Row 2 is the rule earning its position. Every origin's ceiling is `critical` —
+the widest latitude the type permits — and the change is still held. Nothing
+about a ceiling can produce that, which is rung 4's argument arriving a second
+time and is the whole of *The rules a level could not have been*.
+
+Row 4 is the floor still sovereign: the same change under `refusalFloor: "high"`
+is refused rather than held, at rung 2, before rung 5 is consulted.
+
+**Rows 1 and 4 have the same `detail` and different codes, and neither rule
+composed that sentence.** `assessStakes` did, when it built the factor;
+`rejectAtRefusalFloor` joins the details of every factor it found, and
+`confirmRedirectedSubmission` copies the one factor it looked for. Which is the
+answer to the first half of Q7: **a reason code says which rule spoke, and the
+detail says what was found.** They vary independently, and a reader who treats
+the code as the description of the change will misread every verdict where the
+floor fired.
+
+Row 3 is the tie in the array being broken. Two rules are true — the change
+discards work *and* moves a form, both `high` — and the reader is shown the
+discard, because `confirmDiscardsLaterWork` is one line earlier in
+`ESCALATION_RULES`. Nothing deeper than that decides it, and both outcomes would
+have been defensible; what would not be defensible is not knowing which.
+
+Rows 5 and 6 are both accepted, and for two different reasons.
+
+Row 5: the `aside` posted nowhere and now posts to `contact.enquiry`. That is not
+a redirection, because no expectation is being moved — it is a form that did not
+exist as a form before. Escalating it would mean every ordinary new form on every
+page gets a confirmation, and the sentence "this form now posts somewhere else"
+would be false.
+
+Row 6: two operations, moving the destination to `contact.enquiry` and back
+again. The delta plainly touches `loom:submit` twice, and nothing is escalated —
+because the factor is measured **between the two trees**, by comparing
+destinations by node id, and the two trees agree. So the answer to the last
+question is that **no delta can make row 6 escalate**: for the answer to change,
+the tree after the change would have to name a different endpoint, and if it did
+it would not be row 6. Reading the operations instead would have caught it, and
+would also have escalated every no-op — which is the trade, stated as a rule of
+thumb: *measure the change where the change is, not where the request for it is.*

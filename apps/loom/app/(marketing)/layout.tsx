@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 
-import { HOME } from "@/app/(marketing)/_lib/site"
+import { HOME, siteOrigin } from "@/app/(marketing)/_lib/site"
 
 import "./globals.css"
 
@@ -14,7 +14,18 @@ import "./globals.css"
  * which is the one claim this site cannot afford to fudge.
  */
 
+/**
+ * The document's defaults. Every page replaces the title, the description and
+ * everything a shared link unfurls as, in its own `generateMetadata`.
+ *
+ * `metadataBase` is here because it is the one thing that is true of the whole
+ * surface rather than of a page: it is where this deployment is answering from,
+ * which on a preview build is not the production domain and on a laptop is
+ * neither. Without it a relative address in any page's metadata would resolve
+ * against nothing.
+ */
 export const metadata: Metadata = {
+  metadataBase: new URL(siteOrigin()),
   title: HOME.title,
   description: HOME.description,
 }

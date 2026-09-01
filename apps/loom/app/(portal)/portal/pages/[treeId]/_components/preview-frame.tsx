@@ -34,11 +34,22 @@ export const PreviewFrame = ({
   treeId,
   revision,
   diagnostics,
+  views,
   children,
 }: {
   readonly treeId: TreeId
   readonly revision: number
   readonly diagnostics: readonly RenderDiagnostic[]
+  /**
+   * The strip of everything else the portal can tell you about this page.
+   *
+   * Passed in rather than rendered here, because this component's whole job is
+   * the chrome around one rendered tree and where the reader can go next is not
+   * its decision. It arrives as a slot so that it lands where it has to — after
+   * the reader knows which page they are on, before the page itself — which is
+   * the one thing about it this component does get to decide.
+   */
+  readonly views?: ReactNode
   readonly children: ReactNode
 }) => (
   <div className="flex flex-col gap-4">
@@ -63,6 +74,8 @@ export const PreviewFrame = ({
         <RevisionLink treeId={treeId} revision={revision} />
       </p>
     </header>
+
+    {views}
 
     {diagnostics.length > 0 && (
       <div className="flex flex-col gap-2">

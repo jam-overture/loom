@@ -254,14 +254,22 @@ Here is where most readings of "two independent axes" go wrong, including,
 probably, the answer you wrote for Predict 1.
 
 Independence does **not** mean the axes are computed from disjoint inputs. They
-are not. Two of `ChangeAnalysis`'s ten fields feed both:
+are not. Three of `ChangeAnalysis`'s fourteen fields feed both:
 
 | Field | Feeds stakes via | Feeds reversibility via |
 | --- | --- | --- |
 | `removedNodeCount` | `large-removal`, thresholds 3 / 12 | `retention-budget-exceeded`, budget 200 |
 | `touchedPrimitiveTypes` | `protected-type-touched` | `out-of-tree-effect` |
+| `relocatedPrimitiveTypes` | `protected-type-relocated` | `out-of-tree-effect` |
 
-One number, two axes. So what makes them independent?
+One number, two axes. The third row is the youngest and the most useful evidence
+here: `relocatedPrimitiveTypes` was added after both axes existed (0044), and
+both picked it up — stakes through a new factor, reversibility by adding it to
+the list it already filtered. Neither had to know what the other did with it. A
+design where a shared input *did* couple the axes could not have absorbed a new
+one that way.
+
+So what makes them independent?
 
 > **Two axes are two axes when every combination of their values is reachable.**
 
@@ -340,8 +348,8 @@ declared what it writes over — and the difference between `accepted` and
 
 ### What the Gate does with two of them
 
-Briefly, because it is lesson 09's subject. The Gate is six ordered rules, first
-match wins, and two of the orderings matter here:
+Briefly, because it is lesson 09's subject. The Gate is seven ordered rules,
+first match wins, and two of the orderings matter here:
 
 - Irreversibility is escalated **before** the stakes ceiling is consulted. The
   ceiling is per-origin — a developer may auto-apply `high` stakes, a scheduled
@@ -359,7 +367,7 @@ whole ladder gets an argument rather than a mention.
 
 | What | Where |
 | --- | --- |
-| The damage axis: eight factors, highest wins | [`src/runtime/stakes.ts`](../src/runtime/stakes.ts) |
+| The damage axis: ten factors, highest wins | [`src/runtime/stakes.ts`](../src/runtime/stakes.ts) |
 | Four levels, and the comparisons on them | [`src/runtime/stake-level.ts`](../src/runtime/stake-level.ts) |
 | The permanence axis, and where the undo comes from | [`src/runtime/reversibility.ts`](../src/runtime/reversibility.ts) |
 | Both axes assembled, and the last place a tree is touched | [`src/runtime/assessment.ts`](../src/runtime/assessment.ts) |
@@ -752,11 +760,13 @@ ones that quietly break your model later.
 - Predict 3's second half asked what an irreversible change holds in `inverse`.
   Exercise B answered it and then applied the thing. If your answer was
   "nothing", say what you were assuming `reversible` was a claim about.
-- Lesson 07 ended by asking whether you would file exercise D's empty
-  `touchedPrimitiveTypes` as a bug. You now know that field also feeds the
-  reversibility axis, through `outOfTreeEffectTypes`. Does that change your
-  answer? Write one sentence; this is the third time the question has been put to
-  you and the first time you have had both axes in hand.
+- Lesson 07's exercise D showed a relocation reported in
+  `relocatedPrimitiveTypes` and nowhere near `touchedPrimitiveTypes`. You now
+  know that both of those feed the reversibility axis as well, through
+  `outOfTreeEffectTypes` — and 0044 says the tie there goes to *irreversible*
+  on purpose. Write one sentence saying what that costs a host, and one saying
+  what the opposite tie-break would have cost. This is the third time this
+  material has been put to you and the first time you have had both axes in hand.
 - Which of the four cells in exercise C's grid did you predict wrongly? That one
   is the coupling you were assuming, and it is worth naming out loud.
 
@@ -765,9 +775,9 @@ ones that quietly break your model later.
 ## Come back to this
 
 - **In 2 days:** Self-check 1 and 3, closed book.
-- **In 1 week:** From memory, write the eight stake factor codes with their
-  levels, then the two irreversibility reasons. Then say, for each of the eight,
-  whether the input it reads also feeds the other axis.
+- **In 1 week:** From memory, write the ten stake factor codes with their levels,
+  then the two irreversibility reasons. Then say, for each of the ten, whether
+  the input it reads also feeds the other axis.
 - **In 1 month:** Redo exercise C from memory — predict all five rows, including
   the boundary — and then say what the grid would look like if `removalThresholds`
   and `inverseRetentionBudget` were one knob.
@@ -781,7 +791,7 @@ ones that quietly break your model later.
 - [`decisions/0032`](../decisions/0032-an-undo-is-a-proposal-not-a-rewind.md) — why an undo goes back through the Gate like anything else
 - [`decisions/0035`](../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) — the thing that could have been irreversibility
 - [`src/runtime/gate.test.ts`](../src/runtime/gate.test.ts) — the tests are the specification
-- Next: 09 — The Gate *(not yet written)*
+- Next: [09 — The Gate](09-the-gate.md)
 
 ---
 
@@ -971,8 +981,10 @@ the declaration on the runtime rather than on a model.
 **1** Two axes are two axes when every combination of their values is reachable —
 not when their inputs are disjoint. `stakes` and `reversibility` share
 `removedNodeCount` (read as `large-removal` on one axis and as the retention
-budget on the other) and `touchedPrimitiveTypes` (read as `protected-type-touched`
-and as `out-of-tree-effect`). They stay independent because each axis reads those
+budget on the other), `touchedPrimitiveTypes` (read as `protected-type-touched`
+and as `out-of-tree-effect`) and `relocatedPrimitiveTypes` (read as
+`protected-type-relocated`, and against the same out-of-tree list). They stay
+independent because each axis reads those
 inputs through its own policy knob, and exercise C produces all four cells from
 one delta. The July design failed this test: "small damage, permanent" was
 unreachable.

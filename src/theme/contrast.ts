@@ -157,8 +157,12 @@ const channel = (value: number): number => {
  *
  * Answering "I could not measure this" is the same move `not-probeable` makes in
  * the conformance probe: a check that cannot answer says so, rather than passing.
+ *
+ * Exported because `separation.ts` measures the same palette in a different
+ * colour space and has to decline the same forms for the same reasons. Two
+ * parsers would be two answers to "is this measurable".
  */
-const channelsOf = (colour: string): readonly [number, number, number] | undefined => {
+export const channelsOf = (colour: string): readonly [number, number, number] | undefined => {
   const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(colour)?.[1]
   if (hex === undefined) return undefined
 
