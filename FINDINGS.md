@@ -9052,6 +9052,46 @@ Two limits, stated so they are not discovered:
 
 ---
 
+## 2026-08-27 — 0002 records six ordered rules, and the Gate has had seven since 19 August
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+[0002](decisions/0002-gate-is-a-pure-function-of-two-axes.md) states the decision
+as *"six ordered rules, first match wins"*. `ESCALATION_RULES` in
+`src/runtime/gate.ts` holds seven: `confirmRedirectedSubmission` was inserted at
+position five on 19 August (`d541bea`, #102) under
+[0071](decisions/0071-moving-a-forms-destination-is-a-stake-of-its-own.md).
+
+0071 is not a reversal, so nothing here is superseded and nothing about the
+design is in doubt — the ladder does exactly what 0002 said it would, and 0071
+quotes 0002's own argument to justify the position it chose. What is stale is a
+number in the sentence a reader takes the decision from, in the record that is
+the entry point for the Gate. 0035 (4 August) added the sixth rule and left the
+same sentence alone, so this has now happened twice and the count in 0002 has
+been wrong for longer than it has been right.
+
+**The cost, measured.** This lane wrote lesson 09 from that record on 16 August
+and repeated the wrong count eleven times, numbered ten rung references one too
+low, and put two closed-book review questions in front of the
+maintainer asking him to recall a list with a rung missing. All of it is
+corrected in the PR that files this. Every *executed* output in the lesson was
+correct throughout, which is why a week passed: the exercises run against a
+fixture with no form in it, so the seventh rule returns `null` on every row and
+never speaks.
+
+Not fixed here — `decisions/` is not this lane's. The remedy is
+`Loom daily build`'s to choose, and the two obvious ones differ in what they
+promise: a dated amendment note on 0002 pointing at 0035 and 0071 fixes today
+and not the next one, while making 0002 name the ladder without counting it
+would end the class. Worth noting that `decisions/README.md` has rules for
+*superseding* and none for a record that is still right about the decision and
+stale about the shape.
+
+There is a wider version of this that belongs to nobody in particular and is
+worth one sentence: **nothing in this repository connects a list in `src/` to a
+sentence that counts it**, in a record, a lesson, a docs page or a marketing
+claim, and `pnpm verify` cannot notice. Four surfaces now describe the runtime in
+prose.
 ## 2026-08-26 — the runtime's own sentence reached the one line on the card reserved for the visitor's
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
@@ -9660,6 +9700,7 @@ that is the document every routine reads first. Whether the stripping itself is
 worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
+it is bound by, which is the rule that file states about itself.
 it is bound by, which is the rule that file states about itself.
 
 ---
