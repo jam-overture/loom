@@ -22,6 +22,11 @@ import { createThemeRegistry } from "../theme/registry.js"
 import { PALETTE_SLOTS } from "../theme/theme.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
+import {
+  createFrameOriginRegistry,
+  type FrameOriginDefinition,
+  type FrameOriginRegistry,
+} from "../frame/origin.js"
 
 import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
 import { LIBRARY_CLASS } from "./stylesheet.js"
@@ -125,10 +130,45 @@ const samplePage = (theme: Record<string, string>, idFactory: IdFactory = sequen
   return createTree(page, idFactory)
 }
 
-const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics: readonly unknown[] } => {
+/**
+ * The deployment half of 0095, which every fixture below needs because
+ * `loom.embed` now declares `frames: ["src"]` and reads a verdict rather than a
+ * prop. A host that registers nothing frames nothing — which is the seam
+ * working, not a fixture problem — so the two origins the fixtures embed are
+ * registered here exactly as a real deployment would register them.
+ */
+const originsOf = (...definitions: readonly FrameOriginDefinition[]): FrameOriginRegistry => {
+  const built = createFrameOriginRegistry(definitions)
+  if (!built.ok) throw new Error(`fixture origins did not build: ${built.error.code}`)
+
+  return built.value
+}
+
+const FIXTURE_ORIGINS = originsOf(
+  { origin: "https://player.example.com", description: "The fixture video player" },
+  { origin: "https://maps.example.com", description: "The fixture map" }
+)
+
+/**
+ * `null` rather than `undefined` for "this deployment registered nothing".
+ * An explicit `undefined` argument takes a default parameter, so the two could
+ * not be told apart — and the case that matters most is exactly the one a host
+ * gets by wiring nothing.
+ */
+const render = (
+  tree: LoomTree,
+  editMode = false,
+  origins: FrameOriginRegistry | null = FIXTURE_ORIGINS
+): { markup: string; diagnostics: readonly unknown[] } => {
   const rendered = renderLoomTree(tree, {
     resolver: registry,
     validator: registry,
+    /**
+     * Spread rather than set, because `exactOptionalPropertyTypes` makes
+     * "absent" and "present and undefined" different things — and a host that
+     * wired no allowlist leaves the option absent.
+     */
+    ...(origins === null ? {} : { origins }),
     /**
      * **No `text` here, deliberately.** It used to be wired because omitting it
      * was not a no-op — every primitive was handed an empty map, so a declared
@@ -150,8 +190,8 @@ const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics
 }
 
 describe("the starter library", () => {
-  it("registers as sixty-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(68)
+  it("registers as seventy primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(70)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -161,11 +201,13 @@ describe("the starter library", () => {
       "loom.grid",
       "loom.mosaic",
       "loom.marquee",
+      "loom.orbit",
       "loom.card",
       "loom.hero",
       "loom.feature-grid",
       "loom.feature",
       "loom.milestone-list",
+      "loom.milestone-row",
       "loom.milestone",
       "loom.stat-grid",
       "loom.stat",
@@ -824,6 +866,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(tablePage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
+      ...typesIn(explainerPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -1964,6 +2007,69 @@ describe("the page chrome", () => {
     expect(markup).toContain("Start building")
   })
 
+  /**
+   * The disclosure, in the four assertions that would each have let it ship
+   * broken. Three of them are about things *not* being somewhere.
+   */
+  describe("the menu that collapses on a phone", () => {
+    it("places the control in a box of its own, beside the menu it opens", () => {
+      const { tree } = splitStylesheet(render(chromePage(EDITORIAL)).markup)
+
+      /**
+       * The control itself renders nothing on the server (0092), so what the
+       * markup can show is the box waiting for it — and that the box is a
+       * sibling *before* the menu, which is what the rule selects across.
+       */
+      expect(tree).toContain(`class="${LIBRARY_CLASS.navToggle}"`)
+      expect(tree.indexOf(LIBRARY_CLASS.navToggle)).toBeLessThan(
+        tree.indexOf(LIBRARY_CLASS.navMenu)
+      )
+    })
+
+    /**
+     * The regression this run exists to prevent from coming back. An inline
+     * `display` on the menu beats the rule that hides it, so the collapse
+     * would be a rule that silently does nothing — no test fails, no
+     * diagnostic fires, and the bar is three rows on a phone again.
+     */
+    it("sets no inline display on the menu, because a rule has to be able to hide it", () => {
+      const { tree } = splitStylesheet(render(chromePage(EDITORIAL)).markup)
+      const menu = new RegExp(`<div class="${LIBRARY_CLASS.navMenu}"[^>]*>`).exec(tree)?.[0] ?? ""
+
+      expect(menu).not.toBe("")
+      expect(menu).not.toContain("display")
+    })
+
+    it("carries the collapse rule, the empty-box rule, and both only under a phone's width", () => {
+      const { stylesheet } = splitStylesheet(render(chromePage(EDITORIAL)).markup)
+
+      /** The region's own box, which had to leave the element for the rule to reach it. */
+      expect(stylesheet).toContain(`.${LIBRARY_CLASS.navMenu} {`)
+      /** Hidden by the rule, never rendered hidden — 0092's direction. */
+      expect(stylesheet).toContain(
+        `.${LIBRARY_CLASS.nav}:has(.${LIBRARY_CLASS.navToggle} [data-loom-disclosed="false"]) .${LIBRARY_CLASS.navMenu}`
+      )
+      /** No control built means no gap left behind by the box that would have held it. */
+      expect(stylesheet).toContain(`.${LIBRARY_CLASS.navToggle}:empty`)
+      expect(stylesheet).toContain("@media (max-width: 47.99rem)")
+    })
+
+    it("declares the control and its one name, in both palettes", () => {
+      const nav = registry.primitives.find((primitive) => primitive.type === "loom.nav")
+
+      expect(nav?.behaviours).toEqual(["disclose"])
+      /** One name, not two — `aria-expanded` carries the state (0092). */
+      expect(nav?.text["disclose"]).toBe("Menu")
+
+      for (const theme of [EDITORIAL, BOLD]) {
+        const { markup, diagnostics } = render(chromePage(theme))
+
+        expect(diagnostics).toEqual([])
+        expect(markup).toContain(`class="${LIBRARY_CLASS.navToggle}"`)
+      }
+    })
+  })
+
   it("marks the page the reader is on, which is the whole reason `current` exists", () => {
     const { markup } = render(chromePage(EDITORIAL))
 
@@ -2517,9 +2623,20 @@ describe("the targets the library declares", () => {
   })
 
   it("declares nothing on a container, since a container is not a target", () => {
-    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
+    for (const type of ["loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
       expect(declarationOf(type)).toBeUndefined()
     }
+  })
+
+  /**
+   * `loom.nav` was in the list above until it took a disclosure control, and it
+   * is out of it because the primitive changed rather than because the rule
+   * did. A container that places a `<button>` *is* a target — the registry
+   * refuses the behaviour without the declaration (0086), and the declaration
+   * is what keeps a menu button from being nested inside an anchor.
+   */
+  it("declares a target on the one container that places a control", () => {
+    expect(declarationOf("loom.nav")).toBe("always")
   })
 
   it("names only props the schema declares, which the registry is what enforces", () => {
@@ -3400,7 +3517,7 @@ describe("the prose vocabulary", () => {
     expect(aside).toContain("Before you start")
     expect(aside).not.toMatch(/<h[1-6]/)
     expect(aside).toContain("border-inline-start:3px solid var(--loom-accent)")
-    expect(propsOfType("loom.callout")).toEqual(["title", "tone"])
+    expect(propsOfType("loom.callout")).toEqual(["anchor", "title", "tone"])
   })
 
   it("places the marker in its gutter ahead of the content it introduces", () => {
@@ -4418,6 +4535,117 @@ describe("the band that moves", () => {
     expect(markup).toMatch(/aspect-ratio:1 \/ 1/)
   })
 
+  /**
+   * The allowlist half of 0095, which is the deployment's rather than this
+   * primitive's. What is checked here is only that the primitive honours the
+   * verdict it is handed — in both directions, because a check that a page
+   * cannot fail is decoration.
+   */
+  describe("the frame the deployment did not permit", () => {
+    const embedded = (src: string, theme: Record<string, string>): LoomTree => {
+      const idFactory = sequentialIdFactory()
+
+      return createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: theme },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.embed",
+              props: { src, title: "A film about the framework" },
+            }),
+          ],
+        }),
+        idFactory
+      )
+    }
+
+    const PERMITTED = "https://player.example.com/embed/loom-in-ninety-seconds"
+
+    it("draws the box and says so, rather than framing an origin nobody registered", () => {
+      for (const theme of [EDITORIAL, BOLD]) {
+        const { markup } = render(embedded("https://elsewhere.example.net/x", theme))
+
+        expect(markup).not.toContain("<iframe")
+        expect(markup).toContain("This content cannot be shown here.")
+        /** The box keeps its ratio, so the bands around a refused embed do not move. */
+        expect(markup).toMatch(/aspect-ratio:16 \/ 9/)
+        /**
+         * The visitor is told the page is not broken and nothing more. Naming
+         * the origin or the registry here would put a deployment's shape on a
+         * public page; the reason belongs in the diagnostics.
+         */
+        expect(markup).not.toContain("elsewhere.example.net")
+      }
+    })
+
+    it("refuses everything when the deployment registered nothing at all", () => {
+      const { markup } = render(embedded(PERMITTED, EDITORIAL), false, null)
+
+      expect(markup).not.toContain("<iframe")
+      expect(markup).toContain("This content cannot be shown here.")
+    })
+
+    /**
+     * The half that makes the check binding rather than advisory. Two strings
+     * that are one origin to the allowlist can be two documents to a browser,
+     * so what is placed is the seam's normalised URL and never the prop.
+     */
+    it("places the seam's normalised url, not the string the tree carried", () => {
+      const { markup } = render(embedded("https://player.example.com:443/embed/x", EDITORIAL))
+
+      expect(markup).toContain("<iframe")
+      expect(markup).toContain('src="https://player.example.com/embed/x"')
+      expect(markup).not.toContain(":443")
+    })
+
+    it("frames a permitted origin under both palettes, with nothing left unhonoured", () => {
+      for (const theme of [EDITORIAL, BOLD]) {
+        const { markup, diagnostics } = render(embedded(PERMITTED, theme))
+
+        expect(diagnostics).toEqual([])
+        expect(markup).toContain(`src="${PERMITTED}"`)
+        expect(markup).not.toContain("This content cannot be shown here.")
+      }
+    })
+  })
+
+  /**
+   * 0093 arrived after this primitive was written and the echo was built from
+   * `children`, because there was nothing else to build it from.
+   *
+   * **What this can assert is weaker than the change**, and the reason is worth
+   * writing down. The echo exists only when the page is published and identity
+   * exists only when it is being edited — 0091 holds the band still for an
+   * editor, and a still band has no echo — so the two conditions this change is
+   * about are mutually exclusive in this primitive and no render of it can show
+   * a duplicated id either before or after. That is precisely the finding's
+   * point: the old code was correct *by accident of where it is used* rather
+   * than by construction, and an accident is not a property.
+   *
+   * So what is held here is the visible half — the copy is still a copy, and it
+   * still disappears for an editor. The identity half is the render seam's to
+   * prove, and `render/decorative.test.ts` proves it there.
+   */
+  it("keeps the marquee's echo a copy of its children, and still drops it for an editor", () => {
+    const echoOf = (markup: string): string | undefined =>
+      new RegExp(`<div class="${LIBRARY_CLASS.marqueeRun} ${LIBRARY_CLASS.marqueeEcho}"[\\s\\S]*`)
+        .exec(markup)?.[0]
+
+    for (const theme of [EDITORIAL, BOLD]) {
+      const published = echoOf(render(motionPage(theme)).markup)
+
+      expect(published).toBeDefined()
+      /** The same children, not no children — a decorative copy is a copy. */
+      expect(published).toContain("Meridian")
+      expect(published).toContain("Perihelion")
+      /** Nothing in a published render carries identity, echo or otherwise. */
+      expect(published).not.toContain("data-loom-node")
+
+      expect(echoOf(render(motionPage(theme), true).markup)).toBeUndefined()
+    }
+  })
+
   it("refuses a frame with no accessible name and one with a scheme that is not http", () => {
     const embed = registry.primitives.find((primitive) => primitive.type === "loom.embed")
 
@@ -4874,5 +5102,287 @@ describe("what you can book, and why you should be believed", () => {
      */
     expect(stylesheet).toContain(".loom-offering-action {\n  display: grid;\n  margin-block-start: auto;\n}")
     expect(render(bookablePage(EDITORIAL)).markup).toContain("align-items:stretch")
+  })
+})
+
+/**
+ * The two bands that explain rather than sell, and the anchor that lands a
+ * reader on either of them.
+ */
+const explainerPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const step = (props: JsonObject) => buildElement(idFactory, { type: "loom.milestone", props })
+
+  const steps = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "how-it-works", eyebrow: "How it works" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "Four steps from a request to a page")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.milestone-row",
+        props: {},
+        children: [
+          step({ marker: "01", title: "Ask", body: "A visitor says what they came for.", state: "done" }),
+          step({ marker: "02", title: "Propose", body: "The model answers in operations, never in code.", state: "done" }),
+          step({ marker: "03", title: "Gate", body: "Every operation is weighed before it lands.", state: "current" }),
+          step({ marker: "04", title: "Apply", body: "The page changes, and the change has an inverse.", state: "planned" }),
+        ],
+      }),
+    ],
+  })
+
+  const logo = (name: string) => buildElement(idFactory, { type: "loom.logo", props: { name } })
+
+  const worksWith = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "works-with", eyebrow: "Works with" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.orbit",
+        props: { rings: "two", direction: "anticlockwise" },
+        children: [
+          buildSlot(idFactory, "mark", [
+            buildElement(idFactory, {
+              type: "loom.icon",
+              props: { label: "Loom", shape: "circle", tone: "strong", size: "large" },
+              children: [buildText(idFactory, "◈")],
+            }),
+          ]),
+          logo("Postgres"),
+          logo("Vercel"),
+          logo("Next.js"),
+          logo("Anthropic"),
+          logo("Drizzle"),
+          logo("Supabase"),
+        ],
+      }),
+    ],
+  })
+
+  const caveat = buildElement(idFactory, {
+    type: "loom.callout",
+    props: { anchor: "the-caveat", title: "Before you start" },
+    children: [buildText(idFactory, "A gate you have not configured refuses everything, which is the safe direction.")],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [steps, worksWith, caveat],
+    }),
+    idFactory
+  )
+}
+
+describe("how it works, and what it works with", () => {
+  it("renders both bands with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(explainerPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Four steps from a request to a page")
+    expect(markup).toContain("The model answers in operations, never in code.")
+    expect([...markup.matchAll(/class="loom-milestone"/g)]).toHaveLength(4)
+    expect([...markup.matchAll(/class="loom-orbit-seat/g)]).toHaveLength(6)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(explainerPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(explainerPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(explainerPage(BOLD)).diagnostics).toEqual([])
+    expect(render(explainerPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("lays one child two ways, because its layout is in the stylesheet and not on it", () => {
+    /**
+     * The whole argument for a second container rather than a `loom.step`. An
+     * inline style beats a rule, so a milestone that set its own grid columns
+     * could only ever have been drawn down a rail — the arrangement would have
+     * been unreachable from every parent, and the reachable answer would have
+     * been a second child type rendering the same three fields.
+     *
+     * Asserted from both ends: the entry carries no layout of its own, and the
+     * stylesheet carries both arrangements of it.
+     */
+    const { markup } = render(explainerPage(EDITORIAL))
+    const { stylesheet, tree } = splitStylesheet(markup)
+    const entry = tree.slice(tree.indexOf('class="loom-milestone"'))
+
+    expect(entry.slice(0, entry.indexOf(">"))).not.toContain("grid-template-columns")
+    expect(stylesheet).toContain(".loom-milestone {\n  display: grid;\n  grid-template-columns: 5.5rem auto 1fr;")
+    expect(stylesheet).toContain(".loom-milestone-row > .loom-milestone {\n  flex: 1 1 14rem;\n  grid-template-columns: 1fr;")
+    expect(stylesheet).toContain(".loom-milestone-row > li:last-child .loom-rail-line")
+  })
+
+  it("keeps one vocabulary across the two arrangements, rather than two words for one thing", () => {
+    /**
+     * `rail: "none"` means the same thing on the row as on the list, and it is
+     * the *same class*: the rule is scoped to a library class rather than to
+     * the list, so the two containers cannot drift apart on what it means.
+     */
+    const idFactory = sequentialIdFactory()
+    const rowOf = (props: JsonObject): string =>
+      splitStylesheet(
+        render(
+          createTree(
+            buildElement(idFactory, {
+              type: "loom.milestone-row",
+              props,
+              children: [buildElement(idFactory, { type: "loom.milestone", props: { title: "One" } })],
+            }),
+            idFactory
+          )
+        ).markup
+      ).tree
+
+    expect(propsOfType("loom.milestone-row")).toEqual(propsOfType("loom.milestone-list"))
+    expect(rowOf({ rail: "none" })).toContain(LIBRARY_CLASS.railNone)
+    expect(rowOf({})).not.toContain(LIBRARY_CLASS.railNone)
+    expect(rowOf({ density: "tight" })).toContain("gap:var(--loom-spacing-4)")
+    expect(rowOf({ density: "loose" })).toContain("gap:var(--loom-spacing-6)")
+  })
+
+  it("seats each child by its angle, and leaves every radius to the stylesheet", () => {
+    /**
+     * The split this band turns on. An **angle** is a fact about one child
+     * among its siblings — the third of six — which no static rule can say, so
+     * it is computed per node. A **radius** is a fact about the arrangement, so
+     * it is in the stylesheet where a `@container` rule can open the inner ring
+     * out on a narrow band. If a radius were inline it would beat that rule,
+     * and the phone rendering would be the one the screenshots caught: half the
+     * marks drawn on top of the thing they circle.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    const seats = [
+      ...tree.matchAll(
+        new RegExp(`class="${LIBRARY_CLASS.orbitSeat}[^"]*" style="--loom-orbit-x:(-?[0-9.]+);--loom-orbit-y:(-?[0-9.]+)"`, "g")
+      ),
+    ]
+
+    expect(seats).toHaveLength(6)
+    /** The first seat is at twelve o'clock: no horizontal offset, a full radius up. */
+    expect(seats[0]?.slice(1, 3)).toEqual(["0.0000", "-1.0000"])
+    expect(new Set(seats.map((seat) => `${seat[1]}/${seat[2]}`)).size).toBe(6)
+    /** Alternating seats take the inner ring, which is all `rings: "two"` means. */
+    expect([...tree.matchAll(new RegExp(`${LIBRARY_CLASS.orbitSeat} ${LIBRARY_CLASS.orbitInner}`, "g"))]).toHaveLength(3)
+    expect(tree).not.toContain("--loom-orbit-radius")
+    expect(stylesheet).toContain("@container (max-width: 26rem) {\n  .loom-orbit-inner {\n    --loom-orbit-radius: 38%;\n  }")
+    /** Nothing about the motion is on an element either: the tree carries no duration at all. */
+    expect(tree).not.toContain("animation")
+  })
+
+  it("turns the ring one way and every mark on it the other, at one duration", () => {
+    /**
+     * A ring that rotates rotates everything on it, so the counter-rotation is
+     * what keeps a wordmark the right way up. The two have to run at the same
+     * rate — a mismatch is a logo tumbling slowly rather than staying upright —
+     * which is why they are one multiple written twice in one file rather than
+     * two numbers in two.
+     */
+    const { stylesheet } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    const duration = "calc(var(--loom-motion-slow) * 80)"
+
+    expect(stylesheet).toContain(`.loom-orbit-spinner {\n  position: absolute;\n  inset: 0;\n  animation: loom-orbit ${duration} linear infinite;`)
+    expect(stylesheet).toContain(`animation: loom-orbit ${duration} linear infinite reverse;`)
+    expect(stylesheet).toContain(".loom-orbit-reverse .loom-orbit-spinner {\n  animation-direction: reverse;\n}")
+    expect(stylesheet).toContain(".loom-orbit-spinner, .loom-orbit-item {\n    animation: none;\n  }")
+  })
+
+  it("holds still while the page is being edited, the way a marquee does", () => {
+    /**
+     * `loom.marquee`'s rule for a second primitive: a moving target is hostile
+     * to the one activity edit mode exists for, and `loom.editable` being
+     * present only in edit mode is the whole test.
+     */
+    expect(splitStylesheet(render(explainerPage(EDITORIAL), true).markup).tree).toContain(LIBRARY_CLASS.orbitStill)
+    expect(splitStylesheet(render(explainerPage(EDITORIAL)).markup).tree).not.toContain(LIBRARY_CLASS.orbitStill)
+  })
+
+  it("places the mark by its own middle, so it is not a sheet lying over the ring", () => {
+    /**
+     * The defect a full-inset overlay makes invisibly: the mark is centred in
+     * the band, so `inset: 0` with `place-items: center` draws it in the right
+     * place *and* covers every logo on the ring with a transparent box that
+     * eats the pointer. Asserted because both renderings look identical.
+     */
+    const { tree } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    const glyph = tree.indexOf("◈")
+    const mark = tree.slice(tree.lastIndexOf("<div", glyph - 200), glyph)
+
+    expect(tree).not.toMatch(/position:absolute;inset:0;display:grid;place-items:center/)
+    expect(mark).toContain("position:absolute;inset-inline-start:50%;inset-block-start:50%")
+    expect(mark).toContain("transform:translate(-50%, -50%)")
+  })
+
+  it("renders an id where a band was named, and only on the bands a menu points at", () => {
+    /**
+     * The 26 August finding: a Loom page could link to any document on the web
+     * except its own second screen, because nothing in the library rendered an
+     * `id`. It is three primitives rather than seventy for the reason 0014
+     * gives — a prop on every schema to serve the three things a table of
+     * contents lists is a cost, and a tree that needs to point at something
+     * finer wraps it in a section.
+     */
+    const { markup } = render(explainerPage(EDITORIAL))
+
+    expect(markup).toContain('id="how-it-works"')
+    expect(markup).toContain('id="works-with"')
+    expect(markup).toContain('id="the-caveat"')
+    expect(markup).toContain("scroll-margin-block-start:var(--loom-spacing-6)")
+
+    for (const type of ["loom.section", "loom.hero", "loom.callout"]) {
+      expect(propsOfType(type)).toContain("anchor")
+    }
+    for (const type of ["loom.card", "loom.milestone-row", "loom.orbit", "loom.stack"]) {
+      expect(propsOfType(type)).not.toContain("anchor")
+    }
+  })
+
+  it("refuses a fragment that is not one, rather than quietly rewriting it", () => {
+    /**
+     * An anchor is the one value in this library a model writes straight into
+     * the document as markup, so it is the one place to keep narrow: `id="my
+     * section"` is two attributes to a parser. A sanitiser would leave every
+     * link pointing at a name nobody wrote, so the seam reports it instead
+     * (0011) and the band renders without an id.
+     */
+    const idFactory = sequentialIdFactory()
+    const { markup, diagnostics } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { anchor: "How It Works" },
+          children: [buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, "Body")] })],
+        }),
+        idFactory
+      )
+    )
+
+    expect(diagnostics).toEqual([
+      {
+        code: "invalid-props",
+        nodeId: "n_3",
+        type: "loom.section",
+        issues: [{ path: "anchor", message: "an anchor is lower-case words joined by single hyphens" }],
+      },
+    ])
+    /**
+     * And the band does not render, which is worth asserting rather than
+     * assuming: the seam refuses a node whose props do not validate, so a
+     * mistyped anchor costs the whole section and not just its id. That is
+     * every prop's rule (0011) rather than something an anchor makes worse,
+     * and it is the reason the message says what a valid one looks like.
+     */
+    expect(markup).toBe("")
   })
 })

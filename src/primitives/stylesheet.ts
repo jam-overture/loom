@@ -86,10 +86,33 @@ export const LIBRARY_CLASS = {
   railTight: "loom-rail-tight",
   /** The same list with the connecting line dropped, dots kept. */
   railNone: "loom-rail-none",
+  /**
+   * One `loom.milestone`, and the reason its own layout is here rather than on
+   * the element: **a child that lays itself out inline cannot be rearranged by
+   * the container it is in.** An inline style beats a rule, so the marker
+   * column, the rail's direction and the dot's optical offset were all
+   * unreachable from any parent — and a second arrangement of the same content
+   * model is exactly what 0054 says a second container is for. Moving four
+   * declarations into this file is what let `loom.milestone-row` exist without
+   * a second child type that renders the same three fields.
+   *
+   * It stays on the *entry* rather than on the list, which is the property the
+   * inline version was protecting: a milestone that finds itself outside a
+   * list still lays itself out, because the class travels with the child.
+   */
+  milestone: "loom-milestone",
+  /** Its marker cell — right-aligned on a rail, above the title in a row. */
+  railMarker: "loom-rail-marker",
+  /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */
+  railTrack: "loom-rail-track",
+  /** The dot itself, offset onto the marker's first line where the marker is beside it. */
+  railDot: "loom-rail-dot",
   /** One entry's connector, hidden on the last entry because only CSS knows which that is. */
   railLine: "loom-rail-line",
   /** One entry's content cell, which carries the gap to the entry below it. */
   railBody: "loom-rail-body",
+  /** A `loom.milestone-row`: the same entries laid across, as a process band. */
+  milestoneRow: "loom-milestone-row",
   /** A card whose title anchor is stretched over the whole surface. */
   cover: "loom-cover",
   /** That anchor. Its `::after` is what makes the surface clickable. */
@@ -209,12 +232,54 @@ export const LIBRARY_CLASS = {
   offeringAction: "loom-offering-action",
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
+  /**
+   * A `loom.nav`. The bar itself, the box holding its disclosure control, and
+   * the menu that control opens and closes.
+   *
+   * The menu's `display` is here rather than on the element, and that is the
+   * whole reason the disclosure works at all: 0092's contract is a rule that
+   * hides the region, and an inline `display: flex` would beat it. Its
+   * alignment stays inline, because that varies by prop and nothing needs to
+   * override it.
+   *
+   * The drawer aligns its items to `flex-start` rather than stretching them,
+   * and that is a rendering decision rather than a tidiness one: the current
+   * item is marked by an underline the link paints across its own box, so a
+   * stretched row draws that rule the full width of the bar. One mark that
+   * renders as a text underline on a laptop and as a full-width rule on a
+   * phone is the same primitive saying two different things.
+   */
+  nav: "loom-nav",
+  navToggle: "loom-nav-toggle",
+  navMenu: "loom-nav-menu",
+  /** Its actions end, which takes the slack on a phone when no control was built. */
+  navActions: "loom-nav-actions",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
   mosaicAlternating: "loom-mosaic-alternating",
   mosaicShowcase: "loom-mosaic-showcase",
   mosaicLead: "loom-mosaic-lead",
+  /**
+   * A `loom.orbit`. The square stage; the dashed guides nothing sits on; the
+   * layer that turns; one seat on it; the item in that seat, which turns the
+   * other way at the same rate so a wordmark stays the right way up.
+   *
+   * The two animations are one duration written twice and they have to stay
+   * equal — a counter-rotation that runs at a different rate is a logo that
+   * tumbles slowly instead of staying upright — so both read the same
+   * multiple of `--loom-motion-slow` and neither is expressible inline.
+   */
+  orbit: "loom-orbit",
+  orbitGuide: "loom-orbit-guide",
+  /** A seat or a guide on the second ring, which is the one a narrow band opens out. */
+  orbitInner: "loom-orbit-inner",
+  orbitSpinner: "loom-orbit-spinner",
+  orbitSeat: "loom-orbit-seat",
+  orbitItem: "loom-orbit-item",
+  /** The ring turning the other way, and the still rendering it takes while somebody edits it. */
+  orbitReverse: "loom-orbit-reverse",
+  orbitStill: "loom-orbit-still",
 } as const
 
 /**
@@ -227,6 +292,10 @@ const CSS = `
 @keyframes loom-rise {
   from { opacity: 0; transform: translate3d(0, 0.9rem, 0); }
   to { opacity: 1; transform: none; }
+}
+@keyframes loom-orbit {
+  from { transform: rotate(0turn); }
+  to { transform: rotate(1turn); }
 }
 @keyframes loom-aurora {
   0% { transform: translate3d(-6%, -4%, 0) scale(1); }
@@ -274,6 +343,55 @@ details[open] > summary .loom-marker {
 .loom-mark:hover, a:hover > .loom-mark, a:focus-visible > .loom-mark {
   filter: none;
   opacity: 1;
+}
+.loom-milestone {
+  display: grid;
+  grid-template-columns: 5.5rem auto 1fr;
+  column-gap: var(--loom-spacing-3);
+}
+.loom-milestone > .loom-rail-marker {
+  text-align: end;
+}
+.loom-milestone > .loom-rail-track {
+  flex-direction: column;
+}
+.loom-rail-dot {
+  margin-block-start: 0.45em;
+}
+.loom-rail-line {
+  flex: 1 1 auto;
+  width: 2px;
+}
+.loom-milestone-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.loom-milestone-row > .loom-milestone {
+  flex: 1 1 14rem;
+  grid-template-columns: 1fr;
+  row-gap: var(--loom-spacing-2);
+  align-content: start;
+}
+.loom-milestone-row > .loom-milestone > .loom-rail-track {
+  order: 1;
+  flex-direction: row;
+}
+.loom-milestone-row > .loom-milestone > .loom-rail-marker {
+  order: 2;
+  text-align: start;
+}
+.loom-milestone-row > .loom-milestone > .loom-rail-body {
+  order: 3;
+}
+.loom-milestone-row .loom-rail-dot {
+  margin-block-start: 0;
+}
+.loom-milestone-row .loom-rail-line {
+  width: auto;
+  height: 2px;
+}
+.loom-milestone-row > li:last-child .loom-rail-line {
+  visibility: hidden;
 }
 .loom-rail > li .loom-rail-body {
   padding-block-end: var(--loom-spacing-5);
@@ -551,6 +669,37 @@ details[open] > summary .loom-marker {
 .loom-credential {
   position: relative;
 }
+.loom-nav-menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--loom-spacing-5);
+}
+.loom-nav-toggle {
+  display: none;
+}
+.loom-nav-toggle:empty {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .loom-nav-toggle {
+    display: block;
+    margin-inline-start: auto;
+  }
+  .loom-nav:not(:has(.loom-nav-toggle > *)) .loom-nav-actions {
+    margin-inline-start: auto;
+  }
+  .loom-nav-menu {
+    order: 1;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--loom-spacing-3);
+  }
+  .loom-nav:has(.loom-nav-toggle [data-loom-disclosed="false"]) .loom-nav-menu {
+    display: none;
+  }
+}
 .loom-mosaic {
   display: grid;
   grid-template-columns: 1fr;
@@ -584,7 +733,61 @@ details[open] > summary .loom-marker {
     grid-column: span 6;
   }
 }
+.loom-orbit {
+  position: relative;
+  aspect-ratio: 1;
+  width: 100%;
+  container-type: inline-size;
+}
+.loom-orbit-guide, .loom-orbit-seat {
+  position: absolute;
+  --loom-orbit-radius: 38%;
+}
+.loom-orbit-inner {
+  --loom-orbit-radius: 22%;
+}
+.loom-orbit-guide {
+  inset: calc(50% - var(--loom-orbit-radius));
+  border: 1px dashed var(--loom-border-subtle);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.loom-orbit-seat {
+  inset-inline-start: calc(50% + var(--loom-orbit-x) * var(--loom-orbit-radius));
+  inset-block-start: calc(50% + var(--loom-orbit-y) * var(--loom-orbit-radius));
+  transform: translate(-50%, -50%);
+}
+@container (max-width: 26rem) {
+  .loom-orbit-inner {
+    --loom-orbit-radius: 38%;
+  }
+  .loom-orbit-guide.loom-orbit-inner {
+    display: none;
+  }
+}
+.loom-orbit-spinner {
+  position: absolute;
+  inset: 0;
+  animation: loom-orbit calc(var(--loom-motion-slow) * 80) linear infinite;
+}
+.loom-orbit-item {
+  display: grid;
+  place-items: center;
+  animation: loom-orbit calc(var(--loom-motion-slow) * 80) linear infinite reverse;
+}
+.loom-orbit-reverse .loom-orbit-spinner {
+  animation-direction: reverse;
+}
+.loom-orbit-reverse .loom-orbit-item {
+  animation-direction: normal;
+}
+.loom-orbit-still .loom-orbit-spinner, .loom-orbit-still .loom-orbit-item {
+  animation: none;
+}
 @media (prefers-reduced-motion: reduce) {
+  .loom-orbit-spinner, .loom-orbit-item {
+    animation: none;
+  }
   .loom-rise, .loom-aurora {
     animation: none;
     opacity: 1;

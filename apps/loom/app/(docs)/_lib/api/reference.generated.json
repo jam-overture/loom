@@ -1565,6 +1565,20 @@
               "summary": ""
             },
             {
+              "name": "CompositionOutcomeKind",
+              "kind": "type",
+              "signature": "type CompositionOutcomeKind = CompositionOutcome[\"kind\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "COMPOSITION_OUTCOME_KINDS",
+              "kind": "value",
+              "signature": "const COMPOSITION_OUTCOME_KINDS: readonly CompositionOutcomeKind[]",
+              "truncated": false,
+              "summary": "The five ways an ask can end, in the order a host meets them."
+            },
+            {
               "name": "composeChange",
               "kind": "function",
               "signature": "const composeChange: (runtime: CompositionRuntime, tree: LoomTree, intent: EditIntent) => Promise<CompositionOutcome>",
@@ -2286,6 +2300,13 @@
               "summary": ""
             },
             {
+              "name": "channelsOf",
+              "kind": "function",
+              "signature": "const channelsOf: (colour: string) => readonly [number, number, number] | undefined",
+              "truncated": false,
+              "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
+            },
+            {
               "name": "contrastRatio",
               "kind": "function",
               "signature": "const contrastRatio: (a: string, b: string) => number | undefined",
@@ -2813,6 +2834,83 @@
           ]
         },
         {
+          "module": "theme/separation",
+          "title": "Separation",
+          "summary": "Whether two slots a reader is meant to tell apart are far enough apart to be told apart. The other half of what a palette owes a page.",
+          "symbols": [
+            {
+              "name": "JUST_NOTICEABLE_DIFFERENCE",
+              "kind": "value",
+              "signature": "const JUST_NOTICEABLE_DIFFERENCE = 2.3",
+              "truncated": false,
+              "summary": "ΔE below which two colours are the same colour to a reader."
+            },
+            {
+              "name": "colourDifference",
+              "kind": "function",
+              "signature": "const colourDifference: (a: string, b: string) => number | undefined",
+              "truncated": false,
+              "summary": "The CIE76 colour difference between two colours, or `undefined` when either is a form `channelsOf` declines to guess at."
+            },
+            {
+              "name": "PeerBasis",
+              "kind": "type",
+              "signature": "type PeerBasis = \"colour-only\" | \"also-marked\";",
+              "truncated": false,
+              "summary": "How the reader is told the two apart, which decides what a collapse means."
+            },
+            {
+              "name": "PeerPairing",
+              "kind": "type",
+              "signature": "type PeerPairing = (PeerBase & {\n    readonly basis: \"colour-only\";\n}) | (PeerBase & {\n    readonly basis: \"also-marked\";\n    readonly mark: PaletteSlot;\n});",
+              "truncated": false,
+              "summary": "Two slots a reader is meant to tell apart, and what tells them apart."
+            },
+            {
+              "name": "PALETTE_PEER_PAIRINGS",
+              "kind": "value",
+              "signature": "const PALETTE_PEER_PAIRINGS: readonly PeerPairing[]",
+              "truncated": false,
+              "summary": "The pairs the library actually asks a reader to distinguish."
+            },
+            {
+              "name": "MeasuredPeer",
+              "kind": "type",
+              "signature": "type MeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly difference: number;\n    /**\n     * How far the mark is from whichever of the two it is nearer to — the mark's\n     * worst case, since it has to be visible against both.\n     *\n     * `undefined` for a `colour-only` peer, which has no mark, and for a mark\n     * written in a form this cannot measure. The second case judges the pair on\n     * its colours alone, which is the safe direction: a defence that cannot be\n     * measured is not counted as one.\n     */\n    readonly markDifference: number | undefined;\n    readonly separated: boolean;\n};",
+              "truncated": false,
+              "summary": "A peer that was measured, whether or not it came apart."
+            },
+            {
+              "name": "UnmeasuredPeer",
+              "kind": "type",
+              "signature": "type UnmeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly first: string;\n    readonly second: string;\n};",
+              "truncated": false,
+              "summary": "A peer whose colours could not be measured, and which colour stopped it."
+            },
+            {
+              "name": "PaletteSeparation",
+              "kind": "type",
+              "signature": "type PaletteSeparation = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPeer[];\n    /**\n     * Colour-only peers under the threshold: two things that look like one thing,\n     * with nothing else to go on. The list a host asserts empty.\n     */\n    readonly collapsed: readonly MeasuredPeer[];\n    /**\n     * Marked peers whose colours have collapsed **and** whose mark has too — a\n     * card that is neither filled nor outlined. Separate from `collapsed` because\n     * it is a different defect with a different fix, and because a marked pair\n     * whose mark is doing its job is not a defect at all.\n     */\n    readonly unmarked: readonly MeasuredPeer[];\n    /** Neither separated nor collapsed: a colour this cannot measure. */\n    readonly unmeasured: readonly UnmeasuredPeer[];\n};",
+              "truncated": false,
+              "summary": "What one palette does with the pairs its reader has to tell apart."
+            },
+            {
+              "name": "auditSeparation",
+              "kind": "function",
+              "signature": "const auditSeparation: (palette: Palette, peers?: readonly PeerPairing[]) => PaletteSeparation",
+              "truncated": false,
+              "summary": "Measures every declared peer in one palette. Refuses nothing."
+            },
+            {
+              "name": "describeSeparationAudit",
+              "kind": "function",
+              "signature": "const describeSeparationAudit: (audit: PaletteSeparation) => string",
+              "truncated": false,
+              "summary": "One line per problem, for a CLI or a failing test's message. Empty when clean."
+            }
+          ]
+        },
+        {
           "module": "theme/style-presets",
           "title": "Style presets",
           "summary": "The seven style presets the starter library ships beyond the first three, and the reason there are seven rather than seventeen.",
@@ -3173,6 +3271,20 @@
               "signature": "type TreeOperation = InsertOperation | RemoveOperation | MoveOperation | ConfigureOperation;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TreeOperationName",
+              "kind": "type",
+              "signature": "type TreeOperationName = TreeOperation[\"op\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TREE_OPERATIONS",
+              "kind": "value",
+              "signature": "const TREE_OPERATIONS: readonly TreeOperationName[]",
+              "truncated": false,
+              "summary": "The whole vocabulary of structural change, in the order the doc comment above argues it."
             },
             {
               "name": "treeDeltaSchema",
@@ -5389,7 +5501,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent, and its rows carry the gap\n     * between them. Both are here rather than inline because neither is\n     * expressible on the element that needs it — `::marker` is a pseudo-element,\n     * and a row's gap is a fact about the *list* that only the row can apply.\n     */\n    readonly list: \"loom-list\";\n    /** The same list set tight — points to scan rather than points to read. */\n    readonly listTight: \"loom-list-tight\";\n    /** The same list set loose, for rows that are a sentence each. */\n    readonly listLoose: \"loom-list-loose\";\n    /**\n     * A `loom.table`: the padding its cells share, and the rules between its\n     * rows. Both are the *table's* decisions applied to cells it does not render,\n     * which is the one thing an inline style cannot reach.\n     */\n    readonly table: \"loom-table\";\n    /** The same table drawn as a bordered surface, which is what makes its heading column stick. */\n    readonly tablePanel: \"loom-table-panel\";\n    /** The same table set tight — a spec to scan — and set loose, a page to read. */\n    readonly tableTight: \"loom-table-tight\";\n    readonly tableLoose: \"loom-table-loose\";\n    /** Vertical rules as well as horizontal ones, and no rules at all. */\n    readonly tableGrid: \"loom-table-grid\";\n    readonly tableFlush: \"loom-table-flush\";\n    /** One `loom.table-row`, so the whole row can answer a pointer. */\n    readonly tableRow: \"loom-table-row\";\n    /** A row the page is pointing at, whi\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent,\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -6988,6 +7100,20 @@
               "signature": "type TelemetryEvent = {\n    readonly type: \"intent-received\";\n    readonly intent: IntentSummary;\n} | {\n    readonly type: \"policy-resolved\";\n    readonly intentId: IntentId;\n    readonly policyId: string;\n    /** Absent on a record written before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n} | {\n    readonly type: \"interpretation-failed\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-proposed\";\n    readonly proposal: ProposedChange;\n} | {\n    readonly type: \"assessment-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-assessed\";\n    readonly assessment: AssessmentSummary;\n} | {\n    readonly type: \"disposition-decided\";\n    readonly proposalId: ProposalId;\n    readonly disposition: Disposition;\n} | {\n    readonly type: \"repair-requested\";\n    readonly refusedProposalId: ProposalId;\n    readonly reason: DispositionReason;\n} | {\n    readonly type: \"repair-failed\";\n    readonly refusedProposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-applied\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"application-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"intent-not-writable\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"proposal-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly type: \"hold-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"hold-confirmed\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"hold-discarded\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"change-committed\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"commit-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TelemetryEventType",
+              "kind": "type",
+              "signature": "type TelemetryEventType = TelemetryEvent[\"type\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TELEMETRY_EVENT_TYPES",
+              "kind": "value",
+              "signature": "const TELEMETRY_EVENT_TYPES: readonly TelemetryEventType[]",
+              "truncated": false,
+              "summary": "Every event the journal can hold, in the order the runtime writes them."
             },
             {
               "name": "telemetryRecordSchema",
