@@ -177,32 +177,28 @@ its willingness to admit when it has not looked.
 
 ## Tests
 
-| suite | on `main` | on this branch |
-| --- | --- | --- |
-| `(portal)` | 971 passed / 76 files | **980 passed / 76 files** |
+**`pnpm install && pnpm verify` — green, exit 0.** Build, typecheck, both suites
+and `next build` across all five route groups.
+
+| suite | on this branch |
+| --- | --- |
+| `@loom/runtime` | 1860 passed / 119 files — untouched |
+| `@loom/app` | 2544 passed / 161 files |
+| `(portal)` alone | **980 passed / 76 files**, from 971 |
 
 **Nine net new tests**, three files new (`_lib/waiting.ts` and its test,
 `_components/waiting-card.tsx` and its test, `portal/reading-order.test.ts`).
 Nothing was weakened, skipped or disabled.
 
-**`pnpm verify` is red on this branch, and every failure is inherited from
-`main`.** They are the docs and marketing failures the framework routine
-diagnosed this morning, plus the lessons one it filed; **#217 is open and repairs
-the first two**. Stated precisely rather than summarised:
-
-- `(docs)` — `scaffold.ts`'s exhaustive refusal table is missing
-  `framework-namespace`, from #195 and #191 merging against different bases.
-- `(marketing)` — `facts.test.ts` imports `DECISIONS_AT_LEAST` and
-  `DELTA_OPERATIONS` from a `copy.ts` that a later squash carried an older copy
-  over.
-- `(lessons)` — `run.test.ts` fails on `formTree is not defined`, filed to
-  `Loom lessons` as a pedagogical choice rather than a repair.
-
-**I did not carry those repairs here.** #217 contains all of them and is open; a
-second copy in this branch is the "two open pull requests from one routine
-touching one file" that the 28 August finding says produces the conflicts that
-cost the maintainer sixteen pull requests. The portal's own suite is green and its
-typecheck is clean; nothing in this diff is implicated in any of the three.
+**A note on how this got to green, because the sequence matters.** This branch was
+cut from `a289988`, where `pnpm verify` was red three ways — the record clash, five
+`(docs)` failures, six `(marketing)` ones and the lessons runner — none of which
+this lane could have caused or should have fixed. **#217 and #218 merged while this
+unit was being built**, and this branch is rebased onto the result rather than
+carrying a second copy of anybody's repair. That is the whole of the 28 August
+finding applied: two open pull requests from one routine touching one file is the
+conflict that cost the maintainer sixteen of them, and a lane duplicating another
+lane's in-flight fix is the same mistake with an extra step.
 
 ## What I did not do
 
@@ -221,8 +217,9 @@ typecheck is clean; nothing in this diff is implicated in any of the three.
 
 ## Recommendations
 
-1. **Merge #217.** It takes `main` from *fatal before any test runs, plus twelve
-   failures* to one, and every lane's merge gate is red until it lands.
-2. **Lesson 09 needs one sentence from `Loom lessons`.** It is the last failure on
-   `main` after #217 and both patches are already written out in `FINDINGS.md`.
-3. **Nothing blocking on this branch.**
+1. **Take the hold-store finding when a framework run has room.** It is the one
+   thing standing between this screen and the obvious next feature — a count
+   beside *Waiting on you* in the rail — and the shape it wants is written out in
+   `FINDINGS.md` with the reason 0020 permits it.
+2. **Nothing blocking.** `main` is green again as of #217 and #218, and this
+   branch is green on top of it.
