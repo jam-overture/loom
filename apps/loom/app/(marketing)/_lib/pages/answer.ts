@@ -118,8 +118,15 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
  * and wear the accent; refused and nothing-to-do hand them nothing and are an
  * aside. The title carries the verdict in both, and it is the only thing that
  * does.
+ *
+ * **Exported because the share card asks the same question.** A card carries no
+ * control at all, so the rule as written — *wear the accent if and only if you
+ * offer a primary control* — does not decide it on its own; what does is the
+ * half underneath, that a refusal must not be painted the tone this site uses to
+ * say "look here". The predicate is the same predicate and it lives here, once,
+ * rather than being restated in a file nobody reads beside this one.
  */
-const toneFor = (record: ChangeRecord): string =>
+export const toneFor = (record: ChangeRecord): "accent" | "neutral" =>
   record.awaitingYou || record.landed ? "accent" : "neutral"
 
 export const answerBand = (ids: IdFactory, context: AnswerContext): LoomNode => {

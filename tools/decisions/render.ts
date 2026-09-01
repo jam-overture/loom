@@ -1,5 +1,6 @@
 import { err, ok, type Result } from "../../src/result.js"
 
+import { missingNumbers } from "./numbering.js"
 import type { DecisionRecord } from "./record.js"
 
 /**
@@ -31,12 +32,30 @@ export const compressSection = (section: string): string =>
 const rowOf = (record: DecisionRecord): string =>
   `| [${String(record.number).padStart(4, "0")}](${record.file}) | ${record.title} | ${record.status} | ${compressSection(record.section)} |`
 
-export const renderIndex = (records: readonly DecisionRecord[]): string =>
-  [
+/**
+ * A number nothing on this branch claims, stated rather than skipped over.
+ *
+ * The index is the only place a hole in the sequence is visible once it stops
+ * being an exit code, and a reader who counts the rows and finds one short
+ * deserves to be told which one and not left to work it out. The row is also
+ * what a merge resolves: whichever branch holding this number lands first
+ * replaces the line with its own on the next `pnpm decisions:index`.
+ */
+const missingRowOf = (number: number): string =>
+  `| ${String(number).padStart(4, "0")} | *No record on this branch* | — | — |`
+
+export const renderIndex = (records: readonly DecisionRecord[]): string => {
+  const rows: readonly (readonly [number, string])[] = [
+    ...records.map((record) => [record.number, rowOf(record)] as const),
+    ...missingNumbers(records).map((number) => [number, missingRowOf(number)] as const),
+  ]
+
+  return [
     "| # | Title | Status | Section |",
     "| --- | --- | --- | --- |",
-    ...[...records].sort((a, b) => a.number - b.number).map(rowOf),
+    ...[...rows].sort(([a], [b]) => a - b).map(([, row]) => row),
   ].join("\n")
+}
 
 export type IndexProblem = { readonly code: "no-index-heading" }
 

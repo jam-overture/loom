@@ -289,6 +289,47 @@ export type TelemetryEvent =
       readonly failure: TelemetryFailure
     }
 
+export type TelemetryEventType = TelemetryEvent["type"]
+
+/**
+ * Every event the journal can hold, in the order the runtime writes them.
+ *
+ * `TelemetryEvent` is exhaustive in a `switch` and that is the case it was built
+ * for. What it cannot answer is **how many**, and three things ask: a page that
+ * says what fraction of the vocabulary it is showing, a dashboard that needs
+ * every bucket to exist before the first request rather than discovering them as
+ * they arrive, and anything checking a sink against §6. Each of those otherwise
+ * keeps its own copy, in its own order, with nothing to fail when a nineteenth
+ * lands.
+ *
+ * The order is the lifecycle rather than the alphabet: an episode reads
+ * top to bottom, so a list printed in this order is a story and a list sorted by
+ * name is eighteen strings. `event.test.ts` holds it against
+ * `telemetryEventSchema`, which is what keeps it complete — the schema is the
+ * boundary a record has to cross, so a type the schema accepts and this omits is
+ * the drift worth failing over.
+ */
+export const TELEMETRY_EVENT_TYPES: readonly TelemetryEventType[] = [
+  "intent-received",
+  "policy-resolved",
+  "interpretation-failed",
+  "change-proposed",
+  "assessment-failed",
+  "change-assessed",
+  "disposition-decided",
+  "repair-requested",
+  "repair-failed",
+  "change-applied",
+  "application-failed",
+  "intent-not-writable",
+  "proposal-held",
+  "hold-failed",
+  "hold-confirmed",
+  "hold-discarded",
+  "change-committed",
+  "commit-failed",
+]
+
 export const telemetryRecordSchema = z.object({
   treeId: treeIdSchema,
   occurredAt: z.string().datetime(),

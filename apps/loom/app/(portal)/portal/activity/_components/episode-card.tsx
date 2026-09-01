@@ -30,7 +30,25 @@ import { ProposalLine } from "./proposal-line"
  * way between the two was reading a number off one page and hunting for it on
  * the other.
  */
-export const EpisodeCard = ({ episode }: { readonly episode: IntentEpisode }) => {
+export const EpisodeCard = ({
+  episode,
+  scoped = false,
+}: {
+  readonly episode: IntentEpisode
+  /**
+   * Whether the screen is already showing one page and saying so.
+   *
+   * The corner link is what tells one card from the next on the unscoped
+   * screen, where every row could belong to a different page. On a scoped one
+   * it is the same id in the lead sentence, in the strip's "The page", and once
+   * more on every card — four printings of one fact, none of which tells the
+   * reader anything the one above it did not.
+   *
+   * Only the repeat goes. The page is still one click away, on the tab whose
+   * whole job is being that click.
+   */
+  readonly scoped?: boolean
+}) => {
   const view = viewOf(episode.resolution)
   const ask = describeAsk(episode)
   const failure = failureWords(episode.resolution)
@@ -42,9 +60,11 @@ export const EpisodeCard = ({ episode }: { readonly episode: IntentEpisode }) =>
           <strong className="font-medium">{view.label}</strong>
         </span>
 
-        <Link href={`/portal/pages/${episode.treeId}`} className="font-mono text-2xs">
-          {episode.treeId} →
-        </Link>
+        {!scoped && (
+          <Link href={`/portal/pages/${episode.treeId}`} className="font-mono text-2xs">
+            {episode.treeId} →
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col gap-1 text-xs">

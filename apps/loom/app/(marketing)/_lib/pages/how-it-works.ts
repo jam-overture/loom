@@ -12,6 +12,7 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 
 import type { PaperTrail, TrailLine } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { JOURNEY, ordinal, spell, spellCapitalised, STEPS, STEPS_CAPITALISED } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
   DECISIONS_URL,
@@ -39,7 +40,9 @@ const hero = (ids: IdFactory): LoomNode =>
     props: { backdrop: "grid", align: "start", stature: "standard", eyebrow: "The path a change takes" },
     children: [
       buildSlot(ids, "heading", [
-        heading(ids, 1, "Five steps, every time, in the same order", { balance: true }),
+        heading(ids, 1, `${STEPS_CAPITALISED} steps, every time, in the same order`, {
+          balance: true,
+        }),
       ]),
       prose(
         ids,
@@ -49,58 +52,30 @@ const hero = (ids: IdFactory): LoomNode =>
     ],
   })
 
+/**
+ * The steps themselves, off the one list that holds them (`journey.ts`).
+ *
+ * The markers are positions in that list rather than typed digits, which is the
+ * small half of the change. The large half is that every sentence on this page
+ * saying *how many* now comes off the same list, so a sixth step cannot arrive
+ * and leave five correct-looking sentences standing behind it.
+ */
 const journey = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "End to end" }, "How a change travels", [
     buildElement(ids, {
       type: "loom.milestone-list",
       props: { rail: "line", density: "loose" },
-      children: [
+      children: JOURNEY.map((step, index) =>
         buildElement(ids, {
           type: "loom.milestone",
           props: {
-            marker: "1",
-            title: "Someone asks for something",
-            body: "In their own words, about one particular page. Nothing has been worked out yet and nothing has moved.",
+            marker: String(index + 1),
+            title: step.title,
+            body: step.body,
             state: "done",
           },
-        }),
-        buildElement(ids, {
-          type: "loom.milestone",
-          props: {
-            marker: "2",
-            title: "The AI writes down what it wants to change",
-            body: "It is shown an outline of the page and the list of pieces it is allowed to use. It answers with an exact list of changes — add this, remove that, move the other, change a setting — and with why it wants them and who asked. That list is called a delta, and it is the only thing that travels from here on.",
-            state: "done",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.milestone",
-          props: {
-            marker: "3",
-            title: "The change is measured",
-            body: "Facts before opinions: what it touches, how much of the page it moves, and whether it can be taken back cleanly.",
-            state: "done",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.milestone",
-          props: {
-            marker: "4",
-            title: "Your rules decide",
-            body: "They read those measurements and give one of three answers — do it, hold it for a person to look at, or refuse it — and name the rule that answered. The part that applies them is called the Gate.",
-            state: "done",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.milestone",
-          props: {
-            marker: "5",
-            title: "What happened is written down",
-            body: "The change goes into a log with who asked for it and the change that would undo it. That log is the page\u2019s history — nothing is overwritten and nothing is lost.",
-            state: "done",
-          },
-        }),
-      ],
+        })
+      ),
     }),
   ])
 
@@ -221,9 +196,18 @@ export const glossaryLine = (entry: GlossaryEntry): string =>
 
 const glossary = (ids: IdFactory): LoomNode =>
   stack(ids, { direction: "column", gap: "snug", align: "start" }, [
-    prose(ids, "Five of our words appear in these lines. Here is each one first.", {
-      tone: "muted",
-    }),
+    /**
+     * The seventh typed count on this site, and the one nothing else on the
+     * page could have contradicted — which is why it is worth deriving anyway.
+     * `GLOSSARY` is directly below and is already exported for `voice.test.ts`;
+     * a sixth entry added there would have left this sentence saying five with
+     * every test on the site still green.
+     */
+    prose(
+      ids,
+      `${spellCapitalised(GLOSSARY.length)} of our words appear in these lines. Here is each one first.`,
+      { tone: "muted" }
+    ),
     buildElement(ids, {
       type: "loom.list",
       props: { marker: "bullet", density: "tight", size: "small", measured: true },
@@ -268,10 +252,14 @@ const stage = (ids: IdFactory, line: TrailLine, index: number): readonly LoomNod
  * screenshot, and not written by hand. A listener was attached to a real
  * request and these are the lines it was handed, whole and in order.
  *
- * **Six lines for five steps**, and the extra one is worth the sentence it
- * costs: which rules were in force is settled and written down *before*
- * anything is worked out, so what judged a change is never something anybody
- * has to reconstruct afterwards.
+ * **One more line than there are steps**, and the extra one is worth the
+ * sentence it costs: which rules were in force is settled and written down
+ * *before* anything is worked out, so what judged a change is never something
+ * anybody has to reconstruct afterwards.
+ *
+ * Both numbers in that sentence are counted rather than typed — the lines off
+ * the trail this band is printing, the steps off `journey.ts` — because the
+ * sentence is a claim about two lists the page is holding while it says it.
  *
  * It is long, and the length is the argument. A record you can fit on a slide
  * is a record that left something out.
@@ -289,7 +277,7 @@ const paperTrail = (ids: IdFactory, trail: PaperTrail): LoomNode =>
       ),
       prose(
         ids,
-        "Six lines for the five steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards.",
+        `${spellCapitalised(trail.lines.length)} lines for the ${STEPS} steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards.`,
         { tone: "muted", measured: true }
       ),
       glossary(ids),
@@ -300,21 +288,42 @@ const paperTrail = (ids: IdFactory, trail: PaperTrail): LoomNode =>
 /**
  * The one this site will not do, and the only line of it that differs.
  *
- * A refused change produces the same first four lines as an allowed one — the
- * same request, the same rules, the same list, the same measurement — and then
- * one answer that is not the same, followed by nothing. Printing the fifth line
- * on its own is not an economy: the absence of a sixth is half of what this
- * band is showing.
+ * A refused change produces the same opening lines as an allowed one — the same
+ * request, the same rules, the same list, the same measurement — and then one
+ * answer that is not the same, followed by nothing. Printing the verdict line
+ * on its own is not an economy: the absence of the line after it is half of
+ * what this band is showing.
+ *
+ * **The heading and the sentence under it used to disagree**, and the disagreement
+ * survived every check on this site: the heading said *the same five lines* and
+ * the sentence three inches below it said *the first four lines read exactly as
+ * they do above*. Four is the right number — the verdict is the line that
+ * differs, so it is not one of the ones that match — and the heading was
+ * counting the verdict among the things it is about to say is different.
+ *
+ * Both come off the trail now, which is the only reason to trust either.
  */
-const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode =>
-  section(
+const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode => {
+  /**
+   * Where the two records stop matching, counted off the one this page holds.
+   *
+   * A refusal is the allowed trail without its final line: everything up to the
+   * verdict is identical, the verdict itself is the line that differs, and the
+   * line that would have recorded a changed page is simply not there. All three
+   * of those positions were English words typed into prose until this run.
+   */
+  const matching = trail.lines.length - 2
+  const verdict = trail.lines.length - 1
+  const absent = trail.lines.length
+
+  return section(
     ids,
     { width: "wide", eyebrow: "And when the answer is no" },
-    "The same five lines, and then a different answer",
+    `The same ${spell(matching)} lines, and then a different answer`,
     [
       prose(
         ids,
-        "The front page will not let anything take away the statement of what this site is for. Ask it to and the first four lines read exactly as they do above — the request, the rules, the list, the measurement. This is the fifth. There is no sixth, because nothing happened to the page.",
+        `The front page will not let anything take away the statement of what this site is for. Ask it to and the first ${spell(matching)} lines read exactly as they do above — the request, the rules, the list, the measurement. This is the ${ordinal(verdict)}. There is no ${ordinal(absent)}, because nothing happened to the page.`,
         { measured: true }
       ),
       buildElement(ids, {
@@ -333,6 +342,7 @@ const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode =>
       ),
     ]
   )
+}
 
 const questions = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Questions" }, "About the mechanism", [
@@ -388,7 +398,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "Now watch it happen to a real page", [
     prose(
       ids,
-      "The five steps above are not a diagram of something that happens elsewhere. Ask a page to change and you can read every one of them, in order, as it runs.",
+      `The ${STEPS} steps above are not a diagram of something that happens elsewhere. Ask a page to change and you can read every one of them, in order, as it runs.`,
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
