@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" width="900" height="430" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="900" height="430" fill="#fbfbfa"/>
+
+  <text x="32" y="42" font-size="19" font-weight="600" fill="#1a1a1a">Thirty-five pull requests, and the second one is the expensive one</text>
+  <text x="32" y="66" font-size="13" fill="#6b6b6b">Measured with git merge-tree against main at 3a57feb, 30 August</text>
+
+  <!-- Panel one -->
+  <rect x="32" y="92" width="396" height="300" rx="8" fill="#ffffff" stroke="#e3e3e0"/>
+  <text x="52" y="122" font-size="13" font-weight="600" fill="#1a1a1a">Each one, on its own, against main today</text>
+
+  <g fill="#3f8f5c">
+    <rect x="52" y="140" width="352" height="9" rx="4"/>
+    <rect x="52" y="156" width="352" height="9" rx="4"/>
+    <rect x="52" y="172" width="352" height="9" rx="4"/>
+    <rect x="52" y="188" width="352" height="9" rx="4"/>
+    <rect x="52" y="204" width="352" height="9" rx="4"/>
+    <rect x="52" y="220" width="352" height="9" rx="4"/>
+    <rect x="52" y="236" width="352" height="9" rx="4"/>
+    <rect x="52" y="252" width="352" height="9" rx="4"/>
+    <rect x="52" y="268" width="352" height="9" rx="4"/>
+    <rect x="52" y="284" width="352" height="9" rx="4"/>
+  </g>
+  <rect x="52" y="300" width="352" height="9" rx="4" fill="#b8462f"/>
+
+  <text x="52" y="336" font-size="30" font-weight="600" fill="#3f8f5c">34</text>
+  <text x="92" y="336" font-size="13" fill="#4a4a4a">merge clean</text>
+  <text x="52" y="362" font-size="15" font-weight="600" fill="#b8462f">1</text>
+  <text x="70" y="362" font-size="13" fill="#4a4a4a">conflicts (#172, in src/primitives)</text>
+  <text x="52" y="382" font-size="12" fill="#8a8a8a">Nothing here looks like a backlog in trouble.</text>
+
+  <!-- Panel two -->
+  <rect x="472" y="92" width="396" height="300" rx="8" fill="#ffffff" stroke="#e3e3e0"/>
+  <text x="492" y="122" font-size="13" font-weight="600" fill="#1a1a1a">After any one of them is merged</text>
+
+  <rect x="492" y="140" width="352" height="9" rx="4" fill="#3f8f5c"/>
+  <g fill="#b8462f">
+    <rect x="492" y="156" width="352" height="9" rx="4"/>
+    <rect x="492" y="172" width="352" height="9" rx="4"/>
+    <rect x="492" y="188" width="352" height="9" rx="4"/>
+    <rect x="492" y="204" width="352" height="9" rx="4"/>
+    <rect x="492" y="220" width="352" height="9" rx="4"/>
+    <rect x="492" y="236" width="352" height="9" rx="4"/>
+    <rect x="492" y="252" width="352" height="9" rx="4"/>
+    <rect x="492" y="268" width="352" height="9" rx="4"/>
+    <rect x="492" y="284" width="352" height="9" rx="4"/>
+    <rect x="492" y="300" width="352" height="9" rx="4"/>
+  </g>
+
+  <text x="492" y="336" font-size="30" font-weight="600" fill="#b8462f">31</text>
+  <text x="534" y="336" font-size="13" fill="#4a4a4a">of the remaining 33 now conflict</text>
+  <text x="492" y="362" font-size="13" fill="#4a4a4a">Every single one of them on <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">FINDINGS.md</tspan></text>
+  <text x="492" y="382" font-size="12" fill="#8a8a8a">Six routines append to the end of one file.</text>
+
+  <text x="32" y="418" font-size="12" fill="#6b6b6b">The queue is not thirty-five reviews. It is one review and thirty-four rebases — which is why it has not moved since 26 August.</text>
+</svg>

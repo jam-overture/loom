@@ -6,11 +6,15 @@ import type { OperationEffect, ProposalEffect } from "@/app/(portal)/_lib/propos
 import { ProposalEffectView } from "./proposal-effect"
 
 const operation = (over: Partial<OperationEffect> = {}): OperationEffect => ({
+  op: "configure",
   verb: "reconfigure",
   subject: "loom.heading",
   place: ["loom.page", "loom.card"],
   detail: "1 value",
-  changes: [{ key: "value", before: `"Ship faster"`, after: `"Ship safer"`, inert: false }],
+  into: null,
+  before: null,
+  from: null,
+  changes: [{ key: "title", before: `"Ship faster"`, after: `"Ship safer"`, inert: false }],
   text: [],
   carries: null,
   missing: false,
@@ -29,13 +33,55 @@ const effect = (over: Partial<ProposalEffect> = {}): ProposalEffect => ({
   ...over,
 })
 
+/**
+ * What a reviewer meets without asking.
+ *
+ * A closed `<details>` is still in the DOM — deliberately, so find-in-page
+ * reaches it — which means `document.body.textContent` cannot tell "on the
+ * surface" from "one click down". Every assertion about the plain-language rule
+ * turns on that difference, so it gets a reading of its own.
+ */
+const surfaceOf = (container: HTMLElement): string => {
+  const copy = container.cloneNode(true) as HTMLElement
+
+  for (const disclosure of Array.from(copy.querySelectorAll("details"))) disclosure.remove()
+
+  return copy.textContent ?? ""
+}
+
+const recordOf = (container: HTMLElement): string =>
+  Array.from(container.querySelectorAll("details"), (one) => one.textContent ?? "").join(" ")
+
 describe("ProposalEffectView", () => {
+  it("asks the reader's own question rather than labelling the section", () => {
+    const { container } = render(<ProposalEffectView effect={effect()} />)
+
+    expect(surfaceOf(container)).toContain("What this would do to your page")
+  })
+
+  it("leads with what would happen, in a sentence", () => {
+    const { container } = render(<ProposalEffectView effect={effect()} />)
+
+    expect(surfaceOf(container)).toContain("Changes the loom.heading's title.")
+  })
+
+  /**
+   * The rule, as one assertion. Everything the section used to print is still
+   * rendered; none of it is what a reviewer meets first.
+   */
+  it("keeps the delta's own verb off the surface and in the record", () => {
+    const { container } = render(<ProposalEffectView effect={effect()} />)
+
+    expect(surfaceOf(container)).not.toContain("reconfigure")
+    expect(recordOf(container)).toContain("reconfigure loom.heading — 1 value")
+  })
+
   /** The before side is the whole point: the delta already says what it writes. */
   it("shows what a value is now beside what it would become", () => {
-    render(<ProposalEffectView effect={effect()} />)
+    const { container } = render(<ProposalEffectView effect={effect()} />)
 
-    expect(document.body.textContent).toContain(`"Ship faster"`)
-    expect(document.body.textContent).toContain(`"Ship safer"`)
+    expect(surfaceOf(container)).toContain(`"Ship faster"`)
+    expect(surfaceOf(container)).toContain(`"Ship safer"`)
   })
 
   /**
@@ -43,7 +89,7 @@ describe("ProposalEffectView", () => {
    * blank cell would render them identically.
    */
   it("names an absent value rather than leaving the cell blank", () => {
-    render(
+    const { container } = render(
       <ProposalEffectView
         effect={effect({
           operations: [
@@ -53,14 +99,14 @@ describe("ProposalEffectView", () => {
       />
     )
 
-    expect(document.body.textContent).toContain("not set")
-    expect(document.body.textContent).toContain("cleared")
+    expect(surfaceOf(container)).toContain("nothing set")
+    expect(surfaceOf(container)).toContain("taken away")
   })
 
-  it("puts the place in labels a reader recognises", () => {
-    render(<ProposalEffectView effect={effect()} />)
+  it("says what the breadcrumb is a path to", () => {
+    const { container } = render(<ProposalEffectView effect={effect()} />)
 
-    expect(document.body.textContent).toContain("loom.page › loom.card")
+    expect(surfaceOf(container)).toContain("Inside loom.page › loom.card")
   })
 
   /**
@@ -76,14 +122,25 @@ describe("ProposalEffectView", () => {
 
     const announced = screen.getByRole("status")
 
-    expect(announced.textContent).toContain("No node n_p9 in this tree.")
+    expect(announced.textContent).toContain("This would not work on the page as it stands.")
     expect(
       announced.compareDocumentPosition(container.querySelector("ol") as Element) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 
-  it("says how far the tree has moved when the proposal is stale", () => {
+  it("keeps the runtime's account of a refusal, one click down", () => {
+    const { container } = render(
+      <ProposalEffectView
+        effect={effect({ applies: false, obstacle: "No node n_p9 in this tree." })}
+      />
+    )
+
+    expect(surfaceOf(container)).not.toContain("No node n_p9")
+    expect(recordOf(container)).toContain("No node n_p9 in this tree.")
+  })
+
+  it("says how far the page has moved when the proposal is stale, and what to do", () => {
     render(
       <ProposalEffectView
         effect={effect({
@@ -96,15 +153,19 @@ describe("ProposalEffectView", () => {
       />
     )
 
-    expect(screen.getByRole("status").textContent).toContain("revision 4, now at 7")
+    const announced = screen.getByRole("status")
+
+    expect(announced.textContent).toContain("older version of this page")
+    expect(announced.textContent).toContain("changed 3 times")
+    expect(announced.textContent).toContain("Turn it down and ask again.")
   })
 
   /**
    * The runtime's obstacle for a stale proposal is the revision mismatch, so
    * printing it beside the portal's own sentence says the same thing twice.
    */
-  it("says the tree moved once, not once in each vocabulary", () => {
-    render(
+  it("says the page moved once, not once in each vocabulary", () => {
+    const { container } = render(
       <ProposalEffectView
         effect={effect({
           applies: false,
@@ -117,77 +178,125 @@ describe("ProposalEffectView", () => {
     )
 
     expect(screen.getByRole("status").textContent).not.toContain("Delta targets")
+    expect(recordOf(container)).toContain("Delta targets revision 4 but the tree is at revision 7.")
+    expect(recordOf(container)).toContain(
+      "judged against revision 4 · this page is at revision 7"
+    )
+  })
+
+  /**
+   * Both numbers, whether or not they are the problem: "judged against 6, page
+   * is at 6" is the sentence that says a proposal is still current, and nothing
+   * else on the card says it.
+   */
+  it("records both revision numbers on a proposal that would apply", () => {
+    const { container } = render(
+      <ProposalEffectView effect={effect({ baseRevision: 6, treeRevision: 6 })} />
+    )
+
+    expect(recordOf(container)).toContain(
+      "judged against revision 6 · this page is at revision 6"
+    )
   })
 
   /** Nothing else on the card would give this away: it looks like a change. */
   it("says when applying the change would leave the page exactly as it is", () => {
-    render(
+    const { container } = render(
       <ProposalEffectView
         effect={effect({ operations: [operation({ inert: true })], inertCount: 1 })}
       />
     )
 
-    expect(document.body.textContent).toContain("changes nothing")
-    expect(document.body.textContent).toContain("applying this leaves the page as it is")
+    expect(surfaceOf(container)).toContain("No change")
+    expect(surfaceOf(container)).toContain("saying yes would leave the page exactly as it is")
   })
 
   it("counts a partly inert proposal without claiming the whole of it is", () => {
-    render(
+    const { container } = render(
       <ProposalEffectView
-        effect={effect({
-          operations: [operation({ inert: true }), operation()],
-          inertCount: 1,
-        })}
+        effect={effect({ operations: [operation({ inert: true }), operation()], inertCount: 1 })}
       />
     )
 
-    expect(document.body.textContent).toContain("1 of 2 operations write what is already there")
-    expect(document.body.textContent).not.toContain("leaves the page as it is")
+    expect(surfaceOf(container)).toContain("1 of these 2 steps writes what is already there")
+    expect(surfaceOf(container)).not.toContain("Every part of this")
+    /**
+     * The step's own badge is scoped to the step. One inert step among two must
+     * not read as a verdict on the proposal, which is exactly what it would if
+     * the two sentences were worded alike.
+     */
+    expect(surfaceOf(container)).not.toContain("leave the page exactly as it is")
   })
 
-  /** An operation naming a node that is gone is why the whole delta is refused. */
-  it("marks an operation whose node this tree does not have", () => {
-    render(
+  /** An operation naming a part that is gone is why the whole delta is refused. */
+  it("marks a step whose part this page does not have, and says what that means", () => {
+    const { container } = render(
       <ProposalEffectView
         effect={effect({
           applies: false,
           obstacle: "No node n_p9 in this tree.",
-          operations: [operation({ missing: true, changes: [], detail: "this tree has no such node" })],
-        })}
-      />
-    )
-
-    expect(document.body.textContent).toContain("not in this tree")
-  })
-
-  it("previews the words an operation brings or takes", () => {
-    render(
-      <ProposalEffectView
-        effect={effect({
           operations: [
-            operation({ verb: "delete", changes: [], text: ["Ship faster", "Talk to us"] }),
+            operation({ missing: true, changes: [], detail: "this tree has no such node" }),
           ],
         })}
       />
     )
 
-    expect(document.body.textContent).toContain("“Ship faster” · “Talk to us”")
+    expect(surfaceOf(container)).toContain("Not on this page")
+    expect(surfaceOf(container)).toContain("isn't there any more")
+    expect(surfaceOf(container)).not.toContain("not in this tree")
+    expect(recordOf(container)).toContain("this tree has no such node")
   })
 
-  it("renders one row per operation, in the order they would be applied", () => {
+  it("says which way the words are travelling", () => {
     const { container } = render(
       <ProposalEffectView
         effect={effect({
           operations: [
-            operation({ verb: "delete", subject: "loom.card", changes: [] }),
-            operation({ verb: "add", subject: "loom.heading", changes: [] }),
+            operation({
+              op: "remove",
+              verb: "delete",
+              changes: [],
+              carries: 1,
+              text: ["Ship faster", "Talk to us"],
+            }),
           ],
         })}
       />
     )
 
-    expect(
-      Array.from(container.querySelectorAll("li"), (row) => row.querySelector("span")?.textContent)
-    ).toEqual(["delete", "add"])
+    expect(surfaceOf(container)).toContain(
+      "The words it takes away: “Ship faster” · “Talk to us”"
+    )
+  })
+
+  it("renders one step per operation, in the order they would be applied", () => {
+    const { container } = render(
+      <ProposalEffectView
+        effect={effect({
+          operations: [
+            operation({ op: "remove", verb: "delete", subject: "loom.card", changes: [], carries: 1 }),
+            operation({
+              op: "insert",
+              verb: "add",
+              subject: "loom.heading",
+              into: "loom.band",
+              changes: [],
+              carries: 1,
+            }),
+          ],
+        })}
+      />
+    )
+
+    const steps = Array.from(
+      (container.querySelector("ol") as HTMLElement).querySelectorAll(":scope > li > p:first-child"),
+      (row) => row.textContent
+    )
+
+    expect(steps).toEqual([
+      "Deletes the loom.card, which has nothing inside it.",
+      "Adds a loom.heading at the end of loom.band.",
+    ])
   })
 })

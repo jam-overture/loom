@@ -120,6 +120,7 @@ describe("marking a change on the page", () => {
     expect(marks).toHaveLength(1)
     expect(marks[0]?.tone).toBe("awaiting")
     expect(marks[0]?.label).toBe("This would be removed")
+    expect(marks[0]?.placement).toBe("inside")
     expect(typeOf(await headOf(session), marks[0]!.nodeId)).toBe("loom.stat-grid")
   })
 
@@ -140,6 +141,13 @@ describe("marking a change on the page", () => {
     expect(typeOf(tree, marks[0]!.nodeId)).not.toBe("loom.stat-grid")
     /** The band that now stands where the numbers were. */
     expect(tree.root.children.some((node) => node.id === marks[0]?.nodeId)).toBe(true)
+    /**
+     * And the gap is the space that band moved up into, which is above it. This
+     * is the assertion the chip's position is drawn from: the neighbour is the
+     * band *below* the gap, so a mark placed `inside` it — or below it — would
+     * be pointing at a stretch of page where nothing was taken away.
+     */
+    expect(marks[0]?.placement).toBe("above")
   })
 
   it("marks where a held insert would go, and the node itself once it exists", async () => {
@@ -149,12 +157,65 @@ describe("marking a change on the page", () => {
 
     expect(before[0]?.label).toBe("Something new would go here")
     expect(before[0]?.tone).toBe("awaiting")
+    /** The band it would be inserted before, so the space it would fill is above it. */
+    expect(before[0]?.placement).toBe("above")
 
     const applied = await answer(session, held)
     const after = await marksFor(session, applied)
 
     expect(after[0]?.label).toBe("New — just added")
+    expect(after[0]?.placement).toBe("inside")
     expect(typeOf(await headOf(session), after[0]!.nodeId)).toBe("loom.section")
+  })
+
+  /**
+   * The other side of the same seam, and the only case where the gap is not
+   * above its neighbour: nothing stands at the position a last child left, so
+   * the nearest band is the one before it and the chip belongs under that.
+   *
+   * No preset reaches this — both act in the middle of the page — but a visitor
+   * typing their own ask can, and a chip that always drew above its neighbour
+   * would point at the wrong seam by the height of a whole band.
+   */
+  /**
+   * The one place a gap has no room of its own. Above the first band is the top
+   * of the stage — unreachable by scrolling, and inside a primitive that may clip
+   * its own overflow — so the chip goes back where it can be read. Imprecise and
+   * legible beats exact and invisible, and the label still says "here" rather
+   * than "this".
+   */
+  it("keeps the chip in the corner when the gap is above the first band", () => {
+    const tree = demoPageTree()
+    const first = tree.root.children.find((node) => node.kind === "element")
+    if (first === undefined) throw new Error("the demo page has no bands")
+
+    const marks = spotlightsFor(
+      tree,
+      [{ kind: "added", nodeId: id("not-yet"), parentId: tree.root.id, index: 0 }],
+      "awaiting"
+    )
+
+    expect(marks[0]?.nodeId).toBe(first.id)
+    expect(marks[0]?.placement).toBe("inside")
+    expect(marks[0]?.label).toBe("Something new would go here")
+  })
+
+  it("marks under the last band when the gap is at the end of the page", () => {
+    const tree = demoPageTree()
+    const bands = tree.root.children.filter((node) => node.kind === "element")
+    const last = bands.at(-1)
+    if (last === undefined) throw new Error("the demo page has no bands")
+
+    const marks = spotlightsFor(
+      tree,
+      [{ kind: "removed", nodeId: id("gone"), parentId: tree.root.id, index: bands.length }],
+      "applied"
+    )
+
+    expect(marks).toHaveLength(1)
+    expect(marks[0]?.nodeId).toBe(last.id)
+    expect(marks[0]?.placement).toBe("below")
+    expect(marks[0]?.label).toBe("Something was removed here")
   })
 
   /**
@@ -349,11 +410,61 @@ describe("the mark's stylesheet", () => {
   })
 
   it("keys the rule on the attribute edit mode already puts on the node", () => {
-    const rules = spotlightCss([{ nodeId: id("demo-n7"), tone: "applied", label: "Just changed" }])
+    const rules = spotlightCss([
+      { nodeId: id("demo-n7"), tone: "applied", label: "Just changed", placement: "inside" },
+    ])
 
     expect(rules).toContain('[data-loom-node="demo-n7"]')
     expect(rules).toContain('content: "Just changed"')
     expect(rules).toContain(SPOT_COLOURS.applied.edge)
+  })
+
+  /**
+   * The chip's position, which is the difference between pointing at a band and
+   * pointing at the space beside it.
+   *
+   * Asserted as geometry rather than as a string of CSS: `bottom: 100%` puts the
+   * chip's lower edge on the band's top edge, so it is drawn in the gap above;
+   * `top: 100%` puts it under the band; and the corner case keeps the chip
+   * inside, where a clipping primitive cannot cut it in half.
+   */
+  const chipRule = (placement: "inside" | "above" | "below"): string => {
+    const rules = spotlightCss([
+      { nodeId: id("n_1"), tone: "applied", label: "Something was removed here", placement },
+    ])
+    const after = rules.split("::after")[1]
+    if (after === undefined) throw new Error("the mark drew no chip")
+
+    return after
+  }
+
+  it("draws a mark on a band inside its own corner", () => {
+    expect(chipRule("inside")).toContain("inset: 6px 6px auto auto;")
+  })
+
+  it("draws a mark on a gap in the gap, clear of the band beside it", () => {
+    expect(chipRule("above")).toContain("inset: auto 6px 100% auto;")
+    expect(chipRule("above")).toContain("margin: 0 0 5px 0;")
+
+    expect(chipRule("below")).toContain("inset: 100% 6px auto auto;")
+    expect(chipRule("below")).toContain("margin: 5px 0 0 0;")
+  })
+
+  /**
+   * A chip under a band overlaps the band that follows it, and that band paints
+   * later. Without this the mark disappears behind any section carrying a ground
+   * of its own — which on this page is every other one.
+   */
+  it("lifts a band carrying a chip beneath it above the band that follows", () => {
+    const below = spotlightCss([
+      { nodeId: id("n_1"), tone: "applied", label: "gone", placement: "below" },
+    ])
+    const above = spotlightCss([
+      { nodeId: id("n_1"), tone: "applied", label: "gone", placement: "above" },
+    ])
+
+    expect(below.split("::after")[0]).toContain("z-index: 1;")
+    expect(above.split("::after")[0]).not.toContain("z-index: 1;")
   })
 
   /**
@@ -362,14 +473,18 @@ describe("the mark's stylesheet", () => {
    * would be shown a shift the change did not make.
    */
   it("draws with an outline, so marking a band does not move it", () => {
-    const rules = spotlightCss([{ nodeId: id("n_1"), tone: "applied", label: "Just changed" }])
+    const rules = spotlightCss([
+      { nodeId: id("n_1"), tone: "applied", label: "Just changed", placement: "inside" },
+    ])
 
     expect(rules).toMatch(/outline:\s*2px solid/)
     expect(rules).not.toMatch(/^\s*border:/m)
   })
 
   it("escapes a label so a quotation mark cannot end the rule early", () => {
-    const rules = spotlightCss([{ nodeId: id('a"b'), tone: "awaiting", label: 'say "no"' }])
+    const rules = spotlightCss([
+      { nodeId: id('a"b'), tone: "awaiting", label: 'say "no"', placement: "inside" },
+    ])
 
     expect(rules).toContain('content: "say \\"no\\""')
     expect(rules).toContain('[data-loom-node="a\\"b"]')

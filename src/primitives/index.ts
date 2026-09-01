@@ -44,8 +44,10 @@ import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
+import { loomMilestoneRow } from "./loom.milestone-row.js"
 import { loomMosaic } from "./loom.mosaic.js"
 import { loomNav } from "./loom.nav.js"
+import { loomOrbit } from "./loom.orbit.js"
 import { loomOffering } from "./loom.offering.js"
 import { loomOfferingGrid } from "./loom.offering-grid.js"
 import { loomOption } from "./loom.option.js"
@@ -222,6 +224,21 @@ import { loomTierTable } from "./loom.tier-table.js"
  * the width and as a card when it is not — one `@container` rule rather than two
  * primitives or a prop nobody should have to set twice.
  *
+ * **The two bands that explain rather than sell** are the pair a page reaches
+ * for after it has made its claim: *how it works*, and *what it works with*.
+ * `loom.milestone-row` is the second arrangement of a child that already
+ * existed — the same entries a rail runs down, laid across as numbered steps —
+ * which is 0054's rule producing a container rather than the `loom.step` a
+ * fourth set of words would have argued for. It cost four declarations moving
+ * out of `loom.milestone` and into the stylesheet, because a child that lays
+ * itself out inline cannot be rearranged by whatever it is in. `loom.orbit` is
+ * the fourth general arranger and the second primitive here whose motion is the
+ * point: children circling a mark it places in the middle, which is the claim a
+ * logo wall cannot make. Landing either of them from a menu is what the same
+ * run's `anchor` is for: `loom.section`, `loom.hero` and `loom.callout` now
+ * take one, which is the first `id` this library renders and the reason a Loom
+ * page can link to its own second screen (`anchor.ts`).
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -237,11 +254,13 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomGrid,
   loomMosaic,
   loomMarquee,
+  loomOrbit,
   loomCard,
   loomHero,
   loomFeatureGrid,
   loomFeature,
   loomMilestoneList,
+  loomMilestoneRow,
   loomMilestone,
   loomStatGrid,
   loomStat,
