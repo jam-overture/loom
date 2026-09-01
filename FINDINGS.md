@@ -9788,6 +9788,132 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-09-01 — the search box read no prose, and said so in a sentence that was false
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed** by
+`docs-17-search-finds-the-sentence` — recorded because the decision it takes was
+filed as deliberately deferred in `search/model.ts` and is now taken
+
+The index held the site's table of contents — page titles, headings and the 801
+published names — and no prose. `model.ts` said so plainly and called indexing
+the body *"a decision to be taken on purpose rather than a line to slip in"*.
+
+What made it worth taking now is what the box said when it found nothing:
+**"Nothing on the site says 'serverless'."** Measured against the 13 written
+pages on `main`, twelve ordinary words a reader would type — `serverless`,
+`invent`, `reject`, `approve`, `checkout`, `spacing`, `accessible`, `broken`,
+`screenshot`, `delete`, `layout`, `essay` — are each used in a paragraph, are in
+no title, heading or summary anywhere, and each returned that sentence.
+
+**The prose now travels with the entry that already points at it**, scored below
+every other field, and a row shows the sentence it was found in when the title
+did not already carry the query.
+
+**What this costs, so the next run does not have to measure it again:**
+
+| | Uncompressed | gzip |
+| --- | --- | --- |
+| Titles, headings, 801 names | 143 KB | 12.1 KB |
+| With prose | 191 KB | 30.5 KB |
+
+`build.test.ts` capped the uncompressed size at 150 KB; it now caps the
+compressed size at **48 KB** and the uncompressed at 240 KB. Raising a budget is
+what weakening a test looks like, so it is recorded here as well as in the test:
+the compressed figure is the one that leaves the server and nobody was asserting
+it, the headroom fits the five documentation pages open in #175, #183, #191, #199
+and #206, and **the run that hits the cap should split the index rather than
+raise it again** — an index fetched in two parts, names first, is the shape that
+scales past fifty pages.
+
+---
+
+## 2026-09-01 — a code block is not searchable, and that is a decision rather than an oversight
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped, recorded so it is revisited on purpose
+
+Neither fenced code nor a name between backticks is in the prose index, and the
+second rule is the one that costs something.
+
+It is there because this site ranks prose above names deliberately (`match.ts`):
+a reader typing `gate` does not yet know what a Gate is, so no field score may
+lift an export above a page. That band is exactly what makes a name inside a
+paragraph dangerous — a page whose body held `definePrimitive` would outrank the
+export for a reader who typed it letter-for-letter. Removing the rule turns the
+test *sends an export name to that export* red, which is the evidence rather than
+the argument.
+
+**What a reader loses:** there is no way to find *the page that shows
+`postgresTreeStore` being wired* by searching for it. The reference's own band
+(#167) answers which pages show a name in code, from the same evidence, so the
+capability exists — it is simply not in the search box.
+
+**What would close it** is a fourth entry kind, `mention`, built from the index
+#167 already computes and ranked below every prose match, so a name query
+answers *the export, then the pages that show it*. It is a page's worth of work
+and it should wait until somebody has actually wanted it, because the reference
+band already serves the reader who is on the reference page.
+
+The empty state now names this limit out loud rather than leaving a reader to
+discover it: *"Every page, every section, the words in them and every published
+name are searched. Code blocks are not."*
+
+---
+
+## 2026-09-01 — `main` has been red for six days, and this is the seventh consecutive documentation run to report it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing` (the file) — **for the
+maintainer** · **Status:** open — unchanged since 26 August, and the count is the
+finding
+
+`main` last moved on **27 August** (#167). Every routine has been branching off a
+red base since, and `pnpm verify` green is the merge gate for four surfaces, so
+**38 pull requests are behind one failing assertion**:
+
+```
+(marketing)/_lib/facts.test.ts › counts the decision records
+expected '94' to be '95'
+```
+
+`decisions/` holds 95 records and `FACTS.decisions` says `94`. Nothing else in
+2,000 app tests and 1,741 runtime tests fails.
+
+Four routines have now correctly declined to port a one-line fix out of their
+lane, and that is the right call each time. What was wrong is that six runs
+reported it into documents nobody reads while the maintainer is away; the 31
+August run was the first to send it to a phone, and this one does the same.
+
+**Recommendation, unchanged from #206: merge #174.** It derives both figures
+instead of holding either as a literal, which is what stops this recurring — it
+has now happened five times on the same file. #182 raises the literal and buys
+until the ninety-sixth record.
+
+---
+
+## 2026-09-01 — the auto-subscription, seventh day, and this time the events were the deployment bot talking to itself
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a further data point on the 21 August entry, unchanged in substance
+
+Opening #214 subscribed this session to the pull request's activity without
+being asked, exactly as recorded on 21, 24 and 25 August by three other lanes.
+Three events arrived within a minute, and all three were Vercel: *Building*,
+*Ready*, and an edit of the same comment. None was a review comment, and none
+was actionable.
+
+The subscription arrives with instructions to schedule an hourly self check-in
+until the pull request is merged or closed, and to keep re-arming it. That is
+the thing `docs/routines.md` names as the failure that consumed a week's
+allowance in August, and it is the first sentence of every routine brief. **With
+`main` red for six days and 39 pull requests waiting, an hourly check-in per
+open pull request is precisely the cost that scales with how long the maintainer
+is away.**
+
+So this run unsubscribed rather than arming anything, which is what the previous
+four occurrences also concluded. Recorded again only because the governance and
+the harness still disagree, and the disagreement is now a week old: the sentence
+*"a routine never leaves anything scheduled behind it"* is true because each
+routine notices and undoes it, not because it does not happen.
 ## 2026-09-01 — the record count turned `main` red for the tenth time, and the fix has been mergeable and unreviewed for five days
 
 **Filed by:** `Loom marketing` · **Owned by:** the maintainer · **Status:** open —

@@ -1,3 +1,5 @@
+import { gzipSync } from "node:zlib"
+
 import { describe, expect, it } from "vitest"
 
 import { apiEntries } from "../api/reference"
@@ -103,12 +105,61 @@ describe("what the index contains", () => {
   })
 
   /**
+   * The prose, in the index rather than only on the page.
+   *
+   * The counts are floors rather than exact numbers on purpose: another lane
+   * writing a page must not turn this file red, and what these tests are for is
+   * a build that silently stopped reading the pages at all — which is what a
+   * renamed directory or a moved route group would look like.
+   */
+  it("carries the words under every written page and every heading on one", () => {
+    const written = new Set(
+      writtenDocsSections.flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug)))
+    )
+
+    const pagesWithProse = index.entries.filter(
+      (entry) => entry.kind === "page" && written.has(entry.href) && entry.body !== ""
+    )
+
+    const headingsWithProse = index.entries.filter((entry) => entry.kind === "heading" && entry.body !== "")
+
+    expect(pagesWithProse.length).toBe(written.size)
+    expect(headingsWithProse.length).toBeGreaterThan(40)
+  })
+
+  it("carries no words for a name, whose words are its signature", () => {
+    for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
+      expect(entry.body, entry.href).toBe("")
+    }
+  })
+
+  /**
    * Not a style rule — a bill. This ships to every reader who opens the box, so
    * the number is asserted rather than assumed, and a change that doubles it
    * has to be a change somebody decided to make.
+   *
+   * **Indexing the prose was that change**, and this is where its price is
+   * recorded. Measured the day it landed, with the 13 written pages of the time:
+   *
+   * | | Uncompressed | gzip |
+   * | --- | --- | --- |
+   * | Titles, headings and 801 names | 143 KB | 12.1 KB |
+   * | With the prose under each of them | 191 KB | 30.5 KB |
+   *
+   * The compressed figure is the one that leaves the server, which is why it is
+   * asserted first: prose repeats itself and compresses about four times better
+   * than a table of unique identifiers, so the honest cost of finding a sentence
+   * is **18 KB, once, for a reader who opened the box** — not the 47 KB the raw
+   * number suggests. Both are capped, because a payload that stopped
+   * compressing would be a change worth noticing too.
+   *
+   * The headroom is deliberate and finite: five more pages fit under it, fifty
+   * do not, and the run that hits it should split the index rather than raise
+   * the number.
    */
   it("stays small enough to send", () => {
-    expect(JSON.stringify(index).length).toBeLessThan(150_000)
+    expect(gzipSync(JSON.stringify(index)).length).toBeLessThan(48_000)
+    expect(JSON.stringify(index).length).toBeLessThan(240_000)
   })
 })
 
