@@ -898,7 +898,7 @@ ones that quietly break your model later.
 - [`decisions/0040`](../decisions/0040-a-failure-names-the-actor-who-must-clear-it.md) — five codes, five actors, and the regex that proved the type was wrong
 - [`decisions/0057`](../decisions/0057-a-preset-is-a-deterministic-interpreter.md) — the seam is about non-determinism, not about models
 - [`decisions/0014`](../decisions/0014-the-reply-schema-must-fit-a-grammar-budget.md) — why props cross as a JSON string, which lesson 12 takes
-- Next: 12 — Projection *(not yet written)*
+- Next: [12 — Projection](12-projection.md)
 
 ---
 

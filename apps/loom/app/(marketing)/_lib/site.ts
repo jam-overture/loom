@@ -34,6 +34,29 @@ export const HOW_IT_WORKS: SiteRoute = {
     "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
 }
 
+/**
+ * The page the front door's central promise sends a reader looking for.
+ *
+ * Everything else on this site says *nothing lands until it has been checked
+ * against your rules*, and until 28 August the obvious next question — **what
+ * is a rule, and who writes it?** — was answered in one band of the mechanism
+ * page and one line of a questions list. That is the half of the pitch the
+ * recorded positioning says is the differentiator: not that a page adapts, but
+ * that somebody decided in advance what it may do and can prove which decision
+ * applied.
+ *
+ * It is a description of code rather than a position, like the mechanism page
+ * and unlike anything about audience or price, which is why it could be written
+ * without waiting for an answer.
+ */
+export const THE_RULES: SiteRoute = {
+  path: "/the-rules",
+  label: "The rules",
+  title: "The rules — what your AI may change, and what it may not",
+  description:
+    "You write down what may change on your page and what may never change. Every request is weighed against it before anything moves, and the answer names the rule that gave it.",
+}
+
 export const THE_RECORD: SiteRoute = {
   path: "/the-record",
   label: "The record",
@@ -42,8 +65,16 @@ export const THE_RECORD: SiteRoute = {
     "Ask the front page for one change after another and watch the list fill in: what each request turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
 }
 
-/** Every route, in nav order. A route that is not here has no way to be reached. */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RECORD]
+/**
+ * Every route, in nav order. A route that is not here has no way to be reached.
+ *
+ * The order is the order a stranger needs them in, not the order they were
+ * built: what this is, then how it works, then **what you control**, then what
+ * you are left holding afterwards. The rules page sits before the record
+ * because a record of decisions is only interesting to someone who knows the
+ * decisions were theirs to set.
+ */
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RULES, THE_RECORD]
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -85,6 +116,27 @@ export type Surface = {
   readonly cost: string
   /** Whether a visitor who is not signed in is sent to a sign-in page first. */
   readonly guarded: boolean
+  /**
+   * Whether the bar across the top carries it, as well as the footer's map.
+   *
+   * **A separate question from `guarded`, as of 28 August, and this is why.**
+   * The header used to be *every unguarded surface*, which is a rule about
+   * permissions standing in for a decision about attention. It gave the bar
+   * eight items — a mark, six links and the way in — and the maintainer asked
+   * on #166 whether that was too many. It was, and this route group had a
+   * fourth page to add.
+   *
+   * So the bar is now the shortest path for someone who has just arrived: this
+   * site's own pages, the demonstration, and the documentation. Everything else
+   * keeps all three of its other placements — the footer's map, the front
+   * door's band of cards, and its own paragraph wherever the argument reaches
+   * it — so nothing has been hidden, and one word here puts anything back.
+   *
+   * The course is the one that moved. Of the four it asks the most of a visitor
+   * (`cost` says an afternoon) and it is the one a stranger is least likely to
+   * want in the first ten seconds, which is the only span the top bar is for.
+   */
+  readonly inMenu: boolean
 }
 
 /**
@@ -120,6 +172,7 @@ export const DEMO: Surface = {
     "Ask a small business's page to rearrange itself — in your own words — and watch the record fill in beside it.",
   cost: "Costs you a click",
   guarded: false,
+  inMenu: true,
 }
 
 export const DOCS: Surface = {
@@ -129,6 +182,7 @@ export const DOCS: Surface = {
     "How to install it, hand it the components you already have, and get your first change approved on a page of your own.",
   cost: "Costs you a read",
   guarded: false,
+  inMenu: true,
 }
 
 export const LESSONS: Surface = {
@@ -138,6 +192,7 @@ export const LESSONS: Surface = {
     "A course on why Loom works the way it does. You answer before you read, and it tells you when to come back.",
   cost: "Costs you an afternoon",
   guarded: false,
+  inMenu: false,
 }
 
 export const PORTAL: Surface = {
@@ -147,6 +202,13 @@ export const PORTAL: Surface = {
     "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts any of it back.",
   cost: "Costs you an account",
   guarded: true,
+  /**
+   * False because it is the bar's *action* rather than one of its links, and
+   * has been since the header was written. `inMenu` means "carried as a menu
+   * item", so the one surface that is a button says no here and is offered
+   * under the word a stranger recognises instead.
+   */
+  inMenu: false,
 }
 
 /**

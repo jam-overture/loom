@@ -41,6 +41,25 @@ A change that contradicts an `Accepted` record is an escalation, not a
 refactor: write the replacement with status `Proposed`, flag it for review, and
 leave the existing record standing until someone decides.
 
+## Correcting a record that is still right
+
+The other thing that happens to a record: the decision stands, and a fact about
+the shape it produced moves underneath it. 0002 records that the Gate is an
+ordered list of rules and says how many — the first half is still exactly true
+and the second was wrong for three weeks.
+
+Superseding that would be false, because nothing was reversed. So **a record is
+amended in place when only the shape moved** (0096): a dated block under the
+header, before `## Context`, naming what moved, which records moved it, and
+saying that nothing is reversed. The record keeps its number, its status and its
+trail. The test is what a reader would do differently — a reader who would now
+*act* differently needs a superseding record; a reader who would write down the
+wrong number needs an amendment.
+
+A count a record states about a list in `src/` is registered in
+`src/record-claims.test.ts` and held against that list, so it fails `pnpm verify`
+rather than a reader.
+
 ## The index below is generated
 
 Write the record, then run `pnpm decisions:index`. Do not edit the table by
@@ -48,9 +67,16 @@ hand — it is rebuilt from the `**Status:**` and `**Section:**` lines of the
 files themselves, and an edit here is overwritten on the next run.
 
 `pnpm verify` fails if the committed table has drifted, if two records claim the
-same number, if a number is missing, or if a status names a record that does not
-exist. That last set is not hypothetical: two concurrent sessions each wrote an
-`0032` on the same day, and nothing noticed until their branches met.
+same number, or if a status names a record that does not exist. That set is not
+hypothetical: two concurrent sessions each wrote an `0032` on the same day, and
+nothing noticed until their branches met.
+
+A number that no record claims is **reported and does not fail**
+([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)). It
+appears in the table below as `*No record on this branch*`, which is what a hole
+looks like when it is stated rather than stopped for — either a record was
+deleted, which the process forbids, or the number is claimed on a branch that
+has not merged, which is ordinary. Whichever branch lands first fills the row.
 
 Everything above this line is prose a person wrote, and stays that way.
 
@@ -153,4 +179,9 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0093](0093-a-decorative-copy-is-the-same-children-without-identity.md) | A decorative copy is the same children without identity | Accepted | §4b |
 | [0094](0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) | A card's prose is a child when the card has a flow, and a prop when it does not | Accepted | §4b |
 | [0095](0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | A frame carries its URL, and the deployment carries the origins | Accepted | §3, §4b |
-| [0096](0096-a-same-origin-path-is-not-a-scheme.md) | A same-origin path is not a scheme | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |
+| [0096](0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md) | A behaviour publishes a value on the element the primitive placed it in | Accepted | §4b |
+| [0096](0096-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
+| [0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md) | A hole in the decision numbering is reported, and a clash is fatal | Accepted | §1 (process) |
+| [0098](0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md) | An anchor is a reserved key the runtime checks and a primitive places | Accepted | §4b |
+| 0099 | *No record on this branch* | — | — |
+| [0100](0100-a-same-origin-path-is-not-a-scheme.md) | A same-origin path is not a scheme | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |

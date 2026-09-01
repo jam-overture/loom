@@ -1152,6 +1152,13 @@
               "summary": "A node's submission — which registered endpoint a form posts to, on any node."
             },
             {
+              "name": "ANCHOR_PROP_KEY",
+              "kind": "value",
+              "signature": "const ANCHOR_PROP_KEY = \"loom:anchor\"",
+              "truncated": false,
+              "summary": "The fragment a node answers to, so the page's own links can point at it, on any node."
+            },
+            {
               "name": "isReservedPropKey",
               "kind": "function",
               "signature": "const isReservedPropKey: (key: string) => boolean",
@@ -1397,6 +1404,20 @@
           "summary": "The Gate.",
           "symbols": [
             {
+              "name": "EscalationCode",
+              "kind": "type",
+              "signature": "type EscalationCode = Exclude<DispositionReasonCode, \"within-policy\">;",
+              "truncated": false,
+              "summary": "The code a rung stamps when it fires. Every reason code but the acceptance."
+            },
+            {
+              "name": "ESCALATION_LADDER",
+              "kind": "value",
+              "signature": "const ESCALATION_LADDER: readonly EscalationCode[]",
+              "truncated": false,
+              "summary": "The ladder, in the order it is consulted, read off the rules themselves."
+            },
+            {
               "name": "gate",
               "kind": "function",
               "signature": "const gate: (assessment: ChangeAssessment, policy: GatePolicy) => Disposition",
@@ -1563,6 +1584,20 @@
               "signature": "type CompositionOutcome = {\n    readonly kind: \"applied\";\n    readonly tree: LoomTree;\n    readonly assessment: ChangeAssessment;\n    readonly disposition: Disposition;\n    readonly inverse: TreeDelta;\n} | {\n    readonly kind: \"awaiting-confirmation\";\n    readonly assessment: ChangeAssessment;\n    readonly disposition: Disposition;\n} | {\n    readonly kind: \"rejected\";\n    readonly assessment: ChangeAssessment;\n    readonly disposition: Disposition;\n    /**\n     * Why no smaller change was offered instead — present only when a repairer\n     * was asked for one and could not produce it.\n     *\n     * The three ways a refusal can end are told apart by this field and\n     * `assessment.proposal.repairOf` together: `repairOf` set means a repair\n     * was made and refused in its turn; this field set means the repairer\n     * declined; neither means no repairer was wired, so nothing was asked.\n     * Without it the second and third read identically, and a host that wanted\n     * to say \"we asked for something smaller and could not get one\" had to\n     * recover the fact from the event stream.\n     */\n    readonly repairFailure?: InterpretationError;\n} | {\n    readonly kind: \"not-interpreted\";\n    readonly error: InterpretationError;\n} | {\n    readonly kind: \"not-applicable\";\n    readonly proposal: ProposedChange;\n    readonly error: TreeError;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "CompositionOutcomeKind",
+              "kind": "type",
+              "signature": "type CompositionOutcomeKind = CompositionOutcome[\"kind\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "COMPOSITION_OUTCOME_KINDS",
+              "kind": "value",
+              "signature": "const COMPOSITION_OUTCOME_KINDS: readonly CompositionOutcomeKind[]",
+              "truncated": false,
+              "summary": "The five ways an ask can end, in the order a host meets them."
             },
             {
               "name": "composeChange",
@@ -2286,6 +2321,13 @@
               "summary": ""
             },
             {
+              "name": "channelsOf",
+              "kind": "function",
+              "signature": "const channelsOf: (colour: string) => readonly [number, number, number] | undefined",
+              "truncated": false,
+              "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
+            },
+            {
               "name": "contrastRatio",
               "kind": "function",
               "signature": "const contrastRatio: (a: string, b: string) => number | undefined",
@@ -2813,6 +2855,83 @@
           ]
         },
         {
+          "module": "theme/separation",
+          "title": "Separation",
+          "summary": "Whether two slots a reader is meant to tell apart are far enough apart to be told apart. The other half of what a palette owes a page.",
+          "symbols": [
+            {
+              "name": "JUST_NOTICEABLE_DIFFERENCE",
+              "kind": "value",
+              "signature": "const JUST_NOTICEABLE_DIFFERENCE = 2.3",
+              "truncated": false,
+              "summary": "ΔE below which two colours are the same colour to a reader."
+            },
+            {
+              "name": "colourDifference",
+              "kind": "function",
+              "signature": "const colourDifference: (a: string, b: string) => number | undefined",
+              "truncated": false,
+              "summary": "The CIE76 colour difference between two colours, or `undefined` when either is a form `channelsOf` declines to guess at."
+            },
+            {
+              "name": "PeerBasis",
+              "kind": "type",
+              "signature": "type PeerBasis = \"colour-only\" | \"also-marked\";",
+              "truncated": false,
+              "summary": "How the reader is told the two apart, which decides what a collapse means."
+            },
+            {
+              "name": "PeerPairing",
+              "kind": "type",
+              "signature": "type PeerPairing = (PeerBase & {\n    readonly basis: \"colour-only\";\n}) | (PeerBase & {\n    readonly basis: \"also-marked\";\n    readonly mark: PaletteSlot;\n});",
+              "truncated": false,
+              "summary": "Two slots a reader is meant to tell apart, and what tells them apart."
+            },
+            {
+              "name": "PALETTE_PEER_PAIRINGS",
+              "kind": "value",
+              "signature": "const PALETTE_PEER_PAIRINGS: readonly PeerPairing[]",
+              "truncated": false,
+              "summary": "The pairs the library actually asks a reader to distinguish."
+            },
+            {
+              "name": "MeasuredPeer",
+              "kind": "type",
+              "signature": "type MeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly difference: number;\n    /**\n     * How far the mark is from whichever of the two it is nearer to — the mark's\n     * worst case, since it has to be visible against both.\n     *\n     * `undefined` for a `colour-only` peer, which has no mark, and for a mark\n     * written in a form this cannot measure. The second case judges the pair on\n     * its colours alone, which is the safe direction: a defence that cannot be\n     * measured is not counted as one.\n     */\n    readonly markDifference: number | undefined;\n    readonly separated: boolean;\n};",
+              "truncated": false,
+              "summary": "A peer that was measured, whether or not it came apart."
+            },
+            {
+              "name": "UnmeasuredPeer",
+              "kind": "type",
+              "signature": "type UnmeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly first: string;\n    readonly second: string;\n};",
+              "truncated": false,
+              "summary": "A peer whose colours could not be measured, and which colour stopped it."
+            },
+            {
+              "name": "PaletteSeparation",
+              "kind": "type",
+              "signature": "type PaletteSeparation = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPeer[];\n    /**\n     * Colour-only peers under the threshold: two things that look like one thing,\n     * with nothing else to go on. The list a host asserts empty.\n     */\n    readonly collapsed: readonly MeasuredPeer[];\n    /**\n     * Marked peers whose colours have collapsed **and** whose mark has too — a\n     * card that is neither filled nor outlined. Separate from `collapsed` because\n     * it is a different defect with a different fix, and because a marked pair\n     * whose mark is doing its job is not a defect at all.\n     */\n    readonly unmarked: readonly MeasuredPeer[];\n    /** Neither separated nor collapsed: a colour this cannot measure. */\n    readonly unmeasured: readonly UnmeasuredPeer[];\n};",
+              "truncated": false,
+              "summary": "What one palette does with the pairs its reader has to tell apart."
+            },
+            {
+              "name": "auditSeparation",
+              "kind": "function",
+              "signature": "const auditSeparation: (palette: Palette, peers?: readonly PeerPairing[]) => PaletteSeparation",
+              "truncated": false,
+              "summary": "Measures every declared peer in one palette. Refuses nothing."
+            },
+            {
+              "name": "describeSeparationAudit",
+              "kind": "function",
+              "signature": "const describeSeparationAudit: (audit: PaletteSeparation) => string",
+              "truncated": false,
+              "summary": "One line per problem, for a CLI or a failing test's message. Empty when clean."
+            }
+          ]
+        },
+        {
           "module": "theme/style-presets",
           "title": "Style presets",
           "summary": "The seven style presets the starter library ships beyond the first three, and the reason there are seven rather than seventeen.",
@@ -3173,6 +3292,20 @@
               "signature": "type TreeOperation = InsertOperation | RemoveOperation | MoveOperation | ConfigureOperation;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TreeOperationName",
+              "kind": "type",
+              "signature": "type TreeOperationName = TreeOperation[\"op\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TREE_OPERATIONS",
+              "kind": "value",
+              "signature": "const TREE_OPERATIONS: readonly TreeOperationName[]",
+              "truncated": false,
+              "summary": "The whole vocabulary of structural change, in the order the doc comment above argues it."
             },
             {
               "name": "treeDeltaSchema",
@@ -3709,6 +3842,55 @@
           ]
         },
         {
+          "module": "render/anchor",
+          "title": "Anchor",
+          "summary": "A band the page's own links can point at.",
+          "symbols": [
+            {
+              "name": "AnchorAttributes",
+              "kind": "type",
+              "signature": "type AnchorAttributes = {\n    readonly id: string;\n};",
+              "truncated": false,
+              "summary": "What a primitive spreads to become a fragment target."
+            },
+            {
+              "name": "AnchorReading",
+              "kind": "type",
+              "signature": "type AnchorReading = {\n    readonly status: \"anchored\";\n    readonly attributes: AnchorAttributes;\n} | {\n    readonly status: \"unusable\";\n    readonly detail: string;\n} | {\n    readonly status: \"claimed\";\n    readonly anchor: string;\n    readonly holder: NodeId;\n};",
+              "truncated": false,
+              "summary": "What the renderer learned about a node's declared anchor."
+            },
+            {
+              "name": "ANCHOR_MAX_LENGTH",
+              "kind": "value",
+              "signature": "const ANCHOR_MAX_LENGTH = 64",
+              "truncated": false,
+              "summary": "The longest anchor a tree may name."
+            },
+            {
+              "name": "AnchorLedger",
+              "kind": "type",
+              "signature": "type AnchorLedger = {\n    /**\n     * Records this node as the holder, or answers with the node that got there\n     * first. First claim in document order wins: the walk reaches a node before\n     * its descendants and reads siblings in tree order, so the winner is a fact\n     * about the tree rather than about the order the renderer happened to visit.\n     */\n    readonly claim: (anchor: string, nodeId: NodeId) => NodeId | undefined;\n};",
+              "truncated": false,
+              "summary": "Who holds each anchor in one render."
+            },
+            {
+              "name": "createAnchorLedger",
+              "kind": "function",
+              "signature": "const createAnchorLedger: () => AnchorLedger",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "resolveAnchor",
+              "kind": "function",
+              "signature": "const resolveAnchor: (declared: JsonValue | undefined, nodeId: NodeId, ledger: AnchorLedger) => AnchorReading",
+              "truncated": false,
+              "summary": "The whole check, as a function of a declared value and what is already taken."
+            }
+          ]
+        },
+        {
           "module": "render/behaviour",
           "title": "Behaviour",
           "summary": "The behaviour seam: the things a primitive *does* that its props cannot carry.",
@@ -3716,7 +3898,7 @@
             {
               "name": "BEHAVIOUR_NAMES",
               "kind": "value",
-              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\"]",
+              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\", \"adjust\"]",
               "truncated": false,
               "summary": ""
             },
@@ -3733,6 +3915,34 @@
               "signature": "const DISCLOSED_ATTRIBUTE = \"data-loom-disclosed\"",
               "truncated": false,
               "summary": "The attribute a disclosure control stamps on its own button: `\"true\"` when the region it names is open, `\"false\"` when it is closed."
+            },
+            {
+              "name": "ADJUST_PROPERTY",
+              "kind": "value",
+              "signature": "const ADJUST_PROPERTY = \"--loom-adjust\"",
+              "truncated": false,
+              "summary": "The custom property an adjust control publishes its value on: a plain number between {@link ADJUST_MINIMUM} and {@link ADJUST_MAXIMUM}, no unit."
+            },
+            {
+              "name": "ADJUST_MINIMUM",
+              "kind": "value",
+              "signature": "const ADJUST_MINIMUM = 0",
+              "truncated": false,
+              "summary": "The bottom of an adjust control's range."
+            },
+            {
+              "name": "ADJUST_MAXIMUM",
+              "kind": "value",
+              "signature": "const ADJUST_MAXIMUM = 100",
+              "truncated": false,
+              "summary": "The top of an adjust control's range."
+            },
+            {
+              "name": "ADJUST_RESTING",
+              "kind": "value",
+              "signature": "const ADJUST_RESTING = 50",
+              "truncated": false,
+              "summary": "Where the control sits before anybody moves it."
             },
             {
               "name": "BEHAVIOURS",
@@ -3828,8 +4038,8 @@
             {
               "name": "RenderDiagnostic",
               "kind": "type",
-              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /** The tree asks for data and this render was given no resolution. */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * `loom:submit` that is not an endpoint id under `to`. The node renders —\n     * its props are its own and are still valid — with no target, which is\n     * what a form primitive's unavailable path is for.\n     */\n    readonly code: \"submit-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: SubmissionError;\n} | {\n    /**\n     * A form whose endpoint could not give a target: nobody registered it,\n     * it refused this visitor, or it answered with something the seam refuses.\n     * The page still renders, because a page lost to one form is worse than a\n     * form that says it cannot be sent right now.\n     */\n    readonly code: \"submit-unavailable\";\n    readonly nodeId: NodeId;\n    readonly to: EndpointId;\n    readonly unavailable: SubmissionUnavailable;\n} | {\n    /** The tree names an endpoint and this render was given no resolution. */\n    readonly code: \"submit-unresolved\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A framable prop whose URL will not be framed: no allowlist was wired,\n     * nobody registered its origin, or it is not an absolute http(s) URL at\n     * all. The node still renders — its props are its own — and what it does\n     * with a refusal is the primitive's business, which for a frame is\n     * usually to render the refusal rather than an empty box.\n     */\n    readonly code: \"frame-refused\";\n    readonly nodeId: NodeId;\n    readonly prop: string;\n    readonly refusal: FrameRefusal;\n} | {\n    /**\n     * A permitted frame whose document comes from this deployment's own\n     * origin, so the primitive's `sandbox` is inert: `allow-scripts` beside\n     * `allow-same-origin` is only a boundary between two origins, and between\n     * one and itself it is nothing. Not a refusal — a host that registered\n     * its own origin meant to — and reported anyway, because it is the one\n     * thing about a frame that looks contained and is not.\n     */\n    readonly code: \"frame-same-origin\";\n    readonly nodeId: NodeId;\n    readonly prop: string;\n    readonly origin: FrameOrigin;\n} | {\n    /**\n     * A declared behaviour's control had no name to render under, so it was\n     * left out. The registry refuses a primitive that declares a behaviour\n     * and not its strings, so the way here is a dictionary that answers a\n     * declared key with a blank — a translation fault, in the one place that\n     * can see it, rather than an unnamed button on the page.\n     */\n    readonly code: \"behaviour-unnamed\";\n    readonly nodeId: NodeId;\n    readonly behaviour: string;\n    readonly key: string;\n};",
-              "truncated": false,
+              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /** The tree asks for data and this render was given no resolution. */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * `loom:submit` that is not an endpoint id under `to`. The node renders —\n     * its props are its own and are still valid — with no target, which is\n     * what a form primitive's unavailable path is for.\n     */\n    readonly code: \"submit-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: SubmissionError;\n} | {\n    /**\n     * A form whose endpoint could not give a target: nobody registered it,\n     * it refused this visitor, or it answered with something the seam refuses.\n     * The page still renders, because a page lost to one form is worse than a\n     * form that says it cannot be sent right now.\n     */\n    readonly code: \"submit-unavailable\";\n    readonly nodeId: NodeId;\n    readonly to: EndpointId;\n    readonly unavailable: SubmissionUnavailable;\n} | {\n    /** The tree names an endpoint and this render was given no resolution. */\n    readonly code: \"submit-unresolved\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A framable prop whose URL will not be framed: no allowlist was wired,\n     * nobody registered its origin, or it is not an absolute http(s) URL at\n     * all. The node still renders — its props are its own — and what it does\n     * with a refusal is the primitive's business, which for a frame is\n     * usually to render the refusal rather than an empty box.\n     */\n    readonly code: \"frame-refused\";\n    readonly nodeId: NodeId;\n    readonly prop: string;\n    readonly refusal: FrameRefusal;\n} | {\n    /**\n     * A permitted frame whose document comes from this deployment's own\n     * origin, so the primitive's `sandbox` is inert: `allow-scripts` beside\n     * `allow-same-origin` is only a boundary between two origins, and between\n     * one and itself it is nothing. Not a refusal — a host that registered\n     * its own origin meant to — and reported anyway, because it is the one\n     * thing about a frame that looks contained and is not.\n     */\n    readonly code: \"frame-same-origin\";\n    readonly nodeId: NodeId;\n    readonly prop: string;\n    readonly origin: FrameOrigin;\n} | {\n    /**\n     * `loom:anchor` that is not a slug a link can carry: not a string, empty,\n     * longer than an anchor may be, or spelled with something that does not\n     * survive a URL. The node renders exactly as it would have — an anchor\n     * adds an attribute and changes nothing else — and is not a fragment\n     * target.\n     */\n    readonly code: \"anchor-unusable\";\n    readonly nodeId: NodeId;\n    readonly detail: string;\n} | {\n    /**\n     * Two nodes named the same anchor, and this is the second one. The first\n     * in document order keeps it, because two elements sharing an `id` is a\n     * document a browser resolves by its own rule rather than by the tree's —\n     * and a link that lands on whichever of the two the parser preferred is\n     * worse than one node that cannot be linked to.\n     */\n    readonly code: \"anchor-claimed\";\n    readonly nodeId: NodeId;\n    readonly anchor: string;\n    readonly holder: NodeId;\n} | {\n    /**\n     * A declared behaviour's control had no name to render under, so it was\n     * left out. The registry refuses a primitive that declares a behaviour\n     *\n…",
+              "truncated": true,
               "summary": ""
             },
             {
@@ -3926,7 +4136,7 @@
             {
               "name": "LoomRenderContext",
               "kind": "type",
-              "signature": "type LoomRenderContext<TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /**\n     * Present only when the tree was rendered in edit mode. Spread onto the\n     * primitive's own root element; a primitive that drops it renders correctly\n     * but becomes invisible to the portal.\n     */\n    readonly editable?: EditableAttributes;\n    /**\n     * The tree's theme, flattened into CSS custom properties. Present on the\n     * **root node only**, and only when the tree names a theme the render could\n     * resolve; apply it as `style` on the primitive's own root element.\n     *\n     * It arrives here rather than on a wrapper the renderer emits for the reason\n     * `editable.ts` gives for the same choice: a wrapper changes what `>`,\n     * `:first-child` and `:nth-child` select, and a page that only lays out\n     * correctly when it is unthemed is not a page anyone reviewed. The cost is\n     * that a root primitive which drops it renders unstyled — which is what the\n     * two starter palettes exist to catch.\n     */\n    readonly theme?: CSSProperties;\n    /**\n     * The content of this element's own `slot` children, keyed by slot name — the\n     * named regions the primitive declared and is responsible for placing.\n     *\n     * Always present, empty when the node has no slot children, so a primitive\n     * reads `loom.slots.aside` without first proving the map exists. A slot the\n     * primitive does not place renders nothing: that is what makes a region a\n     * region rather than a position in `children`.\n     */\n    readonly slots: SlotChildren;\n    /**\n     * What the host answered for this node's bindings, by binding name.\n     *\n     * Always present, empty when the node binds nothing, so a primitive reads\n     * `loom.data.services` without first proving the map exists. Each answer is\n     * `ready` or `unavailable` with a reason — never merely absent — because a\n     * primitive shows different things for \"you have no services yet\" and \"we\n     * could not reach your services\", and a shape that cannot tell them apart\n     * guarantees it eventually shows the wrong one.\n     *\n     * It arrives beside `props` rather than merged into them because the two have\n     * different authors. Props are in the tree, proposed by a model and weighed by\n     * the Gate; data is the host's answer to a question the tree asked, and it\n     * belongs to whoever runs the deployment.\n     */\n    readonly data: NodeData;\n    /**\n     * Where this node's form posts, if it declared a submission.\n     *\n     * Absent — not `unavailable` — when the node declared none: the three states\n     * are distinct and a form primitive acts differently on each. Absent is a\n     * tree that never said where to post, which is an authoring gap; `unavailable`\n     * is a deployment that could not answer right now, which is not.\n     *\n     * Unlike `data`, `text` and `slots` there is at most one per node, because a\n     * form posts to one place. Everything on a `ready` target is host-authored:\n     * nothing about the address is in the tree, so nothing about it survives into\n     * a delta, a revision, or the diff a reviewer reads.\n     */\n    readonly submit?: SubmissionOutcome;\n    /**\n     * Whether the URLs this primitive said it frames may be framed, by the\n     * prop name that carried each one.\n     *\n     * Always present, empty for the primitive that declared no framable prop —\n     * which is all but one of them — so a primitive reads `loom.frames.src`\n     * without first proving the map exists. An entry appears for every declared\n     * prop the node actually carries, so a primitive that has a `src` to frame\n     * always has an answer about it, and one whose optional `src` was left out\n     * has nothing to frame and no entry.\n     *\n     * Unlike `data` and `submit`, no part of this waits on anything: an allowlist\n     * is a static fact about a deployment, so the check happens inside the walk\n     * and there is nothing for a host to resolve first. What a host *does* have\n     * to wire is the allowlist itself — absent, every frame is refused, because a\n     * deployment that has not said whose documents it will run has not agreed to\n     * run anybody's.\n     */\n    readonly frames: NodeFrames;\n    /**\n     * The strings this primitive declared, resolved for this deployment.\n     *\n     * Always present and always complete: every key the primitive declared is\n     * here, carrying the host's translation where there is one and the declared\n     * string where there is not. A primitive reads `loom.text.excluded` and gets a\n     * string, never `undefined` — a control whose accessible name went missing\n     * because nobody translated it is the failure this seam exists to prevent.\n     *\n     * Empty for a primitive that declared none, and typed as such: `TText` is the\n     * union of declared keys, so reading one that was never declared does not\n     * compile.\n     */\n    readonly text: PrimitiveText<TText>;\n    /**\n     * The controls this primitive declared, built and ready to place.\n     *\n     * Always present, empty for the primitive that declared none, so a primitive\n     * reads `loom.behaviours.copy` without first proving the map exists — and\n     * typed by what it declared, so reading one it did not ask for does not\n     * compile.\n     *\n     * A behaviour is the one thing a primitive receives that **runs**: a copy\n     * button is a click handler, and a click handler is not expressible in the\n     * JSON a primitive's props are. It arrives already built rather than as a\n     * component to configure, because there is nothing here for a tree, a model\n     * or a primitive to get right or wrong — the strings came from the\n     * primitive's own declarations and the content came from the tree. See\n     * `behaviour.ts`.\n     */\n    readonly behaviours: PrimitiveBehaviours<TBehavio\n…",
+              "signature": "type LoomRenderContext<TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /**\n     * Present only when the tree was rendered in edit mode. Spread onto the\n     * primitive's own root element; a primitive that drops it renders correctly\n     * but becomes invisible to the portal.\n     */\n    readonly editable?: EditableAttributes;\n    /**\n     * The `id` this node answers to, so a link on the same page can point at it.\n     *\n     * Present only when the tree named an anchor that is usable and that no\n     * earlier node claimed; absent otherwise, including inside a decorative copy,\n     * which carries no identity. Spread onto the primitive's own root element,\n     * beside `editable` — a primitive that drops it renders correctly and cannot\n     * be linked to.\n     *\n     * There is nothing here to distinguish \"the tree named none\" from \"the tree\n     * named one and it was refused\", which every other seam on this context takes\n     * care to keep apart. The difference is real and it is in the diagnostics; it\n     * is not here because a primitive would do the same thing with both, and a\n     * shape that offers a choice nobody can act on invites one to be invented.\n     */\n    readonly anchor?: AnchorAttributes;\n    /**\n     * The tree's theme, flattened into CSS custom properties. Present on the\n     * **root node only**, and only when the tree names a theme the render could\n     * resolve; apply it as `style` on the primitive's own root element.\n     *\n     * It arrives here rather than on a wrapper the renderer emits for the reason\n     * `editable.ts` gives for the same choice: a wrapper changes what `>`,\n     * `:first-child` and `:nth-child` select, and a page that only lays out\n     * correctly when it is unthemed is not a page anyone reviewed. The cost is\n     * that a root primitive which drops it renders unstyled — which is what the\n     * two starter palettes exist to catch.\n     */\n    readonly theme?: CSSProperties;\n    /**\n     * The content of this element's own `slot` children, keyed by slot name — the\n     * named regions the primitive declared and is responsible for placing.\n     *\n     * Always present, empty when the node has no slot children, so a primitive\n     * reads `loom.slots.aside` without first proving the map exists. A slot the\n     * primitive does not place renders nothing: that is what makes a region a\n     * region rather than a position in `children`.\n     */\n    readonly slots: SlotChildren;\n    /**\n     * What the host answered for this node's bindings, by binding name.\n     *\n     * Always present, empty when the node binds nothing, so a primitive reads\n     * `loom.data.services` without first proving the map exists. Each answer is\n     * `ready` or `unavailable` with a reason — never merely absent — because a\n     * primitive shows different things for \"you have no services yet\" and \"we\n     * could not reach your services\", and a shape that cannot tell them apart\n     * guarantees it eventually shows the wrong one.\n     *\n     * It arrives beside `props` rather than merged into them because the two have\n     * different authors. Props are in the tree, proposed by a model and weighed by\n     * the Gate; data is the host's answer to a question the tree asked, and it\n     * belongs to whoever runs the deployment.\n     */\n    readonly data: NodeData;\n    /**\n     * Where this node's form posts, if it declared a submission.\n     *\n     * Absent — not `unavailable` — when the node declared none: the three states\n     * are distinct and a form primitive acts differently on each. Absent is a\n     * tree that never said where to post, which is an authoring gap; `unavailable`\n     * is a deployment that could not answer right now, which is not.\n     *\n     * Unlike `data`, `text` and `slots` there is at most one per node, because a\n     * form posts to one place. Everything on a `ready` target is host-authored:\n     * nothing about the address is in the tree, so nothing about it survives into\n     * a delta, a revision, or the diff a reviewer reads.\n     */\n    readonly submit?: SubmissionOutcome;\n    /**\n     * Whether the URLs this primitive said it frames may be framed, by the\n     * prop name that carried each one.\n     *\n     * Always present, empty for the primitive that declared no framable prop —\n     * which is all but one of them — so a primitive reads `loom.frames.src`\n     * without first proving the map exists. An entry appears for every declared\n     * prop the node actually carries, so a primitive that has a `src` to frame\n     * always has an answer about it, and one whose optional `src` was left out\n     * has nothing to frame and no entry.\n     *\n     * Unlike `data` and `submit`, no part of this waits on anything: an allowlist\n     * is a static fact about a deployment, so the check happens inside the walk\n     * and there is nothing for a host to resolve first. What a host *does* have\n     * to wire is the allowlist itself — absent, every frame is refused, because a\n     * deployment that has not said whose documents it will run has not agreed to\n     * run anybody's.\n     */\n    readonly frames: NodeFrames;\n    /**\n     * The strings this primitive declared, resolved for this deployment.\n     *\n     * Always present and always complete: every key the primitive declared is\n     * here, carrying the host's translation where there is one and the declared\n     * string where there is not. A primitive reads `loom.text.excluded` and gets a\n     * string, never `undefined` — a control whose accessible name went missing\n     * because nobody translated it is the failure this seam exists to prevent.\n     *\n     * Empty for a primitive that declared none, and typed as such: `TText` is the\n     * union of declared keys, so reading one that was never declared does not\n     * compile.\n     */\n    readonly text: PrimitiveText<TTex\n…",
               "truncated": true,
               "summary": ""
             },
@@ -5361,7 +5571,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent, and its rows carry the gap\n     * between them. Both are here rather than inline because neither is\n     * expressible on the element that needs it — `::marker` is a pseudo-element,\n     * and a row's gap is a fact about the *list* that only the row can apply.\n     */\n    readonly list: \"loom-list\";\n    /** The same list set tight — points to scan rather than points to read. */\n    readonly listTight: \"loom-list-tight\";\n    /** The same list set loose, for rows that are a sentence each. */\n    readonly listLoose: \"loom-list-loose\";\n    /**\n     * A `loom.table`: the padding its cells share, and the rules between its\n     * rows. Both are the *table's* decisions applied to cells it does not render,\n     * which is the one thing an inline style cannot reach.\n     */\n    readonly table: \"loom-table\";\n    /** The same table drawn as a bordered surface, which is what makes its heading column stick. */\n    readonly tablePanel: \"loom-table-panel\";\n    /** The same table set tight — a spec to scan — and set loose, a page to read. */\n    readonly tableTight: \"loom-table-tight\";\n    readonly tableLoose: \"loom-table-loose\";\n    /** Vertical rules as well as horizontal ones, and no rules at all. */\n    readonly tableGrid: \"loom-table-grid\";\n    readonly tableFlush: \"loom-table-flush\";\n    /** One `loom.table-row`, so the whole row can answer a pointer. */\n    readonly tableRow: \"loom-table-row\";\n    /** A row the page is pointing at, whi\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent,\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -6472,6 +6682,20 @@
               "summary": ""
             },
             {
+              "name": "WriteOutcomeKind",
+              "kind": "type",
+              "signature": "type WriteOutcomeKind = WriteOutcome[\"kind\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "WRITE_OUTCOME_KINDS",
+              "kind": "value",
+              "signature": "const WRITE_OUTCOME_KINDS: readonly WriteOutcomeKind[]",
+              "truncated": false,
+              "summary": "Every way a write can end, in the order the runtime reaches them."
+            },
+            {
               "name": "describeWriteOutcome",
               "kind": "function",
               "signature": "const describeWriteOutcome: (outcome: WriteOutcome) => string",
@@ -6960,6 +7184,20 @@
               "signature": "type TelemetryEvent = {\n    readonly type: \"intent-received\";\n    readonly intent: IntentSummary;\n} | {\n    readonly type: \"policy-resolved\";\n    readonly intentId: IntentId;\n    readonly policyId: string;\n    /** Absent on a record written before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n} | {\n    readonly type: \"interpretation-failed\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-proposed\";\n    readonly proposal: ProposedChange;\n} | {\n    readonly type: \"assessment-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-assessed\";\n    readonly assessment: AssessmentSummary;\n} | {\n    readonly type: \"disposition-decided\";\n    readonly proposalId: ProposalId;\n    readonly disposition: Disposition;\n} | {\n    readonly type: \"repair-requested\";\n    readonly refusedProposalId: ProposalId;\n    readonly reason: DispositionReason;\n} | {\n    readonly type: \"repair-failed\";\n    readonly refusedProposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-applied\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"application-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"intent-not-writable\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"proposal-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly type: \"hold-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"hold-confirmed\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"hold-discarded\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"change-committed\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"commit-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TelemetryEventType",
+              "kind": "type",
+              "signature": "type TelemetryEventType = TelemetryEvent[\"type\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TELEMETRY_EVENT_TYPES",
+              "kind": "value",
+              "signature": "const TELEMETRY_EVENT_TYPES: readonly TelemetryEventType[]",
+              "truncated": false,
+              "summary": "Every event the journal can hold, in the order the runtime writes them."
             },
             {
               "name": "telemetryRecordSchema",

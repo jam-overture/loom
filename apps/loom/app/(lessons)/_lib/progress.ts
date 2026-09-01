@@ -56,6 +56,33 @@ export type Prediction = {
   readonly on: string
 }
 
+/**
+ * The same question, answered again on a later day.
+ *
+ * The schedule's instruction after a miss is one sentence long — *look up only
+ * the specific point, then re-answer that question from memory a day later* —
+ * and it is the only thing in this course that nothing kept. It could not be an
+ * `Attempt`: a second attempt at a question **replaces** the first, because a
+ * set you came back to is a set you did, and that rule is right for a sitting
+ * and catastrophic here. Overwriting the miss would delete the confidence that
+ * made it worth returning to, so getting a question right at last would erase
+ * the evidence that you were ever confident and wrong about it — the one number
+ * the whole surface exists to keep.
+ *
+ * So a correction is a separate thing that accumulates rather than replaces. The
+ * sitting stays exactly as it happened; what is added is what happened *since*.
+ */
+export type Correction = {
+  /** The set the question is in — a correction is always a question somewhere. */
+  readonly set: string
+  readonly question: number
+  /** Rated before the reveal, again. The first rating is not reused. */
+  readonly confidence: Confidence
+  readonly answer: string
+  readonly grade: Grade
+  readonly on: string
+}
+
 export type Progress = {
   /** Lesson number as a string, to the day it was worked through. */
   readonly lessons: Readonly<Record<string, string>>
@@ -63,9 +90,16 @@ export type Progress = {
   readonly sets: Readonly<Record<string, SetProgress>>
   /** Set slug to what was written before the answer existed. */
   readonly predictions: Readonly<Record<string, readonly Prediction[]>>
+  /** Every re-answer, oldest first. Appended to; nothing here is ever replaced. */
+  readonly corrections: readonly Correction[]
 }
 
-export const EMPTY_PROGRESS: Progress = { lessons: {}, sets: {}, predictions: {} }
+export const EMPTY_PROGRESS: Progress = {
+  lessons: {},
+  sets: {},
+  predictions: {},
+  corrections: [],
+}
 
 export const EMPTY_SET_PROGRESS: SetProgress = { attempts: [], completedOn: undefined }
 
@@ -125,6 +159,29 @@ const readPrediction = (value: unknown): Prediction | undefined => {
   return { question, confidence, on, answer: typeof value["answer"] === "string" ? value["answer"] : "" }
 }
 
+const readCorrection = (value: unknown): Correction | undefined => {
+  if (!isObject(value)) return undefined
+
+  const set = value["set"]
+  const question = value["question"]
+  const confidence = readConfidence(value["confidence"])
+  const grade = readGrade(value["grade"])
+  const on = readDay(value["on"])
+
+  if (typeof set !== "string" || set === "") return undefined
+  if (typeof question !== "number" || !Number.isInteger(question)) return undefined
+  if (confidence === undefined || grade === undefined || on === undefined) return undefined
+
+  return {
+    set,
+    question,
+    confidence,
+    grade,
+    on,
+    answer: typeof value["answer"] === "string" ? value["answer"] : "",
+  }
+}
+
 export const readProgress = (value: unknown): Progress => {
   if (!isObject(value)) return EMPTY_PROGRESS
 
@@ -158,7 +215,12 @@ export const readProgress = (value: unknown): Progress => {
     }
   }
 
-  return { lessons, sets, predictions }
+  const raw = value["corrections"]
+  const corrections = Array.isArray(raw)
+    ? raw.map(readCorrection).filter((entry): entry is Correction => entry !== undefined)
+    : []
+
+  return { lessons, sets, predictions, corrections }
 }
 
 export const setProgress = (progress: Progress, slug: string): SetProgress =>
@@ -224,6 +286,25 @@ export const withPrediction = (
     },
   }
 }
+
+export const correctionsFor = (
+  progress: Progress,
+  slug: string,
+  question: number
+): readonly Correction[] =>
+  progress.corrections.filter(
+    (correction) => correction.set === slug && correction.question === question
+  )
+
+/**
+ * A re-answer, recorded. Appended, never replacing: two goes at the same
+ * question a week apart are two retrievals, and the fact that there were two is
+ * the thing being measured.
+ */
+export const withCorrection = (progress: Progress, correction: Correction): Progress => ({
+  ...progress,
+  corrections: [...progress.corrections, correction],
+})
 
 export const withSetCompleted = (progress: Progress, slug: string, on: string): Progress => ({
   ...progress,

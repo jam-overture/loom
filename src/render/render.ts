@@ -5,7 +5,7 @@ import type { FrameOriginRegistry } from "../frame/origin.js"
 import { NO_FRAMES, type NodeFrames } from "../frame/resolution.js"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
-import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
+import { ANCHOR_PROP_KEY, DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { assertNever } from "../result.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
@@ -14,6 +14,12 @@ import { textOf } from "../tree/navigation.js"
 import type { ElementNode, LoomNode, SlotNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
+import {
+  createAnchorLedger,
+  resolveAnchor,
+  type AnchorAttributes,
+  type AnchorLedger,
+} from "./anchor.js"
 import {
   isBehaviourResolver,
   NO_RESOLVED_BEHAVIOURS,
@@ -157,6 +163,15 @@ type RenderContext = {
    * seam's base case with no dictionary half to lay over it (0063).
    */
   readonly behaviours: BehaviourResolver | undefined
+  /** Who holds each anchor, for the length of this one render. */
+  readonly anchors: AnchorLedger
+  /**
+   * This walk is a decorative copy, so nothing in it carries identity — no
+   * editable attributes and no anchor. `editMode` already governs the first;
+   * this governs the second, and they are separate because a copy has no
+   * identity whether or not anyone is editing.
+   */
+  readonly decorative: boolean
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
@@ -238,6 +253,7 @@ const decorativeChildrenFor = (
       copy = renderChildren(node.children, {
         ...context,
         editMode: false,
+        decorative: true,
         collect: discardDiagnostic,
       })
       rendered = true
@@ -253,6 +269,7 @@ const renderContextFor = (
   data: NodeData,
   submit: SubmissionOutcome | undefined,
   frames: NodeFrames,
+  anchor: AnchorAttributes | undefined,
   text: PrimitiveText<string>,
   behaviours: PrimitiveBehaviours<BehaviourName>,
   context: RenderContext
@@ -270,6 +287,7 @@ const renderContextFor = (
     behaviours,
     decorative: decorativeChildrenFor(node, context),
     ...(submit ? { submit } : {}),
+    ...(anchor ? { anchor } : {}),
     ...(context.editMode
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
       : {}),
@@ -379,6 +397,49 @@ const nodeFramesFor = (
 }
 
 /**
+ * The `id` this node was given, and a diagnostic when the tree named one it
+ * could not have.
+ *
+ * Read from the node's own props with nothing to plan and nothing to wire,
+ * exactly as a frame is — an anchor is a string held against a grammar and
+ * against the anchors already taken, and neither of those waits on anybody.
+ *
+ * Nothing is read at all inside a decorative copy. A copy is the same children
+ * with identity switched off, and an anchor is identity: emitting one would put
+ * the same `id` on two elements, which is the failure the copy exists to avoid
+ * in the first place, in the other of its two spellings.
+ */
+const nodeAnchorFor = (
+  node: ElementNode,
+  reserved: JsonObject,
+  context: RenderContext
+): AnchorAttributes | undefined => {
+  if (context.decorative) return undefined
+
+  const reading = resolveAnchor(reserved[ANCHOR_PROP_KEY], node.id, context.anchors)
+
+  switch (reading.status) {
+    case "anchored":
+      return reading.attributes
+    case "unusable":
+      context.collect({ code: "anchor-unusable", nodeId: node.id, detail: reading.detail })
+
+      return undefined
+    case "claimed":
+      context.collect({
+        code: "anchor-claimed",
+        nodeId: node.id,
+        anchor: reading.anchor,
+        holder: reading.holder,
+      })
+
+      return undefined
+    default:
+      return assertNever(reading, "nodeAnchorFor")
+  }
+}
+
+/**
  * The controls this node's primitive declared, built from the tree.
  *
  * The content a behaviour acts on is `textOf` the node — read from the tree
@@ -429,6 +490,9 @@ const reportUnreadReservedProps = (
 
     /** The same, by the submission seam and `nodeSubmissionFor`. */
     if (key === SUBMIT_PROP_KEY) continue
+
+    /** Read inside the walk, by `nodeAnchorFor`, which reports its own faults. */
+    if (key === ANCHOR_PROP_KEY) continue
 
     context.collect({ code: "reserved-prop-unrecognised", nodeId: node.id, key })
   }
@@ -487,13 +551,32 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
    */
   const frames = nodeFramesFor(node, props, context)
 
+  /**
+   * Claimed here rather than while the render context is built, which happens
+   * after this node's children have already been walked. First claim in document
+   * order has to mean the ancestor, not whichever descendant the walk reached
+   * before returning to its parent.
+   */
+  const anchor =
+    reserved[ANCHOR_PROP_KEY] === undefined ? undefined : nodeAnchorFor(node, reserved, context)
+
   const text = context.text?.textFor(node.type) ?? NO_TEXT
   const behaviours = nodeBehavioursFor(node, text, context)
   const body = renderElementBody(node, context)
 
   return createElement(primitive, {
     key: node.id,
-    loom: renderContextFor(node, body.slots, data, submit, frames, text, behaviours, context),
+    loom: renderContextFor(
+      node,
+      body.slots,
+      data,
+      submit,
+      frames,
+      anchor,
+      text,
+      behaviours,
+      context
+    ),
     props,
     children: body.children,
   })
@@ -615,6 +698,8 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     frames: isFrameResolver(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),
     behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
+    anchors: createAnchorLedger(),
+    decorative: false,
     collect,
   })
 

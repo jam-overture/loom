@@ -20,7 +20,7 @@ const LEVELS = {
 
 export const loomHeading = definePrimitive({
   type: "loom.heading",
-  description: "A section title; level 1 to 3",
+  description: "A section title; level 1 to 3.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {

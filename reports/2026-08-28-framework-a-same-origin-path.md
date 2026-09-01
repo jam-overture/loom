@@ -49,7 +49,7 @@ forbidden. `src/submit/endpoint.ts` was the only `startsWith("/")` in `src/` on
 page beside it, and `(marketing)` pays for that with a per-request origin seam
 that makes its trees a function of deployment. Changing it contradicts an
 `Accepted` clause of 0053, so per the escalation rule
-[0096](../decisions/0096-a-same-origin-path-is-not-a-scheme.md) is `Proposed`,
+[0096](../decisions/0100-a-same-origin-path-is-not-a-scheme.md) is `Proposed`,
 0053 is untouched, and **nothing that depends on it was built.**
 
 ## Decisions taken that were not specified
@@ -87,7 +87,7 @@ renumbering pass.
 
 ## Records added or superseded
 
-- **[0096](../decisions/0096-a-same-origin-path-is-not-a-scheme.md)** — `Proposed`,
+- **[0096](../decisions/0100-a-same-origin-path-is-not-a-scheme.md)** — `Proposed`,
   **ARCHITECTURAL, needs review.** Nothing superseded; 0053 untouched.
 
 ## Findings closed or filed

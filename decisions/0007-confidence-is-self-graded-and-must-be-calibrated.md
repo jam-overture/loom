@@ -4,9 +4,14 @@
 **Date:** 2026-07-28
 **Section:** §2 — Composition Runtime, binding on §6 — Telemetry
 
+> **Amended 2026-08-28**, under [0096](0099-a-record-is-amended-when-only-the-count-moved.md).
+> The ladder's rule count below read *six* and has been seven since 19 August.
+> Two rules still read confidence; only the size of the list they sit in moved.
+> Held against `ESCALATION_LADDER` by `src/record-claims.test.ts` from now on.
+
 ## Context
 
-Two of the Gate's six rules read `provenance.confidence`: one refuses a change
+Two of the Gate's seven rules read `provenance.confidence`: one refuses a change
 below the floor, one escalates a change below the minimum. That number is
 supplied by the proposer — since 2026-07-28, by a real model, which reports its
 own confidence in its own reply.

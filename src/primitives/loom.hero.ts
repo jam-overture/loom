@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, motion, radius, size, space } from "./tokens.js"
 
@@ -44,6 +45,8 @@ const props = z
     /** `tall` holds the fold — a landing hero — rather than sizing to its copy. */
     stature: z.enum(["standard", "tall"]).optional(),
     eyebrow: z.string().min(1).max(60).optional(),
+    /** The name this band answers to, so a link on the page can point at it — usually `top`. */
+    anchor: anchorSchema.optional(),
   })
   .strict()
 
@@ -233,7 +236,9 @@ export const loomHero = definePrimitive({
       "section",
       {
         ...loom.editable,
+        ...anchorAttributes(given.anchor),
         style: {
+          ...anchorStyle(given.anchor),
           position: "relative",
           isolation: "isolate",
           overflow: "hidden",

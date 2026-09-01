@@ -115,6 +115,12 @@ const orderedSections: readonly DocsSection[] = [
         summary: "Install the runtime and find your way around its ten entry points.",
       },
       {
+        slug: "scaffolding-a-project",
+        title: "Scaffolding a project",
+        summary:
+          "One command writes a primitive of your own, a registry that regenerates itself, and the test that catches the one failure nothing else reports.",
+      },
+      {
         slug: "your-first-tree",
         title: "Your first tree",
         summary: "Build a page as data — elements, text and props — with the builders that cannot produce an invalid tree.",
@@ -180,6 +186,12 @@ const orderedSections: readonly DocsSection[] = [
         title: "Connecting a model",
         summary:
           "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
+      },
+      {
+        slug: "what-your-app-has-to-do",
+        title: "What your app has to do",
+        summary:
+          "The one function that writes, the seven ways a write can end, and what your own code owes a person for each of them.",
       },
     ],
   },

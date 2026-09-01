@@ -2,11 +2,23 @@ import type { Metadata } from "next"
 
 import { readChangeSequence } from "@/app/(marketing)/_lib/adapt/history"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { pageMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, THE_RECORD } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = { title: THE_RECORD.title, description: THE_RECORD.description }
-
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+export const generateMetadata = async ({
+  searchParams,
+}: {
+  readonly searchParams: SearchParams
+}): Promise<Metadata> => {
+  const params = await searchParams
+
+  return pageMetadata(THE_RECORD, {
+    origin: siteOrigin(),
+    theme: readThemeName(params["theme"]),
+  })
+}
 
 /**
  * The record page: a run of changes, replayed from the published front door.

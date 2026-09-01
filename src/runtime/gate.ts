@@ -1,5 +1,10 @@
 import type { ChangeAssessment } from "./assessment.js"
-import type { Disposition, DispositionReason } from "./disposition.js"
+import type {
+  Disposition,
+  DispositionKind,
+  DispositionReason,
+  DispositionReasonCode,
+} from "./disposition.js"
 import { policyFingerprintOf } from "./policy-fingerprint.js"
 import { ceilingFor, type GatePolicy } from "./policy.js"
 import { isAbove, isAtLeast } from "./stake-level.js"
@@ -22,7 +27,28 @@ import { stakeFactor } from "./stakes.js"
  * depend on who asked (0035).
  */
 
-type GateRule = (assessment: ChangeAssessment, policy: GatePolicy) => Disposition | null
+/**
+ * The code a rung stamps when it fires. Every reason code but the acceptance.
+ *
+ * Excluded by type rather than by care: `within-policy` is what the Gate says
+ * when nothing objected, and a rung that stamped it would be a rung reporting
+ * that it did not fire.
+ */
+export type EscalationCode = Exclude<DispositionReasonCode, "within-policy">
+
+/**
+ * One rung of the ladder: what it stamps, what it decides, and when it fires.
+ *
+ * A rung declares its code and its kind once, and answers with the detail line
+ * when it fires and `null` when it does not. The rule cannot stamp a code other
+ * than its own, and the ladder can be read off the rungs — which is what lets
+ * anything outside this module count the rules rather than keep a list of them.
+ */
+type GateRule = {
+  readonly code: EscalationCode
+  readonly kind: Exclude<DispositionKind, "accepted">
+  readonly fires: (assessment: ChangeAssessment, policy: GatePolicy) => string | null
+}
 
 const decide = (
   assessment: ChangeAssessment,
@@ -51,38 +77,41 @@ const decide = (
 })
 
 /** Too unsure to act on at all — asking the user to confirm a guess is noise. */
-const rejectBelowConfidenceFloor: GateRule = (assessment, policy) => {
-  const { confidence } = assessment.proposal.provenance
-  if (confidence >= policy.confidenceFloor) return null
+const rejectBelowConfidenceFloor: GateRule = {
+  code: "confidence-below-floor",
+  kind: "rejected",
+  fires: (assessment, policy) => {
+    const { confidence } = assessment.proposal.provenance
+    if (confidence >= policy.confidenceFloor) return null
 
-  return decide(assessment, policy, "rejected", {
-    code: "confidence-below-floor",
-    detail: `interpreter confidence ${confidence} is below the floor of ${policy.confidenceFloor}`,
-  })
+    return `interpreter confidence ${confidence} is below the floor of ${policy.confidenceFloor}`
+  },
 }
 
 /** Some changes are not offered to the user at all, however they were asked for. */
-const rejectAtRefusalFloor: GateRule = (assessment, policy) => {
-  if (!isAtLeast(assessment.stakes.level, policy.refusalFloor)) return null
+const rejectAtRefusalFloor: GateRule = {
+  code: "stakes-at-refusal-floor",
+  kind: "rejected",
+  fires: (assessment, policy) => {
+    if (!isAtLeast(assessment.stakes.level, policy.refusalFloor)) return null
 
-  const detail = assessment.stakes.factors.map((factor) => factor.detail).join("; ")
+    const detail = assessment.stakes.factors.map((factor) => factor.detail).join("; ")
 
-  return decide(assessment, policy, "rejected", {
-    code: "stakes-at-refusal-floor",
-    detail: detail || `stakes reached ${policy.refusalFloor}`,
-  })
+    return detail || `stakes reached ${policy.refusalFloor}`
+  },
 }
 
 /** Undo would not undo reality, so a human decides — regardless of how small it looks. */
-const confirmIrreversible: GateRule = (assessment, policy) => {
-  if (assessment.reversibility.reversible) return null
+const confirmIrreversible: GateRule = {
+  code: "irreversible",
+  kind: "requires-confirmation",
+  fires: (assessment) => {
+    if (assessment.reversibility.reversible) return null
 
-  const detail = assessment.reversibility.reasons.map((reason) => reason.code).join("; ")
+    const detail = assessment.reversibility.reasons.map((reason) => reason.code).join("; ")
 
-  return decide(assessment, policy, "requires-confirmation", {
-    code: "irreversible",
-    detail: `cannot be undone cleanly: ${detail}`,
-  })
+    return `cannot be undone cleanly: ${detail}`
+  },
 }
 
 /**
@@ -98,14 +127,10 @@ const confirmIrreversible: GateRule = (assessment, policy) => {
  * much damage refusable gets a refusal; the floor stays sovereign over the
  * escalations.
  */
-const confirmDiscardsLaterWork: GateRule = (assessment, policy) => {
-  const factor = stakeFactor(assessment.stakes, "discards-later-work")
-  if (!factor) return null
-
-  return decide(assessment, policy, "requires-confirmation", {
-    code: "discards-later-work",
-    detail: factor.detail,
-  })
+const confirmDiscardsLaterWork: GateRule = {
+  code: "discards-later-work",
+  kind: "requires-confirmation",
+  fires: (assessment) => stakeFactor(assessment.stakes, "discards-later-work")?.detail ?? null,
 }
 
 /**
@@ -120,38 +145,37 @@ const confirmDiscardsLaterWork: GateRule = (assessment, policy) => {
  * Below the refusal floor for the same reason, so a host that has declared this
  * much damage refusable still gets a refusal.
  */
-const confirmRedirectedSubmission: GateRule = (assessment, policy) => {
-  const factor = stakeFactor(assessment.stakes, "redirected-submission")
-  if (!factor) return null
-
-  return decide(assessment, policy, "requires-confirmation", {
-    code: "redirected-submission",
-    detail: factor.detail,
-  })
+const confirmRedirectedSubmission: GateRule = {
+  code: "redirected-submission",
+  kind: "requires-confirmation",
+  fires: (assessment) => stakeFactor(assessment.stakes, "redirected-submission")?.detail ?? null,
 }
 
-const confirmAboveCeiling: GateRule = (assessment, policy) => {
-  const ceiling = ceilingFor(policy, assessment.proposal.provenance.origin)
-  if (!isAbove(assessment.stakes.level, ceiling)) return null
+const confirmAboveCeiling: GateRule = {
+  code: "stakes-above-ceiling",
+  kind: "requires-confirmation",
+  fires: (assessment, policy) => {
+    const ceiling = ceilingFor(policy, assessment.proposal.provenance.origin)
+    if (!isAbove(assessment.stakes.level, ceiling)) return null
 
-  const detail = assessment.stakes.factors.map((factor) => factor.detail).join("; ")
+    const detail = assessment.stakes.factors.map((factor) => factor.detail).join("; ")
 
-  return decide(assessment, policy, "requires-confirmation", {
-    code: "stakes-above-ceiling",
-    detail:
+    return (
       detail ||
-      `${assessment.stakes.level} stakes exceed the ${ceiling} ceiling for ${assessment.proposal.provenance.origin}`,
-  })
+      `${assessment.stakes.level} stakes exceed the ${ceiling} ceiling for ${assessment.proposal.provenance.origin}`
+    )
+  },
 }
 
-const confirmBelowMinimumConfidence: GateRule = (assessment, policy) => {
-  const { confidence } = assessment.proposal.provenance
-  if (confidence >= policy.minimumConfidence) return null
+const confirmBelowMinimumConfidence: GateRule = {
+  code: "confidence-below-minimum",
+  kind: "requires-confirmation",
+  fires: (assessment, policy) => {
+    const { confidence } = assessment.proposal.provenance
+    if (confidence >= policy.minimumConfidence) return null
 
-  return decide(assessment, policy, "requires-confirmation", {
-    code: "confidence-below-minimum",
-    detail: `interpreter confidence ${confidence} is below ${policy.minimumConfidence}`,
-  })
+    return `interpreter confidence ${confidence} is below ${policy.minimumConfidence}`
+  },
 }
 
 /** Nothing objected, so the change goes through. */
@@ -171,10 +195,27 @@ const ESCALATION_RULES: readonly GateRule[] = [
   confirmBelowMinimumConfidence,
 ]
 
+/**
+ * The ladder, in the order it is consulted, read off the rules themselves.
+ *
+ * Published because the number of rungs and their precedence are the thing this
+ * repository describes most often and in the most places — a record, a lesson,
+ * a documentation page, a portal that shows a reader which rung fired. Every one
+ * of those otherwise counts the rules by reading the source and writing the
+ * number down, which is a copy, and a copy of a list is wrong from the first
+ * time the list changes.
+ *
+ * It is derived rather than declared, so it cannot disagree with the rules it
+ * describes: inserting a rung changes this list in the same edit.
+ */
+export const ESCALATION_LADDER: readonly EscalationCode[] = ESCALATION_RULES.map(
+  (rule) => rule.code
+)
+
 export const gate = (assessment: ChangeAssessment, policy: GatePolicy): Disposition => {
   for (const rule of ESCALATION_RULES) {
-    const escalation = rule(assessment, policy)
-    if (escalation) return escalation
+    const detail = rule.fires(assessment, policy)
+    if (detail !== null) return decide(assessment, policy, rule.kind, { code: rule.code, detail })
   }
 
   return accept(assessment, policy)

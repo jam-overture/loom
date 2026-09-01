@@ -58,8 +58,15 @@ export type ChangeRecord = {
  * Not a gloss on the verdict — the *reason*, translated. A page that said
  * "your rules allowed it" and stopped would be asserting the thing this site
  * exists to prove.
+ *
+ * **Exported since 28 August, and the reason is the best property the rules
+ * page has.** That page explains the seven questions the rules ask; this map
+ * holds what the site *says* when one of them answers. If the explanation were
+ * written out again over there, the two would drift — and the drift would be
+ * invisible, because a reader never sees them on the same screen. They are one
+ * set of sentences, used twice: once to teach and once to report.
  */
-const BECAUSE = {
+export const BECAUSE = {
   "within-policy":
     "It can be taken back, it moves little enough, and it was worked out rather than guessed.",
   "confidence-below-floor":
@@ -91,7 +98,8 @@ const RAISED_BY = {
   "redirected-submission": "it changes where the page sends what people type",
 } satisfies Record<StakeFactorCode, string>
 
-const WEIGHT = {
+/** What each weight is called, in the one word the site uses for it everywhere. */
+export const WEIGHT = {
   low: "light",
   medium: "middling",
   high: "heavy",

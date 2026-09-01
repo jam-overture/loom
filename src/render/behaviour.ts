@@ -2,6 +2,7 @@ import { createElement, type ReactNode } from "react"
 
 import type { PrimitiveType } from "../primitive-type.js"
 
+import { AdjustControl } from "./behaviour-adjust.js"
 import { CopyControl } from "./behaviour-copy.js"
 import { DiscloseControl } from "./behaviour-disclose.js"
 import type { PrimitiveText } from "./text.js"
@@ -60,9 +61,19 @@ import type { PrimitiveText } from "./text.js"
  * page was projected from — so it is right before the browser has laid anything
  * out, needs no ref into markup the primitive owns, and copies what the page
  * *says* rather than whatever text happened to render beside it.
+ *
+ * Two members later that is still true of what a control *reads*, and the
+ * vocabulary has grown a second axis it says nothing about: what a control hands
+ * *back*. `copy` hands back nothing. `disclose` hands back a boolean, on its own
+ * element, which a sibling selector reaches. `adjust` hands back a number, on the
+ * element the primitive placed it in, because inheritance is the only way a
+ * stylesheet can compute with one. Each is the smallest thing that reaches the
+ * layout it has to reach, and
+ * [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
+ * records why the third could not be the second.
  */
 
-export const BEHAVIOUR_NAMES = ["copy", "disclose"] as const
+export const BEHAVIOUR_NAMES = ["copy", "disclose", "adjust"] as const
 
 export type BehaviourName = (typeof BEHAVIOUR_NAMES)[number]
 
@@ -95,6 +106,69 @@ export type BehaviourName = (typeof BEHAVIOUR_NAMES)[number]
  * then describes correctly instead of contradicting.
  */
 export const DISCLOSED_ATTRIBUTE = "data-loom-disclosed"
+
+/**
+ * The custom property an adjust control publishes its value on: a plain number
+ * between {@link ADJUST_MINIMUM} and {@link ADJUST_MAXIMUM}, no unit.
+ *
+ * **This is the whole of the contract between the runtime and a primitive that
+ * takes `adjust`**, and it is a custom property rather than an attribute for the
+ * one reason an attribute cannot be made to work: what this hands back is a
+ * number a stylesheet has to *compute with*, and there is no portable way to
+ * read an attribute's value into a length. `attr()` outside `content` is not
+ * something a library may rely on today.
+ *
+ * A property is read with `var()`, which resolves by **inheritance**, and that
+ * is what makes this behaviour differ from `disclose` in a way worth stating
+ * rather than glossing. `data-loom-disclosed` is read *sideways*, by an ordinary
+ * sibling selector, so the control stamping it on its own button reaches the
+ * region beside it. Inheritance runs downwards only, so a property set on the
+ * control's own element would be readable by nothing at all — least of all the
+ * sibling region the control exists to drive.
+ *
+ * So the control writes this property on **the element the primitive placed it
+ * in**, its parent, and the primitive reads it from anywhere in that subtree.
+ * The unit is left off deliberately, so one value serves every use:
+ *
+ * ```css
+ * .after { clip-path: inset(0 calc(100% - var(--loom-adjust, 50) * 1%) 0 0) }
+ * ```
+ *
+ * **The fallback is not optional and not decoration.** The property is absent
+ * until the control has mounted and proved scripting runs, and absent again the
+ * moment it unmounts — so the second argument to `var()` is what a page served
+ * with scripting off renders, and it should be the position the primitive's own
+ * props declared. That is what keeps the still version of a comparison the thing
+ * that ships, rather than a blank waiting on a control that may never arrive.
+ *
+ * See [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md).
+ */
+export const ADJUST_PROPERTY = "--loom-adjust"
+
+/** The bottom of an adjust control's range. */
+export const ADJUST_MINIMUM = 0
+
+/**
+ * The top of an adjust control's range.
+ *
+ * A percentage rather than a unit interval, because every use so far multiplies
+ * by `1%` and a stylesheet author reading `var(--loom-adjust)` should see the
+ * number they would have typed. Fixed rather than declarable for the reason the
+ * seam gives about props: what a control ranges over is not a model's to write.
+ */
+export const ADJUST_MAXIMUM = 100
+
+/**
+ * Where the control sits before anybody moves it.
+ *
+ * The midpoint, and it is the control's rather than the primitive's on purpose.
+ * `build` receives the node's text and its content, not its props, so there is
+ * nothing here that could read a declared position — and nothing that needs to:
+ * the primitive supplies its own position as the `var()` fallback, which covers
+ * the case that actually matters, the page where the control never mounts. Once
+ * a reader has a slider in front of them, where it started is theirs to change.
+ */
+export const ADJUST_RESTING = 50
 
 type Behaviour = {
   /** One line, for the reference. A behaviour is never shown to a model. */
@@ -147,6 +221,30 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
     build: (_content, text) =>
       createElement(DiscloseControl, {
         label: text.disclose ?? "",
+      }),
+  },
+  /**
+   * The third member, and the first that hands a value *back*.
+   *
+   * `copy` reads the node's text because what it acts on is in the tree.
+   * `disclose` publishes a boolean because what it acts on is layout the
+   * primitive owns and a sibling selector can reach. This publishes a number,
+   * because what it acts on is a length a stylesheet has to compute — and that
+   * is the one thing neither of the other two shapes can express.
+   *
+   * It is the first control that writes to an element the runtime did not
+   * create, which is a cost recorded rather than a detail (0096). The element is
+   * the one the primitive placed the control in, so it is chosen and not
+   * discovered; see {@link ADJUST_PROPERTY}.
+   */
+  adjust: {
+    description:
+      "A control the reader drags to choose a number, published to the primitive as a CSS custom property so a stylesheet can compute a length from it.",
+    text: ["adjust"],
+    rendersControl: true,
+    build: (_content, text) =>
+      createElement(AdjustControl, {
+        label: text.adjust ?? "",
       }),
   },
 }

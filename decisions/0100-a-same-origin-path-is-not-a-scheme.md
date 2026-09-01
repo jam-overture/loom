@@ -1,4 +1,4 @@
-# 0096. A same-origin path is not a scheme
+# 0100. A same-origin path is not a scheme
 
 **Status:** Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause
 of [0053](0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md),

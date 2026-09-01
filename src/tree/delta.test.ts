@@ -4,7 +4,12 @@ import { sequentialIdFactory } from "../ids.js"
 import { sampleTree } from "../testing/fixtures.js"
 
 import { buildElement } from "./builders.js"
-import { configureOperationSchema, parseDelta, treeOperationSchema } from "./delta.js"
+import {
+  configureOperationSchema,
+  parseDelta,
+  TREE_OPERATIONS,
+  treeOperationSchema,
+} from "./delta.js"
 
 const idFactory = sequentialIdFactory("d")
 
@@ -85,5 +90,21 @@ describe("parseDelta", () => {
     })
 
     expect(result.ok).toBe(false)
+  })
+})
+
+/**
+ * Four is a claim this project makes in prose on four surfaces, and it was a
+ * digit in each of them. This is the list those sentences can be held against.
+ */
+describe("TREE_OPERATIONS", () => {
+  it("is every operation the schema parses, in the order the delta doc argues them", () => {
+    const parsed = treeOperationSchema.options.map((option) => option.shape.op.value)
+
+    expect(TREE_OPERATIONS).toEqual(parsed)
+  })
+
+  it("is four, which is the number the vocabulary is", () => {
+    expect(TREE_OPERATIONS).toHaveLength(4)
   })
 })
