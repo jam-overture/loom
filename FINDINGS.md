@@ -12636,3 +12636,84 @@ already does — would make the class of failure impossible instead of legible.
 That is a change in that lane's route group and so is not made here.
 it is bound by, which is the rule that file states about itself.
 >>>>>>> origin/main
+
+---
+
+## 2026-08-28 — sixteen pull requests were closed unmerged, and the work needs redoing
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** each routine named below · **Status:** open
+
+A backlog of thirty pull requests had accumulated. Fourteen merged. The sixteen
+below were **closed unmerged on 28 August**, and each owning routine should
+**redo that work against current `main`**.
+
+**The branches are preserved.** Nothing was deleted — read yours for what it was
+trying to do, then rebuild rather than reviving it. Parts have already been
+superseded by later runs of the same lane.
+
+**Why they could not be merged.** Each lane had several runs open at once, every
+one branched off `main` and editing the same files. They conflicted with *each
+other*, not with other lanes: all four demo runs edited `record-card.tsx`, all
+four primitives runs edited `library.test.ts`, `stylesheet.ts` and `index.ts`.
+Those are overlapping rewrites of the same logic rather than additions that
+combine — resolving them mechanically produced `loom.nav.ts(197,4): error TS1109`,
+so it was stopped rather than forced.
+
+**What to do differently, and this is the part that matters.** Before starting a
+unit, check whether you already have an open pull request. If you do, **continue
+it rather than branching again from `main`** — push onto that branch. Two open
+pull requests from one routine touching one file is a conflict you are creating
+for yourself, and the cost lands on the maintainer, not on the run.
+
+### Loom daily build
+
+- **#171** — §4b: a control that hands back a number  
+  branch `framework-14-a-control-that-hands-back-a-number`
+
+### Loom demo
+
+- **#186** — Demo: what allowing it would do, in the words on the page  
+  branch `demo-08-what-allowing-it-would-do`
+- **#194** — Demo: the payoff card took its own undo away  
+  branch `demo-09-the-offer-that-withdrew-itself`
+- **#202** — Demo: the two questions it promised — and main was red  
+  branch `demo-10-the-two-questions-it-promised`
+- **#209** — Demo: what an ask from here may do — and main was red  
+  branch `demo-11-what-an-ask-from-here-may-do`
+
+### Loom docs
+
+- **#183** — §4c: what every ask leaves behind  
+  branch `docs-13-what-every-ask-leaves-behind`
+- **#199** — §4c: going to production — and main was red  
+  branch `docs-15-going-to-production`
+
+### Loom lessons
+
+- **#215** — Lessons: 18, a destination that is a name and never an address  
+  branch `lessons-23-the-write-seam`
+
+### Loom marketing
+
+- **#198** — §4d: the record of the change you actually made — and main was red  
+  branch `marketing-16-the-record-of-your-ask`
+
+### Loom portal
+
+- **#185** — §5: who has been trying to get in, and a check the rename queue cannot forget  
+  branch `portal-15-who-has-been-trying-to-get-in`
+- **#201** — §5: what a checkup actually proves — and main was red  
+  branch `portal-17-what-a-checkup-proves`
+- **#208** — §5: everything waiting on you, and what each answer would do  
+  branch `portal-18-everything-waiting-on-you`
+
+### Loom primitives
+
+- **#172** — §4b: what a phone can see, and what a screenshot says  
+  branch `primitives-15-what-a-phone-can-see`
+- **#180** — §4b: what you press play on, and what you turn up for  
+  branch `primitives-16-press-play-and-turn-up`
+- **#188** — §4b: the ground you stand on  
+  branch `primitives-17-the-ground-you-stand-on`
+- **#196** — §4b: what is on the shelf, and what is on the market  
+  branch `primitives-18-the-shelf-and-the-market`
