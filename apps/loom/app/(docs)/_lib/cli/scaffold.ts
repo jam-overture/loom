@@ -196,7 +196,7 @@ const REFUSAL_SPECS: Record<CliError["code"], RefusalSpec> = {
   "framework-namespace": {
     argv: ["add", "primitive", "loom.card"],
     protects:
-      "loom.* is the framework's own namespace, and a primitive of yours under it is one no registry could ever build.",
+      "@loom/runtime registers the loom.* types itself, and a registry refuses two definitions of one type — so a primitive scaffolded there would be unreachable in the app that wrote it.",
   },
   "already-registered": {
     argv: ["add", "primitive", "app.page"],
@@ -225,8 +225,8 @@ const REFUSAL_SPECS: Record<CliError["code"], RefusalSpec> = {
  */
 export const REFUSAL_ORDER: readonly CliError["code"][] = [
   "file-exists",
-  "already-registered",
   "framework-namespace",
+  "already-registered",
   "reserved-primitive-type",
   "invalid-primitive-type",
   "unknown-command",

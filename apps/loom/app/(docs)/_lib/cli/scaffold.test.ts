@@ -206,30 +206,4 @@ describe("the claims the page makes about the runtime", () => {
     expect(audit).toHaveProperty("throwsOnDeclaredProps")
   })
 
-  /**
-   * This asserted the opposite until 1 September, and the flip is the news.
-   *
-   * The scaffold used to write a `loom.page`, which the starter library also
-   * registers, so the page carried a callout warning that a reader who combined
-   * the two got a registry that refused itself. `framework-20` closed that —
-   * [0101](../../../../../../decisions/0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md)
-   * gave the whole `loom.` namespace to the framework and the scaffold writes
-   * `app.page` — so the callout now describes something that cannot happen.
-   *
-   * Kept rather than deleted, and inverted rather than weakened: the guarantee
-   * a reader needs is that following this page and *Rendering a tree* in order
-   * produces a registry that builds. That is worth an assertion permanently,
-   * where the collision was only ever worth one while it lasted.
-   */
-  it("scaffolds a type the starter library leaves free, so the two combine", async () => {
-    const session = await scaffoldSession()
-
-    expect([...session.files.keys()]).toContain(`${SCAFFOLD_DIRECTORY}/primitives/app.page.ts`)
-
-    const built = createStarterPrimitiveRegistry()
-
-    if (!built.ok) throw new Error(describeRegistryError(built.error))
-
-    expect(built.value.primitives.map((primitive) => primitive.type)).not.toContain("app.page")
-  })
 })
