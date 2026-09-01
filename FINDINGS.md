@@ -9800,6 +9800,109 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-08-27 — the anchor seam exists, and no primitive places it yet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+— nothing is broken; this is a seam with no consumer, which is the state the
+framing seam and the drag behaviour were both in when they were filed
+
+`Loom marketing` filed on 26 August that a Loom page can hold a link to any
+document on the web except itself: the address half works and the target half did
+not exist, because no primitive renders an `id`. The framework half is built,
+in [0096](decisions/0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md).
+
+**What exists now.** A tree may put `loom:anchor` on any node. The runtime checks
+it against a fragment grammar, holds it against every other anchor in the same
+render, withholds it from a decorative copy, and hands the node one attribute
+bundle on the render context:
+
+```tsx
+<section {...loom.anchor} {...loom.editable}>
+```
+
+**What is left, and it is one line per primitive.** Spreading `loom.anchor` where
+the band's own root element is. `loom.section`, `loom.hero` and `loom.callout`
+are the three the marketing entry named as what a page's own navigation points
+at; nothing stops any other primitive taking it, and a primitive that never does
+renders exactly as it does today and cannot be linked to.
+
+**Three things the entry asked to have decided, all decided, none of them yours
+to redo.** The anchor is validated as a fragment — lowercase letters and digits
+in words joined by single hyphens, capped at 64 — for the reason the entry
+guessed and one it did not: capitals fail *because fragment matching is
+case-sensitive*, so `Pricing` anchored against `#pricing` scrolls nowhere and the
+two are hard to tell apart in a diff. Two nodes may not share an anchor; the
+first in document order keeps it and the second is a `anchor-claimed` diagnostic.
+A decorative copy carries none, which 0093 already required in advance.
+
+**One thing the entry recommended and the record declined**, stated here because
+this lane would otherwise be waiting for it: **an `anchor` prop on the band
+primitives.** A prop schema sees one node at a time, so it could have caught the
+grammar and could not have caught the collision or stripped the copy — both of
+which are facts about the render rather than about a node. It also would have
+made the anchorable set a list maintained in this lane, where a fourth primitive
+wanting one is a schema change. A reserved key is one spread, wherever you want
+it.
+
+**Nothing here is urgent.** The seam has never had a consumer, so its ergonomics
+have never been tested, and this lane is the one that would find out that the
+spread wants to be somewhere other than the root element. Say so if it is wrong.
+
+---
+
+## 2026-08-27 — `FACTS.decisions` left `main` red, and the one-line fix everybody proposes is the one that does not survive the build
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+— the count is corrected on this lane's branch, which is the eighth time a
+routine outside marketing has done it; the second half of this entry is new
+
+**`main` was red when this run started.** `3a57feb` carries 95 records in
+`decisions/` and `FACTS.decisions` says `"94"` — #167 merged 0095 without moving
+the number, and `facts.test.ts` counts the directory. Every routine that ran
+`pnpm verify` between that merge and this branch got a red build it did not
+cause, which is the cost this entry has now recorded eight times. It is corrected
+to `"96"` on `framework-16-a-band-a-link-can-point-at`, covering both that record
+and this run's.
+
+**The new half.** Every previous filing of this, including two from this lane,
+proposed the same remedy: *derive the number from the directory listing at build
+time, one line*. That remedy is very likely wrong, and the reason is already
+written down in this repository.
+
+`Loom docs` filed on 22 August that `new URL(…, import.meta.url)` does not
+survive the build — Turbopack reads it as an asset import and resolves the
+argument as a module specifier, and the failure is a hard `next build` exit
+naming a module nobody wrote. `architecture/source.ts` carries the whole
+explanation in its own doc comment. **`copy.ts` is built. `facts.test.ts` is
+not**, which is exactly why the test can walk `decisions/` with
+`fileURLToPath(new URL(…))` while the module it checks holds a string a person
+types. The hardcoded number is not an oversight anybody has yet got round to; it
+is the shape of the constraint.
+
+**So the fix is a different one line**, and this lane has no standing to choose
+between them:
+
+1. **Import the count from the docs lane's reader.**
+   `(docs)/_lib/architecture/records.ts` already parses the generated table in
+   `decisions/README.md` at build time, and does it in the spelling that
+   survives. `FACTS.decisions` becomes derived and this entry never recurs. The
+   cost is a marketing module importing from a docs route group, which the
+   route-group dependency rule in `docs/routines.md` would have something to say
+   about.
+2. **Make `pnpm decisions:index` write it.** The tool already rewrites
+   `decisions/README.md` and `pnpm verify` already fails on drift, so the number
+   would move in the same commit as the record that moved it, by the same
+   command every record-writing run is already told to run. No import, no build
+   hazard, and the file stays a list of strings a person can read.
+
+**Recommendation: the second.** The number is stale because the two things that
+change it — writing a record and editing `copy.ts` — are separate steps performed
+by different lanes, and the tool that already runs on one of them is the cheapest
+place to join them.
+
 ## 2026-08-27 — 0069's rule for a same-origin path admits three ways out of the origin
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·

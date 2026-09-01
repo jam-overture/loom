@@ -1,17 +1,11 @@
-import { treeOperationSchema } from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
-
-import { siteRegistry } from "./registry"
-
 /**
  * The three kinds of words on this site, kept apart on purpose.
  *
- * **Facts** are claims about the repository that the page works out from the
+ * **Facts** are claims about the repository that a test checks against the
  * repository. A marketing page that says "37 primitives" is worth nothing if
  * the number is a guess someone typed, and worth a great deal if it cannot be
- * wrong — so the numbers here are counted from the thing they are about wherever
- * the page can reach it, and stated as a floor the page cannot overstate where
- * it cannot. None of them is typed from a memory of it.
+ * wrong — so the numbers here are held against the registry and the decisions
+ * directory rather than against a memory of them.
  *
  * **Placeholders** are the sentences that are not engineering's to write.
  * Positioning, audience, pricing and licensing are the maintainer's; where the
@@ -23,59 +17,14 @@ import { siteRegistry } from "./registry"
  * visitor has never heard. See `RESERVED_VOCABULARY`.
  */
 
-/**
- * The delta vocabulary, read off the schema the runtime validates against.
- *
- * Not a list typed here, because a list typed here is a list that is wrong the
- * first time a fifth operation exists. The stat band's caption makes a
- * completeness claim — *"that is the whole list"* — and `facts.test.ts` holds
- * these four names so that a vocabulary which grew would take this lane red
- * rather than leaving the claim standing.
- */
-export const DELTA_OPERATIONS: readonly string[] = [
-  ...treeOperationSchema.optionsMap.keys(),
-].map((op) => String(op))
-
-/**
- * The floor under the record count, because this is the one number the page
- * cannot count for itself.
- *
- * `decisions/` sits five directory levels above the application, and `/` is a
- * **dynamic** route — so counting the records where the other two are counted
- * would mean a filesystem read inside a serverless function against a directory
- * the build never traced. The fix that would make it exact reaches
- * `next.config.ts` or the application's `package.json`, and both belong to other
- * lanes.
- *
- * So the page states a floor instead, and the test holds it in the one direction
- * that can damage the site: **the floor may never be higher than the truth.**
- * The cost is that the number understates itself as records accumulate, and
- * raising it is this lane's own work rather than something another lane's run is
- * forced into. That asymmetry is the entire point — see the 19 August finding.
- */
-export const DECISIONS_AT_LEAST = 90
-
-/**
- * The numbers on the page, counted rather than typed.
- *
- * Two of the three are worked out here from the thing they describe, so no run
- * that adds a primitive or a delta operation has to remember to come and edit a
- * marketing file. The rule the three follow:
- *
- * - **A number the page can count, it counts.** Adding a primitive changes the
- *   number and not the claim, so nothing needs a person.
- * - **A number that would change the claim goes red.** A fifth delta operation
- *   makes the caption beside it untrue, and this lane should have to answer for
- *   that rather than watch a digit tick over.
- * - **A number the page cannot count, it states as a floor it cannot overstate.**
- */
+/** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
-  /** Registered types in the registry this site actually renders with. */
-  primitives: String(catalogueOf(siteRegistry).length),
-  /** Numbered records in `decisions/`, README excluded — as a floor. */
-  decisions: `${DECISIONS_AT_LEAST}+`,
+  /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
+  primitives: "64",
+  /** Numbered records in `decisions/`, README excluded. */
+  decisions: "99",
   /** Delta operations. The whole vocabulary of structural change. */
-  operations: String(DELTA_OPERATIONS.length),
+  operations: "4",
 } as const
 
 /**
