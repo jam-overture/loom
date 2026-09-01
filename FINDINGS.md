@@ -9726,6 +9726,151 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-29 — a tree has one projection, and a share card needs a second
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+
+The marketing site now draws an image for every address a visitor can send
+somebody. It is **the only file on this surface that is not a Loom tree**, and it
+is not for want of trying: there is no arrangement of the seam by which a
+registered primitive can draw one pixel of it.
+
+Two facts meet and neither is negotiable on its own:
+
+- **The renderer is a total pure projection into React**
+  ([0008](decisions/0008-the-renderer-is-a-total-pure-projection.md)). React
+  elements are what a walk produces, and the one consumer is a browser.
+- **A primitive paints itself by naming a custom property.** `loom.section` emits
+  `var(--loom-bg-surface)`; the root mounts the theme as variables
+  ([0050](decisions/0050-the-runtimes-props-are-namespaced-and-the-root-mounts-the-theme.md)).
+
+An image renderer resolves no cascade and no custom properties — it takes inline
+styles and literal values. So a projection whose every colour is a `var()` is a
+projection that renders as a blank rectangle in the one medium that has no CSS.
+The same is true of anything else that has to show a page where a browser is not:
+an email body, a PDF, a plain-text digest.
+
+What this run did about it, so nobody has to guess: `_lib/share-card.tsx` draws
+one card by hand, is private to this lane, is imported by no page, and reads
+every colour, size, weight, radius and spacing step off the **resolved theme** —
+so it is not a parallel component library and it hard-codes nothing. A test
+walks the element it returns and fails on any colour that is not a slot of the
+palette the address named.
+
+**It is still a hand-drawn copy of a page, and that is the finding.** Three ways
+out, cheapest first, and this lane has no vote in which:
+
+1. **Leave it.** One card is one card. Say so, and let the next surface that
+   needs a second medium copy this file.
+2. **A resolver that inlines.** `applyTheme` already computes every slot's literal
+   value for the root; a render option that emitted `background: #faf7f5` in place
+   of `background: var(--loom-bg-canvas)` would let a real tree render into an
+   image renderer with no change to any primitive. It is the smallest change that
+   makes 0008 true in a second medium, and it is `src/render`'s to make.
+3. **A second projection target**, which is the architectural version and much the
+   largest: the walk producing something other than React. Worth a record if it is
+   ever wanted; not worth one for a share card.
+
+Recommendation: **2**, when something else wants it. One card does not justify it.
+
+---
+
+## 2026-08-29 — a font pack names a family and never says where the face is
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+
+A `FontPack` carries `headingFamily` and `bodyFamily` as **CSS family stacks** —
+`'Geist', ui-sans-serif, …`. That is right for a browser, which already has the
+faces or is handed them by the host's own stylesheet, and it is the reason
+`(marketing)/layout.tsx` carries a stylesheet link at all.
+
+It is not enough for anything that draws text itself. An image renderer needs
+font *data*: it cannot look a family name up, so it falls back to whatever it
+ships with. The share card this run added therefore wears the address's
+**palette** exactly — every slot, three registered triples, measured — and its
+**typeface not at all**. Under `editorial-serif`, whose whole character is
+Georgia, the card renders in a grotesque and looks entirely deliberate while
+doing it, which is the same failure mode the `next/font` note in `layout.tsx`
+already records for the page.
+
+The gap is that a pack says what to *ask for* and never where the face *is*. An
+optional `source` beside each family — a URL or a package path a host registers —
+would let a non-browser renderer fetch or read the face, and would change nothing
+for a browser, which would go on reading the stack.
+
+**Not urgent and possibly not worth it.** The card is legible and on-palette, no
+font is fetched, so the route makes no network call and cannot fail because
+somebody else's CDN is down — which for the one asset other people's servers
+fetch is worth more than matching the typeface. Recorded so that the next surface
+that draws text outside a browser does not rediscover it, and so that the report's
+claim that the card wears the theme is read with the one exception attached.
+
+---
+
+## 2026-08-29 — `main` was red on the record count for the eighth time, and the fix has been open two days
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`,
+`@jonathanbravecredit` · **Status:** open — an instance on the 19, 24 and
+25 August entries, not a fourth argument
+
+`pnpm verify` on `main` at `3a57feb` fails one test: `FACTS.decisions` says `94`
+and `decisions/` holds `95`. Measured, not inferred — the marketing suite on
+`main` is 588 passed, 1 failed.
+
+Since 0067 that is **four surfaces red rather than one**, and it is now the
+second consecutive marketing run to open a branch by bumping a digit it did not
+change. This branch bumps it to `95` so it can open on green, exactly as #182
+did to `94`.
+
+**#174 is the fix and it deletes the literal.** It counts the primitives off the
+registry and the kinds of change off the schema, and holds the record count as a
+floor rather than an equality — so a ninety-sixth record is a no-op. It has been
+open, green and mergeable since 27 August. Nothing here is new; the count is the
+whole content of this entry, because eight occurrences across three lanes in
+eleven days is the argument for merging it.
+
+---
+
+## 2026-08-29 — the preview deployment came back `Blocked`, and it is not a build failure
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+#190's only status is `Vercel — Deployment was blocked`, at 11:48 UTC. Not
+*failed*: **blocked**, which is Vercel refusing to start the build rather than
+the build going red. There is no log to read and nothing in the diff to fix.
+
+It is not this branch's, and the evidence is on the same repository within the
+same three hours, all from the same base commit:
+
+| PR | Opened (UTC) | Vercel |
+| --- | --- | --- |
+| #188 | 08:35 | Deployment has completed |
+| #189 | 09:38 | Deployment has completed |
+| **#190** | **11:48** | **Deployment was blocked** |
+
+`pnpm verify` is green on the branch, exit 0, including `next build` — so the
+application compiles here and the same commit would compile there. Whatever
+stopped it is upstream of the build: a spend or usage limit reached, a paused
+project, or a concurrency cap. All three are account settings and none is
+reachable from a routine.
+
+**What it costs, and why it is worth an entry rather than a line in one report.**
+Every brief on this project ends with *include the deployed preview URL and a
+screenshot — the maintainer judges it by eye.* A blocked deployment removes the
+preview URL from every pull request opened from now on, so the instruction stops
+being satisfiable and every lane will report the same thing in turn. This lane is
+the one it costs most: a marketing site is judged by looking at it.
+
+There is no re-run available to a routine — the deployment is Vercel's and
+neither `actions_run_trigger` nor anything else in reach touches it. This run
+pushed a second commit carrying this entry, which gave the deployment one more
+attempt; if that is also blocked, the cap is real rather than transient.
+
+Nothing was skipped or weakened to get around it. The pictures in
+`reports/2026-08-29-marketing-the-link-you-send*.png` are the real route's real
+output, rendered from the built application and verified against a running
+`next start` on this machine — an origin of `localhost:3000` in one of them is
+that, and not a placeholder.
 ## 2026-08-29 — a link inside a paragraph is the paragraph's own colour, in the palette all four surfaces wear
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`,
