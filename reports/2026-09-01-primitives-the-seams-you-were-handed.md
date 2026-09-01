@@ -189,6 +189,46 @@ Every screenshot was taken at a **true 390px viewport** through Playwright, and
 each shot carries a `scrollWidth === innerWidth` measurement: **ten of ten, no
 overflow**, both palettes, all three disclosure states.
 
+## The end-to-end check, and the two things it found
+
+The static fixtures above prove the CSS rule and the declarations. They cannot
+prove the half that only exists after hydration: that the control **actually
+appears and actually toggles** on a real page. Every previous run in this lane
+stopped at the fixture, so this one did not.
+
+**The deployed preview is unreachable from the sandbox.** `*.vercel.app` is not
+on the egress allowlist — `curl` gets `CONNECT tunnel failed, response 403`, and
+headless Chromium gets `ERR_TUNNEL_CONNECTION_FAILED`. The brief asks for *"the
+deployed preview URL and a screenshot of every primitive you added"*, and the
+second half of that has never been possible for any run. Filed.
+
+So the check was run against the marketing site built and served locally, which
+is the same code the deployment serves. **On the real front door, at a true
+390px:**
+
+| | closed | after a real click |
+| --- | --- | --- |
+| control present and visible | yes | yes |
+| menu visible | **no** | **yes** |
+| `aria-expanded` | `"false"` | `"true"` |
+
+and at 1280px the control is **not** visible while the menu is, which is the
+other half of the claim. `scrollWidth === innerWidth` at both widths.
+
+**The first attempt said `buttons=0`, and it was nearly reported as a defect.**
+Under `next dev` the control never appears: the HMR websocket handshake fails in
+this sandbox, hydration does not complete, and the button that renders from an
+effect therefore never renders. Nothing is wrong with the primitive — the same
+page under `next build && next start` hydrates in under two seconds and produces
+the button byte-for-byte as `behaviour-disclose.ts` writes it. Worth knowing
+before someone else spends a cycle on it: **in this sandbox, a control that
+renders from an effect cannot be verified under the dev server, only under a
+production build.**
+
+The three `2026-09-01-live-*.png` shots are from that run, and they are the real
+site rather than a fixture — six destinations in the menu, which is the case the
+25 August finding measured at three rows.
+
 ## What the library still cannot express
 
 - **A tab strip.** `tabs` is still blocked on client-side selection. `disclose`

@@ -9646,3 +9646,70 @@ Two ways out, and both are the maintainer's:
 
 Either is better than a thirteenth identical entry. There is no third option a
 routine can take.
+
+---
+
+## 2026-09-01 — the deployed preview is unreachable from the sandbox, so no run has ever screenshotted one
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — only the maintainer can widen egress
+
+Every routine brief asks for **the deployed preview URL and a screenshot** of
+what the run built. The first half works; the second half has never been
+possible for any lane.
+
+`*.vercel.app` is not on the egress allowlist:
+
+```
+$ curl -sS https://loom-git-primitives-20-…-projects.vercel.app/
+curl: (56) CONNECT tunnel failed, response 403
+```
+
+Headless Chromium gets `ERR_TUNNEL_CONNECTION_FAILED` for the same reason. So
+every "screenshot" in every report and pull request body across every lane is a
+**local render of the same code**, not a picture of the deployment. That is
+honest for layout and colour — same code, same palettes — and it silently is not
+a check on anything the build or the host does differently.
+
+**This is a smaller problem than it looks, and worth fixing anyway.** The gap it
+actually leaves is hydration: a primitive whose control renders from an effect
+(0086, 0092) is invisible in a static render, so the fixture cannot show it at
+all. This run worked around it by building the app and serving it locally, which
+is a fine substitute and is what the next lane should do rather than assuming
+the fixture covers it.
+
+**Recommendation:** add `*.vercel.app` to `sandbox.network.allowedDomains` and to
+`permissions.allow` as `WebFetch(domain:*.vercel.app)`. It is the deployment
+this project's own briefs point every reviewer at, and it is already public
+(0056). If that is unwanted, the briefs should stop asking for a screenshot of
+it and ask for a locally-served one instead — which is what they would be
+getting either way.
+
+---
+
+## 2026-09-01 — a control that renders from an effect cannot be verified under `next dev` in this sandbox
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`,
+`Loom daily build` · **Status:** open — a testing note, not a defect
+
+Placing `disclose` on `loom.nav` and then checking it on the running marketing
+site reported **zero buttons**, at 2, 5 and 10 seconds after load. It looked
+exactly like a primitive that does not work, and it was nearly filed as one.
+
+It is the dev server. Under `next dev` in this sandbox the HMR websocket
+handshake fails —
+
+```
+WebSocket connection to 'ws://127.0.0.1:PORT/_next/webpack-hmr?id=…' failed:
+Error during WebSocket handshake: net::ERR_INVALID_HTTP_RESPONSE
+```
+
+— hydration never completes, and a control that renders from an effect
+(`useEffect` proving scripting runs, which is 0086's and 0092's deliberate
+design) therefore never renders. Under `next build && next start` the same page
+hydrates in under two seconds and the button is byte-identical to what
+`behaviour-disclose.ts` writes.
+
+**The rule for the next lane:** verifying `copy`, `disclose`, or any future
+behaviour requires a **production build**. A dev-server check will report the
+feature missing and be wrong. Costs one build.
