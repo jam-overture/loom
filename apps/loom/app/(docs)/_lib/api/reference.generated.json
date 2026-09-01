@@ -1565,6 +1565,20 @@
               "summary": ""
             },
             {
+              "name": "CompositionOutcomeKind",
+              "kind": "type",
+              "signature": "type CompositionOutcomeKind = CompositionOutcome[\"kind\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "COMPOSITION_OUTCOME_KINDS",
+              "kind": "value",
+              "signature": "const COMPOSITION_OUTCOME_KINDS: readonly CompositionOutcomeKind[]",
+              "truncated": false,
+              "summary": "The five ways an ask can end, in the order a host meets them."
+            },
+            {
               "name": "composeChange",
               "kind": "function",
               "signature": "const composeChange: (runtime: CompositionRuntime, tree: LoomTree, intent: EditIntent) => Promise<CompositionOutcome>",
@@ -3257,6 +3271,20 @@
               "signature": "type TreeOperation = InsertOperation | RemoveOperation | MoveOperation | ConfigureOperation;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TreeOperationName",
+              "kind": "type",
+              "signature": "type TreeOperationName = TreeOperation[\"op\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TREE_OPERATIONS",
+              "kind": "value",
+              "signature": "const TREE_OPERATIONS: readonly TreeOperationName[]",
+              "truncated": false,
+              "summary": "The whole vocabulary of structural change, in the order the doc comment above argues it."
             },
             {
               "name": "treeDeltaSchema",
@@ -7044,6 +7072,20 @@
               "signature": "type TelemetryEvent = {\n    readonly type: \"intent-received\";\n    readonly intent: IntentSummary;\n} | {\n    readonly type: \"policy-resolved\";\n    readonly intentId: IntentId;\n    readonly policyId: string;\n    /** Absent on a record written before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n} | {\n    readonly type: \"interpretation-failed\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-proposed\";\n    readonly proposal: ProposedChange;\n} | {\n    readonly type: \"assessment-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-assessed\";\n    readonly assessment: AssessmentSummary;\n} | {\n    readonly type: \"disposition-decided\";\n    readonly proposalId: ProposalId;\n    readonly disposition: Disposition;\n} | {\n    readonly type: \"repair-requested\";\n    readonly refusedProposalId: ProposalId;\n    readonly reason: DispositionReason;\n} | {\n    readonly type: \"repair-failed\";\n    readonly refusedProposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"change-applied\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"application-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"intent-not-writable\";\n    readonly intentId: IntentId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"proposal-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly type: \"hold-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n} | {\n    readonly type: \"hold-confirmed\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"hold-discarded\";\n    readonly proposalId: ProposalId;\n    readonly actor?: string;\n} | {\n    readonly type: \"change-committed\";\n    readonly proposalId: ProposalId;\n    readonly revision: number;\n} | {\n    readonly type: \"commit-failed\";\n    readonly proposalId: ProposalId;\n    readonly failure: TelemetryFailure;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "TelemetryEventType",
+              "kind": "type",
+              "signature": "type TelemetryEventType = TelemetryEvent[\"type\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "TELEMETRY_EVENT_TYPES",
+              "kind": "value",
+              "signature": "const TELEMETRY_EVENT_TYPES: readonly TelemetryEventType[]",
+              "truncated": false,
+              "summary": "Every event the journal can hold, in the order the runtime writes them."
             },
             {
               "name": "telemetryRecordSchema",
