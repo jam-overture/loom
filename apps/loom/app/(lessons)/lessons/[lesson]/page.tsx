@@ -1,13 +1,20 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { LessonReader, type LessonPart, type PromptQuestion } from "../../_components/lesson-reader"
+import {
+  LessonReader,
+  type ExerciseUnit,
+  type LessonPart,
+  type PromptQuestion,
+} from "../../_components/lesson-reader"
 import * as style from "../../_components/style"
 import { blockNodes } from "../../_lib/blocks"
+import { transcriptText, type ExerciseRun } from "../../_lib/exercises"
 import { lessonPointers } from "../../_lib/links"
 import { heading, prose, renderFragment } from "../../_lib/loom"
 import { promptSet, readLesson, section, splitAnswers, type LessonDocument, type Prompt } from "../../_lib/lesson"
 import type { Block } from "../../_lib/markdown"
+import { runExercises } from "../../_lib/run"
 import { WRITTEN_LESSONS, lesson as syllabusLesson } from "../../_lib/syllabus"
 
 /**
@@ -87,7 +94,91 @@ const SELF_CHECK = "Self-check"
 const REFLECT = "Reflect"
 const ANSWERS = "Answers"
 
-const partsOf = (document: LessonDocument): readonly LessonPart[] => {
+const CODE_LANGUAGES = new Set(["ts", "tsx"])
+
+/**
+ * Try it, as fences and the prose between them.
+ *
+ * The section is rebuilt rather than rendered whole because one thing has to be
+ * inserted into the middle of it: under each fence that prints something, the
+ * prediction it is owed and then what it actually printed. Everything else —
+ * the introduction, the sentence naming each exercise, the fences that are
+ * illustrations rather than programs — is the author's text in the author's
+ * order, rendered exactly as the rest of the lesson is.
+ */
+const exerciseUnits = (
+  blocks: readonly Block[],
+  run: ExerciseRun,
+  key: string
+): { readonly units: readonly ExerciseUnit[]; readonly total: number } => {
+  const outputs = new Map(
+    (run.kind === "ran" ? run.outputs : []).filter((output) => output.tests.length > 0).map((output) => [output.index, output])
+  )
+
+  const units: ExerciseUnit[] = []
+  let held: Block[] = []
+  let fence = 0
+  let numbered = 0
+
+  const flush = (): void => {
+    if (held.length === 0) return
+
+    const id = `${key}x${units.length}`
+    units.push({ kind: "prose", id, node: fragment(held, id) })
+    held = []
+  }
+
+  for (const block of blocks) {
+    if (block.kind !== "code" || !CODE_LANGUAGES.has(block.language ?? "")) {
+      held.push(block)
+      continue
+    }
+
+    flush()
+
+    const index = fence
+    fence += 1
+
+    const output = outputs.get(index)
+    const id = `${key}x${units.length}`
+
+    if (output === undefined) {
+      units.push({ kind: "code", id, node: fragment([block], id), run: undefined })
+      continue
+    }
+
+    numbered += 1
+    const number = numbered
+
+    units.push({
+      kind: "code",
+      id,
+      node: fragment([block], id),
+      run: {
+        number,
+        prompt: renderFragment(
+          (ids) => [
+            prose(
+              ids,
+              `Exercise ${number}. Write down what this prints — the lines, in order, and the values on them. Where you are guessing, say which part you are guessing at.`
+            ),
+          ],
+          `${id}p`
+        ),
+        transcript: fragment(
+          [{ kind: "code", language: "console", code: transcriptText(output) }],
+          `${id}t`
+        ),
+      },
+    })
+  }
+
+  flush()
+
+  return { units, total: numbered }
+}
+
+const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly LessonPart[] => {
   const key = `l${pad(document.number)}`
   const parts: LessonPart[] = []
 
@@ -173,6 +264,55 @@ const partsOf = (document: LessonDocument): readonly LessonPart[] => {
       continue
     }
 
+    if (title === TRY_IT) {
+      const { units, total } = exerciseUnits(each.blocks, exercises, key)
+
+      parts.push({
+        kind: "exercises",
+        id,
+        heading: sectionHeading(title, `${id}-h`),
+        slug: slugFor(document.number, "try-it"),
+        units,
+        total,
+        failure: exercises.kind === "failed" ? exercises.message : undefined,
+      })
+
+      if (split !== undefined && split.exercises.length > 0) {
+        parts.push({
+          kind: "answers",
+          id: `${id}-answers`,
+          heading: sectionHeading("The exercise answers", `${id}-ah`),
+          node: fragment(split.exercises, `${key}ea`),
+          gate: {
+            kind: "written",
+            slug: slugFor(document.number, "try-it"),
+            count: Math.max(total, 1),
+            /**
+             * Where the exercises run, the predictions have already been taken
+             * one fence at a time and asking for a summary of them afterwards
+             * would be asking twice. Where they do not — a lesson with no
+             * program in Try it — the single written prediction is still the
+             * only thing standing between the reader and the answers.
+             */
+            prompt:
+              total > 0
+                ? undefined
+                : renderFragment(
+                    (ids) => [
+                      prose(
+                        ids,
+                        "Before these unlock: what did you predict each exercise would print? Summarise it — the exact strings if you wrote them down, and where you were unsure if you did not."
+                      ),
+                    ],
+                    `${key}tg`
+                  ),
+          },
+        })
+      }
+
+      continue
+    }
+
     parts.push({
       kind: "prose",
       id,
@@ -181,28 +321,6 @@ const partsOf = (document: LessonDocument): readonly LessonPart[] => {
         id
       ),
     })
-
-    if (title === TRY_IT && split !== undefined && split.exercises.length > 0) {
-      parts.push({
-        kind: "answers",
-        id: `${id}-answers`,
-        heading: sectionHeading("The exercise answers", `${id}-ah`),
-        node: fragment(split.exercises, `${key}ea`),
-        gate: {
-          kind: "written",
-          slug: slugFor(document.number, "try-it"),
-          prompt: renderFragment(
-            (ids) => [
-              prose(
-                ids,
-                "Before these unlock: what did you predict each exercise would print? Summarise it — the exact strings if you wrote them down, and where you were unsure if you did not."
-              ),
-            ],
-            `${key}tg`
-          ),
-        },
-      })
-    }
   }
 
   return parts
@@ -214,6 +332,8 @@ const LessonPage = async ({ params }: { readonly params: Params }) => {
 
   if (document === undefined) notFound()
 
+  const { run } = await runExercises(section(document, TRY_IT)?.blocks ?? [])
+
   return (
     <main style={style.column(6)}>
       {renderFragment(
@@ -224,7 +344,7 @@ const LessonPage = async ({ params }: { readonly params: Params }) => {
         `l${pad(document.number)}head`
       )}
 
-      <LessonReader lesson={document.number} parts={partsOf(document)} />
+      <LessonReader lesson={document.number} parts={partsOf(document, run)} />
     </main>
   )
 }
