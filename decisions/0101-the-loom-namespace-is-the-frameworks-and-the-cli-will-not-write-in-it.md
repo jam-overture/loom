@@ -1,4 +1,4 @@
-# 0096. The `loom.` namespace is the framework's, and the CLI will not write in it
+# 0101. The `loom.` namespace is the framework's, and the CLI will not write in it
 
 **Status:** Accepted
 **Date:** 2026-08-29

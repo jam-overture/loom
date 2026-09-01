@@ -167,6 +167,31 @@ export type RenderDiagnostic =
     }
   | {
       /**
+       * `loom:anchor` that is not a slug a link can carry: not a string, empty,
+       * longer than an anchor may be, or spelled with something that does not
+       * survive a URL. The node renders exactly as it would have — an anchor
+       * adds an attribute and changes nothing else — and is not a fragment
+       * target.
+       */
+      readonly code: "anchor-unusable"
+      readonly nodeId: NodeId
+      readonly detail: string
+    }
+  | {
+      /**
+       * Two nodes named the same anchor, and this is the second one. The first
+       * in document order keeps it, because two elements sharing an `id` is a
+       * document a browser resolves by its own rule rather than by the tree's —
+       * and a link that lands on whichever of the two the parser preferred is
+       * worse than one node that cannot be linked to.
+       */
+      readonly code: "anchor-claimed"
+      readonly nodeId: NodeId
+      readonly anchor: string
+      readonly holder: NodeId
+    }
+  | {
+      /**
        * A declared behaviour's control had no name to render under, so it was
        * left out. The registry refuses a primitive that declares a behaviour
        * and not its strings, so the way here is a dictionary that answers a
@@ -214,6 +239,10 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} frames "${diagnostic.prop}" and it will not be framed — ${describeFrameRefusal(diagnostic.refusal)}`
     case "frame-same-origin":
       return `node ${diagnostic.nodeId} frames "${diagnostic.prop}" from "${diagnostic.origin}", which this deployment registered as its own, so the frame's sandbox grants it nothing it did not already have`
+    case "anchor-unusable":
+      return `node ${diagnostic.nodeId} names an anchor a link could not carry, so it is not a fragment target — ${diagnostic.detail}`
+    case "anchor-claimed":
+      return `node ${diagnostic.nodeId} names the anchor "${diagnostic.anchor}" and node ${diagnostic.holder} already holds it, so only the first one is a fragment target`
     case "behaviour-unnamed":
       return `node ${diagnostic.nodeId} takes the "${diagnostic.behaviour}" behaviour and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
     default:

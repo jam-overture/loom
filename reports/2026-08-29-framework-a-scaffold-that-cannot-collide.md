@@ -48,7 +48,7 @@ taken, and then widened, because the class is barely wider than the instance:
 - The CLI's own usage text was, at that moment, offering **`loom.card`** as its
   example of a well-formed type. The tool was teaching the defect.
 
-So [0096](../decisions/0096-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md)
+So [0096](../decisions/0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md)
 says the whole namespace is the framework's: **`loom` and everything under it**
 is refused by the CLI, and `init` writes `app.page`.
 

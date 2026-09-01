@@ -26,7 +26,14 @@ import type { TreeDelta } from "../tree/delta.js"
 import { findNode } from "../tree/navigation.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { commitIntent, confirmHeld, describeWriteOutcome, discardHeld, type WritePath } from "./commit.js"
+import {
+  commitIntent,
+  confirmHeld,
+  describeWriteOutcome,
+  discardHeld,
+  WRITE_OUTCOME_KINDS,
+  type WritePath,
+} from "./commit.js"
 import { memoryHoldStore } from "./held.js"
 
 const spare = sequentialIdFactory("write")
@@ -579,6 +586,21 @@ describe("describeWriteOutcome", () => {
     }
 
     expect(new Set(outcomes.map((outcome) => outcome.kind)).size).toBe(outcomes.length)
+
+    /**
+     * Held against the published list rather than against this array's own
+     * length, which was the assertion until now and could only ever say that
+     * seven distinct things are seven distinct things. An eighth ending would
+     * have left this test passing over six of them.
+     */
+    expect([...outcomes.map((outcome) => outcome.kind)].sort()).toEqual(
+      [...WRITE_OUTCOME_KINDS].sort()
+    )
+  })
+
+  it("publishes the endings in an order a reader can rely on, with nothing said twice", () => {
+    expect(new Set(WRITE_OUTCOME_KINDS).size).toBe(WRITE_OUTCOME_KINDS.length)
+    expect(WRITE_OUTCOME_KINDS[0]).toBe("committed")
   })
 
   /**

@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
 import { colour, family, radius, size, space, weight } from "./tokens.js"
 
 /**
@@ -65,6 +66,8 @@ const props = z
      * what a page is allowed to be careful about.
      */
     title: z.string().min(1).max(120).optional(),
+    /** The name this aside answers to, so a link on the page can point at it. */
+    anchor: anchorSchema.optional(),
   })
   .strict()
 
@@ -146,7 +149,9 @@ export const loomCallout = definePrimitive({
       "aside",
       {
         ...loom.editable,
+        ...anchorAttributes(given.anchor),
         style: {
+          ...anchorStyle(given.anchor),
           display: "flex",
           alignItems: "flex-start",
           gap: space(3),

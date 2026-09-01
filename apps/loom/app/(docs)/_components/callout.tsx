@@ -10,6 +10,13 @@ import type { ReactNode } from "react"
  * tinted ground, which is the recurring "subtle highlight" the theme is built
  * around. The warning keeps an amber, because the whole value of two kinds is
  * that a reader can tell them apart at a glance, and two greens cannot.
+ *
+ * `callout-prose` is the one thing here that is not about tone. This is a
+ * `.not-prose` region holding *authored markdown*, so the two treatments that
+ * content needs — an underline on a link, a chip on a backtick span — have to
+ * be asked for rather than inherited from the prose rules the barrier keeps
+ * out. They come back in the callout's own colour, which is what the shared
+ * grey chip never did.
  */
 export type CalloutKind = "note" | "warning"
 
@@ -30,7 +37,7 @@ export const Callout = ({
   return (
     <aside className={`not-prose my-6 rounded-lg border px-4 py-3 text-sm leading-relaxed ${tone.className}`}>
       <p className="mb-1 text-xs font-semibold tracking-wide uppercase">{tone.label}</p>
-      <div className="[&>*+*]:mt-2">{children}</div>
+      <div className="callout-prose [&>*+*]:mt-2">{children}</div>
     </aside>
   )
 }

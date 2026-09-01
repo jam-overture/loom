@@ -21,10 +21,22 @@ describe("the decision records, read off the index", () => {
     expect(DECISION_RECORDS.length).toBeGreaterThanOrEqual(80)
   })
 
-  it("numbers them from one, with no gaps and no repeats", () => {
+  /**
+   * Ascending from one and never repeating, which is what the parser guarantees.
+   *
+   * It asserted contiguity until 0097, when a number no record claims became a
+   * reported hole rather than a failed build — so the index can now carry a row
+   * with no link in it, this parser skips it (correctly: there is no record to
+   * point at), and the sequence this section shows has a number missing from the
+   * middle. A repeat still means two records claim one number, which is the
+   * failure worth keeping.
+   */
+  it("numbers them from one and ascending, with no repeats", () => {
     const numbers = DECISION_RECORDS.map((record) => record.number)
 
-    expect(numbers).toEqual(numbers.map((_, index) => index + 1))
+    expect(numbers[0]).toBe(1)
+    expect([...new Set(numbers)]).toHaveLength(numbers.length)
+    expect(numbers).toEqual([...numbers].sort((a, b) => a - b))
   })
 
   it("points at a file that is really there", () => {
@@ -96,14 +108,23 @@ describe("the course, read off its syllabus", () => {
     }
   })
 
-  it("gives an unwritten lesson a title and no link, rather than a link that 404s", () => {
-    const unwritten = COURSE.filter((lesson) => lesson.file === undefined)
+  /**
+   * Lesson 17 completed the syllabus, so the unwritten half of this is empty
+   * against the live file and would pass vacuously on its own. Both halves are
+   * asserted instead: a lesson with a file gets a link, one without gets a
+   * title and no link. Whichever way the README moves, one of the two branches
+   * is doing work. The unwritten shape is also pinned against a fixture in
+   * "takes the third column", below.
+   */
+  it("links a written lesson and gives an unwritten one a title, never a link that 404s", () => {
+    for (const lesson of COURSE) {
+      if (lesson.file === undefined) {
+        expect(lesson.href, `lesson ${lesson.number}`).toBeUndefined()
+        expect(lesson.title.length, `lesson ${lesson.number}`).toBeGreaterThan(3)
+        continue
+      }
 
-    expect(unwritten.length).toBeGreaterThan(0)
-
-    for (const lesson of unwritten) {
-      expect(lesson.href, `lesson ${lesson.number}`).toBeUndefined()
-      expect(lesson.title.length, `lesson ${lesson.number}`).toBeGreaterThan(3)
+      expect(lesson.href, `lesson ${lesson.number}`).toBeDefined()
     }
   })
 

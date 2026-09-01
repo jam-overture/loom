@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises"
 
 import { describe, expect, it } from "vitest"
 
-import { collectDecisions, generatedReadme, README_PATH } from "./collect.js"
-import { checkNumbering } from "./numbering.js"
+import { blocking, collectDecisions, generatedReadme, README_PATH } from "./collect.js"
+import { checkNumbering, missingNumbers, severityOf } from "./numbering.js"
 import { parseDecisionRecord, type DecisionRecord } from "./record.js"
 import { compressSection, renderIndex, withGeneratedIndex } from "./render.js"
 
@@ -102,13 +102,48 @@ describe("checkNumbering", () => {
     })
   })
 
-  it("catches a missing number, because a record is superseded and never deleted", () => {
+  it("still notices a missing number, because a record is superseded and never deleted", () => {
     const problems = checkNumbering([
       recordWith({ number: 1 }),
       recordWith({ number: 3, file: "0003-c.md" }),
     ])
 
     expect(problems).toContainEqual({ code: "gap", missing: 2 })
+  })
+
+  /**
+   * The trade the severities exist for. Six lanes branch off `main`, all read
+   * the same highest number, and forbidding the hole left a run that saw its
+   * number taken elsewhere no way to step over it — nine branches each wrote an
+   * `0096`. A hole costs a row in the index; a clash costs a rename and every
+   * citation of the renamed file.
+   */
+  it("reports a hole and blocks on a clash", () => {
+    const hole = checkNumbering([recordWith({ number: 1 }), recordWith({ number: 3, file: "c.md" })])
+    const clash = checkNumbering([
+      recordWith({ number: 1 }),
+      recordWith({ number: 1, file: "0001-b.md" }),
+    ])
+
+    expect(hole.map(severityOf)).toEqual(["reported"])
+    expect(clash.map(severityOf)).toEqual(["blocking"])
+  })
+
+  it("blocks on a status naming a record that a deletion took away", () => {
+    const problems = checkNumbering([
+      recordWith({ number: 1, status: "Superseded by 0002" }),
+      recordWith({ number: 3, file: "0003-c.md" }),
+    ])
+
+    expect(problems.filter((problem) => severityOf(problem) === "blocking")).toEqual([
+      { code: "unknown-reference", from: 1, to: 2 },
+    ])
+  })
+
+  it("counts every hole below the highest record, and invents none above it", () => {
+    expect(
+      missingNumbers([recordWith({ number: 1 }), recordWith({ number: 4, file: "0004-d.md" })])
+    ).toEqual([2, 3])
   })
 
   it("catches a status pointing at a record that does not exist", () => {
@@ -169,6 +204,36 @@ describe("renderIndex", () => {
   it("links each row to the file it came from", () => {
     expect(renderIndex([recordWith()])).toContain("[0001](0001-a-decision.md)")
   })
+
+  /**
+   * The index is where a hole is visible once it stops being an exit code, and
+   * a reader who counts the rows and finds one short is told which one.
+   */
+  it("writes a row for a number no record on this branch claims", () => {
+    const table = renderIndex([
+      recordWith({ number: 1, title: "First" }),
+      recordWith({ number: 3, file: "0003-c.md", title: "Third" }),
+    ])
+
+    expect(table).toContain("| 0002 | *No record on this branch* | — | — |")
+    expect(table.indexOf("First")).toBeLessThan(table.indexOf("0002"))
+    expect(table.indexOf("0002")).toBeLessThan(table.indexOf("Third"))
+  })
+
+  it("does not link a row there is no file to link to", () => {
+    expect(renderIndex([recordWith({ number: 2, file: "0002-b.md" })])).not.toContain("| [0001]")
+  })
+
+  /** A clash is two records, and the index says so rather than hiding one. */
+  it("keeps both rows when two records claim one number", () => {
+    const table = renderIndex([
+      recordWith({ number: 1, file: "0001-one.md", title: "One" }),
+      recordWith({ number: 1, file: "0001-another.md", title: "Another" }),
+    ])
+
+    expect(table).toContain("One")
+    expect(table).toContain("Another")
+  })
 })
 
 describe("withGeneratedIndex", () => {
@@ -207,12 +272,15 @@ describe("withGeneratedIndex", () => {
  * The guard. Everything above tests the generator against fixtures; these two
  * test the repository against the generator, which is the part that turns a
  * numbering clash into a failure somebody sees before a merge conflict does.
+ *
+ * A hole is deliberately not part of the guard: it is reported, it appears in
+ * the index, and it does not fail. `0096` is one on this branch.
  */
 describe("the decision records in this repository", () => {
-  it("parse, and number without duplicates or gaps", async () => {
+  it("parse, and number without duplicates or dangling references", async () => {
     const { records, problems } = await collectDecisions()
 
-    expect(problems).toEqual([])
+    expect(blocking(problems)).toEqual([])
     expect(records.length).toBeGreaterThan(0)
   })
 
