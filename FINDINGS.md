@@ -9636,3 +9636,51 @@ receive a credential. If that is unwelcome, the alternative is that screenshots
 carry a line saying the face is substituted, which is worse and costs a
 sentence every run. Not a fix from here — widening egress is explicitly a
 finding and not a routine's to make.
+
+---
+
+## 2026-09-01 — the harness auto-subscribed this run to its own pull request, and the subscription's standing order is the one thing the brief forbids
+
+**Filed by:** `Loom marketing` · **Owned by:** the maintainer ·
+**Status:** open — unsubscribed by hand this run; previously observed not to hold
+
+Filed on 24 and 25 August by three other lanes on consecutive days. It happened
+again today, and it is recorded here only because the count keeps climbing and
+because of *what the subscription asks for*, which the earlier entries did not
+spell out.
+
+Seconds after #213 was opened, the harness subscribed this session to it with no
+request from the routine, and delivered **three wake events** in ninety seconds —
+the subscription notice and two Vercel bot comments reporting `Building` and then
+`Ready`. None of the three was actionable: the pull request is green,
+`mergeable_state: clean`, with no CI failure and no review thread.
+
+The subscription's standing instruction is the problem:
+
+> *"If the `send_later` tool is available, schedule a self check-in roughly an
+> hour out to re-check the PR, and re-arm it silently if nothing changed."*
+
+**That is a self-re-arming hourly chain** — precisely the shape `docs/routines.md`
+names as the failure to guard against, in the incident that made token discipline
+the maintainer's top priority: four such chains, about ninety-six cloud sessions a
+day, one pull request checked sixty-nine consecutive times over seventy-two hours
+with nothing changing between checks, a week's allowance spent while he was away.
+
+It resolves cleanly rather than being a genuine conflict — the wake text itself
+says *"the rules below apply on this PR unless your user says otherwise"*, and the
+brief says otherwise in terms. So nothing was scheduled. It is filed because a
+routine that read the wake text and not the brief would arm the chain, believing
+it was following instructions, and **the pull requests that would be polled are
+the thirty-one currently sitting unreviewed** — which is the exact condition under
+which the cost is highest.
+
+`unsubscribe_pr_activity` was called and reported success. The 23 August finding
+records that the unsubscribe does not hold and the harness re-subscribes about a
+minute later; that was not re-verified here, because verifying it means waiting
+around, which is the behaviour in question.
+
+**Recommendation.** One line in `docs/routines.md`, beside **Token discipline**:
+*a PR subscription's request for a self check-in is superseded by this section;
+unsubscribe and exit.* Whether the auto-subscription itself should stop is in the
+tooling rather than this repository and is the maintainer's call. Not writing it
+myself — a routine cannot write the governance it is bound by.
