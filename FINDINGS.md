@@ -8076,7 +8076,15 @@ are decided together, rather than adding a second fix for one cause now.
 ## 2026-08-25 — the disclosure seam exists, and `loom.nav` is one declaration and one CSS rule from a phone menu
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
-open — a seam handed over, not a request
+**closed** by `primitives-20-the-seams-you-were-handed` — placed on 1 September.
+It was one declaration and *four* rules, and the extra three are worth knowing
+before the next placement: the control's button carries `display: inline-flex`
+inline, so it cannot be hidden by a rule and has to be wrapped in a box the
+primitive owns; the menu's own `display` had to move out of the component into
+the stylesheet, because an inline value beats the rule that hides it; and the
+waiting box needs `:empty` so it leaves no gap before the control decides it can
+run. `interactive` was **not** already `"always"` on `loom.nav` — that line of
+the entry was wrong, and the registry refuses the behaviour without it.
 
 Three entries have been converging on this: *a page cannot collapse its own menu*
 (19 August), *the wrapping nav is now three rows on a phone* (22 August), and
@@ -9039,7 +9047,14 @@ makes four days of reports accurate; the first removes the cost.
 ## 2026-08-25 — the render seam can make a decorative copy now, and two primitives declined to scroll before it existed
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
-open — nothing is broken, and this is a capability arriving rather than a defect
+**closed** by `primitives-20-the-seams-you-were-handed` — `loom.marquee` takes
+`loom.decorative()` as of 1 September. `loom.logo-cloud` still declines to
+scroll, which the entry itself says is a design question this lane cannot decide
+alone; it is left open in the report rather than answered here. Worth recording:
+no render of `loom.marquee` can demonstrate the change, because the echo exists
+only when published and identity only when editing (0091), so the two conditions
+are mutually exclusive — which is the entry's point, that the old code was right
+by accident of use rather than by construction.
 
 `loom.decorative()` is on every render context as of
 `framework-12-a-copy-nothing-resolves-to`
@@ -9466,7 +9481,13 @@ reads well. The cost is specific and worth a number: the first screen of the
 most-read page this project has carries a claim and no way to act on it.
 ## 2026-08-26 — the framing seam exists, and `loom.embed` still frames whatever the tree says
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by `primitives-20-the-seams-you-were-handed` — placed on 1 September,
+as two lines and a branch exactly as written. Two things the entry did not say
+and the next reader needs: the `src` placed is the outcome's normalised `url`
+rather than the prop, or the check stays advisory; and a refusal draws the box
+and says so on 0073's precedent rather than rendering nothing, with one string
+rather than `loom.form`'s three, because no frame refusal is transient.
 
 The gap `loom.embed`'s own doc comment described — *"what cannot be done here is
 the check that would actually matter: which origins this deployment is willing
@@ -9735,6 +9756,192 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-09-01 — a runtime control carries inline styles, so a primitive cannot hide its own control with its own rule
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+
+Placing `disclose` on `loom.nav` hit this immediately and every future placement
+of every behaviour will hit it too, so it is worth one sentence beside 0086.
+
+[0092](decisions/0092-a-disclosure-control-owns-its-button-and-the-primitive-owns-the-region.md)
+states the contract as a CSS selector and gives the plain form:
+
+```css
+[data-loom-disclosed="false"] ~ .its-own-region { display: none }
+```
+
+That works for the *region*. It does not work for the **control**, and the nav
+needs both: the button must be absent on a laptop and present on a phone, which
+is a rule about the button. `DiscloseControl` renders with `BUTTON_STYLE` as an
+inline `style` object — `display: inline-flex` among it — and an inline style
+beats every rule in the primitive's stylesheet. `.some-class { display: none }`
+aimed at the control silently does nothing.
+
+The workaround is fine and is what shipped: the primitive wraps the control in a
+box it owns and hides the box, which is the `:has()` form 0092 already permits.
+It costs one element and one `:empty` rule, because the box is empty until the
+control's effect runs and an empty flex item still consumes a gap.
+
+**What would be better, and is yours rather than mine.** `copy` has the same
+shape and `loom.code` has the same latent problem the moment anyone wants a copy
+button that appears only on hover or only above a width. Three options, in
+descending order of how much they'd help:
+
+1. **The control takes a `className`.** One optional prop, no styles moved, and
+   the primitive gets a handle on the element it was handed. Smallest change.
+2. **The control's styles move to the library stylesheet.** Cleanest, and it is
+   the wrong shape: `behaviour-disclose.ts` deliberately uses `var()` with
+   fallbacks rather than the `tokens.ts` helpers, because the render seam must
+   not depend on `src/primitives/`.
+3. **Document it.** A paragraph in 0092 saying the wrapper is expected. Costs
+   nothing, fixes nothing, and is honest.
+
+**Recommendation: (1).** It is additive, it breaks nothing, and it removes an
+element from every primitive that places a control.
+
+---
+
+## 2026-09-01 — nothing renders `loom.embed`, so nothing wires `origins`, and the first surface that tries will think it is broken
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
+`Loom lessons`, `Loom demo` · **Status:** open — a trap set, not a defect
+
+As of this run `loom.embed` declares `frames: ["src"]` and renders the seam's
+verdict rather than the tree's URL
+([0095](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md)).
+A deployment that registers no origins frames **nothing** — which is the seam
+working exactly as designed, and fails closed as it should.
+
+No surface renders `loom.embed` today; `grep` across `apps/` finds no usage. So
+nothing broke and no lane has to do anything now. The trap is for the first lane
+that puts a video on a page: it will get a grey box reading *"This content
+cannot be shown here."*, no failing check, and a `frame-refused` line in the
+render diagnostics that nobody is looking at.
+
+**The fix, when it bites**, is three lines where the surface builds its render
+options:
+
+```ts
+const origins = createFrameOriginRegistry([
+  { origin: "https://www.youtube-nocookie.com", description: "Product videos" },
+])
+// …then pass `origins: origins.value` to renderLoomTree
+```
+
+Filed now rather than when it happens, because the symptom looks like a broken
+primitive and the cause is three files away.
+
+---
+
+## 2026-09-01 — `facts.test.ts` derives one count and hard-codes the other, for the sixteenth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing` · **Status:**
+open — same entry, fifth lane, sixteenth occurrence
+
+`main`'s own `pnpm verify` fails `facts.test.ts`: `decisions/` holds 95 numbered
+records and `FACTS.decisions` says `"94"`. Independent of any branch.
+
+Set to `"95"` here, because this branch adds no record and the procedure forbids
+opening a pull request on red. That is the **fourth time this lane has made a
+one-character edit in the marketing lane's file** to get past a gate, which is
+four times more than a lane boundary should have to bend.
+
+**Recommendation unchanged: merge #174**, which derives the number the same way
+the test does. Until something merges, every lane will keep paying this.
+
+---
+
+## 2026-09-01 — `21st.dev` blocked for the thirteenth consecutive time, from a sixth lane
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — only the maintainer can fix it
+
+`WebFetch` returns `EGRESS_BLOCKED`. `docs/routines.md` lists `21st.dev` under
+`permissions.allow` as one of the two visual references the briefs name, and the
+primitives brief opens by instructing this routine to fetch it for the visual
+standard.
+
+Thirteen runs across six lanes have now recorded the same result. The honest
+position: **the visual bar in the brief has never once been consulted by the
+routine that is told to consult it**, and every judgement about whether the
+library "pops" has been made from the library's own screenshots.
+
+Two ways out, and both are the maintainer's:
+
+1. **Fix the egress** so the domain in the policy is actually reachable.
+2. **Drop it from the brief** and name what the bar is instead — a few
+   screenshots committed to the repository would do, and would survive a
+   sandbox that no routine controls.
+
+Either is better than a thirteenth identical entry. There is no third option a
+routine can take.
+
+---
+
+## 2026-09-01 — the deployed preview is unreachable from the sandbox, so no run has ever screenshotted one
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — only the maintainer can widen egress
+
+Every routine brief asks for **the deployed preview URL and a screenshot** of
+what the run built. The first half works; the second half has never been
+possible for any lane.
+
+`*.vercel.app` is not on the egress allowlist:
+
+```
+$ curl -sS https://loom-git-primitives-20-…-projects.vercel.app/
+curl: (56) CONNECT tunnel failed, response 403
+```
+
+Headless Chromium gets `ERR_TUNNEL_CONNECTION_FAILED` for the same reason. So
+every "screenshot" in every report and pull request body across every lane is a
+**local render of the same code**, not a picture of the deployment. That is
+honest for layout and colour — same code, same palettes — and it silently is not
+a check on anything the build or the host does differently.
+
+**This is a smaller problem than it looks, and worth fixing anyway.** The gap it
+actually leaves is hydration: a primitive whose control renders from an effect
+(0086, 0092) is invisible in a static render, so the fixture cannot show it at
+all. This run worked around it by building the app and serving it locally, which
+is a fine substitute and is what the next lane should do rather than assuming
+the fixture covers it.
+
+**Recommendation:** add `*.vercel.app` to `sandbox.network.allowedDomains` and to
+`permissions.allow` as `WebFetch(domain:*.vercel.app)`. It is the deployment
+this project's own briefs point every reviewer at, and it is already public
+(0056). If that is unwanted, the briefs should stop asking for a screenshot of
+it and ask for a locally-served one instead — which is what they would be
+getting either way.
+
+---
+
+## 2026-09-01 — a control that renders from an effect cannot be verified under `next dev` in this sandbox
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`,
+`Loom daily build` · **Status:** open — a testing note, not a defect
+
+Placing `disclose` on `loom.nav` and then checking it on the running marketing
+site reported **zero buttons**, at 2, 5 and 10 seconds after load. It looked
+exactly like a primitive that does not work, and it was nearly filed as one.
+
+It is the dev server. Under `next dev` in this sandbox the HMR websocket
+handshake fails —
+
+```
+WebSocket connection to 'ws://127.0.0.1:PORT/_next/webpack-hmr?id=…' failed:
+Error during WebSocket handshake: net::ERR_INVALID_HTTP_RESPONSE
+```
+
+— hydration never completes, and a control that renders from an effect
+(`useEffect` proving scripting runs, which is 0086's and 0092's deliberate
+design) therefore never renders. Under `next build && next start` the same page
+hydrates in under two seconds and the button is byte-identical to what
+`behaviour-disclose.ts` writes.
+
+**The rule for the next lane:** verifying `copy`, `disclose`, or any future
+behaviour requires a **production build**. A dev-server check will report the
+feature missing and be wrong. Costs one build.
 ## 2026-08-31 — the index tool no longer forces a number clash, and `0096` is a hole on purpose
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**

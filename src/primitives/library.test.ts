@@ -22,6 +22,11 @@ import { createThemeRegistry } from "../theme/registry.js"
 import { PALETTE_SLOTS } from "../theme/theme.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
+import {
+  createFrameOriginRegistry,
+  type FrameOriginDefinition,
+  type FrameOriginRegistry,
+} from "../frame/origin.js"
 
 import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
 import { LIBRARY_CLASS } from "./stylesheet.js"
@@ -125,10 +130,45 @@ const samplePage = (theme: Record<string, string>, idFactory: IdFactory = sequen
   return createTree(page, idFactory)
 }
 
-const render = (tree: LoomTree, editMode = false): { markup: string; diagnostics: readonly unknown[] } => {
+/**
+ * The deployment half of 0095, which every fixture below needs because
+ * `loom.embed` now declares `frames: ["src"]` and reads a verdict rather than a
+ * prop. A host that registers nothing frames nothing — which is the seam
+ * working, not a fixture problem — so the two origins the fixtures embed are
+ * registered here exactly as a real deployment would register them.
+ */
+const originsOf = (...definitions: readonly FrameOriginDefinition[]): FrameOriginRegistry => {
+  const built = createFrameOriginRegistry(definitions)
+  if (!built.ok) throw new Error(`fixture origins did not build: ${built.error.code}`)
+
+  return built.value
+}
+
+const FIXTURE_ORIGINS = originsOf(
+  { origin: "https://player.example.com", description: "The fixture video player" },
+  { origin: "https://maps.example.com", description: "The fixture map" }
+)
+
+/**
+ * `null` rather than `undefined` for "this deployment registered nothing".
+ * An explicit `undefined` argument takes a default parameter, so the two could
+ * not be told apart — and the case that matters most is exactly the one a host
+ * gets by wiring nothing.
+ */
+const render = (
+  tree: LoomTree,
+  editMode = false,
+  origins: FrameOriginRegistry | null = FIXTURE_ORIGINS
+): { markup: string; diagnostics: readonly unknown[] } => {
   const rendered = renderLoomTree(tree, {
     resolver: registry,
     validator: registry,
+    /**
+     * Spread rather than set, because `exactOptionalPropertyTypes` makes
+     * "absent" and "present and undefined" different things — and a host that
+     * wired no allowlist leaves the option absent.
+     */
+    ...(origins === null ? {} : { origins }),
     /**
      * **No `text` here, deliberately.** It used to be wired because omitting it
      * was not a no-op — every primitive was handed an empty map, so a declared
@@ -1967,6 +2007,69 @@ describe("the page chrome", () => {
     expect(markup).toContain("Start building")
   })
 
+  /**
+   * The disclosure, in the four assertions that would each have let it ship
+   * broken. Three of them are about things *not* being somewhere.
+   */
+  describe("the menu that collapses on a phone", () => {
+    it("places the control in a box of its own, beside the menu it opens", () => {
+      const { tree } = splitStylesheet(render(chromePage(EDITORIAL)).markup)
+
+      /**
+       * The control itself renders nothing on the server (0092), so what the
+       * markup can show is the box waiting for it — and that the box is a
+       * sibling *before* the menu, which is what the rule selects across.
+       */
+      expect(tree).toContain(`class="${LIBRARY_CLASS.navToggle}"`)
+      expect(tree.indexOf(LIBRARY_CLASS.navToggle)).toBeLessThan(
+        tree.indexOf(LIBRARY_CLASS.navMenu)
+      )
+    })
+
+    /**
+     * The regression this run exists to prevent from coming back. An inline
+     * `display` on the menu beats the rule that hides it, so the collapse
+     * would be a rule that silently does nothing — no test fails, no
+     * diagnostic fires, and the bar is three rows on a phone again.
+     */
+    it("sets no inline display on the menu, because a rule has to be able to hide it", () => {
+      const { tree } = splitStylesheet(render(chromePage(EDITORIAL)).markup)
+      const menu = new RegExp(`<div class="${LIBRARY_CLASS.navMenu}"[^>]*>`).exec(tree)?.[0] ?? ""
+
+      expect(menu).not.toBe("")
+      expect(menu).not.toContain("display")
+    })
+
+    it("carries the collapse rule, the empty-box rule, and both only under a phone's width", () => {
+      const { stylesheet } = splitStylesheet(render(chromePage(EDITORIAL)).markup)
+
+      /** The region's own box, which had to leave the element for the rule to reach it. */
+      expect(stylesheet).toContain(`.${LIBRARY_CLASS.navMenu} {`)
+      /** Hidden by the rule, never rendered hidden — 0092's direction. */
+      expect(stylesheet).toContain(
+        `.${LIBRARY_CLASS.nav}:has(.${LIBRARY_CLASS.navToggle} [data-loom-disclosed="false"]) .${LIBRARY_CLASS.navMenu}`
+      )
+      /** No control built means no gap left behind by the box that would have held it. */
+      expect(stylesheet).toContain(`.${LIBRARY_CLASS.navToggle}:empty`)
+      expect(stylesheet).toContain("@media (max-width: 47.99rem)")
+    })
+
+    it("declares the control and its one name, in both palettes", () => {
+      const nav = registry.primitives.find((primitive) => primitive.type === "loom.nav")
+
+      expect(nav?.behaviours).toEqual(["disclose"])
+      /** One name, not two — `aria-expanded` carries the state (0092). */
+      expect(nav?.text["disclose"]).toBe("Menu")
+
+      for (const theme of [EDITORIAL, BOLD]) {
+        const { markup, diagnostics } = render(chromePage(theme))
+
+        expect(diagnostics).toEqual([])
+        expect(markup).toContain(`class="${LIBRARY_CLASS.navToggle}"`)
+      }
+    })
+  })
+
   it("marks the page the reader is on, which is the whole reason `current` exists", () => {
     const { markup } = render(chromePage(EDITORIAL))
 
@@ -2520,9 +2623,20 @@ describe("the targets the library declares", () => {
   })
 
   it("declares nothing on a container, since a container is not a target", () => {
-    for (const type of ["loom.nav", "loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
+    for (const type of ["loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
       expect(declarationOf(type)).toBeUndefined()
     }
+  })
+
+  /**
+   * `loom.nav` was in the list above until it took a disclosure control, and it
+   * is out of it because the primitive changed rather than because the rule
+   * did. A container that places a `<button>` *is* a target — the registry
+   * refuses the behaviour without the declaration (0086), and the declaration
+   * is what keeps a menu button from being nested inside an anchor.
+   */
+  it("declares a target on the one container that places a control", () => {
+    expect(declarationOf("loom.nav")).toBe("always")
   })
 
   it("names only props the schema declares, which the registry is what enforces", () => {
@@ -4419,6 +4533,117 @@ describe("the band that moves", () => {
     /** The ratio is the wrapper's, so the box holds its shape before the document arrives. */
     expect(markup).toMatch(/aspect-ratio:16 \/ 9/)
     expect(markup).toMatch(/aspect-ratio:1 \/ 1/)
+  })
+
+  /**
+   * The allowlist half of 0095, which is the deployment's rather than this
+   * primitive's. What is checked here is only that the primitive honours the
+   * verdict it is handed — in both directions, because a check that a page
+   * cannot fail is decoration.
+   */
+  describe("the frame the deployment did not permit", () => {
+    const embedded = (src: string, theme: Record<string, string>): LoomTree => {
+      const idFactory = sequentialIdFactory()
+
+      return createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: theme },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.embed",
+              props: { src, title: "A film about the framework" },
+            }),
+          ],
+        }),
+        idFactory
+      )
+    }
+
+    const PERMITTED = "https://player.example.com/embed/loom-in-ninety-seconds"
+
+    it("draws the box and says so, rather than framing an origin nobody registered", () => {
+      for (const theme of [EDITORIAL, BOLD]) {
+        const { markup } = render(embedded("https://elsewhere.example.net/x", theme))
+
+        expect(markup).not.toContain("<iframe")
+        expect(markup).toContain("This content cannot be shown here.")
+        /** The box keeps its ratio, so the bands around a refused embed do not move. */
+        expect(markup).toMatch(/aspect-ratio:16 \/ 9/)
+        /**
+         * The visitor is told the page is not broken and nothing more. Naming
+         * the origin or the registry here would put a deployment's shape on a
+         * public page; the reason belongs in the diagnostics.
+         */
+        expect(markup).not.toContain("elsewhere.example.net")
+      }
+    })
+
+    it("refuses everything when the deployment registered nothing at all", () => {
+      const { markup } = render(embedded(PERMITTED, EDITORIAL), false, null)
+
+      expect(markup).not.toContain("<iframe")
+      expect(markup).toContain("This content cannot be shown here.")
+    })
+
+    /**
+     * The half that makes the check binding rather than advisory. Two strings
+     * that are one origin to the allowlist can be two documents to a browser,
+     * so what is placed is the seam's normalised URL and never the prop.
+     */
+    it("places the seam's normalised url, not the string the tree carried", () => {
+      const { markup } = render(embedded("https://player.example.com:443/embed/x", EDITORIAL))
+
+      expect(markup).toContain("<iframe")
+      expect(markup).toContain('src="https://player.example.com/embed/x"')
+      expect(markup).not.toContain(":443")
+    })
+
+    it("frames a permitted origin under both palettes, with nothing left unhonoured", () => {
+      for (const theme of [EDITORIAL, BOLD]) {
+        const { markup, diagnostics } = render(embedded(PERMITTED, theme))
+
+        expect(diagnostics).toEqual([])
+        expect(markup).toContain(`src="${PERMITTED}"`)
+        expect(markup).not.toContain("This content cannot be shown here.")
+      }
+    })
+  })
+
+  /**
+   * 0093 arrived after this primitive was written and the echo was built from
+   * `children`, because there was nothing else to build it from.
+   *
+   * **What this can assert is weaker than the change**, and the reason is worth
+   * writing down. The echo exists only when the page is published and identity
+   * exists only when it is being edited — 0091 holds the band still for an
+   * editor, and a still band has no echo — so the two conditions this change is
+   * about are mutually exclusive in this primitive and no render of it can show
+   * a duplicated id either before or after. That is precisely the finding's
+   * point: the old code was correct *by accident of where it is used* rather
+   * than by construction, and an accident is not a property.
+   *
+   * So what is held here is the visible half — the copy is still a copy, and it
+   * still disappears for an editor. The identity half is the render seam's to
+   * prove, and `render/decorative.test.ts` proves it there.
+   */
+  it("keeps the marquee's echo a copy of its children, and still drops it for an editor", () => {
+    const echoOf = (markup: string): string | undefined =>
+      new RegExp(`<div class="${LIBRARY_CLASS.marqueeRun} ${LIBRARY_CLASS.marqueeEcho}"[\\s\\S]*`)
+        .exec(markup)?.[0]
+
+    for (const theme of [EDITORIAL, BOLD]) {
+      const published = echoOf(render(motionPage(theme)).markup)
+
+      expect(published).toBeDefined()
+      /** The same children, not no children — a decorative copy is a copy. */
+      expect(published).toContain("Meridian")
+      expect(published).toContain("Perihelion")
+      /** Nothing in a published render carries identity, echo or otherwise. */
+      expect(published).not.toContain("data-loom-node")
+
+      expect(echoOf(render(motionPage(theme), true).markup)).toBeUndefined()
+    }
   })
 
   it("refuses a frame with no accessible name and one with a scheme that is not http", () => {
