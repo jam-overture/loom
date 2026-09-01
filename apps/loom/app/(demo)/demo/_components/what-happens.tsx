@@ -23,6 +23,15 @@
  * The steps stay after the first change lands rather than disappearing, because
  * they are the frame a visitor reads the cards through. What changes is that
  * step three stops being a promise and becomes the cards underneath it.
+ *
+ * **Step three no longer says *really*.** The word was there to mean *a real
+ * change rather than a rewind*, which is the interesting claim (0032) and is
+ * still made in the clause after it. What a stranger read it as was
+ * *immediately* — and the undo this frame is describing is held by the Gate, so
+ * pressing it moves nothing until they answer a second question. A frame that
+ * over-promises the payoff is worse than one that says less: the sentence now
+ * says the undo is weighed like any other change, which is both the honest
+ * expectation and the better claim.
  */
 
 const STEPS: readonly { readonly title: string; readonly body: string }[] = [
@@ -36,7 +45,7 @@ const STEPS: readonly { readonly title: string; readonly body: string }[] = [
   },
   {
     title: "The record appears",
-    body: "What you asked for, what was decided and why it was decided that way — and a button that really puts the page back, because undoing is a change of its own rather than a rewind.",
+    body: "What you asked for, what was decided and why it was decided that way — and a button that puts the page back. Undoing is a change of its own rather than a rewind, so it is weighed the same way.",
   },
 ]
 

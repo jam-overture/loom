@@ -201,6 +201,13 @@ export const derivePalette = (spec: PaletteSpec): Palette => {
  * The palette and its audit together, which is how a host should call this: the
  * derivation is a rule and the audit is the check on it, and a rule that has
  * never been checked is a rule that will eventually be wrong at one hue.
+ *
+ * **`clean` means legible, not distinguishable.** It is `auditPalette` and
+ * nothing else: every ink clears the contrast bar on every ground it is
+ * rendered on. Whether two slots a reader is meant to tell apart are far enough
+ * apart to be told apart is `auditSeparation`, and a host that wants both runs
+ * both — five of the palettes this function derived collapse a pair that one
+ * measures and the other does not.
  */
 export const derivePaletteChecked = (
   spec: PaletteSpec
