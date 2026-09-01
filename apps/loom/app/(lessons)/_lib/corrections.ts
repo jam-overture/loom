@@ -1,0 +1,242 @@
+import { CONFIDENT } from "./calibration"
+import {
+  correctionsFor,
+  type Confidence,
+  type Correction,
+  type Grade,
+  type Progress,
+} from "./progress"
+import { addDays, daysBetween } from "./queue"
+
+/**
+ * The questions you got wrong, coming back.
+ *
+ * `review-schedule.md` has said since the first lesson what to do about a miss,
+ * and it is the most specific instruction in the whole document:
+ *
+ * > If you miss something: **do not reread the lesson.** Look up only the
+ * > specific point, then re-answer that question from memory a day later.
+ *
+ * Nothing implemented it. The surface counts the misses, prints them, calls them
+ * the real study plan, tells the reader to re-answer them from memory — and then
+ * offers them nothing to re-answer. The set they were in is marked done and will
+ * not come round again; the question is a line of text in a summary, and looking
+ * at it is not retrieving it. That gap is where the most valuable questions in
+ * the course go to die, and it is the one *Make It Stick* is least equivocal
+ * about: **successive relearning** — the same item retrieved again, after a gap,
+ * more than once — is what separates knowing a thing in the session from knowing
+ * it in six months.
+ *
+ * Everything here is arithmetic over what the reader has already recorded. There
+ * is no new judgement in it and deliberately no new question: a correction is
+ * one of the schedule's own questions, asked again, closed book, rated first.
+ *
+ * The clock is a parameter and not a call (0005), for the same reason the set
+ * queue's is: a spacing rule tested against the real clock is a test that passes
+ * tomorrow for a different reason than it passed today.
+ */
+
+/**
+ * How long a corrected question waits, per clean retrieval so far.
+ *
+ * The first gap is the schedule's own sentence — *a day later* — and the two
+ * after it are the cadence the schedule already uses for everything else, a week
+ * and a month. Three clean retrievals spread across a month retires a question;
+ * one miss at any point sends it back to the beginning.
+ *
+ * The exact intervals matter less than the fact that there are three of them and
+ * that they are separated. Expanding and equal gaps come out close in the
+ * literature; a single re-test the same afternoon does not, and is the version
+ * this replaces.
+ */
+export const CORRECTION_GAPS: readonly number[] = [1, 7, 30]
+
+/**
+ * How many corrections one sitting offers.
+ *
+ * The same argument the set queue makes about a backlog, in miniature. A reader
+ * who has done a dozen sets and is honest about their grading can easily have
+ * thirty questions outstanding, and thirty questions handed over at once is
+ * massed practice wearing the costume of catching up. Five mixed questions is
+ * about ten minutes.
+ */
+export const SITTING = 5
+
+export type CorrectionStatus = "due" | "upcoming" | "retired"
+
+export type PendingCorrection = {
+  /** Set slug, e.g. `set-d`. */
+  readonly set: string
+  readonly question: number
+  /**
+   * The confidence given in the sitting where this was missed — not the most
+   * recent one. This is the number that makes the question worth returning to,
+   * and it does not get to improve just because the reader has calmed down.
+   */
+  readonly confidence: Confidence
+  readonly grade: Grade
+  readonly missedOn: string
+  /** Clean retrievals since the miss, 0–3. */
+  readonly done: number
+  readonly dueOn: string
+  readonly status: CorrectionStatus
+  /** Zero unless due: days late, which decides the order within a band. */
+  readonly overdueBy: number
+  /** Days until it comes round, for the ones that have not. */
+  readonly inDays: number | undefined
+}
+
+/**
+ * Whether the reader was sure. Kept here rather than inlined because it is the
+ * same threshold the calibration panel counts by, and two different answers to
+ * "confident" across one surface would be worse than either.
+ */
+export const wasConfident = (correction: PendingCorrection): boolean =>
+  correction.confidence >= CONFIDENT
+
+/**
+ * Corrections that count towards this miss: the ones recorded on or after the
+ * day it happened.
+ *
+ * A reader who redoes a whole set overwrites the old attempt, so a question can
+ * be missed again long after it was retired. The corrections that retired it are
+ * still in the record — nothing here deletes anything — but they answered an
+ * older miss, and counting them would retire the new one on the strength of a
+ * retrieval from three months ago.
+ */
+const since = (all: readonly Correction[], missedOn: string): readonly Correction[] =>
+  [...all].filter((correction) => correction.on >= missedOn).sort((a, b) => a.on.localeCompare(b.on))
+
+/**
+ * Clean retrievals in a row, counted from the most recent backwards.
+ *
+ * Backwards because a miss resets: got it, got it, missed leaves the reader
+ * where they started, not two thirds of the way through. "Partly" resets too,
+ * and that is a judgement worth stating — a half-remembered answer is the exact
+ * thing the fluency illusion feels like from the inside, and it is what the
+ * reader will grade themselves when they are being generous.
+ */
+const streakOf = (corrections: readonly Correction[]): number => {
+  let clean = 0
+
+  for (const correction of [...corrections].reverse()) {
+    if (correction.grade !== "got-it") break
+    clean += 1
+  }
+
+  return clean
+}
+
+const pendingFor = (
+  set: string,
+  question: number,
+  confidence: Confidence,
+  grade: Grade,
+  missedOn: string,
+  progress: Progress,
+  today: string
+): PendingCorrection => {
+  const counted = since(correctionsFor(progress, set, question), missedOn)
+  const done = Math.min(streakOf(counted), CORRECTION_GAPS.length)
+  const gap = CORRECTION_GAPS[done]
+  const last = counted.at(-1)?.on ?? missedOn
+
+  if (gap === undefined) {
+    return {
+      set,
+      question,
+      confidence,
+      grade,
+      missedOn,
+      done,
+      dueOn: last,
+      status: "retired",
+      overdueBy: 0,
+      inDays: undefined,
+    }
+  }
+
+  const dueOn = addDays(last, gap)
+  const days = daysBetween(dueOn, today)
+
+  return days >= 0
+    ? { set, question, confidence, grade, missedOn, done, dueOn, status: "due", overdueBy: days, inDays: 0 }
+    : {
+        set,
+        question,
+        confidence,
+        grade,
+        missedOn,
+        done,
+        dueOn,
+        status: "upcoming",
+        overdueBy: 0,
+        inDays: -days,
+      }
+}
+
+/**
+ * The order to work them in: what you were sure about and wrong about, first.
+ *
+ * That pair is what the schedule calls the real study plan, and it is first here
+ * for the reason it is watched everywhere else — being unsure and wrong gets
+ * fixed on contact, and being sure and wrong is what stops you checking. After
+ * that, a clean miss before a partial one, and the most overdue before the rest.
+ */
+const RANK: Readonly<Record<Grade, number>> = { missed: 0, partly: 1, "got-it": 2 }
+
+const order = (a: PendingCorrection, b: PendingCorrection): number => {
+  if (wasConfident(a) !== wasConfident(b)) return wasConfident(a) ? -1 : 1
+  if (RANK[a.grade] !== RANK[b.grade]) return RANK[a.grade] - RANK[b.grade]
+  if (a.overdueBy !== b.overdueBy) return b.overdueBy - a.overdueBy
+  if (a.set !== b.set) return a.set.localeCompare(b.set)
+
+  return a.question - b.question
+}
+
+/**
+ * Every question the reader has missed and not yet retired, with when it next
+ * comes round.
+ *
+ * A question leaves this list one of two ways: three clean retrievals across a
+ * month, or a later go at the whole set in which it was got. Nothing else
+ * removes one, and in particular reading the lesson again does not.
+ */
+export const correctionQueue = (progress: Progress, today: string): readonly PendingCorrection[] =>
+  Object.entries(progress.sets)
+    .flatMap(([set, record]) =>
+      record.attempts
+        .filter((attempt) => attempt.grade !== "got-it")
+        .map((attempt) =>
+          pendingFor(set, attempt.question, attempt.confidence, attempt.grade, attempt.on, progress, today)
+        )
+    )
+    .filter((correction) => correction.status !== "retired")
+    .sort(order)
+
+export const dueCorrections = (
+  queue: readonly PendingCorrection[]
+): readonly PendingCorrection[] => queue.filter((correction) => correction.status === "due")
+
+/**
+ * Today's corrections sitting: the five that most want answering, out of
+ * however many are due.
+ *
+ * `take` is how many the caller still has room for, and it exists because a
+ * sitting shrinks as it is worked. A question answered a minute ago is no longer
+ * due — its next gap has started — so recomputing the top five from what is left
+ * would hand out a sixth, and a seventh, and quietly turn a ten-minute sitting
+ * into the whole backlog.
+ */
+export const correctionSitting = (
+  queue: readonly PendingCorrection[],
+  take: number = SITTING
+): readonly PendingCorrection[] => dueCorrections(queue).slice(0, Math.max(take, 0))
+
+/** The next one to come round, for a queue with nothing due today. */
+export const nextCorrection = (
+  queue: readonly PendingCorrection[]
+): PendingCorrection | undefined =>
+  [...queue]
+    .filter((correction) => correction.status === "upcoming")
+    .sort((a, b) => (a.inDays ?? 0) - (b.inDays ?? 0))[0]

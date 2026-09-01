@@ -46,14 +46,42 @@ import { mediaUrlSchema } from "./url.js"
  * - `referrerPolicy` sends the origin and never the path, so a private preview
  *   URL is not handed to whoever is being embedded.
  *
- * What cannot be done here is the check that would actually matter: **which
- * origins this deployment is willing to frame.** That is a per-deployment list
- * and it belongs beside the endpoint registry (0065), not in a props schema —
- * a primitive that carried its own allowlist would be a primitive every host
- * has to fork. Note also that `allow-scripts` with `allow-same-origin` is only
- * a sandbox at all *because* the framed document is cross-origin; a host that
- * embeds its own origin gets nothing from it, and nothing here can tell.
- * Filed for the framework lane rather than guessed at.
+ * The check that would actually matter — **which origins this deployment is
+ * willing to frame** — is not a primitive's to make, and for six days it was
+ * not made at all. It belongs beside the endpoint registry (0065), because a
+ * primitive carrying its own allowlist is a primitive every host has to fork.
+ * It was filed for the framework lane rather than guessed at, and it arrived on
+ * 26 August as
+ * [0095](../../decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md).
+ *
+ * So this file no longer decides anything about the URL and no longer reads
+ * one. `frames: ["src"]` is the declaration — the one thing the runtime cannot
+ * work out for itself, since a `src` reaching an `iframe` and a `src` reaching
+ * an `img` are the same JSON string and very different documents — and what
+ * comes back on `loom.frames.src` is a verdict rather than a prop.
+ *
+ * Two consequences worth stating, because both are easy to get wrong:
+ *
+ * - **The `src` placed is the seam's `url`, never `given.src`.** The seam
+ *   normalises through `URL` so that what the browser resolves is what the
+ *   allowlist matched. Echoing the prop instead would leave the check advisory:
+ *   two strings that differ only in case or a trailing dot are one origin to
+ *   the allowlist and can be two to a browser.
+ * - **A refusal renders the box and says so**, on 0073's precedent for a form
+ *   with nowhere to post. The alternative is rendering nothing, which reads as
+ *   a page that forgot a section, or rendering the frame anyway, which makes
+ *   the allowlist decoration. The notice names no origin and no registry: the
+ *   reason belongs in the render diagnostics, where the person who can fix it
+ *   is looking, and the visitor only needs to know the page is not broken.
+ *
+ * What the seam also settles is the sandbox footnote this comment used to end
+ * on. `allow-scripts` with `allow-same-origin` is a boundary only because the
+ * framed document is cross-origin, and a host framing its own origin gets
+ * nothing from it — *and nothing here could tell*. The outcome now carries
+ * `sameOrigin`, and the seam says it out loud in the diagnostics. It stays a
+ * disclosure rather than something this file acts on: dropping
+ * `allow-same-origin` for a same-origin frame would give the document a null
+ * origin and break the embed a host deliberately registered.
  */
 
 const props = z
@@ -80,15 +108,49 @@ const SANDBOX = "allow-scripts allow-same-origin allow-presentation"
 
 const ALLOW = "accelerometer; encrypted-media; picture-in-picture; fullscreen"
 
+/**
+ * One string for all three refusals, where `loom.form` has three.
+ *
+ * The form distinguishes them because a visitor reads them differently — one is
+ * a page that is not finished, one is worth trying again in a minute, and one
+ * is not. A frame has no such split: every refusal here is a deployment that
+ * will not frame this document, none of them is transient, and there is nothing
+ * a visitor could do differently on being told which. The reason is in the
+ * render diagnostics for the person who can act on it.
+ */
+const EMBED_TEXT = {
+  refused: "This content cannot be shown here.",
+} as const
+
+type EmbedTextKey = keyof typeof EMBED_TEXT
+
 export const loomEmbed = definePrimitive({
   type: "loom.embed",
   description:
     "A third-party document — a video, a map, a prototype — framed at a fixed aspect ratio with a required accessible name.",
   props,
   slots: [],
-  component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
+  text: EMBED_TEXT,
+  /**
+   * The declaration, and the whole of this primitive's part in the check. Which
+   * props reach a frame is the author's to say because it is the one thing the
+   * runtime cannot derive; whether a given URL may be framed is the
+   * deployment's, and neither half is the other's business.
+   */
+  frames: ["src"],
+  component: ({ loom, props: given }: LoomPrimitiveProps<Props, EmbedTextKey>) => {
     const flush = given.frame === "flush"
     const aspect: AspectName = given.aspect ?? "wide"
+    const outcome = loom.frames["src"]
+
+    /**
+     * `undefined` cannot happen while `src` is required and declared, and is
+     * treated as a refusal rather than asserted away: a later schema that made
+     * the URL optional would otherwise start rendering an unchecked frame, and
+     * the failure would be silent. Absence means no frame, which is what this
+     * branch draws.
+     */
+    const framed = outcome !== undefined && outcome.status === "allowed" ? outcome : undefined
 
     const frame = createElement(
       "div",
@@ -112,16 +174,43 @@ export const loomEmbed = definePrimitive({
               }),
         },
       },
-      createElement("iframe", {
-        src: given.src,
-        title: given.title,
-        loading: "lazy",
-        sandbox: SANDBOX,
-        allow: ALLOW,
-        allowFullScreen: true,
-        referrerPolicy: "strict-origin-when-cross-origin",
-        style: { display: "block", width: "100%", height: "100%", border: "0" },
-      })
+      framed === undefined
+        ? /**
+           * The box keeps its ratio, so a refused embed holds the same space
+           * its frame would have and the bands around it do not move. The
+           * notice is the figure's only text and is read as such — there is no
+           * frame to name, so nothing here is `aria-hidden`.
+           */
+          createElement(
+            "p",
+            {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                height: "100%",
+                margin: "0",
+                paddingInline: space(4),
+                boxSizing: "border-box",
+                textAlign: "center",
+                fontFamily: family("body"),
+                fontSize: size(2),
+                color: colour("fg-muted"),
+              },
+            },
+            loom.text.refused
+          )
+        : createElement("iframe", {
+            src: framed.url,
+            title: given.title,
+            loading: "lazy",
+            sandbox: SANDBOX,
+            allow: ALLOW,
+            allowFullScreen: true,
+            referrerPolicy: "strict-origin-when-cross-origin",
+            style: { display: "block", width: "100%", height: "100%", border: "0" },
+          })
     )
 
     return createElement(
