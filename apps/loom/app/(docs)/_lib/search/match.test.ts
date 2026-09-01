@@ -22,6 +22,7 @@ const entry = (over: Partial<SearchEntry>): SearchEntry => ({
   context: "A section",
   kind: "page",
   summary: "",
+  body: "",
   ...over,
 })
 
@@ -63,6 +64,126 @@ describe("what matches", () => {
 
   it("finds nothing for a word the site does not use", () => {
     expect(titles(index, "kubernetes")).toEqual([])
+  })
+})
+
+describe("what the prose is worth", () => {
+  const serverless = entry({
+    href: "/a#serverless",
+    title: "Memory is a real answer, for exactly one shape of deployment",
+    context: "Going to production",
+    kind: "heading",
+    body: "They are the wrong choice on a serverless host, where a change lands in the memory of whichever process served the request.",
+  })
+
+  it("finds a section by a word that is only in its prose", () => {
+    expect(titles(of(serverless), "serverless")).toEqual([serverless.title])
+  })
+
+  it("finds it halfway through the word, the way somebody types", () => {
+    expect(titles(of(serverless), "server")).toEqual([serverless.title])
+  })
+
+  /**
+   * A paragraph is long enough for a substring to be wrong in a way a title
+   * never is: `ai` is inside *said*, `gate` is inside *propagate*, and a reader
+   * who typed either would be handed a section that never mentions their
+   * subject.
+   */
+  it("does not find a word buried inside another word", () => {
+    expect(titles(of(entry({ title: "Elsewhere", body: "Nothing propagates here." })), "gate")).toEqual([])
+  })
+
+  it("is worth less than a summary, which is worth less than a title", () => {
+    const index = of(
+      entry({ href: "/a", title: "Elsewhere", body: "All about holds." }),
+      entry({ href: "/b", title: "Elsewhere too", summary: "All about holds." }),
+      entry({ href: "/c", title: "Holds" })
+    )
+
+    expect(titles(index, "holds")).toEqual(["Holds", "Elsewhere too", "Elsewhere"])
+  })
+
+  /**
+   * The reason `prose.ts` drops a name in backticks. Prose outranks names by
+   * design, so a page whose *body* held `definePrimitive` would be handed to a
+   * reader who typed the export letter-for-letter — the one query where the
+   * export is the right answer, and the one this site would then get wrong.
+   */
+  it("never lets a page's words outrank the export somebody typed exactly", () => {
+    const index = of(
+      entry({ href: "/a", title: "definePrimitive", kind: "export", context: "@loom/runtime/sdk" }),
+      entry({ href: "/b", title: "Primitives and the registry", kind: "page", body: "You define a primitive." })
+    )
+
+    expect(titles(index, "definePrimitive")).toEqual(["definePrimitive"])
+  })
+
+  it("still narrows on two words when one of them is only in the prose", () => {
+    const index = of(
+      serverless,
+      entry({ href: "/b", title: "Memory", kind: "heading", body: "Kept in one process." })
+    )
+
+    expect(titles(index, "memory serverless")).toEqual([serverless.title])
+  })
+})
+
+describe("the sentence a result is shown with", () => {
+  const hit = (over: Partial<SearchEntry>, query: string) =>
+    searchDocs(of(entry(over)), query, SEARCH_RESULT_LIMIT)[0]
+
+  const excerpt = (over: Partial<SearchEntry>, query: string): string =>
+    (hit(over, query)?.excerpt ?? []).map((part) => part.text).join("")
+
+  it("is the words around the one the prose was found by", () => {
+    expect(excerpt({ body: "A hold waits for a person to answer it, and is not thrown away." }, "answer")).toBe(
+      "A hold waits for a person to answer it, and is not thrown away."
+    )
+  })
+
+  it("marks every word the reader typed", () => {
+    const marked = (hit({ body: "A hold waits for a person to answer it." }, "hold answer")?.excerpt ?? [])
+      .filter((part) => part.match)
+      .map((part) => part.text)
+
+    expect(marked).toEqual(["hold", "answer"])
+  })
+
+  it("is not shown when the title already carried the whole query", () => {
+    expect(excerpt({ title: "Holds", body: "A hold waits for a person." }, "holds")).toBe("")
+  })
+
+  it("says where it was cut, and does not claim a cut that is not there", () => {
+    const long = `${"padding word ".repeat(40)}serverless host ${"trailing word ".repeat(40)}`
+
+    expect(excerpt({ body: long }, "serverless")).toMatch(/^….*…$/)
+    expect(excerpt({ body: "Short and serverless." }, "serverless")).toBe("Short and serverless.")
+  })
+
+  it("prints one ellipsis where the paragraph had already left a name out", () => {
+    /* The name the paragraph left out lands exactly where the window ends. */
+    const body = `hold ${"word ".repeat(25)}… and then the rest of the paragraph`
+
+    expect(excerpt({ body }, "hold")).toMatch(/…$/)
+    expect(excerpt({ body }, "hold")).not.toContain("……")
+  })
+
+  it("begins and ends on a whole word", () => {
+    const long = `${"padding word ".repeat(40)}serverless host ${"trailing word ".repeat(40)}`
+
+    expect(excerpt({ body: long }, "serverless").replace(/…/g, "")).toMatch(/^\S.*\S$/)
+    expect(excerpt({ body: long }, "serverless")).toContain("serverless host")
+  })
+
+  it("centres on the word the prose carried rather than one the title already had", () => {
+    const body = `Holds are ${"described at length ".repeat(20)}and only much later, serverless.`
+
+    expect(excerpt({ title: "Holds", body }, "holds serverless")).toContain("serverless")
+  })
+
+  it("is nothing at all for an entry with no prose", () => {
+    expect(excerpt({ title: "planReverts", kind: "export", context: "@loom/runtime" }, "planreverts")).toBe("")
   })
 })
 
@@ -179,6 +300,48 @@ describe("the queries a stranger arrives with", () => {
     const [first] = titles(index, "definePrimitive")
 
     expect(first).toBe("definePrimitive")
+  })
+
+  /**
+   * The thing this site could not do until the prose was indexed, asserted
+   * without naming a word any page is obliged to keep saying.
+   *
+   * The word is *found* rather than written down: the first long one that
+   * appears in some paragraph and in no title, section or summary anywhere on
+   * the site. Whatever it turns out to be today, a reader typing it used to be
+   * told the site had never heard of it, and the excerpt is what makes the
+   * answer accountable — the row shows the sentence it came from.
+   */
+  const onlyInProse = (): { readonly href: string; readonly word: string } => {
+    const named = index.entries
+      .map((entry) => `${entry.title} ${entry.context} ${entry.summary}`.toLowerCase())
+      .join(" ")
+
+    for (const entry of index.entries) {
+      for (const word of entry.body.toLowerCase().split(/[^\p{L}]+/u)) {
+        if (word.length >= 9 && !named.includes(word)) return { href: entry.href, word }
+      }
+    }
+
+    throw new Error("every word on this site is in a title, which cannot be right")
+  }
+
+  it("finds a section by a word that is in its paragraph and nowhere else", () => {
+    const { href, word } = onlyInProse()
+
+    expect(
+      searchDocs(index, word, SEARCH_RESULT_LIMIT).map((hit) => hit.entry.href),
+      word
+    ).toContain(href)
+  })
+
+  it("shows that reader the sentence it found, with their word in it", () => {
+    const { word } = onlyInProse()
+
+    const [first] = searchDocs(index, word, SEARCH_RESULT_LIMIT)
+
+    expect(first?.excerpt.some((part) => part.match), word).toBe(true)
+    expect(first?.excerpt.map((part) => part.text).join("").toLowerCase(), word).toContain(word)
   })
 
   it("finds a section by its own words rather than only its page", () => {
