@@ -4,9 +4,12 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
+import { PageViews } from "@/app/(portal)/_components/page-views"
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { scopedLead } from "@/app/(portal)/_lib/page-views"
 import {
   anchorOf,
   describeAnchorMiss,
@@ -117,8 +120,6 @@ const HistoryPage = async ({
   }
 
   const newestFirst = [...page.value.revisions].reverse()
-  const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
-
   /**
    * What undoing each shown revision would restore and cost, read from the log.
    *
@@ -165,24 +166,20 @@ const HistoryPage = async ({
 
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="text-2xl tracking-tight">History</h1>
-          <div className="flex gap-4">
-            <Link href={`/portal/activity?${scopeQuery}`} className="text-xs">
-              What was asked for →
-            </Link>
-            <Link href={`/portal/pages/${scope.data}`} className="font-mono text-xs">
-              {scope.data} →
-            </Link>
-          </div>
-        </div>
+      <header className="flex flex-col gap-2">
+        <h1 className="text-2xl tracking-tight">History</h1>
+        {/*
+         * "this page" meant the tree and nothing on screen said which tree it
+         * was, except an id in the corner with an arrow after it. The id is in
+         * the sentence now, where a reader meets it while being told what they
+         * are looking at rather than beside a link out.
+         */}
         <p className="text-ink-muted text-sm">
-          Every change that has actually been made to this page, newest first &mdash; and, for each
-          one, what undoing it would put back. The page as it stands keeps no record of what it
-          replaced; this does.
+          <PlainSentence line={scopedLead("changed", scope.data)} />
         </p>
-      </div>
+      </header>
+
+      <PageViews treeId={scope.data} current="changed" />
 
       <RevisionBox treeId={scope.data} typed={echoOf(named)} />
 
@@ -240,9 +237,6 @@ const HistoryPage = async ({
             Jump to the newest →
           </Link>
         )}
-        <Link href="/portal/history" className="text-ink-muted text-xs">
-          ← Pick a different page
-        </Link>
       </div>
 
       {storeIsDurable ? null : (
