@@ -221,6 +221,27 @@ describe("ruleSentence", () => {
       expect(ruleSentence(code)).not.toContain(code)
     }
   })
+
+  /**
+   * Found by looking at the queue on `/portal`, where these sentences are now
+   * read a second time.
+   *
+   * `stakes-above-ceiling` used to read *"Riskier than a request **from here**
+   * is allowed to be without asking"* — a phrase pointing at the origin of the
+   * ask, which on the page screen sits a line above it and on the queue is not
+   * on screen at all. So one of the two screens showed a sentence with a
+   * dangling reference, and every assertion about it passed, because the
+   * sentence is only wrong in a place the test never stood.
+   *
+   * The guard is deliberately about the class rather than that one string: a
+   * sentence that says "here", "this page" or "above" is a sentence that has
+   * assumed which screen it is on, and these are read on three.
+   */
+  it("never points at a place, because the same sentence is read on more than one screen", () => {
+    for (const code of dispositionReasonCodeSchema.options) {
+      expect(ruleSentence(code), code).not.toMatch(/\b(from here|on this page|above|below)\b/iu)
+    }
+  })
 })
 
 describe("confidenceWord", () => {
