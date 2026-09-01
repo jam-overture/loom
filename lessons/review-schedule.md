@@ -29,6 +29,15 @@ breaks understanding later.
 If you miss something: **do not reread the lesson.** Look up only the specific
 point, then re-answer that question from memory a day later.
 
+That last sentence is the one this document has always been worst at getting
+anybody to do, because it asks you to remember, a day later, which question you
+missed — and to ask it of yourself without reading the rest of the set around
+it. `/lessons/review/corrections` does it instead: a question you missed comes
+back the next day, a week after you get it, and a month after that. **Three
+clean retrievals retire it; missing it once sends it back to the beginning.**
+Five at a time, drawn from whichever sets they happen to be in, which makes a
+corrections sitting the most interleaved ten minutes in the course.
+
 ---
 
 ## Set A — two days after lesson 01

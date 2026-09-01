@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { SetRunner, type RunnableQuestion } from "../../../_components/set-runner"
-import { lessonPointers } from "../../../_lib/links"
+import { reviewPointers } from "../../../_lib/links"
 import { heading, prose, renderFragment } from "../../../_lib/loom"
 import { REVIEW_SETS, reviewSet, type ReviewSet } from "../../../_lib/schedule"
 import * as style from "../../../_components/style"
@@ -32,18 +32,10 @@ export const generateMetadata = async ({ params }: { readonly params: Params }):
     : { title: `Set ${found.letter}`, description: `Review set ${found.letter} — ${found.timing}.` }
 }
 
-/**
- * Where to check, once an answer is in: the lesson the set follows, plus every
- * lesson the question is marked as reaching back into. Interleaved sets reach
- * into four or five, which is the point of them.
- */
-const pointersFor = (set: ReviewSet, refs: readonly number[]) =>
-  lessonPointers([...(set.anchor.kind === "lesson" ? [set.anchor.lesson] : []), ...refs])
-
 const questionsOf = (set: ReviewSet): readonly RunnableQuestion[] =>
   set.questions.map((question) => ({
     number: question.number,
-    checkIn: pointersFor(set, question.refs),
+    checkIn: reviewPointers(set.anchor, question.refs),
     body: renderFragment(
       (ids) => [prose(ids, question.text)],
       `${set.slug}-q${question.number}`
