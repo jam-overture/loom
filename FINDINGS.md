@@ -9352,9 +9352,15 @@ nothing. Not done here: it is worth doing only once there are enough pages for t
 derived version to be wrong, and today it is not.
 ## 2026-08-26 — a tree cannot point at a band of its own page, and the front door needed to
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
-— nothing is broken, and this is a capability that does not exist rather than one
-that misbehaves
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+**half closed** by `primitives-19-how-it-works` — the target exists.
+`loom.section`, `loom.hero` and `loom.callout` take an `anchor` and render it as
+an `id`, and the three questions below are answered in
+`src/primitives/anchor.ts`. The address half is `linkUrlSchema`'s, which refuses
+a bare `#name` under the same clause of 0053 that #187 escalated as 0096 — see
+the 31 August entry at the end of this file for why a fragment-only href is the
+narrowest slice of that question and should be decided beside it. Until then a
+page links to its own band with its own absolute URL, which works.
 
 The front door now answers a visitor's request above the opening band, because
 the answer was landing two screens below the fold (see the report of the same
@@ -9726,6 +9732,99 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-31 — the anchor's target half exists; the address half is `#name`, and only 0096 can allow it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+— the target half is built and shipped on `primitives-19-how-it-works`
+
+The 26 August finding — *a tree cannot point at a band of its own page* — is
+**half closed.** `loom.section`, `loom.hero` and `loom.callout` now take an
+`anchor` and render it as an `id`, with the three open questions answered in
+`src/primitives/anchor.ts`: which primitives carry one (the bands a menu points
+at, not seventy schemas), what it accepts (a fragment, refused rather than
+sanitised), and what it cannot check (uniqueness, which is a fact about a tree
+and not about a node).
+
+**What is left is the address, and it is not this lane's to widen.**
+`linkUrlSchema` parses with `new URL`, so a bare `#how-it-works` is refused as
+*must be an absolute URL* — the same clause of
+[0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)
+that #187 escalated as `Proposed` 0096 for root-relative paths. So a page links
+to its own band today by writing its own absolute URL with a fragment on the
+end, which works and is exactly the deployment-stamping 0096 is about.
+
+**A fragment-only href is the narrowest slice of that question and worth
+deciding with it**, because it does not raise the objection 0053 gives. That
+objection is that *a relative destination means something different per
+deployment*. `#how-it-works` means the same thing in every deployment, at every
+path, forever: this document. It carries no scheme, so it cannot be
+`javascript:`; it names no host, so `//evil.example` is not reachable through
+it; the predicate is `value.startsWith("#")` and the rest of the fragment
+grammar is `anchorSchema`'s, already written.
+
+Not built here, and deliberately: it contradicts an `Accepted` clause, which is
+an escalation rather than a fix. **No competing record was written** — 0096 is
+claimed nine ways across open branches already, and a second proposal against
+the same clause would be noise rather than information. This is filed as a
+paragraph for whoever answers 0096 to read beside it.
+
+---
+
+## 2026-08-31 — a child that lays itself out inline cannot be rearranged by its container
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-19-how-it-works` for `loom.milestone`, open as a pattern
+for every other pair in the library
+
+Building a second arrangement of `loom.milestone` — the same entries laid across
+as a *how it works* band rather than down a rail — found the rule that decides
+whether 0054 is available at all.
+
+`stylesheet.ts` says it in one line: **an inline style beats a rule.** So a
+child that sets its own `display`, `grid-template-columns`, flex direction or
+optical offsets has made every one of them unreachable from its parent, and a
+container that wants the same content model arranged differently has exactly one
+option left — **a second child type rendering the same fields**, which is the
+duplicate 0054 exists to prevent. Four declarations moved out of
+`loom.milestone` and into the stylesheet, and `loom.milestone-row` needed no new
+child.
+
+**The general form, for the next pair:** a child's inline styles should be what
+*no arrangement of it would ever vary* — its typography, its colours, its own
+internal gaps. Anything an alternative container might want differently belongs
+in the stylesheet under a class the child carries, whether or not a second
+container exists yet. It costs nothing to write it that way first and it costs a
+primitive to fix afterwards.
+
+Every other container/child pair in the library is a candidate for the same
+audit. Not done here: changing a shipped primitive's layout is a change that has
+to be photographed under every palette, and this run photographed one.
+
+---
+
+## 2026-08-31 — the third primitive to want its container's width, and the first to get it right cheaply
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:** open
+— a note against the 26 August entry about `loom.mosaic`, not a new complaint
+
+`loom.orbit` alternates its children between two radii, and on a 350px band the
+inner ring lands **on top of the mark it circles** — the phone screenshot's
+finding and no assertion's. The fix is a `@container (max-width: 26rem)` rule
+that opens the inner ring out to the outer one, which is `loom.offering`'s
+pattern for the second time and the first time it has been cheap: the radius was
+never a per-node fact, so moving it into the stylesheet took nothing away.
+
+The mechanic worth carrying: **a seat carries an angle and not a radius.** The
+angle is a fact about one child among its siblings, which no rule can express;
+the radius is a fact about the arrangement, which a rule must be able to change.
+Splitting them that way is what left a `@container` hook where a media query
+would otherwise have been needed — and a media query would have been wrong here
+for `loom.offering`'s reason, since this band is as likely to be half of a
+`loom.split` on a laptop as the whole width of a phone.
+
+`loom.mosaic` still reads the viewport where it should read its container, filed
+on 21 August and again on 26 August. Third occurrence, same shape, and there are
+now two primitives in the library doing it correctly to copy from.
 ## 2026-08-30 — the framework lane rebuilt a unit that had been finished and open for four days
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
