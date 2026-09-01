@@ -156,16 +156,23 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         <StateNotice tone="notice">
           <p>
             <strong className="font-medium">Changes here won&rsquo;t be kept.</strong>{" "}
-            No
-            database is set up, so anything you accept lives only until the server restarts.
+            No database is set up, so anything you accept lives only until the server restarts
+            &mdash; and a change waiting for your answer can disappear before you get to it.
           </p>
           <TechnicalDetail summary="What to set, and why it matters more than it sounds">
             <p>
-              Trees live in the server process. Locally that lasts as long as{" "}
-              <span className="font-mono">pnpm dev</span>; on a serverless deployment an accepted
-              change may not be there when you reload, because the next request can be served by
-              a different instance. Set <span className="font-mono">DATABASE_URL</span> to make
-              writes durable.
+              Trees and held proposals both live in the server process. Locally that lasts as
+              long as <span className="font-mono">pnpm dev</span>; on a serverless deployment an
+              accepted change may not be there when you reload, because the next request can be
+              served by a different instance. Set{" "}
+              <span className="font-mono">DATABASE_URL</span> to make writes durable.
+            </p>
+            <p>
+              A hold is the worse half of it, and the one nothing on screen would give away. The
+              instance that judged a change is usually gone before a reviewer opens the queue, so
+              a confirmation arrives somewhere that has never heard of the proposal and comes
+              back as <span className="font-mono">not-held</span> &mdash; which reads as
+              &ldquo;already answered&rdquo; and is not.
             </p>
           </TechnicalDetail>
         </StateNotice>
