@@ -10,7 +10,7 @@ type Props = z.infer<typeof props>
 
 export const loomPage = definePrimitive({
   type: "loom.page",
-  description: "The root of a page; stacks its children vertically",
+  description: "The root of a page; stacks its children vertically.",
   props,
   slots: [],
   component: ({ loom, children }: LoomPrimitiveProps<Props>) =>

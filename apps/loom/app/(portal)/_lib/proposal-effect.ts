@@ -86,6 +86,13 @@ export type ValueChange = {
 }
 
 export type OperationEffect = {
+  /**
+   * The delta model's own name for what this is. Kept because a plain reading
+   * has to be chosen by what the operation *is*, and choosing it by the display
+   * verb below would make a rewording of that verb silently change which
+   * sentence is composed.
+   */
+  readonly op: TreeOperation["op"]
   /** The portal's verb, not the delta model's — `delta-summary` owns the mapping. */
   readonly verb: string
   /** The node as a reader recognises it: a primitive type, a slot name, or "text". */
@@ -94,6 +101,20 @@ export type OperationEffect = {
   readonly place: readonly string[]
   /** Where and how much, in one sentence. */
   readonly detail: string
+  /**
+   * Where it lands, and where it comes from, as labels rather than as prose.
+   *
+   * `detail` above says the same things and says them in one composed string —
+   * `into loom.band, before loom.heading` — which is exactly the shape a plain
+   * reading cannot be built from without parsing it back apart. These are the
+   * pieces, so `effect-view` can word a sentence and the disclosure can keep
+   * `detail` verbatim. `null` throughout means the operation has no such part:
+   * a remove lands nowhere, a move within one parent comes from and goes to the
+   * same place, an insert at the end sits before nothing.
+   */
+  readonly into: string | null
+  readonly before: string | null
+  readonly from: string | null
   /** Before and after, per key. Empty for anything but a reconfigure. */
   readonly changes: readonly ValueChange[]
   /** The words this operation brings or takes, for a reader who knows the page by its text. */
@@ -247,16 +268,22 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
   switch (operation.op) {
     case "insert": {
       const carries = countNodes(operation.node)
+      const parent = findNode(root, operation.parentId)
+      const occupant = childrenOfNode(parent)[operation.index]
 
       return {
+        op: operation.op,
         verb,
         subject: nodeLabel(operation.node),
         place: placeThrough(root, operation.parentId),
         detail: insertDetail(root, operation.parentId, operation.index, carries),
+        into: parent === null ? null : nodeLabel(parent),
+        before: occupant === undefined ? null : nodeLabel(occupant),
+        from: null,
         changes: [],
         text: textIn(operation.node),
         carries,
-        missing: findNode(root, operation.parentId) === null,
+        missing: parent === null,
         inert: false,
       }
     }
@@ -266,6 +293,7 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
       const carries = node === null ? null : countNodes(node)
 
       return {
+        op: operation.op,
         verb,
         subject: node === null ? operation.nodeId : nodeLabel(node),
         place: placeOf(root, operation.nodeId),
@@ -275,6 +303,9 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
             : carries !== null && carries > 1
               ? `and ${plural(carries - 1, "node")} under it`
               : "a single node, with nothing under it",
+        into: null,
+        before: null,
+        from: null,
         changes: [],
         text: node === null ? [] : textIn(node),
         carries,
@@ -285,12 +316,19 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
 
     case "move": {
       const node = findNode(root, operation.nodeId)
+      const from = findParent(root, operation.nodeId)
+      const to = findNode(root, operation.parentId)
 
       return {
+        op: operation.op,
         verb,
         subject: node === null ? operation.nodeId : nodeLabel(node),
         place: placeOf(root, operation.nodeId),
         detail: node === null ? "this tree has no such node" : moveDetail(root, operation),
+        into: to === null ? null : nodeLabel(to),
+        before: null,
+        /** `null` when it is not leaving: a move within one parent has no elsewhere to name. */
+        from: from === null || from.id === operation.parentId ? null : nodeLabel(from),
         changes: [],
         text: [],
         carries: null,
@@ -304,10 +342,14 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
       const changes = node === null ? [] : changesFor(node, operation)
 
       return {
+        op: operation.op,
         verb,
         subject: node === null ? operation.nodeId : nodeLabel(node),
         place: placeOf(root, operation.nodeId),
         detail: node === null ? "this tree has no such node" : configureDetail(changes),
+        into: null,
+        before: null,
+        from: null,
         changes,
         text: [],
         carries: null,

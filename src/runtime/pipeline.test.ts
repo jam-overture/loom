@@ -20,7 +20,13 @@ import type { LoomTree } from "../tree/tree.js"
 
 import type { IntentOrigin } from "./intent.js"
 import type { InterpretationError } from "./interpreter.js"
-import { composeChange, confirmChange, type CompositionRuntime } from "./pipeline.js"
+import {
+  COMPOSITION_OUTCOME_KINDS,
+  composeChange,
+  confirmChange,
+  type CompositionOutcomeKind,
+  type CompositionRuntime,
+} from "./pipeline.js"
 import { fixedPolicy, type PolicyContext, type PolicySource } from "./policy-source.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
@@ -744,5 +750,29 @@ describe("composeChange on a change that nests one target inside another", () =>
     })
 
     expect((await composeChange(runtime, tree, intentFor(tree))).kind).toBe("rejected")
+  })
+})
+
+/**
+ * `CompositionOutcome` has no schema — it never crosses a boundary, so there is
+ * nothing to parse it back and nothing to count it. The completeness check is
+ * therefore at the type level: the record below has to name every kind or this
+ * file does not compile, and the assertion carries that into the exported list.
+ */
+const everyKind: Readonly<Record<CompositionOutcomeKind, true>> = {
+  applied: true,
+  "awaiting-confirmation": true,
+  rejected: true,
+  "not-interpreted": true,
+  "not-applicable": true,
+}
+
+describe("COMPOSITION_OUTCOME_KINDS", () => {
+  it("is every way an ask can end", () => {
+    expect([...COMPOSITION_OUTCOME_KINDS].sort()).toEqual(Object.keys(everyKind).sort())
+  })
+
+  it("names each ending once", () => {
+    expect(new Set(COMPOSITION_OUTCOME_KINDS).size).toBe(COMPOSITION_OUTCOME_KINDS.length)
   })
 })
