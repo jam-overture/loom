@@ -9726,6 +9726,55 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-29 — nothing has merged in four days, and every lane is cutting from a `main` that is four days stale and red
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the merge queue, not any one pull request
+
+The last merge to `main` is **#167, on 25 August**. As of this run there are
+**twenty-five open pull requests** across six lanes, numbered #168 to #192, and
+none of them has a review on it.
+
+This is not a complaint about review latency, which costs nothing. It is a
+report of what the *no-stacking rule* does once the queue stops moving, because
+that combination has a cost that grows on its own:
+
+- Every brief says **branch off `main`, never stack**. That is the right rule
+  when `main` moves — it is what keeps a pull request reviewable alone.
+- With `main` four days behind, each lane's sixth branch is cut from a tree that
+  is missing its own lane's previous three units. This lane's #169, #177 and
+  #185 are all unmerged, so today's work is the *fourth* portal branch that
+  cannot see the other three.
+- The lanes are consequently doing work they cannot see each other doing. #185
+  already reported checking its own compatibility against #177 by hand, in a
+  scratch worktree, because nothing else could tell it.
+- Conflicts are now certain rather than possible, and every one of them will be
+  resolved by whoever merges rather than by the routine that wrote the code.
+
+**And `main` is red the whole time.** `apps/loom/app/(marketing)/_lib/copy.ts`
+says `decisions: "94"`; `decisions/` holds 95. `facts.test.ts` has failed on
+`main` since #165 merged on 27 August, which means **`pnpm verify` — the stated
+merge gate for four surfaces — does not pass on the branch every routine is told
+to cut from.** #169, #177 and now this branch each carry the same one-line bump
+so that their own build is green. That is three lanes-crossings for one
+character, and #174 (`marketing-13-numbers-that-count-themselves`) deletes the
+literal outright so no routine ever has to make it again.
+
+**Recommendation, in order of how much it buys:**
+
+1. **Merge #174.** It is the root fix for the red `main`, it is small, and it
+   ends a finding that has now been filed six times.
+2. **Merge or close the backlog in lane order.** Even merging one pull request
+   per lane would put every routine back on a base that contains its own last
+   unit.
+3. If the queue is going to stay long, **the no-stacking rule is worth
+   revisiting for consecutive units within one lane** — that is a governance
+   decision and a routine cannot make it, which is why it is here rather than in
+   a decision record.
+
+Nothing in this entry is fixable by the routine that filed it. What this run
+could do, it did: it carried the one-line bump again, and it says so in its own
+pull request.
 ## 2026-08-29 — `loom init` scaffolds a primitive the starter library already registers, and Getting started walks a stranger straight into it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/cli/`) ·
