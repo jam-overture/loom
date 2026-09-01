@@ -7,7 +7,7 @@ import { plainText } from "./text"
  * The README's table is already the course's index — written lessons are links
  * and unwritten ones are a bare number — so a second list here would be a second
  * place to forget. What this page adds is only the part membership, which the
- * schedule needs and the reader cannot see: four of the twenty sets are
+ * schedule needs and the reader cannot see: four of the twenty-one sets are
  * anchored to *a part* rather than to a lesson, and a part is finished when its
  * last lesson is.
  */

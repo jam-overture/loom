@@ -9503,3 +9503,53 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
+
+---
+
+## 2026-09-01 — `submit-misdeclared` says it lands on a form's unavailable path, and it lands on the untargeted one
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+
+Found while writing lesson 18, which teaches the submission seam. The behaviour
+is correct and fails closed; the doc comment describing it is wrong, and it is
+wrong in the direction that would mislead somebody reasoning about what a
+visitor sees.
+
+`src/render/diagnostics.ts` says of the `submit-misdeclared` code:
+
+> The node renders — its props are its own and are still valid — with no target,
+> which is what a form primitive's unavailable path is for.
+
+A form primitive has three paths, not two: `loom.submit` absent, `unavailable`
+with a reason, or `ready` (0065). A misdeclared node reaches the **absent** one,
+never `unavailable`. `planSubmissionsIn` puts a node whose `loom:submit` fails
+to parse into `plan.problems` rather than `plan.submissions`, and
+`buildSubmissionResolution` only ever writes outcomes for planned *submissions* —
+so `lookup` returns `undefined` and the `unavailable` branch is unreachable for
+this diagnostic.
+
+Executed, rendering through the starter library with one endpoint registered:
+
+| tree | `lookup` | `loom.form` notice |
+| --- | --- | --- |
+| `{ to: "contact.enquiry" }` | `ready` | none; `action="/api/contact"` |
+| nothing declared | `undefined` | This form is not connected yet, so it cannot be sent. |
+| `{ to: "contact.enquiry", action: "https://…/harvest" }` | `undefined` | This form is not connected yet, so it cannot be sent. |
+| `{ to: "nowhere.at-all" }` | `unavailable` | This form cannot be sent just now. Please try again in a moment. |
+
+Row three is the misdeclared case. It shows the *untargeted* sentence, not the
+unavailable one — `noticeKeyFor` in `src/primitives/loom.form.ts` returns
+`"untargeted"` for `undefined`. A reader of the comment would expect row three
+to look like row four, and it looks like row two.
+
+**Why it is worth a line rather than nothing.** The seam's own safety argument
+rests on the three states being distinct, and this is the one place a document
+in the repository says two of them meet where they do not. The visitor-facing
+behaviour is arguably ideal as it stands — "not connected yet" is true of a
+refused declaration, and "try again in a moment" would be a lie about one that
+will never parse — so the fix is very likely the comment rather than the code.
+
+**Not fixed here.** `src/render/` is not this routine's lane. Nothing else in
+the seam disagrees with its records; `plan.problems`, the strict parse and the
+absent-versus-`unavailable` split are all argued in 0065 and 0087 and teach
+well as written.

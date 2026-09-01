@@ -689,6 +689,55 @@ dashboard.
 
 ---
 
+## Set U — two days after lesson 18
+
+Interleaved with 03, 05, 09, 12, 14, 15 and 16, and built around the failure
+mode lesson 18 exists to name: **treating a dangerous input as something to
+validate rather than something to remove.** Four of these are about a check
+that cannot answer the question somebody is asking it, and they are
+deliberately not adjacent.
+
+1. A scheme allowlist keeps `javascript:` out of an `href` and does not solve
+   the form problem. Give the one-line example that breaks it, then say what
+   class of question an allowlist over a string can never answer. Then find the
+   earlier place in this course where a check was rejected for the same reason
+   — that its two sides could be wrong together. *(16)*
+2. A binding carries params and a submission does not. Give the argument from
+   what varies rather than from what is dangerous. Then say what a deployment
+   with twenty mailing lists has to do, and say whether that is the cost of the
+   decision or the mechanism of it.
+3. Almost every parse of stored JSON in Loom is permissive; `loom:submit` is
+   strict. Say why, then say exactly what a node that declared a valid `to`
+   *and* an `action` ends up with — and why the permissive outcome would have
+   been worse despite being safe. *(03)*
+4. Name the three states a form can be in and say why there is no fourth. Then
+   name the two a visitor cannot tell apart on the page, say where the
+   distinction survives instead, and say who each of the two audiences is.
+   *(14)*
+5. `probeSubmissionPlacement` calls a component with a target whose action is a
+   string nothing else would produce. Say what claim that tests and what it
+   deliberately does not test. Then say what happens to a primitive the probe
+   could not call, and give the rule that decision follows. *(15)*
+6. A `configure` moves `loom:submit` from one registered endpoint to another.
+   Both are registered, so nothing leaves the deployment. Say what the analysis
+   reports, say what the Gate makes of it, and then say what you think it
+   *should* make of it — this one is an open question in the repository, not a
+   settled answer. *(07, 09)*
+7. An endpoint is the host's own code and the seam validates what it answers
+   anyway. Give the rule in one sentence. Then name the two other places in this
+   course where the same rule was applied to something a person on this team
+   wrote. *(05, 14)*
+8. Lesson 12 defined a projection in one sentence. Apply it to the endpoint
+   catalogue: source of truth, what is thrown away, who is protected. Then say
+   what this seam does *in addition to* projecting, which is a different verb,
+   and why the projection alone would not have been enough. *(12, 04)*
+
+Question 3 is the slow one and the one to write in full sentences. Question 6 is
+the payoff: it is the question the next lesson in Part V starts from, and having
+an opinion before you are told one is the point.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -723,3 +772,4 @@ renders this file rather than restating it.
 | R | 2 days after L14 | | |
 | S | 2 days after L15 | | |
 | T | 2 days after L16 | | |
+| U | 2 days after L18 | | |

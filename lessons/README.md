@@ -169,6 +169,16 @@ tree. Everything else in the system follows from protecting that one property.
 | [16](16-persistence.md) | Persistence | The log is the truth; the snapshot is a view you can rebuild — and the audit is what it costs to keep one. |
 | 17 | Telemetry | How a self-graded confidence number eventually gets calibrated. |
 
+### Part V — Making it do something
+
+Parts I–IV are about a page that *shows* something, where the worst a bad change
+can do is look wrong. Part V is about a page that *does* something, where it
+cannot.
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| [18](18-the-write-seam.md) | The write seam | Why a form's destination is a name and never an address — and the one thing this seam refuses to copy from the read seam. |
+
 Unlinked lessons are not written yet. They arrive as the routine reaches them.
 
 ## Pacing
