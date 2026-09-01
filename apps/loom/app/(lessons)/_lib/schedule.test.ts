@@ -16,14 +16,14 @@ import { plainText, referencedLessons } from "./text"
 
 describe("the review schedule, read as a queue", () => {
   it("finds every set in the file, in order", () => {
-    expect(REVIEW_SETS.map((set) => set.letter).join("")).toBe("ABCDEFGHIJKLMNOPQRST")
+    expect(REVIEW_SETS.map((set) => set.letter).join("")).toBe("ABCDEFGHIJKLMNOPQRSTUV")
   })
 
   it("stops at the tracking table rather than reading it as a set", () => {
     const last = REVIEW_SETS.at(-1)
 
-    expect(last?.letter).toBe("T")
-    expect(last?.questions).toHaveLength(8)
+    expect(last?.letter).toBe("V")
+    expect(last?.questions).toHaveLength(7)
     expect(last?.closing.join(" ")).not.toContain("Confident-and-wrong")
   })
 
@@ -37,11 +37,13 @@ describe("the review schedule, read as a queue", () => {
   it("anchors the consolidation sets to a part and the rest to a lesson", () => {
     const parts = REVIEW_SETS.filter((set) => set.anchor.kind === "part").map((set) => set.letter)
 
-    expect(parts).toEqual(["E", "F", "M", "Q"])
+    expect(parts).toEqual(["E", "F", "M", "Q", "V"])
     expect(reviewSet("set-m")?.anchor).toEqual({ kind: "part", part: "II" })
     expect(reviewSet("set-m")?.delayDays).toBe(7)
     expect(reviewSet("set-q")?.anchor).toEqual({ kind: "part", part: "III" })
     expect(reviewSet("set-q")?.delayDays).toBe(7)
+    expect(reviewSet("set-v")?.anchor).toEqual({ kind: "part", part: "IV" })
+    expect(reviewSet("set-v")?.delayDays).toBe(7)
   })
 
   it("gives every set at least three questions and every question some text", () => {

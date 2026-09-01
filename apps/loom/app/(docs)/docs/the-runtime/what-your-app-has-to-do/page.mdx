@@ -1,0 +1,203 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { WriteEndings } from "@/app/(docs)/_components/write-endings"
+
+export const metadata = pageMetadata("the-runtime", "what-your-app-has-to-do")
+
+# What your app has to do
+
+The last four pages were about the runtime making decisions. This one is about
+the code you write around it — which is smaller than you would expect, and has
+exactly one shape.
+
+Loom does not run your application. It has no routes, no login, no session and
+no opinion about your database. What it has is **one function that changes a
+page**. Your job is to call it when somebody asks for something, and to do
+something sensible with each of the ways it can answer.
+
+One call, seven answers. That is the whole of the surface.
+
+<Example id="first-tree" />
+
+The chips on that example go through the same function a deployment calls, and
+so does every other example on this site. Nothing here is a demonstration mode.
+
+## The three things a change needs
+
+`commitIntent` takes two arguments. The second is the ask. The first is called
+the **write path**, and it is the three things that have to exist before a page
+can change at all:
+
+```ts
+import { fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
+import { postgresHoldStore, postgresTreeStore } from "@loom/runtime/postgres"
+import { commitIntent, type WritePath } from "@loom/runtime/write"
+
+const path: WritePath = {
+  store: postgresTreeStore(db),
+  holds: postgresHoldStore(db),
+  runtime: {
+    interpreter,
+    policySource: fixedPolicy(policy),
+    events,
+    clock: systemClock,
+    idFactory: randomIdFactory,
+  },
+}
+```
+
+**The store** is where the page lives, and where every change ever applied to it
+is kept. **The holds** are where a change waits when the Gate decides a person
+has to answer it — a separate place, because a change that has not happened
+cannot go in the history of things that did. **The runtime** is the thing that
+plans a change and the rules that judge it: an interpreter, usually a model, and
+your policy.
+
+Build it once, where your app starts, and hand it to every request.
+
+<Callout>
+  Both stores ship in two shapes: in memory, and Postgres. The examples on this
+  page use the memory pair in your browser tab; a deployment swaps two
+  constructors and changes nothing else. They are held to the same contract by
+  the same tests, so "it works here" and "it works in production" are one claim.
+</Callout>
+
+## An ask names the page, and which version of it
+
+An **intent** is the ask. It is a sentence, plus enough context to judge it:
+
+```ts
+const intent: EditIntent = {
+  intentId: randomIdFactory.intentId(),
+  treeId: page.treeId,
+  baseRevision: page.revision,
+  origin: "user-instruction",
+  actor: session.userId,
+  utterance: "Make the heading on this page smaller",
+  observedAt: systemClock.now(),
+}
+
+const outcome = await commitIntent(path, intent)
+```
+
+Two of those fields are the ones people leave out, and both of them cost
+something real.
+
+**`baseRevision` is the version of the page they were looking at** when they
+asked. Not the version your server has now — the one on their screen. It is what
+lets the runtime notice that the page moved under them, and refuse the ask
+before it spends a model call on a plan that could only have been thrown away.
+
+**`actor` is who is asking**, by whatever name your app knows them. It is
+recorded on the change, and on a change a person had to allow it is recorded
+separately from who allowed it. A history where those two are the same field
+makes every confirmed change look like somebody waving through their own
+request.
+
+<Callout>
+  `origin` is one of four words — `user-instruction`, `system-signal`,
+  `scheduled-adaptation`, `developer` — and it is not decoration. A person
+  asking for something in so many words gets more latitude from the Gate than a
+  background job that nobody requested. Say which one this is honestly; it is an
+  input to the verdict.
+</Callout>
+
+## Seven ways that call can end
+
+Here they are, and none of them was typed. Each card below was produced by
+sending an ask through the write path as this page was built, and the middle
+line is the sentence the runtime itself returned about what happened.
+
+<WriteEndings />
+
+Three of these are the Gate speaking: **it happened**, **somebody has to say
+yes**, **no**. Those are the ones your product is about, and the middle one is
+the reason Loom exists — software that can only allow or forbid has to decide at
+build time which changes are safe, and it will be wrong.
+
+The other four are the world being ordinary. A model times out. A planner names
+a node that is not there. Two people edit the same page. Somebody double-clicks.
+None of them is exotic, and each one wants a different sentence in front of a
+person, which is why the runtime keeps them apart instead of handing you one
+`error` to shrug at.
+
+<Callout kind="warning">
+  The one worth reading twice is **the plan did not fit the page**. That is not a
+  refusal — the Gate never saw it — and it is not the asker's fault. It means
+  whatever planned the change described something that is not there. On a
+  deployment with a model behind the seam, a rising count here is a signal about
+  the model, and reporting it to the person as "your change was rejected" hides
+  the only thing it was telling you.
+</Callout>
+
+## Answering a change that is waiting
+
+A held change is not applied. It is in custody, keyed by the proposal's own id,
+and the answer arrives later — from a different person, in a different request,
+possibly on a different server. So your app needs a second door:
+
+```ts
+import { confirmHeld, discardHeld } from "@loom/runtime/write"
+
+const yes = await confirmHeld(path, { proposalId, actor: reviewer.id })
+const no = await discardHeld(path, { proposalId, actor: reviewer.id })
+```
+
+A confirmation sends **an id and a name**, and never the change itself. The
+change is already on your server; a browser that could post one would be a
+browser that could author one, and then the Gate would be judging whatever the
+browser felt like sending.
+
+To build a review queue, ask the hold store what is waiting for a page:
+`holds.forTree(treeId)` returns them oldest first, each carrying the Gate's
+reason rather than its verdict — because a reviewer needs to know *why* this was
+worth stopping, and "requires confirmation" tells them nothing.
+
+Two things about answering that you do not have to build:
+
+**Saying yes is not a way past the Gate.** The change is judged again, against
+the page as it stands at the moment of the answer. If the page moved in a way
+that makes the change unsafe, it is refused, and the person who said yes was
+answering the question rather than overruling it.
+
+**An answer can only happen once.** Releasing a proposal from custody is a take,
+not a read — it removes and returns in one step — so two tabs pressing yes
+cannot both apply the same change. That is a property of the store, not a rule
+your handler has to remember.
+
+## What you do not have to write
+
+**No undo route.** Undo goes through this same function, as an ordinary proposal
+from an interpreter that has nothing to guess. Call `revertRevision` and the
+change is judged, held or refused like any other, and appended as a new
+revision.
+
+**No check that a change was judged.** There is one function that appends to a
+page's history, and it is the same function that runs the Gate. Not tidiness —
+it is what makes "every change was judged" a property of the system rather than
+a rule everybody has to remember.
+
+**No locking.** Every ask names the revision it was written against, so two
+people editing the same page do not need a lock; the second one is told the page
+moved and gets to ask again against what is actually there.
+
+<Callout>
+  This is the bargain the whole framework asks you to take, seen from the server
+  side. Because a change is a short list of operations on named nodes rather
+  than a new version of the page, it can be judged before it happens, refused
+  without a trace, held for a person, attributed, and undone. A vocabulary you
+  could say anything in would buy none of that.
+</Callout>
+
+## Where this site does exactly this
+
+Every example on these pages opens a store in your browser tab and sends its
+asks through `commitIntent`. The site has no privileged path into the runtime,
+and it is worth knowing that the code doing it is about a hundred lines: build a
+runtime around the interpreter, build the intent, call the function, and render
+whatever came back.
+
+The interpreter behind these chips is deterministic rather than a model, which
+is the one thing here a real deployment does differently — dozens of examples
+that must behave identically on every visit is not a thing to point at a model.
+Everything downstream of that seam cannot tell the difference, which is exactly
+what the seam is for.
