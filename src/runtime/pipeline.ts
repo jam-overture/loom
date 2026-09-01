@@ -83,6 +83,31 @@ export type CompositionOutcome =
       readonly error: TreeError
     }
 
+export type CompositionOutcomeKind = CompositionOutcome["kind"]
+
+/**
+ * The five ways an ask can end, in the order a host meets them.
+ *
+ * The same addition `WRITE_OUTCOME_KINDS` is for the write path, one level up:
+ * a `switch` is exhaustive at compile time and enumeration has no answer, so
+ * anything that wants to *walk* the endings — a surface explaining what a host
+ * must handle, a dashboard seeding a bucket per ending before the first request,
+ * a runbook — keeps its own copy and nothing fails when a sixth lands.
+ *
+ * Ordered applied, awaiting-confirmation, rejected, not-interpreted,
+ * not-applicable: the three the Gate decides first, then the two that never
+ * reached it. A reader taking them in this order learns the shape of the
+ * pipeline; alphabetical order would put `applied` beside `awaiting-confirmation`
+ * for no reason a reader could use.
+ */
+export const COMPOSITION_OUTCOME_KINDS: readonly CompositionOutcomeKind[] = [
+  "applied",
+  "awaiting-confirmation",
+  "rejected",
+  "not-interpreted",
+  "not-applicable",
+]
+
 const emitter = (runtime: CompositionRuntime, tree: LoomTree) =>
   narrator(runtime.events, runtime.clock, tree.treeId)
 

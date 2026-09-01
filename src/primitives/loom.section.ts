@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
 import { colour, radius, size, space, WIDTHS, type WidthName } from "./tokens.js"
 
 /**
@@ -23,6 +24,8 @@ const props = z
     width: z.enum(["full", "wide", "readable"]).optional(),
     /** Above the heading region: the small uppercase label Hermes called an eyebrow. */
     eyebrow: z.string().min(1).max(60).optional(),
+    /** The name this band answers to, so a link on the page can point at it. */
+    anchor: anchorSchema.optional(),
   })
   .strict()
 
@@ -48,8 +51,10 @@ export const loomSection = definePrimitive({
       "section",
       {
         ...loom.editable,
+        ...anchorAttributes(given.anchor),
         style: {
           ...tone,
+          ...anchorStyle(given.anchor),
           display: "flex",
           flexDirection: "column",
           gap: space(5),

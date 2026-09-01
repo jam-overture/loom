@@ -20,8 +20,18 @@ import { ChangeSpotlight } from "./change-spotlight"
 /** Node ids are branded, and a fixture is the one place they are written by hand. */
 const id = (value: string): NodeId => value as NodeId
 
-const APPLIED: Spotlight = { nodeId: id("demo-n7"), tone: "applied", label: "Just changed" }
-const AWAITING: Spotlight = { nodeId: id("demo-n7"), tone: "awaiting", label: "This would be removed" }
+const APPLIED: Spotlight = {
+  nodeId: id("demo-n7"),
+  tone: "applied",
+  label: "Just changed",
+  placement: "inside",
+}
+const AWAITING: Spotlight = {
+  nodeId: id("demo-n7"),
+  tone: "awaiting",
+  label: "This would be removed",
+  placement: "inside",
+}
 
 /**
  * jsdom implements neither of these, and both are decisions rather than

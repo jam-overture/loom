@@ -20,7 +20,7 @@
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
-  primitives: "68",
+  primitives: "64",
   /**
    * Numbered records in `decisions/`, README excluded.
    *
@@ -33,7 +33,7 @@ export const FACTS = {
    * that branch is open and green. If it merges first, this line will not exist
    * to conflict with; if this merges first, resolve in favour of #174.
    */
-  decisions: "95",
+  decisions: "100",
   /** Delta operations. The whole vocabulary of structural change. */
   operations: "4",
 } as const

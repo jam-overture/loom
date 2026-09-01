@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="960" height="540" fill="#ffffff"/>
+  <rect x="0" y="0" width="960" height="6" fill="#b42318"/>
+
+  <text x="48" y="62" font-size="25" font-weight="700" fill="#101828">Four values that begin with a slash</text>
+  <text x="48" y="92" font-size="15.5" fill="#475467">0069 proposes the rule &#8220;begins with <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">/</tspan>, and does not begin with <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">//</tspan>&#8221;, and calls that</text>
+  <text x="48" y="114" font-size="15.5" fill="#475467">&#8220;the whole of the care needed&#8221;. Here is that rule beside the URL parser.</text>
+
+  <line x1="48" y1="146" x2="912" y2="146" stroke="#d0d5dd" stroke-width="1"/>
+  <text x="48" y="172" font-size="12.5" font-weight="600" fill="#667085" letter-spacing="0.7">THE VALUE IN THE TREE</text>
+  <text x="424" y="172" font-size="12.5" font-weight="600" fill="#667085" letter-spacing="0.7">0069&#8217;S RULE</text>
+  <text x="632" y="172" font-size="12.5" font-weight="600" fill="#667085" letter-spacing="0.7">WHERE A BROWSER GOES</text>
+  <line x1="48" y1="188" x2="912" y2="188" stroke="#d0d5dd" stroke-width="1"/>
+
+  <!-- row 1 : correct -->
+  <text x="48" y="222" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">/pricing</text>
+  <text x="424" y="222" font-size="15" fill="#067647">accepted</text>
+  <text x="632" y="222" font-size="15" fill="#344054">its own origin</text>
+  <text x="880" y="222" font-size="17" fill="#067647">&#10003;</text>
+
+  <line x1="48" y1="242" x2="912" y2="242" stroke="#eaecf0" stroke-width="1"/>
+
+  <!-- row 2 : correct -->
+  <text x="48" y="276" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">//evil.example</text>
+  <text x="424" y="276" font-size="15" fill="#b42318">refused</text>
+  <text x="632" y="276" font-size="15" fill="#344054">evil.example</text>
+  <text x="880" y="276" font-size="17" fill="#067647">&#10003;</text>
+
+  <line x1="48" y1="296" x2="912" y2="296" stroke="#eaecf0" stroke-width="1"/>
+
+  <!-- the three bypasses -->
+  <rect x="36" y="304" width="888" height="126" rx="8" fill="#fef3f2"/>
+  <rect x="36" y="304" width="4" height="126" fill="#b42318"/>
+
+  <text x="48" y="336" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">/\evil.example</text>
+  <text x="424" y="336" font-size="15" font-weight="700" fill="#b42318">accepted</text>
+  <text x="632" y="336" font-size="15" fill="#344054">evil.example</text>
+  <text x="880" y="336" font-size="17" fill="#b42318">&#10007;</text>
+
+  <text x="48" y="376" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">/<tspan fill="#b42318">&#8677;</tspan>/evil.example</text>
+  <text x="424" y="376" font-size="15" font-weight="700" fill="#b42318">accepted</text>
+  <text x="632" y="376" font-size="15" fill="#344054">evil.example</text>
+  <text x="880" y="376" font-size="17" fill="#b42318">&#10007;</text>
+
+  <text x="48" y="416" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#101828">/<tspan fill="#b42318">&#9166;</tspan>/evil.example</text>
+  <text x="424" y="416" font-size="15" font-weight="700" fill="#b42318">accepted</text>
+  <text x="632" y="416" font-size="15" fill="#344054">evil.example</text>
+  <text x="880" y="416" font-size="17" fill="#b42318">&#10007;</text>
+
+  <text x="48" y="466" font-size="15" fill="#475467">A backslash is a slash under a special scheme, and tabs and newlines are stripped <tspan font-style="italic">before</tspan> the parser</text>
+  <text x="48" y="488" font-size="15" fill="#475467">decides where the authority begins. The fix is not a longer pattern &#8212; it is to stop matching and resolve.</text>
+</svg>

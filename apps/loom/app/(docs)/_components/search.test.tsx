@@ -29,6 +29,7 @@ const index: SearchIndex = {
       context: "The runtime",
       kind: "page",
       summary: "Yes, ask a person, or no.",
+      body: "",
     },
     {
       href: "/docs/the-runtime/what-the-gate-decides#the-two-questions-it-asks",
@@ -36,6 +37,7 @@ const index: SearchIndex = {
       context: "What the Gate decides",
       kind: "heading",
       summary: "",
+      body: "How much damage could this do, and could it be taken back afterwards.",
     },
     {
       href: "/docs/getting-started/your-first-tree#a-tree-is-more-than-its-root",
@@ -43,6 +45,7 @@ const index: SearchIndex = {
       context: "Your first tree",
       kind: "heading",
       summary: "",
+      body: "",
     },
     {
       href: "/docs/api-reference/runtime#s-evaluateGate",
@@ -50,6 +53,7 @@ const index: SearchIndex = {
       context: "@loom/runtime",
       kind: "export",
       summary: "",
+      body: "",
     },
   ],
 }
@@ -119,7 +123,7 @@ describe("what a reader sees after typing", () => {
     expect(screen.getByRole("listbox").textContent).toContain("What the Gate decides")
   })
 
-  it("says so plainly when the site has nothing", async () => {
+  it("says so plainly when the site has nothing, and says how much it looked at", async () => {
     render(<Search />)
 
     await open()
@@ -127,6 +131,41 @@ describe("what a reader sees after typing", () => {
 
     expect(screen.queryByRole("listbox")).toBeNull()
     expect(screen.getByText(/nothing on the site says/i)).toBeTruthy()
+    /*
+     * The claim above is only worth making beside the limit under it. The box
+     * reads the prose but not the fenced code, and a reader looking at a word
+     * they can see on the page has no other way to learn that.
+     */
+    expect(screen.getByText(/code blocks are not/i)).toBeTruthy()
+  })
+
+  /**
+   * A row in the list because of a word in its paragraph, showing the paragraph
+   * — without which the reader is handed a heading that does not contain what
+   * they typed and has to take the site's word for it.
+   */
+  it("shows the sentence a result was found by, with the typed word marked", async () => {
+    render(<Search />)
+
+    await open()
+    await type("damage")
+
+    const row = screen.getByRole("option", { name: /two questions/i })
+
+    expect(row.textContent).toContain("How much damage could this do")
+    expect(row.querySelector("mark")?.textContent).toBe("damage")
+  })
+
+  it("does not show a sentence when the title already said it", async () => {
+    render(<Search />)
+
+    await open()
+    await type("questions")
+
+    const row = screen.getByRole("option", { name: /two questions/i })
+
+    expect(row.querySelector("mark")).toBeNull()
+    expect(row.textContent).not.toContain("could be taken back")
   })
 
   it("says the index failed rather than showing an empty list", async () => {

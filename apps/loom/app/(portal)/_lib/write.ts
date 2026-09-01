@@ -1,7 +1,9 @@
 import { defaultGatePolicy, fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
+import { postgresHoldStore } from "@loom/runtime/postgres"
 import { collectTelemetry } from "@loom/runtime/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
 
+import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"
 import { portalStore } from "./store"
 import { portalTelemetry } from "./telemetry"
@@ -27,8 +29,36 @@ type Carrier = { [CARRIER_KEY]?: HoldStore }
 
 const carrier = globalThis as unknown as Carrier
 
-/** One per server process, like the store, so a hold survives the request that made it. */
-export const portalHolds: HoldStore = (carrier[CARRIER_KEY] ??= memoryHoldStore())
+/**
+ * Custody of the changes the Gate would not make alone: Postgres when one is
+ * configured, memory when not — the same choice, on the same handle, as the tree
+ * store.
+ *
+ * A `Map` keeps a hold for exactly as long as the process that made it. That is
+ * true durability under `pnpm dev` and a fiction on a serverless host, where the
+ * instance that judged a change is usually gone before the reviewer opens the
+ * queue: the confirmation arrives at an instance that has never heard of the
+ * proposal, and the reviewer is told `not-held` — whose own comment admits it
+ * means "never held, already answered, or expired" and has no fourth reading for
+ * *the machine that was holding this went away*, which is the true one.
+ *
+ * So the review queue — the one thing this portal shows that no repository, log
+ * or build output has ever seen — was empty by construction on the deployment
+ * anybody actually looks at. Filed by the framework routine on 23 August, owned
+ * here because choosing a store is a deployment decision the surface makes and
+ * not one the runtime should make for it (0088). No schema step: `db:push`
+ * already creates `loom_holds`.
+ *
+ * One consequence is worth stating rather than discovering. `release` is a take,
+ * and with Postgres behind it that is enforced by the statement rather than by
+ * the process happening to be single-threaded. Two reviewers pressing *apply* at
+ * the same moment now produce exactly one success and one `not-held`, and the
+ * loser is correct rather than faulty — which is what "Already answered" on the
+ * card is for, and why it is worded as somebody having answered rather than as
+ * something having gone wrong.
+ */
+export const portalHolds: HoldStore = (carrier[CARRIER_KEY] ??=
+  portalDatabase === undefined ? memoryHoldStore() : postgresHoldStore(portalDatabase))
 
 export type PortalWrite = {
   readonly path: WritePath

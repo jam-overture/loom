@@ -100,5 +100,15 @@ export const headingsIn = (source: string): readonly PageHeading[] => {
   return headings
 }
 
+/**
+ * A written page's source, read once.
+ *
+ * Exported because two things now read the same file — the headings here and
+ * the prose in `prose.ts` — and the index would otherwise read every page
+ * twice to answer two questions about the same text.
+ */
+export const readPageSource = (sectionSlug: string, pageSlug: string): string =>
+  readFileSync(join(docsRoot, sectionSlug, pageSlug, "page.mdx"), "utf8")
+
 export const readPageHeadings = (sectionSlug: string, pageSlug: string): readonly PageHeading[] =>
-  headingsIn(readFileSync(join(docsRoot, sectionSlug, pageSlug, "page.mdx"), "utf8"))
+  headingsIn(readPageSource(sectionSlug, pageSlug))

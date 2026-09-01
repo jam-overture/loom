@@ -31,6 +31,10 @@ import {
  * - **It says what happened.** Loading, nothing found, and could-not-load are
  *   three different sentences, because a box that shows an empty list for all
  *   three teaches a reader that the site has nothing on the subject.
+ * - **It shows the sentence it found**, where a row is in the list because of
+ *   its prose rather than its name. A heading offered for a word that is not in
+ *   the heading looks like a bug until the reader can see the words that earned
+ *   it.
  */
 
 const KIND_LABEL: Readonly<Record<SearchKind, string>> = {
@@ -99,6 +103,27 @@ const Results = ({
             <span className="text-ink-faint block truncate text-xs">
               {hit.entry.summary === "" ? hit.entry.context : `${hit.entry.context} — ${hit.entry.summary}`}
             </span>
+
+            {/*
+             * The sentence that put this row in the list, shown only when the
+             * title did not already carry the query. It is why a reader can
+             * account for a heading that does not contain the word they typed —
+             * and it wraps to two lines rather than truncating, because half a
+             * sentence answers nothing.
+             */}
+            {hit.excerpt.length > 0 && (
+              <span className="text-ink-muted mt-1 line-clamp-2 block text-xs leading-snug">
+                {hit.excerpt.map((part, at) =>
+                  part.match ? (
+                    <mark key={at} className="text-ink bg-transparent font-semibold">
+                      {part.text}
+                    </mark>
+                  ) : (
+                    <span key={at}>{part.text}</span>
+                  )
+                )}
+              </span>
+            )}
           </span>
 
           <span className="text-ink-faint shrink-0 text-[0.65rem] tracking-wide uppercase">
@@ -272,7 +297,7 @@ export const Search = () => {
                 {...(hits[active] === undefined ? {} : { "aria-activedescendant": OPTION_ID(active) })}
                 autoComplete="off"
                 spellCheck={false}
-                placeholder="Search pages, sections and exports"
+                placeholder="Search the pages, their words and every name"
                 aria-label="Search the documentation"
                 value={query}
                 onChange={(event) => {
@@ -293,9 +318,20 @@ export const Search = () => {
             )}
 
             {loading === "ready" && query !== "" && hits.length === 0 && (
-              <p className="text-ink-muted px-4 py-6 text-sm">
-                Nothing on the site says “{query}”.
-              </p>
+              <div className="px-4 py-6">
+                <p className="text-ink-muted text-sm">Nothing on the site says “{query}”.</p>
+                {/*
+                 * The sentence above is a strong claim, so the one under it says
+                 * exactly how much was looked at. It was worth writing only once
+                 * the prose was searched: before that the claim was routinely
+                 * false, and a reader who could see the words on the page had no
+                 * way to know the box had never read them.
+                 */}
+                <p className="text-ink-faint mt-1 text-xs">
+                  Every page, every section, the words in them and every published name are searched.
+                  Code blocks are not.
+                </p>
+              </div>
             )}
 
             {hits.length > 0 && (
