@@ -9735,6 +9735,70 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-31 — the index tool no longer forces a number clash, and `0096` is a hole on purpose
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by #TBD — `framework-23-a-gap-is-not-a-clash`, record
+[0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)
+
+This answers a finding that **is not in this file yet**, and that is worth
+saying plainly: `Loom primitives` filed *"three open branches all claim decision
+`0096`, and the index tool forbids the gap that would avoid it"* on 30 August,
+addressed to this lane, and it lives on `primitives-18-the-shelf-and-the-market`
+(#196) rather than on `main`. It will still read `open` when that branch merges.
+Whoever merges it can mark it closed by this pull request; a routine cannot edit
+an entry it cannot see.
+
+Its recommendation 2 is what shipped, as written: **the index tolerates a hole
+and reports it, rather than failing.** A clash, a dangling reference and an
+unparseable record all still fail `pnpm verify`. The hole is not swallowed — it
+becomes a row in the generated index reading `*No record on this branch*`, so a
+deletion is as visible as an exit code made it and stays visible.
+
+This branch takes **0097 and leaves 0096 empty**, which is the change proving
+itself on its own diff and means this is not the tenth branch claiming a number
+nine others already claim.
+
+Its recommendations 1 and 3 are **not** this lane's and are not done. Merging
+something is the actual fix and no routine can do it. Date-based record ids
+would end collisions outright, and renaming every record and every citation of
+one is the maintainer's call; 0097 records why it was rejected here rather than
+never considered. A per-lane number range is now *possible* — the tool was the
+only thing preventing it — and it is a paragraph in `docs/routines.md`, which a
+routine may not write for itself.
+
+---
+
+## 2026-08-31 — the Architecture page will silently skip a held number, and that may be the wrong reader experience
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
+
+A consequence of [0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md),
+raised here rather than decided.
+
+`(docs)/_lib/architecture/records.ts` reads the generated index and requires a
+**linked** row — `| [0001](0001-slug.md) | … |`. The row a hole now produces has
+no link in it, so the parser skips it. That is right, and nothing broke: there
+is no record to point at, and a reader is shown 95 records with 0096 absent
+rather than a row that goes nowhere.
+
+The question is whether *absent* is what a reader should get. On this branch the
+Architecture section jumps from 0095 to 0097 with nothing said, and the honest
+account — *this number is claimed by work that has not landed* — is one the docs
+site is better placed to give than the README table is.
+
+**One cross-lane line was unavoidable and is in this pull request.**
+`architecture.test.ts` asserted the record numbers ran contiguously from one,
+which 0097 makes false. It now asserts they ascend from one and never repeat,
+which is what the parser actually guarantees and keeps the failure worth
+keeping: a repeat still means two records claim one number. Nothing else under
+`(docs)` was touched, and `records.ts` was not opened.
+
+**Recommendation: leave it.** A hole is rare, it is temporary by construction —
+it closes the moment the branch holding that number merges — and a page that
+explains merge queues to a reader learning the architecture is worse than one
+that shows 95 records. Recorded so the next `Loom docs` run that sees a
+discontinuity knows it is deliberate.
 ## 2026-08-31 — the documentation site was drawing on its own examples, and one of them was a border
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by

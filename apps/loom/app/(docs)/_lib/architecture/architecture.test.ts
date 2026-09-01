@@ -21,10 +21,22 @@ describe("the decision records, read off the index", () => {
     expect(DECISION_RECORDS.length).toBeGreaterThanOrEqual(80)
   })
 
-  it("numbers them from one, with no gaps and no repeats", () => {
+  /**
+   * Ascending from one and never repeating, which is what the parser guarantees.
+   *
+   * It asserted contiguity until 0097, when a number no record claims became a
+   * reported hole rather than a failed build — so the index can now carry a row
+   * with no link in it, this parser skips it (correctly: there is no record to
+   * point at), and the sequence this section shows has a number missing from the
+   * middle. A repeat still means two records claim one number, which is the
+   * failure worth keeping.
+   */
+  it("numbers them from one and ascending, with no repeats", () => {
     const numbers = DECISION_RECORDS.map((record) => record.number)
 
-    expect(numbers).toEqual(numbers.map((_, index) => index + 1))
+    expect(numbers[0]).toBe(1)
+    expect([...new Set(numbers)]).toHaveLength(numbers.length)
+    expect(numbers).toEqual([...numbers].sort((a, b) => a - b))
   })
 
   it("points at a file that is really there", () => {
