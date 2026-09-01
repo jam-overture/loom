@@ -42,42 +42,122 @@ export type SeeItHappenContext = {
  * rather than to a diagram. `pages.test.ts` holds the count against that page,
  * so a sixth step described there and not shown here is a failing test rather
  * than a quiet inconsistency between two pages of one site.
+ *
+ * **The titles live here and nowhere else**, which is what this table is for.
+ * Until now the five were written out twice: once as the rungs below, and once
+ * as a sentence in the waiting panel promising *what you asked for, what the
+ * change turned out to be, how much of the page it moved, which of your rules
+ * allowed it, and what putting it back would restore.* Two hand-written copies
+ * of one list, in one file, either of which could be re-worded on its own — and
+ * the one that drifted would have been the sentence, because it is the one a
+ * visitor reads before there is anything to check it against.
+ *
+ * So each row carries its title and the way it reads its own line off the
+ * record. A step is added or re-worded in one place, and both states of the
+ * panel move together.
  */
+type PanelStep = {
+  readonly marker: string
+  readonly title: string
+  /** What this line says once there is something for it to say. */
+  readonly body: (record: ChangeRecord) => string
+  /** Whether this line is still ahead of the reader. Absent means it happened. */
+  readonly stateFor?: (record: ChangeRecord) => "done" | "current" | "planned"
+}
+
+export const PANEL_STEPS: readonly PanelStep[] = [
+  { marker: "1", title: "You asked for something", body: (record) => `“${record.asked}”` },
+  { marker: "2", title: "The change was worked out", body: (record) => record.proposed },
+  {
+    marker: "3",
+    title: "The change was measured",
+    body: (record) => `${record.measured} ${record.weighed}`,
+  },
+  { marker: "4", title: "Your rules decided", body: (record) => record.verdictLine },
+  {
+    marker: "5",
+    title: "Putting it back",
+    body: (record) => record.undo,
+    stateFor: (record) => (record.landed ? "current" : "planned"),
+  },
+]
+
 const step = (
   ids: IdFactory,
   marker: string,
   title: string,
-  body: string,
-  state: "done" | "current" | "planned"
+  state: "done" | "current" | "planned",
+  body?: string
 ): LoomNode =>
   buildElement(ids, {
     type: "loom.milestone",
-    props: { marker, title, body, state },
+    props: { marker, title, state, ...(body === undefined ? {} : { body }) },
   })
 
-const stepsOf = (ids: IdFactory, record: ChangeRecord): readonly LoomNode[] => [
-  step(ids, "1", "You asked for something", `“${record.asked}”`, "done"),
-  step(ids, "2", "The change was worked out", record.proposed, "done"),
-  step(ids, "3", "The change was measured", `${record.measured} ${record.weighed}`, "done"),
-  step(ids, "4", "Your rules decided", record.verdictLine, "done"),
-  step(ids, "5", "Putting it back", record.undo, record.landed ? "current" : "planned"),
-]
+const rail = (
+  ids: IdFactory,
+  density: "tight" | "loose",
+  steps: readonly LoomNode[]
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.milestone-list",
+    props: { rail: "line", density },
+    children: [...steps],
+  })
+
+const stepsOf = (ids: IdFactory, record: ChangeRecord): readonly LoomNode[] =>
+  PANEL_STEPS.map((entry) =>
+    step(ids, entry.marker, entry.title, entry.stateFor?.(record) ?? "done", entry.body(record))
+  )
 
 /**
- * What the panel says before the visitor has asked for anything.
+ * What the panel says before the visitor has asked for anything — which is the
+ * state every visitor, every crawler and every share preview meets first.
  *
- * It lists what will appear rather than inviting a click twice. The band's own
- * heading has already asked; this is the promise the panel is about to keep, and
- * a visitor who reads it and clicks nothing has still learned what the product
- * does that others do not.
+ * It used to be a heading and a sentence inside a card built for five steps of
+ * prose, so the most important band on the site opened as a bordered rectangle
+ * with two lines in it and three hundred pixels of nothing under them. The band
+ * promises *watch what happens and read what the page wrote down*, and the
+ * thing directly under that promise was an empty box.
+ *
+ * Now it is the record's own shape, unlit: the same five rungs in the same
+ * order, each one hollow and holding its title and nothing else. A visitor who
+ * clicks nothing has still been shown the five things this product writes down,
+ * which is the one thing on the site a competitor cannot copy.
+ *
+ * **It costs 121px of band**, measured at 1440 — 828 to 949 — and that is the
+ * honest price rather than the free win the first draft of this comment claimed.
+ * It buys the emptiest three hundred pixels on the site turning into the
+ * sequence the band exists to demonstrate.
+ *
+ * What it must not do is look like it has already happened. Every rung is
+ * `planned`, which renders hollow and is announced as *Planned* rather than
+ * silently; the badge says so in a word; and no rung carries a body, because a
+ * body is a fact about a change and there has not been one.
+ *
+ * **The weakest thing here is the phone, and the lane has no lever on it.**
+ * `loom.milestone` reserves `5.5rem` for its marker column at every viewport
+ * and whether or not a marker is set, so at 390px each rung gives its title
+ * 101px of the 390 and *You asked for something* wraps to three lines. Dropping
+ * the numbers reclaims none of it — the column is unconditional — and the same
+ * gutter already shapes the filled panel and the mechanism page. Filed for
+ * `Loom primitives` with the measurements; not worked around, because the
+ * workaround is a local component and this lane does not get one.
  */
 const waiting = (ids: IdFactory): readonly LoomNode[] => [
-  prose(ids, "Nothing has changed yet.", { size: "lead" }),
-  prose(
-    ids,
-    "Pick one and this panel fills in: what you asked for, what the change turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
-    { tone: "muted" }
-  ),
+  stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
+    buildElement(ids, {
+      type: "loom.badge",
+      props: { tone: "outline" },
+      children: [buildText(ids, "Nothing yet")],
+    }),
+    prose(ids, "What the page will write down", { size: "small", tone: "muted" }),
+  ]),
+  rail(ids, "tight", PANEL_STEPS.map((entry) => step(ids, entry.marker, entry.title, "planned"))),
+  prose(ids, "Pick one above and every line fills in with what actually happened.", {
+    size: "small",
+    tone: "muted",
+  }),
 ]
 
 /** The verdict as a badge, so the answer is legible before the reasoning is read. */
@@ -145,11 +225,7 @@ const panel = (ids: IdFactory, context: SeeItHappenContext): LoomNode => {
               verdictBadge(ids, record),
               prose(ids, "What the page wrote down", { size: "small", tone: "muted" }),
             ]),
-            buildElement(ids, {
-              type: "loom.milestone-list",
-              props: { rail: "line", density: "loose" },
-              children: [...stepsOf(ids, record)],
-            }),
+            rail(ids, "loose", stepsOf(ids, record)),
             /**
              * The disclosure, and it is a selling point rather than a caveat.
              * What worked this change out was the page itself, not a model — and
@@ -251,9 +327,18 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
         })
       )
     ),
+    /**
+     * The claim, without the sequence.
+     *
+     * This sentence used to walk the reader through *works out what it would
+     * take, measures it, and puts it to the rules* — a third written copy of the
+     * five steps, two inches above a panel that now shows them. What it is here
+     * to say is the part the panel cannot: that these are real requests and that
+     * the rules judging them are the site's own, not a demonstration mode.
+     */
     prose(
       ids,
-      "Each one is a real request. The page works out what it would take, measures it, and puts it to the rules this site is published under — the same way it would on a page of yours.",
+      "Each one is a real request, put to the rules this site is published under — the same way it would be on a page of yours.",
       { tone: "muted", size: "small" }
     ),
     /**

@@ -9855,6 +9855,96 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-31 — `loom.milestone` reserves 5.5rem for its marker at every viewport, and a phone has 390 of them
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+`loom.milestone` lays each row out as a three-column grid:
+
+```ts
+const MARKER_WIDTH = "5.5rem"
+gridTemplateColumns: `${MARKER_WIDTH} auto 1fr`
+```
+
+The column is **fixed, and unconditional** — the same 88px at 1440 and at 390,
+and reserved whether or not the node sets a `marker`. On a phone that is 22% of
+the viewport before any container padding is counted.
+
+**Measured**, on the front door's see-it-happen panel at a 390px viewport, in
+the production build:
+
+| | |
+| --- | --- |
+| viewport | 390px |
+| the `li` after the card's padding | 188px |
+| the marker column | **88px** |
+| the rail column and its two gaps | 40px |
+| left for the title | **101px** |
+| *You asked for something*, at 20px | **three lines** |
+
+The same gutter already shapes the filled panel and every rung on
+`/how-it-works`, both of which are on `main` today. This is not a regression
+somebody introduced; it is the ceiling on how well a rail can render on a phone.
+
+**Nothing in this lane can move it.** Dropping the numbers reclaims none of the
+88px, because the column does not depend on the prop. The one lever a consumer
+has is the container's padding, and it is not enough: `roomy` → `normal` on the
+card returns 56px, which takes the title from 101px to 116px and still wraps to
+three lines. That change was tried and reverted rather than shipped, because it
+is a design decision made to chase something it cannot reach.
+
+**Three ways out, in preference order.**
+
+1. **Let the column collapse when no row in the list sets a marker.** Cheapest,
+   and it is the case a `process-steps` rail is always in. It wants to be the
+   *list's* decision rather than each row's, so that rows still line up with each
+   other — which is the same shape as `density`, already a prop on
+   `loom.milestone-list`.
+2. **Make the width responsive**, so the marker column narrows below some
+   breakpoint. This is the general fix and the most expensive: the library has no
+   breakpoint vocabulary today, and inventing one for a marker column is the
+   wrong place to start it.
+3. **A `markers` prop on `loom.milestone-list`** — `inline` putting the marker
+   above the title in one column instead of beside it. More grammar (0014) for a
+   case the first option handles without any.
+
+Recommending the first. The primitive's own note says `marker` is optional
+because Hermes kept it free text across seven blocks; a list where nobody sets it
+paying 5.5rem for the privilege is the cost of that generosity landing on the
+consumer that needed it least.
+
+---
+
+## 2026-08-31 — `FACTS.decisions`, tenth occurrence, and `main` has now been red for four days
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an instance, not a new argument
+
+Recording the data point. Nothing here is new in shape; the 19, 21, 23, 24 and
+25 August entries have the whole of it.
+
+`FACTS.decisions` in `apps/loom/app/(marketing)/_lib/copy.ts` was `"94"` and
+`decisions/` holds 95 records. 94 → 95, by hand, for the tenth time. What the
+last four days add:
+
+- **`main` itself has been red on this one assertion since `3a57feb` on
+  27 August.** Measured this run, not inferred: 1962 passed, 1 failed. Because
+  the four surfaces are one application (0067), that is every surface red.
+- **It is the fourth consecutive marketing run** to open by changing a digit it
+  did not cause — #182, #190, #198 and this one.
+- **#174 deletes the literal**, has been green and mergeable since 27 August,
+  and is unreviewed.
+
+**This branch deliberately does not duplicate that fix.** A second, competing
+derivation of the same three numbers in the same file would put #174 into
+conflict, and a pull request that fixes this properly becoming un-mergeable is a
+worse outcome than a digit that has to be bumped once more. The recommendation is
+unchanged and is one word: **merge #174.**
+
+The wider version of it, which is not this lane's to solve and is the reason the
+digit keeps coming back: thirty pull requests are open and nothing has merged
+since 27 August. `docs/rollout.md` names review latency as the second-largest
+lever on the schedule. This is that lever, measured.
 ## 2026-08-29 — the scaffold no longer collides, and the callout describing the collision is now describing a fix
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
