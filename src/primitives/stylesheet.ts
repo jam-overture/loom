@@ -209,6 +209,28 @@ export const LIBRARY_CLASS = {
   offeringAction: "loom-offering-action",
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
+  /**
+   * A `loom.nav`. The bar itself, the box holding its disclosure control, and
+   * the menu that control opens and closes.
+   *
+   * The menu's `display` is here rather than on the element, and that is the
+   * whole reason the disclosure works at all: 0092's contract is a rule that
+   * hides the region, and an inline `display: flex` would beat it. Its
+   * alignment stays inline, because that varies by prop and nothing needs to
+   * override it.
+   *
+   * The drawer aligns its items to `flex-start` rather than stretching them,
+   * and that is a rendering decision rather than a tidiness one: the current
+   * item is marked by an underline the link paints across its own box, so a
+   * stretched row draws that rule the full width of the bar. One mark that
+   * renders as a text underline on a laptop and as a full-width rule on a
+   * phone is the same primitive saying two different things.
+   */
+  nav: "loom-nav",
+  navToggle: "loom-nav-toggle",
+  navMenu: "loom-nav-menu",
+  /** Its actions end, which takes the slack on a phone when no control was built. */
+  navActions: "loom-nav-actions",
   /** A `loom.mosaic`: one column until there is room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -550,6 +572,37 @@ details[open] > summary .loom-marker {
 }
 .loom-credential {
   position: relative;
+}
+.loom-nav-menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--loom-spacing-5);
+}
+.loom-nav-toggle {
+  display: none;
+}
+.loom-nav-toggle:empty {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .loom-nav-toggle {
+    display: block;
+    margin-inline-start: auto;
+  }
+  .loom-nav:not(:has(.loom-nav-toggle > *)) .loom-nav-actions {
+    margin-inline-start: auto;
+  }
+  .loom-nav-menu {
+    order: 1;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--loom-spacing-3);
+  }
+  .loom-nav:has(.loom-nav-toggle [data-loom-disclosed="false"]) .loom-nav-menu {
+    display: none;
+  }
 }
 .loom-mosaic {
   display: grid;

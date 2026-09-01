@@ -128,6 +128,16 @@ export const loomMarquee = definePrimitive({
      * `inert` as well as `aria-hidden`: the copy may contain links, and a
      * second unreachable tab stop for every one of them is what an
      * `aria-hidden` subtree still leaves behind.
+     *
+     * **`loom.decorative()` rather than `children`**, as of
+     * [0093](../../decisions/0093-a-decorative-copy-is-the-same-children-without-identity.md).
+     * The copy is the same nodes in the same order with the same props and no
+     * `data-loom-node` anywhere in it. Passing `children` twice put one node id
+     * on two elements, which was harmless only because a published render
+     * carries no identity at all — an accident of where this primitive is used
+     * rather than a property of it. Nothing visible changes; what changes is
+     * that the echo is now unresolvable by construction, so an editable render
+     * of a marquee cannot address the wrong copy of a node.
      */
     const echo = still
       ? null
@@ -137,7 +147,7 @@ export const loomMarquee = definePrimitive({
           style: runStyle,
           "aria-hidden": true,
           inert: true,
-          children,
+          children: loom.decorative(),
         })
 
     return createElement(
