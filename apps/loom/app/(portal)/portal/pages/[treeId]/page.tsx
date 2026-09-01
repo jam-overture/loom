@@ -5,6 +5,7 @@ import { treeIdSchema } from "@loom/runtime"
 import { renderRequest } from "@loom/runtime/react"
 import { attributeTree, treeSourceFromStore } from "@loom/runtime/store"
 
+import { PageViews } from "@/app/(portal)/_components/page-views"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { portalDecoration } from "@/app/(portal)/_lib/addressing"
@@ -130,6 +131,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
             treeId={rendered.value.tree.treeId}
             revision={rendered.value.tree.revision}
             diagnostics={rendered.value.diagnostics}
+            views={<PageViews treeId={rendered.value.tree.treeId} current="page" />}
           >
             <PreviewSurface>{rendered.value.element}</PreviewSurface>
           </PreviewFrame>
@@ -141,10 +143,6 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           />
 
           <ReviewQueue changes={changes} />
-
-          <Link href={`/portal/activity?tree=${encodeURIComponent(rendered.value.tree.treeId)}`} className="text-xs">
-            Everything ever asked of this page →
-          </Link>
         </div>
 
         <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">

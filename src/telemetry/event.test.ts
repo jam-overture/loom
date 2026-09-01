@@ -12,6 +12,7 @@ import type { TreeDelta } from "../tree/delta.js"
 
 import {
   recordOf,
+  TELEMETRY_EVENT_TYPES,
   telemetryEventSchema,
   telemetryRecordSchema,
   intentIdOf,
@@ -318,5 +319,23 @@ describe("correlation", () => {
     expect(intentIdOf(recordOf(envelopeOf({ type: "change-proposed", proposal })).event)).toBe(
       intent.intentId
     )
+  })
+})
+
+/**
+ * The list is only worth exporting if it cannot fall behind the union, and the
+ * schema is where the union is enforced — a record crossing storage is parsed by
+ * it, so a type it accepts is one the journal can hold whether or not anyone
+ * remembered to list it.
+ */
+describe("TELEMETRY_EVENT_TYPES", () => {
+  it("is every type the journal can store, in the schema's own order", () => {
+    const stored = telemetryEventSchema.options.map((option) => option.shape.type.value)
+
+    expect(TELEMETRY_EVENT_TYPES).toEqual(stored)
+  })
+
+  it("names each type once", () => {
+    expect(new Set(TELEMETRY_EVENT_TYPES).size).toBe(TELEMETRY_EVENT_TYPES.length)
   })
 })

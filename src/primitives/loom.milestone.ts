@@ -65,14 +65,6 @@ type State = NonNullable<Props["state"]>
 
 const DOT_SIZE = "0.75rem"
 
-/**
- * The marker column's floor. Set here rather than on the list because each
- * entry lays itself out — so the width has to be a constant both siblings
- * agree on rather than something the parent hands down, and a `loom.milestone`
- * that finds itself outside a list still lines up with the next one.
- */
-const MARKER_WIDTH = "5.5rem"
-
 const DOTS: Readonly<Record<State, { names: "current" | "planned" | undefined; style: CSSProperties }>> = {
   done: {
     /** The default state names nothing — see the note above about nine rows. */
@@ -164,22 +156,24 @@ export const loomMilestone = definePrimitive({
       "li",
       {
         ...loom.editable,
-        style: {
-          display: "grid",
-          /** Marker, rail, content — the rail column is the dot's width and nothing more. */
-          gridTemplateColumns: `${MARKER_WIDTH} auto 1fr`,
-          columnGap: space(3),
-          listStyle: "none",
-        },
+        /**
+         * **Its own layout is in the stylesheet, and that is load-bearing.** An
+         * inline style beats a rule, so a marker column and a rail direction
+         * written here would be unreachable from the container — and there are
+         * two containers now: a `loom.milestone-list` runs these down a rail
+         * and a `loom.milestone-row` lays the same entries across as a process
+         * band. What stays inline is everything neither arrangement varies.
+         */
+        className: LIBRARY_CLASS.milestone,
+        style: { listStyle: "none" },
       },
       libraryStylesheet(),
       createElement(
         "div",
         {
           key: "marker",
+          className: LIBRARY_CLASS.railMarker,
           style: {
-            /** Right-aligned so markers of different lengths share an edge with the rail. */
-            textAlign: "end",
             fontFamily: family("body"),
             fontSize: size(2),
             lineHeight: 1.6,
@@ -194,15 +188,20 @@ export const loomMilestone = definePrimitive({
         "div",
         {
           key: "rail",
-          style: { display: "flex", flexDirection: "column", alignItems: "center", gap: space(1) },
+          className: LIBRARY_CLASS.railTrack,
+          /**
+           * The direction is the *arrangement's* — down beside a marker on a
+           * rail, across above one in a row — so it is in the stylesheet with
+           * the rest of what a container varies.
+           */
+          style: { display: "flex", alignItems: "center", gap: space(1) },
         },
         createElement("span", {
           key: "dot",
           ...(named === undefined ? { "aria-hidden": true } : { role: "img", "aria-label": named }),
+          className: LIBRARY_CLASS.railDot,
           style: {
             ...dot.style,
-            /** Centred on the marker's first line rather than the row's box. */
-            marginBlockStart: "0.45em",
             flex: `0 0 ${DOT_SIZE}`,
             width: DOT_SIZE,
             height: DOT_SIZE,
@@ -222,7 +221,8 @@ export const loomMilestone = definePrimitive({
           key: "line",
           className: LIBRARY_CLASS.railLine,
           "aria-hidden": true,
-          style: { flex: "1 1 auto", width: "2px", background: colour("border-subtle") },
+          /** Its thickness is the arrangement's — 2px wide down a rail, 2px tall across a row. */
+          style: { background: colour("border-subtle") },
         })
       ),
       /**
