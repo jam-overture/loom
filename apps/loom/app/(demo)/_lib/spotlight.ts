@@ -49,11 +49,28 @@ export const SPOT_COLOURS: Readonly<Record<SpotTone, { readonly edge: string; re
   awaiting: { edge: "#a97b16", fill: "#f0c674", ink: "#0a0a0a" },
 }
 
+/**
+ * Whether the chip belongs on the marked band or beside it.
+ *
+ * `inside` is a mark *on a thing* — the band the chip names is the band the
+ * change is about, so the chip sits in its corner. `above` and `below` are marks
+ * on a *place*: the node the change is about is not in this tree at all, the
+ * band carrying the mark is only its neighbour, and what the chip is pointing at
+ * is the seam between them.
+ *
+ * The distinction is not decoration. A chip drawn in the corner of a band that
+ * did not change lands on that band's own words — on the specimen page it lands
+ * squarely on the second line of the testimonial — and says "something was
+ * removed here" over a sentence that is plainly still there.
+ */
+export type SpotPlacement = "inside" | "above" | "below"
+
 export type Spotlight = {
   /** A node that is in the tree on the stage, so the DOM has somewhere to draw. */
   readonly nodeId: NodeId
   readonly tone: SpotTone
   readonly label: string
+  readonly placement: SpotPlacement
 }
 
 /**
@@ -108,22 +125,53 @@ const elementInTree = (tree: LoomTree, nodeId: NodeId | undefined): LoomNode | u
 }
 
 /**
- * The node that now stands where a missing one belongs.
+ * The band beside the gap, and **which side of it the chip goes**.
  *
- * Its position first, then the last child, then nothing — a parent whose
- * children have all gone has no gap to point at, and marking the parent would
- * ring a container rather than a place.
+ * A node that is not in this tree has one thing left: a position among its
+ * parent's children. That position has a band on either side of it, and the two
+ * of them name the same seam from opposite sides — so the answer is a band to
+ * carry the mark plus the side of it the missing node's space is on. A chip put
+ * on the wrong side is pointing at a stretch of page where nothing happened, by
+ * the height of a whole band.
+ *
+ * Where there is a band on both sides there is a seam *between* them, which is
+ * space the page has already set aside and the chip can be drawn in. Where there
+ * is only one — the position is the top of the parent, or its end — there is no
+ * such space: above the first band is the edge of the stage, which cannot be
+ * scrolled to and which a clipping primitive would cut off anyway. There the
+ * chip goes back in the corner, which is imprecise and legible rather than exact
+ * and invisible.
+ *
+ * The walk is over every child rather than over the elements alone, because
+ * `index` counts a parent's children and a slot or a text node is one of them.
+ * Only an element can carry the mark, so the search steps outward from the
+ * position to the first element on each side.
  */
-const neighbourOf = (tree: LoomTree, touched: TouchedNode): LoomNode | undefined => {
+const neighbourOf = (
+  tree: LoomTree,
+  touched: TouchedNode
+): { readonly node: LoomNode; readonly placement: SpotPlacement } | undefined => {
   const parent = elementInTree(tree, touched.parentId)
   if (parent === undefined) return undefined
 
-  const siblings = childrenOf(parent).filter((child) => child.kind === "element")
-  if (siblings.length === 0) return undefined
+  const children = childrenOf(parent)
+  const at = Math.max(touched.index ?? children.length, 0)
 
-  const at = touched.index ?? siblings.length
+  const under = children.slice(at).find((child) => child.kind === "element")
+  const over = children
+    .slice(0, at)
+    .reverse()
+    .find((child) => child.kind === "element")
 
-  return siblings[Math.min(at, siblings.length - 1)]
+  if (under) return { node: under, placement: over ? "above" : "inside" }
+
+  /*
+   * Nothing stands at the position any more, so the band before it is the
+   * nearest thing to the gap and the gap is under it. A parent whose children
+   * have all gone has neither, and marking the parent would ring a container
+   * rather than a place.
+   */
+  return over ? { node: over, placement: "below" } : undefined
 }
 
 const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotlight | undefined => {
@@ -134,11 +182,20 @@ const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotligh
    * that change is the page itself turning over.
    */
   const own = touched.nodeId === tree.root.id ? undefined : elementInTree(tree, touched.nodeId)
-  const target = own ?? neighbourOf(tree, touched)
 
-  if (target === undefined || target.id === tree.root.id) return undefined
+  if (own) {
+    return { nodeId: own.id, tone, label: labelFor(touched.kind, tone, "node"), placement: "inside" }
+  }
 
-  return { nodeId: target.id, tone, label: labelFor(touched.kind, tone, own ? "node" : "near") }
+  const near = neighbourOf(tree, touched)
+  if (near === undefined || near.node.id === tree.root.id) return undefined
+
+  return {
+    nodeId: near.node.id,
+    tone,
+    label: labelFor(touched.kind, tone, "near"),
+    placement: near.placement,
+  }
 }
 
 /**
@@ -195,18 +252,56 @@ export const spotlitChange = (
 const cssString = (value: string): string => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
 
 /**
+ * Where the chip is drawn, given what it is pointing at.
+ *
+ * **A mark on a band sits wholly inside its top-right corner**, and both halves
+ * of that are corrections rather than preferences. *Inside*, because a primitive
+ * may clip its own overflow — `loom.hero` does, for its backdrop — so anything
+ * drawn outside the box is cut in half on exactly the band a visitor was just
+ * carried to. *Right*, because a band's first words are at its left: on the stat
+ * grid a left chip lands on the first figure, and a mark that covers what it is
+ * pointing at has undone itself.
+ *
+ * **A mark on a gap sits in the gap**, outside the neighbour's box, which is the
+ * same rule read against a different target: the thing being pointed at is the
+ * empty space where a band was or would be, and the corner of the band beside it
+ * is the one place in reach that is *not* empty. On the specimen page the
+ * inside-corner version landed on the second line of the testimonial and said
+ * "Something was removed here" over a sentence still plainly there.
+ *
+ * The gap is free by construction — a band left it, or a band is about to fill
+ * it — so nothing is covered, and `margin` keeps the chip clear of the ring
+ * rather than `inset` alone, so the two never touch at any zoom.
+ */
+const chipPosition = (placement: SpotPlacement): string => {
+  switch (placement) {
+    case "inside":
+      return "inset: 6px 6px auto auto;\n  margin: 0;"
+    case "above":
+      return "inset: auto 6px 100% auto;\n  margin: 0 0 5px 0;"
+    case "below":
+      return "inset: 100% 6px auto auto;\n  margin: 5px 0 0 0;"
+  }
+}
+
+/**
+ * A band carrying a chip in the gap *below* it overlaps the band that follows,
+ * which paints later and would cover the chip if it has a ground of its own.
+ * Raising the marked band one step fixes the order without moving anything: it
+ * is already `position: relative` for the chip's sake, and a page whose bands do
+ * not overlap cannot tell the difference.
+ *
+ * Only where it is needed. A chip in the gap *above* overlaps the band before
+ * it, which has already painted.
+ */
+const stackingFor = (placement: SpotPlacement): string =>
+  placement === "below" ? "\n  z-index: 1;" : ""
+
+/**
  * The mark, as rules.
  *
  * `outline` rather than `border`, because an outline takes no space and a border
  * would move the page it is describing.
- *
- * **The chip sits wholly inside the band's top-right corner** rather than above it
- * or straddling the edge, and both halves of that are corrections rather than
- * preferences. *Inside*, because a primitive may clip its own overflow —
- * `loom.hero` does, for its backdrop — so anything drawn outside the box is cut
- * in half on exactly the band a visitor was just carried to. *Right*, because a
- * band's first words are at its left: on the stat grid a left chip lands on the
- * first figure, and a mark that covers what it is pointing at has undone itself.
  *
  * It names its own font, because it is Loom speaking inside a page wearing
  * somebody else's typeface.
@@ -223,15 +318,14 @@ ${selector} {
   outline: 2px solid ${colour.edge};
   outline-offset: -1px;
   border-radius: 4px;
-  scroll-margin: 4rem;
+  scroll-margin: 4rem;${stackingFor(spot.placement)}
 }
 ${selector}::after {
   content: ${cssString(spot.label)};
   position: absolute;
-  inset: 6px 6px auto auto;
+  ${chipPosition(spot.placement)}
   transform: none;
   z-index: 5;
-  margin: 0;
   padding: 4px 8px;
   border-radius: 4px;
   background: ${colour.fill};

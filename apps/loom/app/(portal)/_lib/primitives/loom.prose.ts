@@ -16,7 +16,7 @@ const TONES = { normal: "text-ink", muted: "text-ink-muted" } as const
 
 export const loomProse = definePrimitive({
   type: "loom.prose",
-  description: "A paragraph of text",
+  description: "A paragraph of text.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>

@@ -34,7 +34,25 @@ const findCourseRoot = (start: string): string => {
   }
 }
 
-/** The repository's `lessons/` directory, resolved once. */
-export const COURSE_DIR = join(findCourseRoot(process.cwd()), "lessons")
+/** The checkout this surface is being built from, resolved once. */
+export const REPOSITORY_ROOT = findCourseRoot(process.cwd())
+
+/** The repository's `lessons/` directory. */
+export const COURSE_DIR = join(REPOSITORY_ROOT, "lessons")
+
+/**
+ * The runtime's source, which the exercises are written against.
+ *
+ * Reading `src/` from here is the same move `lessons/` already is, and it is
+ * worth being explicit about why it is a read and only a read. An exercise says
+ * `import { applyDelta } from "./tree/apply.js"` because the reader is told to
+ * paste it into `src/scratch.test.ts`; those specifiers name files in this
+ * checkout and resolve nowhere else. `@loom/runtime` cannot stand in for them —
+ * the single most-used import in the course is `./testing/fixtures.js`, and
+ * `src/testing/**` is excluded from the published build on purpose. So the
+ * runner reads the files the reader would have imported, which is also the only
+ * version of this that cannot drift.
+ */
+export const RUNTIME_SRC = join(REPOSITORY_ROOT, "src")
 
 export const readCourseFile = (name: string): string => readFileSync(join(COURSE_DIR, name), "utf8")

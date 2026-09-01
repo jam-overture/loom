@@ -7,7 +7,7 @@ import { PART_LESSONS } from "../../_lib/syllabus"
 import * as style from "../../_components/style"
 
 /**
- * The queue: twenty sets, and which of them is today's.
+ * The queue: twenty-two sets, and which of them is today's.
  *
  * The schedule in the repository is the source for every question here. What
  * this page adds is the part of it that a file cannot hold — a date per set,
