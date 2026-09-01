@@ -9726,6 +9726,118 @@ it is bound by, which is the rule that file states about itself.
 
 ---
 
+## 2026-08-29 — `loom init` scaffolds a primitive the starter library already registers, and Getting started walks a stranger straight into it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/cli/`) ·
+**Status:** open — documented on the page rather than worked around
+
+`loom init` writes one starter primitive and its type is **`loom.page`**.
+`@loom/runtime/primitives` also registers a `loom.page` — it is the primitive
+that mounts a theme, and every example on the documentation site is rooted at
+it. They are two different components with one name.
+
+`createPrimitiveRegistry` refuses that pair rather than letting one win
+(`duplicate-primitive-type`, `src/sdk/registry.ts`), which is the right
+behaviour and is not the finding. The finding is the **order a stranger meets
+them in**, which is now the site's own reading order:
+
+1. *Installation* — install the package.
+2. *Scaffolding a project* — run `loom init`; you now own a `loom.page`.
+3. *Rendering a tree* — build a registry with `createStarterPrimitiveRegistry()`.
+
+Follow those three pages and combine what each one gave you, and the registry
+you build is refused. Nothing on the path warns you, because until this run
+there was no page between 1 and 3 that mentioned the scaffold at all. The new
+page carries a callout saying it plainly, which is documenting what is true
+rather than fixing it — the type the CLI writes is `src/cli/plan.ts`'s
+`STARTER_TYPE` and that file is not this lane's.
+
+**Why it is worth a change rather than only a callout.** The exit condition for
+§4c is that a stranger can install Loom, register a primitive and get a proposal
+accepted working only from the site. This is the one collision on that exact
+path, it appears at first contact, and the error a reader gets names a type they
+did not choose to conflict with.
+
+**Two shapes that would close it, and I prefer the first.** Scaffold a type
+outside the `loom.` namespace — `app.page` is the obvious candidate and reads as
+*yours* rather than as the framework's, which is also the lesson the file is
+there to teach. Or leave the type and have the scaffold's comment say that it
+shadows a starter primitive and that a host registering both must drop one. The
+first costs one string in `plan.ts` and one expectation in `templates.test.ts`;
+the second leaves the collision in place and asks every reader to notice a
+comment.
+
+Nothing is asked of this lane beyond the callout, which stays correct either
+way and should be deleted by whoever changes the type.
+
+---
+
+## 2026-08-29 — a browser may break a line after a hyphen, and `run loom --help` wrapped as `run loom -` / `-help`
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+this pull request in `(docs)`, recorded because three other surfaces print flags
+
+The refusals table on *Scaffolding a project* quotes what the CLI prints to
+stderr, verbatim, in a narrow column. Two of those sentences end in
+`run loom --help`, and the first screenshot of the table showed
+
+```
+"build" is not a loom command — run loom -
+--help
+```
+
+That is not a wrapping bug in anything. Line breaking is **allowed after a
+hyphen**, so a browser may split `--help` after its first character, and none of
+`whitespace`, `overflow-wrap` or `hyphens` prevents it — they govern spaces,
+long words and hyphen *insertion* respectively, not a hyphen that is already
+there.
+
+It matters more than it looks because the column's whole job is to quote a
+command exactly. A reader who copies what they see types a flag that does not
+exist, and the page has taught them something false about the tool.
+
+**The fix, which any lane can copy:** render the sentence as one
+`whitespace-nowrap` span per word with the separating spaces left *outside* the
+spans, as ordinary text nodes. No word can be cut; lines still wrap between
+words. Putting the space inside the span looks equivalent and is not — it
+removes the only break opportunity and the sentence stops wrapping at all.
+
+Recorded here rather than kept local because marketing, the portal and the demo
+all print `--flag`-shaped text, and this is invisible to every test: the DOM is
+correct, the string is correct, and only a screenshot at a real width shows it.
+Found by looking at the dark-mode screenshot — one more for the tally the
+25 August entry put at nine across six runs, and the same lesson each time.
+
+---
+
+## 2026-08-29 — `main` has been red for three days, and it is now measured rather than inferred
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the seventh entry about this literal and the first with a
+clean-checkout measurement
+
+`pnpm verify` on **`main` itself**, with this branch stashed and nothing of mine
+on disk: `@loom/runtime` 111 files / 1741 tests green, `@loom/app`
+**1 failed | 1962 passed (1963)** — `app/(marketing)/_lib/facts.test.ts > counts
+the decision records`, expected `95`, got `94`. `decisions/` holds 95 numbered
+records and `FACTS.decisions` is a hand-written `"94"`.
+
+So the merge gate for all four surfaces has been red since the ninety-fifth
+record landed, and every branch cut from `main` since inherits it. This is the
+**fourth consecutive documentation run** to open a pull request whose only red
+check is this one, and the third to explain in a comment that it is not the
+branch's.
+
+**Not ported, deliberately, for the reason the last two runs gave.**
+`(marketing)/_lib/copy.ts` is not this lane's file, and the fix already exists
+twice in the lane that owns it — **#182** bumps the literal, **#174** deletes it
+and derives the number from the directory. A third copy of a one-line bump
+conflicts with both.
+
+The only thing this entry adds is the measurement, because "it is main's" has so
+far been an inference from a diff and is now a number from a clean checkout.
+**Merging #174 turns every open branch green and is the one that stops this
+recurring**; #182 turns them green until the ninety-sixth record.
 ## 2026-08-29 — a tree has one projection, and a share card needs a second
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open

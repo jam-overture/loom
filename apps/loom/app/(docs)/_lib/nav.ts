@@ -115,6 +115,12 @@ const orderedSections: readonly DocsSection[] = [
         summary: "Install the runtime and find your way around its ten entry points.",
       },
       {
+        slug: "scaffolding-a-project",
+        title: "Scaffolding a project",
+        summary:
+          "One command writes a primitive of your own, a registry that regenerates itself, and the test that catches the one failure nothing else reports.",
+      },
+      {
         slug: "your-first-tree",
         title: "Your first tree",
         summary: "Build a page as data — elements, text and props — with the builders that cannot produce an invalid tree.",
