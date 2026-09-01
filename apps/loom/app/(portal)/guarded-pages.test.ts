@@ -27,17 +27,18 @@ const APP = join(process.cwd(), "app", "(portal)")
  * one, and `/portal` only redirects — it renders nothing and reads nothing, so
  * an actor would gate a page that has no content to protect.
  *
- * The other four are redirects, and they are here for `/portal`'s reason
+ * The other five are redirects, and they are here for `/portal`'s reason
  * exactly: each renders nothing and reads nothing, so an actor would gate a page
  * with no content to protect.
  *
  * `/portal/demo` is where the demo lived until it moved to a public `/demo` of
- * its own. `/portal/trees`, `/portal/calibration` and `/portal/audit` are the old
- * names of routes renamed into a person's words — `/portal/pages`,
- * `/portal/trust` and `/portal/checkup` — each kept alive as a 308 so a bookmark
- * or a link written in a report still lands somewhere.
+ * its own. `/portal/trees`, `/portal/calibration`, `/portal/audit` and
+ * `/portal/primitives` are the old names of routes renamed into a person's
+ * words — `/portal/pages`, `/portal/trust`, `/portal/checkup` and
+ * `/portal/pieces` — each kept alive as a 308 so a bookmark or a link written in
+ * a report still lands somewhere.
  *
- * The proxy still covers all four, since all are under `/portal`. That matters
+ * The proxy still covers all five, since all are under `/portal`. That matters
  * for the demo's: a signed-out visitor following an old link is forwarded to
  * `/demo` rather than sent to sign in for a page that needs no account.
  *
@@ -52,6 +53,7 @@ const UNGUARDED_BY_DESIGN: readonly string[] = [
   "portal/trees/[[...rest]]/page.tsx",
   "portal/calibration/[[...rest]]/page.tsx",
   "portal/audit/[[...rest]]/page.tsx",
+  "portal/primitives/[[...rest]]/page.tsx",
 ]
 
 const pagesUnder = (directory: string, prefix = ""): readonly string[] =>
@@ -79,12 +81,13 @@ describe("every page", () => {
   })
 
   /** The exemptions are a list someone can append to, so they are named. */
-  it("exempts only the sign-in page and the five redirects", () => {
+  it("exempts only the sign-in page and the six redirects", () => {
     expect([...UNGUARDED_BY_DESIGN].sort()).toEqual([
       "portal/audit/[[...rest]]/page.tsx",
       "portal/calibration/[[...rest]]/page.tsx",
       "portal/demo/page.tsx",
       "portal/page.tsx",
+      "portal/primitives/[[...rest]]/page.tsx",
       "portal/sign-in/page.tsx",
       "portal/trees/[[...rest]]/page.tsx",
     ])

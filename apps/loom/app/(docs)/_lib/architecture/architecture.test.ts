@@ -96,14 +96,23 @@ describe("the course, read off its syllabus", () => {
     }
   })
 
-  it("gives an unwritten lesson a title and no link, rather than a link that 404s", () => {
-    const unwritten = COURSE.filter((lesson) => lesson.file === undefined)
+  /**
+   * Lesson 17 completed the syllabus, so the unwritten half of this is empty
+   * against the live file and would pass vacuously on its own. Both halves are
+   * asserted instead: a lesson with a file gets a link, one without gets a
+   * title and no link. Whichever way the README moves, one of the two branches
+   * is doing work. The unwritten shape is also pinned against a fixture in
+   * "takes the third column", below.
+   */
+  it("links a written lesson and gives an unwritten one a title, never a link that 404s", () => {
+    for (const lesson of COURSE) {
+      if (lesson.file === undefined) {
+        expect(lesson.href, `lesson ${lesson.number}`).toBeUndefined()
+        expect(lesson.title.length, `lesson ${lesson.number}`).toBeGreaterThan(3)
+        continue
+      }
 
-    expect(unwritten.length).toBeGreaterThan(0)
-
-    for (const lesson of unwritten) {
-      expect(lesson.href, `lesson ${lesson.number}`).toBeUndefined()
-      expect(lesson.title.length, `lesson ${lesson.number}`).toBeGreaterThan(3)
+      expect(lesson.href, `lesson ${lesson.number}`).toBeDefined()
     }
   })
 
