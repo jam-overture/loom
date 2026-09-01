@@ -33,7 +33,7 @@ describe("the review queue", () => {
     const { container } = render(<Queue sets={SETS} parts={PARTS} />)
 
     expect(container.textContent).toContain("Waiting on a lesson (3)")
-    expect(container.textContent).toContain("Nothing is due today")
+    expect(container.textContent).toContain("No set is due today")
     expect(container.textContent).toContain("when lesson 01 is done")
   })
 

@@ -9,11 +9,15 @@
  *
  * **Three kinds of thing are findable, and nothing else is.** A page, a heading
  * on a page, and a published export. That is the site's own table of contents
- * plus the runtime's own surface — which is to say, everything this site
- * already states somewhere else. No prose is indexed. Searching the body text
- * would find more and would mean shipping the site's words to the browser a
- * second time, so it is a decision to be taken on purpose rather than a line to
- * slip in; it is filed rather than done.
+ * plus the runtime's own surface.
+ *
+ * Each of those entries also carries **the prose it sits above** (`body`), which
+ * is the decision this file used to say was filed rather than taken. Taking it
+ * costs what it was always going to cost — the site's words are shipped to the
+ * browser a second time — and `payload.test.ts` is what keeps that cost a number
+ * somebody chose rather than one that drifted. What it buys is that a reader
+ * searching for a word the site plainly uses stops being told the site has never
+ * heard of it.
  */
 
 export type SearchKind = "page" | "heading" | "export"
@@ -32,6 +36,16 @@ export type SearchEntry = {
   readonly kind: SearchKind
   /** One sentence, where the site already has one written. Often empty. */
   readonly summary: string
+  /**
+   * The words under this entry on the page — the prose of its section, stripped
+   * of code and of markup (`prose.ts`). Empty for an export, whose words are
+   * the signature its author wrote and live on the reference page itself.
+   *
+   * This is the field that lets a reader find a sentence rather than a heading.
+   * It is scored below every other field and shown only as the excerpt that
+   * explains why a result is in the list, never as the result's own title.
+   */
+  readonly body: string
 }
 
 export type SearchIndex = {
@@ -63,6 +77,7 @@ const isEntry = (value: unknown): value is SearchEntry =>
   typeof value.title === "string" &&
   typeof value.context === "string" &&
   typeof value.summary === "string" &&
+  typeof value.body === "string" &&
   KINDS.includes(value.kind as SearchKind)
 
 /**

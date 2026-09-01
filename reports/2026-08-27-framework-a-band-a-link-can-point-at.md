@@ -59,7 +59,7 @@ primitive's own root element beside the attributes that make it editable:
 ```
 
 The finding recommended an `anchor` **prop** on the three band primitives, and
-[0096](../decisions/0096-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md)
+[0096](../decisions/0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md)
 declined it. The reason is the picture at the top of this report, and it is the
 part worth thirty seconds: **two of the three things the finding asked to have
 decided are things a prop schema structurally cannot do.**

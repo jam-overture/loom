@@ -48,9 +48,16 @@ hand — it is rebuilt from the `**Status:**` and `**Section:**` lines of the
 files themselves, and an edit here is overwritten on the next run.
 
 `pnpm verify` fails if the committed table has drifted, if two records claim the
-same number, if a number is missing, or if a status names a record that does not
-exist. That last set is not hypothetical: two concurrent sessions each wrote an
-`0032` on the same day, and nothing noticed until their branches met.
+same number, or if a status names a record that does not exist. That set is not
+hypothetical: two concurrent sessions each wrote an `0032` on the same day, and
+nothing noticed until their branches met.
+
+A number that no record claims is **reported and does not fail**
+([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)). It
+appears in the table below as `*No record on this branch*`, which is what a hole
+looks like when it is stated rather than stopped for — either a record was
+deleted, which the process forbids, or the number is claimed on a branch that
+has not merged, which is ordinary. Whichever branch lands first fills the row.
 
 Everything above this line is prose a person wrote, and stays that way.
 
@@ -153,4 +160,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0093](0093-a-decorative-copy-is-the-same-children-without-identity.md) | A decorative copy is the same children without identity | Accepted | §4b |
 | [0094](0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) | A card's prose is a child when the card has a flow, and a prop when it does not | Accepted | §4b |
 | [0095](0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md) | A frame carries its URL, and the deployment carries the origins | Accepted | §3, §4b |
-| [0096](0096-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md) | An anchor is a reserved key the runtime checks and a primitive places | Accepted | §4b |
+| [0096](0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md) | A behaviour publishes a value on the element the primitive placed it in | Accepted | §4b |
+| [0096](0096-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
+| [0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md) | A hole in the decision numbering is reported, and a clash is fatal | Accepted | §1 (process) |
+| [0098](0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md) | An anchor is a reserved key the runtime checks and a primitive places | Accepted | §4b |

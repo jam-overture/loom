@@ -1,4 +1,4 @@
-# 0096. An anchor is a reserved key the runtime checks and a primitive places
+# 0098. An anchor is a reserved key the runtime checks and a primitive places
 
 **Status:** Accepted
 **Date:** 2026-08-27

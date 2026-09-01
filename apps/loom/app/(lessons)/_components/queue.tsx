@@ -3,7 +3,9 @@
 import Link from "next/link"
 
 import { calibrationOf } from "../_lib/calibration"
+import { correctionQueue, dueCorrections } from "../_lib/corrections"
 import { dueNow, queueFor, type PartLessons, type QueueEntry, type ScheduledSet } from "../_lib/queue"
+import { CorrectionsPanel } from "./corrections"
 import * as style from "./style"
 import { today, useProgress } from "./store"
 
@@ -71,13 +73,17 @@ export const Queue = ({ sets, parts }: QueueProps) => {
   const entries = queueFor(sets, progress, parts, today())
   const calibration = calibrationOf(progress)
   const [next, ...backlog] = dueNow(entries)
+  const corrections = dueCorrections(correctionQueue(progress, today()))
 
   return (
     <div style={style.column(6)}>
       {next === undefined ? (
         <p style={style.note}>
-          Nothing is due today. That is the schedule working, not the schedule empty — a set you do
+          No set is due today. That is the schedule working, not the schedule empty — a set you do
           early is a set you remember instead of retrieve.
+          {corrections.length > 0
+            ? " Questions you missed are a separate queue and one of them is due; it is below."
+            : ""}
         </p>
       ) : (
         <section
@@ -101,6 +107,15 @@ export const Queue = ({ sets, parts }: QueueProps) => {
           </p>
         </section>
       )}
+
+      {/*
+        * The other queue, and it is deliberately a separate one. A set comes
+        * round once and is then behind you; a question you missed comes round
+        * until you have got it three times. Folding the two together would make
+        * the second look like a backlog of the first — something to clear —
+        * when it is the opposite: the list that is supposed to keep coming back.
+        */}
+      <CorrectionsPanel />
 
       {/*
         * Everything else that is late is listed, and listed second. A queue that
@@ -158,7 +173,7 @@ export const Queue = ({ sets, parts }: QueueProps) => {
               : `— ${calibration.confidentAndWrong
                   .slice(0, 6)
                   .map((miss) => `${miss.set.replace("set-", "set ").toUpperCase()} q${miss.question}`)
-                  .join(", ")}. Re-answer these from memory rather than rereading.`}
+                  .join(", ")}. These are first in the corrections queue, and a later go at one does not remove it from this list — being sure and wrong happened.`}
           </p>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, ...style.column(1) }}>
             {calibration.bands
@@ -182,14 +197,23 @@ export const DueSummary = ({ sets, parts }: QueueProps) => {
   if (!ready) return <p style={style.note}>&nbsp;</p>
 
   const due = dueNow(queueFor(sets, progress, parts, today()))
+  const corrections = dueCorrections(correctionQueue(progress, today()))
+
+  const setsLine =
+    due.length === 0
+      ? "No set is due for review today. "
+      : `Due for review: Set ${due[0]?.set.letter}${
+          due.length > 1 ? `, and ${due.length - 1} more behind it` : ""
+        }. `
 
   return (
     <p style={style.note}>
-      {due.length === 0
-        ? "Nothing is due for review today. "
-        : `Due for review: Set ${due[0]?.set.letter}${
-            due.length > 1 ? `, and ${due.length - 1} more behind it` : ""
-          }. `}
+      {setsLine}
+      {corrections.length > 0
+        ? `${corrections.length} question${
+            corrections.length === 1 ? "" : "s"
+          } you missed ${corrections.length === 1 ? "has" : "have"} come back. `
+        : ""}
       <Link href="/lessons/review" style={{ color: style.highlight }}>
         The review queue
       </Link>

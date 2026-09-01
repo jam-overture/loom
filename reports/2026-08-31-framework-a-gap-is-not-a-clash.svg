@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 600" width="920" height="600" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="600" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">Two ways to arrive at a number, and one of them cost nine branches</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Six lanes branch off <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">main</tspan>. Each reads the same directory, computes the same next free number, and cannot see the others.</text>
+
+  <!-- ================= BEFORE ================= -->
+  <text x="40" y="120" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">BEFORE — A HOLE FAILED THE BUILD</text>
+
+  <rect x="40" y="134" width="400" height="196" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+
+  <text x="60" y="162" font-size="12.5" fill="#5c5751">A run sees <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">0096</tspan> taken on another branch.</text>
+
+  <text x="60" y="196" font-size="12" font-weight="650" fill="#15120e">Take 0096 anyway</text>
+  <text x="60" y="214" font-size="11.5" fill="#7a6f62">a clash — a rename, plus every citation of it</text>
+
+  <text x="60" y="246" font-size="12" font-weight="650" fill="#15120e">Step over it to 0097</text>
+  <text x="60" y="264" font-size="11.5" fill="#b4442e">0096 is missing — the numbers must run</text>
+  <text x="60" y="280" font-size="11.5" fill="#b4442e">unbroken from 0001 &#160;&#160;·&#160;&#160; exit 1</text>
+
+  <text x="60" y="312" font-size="12" font-weight="650" fill="#15120e">Do not write the record</text>
+  <text x="284" y="312" font-size="11.5" fill="#7a6f62">worst of the three</text>
+
+  <text x="40" y="360" font-size="12.5" fill="#5c5751">By 30 August, with nothing merged since #167:</text>
+  <text x="40" y="384" font-size="26" font-weight="650" fill="#b4442e">9</text>
+  <text x="66" y="384" font-size="13" fill="#5c5751">unmerged branches had each written an <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#15120e">0096</tspan></text>
+
+  <!-- ================= AFTER ================= -->
+  <text x="490" y="120" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">AFTER — A HOLE IS A ROW IN THE INDEX</text>
+
+  <rect x="490" y="134" width="390" height="196" rx="10" fill="#f7faf7" stroke="#d8e5d8"/>
+
+  <text x="510" y="162" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">| 0094 | A card's prose is a child…   | Accepted |</text>
+  <text x="510" y="182" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">| 0095 | A frame carries its URL…     | Accepted |</text>
+  <rect x="502" y="192" width="360" height="24" rx="5" fill="#eaf1ea"/>
+  <text x="510" y="209" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f5d3a">| 0096 | *No record on this branch*  |    —     |</text>
+  <text x="510" y="236" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#7a6f62">| 0097 | A hole is reported, a clash…  | Accepted |</text>
+
+  <text x="510" y="272" font-size="12" fill="#5c5751">The build passes. The hole is stated, permanently,</text>
+  <text x="510" y="290" font-size="12" fill="#5c5751">in the file every review of it opens — and the branch</text>
+  <text x="510" y="308" font-size="12" fill="#5c5751">holding 0096 fills the row when it lands.</text>
+
+  <!-- ================= SEVERITY TABLE ================= -->
+  <text x="490" y="360" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT STILL FAILS</text>
+
+  <line x1="490" y1="374" x2="880" y2="374" stroke="#e4ded5"/>
+  <text x="490" y="396" font-size="12.5" fill="#15120e">Two records claim one number</text>
+  <text x="800" y="396" font-size="12" font-weight="650" fill="#b4442e">blocking</text>
+  <line x1="490" y1="408" x2="880" y2="408" stroke="#f0ece6"/>
+  <text x="490" y="430" font-size="12.5" fill="#15120e">A status names a record that is not there</text>
+  <text x="800" y="430" font-size="12" font-weight="650" fill="#b4442e">blocking</text>
+  <line x1="490" y1="442" x2="880" y2="442" stroke="#f0ece6"/>
+  <text x="490" y="464" font-size="12.5" fill="#15120e">A record file does not parse</text>
+  <text x="800" y="464" font-size="12" font-weight="650" fill="#b4442e">blocking</text>
+  <line x1="490" y1="476" x2="880" y2="476" stroke="#f0ece6"/>
+  <text x="490" y="498" font-size="12.5" fill="#15120e">A number below the highest has no record</text>
+  <text x="800" y="498" font-size="12" font-weight="650" fill="#2f5d3a">reported</text>
+  <line x1="490" y1="510" x2="880" y2="510" stroke="#e4ded5"/>
+
+  <!-- ================= FOOTER ================= -->
+  <rect x="40" y="416" width="400" height="94" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="60" y="444" font-size="12.5" font-weight="650" fill="#15120e">What this does not decide</text>
+  <text x="60" y="466" font-size="11.5" fill="#5c5751">Whether lanes get number ranges, or dates instead of</text>
+  <text x="60" y="483" font-size="11.5" fill="#5c5751">a sequence. That is governance. The tool was the only</text>
+  <text x="60" y="500" font-size="11.5" fill="#5c5751">thing standing in the way of either; it no longer is.</text>
+
+  <text x="40" y="548" font-size="11.5" fill="#8a8178">0097 · 2026-08-31 · <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">framework-23-a-gap-is-not-a-clash</tspan> · tools/decisions/ · 31 tests, 7 new</text>
+  <text x="40" y="570" font-size="11.5" fill="#b4442e">main is red on FACTS.decisions, is not this branch's, and is untouched here — #174 removes it.</text>
+</svg>

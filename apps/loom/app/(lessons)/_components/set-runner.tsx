@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { sittingMisses } from "../_lib/calibration"
@@ -56,6 +57,7 @@ export const SetRunner = ({ slug, letter, questions, closing }: SetRunnerProps) 
   const answered = new Map(record.attempts.map((attempt) => [attempt.question, attempt]))
   const current = questions.find((question) => !answered.has(question.number))
   const misses = sittingMisses(slug, record.attempts)
+  const outstanding = record.attempts.filter((attempt) => attempt.grade !== "got-it")
 
   return (
     <div style={style.column(5)}>
@@ -99,10 +101,28 @@ export const SetRunner = ({ slug, letter, questions, closing }: SetRunnerProps) 
                 <strong style={{ color: style.ink }}>Confident and wrong:</strong> question
                 {misses.length === 1 ? " " : "s "}
                 {misses.map((miss) => miss.question).join(", ")}. This is the list the schedule calls
-                your real study plan. Re-answer these from memory in a day — do not reread the lesson.
+                your real study plan.
               </p>
             </div>
           )}
+
+          {/*
+            * What happens to a miss now, which is the thing this panel used to
+            * assert and nothing did. Every question graded anything but "got
+            * it" comes back — not only the confident ones, because a question
+            * you half-remembered is a question you do not have.
+            */}
+          {outstanding.length > 0 ? (
+            <p style={style.note}>
+              {outstanding.length} question{outstanding.length === 1 ? "" : "s"} from this set
+              {outstanding.length === 1 ? " is" : " are"} in{" "}
+              <Link href="/lessons/review/corrections" style={{ color: style.highlight }}>
+                corrections
+              </Link>
+              , starting tomorrow. Do not reread the lesson between now and then — look up the
+              specific point only, and let the question come to you.
+            </p>
+          ) : undefined}
 
           {closing}
 
