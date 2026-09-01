@@ -12815,3 +12815,159 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-01 — #186 was closed unmerged, and four days of `main` moved the ground under half its argument
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-12-what-allowing-it-would-do` for #186; **still open for #194, #202 and
+#209**
+
+The 28 August backlog entry names four `Loom demo` pull requests closed unmerged
+and says each lane should redo that work against current `main`. This run redid
+**#186** — *what allowing it would do, in the words on the page* — and nothing
+else, because one coherent unit is one unit.
+
+The redo is filed rather than just done, because **what it cost is the useful
+part**, and the next lane to redo one of these should expect the same shape.
+Cherry-picking `e234a63` onto `d7375ef` produced three conflicts and two of them
+were noise (`FINDINGS.md`, and the `FACTS.decisions` bump that `#174` has since
+made unnecessary). The third was not:
+
+- **`OperationEffect` gained four fields** — `op`, `into`, `before`, `from` — so
+  the branch's test fixture no longer typechecked.
+- **`ProposalEffectView` was rewritten by its owner**, and rewritten *towards the
+  same rule this unit is about*. On 28 August it read
+  `what this would change · delete · loom.stat-grid · loom.page · and 3 nodes
+  under it`. On `d7375ef` it reads **"Deletes the `loom.stat-grid`, and the 3
+  pieces inside it. Inside `loom.page`"**, with the verb list one click down
+  under *What the change record says*. `delete` is no longer a bare text node,
+  so an assertion looking for one failed.
+
+**Half of #186's premise is therefore gone, and it is worth saying so plainly
+rather than shipping the old argument.** The portal did the plain-language pass
+on its own component. What is left is the half only this lane can do, and it is
+still three things:
+
+1. **It names the thing by its type.** `loom.stat-grid` and `loom.page`, in
+   monospace, in the one sentence a stranger has to act on. The portal is right
+   to keep them — a reviewer tells one row from another by them — and a visitor
+   who has never heard of Loom cannot read either.
+2. **"the 3 pieces inside it" is a count, not the words.** The three pieces are
+   `"3,400"`, `"24"` and `"92%"`, and they are printed six inches to the left
+   inside an amber ring. A count cannot be checked against a page; a quotation
+   can.
+3. **It sat below the two buttons.** That one is this lane's own and was fixed
+   here: on `main` the order is *Apply this change* → *What this would do to
+   your page*, so a visitor reading down to the control and pressing it meets the
+   description after the press.
+
+**The lesson for the other three redos.** A closed branch is a *proposal*, not a
+patch — three of #186's four files applied unchanged and the fourth was arguing
+against a component that no longer says what it said. Read what the owning lane
+did in the meantime before rebuilding, and expect part of the case to have been
+answered by somebody else.
+
+---
+
+## 2026-09-01 — `OperationEffect.text` finds no words on a primitive that carries its content in props
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+
+`(portal)/_lib/proposal-effect.ts:169` — `textIn` walks the subtree and keeps
+only nodes whose `kind` is `"text"`. A `loom.stat-grid` carries every figure it
+prints in **props** (`value`, `label`, `caption` on each `loom.stat`), so it has
+no text nodes at all and `effect.text` comes back empty.
+
+The consequence is on your own review-queue card, not just here: a reviewer
+answering a hold on the demo's leading ask is shown *"Deletes the
+`loom.stat-grid`, and the 3 pieces inside it"* and **no `its words` line**, on a
+band that is nothing but words. Every primitive that carries content in props
+has the same hole, and the starter library has many.
+
+The mechanism is in `(demo)/_lib/plain-change.ts` on this branch if you want it,
+and it is not a straight lift — its rules are tuned for a stranger rather than a
+reviewer:
+
+- **one string per node, never all of them**, or a `loom.stat`'s three strings
+  fill the whole allowance from the first figure and report the band as *"3,400"
+  · "appointments last year" · "four clinicians, six days a week"* — one figure
+  described three ways;
+- **which props are words is `RegisteredPrimitive.choices`' answer**, not a list
+  — `tone`, `align`, `variant` are closed vocabularies their authors declared, so
+  a primitive that gains one is excluded on the next render with nothing to
+  maintain;
+- **addresses are not words** — `mailto:` and `https://` are strings a primitive
+  carries and nobody reads off a page.
+
+Not fixed here: it is your file and your reviewers. Filed originally on the
+closed #186 and re-filed because that entry never reached `main`.
+
+---
+
+## 2026-09-01 — the four portal links to `/portal/demo` are still unrepointed, and the 308 cannot go until they are
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open — a
+date on the 21 August entry, not a new argument
+
+Verified on `d7375ef`: `(portal)/portal/demo/page.tsx` is still a
+`permanentRedirect("/demo")` shim, and `DEMO_PATH`, the rail entry, the sign-in
+hero and the `/portal/pages` empty state still name the old path. Nothing is
+broken while they stay — every link lands — and the shim is a file in the
+portal's route group, so deleting it is a change this lane will make on the
+portal's word rather than guess at. Eleven days.
+
+---
+
+## 2026-09-01 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24, 25, 26 and 27 August entries
+
+Fifth consecutive run opening by establishing that its headline instruction —
+*"Two problems to fix before anything else"*, the first being the move off
+`/portal/demo` — describes this lane's first unit, landed eleven days ago.
+`docs/rollout.md:19` still points at the old path. Neither is fixable by a
+routine.
+
+The second of the two, *"it is clunky"*, is not stale and this run acted on it.
+Worth separating, because a brief that is half-stale reads as wholly stale on the
+sixth pass and the live half is the one that matters.
+
+---
+
+## 2026-09-01 — `21st.dev` blocked for the fourteenth time, and the visual standard was set by a browser instead
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — only the maintainer can widen egress
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. The brief names it as the visual
+standard and `docs/routines.md` lists it as allowed for `WebFetch`, so the two
+disagree and the second has been wrong for a fortnight.
+
+At no cost to this unit, again: what decided the amber rule's position and its
+three quoted figures was building both trees, driving them in Chromium at
+1440×900 and 390×844, and putting the two frames side by side. A reference
+gallery could not have answered where a sentence goes relative to the button it
+describes.
+
+---
+
+## 2026-09-01 — `main` is green at `d7375ef`, including the lesson-09 test filed red the same day
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom lessons` · **Status:** closed —
+observed green, filed so the next run does not budget for a repair that is done
+
+The 1 September entry *"lesson 09's preamble does not import what exercise G
+uses"* says `main` is red on one test and that fix **A** — adding `formTree` to
+the preamble fence — was deliberately not taken. On `d7375ef` it has been:
+`lessons/09-the-gate.md:524` now reads
+`import { formTree, sampleTree } from "./testing/fixtures.js"`, and
+`pnpm verify` is **exit 0** with 2519 app tests and 1860 runtime tests passing.
+
+Recorded because this lane budgeted a repair run on the strength of that entry
+and did not need one, and because the reader-facing half of the diagnosis
+survives: the instruction at `lessons/09-the-gate.md:806` now tells a reader to
+add an import the preamble already has. That is a pedagogical edit and it is
+`Loom lessons`' to make.
