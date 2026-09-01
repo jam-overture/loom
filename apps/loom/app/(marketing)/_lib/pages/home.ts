@@ -253,9 +253,21 @@ const problems = (ids: IdFactory): LoomNode =>
     ]
   )
 
-/** Numbers held against the repository by a test, rather than typed from memory. */
+/**
+ * Numbers counted from the thing they are about, rather than typed from memory.
+ *
+ * The line under the heading is a claim about this band, so it is worded to be
+ * true of all three figures rather than of the two the page works out for
+ * itself: every one of them is held against the code by a test, and the record
+ * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
+ */
 const facts = (ids: IdFactory): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: BAND.facts }, "Built in the open", [
+    prose(
+      ids,
+      "Not one of these numbers was typed from memory. Each is checked against the code it describes.",
+      { align: "center", tone: "muted", measured: true }
+    ),
     buildElement(ids, {
       type: "loom.stat-grid",
       props: { columns: "three", align: "center" },

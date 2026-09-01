@@ -1522,7 +1522,10 @@ routine's directory, and #97 reports having taken both.
 
 ## 2026-08-19 — the marketing site's checked numbers make every other lane's run go red
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-13-numbers-that-count-themselves`** — the primitive count
+is derived, the record count is a floor, and neither can be turned red by a run
+outside this lane. See the 27 August entry for what was and was not solved.
 
 Recorded here rather than left in a pull-request thread, because a merged PR's
 comments are not something the next run reads — and this one has now been hit
@@ -7223,8 +7226,9 @@ somebody else's lane.
 ## 2026-08-24 — the record-count edit, the fourth in six days
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`,
-`@jonathanbravecredit` · **Status:** open — for the count, and because the
-cheaper of the two fixes now has four data points behind it
+`@jonathanbravecredit` · **Status:** **closed by
+`marketing-13-numbers-that-count-themselves`**, with the 19 August entry it is
+an instance of — writing a record no longer touches this lane at all
 
 `FACTS.decisions` in `apps/loom/app/(marketing)/_lib/copy.ts` is the string
 `"87"`, and `facts.test.ts` checks it against the number of files in
@@ -8717,8 +8721,9 @@ only the measurement: on the front door, on a phone, there is currently none.
 ## 2026-08-25 — `FACTS` turned another lane's run red twice in one day, which is the fifth and sixth time
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`,
-`@jonathanbravecredit` · **Status:** open — dated on the 19 and 24 August
-entries rather than opened again
+`@jonathanbravecredit` · **Status:** **closed by
+`marketing-13-numbers-that-count-themselves`** — six occurrences was enough, and
+the fix turned out not to need the decision this entry was waiting on
 
 Recording instances, not re-arguing. The 19 August entry named the two ways out
 and said neither is a routine's to choose alone; the 24 August entry said four
@@ -9795,7 +9800,6 @@ worth chasing is the maintainer's call; it is in the tooling rather than in this
 repository, and a documented one-line workaround costs nothing to follow. Not
 adding it to `docs/routines.md` myself — a routine cannot write the governance
 it is bound by, which is the rule that file states about itself.
-<<<<<<< HEAD
 ## 2026-08-27 — 0069's rule for a same-origin path admits three ways out of the origin
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
@@ -9924,7 +9928,6 @@ The general lesson is the same one the day produced twice: **the difference
 between a claim and a check is one command**, and neither the `src` nor the 404
 would have survived thirty seconds of looking.
 
-=======
 
 ---
 
