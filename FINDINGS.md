@@ -12927,3 +12927,73 @@ was never visible from the branch at all.
 The general form, for whoever redoes the other fifteen: **a closed branch is a
 statement of intent, not a patch.** What it was trying to do survives; how it did
 it was written against a repository that no longer exists.
+
+---
+
+## 2026-09-02 — a routine cannot open the preview URL it is required to publish
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open
+
+Every routine brief says to **include the deployed preview URL** in the pull
+request, and the marketing brief adds that the maintainer judges this surface by
+eye. Both are right. Neither is checkable from inside a run: `*.vercel.app` is
+not on the sandbox egress allowlist, so the URL a routine publishes is one it has
+never opened.
+
+Measured on #224, whose deployment reported `Ready` and whose only check is
+`success`:
+
+```
+loom-git-marketing-19-the-re-3e7ff4-…vercel.app:443 — connect_rejected ×5
+```
+
+**This is not the 19 August finding.** That one was about a routine being unable
+to *produce* a preview URL at all, and it is fixed — Vercel builds and posts one.
+This is the next step: the URL exists, it is in the pull request, and nobody who
+wrote the pull request has ever seen what is behind it.
+
+**What it costs today is small and what it will cost is not.** This run verified
+every state locally against `next start` on the production build, which is the
+same artifact Vercel serves, so the pictures in the report are honest. What
+cannot be caught from here is anything that differs *because* it is deployed —
+an environment variable that is set in one place and not the other, `VERCEL_URL`
+resolving differently from `LOOM_SITE_ORIGIN`, a route that is static locally and
+dynamic in production. `siteOrigin()` reads exactly those two variables, so this
+lane has a standing reason to care.
+
+**Recommendation:** allow `*.vercel.app` for Bash. It is this project's own
+deployment output and a preview URL is already public to anyone holding the link,
+so nothing is disclosed that the pull request does not already disclose. A
+`WebFetch(domain:*.vercel.app)` entry would cover the other half.
+
+---
+
+## 2026-09-02 — the font finding, with the failed connections rather than the argument
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — evidence for the entry above it, gathered without meaning to.
+
+The font host has been filed eleven times as an inference: the theme names Geist,
+the screenshots are not in Geist, therefore the stylesheet is not arriving. The
+agent proxy's own log settles it. During this run's screenshot pass, Chromium
+attempted the host on every page load and was cut off each time:
+
+```
+fonts.googleapis.com:443 — ws_closed_mid_exchange
+  "tunnel closed (code 1006) after 6s; 1826 B sent, 39 B received, client reading"
+```
+
+Six seconds, per page, per screenshot. So it is not only the wrong typeface — it
+is **six seconds of dead wait on every page load in every run of every lane that
+photographs anything**, silently, because the page renders fine once the request
+gives up.
+
+Nothing about the site is wrong. `font.test.ts` checks what the theme *names*,
+which is correct and passes. The face simply never arrives, and the fallback was
+chosen as a deliberate near-neighbour, so every picture looks plausible.
+
+**Recommendation is unchanged and now cheaper to justify:** add
+`fonts.googleapis.com` and `fonts.gstatic.com`. Both are static font hosts,
+neither can receive a credential, and both are already the mechanism `next/font`
+would use if it were reaching them.
