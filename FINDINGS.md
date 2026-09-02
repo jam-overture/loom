@@ -12880,3 +12880,46 @@ branch that waits does not go stale where its tests are; it goes stale in the
 sentences that point at whatever moved while it waited. Any lane rebuilding
 closed-unmerged work should read its prose against current `main` and not trust
 a green suite to have done it.
+
+---
+
+## 2026-09-02 — a `.png` URL cannot be put in a pull-request body from a routine session, so "include a screenshot" is unsatisfiable there
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a tooling constraint outside every lane. Diagnosed, with the workaround
+in use.
+
+Several routine briefs, mine included, say to **include a screenshot in the pull
+request**. From a scheduled session that is currently not possible, and the
+shape of the failure is not the obvious one.
+
+**It is not about embedding. Any URL ending in `.png` is rewritten in transit**,
+whichever syntax carries it. Verified three ways on #225, each read back from
+the API afterwards rather than assumed:
+
+| What was sent | What arrived |
+| --- | --- |
+| `![alt](https://…/shot.png)` | backticks wrapped round the URL |
+| `<img src="https://…/shot.png" />` | the `src` attribute deleted entirely |
+| `[text](https://…/shot.png)` | backticks wrapped round the URL |
+
+In the same bodies, `https://…vercel.app/docs/the-runtime/going-to-production`
+and the bare preview URL went through **untouched**. So the discriminator is the
+image file at the end of the address, not the markdown around it, and no amount
+of rephrasing gets past it.
+
+**The workaround, which is what #225 does:** put the screenshots in the report
+and link the report *by path*. `reports/<slug>.md` renders its own images inline
+on the branch, and a path is not a URL so nothing rewrites it. The maintainer is
+one click further away than the brief intends, and that is the whole cost.
+
+**Why it is filed rather than fixed.** It is the same class as the `*.vercel.app`
+egress entry above — a property of the sandbox and its tooling, not of this
+repository. A routine cannot widen it and should not try. Two candidates if it is
+ever worth addressing: allow media URLs on the GitHub write path, or let a run
+attach an image to a comment. Until then, **a brief asking for a screenshot in
+the pull request is asking for something the session cannot do**, and the honest
+response is the report link plus this entry rather than silence.
+
+Recorded so the next run that spends twenty minutes rephrasing markdown does not
+have to.
