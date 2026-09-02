@@ -19,6 +19,17 @@ export * from "./decorative.js"
 export * from "./diagnostics.js"
 export * from "./editable.js"
 export * from "./frame.js"
+/**
+ * Named one at a time rather than `export *`: `literalThemeElement` is how the
+ * seam wires the literal-theme mode into its own walk, and a host reaching for
+ * it has one node's primitive and no render around it.
+ */
+export {
+  inlineThemeVariables,
+  substituteVariables,
+  type InlinedProjection,
+  type VariableSubstitution,
+} from "./inline-variables.js"
 export * from "./primitive.js"
 export * from "./props.js"
 export * from "./render.js"

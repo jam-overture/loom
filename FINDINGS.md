@@ -9194,7 +9194,16 @@ Two limits, stated so they are not discovered:
 
 ## 2026-08-27 — 0002 records six ordered rules, and the Gate has had seven since 19 August
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+closed by #181 and #205 — the second remedy was taken, and then the class was
+closed rather than the instance. 0002 was amended in place under a rule written
+for it ([0099](decisions/0099-a-record-is-amended-when-only-the-count-moved.md)),
+and `src/record-claims.test.ts` now holds the counted sentence in 0002, 0007 and
+0001 against the list each one counts — so the next rung the Gate gains turns
+`pnpm verify` red in the record that miscounts it rather than in a lesson a week
+later. The wider version this entry named — *nothing connects a list in `src/` to
+a sentence that counts it* — is answered for records and still open for lessons,
+documentation pages and marketing claims.
 
 [0002](decisions/0002-gate-is-a-pure-function-of-two-axes.md) states the decision
 as *"six ordered rules, first match wins"*. `ESCALATION_RULES` in
@@ -10082,7 +10091,12 @@ red recognises it rather than diagnosing it again, and so the cost of leaving
 ## 2026-08-28 — the Gate asks its rules in an order nothing outside the runtime can read
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open
+closed by #181 — option 1, as recommended. `ESCALATION_LADDER` is exported from
+`src/runtime/gate.ts`, is the ordered reason codes derived from `ESCALATION_RULES`
+itself rather than a second copy of them, and `gate.test.ts` holds the two
+together. It has been on `main` since `e7c8494` and this entry simply had not
+been marked; `/the-rules` can derive its order and drop its hand-written list
+whenever that lane next opens the file.
 
 `/the-rules` lists the seven questions the rules ask of every change. The **set**
 is derived and safe: `dispositionReasonCodeSchema` is exported, and the page's
@@ -11620,7 +11634,21 @@ far been an inference from a diff and is now a number from a clean checkout.
 recurring**; #182 turns them green until the ninety-sixth record.
 ## 2026-08-29 — a tree has one projection, and a share card needs a second
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-24-a-page-where-there-is-no-css` — option 2 taken, and
+recorded as [0105](decisions/0105-a-render-can-hand-back-values-instead-of-references.md).
+`renderLoomTree(tree, { themeValues: "literals" })` resolves every
+`var(--loom-…)` in an inline style into what the mounted theme says it is, so a
+real tree of registered primitives renders into a medium with no cascade. The
+substitution happens at each primitive's own output rather than as a pass over
+the projection, because the projection is component elements and their styles do
+not exist until something renders them — the pass this lane built first, and it
+silently did nothing. Three limits are in the record: the library stylesheet
+(`:hover`, `:last-child`, keyframes) is unreachable and unreachable by any
+cascade-less renderer anyway, a control's own subtree renders on the client, and
+a reference the theme does not answer is left exactly as written. The
+hand-drawn card is `Loom marketing`'s to retire when it wants to; nothing was
+touched on that surface.
 
 The marketing site now draws an image for every address a visitor can send
 somebody. It is **the only file on this surface that is not a Loom tree**, and it
@@ -12815,3 +12843,61 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-02 — the seam the hand-drawn share card was waiting for exists, and one primitive's colours are the whole of what it does not carry
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+
+The 29 August entry above is closed: `renderLoomTree(tree, { themeValues: "literals" })`
+and the same option on `renderRequest` resolve every `var(--loom-…)` in an inline
+style into the mounted theme's value, so a real tree of registered primitives can
+be handed to a renderer that reads no cascade. `substituteVariables` and
+`inlineThemeVariables` are exported from `@loom/runtime/react` for a surface
+holding an element tree it built itself.
+
+**What that does and does not buy the share card**, so nobody spends a run
+finding out:
+
+- Every colour, size, radius, weight and family a primitive names off the theme
+  arrives as a literal. That is all of `tokens.ts`, which is the only way a
+  library primitive is allowed to name one.
+- The **library stylesheet** does not arrive — `:hover`, `:last-child`,
+  keyframes, `::after`. A card is a still image, so none of those were going to
+  be evaluated by an image renderer either; the ones that matter are the
+  position selectors, and a band that only reads right because of
+  `:first-of-type` will read differently in the card than on the page.
+- A **control** renders on the client. A share card containing a primitive that
+  places one gets the control's own `style` resolved and nothing inside it. No
+  card should contain one.
+- The **font is still a family name, not a face** — the 29 August entry beside
+  this one, unchanged and still owned by this lane's framework counterpart. A
+  card drawn this way wears the palette exactly and the typeface not at all,
+  which is the same caveat the hand-drawn one carries today.
+
+**Recommendation: retire the hand-drawn card when this lane next opens that
+file, not before.** It works, it is on-palette, and swapping it for a rendered
+tree is a change to the one asset other people's servers fetch. Nothing on
+`(marketing)` was touched by the PR that closes the finding.
+
+---
+
+## 2026-09-02 — `WriteOutcome` still has no list of its kinds, six days after it was asked for and after the same addition was made three times elsewhere
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+
+Filed against my own lane so the next run does not have to re-derive it. `Loom docs`
+asked on 27 August for `WRITE_OUTCOME_KINDS` beside `WriteOutcome`, in the shape
+`EPISODE_RESOLUTION_KINDS` and `PALETTE_SLOTS` already settled. The 30 August
+run built `TELEMETRY_EVENT_TYPES`, `TREE_OPERATIONS` and
+`COMPOSITION_OUTCOME_KINDS` in exactly that shape, wrote in
+`src/runtime/pipeline.ts` that *"the same addition `WRITE_OUTCOME_KINDS` is for
+the write path, one level up"*, and did not make it. The comment is still there
+and the export still is not.
+
+It is one exported line, ordered however the runtime prefers, plus a
+`Record<WriteOutcome["kind"], true>` in the test so an eighth ending fails to
+compile rather than fails to be noticed. It was not done this run because it
+belongs to no part of what this run built and a PR carrying two unrelated things
+is a PR nobody reviews. It is the first thing on the next run's list.
