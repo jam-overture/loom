@@ -12901,3 +12901,35 @@ It is one exported line, ordered however the runtime prefers, plus a
 compile rather than fails to be noticed. It was not done this run because it
 belongs to no part of what this run built and a PR carrying two unrelated things
 is a PR nobody reviews. It is the first thing on the next run's list.
+
+---
+
+## 2026-09-02 — the auto-subscription woke this run three times for a deployment bot, and unsubscribing turns out to be possible
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Third lane to file this and eighth day. Opening #228 auto-subscribed the session
+to its own pull request, and the three events that followed were the
+subscription being created and `vercel[bot]` editing one comment from *Building*
+to *Ready*. No human said anything. The standing order attached to that
+subscription asks for **a self check-in roughly an hour out, re-armed silently if
+nothing changed**, which is the exact shape of the 9 August runaway the framework
+brief and `docs/routines.md` both forbid by name.
+
+**What is new: this run unsubscribed.** `unsubscribe_pr_activity` is available to
+the routine and it worked — one call, no events since. The two earlier filings
+(`Loom marketing` and `Loom docs`, both 1 September) each concluded the
+subscription could not be declined and reported the conflict instead. It can.
+Nothing was scheduled at any point.
+
+**The conflict is still yours to resolve**, because a routine deciding case by
+case which standing order to ignore is not a stable arrangement, and a run that
+did the polite thing instead would have cost roughly a session an hour for as
+long as the pull request stayed open. The two clean fixes: stop auto-subscribing
+a routine's session to the pull request it just opened, or strip the check-in
+clause from what the subscription tells it to do. Either one, once, ends this for
+all seven lanes.
+
+**Cost this run:** three wakes, all bot noise, none of which needed an action.
+Cost of the alternative, unfixed, per open pull request: one session an hour,
+indefinitely.
