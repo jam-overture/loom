@@ -189,7 +189,15 @@ new**, all in this lane, and they are 2519 → 2537 on the app suite exactly.
   does not, and that a change still waiting on the visitor offers no undo in any
   state.
 
-OLD_RULE_PLACEHOLDER
+**Measured against the old rule rather than asserted.** Restoring the old gate
+(`!undoReport`) and the old unconditional sentence in `record-card.tsx`, with the
+new library left in place, turns the card suite **red on two of the six new
+tests** — *points at the waiting question instead of the button* and *stops
+promising the button once the undo has landed* — and leaves the other twenty
+green. The remaining twelve new tests cover `undoOffer`, `undoOf` and the fold,
+which are functions the old code did not have, so "they fail without the change"
+would be a module error rather than a claim about behaviour. Said plainly because
+the honest number here is two, not eighteen.
 
 `src/` was not opened. One framework gap was found and filed rather than fixed.
 
@@ -227,6 +235,33 @@ here.
 
 ## The visuals
 
-VISUALS_PLACEHOLDER
+Every pair is the same script driven against two `next build` outputs — this
+branch's and the branch as it stood at `99067d5` — so the only difference in a
+frame is the change. The frames are the **applied card itself** rather than the
+rail, because the held undo appears *above* it (records are newest first) and a
+rail screenshot cuts the subject off the bottom.
+
+| | |
+| --- | --- |
+| [before, held](2026-09-02-demo-the-offer-that-withdrew-itself-before-held.png) | two seconds after **Put it back**: no button, under a sentence still saying *“Put it back” undoes it* |
+| [after, held](2026-09-02-demo-the-offer-that-withdrew-itself-after-held.png) | the same press: **“You’ve asked to put this back. It’s waiting on your yes, on the card above.”** |
+| [before, declined](2026-09-02-demo-the-offer-that-withdrew-itself-before-declined.png) | after **No thanks** on the undo. Identical to the frame above: the offer is gone for the rest of the visit |
+| [after, declined](2026-09-02-demo-the-offer-that-withdrew-itself-after-declined.png) | the same press: **Put it back** is under the card again, with its caution |
+| [after, spent](2026-09-02-demo-the-offer-that-withdrew-itself-after-spent.png) | and once the undo is allowed: **“You put this back, so the page is as it was before this ask.”** |
+| [phone](2026-09-02-demo-the-offer-that-withdrew-itself-phone.png) | 390×844, the held undo |
+
+**The driver reported the defect on its own.** On the `before` build the script's
+fourth step — ask again, and this time allow it — logged `!! "Put it back" is not
+on the page`, at both viewports. On this branch it completes and produces the
+*spent* frame. That line is the finding, printed by a browser rather than argued.
+
+**Preview:** the Vercel deployment for this branch's head. This sandbox cannot
+open `vercel.app` to check it (standing 19 August finding), so everything above
+is a local `next start` of two real builds.
+
+**To see it yourself:** open `/demo`, press the green button, press **Apply this
+change**, then press **Put it back** and read the line where the button was.
+Press **No thanks** on the question that appears above, and watch the button come
+back.
 
 Nothing is scheduled and nothing is watching this pull request.
