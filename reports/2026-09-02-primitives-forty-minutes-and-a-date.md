@@ -16,13 +16,22 @@ The library is **74 primitives**. The Hermes port is **52 of 70 blocks ported,
 67 of 70 settled**, and what remains is two pairs — `loom.book` and
 `loom.listing` — rather than the four the map carried this morning.
 
-![The library's two new bands under the editorial palette, at 1280px](2026-09-02-primitives-forty-minutes-wide-editorial.png)
+![The library's two new bands under the editorial palette, at 1280px](2026-09-02-primitives-forty-minutes-wide-serif.png)
 
 ![The same page under the bold palette](2026-09-02-primitives-forty-minutes-wide-bold.png)
 
 Phone shots at a true 390px are alongside:
-[editorial](2026-09-02-primitives-forty-minutes-phone-editorial.png),
+[editorial](2026-09-02-primitives-forty-minutes-phone-serif.png),
 [bold](2026-09-02-primitives-forty-minutes-phone-bold.png).
+
+*The editorial palette's two files are named `-serif` rather than `-editorial`,
+and it is worth one sentence so nobody renames them back. Every URL containing
+the string `editorial` that this routine wrote into the pull request body came
+back wrapped in backticks — twice, through two different URL forms and two
+different link texts — while the `-bold` URLs beside them never did, which broke
+exactly half of the screenshots the brief asks a reviewer to look at. `serif`
+names the same theme by its font pack (`editorial-serif`) and renders. The
+palette is still called `editorial` everywhere it actually is one.*
 
 ## Why these, and why not something else
 
