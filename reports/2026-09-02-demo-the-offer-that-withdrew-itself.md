@@ -255,9 +255,16 @@ fourth step — ask again, and this time allow it — logged `!! "Put it back" i
 on the page`, at both viewports. On this branch it completes and produces the
 *spent* frame. That line is the finding, printed by a browser rather than argued.
 
-**Preview:** the Vercel deployment for this branch's head. This sandbox cannot
+**Preview:**
+`https://loom-git-demo-12-what-allowi-fa1349-jpizzolato36-6341s-projects.vercel.app/demo`
+— deployment completed at `0b226ae`, Vercel status green. This sandbox cannot
 open `vercel.app` to check it (standing 19 August finding), so everything above
 is a local `next start` of two real builds.
+
+One push, one preview. The commit identity was `Claude <noreply@anthropic.com>`
+throughout — checked on `git config` **before** committing rather than caught on
+a glance at `git log` afterwards, which is the sixth-time finding from 27 August
+acted on rather than re-filed.
 
 **To see it yourself:** open `/demo`, press the green button, press **Apply this
 change**, then press **Put it back** and read the line where the button was.
