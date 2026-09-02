@@ -10,7 +10,14 @@ import { answerNote } from "@/app/(demo)/_lib/answer"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
-import { askedLine, UNDO_CAUTION, UNDO_LABEL } from "@/app/(demo)/_lib/undo"
+import {
+  askedLine,
+  UNDO_CAUTION,
+  UNDO_LABEL,
+  UNDO_SPENT,
+  UNDO_WAITING,
+  type UndoOffer,
+} from "@/app/(demo)/_lib/undo"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
@@ -56,6 +63,7 @@ export const RecordCard = ({
   record,
   effect,
   plain = [],
+  offer = "offer",
 }: {
   readonly record: ChangeRecord
   /**
@@ -75,6 +83,13 @@ export const RecordCard = ({
    * to say so.
    */
   readonly plain?: readonly PlainChange[]
+  /**
+   * Whether this card's undo is still to be had, waiting on an answer, or
+   * already spent — computed from the whole record list, which is the only
+   * place the answer exists. Defaulted, because a card with no revision has no
+   * undo to offer and should not have to say so.
+   */
+  readonly offer?: UndoOffer
 }) => {
   const [answerReport, answer, answering] = useActionState<WriteReport | null, FormData>(answerHeld, null)
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
@@ -120,8 +135,17 @@ export const RecordCard = ({
           * The state in a sentence, under the badge that names it. "Refused" is
           * a word; "a rule in this project's settings blocked it, so nothing
           * changed" is the thing a visitor came to the demo to find out.
+          *
+          * Except once the undo has landed, where the applied sentence — *"This
+          * change is live on the page beside you"* — is no longer a signpost in
+          * the wrong place but a false statement about the page three inches
+          * away. The badge still reads "Applied", correctly: that is what became
+          * of *this ask*, and the sentence under it is where the page stands
+          * now. `_lib/undo.ts` owns both strings.
           */}
-        <p className="text-ink-secondary text-sm">{outcome.meaning}</p>
+        <p className="text-ink-secondary text-sm">
+          {offer === "spent" ? UNDO_SPENT : outcome.meaning}
+        </p>
 
         <p className="text-ink-muted text-2xs">
           asked by {record.actor ?? "nobody named"}
@@ -223,8 +247,15 @@ export const RecordCard = ({
         * nothing. It is the same defect `AskPanel` fixed one control earlier,
         * with the same fix — say it before the press, in one line, under the
         * control it is about.
+        *
+        * What the offer is gated on is `_lib/undo.ts`'s to decide, from the
+        * records rather than from this card's own press. The press is the one
+        * thing that does not settle it: the undo it starts is answered on a
+        * different card, so a gate on `undoReport` withdrew the offer the
+        * moment the Gate held it and never gave it back — including to a
+        * visitor who had turned their own undo down.
         */}
-      {record.revision && !undoReport && (
+      {record.revision && offer === "offer" && (
         <form action={undo} className="flex flex-col gap-1.5">
           <input type="hidden" name="revision" value={record.revision.produced} />
           <button
@@ -236,6 +267,17 @@ export const RecordCard = ({
           </button>
           <p className="text-ink-muted text-2xs">{UNDO_CAUTION}</p>
         </form>
+      )}
+
+      {/*
+        * The undo this card offered, now a question of its own above it. Said
+        * in the awaiting tone and marked with a rule, so it reads as the same
+        * kind of thing as the answered note above rather than as a control.
+        */}
+      {record.revision && offer === "waiting" && (
+        <p className="border-awaiting-ink text-ink-secondary border-l-2 pl-2.5 text-xs">
+          {UNDO_WAITING}
+        </p>
       )}
 
       <TechnicalDetail summary="Show the full record">

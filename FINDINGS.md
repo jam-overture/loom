@@ -13050,3 +13050,111 @@ second write intact, verified by reading the body back a second time. The entry'
 recommendation — that this goes into `docs/routines.md` beside the sentence
 asking for the screenshot — is now a week old and would have saved this run two
 round-trips.
+
+---
+
+## 2026-09-02 — the demo's payoff card withdrew its own undo, and the press that withdrew it was the one that changed nothing
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-12-what-allowing-it-would-do` (#220) — the redo of #194
+
+Recorded because the *shape* is now three for three and belongs in the channel
+rather than only in a report. This lane's standing diagnosis, filed 25 August,
+is that its failures are **machinery that does not reach the screen**. This one
+is the inverse and the same thing: machinery that reaches the screen and then
+takes itself away.
+
+The offer was gated on `record.revision && !undoReport` — withdraw as soon as
+the server answers *anything*. On the demo's primary path the first answer is a
+**hold**: an undo is a change of its own (0032) and putting the numbers band
+back restructures the page as much as taking it off did, so the Gate stops it
+and the page does not move. Every part of that is correct and the button
+vanished anyway, two seconds after a press that visibly did nothing, off a card
+still reading *"This change is live on the page beside you. 'Put it back' undoes
+it."*
+
+The half worth naming separately: answer that held undo with **No thanks** and
+the visitor has declined their own undo and **can never ask again**. The offer
+was spent by a press, not by an outcome.
+
+**Why the card could not have got this right on its own**, which is the part
+worth keeping. `undoReport` is `useActionState` on the applied card, and every
+event that resolves an undo happens on a *different* card — the held undo is
+answered on its own. So a card watching its own press can only ever learn that
+an undo was **asked for**, which is the one fact that settles nothing. The
+records can see all of it. The fix is a function over the record list
+(`undoOffer`), and it is server-derived, so declining the undo puts the offer
+back with no client state to go stale.
+
+---
+
+## 2026-09-02 — a revert does not say which revision it reverts, except in two sentences it synthesised
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around inside this lane, and the workaround is the evidence
+
+`revertRevision` stamps `REVERT_INTERPRETER` on the proposal's provenance, so a
+surface can ask the runtime *whether* a change is an undo and get a real answer
+rather than pattern-matching English — `(demo)/_lib/undo.ts` has done exactly
+that since 26 August and the comment there explains why it matters.
+
+**What it cannot ask is which revision the undo is of.** That number appears in
+the narrated events only inside strings the runtime composed for people:
+`utterance` is `Undo revision 1.` and `interpretation.rationale` is *"Undoes
+revision 1, applied … from proposal …"*. Both are correct and neither is a
+field. A surface that needs the link — to know whether an applied change has
+already been put back — has to either parse a sentence it does not own, which is
+the thing the provenance stamp exists to avoid, or carry the number itself.
+
+This lane carried it: `undoRevision` stamps `ChangeRecord.undoes` from the
+argument it passed, which is honest because it is the surface's own knowledge
+about its own request. It does not generalise. A surface reading a log it did not
+write — the portal's history screen is the obvious one — has no such argument to
+stamp from, and would be left with the sentences.
+
+**The ask:** a structured `revision` on what a revert narrates, so the link is
+the runtime's rather than each surface's. Not urgent for the demo, which is
+whole without it. Filed because the next surface to want it will not have the
+workaround available.
+
+---
+
+## 2026-09-02 — `21st.dev` re-verified blocked, from the demo lane an eighth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 1 September entry, not a new argument
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. Fifteenth recorded refusal
+across six lanes; `docs/routines.md` still lists it as allowed for `WebFetch`,
+and has been wrong for a fortnight.
+
+No cost to this unit again, and for the same reason as yesterday: what decided
+where the waiting line goes and what it says was building the tree, driving it in
+Chromium, pressing **Put it back** and looking at what the card did next. A
+reference gallery cannot answer whether a control should still be under a
+sentence that names it.
+
+---
+
+## 2026-09-02 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24–27 August and 1 September entries
+
+Sixth consecutive run. *"Two problems to fix before anything else"* — the first
+being the move off `/portal/demo` — describes this lane's first unit, landed
+twelve days ago. `docs/rollout.md:19` still says the demo is live at
+`apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
+
+The second of the two, *"it is clunky"*, is live and is what this run acted on.
+
+---
+
+## 2026-09-02 — the four portal links to `/portal/demo` are still unrepointed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open — a
+date on the 21 August and 1 September entries
+
+Verified again on `d7375ef`: the shim, `DEMO_PATH`, the rail entry, the sign-in
+hero and the `/portal/pages` empty state all still name the old path. Nothing is
+broken while they stay. Twelve days.

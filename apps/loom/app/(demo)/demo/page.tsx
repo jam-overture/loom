@@ -11,6 +11,7 @@ import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { spotlightsFor, spotlitChange } from "@/app/(demo)/_lib/spotlight"
+import { undoOffer } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
@@ -268,7 +269,12 @@ const DemoPage = async () => {
 
               <ul className="flex flex-col gap-2">
                 {records.map((record) => (
-                  <RecordCard key={record.recordId} record={record} {...heldProps(record)} />
+                  <RecordCard
+                    key={record.recordId}
+                    record={record}
+                    offer={undoOffer(record, records)}
+                    {...heldProps(record)}
+                  />
                 ))}
               </ul>
 

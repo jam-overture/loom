@@ -92,6 +92,22 @@ export type ChangeRecord = {
   /** Set while a proposal sits in custody, so the surface can offer the answer. */
   readonly heldProposalId?: string
   /**
+   * The revision this ask was asking to put back, when it was an undo.
+   *
+   * Not read off the events, because the log does not carry it in a form this
+   * surface may read: `revertRevision` synthesises `Undo revision 1.` and a
+   * rationale saying the same thing in prose, and both are the runtime's
+   * sentences rather than a field. Parsing either would be this surface
+   * pattern-matching a string it does not own — the exact thing `undo.ts`
+   * refuses to do when it decides whether a record *is* an undo.
+   *
+   * So it is stamped by the action that asked, which knows the number because
+   * it is the number it passed. That makes it the surface's own knowledge about
+   * its own request, which is honest, and it is why `undoOf` lives next to the
+   * predicate rather than here.
+   */
+  readonly undoes?: number
+  /**
    * Who allowed a held change. Never the same field as `actor`: a hold exists
    * because the Gate wanted a second person, and provenance records only the
    * first (0029).
@@ -180,6 +196,15 @@ type Draft = {
   revision?: RevisionView
   held?: string | undefined
   answeredBy?: string | undefined
+  /**
+   * Carried rather than derived, and this is the only reason `Draft` knows about
+   * it at all: answering a held undo folds a second assessment and verdict onto
+   * the record that was waiting (`recordAwaiting`), so a fold that dropped this
+   * would sever the undo from the revision it undoes at exactly the moment it
+   * lands. The card offering the undo would then go on offering it after the
+   * page had been put back.
+   */
+  undoes?: number
   discarded: boolean
   failure?: string
   repaired: boolean
@@ -212,6 +237,7 @@ const draftFrom = (base: ChangeRecord | undefined): Draft =>
         ...(base.revision === undefined ? {} : { revision: base.revision }),
         ...(base.heldProposalId === undefined ? {} : { held: base.heldProposalId }),
         ...(base.answeredBy === undefined ? {} : { answeredBy: base.answeredBy }),
+        ...(base.undoes === undefined ? {} : { undoes: base.undoes }),
         discarded: base.outcome === "discarded",
         repaired: base.repaired,
         touched: base.touched,
@@ -336,6 +362,7 @@ export const recordFromEvents = (
     ...(draft.revision === undefined ? {} : { revision: draft.revision }),
     ...(draft.held === undefined ? {} : { heldProposalId: draft.held }),
     ...(draft.answeredBy === undefined ? {} : { answeredBy: draft.answeredBy }),
+    ...(draft.undoes === undefined ? {} : { undoes: draft.undoes }),
     ...(draft.failure === undefined ? {} : { failure: draft.failure }),
     repaired: draft.repaired,
     touched: draft.touched,

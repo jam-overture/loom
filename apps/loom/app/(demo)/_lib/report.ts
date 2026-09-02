@@ -57,6 +57,15 @@ export { toneClasses } from "@/app/(portal)/_lib/vocabulary"
  * Anything not named here falls through to the shared table unchanged, and
  * `report.test.ts` asserts that nothing falling through sends a visitor
  * somewhere this surface does not have.
+ *
+ * **This sentence has a second life it cannot see from here.** It names a
+ * control — *"Put it back"* — and that control is withdrawn once the undo has
+ * actually been taken, at which point the first half is false too: the change
+ * is not live on the page any more. Which state the card is in depends on the
+ * whole record list rather than on the state of any one change, so the
+ * substitution is `record-card`'s to make and the string is `undo.ts`'s to own
+ * (`UNDO_SPENT`). What stays here is the sentence for a change whose undo is
+ * still to be had, which is every applied card until somebody takes it.
  */
 const DEMO_MEANINGS: Partial<Record<ChangeState, string>> = {
   applied: "This change is live on the page beside you. “Put it back” undoes it.",

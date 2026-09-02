@@ -17,6 +17,7 @@ import {
   rememberRecord,
   spendModelCall,
 } from "@/app/(demo)/_lib/session"
+import { undoOf } from "@/app/(demo)/_lib/undo"
 import { DEMO_ACTOR, DEMO_PATH, readVisitorId, rememberVisitorId } from "@/app/(demo)/_lib/visitor"
 import {
   invalidReport,
@@ -216,8 +217,14 @@ export const undoRevision = async (
     actor: DEMO_ACTOR,
   })
 
+  /**
+   * Stamped with the revision it is undoing, which is knowledge this call has
+   * and the events do not carry in a readable form. It is what lets the applied
+   * card know whether its undo is still to be had, still waiting, or already
+   * spent — none of which the card can see from its own press.
+   */
   const record = recordFromEvents(write.narrated())
-  if (record) rememberRecord(session, record)
+  if (record) rememberRecord(session, undoOf(record, parsed.data.revision))
 
   revalidatePath(DEMO_PATH)
 

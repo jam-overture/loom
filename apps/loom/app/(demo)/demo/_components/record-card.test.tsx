@@ -7,7 +7,7 @@ import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
-import { UNDO_CAUTION } from "@/app/(demo)/_lib/undo"
+import { UNDO_CAUTION, UNDO_SPENT, UNDO_WAITING } from "@/app/(demo)/_lib/undo"
 
 import { RecordCard } from "./record-card"
 
@@ -386,5 +386,65 @@ describe("a record card", () => {
     expect(screen.queryByRole("button", { name: "Apply this change" })).toBeNull()
     expect(screen.queryByRole("button", { name: "No thanks" })).toBeNull()
     expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+  })
+})
+
+/**
+ * The payoff card, and the control it spent five runs learning to keep.
+ *
+ * The offer used to be gated on whether an undo had been *pressed*, and on this
+ * demo's primary path the first thing that comes back from a press is a hold —
+ * the Gate stopping an undo exactly as it stops any other change (0032). So the
+ * button went away while the page had not moved, off a card whose own sentence
+ * still named it. Which state the card is in is decided from the record list
+ * (`undoOffer`), because the undo is answered on a different card and this one
+ * cannot see that happen.
+ */
+describe("what the payoff card offers", () => {
+  it("offers the undo, and says what pressing it may do, before anything is pressed", () => {
+    render(<RecordCard record={APPLIED} offer="offer" />)
+
+    expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+    expect(screen.getByText(new RegExp(UNDO_CAUTION.slice(0, 40)))).toBeTruthy()
+  })
+
+  /**
+   * The frame the defect produced: the undo is held, the page has not moved,
+   * and the card has to say where the question went rather than withdrawing the
+   * control and leaving the sentence pointing at nothing.
+   */
+  it("points at the waiting question instead of the button, while the undo is held", () => {
+    render(<RecordCard record={APPLIED} offer="waiting" />)
+
+    expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
+    expect(screen.getByText(UNDO_WAITING)).toBeTruthy()
+  })
+
+  /** And it must not still be claiming the change can be undone from here. */
+  it("stops promising the button once the undo has landed", () => {
+    render(<RecordCard record={APPLIED} offer="spent" />)
+
+    expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
+    expect(screen.getByText(UNDO_SPENT)).toBeTruthy()
+    expect(screen.queryByText(/live on the page beside you/)).toBeNull()
+  })
+
+  /**
+   * The badge is not the sentence. "Applied" is what became of *this ask* and
+   * stays true after the change is put back; what changes is the line under it,
+   * which is about where the page stands now.
+   */
+  it("still says the ask was applied after it has been put back", () => {
+    render(<RecordCard record={APPLIED} offer="spent" />)
+
+    expect(screen.getByText("Applied")).toBeTruthy()
+  })
+
+  /** An unanswered change has no undo to offer in any of the three states. */
+  it("offers no undo on a change that is still waiting on the visitor", () => {
+    render(<RecordCard record={HELD} offer="offer" />)
+
+    expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
+    expect(screen.queryByText(UNDO_WAITING)).toBeNull()
   })
 })

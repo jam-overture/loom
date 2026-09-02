@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import type { EditIntent, RuntimeEvent, RuntimeEventEnvelope } from "@loom/runtime"
 
-import { recordFromEvents } from "./record"
+import { recordFromEvents, type ChangeRecord } from "./record"
 
 /**
  * The projection, on the paths that are hard to cause on purpose.
@@ -104,5 +104,66 @@ describe("a record", () => {
     ])
 
     expect(record?.askedAt).toBe("2026-08-12T09:00:00.000Z")
+  })
+})
+
+/**
+ * The one field on a record that the events do not carry.
+ *
+ * `undoes` is stamped by the action that asked for the undo, because the log
+ * says which revision is being put back only inside two sentences the runtime
+ * synthesised — and this surface does not read those (`undo.ts`). Everything
+ * else about a record survives a fold by construction; this has to be carried
+ * deliberately, and the moment it matters is the moment it would be lost.
+ */
+/** The bare record an undo starts from, before anything has been decided. */
+const askedAsUndo = (): ChangeRecord => {
+  const base = recordFromEvents([envelope({ type: "intent-received", intent: INTENT })])
+  if (base === undefined) throw new Error("an intent alone should always produce a record")
+
+  return base
+}
+
+describe("a record that is an undo", () => {
+  /**
+   * Answering a held undo folds a second assessment and verdict onto the record
+   * that was waiting, exactly as answering any other hold does. If the fold
+   * dropped `undoes`, the link would break at the instant the undo *landed* —
+   * so the applied card would go on offering an undo of a change that had
+   * already been put back, which is the defect this field exists to close.
+   */
+  it("keeps what it undoes when the answer is folded onto it", () => {
+    const asUndo = { ...askedAsUndo(), undoes: 1 }
+    const answered = recordFromEvents(
+      [
+        envelope({ type: "hold-confirmed", proposalId: "p_1" as never, actor: "a demo visitor" }),
+        envelope({ type: "change-committed", proposalId: "p_1" as never, revision: 2 }),
+      ],
+      asUndo
+    )
+
+    expect(answered?.outcome).toBe("applied")
+    expect(answered?.undoes).toBe(1)
+  })
+
+  /** And when the visitor turns their own undo down, which puts the offer back. */
+  it("keeps what it undoes when the visitor declines it", () => {
+    const declined = recordFromEvents(
+      [envelope({ type: "hold-discarded", proposalId: "p_1" as never, actor: "a demo visitor" })],
+      { ...askedAsUndo(), undoes: 1 }
+    )
+
+    expect(declined?.outcome).toBe("discarded")
+    expect(declined?.undoes).toBe(1)
+  })
+
+  /** An ordinary ask is not an undo of anything, and must not become one. */
+  it("is absent on a change that was not an undo", () => {
+    const record = recordFromEvents([
+      envelope({ type: "intent-received", intent: INTENT }),
+      envelope({ type: "change-committed", proposalId: "p_1" as never, revision: 1 }),
+    ])
+
+    expect(record?.undoes).toBeUndefined()
   })
 })
