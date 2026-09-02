@@ -12815,3 +12815,120 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-02 — the pairings probe cannot see an ink behind an optional prop, and one declared row is already wrong because of it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is broken; a bar is looser than the library's own components
+deserve, and the fix is one row.
+
+`registryPairings` derives what the library actually paints by rendering each
+primitive through `probeColourPairings` and reading the ground/ink pairs out of
+the result. It renders each primitive **with default props**, which is the only
+thing it can do without inventing content — and the consequence is that *any ink
+a primitive only paints when an optional prop is set is invisible to it*.
+
+That is not hypothetical. `loom.offering` paints its `price` in
+`accent-strong` on the `bg-surface` of its own card:
+
+```ts
+// src/primitives/loom.offering.ts
+color: colour("accent-strong"),   // the price
+background: colour("bg-surface"), // SURFACES.plain, on the same <article>
+```
+
+`price` is optional, so the probe never renders one, so the pairing is never
+derived — and `src/theme/contrast.ts` declares it:
+
+```ts
+{ foreground: "accent-strong", background: "bg-surface", basis: "composed",
+  where: "loom.field inside a card" },
+```
+
+**`composed` means reported, not asserted** (0089). So a palette whose
+`accent-strong` fails on `bg-surface` would ship: the audit would print it and
+`auditPalette(...).failures` would stay empty, even though a `loom.offering`
+with a price is a page nobody can read. The row is not a judgement call that
+went the wrong way — it is a row written from what the probe could see.
+
+**How it surfaced.** `loom.event` was written with its date in `accent-strong`,
+and `date` is *required*, so the probe saw it immediately and
+`pairings.test.ts > never declares a painted pairing as the softer composed`
+failed with exactly one entry: `accent-strong on bg-surface`. The check works.
+It is the only reason any of this is visible.
+
+**Two things to do, and they are independent:**
+
+1. **Promote the row** to `basis: "painted"`, with a `where` naming
+   `loom.offering price` alongside the field. **Every starter palette already
+   clears it** — it is absent from the pinned composed shortfall in
+   `contrast.test.ts`, so `failures` stays empty and the shortfall assertion is
+   untouched. This is a one-row change that makes a true statement out of a
+   false one. It was not made here because `src/theme/` is another lane's.
+2. **Decide what the probe should do about optional props.** Rendering each
+   primitive once more with every optional prop set to a placeholder would
+   derive the real set, at the cost of a probe that has to invent a URL and a
+   date. Refusing to guess is a defensible answer — but then the *gap* should be
+   stated in `contrast.ts`, because a list whose own comment says it is "read off
+   `src/primitives` rather than imagined" is currently claiming more coverage
+   than the derivation gives it.
+
+**What this run did instead**, so nobody has to guess: `loom.event` sets its
+date in `accent` rather than `accent-strong`. There is an independent
+typographic argument for that — `accent-strong` exists to keep *small* emphatic
+text legible and a date at heading size does not need it — and the reasoning is
+in the file. But the pairing is the reason it was looked at, and if the row is
+promoted, `accent-strong` becomes available for the date again on the merits.
+
+---
+
+## 2026-09-02 — a queue row whose child has no artwork cannot line up with the ones that do
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit rather than a defect, recorded so the next run does not
+rediscover it. Visible in this run's screenshots.
+
+`loom.recording` draws its artwork frame when it has `artwork` *or* `href`, and
+skips it when it has neither — a track with no cover and no listen link is a
+title, a byline and a runtime. That is right for the card on its own.
+
+In a `loom.recording-grid` with `columns: "one"`, where every cell is a row with
+an 11rem artwork panel at its start, a cell with no panel starts its text at the
+card's edge instead. Two rows with covers and one without produce a ragged left
+edge that reads as a bug rather than as a decision.
+
+**A primitive cannot fix this**, because it is a fact about siblings and a render
+is a pure function of one node (0008). The three candidate answers all cost
+something:
+
+| | |
+| --- | --- |
+| always draw the panel | every coverless track gets an empty tinted rectangle, on a phone as well as in a row |
+| reserve the width without drawing | `:not(:has(.loom-recording-art))` can add an 11rem inset in the row arrangement only — it is expressible, and it is 11rem of nothing |
+| leave it | ragged, and only when a band mixes the two |
+
+Left, deliberately: in real content a playlist either has cover art throughout
+or has none, and the mixed case is the rare one. The second option is the one to
+take if a real page hits it — it is four lines in `stylesheet.ts` and it is
+confined to the arrangement where the problem exists.
+
+---
+
+## 2026-09-02 — `21st.dev` is still blocked, for the fourteenth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — unchanged, and restated only because the count is now the point.
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`. The primitives brief names
+it as *the visual standard* and instructs every run to consult it;
+`docs/routines.md` lists it under `permissions.allow`. **No run of this routine
+has ever been able to open it.**
+
+Seventh lane to file this and the fourteenth occurrence. There are two honest
+resolutions and neither is "file it again": add the domain to the sandbox's
+egress allowlist, or **strike the instruction from the brief and name the
+standard in words**, in a file the routine can actually read. The second costs
+one paragraph and would make the bar checkable; the first costs a proxy rule.
+Either is better than a brief whose first quality instruction is inoperative.
