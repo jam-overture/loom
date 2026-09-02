@@ -25,13 +25,22 @@ Phone shots at a true 390px are alongside:
 [bold](2026-09-02-primitives-forty-minutes-phone-bold.png).
 
 *The editorial palette's two files are named `-serif` rather than `-editorial`,
-and it is worth one sentence so nobody renames them back. Every URL containing
-the string `editorial` that this routine wrote into the pull request body came
-back wrapped in backticks — twice, through two different URL forms and two
-different link texts — while the `-bold` URLs beside them never did, which broke
-exactly half of the screenshots the brief asks a reviewer to look at. `serif`
-names the same theme by its font pack (`editorial-serif`) and renders. The
-palette is still called `editorial` everywhere it actually is one.*
+and the honest version of why is worth one paragraph, because the tidy version
+was wrong.* Image URLs this routine wrote into the pull request body kept coming
+back wrapped in double backticks and rendering as broken images. It looked
+deterministic on the substring `editorial` — the same two URLs were mangled
+across three attempts, through two different URL forms and two different link
+texts, while the `-bold` URLs beside them never were. **That diagnosis was
+incomplete.** After the rename, `wide-serif` renders and `phone-serif` still
+does not, reproducibly, so whatever the trigger is it is not the palette's name.
+
+The rename stays, because it did fix one of the two and costs nothing —
+`serif` names the same theme by its font pack, `editorial-serif`, and the
+palette keeps its own name everywhere it actually is one. But it is a
+workaround for something not understood, not a fix, and the next run should not
+spend more of the allowance on it: **the committed report is the artefact that
+renders all four**, and the pull request body links to it twice for that reason.
+Three of four render there and the fourth is one click away.
 
 ## Why these, and why not something else
 
