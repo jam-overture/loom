@@ -179,6 +179,15 @@ none amended.
 **One filed and closed:** the four stale citations above, with the mechanism, so
 the three lanes whose records were opened know why.
 
+**One filed and open**, to `@jonathanbravecredit`: **#223 got no preview
+deployment.** Vercel returned *Blocked* — `@jpizzo` is not a member of the
+project's team — so there is no preview URL to put in the pull request, which
+every brief asks for. New between #221 and #223, twelve hours apart, with no
+change to `vercel.json` in between; the difference is the account credited with
+the push. Nothing a routine can change. It costs this branch only a link, since
+there is no UI here to look at, but the next lane to hit it will lose the
+screenshot its work is judged by.
+
 ## Open questions
 
 1. **Delete the migration section from the framework brief.** Second run in a

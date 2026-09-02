@@ -12892,3 +12892,38 @@ fatal.** The repairs change no argument in any of the three records — 0087's
 `0010` became `0012` in a link and in the sentence beside it, because both name
 the reasoning the paragraph is actually using.
 
+
+---
+
+## 2026-09-02 — the preview deployment is Blocked because the pushing account is not on the Vercel team
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an access question, not an engineering one, and it removes
+the preview URL every brief asks a pull request to carry
+
+#223 got no preview. Vercel's bot on the pull request:
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+The deployment is marked **Blocked**, there is no `previewUrl` in the payload,
+and the only check on the pull request is `Vercel Preview Comments`, which
+passes because commenting is all it did.
+
+**This is new between #221 and #223, twelve hours apart, with no change to
+`vercel.json` or to `apps/loom/package.json` in between.** #221 deployed and
+carries a working preview link. The difference is the account credited with the
+push — Vercel names `@jpizzo` (GitHub id `34899384`), which is not the account
+the project's team knows. Nothing a routine can change: the remedy is one of the
+two links in that comment, adding the account to the team.
+
+Worth stating alongside the two standing preview findings rather than folded
+into them, because they are different failures. *The deployed preview is
+unreachable from the sandbox* (1 September) is about a run being unable to
+**screenshot** a preview that exists. This is about there being **no preview**,
+which is a step further back: a reviewer opening the pull request has nothing to
+click either.
+
+No consequence for this branch beyond the missing link — it adds no UI, so there
+was nothing to look at. The lane that files this next will not be so lucky.
+
