@@ -12698,7 +12698,10 @@ for yourself, and the cost lands on the maintainer, not on the run.
 ### Loom marketing
 
 - **#198** — §4d: the record of the change you actually made — and main was red  
-  branch `marketing-16-the-record-of-your-ask`
+  branch `marketing-16-the-record-of-your-ask` — **redone 2 September** as
+  `marketing-19-the-record-of-your-ask`. Rebuilt rather than revived, and the
+  rebuild found three defects in it; see the 2 September entry at the foot of
+  this file. This lane's share of the list is clear.
 
 ### Loom portal
 
@@ -12815,3 +12818,112 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-02 — the refusal band was counting a run it was not printing, and it was right for eight runs
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-19-the-record-of-your-ask`
+
+Recorded for **how it survived**, not because it is still open.
+
+The mechanism page's contrast band states three numbers while it speaks: how many
+kinds of line a refused change reaches before the answer, which line the answer
+is, and the one that is not there. All three are positions in the **refused**
+run. All three were read off `trail.lines` — the run printed *above* the band.
+
+Those are different runs and the arithmetic gave the right three numbers anyway,
+because the run above could only ever be the six-line default. `matching =
+lines.length - 2` is four when `lines.length` is six, and four is correct. The
+moment that page could print a five-line run — which is what this run's own change
+makes possible — every one of the three would have been one too small, on a band
+whose entire subject is a count.
+
+**Nothing on this site could have seen it.** The band was correct on every page
+that existed, its two sentences agreed with each other, and `journey.test.ts`
+checked exactly that agreement — against a page where both were derived from the
+same wrong list. It is the third occurrence in this lane of one shape: **two
+individually correct things that had never been read next to each other.** 30
+August was four sentences hardened into facts about the one ask ever exercised;
+31 August was a prose promise beside an empty panel; 1 September was four versus
+five across a link.
+
+The tell that would have caught all four is the same and is cheap: **when a value
+becomes variable, re-read every sentence that was derived from it while it was
+not.** A derivation is only as correct as the thing it derives from is stable, and
+the eight runs of stability are what make it invisible.
+
+---
+
+## 2026-09-02 — a change the visitor allows is nine lines, and nothing had looked at it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-19-the-record-of-your-ask`
+
+`runAsk` with `approve` puts a held change to the rules a **second** time, and
+`confirmChange` narrates the whole second pass to the listener. So the record of
+an approved change is `intent-received`, `policy-resolved`, `change-proposed`,
+`change-assessed`, `disposition-decided` — and then `policy-resolved`,
+`change-assessed`, `disposition-decided`, `change-applied` again. Nine lines,
+measured, for `problem` with `approve=1`.
+
+That is correct and it is the most interesting record this site can print. It is
+also a length nobody had written a sentence for: #198 branched on *landed* and had
+two shapes, six and five, and would have described this one as six with one extra
+line for the rules.
+
+Worth keeping beyond the fix, because it is a fact about the runtime rather than
+about this page: **an approval is not a bypass and the record proves it.** The
+rules are asked again, they answer again, and both answers are in the log. Any
+surface that reports on a held-then-allowed change — the portal's history, the
+demo's payoff card — is reporting on two passes, not one, and a count written for
+the single-pass case will be wrong there too.
+
+---
+
+## 2026-09-02 — `fonts.googleapis.com` is still not reachable, and this is the twelfth screenshot set in the wrong face
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — restated from 1 September with a measurement rather than a new
+argument.
+
+Nine images ship with this run's report and none of them is in Geist. The house
+theme names the family, the stylesheet asks for it, and the sandbox does not
+allow the host — so Chromium falls back to the platform grotesque, which was
+chosen as a deliberate near-neighbour and therefore looks entirely plausible.
+Nothing on the page announces it.
+
+No assertion depends on the face. `font.test.ts` passes because it checks what the
+theme *names*, which is right. The cost is that **this surface is judged by eye
+and has been judged in a font it does not ship in**, for as long as it has had
+screenshots.
+
+Two static font hosts, `fonts.googleapis.com` and `fonts.gstatic.com`. Neither
+can receive a credential; both are already the mechanism `next/font` would use.
+Widening egress is explicitly a finding rather than a fix, which is why this is
+here for the twelfth time rather than in a diff.
+
+---
+
+## 2026-09-02 — #198's work is back on `main`'s doorstep, and the rebuild was worth more than the branch
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed — this lane's entry on the 28 August backlog list is done.
+
+The 28 August entry names one marketing branch,
+`marketing-16-the-record-of-your-ask` (#198), and says to **redo the work against
+current `main` rather than revive the branch**. That instruction was right and is
+worth confirming with evidence, because reviving would have been cheaper and the
+diff would have applied.
+
+The branch was read, not cherry-picked. Rebuilding it found three things it had
+wrong: a refusal band counting the wrong run, a guard that let a query string
+throw on a live page, and a nine-line record it would have called six. Two of
+those are only visible once the surrounding code has moved on — `journey.ts` and
+the derived counts landed on 1 September, after #198 was written — and the third
+was never visible from the branch at all.
+
+The general form, for whoever redoes the other fifteen: **a closed branch is a
+statement of intent, not a patch.** What it was trying to do survives; how it did
+it was written against a repository that no longer exists.
