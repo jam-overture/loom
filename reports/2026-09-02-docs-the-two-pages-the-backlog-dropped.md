@@ -123,6 +123,19 @@ The one failure the last docs report recorded as `main`'s —
 `(marketing)/_lib/facts.test.ts` — is gone, as is the lesson-9 runner failure
 `FINDINGS.md` had open. `main` is green under this branch.
 
+## Preview
+
+**https://loom-git-docs-18-the-two-pag-69b826-jpizzolato36-6341s-projects.vercel.app**
+— Vercel reports *Deployment has completed*, and it is the only check on the
+pull request.
+
+I have not opened it. `*.vercel.app` is still not on the sandbox egress
+allowlist — `curl` gets `CONNECT tunnel failed, response 403`, which is the
+standing finding and unchanged. **The URL and the screenshots are two different
+claims** and worth keeping apart: the URL is Vercel's, reported by the bot on the
+pull request; every screenshot below is `next build && next start` served
+locally, which is the same build from the same commit but is not the deployment.
+
 ## Dark and 390px
 
 `document.documentElement.scrollWidth` is exactly 390 at a 390px viewport and
