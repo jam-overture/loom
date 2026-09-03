@@ -131,6 +131,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "Turn a tree into React through a registry, resolve a theme, and read the diagnostics a render leaves behind.",
       },
+      {
+        slug: "your-first-change",
+        title: "Your first change",
+        summary:
+          "Ask for a change and watch what the runtime does with it: accept it, hold it for a person, or refuse it — the whole loop, live in your browser.",
+      },
     ],
   },
   {
