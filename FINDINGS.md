@@ -13158,3 +13158,131 @@ date on the 21 August and 1 September entries
 Verified again on `d7375ef`: the shim, `DEMO_PATH`, the rail entry, the sign-in
 hero and the `/portal/pages` empty state all still name the old path. Nothing is
 broken while they stay. Twelve days.
+
+---
+
+## 2026-09-03 — the rail promised two questions and the card answered neither: #202, redone
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+this run, on the branch behind #220
+
+The third of the four demo pull requests closed unmerged on 28 August. Rebuilt
+against `d7375ef` rather than revived: `demo-10-the-two-questions-it-promised`
+is preserved and was read, and two of its decisions did not survive contact with
+what the lane has shipped since.
+
+**The gap.** `WhatHappens` step two tells a first-time visitor, before they have
+pressed anything, that *every ask is weighed on two questions: how much damage
+could this do, and can it be taken back?* Then the card answered neither. In
+plain view a held change printed the rule's conclusion — *"Riskier than a request
+from here is allowed to be without asking."* — and stopped. Both answers had been
+on the record since this surface was built, one click down, in the runtime's own
+shorthand: `stakes: medium`, `reversible: yes`, `undo carries: 4 nodes`.
+
+**The half the 30 August branch did not name, and it is the bigger one.** The
+card describes a loss directly above the button that commits to it — *"This comes
+off the page, and everything under it goes too. '3,400' '24' '92%'"*, shipped on
+1 September — and until this unit there was nothing anywhere near that button
+saying the page could be put back. The visitor met the undo *after* saying yes.
+The demo's whole argument is reversibility and it was arriving one press too
+late.
+
+`_lib/weighed.ts` reads the two answers off the record and says them in the words
+the rail asked them in; the questions are one exported constant read by both
+halves, so the promise and the answer cannot drift apart again without a test
+going red. No new vocabulary: the stakes sentences are the portal's `STAKES`
+table and the reversibility clause its `reversibilityWord`. Nothing was removed —
+the level, the factor codes, `reversible` and `undo carries` keep the rows they
+had, one click down, as the evidence.
+
+Two changes against the closed branch:
+
+- **The block is headed *what Loom weighed*.** It was unheaded there, which was
+  survivable on a held card and is not on an answered one: the portal's sentence
+  for `medium` is *"Worth a look before you say yes"*, and under an **Applied**
+  badge three lines above *"You said yes"* that reads as stale advice. Named as
+  Loom's working, it is the reasoning that was in hand when the Gate decided,
+  which is what it is. The alternative was a second stakes table in this lane
+  phrased for two tenses, which is the drift the module exists to refuse.
+- **No `id` on the block.** The closed branch's `aria-labelledby` would have been
+  fine on a singleton and this renders once per card, so a page with a dozen
+  records would have carried a dozen elements sharing one id.
+
+`#209` is the last of the four still to redo.
+
+---
+
+## 2026-09-03 — three of the four portal links to `/portal/demo` were already repointed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** closed —
+the 21 August, 1 September and 2 September entries were stale when filed
+
+This lane has re-filed *"the four portal links to `/portal/demo` are still
+unrepointed"* on three runs, most recently yesterday, claiming the rail entry,
+the sign-in hero and the `/portal/pages` empty state all still name the old path.
+**On `d7375ef` none of them does**, and the rail entry was repointed by this
+lane's own #153 on 24 August:
+
+- `_components/shell/nav-items.tsx:70` — `href: "/demo"`
+- `portal/sign-in/_components/sign-in-hero.tsx:87` — `href="/demo"`
+- `portal/pages/page.tsx:102` — `href="/demo"`
+
+What is left is the 308 at `portal/demo/page.tsx` and `DEMO_PATH` in
+`_lib/auth/paths.ts`, and the second is not a link to the demo — it is the
+public-path exemption that *keeps the 308 working* for a signed-out visitor
+following an old bookmark. `paths.ts` already documents itself that way, and
+accurately. So nothing here is broken and nothing is pending on this lane's
+account: whether the shim is retired at all is a judgement about links outside
+this repository, which is the portal routine's to make and not this one's.
+
+Recorded rather than quietly dropped, because a finding re-filed by date without
+being re-verified is worse than no finding: it spends the owning routine's
+attention on work that was done a fortnight ago.
+
+---
+
+## 2026-09-03 — a `PlainState.meaning` that is advice reads oddly on a decision already made
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open —
+worked around here, and the workaround may be all it needs
+
+`STAKES.medium.meaning` is *"Worth a look before you say yes, but nothing
+drastic."* It is the right sentence in the place it was written for — a queue
+where somebody is about to answer — and it is a sentence in the future tense
+about a decision, so it goes slightly wrong anywhere the decision has already
+been made. This lane hit it as soon as the plain answers went on a card that
+also gets rendered after the visitor has said yes.
+
+Worked around with a heading (*what Loom weighed*) that puts the whole block in
+the past, which is cheap and honest and may well be the whole answer. Filed
+because the portal's own history and audit screens print records of settled
+decisions too, and if it reads wrong there the fix belongs in the table rather
+than in each reader's heading.
+
+---
+
+## 2026-09-03 — `21st.dev` re-verified blocked, from the demo lane a ninth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 2 September entry, not a new argument
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. Sixteenth recorded refusal;
+`docs/routines.md` still lists it as allowed for `WebFetch`.
+
+No cost to this unit. What decided where the block sits, whether it needed a
+heading and whether the card still fit above the fold with it was building the
+tree, driving it in Chromium at 1440×900 and 390×844, and looking at the frames.
+
+---
+
+## 2026-09-03 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24–27 August, 1 September and 2 September entries
+
+Seventh consecutive run. *"Two problems to fix before anything else"* — the first
+being the move off `/portal/demo` — describes this lane's first unit, landed
+thirteen days ago. `docs/rollout.md:19` still says the demo is live at
+`apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
+
+The second of the two, *"it is clunky"*, is live and is what this run acted on.

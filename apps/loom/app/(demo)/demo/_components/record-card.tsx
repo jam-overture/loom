@@ -18,9 +18,11 @@ import {
   UNDO_WAITING,
   type UndoOffer,
 } from "@/app/(demo)/_lib/undo"
+import { weighedOf } from "@/app/(demo)/_lib/weighed"
 
 import { answerHeld, undoRevision } from "../actions"
 import { TechnicalDetail } from "./technical-detail"
+import { Weighed } from "./weighed"
 import { WhatWouldHappen } from "./what-would-happen"
 
 /**
@@ -97,6 +99,7 @@ export const RecordCard = ({
   const outcome = demoState(stateOfRecord(record.outcome))
   const answered = answerNote(record)
   const asked = askedLine(record)
+  const weighed = weighedOf(record)
 
   return (
     /*
@@ -152,6 +155,26 @@ export const RecordCard = ({
           {record.repaired ? " · refused once, then repaired" : ""}
         </p>
       </header>
+
+      {/*
+        * What the Gate weighed, before the rule that read it.
+        *
+        * The rail promises two questions and then a named rule; this is the
+        * card keeping that promise, in that order. Both answers were already on
+        * the record and both were behind the disclosure in the runtime's
+        * shorthand — `stakes: medium`, `undo carries: 4 nodes` — so a visitor
+        * met the verdict and never met the weighing.
+        *
+        * It stays on an answered card as well as a held one. The weighing is
+        * what the Gate did with this ask, which is a fact about the record and
+        * not a control: a card that dropped it once the change had landed would
+        * be a record that forgets its own reasoning the moment the reasoning
+        * stops being urgent.
+        *
+        * `_lib/weighed.ts` decides the words, and returns nothing for an ask
+        * that never reached assessment.
+        */}
+      {weighed && <Weighed answers={weighed} />}
 
       {/*
         * The verdict, in the words of the rule that produced it, above the

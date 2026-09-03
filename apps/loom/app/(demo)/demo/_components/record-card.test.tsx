@@ -8,6 +8,7 @@ import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { UNDO_CAUTION, UNDO_SPENT, UNDO_WAITING } from "@/app/(demo)/_lib/undo"
+import { WEIGHED_QUESTIONS } from "@/app/(demo)/_lib/weighed"
 
 import { RecordCard } from "./record-card"
 
@@ -175,6 +176,92 @@ describe("a record card", () => {
     expect(screen.getByText("low")).toBeTruthy()
     expect(screen.getByText(/^yes$/)).toBeTruthy()
     expect(screen.getByText("nothing this policy watches for")).toBeTruthy()
+  })
+
+  /**
+   * The two questions the rail promised, answered on the card in the words they
+   * were asked in.
+   *
+   * Both facts were on the record from the day this surface was built and both
+   * were behind the disclosure in the runtime's shorthand, so a stranger was
+   * told what would be weighed, watched a verdict arrive, and never saw the
+   * weighing. Asserted to be *outside* the disclosure rather than merely
+   * present: the whole defect was that they were present.
+   */
+  it("answers both of the rail's questions without the visitor opening anything", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    const damage = screen.getByText(WEIGHED_QUESTIONS.damage)
+    const reversal = screen.getByText(WEIGHED_QUESTIONS.reversal)
+
+    expect(disclosure.contains(damage)).toBe(false)
+    expect(disclosure.contains(reversal)).toBe(false)
+    expect(screen.getByText(/Worth a look before you say yes/)).toBeTruthy()
+  })
+
+  /**
+   * Order, and it is the argument rather than the layout: the rail says *weighed
+   * on two questions, then a named rule decides*, so the two answers come before
+   * the rule's sentence. Reversed, the card is a verdict with its reasoning
+   * underneath — which is the shape this unit replaced.
+   */
+  it("weighs before it rules", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+    const text = container.textContent ?? ""
+
+    expect(text.indexOf(WEIGHED_QUESTIONS.damage)).toBeGreaterThan(-1)
+    expect(text.indexOf(WEIGHED_QUESTIONS.damage)).toBeLessThan(
+      text.indexOf("Riskier than a request from here")
+    )
+  })
+
+  /**
+   * The reassurance and the button it makes pressable, on one card.
+   *
+   * A held card's whole job is to be answerable. It describes a loss — *"This
+   * comes off the page, and everything under it goes too"* — directly above a
+   * green button, and until this block the only statement that the page could be
+   * put back was three clicks down as `undo carries: 4 nodes`, or one press too
+   * late on the card that appears *after* the visitor has already committed.
+   */
+  it("says the change can be taken back on the same card as the button that makes it", () => {
+    render(<RecordCard record={HELD} plain={PLAIN} />)
+
+    const reversal = screen.getByText(WEIGHED_QUESTIONS.reversal).closest("li")
+
+    expect(reversal).toBeTruthy()
+    expect(reversal?.textContent).toContain("Apply this change")
+    expect(reversal?.textContent).toContain("already exists")
+  })
+
+  /**
+   * And it stays once the change has landed. The weighing is what the Gate did
+   * with this ask; a card that dropped it the moment it stopped being urgent
+   * would be a record forgetting its own reasoning.
+   */
+  it("keeps the weighing on the card after the change is applied", () => {
+    render(<RecordCard record={ANSWERED} />)
+
+    expect(screen.getByText(WEIGHED_QUESTIONS.damage)).toBeTruthy()
+    expect(screen.getByText(WEIGHED_QUESTIONS.reversal)).toBeTruthy()
+  })
+
+  /**
+   * Nothing was removed to make room. The level and the retained count keep the
+   * rows they always had, one click down, beside the factor codes they came
+   * from.
+   */
+  it("keeps the runtime's own numbers in the record underneath", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText("medium"))).toBe(true)
+    expect(disclosure.contains(screen.getByText("0 nodes"))).toBe(true)
   })
 
   it("names the rule that fired and the policy it fired under", () => {

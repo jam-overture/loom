@@ -7,6 +7,7 @@ import type {
   RuntimeEvent,
   RuntimeEventEnvelope,
   StakeFactor,
+  StakeLevel,
   TreeDelta,
 } from "@loom/runtime"
 
@@ -49,7 +50,16 @@ export type InterpretationView = {
 }
 
 export type StakesView = {
-  readonly level: string
+  /**
+   * The runtime's level, not a string that happens to hold one.
+   *
+   * It was widened to `string` when this view was written and nothing needed it
+   * narrow, because the only consumer printed it. `weighed.ts` reads it against
+   * the portal's four-entry `STAKES` table, and a `string` there is either a
+   * cast or an unreachable fallback branch — both of which are a surface
+   * pretending it might be handed a level the Gate cannot produce.
+   */
+  readonly level: StakeLevel
   readonly factors: readonly StakeFactor[]
 }
 
