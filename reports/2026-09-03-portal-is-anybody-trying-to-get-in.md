@@ -244,12 +244,48 @@ an advantage.
   cannot meet, and a redirect is not free.
 - **No follow-up scheduled.** Token discipline.
 
+## The preview, and a wrong answer I published before the right one arrived
+
+**This pull request first went up with no preview, and it was my fault rather
+than the deployment's.** I committed as `Loom portal <jpizzolato36@gmail.com>`;
+that address resolves on GitHub to an account which is not on the Vercel team, so
+Vercel refused to start the build and reported `Deployment was blocked`. Both
+commits are re-authored to the environment's default identity — the one #233 used
+two hours earlier on a branch that deployed — and force-pushed before any review
+existed. It is the **fourth** occurrence of this on the repository and the finding
+asking for three lines in `docs/routines.md` now has four data points.
+
+The part worth more than the fix: **I diagnosed it wrong, and said so out loud
+first.** Working from the status alone — the explanatory bot comment arrives on a
+delay — I built a table showing #229 to #233 deploying that morning and #234
+blocked at 18:00, concluded a spend or usage cap had been reached during the day,
+filed it as a finding, said it in the pull-request comment, and sent it to the
+maintainer. Every fact in that table was true. The conclusion drawn from them was
+false, and it would have sent somebody to a Vercel billing page over a git author
+line.
+
+Two lessons, both cheap and both mine:
+
+- **A status without its comment is half the evidence.** `Blocked` is Vercel's
+  word for at least two unrelated conditions and the status does not distinguish
+  them. The thing that did was a bot comment ninety seconds later.
+- **A pattern found by correlating across pull requests can be a coincidence.**
+  #233 deployed and #234 did not, two hours apart, and the difference was never
+  the time.
+
+The finding is filed with the wrong answer in it rather than tidied away, and the
+one I filed on the wrong diagnosis is deleted rather than amended.
+
 ## Recommendations
 
 1. **Nothing blocking.**
 2. **#219 and #227 are still open**, and both are self-contained. This branch
    touches neither's files.
-3. **The screenshot recipe is in `FINDINGS.md` and it works.** Four briefs ask
+3. **Three lines in `docs/routines.md`: never override the git author.** Fourth
+   occurrence, four separate lanes, same repair each time. It is procedure, and
+   `FINDINGS.md` is read for work — which is why four runs have met it in the
+   file where it is not.
+4. **The screenshot recipe is in `FINDINGS.md` and it works.** Four briefs ask
    for a picture and nothing in the repository takes one. It cost this run two
    failed attempts to rediscover, and it is thirty lines that belong in
    `apps/loom/scripts/`.
