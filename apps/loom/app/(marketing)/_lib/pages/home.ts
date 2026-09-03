@@ -17,6 +17,7 @@ import { FACTS } from "../copy"
 import { PLAIN_WORDS, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
+import { asDataBand } from "./as-data"
 import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
@@ -443,11 +444,26 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
     }),
   ])
 
+/**
+ * The last word, and it used to end on a sentence that was not true.
+ *
+ * *"None of it was written by hand"* stood here from 19 August until this run.
+ * What it meant is that no band of this page is written out as a web page,
+ * which is true and is now a band of its own further up. What it **said**, to
+ * somebody who has never heard of any of this, is that nobody wrote the words —
+ * and every word on this site was written by a person. It was also false in the
+ * one way a reader could catch: the button directly beside it says *Read the
+ * source*, and the source is a file with that sentence typed into it.
+ *
+ * The clause that replaces it is the same reassurance said accurately, and it
+ * is the answer to the first problem the page named an hour of reading ago: a
+ * tool that generates components hands you work rather than taking it away.
+ */
 const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
     prose(
       ids,
-      "The menu, the questions, this sentence — every one of them is a piece the AI could be asked to move. None of it was written by hand.",
+      "The menu, the questions, this sentence — every one of them is a piece the AI could be asked to move, and none of it is code you would have to read afterwards.",
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
@@ -529,6 +545,19 @@ export const homePageTree = (context: PageContext): LoomTree => {
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
         facts(ids),
+        /**
+         * The claim the facts band makes about the repository, made about this
+         * page. *Not one of these numbers was typed from memory* is directly
+         * above it, and the same argument applied to the page itself is the one
+         * thing this surface can show that a description of it cannot.
+         *
+         * After the numbers rather than before them because a reader who has
+         * not yet been told the site is checkable has no reason to care how it
+         * is put together, and before the questions because *"can the AI write
+         * code into my page?"* is easier to believe from somebody who has just
+         * seen what a change is actually written against.
+         */
+        asDataBand(ids),
         questions(ids),
         waysIn(ids, context),
         closing(ids, context),
