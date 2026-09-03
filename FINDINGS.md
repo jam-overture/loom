@@ -9204,6 +9204,18 @@ and `src/record-claims.test.ts` now holds the counted sentence in 0002, 0007 and
 later. The wider version this entry named — *nothing connects a list in `src/` to
 a sentence that counts it* — is answered for records and still open for lessons,
 documentation pages and marketing claims.
+**closed** by #181, recorded here on 2026-09-02 because the finding was never
+marked. The remedy taken is the one this finding said would *end the class*
+rather than fix today's instance: `record-claims.test.ts` holds counted
+sentences in `decisions/` against the lists in `src/` that they count, so
+inserting a rung fails 0002 and 0007 **by name**. 0002 and 0007 were amended
+in place under
+[0099](decisions/0099-a-record-is-amended-when-only-the-count-moved.md), neither
+superseded — 0007 was stale too, which nobody had noticed.
+
+The wider sentence this finding ended on — *nothing connects a list in `src/` to
+a sentence that counts it* — is answered for `decisions/` and remains open for
+lessons, docs pages and marketing copy.
 
 [0002](decisions/0002-gate-is-a-pure-function-of-two-axes.md) states the decision
 as *"six ordered rules, first match wins"*. `ESCALATION_RULES` in
@@ -10097,6 +10109,17 @@ itself rather than a second copy of them, and `gate.test.ts` holds the two
 together. It has been on `main` since `e7c8494` and this entry simply had not
 been marked; `/the-rules` can derive its order and drop its hand-written list
 whenever that lane next opens the file.
+**closed** by #181, and the closure is recorded here on 2026-09-02 because the
+finding was never marked. This lane's recommendation — option 1 — is what
+landed: `ESCALATION_LADDER` is exported from `src/runtime/gate.ts`, **derived
+from `ESCALATION_RULES` rather than declared beside them**, so the two cannot
+drift even in principle, and `gate.test.ts` holds it. It is re-exported through
+`runtime/index.ts` and `src/index.ts`, so `@loom/runtime` is where a page
+imports it from.
+
+`app/(marketing)/_lib/pages/the-rules.ts` still writes the order by hand and can
+now stop. That is this lane's own file and its own call; nothing outside it
+blocks the change any more.
 
 `/the-rules` lists the seven questions the rules ask of every change. The **set**
 is derived and safe: `dispositionReasonCodeSchema` is exported, and the page's
@@ -11955,7 +11978,21 @@ a maintainer's word, since it changes what a host is told about its own brand
 colour.
 ## 2026-08-28 — the course can run its own exercises, but not in the reader's browser
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-23-the-fixtures-a-host-can-import` — the two framework
+facts are gone. `src/testing/**` is built and published as
+`@loom/runtime/testing` under
+[0104](decisions/0104-the-runtime-publishes-its-fixtures-and-its-contract-suites.md),
+so `sampleTree()` and `formTree()` are importable, and the entry point is split
+so that nothing reachable from the fixtures imports `vitest` — which is the
+property a browser runner needs and the one a single entry point would have
+lost. The contract suites are published too, at `@loom/runtime/testing/contracts`.
+
+The third fact is not a framework one and is left as filed: `zod` is not a
+dependency of `apps/loom`. Importing the fixtures does not need it — they
+resolve `zod` through the runtime — so it is only wanted when a *fence* imports
+`z` directly, which is `Loom lessons`' call to make in its own file when it
+builds the runner.
 
 The brief for this lane asks for runnable exercises: the reader writes a
 prediction and then runs the snippet on the page, instead of cloning the
@@ -12336,6 +12373,12 @@ does not exist" and put it first on the next run. It had merged eighteen hours
 earlier. The run that reported it was reading a `main` from before the backlog
 merge, and the correction is recorded here rather than quietly — a lane that
 misreports its own queue costs the next session the same look.
+**closed** by #181, recorded here on 2026-09-02 because the finding was never
+marked. `WRITE_OUTCOME_KINDS` sits beside the type in `src/write/commit.ts`,
+built through `everyMemberOf<WriteOutcomeKind>()` so an eighth ending is a
+compile error rather than a silent omission, and is published through
+`@loom/runtime/write`. The documentation page can delete its own copy whenever
+`Loom docs` next opens the file.
 
 `commitIntent` can end seven ways, and the seven are a union of string literals
 on `WriteOutcome["kind"]`. A `switch` over them is exhaustive at compile time,
@@ -13026,3 +13069,71 @@ all seven lanes.
 **Cost this run:** three wakes, all bot noise, none of which needed an action.
 Cost of the alternative, unfixed, per open pull request: one session an hour,
 indefinitely.
+## 2026-09-02 — three records cited each other by numbers that had stopped being true, and nothing could see it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed by `framework-23-the-fixtures-a-host-can-import` — repaired,
+and a check added so the class cannot recur
+
+Recorded so that the three lanes whose records were opened know why, and because
+the mechanism is worth one paragraph.
+
+A cross-reference between records is written twice — once as the number a reader
+sees, once as the file a click opens — and every rename moves only the second.
+Three had drifted apart:
+
+| record | said | opened | actually |
+| --- | --- | --- | --- |
+| 0002, 0007 | `[0096]` | `0099-a-record-is-amended-…` | the file was right; the number was the one 0099 held **before** #217 renumbered it |
+| 0057 | `[0005]` | `0005-interpretation-is-the-only-non-deterministic-step.md` | no such file; 0005 is *Model access is a narrow seam with an optional adapter* |
+| 0087 | `[0010]`, twice | `0010-conformance-is-probed-not-proven.md` | no such file, and 0010 is *Edit mode decorates*. The record it is reasoning from is **0012**, *Conformance is probed and reported, never enforced by registration* — which is what the surrounding sentence says |
+
+None of this was catchable. `checkNumbering` reads a record's **status** line,
+which is where a supersession is declared, and these are citations in prose. Two
+of the four links resolved to a real file under a wrong number, so a reader
+following them landed somewhere plausible; the other two 404 and had done for
+long enough that nobody clicked.
+
+`decisions.test.ts` now reads every record and fails when a link's label and its
+target disagree, or when the target is not a record. It fails on each of the four
+above before the repair, and it is the counterpart to 0097 aimed at prose rather
+than at the numbering: **0097 makes a clash fatal; this makes a stale citation
+fatal.** The repairs change no argument in any of the three records — 0087's
+`0010` became `0012` in a link and in the sentence beside it, because both name
+the reasoning the paragraph is actually using.
+
+
+---
+
+## 2026-09-02 — the preview deployment is Blocked because the pushing account is not on the Vercel team
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — an access question, not an engineering one, and it removes
+the preview URL every brief asks a pull request to carry
+
+#223 got no preview. Vercel's bot on the pull request:
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+The deployment is marked **Blocked**, there is no `previewUrl` in the payload,
+and the only check on the pull request is `Vercel Preview Comments`, which
+passes because commenting is all it did.
+
+**This is new between #221 and #223, twelve hours apart, with no change to
+`vercel.json` or to `apps/loom/package.json` in between.** #221 deployed and
+carries a working preview link. The difference is the account credited with the
+push — Vercel names `@jpizzo` (GitHub id `34899384`), which is not the account
+the project's team knows. Nothing a routine can change: the remedy is one of the
+two links in that comment, adding the account to the team.
+
+Worth stating alongside the two standing preview findings rather than folded
+into them, because they are different failures. *The deployed preview is
+unreachable from the sandbox* (1 September) is about a run being unable to
+**screenshot** a preview that exists. This is about there being **no preview**,
+which is a step further back: a reviewer opening the pull request has nothing to
+click either.
+
+No consequence for this branch beyond the missing link — it adds no UI, so there
+was nothing to look at. The lane that files this next will not be so lucky.
+
