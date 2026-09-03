@@ -10103,19 +10103,19 @@ red recognises it rather than diagnosing it again, and so the cost of leaving
 ## 2026-08-28 — the Gate asks its rules in an order nothing outside the runtime can read
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-closed by #181 — option 1, as recommended. `ESCALATION_LADDER` is exported from
-`src/runtime/gate.ts`, is the ordered reason codes derived from `ESCALATION_RULES`
-itself rather than a second copy of them, and `gate.test.ts` holds the two
-together. It has been on `main` since `e7c8494` and this entry simply had not
-been marked; `/the-rules` can derive its order and drop its hand-written list
-whenever that lane next opens the file.
-**closed** by #181, and the closure is recorded here on 2026-09-02 because the
-finding was never marked. This lane's recommendation — option 1 — is what
-landed: `ESCALATION_LADDER` is exported from `src/runtime/gate.ts`, **derived
-from `ESCALATION_RULES` rather than declared beside them**, so the two cannot
-drift even in principle, and `gate.test.ts` holds it. It is re-exported through
-`runtime/index.ts` and `src/index.ts`, so `@loom/runtime` is where a page
-imports it from.
+**closed** by #181 — option 1, as this lane recommended. `ESCALATION_LADDER` is
+exported from `src/runtime/gate.ts`, **derived from `ESCALATION_RULES` rather
+than declared beside them**, so the two cannot drift even in principle, and
+`gate.test.ts` holds it. It is re-exported through `runtime/index.ts` and
+`src/index.ts`, so `@loom/runtime` is where a page imports it from. It has been
+on `main` since `e7c8494`; the entry simply had not been marked.
+
+**Two runs of this lane wrote that closure independently**, on
+`framework-22-a-handle-on-the-control` and
+`framework-23-the-fixtures-a-host-can-import`, neither able to see the other. The
+merge that put those branches together concatenated both paragraphs; this is the
+one of the two that survived. It is a small instance of the thing the 3 September
+entry below is about.
 
 `app/(marketing)/_lib/pages/the-rules.ts` still writes the order by hand and can
 now stop. That is this lane's own file and its own call; nothing outside it
@@ -13136,4 +13136,58 @@ click either.
 
 No consequence for this branch beyond the missing link — it adds no UI, so there
 was nothing to look at. The lane that files this next will not be so lucky.
+
+
+---
+
+## 2026-09-03 — four of this lane's own pull requests could not be merged together, and they are now one branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** **resolved on this branch** — the merge is done, `pnpm verify` is
+green, and what is left is a decision about the other three pull requests
+
+The 28 August backlog entry names the cause of sixteen closed pull requests:
+*"each lane had several runs open at once, every one branched off `main` and
+editing the same files"*. This lane then did it four more times. #221, #223, #228
+and #230 were each branched off `main`, and **they do not merge with each other**:
+
+```
+main + #221                    → clean
+      + #223  → CONFLICT  FINDINGS.md, decisions/README.md
+      + #228  → CONFLICT  FINDINGS.md, decisions/README.md
+      + #230  → CONFLICT  FINDINGS.md, decisions/README.md
+```
+
+Measured, not predicted — the merges were run. None of the conflicts is a
+disagreement: `FINDINGS.md` is an append-only channel and both sides are wanted,
+and `decisions/README.md` is a file `pnpm decisions:index` generates. The third
+shared file, `reference.generated.json`, three-way merged cleanly this time and
+would not have on a different pair of branches.
+
+**What the conflict was hiding is the more useful half.** On `main`, the
+decisions index has four holes in it — `0103`, `0104`, `0105`, `0106` all read
+*No record on this branch*. Three of those four holes are these pull requests,
+and merging them fills the table in. A hole in that index is not cosmetic: it is
+the file a routine skims to learn which constraints are deliberate, and a number
+that reads as deleted is a number the next lane may take.
+
+**Done here.** All four are merged into
+`framework-25-where-the-face-is`, the newest of them, in the order they were
+opened. `FINDINGS.md` took both sides everywhere; `decisions/README.md` and the
+API reference were regenerated rather than hand-merged. `pnpm verify` passes —
+1931 runtime tests across 123 files, 2497 application tests across 158, exit 0.
+
+Because the heads of #221, #223 and #228 are now ancestors of this branch,
+**merging this one closes all four as merged.** They stay open and independently
+readable until then; nothing was closed by this run.
+
+**What this asks of you: nothing, if you merge this branch.** The recommendation
+is to read the four pull requests separately — they are four units and the
+diffs are unchanged — and merge only this one.
+
+`docs/routines.md` gains the two rules this cost: continue your own open pull
+request rather than opening a second, and the three shared files with how each is
+resolved. The first of those contradicts the previous step 3 (*"Branch off
+`main`"*) read literally, which is why it is an edit to that step rather than a
+line added under it.
 

@@ -137,8 +137,12 @@ not done.
    them.
 2. **Maintainer comments outrank everything**, including the plan and the
    findings queue. Address them first and say how in the report.
-3. **Branch off `main`. Never stack** one branch on another — a stack once cost
-   four days of visibility. **Never merge to `main` yourself.**
+3. **Check whether you already have an open pull request.** If you do, **push
+   onto that branch** rather than opening a second one — two open branches from
+   one lane touching one file is a conflict the lane created for itself, and the
+   cost lands on the maintainer at merge time rather than on the run. If you do
+   not, **branch off `main`. Never stack** on another lane's branch — a stack
+   once cost four days of visibility. **Never merge to `main` yourself.**
 4. Build **one coherent unit**, with tests.
 5. `pnpm install && pnpm verify`. **Never open a pull request on red**; say so
    rather than weakening a test to get green.
@@ -156,6 +160,26 @@ not done.
 
 From the first rendered primitive onward, **include the deployed preview URL**,
 and a screenshot once there is a page worth looking at.
+
+### The three files every lane writes to
+
+Almost every branch in this repository touches the same three, and almost every
+merge conflicts in them. None of the three is a disagreement about anything, and
+none is a reason to close a pull request.
+
+| File | What it is | How a conflict is resolved |
+| --- | --- | --- |
+| `FINDINGS.md` | an append-only channel | **take both sides.** Two lanes appending entries are not in conflict; git only thinks so because they appended in the same place |
+| `decisions/README.md` | **generated** by `pnpm decisions:index` | take either side, then **regenerate**. Never hand-merge a table git built |
+| `apps/loom/app/(docs)/_lib/api/reference.generated.json` | **generated** from `dist/` | take either side, then `pnpm build && pnpm --filter @loom/app docs:api`, **in that order** — the generator reads declaration files, not source |
+
+The last of those is also the answer to a red build that no source change
+explains: **a new export in `src/` leaves the API reference stale**, and stale is
+a failing test. Regenerate it in the same commit as the export.
+
+The one case that is a real conflict is two branches rewriting the same logic in
+the same file. That is what closed sixteen pull requests on 28 August, and step 3
+above is how a lane stops producing it.
 
 ## Standards
 
