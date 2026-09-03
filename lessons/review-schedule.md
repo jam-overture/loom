@@ -757,9 +757,10 @@ thing in the course. Question 7 is the point of the set.
 
 ## Set V — one week after Part IV
 
-Part IV ends at lesson 17, which is the end of the syllabus, so this is the last
-scheduled set and the counterpart to Sets E, M and Q. Do it **out loud**, and do
-not do it the same day as Set U. It reaches into all four parts on purpose:
+Part IV ends at lesson 17, which is the end of the system, so this is the
+counterpart to Sets E, M and Q and the one that closes it. Do it **out loud**,
+and do not do it the same day as Set U. It reaches into all four parts on
+purpose:
 everything before this asked you to hold one part in your head, and the thing
 worth having at the end is the system.
 
@@ -794,6 +795,56 @@ worth having at the end is the system.
 
 Question 6 is the one that tells you whether the course worked. Question 7 is the
 one to still be thinking about tomorrow.
+
+---
+
+## Set W — two days after lesson 18
+
+Interleaved with 02, 05, 09, 12, 14, 15 and 16. Set V asked you to hold the
+system; this set is the first that asks you to hold the system **against
+something outside it**, which is what Part V is. Half of these questions are
+about a seam and the other half are about a claim the seam made false — and the
+second half is the harder one.
+
+1. State what a binding contains and what it may never contain. Then give the
+   reason twice: once as an argument about the tree, and once as an argument
+   about what the Gate would find itself weighing. Say which of your two is the
+   one that actually kills the alternative. *(03, 08)*
+2. `renderLoomTree` is synchronous and `renderRequest` is not. Name the two
+   seams that forced that, say where each one's work happens instead, and then
+   give the general rule both are instances of — the one lesson 05 stated first
+   about something much smaller. *(05, 14)*
+3. A source declares what it answers with, and the adapter that answers is
+   already typed by that declaration. Say why the answer is validated anyway.
+   Then name the other place in this course where a value is re-checked at a
+   boundary its own types already described, and say what the two boundaries
+   have in common about who wrote what is on the far side. *(14, 16)*
+4. "The page is a function of the tree alone" was true through Part IV. State
+   what replaced it, exactly, and then state what a reviewer can still conclude
+   from a revision because of the weaker claim. Then the harder half: name what
+   a reviewer approved when they approved a bound node, and say what would have
+   to be stored for them to have approved more. *(09, 10)*
+5. A source with nothing to report answers `ready` with an empty list rather
+   than reporting that it has nothing. Give the failure this prevents, in terms
+   of what a *visitor* concludes. Then find the same argument in lesson 12 and
+   in lesson 14, name the party it is protecting in each of the three, and say
+   which of the three is the one you would have been most likely to get wrong on
+   your own. *(12, 14)*
+6. A node declares three bindings and one of them is malformed. Say what the
+   other two get, then say what a page looks like under the *other* decision and
+   why that is worse — the answer is about which failures a person notices, not
+   about which is more correct. *(14)*
+7. Name every place in this system where a name in the tree points at something
+   the tree does not contain, and for each, name the party that owns the far
+   side. There are at least four. Then say what all four do when the far side is
+   missing, and whether they all do the same thing. *(02, 15)*
+8. Loom's own code contains exactly one `try`. Say what is on the far side of it
+   and why that one is the exception to lesson 05's rule rather than a hole in
+   it. Then name two other places where Loom treats something as foreign that a
+   less careful library would treat as its own. *(05, 15, 16)*
+
+Question 5 is the point of the set. Question 7 is the one to write as a list and
+then be unsatisfied with, because the fourth entry is the one nobody remembers.
 
 ---
 
@@ -833,3 +884,4 @@ renders this file rather than restating it.
 | T | 2 days after L16 | | |
 | U | 2 days after L17 | | |
 | V | 1 week after Part IV | | |
+| W | 2 days after L18 | | |

@@ -188,9 +188,19 @@ tree. Everything else in the system follows from protecting that one property.
 | [16](16-persistence.md) | Persistence | The log is the truth; the snapshot is a view you can rebuild — and the audit is what it costs to keep one. |
 | [17](17-telemetry.md) | Telemetry | How a self-graded confidence number eventually gets calibrated — and why the thing that measures it is not allowed to act on it. |
 
-That is the syllabus, complete. What is left is the [review
-schedule](review-schedule.md), which is where seventeen separate ideas become one
-system you can hold at once.
+### Part V — What the tree cannot hold
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| [18](18-data.md) | Data: the question the tree asks | Why an answer may never be in the tree, what a page stops being a function of, and what a reviewer's approval covers once it covers a question. |
+
+Parts I to IV are the system, and the [review
+schedule](review-schedule.md) is where those seventeen ideas become one thing you
+can hold at once. Part V is what came after the system was whole: places where a
+tree names something a deployment owns and holds none of it. It has one lesson in
+it, and how far it runs is an open question — a submission's destination and a
+frame's origin are the same shape as a binding, and whether they are lessons is a
+decision for whoever is learning this, not for whoever is writing it down.
 
 ## Pacing
 
