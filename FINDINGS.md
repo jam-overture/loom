@@ -10785,6 +10785,21 @@ promote the list under *After the migration* — open findings owned by the lane
 framework depth behind the surfaces, the demo, then §7 — to be the queue. If the
 other three briefs carry a matching "blocked until the migration" clause, they
 need the same edit.
+
+**3 September, fourth consecutive framework run to open by establishing this,
+and there is a second stale line in the same brief.** The queue it recommends
+promoting names *"**The demo**, which is yours"* as item 3. The demo has not been
+this lane's since 20 August, when `Loom demo` was split out of it —
+`docs/routines.md` records the split and the reason, and that routine has shipped
+into `app/(demo)/` on four of the last five days, #220 being open now. Two
+routines pointed at one directory is the collision the lane table exists to
+prevent, and it is one line in the brief rather than a second argument.
+
+**Recommendation, added to the above:** drop *the demo* from the framework
+queue's item 3 in the same edit. This run read `docs/routines.md` over the brief
+on that point and did not touch `app/(demo)/`, which is the opposite of what
+that file says to do when the two disagree — recorded here because next time the
+brief may be right and the disagreement is the maintainer's to settle.
 ## 2026-09-01 — a runtime control carries inline styles, so a primitive cannot hide its own control with its own rule
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
@@ -11669,7 +11684,28 @@ Recommendation: **2**, when something else wants it. One card does not justify i
 
 ## 2026-08-29 — a font pack names a family and never says where the face is
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-25-where-the-face-is`** ([0107](decisions/0107-a-font-pack-may-say-where-a-face-is-and-the-runtime-never-fetches-it.md)),
+taking the shape this entry proposed — an optional `source` beside each family —
+and settling the question it left open. **The runtime never fetches one.** A pack
+declares an address; `declaredFaces`, `facesForRole` and `fontFaceRules` hand it
+back, and a host or a renderer resolves it against its own allowlist. Fetching
+inside a render would put 0008's determinism behind somebody else's uptime, and
+would let a registered document choose the deployment's egress — the thing 0095
+refused for frames.
+
+Two things this entry asked for that the fix deliberately does **not** do. No
+starter pack declares a source, so the library still makes no network call, and
+that is now asserted rather than described. And the four descriptions saying
+*"the host must serve Inter"* stay prose: the distinction they draw is a
+judgement about what a mainstream operating system ships, and it is not
+derivable from a stack. `familiesWithoutSource` answers the narrower question
+that is — which families a pack asks for and does not address — which is the one
+an image renderer actually has.
+
+The seam has no consumer yet, and the share card is `Loom marketing`'s file.
+Nothing was changed on that surface; that lane's own recommendation was to leave
+the card alone until it next opens it.
 
 A `FontPack` carries `headingFamily` and `bodyFamily` as **CSS family stacks** —
 `'Geist', ui-sans-serif, …`. That is right for a browser, which already has the
@@ -12252,8 +12288,19 @@ it is bound by, which is the rule that file states about itself.
 
 ## 2026-08-27 — `WriteOutcome` has seven kinds and no list of them, and telemetry solved this once already
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-a small addition, with the shape already settled elsewhere in `src/`
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed — it was built on 1 September** by #181, and `WRITE_OUTCOME_KINDS` has
+been exported from `@loom/runtime/write` since. `src/write/commit.ts:101` is the
+list, in the order a request meets the endings, with `everyMemberOf` holding it
+complete. `Loom docs` can delete its `WRITE_ENDING_ORDER` copy whenever it next
+opens that page.
+
+Closed on 3 September by the lane that owns it, which had reported the opposite
+the evening before: the 2 September framework run said on #228 that this "still
+does not exist" and put it first on the next run. It had merged eighteen hours
+earlier. The run that reported it was reading a `main` from before the backlog
+merge, and the correction is recorded here rather than quietly — a lane that
+misreports its own queue costs the next session the same look.
 
 `commitIntent` can end seven ways, and the seven are a union of string literals
 on `WriteOutcome["kind"]`. A `switch` over them is exhaustive at compile time,

@@ -2435,6 +2435,83 @@
           ]
         },
         {
+          "module": "theme/faces",
+          "title": "Faces",
+          "summary": "Where a face actually is, for anything that cannot look one up.",
+          "symbols": [
+            {
+              "name": "FaceRole",
+              "kind": "type",
+              "signature": "type FaceRole = \"heading\" | \"body\" | \"mono\";",
+              "truncated": false,
+              "summary": "The three roles a pack names a family for."
+            },
+            {
+              "name": "FACE_ROLES",
+              "kind": "value",
+              "signature": "const FACE_ROLES: readonly FaceRole[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "GENERIC_FAMILIES",
+              "kind": "value",
+              "signature": "const GENERIC_FAMILIES: readonly string[]",
+              "truncated": false,
+              "summary": "The CSS generic families, which name a face without addressing one."
+            },
+            {
+              "name": "isGenericFamily",
+              "kind": "function",
+              "signature": "const isGenericFamily: (family: string) => boolean",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "leadingFamily",
+              "kind": "function",
+              "signature": "const leadingFamily: (stack: string) => string",
+              "truncated": false,
+              "summary": "The first family a stack asks for, unquoted."
+            },
+            {
+              "name": "familyStackForRole",
+              "kind": "function",
+              "signature": "const familyStackForRole: (pack: FontPack, role: FaceRole) => string | undefined",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "declaredFaces",
+              "kind": "function",
+              "signature": "const declaredFaces: (pack: FontPack) => readonly FontFace[]",
+              "truncated": false,
+              "summary": "Every face the pack says where to find, in declaration order."
+            },
+            {
+              "name": "facesForRole",
+              "kind": "function",
+              "signature": "const facesForRole: (pack: FontPack, role: FaceRole) => readonly FontFace[]",
+              "truncated": false,
+              "summary": "The declared faces whose family is the one this role's stack leads with."
+            },
+            {
+              "name": "familiesWithoutSource",
+              "kind": "function",
+              "signature": "const familiesWithoutSource: (pack: FontPack) => readonly string[]",
+              "truncated": false,
+              "summary": "The families this pack asks for first and does not say where to find."
+            },
+            {
+              "name": "fontFaceRules",
+              "kind": "function",
+              "signature": "const fontFaceRules: (pack: FontPack) => string",
+              "truncated": false,
+              "summary": "The pack's declared faces as `@font-face` rules, for a host that wants them."
+            }
+          ]
+        },
+        {
           "module": "theme/font-packs",
           "title": "Font packs",
           "summary": "The seventeen font packs the starter library ships beyond the first three.",
@@ -3052,6 +3129,20 @@
               "name": "Palette",
               "kind": "type",
               "signature": "type Palette = z.infer<typeof paletteSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "fontFaceSchema",
+              "kind": "schema",
+              "signature": "const fontFaceSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FontFace",
+              "kind": "type",
+              "signature": "type FontFace = z.infer<typeof fontFaceSchema>;",
               "truncated": false,
               "summary": ""
             },

@@ -81,6 +81,39 @@ export const paletteSchema = z.object({
 export type Palette = z.infer<typeof paletteSchema>
 
 /**
+ * Where one face is, for a reader that cannot look a family name up.
+ *
+ * A family stack is an instruction to something that already has fonts. A
+ * browser resolves `Fraunces` against the faces the machine holds and the ones
+ * the host's stylesheet loaded; anything drawing text itself resolves it against
+ * nothing, falls back silently, and looks entirely deliberate while doing it.
+ *
+ * So a pack may say where a face is as well as what to ask for. The value is an
+ * address and the runtime never dereferences one — a host or a renderer fetches
+ * it, on its own schedule and against its own allowlist. Everything that reads
+ * this is in `faces.ts`.
+ *
+ * The character class is narrow because both fields are interpolated into CSS
+ * by `fontFaceRules`, and a family or a URL carrying a quote or a brace would
+ * be closing a declaration rather than naming a font.
+ */
+const cssSafe = z
+  .string()
+  .min(1)
+  .regex(/^[^"'{};\r\n]+$/, "may not contain quotes, braces, semicolons or newlines")
+
+export const fontFaceSchema = z.object({
+  /** The family this face provides, as the stack asks for it and without quotes. */
+  family: cssSafe,
+  weight: z.number().int().positive(),
+  style: z.enum(["normal", "italic"]).default("normal"),
+  /** Where the face data is: a URL, or a path the host knows how to resolve. */
+  source: cssSafe,
+  format: z.enum(["woff2", "woff", "truetype", "opentype"]).optional(),
+})
+export type FontFace = z.infer<typeof fontFaceSchema>
+
+/**
  * A pack declares a face for each role the library actually reads, and no
  * others. There were three roles here and a primitive read two of them: an
  * `accentFamily` was emitted as `--loom-accent-family` and referenced by
@@ -109,6 +142,16 @@ export const fontPackSchema = z.object({
   bodyWeight: z.number().int().positive(),
   /** Typographic ramp in px, smallest first. Emitted as `--loom-scale-1…8`. */
   scaleRamp: z.array(z.number().positive()).length(RAMP_STEPS),
+  /**
+   * Where the families above are, for a reader that cannot look one up.
+   *
+   * Optional, and absent on every pack the starter library ships: those name
+   * only faces an operating system already has, or say in their description
+   * that a host must serve them, and neither case wants this file holding an
+   * address on somebody else's CDN. It is here for a host registering its own
+   * pack, and for a renderer that draws text without a browser.
+   */
+  faces: z.array(fontFaceSchema).optional(),
 })
 export type FontPack = z.infer<typeof fontPackSchema>
 
