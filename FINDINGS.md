@@ -12815,3 +12815,74 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+## 2026-09-03 — the disclosure was louder than the sentence it sits under, and only a screenshot could say so
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**fixed on one screen, not in the component.**
+
+`TechnicalDetail` sets no text colour of its own. Its body inherits whatever it
+is mounted inside, and every existing use in this route group happens to sit
+inside a `StateNotice`, whose content wrapper is `text-ink-muted`. So the
+component has never been rendered without a muted ancestor and nobody has had to
+notice that it does not set one.
+
+`/portal/sign-ins` is the first screen to mount one at page level. The result is
+the rule the component exists to enforce, upside down:
+
+> The plain sentence a person is meant to read first rendered in `text-ink-muted`;
+> the technical record one click below it rendered in the body ink — **darker and
+> more prominent than the thing it is a footnote to.**
+
+Every test passed. The disclosure contained exactly what it should, in the right
+order, behind a `<details>` that was closed. Nothing about "the record must not
+out-shout the sentence" is expressible as an assertion about text content, and
+this is the sixteenth defect this lane has found by looking at a screen rather
+than in a test, across ten runs.
+
+Fixed here by muting the four places this screen puts inside a disclosure. **That
+is the smaller half of the fix and deliberately so** — the real one is a default
+colour on `TechnicalDetail` itself, and that is ten screens wide. A run that
+changed it could look at one of them, which is how a component acquires an
+inherited default nobody chose in the first place. It wants the run that can
+screenshot the portal end to end.
+
+## 2026-09-03 — a screenshot recipe that works in this sandbox, verified, and still nothing in the repository takes one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— **re-filed against `main`.** The same finding was filed on
+[#227](https://github.com/jam-overture/loom/pull/227), which is unmerged, so
+`main` still carries no record of it.
+
+Four routine briefs and `docs/routines.md` ask for a screenshot. There is no
+dependency, no script and no recipe, so each lane rediscovers the same two walls:
+`playwright install` cannot reach its CDN from the sandbox, and a current
+Playwright looks for a browser build that is not there.
+
+Both are avoidable, and this run took the pictures in its report and its pull
+request with the following. It is written down here because the next run in any
+lane should not have to find it again.
+
+- **The browser is already installed.** `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+  exists in this image. Do not run `playwright install`; point at it.
+- **`playwright-core` installs from the npm registry**, which is on the sandbox
+  allowlist. `npm install playwright-core` into a scratch directory — it is a
+  tool for taking the picture, not a dependency of the application, and it does
+  not belong in `apps/loom/package.json`.
+- **Launch with `--no-sandbox`**, or Chromium exits immediately as root.
+- **A signed-in portal screenshot needs three environment variables and a wait
+  that is not `networkidle`.** `LOOM_PORTAL_SESSION_SECRET` (32+ characters),
+  `LOOM_PORTAL_REVIEWERS` (`actor:key`, key 24+ characters), and then
+  `next start`. The sign-in form is a client component driven by
+  `useActionState`, so submitting it is a fetch rather than a navigation:
+  `waitForLoadState("networkidle")` resolves **before** the session cookie is
+  set, and the next `goto` bounces straight back to the sign-in page. Wait on the
+  destination screen's own heading instead. This run lost two attempts to it and
+  photographed the sign-in page believing it was the portal.
+- **A screen with three states is worth three pictures**, and the states can be
+  driven rather than staged: six wrong keys from a second browser context locks
+  the address, and the first context's session survives it, so one script
+  produces the quiet screen and the locked one from the same live server.
+
+It wants `apps/loom/scripts/`, beside `db-push.ts`, as something a brief can name
+instead of describe.

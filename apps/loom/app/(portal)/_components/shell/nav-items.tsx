@@ -38,6 +38,16 @@ const strokeProps = {
  * page, never before it — a nav label renamed ahead of the screen it points at
  * is a promise the screen does not keep.
  *
+ * `Sign-ins` is the one that did not move on the run that rewrote its page, and
+ * that is the decision rather than an omission. The rule is to name a thing
+ * after what a person wants, and the words the rest of the industry would use
+ * here — `Security` — is a claim four sizes larger than the screen: it reports
+ * failed sign-ins to this portal and nothing else, not the runtime's own
+ * permissions, not what a proposal was allowed to do, not who may edit a page.
+ * A rail entry that promised those would send a reader looking for them. Its
+ * heading carries the question instead, which is where a question belongs: a
+ * rail is a list of places and a noun is what names a place.
+ *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
  * about what a thing can do. It came back once its page did — and the page keeps
  * the claim honest, because a tree whose seed this host cannot reproduce is
