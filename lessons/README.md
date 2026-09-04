@@ -134,6 +134,16 @@ is still written, reviewed and versioned as text in this directory. Reading it
 here is reading the same words with none of that enforced, which is fine — it is
 the version you can read on a train, and the honour system is the cost.
 
+**Your record is yours, and that means keeping it is yours too.** Everything the
+surface computes — what is due, which questions come back, how often you were
+sure and wrong — comes from one value stored in your browser and sent nowhere.
+So clearing site data deletes it, and a second machine starts from zero. There is
+a page for that: `/lessons/record` saves the record as a file and merges one
+back in — later answers win, a lesson
+keeps the earlier day you did it, re-answers add up rather than overwrite, and
+importing the same file twice does nothing the second time. Save a copy the day
+you have something worth losing.
+
 ## The one-paragraph version
 
 Read this *after* lesson 01, not before — it is a summary, and summaries are
