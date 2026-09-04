@@ -15,8 +15,9 @@ const strokeProps = {
 } as const
 
 /**
- * Three groups. What the runtime holds — the pages themselves, and the catalogue a
- * model is told it may build from (0013). Then the record of how they got that
+ * Three groups. What the runtime holds — the pages themselves, the catalogue a
+ * model is told it may build from (0013), and the policy every change is judged
+ * against before it reaches one (0002). Then the record of how they got that
  * way: what the runtime was asked to do and what became of it (0023), what was
  * accepted into a tree (0016), whether the model's own confidence has been worth
  * anything (0031), and whether the log still produces the snapshot.
@@ -87,6 +88,23 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
           <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
           <line x1="12" y1="12" x2="12" y2="16" />
           <line x1="10" y1="14" x2="14" y2="14" />
+        </svg>
+      ),
+    },
+    {
+      /**
+       * Beside `Pieces` rather than in the record group, because the two are one
+       * question asked twice: what the AI may *build* from, and what it may
+       * *do*. Both are true before anything has happened, which is what makes
+       * them the pair a new arrival reads first — every entry in the group below
+       * is empty on a deployment nothing has been asked of.
+       */
+      label: "Rules",
+      href: "/portal/rules",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" />
+          <polyline points="9 12 11 14 15 10" />
         </svg>
       ),
     },
