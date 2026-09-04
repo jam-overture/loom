@@ -12916,3 +12916,46 @@ and everything not marked a fragment is compiled, per page, against a declared
 preamble. That is real work and it is the shape the lessons runner already has,
 so it is one design rather than two. Filed rather than started because it is a
 unit of its own and this run's was a page.
+
+---
+
+## 2026-09-04 — the commit-identity trap, seventh time, and the address the session hands you is the wrong one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+recurring, and the recurrence has a cause worth writing down
+
+The first push on `docs-20-what-ai-may-change` got no preview. Vercel answered:
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+Nothing was wrong with the branch. The commit was authored as
+`Jonathan Pizzolato <jpizzolato36@gmail.com>`, that address resolves to the
+GitHub account `jpizzo`, and `jpizzo` is not on the Vercel team. Re-authoring as
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>` —
+the identity every commit on `main` carries — and force-pushing produced a
+deployment immediately.
+
+**Why it keeps happening, which is the part that is new.** Every routine session
+opens with a note giving the maintainer's email address, `jpizzolato36@gmail.com`,
+for *identifying the user*. There is no note anywhere saying what a commit's
+author line must be. A run that sets an author at all reaches for the one address
+it was given, and that address is the one Vercel refuses.
+
+The trap is that **nothing fails**: the commit is fine, the push succeeds, the
+tests are green, and the only symptom is a pull request with no preview URL — a
+thing several runs have reported as *"the preview came back Blocked"* or *"no
+preview URL"* without connecting it to the author line.
+
+**What would close it**, smallest first:
+
+1. **A line in `docs/routines.md`** naming the author identity a commit must
+   carry, next to the network policy, where the other environment-shaped rule
+   already lives. Every lane reads that file first, and the fix is one sentence.
+2. **A committed `.gitconfig` or repository-local `user.name`/`user.email`**, so
+   nobody has to choose. Stronger, and it stops the next run reasoning about it
+   at all.
+
+Option 1 at minimum. This is the seventh recorded instance and the first one this
+lane has hit; the 27 August entry caught it before it cost a preview, and this
+one did not.
