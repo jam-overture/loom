@@ -12960,3 +12960,31 @@ header, with "Ask for a change →" in it**, and it is unfixed.
 Not fixed here because it is a different screen and this branch is one unit. It is
 two lines and a line in `reading-order.test.ts`, which `/portal/pieces` does not
 yet have.
+
+---
+
+## 2026-09-04 — the auto-subscription, ninth day, and its standing order is still the one thing the brief forbids
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open — an
+occurrence on the 1 September entry, with the one thing that has changed
+
+The harness subscribed this session to #240 the moment it was opened, and the
+subscription's standing order asks for **a self check-in roughly an hour out,
+re-armed silently if nothing changed**. That is a re-arming poll, which is
+precisely what `docs/routines.md` forbids after four such chains cost a week's
+allowance in August, and both the portal brief and that document say *run,
+report, exit*. The brief wins, so: unsubscribed by hand, no check-in scheduled.
+
+**What is different this time is that the events proved the point.** Three
+arrived within ninety seconds and all three were the deployment bot talking about
+itself — subscription created, `Building`, `Ready`. Nothing needed a decision.
+Had the check-in been armed, it would have woken this session hourly to re-read a
+green pull request nobody had touched, which is the 9 August failure exactly.
+
+One thing worth keeping from it: **the `Ready` event carried the preview URL**,
+which is the piece the brief requires in every pull request and which no run has
+been able to include at open time. Reading the notification once, then
+unsubscribing, is the cheap version of that — the events are already queued, and
+what costs is the standing order, not the delivery.
+
+Nothing a routine can fix. Filed for the ninth consecutive day.
