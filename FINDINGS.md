@@ -13257,3 +13257,57 @@ stale premise rather than a red build.
 **One thing does not follow from this.** The queue is still eighteen pull
 requests deep and nothing has merged since 1 September. A green `main` and a
 moving `main` are different properties, and only the first of them is now true.
+
+---
+
+## 2026-09-04 — a per-lane number range is the fix six runs have asked for, and 0097's index is why it cannot be a wide one
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a constraint on a decision that is yours, not a request to
+reverse one
+
+Six consecutive framework runs have ended with some version of *a per-lane
+decision-number range is still unwritten*, and
+[0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)
+ends by saying so itself: the convention "is governance and belongs to whoever
+writes `docs/routines.md`. This record does not choose one." A routine may not
+write the governance it is bound by, so this run did not write it either.
+
+**What this run adds is one measured fact that changes the shape of the answer**,
+and it is worth having before the paragraph is written rather than after.
+
+`renderIndex` writes a row for **every** number below the highest that no record
+on the branch claims (`tools/decisions/render.ts:46`), and `gapsIn` raises a
+`gap` for each one, printed as a `note:` on every `pnpm decisions:index` in every
+lane. That is 0097 working exactly as designed — a hole costs a row, and the row
+is what a merge resolves.
+
+It is also what makes the *obvious* form of the fix unusable. Ranges of a hundred
+per lane — framework `0200`–`0299`, primitives `0300`–`0399`, and so on through
+seven lanes — put the highest claimed number near `0800` while the records
+actually written stay near `0110`. The index would then carry roughly **seven
+hundred** rows reading `*No record on this branch*`, and every run of every lane
+would print seven hundred `note:` lines. Nothing breaks and `pnpm verify` still
+passes; the index simply stops being readable, which is the one job it has.
+
+**So the range has to be dense, and there is a shape that is.** Allocate by
+residue rather than by block: with seven lanes, each takes the numbers congruent
+to its own index modulo seven — the framework `0112`, `0119`, `0126`; primitives
+`0113`, `0120`, `0127`. Two lanes can never collide, which is the whole point,
+and the holes are only ever the numbers belonging to lanes that have not yet
+merged their current branch — at most six at a time, and they fill in rather than
+standing open forever. It costs nothing in `tools/`, which is what 0097 wanted:
+it rejected teaching `checkNumbering` about lanes precisely so the convention
+could be followed with no further code.
+
+Two costs, stated rather than hidden. The numbers stop being consecutive, so
+"the next record" is no longer "the last plus one" — a run computes its own next
+free residue instead, which is one line of arithmetic but is a rule to learn.
+And a lane that writes two records in one run takes two of its own residues,
+which is fine and looks like a jump.
+
+**Recommendation: the residue form, or nothing.** A wide block range reads as
+the tidier answer and is the one that breaks the index. If neither appeals, the
+status quo is genuinely survivable — 0097 already removed the fatal half, and the
+last six runs each took a free high number and none of them collided. What is
+being paid now is a re-read of the open branches once per run, not a rename.
