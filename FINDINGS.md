@@ -13286,3 +13286,84 @@ thirteen days ago. `docs/rollout.md:19` still says the demo is live at
 `apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
 
 The second of the two, *"it is clunky"*, is live and is what this run acted on.
+
+---
+
+## 2026-09-04 — the sentence the demo's primary path ends on had no referent, and the code that was standing in for it was jargon: #209, redone
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+this run, on the branch behind #220
+
+The last of the four demo pull requests closed unmerged on 28 August. Rebuilt
+against `d7375ef` rather than revived, and the branch
+`demo-11-what-an-ask-from-here-may-do` is preserved and was read.
+
+**The gap.** Press the demo's one green button, meet the hold, and the rule the
+Gate cited reads, in the portal's shared words:
+
+> *Riskier than a request from here is allowed to be without asking.*
+
+*From here* is the whole of the claim, and nothing on the card said what *here*
+was. The one thing that came close was `user-instruction`, set in monospace in
+the card's top right corner, at the size of a footnote, on the first card this
+surface ever shows anybody.
+
+**It is not a label. It is an input the rule read.** `autoApplyCeiling` is keyed
+by origin, and `demoPolicy` sets `user-instruction` to `low` on purpose —
+`session.ts` says why: under the shipped default every change this demo offers
+would auto-apply and the hold would never appear. So the Gate's comparison on
+this exact card is *this origin's ceiling* against *these stakes*, and
+`src/runtime/policy.ts` states the idea plainly: *"An explicit human instruction
+earns more latitude than an adaptation nobody requested."* That is one of the
+genuinely distinctive things in this project, and the demo was demonstrating it
+as a hyphenated string with no verb.
+
+**And what changed since the branch was closed makes it worse rather than
+better.** `_lib/weighed.ts` landed on 3 September and put the stakes in the light
+directly above that rule — *"Some risk"*. So the card printed one side of the
+Gate's inequality, then a sentence saying a limit was exceeded, and never the
+limit. Both terms and no threshold.
+
+`_lib/ceiling.ts` says the threshold, in one sentence, on the one rule of the
+eight that reads it. The words are the shared tables' — `ASK_ORIGINS[…].label`
+and `STAKES[…].label` — and the level is asked of the runtime through the same
+`ceilingFor` the Gate called, so a retune of the policy rewrites the sentence
+rather than leaving it confidently wrong. The origin code moved into the
+disclosure under a new `the ask` section, with `askedAt` beside it — a field the
+record has carried since this surface was built and neither half of the card had
+ever printed. Nothing was removed.
+
+The three lines now read as the Gate's arithmetic in the order it happened:
+*this much risk · this much is allowed to land unasked · so it waits for you.*
+
+**All four of the 28 August demo branches have now been redone**, all on the one
+pull request, per the backlog entry's own instruction.
+
+---
+
+## 2026-09-04 — `21st.dev` re-verified blocked, from the demo lane a tenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 2–3 September entries, not a new argument
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. Seventeenth recorded refusal;
+`docs/routines.md` still lists it as allowed for `WebFetch`, and has been wrong
+about that for a fortnight.
+
+No cost to this unit. What decided where the sentence sits, how quiet it is set
+and whether the card still fits on one phone screen with it was building the
+tree, driving it in Chromium at 1440×900 and 390×844, and looking at the frames.
+
+---
+
+## 2026-09-04 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24–27 August, 1–3 September entries
+
+Eighth consecutive run. *"Two problems to fix before anything else"* — the first
+being the move off `/portal/demo` — describes this lane's first unit, landed
+fourteen days ago. `docs/rollout.md:19` still says the demo is live at
+`apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
+
+The second of the two, *"it is clunky"*, is live and is what this run acted on.

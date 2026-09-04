@@ -7,6 +7,7 @@ import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 
 import { answerNote } from "@/app/(demo)/_lib/answer"
+import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
@@ -100,6 +101,7 @@ export const RecordCard = ({
   const answered = answerNote(record)
   const asked = askedLine(record)
   const weighed = weighedOf(record)
+  const ceiling = ceilingNote(record)
 
   return (
     /*
@@ -114,11 +116,22 @@ export const RecordCard = ({
       className="border-edge-subtle bg-surface-raised flex flex-col gap-3 rounded-md border p-3.5"
     >
       <header className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
+        {/*
+          * The state, and nothing beside it.
+          *
+          * `record.origin` used to sit opposite, in monospace: `user-instruction`
+          * in the top right of the first card a stranger ever reads. It is the
+          * runtime's code for *what kind of act this was*, and it is a real
+          * input to the verdict below — `autoApplyCeiling` is keyed by it — but
+          * as a hyphenated token in the corner it was a label nobody could read
+          * standing in for a claim nobody was told. It is now in the disclosure,
+          * where the portal's own screens keep it, and the claim it stood for is
+          * a sentence under the rule that used it (`_lib/ceiling.ts`).
+          */}
+        <div className="flex items-center gap-2">
           <span className={`rounded-sm px-1.5 py-0.5 text-2xs ${toneClasses(outcome.tone)}`}>
             {outcome.label}
           </span>
-          <span className="text-ink-muted font-mono text-2xs">{record.origin}</span>
         </div>
 
         {/*
@@ -186,6 +199,28 @@ export const RecordCard = ({
       {record.disposition && (
         <p className="text-ink-secondary text-xs">{ruleSentence(record.disposition.ruleCode)}</p>
       )}
+
+      {/*
+        * And what "from here" is, on the one verdict that turns on it.
+        *
+        * The rule above is the only one of the eight that compares an ask
+        * against what its *origin* is allowed to do alone, and its sentence —
+        * "Riskier than a request from here is allowed to be without asking" —
+        * names that allowance without ever saying what it is. This is the
+        * allowance, read from the same policy through the same `ceilingFor` the
+        * Gate called.
+        *
+        * With `Weighed` directly above it, the three lines are now the Gate's
+        * whole arithmetic in the order it happened: *some risk*, then *this much
+        * is allowed unasked*, then the rule saying the first exceeded the
+        * second. Before this line the card printed both sides of an inequality
+        * and never the threshold between them.
+        *
+        * Quieter than the rule and directly under it, because it is that
+        * sentence's second half rather than a claim of its own. `_lib/ceiling.ts`
+        * decides when there is one; on seven of the eight rules there is not.
+        */}
+      {ceiling && <p className="text-ink-muted text-xs">{ceiling.sentence}</p>}
 
       {/*
         * And what the visitor did about it, which is the sentence above's
@@ -304,6 +339,21 @@ export const RecordCard = ({
       )}
 
       <TechnicalDetail summary="Show the full record">
+        {/*
+          * The ask itself, in the runtime's words, and the only section here
+          * that renders on every card.
+          *
+          * It exists because the origin had to leave the light and nothing is
+          * ever removed from this surface — a card that never reached a verdict
+          * would otherwise have dropped the field entirely rather than moved it.
+          * `askedAt` joins it: the record has carried it since the surface was
+          * built and no half of this card has ever printed it.
+          */}
+        <Section title="the ask">
+          <Row label="origin">{record.origin}</Row>
+          <Row label="asked at">{record.askedAt}</Row>
+        </Section>
+
         {record.interpretation && (
           <Section title="the proposal">
             {/*
@@ -379,6 +429,12 @@ export const RecordCard = ({
             {/* The rule's sentence is above the disclosure; only its own words are here. */}
             <p className="text-ink-secondary text-2xs">{record.disposition.detail}</p>
             <Row label="policy">{record.disposition.policyId}</Row>
+            {/*
+              * The number the rule above compared against, beside the origin it
+              * belongs to. The plain sentence is in the light; this is the
+              * evidence for it, which is the rule the whole disclosure follows.
+              */}
+            {ceiling && <Row label="ceiling">{ceiling.technical}</Row>}
             {record.disposition.policyFingerprint && (
               <Row label="fingerprint">{record.disposition.policyFingerprint.slice(0, 16)}…</Row>
             )}
