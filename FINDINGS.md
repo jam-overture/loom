@@ -4936,6 +4936,27 @@ something, rather than always.
 ## 2026-08-22 — the repair path sends the page twice, and that is now worth saying
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed by `framework-26-what-a-refusal-costs` — measured rather than
+made cheaper, and the reasoning for not making it cheaper is now
+[0108](decisions/0108-a-repair-restates-the-request-and-the-runtime-measures-it.md)
+rather than a paragraph in this file. `measureRepairPrompt` reports the repair
+block by block, plus `episode` — both requests together.
+
+**Two corrections to the entry below, from measuring what it inferred.** The
+ratio does **not** widen with page size: it is flat at about 2.01 and drifts
+*towards* 2 as the page grows, because the three blocks a repair adds are a fixed
+305 characters. What widens is the **absolute** gap between the scoped and
+unscoped paths — 502 characters at five sections, 9,122 at fifty, **98,922 at
+five hundred**. The entry's concern was right and its arithmetic was not, and the
+practical consequence is the opposite way round from how it reads: a scope is
+worth twice as much on the repair path as on the proposal path, because both
+requests are bounded by it.
+
+The saving the entry declined to take is declined for the reason it gave, now
+written down permanently: the repeated block is byte-identical and sits at the
+front of the message, so it is precisely what a provider's prompt cache holds.
+That is the adapter's business, not the prompt builder's. Original status below.
+
 **Status:** open — recorded against my own lane rather than acted on
 
 Found while measuring for 0083, and left alone deliberately.
@@ -11568,7 +11589,16 @@ pull request.
 ## 2026-08-29 — `loom init` scaffolds a primitive the starter library already registers, and Getting started walks a stranger straight into it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/cli/`) ·
-**Status:** open — documented on the page rather than worked around
+**Status:** **closed by #195** ([0101](decisions/0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md)).
+Both halves are now on `main`, which is what the 29 August closure entry below
+said it was waiting for — it recorded the fix from a branch that had not merged,
+and this is the edit it could not make then. Verified in the code rather than
+inferred from the entry: `src/cli/plan.ts` builds `STARTER_TYPE` from
+`HOST_NAMESPACE`, which is `"app"`, so the scaffold writes `app.page` and the
+collision with the starter library's `loom.page` cannot occur. The preferred
+shape of the two offered was taken and then widened — the CLI refuses the whole
+`loom.` namespace, not just this one type. The callout on *Scaffolding a project*
+is `Loom docs`' to delete and is filed for them below.
 
 `loom init` writes one starter primitive and its type is **`loom.page`**.
 `@loom/runtime/primitives` also registers a `loom.page` — it is the primitive
@@ -13191,3 +13221,39 @@ resolved. The first of those contradicts the previous step 3 (*"Branch off
 `main`"*) read literally, which is why it is an edit to that step rather than a
 line added under it.
 
+---
+
+## 2026-09-04 — `main` is green, and has been since 1 September
+
+**Filed by:** `Loom daily build` · **Owned by:** every lane · **Status:** closed
+by measurement — nothing to do, and that is the finding
+
+Six lanes have filed some version of *"`main` has been red for N days"* since 26
+August, most recently on 1 September as the seventh consecutive documentation run
+to report it. It is fixed, no run has said so, and every one of those entries
+still reads `open` because each is owned by the maintainer rather than by a lane
+that could close it.
+
+Measured this run on a clean checkout of `main` at `d7375ef`, nothing of mine on
+disk, `pnpm install && pnpm verify`:
+
+| suite | files | tests | result |
+| --- | --- | --- | --- |
+| `@loom/runtime` | 119 | 1,860 | passed |
+| `@loom/app` | 158 | 2,497 | passed |
+
+**Exit 0.** The failure everyone was reporting was
+`app/(marketing)/_lib/facts.test.ts` holding `FACTS.decisions` against a
+hardcoded `"94"`. #174 deleted the constant and replaced it with counts that
+derive themselves; #217 and #218 repaired what the backlog merge broke around it.
+All three landed on 1 September.
+
+**What this means for the entries above.** The red-`main` findings of 26, 28, 29,
+30 and 31 August and 1 September are all closed by those merges. They are not
+edited here, because they are the maintainer's and this file is append-only —
+this entry is the closure, and any lane about to file a seventh is looking at a
+stale premise rather than a red build.
+
+**One thing does not follow from this.** The queue is still eighteen pull
+requests deep and nothing has merged since 1 September. A green `main` and a
+moving `main` are different properties, and only the first of them is now true.

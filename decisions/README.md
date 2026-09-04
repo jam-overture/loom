@@ -191,3 +191,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0105](0105-a-render-can-hand-back-values-instead-of-references.md) | A render can hand back values instead of references | Accepted | §3 |
 | 0106 | *No record on this branch* | — | — |
 | [0107](0107-a-font-pack-may-say-where-a-face-is-and-the-runtime-never-fetches-it.md) | A font pack may say where a face is, and the runtime never fetches it | Accepted | §3 |
+| [0108](0108-a-repair-restates-the-request-and-the-runtime-measures-it.md) | A repair restates the request, and the runtime measures it rather than making it cheaper | Accepted | §2 |
