@@ -4936,6 +4936,27 @@ something, rather than always.
 ## 2026-08-22 — the repair path sends the page twice, and that is now worth saying
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed by `framework-26-what-a-refusal-costs` — measured rather than
+made cheaper, and the reasoning for not making it cheaper is now
+[0108](decisions/0108-a-repair-restates-the-request-and-the-runtime-measures-it.md)
+rather than a paragraph in this file. `measureRepairPrompt` reports the repair
+block by block, plus `episode` — both requests together.
+
+**Two corrections to the entry below, from measuring what it inferred.** The
+ratio does **not** widen with page size: it is flat at about 2.01 and drifts
+*towards* 2 as the page grows, because the three blocks a repair adds are a fixed
+305 characters. What widens is the **absolute** gap between the scoped and
+unscoped paths — 502 characters at five sections, 9,122 at fifty, **98,922 at
+five hundred**. The entry's concern was right and its arithmetic was not, and the
+practical consequence is the opposite way round from how it reads: a scope is
+worth twice as much on the repair path as on the proposal path, because both
+requests are bounded by it.
+
+The saving the entry declined to take is declined for the reason it gave, now
+written down permanently: the repeated block is byte-identical and sits at the
+front of the message, so it is precisely what a provider's prompt cache holds.
+That is the adapter's business, not the prompt builder's. Original status below.
+
 **Status:** open — recorded against my own lane rather than acted on
 
 Found while measuring for 0083, and left alone deliberately.
@@ -12815,3 +12836,40 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-04 — `main` is green, and has been since 1 September
+
+**Filed by:** `Loom daily build` · **Owned by:** every lane · **Status:** closed
+by measurement — nothing to do, and that is the finding
+
+Six lanes have filed some version of *"`main` has been red for N days"* since 26
+August, most recently on 1 September as the seventh consecutive documentation run
+to report it. It is fixed, no run has said so, and every one of those entries
+still reads `open` because each is owned by the maintainer rather than by a lane
+that could close it.
+
+Measured this run on a clean checkout of `main` at `d7375ef`, nothing of mine on
+disk, `pnpm install && pnpm verify`:
+
+| suite | files | tests | result |
+| --- | --- | --- | --- |
+| `@loom/runtime` | 119 | 1,860 | passed |
+| `@loom/app` | 158 | 2,497 | passed |
+
+**Exit 0.** The failure everyone was reporting was
+`app/(marketing)/_lib/facts.test.ts` holding `FACTS.decisions` against a
+hardcoded `"94"`. #174 deleted the constant and replaced it with counts that
+derive themselves; #217 and #218 repaired what the backlog merge broke around it.
+All three landed on 1 September.
+
+**What this means for the entries above.** The red-`main` findings of 26, 28, 29,
+30 and 31 August and 1 September are all closed by those merges. They are not
+edited here, because they are the maintainer's and this file is append-only —
+this entry is the closure, and any lane about to file a seventh is looking at a
+stale premise rather than a red build.
+
+**One thing does not follow from this.** The queue is still eighteen pull
+requests deep and nothing has merged since 1 September. A green `main` and a
+moving `main` are different properties, and only the first of them is now true.
