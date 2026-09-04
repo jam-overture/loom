@@ -280,6 +280,32 @@ export const LIBRARY_CLASS = {
   /** The ring turning the other way, and the still rendering it takes while somebody edits it. */
   orbitReverse: "loom-orbit-reverse",
   orbitStill: "loom-orbit-still",
+  /**
+   * A `loom.frame`. The chrome itself, which declares the containment its marks
+   * are measured against; the screen inside it; and the layer over that screen.
+   */
+  frame: "loom-frame",
+  frameScreen: "loom-frame-screen",
+  /**
+   * The layer is the whole of what separates a wide frame from a narrow one: an
+   * overlay on the screen where there is room, a legend under it where there is
+   * not. Both are in this file because a pin cannot know which it is in, the
+   * legend is the **unqueried** rule so a client that resolves no query gets the
+   * readable one (0079), and the query is the *frame's* width rather than the
+   * window's — a screenshot in one column of a split is narrow on the widest
+   * screen there is.
+   */
+  framePins: "loom-frame-pins",
+  /** One `loom.pin`: the mark, its dot, its label, and the four sides it may open to. */
+  pin: "loom-pin",
+  pinDot: "loom-pin-dot",
+  pinLabel: "loom-pin-label",
+  pinStart: "loom-pin-start",
+  pinEnd: "loom-pin-end",
+  pinAbove: "loom-pin-above",
+  pinBelow: "loom-pin-below",
+  /** The still rendering it takes while somebody is editing the page. */
+  pinStill: "loom-pin-still",
 } as const
 
 /**
@@ -784,8 +810,104 @@ details[open] > summary .loom-marker {
 .loom-orbit-still .loom-orbit-spinner, .loom-orbit-still .loom-orbit-item {
   animation: none;
 }
+@keyframes loom-pin-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  70%, 100% { transform: scale(2.2); opacity: 0; }
+}
+.loom-frame {
+  container-type: inline-size;
+}
+.loom-frame-pins {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  padding: var(--loom-spacing-3);
+  border-block-start: 1px solid var(--loom-border-subtle);
+}
+.loom-frame-pins:empty {
+  display: none;
+}
+.loom-pin {
+  display: flex;
+  align-items: center;
+  gap: var(--loom-spacing-2);
+}
+.loom-pin-dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding-inline: 0.3rem;
+  border-radius: var(--loom-radius-full);
+  line-height: 1;
+}
+.loom-pin-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--loom-accent);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: loom-pin-pulse calc(var(--loom-motion-slow) * 7) ease-out infinite;
+}
+.loom-pin-label {
+  display: inline-block;
+  padding: var(--loom-spacing-1) var(--loom-spacing-2);
+}
+.loom-pin-still .loom-pin-dot::after {
+  animation: none;
+}
+@container (min-width: 40rem) {
+  .loom-frame-pins {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+    border-block-start: 0;
+    pointer-events: none;
+  }
+  .loom-pin {
+    position: absolute;
+    inset-inline-start: var(--loom-pin-x);
+    inset-block-start: var(--loom-pin-y);
+    display: grid;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+  }
+  .loom-pin-label {
+    position: absolute;
+    max-width: 14rem;
+    white-space: nowrap;
+  }
+  .loom-pin-start .loom-pin-label, .loom-pin-end .loom-pin-label {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+  }
+  .loom-pin-end .loom-pin-label {
+    inset-inline-start: calc(100% + var(--loom-spacing-2));
+  }
+  .loom-pin-start .loom-pin-label {
+    inset-inline-end: calc(100% + var(--loom-spacing-2));
+  }
+  .loom-pin-above .loom-pin-label, .loom-pin-below .loom-pin-label {
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+  }
+  .loom-pin-above .loom-pin-label {
+    inset-block-end: calc(100% + var(--loom-spacing-2));
+  }
+  .loom-pin-below .loom-pin-label {
+    inset-block-start: calc(100% + var(--loom-spacing-2));
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .loom-orbit-spinner, .loom-orbit-item {
+    animation: none;
+  }
+  .loom-pin-dot::after {
     animation: none;
   }
   .loom-rise, .loom-aurora {
