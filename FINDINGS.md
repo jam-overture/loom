@@ -12815,3 +12815,104 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-04 — a field added to `gatePolicySchema` and not to `GatePolicy` compiles, and every consumer keyed on the type silently omits it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+a hole in a guarantee two lanes are now relying on
+
+`src/runtime/policy.ts` states the policy's thirteen fields **twice**: once as
+`gatePolicySchema`, and once as the hand-written `GatePolicy` type beneath it.
+The line that looks like it holds the two together does not:
+
+```ts
+export const defaultGatePolicy: GatePolicy = gatePolicySchema.parse({})
+```
+
+That assignment catches one direction and not the other. A field **removed** from
+the schema makes the parsed value un-assignable and fails the build, which is
+right. A field **added** to the schema is an excess property on a returned value
+rather than on a fresh object literal, so it is assignable, it compiles, and
+`keyof GatePolicy` never hears about it.
+
+**Why this lane noticed.** The new documentation page *What AI may change*
+describes every knob a policy has, and it refuses to keep a list: the rows are a
+`Record<keyof GatePolicy, Knob>`, so a fourteenth knob stops the docs site
+compiling until somebody writes the sentence that goes with it. That is the same
+device `scaffold.ts` uses on `CliError["code"]` and `endings.ts` on
+`WriteOutcome["kind"]`, and it is the first of the three where the key is a
+**hand-maintained mirror** rather than the thing itself. The guarantee is only as
+good as the mirror.
+
+`app/(docs)/_lib/policy/knobs.test.ts` closes it from outside — it holds
+`KNOB_ORDER` against `Object.keys(gatePolicySchema.shape)`, so a schema field
+missing from the type takes the documentation red. That is the wrong place for
+it: the docs site is telling the runtime about a mismatch inside the runtime, and
+a second consumer keying off `keyof GatePolicy` would get no such warning.
+
+**What would close it**, smallest first:
+
+1. **Derive the type**: `export type GatePolicy = Readonly<z.infer<typeof
+   gatePolicySchema>>`. One list instead of two, and the mismatch becomes
+   impossible rather than tested. The reason it was written by hand is presumably
+   the branded `PrimitiveType[]` and the `Readonly` shape — worth checking
+   whether `z.infer` gives them today, because it may simply work now.
+2. **Assert the two agree in `policy.test.ts`**: a test that
+   `Object.keys(gatePolicySchema.shape)` and the keys of `defaultGatePolicy`
+   match. Cheap, keeps both statements, and puts the check where the drift would
+   happen.
+
+Option 1 is this lane's recommendation. Nothing is broken today: the thirteen
+agree, and `knobs.test.ts` will say so on every documentation run until the
+runtime owns the check itself.
+
+---
+
+## 2026-09-04 — thirty code fences on this site, and nothing checks that any of them would compile
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped, with the measurement that makes it decidable
+
+A code block is the one kind of prose on this site a reader will paste, and the
+site checks less of them than it looks like it does. What is checked today:
+
+| | |
+| --- | --- |
+| every `loom …` line on *Scaffolding a project* | executed, output read back |
+| every rendered `<Example>` | a real tree, mounted, no render diagnostic |
+| import lines on *What your app has to do* and *What AI may change* | names asked of the door they claim |
+| everything else in a fence | **nothing** |
+
+The whole site has **30 TypeScript fences across 10 pages** — 26 `ts` and 4
+`tsx` once the relabelling below is counted. Whether the rest could be
+type-checked was measured this run rather than
+guessed at, and the answer is **no, not as they stand**, which is why this is
+filed instead of built:
+
+- **Eight are deliberate fragments.** `props: { "loom:theme": … }` and
+  `slots: ["heading", "actions", "media"]` are not statements and were never
+  meant to be; they are a shape a reader is meant to recognise inside a larger
+  object.
+- **Two contain a literal `…`.** *Proposing a change* and *What the Gate decides*
+  elide the uninteresting half of a call on purpose, and spelling it out would
+  make both worse.
+- **One is deliberately invalid.** *The history of a page* writes `store:` twice
+  in one object to show the two things it could be. It teaches well and does not
+  parse.
+- **Most of the rest reference names from earlier on the page** — `tree`, `db`,
+  `registry`, `request` — which a per-page preamble could supply, as the lessons
+  runner already does for `lessons/`.
+
+**One real defect was found by the measurement and fixed in this pull request:**
+`getting-started/rendering-a-tree` had a fence labelled `ts` containing
+`return <main>{served.value.element}</main>`. The same page labels the identical
+construct `tsx` forty lines earlier. A reader copying it into a `.ts` file gets a
+syntax error from their own compiler and no explanation.
+
+**What would close it.** A fence declares what it is — `ts`, or `ts fragment` —
+and everything not marked a fragment is compiled, per page, against a declared
+preamble. That is real work and it is the shape the lessons runner already has,
+so it is one design rather than two. Filed rather than started because it is a
+unit of its own and this run's was a page.

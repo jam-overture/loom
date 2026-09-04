@@ -156,6 +156,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "A palette, a font pack and a style preset, named by id on the root — and how to get your own brand colour into one without shipping a page nobody can read.",
       },
+      {
+        slug: "what-ai-may-change",
+        title: "What AI may change",
+        summary:
+          "The second list you write: which of your primitives matter, how much latitude each kind of asker gets, and the thirteen settings that decide it.",
+      },
     ],
   },
   {
