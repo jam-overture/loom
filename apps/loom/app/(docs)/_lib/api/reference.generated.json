@@ -4682,6 +4682,20 @@
           ]
         },
         {
+          "module": "primitives/loom.banner",
+          "title": "loom.banner",
+          "summary": "The strip a site runs above everything else: one short thing to say, and one thing to do about it.",
+          "symbols": [
+            {
+              "name": "loomBanner",
+              "kind": "value",
+              "signature": "const loomBanner: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.before-after",
           "title": "loom.before-after",
           "summary": "Two states of one thing, superimposed, with a hard edge between them — the redesign over the old page, the room staged and unstaged, the photograph before the retouch.",
@@ -4732,6 +4746,20 @@
               "name": "loomCard",
               "kind": "value",
               "signature": "const loomCard: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.carousel",
+          "title": "loom.carousel",
+          "summary": "The fifth general arranger: children in a row that runs past the edge of the page, and snaps.",
+          "symbols": [
+            {
+              "name": "loomCarousel",
+              "kind": "value",
+              "signature": "const loomCarousel: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -5074,6 +5102,20 @@
           ]
         },
         {
+          "module": "primitives/loom.link-trail",
+          "title": "loom.link-trail",
+          "summary": "Where the reader is, and every step back out — a run of `loom.link` with the way home between them.",
+          "symbols": [
+            {
+              "name": "loomLinkTrail",
+              "kind": "value",
+              "signature": "const loomLinkTrail: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.list",
           "title": "loom.list",
           "summary": "A run of points, bulleted or numbered — the list a page's prose is written in.",
@@ -5152,6 +5194,20 @@
               "name": "loomMedia",
               "kind": "value",
               "signature": "const loomMedia: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.meter",
+          "title": "loom.meter",
+          "summary": "How much of a thing there is, drawn rather than typeset.",
+          "symbols": [
+            {
+              "name": "loomMeter",
+              "kind": "value",
+              "signature": "const loomMeter: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

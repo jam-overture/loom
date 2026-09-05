@@ -8,10 +8,12 @@ import { loomArticleGrid } from "./loom.article-grid.js"
 import { loomAvatar } from "./loom.avatar.js"
 import { loomAvatarRow } from "./loom.avatar-row.js"
 import { loomBadge } from "./loom.badge.js"
+import { loomBanner } from "./loom.banner.js"
 import { loomBeforeAfter } from "./loom.before-after.js"
 import { loomButton } from "./loom.button.js"
 import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
+import { loomCarousel } from "./loom.carousel.js"
 import { loomCode } from "./loom.code.js"
 import { loomComparison } from "./loom.comparison.js"
 import { loomComparisonRow } from "./loom.comparison-row.js"
@@ -36,12 +38,14 @@ import { loomIcon } from "./loom.icon.js"
 import { loomKbd } from "./loom.kbd.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
+import { loomLinkTrail } from "./loom.link-trail.js"
 import { loomList } from "./loom.list.js"
 import { loomListItem } from "./loom.list-item.js"
 import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
+import { loomMeter } from "./loom.meter.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
 import { loomMilestoneRow } from "./loom.milestone-row.js"
@@ -239,6 +243,20 @@ import { loomTierTable } from "./loom.tier-table.js"
  * take one, which is the first `id` this library renders and the reason a Loom
  * page can link to its own second screen (`anchor.ts`).
  *
+ * **The four between the bands** are what a page does that none of its bands
+ * do: announce, orient, run past the edge, and show a proportion.
+ * `loom.banner` is the strip above everything — the third primitive here whose
+ * absence was Hermes' app shell owning the top of the window, after `loom.nav`
+ * and `loom.footer`. `loom.link-trail` is the way back out, and it is
+ * `loom.link` arranged a second way rather than a `loom.crumb`, because 0054's
+ * own consequence is that one link primitive must not become two that differ by
+ * the element they render. `loom.carousel` is the fifth general arranger and the
+ * first that admits the reader has a phone: a row that scrolls and snaps, with
+ * no state in the tree, because which item somebody is looking at is theirs and
+ * not the page's (0008). `loom.meter` is the proportion `loom.stat` cannot
+ * typeset — a stat states a figure and a meter draws it against its whole, which
+ * is the only reason to draw one at all.
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -248,12 +266,14 @@ import { loomTierTable } from "./loom.tier-table.js"
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPage,
   loomNav,
+  loomBanner,
   loomSection,
   loomSplit,
   loomStack,
   loomGrid,
   loomMosaic,
   loomMarquee,
+  loomCarousel,
   loomOrbit,
   loomCard,
   loomHero,
@@ -264,6 +284,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomMilestone,
   loomStatGrid,
   loomStat,
+  loomMeter,
   loomTierTable,
   loomTier,
   loomPerkList,
@@ -296,6 +317,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomOption,
   loomFooter,
   loomLinkList,
+  loomLinkTrail,
   loomHeading,
   loomProse,
   loomList,
@@ -340,10 +362,12 @@ export {
   loomAvatar,
   loomAvatarRow,
   loomBadge,
+  loomBanner,
   loomBeforeAfter,
   loomButton,
   loomCallout,
   loomCard,
+  loomCarousel,
   loomCode,
   loomComparison,
   loomComparisonRow,
@@ -368,12 +392,14 @@ export {
   loomKbd,
   loomLink,
   loomLinkList,
+  loomLinkTrail,
   loomList,
   loomListItem,
   loomLogo,
   loomLogoCloud,
   loomMarquee,
   loomMedia,
+  loomMeter,
   loomMilestone,
   loomMilestoneList,
   loomMosaic,
