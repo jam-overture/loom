@@ -7,7 +7,7 @@ import { correctionQueue, dueCorrections } from "../_lib/corrections"
 import { dueNow, queueFor, type PartLessons, type QueueEntry, type ScheduledSet } from "../_lib/queue"
 import { CorrectionsPanel } from "./corrections"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * The tracking table at the bottom of `review-schedule.md`, kept by the thing
@@ -66,14 +66,14 @@ const Row = ({ entry }: { readonly entry: QueueEntry }) => (
 )
 
 export const Queue = ({ sets, parts }: QueueProps) => {
-  const { progress, ready } = useProgress()
+  const { progress, ready, today } = useProgress()
 
   if (!ready) return <p style={style.note}>Working out what is due&hellip;</p>
 
-  const entries = queueFor(sets, progress, parts, today())
+  const entries = queueFor(sets, progress, parts, today)
   const calibration = calibrationOf(progress)
   const [next, ...backlog] = dueNow(entries)
-  const corrections = dueCorrections(correctionQueue(progress, today()))
+  const corrections = dueCorrections(correctionQueue(progress, today))
 
   return (
     <div style={style.column(6)}>
@@ -192,12 +192,12 @@ export const Queue = ({ sets, parts }: QueueProps) => {
 
 /** The one line the index page needs: whether there is anything to do today. */
 export const DueSummary = ({ sets, parts }: QueueProps) => {
-  const { progress, ready } = useProgress()
+  const { progress, ready, today } = useProgress()
 
   if (!ready) return <p style={style.note}>&nbsp;</p>
 
-  const due = dueNow(queueFor(sets, progress, parts, today()))
-  const corrections = dueCorrections(correctionQueue(progress, today()))
+  const due = dueNow(queueFor(sets, progress, parts, today))
+  const corrections = dueCorrections(correctionQueue(progress, today))
 
   const setsLine =
     due.length === 0

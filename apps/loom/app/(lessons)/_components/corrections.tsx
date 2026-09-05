@@ -14,9 +14,10 @@ import {
   type PendingCorrection,
 } from "../_lib/corrections"
 import { withCorrection, type Confidence, type Grade } from "../_lib/progress"
-import { Answer, type CheckPointer } from "./answer"
+import type { CheckPointer } from "../_lib/links"
+import { Answer } from "./answer"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * The questions that come back.
@@ -87,7 +88,7 @@ export const Corrections = ({
 }: {
   readonly questions: readonly CorrectionQuestion[]
 }) => {
-  const { progress, ready, update } = useProgress()
+  const { progress, ready, today, update } = useProgress()
   const [answered, setAnswered] = useState<readonly AnsweredNote[]>([])
 
   if (!ready) {
@@ -113,7 +114,7 @@ export const Corrections = ({
    * panel with a confidence control underneath, or a queue that says one thing
    * is due and then offers nothing.
    */
-  const queue = correctionQueue(progress, today()).filter((correction) =>
+  const queue = correctionQueue(progress, today).filter((correction) =>
     known.has(keyOf(correction.set, correction.question))
   )
   const due = dueCorrections(queue)
@@ -145,7 +146,7 @@ export const Corrections = ({
         confidence: attempt.confidence,
         answer: attempt.answer,
         grade: attempt.grade,
-        on: today(),
+        on: today,
       })
     )
 
@@ -232,11 +233,11 @@ export const Corrections = ({
  * worth putting in front of the reader — how many of them they were sure about.
  */
 export const CorrectionsPanel = () => {
-  const { progress, ready } = useProgress()
+  const { progress, ready, today } = useProgress()
 
   if (!ready) return undefined
 
-  const queue = correctionQueue(progress, today())
+  const queue = correctionQueue(progress, today)
   const due = dueCorrections(queue)
 
   if (queue.length === 0) return undefined

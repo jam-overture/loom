@@ -32,7 +32,7 @@ const QUESTIONS: readonly CorrectionQuestion[] = REVIEW_SETS.flatMap((set) =>
     set: set.slug,
     letter: set.letter,
     number: question.number,
-    checkIn: reviewPointers(set.anchor, question.refs),
+    checkIn: reviewPointers(set.anchor, question),
     body: renderFragment(
       (ids) => [prose(ids, question.text)],
       `${set.slug}-c${question.number}`

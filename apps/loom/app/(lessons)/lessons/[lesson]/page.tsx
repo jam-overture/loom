@@ -10,7 +10,7 @@ import {
 import * as style from "../../_components/style"
 import { blockNodes } from "../../_lib/blocks"
 import { transcriptText, type ExerciseRun } from "../../_lib/exercises"
-import { lessonPointers } from "../../_lib/links"
+import { checkPointers } from "../../_lib/links"
 import { heading, prose, renderFragment } from "../../_lib/loom"
 import { promptSet, readLesson, section, splitAnswers, type LessonDocument, type Prompt } from "../../_lib/lesson"
 import type { Block } from "../../_lib/markdown"
@@ -80,7 +80,7 @@ const questionsOf = (
   prompts.map((prompt) => ({
     number: prompt.number,
     body: renderFragment((ids) => [prose(ids, prompt.text)], `${key}q${prompt.number}`),
-    checkIn: lessonPointers(checkIn(prompt)),
+    checkIn: checkPointers(checkIn(prompt)),
   }))
 
 /**
