@@ -358,6 +358,10 @@ export const askHref = (
     readonly theme?: SiteThemeName
     readonly ask?: string
     readonly approve?: boolean
+    /** Whether the visitor has pressed *Put it back* on the change above. */
+    readonly back?: boolean
+    /** And whether they have answered the rules holding *that* back. */
+    readonly backApprove?: boolean
   } = {}
 ): string => {
   const url = new URL(HOME.path, `${origin}/`)
@@ -365,6 +369,17 @@ export const askHref = (
   if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
   if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
   if (options.approve === true) url.searchParams.set("approve", "1")
+  /**
+   * Two parameters rather than one with three values, because they answer two
+   * questions a visitor asks at two different moments — *put it back*, and then
+   * *yes, I mean it* — and an address that said `back=yes` would be spelling the
+   * second in a word that reads like the first.
+   *
+   * `-yes` is the suffix the record page's sequence already uses for exactly
+   * this, so the two pages name approval the same way.
+   */
+  if (options.back === true) url.searchParams.set("back", "1")
+  if (options.backApprove === true) url.searchParams.set("back-yes", "1")
 
   return url.toString()
 }

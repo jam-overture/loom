@@ -65,8 +65,20 @@ export type PageContext = {
    * this site is a function of.
    */
   readonly approve?: boolean
+  /**
+   * Whether the visitor has pressed *Put it back* on a change that landed, and
+   * whether they have answered the rules holding the undo itself back.
+   *
+   * Two more things the address says, for the same reason as the two above: the
+   * undo is a change of its own (0032) and it is judged by the same rules, so it
+   * can be held for a person exactly as the change it reverses can.
+   */
+  readonly back?: boolean
+  readonly backApprove?: boolean
   /** What happened, once it has. See `render.ts` for why this arrives in a second pass. */
   readonly record?: ChangeRecord
+  /** And what happened when the visitor put it back, once they have. */
+  readonly undone?: ChangeRecord
 }
 
 const hero = (ids: IdFactory, context: PageContext): LoomNode =>
@@ -467,6 +479,12 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
 
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
+  /**
+   * The most recent thing that happened to this page, which the notice at the
+   * top reports: the undo once the visitor has put a change back, and the change
+   * itself until then.
+   */
+  const latest = context.undone ?? context.record
   const chrome: ChromeContext = {
     origin: context.origin,
     theme: context.theme,
@@ -497,13 +515,14 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * Nothing is spread here when there is no record: the arrival page is
          * the tree it has always been, node for node.
          */
-        ...(context.record === undefined
+        ...(latest === undefined
           ? []
           : [
               answerBand(ids, {
                 origin: context.origin,
                 theme: context.theme,
-                record: context.record,
+                record: latest,
+                ...(context.approve === undefined ? {} : { approve: context.approve }),
               }),
             ]),
         hero(ids, context),
@@ -518,7 +537,9 @@ export const homePageTree = (context: PageContext): LoomTree => {
           origin: context.origin,
           theme: context.theme,
           ...(context.ask === undefined ? {} : { ask: context.ask }),
+          ...(context.approve === undefined ? {} : { approve: context.approve }),
           ...(context.record === undefined ? {} : { record: context.record }),
+          ...(context.undone === undefined ? {} : { undone: context.undone }),
         }),
         problems(ids),
         /**

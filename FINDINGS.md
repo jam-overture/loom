@@ -12815,3 +12815,137 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-05 — a stateless surface can compute an undo and cannot assemble one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around in this lane in about thirty lines, and the workaround is
+the finding
+
+The front door's *Put it back* now runs a real undo: the inverse the runtime
+wrote when the change applied is put back through `composeChange` against the
+changed page, weighed by the same named rules, and applied only if they allow it.
+Doing that needed **an interpreter this lane had to write**, and it should not
+have.
+
+`@loom/runtime/write` already has the assembled version. `revertRevision` plans
+an undo, gates it and commits it, and `revertInterpreter` is exported beside it —
+but it takes a `RevertablePlan`, whose `target` is a `StoredRevision`. **The
+whole path is reachable only through a store.** The front door has none and is
+not getting one
+([0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)):
+a session per visitor on the most-crawled surface the project has is a memory
+leak with an advertising budget.
+
+The gap is smaller than it sounds, and that is what makes it worth filing:
+
+| | |
+| --- | --- |
+| **Have** | `composeChange` hands back `inverse` on every applied change |
+| **Have** | `revertInterpreter`, which turns a plan into a gateable proposal |
+| **Missing** | anything that turns *an inverse already in hand* into that proposal |
+
+`apps/loom/app/(marketing)/_lib/adapt/undo.ts` is that missing piece, written
+here. It is thirty lines and it is `revertInterpreter` with the store-shaped
+fields taken out — the same head check, the same `authoredBy: "runtime"`, the
+same confidence of 1 and the same reasoning for both.
+
+**Recommendation: export `inverseInterpreter(inverse, ids, clock)` from
+`@loom/runtime`**, and let `revertInterpreter` be it plus the rationale a store
+can write. Two things follow. Every stateless surface that offers an undo gets
+one that behaves identically to the portal's rather than one each lane rebuilt,
+and the second half of the recorded differentiator — *and how to undo it* —
+stops being the half that costs a surface a file to demonstrate.
+
+**One thing deliberately not borrowed, and it should stay that way.**
+`REVERT_INTERPRETER` is what `revertInterpreter` stamps on a delta it planned
+itself, and `(demo)/_lib/undo.ts` reads that stamp to decide whether a record is
+an undo — the runtime saying so rather than a surface pattern-matching an
+utterance. Claiming it for a delta planned somewhere else would break that, so
+the marketing lane stamps `loom/front-door-undo` instead. If the export above
+lands, the interpreter id is the one decision worth making deliberately rather
+than inheriting.
+
+---
+
+## 2026-09-05 — `/the-record` calls dropping a request "putting one back", and now the front door does not
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — a real inconsistency this run created by fixing one half of it, recorded
+so the next run on this lane starts from the diagnosis
+
+`history.ts` has, and has always had:
+
+```ts
+/** The sequence without its most recent request, which is what putting one back is. */
+export const withoutLastChange = ...
+```
+
+It is not what putting one back is. It is the page replayed from the published
+one with the last request left out — a different page reached by a different
+route, which happens to look the same. That was the front door's behaviour too
+until this run, and on the front door it has been replaced by the undo it
+describes.
+
+**On the record page it is defensible and on the front door it was not**, which
+is why only one of them moved. A history is a list of requests in the address
+(0081), and re-running the list without its last entry is an honest way to render
+"the page as of before that change". What is now inconsistent is the *language*:
+one page reports an undo as a change with a verdict of its own, and the other
+uses the same words for dropping a token.
+
+Two ways out, and it is a run's work rather than a line's:
+
+| | |
+| --- | --- |
+| **A** — reword the record page | *"Show the page before this"*, and stop calling it putting back. Cheap, honest, and gives up the better demonstration |
+| **B** — run the inverse there too | Each step already carries its `undo`. The address would need to say *the third request, and then its undo*, which the token grammar cannot express yet |
+
+**B is the better page and A is the smaller change.** Recommending B, because the
+record page is the one surface on this site whose subject is a *sequence*, and an
+undo appended to a sequence is the case a competitor cannot show at all — but not
+taken this run, because the address grammar is the interesting part of it and
+bolting it onto a run that was about the front door would have made a pull
+request nobody can review.
+
+---
+
+## 2026-09-05 — `loom.milestone`'s marker gutter now costs the front door a 7,299px band on a phone
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — an instance on the 1 September entry, with the number it has grown into
+
+The 1 September run filed that `loom.milestone` reserves `5.5rem` for its marker
+column at every viewport and whether or not a marker is set, so at 390px each
+rung gives its title 101px of the 390 and *You asked for something* wraps to
+three lines. That was one rail. The front door now shows **two** once a visitor
+puts a change back, and the cost is no longer a wrapped heading.
+
+Measured this run against `next start` on the production build, band height:
+
+| | 1440px | 390px |
+| --- | --- | --- |
+| nothing asked | 949px | 2,090px |
+| one record | 1,351px | 4,097px |
+| **two records** | **2,114px** | **7,299px** |
+
+The document is 6,885px at 1440 and **15,682px at 390**. Two records cost 763px
+of desktop and **3,202px of phone** — four times as much, for the same words.
+
+Nothing is broken and nothing scrolls sideways at either width. What the gutter
+does is turn one line of prose into three or four on the narrow viewport, on the
+one band of this site a visitor is meant to read closely, and it now does it
+twice.
+
+**Recommendation unchanged from 1 September** — let the column collapse when
+there is no marker, or narrow it below some breakpoint. Re-filed rather than left
+alone because the earlier entry's measurement was *a title wrapping to three
+lines*, which reads as a nuisance, and the honest number is now a band five
+screens tall on a phone.
+
+**Not worked around**, for the reason the earlier entry gives: the workaround is
+a local component and this lane does not get one. The alternative within this
+lane is to stop showing the second record on a narrow viewport, which would be
+hiding the thing the band exists for from every visitor on a phone.
