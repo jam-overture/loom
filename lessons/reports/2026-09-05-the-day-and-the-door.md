@@ -172,8 +172,17 @@ and nothing appended. Yesterday's run identified that file as acting like a glob
 lock on this lane, every collision between the open lessons branches being that
 one file. Marking two findings closed mid-file is a smaller thing than the appends
 that collide, and leaving a finding open that I have just closed misleads every
-other lane. Tested against the three open lessons branches: clean against each, in
-any order.
+other lane. Checked with `git merge-tree` against all three open lessons branches:
+`FINDINGS.md` merges clean against each.
+
+**The code does not, against #226, and that is worth saying plainly rather than
+burying.** #226 rewrites `corrections.tsx`, `queue.tsx`, `links.ts` and their
+tests to put a lesson's own questions into the corrections queue; this branch
+rewrites four of the same files to take the day out of the ambient environment.
+Six conflicts, all of them in this lane's own files and none in a shared one.
+Whichever merges first, the other rebases — the changes are compatible in
+substance, they are edits to the same twenty lines. #233 and #239 merge clean
+against this in either order.
 
 `lessons/README.md` and `review-schedule.md` are **untouched**. Nothing about
 reading the course as markdown changed — the citation in the schedule was always a
