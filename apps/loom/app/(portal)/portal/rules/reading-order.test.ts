@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
  * The order a reader meets this screen in, pinned at the source, and the two
@@ -18,15 +17,8 @@ import { describe, expect, it } from "vitest"
  * move a policy threshold from a browser, which is the whole of what that record
  * says not to build.
  */
-const file = join(process.cwd(), "app", "(portal)", "portal", "rules", "page.tsx")
-
-/**
- * Comments are stripped first, as on the activity and page screens: the comments
- * here name the very shapes this file must not contain, and a check that could
- * not tell a warning from the thing it warns about would make the warning
- * unwriteable.
- */
-const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu, "")
+const file = portalFile("portal", "rules", "page.tsx")
+const source = screenSource(file)
 
 describe("the rules screen's reading order", () => {
   it("says what has happened under these rules before listing them", () => {
@@ -71,10 +63,5 @@ describe("the rules screen's reading order", () => {
     expect(source).not.toContain("<form")
     expect(source).not.toContain("<button")
     expect(source).not.toContain("action=")
-  })
-
-  it("never reverses a row or a column to place something", () => {
-    expect(source).not.toContain("flex-row-reverse")
-    expect(source).not.toContain("flex-col-reverse")
   })
 })

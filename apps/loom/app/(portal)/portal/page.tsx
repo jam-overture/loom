@@ -170,7 +170,7 @@ const PortalHome = async () => {
         </StateNotice>
       ) : changes.length === 0 ? (
         <StateNotice
-          tone="empty"
+          tone="settled"
           title="You're all caught up."
           /*
            * Not "Your pages", which is two lines below in the strip and again
@@ -190,11 +190,11 @@ const PortalHome = async () => {
             When Loom is unsure about a change, it stops and asks you here instead of guessing.
             Nothing has stopped for you on any page.
           </p>
-          <TechnicalDetail summary="What an empty queue does and doesn't mean">
+          <TechnicalDetail summary="What this does and doesn't mean">
             <p>
               Changes the Gate accepts are written without asking, and ones it refuses outright
               never reach you — a hold is the middle case, where the stakes were high enough that
-              the Gate declined to decide alone. An empty queue is the Gate having decided, not
+              the Gate declined to decide alone. Nothing waiting is the Gate having decided, not
               having stalled.
             </p>
           </TechnicalDetail>

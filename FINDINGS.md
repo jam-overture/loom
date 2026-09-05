@@ -13324,3 +13324,173 @@ unsubscribing, is the cheap version of that — the events are already queued, a
 what costs is the standing order, not the delivery.
 
 Nothing a routine can fix. Filed for the ninth consecutive day.
+
+---
+
+## 2026-09-05 — the portal's most-read heading is a machine identifier, and no vocabulary work can fix it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`, and its answer is
+`Loom daily build`'s · **Status:** open — escalation-adjacent, and deliberately
+not fixed on the way past
+
+`/portal/pages/[treeId]` renders `<h1>{parsed.data}</h1>`. The largest text on
+the busiest screen in the portal is `t_seed1`.
+
+Every other heading in this route group has been rewritten into a person's words
+over the last fortnight — *"Can you trust the AI?"*, *"Is anybody trying to get
+in?"*, *"What Loom is allowed to do here"*. This one cannot be, and the reason is
+not a vocabulary problem:
+
+> **A tree has no name.** The schema carries an id and nothing a person chose.
+> Vercel puts the project's name at the top of that screen; Loom has nothing to
+> put there.
+
+Three things follow, and the middle one is why this is filed rather than done.
+
+1. **The id must stay on the surface.** 22 August settled it and the reasoning
+   holds: a name is what tells one page from another, and a screen listing
+   several is the case that most needs them.
+2. **Giving a tree a name is a tree-schema change**, which is
+   **ARCHITECTURAL — needs review** by this lane's own brief. A portal that
+   invented a name and stored it beside the tree would be a portal holding
+   authoritative state about a tree, which 0018 is precisely about not doing.
+3. **There is a cheap half nobody has taken**, and a portal run can take it
+   without any of the above: the heading can say *what the reader is looking at*
+   with the id beside it rather than instead of it — the way the rail's
+   `Waiting on you` is a sentence about the reader and the strip's `The page` is
+   a label. That is a portal decision and it is this lane's to make; it is not in
+   this diff because this diff is four merged units and a component, and a
+   heading rewrite belongs to the run that rewrites that screen.
+
+**What the framework routine is being asked for, if anything:** nothing yet. This
+is filed so that whoever proposes a name on a tree knows the portal is the caller
+that wants one, and so the portal's next run on that screen does not treat the
+heading as finished because a guard passed over it — `every-screen.test.ts` skips
+a heading whose text is an interpolation, on purpose and with the reason written
+above the skip.
+
+---
+
+## 2026-09-05 — a dashed box meant two opposite things, and the copy inside it had started apologising
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-23-four-units-one-tree`
+
+Recorded because of *how* it was found rather than what it was.
+
+`StateNotice`'s `empty` tone is documented as *"there is nothing here yet —
+dashed, because a dashed edge reads as a space something goes in."* Three notices
+used it to announce a **good result**: *"You're all caught up."*, *"Nothing is
+waiting for you."* and *"It was never wrong by more than a coin flip."*
+
+Every test passed. Each one rendered the right words in the right order behind
+the right disclosure, and the defect is not in any of those — it is that the
+container says *empty* and the content says *fine*, which are opposite answers to
+"should I be worried?".
+
+**The tell was in the prose.** The calibration notice read *"That is the result,
+not an empty section"*. Two others carried a disclosure headed *"What an empty
+queue does and doesn't mean"*. **A writer explaining away a border is a bug
+report about the border**, and it had been sitting in the source for a fortnight
+in three places.
+
+Worth generalising, for any lane: when a component makes its callers write a
+sentence defending the component, the component is wrong and the sentence is the
+evidence. It is cheaper to notice than a screenshot and nobody was looking for it.
+
+Fixed with a fourth tone, `settled`, and the apologies removed from the copy
+because the container now carries them.
+
+---
+
+## 2026-09-05 — a per-screen guard guards the screens somebody remembered
+
+**Filed by:** `Loom portal` · **Owned by:** every lane that writes one ·
+**Status:** open as a recommendation, closed for this lane by
+`portal-23-four-units-one-tree`
+
+Seven `reading-order.test.ts` files in `(portal)` opened with the same eight
+lines. This lane filed the duplication twice and copied it a third time anyway,
+saying on #240 that it was the last time that would be defensible.
+
+**The duplication was the small half.** The large half only became visible when
+the four open branches were merged and the seven copies could be seen together:
+
+> The screens with a guard are the screens somebody thought about. **The screen
+> that ships a defect is, by definition, the one nobody thought about.**
+
+`/portal/trust` had no guard. It is where the first run of the shared one found a
+notice announcing a good result in the box that means "nothing here yet", and
+`error.tsx` — which also had none — is where it found the last lower-case heading
+in the portal.
+
+The fix is not "write the eighth copy". It is to enumerate the screens from the
+filesystem and run the universal rules over whatever is there, which is what
+`app/(portal)/every-screen.test.ts` now does, and what
+`_components/shell/nav-items.test.ts` had already been doing for the rail since
+three of its four items were found pointing at 404s.
+
+**For the other surface lanes:** the same shape is available and cheap.
+`_lib/screen-source.ts` is a portal file and must not be imported across a lane
+boundary, but it is forty lines and the pattern is the whole of the value.
+
+---
+
+## 2026-09-05 — a type can enforce "what do I do now?" and a test cannot
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-23-four-units-one-tree`
+
+The brief's third rule is that every screen answers *what do I do now?*, and an
+empty state is its clearest instance. Two screens' guards asserted it — Activity's
+and the front door's — each over its own file, each written after somebody
+remembered.
+
+`StateNotice`'s props are a discriminated union now: `tone="empty"` requires both
+`action` and `title`. Ten call sites already satisfied it, which is why this cost
+nothing; the point is the eleventh.
+
+The reason to record it: **the enforcement moved from where the defect would be
+noticed to where it would be introduced.** A test names screens. A type names the
+shape, and every future screen meets it before it has a test at all. Where a rule
+in a brief can be spelled as a type rather than as an assertion, it should be —
+and it stays honest because `@ts-expect-error` fails the typecheck if the error
+it claims stops happening.
+
+---
+
+## 2026-09-05 — the four open portal pull requests were the closure finding happening again, and this is how it was stopped
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-23-four-units-one-tree`
+
+The 28 August entry — sixteen pull requests closed unmerged — carries a
+maintainer instruction: *continue an open pull request rather than branching
+again from `main`.*
+
+This lane had four open when this run started: #219, #227, #234, #240. **Three of
+them edit `nav-items.tsx` and all four edit `FINDINGS.md`.** A fifth branch cut
+from `main` would have been the fifth overlapping rewrite of one file — which is
+the exact arithmetic the closure finding gives for why sixteen branches could not
+be merged mechanically.
+
+**What was done, and it is offered as the pattern rather than as a one-off:**
+branch off `main`, merge all four in order, resolve, verify, then build the run's
+own unit on top. All three conflicts were `FINDINGS.md` append collisions and
+were resolved by keeping both blocks in date order. `nav-items.tsx` auto-merged
+across three branches and was read rather than trusted.
+
+Two properties worth naming, because they are what make this safe rather than a
+stack:
+
+- **It is not stacking.** The branch is off `main`; the four are merged *into* it.
+  Nothing depends on another open pull request being merged first.
+- **No commit was rewritten.** Every commit from all four branches is in the
+  history, so the four can be closed as superseded rather than re-done — which is
+  what the 28 August entry could not offer, and why sixteen units had to be
+  rebuilt.
+
+**What this costs the maintainer:** one review of a larger diff instead of four
+reviews of conflicting ones. **What it costs if it is not done:** the four
+pull requests conflict pairwise on `nav-items.tsx` and only the first to merge
+survives mechanically.

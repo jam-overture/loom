@@ -195,14 +195,13 @@ const TrustPage = async ({
               total={misses.length}
             />
           ) : (
-            <StateNotice tone="empty" title="It was never wrong by more than a coin flip.">
+            <StateNotice tone="settled" title="It was never wrong by more than a coin flip.">
               <p>
                 Every settled change landed on the side the AI&rsquo;s own confidence predicted:
                 nothing it called likely was turned down, and nothing it hedged on sailed
-                through. That is the result, not an empty section — with{" "}
-                {report.overall.judged}{" "}
-                {report.overall.judged === 1 ? "change" : "changes"} answered it is also a small
-                sample.
+                through. With {report.overall.judged}{" "}
+                {report.overall.judged === 1 ? "change" : "changes"} answered it is a small
+                sample, so read it as a good sign rather than as a guarantee.
               </p>
             </StateNotice>
           )}

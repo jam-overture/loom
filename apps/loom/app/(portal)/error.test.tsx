@@ -19,7 +19,7 @@ describe("the error boundary", () => {
   it("does not invent a digest when there is none to quote", () => {
     render(<ErrorBoundary error={new Error("boom")} reset={reset} />)
 
-    expect(document.body.textContent).toContain("The page did not finish loading.")
+    expect(document.body.textContent).toContain("This page didn\u2019t finish loading.")
     expect(document.body.textContent).not.toContain("undefined")
     expect(document.body.textContent).not.toContain("identifier is the whole of what crosses")
   })
@@ -44,7 +44,7 @@ describe("the error boundary", () => {
     const onReset = vi.fn()
 
     render(<ErrorBoundary error={new Error("boom")} reset={onReset} />)
-    screen.getByRole("button", { name: "try again" }).click()
+    screen.getByRole("button", { name: "Try again" }).click()
 
     expect(onReset).toHaveBeenCalledTimes(1)
   })

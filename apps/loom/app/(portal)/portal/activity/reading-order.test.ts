@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
  * The order a reader meets this screen in, pinned at the source.
@@ -18,15 +17,8 @@ import { describe, expect, it } from "vitest"
  * test anywhere else, and has buried the answer under everything that is not
  * it.
  */
-const file = join(process.cwd(), "app", "(portal)", "portal", "activity", "page.tsx")
-
-/**
- * Comments are stripped first, for the reason the page screen's guard strips
- * them: the comments here name the words this screen stopped using, and a check
- * that could not tell a warning from the thing it warns about would make the
- * warning unwriteable.
- */
-const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu, "")
+const file = portalFile("portal", "activity", "page.tsx")
+const source = screenSource(file)
 
 describe("the activity screen's reading order", () => {
   it("says what this page adds up to before listing what is on it", () => {
@@ -45,15 +37,5 @@ describe("the activity screen's reading order", () => {
 
     expect(empty).toContain("action=")
     expect(empty).toContain("/portal/pages")
-  })
-
-  /**
-   * The guard rather than the symptom, same as the page screen's. Any reversal
-   * reintroduces the split between reading order and source order, and it is
-   * invisible until somebody opens the screen on a phone.
-   */
-  it("never reverses a row or a column to place something", () => {
-    expect(source).not.toContain("flex-row-reverse")
-    expect(source).not.toContain("flex-col-reverse")
   })
 })

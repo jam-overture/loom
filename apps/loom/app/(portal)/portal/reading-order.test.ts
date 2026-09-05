@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
  * The front door's reading order, pinned at the source.
@@ -10,13 +9,9 @@ import { describe, expect, it } from "vitest"
  * History's, and the one with most riding on it: this is the screen somebody
  * lands on when they sign in, so whatever it says first is the portal's first
  * sentence to them.
- *
- * Comments are stripped first, as in the other three — the comments here name
- * what the screen replaced, and a check that could not tell a warning from the
- * thing it warns about would make the warning unwriteable.
  */
-const file = join(process.cwd(), "app", "(portal)", "portal", "page.tsx")
-const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu, "")
+const file = portalFile("portal", "page.tsx")
+const source = screenSource(file)
 
 describe("the front door's reading order", () => {
   /**
@@ -44,15 +39,25 @@ describe("the front door's reading order", () => {
   })
 
   /**
-   * Two empty states, and they are different states: a deployment with no pages
-   * cannot have anything waiting, and a deployment with pages and an empty
-   * queue is somebody being told they are done. Both are places a person
-   * actually starts, so both keep an action.
+   * Two states with no queue on screen, and this guard is here because they are
+   * not the same state.
+   *
+   * A deployment with no pages has nothing yet: dashed, and the body's job is to
+   * say what would put something there. A deployment with pages and an empty
+   * queue is somebody being told **they are done**, which is a result — and it
+   * shipped in the dashed box for a fortnight, so a reader who did not open the
+   * disclosure met a blank slot where a clean bill of health should be.
+   *
+   * Both still carry an action, and only one of them has to: an `empty` cannot
+   * compile without one. `settled` may, and here it does, because when nothing
+   * needs answering the standing question is whether the changes Loom made
+   * *without* asking were sound.
    */
-  it("gives both empty states something to do", () => {
-    const notices = source.split('tone="empty"').slice(1)
+  it("tells nothing-yet apart from all-clear, and gives both something to do", () => {
+    const notices = [...source.split('tone="empty"').slice(1), ...source.split('tone="settled"').slice(1)]
 
-    expect(notices.length).toBe(2)
+    expect(source.split('tone="empty"').length - 1).toBe(1)
+    expect(source.split('tone="settled"').length - 1).toBe(1)
     for (const notice of notices) expect(notice.slice(0, 600)).toContain("action=")
   })
 
@@ -107,7 +112,7 @@ describe("the front door's reading order", () => {
    * Every assertion passed, because each half was correct on its own; what was
    * wrong was the pair, and only the whole screen has one.
    *
-   * The empty states are mutually exclusive, so the check is per branch rather
+   * The two states are mutually exclusive, so the check is per branch rather
    * than over the file: the no-pages state and the caught-up state never appear
    * together, and counting their hrefs as one screen would report a repeat that
    * no reader can see.
@@ -117,10 +122,10 @@ describe("the front door's reading order", () => {
       Array.from(text.matchAll(/href="([^"{]+)"/gu), (match) => match[1] ?? "")
 
     const strip = hrefsIn(source.slice(source.indexOf("<nav")))
-    const branches = source
-      .split('tone="empty"')
-      .slice(1)
-      .map((chunk) => hrefsIn(chunk.slice(0, chunk.indexOf("</StateNotice>"))))
+    const branches = [
+      ...source.split('tone="empty"').slice(1),
+      ...source.split('tone="settled"').slice(1),
+    ].map((chunk) => hrefsIn(chunk.slice(0, chunk.indexOf("</StateNotice>"))))
 
     /** Guards the guard: an empty slice would pass this trivially. */
     expect(strip.length).toBe(2)
@@ -132,11 +137,5 @@ describe("the front door's reading order", () => {
 
       expect(new Set(onScreen).size, onScreen.join(" ")).toBe(onScreen.length)
     }
-  })
-
-  /** The guard rather than the symptom, same as the other three. */
-  it("never reverses a row or a column to place something", () => {
-    expect(source).not.toContain("flex-row-reverse")
-    expect(source).not.toContain("flex-col-reverse")
   })
 })
