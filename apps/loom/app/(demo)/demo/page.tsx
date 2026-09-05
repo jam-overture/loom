@@ -11,7 +11,7 @@ import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { spotlightsFor, spotlitChange } from "@/app/(demo)/_lib/spotlight"
-import { undoOffer } from "@/app/(demo)/_lib/undo"
+import { isUndo, undoOffer } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
@@ -79,8 +79,17 @@ const DemoPage = async () => {
    * an applied one describes the tree that is there now, so the same resolution
    * serves both and neither can point at a node that no longer exists.
    */
+  /*
+   * `isUndo` travels with it, because a mark reading "New — just added" over a
+   * band the visitor has just watched come *back* is the one claim this surface
+   * exists to make, said backwards. The delta cannot supply it — an undo's
+   * operations are ordinary inserts and removes (0032) — so the record's own
+   * provenance does.
+   */
   const spotlit = spotlitChange(records, tree)
-  const spots = spotlit ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone) : []
+  const spots = spotlit
+    ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone, isUndo(spotlit.record))
+    : []
 
   /**
    * The one record, if any, that has asked the visitor something and is waiting
@@ -118,8 +127,27 @@ const DemoPage = async () => {
    * it cannot change between two cards on one page.
    */
   const settings = settingsOf(demoRegistry)
+
+  /**
+   * Whether the change waiting on this proposal is one putting something back.
+   *
+   * The join is here rather than in `plainChange` because a held proposal and
+   * the record of the ask that raised it are two different things — the store
+   * holds the first, `session.ts` writes the second — and this page is the one
+   * place both are in hand. A hold with no record of its own is described as an
+   * ordinary change, which is the safe reading: it is what the delta says.
+   */
+  const restoring = (proposalId: string): boolean => {
+    const record = records.find((one) => one.heldProposalId === proposalId)
+
+    return record !== undefined && isUndo(record)
+  }
+
   const plains = new Map<string, readonly PlainChange[]>(
-    held.map((one) => [one.proposalId, plainChange(tree, one.proposal.delta, settings)])
+    held.map((one) => [
+      one.proposalId,
+      plainChange(tree, one.proposal.delta, settings, restoring(one.proposalId)),
+    ])
   )
 
   /** Absent rather than `undefined`: the props are optional, not nullable. */

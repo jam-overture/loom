@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, type LoomTree, type TreeDelta, type TreeOperation } from "@loom/runtime"
+import {
+  applyOperation,
+  sequentialIdFactory,
+  type LoomTree,
+  type TreeDelta,
+  type TreeOperation,
+} from "@loom/runtime"
 
 import { demoPageTree } from "./page-tree"
 import { plainChange, settingsOf } from "./plain-change"
@@ -217,6 +223,95 @@ describe("a proposal the page can no longer honour", () => {
 })
 
 /**
+ * A change that is putting something back.
+ *
+ * The delta of an undo is an ordinary delta — the inverse of a `remove` is an
+ * `insert` (0032) — so on the demo's own path the card under *Put it back* read
+ * **"This goes onto the page, and nothing already on it is touched"**, over
+ * three figures the visitor had watched come *off* that page one press earlier.
+ * True of the operation, and the wrong half of it.
+ */
+describe("a change that puts something back", () => {
+  /**
+   * The page with the numbers taken off, and the insert that would restore
+   * them — which is precisely what `revertRevision` plans, node for node.
+   */
+  const afterTheTrim = (): { readonly tree: LoomTree; readonly restore: TreeOperation } => {
+    const before = demoPageTree()
+    const stats = before.root.children.find(
+      (node) => node.kind === "element" && node.type === "loom.stat-grid"
+    )
+    if (!stats) throw new Error("the demo page has no numbers band")
+
+    const index = before.root.children.indexOf(stats)
+    const after = applyOperation(before.root, { op: "remove", nodeId: stats.id })
+    if (!after.ok) throw new Error("could not take the numbers off")
+    /** `applyOperation` answers with a node; a tree's root is an element. */
+    if (after.value.kind !== "element") throw new Error("the page root stopped being an element")
+
+    return {
+      tree: { ...before, root: after.value, revision: before.revision + 1 },
+      restore: { op: "insert", parentId: before.root.id, index, node: stats },
+    }
+  }
+
+  it("says the numbers go back exactly as they were", () => {
+    const { tree, restore } = afterTheTrim()
+    const [line] = plainChange(tree, deltaOf(tree, [restore]), settings, true)
+
+    expect(line?.sentence).toBe("This goes back on the page, exactly as it was before.")
+    expect(line?.words).toEqual(["3,400", "24", "92%"])
+  })
+
+  /**
+   * The measurement rather than the assertion: **one delta, two sentences**, and
+   * the only thing that differs is whether the record says this is an undo. It
+   * is what proves the fix is reading provenance rather than pattern-matching a
+   * shape the delta happens to have.
+   */
+  it("describes the same operation as an arrival when it is not an undo", () => {
+    const { tree, restore } = afterTheTrim()
+    const [line] = plainChange(tree, deltaOf(tree, [restore]), settings)
+
+    expect(line?.sentence).toBe("This goes onto the page, and nothing already on it is touched.")
+  })
+
+  it("says an undone insert comes back off, rather than reporting a removal", () => {
+    const tree = demoPageTree()
+    const [line] = plainChange(tree, deltaOf(tree, planOf("trim", tree)), settings, true)
+
+    expect(line?.sentence).toBe("This comes back off the page, leaving it as it was before.")
+    expect(line?.words).toEqual(["3,400", "24", "92%"])
+  })
+
+  it("says a move and a re-theme go back to what they were", () => {
+    const tree = demoPageTree()
+
+    expect(plainChange(tree, deltaOf(tree, planOf("promote", tree)), settings, true)[0]?.sentence).toBe(
+      "This goes back where it was. Not a word of it changes."
+    )
+    expect(plainChange(tree, deltaOf(tree, planOf("palette", tree)), settings, true)[0]?.sentence).toBe(
+      "The whole page goes back to how it looked. Not a word on it changes."
+    )
+    expect(plainChange(tree, deltaOf(tree, planOf("backdrop", tree)), settings, true)[0]?.sentence).toBe(
+      "One part of the page goes back to how it looked. Not a word on it changes."
+    )
+  })
+
+  /**
+   * A stale undo is stale for the same reason any other proposal is, so it says
+   * the same thing. The direction of travel is not what is wrong with it.
+   */
+  it("falls back to the stale sentence when the page no longer has the node", () => {
+    const tree = demoPageTree()
+    const gone = { op: "remove", nodeId: tree.root.children[0]?.id ?? tree.root.id } as const
+    const lines = plainChange(tree, deltaOf(tree, [gone, gone]), settings, true)
+
+    expect(lines[1]?.sentence).toBe("This would take off something the page no longer has.")
+  })
+})
+
+/**
  * The property the whole unit is for, stated once as a property rather than as
  * a string: **nothing this card says unasked may be vocabulary a stranger has
  * not met.** A rendering that starts naming primitive types, node ids or delta
@@ -228,6 +323,23 @@ describe("the plain half stays plain", () => {
   it("names no type, no id and no word out of the runtime's vocabulary", () => {
     for (const id of ["trim", "band", "promote", "palette", "backdrop"]) {
       for (const line of linesFor(id)) {
+        for (const reserved of RESERVED) {
+          expect(line.sentence.toLowerCase()).not.toContain(reserved)
+        }
+      }
+    }
+  })
+
+  /**
+   * And the restoring half is held to the same bar. It is newer, it is where a
+   * surface reaching for "the node comes back" would most naturally slip, and it
+   * is read at the one moment a visitor is deciding whether the undo is real.
+   */
+  it("stays plain when the change is putting something back", () => {
+    const tree = demoPageTree()
+
+    for (const id of ["trim", "band", "promote", "palette", "backdrop"]) {
+      for (const line of plainChange(tree, deltaOf(tree, planOf(id, tree)), settings, true)) {
         for (const reserved of RESERVED) {
           expect(line.sentence.toLowerCase()).not.toContain(reserved)
         }

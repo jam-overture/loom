@@ -12,7 +12,7 @@ import {
   type LoomTree,
   type NodeId,
 } from "@loom/runtime"
-import { commitIntent, confirmHeld } from "@loom/runtime/write"
+import { commitIntent, confirmHeld, revertRevision } from "@loom/runtime/write"
 
 import { demoPageTree } from "./page-tree"
 import { presetById, presetInterpreter } from "./presets"
@@ -27,6 +27,7 @@ import {
   type Spotlight,
 } from "./spotlight"
 import type { TouchedNode } from "./touched"
+import { isUndo } from "./undo"
 
 /**
  * Where the mark lands, proved against the page a visitor actually sees.
@@ -92,12 +93,45 @@ const answer = async (session: DemoSession, held: ChangeRecord): Promise<ChangeR
   return record
 }
 
-/** The mark for a change, read against the tree that change left behind. */
+/**
+ * Ask to put a revision back, exactly as the card's button does.
+ *
+ * Through `revertRevision` rather than through a fixture, because the whole
+ * point of the cases below is that an undo's delta is an *ordinary* delta — the
+ * inverse of a remove is an insert — and a hand-written record would let the
+ * test agree with the code about something the runtime decides.
+ */
+const undo = async (session: DemoSession, revision: number): Promise<ChangeRecord> => {
+  const write = beginDemoWrite(session)
+
+  await revertRevision(write.path, {
+    treeId: session.seed.treeId,
+    revision,
+    seed: session.seed,
+    origin: "user-instruction",
+    actor: "a demo visitor",
+  })
+
+  const record = recordFromEvents(write.narrated())
+  if (!record) throw new Error("the undo narrated nothing")
+
+  return record
+}
+
+/**
+ * The mark for a change, read against the tree that change left behind.
+ *
+ * `isUndo` is passed here for the same reason `page.tsx` passes it: it is the
+ * only thing on the record that says an insert is a node coming *back*, and a
+ * helper that dropped it would test a page nobody is looking at.
+ */
 const marksFor = async (session: DemoSession, record: ChangeRecord): Promise<readonly Spotlight[]> => {
   const tree = await headOf(session)
   const spotlit = spotlitChange([record], tree)
 
-  return spotlit ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone) : []
+  return spotlit
+    ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone, isUndo(spotlit.record))
+    : []
 }
 
 const typeOf = (tree: LoomTree, nodeId: string): string => {
@@ -166,6 +200,101 @@ describe("marking a change on the page", () => {
     expect(after[0]?.label).toBe("New — just added")
     expect(after[0]?.placement).toBe("inside")
     expect(typeOf(await headOf(session), after[0]!.nodeId)).toBe("loom.section")
+  })
+
+  /**
+   * The last frame of the demo's own sixty seconds, and it used to say the
+   * opposite of the card beside it.
+   *
+   * A visitor takes the numbers off, allows it, and presses *Put it back*. The
+   * inverse of a `remove` is an `insert` (0032), so every label reached the
+   * `added` branch: the held undo was marked **Something new would go here** and
+   * the restored band was marked **New — just added** — over three figures the
+   * visitor had watched come off that exact spot two presses earlier, on a card
+   * whose own rationale reads *"undoing this restores every node with the id it
+   * had"*.
+   *
+   * *The same nodes come back, not new ones* is what separates this from a
+   * rewind. It is the whole argument, it is the last thing anybody sees, and the
+   * page was denying it.
+   */
+  it("says a held undo would put the band back, rather than add a new one", async () => {
+    const session = await sessionFor("undo-held")
+    const applied = await answer(session, await ask(session, "trim"))
+    const revision = applied.revision?.produced
+    if (revision === undefined) throw new Error("the change produced no revision")
+
+    const held = await undo(session, revision)
+    const marks = await marksFor(session, held)
+
+    expect(held.outcome).toBe("awaiting-you")
+    expect(marks[0]?.tone).toBe("awaiting")
+    expect(marks[0]?.label).toBe("What was here would come back")
+    /** The gap the numbers left, which is above the band that moved up into it. */
+    expect(marks[0]?.placement).toBe("above")
+  })
+
+  it("marks the restored band as the one that was there, not as something new", async () => {
+    const session = await sessionFor("undo-applied")
+    const first = await answer(session, await ask(session, "trim"))
+    const revision = first.revision?.produced
+    if (revision === undefined) throw new Error("the change produced no revision")
+
+    const restored = await answer(session, await undo(session, revision))
+    const marks = await marksFor(session, restored)
+
+    expect(restored.outcome).toBe("applied")
+    expect(marks[0]?.tone).toBe("applied")
+    expect(marks[0]?.label).toBe("Back — exactly as it was")
+    expect(marks[0]?.placement).toBe("inside")
+
+    /**
+     * And the label is a fact rather than a kinder word for the same thing: the
+     * band carrying it is the node that was removed, with the id it had when the
+     * visitor arrived. If this ever stops holding, the mark is the lie and this
+     * test is how it is caught.
+     */
+    const before = demoPageTree()
+    const original = before.root.children.find(
+      (node) => node.kind === "element" && node.type === "loom.stat-grid"
+    )
+    expect(marks[0]?.nodeId).toBe(original?.id)
+    expect(typeOf(await headOf(session), marks[0]!.nodeId)).toBe("loom.stat-grid")
+  })
+
+  /**
+   * The other direction, which is why the restoring labels are a table of their
+   * own rather than a prefix on the ordinary ones. Undoing an *insert* takes
+   * something off — and what a visitor needs told is not that a band was
+   * removed, but that the one they just added has gone again.
+   */
+  it("says an undone insert has gone back off, rather than reporting a removal", async () => {
+    const session = await sessionFor("undo-insert")
+    const added = await answer(session, await ask(session, "band"))
+    const revision = added.revision?.produced
+    if (revision === undefined) throw new Error("the change produced no revision")
+
+    const held = await undo(session, revision)
+    expect((await marksFor(session, held))[0]?.label).toBe("This would go back off")
+
+    const gone = await answer(session, held)
+    const marks = await marksFor(session, gone)
+
+    expect(gone.outcome).toBe("applied")
+    expect(marks[0]?.label).toBe("What was added here has gone")
+  })
+
+  /**
+   * And nothing else moved. An ordinary change is the overwhelming majority of
+   * what this surface marks, and a restoring label leaking onto one would be the
+   * same defect pointing the other way.
+   */
+  it("leaves an ordinary change's words alone", async () => {
+    const session = await sessionFor("ordinary")
+    const record = await ask(session, "trim")
+
+    expect(isUndo(record)).toBe(false)
+    expect((await marksFor(session, record))[0]?.label).toBe("This would be removed")
   })
 
   /**

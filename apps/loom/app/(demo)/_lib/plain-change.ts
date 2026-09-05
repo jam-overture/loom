@@ -149,11 +149,93 @@ const shown = (words: readonly string[]): Pick<PlainChange, "words" | "more"> =>
  * card is asking the visitor to allow something, and an operation naming a node
  * this page no longer has is the most important thing on it.
  */
-const plainOperation = (
+/**
+ * The same four operations, when the change is putting something back.
+ *
+ * **Why there are two tables and not one.** An undo's delta is an ordinary
+ * delta — the inverse of a `remove` is an `insert` (0032) — so the sentences
+ * above described the demo's own payoff as an arrival: press *Put it back* and
+ * the card read *"This goes onto the page, and nothing already on it is
+ * touched"*, over three figures the visitor had watched come off it ninety
+ * pixels earlier. True of the operation, and the wrong half of it. What the
+ * visitor needs to know about an undo is the one thing an insert cannot say:
+ * this is the same content coming back, not a replacement being written.
+ *
+ * They are separate strings rather than a prefix on the ordinary ones because
+ * *what comes back* differs from *what arrives* per operation, and the pairs do
+ * not line up: undoing an insert takes something off, and the interesting half
+ * is that what goes is the thing the visitor had just put there.
+ *
+ * The `null` cases are shared with the ordinary table rather than restated. A
+ * change naming a node the page no longer has is a stale proposal, which is a
+ * fact about the tree and not about the direction of travel.
+ */
+const restoringOperation = (
   root: LoomNode,
   operation: TreeOperation,
   settings: ReadonlySet<string>
+): PlainChange | undefined => {
+  switch (operation.op) {
+    case "insert": {
+      const words = wordsIn(operation.node, settings)
+
+      return {
+        sentence:
+          words.length === 0
+            ? "What came off the page goes back on, exactly as it was."
+            : "This goes back on the page, exactly as it was before.",
+        ...shown(words),
+      }
+    }
+
+    case "remove": {
+      const node = findNode(root, operation.nodeId)
+      if (node === null) return undefined
+
+      const words = wordsIn(node, settings)
+
+      return {
+        sentence:
+          words.length === 0
+            ? "What was added comes back off, leaving the page as it was."
+            : "This comes back off the page, leaving it as it was before.",
+        ...shown(words),
+      }
+    }
+
+    case "move": {
+      const node = findNode(root, operation.nodeId)
+      if (node === null) return undefined
+
+      return {
+        sentence: "This goes back where it was. Not a word of it changes.",
+        ...shown(wordsIn(node, settings)),
+      }
+    }
+
+    case "configure":
+      return {
+        sentence:
+          operation.nodeId === root.id
+            ? "The whole page goes back to how it looked. Not a word on it changes."
+            : "One part of the page goes back to how it looked. Not a word on it changes.",
+        words: [],
+        more: 0,
+      }
+  }
+}
+
+const plainOperation = (
+  root: LoomNode,
+  operation: TreeOperation,
+  settings: ReadonlySet<string>,
+  restoring: boolean
 ): PlainChange => {
+  if (restoring) {
+    const back = restoringOperation(root, operation, settings)
+    if (back) return back
+  }
+
   switch (operation.op) {
     case "insert": {
       const words = wordsIn(operation.node, settings)
@@ -226,17 +308,24 @@ const plainOperation = (
  * A failed step does not stop the walk. `applyOperation` is allowed to refuse —
  * a stale proposal is exactly the case this card exists for — and the operations
  * after it are still what was asked for.
+ *
+ * `restoring` is a fact about the change rather than about any operation in it,
+ * and it is not recoverable from the delta: an undo's operations are ordinary
+ * ones. It comes from the record's provenance (`undo.ts`'s `isUndo`), which is
+ * the runtime's own stamp and the same source the card's quotation reads.
+ * Defaulted, so a caller describing an ordinary change need not say so.
  */
 export const plainChange = (
   tree: LoomTree,
   delta: TreeDelta,
-  settings: ReadonlySet<string>
+  settings: ReadonlySet<string>,
+  restoring = false
 ): readonly PlainChange[] => {
   const lines: PlainChange[] = []
   let state: LoomNode = tree.root
 
   for (const operation of delta.operations) {
-    lines.push(plainOperation(state, operation, settings))
+    lines.push(plainOperation(state, operation, settings, restoring))
 
     const advanced = applyOperation(state, operation)
     if (advanced.ok) state = advanced.value

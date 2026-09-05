@@ -86,8 +86,17 @@ export type AskedLine = {
  * this surface pattern-matching an utterance it does not own. A record with no
  * interpretation was never assessed and has no delta to have come from
  * anywhere, so it falls through to its own words.
+ *
+ * **Exported, because it is not only the card's quotation that turns on it.**
+ * An undo's operations are ordinary inserts, removes and moves — that is the
+ * whole of 0032, and it is why everything downstream of the delta described one
+ * as an arrival. The mark on the page (`spotlight.ts`) and the plain sentence
+ * under it (`plain-change.ts`) both need the one fact the delta cannot carry:
+ * that this insert is a node **coming back**, with the id it had, rather than
+ * something new. Read from the same stamp by all three, so no two halves of the
+ * surface can disagree about whether a change is a restoration.
  */
-const isUndo = (record: ChangeRecord): boolean =>
+export const isUndo = (record: ChangeRecord): boolean =>
   record.interpretation?.interpreter === REVERT_INTERPRETER
 
 export const askedLine = (record: ChangeRecord): AskedLine =>

@@ -83,14 +83,75 @@ export type Spotlight = {
 export const MAX_SPOTS = 3
 
 /**
+ * What to call it when the change is putting something back.
+ *
+ * **This is the demo's own claim, and the page was contradicting it.** An undo
+ * is a change of its own (0032) and its operations are ordinary ones — the
+ * inverse of a `remove` is an `insert` — so every label below was reached
+ * through the `added` branch and the restored numbers band was marked **New —
+ * just added**. Three inches away, on the card that produced it, the record said
+ * the opposite in two places: *"the 4 pieces it takes off the page are kept, so
+ * the exact opposite of this change already exists"*, and the interpreter's own
+ * rationale, *"undoing this restores every node with the id it had"*.
+ *
+ * That is not a wording nit. *The same nodes come back, not new ones* is the
+ * single thing that distinguishes Loom's undo from a rewind, it is the last
+ * thing a visitor is shown before they leave, and the chip on the band was
+ * telling them a fresh one had been inserted.
+ *
+ * So a restoring change says **back** wherever an ordinary one says *new*. The
+ * two tables are separate rather than one table with a prefix, because the
+ * sentences are not the same sentence: an undo of an *insert* takes something
+ * off, and calling that "removed" would lose the half that matters — that what
+ * went is the thing this visitor had just added.
+ */
+const restoringLabel = (kind: TouchKind, tone: SpotTone, placed: "node" | "near"): string => {
+  if (tone === "awaiting") {
+    switch (kind) {
+      case "added":
+        return placed === "near" ? "What was here would come back" : "This would come back"
+      case "removed":
+        return placed === "near" ? "What was added here would go" : "This would go back off"
+      case "moved":
+        return "This would move back"
+      case "changed":
+        return "This would change back"
+    }
+  }
+
+  switch (kind) {
+    case "added":
+      return placed === "near" ? "What was here is back" : "Back — exactly as it was"
+    case "removed":
+      return placed === "near" ? "What was added here has gone" : "Taken back off"
+    case "moved":
+      return "Moved back"
+    case "changed":
+      return "Changed back"
+  }
+}
+
+/**
  * What to call it, in the fewest words that survive being read at a glance.
  *
  * `placed` is the difference between pointing at the thing and pointing at where
  * the thing is not. A removed node has left the tree and an added one has not
  * arrived yet, so both are marked on a neighbour — and a chip reading "Removed"
  * on a band that is still there would be a lie the size of the whole surface.
+ *
+ * `restoring` is the difference between a thing arriving and a thing coming
+ * back, and it cannot be read off the operation: both are an `insert`. It is the
+ * runtime's `REVERT_INTERPRETER` stamp, read through `undo.ts`, which is the
+ * same source the card's own quotation uses.
  */
-const labelFor = (kind: TouchKind, tone: SpotTone, placed: "node" | "near"): string => {
+const labelFor = (
+  kind: TouchKind,
+  tone: SpotTone,
+  placed: "node" | "near",
+  restoring: boolean
+): string => {
+  if (restoring) return restoringLabel(kind, tone, placed)
+
   if (tone === "awaiting") {
     switch (kind) {
       case "added":
@@ -174,7 +235,12 @@ const neighbourOf = (
   return over ? { node: over, placement: "below" } : undefined
 }
 
-const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotlight | undefined => {
+const spotFor = (
+  tree: LoomTree,
+  touched: TouchedNode,
+  tone: SpotTone,
+  restoring: boolean
+): Spotlight | undefined => {
   /*
    * The root is never marked. A change to the page node is a change to
    * everything on the page — the re-theme is exactly this — and a ring around
@@ -184,7 +250,12 @@ const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotligh
   const own = touched.nodeId === tree.root.id ? undefined : elementInTree(tree, touched.nodeId)
 
   if (own) {
-    return { nodeId: own.id, tone, label: labelFor(touched.kind, tone, "node"), placement: "inside" }
+    return {
+      nodeId: own.id,
+      tone,
+      label: labelFor(touched.kind, tone, "node", restoring),
+      placement: "inside",
+    }
   }
 
   const near = neighbourOf(tree, touched)
@@ -193,7 +264,7 @@ const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotligh
   return {
     nodeId: near.node.id,
     tone,
-    label: labelFor(touched.kind, tone, "near"),
+    label: labelFor(touched.kind, tone, "near", restoring),
     placement: near.placement,
   }
 }
@@ -205,13 +276,21 @@ const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotligh
  * function serve both halves: for a change that applied, the tree is the result
  * and the marks land on what moved; for one still waiting, the tree is what it
  * would move and the marks land on what it is asking about.
+ *
+ * `restoring` is a fact about the *change*, not about any one operation, which
+ * is why it is a parameter here rather than something `touched.ts` could put on
+ * a `TouchedNode`: the delta of an undo is indistinguishable from the delta of
+ * any other change, and the only thing that knows otherwise is the record's
+ * provenance. Defaulted, because a caller with no record in hand is describing
+ * an ordinary change and should not have to say so.
  */
 export const spotlightsFor = (
   tree: LoomTree,
   touched: readonly TouchedNode[],
-  tone: SpotTone
+  tone: SpotTone,
+  restoring = false
 ): readonly Spotlight[] => {
-  const spots = touched.flatMap((one) => spotFor(tree, one, tone) ?? [])
+  const spots = touched.flatMap((one) => spotFor(tree, one, tone, restoring) ?? [])
   const seen = new Set<string>()
 
   return spots

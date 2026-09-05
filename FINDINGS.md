@@ -13367,3 +13367,64 @@ fourteen days ago. `docs/rollout.md:19` still says the demo is live at
 `apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
 
 The second of the two, *"it is clunky"*, is live and is what this run acted on.
+
+---
+
+## 2026-09-05 — the undo's own card says "Put it back" three times and means two different things by it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
+second unit's worth of design, diagnosed in full so that run is short
+
+Found in the frame this run fixed the other half of, and left because the answer
+is not obvious. At the end of the demo's own sequence — ask, allow, put it back,
+allow — the visitor is looking at the card for the undo that just landed. It
+reads, top to bottom:
+
+| | |
+| --- | --- |
+| badge | **Applied** |
+| what was asked | **“Put it back.”** |
+| what became of it | *“This change is live on the page beside you. **“Put it back”** undoes it.”* |
+| the control | **[ Put it back ]** |
+| under it | *“Undoing is a change of its own, so Loom weighs it like any other.”* |
+
+Three uses of one phrase, and the button is the odd one out: **pressing it takes
+the numbers off again.** The card's own title is what that button would reverse.
+A visitor reading the sentence in the middle gets a circular instruction — *"Put
+it back" undoes it* — on a card whose subject is putting it back.
+
+Both strings are right where they were written. `askedLine` substitutes the
+visitor's own words for `Undo revision 1.` because the runtime's sentence is not
+one anybody said (26 August, correct and worth keeping). `outcome.meaning` and
+`UNDO_LABEL` are the applied state's words for *any* change, and every change
+does have an undo, an undo included — that is 0032 and the demo should keep
+demonstrating it. What is missing is that **an undo's card is the one card where
+those three strings collide.**
+
+**Why it was not taken here.** The obvious label for undoing an undo is *"Take it
+off again"*, and this surface has a standing refusal to name a change by what it
+does to a *type* — `plain-change.ts` gives the reasoning, and the 1 September
+question to the maintainer is exactly this refusal. Naming it by its words —
+*Take “3,400” “24” “92%” off again* — is available, since `plainChange` already
+computes those, and is a different unit: it means the applied card carries a
+plain reading of the *inverse*, which no card does today.
+
+**Three shapes, for whoever takes it:**
+
+1. **Say what the button would do, not what it is.** Keep `UNDO_LABEL` for an
+   ordinary change; on a record where `isUndo` is true, the control says what
+   reversing *this* change comes to, in the words on the page. Largest, and the
+   only one that leaves the visitor able to predict the press.
+2. **Keep the button and fix the sentence around it.** On an undo's card,
+   `outcome.meaning` becomes something that does not name the control — *"The page
+   is back as it was. This is a change too, so it has an undo of its own."* Small,
+   honest, and leaves the button's words still pointing the wrong way.
+3. **Do nothing and say so.** Defensible: a visitor who has got this far has
+   already seen the interesting thing twice, and the third press is not on the
+   sixty-second path. Worth stating rather than leaving as an accident.
+
+**Recommendation: 2 now, 1 when the applied card next earns a rewrite.** 2 removes
+the circular sentence, which is the half a visitor actually reads, at the cost of
+one string and no new concept.
+
+`isUndo` is exported as of this run and is the predicate all three shapes need.
