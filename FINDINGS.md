@@ -7977,7 +7977,10 @@ created or change what the event says.
 
 ## 2026-08-25 — an `agrees` audit is described as a fact about the page's history
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-20-what-a-green-check-checked`** — the argument was right, and the
+same miscount turned out to be in the red verdict too. See the 2 September entry
+below.
 
 Found while writing lesson 16, which teaches `auditSnapshot`. Not fixed here —
 `apps/loom/app/(portal)/` is not this routine's lane, and this is a wording
@@ -12900,3 +12903,119 @@ Worth one line of that lane's next run, alongside the reason: **a sentence read 
 more than one screen may not point at a place.** The portal's own guard for that
 is now in `vocabulary.test.ts` and rejects *here*, *this page*, *above* and
 *below* in any rule sentence.
+
+---
+
+## 2026-09-02 — a green checkup compared three things and said two, and the red one said two as well
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-20-what-a-green-check-checked` — closing the `Loom lessons` entry of 25
+August, with what taking it turned up
+
+The entry was about one sentence: `readCheckup`'s `agrees` reading promised
+*"…so nothing on it is unexplained"*, which is a claim about the page's history,
+and `auditSnapshot` compares end states rather than histories. The
+counterexample is nine lines and is Exercise D of lesson 16, executed. It is
+exactly right.
+
+**What it did not say is that the red verdict had the same defect, and worse.**
+`diverged` read *"One of the two is wrong, and until you know which, the history
+cannot explain what is on screen."* A fold has three inputs — the seed, the log,
+and the snapshot — so "one of the two" names two suspects out of three and sends
+a reviewer to look at the page and its history when the fault may be in
+**neither**. Under a green verdict the miscount costs false confidence; under a
+red one it costs a search in the wrong place, which is the more expensive of the
+two.
+
+**So the fix is not a softer sentence.** Removing the overclaim leaves a screen
+that is merely quieter about a check nobody can see the shape of. Both verdicts
+now name the shape they started from, and the screen carries the three inputs
+with the real numbers in them — *10 parts*, *2 changes* — plus the assumption
+nothing on the screen checks, on the surface rather than behind a disclosure. A
+correction a reader has to open a disclosure to find is the same wrong thing the
+sentence used to tell them.
+
+**One thing worth keeping from the build.** The basis renders nothing at all
+under `unreplayable`. A fold that stopped part-way replayed no number of changes
+anybody can print, and a basis reading *"it replayed 12 changes"* under a verdict
+reading *"nothing could be checked"* would be the same class of overclaim one
+screen further down. `AuditReport` gained `revision: number | null` — null
+exactly when nothing was compared, the mirror of `stoppedAt` — so that guard is a
+type and not a habit.
+
+**Not taken, and it is the honest limit of this unit:** nothing here makes a
+drifted seed detectable. It cannot be detected from inside the audit, because the
+audit is what the seed is an input to. Detecting it needs a second, independent
+record of a tree's original shape, and this portal has exactly one — a builder in
+source. That is a framework-shaped question rather than a portal one and it is
+not filed as work, because nothing about `auditSnapshot` is wrong: 0016 and 0028
+say precisely what it does. What was wrong is that the portal said more.
+
+---
+
+## 2026-09-02 — the guard that keeps the runtime's vocabulary off the surface now exists in two copies
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken, and it is one regex away from drifting
+
+`audit-view.test.ts` carries a regex — `fold|snapshot|seed|delta|node|tree|
+revision|log|gate|id` — and asserts that no sentence a screen shows unasked
+matches it, then asserts that the technical reading *does*. It is the sharpest
+test in this lane: it turns the plain-language rule from taste into a property,
+and it catches the failure mode nobody notices, which is a rewrite that leaves
+one runtime word behind.
+
+`checkup-basis.test.ts` now carries a second copy, because the basis is four more
+sentences shown unasked and they deserve the same guard.
+
+**Two copies of one rule is how a rule stops being one.** A word added to one
+list and not the other means two screens disagree about what plain language is,
+and neither test fails. It is not fixed here because there is nowhere obvious for
+it to live: it is a test concern, so it does not belong in `_lib/vocabulary.ts`
+with the production tables, and `apps/loom/test/` currently holds only the server
+action stubs the vitest config imports.
+
+**Recommendation:** a `apps/loom/test/plain-language.ts` exporting the regex and
+a `readsPlainly` helper, imported by both — and then applied to the screens that
+have no such guard at all, which is most of them. Roughly one small unit, and it
+is the kind of thing worth doing once rather than per screen.
+
+---
+
+## 2026-09-02 — every screenshot this lane publishes is taken against a browser the sandbox pins and the repo does not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— nothing is broken, and every lane that ships a visual is solving this from
+scratch
+
+The brief for four of the seven surfaces asks for a screenshot, and
+`docs/routines.md` asks for one "once there is a page worth looking at". Nothing
+in the repository takes one. There is no Playwright dependency, no script, and no
+recorded recipe — so each run rediscovers the same three obstacles:
+
+1. **Playwright is not installed anywhere in the workspace.** It has to be
+   installed outside the repo so the lockfile is not touched, which is right, and
+   which means every run pays for it.
+2. **`npx playwright install` does not work here.** The sandbox ships browsers at
+   `/opt/pw-browsers`, and `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` is set for exactly
+   that reason.
+3. **The pinned browser and a fresh Playwright disagree about the build number.**
+   A current `playwright` looks for `chromium_headless_shell-1234`; the sandbox
+   has `-1194`. The launch fails with *"Executable doesn't exist"* and a message
+   telling you to run the install command that cannot work. The way through is
+   `chromium.launch({ executablePath:
+   "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" })`, and the number in it
+   will go stale.
+
+The portal's own recipe, for whoever writes the shared one: `next build`, then
+`next start` with `LOOM_PORTAL_SESSION_SECRET` (32+ chars) and
+`LOOM_PORTAL_REVIEWERS` set to `actor:key`, sign in through the form at
+`/portal/sign-in`, and drive the real prompt box with `LOOM_ANTHROPIC_API_KEY`
+from the environment. Every screenshot in this run's report is a production build
+of its own commit with a live model behind it, and that is worth keeping — but it
+is thirty lines that seven lanes are each writing separately.
+
+**Not fixed here.** A screenshot harness is application-shell work rather than a
+route group's, and putting it in `app/(portal)/` would make six other lanes
+import from a lane they may not edit. It wants `apps/loom/scripts/`, beside
+`db-push.ts`.
