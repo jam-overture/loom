@@ -1,7 +1,7 @@
 import type { IdFactory, TreeId } from "../ids.js"
-import { err, ok } from "../result.js"
 import type { Clock } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
+import { inverseInterpreter } from "../runtime/inverse-interpreter.js"
 import type { ChangeInterpreter } from "../runtime/interpreter.js"
 import type { CompositionRuntime } from "../runtime/pipeline.js"
 import { describeRevertPlan, planRevert, type RevertPlan, type UnrevertablePlan } from "../store/revert.js"
@@ -59,67 +59,38 @@ const rationaleFor = (plan: RevertablePlan): string => {
 }
 
 /**
- * An interpreter that has nothing to interpret.
+ * The stateless interpreter, given the two things only a log can supply.
  *
- * The seam exists because interpretation is the non-deterministic step (0005),
- * not because it is always a model — and a revert is the case that proves the
- * seam was drawn in the right place. Everything downstream of it cannot tell
- * that no model was involved, which is exactly what makes an undo gateable on
- * the same terms as an AI-authored change.
+ * Everything that makes an undo gateable on the same terms as an AI-authored
+ * change — the empty interpretation seam, the head check, `authoredBy: runtime`
+ * and a confidence of 1 — is `inverseInterpreter` and is argued there. What is
+ * left here is what a store knows and a stateless caller does not: which
+ * revision this undoes, and what applying it writes over.
  *
- * `confidence` is 1 because the inverse is computed, not guessed. That is the
- * honest self-grade (0007), and it is also why `authoredBy` is `runtime`: a 1
- * nobody graded is not a claim, and calibration (0031) segments these out of its
- * score rather than letting every undo walk the top band toward a perfect record
- * the model never earned.
+ * The plan's contest check was made against one head, so `headRevision` is the
+ * revision the operations were computed against and the one the interpreter
+ * declines to depart from.
  */
 export const revertInterpreter = (
   plan: RevertablePlan,
   idFactory: IdFactory,
   clock: Clock
-): ChangeInterpreter => ({
-  interpret: (intent: EditIntent, tree: LoomTree) =>
-    Promise.resolve(
+): ChangeInterpreter =>
+  inverseInterpreter(
+    { baseRevision: plan.headRevision, operations: plan.operations },
+    {
+      interpreter: REVERT_INTERPRETER,
+      rationale: rationaleFor(plan),
       /**
-       * The plan's contest check was made against one head. Judging it at a
-       * different one would be judging a different question, so it declines
-       * rather than proposing something whose reasoning has expired. The write
-       * path refuses a moved head before reaching here; this is what keeps the
-       * interpreter safe to wire into a runtime directly.
+       * Declared only when there is something to declare, so absence keeps
+       * meaning "nobody looked at a log" rather than "a log was checked and was
+       * clean" (0035).
        */
-      tree.revision === plan.headRevision
-        ? ok({
-            proposalId: idFactory.proposalId(),
-            intentId: intent.intentId,
-            delta: {
-              deltaId: idFactory.deltaId(),
-              treeId: tree.treeId,
-              baseRevision: tree.revision,
-              operations: plan.operations,
-            },
-            rationale: rationaleFor(plan),
-            /**
-             * Declared only when there is something to declare, so absence keeps
-             * meaning "nobody looked at a log" rather than "a log was checked
-             * and was clean" (0035).
-             */
-            ...(plan.discards.length === 0 ? {} : { discards: plan.discards }),
-            provenance: {
-              origin: intent.origin,
-              ...(intent.actor === undefined ? {} : { actor: intent.actor }),
-              interpreter: REVERT_INTERPRETER,
-              /** Computed, not inferred — so calibration leaves it out (0031). */
-              authoredBy: "runtime",
-              confidence: 1,
-              interpretedAt: clock.now(),
-            },
-          })
-        : err({
-            code: "refused",
-            detail: `the revert was planned at revision ${plan.headRevision}, and this tree is at ${tree.revision}`,
-          })
-    ),
-})
+      ...(plan.discards.length === 0 ? {} : { discards: plan.discards }),
+    },
+    idFactory,
+    clock
+  )
 
 export type RevertRequest = {
   readonly treeId: TreeId

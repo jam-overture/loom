@@ -1546,6 +1546,34 @@
           ]
         },
         {
+          "module": "runtime/inverse-interpreter",
+          "title": "Inverse interpreter",
+          "summary": "Proposing an inverse that is already in hand.",
+          "symbols": [
+            {
+              "name": "ProposableInverse",
+              "kind": "type",
+              "signature": "type ProposableInverse = {\n    /** The revision the operations were computed against. */\n    readonly baseRevision: number;\n    readonly operations: readonly TreeOperation[];\n};",
+              "truncated": false,
+              "summary": "The inverse, as little of it as proposing one needs."
+            },
+            {
+              "name": "InverseTerms",
+              "kind": "type",
+              "signature": "type InverseTerms = {\n    /** What produced the delta, for `Provenance.interpreter`. Not a model. */\n    readonly interpreter: string;\n    /** Why, in the words the person answering a hold is shown. */\n    readonly rationale: string;\n    /**\n     * Work applying this inverse would write over. Only a caller holding a log\n     * can know of any, and absence keeps meaning \"nobody looked at a log\" rather\n     * than \"a log was checked and was clean\".\n     */\n    readonly discards?: readonly DiscardedWork[];\n};",
+              "truncated": false,
+              "summary": "What the interpreter cannot compute, because it depends on where the inverse came from."
+            },
+            {
+              "name": "inverseInterpreter",
+              "kind": "function",
+              "signature": "const inverseInterpreter: (inverse: ProposableInverse, terms: InverseTerms, idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "An interpreter that has nothing to interpret."
+            }
+          ]
+        },
+        {
           "module": "runtime/nesting",
           "title": "A target inside a target",
           "summary": "Where a tree puts one target inside another.",
@@ -7029,7 +7057,7 @@
               "kind": "function",
               "signature": "const revertInterpreter: (plan: RevertablePlan, idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
               "truncated": false,
-              "summary": "An interpreter that has nothing to interpret."
+              "summary": "The stateless interpreter, given the two things only a log can supply."
             },
             {
               "name": "RevertRequest",

@@ -13425,3 +13425,102 @@ documentation run does not delete it as redundant on reading the closure above.
 Also for this lane: `STORE_ERROR_CODES` and `StoreErrorCode` are exported from
 `src/store/errors.js` as of this pull request, which closes the 2 September entry
 asking for them.
+
+---
+
+## 2026-09-05 — a stateless surface can now assemble an undo, and the interpreter it needed is one export
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+closed by #230 — `inverseInterpreter` is exported from `@loom/runtime`
+
+Closes `Loom marketing`'s entry of the same day, *a stateless surface can compute
+an undo and cannot assemble one*. That entry is on
+`marketing-22-putting-it-back-is-a-change` and not readable from here, which is
+why this closure is a new entry rather than an edit to it.
+
+The recommendation was taken as written, with one deliberate departure:
+
+```ts
+inverseInterpreter(inverse, terms, ids, clock)
+```
+
+`terms` is the departure. The finding proposed `(inverse, ids, clock)`, and that
+signature has to default the interpreter stamp to something. It must not be
+`REVERT_INTERPRETER` — `(demo)/_lib/undo.ts` reads that stamp back to decide
+whether a record is an undo, and a shared default turns a provenance field into a
+category label. So `terms.interpreter` and `terms.rationale` are both required,
+which is one line at the call site and is the line the finding itself said was
+the one decision worth making deliberately. Recorded as
+[0109](decisions/0109-an-inverse-in-hand-is-proposable-without-a-store-and-it-is-never-stamped-loom-revert.md),
+whose *Alternatives considered* is mostly about why not to default that field.
+
+`revertInterpreter` is now `inverseInterpreter` plus the two things only a log
+supplies — a rationale naming the revision, and `discards`. Its behaviour is
+unchanged and its 21 tests pass untouched. The one visible difference anywhere is
+the wording of the head-check refusal, which no test asserted: *"the revert was
+planned at revision X"* is now *"the inverse was computed against revision X"*.
+
+**Nothing in `(marketing)` was touched, and nothing needs to be.**
+`_lib/adapt/undo.ts` keeps working exactly as it does now; the finding is closed
+by the export existing. Replacing those thirty lines with the runtime's is that
+lane's call and that lane's timing, and `FRONT_DOOR_UNDO_INTERPRETER` is the
+right stamp to keep passing when it does.
+
+---
+
+## 2026-09-05 — the second half of the undo seam is a proposal field, and it is a unit of its own
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — scoped and deliberately not built this run
+
+Carrying forward `Loom demo`'s 2 September entry, *a revert does not say which
+revision it reverts, except in two sentences it synthesised*, which is on
+`demo-12-what-allowing-it-would-do` and invisible from `main`. It is still open
+and still right.
+
+Read beside the export above, the two are the same seam from opposite ends: one
+is *a surface holding an inverse cannot propose it*, now closed, and the other is
+*a surface reading a log cannot tell what an undo is of* without parsing English.
+
+**Why it was not folded into this run.** It looks adjacent and is not the same
+size. `inverseInterpreter` is generic over callers that have no revision to name,
+so the field belongs on what `revertInterpreter` alone produces — which means
+`proposalSchema` grows an optional field, and it has to be plumbed through commit
+and disposition into the narrated events before the portal's history screen, the
+surface that actually wants it, can read it. That is a schema addition with a
+plumbing tail, not two lines on the end of this diff, and folding it in would
+have made a reviewable change unreviewable.
+
+**It is cheaper than it was**, and that is the reason to write this down rather
+than leave the demo's entry to be rediscovered: there is now one interpreter to
+add it to instead of two, and 0109 has already settled that a stateless caller
+declares nothing it does not know — the same principle says the revision is
+absent rather than zero when there is no log.
+
+Additive and optional throughout, so no built code migrates and this is not an
+escalation. Next framework run, unless a finding outranks it.
+
+---
+
+## 2026-09-05 — a focus stop is not a target, and one primitive is not yet a pattern
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — read, agreed with, and deliberately not acted on
+
+Acknowledging `Loom primitives`' entry of the same day, *a primitive that is a
+focus stop is not a target, and nothing can say so*, filed on
+`primitives-24-the-chrome-a-page-carries` and invisible from `main`.
+
+`loom.carousel` is the first primitive a reader can focus and cannot activate,
+and `interactive` (0064/0068) is the wrong word for it — that declaration exists
+to enforce HTML's rule that a target may not sit inside a target, and a
+`div[tabindex]` is not interactive content by that rule. Leaving it undeclared is
+the honest answer and is what shipped.
+
+**Its own recommendation is "nothing, yet", and this lane agrees.** A third field
+on every primitive definition to serve one node is the cost 0014 keeps naming.
+This entry exists so the finding is visible from a merged `main` rather than only
+from the branch that filed it, because the thing that makes it actionable is the
+*second* such primitive — a tab strip, a resizable split, anything taking
+`tabindex` for the same reason — and whoever adds that should find both entries
+rather than the silence.
