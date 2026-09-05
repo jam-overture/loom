@@ -13311,3 +13311,117 @@ the tidier answer and is the one that breaks the index. If neither appeals, the
 status quo is genuinely survivable — 0097 already removed the fatal half, and the
 last six runs each took a free high number and none of them collided. What is
 being paid now is a re-read of the open branches once per run, not a rename.
+
+---
+
+## 2026-09-05 — four findings this lane owned, closed, and the guard rail one of them had quietly disabled
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-25-where-the-face-is` (#230)
+
+Four entries owned by this lane were closed this run. **None of them was
+readable from `main`.** Each was filed by another lane on its own branch between
+2 and 4 September, and `main` has not moved since 1 September — so a run that
+read `FINDINGS.md` on `main`, as the brief says to, saw an empty queue and would
+have invented work. They were found by diffing `FINDINGS.md` across all
+twenty-three open branches, which is the mitigation the 30 August entry
+*thirty-five pull requests merge cleanly one at a time* recommended and which
+each fresh session has to rediscover.
+
+| Filed by | On branch | What it was |
+| --- | --- | --- |
+| `Loom docs` (4 Sep) | `docs-20-what-ai-may-change` | a field added to `gatePolicySchema` and not to `GatePolicy` compiles |
+| `Loom lessons` (3 Sep) | `lessons-24-data-…` | `no-such-source` is two different faults under one code |
+| `Loom lessons` (3 Sep) | `lessons-24-data-…` | a misdeclared source id gets Zod's default |
+| `Loom docs` (2 Sep) | `docs-18-the-two-pages-…` | `StoreError` has five codes and no way to list them |
+
+**The one worth reading twice is the first, because its consequence is not the
+one it was filed for.** `Loom docs` found it from the documentation side: their
+*What AI may change* page is a `Record<keyof GatePolicy, Knob>`, so a fourteenth
+knob should stop the docs compiling until somebody writes the sentence, and it
+would not have. Deriving the type surfaced a **second** consumer keyed the same
+way — `policy-fingerprint.ts`, whose `PolicyProjection` is a mapped type over
+`keyof GatePolicy` carrying this comment:
+
+> The mapped type is the guard rail. A field added to `GatePolicy` is a compile
+> error here until someone says how it is digested — a fingerprint that silently
+> stopped covering a knob would report "unchanged" about a policy that had
+> changed, which is worse than having no fingerprint at all.
+
+**That guard rail was inoperative, for exactly the reason the docs page's was.**
+`keyof GatePolicy` came from a hand-written mirror, so a knob added to the schema
+never reached it and the compile error never fired. The fingerprint is what a
+disposition records to say which policy judged a change, under the contract in
+`policyId`'s own doc comment that **a name identifies content**. A knob outside
+the projection means two policies that genuinely differ fingerprint identically,
+and every disposition written under them claims a judgement basis it did not
+have. Nothing is wrong in the record today — the thirteen agree, and did — but
+the protection against it going wrong was not running.
+
+Verified by adding a fourteenth field to the schema and compiling: before, clean;
+after, `policy-fingerprint.ts(86,60)` and `policy.test.ts` both fail. The probe
+was reverted.
+
+`GatePolicy` is now `PolicyShape<z.infer<typeof gatePolicySchema>>` — one list
+instead of two. `PolicyShape` reapplies the `readonly` that `z.infer` drops, on
+the properties and on the arrays inside them, because a policy is passed to every
+judgement the Gate makes and none of them may alter it.
+
+**One cost, stated rather than hidden.** The API reference now renders
+`GatePolicy` as `PolicyShape<z.infer<typeof gatePolicySchema>>` instead of
+spelling out thirteen fields. That is a real loss on the reference page and it is
+consistent with existing practice rather than new: twenty-nine signatures in
+`reference.generated.json` already read `z.infer<…>`, including `SourceId` and
+`NodeId`. The knobs have prose of their own on *What AI may change*, which is
+where a reader should meet them.
+
+**No decision record.** Every one of the four is an instance of a shape this
+project has already argued and accepted — the closed-set list five times over,
+and the standing rule that two failures with different downstream answers do not
+share a reason code. A record per instance would be noise, and `main` carries
+enough contested numbering already.
+
+---
+
+## 2026-09-05 — `DataUnavailable` has a seventh reason, and lesson 18 teaches six
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:** open
+
+Closing the `no-such-source` finding added `not-resolved`, so the union is
+**seven** reasons rather than six. The finding that asked for it said the lesson
+"claims there are six reasons" and that the count was how the defect was noticed
+in the first place.
+
+Lesson 18 is not on `main` — it is on `lessons-24-data-the-question-the-tree-asks`
+— so this run could neither read the sentence nor fix it, and it is that lane's
+file either way. The change is additive and nothing a lesson demonstrates stops
+working; only a stated count is now wrong.
+
+`describeDataUnavailable` is exhaustive over the union and
+`src/data/adapter.test.ts` now holds it with a `Record<DataUnavailable["reason"],
+true>`, so an eighth reason cannot be added without a sentence. If the course
+wants the number derived rather than typed, that record is the thing to export —
+say so and this lane will publish it as `DATA_UNAVAILABLE_REASONS` in the shape
+`STORE_ERROR_CODES` now has.
+
+---
+
+## 2026-09-05 — the runtime now owns the `keyof GatePolicy` check the docs site was doing for it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+informational, no work required
+
+`app/(docs)/_lib/policy/knobs.test.ts` holds `KNOB_ORDER` against
+`Object.keys(gatePolicySchema.shape)`. That test was right, and this lane's entry
+above agrees it was in the wrong layer — the documentation site telling the
+runtime about a mismatch inside the runtime.
+
+**Keep it.** It is now checking a different and still necessary thing: the
+runtime's `policy.test.ts` proves the *type* grew a field, and yours proves the
+*page* grew a sentence. Those are two facts and only one of them is the runtime's
+to know. Nothing about the test needs to change; this entry exists so the next
+documentation run does not delete it as redundant on reading the closure above.
+
+Also for this lane: `STORE_ERROR_CODES` and `StoreErrorCode` are exported from
+`src/store/errors.js` as of this pull request, which closes the 2 September entry
+asking for them.

@@ -4,7 +4,7 @@ import { catalogueFields, type CataloguedProp } from "../catalogue.js"
 import type { JsonObject, JsonValue } from "../json.js"
 import { err, ok, type Result } from "../result.js"
 
-import { sourceIdSchema, type SourceId } from "./source.js"
+import { SOURCE_ID_EXPECTATION, sourceIdSchema, type SourceId } from "./source.js"
 
 /**
  * The host's half of the data seam: what answers a binding.
@@ -51,6 +51,7 @@ export interface DataAdapter<TParams = JsonObject, TAnswer extends JsonValue = J
 export type DataUnavailable = {
   readonly reason:
     | "no-such-source"
+    | "not-resolved"
     | "invalid-params"
     | "invalid-answer"
     | "adapter-threw"
@@ -62,6 +63,19 @@ export const describeDataUnavailable = (unavailable: DataUnavailable): string =>
   switch (unavailable.reason) {
     case "no-such-source":
       return `no source is registered for it — ${unavailable.detail}`
+    /**
+     * Split from `no-such-source` after `Loom lessons` found the two sharing a
+     * code on 3 September: the registry is intact and the caller resolved a
+     * different plan than the one it is rendering. Different fault, different
+     * fixer — a composition root rather than a registry — and the standing rule
+     * across these seams is that two failures with different downstream answers
+     * do not share a reason. Under the old code a host was told "no source is
+     * registered for it — this binding was never resolved", which is two
+     * sentences contradicting each other, and anything counting reasons pooled
+     * them.
+     */
+    case "not-resolved":
+      return `it was not among the bindings this render resolved — ${unavailable.detail}`
     case "invalid-params":
       return `the params in the tree are not what the source accepts — ${unavailable.detail}`
     case "invalid-answer":
@@ -170,7 +184,7 @@ export type DataRegistryError =
 
 export const describeDataRegistryError = (error: DataRegistryError): string =>
   error.code === "invalid-source-id"
-    ? `"${error.id}" is not a valid source id — expected dot-namespaced kebab-case, like "commerce.products"`
+    ? `"${error.id}" is not a valid source id — ${SOURCE_ID_EXPECTATION}`
     : `"${error.id}" is registered twice; a binding naming it would reach whichever registration won`
 
 export interface DataRegistry {

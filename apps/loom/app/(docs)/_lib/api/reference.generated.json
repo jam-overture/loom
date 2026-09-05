@@ -83,7 +83,7 @@
             {
               "name": "DataUnavailable",
               "kind": "type",
-              "signature": "type DataUnavailable = {\n    readonly reason: \"no-such-source\" | \"invalid-params\" | \"invalid-answer\" | \"adapter-threw\" | SourceFailure[\"code\"];\n    readonly detail: string;\n};",
+              "signature": "type DataUnavailable = {\n    readonly reason: \"no-such-source\" | \"not-resolved\" | \"invalid-params\" | \"invalid-answer\" | \"adapter-threw\" | SourceFailure[\"code\"];\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": "Why a binding has no value. Every one of these is something a primitive may be told about and a diagnostic says out loud; none of them is an exception anyone catches."
             },
@@ -375,6 +375,13 @@
           "summary": "What a data source is, from the tree's side of the seam.",
           "symbols": [
             {
+              "name": "SOURCE_ID_EXPECTATION",
+              "kind": "value",
+              "signature": "const SOURCE_ID_EXPECTATION = \"expected dot-namespaced kebab-case, like \\\"commerce.products\\\"\"",
+              "truncated": false,
+              "summary": "What a malformed source id is told, in one place because two seams say it."
+            },
+            {
               "name": "sourceIdSchema",
               "kind": "schema",
               "signature": "const sourceIdSchema: z.ZodBranded<…>",
@@ -387,6 +394,13 @@
               "signature": "type SourceId = z.infer<typeof sourceIdSchema>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "BINDING_NAME_EXPECTATION",
+              "kind": "value",
+              "signature": "const BINDING_NAME_EXPECTATION = \"expected camelCase, like \\\"featuredProducts\\\"\"",
+              "truncated": false,
+              "summary": "The same gap `sourceIdSchema` had, for the same reason, in the name beside it."
             },
             {
               "name": "bindingNameSchema",
@@ -1651,9 +1665,9 @@
             {
               "name": "GatePolicy",
               "kind": "type",
-              "signature": "type GatePolicy = {\n    readonly policyId: string;\n    readonly protectedPrimitiveTypes: readonly PrimitiveType[];\n    readonly outOfTreeEffectTypes: readonly PrimitiveType[];\n    readonly protectedPropKeys: readonly string[];\n    readonly interactiveTypes: InteractiveTypes;\n    readonly removalThresholds: {\n        readonly medium: number;\n        readonly high: number;\n    };\n    readonly breadthThreshold: number;\n    readonly shallowDepthThreshold: number;\n    readonly inverseRetentionBudget: number;\n    readonly minimumConfidence: number;\n    readonly confidenceFloor: number;\n    readonly autoApplyCeiling: Readonly<Partial<Record<IntentOrigin, StakeLevel>>>;\n    readonly refusalFloor: StakeLevel;\n};",
+              "signature": "type GatePolicy = PolicyShape<z.infer<typeof gatePolicySchema>>;",
               "truncated": false,
-              "summary": ""
+              "summary": "Derived rather than declared, because stating it twice meant only one of the two directions of drift was caught."
             },
             {
               "name": "defaultGatePolicy",
@@ -6568,6 +6582,20 @@
               "signature": "type StoreError = \n/** No tree under this id — distinct from a tree with an empty history. */\n{\n    readonly code: \"not-found\";\n    readonly treeId: TreeId;\n} | {\n    readonly code: \"already-exists\";\n    readonly treeId: TreeId;\n}\n/**\n * The delta names a base revision that is not the current head. This is the\n * whole of concurrency control: two writers racing at the same base means the\n * second one is refused rather than silently applied to a tree it never saw.\n */\n | {\n    readonly code: \"revision-conflict\";\n    readonly treeId: TreeId;\n    readonly expected: number;\n    readonly found: number;\n} | {\n    readonly code: \"delta-rejected\";\n    readonly treeId: TreeId;\n    readonly error: TreeError;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "StoreErrorCode",
+              "kind": "type",
+              "signature": "type StoreErrorCode = StoreError[\"code\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "STORE_ERROR_CODES",
+              "kind": "value",
+              "signature": "const STORE_ERROR_CODES: readonly StoreErrorCode[]",
+              "truncated": false,
+              "summary": "The five ways persistence can refuse, as a list the runtime can hand you."
             },
             {
               "name": "describeStoreError",

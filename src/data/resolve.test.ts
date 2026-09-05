@@ -7,7 +7,13 @@ import { err, ok } from "../result.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
-import { createDataRegistry, defineSource, type DataRegistry, type SourceEntry } from "./adapter.js"
+import {
+  createDataRegistry,
+  defineSource,
+  describeDataUnavailable,
+  type DataRegistry,
+  type SourceEntry,
+} from "./adapter.js"
 import { buildDataResolution } from "./resolution.js"
 import { planTreeData } from "./plan.js"
 import { resolveDataPlan, resolveTreeData } from "./resolve.js"
@@ -202,6 +208,33 @@ describe("buildDataResolution", () => {
 
     expect(resolution.lookup(nodeId)["bio"]?.status).toBe("unavailable")
     expect(resolution.problemsFor(nodeId)).toHaveLength(1)
+  })
+
+  /**
+   * The registry is intact here and `profile` is registered — what went wrong is
+   * that the caller resolved one plan and rendered another. Reported under
+   * `no-such-source` until `Loom lessons` found the two sharing a code, which
+   * sent anyone reading the diagnostic to the registry to look for a source that
+   * was already there.
+   */
+  it("blames the plan rather than the registry when a binding was never resolved", () => {
+    const nodeId = "n_1" as NodeId
+    const resolution = buildDataResolution(
+      {
+        requests: [{ key: "profile {}", source: "profile" as SourceId, params: {} }],
+        bindings: [{ nodeId, name: "bio" as BindingName, key: "profile {}" }],
+        problems: [],
+      },
+      new Map()
+    )
+
+    const outcome = resolution.lookup(nodeId)["bio"]
+
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable.reason).toBe("not-resolved")
+    expect(describeDataUnavailable(outcome.unavailable)).not.toContain("registered")
   })
 
   it("answers a binding named after something on Object.prototype", () => {

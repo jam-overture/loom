@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 690" width="920" height="690" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="690" fill="#ffffff"/>
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">What the mirror did not say</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Two consumers were keyed on <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">keyof GatePolicy</tspan> to catch a knob nobody had digested. Both were reading a copy.</text>
+
+  <!-- BEFORE -->
+  <rect x="40" y="96" width="404" height="286" rx="10" fill="#fdf6f3" stroke="#e8cfc2"/>
+  <text x="58" y="122" font-size="10.5" font-weight="700" fill="#a8674a" letter-spacing="0.06em">BEFORE — TWO LISTS</text>
+
+  <rect x="58" y="136" width="152" height="40" rx="7" fill="#ffffff" stroke="#d8cec2"/>
+  <text x="134" y="154" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">gatePolicySchema</text>
+  <text x="134" y="168" font-size="10" fill="#8a8178" text-anchor="middle">13 fields</text>
+
+  <rect x="274" y="136" width="152" height="40" rx="7" fill="#ffffff" stroke="#d8cec2"/>
+  <text x="350" y="154" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">type GatePolicy</text>
+  <text x="350" y="168" font-size="10" fill="#8a8178" text-anchor="middle">13 fields, by hand</text>
+
+  <!-- broken link -->
+  <line x1="210" y1="156" x2="248" y2="156" stroke="#b06a4a" stroke-width="1.6"/>
+  <line x1="266" y1="156" x2="274" y2="156" stroke="#b06a4a" stroke-width="1.6"/>
+  <text x="256" y="161" font-size="15" font-weight="700" fill="#b06a4a" text-anchor="middle">✕</text>
+  <text x="242" y="196" font-size="10.5" fill="#a8674a" text-anchor="middle">a field ADDED to the schema is an excess</text>
+  <text x="242" y="210" font-size="10.5" fill="#a8674a" text-anchor="middle">property on a returned value — it compiles</text>
+
+  <line x1="350" y1="176" x2="350" y2="228" stroke="#d8cec2" stroke-width="1.4"/>
+  <line x1="160" y1="228" x2="540" y2="228" stroke="#d8cec2" stroke-width="1.4"/>
+
+  <rect x="58" y="242" width="176" height="52" rx="7" fill="#ffffff" stroke="#d8cec2"/>
+  <text x="146" y="262" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">knobs.test.ts</text>
+  <text x="146" y="277" font-size="10" fill="#8a8178" text-anchor="middle">Record&lt;keyof GatePolicy, Knob&gt;</text>
+  <text x="146" y="289" font-size="10" fill="#a8674a" text-anchor="middle">docs page silently omits it</text>
+
+  <rect x="250" y="242" width="176" height="52" rx="7" fill="#ffffff" stroke="#c8a08a" stroke-width="1.6"/>
+  <text x="338" y="262" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">policy-fingerprint.ts</text>
+  <text x="338" y="277" font-size="10" fill="#8a8178" text-anchor="middle">PolicyProjection, a guard rail</text>
+  <text x="338" y="289" font-size="10" font-weight="650" fill="#a8674a" text-anchor="middle">not running</text>
+
+  <line x1="146" y1="228" x2="146" y2="242" stroke="#d8cec2" stroke-width="1.4"/>
+  <line x1="338" y1="228" x2="338" y2="242" stroke="#d8cec2" stroke-width="1.4"/>
+
+  <rect x="58" y="308" width="368" height="58" rx="7" fill="#f7ece6" stroke="#e0c4b4"/>
+  <text x="72" y="328" font-size="10.5" font-weight="700" fill="#a8674a" letter-spacing="0.05em">WHAT THE GUARD RAIL'S OWN COMMENT CLAIMED</text>
+  <text x="72" y="345" font-size="11.5" font-style="italic" fill="#6b5c52">“a fingerprint that silently stopped covering a knob would</text>
+  <text x="72" y="359" font-size="11.5" font-style="italic" fill="#6b5c52">report ‘unchanged’ about a policy that had changed”</text>
+
+  <!-- AFTER -->
+  <rect x="476" y="96" width="404" height="286" rx="10" fill="#f4f8f6" stroke="#c8ddd2"/>
+  <text x="494" y="122" font-size="10.5" font-weight="700" fill="#4a7d63" letter-spacing="0.06em">AFTER — ONE LIST</text>
+
+  <rect x="590" y="136" width="176" height="40" rx="7" fill="#ffffff" stroke="#c6d6cd"/>
+  <text x="678" y="154" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">gatePolicySchema</text>
+  <text x="678" y="168" font-size="10" fill="#8a8178" text-anchor="middle">the only statement of the 13</text>
+
+  <line x1="678" y1="176" x2="678" y2="200" stroke="#7aa88f" stroke-width="1.6"/>
+  <text x="694" y="192" font-size="10.5" fill="#4a7d63">PolicyShape&lt;z.infer&lt;…&gt;&gt;</text>
+
+  <rect x="590" y="200" width="176" height="28" rx="7" fill="#eaf3ee" stroke="#a8c9b8"/>
+  <text x="678" y="219" font-size="11.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">type GatePolicy</text>
+
+  <line x1="678" y1="228" x2="678" y2="248" stroke="#7aa88f" stroke-width="1.4"/>
+  <line x1="580" y1="248" x2="776" y2="248" stroke="#7aa88f" stroke-width="1.4"/>
+  <line x1="580" y1="248" x2="580" y2="262" stroke="#7aa88f" stroke-width="1.4"/>
+  <line x1="776" y1="248" x2="776" y2="262" stroke="#7aa88f" stroke-width="1.4"/>
+
+  <rect x="494" y="262" width="172" height="46" rx="7" fill="#ffffff" stroke="#c6d6cd"/>
+  <text x="580" y="281" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">knobs.test.ts</text>
+  <text x="580" y="297" font-size="10" fill="#4a7d63" text-anchor="middle">red until the page says it</text>
+
+  <rect x="690" y="262" width="172" height="46" rx="7" fill="#ffffff" stroke="#c6d6cd"/>
+  <text x="776" y="281" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15120e" text-anchor="middle">policy-fingerprint.ts</text>
+  <text x="776" y="297" font-size="10" fill="#4a7d63" text-anchor="middle">red until it is digested</text>
+
+  <rect x="494" y="322" width="368" height="44" rx="7" fill="#eaf3ee" stroke="#b8d4c5"/>
+  <text x="508" y="341" font-size="10.5" font-weight="700" fill="#4a7d63" letter-spacing="0.05em">VERIFIED BY ADDING A FOURTEENTH FIELD</text>
+  <text x="508" y="358" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#5c5751">before: clean · after: 2 errors, both guard rails firing</text>
+
+  <!-- FOUR CLOSURES -->
+  <text x="40" y="420" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">FOUR FINDINGS CLOSED — AND WHERE EACH ONE WAS WRITTEN</text>
+
+  <line x1="40" y1="436" x2="880" y2="436" stroke="#e4ded5"/>
+  <text x="52" y="456" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.05em">FILED BY</text>
+  <text x="196" y="456" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.05em">WHAT WAS WRONG</text>
+  <text x="700" y="456" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.05em">READABLE ON MAIN?</text>
+  <line x1="40" y1="466" x2="880" y2="466" stroke="#e4ded5"/>
+
+  <text x="52" y="488" font-size="11.5" fill="#5c5751">Loom docs</text>
+  <text x="196" y="488" font-size="11.5" fill="#15120e">a schema field that never reached the type</text>
+  <text x="700" y="488" font-size="11.5" font-weight="650" fill="#b06a4a">no — on a branch</text>
+
+  <text x="52" y="512" font-size="11.5" fill="#5c5751">Loom lessons</text>
+  <text x="196" y="512" font-size="11.5" fill="#15120e">two faults sharing one reason code</text>
+  <text x="700" y="512" font-size="11.5" font-weight="650" fill="#b06a4a">no — on a branch</text>
+
+  <text x="52" y="536" font-size="11.5" fill="#5c5751">Loom lessons</text>
+  <text x="196" y="536" font-size="11.5" fill="#15120e">a diagnostic that said only <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">Invalid</tspan></text>
+  <text x="700" y="536" font-size="11.5" font-weight="650" fill="#b06a4a">no — on a branch</text>
+
+  <text x="52" y="560" font-size="11.5" fill="#5c5751">Loom docs</text>
+  <text x="196" y="560" font-size="11.5" fill="#15120e">five store codes and no list of them</text>
+  <text x="700" y="560" font-size="11.5" font-weight="650" fill="#b06a4a">no — on a branch</text>
+  <line x1="40" y1="576" x2="880" y2="576" stroke="#e4ded5"/>
+
+  <rect x="40" y="596" width="840" height="66" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="618" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">THE PART THAT IS NOT ABOUT TYPES</text>
+  <text x="58" y="637" font-size="12.5" fill="#5c5751">Every one of the four was invisible to a run reading <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">FINDINGS.md</tspan> on <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">main</tspan>, which is what the brief says to read.</text>
+  <text x="58" y="654" font-size="12.5" fill="#5c5751">They were found by diffing that file across all <tspan font-weight="650" fill="#15120e">23 open branches</tspan>. Nothing has merged since 1 September.</text>
+</svg>

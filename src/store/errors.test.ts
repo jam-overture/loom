@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 
-import { describeStoreError, type StoreError } from "./errors.js"
+import { describeStoreError, STORE_ERROR_CODES, type StoreError } from "./errors.js"
 
 const treeId = treeIdSchema.parse("t_1")
 
@@ -21,9 +21,17 @@ describe("describeStoreError", () => {
     }
   })
 
+  /**
+   * This checked that five fixtures carried five distinct codes, which five
+   * fixtures do whether or not they are the union's five. `STORE_ERROR_CODES`
+   * gives it something outside itself to agree with, and `everyMemberOf` fails
+   * the compile if that list ever stops being the union.
+   */
   it("covers the whole StoreError union", () => {
-    const codes = new Set(everyError.map((error) => error.code))
-    expect(codes.size).toBe(everyError.length)
+    const codes = everyError.map((error) => error.code)
+
+    expect(new Set(codes).size).toBe(everyError.length)
+    expect([...codes].sort()).toEqual([...STORE_ERROR_CODES].sort())
   })
 
   /**
@@ -46,5 +54,18 @@ describe("describeStoreError", () => {
     })
 
     expect(described).toContain("index-out-of-range")
+  })
+})
+
+describe("STORE_ERROR_CODES", () => {
+  it("names each way persistence can refuse exactly once", () => {
+    expect(new Set(STORE_ERROR_CODES).size).toBe(STORE_ERROR_CODES.length)
+  })
+
+  it("describes every code it names", () => {
+    for (const code of STORE_ERROR_CODES) {
+      const described = everyError.find((error) => error.code === code)
+      expect(described, `no fixture for ${code}`).toBeDefined()
+    }
   })
 })

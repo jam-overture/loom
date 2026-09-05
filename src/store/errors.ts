@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 import type { TreeError } from "../tree/errors.js"
 
@@ -28,6 +29,29 @@ export type StoreError =
     }
   | { readonly code: "delta-rejected"; readonly treeId: TreeId; readonly error: TreeError }
   | { readonly code: "unavailable"; readonly detail: string }
+
+export type StoreErrorCode = StoreError["code"]
+
+/**
+ * The five ways persistence can refuse, as a list the runtime can hand you.
+ *
+ * The sixth instance of a shape this project has now settled on
+ * (`EPISODE_RESOLUTION_KINDS`, `UNJUDGED_REASONS`, `PALETTE_SLOTS`,
+ * `STAKE_ORDER`, `WRITE_OUTCOME_KINDS`), so it is a line of code rather than a
+ * decision. Filed by `Loom docs` on 2 September, who wanted to enumerate what a
+ * store can say without reading the union out of a type they cannot iterate.
+ *
+ * In the order a writer meets them rather than alphabetically: the two about
+ * whether a tree is there, then the two about whether a delta may land, then the
+ * one that is about the storage itself.
+ */
+export const STORE_ERROR_CODES: readonly StoreErrorCode[] = everyMemberOf<StoreErrorCode>()([
+  "not-found",
+  "already-exists",
+  "revision-conflict",
+  "delta-rejected",
+  "unavailable",
+])
 
 export const describeStoreError = (error: StoreError): string => {
   switch (error.code) {
