@@ -13019,3 +13019,135 @@ is thirty lines that seven lanes are each writing separately.
 route group's, and putting it in `app/(portal)/` would make six other lanes
 import from a lane they may not edit. It wants `apps/loom/scripts/`, beside
 `db-push.ts`.
+
+---
+
+## 2026-09-03 — the disclosure was louder than the sentence it sits under, and only a screenshot could say so
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**fixed on one screen, not in the component.**
+
+`TechnicalDetail` sets no text colour of its own. Its body inherits whatever it
+is mounted inside, and every existing use in this route group happens to sit
+inside a `StateNotice`, whose content wrapper is `text-ink-muted`. So the
+component has never been rendered without a muted ancestor and nobody has had to
+notice that it does not set one.
+
+`/portal/sign-ins` is the first screen to mount one at page level. The result is
+the rule the component exists to enforce, upside down:
+
+> The plain sentence a person is meant to read first rendered in `text-ink-muted`;
+> the technical record one click below it rendered in the body ink — **darker and
+> more prominent than the thing it is a footnote to.**
+
+Every test passed. The disclosure contained exactly what it should, in the right
+order, behind a `<details>` that was closed. Nothing about "the record must not
+out-shout the sentence" is expressible as an assertion about text content, and
+this is the sixteenth defect this lane has found by looking at a screen rather
+than in a test, across ten runs.
+
+Fixed here by muting the four places this screen puts inside a disclosure. **That
+is the smaller half of the fix and deliberately so** — the real one is a default
+colour on `TechnicalDetail` itself, and that is ten screens wide. A run that
+changed it could look at one of them, which is how a component acquires an
+inherited default nobody chose in the first place. It wants the run that can
+screenshot the portal end to end.
+
+## 2026-09-03 — a screenshot recipe that works in this sandbox, verified, and still nothing in the repository takes one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— **re-filed against `main`.** The same finding was filed on
+[#227](https://github.com/jam-overture/loom/pull/227), which is unmerged, so
+`main` still carries no record of it.
+
+Four routine briefs and `docs/routines.md` ask for a screenshot. There is no
+dependency, no script and no recipe, so each lane rediscovers the same two walls:
+`playwright install` cannot reach its CDN from the sandbox, and a current
+Playwright looks for a browser build that is not there.
+
+Both are avoidable, and this run took the pictures in its report and its pull
+request with the following. It is written down here because the next run in any
+lane should not have to find it again.
+
+- **The browser is already installed.** `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+  exists in this image. Do not run `playwright install`; point at it.
+- **`playwright-core` installs from the npm registry**, which is on the sandbox
+  allowlist. `npm install playwright-core` into a scratch directory — it is a
+  tool for taking the picture, not a dependency of the application, and it does
+  not belong in `apps/loom/package.json`.
+- **Launch with `--no-sandbox`**, or Chromium exits immediately as root.
+- **A signed-in portal screenshot needs three environment variables and a wait
+  that is not `networkidle`.** `LOOM_PORTAL_SESSION_SECRET` (32+ characters),
+  `LOOM_PORTAL_REVIEWERS` (`actor:key`, key 24+ characters), and then
+  `next start`. The sign-in form is a client component driven by
+  `useActionState`, so submitting it is a fetch rather than a navigation:
+  `waitForLoadState("networkidle")` resolves **before** the session cookie is
+  set, and the next `goto` bounces straight back to the sign-in page. Wait on the
+  destination screen's own heading instead. This run lost two attempts to it and
+  photographed the sign-in page believing it was the portal.
+- **A screen with three states is worth three pictures**, and the states can be
+  driven rather than staged: six wrong keys from a second browser context locks
+  the address, and the first context's session survives it, so one script
+  produces the quiet screen and the locked one from the same live server.
+
+It wants `apps/loom/scripts/`, beside `db-push.ts`, as something a brief can name
+instead of describe.
+
+## 2026-09-03 — the commit-identity trap, fourth occurrence, and this time by the lane that filed the third
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **the recommendation is now four data points old and unchanged.**
+
+[#234](https://github.com/jam-overture/loom/pull/234) went up with no preview.
+Vercel's status read `Deployment was blocked`, and the bot said why in a comment
+two minutes later:
+
+> `@jpizzo must be a member of the jpizzolato36-6341's projects team on Vercel to
+> deploy.`
+
+I had committed as `Loom portal <jpizzolato36@gmail.com>`. That address resolves
+on GitHub to the account `jpizzo`, which is not on the Vercel team, so Vercel
+refused to start the build. The environment's own default identity —
+`Claude <noreply@anthropic.com>` — is the one that deploys, and it is what #233
+used two hours earlier on the branch that went green.
+
+**I diagnosed it wrong first, publicly, and the wrong diagnosis is the part worth
+recording.** Before the bot's explanatory comment arrived I had the status and
+nothing else, built a table showing #229–#233 deploying that morning and #234
+blocked at 18:00, and concluded a usage or spend cap had been reached during the
+day — filed as a finding, said in the pull request comment, and sent to the
+maintainer. Every fact in that table was true and the conclusion drawn from it
+was false. The entry has been deleted rather than amended, because it would have
+sent somebody to look at a Vercel billing page over a git author line.
+
+Two things made it wrong, and both are avoidable:
+
+- **A status without its comment is half the evidence.** `Deployment was blocked`
+  is Vercel's word for at least two unrelated conditions, and the one that
+  distinguishes them arrives as a separate bot comment on a delay. Checking the
+  status and not waiting for the comment is what produced the confident wrong
+  answer.
+- **Correlating across pull requests found a pattern that was a coincidence.**
+  #233 deployed and #234 did not, two hours apart, and the difference was never
+  the time — it was that #233's commit carried the default author and mine did
+  not.
+
+Repaired with `git rebase origin/main --exec 'git commit --amend --reset-author'`
+and force-pushed before any review existed, which is the fourth time that exact
+repair has been made on this repository.
+
+**The recommendation is the 24 August one, unchanged, now with a fourth
+occurrence behind it and this one by the lane that filed the third.** One
+paragraph in `docs/routines.md` beside **Network access** and **Credentials**:
+
+> **Never set `user.name` or `user.email`.** The environment's default identity is
+> the one on the Vercel team; any other author produces a pull request with no
+> preview, and the status says `Blocked` rather than naming the cause.
+
+Every routine reads `docs/routines.md` as procedure and reads `FINDINGS.md` for
+work. This is procedure. Four runs have now met it in the file where it is not,
+and none has met it in the file where it would be.
+
+A routine cannot write the governance it is bound by — `docs/routines.md`'s own
+preamble says so, and that limit was accepted on 15 August. So this is the fourth
+entry asking for three lines that only the maintainer can add.
