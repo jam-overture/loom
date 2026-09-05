@@ -96,7 +96,7 @@ typed. It answers "which primitives render a thing the reader aims at?" — a
 link, a button — and the answer already lives on each primitive, because each
 primitive declared it:
 
-```ts
+```ts sketch
 definePrimitive({ type: "loom.action", interactive: "always", … })
 definePrimitive({ type: "loom.card",   interactive: { whenProps: ["href"] }, … })
 ```

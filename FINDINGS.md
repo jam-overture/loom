@@ -12815,3 +12815,126 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-05 — thirty code blocks nobody had ever compiled, and one of them could not be
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-21-the-code-on-the-page-compiles`
+
+Every *rendered example* on this site is a real `LoomTree` mounted through the
+runtime, so an example that cannot render is a failing test. The **fenced code**
+beside those examples had no such guarantee: thirty blocks of TypeScript a reader
+is invited to copy, and nothing anywhere asked whether any of them would compile.
+A snippet naming a function the runtime removed looks exactly as convincing as
+one that works.
+
+It is closed, and the mechanism is described in the report. The part worth
+keeping here is **what it found on its first run**, because it is the argument
+for the check existing:
+
+`/docs/the-runtime/the-history-of-a-page` shipped a block that **cannot compile
+in any TypeScript project**, and had since the page was written:
+
+```ts
+const path = {
+  store: memoryTreeStore(),        // this site
+  store: postgresTreeStore(db),    // a deployment
+  holds,
+  runtime,
+}
+```
+
+Two properties with the same name. It reads fine — that is the trouble; a person
+scanning it sees a helpful either/or and a compiler sees `TS1117`. A reader who
+copied it got an error on their first paste, on the page that explains where a
+page lives.
+
+Nothing on this site could have seen it. The search index skips fenced code by
+design, `mdx.test.ts` compiles the *markdown* rather than the TypeScript inside
+it, and `next build` never looks in a fence. It is the same shape as the pipe
+tables that shipped as paragraphs for a fortnight, and it wants the same
+treatment: a check that reads the thing rather than the page around it.
+
+**This entry also answers a finding that is not on `main`.** *"Thirty code fences
+on this site and nothing checks any of them would compile"* was filed by this
+lane on 4 September and lives on `docs-20-what-ai-may-change` (#238), so it will
+still read `open` when that branch merges. Whoever merges it can mark it closed
+by this pull request; a routine cannot edit an entry it cannot see. Its
+measurement — that a general check needs a fence to *declare* whether it is a
+program or a fragment — is exactly what shipped.
+
+---
+
+## 2026-09-05 — a fence's declaring word is invisible to MDX, and that is why the scan is a scan
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+constraint worth knowing, not a defect
+
+A fence can carry *meta* after its language — ` ```ts object-body ` — and this
+lane now uses one word of it to say what kind of block the reader is looking at.
+
+**MDX throws it away.** It reaches neither the rendered page nor any plugin this
+site installs: a `remark`/`rehype` pair sees the language as a class name and the
+meta nowhere. That is the desired behaviour for a *reader* — the word never
+appears on the page, and the block is highlighted exactly as before — and it
+means the page source is the only place the word survives.
+
+So the extractor reads `page.mdx` as text rather than compiling it, which is the
+third scanner on this site doing that (`search/headings.ts` and `search/prose.ts`
+are the other two, both skipping fences rather than reading them). Three hand-
+written fence scanners is one more than is comfortable. They want to be one
+reader that both halves consume, and that is a unit of its own rather than
+something to do while adding the first.
+
+The rule that keeps the word honest is worth repeating outside the code: `sketch`
+is the only way a block escapes compilation, and a sketch must contain a visible
+ellipsis. The only blocks that are not checked are the ones already telling the
+reader they are incomplete.
+
+---
+
+## 2026-09-05 — a snippet cannot be made to compile by inventing the function it calls
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+rule holds today; recorded because it is the one that will be leant on
+
+Compiling a page's blocks needs somewhere to put what the *story* assumes. Pages
+like *What your app has to do* are written from inside an application that
+already exists — there is a `db`, a `session`, a `page` loaded from a store — and
+a program made only of the page's own code cannot see any of them. Those live in
+one hand-written context file per page.
+
+The obvious failure mode is that the same file quietly declares `renderRequest`,
+and every snippet on the page compiles against a definition nobody ships. So:
+
+- a context file may **name** what the story assumes, with `export declare`;
+- it must **import** anything the runtime really provides, and re-export it.
+
+`compiled.test.ts` refuses any context file that declares a name appearing in the
+generated API reference — the same reference the API section is built from, so
+the rule **tightens by itself** every time the runtime exports something new. It
+also refuses a context file offering a name its page never reaches for, which
+stops the files filling up with scenery.
+
+Recorded rather than merely commented because it is a rule with a cost: the day a
+snippet fails to compile, the cheapest fix available will be to declare the thing
+it wanted, and that fix is the one that turns the whole check into decoration.
+
+---
+
+## 2026-09-05 — a fifth documentation run in a row could not open the preview it is required to publish
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — unchanged, and restated only with today's count
+
+`*.vercel.app` is not on the sandbox egress allowlist, so no routine has ever
+seen the deployment its own brief tells it to screenshot. The screenshots in
+today's report are `next build && next start` served locally — the same build,
+the same commit, on this machine.
+
+Filed already on 1 September and unchanged; this is a count rather than a new
+finding. The remedy is one line in `.claude/settings.json`
+(`WebFetch(domain:*.vercel.app)`), or a brief that asks for the local render it is
+getting either way.
