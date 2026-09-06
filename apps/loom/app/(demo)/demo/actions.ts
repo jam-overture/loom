@@ -7,7 +7,7 @@ import { proposalIdSchema, randomIdFactory, systemClock } from "@loom/runtime"
 import { commitIntent, confirmHeld, discardHeld, describeHoldError, revertRevision } from "@loom/runtime/write"
 
 import { demoModelInterpreter } from "@/app/(demo)/_lib/interpreter"
-import { presetById, presetInterpreter } from "@/app/(demo)/_lib/presets"
+import { askedWith, presetById, presetInterpreter } from "@/app/(demo)/_lib/presets"
 import { recordFromEvents } from "@/app/(demo)/_lib/record"
 import {
   beginDemoWrite,
@@ -127,7 +127,14 @@ export const askForChange = async (
   })
 
   const record = recordFromEvents(write.narrated())
-  if (record) rememberRecord(session, record)
+
+  /**
+   * Which button was pressed, kept on the record because nothing downstream can
+   * recover it: the runtime was handed the preset's utterance and nothing to say
+   * a button produced it. It is what an ask the page has moved past needs to be
+   * able to offer itself again (`_lib/moved.ts`).
+   */
+  if (record) rememberRecord(session, preset ? askedWith(record, preset.id) : record)
 
   revalidatePath(DEMO_PATH)
 

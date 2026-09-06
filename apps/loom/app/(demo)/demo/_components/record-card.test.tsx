@@ -5,6 +5,7 @@ import { REVERT_INTERPRETER } from "@loom/runtime/write"
 
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
+import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { UNDO_CAUTION, UNDO_SPENT, UNDO_WAITING } from "@/app/(demo)/_lib/undo"
@@ -604,5 +605,101 @@ describe("what the payoff card offers", () => {
 
     expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
     expect(screen.queryByText(UNDO_WAITING)).toBeNull()
+  })
+})
+
+/**
+ * The card an ask gets once the visitor has moved the page out from under it.
+ *
+ * Everything about the held card is about a question that is still open — the
+ * amber badge, *"Loom will not make this change until you say yes"*, the plain
+ * reading of what allowing it would do, and two buttons. This question is shut,
+ * and every one of those was still on the screen: the press was spent, the
+ * buttons vanished with nothing in their place, and the only account of it was
+ * `applied, then not written: revision-conflict` in the smallest type on the
+ * card.
+ */
+describe("an ask the page has moved past", () => {
+  const MOVED = movedOn(0, 1)
+  if (MOVED === undefined) throw new Error("two different revisions have moved on by definition")
+
+  /** The same held ask, with the suggestion it came from still on it. */
+  const FROM_A_BUTTON: ChangeRecord = { ...HELD, presetId: "band" }
+
+  it("stops offering an answer that cannot land", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.queryByRole("button", { name: "Apply this change" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "No thanks" })).toBeNull()
+  })
+
+  /**
+   * And stops saying it is waiting. The badge and the sentence under it are the
+   * two things a visitor reads first, and both were false: the Gate is not
+   * waiting on them, and no yes they can give will land this.
+   */
+  it("says what became of it, in the words the review queue uses for the same state", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.getByText("Nothing changed")).toBeTruthy()
+    expect(screen.queryByText("Waiting on you")).toBeNull()
+    expect(screen.queryByText(/will not make this change until you say yes/)).toBeNull()
+  })
+
+  it("says why, in the sentence rather than in a code", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.getByText(MOVED.sentence)).toBeTruthy()
+  })
+
+  /**
+   * The one control a dead ask can honestly offer: the same request, weighed
+   * again, against the revision the page is actually at. It is a fresh ask
+   * rather than a retry and the caution says so, for the same reason
+   * `UNDO_CAUTION` does — the Gate may hold it again.
+   */
+  it("offers the same ask again, against the page as it stands", () => {
+    const { container } = render(<RecordCard record={FROM_A_BUTTON} moved={MOVED} />)
+
+    expect(screen.getByRole("button", { name: ASK_AGAIN_LABEL })).toBeTruthy()
+    expect(screen.getByText(ASK_AGAIN_CAUTION)).toBeTruthy()
+    expect(container.querySelector('input[name="presetId"]')?.getAttribute("value")).toBe("band")
+    expect(container.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe(
+      `${MOVED.now}`
+    )
+  })
+
+  /**
+   * An ask that named no suggestion gets no button — free text needs a model
+   * that may be absent or out of budget, and an undo has its own control on the
+   * card above. What it must not lose is the sentence.
+   */
+  it("still says what happened when there is no suggestion to repeat", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.queryByRole("button", { name: ASK_AGAIN_LABEL })).toBeNull()
+    expect(screen.getByText(MOVED.sentence)).toBeTruthy()
+  })
+
+  /**
+   * Nothing is removed. The two revisions behind the sentence are one click
+   * down, with the rest of the technical account, and so is the whole weighing
+   * the Gate did — a record that dropped its own reasoning the moment the
+   * reasoning stopped being actionable would not be a record.
+   */
+  it("keeps the two revisions, and the weighing, one click down", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.getByText(MOVED.technical)).toBeTruthy()
+    expect(screen.getByText("stakes-above-ceiling")).toBeTruthy()
+  })
+
+  /** And a hold the page has *not* moved past is untouched by any of it. */
+  it("leaves a live hold with both of its buttons", () => {
+    render(<RecordCard record={HELD} />)
+
+    expect(screen.getByRole("button", { name: "Apply this change" })).toBeTruthy()
+    expect(screen.getByText("Waiting on you")).toBeTruthy()
+    expect(screen.queryByRole("button", { name: ASK_AGAIN_LABEL })).toBeNull()
   })
 })

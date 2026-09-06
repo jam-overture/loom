@@ -5,6 +5,7 @@ import Link from "next/link"
 import { DOCS } from "@/app/(marketing)/_lib/site"
 
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
+import { movedOn, type MovedNote } from "@/app/(demo)/_lib/moved"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { plainChange, settingsOf, type PlainChange } from "@/app/(demo)/_lib/plain-change"
 import { availablePresets } from "@/app/(demo)/_lib/presets"
@@ -86,18 +87,6 @@ const DemoPage = async () => {
    * operations are ordinary inserts and removes (0032) — so the record's own
    * provenance does.
    */
-  const spotlit = spotlitChange(records, tree)
-  const spots = spotlit
-    ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone, isUndo(spotlit.record))
-    : []
-
-  /**
-   * The one record, if any, that has asked the visitor something and is waiting
-   * for the answer. Newest first, so this is the question in front of them
-   * rather than one they have already dealt with.
-   */
-  const awaiting = records.find((record) => record.heldProposalId !== undefined)
-
   /**
    * What each waiting proposal would replace, read against the tree on the
    * stage.
@@ -109,8 +98,59 @@ const DemoPage = async () => {
   const holds = session === undefined ? undefined : await session.holds.forTree(tree.treeId)
   const held = holds?.ok ? holds.value : []
 
+  /**
+   * The holds the page has moved past, by the record they belong to.
+   *
+   * A visitor may hold two changes at once — five buttons and nothing telling
+   * them to answer one at a time — and answering either moves the revision,
+   * which kills the other where it stands. `HeldProposal.baseRevision` is the
+   * runtime's field for noticing, put there in its own words *"so a reader can
+   * tell a hold is stale without parsing the delta"*, and this is the reader.
+   *
+   * Computed once, here, because it decides three separate things that must not
+   * be allowed to disagree: whether the page is marked for this change, whether
+   * the rail scrolls to it, and what its card says and offers.
+   */
+  const movedNotes = new Map<string, MovedNote>(
+    held.flatMap((one) => {
+      const note = movedOn(one.baseRevision, tree.revision)
+      const record = records.find((each) => each.heldProposalId === one.proposalId)
+
+      return note === undefined || record === undefined ? [] : [[record.recordId, note] as const]
+    })
+  )
+
+  const spotlit = spotlitChange(records, tree, new Set(movedNotes.keys()))
+  const spots = spotlit
+    ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone, isUndo(spotlit.record))
+    : []
+
+  /**
+   * The one record, if any, that has asked the visitor something and is waiting
+   * for the answer. Newest first, so this is the question in front of them
+   * rather than one they have already dealt with — and never one the page has
+   * moved past, because scrolling a visitor to a question nobody can answer is
+   * worse than leaving them where they are.
+   */
+  const awaiting = records.find(
+    (record) => record.heldProposalId !== undefined && !movedNotes.has(record.recordId)
+  )
+
+  /**
+   * Both readings are computed for a hold that can still land, and neither for
+   * one the page has moved past.
+   *
+   * Not a tidying: `describeProposalEffect` and `plainChange` both resolve a
+   * delta against the tree in front of them, and a dead hold's delta was planned
+   * against a tree that is gone. What they would return is a confident account of
+   * a change that cannot happen, printed above the words saying it cannot. The
+   * record itself loses nothing — the delta, the inverse and the whole weighing
+   * are on the card's disclosure, off the record rather than off the tree.
+   */
+  const answerable = held.filter((one) => movedOn(one.baseRevision, tree.revision) === undefined)
+
   const effects = new Map<string, ProposalEffect>(
-    held.map((one) => [one.proposalId, describeProposalEffect(tree, one.proposal.delta)])
+    answerable.map((one) => [one.proposalId, describeProposalEffect(tree, one.proposal.delta)])
   )
 
   /**
@@ -144,7 +184,7 @@ const DemoPage = async () => {
   }
 
   const plains = new Map<string, readonly PlainChange[]>(
-    held.map((one) => [
+    answerable.map((one) => [
       one.proposalId,
       plainChange(tree, one.proposal.delta, settings, restoring(one.proposalId)),
     ])
@@ -153,16 +193,22 @@ const DemoPage = async () => {
   /** Absent rather than `undefined`: the props are optional, not nullable. */
   const heldProps = (
     record: (typeof records)[number]
-  ): { readonly effect?: ProposalEffect; readonly plain?: readonly PlainChange[] } => {
+  ): {
+    readonly effect?: ProposalEffect
+    readonly plain?: readonly PlainChange[]
+    readonly moved?: MovedNote
+  } => {
     const id = record.heldProposalId
     if (id === undefined) return {}
 
     const effect = effects.get(id)
     const plain = plains.get(id)
+    const moved = movedNotes.get(record.recordId)
 
     return {
       ...(effect === undefined ? {} : { effect }),
       ...(plain === undefined ? {} : { plain }),
+      ...(moved === undefined ? {} : { moved }),
     }
   }
 

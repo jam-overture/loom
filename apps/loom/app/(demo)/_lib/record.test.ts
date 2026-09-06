@@ -167,3 +167,88 @@ describe("a record that is an undo", () => {
     expect(record?.undoes).toBeUndefined()
   })
 })
+
+/**
+ * A hold the runtime has released, and a record that had gone on describing it.
+ *
+ * `confirmHeld` releases custody before it narrates a conflict, saying why in
+ * its own words: *"A hold names a revision, so a hold whose tree has moved on
+ * can never apply again — it is not stale pending a retry, it is dead."* The
+ * record kept `held` set through that, so the card read **Waiting on you** and
+ * *"Loom will not make this change until you say yes"* about a proposal no yes
+ * could reach, with the conflict code in the smallest type on the card as the
+ * only correction.
+ */
+describe("a record whose commit failed", () => {
+  const heldThenFailed = (): ChangeRecord | undefined =>
+    recordFromEvents([
+      envelope({ type: "intent-received", intent: INTENT }),
+      envelope({ type: "proposal-held", proposalId: "p_1" as never }),
+      envelope({
+        type: "commit-failed",
+        proposalId: "p_1" as never,
+        error: { code: "revision-conflict", treeId: INTENT.treeId, expected: 0, found: 1 },
+      }),
+    ])
+
+  it("is no longer waiting on anybody, because the hold is gone", () => {
+    const record = heldThenFailed()
+
+    expect(record?.heldProposalId).toBeUndefined()
+    expect(record?.outcome).toBe("did-not-apply")
+  })
+
+  /** Nothing is removed: the conflict is still on the record, in the runtime's words. */
+  it("still carries what the runtime said went wrong", () => {
+    expect(heldThenFailed()?.failure).toContain("revision-conflict")
+  })
+
+  /**
+   * The other `commit-failed` — an append that failed after the Gate allowed the
+   * change on its own — has no hold to clear, and must not gain one or lose the
+   * failure by passing through the same branch.
+   */
+  it("reads the same on a change that was never held at all", () => {
+    const record = recordFromEvents([
+      envelope({ type: "intent-received", intent: INTENT }),
+      envelope({
+        type: "commit-failed",
+        proposalId: "p_1" as never,
+        error: { code: "unavailable", detail: "the store was not there" },
+      }),
+    ])
+
+    expect(record?.heldProposalId).toBeUndefined()
+    expect(record?.outcome).toBe("did-not-apply")
+    expect(record?.failure).toContain("unavailable")
+  })
+})
+
+/**
+ * The other field the events cannot supply.
+ *
+ * `presetId` is stamped by the action that read the form, because the runtime is
+ * handed the preset's *utterance* and nothing that says a button produced it. It
+ * has to survive a fold for the same reason `undoes` does: the fold is what
+ * happens when a visitor answers, and a dead ask that had lost its preset would
+ * have lost the one control it can honestly offer.
+ */
+describe("a record that came from one of the suggestions", () => {
+  it("keeps which suggestion it was when an answer is folded onto it", () => {
+    const asked = recordFromEvents([envelope({ type: "intent-received", intent: INTENT })])
+    if (asked === undefined) throw new Error("an intent alone should always produce a record")
+
+    const answered = recordFromEvents(
+      [envelope({ type: "change-committed", proposalId: "p_1" as never, revision: 1 })],
+      { ...asked, presetId: "trim" }
+    )
+
+    expect(answered?.presetId).toBe("trim")
+  })
+
+  it("is absent on an ask that named no suggestion", () => {
+    const record = recordFromEvents([envelope({ type: "intent-received", intent: INTENT })])
+
+    expect(record?.presetId).toBeUndefined()
+  })
+})

@@ -8,6 +8,7 @@ import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 
 import { answerNote } from "@/app/(demo)/_lib/answer"
 import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
+import type { MovedNote } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
@@ -22,6 +23,7 @@ import {
 import { weighedOf } from "@/app/(demo)/_lib/weighed"
 
 import { answerHeld, undoRevision } from "../actions"
+import { PageMovedOn } from "./page-moved-on"
 import { TechnicalDetail } from "./technical-detail"
 import { Weighed } from "./weighed"
 import { WhatWouldHappen } from "./what-would-happen"
@@ -66,6 +68,7 @@ export const RecordCard = ({
   record,
   effect,
   plain = [],
+  moved,
   offer = "offer",
 }: {
   readonly record: ChangeRecord
@@ -87,6 +90,16 @@ export const RecordCard = ({
    */
   readonly plain?: readonly PlainChange[]
   /**
+   * Present when the page has moved past this ask, which is the one thing about
+   * a held change this card cannot see for itself: the revision it was judged
+   * against lives on the hold, not on the record (`_lib/moved.ts`).
+   *
+   * It is not another line on the card, it is a different card. The state, the
+   * sentence under it, the plain reading and the two buttons are all about a
+   * question that is still open, and this one is shut.
+   */
+  readonly moved?: MovedNote
+  /**
    * Whether this card's undo is still to be had, waiting on an answer, or
    * already spent — computed from the whole record list, which is the only
    * place the answer exists. Defaulted, because a card with no revision has no
@@ -97,7 +110,16 @@ export const RecordCard = ({
   const [answerReport, answer, answering] = useActionState<WriteReport | null, FormData>(answerHeld, null)
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
   const report = answerReport ?? undoReport
-  const outcome = demoState(stateOfRecord(record.outcome))
+  /*
+   * The state the record is in, unless the page has moved past it — in which
+   * case the record's own `awaiting-you` is a fact about custody that stopped
+   * being true of the visitor. The Gate is not waiting on them; no answer they
+   * can give will land this. `no-change` is the shared table's name for exactly
+   * that — *"The change no longer fits this page — something it referred to has
+   * moved or gone"* — and it is the same state the record lands in by itself if
+   * a second tab gets there first, so the card reads identically either way.
+   */
+  const outcome = demoState(moved ? "no-change" : stateOfRecord(record.outcome))
   const answered = answerNote(record)
   const asked = askedLine(record)
   const weighed = weighedOf(record)
@@ -262,12 +284,23 @@ export const RecordCard = ({
       {plain.length > 0 && <WhatWouldHappen lines={plain} />}
 
       {/*
+        * Or, where the two buttons would have been, what happened to the page
+        * under this ask and the one thing that can still be done about it.
+        *
+        * It takes the buttons' place rather than joining them, because the
+        * press they invite cannot succeed: `confirmHeld` releases a hold whose
+        * revision has moved and reports the conflict, so the only thing
+        * pressing *Apply this change* here achieves is spending the offer.
+        */}
+      {moved && <PageMovedOn note={moved} {...(record.presetId === undefined ? {} : { presetId: record.presetId })} />}
+
+      {/*
         * The two buttons a held change is waiting on, immediately under the
         * sentence that says it is waiting. They were below the technical record
         * before, which put the whole delta between a visitor being told a
         * decision was theirs and being given anywhere to make it.
         */}
-      {record.heldProposalId && !answerReport && (
+      {record.heldProposalId && !moved && !answerReport && (
         <div className="flex gap-2">
           <form action={answer}>
             <input type="hidden" name="proposalId" value={record.heldProposalId} />
@@ -352,6 +385,14 @@ export const RecordCard = ({
         <Section title="the ask">
           <Row label="origin">{record.origin}</Row>
           <Row label="asked at">{record.askedAt}</Row>
+          {/*
+            * The two revisions behind the plain sentence above, and only on the
+            * card that says it. It goes here rather than under "the verdict"
+            * because it is not the Gate's reasoning: the Gate reached a verdict
+            * and stands by it — what moved is the page it was reached about,
+            * which is a fact about the ask.
+            */}
+          {moved && <Row label="weighed at">{moved.technical}</Row>}
         </Section>
 
         {record.interpretation && (

@@ -118,6 +118,25 @@ export type ChangeRecord = {
    */
   readonly undoes?: number
   /**
+   * Which suggestion this ask came from, when it came from one.
+   *
+   * Stamped by the action that asked, for the reason `undoes` is: it is the
+   * surface's own knowledge about its own request. The runtime is handed a
+   * *sentence* — `preset.utterance`, verbatim, because that is what a person
+   * would have typed — and has no idea a button produced it, so nothing in the
+   * log can give this back. Matching the utterance against the table afterwards
+   * would be the surface pattern-matching a string to recover something it knew
+   * and threw away.
+   *
+   * A `string` rather than a `DemoPresetId`, so this module stays clear of the
+   * preset table: `presets.ts` reads the record, and typing the field would turn
+   * that into a cycle. Same trade `undoes` makes by being a number.
+   *
+   * What it is for is the one control a dead ask can honestly offer — asking for
+   * the same thing again, against the page as it now stands (`moved.ts`).
+   */
+  readonly presetId?: string
+  /**
    * Who allowed a held change. Never the same field as `actor`: a hold exists
    * because the Gate wanted a second person, and provenance records only the
    * first (0029).
@@ -215,6 +234,10 @@ type Draft = {
    * page had been put back.
    */
   undoes?: number
+  /** Carried for the same reason `undoes` is: answering a hold folds onto the
+   * record that was waiting, and a fold that dropped this would take the way out
+   * of a dead ask with it. */
+  presetId?: string
   discarded: boolean
   failure?: string
   repaired: boolean
@@ -248,6 +271,7 @@ const draftFrom = (base: ChangeRecord | undefined): Draft =>
         ...(base.heldProposalId === undefined ? {} : { held: base.heldProposalId }),
         ...(base.answeredBy === undefined ? {} : { answeredBy: base.answeredBy }),
         ...(base.undoes === undefined ? {} : { undoes: base.undoes }),
+        ...(base.presetId === undefined ? {} : { presetId: base.presetId }),
         discarded: base.outcome === "discarded",
         repaired: base.repaired,
         touched: base.touched,
@@ -318,6 +342,31 @@ const fold = (draft: Draft, envelope: RuntimeEventEnvelope): Draft => {
       }
     case "repair-requested":
       return { ...draft, repaired: true }
+    /**
+     * A commit that failed is a hold that is over.
+     *
+     * Both places the runtime narrates this have already released custody —
+     * `persist` is reached only after `confirmHeld` took the hold, and the
+     * revision-conflict branch releases it first, saying why: *"A hold names a
+     * revision, so a hold whose tree has moved on can never apply again — it is
+     * not stale pending a retry, it is dead."*
+     *
+     * Leaving `held` set made the record outlive the custody it described. The
+     * card went on reading **Waiting on you** and *"Loom will not make this
+     * change until you say yes"* over a proposal no yes could reach, with the
+     * conflict code in the smallest type on the card as the only correction.
+     * Cleared here, the same record reads `no-change` — *"The change no longer
+     * fits this page"* — which is what happened, in the words the portal and
+     * the demo already share.
+     *
+     * The failure itself still lands, through the default branch below: this
+     * clears custody and says nothing about why, which is `failureOf`'s to say.
+     */
+    case "commit-failed": {
+      const failure = failureOf(event)
+
+      return { ...draft, held: undefined, ...(failure === undefined ? {} : { failure }) }
+    }
     default: {
       const failure = failureOf(event)
 
@@ -373,6 +422,7 @@ export const recordFromEvents = (
     ...(draft.held === undefined ? {} : { heldProposalId: draft.held }),
     ...(draft.answeredBy === undefined ? {} : { answeredBy: draft.answeredBy }),
     ...(draft.undoes === undefined ? {} : { undoes: draft.undoes }),
+    ...(draft.presetId === undefined ? {} : { presetId: draft.presetId }),
     ...(draft.failure === undefined ? {} : { failure: draft.failure }),
     repaired: draft.repaired,
     touched: draft.touched,

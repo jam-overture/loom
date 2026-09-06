@@ -313,12 +313,27 @@ export const spotlightsFor = (
  *
  * Everything else — refused, discarded, never interpreted — marks nothing,
  * because nothing on the page moved.
+ *
+ * **`movedOn` is the exception to "a hold wins", and it is not a preference.** A
+ * hold whose page has moved under it can never apply (`_lib/moved.ts`), so
+ * ringing the page amber and labelling it *This would be removed* promises a
+ * visitor something that will not happen — on the very band they are looking at,
+ * in the tone this surface reserves for a question it is still asking them. It
+ * is not asking. The mark falls through to the change actually on the stage,
+ * which is the honest one.
+ *
+ * Passed in rather than read here, because a record does not carry the revision
+ * its hold was judged against — `HeldProposal.baseRevision` does, and only the
+ * page has the holds and the tree in hand together.
  */
 export const spotlitChange = (
   records: readonly ChangeRecord[],
-  tree: LoomTree
+  tree: LoomTree,
+  movedOn: ReadonlySet<string> = new Set()
 ): { readonly record: ChangeRecord; readonly tone: SpotTone } | undefined => {
-  const waiting = records.find((record) => record.outcome === "awaiting-you")
+  const waiting = records.find(
+    (record) => record.outcome === "awaiting-you" && !movedOn.has(record.recordId)
+  )
   if (waiting) return { record: waiting, tone: "awaiting" }
 
   const onTheStage = records.find(

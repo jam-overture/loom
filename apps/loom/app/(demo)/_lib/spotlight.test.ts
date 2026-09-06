@@ -438,6 +438,35 @@ describe("which change the page is about", () => {
     expect(spotlitChange([refused], at(0))).toBeUndefined()
     expect(spotlitChange([], at(0))).toBeUndefined()
   })
+
+  /**
+   * The one case where a hold does not win, and it is the one that was drawing
+   * the most misleading frame this surface can draw.
+   *
+   * Two asks can be held at once — five buttons and nothing telling a visitor to
+   * answer one at a time — and answering either kills the other where it stands
+   * (`_lib/moved.ts`). The page went on ringing the dead one's band in amber and
+   * labelling it *This would be removed*, which is this surface's colour for a
+   * question it is still asking. It is not asking, and no answer will land it.
+   */
+  it("does not mark a hold the page has moved past", () => {
+    expect(spotlitChange([waiting], at(2), new Set(["i_held"]))).toBeUndefined()
+  })
+
+  /** And the mark falls through to the change that really is on the stage. */
+  it("marks the change on the stage instead of a hold that can never land", () => {
+    const spotlit = spotlitChange([waiting, applied(2)], at(2), new Set(["i_held"]))
+
+    expect(spotlit?.record.recordId).toBe("i_2")
+    expect(spotlit?.tone).toBe("applied")
+  })
+
+  /** A hold that can still land is still the thing the visitor is being asked about. */
+  it("still prefers a hold the page has not moved past", () => {
+    expect(spotlitChange([applied(2), waiting], at(2), new Set(["i_other"]))?.record.recordId).toBe(
+      "i_held"
+    )
+  })
 })
 
 describe("how many marks one change may draw", () => {
