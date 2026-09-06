@@ -1,0 +1,226 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { StorageSchema, StoreFailures } from "@/app/(docs)/_components/deployment-tables"
+
+export const metadata = pageMetadata("the-runtime", "going-to-production")
+
+# Going to production
+
+Every example on this site is real. The plan is real, the verdict is real, and
+the log underneath it fills up as you press things. It is also **entirely inside
+this browser tab**, and reloading the page throws all of it away.
+
+That is fine for a documentation site and it is not a deployment. This page is
+the difference: the three places a real deployment keeps things, the tables Loom
+creates for them, and what your application is told on the day the database does
+not answer.
+
+<Example id="first-tree" />
+
+## Three places state lives, and only one of them is your pages
+
+A deployment keeps three separate things, and it is worth being able to name
+them apart, because you can lose any one of them without losing the others.
+
+1. **Your pages, and the log of how each one got that way.** This is the
+   important one. It is what a visitor sees, and it is the record of every
+   change that was ever applied.
+2. **The changes waiting for a person.** When the Gate says *ask somebody*, the
+   change is not applied and it is not thrown away. It waits somewhere. That
+   somewhere is a store of its own.
+3. **The account of what happened.** Every ask, what was planned for it, what was
+   decided, and how it ended — including the asks that changed nothing at all.
+
+Each of the three is a small interface with **two implementations**: one that
+keeps things in memory, and one that keeps them in Postgres. They are held to
+the same contract by the same tests, so choosing between them is a line of
+wiring rather than a rewrite.
+
+```ts
+import { memoryTreeStore } from "@loom/runtime/store"
+import { memoryHoldStore } from "@loom/runtime/write"
+import { memoryTelemetryJournal } from "@loom/runtime/telemetry"
+
+// This site, and `pnpm dev`.
+const trees = memoryTreeStore()
+const holds = memoryHoldStore()
+const journal = memoryTelemetryJournal()
+```
+
+```ts
+import { postgresTreeStore, postgresHoldStore } from "@loom/runtime/postgres"
+import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+
+// A deployment.
+const trees = postgresTreeStore(db)
+const holds = postgresHoldStore(db)
+const journal = postgresTelemetryJournal(db)
+```
+
+## Memory is a real answer, for exactly one shape of deployment
+
+The in-memory stores are not toys and they are not a fallback nobody tested.
+They are the right choice when **one long-lived process handles everything**: a
+server you started, that stays up, that is the only one. Local development is
+that. So is a small single-instance deployment, for as long as you are willing
+to lose everything when it restarts.
+
+They are the wrong choice on a serverless host, and the way they are wrong is
+the reason this section exists.
+
+<Callout kind="warning">
+  On a serverless host there are many short-lived processes. A change lands in
+  the memory of whichever one served the request, and the next request is served
+  by a different one that has never heard of it. **A change applies, the screen
+  updates, and the page is back as it was a moment later.** That reads as a
+  broken framework rather than as missing persistence, which is why it is worth
+  knowing before you see it.
+</Callout>
+
+The hold store fails the same way and less visibly: a change held for review
+lives in the process that judged it, and the person's answer arrives at a
+different one. The change is not refused — it is simply not there, and Loom
+cannot tell that apart from an id nobody ever held.
+
+The question to ask is not about scale. It is: **can the process that judged a
+change still be spoken to when the answer arrives?**
+
+## What `db` is
+
+The Postgres halves all take the same thing: a database handle. Loom talks plain
+SQL through Drizzle and never assumes a particular host, so this is your
+connection and not a Loom object.
+
+```ts
+import { drizzle } from "drizzle-orm/postgres-js"
+import postgres from "postgres"
+
+const db = drizzle(postgres(process.env.DATABASE_URL, { prepare: false, max: 1 }))
+```
+
+`prepare: false` is not a detail to copy blindly. A pooled connection in
+transaction mode — which is what serverless deployments use — hands you a
+different backend per transaction, and a prepared statement cannot survive that.
+Getting it wrong produces errors that look like the database is broken.
+
+## The tables Loom creates
+
+Three calls create them, one per seam. Everything below is read out of the SQL
+the runtime would run, as this page builds, rather than typed out beside it.
+
+<StorageSchema />
+
+The two worth understanding are the first two, because they are the pair that
+makes a log a log. **`loom_trees` holds the page as it is now.**
+**`loom_revisions` holds every change that was ever applied to it**, one row
+each, numbered from one and never with a gap. The snapshot is the convenience;
+the log is the truth. If they ever disagree, the log is what is right, and
+`auditSnapshot` is the function that replays one against the other to find out.
+
+## Creating them is one call, and running it twice is a no-op
+
+```ts
+import { ensureTreeStoreSchema, ensureHoldStoreSchema } from "@loom/runtime/postgres"
+import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
+
+await ensureTreeStoreSchema(db)
+await ensureHoldStoreSchema(db)
+await ensureTelemetrySchema(db)
+```
+
+Every statement is `IF NOT EXISTS`, so running this against a database that
+already has the tables does nothing rather than something dangerous. Run it once
+when you set the database up, and run it again whenever you upgrade Loom.
+
+<Callout>
+  **The second half of that sentence is the one that bites.** `CREATE TABLE IF
+  NOT EXISTS` leaves an existing table completely alone — columns and all — so a
+  column added to Loom after your database was created reaches it only through
+  the `ALTER TABLE … ADD COLUMN IF NOT EXISTS` beside it. That is why
+  `answered_by` appears in both statements, and why the table above marks it as
+  added by a later migration. A deployment that skips the re-run keeps working
+  and then fails the first write that needed the column.
+</Callout>
+
+This is deliberately not a migration framework. There is one version of this
+schema and no upgrade path yet, so a list of statements that are safe to re-run
+is the honest amount of machinery for it.
+
+## The tables are locked as they are created
+
+Every table above has **row level security** switched on by the same statements
+that create it. Nothing about that is optional and there is no step for you to
+remember.
+
+The reason is the kind of database Loom is built for. A managed Postgres often
+puts everything in the `public` schema behind a REST API with a key that is
+public by design — so a new table is readable by anyone holding that key from
+the moment it exists. Row level security closes that, and a table that was
+exposed for the ten minutes between two manual steps was exposed.
+
+No policies come with it, on purpose. Row level security with no policy denies
+every role except the table's owner, and the owner is who Loom connects as: the
+runtime speaks plain SQL and never touches the REST layer, so the effect is to
+close a door Loom does not use.
+
+<Callout kind="warning">
+  If you connect as a role that does not own these tables, **every query will be
+  denied** and your application will report the database as unavailable. That is
+  the failure working as designed — it fails closed, which is the direction you
+  want a permissions mistake to fail in. Grant that role a policy, or connect as
+  the owner.
+</Callout>
+
+## When the database does not answer, your app is told which thing went wrong
+
+Every store operation returns a result rather than throwing, and a failure
+carries a code. There are five, and lumping them together as "the database
+broke" would throw away the distinction your application most needs:
+
+<StoreFailures />
+
+`unavailable` is the outage. `revision-conflict` is not a fault at all — it is
+concurrency control doing its job, and the answer to it is to re-read the page
+and ask again, not to retry the same plan harder. The last three mean the caller
+asked for something that is not there.
+
+`describeStoreError` turns any of them into a sentence, which is usually what
+you want in a log line.
+
+<Callout>
+  A change that was accepted and then failed to persist is not the same as a
+  change that was refused. The first one is an outage in the middle of something
+  the Gate already allowed; the runtime's event stream can say so, which is why
+  this taxonomy is separate from the store interface rather than part of it.
+</Callout>
+
+## The journal only grows until you tell it not to
+
+Nothing in Loom deletes from the journal on its own. That is a decision rather
+than an omission: when to forget what people asked for is your call, and a
+framework that made it on a timer of its own choosing would be making it for
+you.
+
+When you do run a retention pass, three things are true and worth knowing before
+you schedule one. [What every ask leaves
+behind](/docs/the-runtime/what-every-ask-leaves-behind) is where each of them
+comes from and what it costs; this is the short version you need in front of you
+while you write the job.
+
+- **A horizon under an hour is refused.** The most likely way to write one is a
+  units mistake, and the cost of that mistake is an empty journal.
+- **It never splits an unfinished episode.** A proposal still waiting for
+  somebody's answer survives however old it is, along with the records that
+  belong to it.
+- **It cannot touch a page.** Retention reads and deletes the account of what
+  happened. Your trees and their revisions live in different tables that it
+  never reads.
+
+## What none of this decides
+
+Loom takes the name of whoever asked for a change and records it. It never asks
+how you established that name — sign-in, sessions and who is allowed to answer
+the Gate are your application's, and the runtime has no opinion about them
+beyond needing an actor to attribute a change to.
+
+That line is deliberate, and where it came from is in
+[Architecture](/docs/architecture/how-it-fits-together).
