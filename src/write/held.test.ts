@@ -3,13 +3,24 @@ import { describe, expect, it } from "vitest"
 import type { ProposalId } from "../ids.js"
 import { heldProposalFixture } from "../testing/hold-contract.js"
 
-import { describeHoldError, parseHeldProposal, type HoldError } from "./held.js"
+import {
+  clampHoldLimit,
+  compareHolds,
+  DEFAULT_HOLD_LIMIT,
+  describeHoldError,
+  holdCursor,
+  holdCursorPosition,
+  MAX_HOLD_LIMIT,
+  parseHeldProposal,
+  type HoldError,
+} from "./held.js"
 
 /**
  * What `memoryHoldStore` does is checked by the contract suite in
  * `held.contract.test.ts`, alongside every other implementation. What is left
- * here is the two things that are not a store: how a refusal reads, and what
- * happens when a stored hold does not parse.
+ * here is the things that are not a store: how a refusal reads, what happens
+ * when a stored hold does not parse, and the paging vocabulary both
+ * implementations are built out of.
  */
 
 describe("parseHeldProposal", () => {
@@ -81,5 +92,82 @@ describe("describeHoldError", () => {
 
   it("covers the whole union", () => {
     expect(new Set(everyError.map((error) => error.code)).size).toBe(everyError.length)
+  })
+})
+
+describe("compareHolds", () => {
+  const at = (heldAt: string, proposalId: string) => ({
+    heldAt,
+    proposalId: proposalId as ProposalId,
+  })
+
+  it("orders by instant before it looks at the id", () => {
+    const early = at("2026-07-30T09:00:00.000Z", "p_z")
+    const late = at("2026-07-30T12:00:00.000Z", "p_a")
+
+    expect(compareHolds(early, late)).toBeLessThan(0)
+    expect(compareHolds(late, early)).toBeGreaterThan(0)
+  })
+
+  it("falls back to the id when the instant is the same", () => {
+    const first = at("2026-07-30T09:00:00.000Z", "p_a")
+    const second = at("2026-07-30T09:00:00.000Z", "p_b")
+
+    expect(compareHolds(first, second)).toBeLessThan(0)
+    expect(compareHolds(second, first)).toBeGreaterThan(0)
+  })
+
+  /** A total order has to say that a position equals itself, or paging repeats it. */
+  it("calls a position equal to itself", () => {
+    const position = at("2026-07-30T09:00:00.000Z", "p_a")
+
+    expect(compareHolds(position, position)).toBe(0)
+  })
+})
+
+describe("holdCursorPosition", () => {
+  const position = {
+    heldAt: "2026-07-30T09:00:00.000Z",
+    proposalId: "p_abc" as ProposalId,
+  }
+
+  it("reads back a cursor it wrote", () => {
+    expect(holdCursorPosition(holdCursor(position))).toEqual(position)
+  })
+
+  /**
+   * Each of these is a cursor that has been through something — a truncated
+   * URL, a caller inventing one, a page number from a different listing. None
+   * of them is an error; all of them start at the beginning.
+   */
+  it("reads an unusable cursor as no position at all", () => {
+    for (const cursor of [
+      undefined,
+      "",
+      "2026-07-30T09:00:00.000Z",
+      "2026-07-30T09:00:00.000Z p_",
+      "yesterday p_abc",
+      "50",
+      " p_abc",
+    ]) {
+      expect(holdCursorPosition(cursor)).toBeUndefined()
+    }
+  })
+})
+
+describe("clampHoldLimit", () => {
+  it("falls back when the caller named nothing", () => {
+    expect(clampHoldLimit(undefined)).toBe(DEFAULT_HOLD_LIMIT)
+  })
+
+  /** The whole point: a caller cannot ask for everything held by naming a big number. */
+  it("refuses to hand back more than the maximum, however it is asked", () => {
+    expect(clampHoldLimit(10_000)).toBe(MAX_HOLD_LIMIT)
+    expect(clampHoldLimit(Number.POSITIVE_INFINITY)).toBe(DEFAULT_HOLD_LIMIT)
+  })
+
+  it("never returns an empty page on purpose", () => {
+    expect(clampHoldLimit(0)).toBe(1)
+    expect(clampHoldLimit(-5)).toBe(1)
   })
 })

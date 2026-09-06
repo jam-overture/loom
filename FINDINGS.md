@@ -13616,3 +13616,46 @@ cannot do is make two runs six months apart comparable, because nothing in this
 repository chooses the browser. That entry stays open and is not this lane's to
 close — it needs a pinned browser, which is an image decision.
 
+
+---
+
+## 2026-09-06 — the portal's front door is one query now, and the cursor it pages with needed two columns
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by #230 — `HoldStore.waiting`, recorded as
+[0112](decisions/0112-a-second-listing-on-the-hold-store-scoped-by-the-handle-and-keyed-by-two-columns.md)
+
+Closes `Loom portal`'s 1 September entry, *a hold store has no deployment-wide
+read, so the portal's headline screen costs one query per page*, filed on
+`portal-23-four-units-one-tree` and not readable from `main`.
+
+That entry proposed the shape and the shape was right: a listing scoped by the
+handle, bounded and cursored like every other read in the contract, ordered by
+`heldAt` the way `forTree` already is. It is shipped as `waiting`, with a second
+index on `(held_at, proposal_id)` in `HOLD_STORE_DDL` so the read is a seek
+rather than a sort over every hold in the deployment.
+
+**One thing the entry did not anticipate, and it is the part worth reading.**
+`TreeStore.list` orders by `treeId`, which is unique, so 0020 never had to
+separate a key from a position. `heldAt` is neither unique nor close to it — the
+Gate holding two changes in one judgement writes one instant twice, and every
+fixture in the contract suite shares one by default. A cursor naming only an
+instant repeats a hold or skips one depending on which side of the comparison it
+falls. The cursor is therefore `(heldAt, proposalId)`, and `forTree` gained the
+same tiebreak, because two listings in one store sorting ties differently is a
+bug waiting for the first duplicate instant.
+
+**The count is still not there, deliberately.** The entry said a count would
+serve the rail badge and be cheaper still, and that the queue wants the rows. It
+does, and a count is derivable from a page in a way a page is not derivable from
+a count — so the badge the portal deferred is now affordable off this read, and
+nothing further is owed. If it turns out a badge on every screen in the shell
+wants its own one-row query rather than a page it discards, that is a smaller
+addition made against a real number rather than a guessed one, and this lane will
+take it when that lane asks.
+
+**`HoldStore` is a five-method interface now, and that is a breaking change to a
+published seam.** Both implementations here are updated and the contract suite
+runs the new behaviour against each. A host outside this repository that wrote
+its own `HoldStore` no longer compiles until it adds the method. Pre-production
+alpha is when that is cheapest, and it is written into 0112 rather than glossed.

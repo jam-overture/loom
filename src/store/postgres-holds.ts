@@ -1,10 +1,14 @@
-import { asc, eq } from "drizzle-orm"
+import { asc, eq, sql } from "drizzle-orm"
 
 import { err, ok, type Result } from "../result.js"
 import {
+  clampHoldLimit,
+  holdCursor,
+  holdCursorPosition,
   parseHeldProposal,
   type HeldProposal,
   type HoldError,
+  type HoldPage,
   type HoldStore,
 } from "../write/held.js"
 
@@ -44,6 +48,33 @@ const toHeld = (row: typeof loomHolds.$inferSelect): Result<HeldProposal, HoldEr
     disposition: row.disposition,
     heldAt: row.heldAt,
   })
+
+/**
+ * `compareHolds`, in the one place it has to be restated rather than called:
+ * ordering happens in the statement so an index can serve it, and the contract
+ * suite is what holds this and the in-memory comparator to the same answer.
+ */
+const HOLD_ORDER = [asc(loomHolds.heldAt), asc(loomHolds.proposalId)] as const
+
+/**
+ * One unreadable row fails the whole listing rather than being skipped. A queue
+ * that quietly omits a change nobody can parse is a queue that says nothing is
+ * waiting when something is — and the reviewer has no way to find out otherwise.
+ */
+const parseAll = (
+  rows: readonly (typeof loomHolds.$inferSelect)[]
+): Result<readonly HeldProposal[], HoldError> => {
+  const held: HeldProposal[] = []
+
+  for (const row of rows) {
+    const parsed = toHeld(row)
+    if (!parsed.ok) return parsed
+
+    held.push(parsed.value)
+  }
+
+  return ok(held)
+}
 
 export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
   hold: async (held) => {
@@ -90,27 +121,48 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
         .select()
         .from(loomHolds)
         .where(eq(loomHolds.treeId, treeId))
-        /** Oldest first: the hold that has waited longest is closest to going stale. */
-        .orderBy(asc(loomHolds.heldAt))
+        .orderBy(...HOLD_ORDER)
 
-      const held: HeldProposal[] = []
-
-      for (const row of rows) {
-        const parsed = toHeld(row)
-        /**
-         * One unreadable row fails the whole listing rather than being skipped.
-         * A queue that quietly omits a change nobody can parse is a queue that
-         * says a tree has nothing waiting on it when it has — and the reviewer
-         * has no way to find out otherwise.
-         */
-        if (!parsed.ok) return parsed
-
-        held.push(parsed.value)
-      }
-
-      return ok(held)
+      return parseAll(rows)
     } catch (cause) {
       return err(unavailable(cause, `could not list what is held against ${treeId}`))
+    }
+  },
+
+  waiting: async (request) => {
+    const limit = clampHoldLimit(request?.limit)
+    const from = holdCursorPosition(request?.cursor)
+
+    try {
+      const rows = await db
+        .select()
+        .from(loomHolds)
+        /**
+         * A row-value comparison, which is `compareHolds` said in SQL: Postgres
+         * compares the tuple left to right, so this is "later than that instant,
+         * or the same instant under a later id" without writing that out as
+         * three predicates one of which will eventually be wrong.
+         */
+        .where(
+          from === undefined
+            ? undefined
+            : sql`(${loomHolds.heldAt}, ${loomHolds.proposalId}) > (${from.heldAt}, ${from.proposalId})`
+        )
+        .orderBy(...HOLD_ORDER)
+        /** One extra row answers "is there another page" without a count. */
+        .limit(limit + 1)
+
+      const parsed = parseAll(rows.slice(0, limit))
+      if (!parsed.ok) return parsed
+
+      const last = parsed.value.at(-1)
+
+      return ok<HoldPage>({
+        held: parsed.value,
+        cursor: rows.length > limit && last !== undefined ? holdCursor(last) : null,
+      })
+    } catch (cause) {
+      return err(unavailable(cause, "could not list what is held"))
     }
   },
 

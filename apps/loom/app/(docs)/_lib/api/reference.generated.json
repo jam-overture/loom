@@ -7008,7 +7008,7 @@
               "kind": "schema",
               "signature": "const heldProposalSchema: z.ZodObject<…>",
               "truncated": false,
-              "summary": "The same shape, as something a stored row can be checked against."
+              "summary": ""
             },
             {
               "name": "HoldError",
@@ -7032,9 +7032,72 @@
               "summary": "Reads a hold back out of storage, or says why it could not."
             },
             {
+              "name": "HoldPosition",
+              "kind": "type",
+              "signature": "type HoldPosition = {\n    readonly heldAt: string;\n    readonly proposalId: ProposalId;\n};",
+              "truncated": false,
+              "summary": "Where a page of holds resumes: an instant and an id, never an instant alone."
+            },
+            {
+              "name": "compareHolds",
+              "kind": "function",
+              "signature": "const compareHolds: (left: HoldPosition, right: HoldPosition) => number",
+              "truncated": false,
+              "summary": "The order both listings are in: oldest first, then by id."
+            },
+            {
+              "name": "holdCursor",
+              "kind": "function",
+              "signature": "const holdCursor: (position: HoldPosition) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "holdCursorPosition",
+              "kind": "function",
+              "signature": "const holdCursorPosition: (cursor: string | undefined) => HoldPosition | undefined",
+              "truncated": false,
+              "summary": "Reads a cursor back into the position it names, or says it cannot."
+            },
+            {
+              "name": "DEFAULT_HOLD_LIMIT",
+              "kind": "value",
+              "signature": "const DEFAULT_HOLD_LIMIT = 25",
+              "truncated": false,
+              "summary": "Smaller than a tree listing's page, because a held proposal is the heaviest row this store keeps: a whole delta, the intent that asked for it, and the judgment that held it back. A reviewer reads them one at a time, so a page is sized for a screen rather than for a fold."
+            },
+            {
+              "name": "MAX_HOLD_LIMIT",
+              "kind": "value",
+              "signature": "const MAX_HOLD_LIMIT = 100",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "clampHoldLimit",
+              "kind": "function",
+              "signature": "const clampHoldLimit: (limit: number | undefined) => number",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "HoldListRequest",
+              "kind": "type",
+              "signature": "type HoldListRequest = {\n    /**\n     * Opaque to the caller: the previous page's `cursor`, passed back unread. A\n     * cursor naming a hold that has since been answered is not an error — the\n     * page resumes from the next position after it, which is what makes a queue\n     * safe to page through while people are emptying it.\n     */\n    readonly cursor?: string;\n    /** Clamped by the implementation — see `clampHoldLimit`. */\n    readonly limit?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "HoldPage",
+              "kind": "type",
+              "signature": "type HoldPage = {\n    readonly held: readonly HeldProposal[];\n    /** `null` when this was the last page. */\n    readonly cursor: string | null;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
               "name": "HoldStore",
               "kind": "interface",
-              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
+              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>;\n    readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
               "truncated": false,
               "summary": "`release` is a take, not a read: it removes and returns in one step, which is what makes answering a proposal exactly once a property of the store rather than a rule every caller has to remember. Confirming and discarding both go through it, so two confirmations racing cannot both apply the same delta."
             },
@@ -7043,7 +7106,7 @@
               "kind": "function",
               "signature": "const memoryHoldStore: () => HoldStore",
               "truncated": false,
-              "summary": "The reference implementation. Ordered by `heldAt` ascending, so a queue reads oldest-first: a change that has been waiting longest is the one most likely to be about to go stale."
+              "summary": "The reference implementation. Both listings are in `compareHolds` order, so a queue reads oldest-first: a change that has been waiting longest is the one most likely to be about to go stale."
             }
           ]
         },

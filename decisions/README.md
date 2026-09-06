@@ -195,3 +195,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0109](0109-an-inverse-in-hand-is-proposable-without-a-store-and-it-is-never-stamped-loom-revert.md) | An inverse in hand is proposable without a store, and the runtime never puts its own name on one it did not plan | Accepted | §2 |
 | 0110 | *No record on this branch* | — | — |
 | [0111](0111-the-revision-an-undo-puts-back-is-a-field-on-provenance.md) | The revision an undo puts back is a field on provenance, because provenance is the part of a proposal a log keeps | Accepted | §2 |
+| [0112](0112-a-second-listing-on-the-hold-store-scoped-by-the-handle-and-keyed-by-two-columns.md) | A hold store lists what the handle can see, and its cursor is two columns because an instant is not a key | Accepted | §5 |

@@ -79,9 +79,12 @@ export const TREE_STORE_DDL: readonly string[] = [
  * to be told about the log. Each store owns its schema and a deployment says
  * which it wants.
  *
- * The index is not decoration. `forTree` is the review queue's only read and it
- * is the one query here that is not a primary-key lookup, so without it a queue
- * scans every hold in the database — including every other tree's.
+ * Neither index is decoration, and they answer different questions. `forTree`
+ * reads one tree's queue, so without the first it scans every hold in the
+ * database including every other tree's. `waiting` reads the whole deployment's
+ * queue a page at a time, in `(held_at, proposal_id)` order — the second index
+ * is what makes that one seek rather than a sort over everything held, which is
+ * the entire reason the read exists.
  */
 export const HOLD_STORE_DDL: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS loom_holds (
@@ -94,6 +97,7 @@ export const HOLD_STORE_DDL: readonly string[] = [
     held_at text NOT NULL
   )`,
   `CREATE INDEX IF NOT EXISTS loom_holds_tree_id_held_at_idx ON loom_holds (tree_id, held_at)`,
+  `CREATE INDEX IF NOT EXISTS loom_holds_held_at_proposal_id_idx ON loom_holds (held_at, proposal_id)`,
   /** Locked on creation for the reason the tree store's tables are — see above. */
   `ALTER TABLE loom_holds ENABLE ROW LEVEL SECURITY`,
 ]
