@@ -5,6 +5,10 @@
 **Branch:** `portal-23-four-units-one-tree` (→ `main`), continued rather than
 branched again. See *Why this is not a new branch* below.
 
+**Deployed preview:**
+https://loom-git-portal-23-four-unit-095fb2-jpizzolato36-6341s-projects.vercel.app
+— the page screen is at `/portal/pages/t_seed1`.
+
 Visuals — the real screens, from a production build of this commit, in a
 signed-in browser, against a page **a live model changed during this run**:
 
