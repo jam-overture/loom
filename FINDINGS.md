@@ -12919,3 +12919,41 @@ Small, and filed rather than fixed because `src/` is not this lane's, and
 because the two messages should probably agree by sharing one string rather than
 by being written twice.
 
+
+## 2026-09-06 — 0087 cites a record number that is not the record it means, under a filename that does not exist
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:** open
+
+0087 closes its Decision section with the principle that makes the audit an
+audit rather than a gate:
+
+> Nothing is refused at registration, per
+> [0010](0010-conformance-is-probed-not-proven.md). The audit reports and the
+> host decides.
+
+Two things are wrong with that link and only one of them is cosmetic.
+
+**The number is wrong.** "Conformance is probed and reported, never enforced by
+registration" is
+[0012](decisions/0012-conformance-is-probed-and-reported-not-enforced.md).
+[0010](decisions/0010-edit-mode-decorates-it-does-not-restructure.md) is "Edit
+mode decorates; it never invents DOM" — a real, Accepted record about something
+else entirely. So a reader who follows the citation does not land on a 404 that
+tells them something is broken; they land on a coherent record that has nothing
+to do with the sentence that sent them there, which is the more expensive
+failure.
+
+**The filename is invented.** `0010-conformance-is-probed-not-proven.md` has
+never existed in `decisions/`. It reads as the title of the record 0087 meant,
+attached to the number of the record it did not — which suggests the citation
+was written from memory of the principle rather than from the file, and that is
+worth knowing because it is a mistake that repeats.
+
+Found while writing lesson 19, which cites 0087 for the `submits` declaration
+and the placement probe. The lesson cites 0012 directly and does not reproduce
+the error.
+
+Filed rather than fixed because `decisions/` is not this lane's. One line in
+0087, and it is worth a `grep` for other citations of `0010` while somebody has
+the file open — 0097 made a hole in the numbering fatal, but nothing yet checks
+that a link inside a record resolves to a file that exists.
