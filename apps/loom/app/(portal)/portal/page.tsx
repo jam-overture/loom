@@ -6,6 +6,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import {
   inQueueOrder,
@@ -73,6 +74,19 @@ const PortalHome = async () => {
 
   const changes = inQueueOrder(
     perPage.flatMap((holds) => (holds.ok ? holds.value.map(waitingChange) : []))
+  )
+
+  /**
+   * What each waiting change is waiting *on*, in words.
+   *
+   * This queue is drawn from several pages at once, so the page is the fact that
+   * tells one card from the next — and it was a bare `t_seed1`. It is read here
+   * rather than in the card because a card is one row and this is one read per
+   * listed page, shared by every row that lands on it.
+   */
+  const names = await namesOf(
+    portalStore,
+    trees.map((listing) => listing.treeId)
   )
 
   /*
@@ -202,7 +216,11 @@ const PortalHome = async () => {
       ) : (
         <ul className="flex flex-col gap-3">
           {changes.map((change) => (
-            <WaitingCard key={change.proposalId} change={change} />
+            <WaitingCard
+              key={change.proposalId}
+              change={change}
+              page={nameFrom(names, change.treeId)}
+            />
           ))}
         </ul>
       )}

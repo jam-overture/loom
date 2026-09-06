@@ -113,19 +113,18 @@ describe("what every screen owes a reader", () => {
  * run — the one screen where a person is already deciding whether this software
  * is looked after.
  *
- * Headings whose text is an interpolation are skipped rather than exempted:
- * `<h1>{treeId}</h1>` prints a name the runtime chose, and 22 August settled
- * that names stay on the surface as they are. Filed as a finding, because a
- * heading that is *only* a name is a separate problem from a heading in the
- * wrong case.
+ * Headings whose text is an interpolation are skipped by the case rule rather
+ * than exempted from every rule: a heading that renders a value cannot be case
+ * checked from the source, and the rule below is the one that applies to it.
  */
 describe("every heading a reader meets", () => {
-  const headings = sourcesUnder(GROUP).flatMap((entry) =>
+  const allHeadings = sourcesUnder(GROUP).flatMap((entry) =>
     [...entry.source.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/gu)]
       .map((match) => (match[1] ?? "").trim().replace(/\s+/gu, " "))
-      .filter((text) => !text.startsWith("{"))
       .map((text) => [entry.file.slice(GROUP.length + 1), text] as const)
   )
+
+  const headings = allHeadings.filter(([, text]) => !text.startsWith("{"))
 
   it("finds the headings this lane writes", () => {
     expect(headings.length).toBeGreaterThan(8)
@@ -135,6 +134,36 @@ describe("every heading a reader meets", () => {
     "starts %s with a capital",
     (_label, text) => {
       expect(text.slice(0, 1)).toBe(text.slice(0, 1).toUpperCase())
+    }
+  )
+
+  /**
+   * **A heading is never a machine identifier.**
+   *
+   * `/portal/pages/[treeId]` was headed `<h1>{treeId}</h1>` — `t_seed1`, the
+   * largest text on the busiest screen in the portal — for as long as the screen
+   * existed. It was filed as a finding by the run that added the rule above,
+   * because a heading that is *only* a name is a different problem from a
+   * heading in the wrong case, and it is the problem this rule closes.
+   *
+   * The check is on the expression rather than on what it evaluates to, which is
+   * all a source read can see: a heading may not interpolate anything whose name
+   * says it is a tree id. That is exactly why `_lib/page-name.ts` hands screens a
+   * `PageName` whose readable half is `name` — the words a person reads and the
+   * identifier they quote are two fields, so a screen cannot reach for the wrong
+   * one by accident, and a rewrite that put the id back in the heading has to
+   * type the word to do it.
+   */
+  const interpolated = allHeadings.filter(([, text]) => text.startsWith("{"))
+
+  it("finds the headings that render a value rather than a literal", () => {
+    expect(interpolated.length).toBeGreaterThan(0)
+  })
+
+  it.each(interpolated.map(([file, text]) => [`${file} — ${text}`, text]))(
+    "does not head %s with an identifier",
+    (_label, text) => {
+      expect(text.toLowerCase()).not.toContain("treeid")
     }
   )
 })
