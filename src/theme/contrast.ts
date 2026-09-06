@@ -71,6 +71,18 @@ export type PairingBasis = "painted" | "composed"
  * date. Both halves of it are now checked against the components themselves —
  * `registryPairings` derives what the library renders, and `pairings.test.ts`
  * fails if this list is missing any of it or carries a row nothing renders.
+ *
+ * **What the derivation does not see, so this list does not claim it.** The
+ * probe renders each primitive with nothing configured but its closed choices,
+ * so an element a component draws only when an optional prop is given never
+ * exists, and the ink it would paint is never derived. That is not a gap the
+ * check can close — the alternative is a probe that invents a price and a date,
+ * and a pairing derived from an invented value is a fact about the invention —
+ * so `RegistryPairings.unprobedProps` names where it stops instead. A row here
+ * may therefore be `painted` on the strength of a component read by a person
+ * where the probe could only reach `composed`; the checks allow that direction
+ * and refuse the other, because declaring a stricter bar than the derivation
+ * found is safe and declaring a softer one is how a real failure goes quiet.
  */
 export type TextPairing = {
   readonly foreground: PaletteSlot
@@ -92,6 +104,24 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
   { foreground: "accent", background: "bg-surface", basis: "painted", where: "loom.quote attribution" },
   { foreground: "accent-strong", background: "accent-subtle", basis: "painted", where: "loom.badge accent, loom.icon soft" },
   /**
+   * Painted, and the derivation cannot see it. `loom.offering` sets its price in
+   * `accent-strong` on the `bg-surface` of the card it drew, so both ends are
+   * one primitive's — but the price element exists only when the optional
+   * `price` prop is given, and the probe gives it nothing. It was declared
+   * `composed` for exactly that reason, which meant a palette failing it would
+   * have been reported rather than refused, on a page nobody can read.
+   *
+   * `loom.field` reaches the same pairing the other way, by floating its ink
+   * into a card, and is kept in the `where` because it is the case a reader is
+   * more likely to hit.
+   */
+  {
+    foreground: "accent-strong",
+    background: "bg-surface",
+    basis: "painted",
+    where: "loom.offering price, loom.field inside a card",
+  },
+  /**
    * `fg-subtle` is held to the body-text bar like the rest (0074). The
    * slot recedes and none of what it carries is reliably large — a `loom.footer`
    * note row and a `loom.tier` note are ordinary small text — so a threshold of
@@ -112,7 +142,6 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
   { foreground: "accent", background: "bg-canvas", basis: "composed", where: "loom.section eyebrow, loom.link current" },
   { foreground: "accent", background: "bg-surface-muted", basis: "composed", where: "loom.faq marker inside a muted well" },
   { foreground: "accent-strong", background: "bg-canvas", basis: "composed", where: "loom.field validation message" },
-  { foreground: "accent-strong", background: "bg-surface", basis: "composed", where: "loom.field inside a card" },
   { foreground: "accent-strong", background: "bg-surface-muted", basis: "composed", where: "loom.field inside a muted well" },
   /**
    * The two the library does not clear. Both are an ink placed on the tinted

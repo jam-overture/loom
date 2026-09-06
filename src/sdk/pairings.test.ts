@@ -192,6 +192,90 @@ describe("registryPairings", () => {
     expect(derived.groundsOutsideTheRamp).toEqual([{ ground: "accent", types: ["loom.probe-filled"] }])
     expect(derived.pairings.map((pairing) => pairing.background)).toEqual(["accent"])
   })
+
+  /**
+   * The blind spot, demonstrated rather than asserted about: the same component
+   * under a required prop and an optional one, and only one of the two inks is
+   * derived. `loom.offering`'s price is this exact shape, and it is what made a
+   * painted pairing get declared as the softer composed.
+   */
+  it("does not see an ink behind an element the primitive draws only when told to", () => {
+    const registry = registryOf(
+      definePrimitive({
+        type: "loom.probe-guarded",
+        description: "A card whose price is drawn only when there is one.",
+        props: z.object({ price: z.string().optional() }),
+        component: ({ props }) =>
+          createElement(
+            "div",
+            { style: { background: colour("bg-surface") } },
+            props.price === undefined
+              ? null
+              : createElement("p", { style: { color: colour("accent-strong") } }, String(props.price))
+          ),
+      })
+    )
+
+    const derived = registryPairings(registry, PALETTE_TEXT_GROUNDS)
+
+    expect(derived.pairings).toEqual([])
+    expect(derived.unprobedProps).toEqual([{ type: "loom.probe-guarded", props: ["price"] }])
+  })
+
+  /**
+   * A prop the probe *can* vary is not a blind spot, which is the difference
+   * between this report and a list of every optional prop in the library.
+   */
+  it("does not count a closed choice as unreachable, because it varies those", () => {
+    const registry = registryOf(
+      definePrimitive({
+        type: "loom.probe-toned",
+        description: "A panel with a tone the probe can enumerate.",
+        props: z.object({
+          tone: z.enum(["plain", "accent"]).optional(),
+          label: z.string().optional(),
+        }),
+        component: () => painted("bg-surface", "fg-muted", null),
+      })
+    )
+
+    expect(registryPairings(registry, PALETTE_TEXT_GROUNDS).unprobedProps).toEqual([
+      { type: "loom.probe-toned", props: ["label"] },
+    ])
+  })
+
+  /** A required prop's element renders anyway, so its ink is not hidden. */
+  it("leaves a primitive out entirely when nothing it declares is out of reach", () => {
+    const registry = registryOf(
+      definePrimitive({
+        type: "loom.probe-plain",
+        description: "Everything it declares is required.",
+        props: z.object({ heading: z.string() }),
+        component: () => painted("bg-surface", "fg-muted", null),
+      })
+    )
+
+    expect(registryPairings(registry, PALETTE_TEXT_GROUNDS).unprobedProps).toEqual([])
+  })
+
+  /**
+   * "I cannot enumerate these" is not "there are none", and a schema whose keys
+   * cannot be read is the one case where the derivation knows least of all.
+   */
+  it("says it cannot tell for a schema whose props do not enumerate", () => {
+    const registry = registryOf(
+      definePrimitive({
+        type: "loom.probe-opaque",
+        description: "A schema that is not an object schema.",
+        props: z.record(z.string()),
+        component: () => painted("bg-surface", "fg-muted", null),
+      })
+    )
+
+    expect(registryPairings(registry, PALETTE_TEXT_GROUNDS).unprobedProps).toEqual([
+      { type: "loom.probe-opaque", props: undefined },
+    ])
+  })
 })
 
 /**
@@ -245,6 +329,26 @@ describe("the declared list against the components", () => {
     const imagined = [...declared.keys()].filter((at) => !rendered.has(at))
 
     expect(imagined).toEqual([])
+  })
+
+  /**
+   * The one row this list carries that the derivation cannot reach, pinned to
+   * the reason it cannot. `loom.offering` paints its price in `accent-strong`
+   * on the `bg-surface` it drew, and the element exists only under the optional
+   * `price` — so the pairing is declared `painted` off the component and the
+   * probe can only get to `composed`. If the probe ever grows to open a guarded
+   * prop, this fails and the row stops needing a person behind it.
+   */
+  it("cannot reach loom.offering's price, which is why its pairing is declared by hand", () => {
+    expect(derived.unprobedProps).toContainEqual(
+      expect.objectContaining({ type: "loom.offering", props: expect.arrayContaining(["price"]) })
+    )
+    expect(
+      derived.pairings.find(
+        (pairing) => pairing.foreground === "accent-strong" && pairing.background === "bg-surface"
+      )?.basis
+    ).toBe("composed")
+    expect(declared.get("accent-strong|bg-surface")?.basis).toBe("painted")
   })
 
   it("holds the ramp to exactly the grounds children land on, bar the filled ones", () => {

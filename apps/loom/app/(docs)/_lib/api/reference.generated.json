@@ -6185,9 +6185,16 @@
               "summary": "A ground a primitive puts its declared children and slots on."
             },
             {
+              "name": "UnprobedProps",
+              "kind": "type",
+              "signature": "type UnprobedProps = {\n    readonly type: PrimitiveType;\n    readonly props: readonly string[] | undefined;\n};",
+              "truncated": false,
+              "summary": "The props a primitive declares that no probe configuration sets, and which therefore mark the edge of what this derivation can see."
+            },
+            {
               "name": "RegistryPairings",
               "kind": "type",
-              "signature": "type RegistryPairings = {\n    readonly pairings: readonly DerivedPairing[];\n    /** Inks a primitive sets without painting a ground of its own. */\n    readonly floating: readonly PaletteSlot[];\n    /** Every ground a primitive places children on, whether or not the ramp is held to it. */\n    readonly childGrounds: readonly ChildGround[];\n    /**\n     * Grounds children land on that the text ramp is not held to. Not a failure:\n     * `accent` is here because `loom.action` fills it and answers the ink itself.\n     * It is reported because a *new* ground appearing here is the signal that\n     * either a primitive is painting somewhere unconsidered or the declared list\n     * has fallen behind the library — the same drift this module exists to catch,\n     * one level up.\n     */\n    readonly groundsOutsideTheRamp: readonly ChildGround[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n};",
+              "signature": "type RegistryPairings = {\n    readonly pairings: readonly DerivedPairing[];\n    /** Inks a primitive sets without painting a ground of its own. */\n    readonly floating: readonly PaletteSlot[];\n    /** Every ground a primitive places children on, whether or not the ramp is held to it. */\n    readonly childGrounds: readonly ChildGround[];\n    /**\n     * Grounds children land on that the text ramp is not held to. Not a failure:\n     * `accent` is here because `loom.action` fills it and answers the ink itself.\n     * It is reported because a *new* ground appearing here is the signal that\n     * either a primitive is painting somewhere unconsidered or the declared list\n     * has fallen behind the library — the same drift this module exists to catch,\n     * one level up.\n     */\n    readonly groundsOutsideTheRamp: readonly ChildGround[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Where this derivation stops seeing, by primitive. Only primitives with at\n     * least one such prop appear, so an empty list is a real claim: nothing in\n     * this registry hides an element behind a prop the probe cannot set.\n     *\n     * Reported rather than fixed, because the alternative is a probe that invents\n     * a price, a date and a URL — and a pairing derived from an invented value is\n     * a fact about the invention. A list that says it is read off the components\n     * should be able to say which part of them it read.\n     */\n    readonly unprobedProps: readonly UnprobedProps[];\n};",
               "truncated": false,
               "summary": "What a registry's components paint, as the contrast bar needs to hear it."
             },

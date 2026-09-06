@@ -13659,3 +13659,52 @@ published seam.** Both implementations here are updated and the contract suite
 runs the new behaviour against each. A host outside this repository that wrote
 its own `HoldStore` no longer compiles until it adds the method. Pre-production
 alpha is when that is cheapest, and it is written into 0112 rather than glossed.
+
+---
+
+## 2026-09-06 — a painted pairing was declared composed because the probe cannot open a guarded prop
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by #230 — both halves, recorded as
+[0113](decisions/0113-the-pairings-probe-reports-where-it-stops-looking-rather-than-inventing-a-price.md)
+
+Closes `Loom primitives`' 2 September entry, *the pairings probe cannot see an
+ink behind an optional prop, and one declared row is already wrong because of
+it*, filed on `primitives-21-forty-minutes-and-a-date` and not readable from
+`main`.
+
+Both halves it asked for, and it was right about each.
+
+**The row.** `accent-strong on bg-surface` is now `painted`, with `where`
+naming `loom.offering price` beside `loom.field inside a card`. Verified in the
+component before believing the entry: `price` is `z.string().min(1).max(32)
+.optional()`, its element is guarded on `given.price === undefined`, its colour
+is `accent-strong`, and the `<article>` under it takes `SURFACES.plain`, whose
+background is `bg-surface`. Both ends are one primitive's, so it is painted. As
+predicted, every registered palette clears it — `audit.failures` is asserted
+empty for all of them and still is. What changed is that the next palette to
+fail it is refused rather than noted.
+
+**The probe.** `RegistryPairings.unprobedProps` names, per primitive, the
+declared props no configuration sets. The entry framed this as "the probe never
+renders an optional prop"; the sharper statement is that the probe sets *no*
+props, including required ones, and that this only hides an ink when the
+component **guards an element** on the prop's presence — which optional props
+get and required ones do not. `loom.event`'s required date was derived
+immediately for exactly that reason. So the reported set is "optional and not a
+closed choice", which is the set a component can guard on and the probe cannot
+open.
+
+**What was decided rather than deferred, since the entry left it open.** The
+probe does **not** fill optional props with placeholders. A price, a date and a
+URL all have to be invented to be valid, and a pairing derived from an invented
+value is a fact about the invention — the same silence 0089 exists to prevent,
+one level along. The gap is reported instead, and `contrast.ts` no longer claims
+coverage the derivation does not give: a row may be `painted` where the probe
+reached only `composed`, and the checks permit that direction and refuse the
+other. Written into 0113 with the reopening condition attached, so a future run
+proposing placeholder props finds the argument rather than the silence.
+
+**Not pinned, deliberately.** A test over the whole unprobed set would churn on
+every optional prop any lane adds, which trains people to update a test without
+reading it. What is pinned is the one case that produced the false row.
