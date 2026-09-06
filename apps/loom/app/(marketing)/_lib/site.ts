@@ -352,19 +352,27 @@ export const internalHref = (origin: string, path: string, theme?: SiteThemeName
  * was — and why two people looking at the site cannot rearrange it under each
  * other.
  */
-export const askHref = (
-  origin: string,
-  options: {
-    readonly theme?: SiteThemeName
-    readonly ask?: string
-    readonly approve?: boolean
-    /** Whether the visitor has pressed *Put it back* on the change above. */
-    readonly back?: boolean
-    /** And whether they have answered the rules holding *that* back. */
-    readonly backApprove?: boolean
-  } = {}
-): string => {
-  const url = new URL(HOME.path, `${origin}/`)
+export type AskedFor = {
+  readonly theme?: SiteThemeName
+  readonly ask?: string
+  readonly approve?: boolean
+  /** Whether the visitor has pressed *Put it back* on the change above. */
+  readonly back?: boolean
+  /** And whether they have answered the rules holding *that* back. */
+  readonly backApprove?: boolean
+}
+
+/**
+ * A page of this site with a request written into its address.
+ *
+ * Two pages read those parameters and they have to read the same ones the same
+ * way, because one links to the other carrying them. Written twice they would
+ * be two spellings of one convention, and this lane's recorded failure three
+ * runs running is a pair of individually correct things that had never been read
+ * next to each other. So there is one spelling and the path is the argument.
+ */
+const askedHref = (origin: string, path: string, options: AskedFor): string => {
+  const url = new URL(path, `${origin}/`)
 
   if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
   if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
@@ -383,6 +391,28 @@ export const askHref = (
 
   return url.toString()
 }
+
+export const askHref = (origin: string, options: AskedFor = {}): string =>
+  askedHref(origin, HOME.path, options)
+
+/**
+ * The mechanism page, with the request whose record it should print.
+ *
+ * Same property as `askHref` and for the same reason: the page keeps nothing,
+ * so what it prints is a function of its address. `/how-it-works` on its own is
+ * the page it has always been — the record of the quietest of the five choices,
+ * chosen because it is the one whose lines fit on a screen. With an ask in the
+ * address it prints the record of *that* request instead, run against the same
+ * published front door, which is what lets the front door hand a visitor the raw
+ * record of the change they just watched rather than of a different one.
+ *
+ * `approve` travels with it because the record does. A change the rules held and
+ * the visitor then allowed has a line the held one does not, and a link that
+ * dropped the approval would open a page whose record is one line shorter than
+ * the panel the visitor followed it from.
+ */
+export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
+  askedHref(origin, HOW_IT_WORKS.path, options)
 
 /**
  * The record page, with the run of changes it is reporting on in the address.

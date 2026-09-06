@@ -552,8 +552,9 @@ export const homePageTree = (context: PageContext): LoomTree => {
         seeItHappenBand(ids, {
           origin: context.origin,
           theme: context.theme,
-          ...(context.ask === undefined ? {} : { ask: context.ask }),
-          ...(context.approve === undefined ? {} : { approve: context.approve }),
+          ...(context.ask === undefined
+            ? {}
+            : { ask: context.ask, approve: context.approve === true }),
           ...(context.record === undefined ? {} : { record: context.record }),
           ...(context.undone === undefined ? {} : { undone: context.undone }),
         }),
