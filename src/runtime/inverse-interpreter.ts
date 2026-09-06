@@ -68,6 +68,15 @@ export type InverseTerms = {
    * than "a log was checked and was clean" (0035).
    */
   readonly discards?: readonly DiscardedWork[]
+  /**
+   * The revision this puts back, recorded on the provenance the log keeps.
+   *
+   * Optional because not every inverse has one to name. A stateless surface
+   * undoing a change it made in the same session has no revision — nothing was
+   * ever appended — and stamping a number it does not have would be worse than
+   * the absence. A caller that planned the undo off a log always does.
+   */
+  readonly undoes?: number
 }
 
 /**
@@ -120,6 +129,7 @@ export const inverseInterpreter = (
               interpreter: terms.interpreter,
               /** Computed, not inferred — so calibration leaves it out (0031). */
               authoredBy: "runtime",
+              ...(terms.undoes === undefined ? {} : { undoes: terms.undoes }),
               confidence: 1,
               interpretedAt: clock.now(),
             },

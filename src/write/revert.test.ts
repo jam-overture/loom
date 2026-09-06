@@ -6,6 +6,7 @@ import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "../runtime/policy.js"
 import { memoryTreeStore } from "../store/memory.js"
 import { planRevert } from "../store/revert.js"
+import { undoneRevisions } from "../store/undone.js"
 import {
   collectingEventSink,
   fixedClock,
@@ -195,6 +196,75 @@ describe("revertRevision applies an undo through the pipeline", () => {
 
     if (outcome.kind !== "committed") throw new Error(describeRevertOutcome(outcome))
     expect(outcome.proposal.rationale).toContain("Undoes revision 1")
+  })
+
+  /**
+   * The same fact as the rationale above, in the form a surface can read. The
+   * sentence is composed for the person answering a hold; a screen that had only
+   * the sentence had to parse it or carry the number itself, and a screen reading
+   * a log it did not write has no number to carry.
+   */
+  it("records which revision it undoes as a field on the stored provenance", async () => {
+    const harness = await harnessFor()
+    await harness.append(setValue(harness.ids.body, "changed"))
+
+    await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    const page = await harness.path.store.revisions(harness.seed.treeId)
+    if (!page.ok) throw new Error(page.error.code)
+
+    expect(page.value.revisions[1]?.provenance.undoes).toBe(1)
+  })
+
+  it("leaves the field off a change that is not an undo", async () => {
+    const harness = await harnessFor()
+    await harness.append(setValue(harness.ids.body, "changed"))
+
+    const page = await harness.path.store.revisions(harness.seed.treeId)
+    if (!page.ok) throw new Error(page.error.code)
+
+    expect(page.value.revisions[0] && "undoes" in page.value.revisions[0].provenance).toBe(false)
+  })
+
+  /**
+   * The end the finding was filed from: a log, read by something that did not
+   * write it, answering *has this change already been put back*. Two undos deep,
+   * because one hop gets that question wrong as soon as somebody changes their
+   * mind twice.
+   */
+  it("lets a reader of the log alone say what is put back, through an undo of an undo", async () => {
+    const harness = await harnessFor()
+    await harness.append(setValue(harness.ids.body, "changed"))
+
+    await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 1,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    const page = await harness.path.store.revisions(harness.seed.treeId)
+    if (!page.ok) throw new Error(page.error.code)
+
+    expect([...undoneRevisions(page.value.revisions).keys()]).toEqual([1])
+
+    await revertRevision(harness.path, {
+      treeId: harness.seed.treeId,
+      revision: 2,
+      seed: harness.seed,
+      origin: "user-instruction",
+    })
+
+    const after = await harness.path.store.revisions(harness.seed.treeId)
+    if (!after.ok) throw new Error(after.error.code)
+
+    /** Revision 1 stands again, and the undo that had put it back does not. */
+    expect([...undoneRevisions(after.value.revisions).keys()]).toEqual([2])
   })
 
   /** An undo is a change, so it is itself in the log and itself undoable. */

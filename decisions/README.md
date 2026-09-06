@@ -193,3 +193,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0107](0107-a-font-pack-may-say-where-a-face-is-and-the-runtime-never-fetches-it.md) | A font pack may say where a face is, and the runtime never fetches it | Accepted | §3 |
 | [0108](0108-a-repair-restates-the-request-and-the-runtime-measures-it.md) | A repair restates the request, and the runtime measures it rather than making it cheaper | Accepted | §2 |
 | [0109](0109-an-inverse-in-hand-is-proposable-without-a-store-and-it-is-never-stamped-loom-revert.md) | An inverse in hand is proposable without a store, and the runtime never puts its own name on one it did not plan | Accepted | §2 |
+| 0110 | *No record on this branch* | — | — |
+| [0111](0111-the-revision-an-undo-puts-back-is-a-field-on-provenance.md) | The revision an undo puts back is a field on provenance, because provenance is the part of a proposal a log keeps | Accepted | §2 |

@@ -82,6 +82,12 @@ export const revertInterpreter = (
       interpreter: REVERT_INTERPRETER,
       rationale: rationaleFor(plan),
       /**
+       * The same number the rationale states in a sentence, as a field. The
+       * sentence is for the person answering a hold; this is for the surface
+       * reading the log afterwards, which until now could only have the sentence.
+       */
+      undoes: plan.target.revision,
+      /**
        * Declared only when there is something to declare, so absence keeps
        * meaning "nobody looked at a log" rather than "a log was checked and was
        * clean" (0035).

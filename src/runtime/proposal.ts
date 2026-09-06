@@ -50,6 +50,27 @@ export const provenanceSchema = z.object({
   authoredBy: authorKindSchema.default("model"),
   /** Hash rather than the prompt itself, so provenance carries no user content. */
   promptHash: z.string().min(1).optional(),
+  /**
+   * The revision this change puts back, when it puts one back.
+   *
+   * `interpreter` already says *that* a change is an undo — `loom/revert` is a
+   * name a surface can read, which is the whole reason it is a stamp rather than
+   * a sentence. This says *which*, and it is here rather than on the proposal
+   * because provenance is the part of a proposal a log keeps (`StoredRevision`).
+   * A surface reading a log it did not write is exactly the reader that has no
+   * other way to know, and the one this was filed for.
+   *
+   * Before it existed the link was real but only ever narrated: `utterance` said
+   * `Undo revision 1.` and the rationale said so again in a longer sentence. Both
+   * are composed for people, and a surface needing the link had to parse prose it
+   * does not own — the thing the interpreter stamp exists to avoid — or carry the
+   * number itself, which only the caller that asked for the undo can do.
+   *
+   * Optional, and absent on every change that is not an undo. Absence therefore
+   * means "this puts nothing back", which is true of the whole log written before
+   * the field existed as well.
+   */
+  undoes: z.number().int().positive().optional(),
   confidence: z.number().min(0).max(1),
   interpretedAt: z.string().datetime(),
 })
@@ -60,6 +81,8 @@ export type Provenance = {
   readonly interpreter: string
   readonly authoredBy: AuthorKind
   readonly promptHash?: string
+  /** The revision this change puts back; absent unless it puts one back. */
+  readonly undoes?: number
   readonly confidence: number
   readonly interpretedAt: string
 }

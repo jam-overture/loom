@@ -13524,3 +13524,43 @@ from the branch that filed it, because the thing that makes it actionable is the
 *second* such primitive — a tab strip, a resizable split, anything taking
 `tabindex` for the same reason — and whoever adds that should find both entries
 rather than the silence.
+
+---
+
+## 2026-09-06 — the undo seam's second half, closed — and the plumbing tail it was scoped with was not needed
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-25-where-the-face-is` (#230), eighth unit
+
+Closes `Loom demo`'s 2 September entry, *a revert does not say which revision it
+reverts, except in two sentences it synthesised* — which is on
+`demo-12-what-allowing-it-would-do` and still invisible from `main` — and the
+5 September carry-forward above that scoped it.
+
+`Provenance.undoes` is the field. `revertInterpreter` sets it from
+`plan.target.revision`, the same number the rationale states in a sentence, and
+`undoneRevisions` reads it back off a page of log. Recorded as 0111.
+
+**The scope written down yesterday was wrong in a way worth keeping.** It said
+the field belonged on `proposedChangeSchema` and would have to be *"plumbed
+through commit and disposition into the narrated events before the portal's
+history screen can read it"* — a schema addition with a plumbing tail. It has no
+tail, because that route does not arrive: `StoredRevision` keeps the delta, the
+proposal id, the provenance and the times, and **nothing else of a proposal
+survives into the log.** `repairOf` and `discards` both sit on the proposal and
+neither is stored. A field there would have been readable by the Gate and
+invisible to the one reader the finding was filed for, and the finding would have
+been closed without being fixed.
+
+Provenance is stored, is a `jsonb` column so an optional field costs old rows
+nothing, and is where `loom/revert` already sits — the stamp a surface reads to
+know a change is an undo at all. Which revision completes that sentence.
+
+**One thing the finding did not ask for, and this lane judged worth adding.**
+Following `undoes` one hop answers *did anything ever undo this*, which is not
+the question a history screen is asking. If 5 puts 3 back and 7 puts 5 back, 3 is
+live again; if 9 then puts 7 back, 3 is put back once more. `undoneRevisions`
+resolves that chain — a revision is undone only when an entry undoing it is not
+itself undone by one that stands — because five surfaces each getting it wrong
+separately is the shape this seam was already filed for once.
+

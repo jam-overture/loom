@@ -163,4 +163,25 @@ describe("inverseInterpreter", () => {
 
     expect(interpreted.ok && interpreted.value.discards).toEqual(discards)
   })
+
+  /**
+   * A surface undoing a change it made in the same session has no revision to
+   * name — nothing was appended — and a number it does not have would be worse
+   * on the record than the absence.
+   */
+  it("records no undone revision when the caller has none to name", async () => {
+    const { changed, inverse } = changeAndInverse((ids) => [{ op: "remove", nodeId: ids.card }])
+
+    const interpreted = await interpretAgainst(inverse, changed)
+
+    expect(interpreted.ok && "undoes" in interpreted.value.provenance).toBe(false)
+  })
+
+  it("records the revision the caller named", async () => {
+    const { changed, inverse } = changeAndInverse((ids) => [{ op: "remove", nodeId: ids.card }])
+
+    const interpreted = await interpretAgainst(inverse, changed, { ...TERMS, undoes: 2 })
+
+    expect(interpreted.ok && interpreted.value.provenance.undoes).toBe(2)
+  })
 })

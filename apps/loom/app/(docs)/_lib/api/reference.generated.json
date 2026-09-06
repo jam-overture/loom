@@ -1560,7 +1560,7 @@
             {
               "name": "InverseTerms",
               "kind": "type",
-              "signature": "type InverseTerms = {\n    /** What produced the delta, for `Provenance.interpreter`. Not a model. */\n    readonly interpreter: string;\n    /** Why, in the words the person answering a hold is shown. */\n    readonly rationale: string;\n    /**\n     * Work applying this inverse would write over. Only a caller holding a log\n     * can know of any, and absence keeps meaning \"nobody looked at a log\" rather\n     * than \"a log was checked and was clean\".\n     */\n    readonly discards?: readonly DiscardedWork[];\n};",
+              "signature": "type InverseTerms = {\n    /** What produced the delta, for `Provenance.interpreter`. Not a model. */\n    readonly interpreter: string;\n    /** Why, in the words the person answering a hold is shown. */\n    readonly rationale: string;\n    /**\n     * Work applying this inverse would write over. Only a caller holding a log\n     * can know of any, and absence keeps meaning \"nobody looked at a log\" rather\n     * than \"a log was checked and was clean\".\n     */\n    readonly discards?: readonly DiscardedWork[];\n    /**\n     * The revision this puts back, recorded on the provenance the log keeps.\n     *\n     * Optional because not every inverse has one to name. A stateless surface\n     * undoing a change it made in the same session has no revision — nothing was\n     * ever appended — and stamping a number it does not have would be worse than\n     * the absence. A caller that planned the undo off a log always does.\n     */\n    readonly undoes?: number;\n};",
               "truncated": false,
               "summary": "What the interpreter cannot compute, because it depends on where the inverse came from."
             },
@@ -1805,7 +1805,7 @@
             {
               "name": "Provenance",
               "kind": "type",
-              "signature": "type Provenance = {\n    readonly origin: IntentOrigin;\n    readonly actor?: string;\n    readonly interpreter: string;\n    readonly authoredBy: AuthorKind;\n    readonly promptHash?: string;\n    readonly confidence: number;\n    readonly interpretedAt: string;\n};",
+              "signature": "type Provenance = {\n    readonly origin: IntentOrigin;\n    readonly actor?: string;\n    readonly interpreter: string;\n    readonly authoredBy: AuthorKind;\n    readonly promptHash?: string;\n    /** The revision this change puts back; absent unless it puts one back. */\n    readonly undoes?: number;\n    readonly confidence: number;\n    readonly interpretedAt: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6897,6 +6897,20 @@
               "signature": "type TreeReader = Pick<TreeStore, \"head\" | \"revisions\">;",
               "truncated": false,
               "summary": "The read half, for consumers that never write."
+            }
+          ]
+        },
+        {
+          "module": "store/undone",
+          "title": "Undone",
+          "summary": "Which changes in a log have been put back.",
+          "symbols": [
+            {
+              "name": "undoneRevisions",
+              "kind": "function",
+              "signature": "const undoneRevisions: (entries: readonly StoredRevision[]) => ReadonlyMap<number, StoredRevision>",
+              "truncated": false,
+              "summary": "Which revisions in this stretch of log are put back, and by which entry."
             }
           ]
         }
