@@ -13360,3 +13360,58 @@ screens tall on a phone.
 a local component and this lane does not get one. The alternative within this
 lane is to stop showing the second record on a narrow viewport, which would be
 hiding the thing the band exists for from every visitor on a phone.
+
+---
+
+## 2026-09-06 — the marketing brief's step 3 tells this lane to do the thing that got sixteen pull requests closed
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The 28 August entry above closed sixteen pull requests and gave every routine one
+instruction:
+
+> Before starting a unit, check whether you already have an open pull request. If
+> you do, **continue it rather than branching again from `main`** — push onto that
+> branch.
+
+The marketing brief's **procedure, step 3**, says:
+
+> Branch `marketing-NN-<slug>` off `main`. Never stack, never merge to main
+> yourself.
+
+These cannot both be followed, and the brief is what a run reads first. It landed
+on `main` on 1 September. **Every marketing run since then followed step 3**:
+
+| run | PR | branch | opened |
+| --- | --- | --- | --- |
+| 2 Sep | #224 | `marketing-19-the-record-of-your-ask` | after the instruction |
+| 3 Sep | #231 | `marketing-20-the-page-showing-itself` | after the instruction |
+| 4 Sep | #237 | `marketing-21-the-product-on-the-page` | after the instruction |
+| 5 Sep | #242 | `marketing-22-putting-it-back-is-a-change` | after the instruction |
+
+All four were cut from the same commit (`d7375ef`) and none stacked on another —
+so all four edited the same files from the same starting point. `home.ts` was
+rewritten by three of them, `see-it-happen.ts`, `render.ts` and `site.ts` by two
+each, and `FINDINGS.md` by all four. That is the identical shape the 28 August
+entry describes: *"overlapping rewrites of the same logic rather than additions
+that combine."*
+
+**The rebuild the entry asked for was done, and then undone by the next run.**
+#224 is the redo of closed #198, which the entry names. It has sat unmerged since
+2 September while three further runs branched past it and edited the same files.
+
+**This run consolidated instead of opening a fifth.** All four are now merged onto
+`marketing-22-putting-it-back-is-a-change`, which is PR #242, green and
+compiling. Details in `reports/2026-09-06-marketing-four-units-one-front-door.md`.
+
+**A routine cannot fix this.** It cannot edit its own brief, and the next
+marketing run will read step 3 and branch from `main` again. The fix is one
+sentence in the brief and in `docs/routines.md` — something like *"if this lane
+already has an open pull request, push onto its branch instead"* — and it is the
+maintainer's, because the same step 3 is in all seven briefs and the same pile is
+in all seven lanes. Twenty-nine pull requests are open as this is written.
+
+Worth naming, because it is the cheap tell: **the four conflicts took about
+twenty minutes to resolve by hand and every one of them combined.** The cost of
+the pile is not that the work is irreconcilable — it is that nobody reconciles it
+until there are sixteen of them and the only affordable move is to close them all.
