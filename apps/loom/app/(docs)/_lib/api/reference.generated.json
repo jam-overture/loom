@@ -5158,6 +5158,34 @@
           ]
         },
         {
+          "module": "primitives/loom.message",
+          "title": "loom.message",
+          "summary": "One turn of a conversation: who said it, and what they said.",
+          "symbols": [
+            {
+              "name": "loomMessage",
+              "kind": "value",
+              "signature": "const loomMessage: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.message-list",
+          "title": "loom.message-list",
+          "summary": "A conversation, in order: a run of `loom.message` turns down the page.",
+          "symbols": [
+            {
+              "name": "loomMessageList",
+              "kind": "value",
+              "signature": "const loomMessageList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.milestone",
           "title": "loom.milestone",
           "summary": "One entry on a rail: a marker, a title, and what happened.",
@@ -5180,6 +5208,20 @@
               "name": "loomMilestoneList",
               "kind": "value",
               "signature": "const loomMilestoneList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.milestone-row",
+          "title": "loom.milestone-row",
+          "summary": "The same entries as a `loom.milestone-list`, laid **across** rather than down: the *how it works* band, three or four steps wide, each with its number over its title and a connector running to the next.",
+          "symbols": [
+            {
+              "name": "loomMilestoneRow",
+              "kind": "value",
+              "signature": "const loomMilestoneRow: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -5250,6 +5292,20 @@
               "name": "loomOption",
               "kind": "value",
               "signature": "const loomOption: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.orbit",
+          "title": "loom.orbit",
+          "summary": "Whatever it is given, circling something it is given — the *works with* band: a product's mark in the middle and the logos of what it plugs into going round it.",
+          "symbols": [
+            {
+              "name": "loomOrbit",
+              "kind": "value",
+              "signature": "const loomOrbit: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -5404,6 +5460,20 @@
               "name": "loomQuoteGrid",
               "kind": "value",
               "signature": "const loomQuoteGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.reveal",
+          "title": "loom.reveal",
+          "summary": "A band that arrives as the reader reaches it: whatever is put inside lifts and fades into place, driven by the page's own scroll position.",
+          "symbols": [
+            {
+              "name": "loomReveal",
+              "kind": "value",
+              "signature": "const loomReveal: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

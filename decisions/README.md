@@ -186,3 +186,11 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0100](0100-a-same-origin-path-is-not-a-scheme.md) | A same-origin path is not a scheme | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |
 | [0101](0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md) | The `loom.` namespace is the framework's, and the CLI will not write in it | Accepted | §4 (CLI), §4c |
 | [0102](0102-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
+| 0103 | *No record on this branch* | — | — |
+| 0104 | *No record on this branch* | — | — |
+| 0105 | *No record on this branch* | — | — |
+| 0106 | *No record on this branch* | — | — |
+| 0107 | *No record on this branch* | — | — |
+| 0108 | *No record on this branch* | — | — |
+| 0109 | *No record on this branch* | — | — |
+| [0110](0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md) | An entrance the reader drives is a wrapper primitive, not a prop on every band | Accepted | §4b |

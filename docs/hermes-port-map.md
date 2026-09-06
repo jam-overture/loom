@@ -59,7 +59,7 @@ stands alone.
 
 ## The ledger
 
-**Done — 47 blocks, 70 primitives.**
+**Done — 47 blocks, 73 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -216,6 +216,20 @@ an inline code reference or a callout. `loom.list`, `loom.list-item`,
 reason, and their absence was invisible from this document because this document
 counts Hermes blocks: the library could draw a pricing table and a timeline and a
 comparison band while being unable to write three bullet points.
+
+**Three more joined them on 6 September, and the first two are the gap a page
+about a product that *answers you* has and a creator's profile never did.**
+Hermes sold a person's services; nothing in the seventy is an **exchange** —
+the conversation itself, shown rather than described, which is the band every
+assistant's marketing page opens with. `loom.message-list` over `loom.message`
+is that band: an `<ol>` because the order is the content, a turn whose body is a
+flow of nodes (0094) and whose side, name, time and portrait are one record's
+worth of props. `loom.reveal` is not a content model at all — it is the first
+primitive here that renders nothing of its own, wrapping a band so that it
+arrives as the reader scrolls to it ([0110](../decisions/0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md)).
+The library has had an entrance since 0055 and it fires on load, which means
+every band below the fold finished arriving before anybody saw it. None of the
+three has a row above, and the count of Hermes blocks is unmoved by any of them.
 
 **Two more joined them on 31 August, and they are the first gap this document
 predicted rather than discovered.** Hermes sold a person; a page that sells a
