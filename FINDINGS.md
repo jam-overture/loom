@@ -13330,8 +13330,12 @@ Nothing a routine can fix. Filed for the ninth consecutive day.
 ## 2026-09-05 — the portal's most-read heading is a machine identifier, and no vocabulary work can fix it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`, and its answer is
-`Loom daily build`'s · **Status:** open — escalation-adjacent, and deliberately
-not fixed on the way past
+`Loom daily build`'s · **Status:** **the cheap half is closed** by
+`portal-23-four-units-one-tree` on 6 September — the heading is now the page's
+own name, derived from its leading heading (`_lib/page-name.ts`), with the id
+directly under it and a lane-wide guard that no `<h1>` may interpolate a tree id.
+**Point 2 stays open and stays architectural**: a tree still has no name of its
+own, and a derived one is a reading of content rather than a field
 
 `/portal/pages/[treeId]` renders `<h1>{parsed.data}</h1>`. The largest text on
 the busiest screen in the portal is `t_seed1`.
@@ -13494,3 +13498,75 @@ stack:
 reviews of conflicting ones. **What it costs if it is not done:** the four
 pull requests conflict pairwise on `nav-items.tsx` and only the first to merge
 survives mechanically.
+
+---
+
+## 2026-09-06 — a primitive cannot say that it carries the page's title, so every host writes the same array
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— nothing is broken, and the same three characters get typed by every host that
+ever wants to name a page
+
+`_lib/page-name.ts` derives what a page is called from the page itself: the first
+heading in document order, its text, tidied. That is the whole of it, and it
+needed one hard-coded constant:
+
+```ts
+const TITLE_TYPES: readonly string[] = ["loom.heading"]
+```
+
+The portal is entitled to that one — it registers exactly four primitives and
+knows which of them is a heading. **A host that registered `acme.hero` is not.**
+It would write the same array with its own type in it, and get it wrong the day
+somebody adds a second heading primitive, because nothing in the registry can be
+asked the question.
+
+`definePrimitive` takes `type`, `description`, `props`, `slots` and `component`.
+A `description` is prose for a model to read, so it cannot be matched on. There
+is no way for a primitive to declare a **role** — that this one is a page's
+title, that one is its body — and a role is exactly the sort of thing a registry
+is for: it is a fact about a primitive, known where the primitive is defined,
+wanted by every consumer that renders a list of pages.
+
+**What is being asked for, concretely:** somewhere for a primitive to say what
+part it plays, and a registry read that answers *"which of these carries the
+title?"*. That is a framework decision with a schema in it and this lane may not
+take it (0018), which is why this is a finding rather than a proposal.
+
+**Why it matters more than one array.** The portal is Loom's own consumer, and
+whatever it has to hard-code is what every other host will hard-code. This one is
+small and completely typical: a consumer wanting a semantic fact about a
+primitive, finding only its type string, and pattern-matching on the string.
+
+---
+
+## 2026-09-06 — a bare `button[type="submit"]` in a screenshot script signs the browser out
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+third entry in the screenshot-trap family, and the third argument for a committed
+script rather than a finding
+
+Two screenshot traps are already filed by this lane: `waitForURL(/\/portal/)`
+matches `/portal/sign-in`, and `pkill -f "next start"` kills the shell running
+it. Both cost me a command again this run. Here is a third, and it is the most
+expensive because it produces a screenshot that *looks* like a screenshot:
+
+> Driving the prompt box with `page.locator('button[type="submit"]').first()`
+> clicks **sign out**. The portal's topbar sign-out is a form submit button and
+> it is first in the DOM on every signed-in screen.
+
+The run then photographs the sign-in page believing it has photographed the
+portal — which is the first filed trap, reached by a different road. Written the
+way it should have been: `page.getByRole("button", { name: /ask loom/i })`.
+
+`pkill -f "next-server"` is the safe form of the second trap; `pkill -f "next
+start"` matched the shell issuing it, again, and cost the command's exit code.
+
+Three traps, three runs, all of them in the same twenty lines of throwaway
+script. **The fix is not a fourth finding.** It is
+`apps/loom/scripts/screenshot.ts` — sign in, take named shots at two widths,
+never guess a selector — committed where the next run finds it. It is filed
+rather than done because a script at the application root is not obviously this
+lane's file, and the lane rule says the lane follows the content: a portal
+screenshot script is the portal's, but the directory is shared and I would rather
+be told than assume.
