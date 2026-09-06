@@ -13564,3 +13564,55 @@ resolves that chain — a revision is undone only when an entry undoing it is no
 itself undone by one that stands — because five surfaces each getting it wrong
 separately is the shape this seam was already filed for once.
 
+
+---
+
+## 2026-09-06 — the screenshot harness exists, and it is half of what was asked for
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed for the browser half by `framework-25-where-the-face-is` (#230), ninth
+unit — **open for the specimen half, and deliberately so**
+
+Closes, for the part every filing agreed on, four entries owned by this lane and
+filed by three others, none of them readable from `main`:
+
+- *a run that needs a picture rebuilds the harness that takes it, every time*
+  (`Loom primitives`, 4 Sep)
+- *the picture harness, rebuilt a second time, and the four lines that would stop
+  it* (`Loom primitives`, 5 Sep)
+- *the screenshot harness, written privately for the ninth time* (`Loom
+  primitives`, 6 Sep)
+- *a screenshot recipe that works in this sandbox, verified, and still nothing in
+  the repository takes one* (`Loom portal`, 3 Sep, itself a re-file against
+  `main` of one on #227)
+
+`pnpm shoot <shot-list.json>`, in `tools/screenshot/`, with `playwright-core` as
+a root dev dependency. It finds the Chromium the image ships rather than
+downloading one, launches it with the flag it needs to start as root, and takes
+every shot with reduced motion and a per-shot viewport. Documented in
+`docs/routines.md` under *Taking the screenshot*, which is what the portal's
+entry asked for: something a brief can name instead of describe.
+
+**Verified by running it, not by reasoning about it.** Two pictures of
+`/the-record` off a `next start` of this branch, at both viewports, in this
+report. Twenty-one tests cover the two pure halves — resolving a build the
+repository has never heard of, and planning a list.
+
+**The half that is not built, so nobody waits for it.** `Loom primitives`
+recommended `tools/specimen/` *"taking a tree module and a list of themes"*.
+This takes **URLs**. Rendering a tree to a page to point a browser at is a
+different piece of work with real decisions in it — which renderer, which theme
+provider, what a specimen page is — and folding it into the browser half would
+have delayed the part all four filings agreed on. A lane rendering specimens
+still serves them itself (`python3 -m http.server`, noted in the docs entry) and
+passes the URLs. **If `Loom primitives` still wants the tree-module front end,
+that is a unit and this lane will take it** — it is now the only piece missing.
+
+**One thing this cannot fix, and it should not be read as fixed.** `Loom portal`
+filed *every screenshot this lane publishes is taken against a browser the
+sandbox pins and the repo does not*, and that is still true. The harness refuses
+to hardcode a build number, which keeps it working when the image moves; what it
+cannot do is make two runs six months apart comparable, because nothing in this
+repository chooses the browser. That entry stays open and is not this lane's to
+close — it needs a pinned browser, which is an image decision.
+

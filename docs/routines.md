@@ -161,6 +161,39 @@ not done.
 From the first rendered primitive onward, **include the deployed preview URL**,
 and a screenshot once there is a page worth looking at.
 
+### Taking the screenshot
+
+`pnpm shoot <shot-list.json>` — added 6 September, after five lanes had written
+nine private versions of it and filed the recipe four times.
+
+```json
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/the-record", "out": "2026-09-06-the-record-wide", "viewport": "wide", "waitFor": "h1" },
+    { "path": "/the-record", "out": "2026-09-06-the-record-phone", "viewport": "phone" }
+  ]
+}
+```
+
+`viewport` is `wide` (1440), `phone` (390), or an explicit `{ width, height }`.
+`waitFor` is a selector; `fullPage` is optional. What the tool already handles,
+so nothing has to rediscover it: the browser the image ships is found rather than
+downloaded (**never run `playwright install`** — its host is not reachable from
+the sandbox), Chromium is launched with the flag it needs to start as root, and
+every shot is taken with reduced motion, because a page that reveals on scroll is
+otherwise photographed blank below the fold.
+
+Two things it does not do, both worth knowing before writing a list:
+
+- **Wait on a selector, not on the network.** A form driven by `useActionState`
+  submits by fetch, so the page is idle *before* the cookie it sets exists — one
+  run photographed a sign-in page believing it was the screen behind it.
+- **Serve the pages if they are files.** `mediaUrlSchema` takes `http:`/`https:`
+  only, so a specimen carrying an image cannot be rendered over `file://`.
+  `python3 -m http.server 8123 --directory <pages>` and point `baseUrl` at it.
+
 ### The three files every lane writes to
 
 Almost every branch in this repository touches the same three, and almost every

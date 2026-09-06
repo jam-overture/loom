@@ -71,7 +71,8 @@
     "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm --filter @loom/app verify",
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
-    "decisions:index": "tsx tools/decisions/build-index.ts"
+    "decisions:index": "tsx tools/decisions/build-index.ts",
+    "shoot": "tsx tools/screenshot/shoot.ts"
   },
   "dependencies": {
     "zod": "^3.24.1"
@@ -105,6 +106,7 @@
     "@vitest/coverage-v8": "^3.2.7",
     "drizzle-orm": "^0.45.2",
     "jsdom": "^30.0.1",
+    "playwright-core": "^1.63.0",
     "postgres": "^3.4.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
