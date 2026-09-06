@@ -60,7 +60,12 @@ export type MovedNote = {
   readonly sentence: string
   /**
    * The same fact as the two revisions, for the disclosure. Both numbers,
-   * because either alone is a number with nothing to compare it to.
+   * because either alone is a number with nothing to compare it to — and
+   * neither the word *weighed* nor the word *at*, because the row it lands in is
+   * labelled `weighed at` and a value repeating its own label is the clutter
+   * this card has spent six runs being cut back from (`ceilingNote.technical`
+   * reads `low, for user-instruction` under a row labelled `ceiling`, for the
+   * same reason).
    */
   readonly technical: string
   /**
@@ -98,7 +103,7 @@ export const movedOn = (baseRevision: number, revision: number): MovedNote | und
   return {
     sentence:
       "You changed the page after asking for this. Loom weighed it against the page as it was then, and won’t apply a decision to a page it hasn’t seen.",
-    technical: `weighed against revision ${baseRevision}, and the page is at ${revision}`,
+    technical: `revision ${baseRevision}, and the page is at ${revision}`,
     at: baseRevision,
     now: revision,
   }

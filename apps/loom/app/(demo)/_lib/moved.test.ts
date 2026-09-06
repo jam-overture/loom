@@ -35,8 +35,15 @@ describe("whether the page has moved past an ask", () => {
     const note = movedOn(0, 1)
 
     expect(note?.sentence).not.toMatch(/revision|\d/)
-    expect(note?.technical).toContain("0")
-    expect(note?.technical).toContain("1")
+    expect(note?.technical).toBe("revision 0, and the page is at 1")
+  })
+
+  /**
+   * And does not repeat the row it lands in. The disclosure labels it
+   * `weighed at`; a value that opened *"weighed against…"* said the label twice.
+   */
+  it("does not say again what the row it sits in already says", () => {
+    expect(movedOn(0, 1)?.technical).not.toMatch(/weighed/)
   })
 
   /**

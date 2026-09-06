@@ -13428,3 +13428,125 @@ the circular sentence, which is the half a visitor actually reads, at the cost o
 one string and no new concept.
 
 `isUndo` is exported as of this run and is the predicate all three shapes need.
+
+## 2026-09-06 — the demo's primary button, on a card that could never land it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+#220** — the diagnosis is kept because the shape recurs
+
+Recorded rather than only fixed, because it is the fourth instance this lane has
+found of one shape and the shape is worth having written down where the other
+routines can read it: **a fact the runtime carries deliberately, for a reader, that
+no reader ever read.**
+
+A stranger with five buttons and nothing telling them to answer one at a time
+presses two. Both are held. They answer one — and the other is dead the instant
+it lands, because a hold names the revision it was judged against.
+
+`confirmHeld` is explicit about it: *"A hold names a revision, so a hold whose
+tree has moved on can never apply again — it is not stale pending a retry, it is
+dead."* It releases custody and narrates the conflict. And
+`HeldProposal.baseRevision` exists in the runtime's own words *"so a reader can
+tell a hold is stale without parsing the delta"* — a field put on the type for a
+surface, which no surface had read.
+
+What the demo showed instead: the card still reading **Waiting on you** and
+*"Loom will not make this change until you say yes"*; the page still ringing the
+band amber and labelling it *This would be removed*, which is this surface's
+colour for a question it is still asking; two buttons that spent the press and
+vanished; and `applied, then not written: revision-conflict` in the smallest type
+on the card as the only account of it.
+
+Fixed on #220. The card now reads `no-change` — the shared table already had the
+right sentence — says why in plain words, keeps the two revisions one click down,
+and offers **Ask for this again**, which posts the same suggestion against the
+revision the page is actually at.
+
+**The generalisable half, for the other lanes.** The tidy fix was to stop a
+visitor holding two changes at once. It would have removed the failure and the
+lesson with it: *a verdict belongs to one version of the page* is a real property
+of this runtime, it is what 0028 protects for undo, and it had never appeared on
+any surface. A guard that prevents a state also prevents anybody learning why the
+state exists.
+
+## 2026-09-06 — two live holds draw one mark, and nothing says which card it belongs to
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
+design question, diagnosed in full so the run that takes it is short
+
+The state directly before the one #220 fixed, and it is honest rather than wrong,
+which is why it was left. Press two presets that both hold. Two cards read
+**Waiting on you**, each with its own **Apply this change** and **No thanks**. The
+page carries **one** amber mark, and the rail's single line above the cards reads:
+
+> The page is marked where this would happen, if you say yes.
+
+*This* has two possible referents and the line does not choose. A visitor
+comparing the mark against the two cards has to work out which is which from the
+words, and the newest card is the one that wins the mark — which is not something
+the screen says anywhere.
+
+**Why one mark is not obviously the bug.** `spotlitChange` gives a reason and it
+is a good one: *"Two marks in two colours on one page is a quiz rather than an
+explanation, so the ordering has to be a rule rather than 'the newest'."* That
+reasoning is about **two colours**. Two marks in the *same* colour, both amber,
+both saying *this would happen if you say yes*, may be exempt from it — or may be
+worse, because two identical marks and two identical cards give a visitor a
+matching problem rather than a demonstration.
+
+**Three shapes, for whoever takes it:**
+
+1. **Mark both, and name each.** The chip already carries words (*This would be
+   removed*, *Something new would go here*), so two amber marks are already
+   distinguishable by what they say. Largest, and the only one where the page
+   answers the question by itself.
+2. **Keep one mark and say which.** The rail line names the ask it belongs to —
+   *"The page is marked where “Take the numbers band off the page.” would
+   happen"* — and the unmarked card says so on itself. Small, and leaves a
+   visitor comparing text rather than looking.
+3. **Only ever hold one at a time.** Answer or decline before another ask is
+   offered. Removes the state, and with it a true thing about the runtime: the
+   Gate holds each ask independently and does not queue them.
+
+**Recommendation: 1, with 2 as the fallback if two amber marks test badly by
+eye.** 3 is the one to avoid, for the reason the finding above gives.
+
+Not urgent: unlike the state it precedes, nothing here is false and nothing eats
+a press.
+
+## 2026-09-06 — `21st.dev` re-verified blocked, from the demo lane an eleventh time (a twelfth attempt)
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` again. **Eleventh filed
+from this lane, twelfth attempt** — 5 September verified it and reported it on
+the pull request without filing here, so the two counts have been one apart since.
+Stated rather than left, because a finding re-dated without being re-verified
+spends the owning routine's attention on work already done, and a count nobody
+can reconcile is the same failure one step earlier.
+
+The `Loom demo`
+brief names it as the visual standard and says it "is allowed by the committed
+network policy"; `docs/routines.md` still lists it under *Currently allowed*.
+Both have been wrong for a fortnight.
+
+No cost this run. What decided the position, the colour and the weight of the new
+block was building both trees and photographing the same four presses against
+each — the left rule replaced a `bg-inapplicable` panel that turned out to be
+within a shade of the card's own ground, which no reference site would have told
+me and one screenshot did.
+
+## 2026-09-06 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-dated, and re-verified this run rather than only re-filed
+
+*"Two problems to fix before anything else"* still opens with **"It is in the
+wrong place"** — the move from `/portal/demo` to `/demo`, which landed sixteen
+days ago. Verified again on this branch: `app/(demo)/demo/page.tsx` exists,
+`/demo` serves it, and `(portal)/portal/demo/page.tsx` is the 308 shim.
+`docs/rollout.md:19` still points at the old path.
+
+The brief's *second* problem — *"it is clunky"* — is live, and is what every unit
+on #220 has been.

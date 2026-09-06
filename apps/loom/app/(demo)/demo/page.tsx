@@ -73,21 +73,6 @@ const DemoPage = async () => {
   const records = session?.records ?? []
 
   /**
-   * The one change the page is currently about, and where to mark it.
-   *
-   * Read against the tree on the stage rather than against the record's own
-   * account of itself: a held proposal describes nodes that are still there, and
-   * an applied one describes the tree that is there now, so the same resolution
-   * serves both and neither can point at a node that no longer exists.
-   */
-  /*
-   * `isUndo` travels with it, because a mark reading "New — just added" over a
-   * band the visitor has just watched come *back* is the one claim this surface
-   * exists to make, said backwards. The delta cannot supply it — an undo's
-   * operations are ordinary inserts and removes (0032) — so the record's own
-   * provenance does.
-   */
-  /**
    * What each waiting proposal would replace, read against the tree on the
    * stage.
    *
@@ -120,6 +105,24 @@ const DemoPage = async () => {
     })
   )
 
+  /**
+   * The one change the page is currently about, and where to mark it.
+   *
+   * Read against the tree on the stage rather than against the record's own
+   * account of itself: a held proposal describes nodes that are still there, and
+   * an applied one describes the tree that is there now, so the same resolution
+   * serves both and neither can point at a node that no longer exists.
+   *
+   * `isUndo` travels with it, because a mark reading "New — just added" over a
+   * band the visitor has just watched come *back* is the one claim this surface
+   * exists to make, said backwards. The delta cannot supply it — an undo's
+   * operations are ordinary inserts and removes (0032) — so the record's own
+   * provenance does.
+   *
+   * And the holds the page has moved past travel with it too, which is why this
+   * had to move below them: a mark in the waiting colour over a change that can
+   * never happen is the same failure in the other direction.
+   */
   const spotlit = spotlitChange(records, tree, new Set(movedNotes.keys()))
   const spots = spotlit
     ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone, isUndo(spotlit.record))
