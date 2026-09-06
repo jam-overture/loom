@@ -12818,6 +12818,123 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-04 — `loom.embed` cannot frame this deployment's own application, because its sandbox has no `allow-forms`
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+— measured against the running page; the band that found it was built, looked
+at, and withdrawn rather than shipped
+
+§4d says the marketing site **embeds the demo rather than describing it**, and
+that this is why the demo is public at all
+([0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)).
+This run built that band: a `loom.embed` framing `/demo`, with
+`createFrameOriginRegistry` wired into the marketing render so the seam permits
+this deployment's own origin (0095). **It renders. It is allowlisted. It does
+not work**, and the reason is one word.
+
+```
+Blocked form submission to '' because the form's frame is sandboxed
+and the 'allow-forms' permission is not set.
+```
+
+`SANDBOX` in `loom.embed.ts` is the module constant
+`"allow-scripts allow-same-origin allow-presentation"`, and there is no prop
+that changes it. Every control in `/demo` is a server action reached through a
+`<form action={…}>` — three of them in `ask-panel.tsx` alone — so a visitor gets
+the demo rendered perfectly, presses the large green button, and **nothing
+happens, silently.** On a site whose whole argument is that it can always tell
+you what happened, that is materially worse than the link it would replace, so
+the band was withdrawn rather than shipped. Screenshot of the working-looking,
+non-working band:
+`reports/2026-09-04-marketing-the-last-typed-number-embed.png`.
+
+**This is not a bug in the primitive.** Its doc comment names the omission
+deliberately — *"No form submission, no pointer lock, no downloads, and no
+top-level navigation"* — and that is the right sandbox for the third-party video
+or map it was ported to carry. The case it does not cover is the one §4d asks
+for: **a deployment framing its own application**, where the framed document is
+already reachable by clicking a link in the menu and is not made more dangerous
+by being shown in a box.
+
+**A suggestion rather than a design, because the primitive is not this lane's.**
+The seam already knows the answer: `RegisteredFrameOrigin.self` is exactly *"this
+origin is the deployment's own"*, and the render already carries `sameOrigin` on
+the outcome and reports it as `frame-same-origin`. Granting `allow-forms` only
+when the resolved outcome is same-origin would need no new prop and no new
+allowlist, and would widen nothing for a third party — a host that has not
+registered its own origin gets today's sandbox exactly. An explicit prop would
+work too and is more honest about intent; either is yours.
+
+Until then, §4d's "embeds the demo" cannot be done, and the front door goes on
+pointing at `/demo` from the hero, the menu and a card.
+
+---
+
+## 2026-09-04 — `loom.embed` has one aspect ratio at every viewport, and a phone is not a laptop
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+— measured, low priority, and secondary to the entry above
+
+Found while building the same withdrawn band, and worth keeping even though the
+band did not ship, because the measurements cost a run to take and the next
+surface to frame anything will need them.
+
+`aspect` offers `square`, `wide` and `portrait`, and whichever is chosen applies
+at every width. Framing `/demo` in the front door's 1080px band:
+
+| aspect | frame at 1440 viewport | frame at 390 viewport |
+| --- | --- | --- |
+| `wide` (16/9) | 1080 × 608 — **12px short**: the demo's *"or type your own"* sits 619px down, so the one control the band's heading promised was the first thing below the fold of the box | 350 × 197 |
+| `square` (1/1) | 1080 × 1080 — correct, whole panel visible | 350 × 350 — the demo's bar and two paragraphs, no control |
+| `portrait` (3/4) | 1080 × 1440 — taller than a viewport | 350 × 467 |
+
+There is no shape that is right at both ends, because the framed document
+reflows and a fixed ratio cannot. A `loom.media` picture has an intrinsic shape
+and honouring it is correct; a framed *application* has a layout, and what it
+needs is a different ratio at a different width — the same thing `loom.mosaic`'s
+rhythm already expresses for spans.
+
+Nothing is asked for urgently. Recorded so that the first lane to frame a video
+does not re-measure this, and because a per-breakpoint `aspect` is the kind of
+prop that is much cheaper to add before three surfaces have worked around its
+absence.
+
+---
+
+## 2026-09-04 — the primitive count is derived, so no run that registers one has to edit a marketing file again
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`, `Loom docs` ·
+**Status:** closes the marketing half of the 25 August entry; the docs half is
+untouched and still theirs
+
+`Loom primitives` filed on 25 August that two files outside `src/primitives/`
+change on every run that registers one, and that the counts were the part worth
+looking at: they are facts about the registry asserted in lanes that own
+neither. The marketing half is now gone.
+
+`FACTS.primitives` was `"70"`, a literal, asserted equal to
+`catalogueOf(siteRegistry).length`. That assertion is why it outlived the other
+two typed numbers — it is a real comparison against the registry, so the number
+was never *wrong*, it just meant **the library could not grow without turning
+this lane red**, and the only way back to green was a primitives run editing
+`copy.ts`. It is now `String(catalogueOf(siteRegistry).length)`: the site counts
+the registry it renders with, and registering a seventy-first primitive moves the
+number on the front door by existing.
+
+The build hazard that forced `FACTS.decisions` into a floor does not apply —
+that one needs a directory listing, and `new URL(…, import.meta.url)` does not
+survive Turbopack. The registry is an ordinary module already in this file's
+bundle.
+
+`FACTS.operations` went the same way in the same change, closing the 30 August
+entry from `Loom daily build`: it counted a four-item list `copy.ts` kept, and
+now counts `TREE_OPERATIONS` from `@loom/runtime`.
+
+**`reference.generated.json` is untouched and is still `Loom docs`'.** Nothing
+here changes it.
+
+---
+
 ## 2026-09-05 — a stateless surface can compute an undo and cannot assemble one
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
