@@ -1,4 +1,4 @@
-import { buildSearchIndex } from "@/app/(docs)/_lib/search/build"
+import { searchIndexWithoutProse } from "@/app/(docs)/_lib/search/build"
 
 /**
  * The search index, as one static file.
@@ -9,6 +9,10 @@ import { buildSearchIndex } from "@/app/(docs)/_lib/search/build"
  * nothing touches the filesystem at serving time, and the browser gets bytes
  * from a CDN.
  *
+ * It carries everything but the prose under each entry, which is a second file
+ * at `prose/` — see `SEARCH_PROSE_PATH`. A reader waits for this one and does
+ * not wait for that one.
+ *
  * It is a route rather than something the layout hands the dialog as a prop,
  * because a prop would put the whole index in the payload of **every page on
  * the site** for the sake of the readers who open the search box. This way it
@@ -17,6 +21,6 @@ import { buildSearchIndex } from "@/app/(docs)/_lib/search/build"
 export const dynamic = "force-static"
 
 export const GET = (): Response =>
-  Response.json(buildSearchIndex(), {
+  Response.json(searchIndexWithoutProse(), {
     headers: { "cache-control": "public, max-age=0, must-revalidate" },
   })

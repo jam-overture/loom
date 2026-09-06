@@ -6,10 +6,14 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { searchDocs, type SearchHit } from "@/app/(docs)/_lib/search/match"
 import {
   parseSearchIndex,
+  parseSearchProse,
   SEARCH_INDEX_PATH,
+  SEARCH_PROSE_PATH,
   SEARCH_RESULT_LIMIT,
+  withProse,
   type SearchIndex,
   type SearchKind,
+  type SearchProse,
 } from "@/app/(docs)/_lib/search/model"
 
 /**
@@ -142,6 +146,7 @@ export const Search = () => {
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
   const [index, setIndex] = useState<SearchIndex | undefined>(undefined)
+  const [prose, setProse] = useState<SearchProse | undefined>(undefined)
   const [loading, setLoading] = useState<Loading>("idle")
 
   const trigger = useRef<HTMLButtonElement>(null)
@@ -180,26 +185,44 @@ export const Search = () => {
    * `idle` is the state that makes that true: the effect runs on every open and
    * does nothing after the first, so re-opening the dialog is free and a failed
    * fetch stays failed rather than retrying on every keystroke.
+   *
+   * **Two files leave together and only one is waited for.** The index is what
+   * the box needs to answer anything at all; the words under each entry are the
+   * cheapest band of the ranking and three times the size, so they are asked for
+   * at the same moment and merged whenever they turn up. A reader typing in
+   * between gets the same results in the same order, without the fourth band —
+   * and if the words never arrive the box carries on as it did before the site
+   * indexed its prose at all, rather than failing.
    */
   useEffect(() => {
     if (!open || loading !== "idle") return
 
     setLoading("loading")
 
-    void fetch(SEARCH_INDEX_PATH)
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+    const read = (path: string): Promise<unknown> =>
+      fetch(path).then((response) =>
+        response.ok ? response.json() : Promise.reject(new Error(String(response.status)))
+      )
+
+    void read(SEARCH_INDEX_PATH)
       .then((body: unknown) => {
         setIndex(parseSearchIndex(body))
         setLoading("ready")
       })
       .catch(() => setLoading("failed"))
+
+    void read(SEARCH_PROSE_PATH)
+      .then((body: unknown) => setProse(parseSearchProse(body)))
+      .catch(() => undefined)
   }, [open, loading])
 
   useEffect(() => {
     if (open) field.current?.focus()
   }, [open])
 
-  const hits = index === undefined ? [] : searchDocs(index, query, SEARCH_RESULT_LIMIT)
+  const searchable = index === undefined ? undefined : prose === undefined ? index : withProse(index, prose)
+
+  const hits = searchable === undefined ? [] : searchDocs(searchable, query, SEARCH_RESULT_LIMIT)
 
   const go = (href: string): void => {
     close()
@@ -327,9 +350,17 @@ export const Search = () => {
                  * false, and a reader who could see the words on the page had no
                  * way to know the box had never read them.
                  */}
+                {/*
+                 * And it says less when it has looked at less. The words arrive
+                 * in a second file, so for the moment before it lands the claim
+                 * above is the one it used to be — true of the titles and not of
+                 * the paragraphs — and saying otherwise would be the exact
+                 * overclaim the sentence was written to end.
+                 */}
                 <p className="text-ink-faint mt-1 text-xs">
-                  Every page, every section, the words in them and every published name are searched.
-                  Code blocks are not.
+                  {prose === undefined
+                    ? "Every page, every section and every published name are searched. The words in them are still loading; code blocks are never searched."
+                    : "Every page, every section, the words in them and every published name are searched. Code blocks are not."}
                 </p>
               </div>
             )}

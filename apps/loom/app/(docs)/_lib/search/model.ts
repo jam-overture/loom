@@ -63,6 +63,29 @@ export type SearchIndex = {
  */
 export const SEARCH_INDEX_PATH = "/docs/search-index"
 
+/**
+ * Where the browser asks for the words, which arrive second and separately.
+ *
+ * **The index is two files, and it had to become two.** Indexing the prose put
+ * the site's words in the same payload as its table of contents, and four pages
+ * arriving at once took the whole thing to 46.7 KB compressed against a 48 KB
+ * cap — with the cap's own comment saying the run that hit it should split the
+ * index rather than raise the number.
+ *
+ * The split is along the line the two halves already grow on. What a reader
+ * needs to type the first letter is the table of contents and the runtime's
+ * surface: 998 entries, **14.6 KB compressed**, and it grows when a page is
+ * added or an export is published. The words under them are **35 KB**, and they
+ * grow every time anybody writes a paragraph. So the box opens on the first,
+ * which is the part that answers by title, section and summary — the top three
+ * bands of the ranking — and the prose lands a moment later and turns on the
+ * fourth.
+ *
+ * A reader on a slow connection therefore gets a working search box rather than
+ * a spinner, and the half that grows fastest is the half nothing waits for.
+ */
+export const SEARCH_PROSE_PATH = "/docs/search-index/prose"
+
 /** How many results the dialog shows. Beyond this a reader types more instead. */
 export const SEARCH_RESULT_LIMIT = 10
 
@@ -95,4 +118,42 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
   }
 
   return { entries: value.entries.filter(isEntry) }
+}
+
+/**
+ * The words under the entries, as they travel.
+ *
+ * A pair rather than an object per entry, because there are two useful fields
+ * and one of them is the key: `href` already identifies an entry uniquely — a
+ * page by its path, a heading by its fragment — so the prose file is a list of
+ * `[href, words]` and nothing else. That is about a fifth of what repeating the
+ * entries would cost, and it cannot drift from the index, because an href it
+ * does not recognise is simply dropped.
+ */
+export type SearchProse = {
+  readonly bodies: readonly (readonly [string, string])[]
+}
+
+const isBody = (value: unknown): value is readonly [string, string] =>
+  Array.isArray(value) && value.length === 2 && typeof value[0] === "string" && typeof value[1] === "string"
+
+export const parseSearchProse = (value: unknown): SearchProse => {
+  if (!isRecord(value) || !Array.isArray(value.bodies)) {
+    throw new Error("loom: the search prose has no bodies")
+  }
+
+  return { bodies: value.bodies.filter(isBody) }
+}
+
+/**
+ * The two halves, put back together.
+ *
+ * An entry the prose file says nothing about keeps the empty body it arrived
+ * with, which is the ordinary case for the 863 published names — their words are
+ * the signature on the reference page rather than a paragraph.
+ */
+export const withProse = (index: SearchIndex, prose: SearchProse): SearchIndex => {
+  const bodies = new Map(prose.bodies)
+
+  return { entries: index.entries.map((entry) => ({ ...entry, body: bodies.get(entry.href) ?? entry.body })) }
 }

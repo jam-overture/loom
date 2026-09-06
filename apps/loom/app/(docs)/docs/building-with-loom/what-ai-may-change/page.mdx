@@ -119,7 +119,7 @@ It answers "which of my primitives render a thing the reader aims at?" — a lin
 a button — and every primitive already declared that about itself when it was
 defined.
 
-```ts
+```ts alternative
 import { interactiveTypesFor } from "@loom/runtime/sdk"
 
 export const policy = gatePolicySchema.parse({
@@ -155,8 +155,9 @@ serving two kinds of page may not want to judge them the same way.
 
 ```ts
 import { fixedPolicy } from "@loom/runtime"
+import type { CompositionRuntime } from "@loom/runtime"
 
-const runtime = {
+const runtime: CompositionRuntime = {
   interpreter,
   policySource: fixedPolicy(policy),
   events,

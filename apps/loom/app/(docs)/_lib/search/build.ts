@@ -3,7 +3,7 @@ import { apiEntries } from "../api/reference"
 import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageHeadings } from "./headings"
-import type { SearchEntry, SearchIndex } from "./model"
+import type { SearchEntry, SearchIndex, SearchProse } from "./model"
 import { readPageProse } from "./prose"
 
 /**
@@ -116,4 +116,24 @@ const exportEntries = (): readonly SearchEntry[] =>
 
 export const buildSearchIndex = (): SearchIndex => ({
   entries: [...pageEntries(), ...headingEntries(), ...exportEntries()],
+})
+
+/**
+ * The half a reader waits for: everything but the words.
+ *
+ * The bodies are emptied rather than the field removed, because what arrives in
+ * the browser is a `SearchIndex` either way — one whose fourth ranking band is
+ * simply not answering yet. A reader who types before the prose lands gets the
+ * same results, ranked by title, section and summary, and the prose band turns
+ * on underneath them without the list flickering.
+ */
+export const searchIndexWithoutProse = (): SearchIndex => ({
+  entries: buildSearchIndex().entries.map((entry) => ({ ...entry, body: "" })),
+})
+
+/** The half nothing waits for: the words, keyed by the entry they sit under. */
+export const searchProse = (): SearchProse => ({
+  bodies: buildSearchIndex()
+    .entries.filter((entry) => entry.body !== "")
+    .map((entry) => [entry.href, entry.body] as const),
 })

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { fencesIn } from "./extract"
+import { type Fence } from "./model"
 import { assemble, contextExportsIn } from "./program"
 
 /**
@@ -41,6 +42,20 @@ describe("assembling a page", () => {
 
     expect(program).toContain('import { v } from "x"')
     expect(program).toContain('import type { T } from "x"')
+  })
+
+  /**
+   * Ten markers on this site were being dropped, and every one of them belonged
+   * to a block that opened with an import. Written above the block, the marker is
+   * the *import's* leading comment — and imports are hoisted and merged, so the
+   * comment went with it. The blocks that lost theirs were the ones a reader is
+   * most likely to copy whole, and a compiler error in one named no page line.
+   */
+  it("marks a block that opens with an import, where the marker used to be lost", () => {
+    const program = programOf('```ts\nimport { f } from "x"\n\nconst a = f()\n```')
+
+    expect(program).toContain("// page.mdx:1 — a program")
+    expect(program.indexOf('import { f } from "x"')).toBeLessThan(program.indexOf("// page.mdx:1"))
   })
 
   it("exports what the page declared, so a name the prose discusses is not an unused local", () => {
@@ -129,6 +144,13 @@ describe("the story a page assumes", () => {
     expect(programOf("```ts\nconst a = sessionStorage\n```", context)).not.toContain("../context/a-page")
   })
 
+  it("stands back from a name the page declares for itself", () => {
+    const program = programOf("```ts\nconst session = { userId: \"u1\" }\n\nconst who = session.userId\n```", context)
+
+    expect(program).not.toContain("../context/a-page")
+    expect(program).toContain('const session = { userId: "u1" }')
+  })
+
   it("reads what a context file offers, declarations and re-exports alike", () => {
     const offered = contextExportsIn(
       [
@@ -146,5 +168,66 @@ describe("the story a page assumes", () => {
       { name: "buildElement", isType: false },
       { name: "EditIntent", isType: true },
     ])
+  })
+})
+
+/**
+ * A block that redoes the block above it.
+ *
+ * *Going to production* names three stores, wires them to memory, and then wires
+ * the same three names to Postgres — because swapping one for the other being a
+ * line of wiring is the whole lesson. Read as one program that is three
+ * redeclarations, and the only vocabulary that existed for it was `sketch`,
+ * which would have left the deployment half of the page unchecked.
+ *
+ * So an alternative is assembled on its own. What it must still be able to see
+ * is what the page had already established, which is why the blocks before it
+ * come along — for their imports, not their code.
+ */
+describe("an alternative", () => {
+  const page = [
+    '```ts',
+    'import { one } from "x"',
+    "",
+    "const store = one()",
+    "```",
+    "",
+    "```ts alternative",
+    'import { two } from "y"',
+    "",
+    "const store = two(one)",
+    "```",
+  ].join("\n")
+
+  const fences = fencesIn(page, "a page")
+  const alternative = fences[1] as Fence
+
+  it("is a program of its own, not a continuation of the one above it", () => {
+    const program = assemble([alternative], "", undefined, fences.slice(0, 1)).source
+
+    expect(program).toContain("const store = two(one)")
+    expect(program).not.toContain("const store = one()")
+    expect(program.match(/const store/g)).toHaveLength(1)
+  })
+
+  it("inherits an import the page made before it, because the page will not repeat it", () => {
+    const program = assemble([alternative], "", undefined, fences.slice(0, 1)).source
+
+    expect(program).toContain('import { two } from "y"')
+    expect(program).toContain('import { one } from "x"')
+  })
+
+  it("inherits only what it reaches for", () => {
+    const before = fencesIn('```ts\nimport { one, spare } from "x"\n\nconst a = one(spare)\n```', "a page")
+    const program = assemble([alternative], "", undefined, before).source
+
+    expect(program).toContain('import { one } from "x"')
+    expect(program).not.toContain("spare")
+  })
+
+  it("says in its own words what it is, so a compiler error names the right block", () => {
+    expect(assemble([alternative], "", undefined, fences.slice(0, 1)).source).toContain(
+      "// page.mdx:7 — the same job as the block above, done differently"
+    )
   })
 })

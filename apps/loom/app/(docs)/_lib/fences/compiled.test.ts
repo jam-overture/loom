@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 
 import { COMPILED_DIR, CONTEXT_DIR, compiledBaseName, compiledPrograms } from "./compiled"
 import { pagesWithFences } from "./extract"
-import { isCheckable } from "./model"
+import { isAlternative, isCheckable } from "./model"
 import { contextExportsIn } from "./program"
 import { apiEntries } from "../api/reference"
 
@@ -52,12 +52,30 @@ describe("the programs in compiled/", () => {
       .map((page) => compiledBaseName(page.sectionSlug, page.pageSlug))
       .sort()
 
-    const covered = compiledPrograms()
-      .map((program) => compiledBaseName(program.sectionSlug, program.pageSlug))
-      .sort()
+    const covered = [
+      ...new Set(compiledPrograms().map((program) => compiledBaseName(program.sectionSlug, program.pageSlug))),
+    ].sort()
 
     expect(covered).toEqual(withCode)
     expect(covered.length).toBeGreaterThan(0)
+  })
+
+  /**
+   * A page is usually one program and is not always one. A block that redoes the
+   * block above it gets a module of its own, which is the only way both halves of
+   * a choice get compiled — so the count of programs is the count of pages plus
+   * the alternatives, and every alternative on the site has a file.
+   */
+  it("are one per page, plus one for every block that redoes the one above it", () => {
+    const pages = pagesWithFences().filter((page) => page.fences.some(isCheckable))
+    const alternatives = pages.flatMap((page) => page.fences.filter(isCheckable).filter(isAlternative))
+
+    expect(compiledPrograms()).toHaveLength(pages.length + alternatives.length)
+    expect(alternatives.length).toBeGreaterThan(0)
+
+    const named = onDisk().filter((name) => name.includes("--alternative-"))
+
+    expect(named).toHaveLength(alternatives.length)
   })
 })
 
@@ -118,13 +136,20 @@ describe("what a page is allowed to assume", () => {
     contextFiles.forEach((fileName) => {
       const source = readFileSync(join(CONTEXT_DIR, fileName), "utf8")
       const base = fileName.replace(/\.ts$/, "")
-      const program = compiledPrograms().find((entry) => entry.fileName.startsWith(`${base}.`))
 
-      expect(program, `${fileName} has no program`).toBeDefined()
+      // Every program the page produces, because a page with an alternative
+      // produces more than one and a name may be lent to either.
+      const programs = compiledPrograms().filter(
+        (entry) => entry.fileName === `${base}.ts` || entry.fileName.startsWith(`${base}.`) || entry.fileName.startsWith(`${base}--`)
+      )
+
+      expect(programs.length, `${fileName} has no program`).toBeGreaterThan(0)
+
+      const reached = programs.map((program) => program.source).join("\n")
 
       const unused = contextExportsIn(source, fileName)
         .map((entry) => entry.name)
-        .filter((name) => !new RegExp(`\\b${name}\\b`).test(program?.source ?? ""))
+        .filter((name) => !new RegExp(`\\b${name}\\b`).test(reached))
 
       expect(unused, `${fileName} offers names nothing on the page reaches for`).toEqual([])
     })

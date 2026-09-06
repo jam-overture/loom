@@ -27,6 +27,7 @@ type ChangeInterpreter = {
   interpret: (intent: EditIntent, tree: LoomTree) => Promise<Result<ProposedChange, InterpretationError>>
 }
 
+// page.mdx:43 — a program
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export const interpreter = modelInterpreter({

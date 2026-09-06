@@ -25,6 +25,7 @@ import {
 } from "../context/the-runtime--what-your-app-has-to-do"
 import type { EditIntent } from "../context/the-runtime--what-your-app-has-to-do"
 
+// page.mdx:30 — a program
 const path: WritePath = {
   store: postgresTreeStore(db),
   holds: postgresHoldStore(db),
@@ -50,6 +51,7 @@ const intent: EditIntent = {
 
 const outcome = await commitIntent(path, intent)
 
+// page.mdx:138 — a program
 const yes = await confirmHeld(path, { proposalId, actor: reviewer.id })
 
 const no = await discardHeld(path, { proposalId, actor: reviewer.id })

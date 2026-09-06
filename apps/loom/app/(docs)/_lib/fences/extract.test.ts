@@ -94,3 +94,31 @@ describe("every sketch on the site", () => {
     })
   })
 })
+
+/**
+ * The rule that keeps `alternative` meaning something.
+ *
+ * The word says *the same job as the block above, done differently*. A page
+ * opening with one would be claiming to redo a block that is not there, and the
+ * damage is silent: the block gets a module of its own, the page's one program
+ * loses its first half, and everything still compiles.
+ */
+describe("an alternative on a page", () => {
+  it("is refused when there is no block above it to be an alternative to", () => {
+    expect(() => fencesIn("```ts alternative\nconst a = 1\n```", "a page")).toThrow(
+      /the first code block on a page cannot be an alternative/
+    )
+  })
+
+  it("is allowed once the page has said something for it to redo", () => {
+    expect(() =>
+      fencesIn("```ts\nconst a = 1\n```\n\n```ts alternative\nconst a = 2\n```", "a page")
+    ).not.toThrow()
+  })
+
+  it("does not count a block nobody compiles as the block above it", () => {
+    expect(() =>
+      fencesIn("```bash\npnpm add loom\n```\n\n```ts alternative\nconst a = 2\n```", "a page")
+    ).toThrow(/cannot be an alternative/)
+  })
+})

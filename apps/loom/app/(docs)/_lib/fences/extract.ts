@@ -1,4 +1,12 @@
-import { FENCE_KINDS, FENCE_LANGUAGES, type Fence, type FenceKind, type FenceLanguage } from "./model"
+import {
+  FENCE_KINDS,
+  FENCE_LANGUAGES,
+  isAlternative,
+  isCheckable,
+  type Fence,
+  type FenceKind,
+  type FenceLanguage,
+} from "./model"
 import { writtenDocsSections } from "../nav"
 import { readPageSource } from "../search/headings"
 
@@ -66,6 +74,25 @@ const parseInfo = (info: string, ticks: string, where: string): Opening => {
 }
 
 /**
+ * An alternative needs something to be an alternative to.
+ *
+ * The word means *the same job as the block above, done differently*, so the
+ * first compiled block on a page cannot be one. The damage a leading alternative
+ * would do is silent rather than loud: it gets a module of its own, the page's
+ * one program quietly loses its opening, and everything still compiles.
+ */
+const refuseALeadingAlternative = (fences: readonly Fence[], where: string): void => {
+  const first = fences.find(isCheckable)
+
+  if (first !== undefined && isAlternative(first)) {
+    throw new Error(
+      `loom: ${where}:${first.line} — the first code block on a page cannot be an alternative. ` +
+        `It says "the same job as the block above", and there is no block above it.`
+    )
+  }
+}
+
+/**
  * Every fenced block on one page, in reading order.
  *
  * Written as a scan rather than by compiling the markdown, because the meta word
@@ -105,6 +132,8 @@ export const fencesIn = (source: string, where: string): readonly Fence[] => {
   if (open !== undefined) {
     throw new Error(`loom: ${where}:${open.line} — a fence that is never closed.`)
   }
+
+  refuseALeadingAlternative(fences, where)
 
   return fences
 }

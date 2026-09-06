@@ -5,9 +5,9 @@ import { describe, expect, it } from "vitest"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsOrder, writtenDocsSections } from "../nav"
 
-import { buildSearchIndex } from "./build"
+import { buildSearchIndex, searchIndexWithoutProse, searchProse } from "./build"
 import { readPageHeadings } from "./headings"
-import { parseSearchIndex } from "./model"
+import { parseSearchIndex, withProse } from "./model"
 
 /**
  * The index, held against the site it claims to describe.
@@ -156,10 +156,45 @@ describe("what the index contains", () => {
    * The headroom is deliberate and finite: five more pages fit under it, fifty
    * do not, and the run that hits it should split the index rather than raise
    * the number.
+   *
+   * **Four pages arrived at once and hit it**, at 46.7 KB against the 48. So the
+   * index was split rather than the number raised, and what is capped now is the
+   * two halves separately — which is the only way the caps stay meaningful,
+   * because the halves grow at different speeds and for different reasons.
    */
   it("stays small enough to send", () => {
-    expect(gzipSync(JSON.stringify(index)).length).toBeLessThan(48_000)
-    expect(JSON.stringify(index).length).toBeLessThan(240_000)
+    const withoutProse = JSON.stringify(searchIndexWithoutProse())
+    const prose = JSON.stringify(searchProse())
+
+    // What a reader waits for: the table of contents and the runtime's surface.
+    // It grows when a page is added or an export is published, which is slowly.
+    expect(gzipSync(withoutProse).length).toBeLessThan(20_000)
+    expect(withoutProse.length).toBeLessThan(200_000)
+
+    // What nobody waits for. It grows every time anybody writes a paragraph, so
+    // it has the room — and the day it runs out, it shards by section rather
+    // than taking the number up again.
+    expect(gzipSync(prose).length).toBeLessThan(60_000)
+    expect(prose.length).toBeLessThan(200_000)
+  })
+
+  /**
+   * The two halves are one index or they are nothing.
+   *
+   * The prose travels keyed by `href`, so an entry whose href the prose file
+   * does not recognise silently keeps an empty body — which would be a search
+   * box quietly missing its fourth band with every test still green. This is the
+   * check that the seam holds: put the halves back together and you have what
+   * `buildSearchIndex` said in the first place.
+   */
+  it("comes apart and goes back together without losing a word", () => {
+    expect(withProse(searchIndexWithoutProse(), searchProse())).toEqual(index)
+  })
+
+  it("keys the prose by an href that names exactly one entry", () => {
+    const hrefs = searchProse().bodies.map(([href]) => href)
+
+    expect(new Set(hrefs).size).toBe(hrefs.length)
   })
 })
 

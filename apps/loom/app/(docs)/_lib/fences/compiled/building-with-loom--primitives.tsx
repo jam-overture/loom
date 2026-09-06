@@ -16,6 +16,7 @@ import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
 
 import { heading, statGrid } from "../context/building-with-loom--primitives"
 
+// page.mdx:16 — a program
 const props = z
   .object({
     value: z.string().min(1).max(24),
@@ -40,6 +41,7 @@ const objectAtLine101 = {
 text: { excluded: "Not included" }
 }
 
+// page.mdx:111 — a program
 const built = createPrimitiveRegistry([stat, statGrid, heading])
 
 if (!built.ok) throw new Error(describeRegistryError(built.error))

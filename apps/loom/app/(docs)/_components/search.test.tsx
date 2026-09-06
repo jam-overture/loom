@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { SEARCH_INDEX_PATH, type SearchIndex } from "@/app/(docs)/_lib/search/model"
+import { SEARCH_INDEX_PATH, SEARCH_PROSE_PATH, type SearchIndex } from "@/app/(docs)/_lib/search/model"
 
 import { Search } from "./search"
 
@@ -60,10 +60,28 @@ const index: SearchIndex = {
 
 const fetchMock = vi.fn()
 
+/**
+ * The index as it really travels: two files, and the words in the second.
+ *
+ * Served apart here rather than whole, because a mock that handed the component
+ * a complete index however it asked would be testing a fetch the site does not
+ * make — and the interesting moment is the one in between, where the box works
+ * and the fourth ranking band does not answer yet.
+ */
+const withoutProse = { entries: index.entries.map((entry) => ({ ...entry, body: "" })) }
+
+const prose = {
+  bodies: index.entries.filter((entry) => entry.body !== "").map((entry) => [entry.href, entry.body]),
+}
+
+const serve = (path: string): unknown => (path === SEARCH_PROSE_PATH ? prose : withoutProse)
+
 beforeEach(() => {
   push.mockReset()
   fetchMock.mockReset()
-  fetchMock.mockResolvedValue({ ok: true, json: async () => JSON.parse(JSON.stringify(index)) })
+  fetchMock.mockImplementation((path: string) =>
+    Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+  )
   vi.stubGlobal("fetch", fetchMock)
 })
 
@@ -90,7 +108,7 @@ describe("the search box", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it("asks for the index once, however many times it is opened", async () => {
+  it("asks for each half once, however many times it is opened", async () => {
     render(<Search />)
 
     await open()
@@ -100,8 +118,9 @@ describe("the search box", () => {
     await open()
     await type("gate")
 
-    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_INDEX_PATH)
+    expect(fetchMock).toHaveBeenCalledWith(SEARCH_PROSE_PATH)
   })
 
   it("opens on the shortcut every reader tries", async () => {
@@ -137,6 +156,64 @@ describe("what a reader sees after typing", () => {
      * they can see on the page has no other way to learn that.
      */
     expect(screen.getByText(/code blocks are not/i)).toBeTruthy()
+  })
+
+  /**
+   * The moment between the two files.
+   *
+   * The words are three times the size of the index and nothing waits for them,
+   * so there is a real interval in which the box is open and answering by title,
+   * section and summary alone. Two things have to hold in it: the box works, and
+   * it does not claim to have read what it has not read yet.
+   */
+  it("answers by name while the words are still on their way", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_PROSE_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(withoutProse)) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("gate")
+
+    expect(screen.getByRole("listbox")).toBeTruthy()
+    expect(screen.getAllByRole("option").length).toBeGreaterThan(0)
+  })
+
+  it("does not say it read the words until it has", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_PROSE_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(withoutProse)) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("kubernetes")
+
+    expect(screen.getByText(/the words in them are still loading/i)).toBeTruthy()
+    expect(screen.queryByText(/the words in them and every published name are searched/i)).toBeNull()
+  })
+
+  /**
+   * A word that is only in a paragraph, found once the paragraph arrives.
+   *
+   * This is the seam the split could break silently: the prose travels keyed by
+   * href, and an href the index does not carry would leave every body empty with
+   * nothing red anywhere. So the fixture's one word that lives in prose alone is
+   * searched for, and it has to come back.
+   */
+  it("finds a word that only the prose carries, once the prose has landed", async () => {
+    render(<Search />)
+
+    await open()
+    await type("damage")
+
+    expect(screen.getByRole("listbox")).toBeTruthy()
+    expect(screen.getByText("The two questions it asks")).toBeTruthy()
   })
 
   /**

@@ -28,12 +28,14 @@ props: {
 }
 }
 
+// page.mdx:159 — a program
 const themes = createThemeRegistry({
   palettes: [ourLightPalette, ourDarkPalette],
   fontPacks: [ourFontPack],
   stylePresets: [ourStylePreset],
 })
 
+// page.mdx:178 — a program
 createThemeRegistry({ palettes: [...STARTER_PALETTES, ourLightPalette] })
 
 export { objectAtLine26, themes, createThemeRegistry, STARTER_PALETTES }

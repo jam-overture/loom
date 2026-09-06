@@ -36,6 +36,7 @@ const WHAT: Record<Fence["kind"], string> = {
   program: "a program",
   "object-body": "the inside of an object literal",
   "function-body": "the inside of a function",
+  alternative: "the same job as the block above, done differently",
   sketch: "abridged, and not compiled",
 }
 
@@ -61,15 +62,19 @@ const marker = (fence: Fence): string => `// page.mdx:${fence.line} — ${WHAT[f
  * import inside a function body is a syntax error, and the page is not wrong to
  * show one.
  */
-const unitFor = (fence: Fence): string => {
-  if (fence.kind === "program") return `${marker(fence)}\n${fence.code}`
-
-  // The inside of an object literal is not parseable on its own, so it is
-  // wrapped exactly as written and left to the compiler in place.
-  if (fence.kind === "object-body") {
-    return `${marker(fence)}\nconst objectAtLine${fence.line} = {\n${fence.code}\n}`
-  }
-
+/**
+ * A fence's imports, and everything else it says.
+ *
+ * Both halves need separating and for two different reasons. An import inside a
+ * function body is a syntax error, and a page showing a handler is not wrong to
+ * show where `parseTree` came from. And a marker written above a block that
+ * *opens* with an import would be that import's leading comment — so it would be
+ * dropped along with the import when the module's imports are hoisted and
+ * merged, and a compiler error in that block would name no page line at all. Ten
+ * markers on this site were being lost that way. The marker goes under the
+ * imports, where there is a statement left for it to belong to.
+ */
+const split = (fence: Fence): { readonly imports: readonly string[]; readonly rest: string } => {
   const parsed = ts.createSourceFile(
     `fence.${fence.language}`,
     fence.code,
@@ -78,19 +83,38 @@ const unitFor = (fence: Fence): string => {
     fence.language === "tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS
   )
 
-  const lifted: string[] = []
+  const imports: string[] = []
   const inside: string[] = []
 
   parsed.statements.forEach((statement) => {
-    const text = fence.code.slice(statement.getFullStart(), statement.getEnd()).trim()
+    if (ts.isImportDeclaration(statement)) {
+      imports.push(fence.code.slice(statement.getFullStart(), statement.getEnd()).trim())
+      return
+    }
 
-    if (ts.isImportDeclaration(statement)) lifted.push(text)
-    else inside.push(fence.code.slice(statement.getFullStart(), statement.getEnd()))
+    inside.push(fence.code.slice(statement.getFullStart(), statement.getEnd()))
   })
 
-  const body = inside.join("").replace(/^\n+/, "").replace(/\s+$/, "")
+  return { imports, rest: inside.join("").replace(/^\n+/, "").replace(/\s+$/, "") }
+}
 
-  return [...lifted, `${marker(fence)}\nconst functionAtLine${fence.line} = async () => {\n${body}\n}`].join("\n")
+const unitFor = (fence: Fence): string => {
+  // The inside of an object literal is not parseable on its own, so it is
+  // wrapped exactly as written and left to the compiler in place.
+  if (fence.kind === "object-body") {
+    return `${marker(fence)}\nconst objectAtLine${fence.line} = {\n${fence.code}\n}`
+  }
+
+  const { imports, rest } = split(fence)
+
+  // An alternative is a program too. What makes it different is the module it is
+  // put in, not the shape of what it says.
+  const written =
+    fence.kind === "program" || fence.kind === "alternative"
+      ? rest
+      : `const functionAtLine${fence.line} = async () => {\n${rest}\n}`
+
+  return [...imports, `${marker(fence)}\n${written}`].join("\n")
 }
 
 type Imported = {
@@ -168,6 +192,52 @@ const renderImports = (imports: Map<string, Imported>): readonly string[] =>
     return lines
   })
 
+/** Every import the given fences make, read without compiling their code. */
+const inheritedImports = (fences: readonly Fence[]): Map<string, Imported> => {
+  const imports = new Map<string, Imported>()
+
+  fences.filter(isCheckable).forEach((fence) => {
+    const parsed = ts.createSourceFile(
+      `inherited.${fence.language}`,
+      fence.code,
+      ts.ScriptTarget.ESNext,
+      true,
+      fence.language === "tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+    )
+
+    parsed.statements.forEach((statement) => {
+      if (ts.isImportDeclaration(statement)) collectImport(statement, imports)
+    })
+  })
+
+  return imports
+}
+
+/** The part of an inherited import a module actually reaches for, if any. */
+const keepUsed = (entry: Imported, used: (name: string) => boolean): Imported | undefined => {
+  const kept: Imported = {
+    values: new Set([...entry.values].filter((name) => used(localName(name)))),
+    types: new Set([...entry.types].filter((name) => used(localName(name)))),
+    ...(entry.defaultName !== undefined && used(entry.defaultName) ? { defaultName: entry.defaultName } : {}),
+    ...(entry.namespace !== undefined && used(entry.namespace) ? { namespace: entry.namespace } : {}),
+  }
+
+  const empty =
+    kept.values.size === 0 && kept.types.size === 0 && kept.defaultName === undefined && kept.namespace === undefined
+
+  return empty ? undefined : kept
+}
+
+/** An inherited import folded into whatever the module already said itself. */
+const merged = (own: Imported | undefined, inherited: Imported): Imported => {
+  if (own === undefined) return inherited
+
+  inherited.values.forEach((name) => own.values.add(name))
+  inherited.types.forEach((name) => own.types.add(name))
+
+  return own
+}
+
 type Declared = {
   readonly values: readonly string[]
   readonly types: readonly string[]
@@ -226,15 +296,23 @@ export type ContextExport = {
 /**
  * Assemble one page's fences into a module.
  *
- * `contextImport` is the module specifier of the page's context file, if it has
- * one, and `contextExports` what that file offers. Only the names the page
- * actually uses are imported — an unused one would fail `noUnusedLocals`, which
- * is the check that keeps a context file from filling up with scenery.
+ * `context` is the page's context file, if it has one: the specifier to import
+ * from and what the file offers. Only the names the module actually uses are
+ * imported — an unused one would fail `noUnusedLocals`, which is the check that
+ * keeps a context file from filling up with scenery.
+ *
+ * `inheriting` is the rest of the page, and it exists for `alternative`. A block
+ * that redoes the block above it is compiled as its own module, which means it
+ * cannot see an import the page made earlier — and a page is not going to repeat
+ * `import { gatePolicySchema }` beside a block whose whole point is that only one
+ * line changed. So the imports of the blocks before it come along, and, like the
+ * context, only the ones this module reaches for.
  */
 export const assemble = (
   fences: readonly Fence[],
   header: string,
-  context?: { readonly specifier: string; readonly exports: readonly ContextExport[] }
+  context?: { readonly specifier: string; readonly exports: readonly ContextExport[] },
+  inheriting: readonly Fence[] = []
 ): Assembly => {
   const compiled = fences.filter(isCheckable)
   const body = compiled.map(unitFor).join("\n\n")
@@ -252,6 +330,7 @@ export const assemble = (
   const kept: string[] = []
   const values: string[] = []
   const types: string[] = []
+  const declaredHere = new Set<string>()
 
   parsed.statements.forEach((statement) => {
     if (ts.isImportDeclaration(statement)) {
@@ -261,13 +340,24 @@ export const assemble = (
 
     kept.push(body.slice(statement.getFullStart(), statement.getEnd()).trim())
 
+    const declared = declaredBy(statement)
+    ;[...declared.values, ...declared.types].forEach((name) => declaredHere.add(name))
+
     // A page that writes `export const stat = …` has already said it. Saying it
     // again at the foot of the file is a redeclaration, not a second export.
     if (isExported(statement)) return
 
-    const declared = declaredBy(statement)
     values.push(...declared.values)
     types.push(...declared.types)
+  })
+
+  const rest = kept.join("\n\n")
+  const used = (name: string): boolean => new RegExp(`\\b${name}\\b`).test(rest)
+
+  inheritedImports(inheriting).forEach((entry, specifier) => {
+    const wanted = keepUsed(entry, used)
+
+    if (wanted !== undefined) imports.set(specifier, merged(imports.get(specifier), wanted))
   })
 
   // Imported names are exported too, and that is deliberate. A page is allowed
@@ -283,10 +373,14 @@ export const assemble = (
     entry.types.forEach((name) => types.push(localName(name)))
   })
 
-  const rest = kept.join("\n\n")
-  const used = (name: string): boolean => new RegExp(`\\b${name}\\b`).test(rest)
-
-  const contextNames = context === undefined ? [] : context.exports.filter((entry) => used(entry.name))
+  // A name the module declares for itself is not one the story is standing in
+  // for. `going-to-production` says what `db` is two sections after it first
+  // wires a store to one, so the story lends it to the block that cannot see it
+  // yet and stands back for the block that builds it.
+  const contextNames =
+    context === undefined
+      ? []
+      : context.exports.filter((entry) => used(entry.name) && !declaredHere.has(entry.name))
   const contextValues = contextNames.filter((entry) => !entry.isType).map((entry) => entry.name)
   const contextTypes = contextNames.filter((entry) => entry.isType).map((entry) => entry.name)
 

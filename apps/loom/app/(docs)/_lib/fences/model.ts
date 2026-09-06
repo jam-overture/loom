@@ -20,12 +20,22 @@
  * ```ts               a program
  * ```ts object-body   the inside of an object literal
  * ```ts function-body the inside of a function
+ * ```ts alternative   the same job as the block above, done differently
  * ```ts sketch        abridged on purpose, and not compiled
  * ```
  * ````
  *
  * The word is markdown *meta* — it never reaches the page, and a reader sees
  * the same highlighted block either way.
+ *
+ * `alternative` is the one that pays for itself. *Going to production* shows
+ * three stores wired to memory and then the same three wired to Postgres, under
+ * the same three names, because being able to swap one line for another is the
+ * entire lesson. Read as one program that is a redeclaration — so an
+ * alternative is compiled as **its own module**, inheriting the page's imports
+ * and its story, and neither branch of the choice goes unchecked. Without it the
+ * only way to write that page is `sketch`, and a checker that pushes people
+ * towards its own escape hatch is worse than no checker.
  *
  * `sketch` is the only way out of the check, and it costs something: a sketch
  * must contain an ellipsis, so the only blocks that escape compilation are the
@@ -45,13 +55,13 @@ export const FENCE_LANGUAGES = ["ts", "tsx", "bash"] as const
 export type FenceLanguage = (typeof FENCE_LANGUAGES)[number]
 
 /**
- * The four kinds, and the word that declares each.
+ * The five kinds, and the word that declares each.
  *
  * `program` has no word, because the overwhelming majority of blocks are
  * programs and a vocabulary that made the common case verbose would be a
  * vocabulary people route around.
  */
-export const FENCE_KINDS = ["program", "object-body", "function-body", "sketch"] as const
+export const FENCE_KINDS = ["program", "object-body", "function-body", "alternative", "sketch"] as const
 
 export type FenceKind = (typeof FENCE_KINDS)[number]
 
@@ -70,3 +80,6 @@ export type Fence = {
 /** Only TypeScript is compiled. A shell command is not a program in this sense. */
 export const isCheckable = (fence: Fence): boolean =>
   (fence.language === "ts" || fence.language === "tsx") && fence.kind !== "sketch"
+
+/** A block read on its own rather than as part of the page's one program. */
+export const isAlternative = (fence: Fence): boolean => fence.kind === "alternative"

@@ -8,7 +8,11 @@ them — which is not a fault in the page. Telling a reader to imagine a request
 is how you explain a request handler.
 
 One file per page names what its story assumes, and the generated program
-imports the names the page actually uses.
+imports the names the page actually uses — and only those the program does not
+declare for itself. *Going to production* wires a store to `db` two sections
+before it says what `db` is, which is the right order for a reader and leaves one
+block reaching for something the page has not shown yet. The story lends that
+block a `db`; the block that builds one keeps its own.
 
 **The rule that keeps this honest:** a context file may *name* what the story
 assumes, and must *import* anything the runtime really provides.

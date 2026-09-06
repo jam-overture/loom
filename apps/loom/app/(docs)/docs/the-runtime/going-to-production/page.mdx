@@ -46,7 +46,7 @@ const holds = memoryHoldStore()
 const journal = memoryTelemetryJournal()
 ```
 
-```ts
+```ts alternative
 import { postgresTreeStore, postgresHoldStore } from "@loom/runtime/postgres"
 import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
 
@@ -94,8 +94,18 @@ connection and not a Loom object.
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-const db = drizzle(postgres(process.env.DATABASE_URL, { prepare: false, max: 1 }))
+const url = process.env.DATABASE_URL
+
+if (url === undefined) throw new Error("DATABASE_URL is not set")
+
+const db = drizzle(postgres(url, { prepare: false, max: 1 }))
 ```
+
+**The two lines in the middle are not ceremony.** An environment variable that
+was never set reads as `undefined`, and handing that straight to a connection
+gets you a failure much later and somewhere less helpful — usually the first
+request, phrased as though the database were down. Checking it where it is read
+turns a confusing outage into a process that refuses to start and says why.
 
 `prepare: false` is not a detail to copy blindly. A pooled connection in
 transaction mode — which is what serverless deployments use — hands you a
