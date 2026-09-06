@@ -3320,7 +3320,15 @@ explanation onto a docs page and discarding the retrieval that makes it work.
 
 ## 2026-08-20 — the review queue tests fail west of UTC in the evening
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom lessons` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom lessons` · **Status:** closed
+by `lessons-26-the-day-and-the-door`, the way this finding said to. Today is an
+input: a `Clock` seam in `(lessons)/_components/store.tsx`, resolved once beside
+the stored record and handed down with it, and the two test files that built
+fixtures out of `toISOString()` now say what day it is. Reproduced first in the
+mirror image of the reported failure — `TZ=Pacific/Kiritimati`, where the local
+date runs *ahead* of UTC — which failed on exactly the two reported assertions;
+green afterwards under `UTC`, `America/Los_Angeles` and `Pacific/Kiritimati`.
+One place in the surface now reads a clock, and it is the seam's default.
 
 `app/(lessons)/_components/queue.test.tsx` fails two assertions when the local
 date and the UTC date differ — reproducible at 19:53 PDT on 2026-08-20, green
@@ -3461,7 +3469,26 @@ regeneration, with nothing to change in `app/(docs)/`.
 
 ## 2026-08-21 — the lessons review surface shows a reader a record number
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom lessons` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom lessons` · **Status:** closed by
+`lessons-26-the-day-and-the-door`, with the second of the two shapes this finding
+offered and **not** the first — the number stays in the question and gains the
+door it was missing. A cited record is resolved out of `decisions/` to the three
+things a lesson gives it (`decisions/0033`, the record's real title, somewhere to
+open it) and rendered in *where to check*, beside the lesson pointers.
+
+Two things that were judgements rather than mechanics, so that the next lane to
+grep for this knows what it is looking at:
+
+- **The number is still on the prerendered page, deliberately.** A record's title
+  is usually its conclusion — `0033 — The policy is resolved per change, and named
+  on the verdict` is one line of the answer to the question that cites it — so
+  putting the title beside the question would print an answer next to its
+  question, which is the one thing this surface never does. The door unlocks after
+  the reader has written an answer, where a lesson pointer already goes.
+- **There were two, not one.** Set U's question 8 cites `0007` and arrived with
+  lesson 17 on 26 August, five days after this was filed. A test now asserts that
+  no review question cites a record it cannot open, so the class is checked rather
+  than the two instances fixed.
 
 Found while checking that the maintainer's rule held across the whole build
 rather than only on my own pages. Every prerendered page in `apps/loom` was

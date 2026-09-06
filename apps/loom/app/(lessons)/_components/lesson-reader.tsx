@@ -13,9 +13,10 @@ import {
   type Grade,
   type Prediction,
 } from "../_lib/progress"
-import { Answer, type CheckPointer } from "./answer"
+import type { CheckPointer } from "../_lib/links"
+import { Answer } from "./answer"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * A lesson, in the order it has to happen in.
@@ -146,7 +147,7 @@ const GRADES: readonly (readonly [Grade, string])[] = [
 ]
 
 export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
-  const { progress, ready, update } = useProgress()
+  const { progress, ready, today, update } = useProgress()
 
   if (!ready) {
     return (
@@ -160,10 +161,10 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
   const written = (slug: string): readonly Prediction[] => predictionsFor(progress, slug)
 
   const record = (slug: string, attempt: { question: number; confidence: Confidence; answer: string; grade: Grade }) =>
-    update((state) => withAttempt(state, slug, { ...attempt, on: today() }))
+    update((state) => withAttempt(state, slug, { ...attempt, on: today }))
 
   const hold = (slug: string, prediction: Omit<Prediction, "on">) =>
-    update((state) => withPrediction(state, slug, { ...prediction, on: today() }))
+    update((state) => withPrediction(state, slug, { ...prediction, on: today }))
 
   /**
    * The one gate that closes over the whole page. Everything after Predict is
@@ -483,7 +484,7 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
               <button
                 type="button"
                 style={style.button(true)}
-                onClick={() => update((state) => withLessonWorkedThrough(state, lesson, today()))}
+                onClick={() => update((state) => withLessonWorkedThrough(state, lesson, today))}
               >
                 I worked through this today
               </button>

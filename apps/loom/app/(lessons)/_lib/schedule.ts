@@ -1,5 +1,5 @@
 import { readCourseFile } from "./source"
-import { plainText, referencedLessons } from "./text"
+import { plainText, referencedLessons, referencedRecords } from "./text"
 
 /**
  * `review-schedule.md`, read as a queue rather than as a document.
@@ -26,6 +26,12 @@ export type ReviewQuestion = {
   readonly text: string
   /** The lessons the schedule marks this question as reaching into, ascending. */
   readonly refs: readonly number[]
+  /**
+   * The decision records the question cites in its own text, ascending. Two do,
+   * and both inherited the citation from the lesson the question came out of —
+   * where it was a link with a title, and here is four digits.
+   */
+  readonly records: readonly number[]
 }
 
 export type ReviewSet = {
@@ -156,6 +162,7 @@ const parseSet = (letter: string, timing: string, body: readonly string[]): Revi
       number: block.number,
       text: plainText(raw),
       refs: referencedLessons(raw),
+      records: referencedRecords(raw),
     })
   }
 

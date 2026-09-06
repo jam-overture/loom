@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { Corrections, CorrectionsPanel, type CorrectionQuestion } from "./corrections"
+import { ClockProvider } from "./store"
 import type { Correction, Grade, Progress } from "../_lib/progress"
 
 /**
@@ -93,9 +94,27 @@ const answerCurrent = (confidence: string, grade: string) => {
   fireEvent.click(screen.getByRole("button", { name: grade }))
 }
 
-const sitting = () => render(<Corrections questions={QUESTIONS} />)
+/**
+ * The day this sitting happens on, said rather than read. `toISOString()` gives a
+ * UTC calendar date and the component works out a local one; the two are the same
+ * day for most of the day, which is exactly what made the queue's version of this
+ * fail west of UTC in the evening and nowhere else.
+ */
+const TODAY = "2026-09-05"
 
-const panel = () => render(<CorrectionsPanel keys={KEYS} />)
+const sitting = () =>
+  render(
+    <ClockProvider clock={() => TODAY}>
+      <Corrections questions={QUESTIONS} />
+    </ClockProvider>
+  )
+
+const panel = () =>
+  render(
+    <ClockProvider clock={() => TODAY}>
+      <CorrectionsPanel keys={KEYS} />
+    </ClockProvider>
+  )
 
 describe("a corrections sitting", () => {
   beforeEach(() => {
@@ -232,12 +251,9 @@ describe("a corrections sitting", () => {
   })
 
   it("says nothing is due when a miss has already been answered today", () => {
-    const today = new Date()
-    const day = today.toISOString().slice(0, 10)
-
     seed(
       [{ set: "set-d", question: 7, confidence: 5 }],
-      [{ set: "set-d", question: 7, confidence: 3, answer: "x", grade: "got-it", on: day }]
+      [{ set: "set-d", question: 7, confidence: 3, answer: "x", grade: "got-it", on: TODAY }]
     )
     const { container } = sitting()
 

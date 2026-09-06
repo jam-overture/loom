@@ -16,9 +16,10 @@ import {
   type PendingCorrection,
 } from "../_lib/corrections"
 import { withCorrection, type Confidence, type Grade } from "../_lib/progress"
-import { Answer, type CheckPointer } from "./answer"
+import type { CheckPointer } from "../_lib/links"
+import { Answer } from "./answer"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * The questions that come back.
@@ -96,7 +97,7 @@ export const Corrections = ({
 }: {
   readonly questions: readonly CorrectionQuestion[]
 }) => {
-  const { progress, ready, update } = useProgress()
+  const { progress, ready, today, update } = useProgress()
   const [answered, setAnswered] = useState<readonly AnsweredNote[]>([])
 
   if (!ready) {
@@ -122,7 +123,7 @@ export const Corrections = ({
    * here. The filter is shared now, and the questions it filters against are
    * every question in the course rather than only the review sets.
    */
-  const queue = knownOnly(correctionQueue(progress, today()), new Set(known.keys()))
+  const queue = knownOnly(correctionQueue(progress, today), new Set(known.keys()))
   const due = dueCorrections(queue)
 
   const sitting = correctionSitting(queue, SITTING - answered.length).filter(
@@ -152,7 +153,7 @@ export const Corrections = ({
         confidence: attempt.confidence,
         answer: attempt.answer,
         grade: attempt.grade,
-        on: today(),
+        on: today,
       })
     )
 
@@ -245,11 +246,11 @@ export const Corrections = ({
  * that is not there when you click through costs more than the panel is worth.
  */
 export const CorrectionsPanel = ({ keys }: { readonly keys: readonly string[] }) => {
-  const { progress, ready } = useProgress()
+  const { progress, ready, today } = useProgress()
 
   if (!ready) return undefined
 
-  const queue = knownOnly(correctionQueue(progress, today()), new Set(keys))
+  const queue = knownOnly(correctionQueue(progress, today), new Set(keys))
   const due = dueCorrections(queue)
 
   if (queue.length === 0) return undefined

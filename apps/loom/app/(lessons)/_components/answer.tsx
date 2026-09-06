@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react"
 
+import type { CheckPointer } from "../_lib/links"
 import { CONFIDENCES, type Attempt, type Confidence, type Grade } from "../_lib/progress"
 import * as style from "./style"
 
@@ -22,7 +23,8 @@ import * as style from "./style"
  *    check informative.
  * 3. **Only then, where to check.** Note what does *not* appear: the answer.
  *    The review sets have no printed answers by design — the answer is in the
- *    lesson, and going to get it is itself a retrieval. What unlocks is the
+ *    lesson, or in the decision record the question cites, and going to get it
+ *    is itself a retrieval. What unlocks is the
  *    pointer, and nothing about this control is easier than the paper version
  *    except the bookkeeping.
  * 4. **Grade yourself.** Which, paired with the rating from step 1, is the only
@@ -32,12 +34,6 @@ import * as style from "./style"
  * records a real attempt with an empty answer, which is honest, and it is the
  * only way past a question without writing something.
  */
-
-export type CheckPointer = {
-  readonly number: number
-  readonly title: string
-  readonly href: string
-}
 
 /**
  * What happens after the writing, which is the only thing two kinds of question
@@ -210,11 +206,11 @@ export const Answer = ({ question, total, body, resolve }: AnswerProps) => {
             <div style={style.row(2)}>
               {(resolve.kind === "check" ? resolve.checkIn : []).map((pointer) => (
                 <a
-                  key={pointer.number}
+                  key={pointer.name}
                   href={pointer.href}
                   style={{ ...style.button(false), textDecoration: "none" }}
                 >
-                  {String(pointer.number).padStart(2, "0")} — {pointer.title}
+                  {pointer.name} — {pointer.title}
                 </a>
               ))}
             </div>

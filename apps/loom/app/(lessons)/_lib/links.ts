@@ -1,4 +1,5 @@
-import type { ReviewAnchor } from "./schedule"
+import { recordPointers } from "./records"
+import type { ReviewAnchor, ReviewQuestion } from "./schedule"
 import type { RecallPart } from "./slugs"
 import { lesson } from "./syllabus"
 
@@ -38,9 +39,43 @@ export const lessonPointers = (numbers: readonly number[]): readonly LessonPoint
     .filter((pointer): pointer is LessonPointer => pointer !== undefined)
 
 /**
+ * Somewhere to go after you have written an answer — a lesson, or a record the
+ * question cites.
+ *
+ * Both are a name, a title and a door, and the reader wants the same thing from
+ * either: the specific point, not a reread. What differs is only where it lives,
+ * which the name says.
+ */
+export type CheckPointer = {
+  readonly kind: "lesson" | "record"
+  /** `04`, or `decisions/0033`. */
+  readonly name: string
+  readonly title: string
+  readonly href: string
+}
+
+const asCheck = (pointer: LessonPointer): CheckPointer => ({
+  kind: "lesson",
+  name: String(pointer.number).padStart(2, "0"),
+  title: pointer.title,
+  href: pointer.href,
+})
+
+/** Where to check a lesson's own question: the lessons it reaches back into. */
+export const checkPointers = (numbers: readonly number[]): readonly CheckPointer[] =>
+  lessonPointers(numbers).map(asCheck)
+
+/**
  * Where to check a review question: the lesson its set follows, plus every
- * lesson the schedule marks that question as reaching back into. Interleaved
- * sets reach into four or five, which is the point of them.
+ * lesson the schedule marks that question as reaching back into, plus any
+ * decision record the question cites by number. Interleaved sets reach into four
+ * or five lessons, which is the point of them.
+ *
+ * The records are last and they are deliberately not first. A question that
+ * cites `0033` is asking the reader to recall what that record settled, so the
+ * record is where the answer is — which is exactly what makes it a place to go
+ * *after* writing something down, alongside the lessons, rather than a reference
+ * beside the question.
  *
  * One definition, because a question asked in its set and the same question
  * asked again a week later must send the reader to the same places — and a
@@ -48,9 +83,18 @@ export const lessonPointers = (numbers: readonly number[]): readonly LessonPoint
  */
 export const reviewPointers = (
   anchor: ReviewAnchor,
-  refs: readonly number[]
-): readonly LessonPointer[] =>
-  lessonPointers([...(anchor.kind === "lesson" ? [anchor.lesson] : []), ...refs])
+  question: ReviewQuestion
+): readonly CheckPointer[] => [
+  ...checkPointers([...(anchor.kind === "lesson" ? [anchor.lesson] : []), ...question.refs]),
+  ...recordPointers(question.records).map(
+    (record): CheckPointer => ({
+      kind: "record",
+      name: record.name,
+      title: record.title,
+      href: record.href,
+    })
+  ),
+]
 
 /**
  * Where to check a lesson's own question, when it comes back as a correction
@@ -67,10 +111,14 @@ export const reviewPointers = (
  * and the whole point is that they have not read it. A day later they have, so
  * the lesson is exactly where to look, and sending them to a page that is now
  * the answer is the correction working rather than a leak.
+ *
+ * A lesson's own question cites no record — a lesson's prose links its records
+ * itself, in the text, where the reader is already reading — so this returns
+ * lessons only, in the same shape a review question's pointers arrive in.
  */
 export const lessonQuestionPointers = (
   lesson: number,
   part: RecallPart,
   refs: readonly number[]
-): readonly LessonPointer[] =>
-  lessonPointers(part === "warm-up" ? refs : [lesson, ...refs])
+): readonly CheckPointer[] =>
+  checkPointers(part === "warm-up" ? refs : [lesson, ...refs])
