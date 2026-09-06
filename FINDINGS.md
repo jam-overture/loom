@@ -13192,3 +13192,127 @@ Filed already on 1 September and unchanged; this is a count rather than a new
 finding. The remedy is one line in `.claude/settings.json`
 (`WebFetch(domain:*.vercel.app)`), or a brief that asks for the local render it is
 getting either way.
+
+---
+
+## 2026-09-06 — a documentation site shows two ways to do one thing, and a page-as-one-program cannot read that
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-21-the-code-on-the-page-compiles`
+
+Recorded because the shape will come back, and because the cheap way out was
+sitting right there.
+
+*Going to production* names three stores, wires them to memory, and then wires
+**the same three names** to Postgres. That the swap is one line of wiring rather
+than a rewrite is the entire lesson of the section. Read as one program — which
+is how #243 compiles a page, and rightly, because a page is a story whose later
+blocks lean on its earlier ones — it is three redeclarations and will not
+compile.
+
+The vocabulary had exactly one word that would have made it green: `sketch`,
+which skips compilation. Taking it would have meant the deployment half of the
+page, the half a reader actually pastes into a real project, was the one part of
+the site nothing checked. **A checker whose escape hatch is the natural way to
+write a common page is a checker people learn to route around**, and it would
+have taken about a week.
+
+So `alternative` was added instead: the block is compiled, in a module of its
+own, inheriting the imports the page had already made. Both halves of a choice
+are checked and neither is written off.
+
+The rule that keeps it from becoming the new escape hatch is that it cannot be
+the first block on a page — the word means *the same job as the block above*, and
+a page opening with one would silently be read as two programs where the writer
+meant one. `extract.ts` refuses it.
+
+---
+
+## 2026-09-06 — a page's marker comment was hoisted away with the import it sat above, ten times
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-21-the-code-on-the-page-compiles`
+
+The generated programs carry a `// page.mdx:83` comment above each block, so a
+compiler error points at a place on the page rather than a place in a file
+nobody wrote. **Ten of them were not there.**
+
+The rule they fell foul of is the one that makes the whole design work: a page's
+imports are hoisted and merged, because a page repeats an import so a reader
+arriving halfway down knows where a name came from. A marker written *above* a
+block is, to the compiler's own parser, the leading trivia of that block's first
+statement — and where the block opens with an import, the marker travelled with
+it into the discard.
+
+The blocks that lost their marker were therefore exactly the blocks that begin
+with an import: the complete, copy-me-whole ones. `what-your-app-has-to-do` had
+one marker of three.
+
+It is fixed by putting the marker under the block's own imports rather than over
+them. Filed rather than left in a commit message because **it is the failure
+mode of any generated artefact that is assembled rather than concatenated**, and
+because it was invisible: nothing was red, and the check went on working — it
+simply stopped saying where.
+
+---
+
+## 2026-09-06 — the search index outgrew its cap, and the cap's own comment said what to do
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-21-the-code-on-the-page-compiles`
+
+On 1 September the prose was indexed and the payload capped, at 48 KB gzipped
+and 240 KB raw, with a note under the numbers: *five more pages fit, fifty do
+not, and the run that hits the cap should split the index rather than raise it
+again.*
+
+Four pages arrived at once when this lane's four branches were merged, and the
+index came out at **46.7 KB gzipped against the 48** and 251.8 KB raw against
+the 240. The raw cap failed; the compressed one had 1.3 KB left. Two runs, not
+five.
+
+Split rather than raised, as instructed by the run that wrote the cap:
+
+| | Uncompressed | gzip | grows when |
+| --- | --- | --- | --- |
+| Titles, sections, summaries, 863 names | 159 KB | 14.6 KB | a page is added or an export published |
+| The words under them | 107 KB | 35.1 KB | anybody writes a paragraph |
+
+The reader waits for the first and not for the second. The box opens on the
+table of contents — which answers the top three bands of the ranking — and the
+words land after and turn on the fourth.
+
+**The number worth keeping is 14.6 KB.** That is now what a reader waits for,
+against 46.7 the day before, and it is the half that grows slowly. Sharding the
+prose by section is the next move when it is needed, and it is now a change to
+one file that nothing waits for.
+
+---
+
+## 2026-09-06 — this lane had four pull requests open at once, and step 3 of the brief says to make it five
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — restating the marketing routine's finding of the same day, with this
+lane's numbers
+
+#225, #232, #238 and #243 were all cut from `d7375ef`, three of them editing
+`_lib/nav.ts` and three editing `FINDINGS.md`. That is the configuration
+described on 28 August when sixteen pull requests were closed unmerged.
+
+This run merged them instead of adding a fifth, and **the four conflicted in
+three places, all of which combined in about ten minutes**: two appends to
+`FINDINGS.md`, and one fence whose language and whose kind had been corrected on
+two different branches — `ts function-body` against `tsx`, where the block is
+both and the resolution is `tsx function-body`.
+
+The pile is not made of irreconcilable work. What it costs is that nobody merges
+it until closing it is the only affordable move — and the merge is where the
+interesting failures were: the four pages' code had never been compiled together,
+and the four pages' prose is what took the search index over its cap. **Neither
+was visible on any of the four branches.**
+
+The brief's step 3 says *branch `docs-NN-<slug>` off `main`*, which is what
+produced the four. A routine cannot edit its own brief. Recommendation, the same
+one `Loom marketing` made on #242 the same day: one sentence in the seven briefs
+and in `docs/routines.md` — *if this lane already has an open pull request, push
+onto its branch instead*.
