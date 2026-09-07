@@ -139,3 +139,116 @@ describe("the front door's reading order", () => {
     }
   })
 })
+
+/**
+ * The second half, added on 7 September: what Loom changed without asking.
+ *
+ * The screen had one subject and now has two, and every rule below is about the
+ * join. A front door that answers "does anything need me?" and stops is a
+ * screen somebody opens when they are expecting bad news; a front door that
+ * also answers "what happened without me?" is one they open in the morning.
+ */
+describe("what happened without you", () => {
+  /**
+   * Urgency first, always. Both halves are about changes and only one of them
+   * is waiting on a human being — a reader who reads the first section and
+   * closes the tab has lost nothing they had to act on.
+   */
+  it("puts what is waiting before what has already happened", () => {
+    const markup = source.slice(source.indexOf("<h1"))
+
+    expect(markup.indexOf("Waiting on you")).toBeGreaterThan(-1)
+    expect(markup.indexOf("Changed without asking you")).toBeGreaterThan(
+      markup.indexOf("Waiting on you")
+    )
+  })
+
+  /**
+   * The heading names the screen rather than one of its two sections. It read
+   * `Waiting on you` when that was the whole screen, and a reader who took that
+   * at face value would read the second section as more of the first — which is
+   * the one misreading this screen must not cause, because "changed without
+   * asking you" read as "waiting on you" invites an answer to a settled change.
+   */
+  it("is headed by something true of both halves", () => {
+    const heading = /<h1[^>]*>([\s\S]*?)<\/h1>/u.exec(source)?.[1]?.trim()
+
+    expect(heading).toBe("What Loom has been doing")
+  })
+
+  /** The count before the cards, for the reason the waiting half says its own. */
+  it("says how much happened without you before it lists any of it", () => {
+    const markup = source.slice(source.indexOf("<h1"))
+
+    expect(markup.indexOf("unattendedSummary")).toBeGreaterThan(-1)
+    expect(markup.indexOf("<UnattendedCard")).toBeGreaterThan(markup.indexOf("unattendedSummary"))
+  })
+
+  /**
+   * **The cap is on the read, never on what came back.**
+   *
+   * A screen that reads a hundred changes and renders five has hidden
+   * ninety-five and said nothing; a screen with a smaller window has a window,
+   * and the sentence above the list is what says so. The difference is
+   * invisible on screen and total to a reader deciding whether they have seen
+   * everything.
+   */
+  it("bounds the record it reads rather than slicing what it read", () => {
+    expect(source).toContain("limit: RECENT_RECORDS")
+    expect(source).not.toContain("unattended.changes.slice")
+    expect(source).not.toContain("changes.slice(0")
+  })
+
+  /**
+   * The two halves come from two sources — the hold store and the journal — and
+   * neither may take the other down with it. A journal that will not read costs
+   * the second section and says so; it must not blank a queue that is still
+   * true, so there is no early return on it.
+   */
+  it("lets the record fail without taking the queue with it", () => {
+    expect(source).toContain("record.ok ?")
+    expect(source).not.toContain("if (!record.ok) return")
+  })
+
+  /**
+   * A read that failed and a record with nothing in it are opposite answers to
+   * "has Loom changed anything on its own?", and the failure is the one a
+   * reader has to be told about because it looks like the good news.
+   */
+  it("tells a failed read apart from a quiet record", () => {
+    expect(source).toContain("describeTelemetryError")
+    expect(source).toContain('title="This half of the screen didn\'t load."')
+  })
+
+  /**
+   * The caught-up notice used to send a reader to `/portal/trust` to answer
+   * "were the changes Loom made without asking sound?" — a question the section
+   * directly below it now answers half of. A link that sends somebody away past
+   * the answer is worse than no link.
+   */
+  it("no longer sends the caught-up reader away to a question this screen answers", () => {
+    expect(source).not.toContain("Has the AI been getting it right?")
+    expect(source).toContain("Has its judgment been sound?")
+  })
+})
+
+/**
+ * Two defects a screenshot found on the first build of the section above, and
+ * neither had a failing test — both are about a pair of things that are each
+ * correct alone, which is the shape this lane keeps finding by looking.
+ */
+describe("what the first screenshot of it found", () => {
+  /**
+   * `Nothing is waiting for you.` sat three lines above a green box headed
+   * `You're all caught up.` — one fact, twice, and the second says it with a
+   * shape as well as with words. It had been there since the settled tone
+   * shipped and only read as a stutter once the section got a heading of its
+   * own.
+   */
+  it("does not say the queue is empty twice", () => {
+    const markup = source.slice(source.indexOf("<h1"))
+
+    expect(markup).toContain("{changes.length > 0 && (")
+    expect(markup.indexOf("changes.length > 0")).toBeLessThan(markup.indexOf("waitingSummary"))
+  })
+})

@@ -13570,3 +13570,86 @@ rather than done because a script at the application root is not obviously this
 lane's file, and the lane rule says the lane follows the content: a portal
 screenshot script is the portal's, but the directory is shared and I would rather
 be told than assume.
+
+---
+
+## 2026-09-07 — the journal knows how long an utterance was and never what it said
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+
+`IntentSummary` in `src/telemetry/event.ts` carries `utteranceLength: number` and
+no utterance. That is a deliberate-looking choice and it may well be the right
+one — a journal that keeps every sentence anybody ever typed is a different
+retention problem from one that keeps a length — so this is filed as a question
+rather than as a defect.
+
+What it costs, concretely, is on the front door as of this run. The two halves of
+`/portal` describe the same runtime and can only lead with different things:
+
+| | leads with | because |
+| --- | --- | --- |
+| **Waiting on you** | *"Remove the second section of the page entirely"* | a hold carries its `intent`, utterance and all |
+| **Changed without asking you** | `Added n_cympx4d32nbgpkqbzu0k, the words, inside n_seed2.` | the journal has no utterance to lead with |
+
+The second is true, complete and much harder to read. Three changes from three
+different asks came out of this run reading nearly identically — *added a node,
+deleted a node, inside `n_seed2`* — because that is what "change the heading"
+compiles to, three times, and nothing on the card says which request produced
+which. A reader can tell them apart by timestamp and by nothing else.
+
+**What the portal did instead**, and it is not a workaround so much as a
+different answer: the card leads with what the change *did*, since a change that
+has already happened is something a reader is finding out about rather than
+deciding on. That is right on its own terms. It is still the case that the one
+string a human wrote is missing from the one screen where it would tell two rows
+apart.
+
+Three options, and choosing is the framework's rather than the portal's:
+
+| | |
+| --- | --- |
+| **A** — keep the utterance on the intent record | simplest, and makes the journal hold user-typed text, which is a retention and privacy decision rather than a schema one |
+| **B** — keep a short digest or first clause | bounded, still tells two rows apart, still stores what somebody typed |
+| **C** — leave it, and let the portal read the hold store for the ones still held | answers nothing for a committed change, which is exactly this case |
+
+`ProposalEpisode.rationale` is on the record and is the model's own sentence
+about why it proposed something. The portal deliberately does not lead with it:
+it is the model's account of its own work, and putting it where a reader expects
+their own words would be the portal quietly swapping one for the other.
+
+---
+
+## 2026-09-07 — the screenshot traps fired again, and the fourth one is about the environment rather than the selectors
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` (the script) and
+`Loom daily build` (where it lives) · **Status:** open — a fourth occurrence of
+the recipe already filed above
+
+`pkill -f "next start"` killed the shell issuing it, again, and cost the
+command's exit code (144). That is trap two, filed twice before, hit a third
+time. `ps -eo pid,args | grep next-server` and `kill $PID` is the form that
+works.
+
+The new one is worth writing down because no selector discipline prevents it:
+
+> A throwaway `env.sh` that generates its secrets inline —
+> `export LOOM_PORTAL_REVIEWERS="ana@loom.local:$(openssl rand -hex 16)"` —
+> generates **different secrets every time it is sourced**. Source it once to
+> write the key down and again to start the server, and the server holds a key
+> the browser has never seen. The portal is entirely correct about this and says
+> *"That key was not recognised."*, which reads exactly like a typo.
+
+That is ten minutes and three commands, and the previous three runs did not hit
+it only because they wrote the values as literals. The recipe filed above is
+unchanged and this is a fourth entry on it: `apps/loom/scripts/screenshot.ts`,
+which signs in, drives the prompt box by accessible name, kills by pid, and
+holds its configuration in one place. **Filed rather than written**, for the same
+reason as before — the application root is not obviously this lane's directory,
+and I would rather be told than assume.
+
+One thing that did work first time and is worth passing on: Chromium is already
+installed in this environment at `/opt/pw-browsers/chromium`, and
+`chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })` avoids
+`npx playwright install` entirely. A locally-installed `playwright` package looks
+for a build number that is not there and tells you to download browsers; it is
+wrong.

@@ -1,7 +1,7 @@
 import type { StoredRevision } from "@loom/runtime/store"
 
 import { plainOperation } from "./delta-summary"
-import { ASK_ORIGINS, confidenceWord, type PlainLine } from "./vocabulary"
+import { ASK_ORIGINS, confidenceWord, NO_CONFIDENCE_TO_JUDGE, type PlainLine } from "./vocabulary"
 
 /**
  * One accepted change, read as sentences.
@@ -64,7 +64,7 @@ export const whoAllowed = (stored: StoredRevision): string | undefined =>
  */
 export const surenessOf = (stored: StoredRevision): string =>
   stored.provenance.authoredBy === "runtime"
-    ? "Loom worked this change out from the record rather than asking a model, so there is no confidence to judge."
+    ? NO_CONFIDENCE_TO_JUDGE
     : `${confidenceWord(stored.provenance.confidence)}.`
 
 /** What the change did, one plain sentence per operation, in the delta's order. */

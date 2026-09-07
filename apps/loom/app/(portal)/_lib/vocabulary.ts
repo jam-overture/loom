@@ -386,6 +386,23 @@ const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
 export const ruleSentence = (code: DispositionReasonCode): string => RULE_SENTENCES[code]
 
 /**
+ * What to say instead, when the thing that wrote the change was not a model.
+ *
+ * A delta the runtime computed — an inverse, a repair it derived from the log —
+ * carries a confidence the way every delta does, and it is meaningless: only a
+ * model grades itself (0007), and 0031 makes calibration the reader of that
+ * self-grade. Printing "The AI says it is very sure" over an inverse the
+ * runtime worked out would attribute a claim to a model that never made one.
+ *
+ * Here rather than in one screen because two now say it — `/portal/history` on
+ * a revision, and the front door on a change nobody was asked about — and two
+ * screens holding their own copy of one sentence is the drift `vocabulary.ts`
+ * exists to prevent.
+ */
+export const NO_CONFIDENCE_TO_JUDGE =
+  "Loom worked this change out from the record rather than asking a model, so there is no confidence to judge."
+
+/**
  * A self-graded confidence, as a word.
  *
  * `0.72` is exact and means nothing to a reader who does not know what the
@@ -413,6 +430,21 @@ export const confidenceWord = (confidence: number): string => {
  */
 export const reversibilityWord = (reversible: boolean): string =>
   reversible ? "you could undo it" : "this one can't be undone"
+
+/**
+ * A clause, shaped to stand on its own.
+ *
+ * The clauses above are written to follow something — a stakes label, another
+ * sentence — and read as a dropped fragment anywhere else. The front door's
+ * first screenshot had `you could undo it` sitting in grey beside a button,
+ * which reads as a caption somebody forgot to finish.
+ *
+ * This shapes rather than rewords, deliberately. A second string saying the
+ * same thing in the standalone case is exactly the drift this module exists to
+ * prevent: one wording, capitalised and stopped where a sentence is wanted.
+ */
+export const asSentence = (clause: string): string =>
+  `${clause.slice(0, 1).toUpperCase()}${clause.slice(1)}.`
 
 /**
  * What became of one ask, in the portal's words.
