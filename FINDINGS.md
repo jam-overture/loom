@@ -13401,3 +13401,35 @@ behind it.
 Same recommendation as yesterday's entry, unchanged and now with a second
 reason: one sentence in the seven briefs and in `docs/routines.md` — *if this
 lane already has an open pull request, push onto its branch instead*.
+
+---
+
+## 2026-09-07 — the preview came back `Blocked` again, on a branch that deployed `Ready` yesterday
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — an instance on the 29 August entry, with the cleanest evidence yet that
+it is not a branch's fault
+
+The only check on #243 is `Vercel — Deployment was blocked`, at 14:08 UTC on
+commit `00aa4cb`. **The commit before it on the same branch deployed `Ready`**
+at 14:23 UTC yesterday, from the same base, the same project and the same
+configuration. Nothing between the two commits touches the build: one page, two
+components, one library, one nav entry, one generated program.
+
+*Blocked* is Vercel refusing to start a build rather than a build going red, so
+there is no log and nothing in the diff to fix — a spend or usage limit, a
+paused project, or a concurrency cap, all of them account settings and none of
+them reachable from a routine. `pnpm verify` is green here, exit 0, `next build`
+included.
+
+**What it costs today, specifically.** The branch alias in the pull request now
+serves *yesterday's* deployment, so the preview link to
+`/docs/the-runtime/when-something-looks-wrong` will 404 until a deployment goes
+through — the URL is correct and the page behind it does not exist yet on the
+preview. This entry is being pushed as a second commit, which gives the
+deployment one more attempt; if that is blocked too, the cap is real rather than
+transient.
+
+Nothing was skipped or weakened. The screenshots in
+`reports/2026-09-07-docs-when-something-looks-wrong*.png` are this commit served
+by `next start`, at a true 390 and 1280 CSS pixels, in both themes.
