@@ -183,3 +183,86 @@ describe("createPrimitiveRegistry over interactivity", () => {
     expect(createPrimitiveRegistry([opaque]).ok).toBe(true)
   })
 })
+
+describe("roles", () => {
+  const heading = (role: string, type = "loom.heading"): PrimitiveEntry => ({
+    ...entry({ type }),
+    role,
+  })
+
+  it("carries a declared role onto the registration", () => {
+    const built = createPrimitiveRegistry([heading("heading")])
+
+    expect(built.ok && built.value.primitives[0]?.role).toBe("heading")
+  })
+
+  it("leaves the role undefined for a primitive that declares none", () => {
+    const built = createPrimitiveRegistry([entry({ type: "loom.card" })])
+
+    expect(built.ok && built.value.primitives[0]?.role).toBeUndefined()
+  })
+
+  it("answers which types declared a role, in registration order", () => {
+    const built = createPrimitiveRegistry([
+      heading("heading", "acme.hero"),
+      entry({ type: "loom.card" }),
+      heading("heading"),
+    ])
+
+    expect(built.ok && built.value.typesWithRole("heading")).toEqual(["acme.hero", "loom.heading"])
+  })
+
+  /**
+   * The whole point of the seam: a host that registered `acme.hero` gets its own
+   * type back, and never has to know that `loom.heading` is the one the library
+   * happens to ship.
+   */
+  it("does not privilege the library's own type", () => {
+    const built = createPrimitiveRegistry([heading("heading", "acme.hero")])
+
+    expect(built.ok && built.value.typesWithRole("heading")).toEqual(["acme.hero"])
+  })
+
+  it("answers empty for a role nothing declared, rather than failing", () => {
+    const built = createPrimitiveRegistry([entry({ type: "loom.card" })])
+
+    expect(built.ok && built.value.typesWithRole("heading")).toEqual([])
+  })
+
+  /**
+   * A misspelling accepted here reads to every consumer as a primitive that
+   * declares no role, which is the silent failure the refusal exists to prevent.
+   * TypeScript stops this at the declaration; a host writing JavaScript has only
+   * this check.
+   */
+  it("refuses a role the runtime does not know", () => {
+    const error = errorOf([heading("title")])
+
+    expect(error).toEqual({ code: "unknown-role", type: "loom.heading", role: "title" })
+    expect(describeRegistryError(error)).toContain("\"title\"")
+  })
+
+  /**
+   * The list is the registry's own, handed out rather than copied — a consumer
+   * may ask per row of a listing. Frozen, so sharing it cannot become a way to
+   * change what a deployment registered. This was wrong in the first draft.
+   */
+  it("hands out a list that cannot be pushed to", () => {
+    const built = createPrimitiveRegistry([heading("heading")])
+    if (!built.ok) throw new Error("expected a registry")
+
+    /** Through `unknown`, because the point is what happens when a host defeats the type. */
+    const types = built.value.typesWithRole("heading") as unknown as string[]
+
+    expect(() => types.push("acme.hero")).toThrow()
+    expect(built.value.typesWithRole("heading")).toEqual(["loom.heading"])
+  })
+
+  it("refuses a role that differs only in case", () => {
+    expect(errorOf([heading("Heading")])).toEqual({
+      code: "unknown-role",
+      type: "loom.heading",
+      role: "Heading",
+    })
+  })
+})

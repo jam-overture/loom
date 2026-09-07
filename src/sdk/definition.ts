@@ -7,6 +7,7 @@ import type { BehaviourName } from "../render/behaviour.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
+import type { PrimitiveRole } from "../role.js"
 
 /**
  * The registration contract: what an author declares to make a component
@@ -41,6 +42,10 @@ import { NO_TEXT, type PrimitiveText } from "../render/text.js"
  *   hold each one against the origins the deployment permits (0094). Optional,
  *   and unlike `submits` it is read at render time: nothing else in the system
  *   can tell a `src` bound for a frame from a `src` bound for an image.
+ * - `role` — what part it plays, so a consumer can ask the registry a
+ *   categorical question instead of matching on the type string (0114).
+ *   Optional, read by nothing in the runtime, and the only declaration here
+ *   whose whole audience is outside this package.
  */
 
 export type PrimitiveDefinition<
@@ -107,6 +112,25 @@ export type PrimitiveDefinition<
    * `interactive` or the Gate will let one sit inside an anchor.
    */
   readonly behaviours?: readonly TBehaviour[]
+  /**
+   * What part this primitive plays — `"heading"` on anything a reader takes as
+   * the title of what follows, whatever it is called. Optional, and absent on
+   * almost everything: most primitives are an arrangement or a surface and play
+   * no part a consumer asks about categorically.
+   *
+   * A role travels in the opposite direction from every other declaration here.
+   * `interactive` and `frames` are read by the runtime and constrain what a tree
+   * may do; a role is read by a *host* and constrains nothing. It is here rather
+   * than in a host's own table for the same reason `description` is: the author
+   * of the component is the one who knows, and a table maintained beside the
+   * registry goes stale the day somebody registers a second heading.
+   *
+   * Typed rather than free — see `role.ts` for why the vocabulary is closed and
+   * why it currently has one member. A host writing JavaScript can still hand
+   * over a string the runtime does not know, so the registry refuses one rather
+   * than letting a misspelling read as "declares no role".
+   */
+  readonly role?: PrimitiveRole
   readonly component: LoomPrimitive<TProps, TText, TBehaviour>
 }
 
@@ -139,6 +163,12 @@ export type PrimitiveEntry = {
   readonly frames: readonly string[]
   /** Declared behaviour names, still raw: the registry is what checks them. */
   readonly behaviours: readonly string[]
+  /**
+   * The declared role, still raw: the registry is what checks it, for the same
+   * reason it checks a behaviour name. `undefined` for the primitive that plays
+   * no part a consumer asks about, which is most of them.
+   */
+  readonly role: string | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -201,6 +231,7 @@ export const definePrimitive = <
   submits: definition.submits ?? false,
   frames: definition.frames ?? [],
   behaviours: definition.behaviours ?? [],
+  role: definition.role,
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

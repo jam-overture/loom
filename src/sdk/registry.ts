@@ -18,6 +18,7 @@ import type { FrameResolver } from "../render/frame.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
+import { isPrimitiveRole, PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
 import type { PrimitiveEntry } from "./definition.js"
 
@@ -63,12 +64,16 @@ export type RegisteredPrimitive = {
   readonly frames: readonly string[]
   /** The controls it takes from the runtime's vocabulary. Empty for most. */
   readonly behaviours: readonly BehaviourName[]
+  /** What part it plays (0114). `undefined` for most, which play none. */
+  readonly role: PrimitiveRole | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
 const NO_BEHAVIOUR_NAMES: readonly BehaviourName[] = Object.freeze([])
 
 const NO_FRAME_PROPS: readonly string[] = Object.freeze([])
+
+const NO_TYPES: readonly PrimitiveType[] = Object.freeze([])
 
 export type RegistryError =
   | { readonly code: "invalid-primitive-type"; readonly type: string }
@@ -89,6 +94,7 @@ export type RegistryError =
       readonly type: string
       readonly behaviour: string
     }
+  | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
@@ -98,6 +104,19 @@ export type PrimitiveRegistry = PrimitiveResolver &
   FrameResolver & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
+    /**
+     * The types that declared a given role, in registration order (0114).
+     *
+     * Empty for a role nothing here declares, which is the honest answer and
+     * not a failure: a deployment that registered no heading has no heading,
+     * and a consumer deriving a page name from one should show what it shows
+     * for a page that has none.
+     *
+     * Types rather than whole registrations, because every consumer this exists
+     * for is matching nodes in a tree, and a node carries a type. A caller that
+     * wants the registration has `primitives` and this is not in its way.
+     */
+    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[]
   }
 
 export const describeRegistryError = (error: RegistryError): string => {
@@ -120,6 +139,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" takes the "${error.behaviour}" behaviour and declares no "${error.key}" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent`
     case "undeclared-interactive-behaviour":
       return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
+    case "unknown-role":
+      return `"${error.type}" declares the role "${error.role}", which the runtime has none of; the vocabulary is closed and its members are ${PRIMITIVE_ROLES.map((role) => `"${role}"`).join(", ")} — and a misspelling accepted here would read to every consumer as a primitive that declares no role at all`
     case "duplicate-primitive-type":
       return `"${error.type}" is registered twice; a tree naming it would resolve to whichever registration won`
   }
@@ -206,6 +227,25 @@ const registeredBehaviours = (
   return ok(names)
 }
 
+/**
+ * The declared role, checked — `undefined` for the primitive that declared none,
+ * which is most of them.
+ *
+ * Shaped like `registeredBehaviours` because it is the same job: an entry
+ * carries the declaration raw, the registry is the boundary that decides whether
+ * it is a member, and a string that is not one is refused rather than dropped.
+ */
+const registeredRole = (
+  entry: PrimitiveEntry
+): Result<PrimitiveRole | undefined, RegistryError> => {
+  const role = entry.role
+
+  if (role === undefined) return ok(undefined)
+  if (!isPrimitiveRole(role)) return err({ code: "unknown-role", type: entry.type, role })
+
+  return ok(role)
+}
+
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
   const type = primitiveTypeSchema.safeParse(entry.type)
   if (!type.success) return err({ code: "invalid-primitive-type", type: entry.type })
@@ -240,6 +280,9 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
   const behaviours = registeredBehaviours(entry)
   if (!behaviours.ok) return behaviours
 
+  const role = registeredRole(entry)
+  if (!role.ok) return role
+
   return ok({
     type: type.data,
     description: entry.description,
@@ -252,6 +295,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     submits: entry.submits,
     frames: entry.frames,
     behaviours: behaviours.value,
+    role: role.value,
     validate: entry.validate,
   })
 }
@@ -269,6 +313,7 @@ export const createPrimitiveRegistry = (
   entries: readonly PrimitiveEntry[]
 ): Result<PrimitiveRegistry, RegistryError> => {
   const byType = new Map<string, RegisteredPrimitive>()
+  const byRole = new Map<PrimitiveRole, PrimitiveType[]>()
   const primitives: RegisteredPrimitive[] = []
 
   for (const entry of entries) {
@@ -281,7 +326,25 @@ export const createPrimitiveRegistry = (
 
     byType.set(registered.value.type, registered.value)
     primitives.push(registered.value)
+
+    const { role } = registered.value
+
+    if (role !== undefined) {
+      const claimed = byRole.get(role)
+
+      if (claimed) claimed.push(registered.value.type)
+      else byRole.set(role, [registered.value.type])
+    }
   }
+
+  /**
+   * Frozen before anything can be handed one. `typesWithRole` returns the list
+   * itself rather than a copy — a consumer may call it per row of a listing —
+   * and an unfrozen array shared that way is one `push` away from a deployment's
+   * registry changing under a rendered page. The same reason `freezeText` copies
+   * and freezes, one collection along.
+   */
+  for (const types of byRole.values()) Object.freeze(types)
 
   return ok({
     primitives,
@@ -293,5 +356,7 @@ export const createPrimitiveRegistry = (
       byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
     framePropsFor: (type: PrimitiveType): readonly string[] =>
       byType.get(type)?.frames ?? NO_FRAME_PROPS,
+    typesWithRole: (role: PrimitiveRole): readonly PrimitiveType[] =>
+      byRole.get(role) ?? NO_TYPES,
   })
 }

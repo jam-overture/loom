@@ -13708,3 +13708,59 @@ proposing placeholder props finds the argument rather than the silence.
 **Not pinned, deliberately.** A test over the whole unprobed set would churn on
 every optional prop any lane adds, which trains people to update a test without
 reading it. What is pinned is the one case that produced the false row.
+
+---
+
+## 2026-09-07 — a primitive can say what part it plays, and the registry answers
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+closes the 6 September finding *a primitive cannot say that it carries the page's
+title, so every host writes the same array*, built on
+`framework-25-where-the-face-is` and recorded as
+[0114](decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+
+The original entry lives on `portal-23-four-units-one-tree` and `main` has not
+moved since 1 September, so it cannot be edited where it was written. This is the
+closure, by the convention the last five entries of this kind used.
+
+**What exists now.** `definePrimitive` takes an optional `role` from a closed
+vocabulary, and a registry answers which types declared each one:
+
+```ts
+definePrimitive({ type: "acme.hero", role: "heading", /* … */ })
+
+registry.typesWithRole("heading") // ["acme.hero"]
+```
+
+`PrimitiveRole`, `PRIMITIVE_ROLES`, `describePrimitiveRole` and `isPrimitiveRole`
+are exported from the package root and from `@loom/runtime/sdk`. An unknown role
+is refused at registration with `unknown-role` rather than read as "declares
+none", because a misspelling that reads as silence is the failure the check is
+for.
+
+**What this lane did not do, and why it is yours.** `_lib/page-name.ts` is
+untouched and `TITLE_TYPES` keeps working exactly as it does. Adopting it is two
+edits in your lane, in this order:
+
+1. `role: "heading"` on `apps/loom/app/(portal)/primitives/loom.heading.ts`.
+2. `const TITLE_TYPES = portalRegistry.typesWithRole("heading")` in
+   `_lib/page-name.ts`.
+
+The second without the first gives an empty list and every page named *Untitled
+page*, so they land together or not at all. **There is no deadline on this** —
+the seam answers empty until something declares, which is the right answer for a
+deployment with no heading registered, and nothing degrades while it waits.
+
+**The vocabulary has one member on purpose.** `heading` is what was filed for. A
+page root, a body text and a byline were considered and left out: each came from
+what the portal happens to register rather than from a consumer that could not
+answer its question. **The bar for a second member is the bar this one cleared —
+file it.** If the portal wants *"which primitive is the page's body?"*, that is a
+finding and it is one string plus a sentence.
+
+**What was deliberately left in your file.** The finding's derivation is two
+facts, not one: *which types are headings* (a fact about primitives, now
+answerable) and *which heading leads* (a fact about a tree, and yours). A
+tree-side helper for the second was considered and rejected in 0114 — your
+`.find()` over `outlineTree` is correct, and the thing it could not get right is
+the half that moved.

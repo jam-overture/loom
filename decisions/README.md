@@ -197,3 +197,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0111](0111-the-revision-an-undo-puts-back-is-a-field-on-provenance.md) | The revision an undo puts back is a field on provenance, because provenance is the part of a proposal a log keeps | Accepted | §2 |
 | [0112](0112-a-second-listing-on-the-hold-store-scoped-by-the-handle-and-keyed-by-two-columns.md) | A hold store lists what the handle can see, and its cursor is two columns because an instant is not a key | Accepted | §5 |
 | [0113](0113-the-pairings-probe-reports-where-it-stops-looking-rather-than-inventing-a-price.md) | The pairings probe reports where it stops looking, rather than inventing a price | Accepted | §4b |
+| [0114](0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md) | A primitive declares what part it plays, and the registry is what gets asked | Accepted | §1 |
