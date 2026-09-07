@@ -48,6 +48,8 @@ import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
+import { loomMessage } from "./loom.message.js"
+import { loomMessageList } from "./loom.message-list.js"
 import { loomMeter } from "./loom.meter.js"
 import { loomMilestone } from "./loom.milestone.js"
 import { loomMilestoneList } from "./loom.milestone-list.js"
@@ -68,6 +70,7 @@ import { loomPerkListItem } from "./loom.perk-list-item.js"
 import { loomProduct } from "./loom.product.js"
 import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
+import { loomReveal } from "./loom.reveal.js"
 import { loomQuote } from "./loom.quote.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
 import { loomRating } from "./loom.rating.js"
@@ -250,6 +253,22 @@ import { loomTierTable } from "./loom.tier-table.js"
  * take one, which is the first `id` this library renders and the reason a Loom
  * page can link to its own second screen (`anchor.ts`).
  *
+ * **The exchange, and the way a band arrives** are what a page about a tool
+ * that *answers you* needs and Hermes never had a block for. `message-list`
+ * over `message` is the conversation itself, shown rather than described: an
+ * `<ol>` because the order is the content, a turn whose body is a flow of
+ * nodes ([0094](../../decisions/0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md))
+ * and whose side, name, time and portrait are one record's worth of props, and
+ * the first primitive here to draw a face outside a person's own card.
+ * `loom.reveal` is the trigger the library was missing rather than the
+ * animation: `.loom-rise` has fired on load since 0055, which means every band
+ * below the fold finished arriving before anybody scrolled to it. It wraps
+ * anything, says one word about which entrance it wants, and cannot hide what
+ * is inside it — every rule that starts at `opacity: 0` sits inside
+ * `@supports (animation-timeline: view())`, so a browser that cannot run the
+ * animation never gets the starting state either
+ * ([0110](../../decisions/0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md)).
+ *
  * **The four between the bands** are what a page does that none of its bands
  * do: announce, orient, run past the edge, and show a proportion.
  * `loom.banner` is the strip above everything — the third primitive here whose
@@ -321,6 +340,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomMarquee,
   loomCarousel,
   loomOrbit,
+  loomReveal,
   loomCard,
   loomFrame,
   loomPin,
@@ -364,6 +384,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomCredential,
   loomFaqList,
   loomFaq,
+  loomMessageList,
+  loomMessage,
   loomForm,
   loomField,
   loomOption,
@@ -455,14 +477,18 @@ export {
   loomLogoCloud,
   loomMarquee,
   loomMedia,
+  loomMessage,
+  loomMessageList,
   loomMeter,
   loomMilestone,
   loomMilestoneList,
+  loomMilestoneRow,
   loomMosaic,
   loomNav,
   loomOffering,
   loomOfferingGrid,
   loomOption,
+  loomOrbit,
   loomPage,
   loomPerk,
   loomPerkList,
@@ -475,6 +501,7 @@ export {
   loomProse,
   loomQuote,
   loomQuoteGrid,
+  loomReveal,
   loomRating,
   loomRecording,
   loomRecordingGrid,

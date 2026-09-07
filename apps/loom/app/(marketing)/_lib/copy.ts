@@ -44,7 +44,7 @@ export const DECISIONS_AT_LEAST = 100
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
-  primitives: "74",
+  primitives: "84",
   /** A floor, not a count. See `DECISIONS_AT_LEAST`. */
   decisions: `${DECISIONS_AT_LEAST}+`,
   /** Delta operations. The whole vocabulary of structural change. */

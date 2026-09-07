@@ -190,8 +190,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as eighty-one primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(81)
+  it("registers as eighty-four primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(84)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -204,6 +204,7 @@ describe("the starter library", () => {
       "loom.marquee",
       "loom.carousel",
       "loom.orbit",
+      "loom.reveal",
       "loom.card",
       "loom.frame",
       "loom.pin",
@@ -247,6 +248,8 @@ describe("the starter library", () => {
       "loom.credential",
       "loom.faq-list",
       "loom.faq",
+      "loom.message-list",
+      "loom.message",
       "loom.form",
       "loom.field",
       "loom.option",
@@ -902,6 +905,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
       ...typesIn(explainerPage(EDITORIAL)),
+      ...typesIn(conversationPage(EDITORIAL)),
       ...typesIn(furniturePage(EDITORIAL)),
       ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(productPage(EDITORIAL)),
@@ -5585,6 +5589,267 @@ describe("how it works, and what it works with", () => {
      * and it is the reason the message says what a valid one looks like.
      */
     expect(markup).toBe("")
+  })
+})
+
+const conversationPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const turn = (props: JsonObject, ...lines: readonly string[]) =>
+    buildElement(idFactory, {
+      type: "loom.message",
+      props,
+      children: lines.map((line) =>
+        buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, line)] })
+      ),
+    })
+
+  const exchange = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "In use", anchor: "the-exchange" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "Ask for the change you want")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.reveal",
+        props: {},
+        children: [
+          buildElement(idFactory, {
+            type: "loom.message-list",
+            props: { density: "tight" },
+            children: [
+              turn({ speaker: "person", name: "You", stamp: "09:41" }, "Put the pricing above the questions."),
+              turn(
+                { speaker: "assistant", name: "Loom", stamp: "09:41", avatar: "https://example.com/mark.png" },
+                "One move, and nothing else on the page changes.",
+                "You can put it back with the same operation reversed.",
+              ),
+              turn({ speaker: "system" }, "The Gate weighed one operation and allowed it."),
+              turn({ speaker: "assistant", name: "Loom", pending: true }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  })
+
+  const cell = (title: string, body: string) =>
+    buildElement(idFactory, {
+      type: "loom.reveal",
+      props: { motion: "fade" },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.card",
+          props: { tone: "surface" },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.heading",
+              props: { level: 3 },
+              children: [buildText(idFactory, title)],
+            }),
+            buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, body)] }),
+          ],
+        }),
+      ],
+    })
+
+  const cells = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "What happens next" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.grid",
+        props: { columns: "two", gap: "normal" },
+        children: [
+          cell("Weighed", "Every operation is assessed before it lands."),
+          cell("Reversible", "Each one carries the operation that undoes it."),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [exchange, cells],
+    }),
+    idFactory
+  )
+}
+
+describe("the exchange, and the way a band arrives", () => {
+  it("renders the conversation with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(conversationPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Put the pricing above the questions.")
+    expect(markup).toContain("The Gate weighed one operation and allowed it.")
+    expect([...markup.matchAll(/class="loom-message[ "]/g)]).toHaveLength(4)
+    expect([...markup.matchAll(/class="loom-reveal[ "]/g)]).toHaveLength(3)
+    expect([...markup.matchAll(/class="loom-reveal loom-reveal-fade"/g)]).toHaveLength(2)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(conversationPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(conversationPage(BOLD)).diagnostics).toEqual([])
+    expect(render(conversationPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("keeps a turn's side in the stylesheet and its paint on the element", () => {
+    /**
+     * `loom.milestone`'s lesson, applied before it costs a rewrite rather than
+     * after: an inline `flex-direction` here would pin these turns into bubbles
+     * forever, and the second arrangement of a conversation — a transcript set
+     * flush left — is the container 0054 says to write when somebody wants one.
+     * Asserted from both ends: the turn carries no direction of its own, and
+     * the stylesheet carries both sides of it.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const turn = tree.slice(tree.indexOf('class="loom-message '))
+
+    expect(turn.slice(0, turn.indexOf(">"))).not.toContain("flex-direction")
+    expect(stylesheet).toContain(".loom-message {\n  display: flex;\n  align-items: flex-end;")
+    expect(stylesheet).toContain(".loom-message-person {\n  flex-direction: row-reverse;\n}")
+    expect(stylesheet).toContain(".loom-message-person > .loom-message-body {\n  align-items: flex-end;\n}")
+    /** The paint is inline, because no arrangement of these turns varies it. */
+    expect(tree).toContain("background:var(--loom-accent-subtle)")
+    expect(tree).toContain("background:var(--loom-bg-surface)")
+  })
+
+  it("paints no pairing the contrast audit does not already carry", () => {
+    /**
+     * The 25 August finding, which is this lane's: `fg-subtle` on
+     * `accent-subtle` is eight of the nine composed contrast failures in the
+     * library, across eight of twenty-one palettes. A person's bubble is an
+     * `accent-subtle` panel, so every ink inside one is a chance to be the
+     * ninth. The dots are `fg-muted` for that reason and no other.
+     */
+    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const person = tree.slice(tree.indexOf('class="loom-message loom-message-person"'))
+    const bubble = person.slice(person.indexOf("background:var(--loom-accent-subtle)"))
+
+    expect(bubble.slice(0, bubble.indexOf("</li>"))).not.toContain("--loom-fg-subtle")
+    expect(tree).toContain("background:var(--loom-fg-muted)")
+  })
+
+  it("names the composing indicator rather than leaving three dots silent", () => {
+    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+
+    expect(tree).toContain('role="img" aria-label="Still writing"')
+    expect([...tree.matchAll(/class="loom-message-dot"/g)]).toHaveLength(3)
+    /** The dots are the only motion in the band, and none of it is in the tree. */
+    expect(tree).not.toContain("animation")
+  })
+
+  it("hides nothing on a browser that cannot run the entrance", () => {
+    /**
+     * The property that makes a scroll-driven entrance safe to ship at all:
+     * every rule that starts at `opacity: 0` is inside the `@supports` block,
+     * so a browser without scroll-driven animations never gets the starting
+     * state, and one that has it holds a band already on screen at the end
+     * state through `animation-fill-mode: both`.
+     */
+    const { stylesheet } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const supported = stylesheet.slice(stylesheet.indexOf("@supports (animation-timeline: view())"))
+    const guarded = supported.slice(0, supported.indexOf("\n}\n"))
+
+    expect(guarded).toContain("animation-timeline: view();")
+    expect(guarded).toContain("animation-fill-mode: both;")
+    /**
+     * The range is the whole **entry** phase and it is a correctness property
+     * rather than taste. A range that ends in `cover` finishes when the band is
+     * comfortably up the screen — and is unreachable for the *last* band on a
+     * page, which has no scroll left to give and would stay half-faded forever.
+     * `entry 92%` is always reached, because at the foot of a document a band's
+     * end edge does cross the scrollport's.
+     */
+    expect(guarded).toContain("animation-range: entry 0% entry 92%;")
+    expect(stylesheet).toContain("@keyframes loom-reveal-rise {\n  from { opacity: 0;")
+    /** The one place `opacity: 0` may be said, and it is inside the guard. */
+    const opacityZero = [...stylesheet.matchAll(/loom-reveal[^@]*?opacity: 0;/gs)]
+    expect(opacityZero).toHaveLength(2)
+    expect(stylesheet.indexOf("@keyframes loom-reveal-rise")).toBeGreaterThan(-1)
+  })
+
+  it("holds still and visible while the page is being edited", () => {
+    /**
+     * 0091's rule, with a second reason this primitive adds: a portal preview
+     * is not a page anybody scrolls, so a band waiting for a scroll would be a
+     * band that is never there.
+     */
+    const edited = splitStylesheet(render(conversationPage(EDITORIAL), true).markup).tree
+    const published = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
+
+    expect(edited).toContain(LIBRARY_CLASS.revealStill)
+    expect(published).not.toContain(LIBRARY_CLASS.revealStill)
+    expect(splitStylesheet(render(conversationPage(EDITORIAL)).markup).stylesheet).toContain(
+      ".loom-reveal:not(.loom-reveal-still) {"
+    )
+  })
+
+  it("gives a reader who asked for calm the content and not the movement", () => {
+    const { stylesheet } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const calm = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    expect(calm).toContain(".loom-message-dot {\n    animation: none;\n    opacity: 1;")
+    expect(calm).toContain(".loom-reveal:not(.loom-reveal-still) {\n    animation: none;\n    opacity: 1;")
+    /** After the guarded block, so it wins at equal specificity. */
+    expect(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(
+      stylesheet.indexOf("@supports (animation-timeline: view())")
+    )
+  })
+
+  it("orders the conversation, because the order is the content", () => {
+    /**
+     * An `<ol>` rather than a stack of divs: a transcript read out of sequence
+     * is a different conversation, which is the same argument
+     * `loom.milestone-list` makes and the reason a page should not reach for a
+     * `loom.stack` of cards here.
+     */
+    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+
+    expect(tree).toContain("<ol")
+    expect(tree.indexOf("Put the pricing above the questions.")).toBeLessThan(
+      tree.indexOf("The Gate weighed one operation and allowed it.")
+    )
+    expect(propsOfType("loom.message-list")).toEqual(["density"])
+    /** No side, name or portrait on the list: those belong to a turn (0009). */
+    expect(propsOfType("loom.message")).toEqual(["avatar", "name", "pending", "speaker", "stamp"])
+  })
+
+  it("refuses a turn with no side rather than guessing one", () => {
+    const idFactory = sequentialIdFactory()
+    const { markup, diagnostics } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.message-list",
+          props: {},
+          children: [buildElement(idFactory, { type: "loom.message", props: { name: "You" } })],
+        }),
+        idFactory
+      )
+    )
+
+    expect(diagnostics).toEqual([
+      {
+        code: "invalid-props",
+        nodeId: "n_1",
+        type: "loom.message",
+        issues: [{ path: "speaker", message: expect.any(String) as unknown as string }],
+      },
+    ])
+    /** The list still renders: one refused turn is not a refused conversation. */
+    expect(markup).toContain("<ol")
   })
 })
 

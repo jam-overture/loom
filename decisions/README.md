@@ -190,3 +190,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0104 | *No record on this branch* | — | — |
 | 0105 | *No record on this branch* | — | — |
 | [0106](0106-a-band-asks-its-own-container-for-a-width-not-the-window.md) | A band asks its own container for a width, not the window | Proposed — **ARCHITECTURAL, needs review.** It reverses a named | §4b |
+| 0107 | *No record on this branch* | — | — |
+| 0108 | *No record on this branch* | — | — |
+| 0109 | *No record on this branch* | — | — |
+| [0110](0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md) | An entrance the reader drives is a wrapper primitive, not a prop on every band | Accepted | §4b |
