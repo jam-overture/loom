@@ -13404,11 +13404,11 @@ lane already has an open pull request, push onto its branch instead*.
 
 ---
 
-## 2026-09-07 — the preview came back `Blocked` again, on a branch that deployed `Ready` yesterday
+## 2026-09-07 — the preview came back `Blocked`, and the very next commit deployed `Ready`
 
 **Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
-open — an instance on the 29 August entry, with the cleanest evidence yet that
-it is not a branch's fault
+open — an instance on the 29 August entry, and the first one that resolved
+itself, which is new information about what the block is
 
 The only check on #243 is `Vercel — Deployment was blocked`, at 14:08 UTC on
 commit `00aa4cb`. **The commit before it on the same branch deployed `Ready`**
@@ -13422,13 +13422,20 @@ paused project, or a concurrency cap, all of them account settings and none of
 them reachable from a routine. `pnpm verify` is green here, exit 0, `next build`
 included.
 
-**What it costs today, specifically.** The branch alias in the pull request now
-serves *yesterday's* deployment, so the preview link to
-`/docs/the-runtime/when-something-looks-wrong` will 404 until a deployment goes
-through — the URL is correct and the page behind it does not exist yet on the
-preview. This entry is being pushed as a second commit, which gives the
-deployment one more attempt; if that is blocked too, the cap is real rather than
-transient.
+**What happened next is the useful half.** This entry was pushed as a second
+commit, which gave the deployment one more attempt — and that one **completed**,
+four minutes after the block, with nothing changed but a paragraph of markdown.
+So the block is **transient rather than a hard cap**: whatever refuses the build
+lets the next one through, which is what a concurrency limit or a transient
+usage window looks like and is not what a paused project or an exhausted spend
+limit looks like.
+
+That narrows the 29 August entry, which could not tell those apart from one
+sample. It also changes what a lane should do about it, and the answer is cheap:
+**a blocked preview is worth one more commit, not a report saying there is no
+preview.** The cost of the confusion is real in the meantime — for four minutes
+the pull request's preview link pointed at an alias serving the previous
+deployment, so the page it named did not exist behind it.
 
 Nothing was skipped or weakened. The screenshots in
 `reports/2026-09-07-docs-when-something-looks-wrong*.png` are this commit served
