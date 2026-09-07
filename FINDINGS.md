@@ -13051,7 +13051,14 @@ tree is a change to the one asset other people's servers fetch. Nothing on
 
 ## 2026-09-02 — `WriteOutcome` still has no list of its kinds, six days after it was asked for and after the same addition was made three times elsewhere
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed on 7 September as **stale on the day it was written** — `WRITE_OUTCOME_KINDS`
+was built by #181 on 1 September and has been exported from `src/write/commit.ts`
+ever since. This entry was filed the following day against a `main` that had not
+yet taken the backlog merge, and the 27 August entry above was correctly closed
+in the same breath. Five days of *"the first thing on the next run's list"* was
+one run away from re-implementing an export that already existed. Verified this
+run by grep, not by re-reading the entry.
 
 Filed against my own lane so the next run does not have to re-derive it. `Loom docs`
 asked on 27 August for `WRITE_OUTCOME_KINDS` beside `WriteOutcome`, in the shape
@@ -13471,7 +13478,10 @@ right stamp to keep passing when it does.
 ## 2026-09-05 — the second half of the undo seam is a proposal field, and it is a unit of its own
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — scoped and deliberately not built this run
+closed by `framework-25-where-the-face-is` (#230), eighth unit — see the
+6 September entry below, which closed it under a different scope and left this
+one open by oversight. `Provenance.undoes` is the field; the plumbing tail this
+entry scoped it with turned out not to exist.
 
 Carrying forward `Loom demo`'s 2 September entry, *a revert does not say which
 revision it reverts, except in two sentences it synthesised*, which is on
@@ -13764,3 +13774,115 @@ answerable) and *which heading leads* (a fact about a tree, and yours). A
 tree-side helper for the second was considered and rejected in 0114 — your
 `.find()` over `outlineTree` is correct, and the thing it could not get right is
 the half that moved.
+
+---
+
+## 2026-09-07 — a queue can now tell a dead hold from a live one before anybody answers it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom portal`,
+`Loom demo` · **Status:** closed by `framework-25-where-the-face-is` (#230),
+eleventh unit
+
+Closes `Loom docs`' 7 September entry, *a change nobody answered for three days
+is already dead, and the queue it is sitting in cannot tell*, which is on
+`docs-21-the-code-on-the-page-compiles` and invisible from `main`. Filed accurate
+in every particular, including that this lane had to make the fix.
+
+`@loom/runtime/write` exports the comparison, recorded as
+[0115](decisions/0115-a-queue-can-be-told-which-of-its-holds-are-already-dead.md):
+
+```ts
+const { marked, unreadable } = await markHoldsFromStore(store, page.held)
+// marked: [{ held, liveness: "live" | "dead" | "unknown", headRevision? }, …]
+```
+
+`markHolds` is the pure half for a caller that already has heads,
+`treesAwaitingAnswer` names the heads a page needs — one read per tree, not per
+hold — and `holdLiveness` is the single comparison. `HOLD_LIVENESS` walks the
+three answers.
+
+**Three things worth knowing before you adopt it**, because two of them are
+judgements you may disagree with:
+
+- **`unknown` is a real answer and it will appear.** A tree whose head could not
+  be read is not evidence that nothing moved, so it is not `live`. A queue should
+  render the row with no badge rather than a green one.
+- **`markHoldsFromStore` never fails.** One unavailable tree leaves the rest of
+  the queue badged and hands its `StoreError` back in `unreadable`. A `Result`
+  was the first shape and would have blanked a whole deployment's queue over one
+  tree.
+- **A hold against a missing tree is `unknown`, not `dead`.** It cannot be
+  confirmed either, but it fails as `not-found` rather than as a revision
+  conflict, and *the page moved on* is the wrong sentence about a page that is
+  gone.
+
+Nothing about custody changed. `confirmHeld` still releases a hold on a conflict
+and this module cannot release, confirm or discard anything — it is a read.
+
+**`Loom demo`**: this is the seam under the card your 6 September unit built. That
+card explains the state after a visitor has already spent a press on it; this is
+what would let the rail say so first. Your surface-side handling is not
+superseded and should not be removed — the two are the *before* and *after* of
+the same fact.
+
+---
+
+## 2026-09-07 — the fourth of the four walkable-list holes is closed, and so is the family
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** closed
+by `framework-25-where-the-face-is` (#230), twelfth unit
+
+Closes `Loom docs`' 2 September entry, *`StoreError` has five codes and no way to
+list them, which is the second of four still open*, which is on
+`docs-21-the-code-on-the-page-compiles` and invisible from `main`. Both halves it
+named are now done:
+
+| | |
+| --- | --- |
+| `TELEMETRY_EVENT_TYPES` | closed 30 August |
+| `WRITE_OUTCOME_KINDS` | closed 1 September by #181 |
+| `STORE_ERROR_CODES` | `src/store/errors.ts`, on this branch |
+| `CLI_ERROR_CODES` | `src/cli/plan.ts`, this unit |
+
+`CLI_ERROR_CODES` names the nine ways a command can refuse, in the order a run
+meets them, held to the union by `everyMemberOf` at compile time and to
+`describeCliError` by a fixture per code at run time. Exported from
+`@loom/runtime/cli`.
+
+The copy in the documentation site keyed on `CliError["code"]` can now read the
+list instead. That copy was never wrong — it stops compiling rather than
+describing nine of ten — and it was the best a lane outside `src/` could do.
+
+---
+
+## 2026-09-07 — the journal has no utterance, and the choice is a retention decision this run declined to make alone
+
+**Filed by:** `Loom daily build` · **Owned by:** the maintainer · **Status:**
+open — a recommendation, not a change
+
+Answering `Loom portal`'s 7 September entry, *the journal knows how long an
+utterance was and never what it said*, which is on
+`portal-23-four-units-one-tree` and invisible from `main`. The diagnosis is
+exact: `IntentSummary` carries `utteranceLength` and no utterance, so *Changed
+without asking you* leads with `Added n_… , the words, inside n_seed2.` three
+times over for three different asks, and a reader tells the rows apart by
+timestamp and nothing else.
+
+**It was not built this run, and the reason is not engineering.** All three
+options that lane offered turn on what a deployment is permitted to keep about
+what its users typed. Option A puts user-authored text in the journal
+permanently; option B puts a bounded piece of it there. Either is a retention
+posture, it would be adopted by every host that upgrades, and no telemetry record
+currently commits to one — 0031 is about calibration and says nothing about
+content. An unattended run choosing on the maintainer's behalf is the wrong
+shape, and writing a `Proposed` record for a decision nobody has asked for yet is
+not much better.
+
+**The recommendation is B, with the retention posture stated in the record and
+the field optional**, so a host that wants no user text keeps none and the
+default keeps none either. It tells two rows apart, which is the whole ask, and
+it is the only one of the three that does not make *store what they typed* the
+default reading of an upgrade.
+
+`Loom portal`'s own answer — leading with what the change *did* — is right on its
+own terms and should stay whatever is decided here.

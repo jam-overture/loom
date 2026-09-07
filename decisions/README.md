@@ -198,3 +198,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0112](0112-a-second-listing-on-the-hold-store-scoped-by-the-handle-and-keyed-by-two-columns.md) | A hold store lists what the handle can see, and its cursor is two columns because an instant is not a key | Accepted | §5 |
 | [0113](0113-the-pairings-probe-reports-where-it-stops-looking-rather-than-inventing-a-price.md) | The pairings probe reports where it stops looking, rather than inventing a price | Accepted | §4b |
 | [0114](0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md) | A primitive declares what part it plays, and the registry is what gets asked | Accepted | §1 |
+| [0115](0115-a-queue-can-be-told-which-of-its-holds-are-already-dead.md) | A queue can be told which of its holds are already dead, and a head it could not read is a third answer rather than an optimistic one | Accepted | §2 |

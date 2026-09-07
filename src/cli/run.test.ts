@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { memoryFileSystem } from "../testing/filesystem.js"
 
 import { CLI_USAGE, describeCliError, runCli, type CliReport } from "./run.js"
-import type { CliError } from "./plan.js"
+import { CLI_ERROR_CODES, type CliError } from "./plan.js"
 
 const reportOf = async (
   argv: readonly string[],
@@ -99,6 +99,46 @@ describe("runCli", () => {
       code: "invalid-primitive-type",
       type: "Loom.Card",
     })
+  })
+})
+
+/**
+ * One fixture per code, so the list has something outside itself to agree with.
+ * `everyMemberOf` fails the compile when `CLI_ERROR_CODES` stops naming the
+ * union; this fails the run when a code is named and nothing can say it.
+ */
+const everyCliError: readonly CliError[] = [
+  { code: "unknown-command", given: "deploy" },
+  { code: "missing-argument", argument: "<type>" },
+  { code: "unexpected-argument", given: "extra" },
+  { code: "invalid-primitive-type", type: "X" },
+  { code: "reserved-primitive-type", type: "registry" },
+  { code: "framework-namespace", type: "loom.card" },
+  { code: "already-registered", type: "app.card" },
+  { code: "file-exists", path: "a/b.ts" },
+  { code: "filesystem-failed", path: "a", detail: "EACCES" },
+]
+
+describe("CLI_ERROR_CODES", () => {
+  it("names each way a command can refuse exactly once", () => {
+    expect(new Set(CLI_ERROR_CODES).size).toBe(CLI_ERROR_CODES.length)
+  })
+
+  it("covers the whole CliError union", () => {
+    const codes = everyCliError.map((error) => error.code)
+
+    expect(new Set(codes).size).toBe(everyCliError.length)
+    expect([...codes].sort()).toEqual([...CLI_ERROR_CODES].sort())
+  })
+
+  it("describes every code it names", () => {
+    for (const code of CLI_ERROR_CODES) {
+      const fixture = everyCliError.find((error) => error.code === code)
+      expect(fixture, `no fixture for ${code}`).toBeDefined()
+      if (fixture === undefined) continue
+
+      expect(describeCliError(fixture).length).toBeGreaterThan(0)
+    }
   })
 })
 

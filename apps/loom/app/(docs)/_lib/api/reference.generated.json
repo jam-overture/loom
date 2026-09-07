@@ -6451,6 +6451,20 @@
               "summary": ""
             },
             {
+              "name": "CliErrorCode",
+              "kind": "type",
+              "signature": "type CliErrorCode = CliError[\"code\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CLI_ERROR_CODES",
+              "kind": "value",
+              "signature": "const CLI_ERROR_CODES: readonly CliErrorCode[]",
+              "truncated": false,
+              "summary": "Every way a command can refuse, as a list something can walk."
+            },
+            {
               "name": "PlannedFile",
               "kind": "type",
               "signature": "type PlannedFile = {\n    readonly path: string;\n    readonly contents: string;\n};",
@@ -7184,6 +7198,69 @@
               "signature": "const memoryHoldStore: () => HoldStore",
               "truncated": false,
               "summary": "The reference implementation. Both listings are in `compareHolds` order, so a queue reads oldest-first: a change that has been waiting longest is the one most likely to be about to go stale."
+            }
+          ]
+        },
+        {
+          "module": "write/liveness",
+          "title": "Liveness",
+          "summary": "Which of the changes waiting for an answer can still happen.",
+          "symbols": [
+            {
+              "name": "HoldLiveness",
+              "kind": "type",
+              "signature": "type HoldLiveness = \"live\" | \"dead\" | \"unknown\";",
+              "truncated": false,
+              "summary": "What can be said about a hold, given what is known about its tree."
+            },
+            {
+              "name": "HOLD_LIVENESS",
+              "kind": "value",
+              "signature": "const HOLD_LIVENESS: readonly HoldLiveness[]",
+              "truncated": false,
+              "summary": "The three answers, as a list a host can walk."
+            },
+            {
+              "name": "holdLiveness",
+              "kind": "function",
+              "signature": "const holdLiveness: (hold: HeldProposal, headRevision: number | undefined) => HoldLiveness",
+              "truncated": false,
+              "summary": "The one comparison, in the direction `confirmHeld` makes it."
+            },
+            {
+              "name": "MarkedHold",
+              "kind": "type",
+              "signature": "type MarkedHold = {\n    readonly held: HeldProposal;\n    readonly liveness: HoldLiveness;\n    /** Absent exactly when `liveness` is `unknown`. */\n    readonly headRevision?: number;\n};",
+              "truncated": false,
+              "summary": "A hold and what is known about whether answering it could work."
+            },
+            {
+              "name": "markHolds",
+              "kind": "function",
+              "signature": "const markHolds: (holds: readonly HeldProposal[], heads: ReadonlyMap<TreeId, number>) => readonly MarkedHold[]",
+              "truncated": false,
+              "summary": "Marks a page of holds against the revisions the caller already knows."
+            },
+            {
+              "name": "treesAwaitingAnswer",
+              "kind": "function",
+              "signature": "const treesAwaitingAnswer: (holds: readonly HeldProposal[]) => readonly TreeId[]",
+              "truncated": false,
+              "summary": "The trees a page of holds is waiting on, each named once, in first-seen order."
+            },
+            {
+              "name": "MarkedHolds",
+              "kind": "type",
+              "signature": "type MarkedHolds = {\n    readonly marked: readonly MarkedHold[];\n    /**\n     * One per tree whose head could not be read. Those holds are `unknown`, and\n     * the errors are handed back rather than swallowed so a host can log them or\n     * say so on the page.\n     */\n    readonly unreadable: readonly StoreError[];\n};",
+              "truncated": false,
+              "summary": "The same page of holds, marked against heads read from the store."
+            },
+            {
+              "name": "markHoldsFromStore",
+              "kind": "function",
+              "signature": "const markHoldsFromStore: (reader: TreeReader, holds: readonly HeldProposal[]) => Promise<MarkedHolds>",
+              "truncated": false,
+              "summary": "Reads what it needs and never fails."
             }
           ]
         },

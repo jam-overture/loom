@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 
@@ -36,6 +37,36 @@ export type CliError =
   | { readonly code: "already-registered"; readonly type: string }
   | { readonly code: "file-exists"; readonly path: string }
   | { readonly code: "filesystem-failed"; readonly path: string; readonly detail: string }
+
+export type CliErrorCode = CliError["code"]
+
+/**
+ * Every way a command can refuse, as a list something can walk.
+ *
+ * The last of the four holes `Loom docs` filed on 2 September, and the same
+ * shape as the three now closed (`TELEMETRY_EVENT_TYPES`, `WRITE_OUTCOME_KINDS`,
+ * `STORE_ERROR_CODES`): a `switch` was always exhaustive, and anything wanting
+ * to *walk* the codes — a page telling a reader what `loom` can say, a
+ * conformance check — kept its own copy with nothing to fail when a tenth
+ * landed. The documentation site keeps exactly such a copy, keyed on
+ * `CliError["code"]` so it stops compiling rather than describing nine of ten,
+ * which is the best a lane outside `src/` can do and is not the fix.
+ *
+ * In the order a run meets them: what the argument line can be wrong about,
+ * then what the requested type can be wrong about, then what the directory can
+ * refuse.
+ */
+export const CLI_ERROR_CODES: readonly CliErrorCode[] = everyMemberOf<CliErrorCode>()([
+  "unknown-command",
+  "missing-argument",
+  "unexpected-argument",
+  "invalid-primitive-type",
+  "reserved-primitive-type",
+  "framework-namespace",
+  "already-registered",
+  "file-exists",
+  "filesystem-failed",
+])
 
 export type PlannedFile = {
   readonly path: string
