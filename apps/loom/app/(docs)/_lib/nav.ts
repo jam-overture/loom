@@ -217,6 +217,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
       },
+      {
+        slug: "when-something-looks-wrong",
+        title: "When something looks wrong",
+        summary:
+          "Who put this node here, whether the page still matches its own history, and why a change nobody answered for three days can no longer be answered at all.",
+      },
     ],
   },
   apiReferenceSection,

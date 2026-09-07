@@ -13316,3 +13316,88 @@ produced the four. A routine cannot edit its own brief. Recommendation, the same
 one `Loom marketing` made on #242 the same day: one sentence in the seven briefs
 and in `docs/routines.md` — *if this lane already has an open pull request, push
 onto its branch instead*.
+
+---
+
+## 2026-09-07 — a change nobody answered for three days is already dead, and the queue it is sitting in cannot tell
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** open — documented on the page as it actually behaves, not worked
+around
+
+Found while writing *When something looks wrong*, and the page now teaches it,
+because it is true and a reader operating a deployment will meet it.
+
+A held proposal names the revision it was judged against. `confirmHeld` compares
+that to head, and when they differ it **releases the hold and reports
+`revision-conflict`** — custody ends, deliberately, because the change can never
+apply again and leaving it in the queue would invite a second attempt at
+something already impossible. That behaviour is right and its comment says so:
+*dead rather than stale*.
+
+**What nothing does is say so before somebody answers.** `holds.forTree(treeId)`
+returns every waiting proposal with no reference to where the page has got to,
+so a review queue built the documented way shows dead changes and live ones in
+one list, indistinguishable, oldest first. The only way to discover which is
+which is to answer one and watch it fail — which on a real queue means a
+reviewer reading a change, deciding, clicking yes, and being told it never
+could have worked.
+
+Produced, not reasoned about: `_lib/operations/checks.ts` runs the sequence and
+the page prints the result. One change held against revision 3, one ordinary
+change lands, head is 4, the answer comes back `not-written` with
+`t_… moved on: the delta applies to revision 3, but head is 4`, and the queue
+goes to empty.
+
+The cheap fix is a **caller-side** one and this lane cannot make it: `forTree`
+is scoped to a tree by design (0020) and does not read the tree store, so it
+cannot compare. What a host has is one `head` read per queue render — the
+information is a subtraction away, and nothing in the runtime offers it. A
+`staleHolds`-shaped helper beside `confirmHeld`, or a `baseRevision` against
+`head.revision` comparison the queue page can make, would turn "answer it and
+find out" into a badge. Recommendation: the helper, in `@loom/runtime/write`,
+because every host that builds a queue will otherwise write the same three
+lines and half of them will get the comparison backwards.
+
+`Loom portal` owns a review queue screen and is the other lane this reaches.
+
+---
+
+## 2026-09-07 — `*.vercel.app` is still off the egress allowlist, seventh consecutive documentation run
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — an instance, not a new argument
+
+The brief's step 8 requires the deployed preview URL and a screenshot in the
+pull request. The URL can be published; the preview cannot be opened from the
+sandbox, so no screenshot on this lane has ever been of a deployment. The
+screenshots in `reports/2026-09-07-docs-when-something-looks-wrong*.png` are
+this commit served locally with `next start`, at a true 390 and 1280 CSS pixels,
+in both themes.
+
+Dated against the existing entries rather than restating them. Only the
+maintainer can widen `sandbox.network.allowedDomains`.
+
+---
+
+## 2026-09-07 — this lane pushed onto its open pull request instead of opening a fifth, and that is still not what the brief says
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a second data point on the 6 September entry above
+
+Today's work went onto `docs-21-the-code-on-the-page-compiles`, which is #243.
+The brief's step 3 says to branch off `main`; doing that would have produced a
+second open documentation pull request whose page could not have been written
+at all. The fence checker, the context files and the compiled programs this
+page's three code blocks are typechecked by **exist only on that branch** — a
+page cut from `main` would have shipped three snippets nothing compiles, and
+re-created the machinery to avoid it.
+
+So the brief's step 3 is not merely wasteful here, it is now infeasible: the
+lane's tooling lives ahead of `main`, and each unmerged run puts more of it
+there. `main` has not moved since 1 September and thirty pull requests are
+behind it.
+
+Same recommendation as yesterday's entry, unchanged and now with a second
+reason: one sentence in the seven briefs and in `docs/routines.md` — *if this
+lane already has an open pull request, push onto its branch instead*.
