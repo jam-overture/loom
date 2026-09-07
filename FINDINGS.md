@@ -13303,3 +13303,102 @@ photographed with reduced motion or the bands below the fold come out blank.
 **Recommendation, unchanged:** `tools/specimen/` with the two scripts in it,
 owned by the framework lane, taking a tree module and a list of themes. Every
 surface lane has now written this privately at least once.
+
+---
+
+## 2026-09-07 — the brief tells this routine to do the thing that cost sixteen pull requests
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (the brief
+is the maintainer's) · **Status:** open — worked around this run, and it
+regenerates every run until the brief changes
+
+The standing prompt for `Loom primitives` says, at step 3 of its procedure:
+
+> Branch `primitives-NN-<slug>` off `main`. Never stack, never merge to main
+> yourself.
+
+The finding merged as #216 on 1 September, filed by the maintainer after sixteen
+pull requests were closed unmerged, says:
+
+> Before starting a unit, check whether you already have an open pull request. If
+> you do, **continue it rather than branching again from `main`** — push onto
+> that branch.
+
+**These are opposite instructions and the routine cannot obey both.** Following
+the brief is what produced the pile the finding was written about, and this lane
+was the case the finding named: *"all four primitives runs edited
+`library.test.ts`, `stylesheet.ts` and `index.ts`"*.
+
+**It recurred.** Between 2 and 6 September this lane opened five more pull
+requests — #222, #229, #235, #241, #246 — every one cut from `d7375ef`, every one
+touching `library.test.ts` and `stylesheet.ts`, four of the five touching
+`index.ts`, `copy.ts` and `hermes-port-map.md`. That is the same collision one
+branch worse than the round that was thrown away, and it happened because each
+run did what its brief told it to.
+
+**Five of the seven lanes have resolved this by ignoring the brief** — #242,
+#243, #245 and #247 are consolidations, and `primitives-26` is now the fifth.
+That works, and it is not a fix: it means the governance says one thing, every
+routine does another, and the correction survives only as long as each run
+happens to read `FINDINGS.md` before it reads its own procedure.
+
+**Two honest resolutions, and neither is a routine's to make:**
+
+| | |
+| --- | --- |
+| **A** — amend step 3 in each routine's stored prompt to *"continue your open pull request; branch from `main` only when you have none"* | the finding then agrees with the brief, and no run has to notice the conflict |
+| **B** — merge or close each lane's open pull requests before the next run fires | the brief becomes true again, because a lane with no open pull request should branch from `main` |
+
+**B without A only works until the queue rebuilds**, which took nine days last
+time. A routine cannot write the governance it is bound by, which is why this is
+filed rather than fixed.
+
+**What it costs while open:** twenty-nine pull requests are open as of
+2026-09-07 and nothing has merged to `main` since 1 September. Every lane's work
+is finished, green, and unreachable.
+
+---
+
+## 2026-09-07 — two branches that append same-shaped test fixtures cannot be merged by git, and the recipe keeps being rediscovered
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — worked around; the tool is thirty lines and is not committed
+
+Consolidating five branches of this lane, every conflict in `library.test.ts`
+had one cause. Two branches each append a page fixture, and the fixtures end
+identically:
+
+```ts
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+```
+
+git takes that shared tail as common context and splices the two function
+*bodies* around it, producing one function with two heads. `git apply -3` makes
+the same mistake for the same reason. Neither side can be chosen, because both
+fixtures are wanted — this is the "resolving them mechanically produced code
+that would not compile" that #216 recorded, and now with the mechanism named.
+
+**What works:** re-apply each branch's `merge-base..branch` diff onto the
+already-merged file **one contiguous insertion run at a time**, anchoring each
+run on the context lines immediately preceding it and requiring a *unique* match
+in the target. Every hunk across all four branches was a pure insertion except
+the registered-count assertion, which is a real rewrite and the one line that
+has to be decided by hand.
+
+**Two traps, both of which cost time here:**
+
+- **Context width matters.** At `-U8`, the count-line hunk merges with the three
+  insertion hunks below it, so a tool that skips any hunk containing a deletion
+  silently drops those insertions too — the tests then fail on ordering rather
+  than on anything real. `-U3` separates them.
+- **`reference.generated.json` must be regenerated after the final `pnpm build`,
+  not before.** It extracts from `dist`, so a copy generated mid-merge is missing
+  the last branch's primitives and `extract.test.ts` fails on the difference.
+
+The applier is thirty lines and lives in a scratchpad. **Every lane that appends
+test fixtures will hit this**, and four have consolidated already, so it belongs
+in `tools/` rather than in five separate rediscoveries. Not committed here
+because `tools/` is outside this lane.
