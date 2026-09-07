@@ -80,7 +80,7 @@ export const LIBRARY_CLASS = {
   marker: "loom-marker",
   /** A logo held back to grey until it is pointed at. */
   mark: "loom-mark",
-  /** A `loom.milestone-list`: spaces its entries and ends its own rail. */
+  /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */
   rail: "loom-rail",
   /** The same list, set tighter — a changelog to scan rather than a history to read. */
   railTight: "loom-rail-tight",
@@ -287,7 +287,7 @@ export const LIBRARY_CLASS = {
   navMenu: "loom-nav-menu",
   /** Its actions end, which takes the slack on a phone when no control was built. */
   navActions: "loom-nav-actions",
-  /** A `loom.mosaic`: one column until there is room for six. */
+  /** A `loom.mosaic`: one column until the band itself has room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
   mosaicAlternating: "loom-mosaic-alternating",
@@ -385,6 +385,34 @@ details[open] > summary .loom-marker {
 .loom-milestone > .loom-rail-marker {
   text-align: end;
 }
+.loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone {
+  grid-template-columns: auto 1fr;
+}
+.loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone > .loom-rail-marker {
+  display: none;
+}
+@container (max-width: 26rem) {
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone {
+    grid-template-columns: auto 1fr;
+    row-gap: var(--loom-spacing-1);
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-marker {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: start;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-track {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) .loom-rail-dot {
+    margin-block-start: 0.3em;
+  }
+}
 .loom-milestone > .loom-rail-track {
   flex-direction: column;
 }
@@ -425,6 +453,9 @@ details[open] > summary .loom-marker {
 }
 .loom-milestone-row > li:last-child .loom-rail-line {
   visibility: hidden;
+}
+.loom-rail {
+  container-type: inline-size;
 }
 .loom-rail > li .loom-rail-body {
   padding-block-end: var(--loom-spacing-5);
@@ -825,13 +856,25 @@ details[open] > summary .loom-marker {
 }
 .loom-mosaic {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(6, 1fr);
   align-items: stretch;
+  container-type: inline-size;
 }
-@media (min-width: 48rem) {
-  .loom-mosaic {
-    grid-template-columns: repeat(6, 1fr);
-  }
+/*
+ * One column until the *band* has room for six, never until the screen does.
+ *
+ * A container query reads an ancestor rather than the element that declared
+ * containment, so grid-template-columns -- which lives on the mosaic itself --
+ * cannot be inside the query. The six tracks are therefore unconditional and it
+ * is the *cells* that are switched: full-width by default, and cut into the
+ * rhythm's spans only where the band is wide enough to hold them. That is also
+ * the safe way round, because a browser that does not understand a container
+ * query falls back to one cell per row rather than to six columns on a phone.
+ */
+.loom-mosaic > * {
+  grid-column: span 6;
+}
+@container (min-width: 48rem) {
   .loom-mosaic-alternating > *:nth-child(4n + 1),
   .loom-mosaic-alternating > *:nth-child(4n) {
     grid-column: span 4;
@@ -849,7 +892,12 @@ details[open] > summary .loom-marker {
   .loom-mosaic-showcase > *:nth-child(5n) {
     grid-column: span 2;
   }
-  .loom-mosaic-lead > * {
+  /*
+   * Two classes rather than one, so this rule outranks the unconditional
+   * .loom-mosaic > * above on specificity rather than on source order -- the
+   * only rhythm rule whose selector would otherwise tie with it.
+   */
+  .loom-mosaic.loom-mosaic-lead > * {
     grid-column: span 2;
   }
   .loom-mosaic-lead > *:first-child {

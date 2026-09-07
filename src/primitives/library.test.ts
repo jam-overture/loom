@@ -1583,6 +1583,77 @@ describe("the ported bands", () => {
     expect(listOf({ rail: "none" })).toContain(LIBRARY_CLASS.railNone)
   })
 
+  it("stops reserving a marker column for a list where no entry sets a marker", () => {
+    const idFactory = sequentialIdFactory()
+    const { stylesheet, tree } = splitStylesheet(
+      render(
+        createTree(
+          buildElement(idFactory, {
+            type: "loom.milestone-list",
+            props: {},
+            children: [
+              buildElement(idFactory, { type: "loom.milestone", props: { title: "You ask for something" } }),
+              buildElement(idFactory, { type: "loom.milestone", props: { title: "Loom proposes a change" } }),
+            ],
+          }),
+          idFactory
+        )
+      ).markup
+    )
+
+    /**
+     * `Loom marketing` measured this on 31 August: 88px of a 188px row on a
+     * phone, reserved whether or not the prop was set, leaving 101px for a
+     * title at 20px. A process rail — the case that never sets a marker — was
+     * paying the whole of it.
+     *
+     * The question is the *list's* and only `:has()` can ask it. A render is a
+     * pure function of one node (0008), so an entry cannot see that none of its
+     * siblings set one, and the two candidate props were both worse: `markers`
+     * on the list is grammar (0014) spent on something the browser can see, and
+     * anything on the entry lets rows disagree and stop lining up.
+     */
+    expect(stylesheet).toContain(".loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone")
+    expect(stylesheet).toContain("grid-template-columns: 5.5rem auto 1fr")
+
+    /**
+     * The empty cell has to still be *rendered* for `:empty` to match it, which
+     * is the half of this an assertion on the stylesheet alone would miss: an
+     * entry that omitted the element when the prop was unset would give the
+     * list nothing to test and the column would never collapse.
+     */
+    expect(tree).toMatch(new RegExp(`class="${LIBRARY_CLASS.railMarker}"[^>]*></div>`))
+  })
+
+  it("puts the marker above the title when the rail itself is narrow, not when the screen is", () => {
+    const { stylesheet } = splitStylesheet(render(portedPage(EDITORIAL)).markup)
+
+    const rail = stylesheet.slice(stylesheet.indexOf(".loom-rail {"))
+
+    /**
+     * The same rail is one column of a `loom.split` on a laptop and the whole
+     * width of a phone, and only one of those two facts is about the screen —
+     * which is why this is a `@container` on the list's own inline size and not
+     * the `@media` the library reached for twice before.
+     */
+    expect(rail).toContain("container-type: inline-size")
+    expect(stylesheet).toContain("@container (max-width: 26rem)")
+
+    /**
+     * Scoped to lists that *do* have markers, so it can never collide with the
+     * collapse above: one rule fires or the other does, never both.
+     */
+    const narrow = stylesheet.slice(stylesheet.indexOf("@container (max-width: 26rem)"))
+    expect(narrow).toContain(".loom-rail:has(> li > .loom-rail-marker:not(:empty))")
+
+    /**
+     * The connector survives the move. The track spans both rows rather than
+     * being pushed out of the way, which is the difference between a rail that
+     * reflows on a phone and a rail that stops being one.
+     */
+    expect(narrow).toContain("grid-row: 1 / span 2")
+  })
+
   it("falls back to a monogram for a person with no photograph", () => {
     const { markup } = render(portedPage(EDITORIAL))
 
@@ -3313,17 +3384,45 @@ describe("the technical vocabulary", () => {
     const { markup } = render(technicalPage(EDITORIAL))
 
     /**
-     * 0079: the six columns exist only where there is room for them, and the
-     * markup is identical either side of the breakpoint. The cycles are
-     * asserted because a span that did not sum to six would leave a hole in
-     * every row and no test that only renders would see it.
+     * 0079: the rhythm exists only where there is room for it, and the markup
+     * is identical either side of the breakpoint. The cycles are asserted
+     * because a span that did not sum to six would leave a hole in every row
+     * and no test that only renders would see it.
+     *
+     * **The breakpoint is the band's own width.** It shipped as a viewport
+     * media query on 26 August and was filed against this lane three times: a
+     * mosaic in a column laid itself out in six tracks because the *window* was
+     * wide. A `@media` here again would be that regression.
      */
-    expect(markup).toContain("@media (min-width: 48rem)")
+    expect(markup).toContain("@container (min-width: 48rem)")
+    expect(markup).not.toContain("@media (min-width: 48rem)")
     expect(markup).toContain("grid-template-columns: repeat(6, 1fr)")
     expect(markup).toContain(".loom-mosaic-showcase > *:nth-child(5n + 1)")
     expect(markup).toContain(".loom-mosaic-lead > *:first-child")
 
     expect(markup).toMatch(/class="loom-mosaic loom-mosaic-showcase"[^>]*><figure/)
+  })
+
+  it("falls back to one cell per row rather than to six columns on a phone", () => {
+    const { stylesheet } = splitStylesheet(render(technicalPage(EDITORIAL)).markup)
+
+    const mosaic = stylesheet.slice(stylesheet.indexOf(".loom-mosaic {"), stylesheet.indexOf(".loom-orbit {"))
+
+    /**
+     * The way round this rule is written is the whole of its safety, and it is
+     * invisible from the rendered page. `grid-template-columns` lives on the
+     * mosaic itself, and a container query reads an *ancestor* — so the six
+     * tracks cannot be inside the query and the cells are switched instead.
+     * Writing it the other way — six tracks unconditional, one column inside a
+     * `@container (max-width:)` — renders six four-character columns on a phone
+     * anywhere the query does not apply.
+     */
+    expect(mosaic).toContain("container-type: inline-size")
+    expect(mosaic.indexOf(".loom-mosaic > *")).toBeLessThan(mosaic.indexOf("@container (min-width: 48rem)"))
+    expect(mosaic).not.toContain("@container (max-width")
+
+    /** The one rhythm rule whose selector would otherwise tie with the base. */
+    expect(mosaic).toContain(".loom-mosaic.loom-mosaic-lead > *")
   })
 
   it("sets no column count inline, because the rule is what has to change it", () => {
@@ -3617,11 +3716,60 @@ describe("a headline on a narrow screen", () => {
       )
     )
 
-    expect(markup).toContain("font-size:min(var(--loom-scale-8), 11vw)")
-    expect(markup).toContain("font-size:min(var(--loom-scale-7), 9vw)")
+    expect(markup).toContain("font-size:min(var(--loom-scale-8), 11cqi)")
+    expect(markup).toContain("font-size:min(var(--loom-scale-7), 9cqi)")
     /** Step 6 is 32px and fits a phone with room to spare. */
     expect(markup).toContain("font-size:var(--loom-scale-6)")
     expect(markup).not.toContain("min(var(--loom-scale-6)")
+
+    /**
+     * The unit is the container's and not the viewport's, which is the limit
+     * this file's own comment named for eleven days. `vw` would size a headline
+     * in one half of a `loom.split` as though it had the whole window.
+     */
+    expect(markup).not.toContain("vw)")
+  })
+
+  it("holds a headline to the column it is in, because the column says how wide it is", () => {
+    const idFactory = sequentialIdFactory()
+    const headline = (level: number) =>
+      buildElement(idFactory, {
+        type: "loom.heading",
+        props: { level },
+        children: [buildText(idFactory, "A tree, a delta, and a page that adapts")],
+      })
+
+    const { markup } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: MINIMAL },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.split",
+              props: { ratio: "start-wide" },
+              children: [buildSlot(idFactory, "start", [headline(1)])],
+            }),
+            buildElement(idFactory, {
+              type: "loom.card",
+              props: {},
+              children: [headline(2)],
+            }),
+          ],
+        }),
+        idFactory
+      )
+    )
+
+    /**
+     * A `cqi` with no ancestor declaring containment resolves against the small
+     * viewport, so the cap is inert until something says how wide the space
+     * around it is. These two are the things that say it — one half of a split
+     * and one card — and without them the swap from `vw` would have been a
+     * rename rather than a repair. Both columns of the split declare it, so the
+     * empty `end` region is the second match.
+     */
+    expect([...markup.matchAll(/container-type:inline-size/g)]).toHaveLength(3)
   })
 })
 
