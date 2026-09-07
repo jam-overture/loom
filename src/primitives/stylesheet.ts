@@ -314,6 +314,49 @@ export const LIBRARY_CLASS = {
   orbitReverse: "loom-orbit-reverse",
   orbitStill: "loom-orbit-still",
   /**
+   * A `loom.link-trail`. The row, one crumb in it, and the three things that
+   * may sit between two crumbs.
+   *
+   * The separator is a `::before` on the *wrapper* rather than on the link,
+   * which is the only reason it can exist: a pseudo-element on the anchor is
+   * inside the link, so its glyph joins the link's accessible name and the
+   * reader hears "slash Documentation". Which crumbs get one is `+`, and where
+   * an element sits among its siblings is a fact no render of one node has.
+   */
+  trail: "loom-trail",
+  trailCrumb: "loom-trail-crumb",
+  /** The default: a rotated corner, drawn rather than typed, so nothing announces it. */
+  trailChevron: "loom-trail-chevron",
+  trailSlash: "loom-trail-slash",
+  trailDot: "loom-trail-dot",
+  /**
+   * A `loom.carousel`: the scroller, one cell in it, and the variant that snaps
+   * to the middle.
+   *
+   * Everything except each cell's width is here, and the width is the one thing
+   * that has to be inline because it comes from a prop. The rest — the snapping,
+   * the smooth scroll a reduced-motion reader does not get, the focus ring, and
+   * the block padding that keeps a card's hover shadow from becoming a vertical
+   * scrollbar — is either a state selector or a rule something else has to
+   * cancel, and an inline value would beat all of it.
+   */
+  carousel: "loom-carousel",
+  carouselCell: "loom-carousel-cell",
+  carouselCentred: "loom-carousel-centred",
+  /**
+   * A `loom.meter`'s two fills. One custom property carries the proportion, and
+   * one keyframe animates it from nothing, so a bar and a ring fill in step and
+   * a single rule stops both for a reader who asked for calm.
+   *
+   * The property is registered with `@property`, which is what makes it
+   * animate at all: an unregistered custom property interpolates discretely, so
+   * the bar would jump from empty to full in one frame. A browser that does not
+   * support the rule still renders the right proportion — the value is on the
+   * element — and simply does not animate it, which is the correct way to fail.
+   */
+  meterFill: "loom-meter-fill",
+  meterArc: "loom-meter-arc",
+  /**
    * A `loom.frame`. The chrome itself, which declares the containment its marks
    * are measured against; the screen inside it; and the layer over that screen.
    */
@@ -348,9 +391,17 @@ export const LIBRARY_CLASS = {
  * for anyone who asked their system to calm it down.
  */
 const CSS = `
+@property --loom-meter-sweep {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
 @keyframes loom-rise {
   from { opacity: 0; transform: translate3d(0, 0.9rem, 0); }
   to { opacity: 1; transform: none; }
+}
+@keyframes loom-meter-sweep {
+  from { --loom-meter-sweep: 0%; }
 }
 @keyframes loom-orbit {
   from { transform: rotate(0turn); }
@@ -981,6 +1032,60 @@ details[open] > summary .loom-marker {
 .loom-orbit-still .loom-orbit-spinner, .loom-orbit-still .loom-orbit-item {
   animation: none;
 }
+.loom-trail-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--loom-spacing-2);
+}
+.loom-trail > .loom-trail-crumb + .loom-trail-crumb::before {
+  flex: 0 0 auto;
+  color: var(--loom-fg-subtle);
+}
+.loom-trail-chevron > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "";
+  width: 0.3em;
+  height: 0.3em;
+  border-block-start: 1px solid var(--loom-border-subtle);
+  border-inline-end: 1px solid var(--loom-border-subtle);
+  transform: rotate(45deg);
+}
+.loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "/";
+}
+.loom-trail-dot > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "\\00B7";
+}
+.loom-carousel {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scroll-snap-type: inline mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--loom-border-subtle) transparent;
+  padding-block: var(--loom-spacing-2);
+}
+.loom-carousel:focus-visible {
+  outline: 2px solid var(--loom-accent);
+  outline-offset: 2px;
+}
+.loom-carousel-cell {
+  display: flex;
+  scroll-snap-align: start;
+}
+.loom-carousel-cell > * {
+  width: 100%;
+}
+.loom-carousel-centred > .loom-carousel-cell {
+  scroll-snap-align: center;
+}
+.loom-meter-fill {
+  width: var(--loom-meter-sweep);
+}
+.loom-meter-fill, .loom-meter-arc {
+  animation: loom-meter-sweep calc(var(--loom-motion-slow) * 2) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 @keyframes loom-pin-pulse {
   0% { transform: scale(1); opacity: 0.5; }
   70%, 100% { transform: scale(2.2); opacity: 0; }
@@ -1106,6 +1211,12 @@ details[open] > summary .loom-marker {
   }
   .loom-lift:hover {
     transform: none;
+  }
+  .loom-meter-fill, .loom-meter-arc {
+    animation: none;
+  }
+  .loom-carousel {
+    scroll-behavior: auto;
   }
   .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
     transform: translate(-50%, -50%);

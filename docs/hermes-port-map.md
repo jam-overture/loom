@@ -239,6 +239,18 @@ a mark the primitive places, which is the claim a logo wall cannot make and the
 fourth general arranger. Neither has a row above, and the count below is
 unmoved by either — which is the point of the paragraph above.
 
+**Four more joined them on 5 September, and three of the four are the page
+chrome paragraph above coming round a second time.** Hermes' app shell owned the
+top of the window, so nothing in the seventy is an announcement strip and
+nothing is a breadcrumb: `loom.banner` and `loom.link-trail` are the third and
+fourth primitives here whose absence is that same fact. `loom.carousel` is the
+fifth general arranger and the first that admits the reader has a phone — a row
+that scrolls and snaps, which no Hermes block needed because a profile was one
+column. `loom.meter` is the only one of the four with something like an
+ancestor, and the distance is the point: Hermes' `stats` block *states* a figure
+and this one draws it against a whole, which is the collapse rule read the other
+way — two blocks that want different markup are two primitives.
+
 **Three more joined them on 4 September, and they are the same gap read one
 level up.** Hermes sold a *person*: a photograph is a photograph, a profile is
 never reviewed, and nothing on a creator's page is a running interface. A page
