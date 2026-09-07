@@ -12957,3 +12957,88 @@ Filed rather than fixed because `decisions/` is not this lane's. One line in
 0087, and it is worth a `grep` for other citations of `0010` while somebody has
 the file open — 0097 made a hole in the numbering fatal, but nothing yet checks
 that a link inside a record resolves to a file that exists.
+
+---
+
+## 2026-09-07 — the frame seam cites 0094 eight times and means 0095
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+Every doc comment in the framing seam that names its own decision record names
+the wrong one. Eight sites, all of them `(0094)` where the record is
+[0095](decisions/0095-a-frame-carries-its-url-and-the-deployment-carries-the-origins.md):
+
+| File | Line | What the comment is about |
+| --- | --- | --- |
+| `src/frame/index.ts` | 7 | "this module is both halves of that seam" |
+| `src/frame/origin.ts` | 143 | "the submission seam whose shape it otherwise borrows" |
+| `src/render/request.ts` | 71 | absent registry refuses every framable prop |
+| `src/render/render.ts` | 104 | the origins this deployment will frame |
+| `src/render/primitive.ts` | 110 | `loom.frames`, on the primitive context |
+| `src/sdk/registry.ts` | 62 | `frames` on a registered primitive |
+| `src/sdk/audit.ts` | 48 | `frames` as the audit reads it |
+| `src/sdk/definition.ts` | 41 | the `frames` field on `definePrimitive` |
+
+[0094](decisions/0094-a-cards-prose-is-a-child-when-the-card-has-a-flow.md) is "A
+card's prose is a child when the card has a flow, and a prop when it does not" —
+a real, Accepted record about something else. **This is the same failure filed
+against 0087 on 6 September**, one day later and eight times over: a number that
+resolves to a coherent record with nothing to do with the sentence citing it, so
+a reader is misled rather than stopped.
+
+Two things worth having beside each other. The three citations of 0094 in
+`src/primitives/library.test.ts` (lines 397, 2762, 4971) are **correct** — they
+are about cards and offerings — so a blind find-and-replace would break them.
+And `src/primitives/loom.embed.ts`, which is the one primitive that consumes
+this seam and lives in a different lane, cites 0095 correctly throughout. The
+error is confined to the eight above, and the working citation next door
+suggests the seam's own comments were written before the record was numbered.
+
+Found while writing lesson 20, which teaches this seam and cites 0095.
+
+Filed rather than fixed because `src/` is not this lane's. The 0087 finding
+closed by suggesting a check that a citation inside a record resolves; this is
+the same check wanted one level down, over `src/`, and eight sites in one seam
+is a better argument for it than one site was.
+
+---
+
+## 2026-09-07 — 0095 says no primitive uses the framing seam, and one has since 26 August
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+0095's Consequences section says:
+
+> **No primitive in the starter library uses the seam yet.** `loom.embed` still
+> reads its own `src` prop and frames whatever passes `mediaUrlSchema`.
+
+and, immediately after:
+
+> **Until it does, this record describes machinery with no consumer.** That is
+> the same state the submission seam shipped in and it is a real cost: a seam
+> nobody calls is a seam whose ergonomics have not been tested by anything.
+
+Both sentences are now false. `src/primitives/loom.embed.ts` declares
+`frames: ["src"]` (line 140), reads `loom.frames["src"]` (line 144), places
+`framed.url` rather than `given.src` on the `iframe`, and renders a notice on a
+refusal. `src/primitives/library.test.ts:135` records the change. The seam has a
+consumer and its ergonomics have been tested by one.
+
+This is [0099](decisions/0099-a-record-is-amended-when-only-the-count-moved.md)
+territory rather than a supersession: **the decision stands entirely and a fact
+about the shape it produced moved underneath it.** Nothing was reversed —
+`Loom primitives` did the thing 0095 asked for, and the record still describes it
+as not done.
+
+Worth more than the two sentences, because 0095 names this as a *cost* it is
+paying and a reason to be uncertain about the interface. A reader deciding
+whether to build on the seam reads "no consumer, ergonomics untested" and weighs
+it, when the honest state is the opposite. A stale count misinforms; a stale
+consequence changes a decision somebody is about to make.
+
+Found while writing lesson 20. The lesson teaches the seam as it behaves —
+including `loom.embed` as its consumer — and its Reflect section uses the gap
+itself, asking the reader what it means about which parts of a record should be
+expected to age.
+
+Filed rather than fixed because `decisions/` is not this lane's.
