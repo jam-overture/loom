@@ -1332,6 +1332,15 @@ until it tries. This run's mosaic is the primitive that reference would have
 calibrated, and it was built against `loom.hero` and `loom.article-grid`
 instead.
 
+**A sixteenth time, 4 September**, from this lane, appended here rather than
+filed again. `primitives-23-the-product-on-the-page` fetched the same URL and
+got the same `EGRESS_BLOCKED`. The three primitives it built — a browser chrome,
+an annotated screenshot and a star rating — are the ones on that site's front
+page, so this is the run where the gap between the brief's *visual standard* and
+what the routine can see is at its widest. Nothing new to add to the two fixes
+the 16 August entry names; the second of them, **writing the standard down in
+words in a file the routine can read**, is now sixteen runs cheaper than it was.
+
 ---
 
 ## 2026-08-19 — a page cannot collapse its own menu, and probably should not try
@@ -13024,3 +13033,72 @@ gaps are closed. Two consecutive runs have now had to reason about what breadth
 
 Filed rather than assumed. The brief is the maintainer's and a routine cannot
 write the governance it is bound by.
+## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around in one token, and the workaround is invisible under every
+registered palette.
+
+`loom.pin` is the library's first primitive whose content **floats over content
+it did not draw**: a label pill lying on a screenshot, positioned by a
+percentage the primitive cannot resolve to anything it can measure. That is the
+one thing `bg-overlay` names, and it is the slot the pin wants.
+
+It cannot have it. `PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` is
+*derived from what the components paint* (0089), and `pairings.test.ts` fails a
+library that renders a pairing the list does not carry. Nothing in seventy-three
+primitives has ever painted `bg-overlay`, so there is no row for
+`fg-default on bg-overlay`, and adding one is that lane's file rather than this
+one's.
+
+The pin ships on `bg-surface` and the swap is one token when the row exists.
+**The rendering is identical today** — all three starter palettes set
+`bg-overlay` to the same value as `bg-surface` (`#ffffff`, `#1a1a1a`,
+`#ffffff`), which is the more interesting half of this finding:
+
+> **A palette slot that every palette must declare and no primitive reads is a
+> slot whose contrast nobody checks and whose value nobody can be wrong about.**
+
+Two ways to close it, and this run has no preference strong enough to
+recommend one:
+
+- **Add the row** — `{ foreground: "fg-default", background: "bg-overlay",
+  basis: "painted", where: "loom.pin label" }` — and this lane swaps the token
+  in its next run. One line, and it makes the slot mean something.
+- **Retire the slot** if nothing is ever going to float. It is one of seventeen
+  a host must supply to register a palette, and a host supplying a value that
+  changes no pixel is a host being asked a question with no answer.
+
+`bg-overlay` was presumably reserved for modals and toasts, which are the
+portal's business rather than the library's — so the second option is not
+obviously wrong, and deciding it is worth more than the row.
+
+---
+
+## 2026-09-04 — a run that needs a picture rebuilds the harness that takes it, every time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a note to this lane's own next run, and cheap to close.
+
+Every brief in this repo asks for a screenshot, and eight consecutive reports
+from this lane have said the picture found something no assertion could. This
+run found four such things (they are in the report). Getting the picture took
+about forty lines: render the tree with `renderLoomTree`, wrap the markup in a
+document, write it to a file, drive `chromium` over `file://` at two widths and
+three palettes.
+
+Those forty lines were written this run and **deleted before the pull request**,
+because `tools/` is not `src/primitives/` and a scratch harness is not a
+deliverable. That is the right call for a diff and the wrong one for the next
+run, which will write them again.
+
+What would close it: a `tools/shot.ts` taking a fixture module and a list of
+themes, owned by whichever lane wants it. It is not this lane's file to add and
+it is not worth a cross-lane diff on its own — but it is worth someone's ten
+minutes, and it would be used by every lane that ships a visual.
+
+The one thing worth knowing before writing it: **`data:` is not an allowed image
+scheme** (`url.ts`, 0053) and the sandbox blocks image hosts, so a fixture
+cannot show a photograph. Compose the screen content out of Loom primitives
+instead — a card, a table, a stat grid. It photographs better than a stock
+photo would and it exercises the library at the same time.
