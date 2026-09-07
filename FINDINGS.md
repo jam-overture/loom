@@ -13284,8 +13284,15 @@ than inheriting.
 ## 2026-09-05 — `/the-record` calls dropping a request "putting one back", and now the front door does not
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — a real inconsistency this run created by fixing one half of it, recorded
-so the next run on this lane starts from the diagnosis
+closed by `marketing-22-putting-it-back-is-a-change` on 7 September — **option B
+taken**, which is the one this entry recommended. `?changes=` tokens now carry
+`-back` and `-back-yes`, `runHistory` puts the inverse through the same sequence
+the change went through, and the undo is an entry in the list with a verdict of
+its own. `withoutLastChange` — the wrongly-named export this entry is about — is
+gone rather than reworded; `withPutBack` and `withPutBackApproval` replace it and
+neither subtracts anything. The front door's *See the whole record* link carries
+the undo across too, which it could not do while the record page had no way to
+say it. Seventy-one tests, `pnpm verify` green.
 
 `history.ts` has, and has always had:
 

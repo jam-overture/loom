@@ -539,6 +539,8 @@ export const homePageTree = (context: PageContext): LoomTree => {
                 theme: context.theme,
                 record: latest,
                 ...(context.approve === undefined ? {} : { approve: context.approve }),
+                ...(context.back === undefined ? {} : { back: context.back }),
+                ...(context.backApprove === undefined ? {} : { backApprove: context.backApprove }),
               }),
             ]),
         hero(ids, context),

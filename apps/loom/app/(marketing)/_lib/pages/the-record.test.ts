@@ -50,6 +50,9 @@ const STATES: Readonly<Record<string, string>> = {
   "a refused change": "drop-pitch",
   "the same request twice": "proof.proof",
   "a run of four": "calmer.proof.problem-yes.shorter",
+  "a change put back": "proof.shorter-back",
+  "an undo the rules held": "problem-yes-back",
+  "an undo the visitor allowed": "problem-yes-back-yes",
   "an address nobody meant": "chartreuse.proof.nonsense",
   "more than it will follow": Array.from({ length: 12 }, () => "proof").join("."),
 }
@@ -160,13 +163,54 @@ describe("what the page prints about a run of changes", () => {
 })
 
 describe("the way through and the way back", () => {
-  it("offers the most recent change back, as the same run without it", async () => {
+  /**
+   * The address the button writes, and it is the whole finding of 5 September.
+   *
+   * It was `changes=proof` — the run with the request dropped, which rebuilds
+   * the page as though nobody had asked for it. It is now `proof.shorter-back`:
+   * both requests still asked for, and the second one reversed. A run that put
+   * the old address back would pass every other test on this page and quietly
+   * un-make the thing the page is about.
+   */
+  it("puts the most recent change back by adding its undo, not by dropping it", async () => {
     const markup = await markupFor("proof.shorter")
 
     expect(markup).toContain("Put this back")
     expect(markup).toContain(
+      linkTo(recordHref(ORIGIN, { theme: DEFAULT_THEME, changes: "proof.shorter-back" }))
+    )
+    expect(markup).not.toContain(
       linkTo(recordHref(ORIGIN, { theme: DEFAULT_THEME, changes: "proof" }))
     )
+  })
+
+  /** The undo is an entry, with the change it reverses still above it. */
+  it("keeps the change in the list and adds the undo under it", async () => {
+    const markup = await markupFor("proof.shorter-back")
+
+    expect(markup).toContain("Change 2 of 2")
+    expect(markup).toContain("Putting change 2 back")
+    expect(markup).toContain("3 requests, in order")
+    expect(markup).toContain("One of them was a change being put back")
+  })
+
+  /**
+   * The best thing this page can show a stranger: the rules that held the
+   * change hold the undo of it too, and the same yes is what gets past both.
+   */
+  it("puts the undo to the same rules, and offers the same answer", async () => {
+    const held = await markupFor("problem-yes-back")
+
+    expect(held).toContain("Putting change 1 back")
+    expect(held).toContain("I say yes — put it back")
+    expect(held).toContain(
+      linkTo(recordHref(ORIGIN, { theme: DEFAULT_THEME, changes: "problem-yes-back-yes" }))
+    )
+
+    const allowed = await markupFor("problem-yes-back-yes")
+
+    expect(allowed).not.toContain("I say yes — put it back")
+    expect(allowed).toContain("You said yes")
   })
 
   /**
@@ -218,7 +262,10 @@ describe("the way through and the way back", () => {
         linkTo(
           recordHref(ORIGIN, {
             theme: DEFAULT_THEME,
-            changes: writeChangeSequence([...history.tokens, { ask: ask.id, approved: false }]),
+            changes: writeChangeSequence([
+              ...history.tokens,
+              { ask: ask.id, approved: false, putBack: false, putBackApproved: false },
+            ]),
           })
         )
       )
