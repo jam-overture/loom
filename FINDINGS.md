@@ -8,6 +8,144 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-07 — `sr-only` is `position: absolute`, and an unpositioned `overflow: hidden` frame does not clip it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom primitives` · **Status:** open —
+a trap, not a bug in anything that exists
+
+Two words no one can see moved this lane's whole layout, and every surface that
+uses a one-viewport frame can meet the same thing.
+
+The demo's outer frame is `lg:h-screen lg:overflow-hidden`, with a stage and a
+rail scrolling independently inside it. A card gained a visually-hidden label —
+`<span className="sr-only">marked on the page: </span>` — so a screen reader
+hears what a badge's words are for. At two open questions the entire page began
+scrolling: the top bar went off screen and 340 pixels of empty ground appeared
+under both panes.
+
+Tailwind's `sr-only` is `position: absolute`. **An absolutely positioned element
+is not clipped by an `overflow: hidden` ancestor that is not itself positioned**
+— the clip only applies down a containing-block chain, and a `static` ancestor is
+not in one. With no positioned parent, the span's containing block was the page,
+so it was laid out at its static position deep inside the rail's own scroll,
+escaped the frame, and stretched the document by the height of the rail's
+overflow.
+
+Measured, at 1440×900, `document.scrollingElement.scrollHeight`: 900 · 900 · 900
+before, 900 · 900 · **1240** with the span, 900 · 900 · 900 with `relative` added
+to its parent.
+
+**Why it is filed for `Loom primitives` rather than fixed here.** It is fixed
+here — one class. What does not generalise is that a contributor has to know it.
+The library has no visually-hidden primitive or utility, so every surface that
+wants an accessible label for a badge, an icon or an abbreviation writes
+`sr-only` by hand, and the ones that write it inside a scrolling frame will find
+this the way this lane did: not in the diff, not in the types, not in a test —
+only by driving the built page and noticing the top bar had gone.
+
+**Recommendation:** a registered visually-hidden seam that carries `relative` on
+whatever it is nested in, or — cheaper and possibly enough — a line in the
+primitives' own guidance saying `sr-only` needs a positioned parent inside any
+clipping frame. Either is worth more than four surfaces each finding it once.
+
+Nothing is blocked on this. The demo ships correct.
+
+---
+
+## 2026-09-07 — the rail scrolls to the newest question, and the stage scrolls to its mark, and neither knows the other did
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — next
+run's candidate unless the maintainer points elsewhere
+
+Found while building the unit above, and left because it is a design question
+rather than a defect, in the same shape as the finding this run closed.
+
+With two questions open, the two halves of the screen are scrolled by two
+different components that do not consult each other:
+
+- `AnswerInView` scrolls **the rail** to the newest question, so the buttons a
+  visitor just raised are in view;
+- `SpotlightScroll` scrolls **the stage** to `spots[0]`, which is that same
+  question's mark.
+
+They agree, which is why nothing looks wrong on the press. They stop agreeing the
+moment the visitor scrolls either pane by hand. Scroll the stage down to the
+*other* question's ring — now on the page for the first time, this unit's whole
+point — and the rail is still showing the newest card, whose pill reads different
+words from the ring in front of them. The screen is honest and the two halves are
+describing different questions.
+
+The pill makes this legible rather than confusing, which is why it is not urgent:
+different words on the pill and the ring is exactly the signal *this ring is not
+this card's*. But a visitor who has just been told each question is marked and
+then goes looking for the second one has to find its card themselves.
+
+**Three shapes:**
+
+1. **The stage tells the rail.** The mark that scrolls into view scrolls its card
+   to the top of the rail. Largest, and the only one where looking at the page
+   answers the question by itself. Needs an observer on the stage, which is a
+   script on a surface that has been careful to draw its marks as rules.
+2. **The card is reachable from the mark.** The chip becomes a link to its card.
+   Small; makes the mark a control, which it has never been.
+3. **Leave it.** The pill already distinguishes them, and a visitor who scrolls
+   the stage is exploring rather than deciding.
+
+**Recommendation: 2**, if anything. 1 is a lot of machinery for a state reached
+by scrolling, and this surface's standing rule is that the mark decorates and
+never restructures.
+
+---
+
+## 2026-09-07 — `21st.dev` re-verified blocked, from the demo lane a twelfth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` again, on the run of
+7 September. **Twelfth filed from this lane, thirteenth attempt**; the counts were
+reconciled in the 6 September entry and this one continues them. The standing
+answer is on the 21 August entry: `.claude/settings.json` allows the domain for
+the tool and the proxy does not, so `docs/routines.md` has listed it as allowed
+for a fortnight and it has never once been reachable.
+
+The cost this run was nil, and it is worth saying so plainly. What decided this
+unit was building both trees and driving them in a browser: whether two amber
+marks read as two questions or as a quiz is a question about *this* page with
+*this* content at *this* width, and no reference gallery could have answered it.
+The one thing that did answer it — and found a layout regression on the way — was
+a screenshot.
+
+---
+
+## 2026-09-07 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, seventeen days on
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+Line 19, verified on `d7375ef` and on this branch this run:
+
+> Eighteen primitives are registered and the demo is live at
+> `apps/loom/app/(portal)/portal/demo`.
+
+It moved to a public `/demo` on 21 August, and `docs/routines.md:115` records the
+move as this lane's first task. `rollout.md` names this lane the conversion
+artifact for launch, so the one document that says what the demo is *for* is also
+the one still pointing at where it was.
+
+Re-verified rather than re-dated: this lane filed a stale finding three times by
+date on 3 September and had to correct itself, and the correction is worth more
+than the count. Also checked this run, and **not** stale: the four references
+previous runs listed are all accurate now — `nav-items.tsx` is repointed, and
+`(portal)/_lib/auth/paths.ts`'s `DEMO_PATH` is the public-path exemption that
+keeps the 308 working for a signed-out visitor on an old bookmark, which is not a
+link to the demo and documents itself correctly.
+
+The brief's opening task — *move it off `/portal/demo`* — has been complete for
+seventeen days and eleven runs. Its second problem, *"it is clunky"*, is live, and
+is what this unit and the six before it are.
+
+---
 
 ## 2026-08-15 — `FINDINGS.md` did not exist, and neither do two of the four docs
 
@@ -13471,8 +13609,15 @@ state exists.
 
 ## 2026-09-06 — two live holds draw one mark, and nothing says which card it belongs to
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
-design question, diagnosed in full so the run that takes it is short
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+#220 (unit 7, 7 September) — shape 1 taken, with a light form of 2 alongside it.
+Every open question is marked, in its own words; the rail's line stops pointing
+at *this* once there is more than one thing it could mean; and each card wears
+its own mark as a pill carrying the chip's words in the chip's colours, so the
+pairing is a thing to look at rather than a sentence to reason about. Driving it
+confirmed the recommendation: two amber marks read as two questions, and the cap
+of three had to become the *page's* budget rather than each change's, spent in
+rounds, or two well-behaved changes would break it together.
 
 The state directly before the one #220 fixed, and it is honest rather than wrong,
 which is why it was left. Press two presets that both hold. Two cards read

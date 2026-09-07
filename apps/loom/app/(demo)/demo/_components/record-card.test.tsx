@@ -8,6 +8,7 @@ import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
+import { SPOT_COLOURS } from "@/app/(demo)/_lib/spotlight"
 import { UNDO_CAUTION, UNDO_SPENT, UNDO_WAITING } from "@/app/(demo)/_lib/undo"
 import { WEIGHED_QUESTIONS } from "@/app/(demo)/_lib/weighed"
 
@@ -701,5 +702,96 @@ describe("an ask the page has moved past", () => {
     expect(screen.getByRole("button", { name: "Apply this change" })).toBeTruthy()
     expect(screen.getByText("Waiting on you")).toBeTruthy()
     expect(screen.queryByRole("button", { name: ASK_AGAIN_LABEL })).toBeNull()
+  })
+})
+
+/**
+ * The pill that says which of two amber rings on the page is this card's.
+ *
+ * A visitor with two questions open is doing a matching problem, and every other
+ * way of solving it — naming the ask in the rail's line, numbering the marks, a
+ * legend — asks them to read a sentence. This asks them to see that two things
+ * are the same thing, so what is asserted here is sameness: the words, and the
+ * colours, are the mark's own rather than a second copy.
+ */
+describe("the card's own mark", () => {
+  it("wears the words the page is wearing for this change", () => {
+    render(<RecordCard record={HELD} mark={{ label: "Something new would go here", tone: "awaiting" }} />)
+
+    expect(screen.getByText("Something new would go here")).toBeTruthy()
+  })
+
+  /**
+   * In the chip's colours, read from the one table the stylesheet on the stage is
+   * drawn from. A Tailwind token here would be a second definition of one
+   * colour, free to drift the first time either is retuned — and a pill that is
+   * nearly the chip's colour is worse than no pill, because the whole mechanism
+   * is a visitor recognising it without being told.
+   */
+  it("wears the mark's own colours, not a second copy of them", () => {
+    /** The DOM keeps colours as `rgb()`; the table keeps them as the CSS writes them. */
+    const rgb = (hex: string): string => {
+      const parsed = /^#([0-9a-f]{6})$/i.exec(hex)?.[1]
+      if (parsed === undefined) throw new Error(`${hex} is not a six-digit hex colour`)
+
+      const [r, g, b] = [0, 2, 4].map((at) => Number.parseInt(parsed.slice(at, at + 2), 16))
+
+      return `rgb(${r}, ${g}, ${b})`
+    }
+
+    render(<RecordCard record={HELD} mark={{ label: "This would be removed", tone: "awaiting" }} />)
+
+    const style = screen.getByText("This would be removed").getAttribute("style") ?? ""
+
+    expect(style).toContain(rgb(SPOT_COLOURS.awaiting.fill))
+    expect(style).toContain(rgb(SPOT_COLOURS.awaiting.ink))
+  })
+
+  /**
+   * And it says what it is to a reader who cannot see the page. "Waiting on you ·
+   * Something new would go here" is two badges to the eye and one run-on sentence
+   * to a screen reader.
+   */
+  it("says what the words are for, to a reader who cannot see the ring", () => {
+    render(<RecordCard record={HELD} mark={{ label: "This would be removed", tone: "awaiting" }} />)
+
+    expect(screen.getByText(/marked on the page/)).toBeTruthy()
+  })
+
+  /**
+   * And that sentence is held inside the pill, which is a layout fact rather
+   * than a style one.
+   *
+   * `sr-only` is `position: absolute`, and an absolutely positioned element is
+   * not clipped by an `overflow: hidden` ancestor that is not itself positioned
+   * — which the demo's `lg:h-screen lg:overflow-hidden` frame is not. Given no
+   * positioned parent, this span is laid out at its static position deep in the
+   * rail's own scroll, escapes the frame, and stretches the *document*: with two
+   * questions open the one-viewport layout started scrolling, carrying the top
+   * bar off screen and leaving 340px of empty ground beneath both panes.
+   *
+   * Nothing renders differently, which is why this is asserted rather than left
+   * to the eye — and why it is asserted here rather than left to a screenshot
+   * that only shows it in one of the states this card has.
+   */
+  it("keeps the words a screen reader hears inside the pill that carries them", () => {
+    render(<RecordCard record={HELD} mark={{ label: "This would be removed", tone: "awaiting" }} />)
+
+    const pill = screen.getByText(/marked on the page/).parentElement
+
+    expect(pill?.className).toContain("relative")
+  })
+
+  /**
+   * There is no pill when the page has one mark on it, which is the ordinary
+   * case and the one six runs have tuned the top of this card for. A second badge
+   * beside the state, on the first card a stranger ever sees, costs that card its
+   * one-glance reading to answer a question nobody is asking yet.
+   */
+  it("is absent when there is nothing to be told apart from", () => {
+    render(<RecordCard record={HELD} />)
+
+    expect(screen.queryByText(/marked on the page/)).toBeNull()
+    expect(screen.getByText("Waiting on you")).toBeTruthy()
   })
 })

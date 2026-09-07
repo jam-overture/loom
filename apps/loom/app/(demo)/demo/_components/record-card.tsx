@@ -12,6 +12,7 @@ import type { MovedNote } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
+import { SPOT_COLOURS, type SpotTone } from "@/app/(demo)/_lib/spotlight"
 import {
   askedLine,
   UNDO_CAUTION,
@@ -70,6 +71,7 @@ export const RecordCard = ({
   plain = [],
   moved,
   offer = "offer",
+  mark,
 }: {
   readonly record: ChangeRecord
   /**
@@ -106,6 +108,21 @@ export const RecordCard = ({
    * undo to offer and should not have to say so.
    */
   readonly offer?: UndoOffer
+  /**
+   * The words the page is wearing for this change, and the colour it wears them
+   * in — present only while the page carries a mark for more than one change.
+   *
+   * It is the chip off the band, reproduced: same words, same fill, same ink. A
+   * visitor with two questions open and two amber rings on the page is doing a
+   * matching problem, and every other way of answering it — naming the ask in
+   * the rail's line, numbering the marks, a legend — asks them to read a
+   * sentence. This asks them to see that two things are the same thing.
+   *
+   * `_lib/marked.ts` decides when there is one, from the marks actually drawn
+   * rather than from the changes that wanted them, so a card can never claim a
+   * mark the page is not carrying.
+   */
+  readonly mark?: { readonly label: string; readonly tone: SpotTone }
 }) => {
   const [answerReport, answer, answering] = useActionState<WriteReport | null, FormData>(answerHeld, null)
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
@@ -150,10 +167,47 @@ export const RecordCard = ({
           * where the portal's own screens keep it, and the claim it stood for is
           * a sentence under the rule that used it (`_lib/ceiling.ts`).
           */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-sm px-1.5 py-0.5 text-2xs ${toneClasses(outcome.tone)}`}>
             {outcome.label}
           </span>
+
+          {/*
+            * And, when the page is marked for more than one thing, this card's
+            * own mark — the chip off the band, in the band's chip's colours.
+            *
+            * Styled from `SPOT_COLOURS` rather than from a class, because the
+            * one property that matters is that it is *identical* to the thing on
+            * the page, and the thing on the page is drawn from that table into a
+            * stylesheet the stage serves (`spotlightCss`). A Tailwind token here
+            * would be a second definition of one colour, free to drift the first
+            * time either is retuned.
+            *
+            * Read aloud with a preposition, because "Waiting on you · Something
+            * new would go here" is two badges to the eye and one run-on sentence
+            * to a screen reader.
+            *
+            * **`relative` is load-bearing and invisible.** `sr-only` is
+            * `position: absolute`, and an absolutely positioned element is not
+            * clipped by an `overflow: hidden` ancestor that is not *positioned*
+            * — which the demo's outer `lg:h-screen lg:overflow-hidden` frame is
+            * not. Without a positioned parent this span's containing block is
+            * the page itself, so it is laid out at its static position deep
+            * inside the rail's own scroll, escapes the frame, and stretches the
+            * document by the height of the rail's overflow: at two open
+            * questions the whole one-viewport layout began scrolling, taking the
+            * top bar off screen and leaving 340px of empty ground under both
+            * panes. Two words no one can see, moving the entire demo.
+            */}
+          {mark && (
+            <span
+              className="relative rounded-sm px-1.5 py-0.5 text-2xs"
+              style={{ background: SPOT_COLOURS[mark.tone].fill, color: SPOT_COLOURS[mark.tone].ink }}
+            >
+              <span className="sr-only">marked on the page: </span>
+              {mark.label}
+            </span>
+          )}
         </div>
 
         {/*
