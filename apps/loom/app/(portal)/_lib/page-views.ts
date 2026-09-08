@@ -1,5 +1,6 @@
 import type { TreeId } from "@loom/runtime"
 
+import { screenName } from "./screen-names"
 import type { PlainLine } from "./vocabulary"
 
 /**
@@ -28,13 +29,19 @@ import type { PlainLine } from "./vocabulary"
  *
  * ### Why the labels are questions
  *
- * The rail's labels are nouns (`Activity`, `History`, `Trust`, `Checkup`) and
- * they stay nouns: a rail is a list of places and a noun is what names a place.
  * A strip scoped to one page is not a list of places, it is a list of things you
  * might want to know about the page you are already looking at — so each label
- * is the question its screen answers, and two of them are word-for-word the
- * heading a reader lands on. A link that says what you will get is the whole of
- * why a person clicks it.
+ * is the question its screen answers. A link that says what you will get is the
+ * whole of why a person clicks it.
+ *
+ * Two of them are no longer written here at all. `What's been asked` and
+ * `What's changed` were this file's invention, and they were right — right
+ * enough that on 8 September the rail and both headings were changed to match
+ * them, because `Activity` and `History` are synonyms in ordinary English and
+ * these two are not. They are read from `_lib/screen-names.ts` now, so the
+ * strip and the rail cannot drift back apart. The other three stay literals,
+ * for the reason that module gives for holding only three screens: a name moves
+ * on the run that rewrites its screen.
  */
 
 export type PageViewKey = "page" | "asked" | "changed" | "trust" | "checkup"
@@ -63,8 +70,8 @@ const VIEWS: readonly {
   readonly path: string
 }[] = [
   { key: "page", label: "The page", path: "/portal/pages" },
-  { key: "asked", label: "What's been asked", path: "/portal/activity" },
-  { key: "changed", label: "What's changed", path: "/portal/history" },
+  { key: "asked", label: screenName("/portal/activity"), path: "/portal/activity" },
+  { key: "changed", label: screenName("/portal/history"), path: "/portal/history" },
   { key: "trust", label: "Can you trust it?", path: "/portal/trust" },
   { key: "checkup", label: "Does it add up?", path: "/portal/checkup" },
 ]

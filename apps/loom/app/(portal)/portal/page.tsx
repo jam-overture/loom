@@ -4,12 +4,14 @@ import type { TreeId } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 import { describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
 
+import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnattendedCard } from "@/app/(portal)/_components/unattended-card"
 import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { unattendedIn, unattendedSummary } from "@/app/(portal)/_lib/unattended"
@@ -90,7 +92,7 @@ const PortalHome = async () => {
   if (!listed.ok) {
     return (
       <div className="flex max-w-2xl flex-col gap-4 p-8">
-        <h1 className="text-2xl tracking-tight">What Loom has been doing</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
         <StateNotice tone="failure" title="We couldn't check what's waiting.">
           <p>
             Nothing has been lost, and nothing has been decided without you — looking for waiting
@@ -180,11 +182,24 @@ const PortalHome = async () => {
        * misreading this screen must not cause.
        */}
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl tracking-tight">What Loom has been doing</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
         <p className="text-ink-muted text-sm">
           Everything Loom stopped to ask you about, and everything it went ahead with on its own.
         </p>
       </header>
+
+      {/*
+       * The scope, said once and near the top. Both halves below are read from a
+       * window on the newest end of the record, so this screen is always about
+       * *lately* — and a queue that looks complete is exactly the kind of screen
+       * a reader takes for the whole story.
+       *
+       * Outside the header rather than inside it, which is where the other two
+       * screens carrying one of these put it: a `gap-1` header set it hard
+       * against the screen's own sentence and the two read as one paragraph
+       * arguing with itself.
+       */}
+      <ElsewhereNote from="/portal" />
 
       <section className="flex flex-col gap-4">
         <header className="flex flex-col gap-1">
@@ -394,19 +409,23 @@ const PortalHome = async () => {
 
       {/*
        * Every screen in the portal is a view of the same deployment, and this
-       * one is where somebody arrives. The two links out say what the other
-       * questions are: which pages there are, and everything that has ever
-       * been asked of them.
+       * one is where somebody arrives. The way out says what the other question
+       * is: which pages there are.
        *
-       * Withheld when there are no pages, because both of them lead to an
-       * empty screen and a strip of dead ends under an empty state is worse
-       * than no strip. The one thing to do then is the empty state's own
-       * action.
+       * It was two links, and the second read "Everything anyone has asked for
+       * →" — a fourth wording for `/portal/activity`, which the rail called
+       * `Activity`, its own heading called `Activity`, and the strip called
+       * "What's been asked". That destination is named once now, in the line
+       * under this screen's heading, where it arrives as the scope of what a
+       * reader is about to read rather than as an afterthought at the bottom.
+       *
+       * Withheld when there are no pages, because it leads to an empty screen
+       * and a dead end under an empty state is worse than no link. The one
+       * thing to do then is the empty state's own action.
        */}
       {trees.length > 0 && (
         <nav className="text-ink-muted flex flex-wrap gap-4 text-xs">
           <Link href="/portal/pages">Your pages →</Link>
-          <Link href="/portal/activity">Everything anyone has asked for →</Link>
         </nav>
       )}
 

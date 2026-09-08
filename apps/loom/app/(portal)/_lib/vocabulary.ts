@@ -18,6 +18,8 @@ import {
   type UnaddressableReason,
 } from "@loom/runtime/react"
 
+import { screenName } from "./screen-names"
+
 /*
  * The demo moved out of this route group to `app/(demo)` on 21 August, and this
  * is the one line of the portal a demo run had to touch to move it: a
@@ -189,7 +191,13 @@ export type ChangeState =
 export const CHANGE_STATES: Readonly<Record<ChangeState, PlainState>> = {
   applied: {
     label: "Applied",
-    meaning: "This change is live on the page. You can undo it from History.",
+    /*
+     * The screen is named rather than spelled. This read "you can undo it from
+     * History" — a screen whose rail entry, heading and strip label had all
+     * moved to `What's changed` — and it is the sentence under every applied
+     * change in the portal, so it was the widest-read copy of the wrong name.
+     */
+    meaning: `This change is live on the page. You can undo it from ${screenName("/portal/history")}.`,
     technical: "committed",
     tone: "applied",
   },

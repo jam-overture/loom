@@ -13653,3 +13653,103 @@ installed in this environment at `/opt/pw-browsers/chromium`, and
 `npx playwright install` entirely. A locally-installed `playwright` package looks
 for a build number that is not there and tells you to download browsers; it is
 wrong.
+
+---
+
+## 2026-09-08 — the demo's guard against the portal's screens names them by hand, so a portal rename disarms it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom demo` · **Status:** open —
+the guard is repaired in `portal-23-four-units-one-tree`; the question under it
+is not.
+
+`app/(demo)/_lib/report.test.ts` holds `NOWHERE_HERE`, the list of places a demo
+visitor must never be sent because this surface does not have them. It was five
+hand-written regexes, one of them `/history/i`.
+
+The portal renamed that screen to `What's changed` on 8 September. The guard did
+not fail — **it went on passing while no longer matching the one sentence it was
+written for**, which is worse than failing. The shared `applied` meaning still
+sends a visitor to a portal screen; the list just stopped being able to see it.
+
+**Repaired here, minimally**, because `pnpm verify` is the merge gate for four
+surfaces and my rename is what broke it: the entry now reads
+`new RegExp(screenName("/portal/history"), "iu")`, and `report.ts`'s comment
+quotes the current sentence. Two lines and a comment, in another lane's files,
+declared in the report.
+
+**What is left, and it is this lane's call rather than mine.** The demo
+overrides exactly one meaning, and the override is a second literal:
+
+```
+applied: "This change is live on the page beside you. “Put it back” undoes it."
+```
+
+Three options, and I have taken none of them:
+
+| | |
+| --- | --- |
+| **A** — leave it | the override is one string and the test now says why it exists in terms that survive a rename |
+| **B** — derive the sentence | the demo says "the button beside you" and the portal says "the screen called X"; the shape is shared, the destination is not |
+| **C** — let a state carry no destination | the shared table would say what happened and nothing about where to go, and each surface would add its own way out |
+
+C is the one that generalises — a fourth surface borrowing this table will want
+the same thing — and it is a change to `vocabulary.ts`, which is the portal's.
+So it needs both lanes to agree rather than either to act, which is why it is
+filed rather than done.
+
+---
+
+## 2026-09-08 — a page has a name in the headings and an id in the sentence underneath
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open.
+
+#245's fifth unit gave a tree its name — read from the heading the page itself
+leads with — and put it in the page screen's heading, the pages list, the front
+door's cards and the history and checkup choosers.
+
+`_lib/page-views.ts`'s `SCOPED_LEADS` was not reached. So on the screenshots
+taken today, the front door calls a page **Autumn arrivals** and
+`/portal/history?tree=t_seed1`, two clicks away, calls the same page `t_seed1`
+in the sentence directly under its heading:
+
+> *"Every change that has actually been made to `t_seed1`, newest first…"*
+
+Four sentences, one module, all four scoped screens at once. It is small and it
+is not this unit — today's is about what a **screen** is called and this is
+about what a **page** is called, and mixing them would make one diff answer two
+questions.
+
+The shape is already right for it: each lead is a `PlainLine` whose middle is
+the subject, and `namesOf`/`nameFrom` already hand a screen a `PageName` with a
+readable half and an id half. The scoped screens all read the store, so the name
+is available to them; what is not available is a name for a page that has no
+heading, which is the case the lead has to keep working for.
+
+---
+
+## 2026-09-08 — a name written twice cannot be found by a test that asserts the name
+
+**Filed by:** `Loom portal` · **Owned by:** every surface lane · **Status:**
+open, offered rather than assigned.
+
+Worth one paragraph to whoever is renaming something next, because it cost me
+three defects I had already written tests for.
+
+I wrote `screen-names.ts`, moved the rail, the headings and the strip onto it,
+and wrote four tests asserting the names were right. All four passed. **Three
+user-facing copies of the old names were still in the lane** — in the sentence
+under every applied change, in the sentence a person reads while deciding
+whether to discard a change, and on the 404 — and none of the four tests could
+see any of them, because a test that asserts *"the heading is X"* is blind to
+everywhere else X's predecessor is still written.
+
+What found them was the inverse: **a sweep asserting the old name appears
+nowhere**, over every `.ts` and `.tsx` in the route group with comments
+stripped, bounded by letters so a symbol like `ActivityPage` and a route like
+`/portal/activity` are untouched. It is about fifteen lines and it is in
+`(portal)/every-screen.test.ts` if another lane wants to copy the shape.
+
+The general rule, which is not specific to names: **a rename needs a test for
+the absence of the old thing, not only for the presence of the new one.** The
+presence test passes the moment the new thing exists; only the absence test
+knows whether the rename finished.

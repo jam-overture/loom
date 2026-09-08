@@ -3,6 +3,7 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
+import { namedScreens } from "./_lib/screen-names"
 import { isForwarding, portalScreens, screenSource } from "./_lib/screen-source"
 
 /**
@@ -59,6 +60,94 @@ describe("the portal's screens, enumerated from the filesystem", () => {
   it("finds more than a handful, so an empty sweep cannot pass as clean", () => {
     expect(screens.length).toBeGreaterThan(10)
     expect(rendered.length).toBeGreaterThan(8)
+  })
+})
+
+/**
+ * **A screen has one name.**
+ *
+ * On 7 September `/portal/activity` was called four different things by four
+ * different parts of this portal — `Activity` in the rail, `Activity` in its own
+ * heading, `What's been asked` in the strip, and `Everything anyone has asked
+ * for →` at the foot of the front door. None of them was wrong on its own and no
+ * test could see the set. `_lib/screen-names.ts` holds the argument.
+ *
+ * The check is that a declared name never appears as a literal in this route
+ * group. Comments are already stripped, so the module's own reasoning about the
+ * names it holds is not mistaken for a second copy of one — the same
+ * arrangement that lets a guard sit under a comment naming the very string it
+ * forbids.
+ *
+ * `.ts` files are swept as well as `.tsx`, which is what catches the case that
+ * actually happened: the strip's labels lived in `_lib/page-views.ts` and
+ * nothing rendered them from a component.
+ */
+describe("the name of a screen", () => {
+  const NAMED = namedScreens()
+
+  const everySource = (directory: string): readonly { file: string; source: string }[] =>
+    readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+      const path = join(directory, entry.name)
+
+      if (entry.isDirectory()) return everySource(path)
+      if (!/\.tsx?$/u.test(entry.name) || entry.name.includes(".test.")) return []
+      if (path === join(GROUP, "_lib", "screen-names.ts")) return []
+
+      return [{ file: path, source: screenSource(path) }]
+    })
+
+  const sources = everySource(GROUP)
+
+  it("finds the lane to sweep, so an empty sweep cannot pass as clean", () => {
+    expect(sources.length).toBeGreaterThan(40)
+    expect(NAMED.length).toBeGreaterThan(2)
+  })
+
+  it.each(NAMED.map((screen) => [screen.route, screen.name]))(
+    "is written once for %s",
+    (_route, name) => {
+      const copies = sources
+        .filter((entry) => entry.source.includes(name))
+        .map((entry) => entry.file.slice(GROUP.length + 1))
+
+      expect(copies).toEqual([])
+    }
+  )
+
+  /**
+   * The other end of the same rule: the name a screen used to have.
+   *
+   * A rename that only adds the new name leaves the old one wherever nobody
+   * grepped. `_lib/waiting.ts` read "What was asked for stays in Activity" at
+   * the moment a person decides whether to throw a change away — a sixth
+   * wording, found by looking at a screenshot after four tests about naming had
+   * already been written and passed.
+   *
+   * Bounded by letters on both sides, which is what lets `ActivityPage` and
+   * `/portal/activity` stay exactly as they are. A symbol is a symbol and a
+   * route is an address; neither is something a reader is shown.
+   */
+  it.each(
+    NAMED.flatMap((screen) => screen.formerly.map((was) => [`${screen.route} — ${was}`, was]))
+  )("no longer calls anything %s", (_label, was) => {
+    const pattern = new RegExp(`(?<![A-Za-z])${was}(?![A-Za-z])`, "u")
+    const left = sources
+      .filter((entry) => pattern.test(entry.source))
+      .map((entry) => entry.file.slice(GROUP.length + 1))
+
+    expect(left).toEqual([])
+  })
+
+  /**
+   * Guards the guard. If the sweep read nothing, or the names were compared
+   * against sources they can never appear in, every case above would pass over
+   * an empty list — so one string that is definitely in this lane has to be
+   * found by exactly the same search.
+   */
+  it("detects a literal that is in the lane", () => {
+    const found = sources.filter((entry) => entry.source.includes("TechnicalDetail"))
+
+    expect(found.length).toBeGreaterThan(5)
   })
 })
 

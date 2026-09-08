@@ -4,12 +4,14 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
+import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 import {
   anchorOf,
   describeAnchorMiss,
@@ -75,12 +77,13 @@ const HistoryPage = async ({
     return (
       <div className="flex max-w-3xl flex-col gap-6 p-8">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl tracking-tight">History</h1>
+          <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
           <p className="text-ink-muted text-sm">
             Every change that has actually been made to one of your pages, newest first &mdash; and,
             for each one, exactly what undoing it would put back.
           </p>
         </div>
+        <ElsewhereNote from="/portal/history" />
         <TreeChooser />
       </div>
     )
@@ -101,7 +104,7 @@ const HistoryPage = async ({
 
     return (
       <div className="flex max-w-3xl flex-col gap-4 p-8">
-        <h1 className="text-2xl tracking-tight">History</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
         <StateNotice tone="failure" title="We couldn&rsquo;t read this page&rsquo;s history.">
           <p>
             Nothing has been lost and nothing has changed &mdash; this is a screen that could not
@@ -167,7 +170,7 @@ const HistoryPage = async ({
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">History</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
         {/*
          * "this page" meant the tree and nothing on screen said which tree it
          * was, except an id in the corner with an arrow after it. The id is in
@@ -180,6 +183,8 @@ const HistoryPage = async ({
       </header>
 
       <PageViews treeId={scope.data} current="changed" />
+
+      <ElsewhereNote from="/portal/history" treeId={scope.data} />
 
       <RevisionBox treeId={scope.data} typed={echoOf(named)} />
 

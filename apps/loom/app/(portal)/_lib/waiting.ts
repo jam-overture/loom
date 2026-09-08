@@ -1,6 +1,7 @@
 import type { Disposition } from "@loom/runtime"
 import type { HeldProposal } from "@loom/runtime/write"
 
+import { screenName } from "./screen-names"
 import { plainMoment } from "./when"
 import {
   ASK_ORIGINS,
@@ -73,7 +74,15 @@ export const answerOutcomes = (disposition: Disposition): AnswerOutcomes => ({
   yes: disposition.reversible
     ? "Loom checks its rules once more, then makes the change and writes it into the page's history — where you can undo it."
     : "Loom checks its rules once more, then makes the change and writes it into the page's history. This one can't be undone afterwards.",
-  no: "The change is thrown away and the page is left exactly as it is. What was asked for stays in Activity, so nothing is lost.",
+  /*
+   * The screen is named rather than spelled, and this line is why the naming is
+   * worth a module. It said "stays in Activity" — a sixth wording for a screen
+   * the rail called `Activity`, the strip called "What's been asked" and the
+   * front door called "Everything anyone has asked for" — printed at the one
+   * moment a person is deciding whether to throw a change away. "Nothing is
+   * lost" is only reassuring if the reader can find the place it is not lost in.
+   */
+  no: `The change is thrown away and the page is left exactly as it is. What was asked for stays in ${screenName("/portal/activity")}, so nothing is lost.`,
 })
 
 /**

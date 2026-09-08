@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
@@ -127,8 +128,16 @@ describe("the front door's reading order", () => {
       ...source.split('tone="settled"').slice(1),
     ].map((chunk) => hrefsIn(chunk.slice(0, chunk.indexOf("</StateNotice>"))))
 
-    /** Guards the guard: an empty slice would pass this trivially. */
-    expect(strip.length).toBe(2)
+    /**
+     * Guards the guard: an empty slice would pass this trivially.
+     *
+     * One, not two. The strip carried "Everything anyone has asked for →" until
+     * 8 September, which was a fourth wording for a screen the rail called
+     * `Activity` and the strip on every scoped screen called "What's been
+     * asked". That destination is named once now, under this screen's heading,
+     * where it arrives as the scope of what a reader is about to read.
+     */
+    expect(strip.length).toBe(1)
     expect(branches.length).toBe(2)
     for (const branch of branches) expect(branch.length).toBeGreaterThan(0)
 
@@ -173,7 +182,8 @@ describe("what happened without you", () => {
   it("is headed by something true of both halves", () => {
     const heading = /<h1[^>]*>([\s\S]*?)<\/h1>/u.exec(source)?.[1]?.trim()
 
-    expect(heading).toBe("What Loom has been doing")
+    expect(heading).toBe('{screenName("/portal")}')
+    expect(screenName("/portal")).toBe("What Loom has been doing")
   })
 
   /** The count before the cards, for the reason the waiting half says its own. */
