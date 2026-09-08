@@ -14,11 +14,10 @@ import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
 import { SPOT_COLOURS, type SpotTone } from "@/app/(demo)/_lib/spotlight"
 import {
+  appliedWords,
   askedLine,
   UNDO_CAUTION,
-  UNDO_LABEL,
-  UNDO_SPENT,
-  UNDO_WAITING,
+  type AskedLine,
   type UndoOffer,
 } from "@/app/(demo)/_lib/undo"
 import { weighedOf } from "@/app/(demo)/_lib/weighed"
@@ -71,9 +70,23 @@ export const RecordCard = ({
   plain = [],
   moved,
   offer = "offer",
+  asked,
   mark,
 }: {
   readonly record: ChangeRecord
+  /**
+   * The line this card quotes, when the page has worked it out from the whole
+   * record list.
+   *
+   * Only an undo needs it, and only because the control it was raised from is
+   * named for what it undoes: an ordinary change offers **Put it back** and an
+   * undo offers **Undo this change too**, so the words to quote are on a card
+   * this one cannot see. Same shape as `offer` and for the same reason.
+   *
+   * Defaulted to the reading this card can reach on its own, which is right for
+   * every card but that one.
+   */
+  readonly asked?: AskedLine
   /**
    * Present only while the change is waiting on the visitor. An applied change
    * has already moved the tree, so describing it against the tree as it is now
@@ -138,7 +151,13 @@ export const RecordCard = ({
    */
   const outcome = demoState(moved ? "no-change" : stateOfRecord(record.outcome))
   const answered = answerNote(record)
-  const asked = askedLine(record)
+  const quoted = asked ?? askedLine(record)
+  /*
+   * The three strings under the badge that are about the *direction* of this
+   * change rather than about its state, and which an undo's card needs its own
+   * versions of. `_lib/undo.ts` owns the table and the reasoning.
+   */
+  const applied = appliedWords(record)
   const weighed = weighedOf(record)
   const ceiling = ceilingNote(record)
 
@@ -221,7 +240,7 @@ export const RecordCard = ({
           * for the words they recognise. `_lib/undo.ts` owns the substitution
           * and the runtime's utterance is under the disclosure, unaltered.
           */}
-        <p className="text-md">“{asked.plain}”</p>
+        <p className="text-md">“{quoted.plain}”</p>
 
         {/*
           * The state in a sentence, under the badge that names it. "Refused" is
@@ -234,9 +253,22 @@ export const RecordCard = ({
           * away. The badge still reads "Applied", correctly: that is what became
           * of *this ask*, and the sentence under it is where the page stands
           * now. `_lib/undo.ts` owns both strings.
+          *
+          * And once more on a card that is *itself* an undo, where the applied
+          * sentence names the control under it — *"'Put it back' undoes it"* —
+          * on the one card whose own title is putting it back. Circular, and
+          * pointing at a button that would take the change off again.
+          *
+          * Gated on `record.revision` rather than on the state's name because
+          * that is the field that says this ask produced one: a held or refused
+          * card has no revision, keeps the shared table's sentence, and must —
+          * *"Loom will not make this change until you say yes"* is not about a
+          * direction and needs no undo's version of itself.
           */}
         <p className="text-ink-secondary text-sm">
-          {offer === "spent" ? UNDO_SPENT : outcome.meaning}
+          {offer === "spent"
+            ? applied.spent
+            : (record.revision && applied.meaning) || outcome.meaning}
         </p>
 
         <p className="text-ink-muted text-2xs">
@@ -408,7 +440,7 @@ export const RecordCard = ({
             disabled={undoing}
             className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover w-full rounded-md border px-3 py-1.5 text-xs transition-colors disabled:opacity-60"
           >
-            {undoing ? "Undoing…" : UNDO_LABEL}
+            {undoing ? "Undoing…" : applied.label}
           </button>
           <p className="text-ink-muted text-2xs">{UNDO_CAUTION}</p>
         </form>
@@ -421,7 +453,7 @@ export const RecordCard = ({
         */}
       {record.revision && offer === "waiting" && (
         <p className="border-awaiting-ink text-ink-secondary border-l-2 pl-2.5 text-xs">
-          {UNDO_WAITING}
+          {applied.waiting}
         </p>
       )}
 
@@ -458,7 +490,7 @@ export const RecordCard = ({
               * surface goes. On every other card it would be the line three
               * inches above, said twice.
               */}
-            {asked.technical && <Row label="asked">{asked.technical}</Row>}
+            {quoted.technical && <Row label="asked">{quoted.technical}</Row>}
             <p className="text-ink-secondary text-2xs italic">{record.interpretation.rationale}</p>
             <Row label="interpreter">{record.interpretation.interpreter}</Row>
             <Row label="authored by">{record.interpretation.authoredBy}</Row>

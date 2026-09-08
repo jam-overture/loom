@@ -9,7 +9,16 @@ import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/m
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { SPOT_COLOURS } from "@/app/(demo)/_lib/spotlight"
-import { UNDO_CAUTION, UNDO_SPENT, UNDO_WAITING } from "@/app/(demo)/_lib/undo"
+import {
+  UNDO_AGAIN_LABEL,
+  UNDO_AGAIN_MEANING,
+  UNDO_AGAIN_SPENT,
+  UNDO_AGAIN_WAITING,
+  UNDO_CAUTION,
+  UNDO_LABEL,
+  UNDO_SPENT,
+  UNDO_WAITING,
+} from "@/app/(demo)/_lib/undo"
 import { WEIGHED_QUESTIONS } from "@/app/(demo)/_lib/weighed"
 
 import { RecordCard } from "./record-card"
@@ -606,6 +615,102 @@ describe("what the payoff card offers", () => {
 
     expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
     expect(screen.queryByText(UNDO_WAITING)).toBeNull()
+  })
+})
+
+/**
+ * The last frame of the sixty seconds: the record of the undo that just landed.
+ *
+ * Everything on it was true and three of its strings were the same phrase.
+ * *“Put it back.”* as the quotation, *“‘Put it back’ undoes it”* as the
+ * sentence, and **Put it back** on a button that takes the change off again —
+ * so the card's own title was what its only control would reverse.
+ *
+ * The button stays, and that is the point: an undo is a change of its own
+ * (0032), weighed and recorded like any other, so it has an undo in its turn.
+ * Only the words change.
+ */
+describe("the card for an undo that landed", () => {
+  const APPLIED_UNDO: ChangeRecord = (({ heldProposalId: _held, ...rest }) => ({
+    ...rest,
+    outcome: "applied" as const,
+    revision: { produced: 2, replaced: 1 },
+    undoes: 1,
+    answeredBy: "a demo visitor",
+  }))(UNDONE)
+
+  /** The property the whole unit is for. */
+  it("says “Put it back” once, as the words the visitor pressed", () => {
+    const { container } = render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+    const uses = (container.textContent ?? "").split(UNDO_LABEL).length - 1
+
+    expect(uses).toBe(1)
+    expect(screen.getByText(`“${UNDO_LABEL}.”`)).toBeTruthy()
+  })
+
+  it("offers an undo of the undo, named for the card rather than for the page", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+
+    expect(screen.getByRole("button", { name: UNDO_AGAIN_LABEL })).toBeTruthy()
+    expect(screen.queryByRole("button", { name: UNDO_LABEL })).toBeNull()
+  })
+
+  /** Nothing is removed: the claim that undoing is itself a weighed change stays. */
+  it("keeps the caution that says this press is weighed like any other", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+
+    expect(screen.getByText(new RegExp(UNDO_CAUTION.slice(0, 40)))).toBeTruthy()
+  })
+
+  it("replaces the circular sentence with where the page now stands", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+
+    expect(screen.getByText(UNDO_AGAIN_MEANING)).toBeTruthy()
+    expect(screen.queryByText(/live on the page beside you/)).toBeNull()
+  })
+
+  it("points at the second question while an undo of the undo is held", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="waiting" />)
+
+    expect(screen.getByText(UNDO_AGAIN_WAITING)).toBeTruthy()
+    expect(screen.queryByText(UNDO_WAITING)).toBeNull()
+  })
+
+  it("says the page has moved on once that one lands too", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="spent" />)
+
+    expect(screen.getByText(UNDO_AGAIN_SPENT)).toBeTruthy()
+    expect(screen.queryByText(UNDO_SPENT)).toBeNull()
+  })
+
+  /**
+   * The quotation the page worked out, when it differs from the one this card
+   * can reach alone — an undo of an undo was raised from *Undo this change
+   * too*, and the card cannot see the ask above its own.
+   */
+  it("quotes the line the page handed it, and keeps the runtime's own words below", () => {
+    render(
+      <RecordCard
+        record={APPLIED_UNDO}
+        offer="offer"
+        asked={{ plain: `${UNDO_AGAIN_LABEL}.`, technical: APPLIED_UNDO.utterance }}
+      />
+    )
+
+    expect(screen.getByText(`“${UNDO_AGAIN_LABEL}.”`)).toBeTruthy()
+    expect(screen.queryByText(`“${UNDO_LABEL}.”`)).toBeNull()
+  })
+
+  /**
+   * The gate is `record.revision`, not the state's name, so a card that has not
+   * produced one keeps the shared table's sentence — which is about an open
+   * question and has no direction to get wrong.
+   */
+  it("leaves the held undo's own card exactly as it was", () => {
+    render(<RecordCard record={UNDONE} offer="offer" />)
+
+    expect(screen.queryByText(UNDO_AGAIN_MEANING)).toBeNull()
+    expect(screen.getByText(/Loom will not make this change until you say yes/)).toBeTruthy()
   })
 })
 

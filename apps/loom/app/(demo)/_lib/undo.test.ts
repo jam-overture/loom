@@ -3,7 +3,17 @@ import { describe, expect, it } from "vitest"
 import { REVERT_INTERPRETER } from "@loom/runtime/write"
 
 import type { ChangeRecord, InterpretationView } from "./record"
-import { askedLine, undoOf, undoOffer, UNDO_CAUTION, UNDO_LABEL } from "./undo"
+import {
+  appliedWords,
+  askedLine,
+  undoOf,
+  undoOffer,
+  UNDO_AGAIN_LABEL,
+  UNDO_CAUTION,
+  UNDO_LABEL,
+  UNDO_SPENT,
+  UNDO_WAITING,
+} from "./undo"
 
 /**
  * What the card quotes, and what it must never quote.
@@ -220,5 +230,97 @@ describe("stamping an undo with what it undoes", () => {
 
   it("changes nothing else about the record", () => {
     expect({ ...undoOf(PRESET, 3), undoes: undefined }).toEqual({ ...PRESET, undoes: undefined })
+  })
+})
+
+/**
+ * The end of the demo's own sequence, in the words on the card.
+ *
+ * Ask, allow, put it back, allow — and the visitor is looking at the record of
+ * the undo. Every string an applied card carries about *direction* was written
+ * for a change that went one way, and on this one card they all point back at
+ * the card's own title. The property these hold is the one the failure broke:
+ * **"Put it back" appears once on an undo's card, as the quotation of what the
+ * visitor pressed, and nowhere else.**
+ */
+describe("what an undo's own card says", () => {
+  it("keeps the ordinary words for a change that is not an undo", () => {
+    expect(appliedWords(PRESET)).toEqual({
+      label: UNDO_LABEL,
+      waiting: UNDO_WAITING,
+      spent: UNDO_SPENT,
+    })
+  })
+
+  /**
+   * The sentence under the badge is the shared table's for every card that is
+   * not an undo — overridden once already in `report.ts`, and a second copy
+   * here would be the drift this table exists to stop.
+   */
+  it("leaves the shared table's sentence alone for an ordinary change", () => {
+    expect(appliedWords(PRESET).meaning).toBeUndefined()
+  })
+
+  /**
+   * The button is the half that was actually wrong: on an undo's card,
+   * *Put it back* takes the change off again.
+   */
+  it("stops naming the control after the thing that control would reverse", () => {
+    expect(appliedWords(UNDO).label).not.toContain(UNDO_LABEL)
+    expect(appliedWords(UNDO).label).toBe(UNDO_AGAIN_LABEL)
+  })
+
+  /** And the sentence between the title and the button stops being circular. */
+  it("replaces the applied sentence that quoted the control back at itself", () => {
+    const { meaning } = appliedWords(UNDO)
+
+    expect(meaning).toBeDefined()
+    expect(meaning).not.toContain(UNDO_LABEL)
+  })
+
+  /** The two states with no button are about the same direction and follow it. */
+  it("says which way the second question and the second answer went", () => {
+    expect(appliedWords(UNDO).waiting).not.toBe(UNDO_WAITING)
+    expect(appliedWords(UNDO).spent).not.toBe(UNDO_SPENT)
+  })
+
+  /**
+   * The generalisation that keeps this out of `plain-change.ts`'s refusal to
+   * name a change by what it does to a type. *"Take it off again"* is right only
+   * because this demo's leading preset is a removal; the undo of *"Add the
+   * opening hours"* puts a section back, and its undo takes one away. No string
+   * in this table may claim to know which.
+   */
+  /**
+   * The trap this unit had to avoid opening one press deeper. `askedLine`
+   * quotes an undo by the button the visitor pressed, and that button's words
+   * now depend on what was being undone — so the quotation has to be read from
+   * the records rather than from the constant.
+   */
+  it("quotes an undo of an undo by the control that actually raised it", () => {
+    const applied: ChangeRecord = { ...PRESET, revision: { produced: 1, replaced: 0 } }
+    const undone: ChangeRecord = {
+      ...UNDO,
+      recordId: "i_2",
+      undoes: 1,
+      revision: { produced: 2, replaced: 1 },
+    }
+    const again: ChangeRecord = { ...UNDO, recordId: "i_3", undoes: 2 }
+
+    expect(askedLine(undone, [applied, undone]).plain).toBe(`${UNDO_LABEL}.`)
+    expect(askedLine(again, [applied, undone, again]).plain).toBe(`${UNDO_AGAIN_LABEL}.`)
+  })
+
+  /** A card rendered with no list in hand keeps the reading it can reach alone. */
+  it("falls back to the ordinary control when there is no record list to read", () => {
+    expect(askedLine(UNDO).plain).toBe(`${UNDO_LABEL}.`)
+  })
+
+  it("names no direction, because a table cannot know which way an undo's undo goes", () => {
+    const words = appliedWords(UNDO)
+
+    for (const sentence of [words.label, words.meaning ?? "", words.waiting, words.spent]) {
+      expect(sentence.toLowerCase()).not.toMatch(/\b(off|removed?|added?|back on)\b/)
+    }
   })
 })

@@ -8,6 +8,88 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-08 — a string that quotes a control is coupled to that control, and renaming the control falsifies the quotation without touching it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open as a
+standing note — the instance is fixed on #220; the shape is what is filed
+
+This lane's cards quote the visitor back to themselves. An undo has no utterance
+anybody typed — `revertRevision` synthesises `Undo revision 1.` — so `askedLine`
+quotes **the words on the button that was pressed** instead, which the 26 August
+run established and which is right.
+
+That makes the quotation a *reference* to a control, held as a copy of its
+string. Today's unit renamed the control on an undo's card from **Put it back**
+to **Undo this change too**, and the quotation kept saying *“Put it back.”* —
+naming a button that was no longer anywhere on the screen. Nothing pointed at
+it: not the types, not the diff, not the twenty-four tests in the file, because
+every one of them still passed. Both strings were `UNDO_LABEL` and `UNDO_LABEL`
+was still correct *somewhere*.
+
+**What found it** was pressing one press past the fix on the built page and
+reading the card that came back. That is the sixth consecutive run where the
+thing that decided the unit was a browser, and the fourth where driving *past*
+the state being fixed found the next one.
+
+**The shape, for the lanes that have it too.** Any surface that echoes a control's
+words somewhere else — a confirmation quoting the button that opened it, a
+history row naming the action that wrote it, a toast repeating the menu item —
+has this coupling, and a rename is the event that breaks it. The portal's review
+queue and history screens both print settled decisions in words a control
+elsewhere also uses.
+
+**The fix that holds here**, and it generalises: the quotation is not a constant.
+It is *derived from whatever the control would say for that record*, through the
+same function the control reads (`appliedWords`), so renaming the control renames
+the quotation. Where the control is on a different card, the list is read where
+the whole list is in hand — `page.tsx`, beside `undoOffer` — rather than guessed
+at by the card.
+
+---
+
+## 2026-09-08 — `21st.dev` re-verified blocked, from the demo lane a thirteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` again, on the run of
+8 September. **Thirteenth filed from this lane.** The standing answer is on the
+21 August entry: `.claude/settings.json` allows the domain for the tool and the
+proxy does not, so `docs/routines.md` has listed it as allowed for three weeks and
+it has never once been reachable.
+
+The cost this run was nil. What decided this unit was building both trees and
+photographing the same six presses against each — whether a card's last control
+points forward or backward is a question about *this* card with *this* record on
+it, and no reference gallery could answer it.
+
+---
+
+## 2026-09-08 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, eighteen days on
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+Line 19, verified on `d7375ef` and on this branch this run:
+
+> Eighteen primitives are registered and the demo is live at
+> `apps/loom/app/(portal)/portal/demo`.
+
+It moved to a public `/demo` on 21 August, and `docs/routines.md:115` records the
+move as this lane's first task. `rollout.md` names this lane the conversion
+artifact for launch, so the one document that says what the demo is *for* is also
+the one still pointing at where it was.
+
+Re-verified rather than re-dated, per the correction this lane had to make on
+3 September. Also re-checked and **not** stale: the portal references previous
+runs listed are all accurate.
+
+The brief's opening task — *move it off `/portal/demo`* — has been complete for
+eighteen days and twelve runs. Its second problem, *“it is clunky”*, is live, and
+is what every unit on #220 is.
+
+---
+
 ## 2026-09-07 — `sr-only` is `position: absolute`, and an unpositioned `overflow: hidden` frame does not clip it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom primitives` · **Status:** open —
@@ -13510,8 +13592,28 @@ The second of the two, *"it is clunky"*, is live and is what this run acted on.
 
 ## 2026-09-05 — the undo's own card says "Put it back" three times and means two different things by it
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
-second unit's worth of design, diagnosed in full so that run is short
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+unit 8 of `demo-12-what-allowing-it-would-do` (#220), 8 September** — shapes 1
+and 2 together rather than in sequence, and shape 1 by naming the card instead of
+the change
+
+Two corrections to the reasoning below, made by building it:
+
+- **Shape 2 alone was not enough**, and the recommendation to take it first was
+  wrong. A sentence is read once; a control is pressed. Fixing the circular
+  sentence and leaving the button would have left a visitor able to read the card
+  correctly and still press the thing that undoes what the card is about.
+- **Shape 1 does not need the words on the page**, which is what made it look
+  large. An applied record carries `inverseOperations` as strings and no delta,
+  so `plainChange` cannot be reached from that card without new plumbing. Naming
+  the *card* — **Undo this change too** — needs nothing new and generalises to
+  every undo, which the words-on-the-page reading would too but at the cost of a
+  resolution this surface would have had to invent.
+
+The refusal below is intact and is why the label reads as it does: *“Take it off
+again”* is right only because this demo's leading preset is a removal, and no
+string in a table can know which way an arbitrary undo's undo goes. A test holds
+the four new strings to naming no direction.
 
 Found in the frame this run fixed the other half of, and left because the answer
 is not obvious. At the end of the demo's own sequence — ask, allow, put it back,

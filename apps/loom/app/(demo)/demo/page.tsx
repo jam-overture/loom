@@ -13,7 +13,7 @@ import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { spotlightsAcross, spotlitChanges } from "@/app/(demo)/_lib/spotlight"
-import { isUndo, undoOffer } from "@/app/(demo)/_lib/undo"
+import { askedLine, isUndo, undoOffer } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
@@ -387,6 +387,15 @@ const DemoPage = async () => {
                       key={record.recordId}
                       record={record}
                       offer={undoOffer(record, records)}
+                      /*
+                       * An undo is quoted by the control that raised it, and
+                       * which control that was is a fact about the card above
+                       * this one: an ordinary change offers *Put it back*, an
+                       * undo offers *Undo this change too*. Read from the
+                       * records here for the same reason `offer` is — a card
+                       * cannot see the ask it undoes.
+                       */
+                      asked={askedLine(record, records)}
                       {...(words === undefined || marked.tone === undefined
                         ? {}
                         : { mark: { label: words, tone: marked.tone } })}

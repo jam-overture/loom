@@ -99,10 +99,32 @@ export type AskedLine = {
 export const isUndo = (record: ChangeRecord): boolean =>
   record.interpretation?.interpreter === REVERT_INTERPRETER
 
-export const askedLine = (record: ChangeRecord): AskedLine =>
-  isUndo(record)
-    ? { plain: `${UNDO_LABEL}.`, technical: record.utterance }
-    : { plain: record.utterance }
+/**
+ * The line at the top of the card, and which control it quotes.
+ *
+ * An undo is quoted by the words on the button that raised it, not by the
+ * runtime's synthesised utterance. Which button that was depends on what was
+ * being undone: an ordinary change offers **Put it back**, and an undo offers
+ * **Undo this change too** (`appliedWords`). So the records are what settle it,
+ * the same way they settle whether the offer is still open — the card cannot
+ * see the ask above its own.
+ *
+ * `records` defaults to empty and the quotation falls back to `UNDO_LABEL`,
+ * which is the control on every card that is not itself an undo. A caller with
+ * no list in hand is a card being rendered on its own, and that is the reading
+ * that is right for all but one of them.
+ */
+export const askedLine = (
+  record: ChangeRecord,
+  records: readonly ChangeRecord[] = []
+): AskedLine => {
+  if (!isUndo(record)) return { plain: record.utterance }
+
+  const undone = records.find((one) => one.revision?.produced === record.undoes)
+  const pressed = undone === undefined ? UNDO_LABEL : appliedWords(undone).label
+
+  return { plain: `${pressed}.`, technical: record.utterance }
+}
 
 /**
  * Stamp a record as the undo of a revision.
@@ -190,3 +212,93 @@ export const undoOffer = (record: ChangeRecord, records: readonly ChangeRecord[]
 export const UNDO_WAITING = "You’ve asked to put this back. It’s waiting on your yes, on the card above."
 
 export const UNDO_SPENT = "You put this back, so the page is as it was before this ask."
+
+/**
+ * And the same three sentences for the one card where every one of them is
+ * about the wrong direction: **an undo's own card.**
+ *
+ * At the end of the demo's sequence — ask, allow, put it back, allow — the
+ * visitor is looking at the record of the undo that just landed. On the strings
+ * above it read, top to bottom:
+ *
+ * | | |
+ * | --- | --- |
+ * | badge | **Applied** |
+ * | what was asked | *“Put it back.”* |
+ * | what became of it | *“This change is live on the page beside you. **“Put it back”** undoes it.”* |
+ * | the control | **[ Put it back ]** |
+ *
+ * Three uses of one phrase, and **the button is the odd one out: pressing it
+ * takes the numbers off again.** The card's own title is what that button would
+ * reverse, and the sentence between them is circular — *“Put it back” undoes
+ * it*, on a card whose subject is putting it back.
+ *
+ * Every one of those strings is right where it was written. `askedLine`
+ * substitutes the visitor's own press for the runtime's `Undo revision 1.`;
+ * `UNDO_LABEL` and the applied state's sentence are the words for *any* change,
+ * and every change does have an undo — an undo included, which is 0032 and is
+ * the claim this card exists to make. What was missing is that an undo's card
+ * is the one place all three collide.
+ *
+ * **So the button stays and only its words change.** Removing it would be the
+ * tidy fix and it would deny the interesting thing: that undoing is a change of
+ * its own, weighed and recorded like any other, and therefore reversible in its
+ * turn.
+ *
+ * **Why none of these names a direction.** *“Take it off again”* is the label
+ * this reads as wanting, and it is only correct because this demo's leading
+ * preset happens to be a removal: the undo of *“Add the opening hours”* puts a
+ * section back, and its undo takes it away again. A string in a table cannot
+ * know which, and this surface will not name a change by what it does to a type
+ * (`plain-change.ts`). So these say *this one too* and let the plain reading on
+ * the held card — which is computed against the tree, and which
+ * `restoringOperation` already writes in the restoring direction — say what
+ * actually moves.
+ *
+ * The one phrase that survives on the card is the quotation at the top, which
+ * is the words the visitor pressed. One phrase, one meaning.
+ */
+export const UNDO_AGAIN_LABEL = "Undo this change too"
+
+export const UNDO_AGAIN_MEANING =
+  "The page is back as it was, and this record is how it got there."
+
+export const UNDO_AGAIN_WAITING =
+  "You’ve asked to undo this one too. It’s waiting on your yes, on the card above."
+
+export const UNDO_AGAIN_SPENT = "You undid this one too, so the page is not as this record left it."
+
+/**
+ * The applied card's own words, which differ on a card that is itself an undo.
+ *
+ * One selector rather than three `isUndo` branches in the markup, because the
+ * three strings are one claim about one card and the failure they fix was
+ * exactly three strings drifting apart while each stayed true on its own.
+ *
+ * `meaning` is optional and absent for an ordinary change: that sentence is
+ * `report.ts`'s, overridden once already for this surface, and a second copy
+ * here would be the drift this file exists to stop. An undo's card is the one
+ * place it has to be replaced rather than adjusted — *“This change is live on
+ * the page beside you”* is true of the undo and useless as a description of a
+ * page that is back where it started.
+ */
+export type AppliedWords = {
+  /** The sentence under the badge, when the shared table's will not do. */
+  readonly meaning?: string
+  /** The words on the control, while the undo is still to be had. */
+  readonly label: string
+  /** In place of the control, once an undo of this card is waiting on an answer. */
+  readonly waiting: string
+  /** In place of the control, once one has been taken. */
+  readonly spent: string
+}
+
+export const appliedWords = (record: ChangeRecord): AppliedWords =>
+  isUndo(record)
+    ? {
+        meaning: UNDO_AGAIN_MEANING,
+        label: UNDO_AGAIN_LABEL,
+        waiting: UNDO_AGAIN_WAITING,
+        spent: UNDO_AGAIN_SPENT,
+      }
+    : { label: UNDO_LABEL, waiting: UNDO_WAITING, spent: UNDO_SPENT }

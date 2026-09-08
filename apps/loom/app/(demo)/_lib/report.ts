@@ -64,8 +64,15 @@ export { toneClasses } from "@/app/(portal)/_lib/vocabulary"
  * is not live on the page any more. Which state the card is in depends on the
  * whole record list rather than on the state of any one change, so the
  * substitution is `record-card`'s to make and the string is `undo.ts`'s to own
- * (`UNDO_SPENT`). What stays here is the sentence for a change whose undo is
+ * (`appliedWords`). What stays here is the sentence for a change whose undo is
  * still to be had, which is every applied card until somebody takes it.
+ *
+ * **Except one, and it is the last card of the demo's own sequence.** On a card
+ * that is itself an undo, this sentence names a control whose press would take
+ * the change off again, on a card headed *“Put it back.”* — so it is replaced
+ * outright rather than adjusted. `undo.ts` owns that string too, next to the
+ * label and for the same reason: they are one claim about direction and they
+ * drifted apart while each stayed true on its own.
  */
 const DEMO_MEANINGS: Partial<Record<ChangeState, string>> = {
   applied: "This change is live on the page beside you. “Put it back” undoes it.",
