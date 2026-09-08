@@ -13,8 +13,10 @@ import {
   type Grade,
   type Prediction,
 } from "../_lib/progress"
+import type { HeldRef } from "../_lib/held"
 import type { CheckPointer } from "../_lib/links"
 import { Answer } from "./answer"
+import { Held } from "./held"
 import * as style from "./style"
 import { useProgress } from "./store"
 
@@ -39,6 +41,15 @@ import { useProgress } from "./store"
  * Nothing here makes the lesson easier. Every gate below is a thing the paper
  * version asks the reader to do and cannot check, and the only work removed is
  * the bookkeeping.
+ *
+ * **Two of those gates hold nothing.** The lesson body and Reflect are here,
+ * held back by a slice; the three things that are *answers* — the transcripts
+ * and the two halves of `## Answers` — are not in this page at all. They are
+ * `HeldRef`s: an address and a slot, fetched when the gate opens (`held.tsx`).
+ * The difference is the difference between a lock and a picture of one, and it
+ * is worth saying plainly which of the two each gate here is. The body gate is
+ * still a slice: an explanation is not an answer, and it is a scroll away in
+ * the markdown either way. The answers are not.
  */
 
 export type PromptQuestion = {
@@ -64,13 +75,15 @@ export type AnswerGate =
     }
 
 /**
- * A fence in Try it, and what it printed.
+ * A fence in Try it, and where what it printed can be fetched from.
  *
  * The code is the lesson's own text and is always on the page. The transcript
  * under it is this build's, and is held until every fence in the section has a
  * prediction against it — which is what the lesson has always asked for in
  * prose ("predict every output in writing before you run anything") and has
- * never been able to check.
+ * never been able to check. `held` is an address, not the output: the page a
+ * reader has open while they are predicting does not contain what any of these
+ * printed.
  *
  * `run` is absent for a fence that registers no test. A shared preamble of
  * imports and helpers is part of the program and prints nothing, and asking a
@@ -83,9 +96,22 @@ export type ExerciseUnit =
       readonly id: string
       readonly node: ReactNode
       readonly run:
-        | { readonly number: number; readonly prompt: ReactNode; readonly transcript: ReactNode }
+        | { readonly number: number; readonly prompt: ReactNode; readonly held: HeldRef }
         | undefined
     }
+  /**
+   * The output the lesson prints for itself.
+   *
+   * Nine lessons write "Predict what this prints" and then print it, in an
+   * untagged fence a few lines below — which is the paper version doing the
+   * only thing paper can. Rendered as written it is the answer, in prose, next
+   * to its own question and behind no gate at all: worse than the payload leak
+   * this file's other gates had, because it is simply on the screen.
+   *
+   * So it is held exactly like the transcript it duplicates, in the same
+   * document and under the same gate, and it stays where the author put it.
+   */
+  | { readonly kind: "printed"; readonly id: string; readonly held: HeldRef }
 
 export type LessonPart =
   | { readonly kind: "prose"; readonly id: string; readonly node: ReactNode }
@@ -112,7 +138,8 @@ export type LessonPart =
       readonly kind: "answers"
       readonly id: string
       readonly heading: ReactNode
-      readonly node: ReactNode
+      /** Where the printed answers are. Not what they say — that is the point. */
+      readonly held: HeldRef
       readonly gate: AnswerGate
     }
   | {
@@ -238,7 +265,7 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
       return (
         <section key={part.id} style={style.column(4)}>
           {part.heading}
-          {part.node}
+          <Held held={part.held} label="Fetching the answers" />
         </section>
       )
     }
@@ -250,17 +277,20 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
         {gate.kind === "attempted" ? (
           <div style={{ ...style.panel, ...style.column(2) }}>
             <p style={style.note}>
-              Locked until you have answered all {gate.count} {gate.of} questions above. An answer
-              read before the attempt is made feels like understanding and leaves nothing behind;
-              this is the same page it always was, with the order enforced.
+              Not here until you have answered all {gate.count} {gate.of} questions above — not
+              hidden here, not in this page. An answer read before the attempt is made feels like
+              understanding and leaves nothing behind, so it is fetched from its own address when
+              the questions above have been attempted, and until then there is nothing on this page
+              to find.
             </p>
           </div>
         ) : gate.prompt === undefined ? (
           <div style={{ ...style.panel, ...style.column(2) }}>
             <p style={style.note}>
-              Locked until every exercise above has a prediction against it. These answers explain
+              Not here until every exercise above has a prediction against it. These answers explain
               output you have already been shown, and read in the other order they explain output you
               have not looked at yet — which is a paragraph you agree with rather than a correction.
+              They are fetched when that is done; the page you are reading does not contain them.
             </p>
           </div>
         ) : (
@@ -304,6 +334,22 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
         {part.heading}
 
         {part.units.map((unit) => {
+          if (unit.kind === "printed") {
+            return (
+              <div key={unit.id}>
+                {complete ? (
+                  <Held held={unit.held} label="Fetching the output the lesson prints here" />
+                ) : (
+                  <p style={style.note}>
+                    The lesson prints its output here. It is not in this page until every exercise
+                    above has a prediction against it — the sentence before this one asked you to
+                    predict it, and on paper that is all it can do.
+                  </p>
+                )}
+              </div>
+            )
+          }
+
           if (unit.kind === "prose" || unit.run === undefined) {
             return <div key={unit.id}>{unit.node}</div>
           }
@@ -317,7 +363,7 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
               {complete ? (
                 <div style={style.column(2)}>
                   <p style={style.label}>What it printed — exercise {run.number}</p>
-                  {run.transcript}
+                  <Held held={run.held} label="Fetching what it printed" />
                 </div>
               ) : unit === next ? (
                 <Answer
@@ -345,8 +391,8 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
             <p style={style.label}>Where these outputs came from</p>
             <p style={style.note}>
               {complete
-                ? "Every transcript above was produced by compiling this section and running it against src/ when this page was built. It is not a record of what the code printed when the lesson was written — a lesson whose exercises stop running is a red test, and this page would be telling you so instead."
-                : "The exercises have already run. They were compiled and executed against src/ when this page was built, so what you are predicting against is this commit's behaviour and not a transcript somebody typed up. You still have to say what you think it is."}
+                ? "Every transcript above was produced by compiling this section and running it against src/ when this page was built, and fetched just now from the address it is served at. It is not a record of what the code printed when the lesson was written — a lesson whose exercises stop running is a red test, and this page would be telling you so instead."
+                : "The exercises have already run. They were compiled and executed against src/ when this page was built, so what you are predicting against is this commit's behaviour and not a transcript somebody typed up. What they printed is not in this page: it is fetched when the last prediction is in, so there is nothing here to read ahead to. You still have to say what you think it is."}
             </p>
           </div>
         ) : (

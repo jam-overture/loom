@@ -116,23 +116,37 @@ things this document asks you to do and cannot check:
   below Predict is the answer to Predict, and on the page below it is one scroll
   away. There it unlocks when the last prediction is committed, one question at
   a time, with the rating taken before you have read a word of the explanation.
-- **The printed answers are locked, and they have moved.** Lessons 01–11 end
-  with an `## Answers` section; the exercise half now stands under Try it and
-  the Self-check half under Self-check, each shut until the questions above it
-  have been attempted. Closer, and further away.
+- **The printed answers are not there.** Lessons 01–11 end with an `## Answers`
+  section; the exercise half now stands under Try it and the Self-check half
+  under Self-check, and neither is *in* the page — each is fetched from its own
+  address when the questions above it have been attempted. Closer, and further
+  away.
 - **Your predictions come back at Reflect**, verbatim, carrying the confidence
   you gave them beforehand — which is what makes "which were you most
   confidently wrong about" a question with an answer rather than a memory of
   one.
-- **The exercises have already run, and you cannot see what they printed.**
+- **The exercises have already run, and what they printed is not in the page.**
   Every fence in Try it that prints something takes a prediction first, one at a
   time, and every transcript appears at once when the last one is committed —
   because this section asks you to predict every output before running anything,
   and revealing them one by one would make each prediction easier than the last.
   What appears is the output of that code executed against `src/` when the page
-  was built. The paste-into-a-checkout route still works and is still worth it
-  if you want to change something and see what happens; what it is no longer for
-  is finding out what the printed answer was.
+  was built. The output the lesson prints for itself, in the fence a line under
+  "predict what this prints", is held with them. The paste-into-a-checkout route
+  still works and is still worth it if you want to change something and see what
+  happens; what it is no longer for is finding out what the printed answer was.
+
+**What "not in the page" means, and what it does not.** A lock that decides what
+to draw is a lock on your attention, and your attention is the thing the honour
+system already governs — an answer rendered and hidden is one `Ctrl-U` away, in
+the same document, searchable. So the three things above are absent from the
+page and fetched when they are earned. This is not secrecy and cannot be: the
+addresses are guessable and every answer is in this directory, which you own.
+It is the standard the review sets have always met — *nothing you have not
+earned is in the document you are reading, and going to get it is a deliberate
+act.* The explanation under Predict is the one thing still shipped with the page
+and merely held back, because an explanation is not an answer and is a scroll
+away in the markdown regardless.
 
 **The markdown here stays the source.** The surface reads these files; a lesson
 is still written, reviewed and versioned as text in this directory. Reading it
