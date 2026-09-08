@@ -4710,6 +4710,34 @@
           ]
         },
         {
+          "module": "primitives/loom.book",
+          "title": "loom.book",
+          "summary": "A book: its cover, what it is called, who wrote it, and a line about it.",
+          "symbols": [
+            {
+              "name": "loomBook",
+              "kind": "value",
+              "signature": "const loomBook: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.book-grid",
+          "title": "loom.book-grid",
+          "summary": "A shelf of `loom.book` cells — the books someone wrote, the ones they recommend, or the one they are halfway through.",
+          "symbols": [
+            {
+              "name": "loomBookGrid",
+              "kind": "value",
+              "signature": "const loomBookGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.button",
           "title": "loom.button",
           "summary": "The control that sends a `loom.form`. Its label is child text.",
@@ -5186,6 +5214,34 @@
           ]
         },
         {
+          "module": "primitives/loom.listing",
+          "title": "loom.listing",
+          "summary": "A thing on offer at a place: a picture of it, what it costs, where it is, and the facts a buyer measures it by.",
+          "symbols": [
+            {
+              "name": "loomListing",
+              "kind": "value",
+              "signature": "const loomListing: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.listing-grid",
+          "title": "loom.listing-grid",
+          "summary": "A band of `loom.listing` cells — what is for sale, what is to let, what is on the lot.",
+          "symbols": [
+            {
+              "name": "loomListingGrid",
+              "kind": "value",
+              "signature": "const loomListingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.logo",
           "title": "loom.logo",
           "summary": "One mark in a `loom.logo-cloud`.",
@@ -5642,6 +5698,20 @@
               "name": "loomSection",
               "kind": "value",
               "signature": "const loomSection: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.spec",
+          "title": "loom.spec",
+          "summary": "A measured fact about the thing it sits on: a figure and the unit it counts.",
+          "symbols": [
+            {
+              "name": "loomSpec",
+              "kind": "value",
+              "signature": "const loomSpec: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

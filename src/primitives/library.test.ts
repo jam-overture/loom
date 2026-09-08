@@ -190,8 +190,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as eighty-four primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(84)
+  it("registers as eighty-nine primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(89)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -231,6 +231,9 @@ describe("the starter library", () => {
       "loom.table-cell",
       "loom.product-grid",
       "loom.product",
+      "loom.listing-grid",
+      "loom.listing",
+      "loom.spec",
       "loom.quote-grid",
       "loom.quote",
       "loom.person-grid",
@@ -238,6 +241,8 @@ describe("the starter library", () => {
       "loom.avatar-row",
       "loom.article-grid",
       "loom.article",
+      "loom.book-grid",
+      "loom.book",
       "loom.recording-grid",
       "loom.recording",
       "loom.event-grid",
@@ -415,9 +420,22 @@ describe("the starter library", () => {
       "loom.meter",
       "loom.perk-list-item",
       "loom.product",
+      /**
+       * A spec is a leaf for a stat's reason and one of its own: a figure and
+       * the unit it counts are two fixed fields of one fact, and the thing a
+       * page would put beside it is the *next spec*, which is a sibling.
+       */
+      "loom.spec",
       "loom.quote",
       "loom.person",
       "loom.article",
+      /**
+       * A book is a leaf where the `loom.listing` built in the same run is not,
+       * and the pair is 0052 landing on opposite sides of one question: a book's
+       * note is one sentence about one book, and a listing's specifications are
+       * however many facts the thing happens to have.
+       */
+      "loom.book",
       /**
        * Two more cards with no children flow, which is 0094 read from the
        * audit's side again: neither a recording nor an event turns a field of
@@ -909,6 +927,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(furniturePage(EDITORIAL)),
       ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(productPage(EDITORIAL)),
+      ...typesIn(shelfPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -6741,5 +6760,332 @@ describe("the product on the page", () => {
     expect(splitStylesheet(render(productPage(EDITORIAL)).markup).stylesheet).toContain(
       ".loom-pin-still .loom-pin-dot::after {\n  animation: none;\n}"
     )
+  })
+})
+
+/**
+ * The two pairs that close `docs/hermes-port-map.md`'s *pairs to build* table,
+ * and the leaf one of them needed.
+ *
+ * The band is built the way a page would actually use them: a shelf whose books
+ * are read, a listings band whose cards are acted on, and one full-width reading
+ * list to hold the `columns: "one"` rendering that `currently-reading` is.
+ */
+const shelfPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const book = (props: JsonObject) => buildElement(idFactory, { type: "loom.book", props })
+
+  const spec = (value: string, label?: string) =>
+    buildElement(idFactory, {
+      type: "loom.spec",
+      props: label === undefined ? { value } : { value, label },
+    })
+
+  const listing = (props: JsonObject, specs: readonly (readonly [string, string?])[], flag?: string) =>
+    buildElement(idFactory, {
+      type: "loom.listing",
+      props,
+      children: [
+        ...(flag === undefined
+          ? []
+          : [
+              buildSlot(idFactory, "flags", [
+                buildElement(idFactory, {
+                  type: "loom.badge",
+                  props: { tone: "accent" },
+                  children: [buildText(idFactory, flag)],
+                }),
+              ]),
+            ]),
+        ...specs.map(([value, label]) => spec(value, label)),
+        buildSlot(idFactory, "action", [
+          buildElement(idFactory, {
+            type: "loom.action",
+            props: { href: "https://example.com/viewing", variant: "primary" },
+            children: [buildText(idFactory, "Book a viewing")],
+          }),
+        ]),
+      ],
+    })
+
+  const shelf = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "shelf", eyebrow: "On the shelf" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "What we have been reading")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.book-grid",
+        props: { columns: "four" },
+        children: [
+          book({
+            title: "The Design of Everyday Things",
+            author: "Don Norman",
+            marker: "1988",
+            cover: "https://example.com/everyday.jpg",
+            href: "https://example.com/everyday",
+          }),
+          book({
+            title: "Thinking in Systems",
+            author: "Donella Meadows",
+            marker: "2008",
+            cover: "https://example.com/systems.jpg",
+          }),
+          /** No cover, deliberately: the panel is drawn anyway and the row lines up. */
+          book({ title: "Notes on the Synthesis of Form", author: "Christopher Alexander", marker: "1964" }),
+          book({
+            title: "Seeing Like a State",
+            author: "James C. Scott",
+            marker: "1998",
+            cover: "https://example.com/state.jpg",
+          }),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.book-grid",
+        props: { columns: "one", gap: "snug" },
+        children: [
+          book({
+            title: "The Timeless Way of Building",
+            author: "Christopher Alexander",
+            marker: "Halfway through",
+            note: "Every pattern is a rule about a relationship, never about a thing.",
+            cover: "https://example.com/timeless.jpg",
+          }),
+          book({
+            title: "How Buildings Learn",
+            author: "Stewart Brand",
+            marker: "Started this week",
+            note: "The argument for structure over configuration, made about houses.",
+          }),
+        ],
+      }),
+    ],
+  })
+
+  const band = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "listings", eyebrow: "Available now" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "Three ways in")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.listing-grid",
+        props: { columns: "three" },
+        children: [
+          listing(
+            {
+              address: "14 Prospect Terrace, Bristol",
+              price: "£450,000",
+              image: "https://example.com/terrace.jpg",
+              href: "https://example.com/terrace",
+            },
+            [
+              ["3", "beds"],
+              ["2", "baths"],
+              ["1,450", "sq ft"],
+            ],
+            "For sale"
+          ),
+          listing(
+            {
+              address: "Flat 2, Wolseley House",
+              price: "From $2,100 / mo",
+              image: "https://example.com/wolseley.jpg",
+              href: "https://example.com/wolseley",
+            },
+            [
+              ["Studio"],
+              ["1", "bath"],
+              ["480", "sq ft"],
+            ],
+            "Price reduced"
+          ),
+          /**
+           * A plot of land: no photograph, no bedrooms, and a fourth
+           * specification no Hermes field could have said. This is the 0052
+           * claim rendered rather than argued.
+           */
+          listing(
+            { address: "Land off Fenn Lane", price: "Offers over £120,000", href: "https://example.com/fenn" },
+            [
+              ["0.4", "acres"],
+              ["Yes", "planning granted"],
+            ]
+          ),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [shelf, band],
+    }),
+    idFactory
+  )
+}
+
+describe("the shelf and the listings band", () => {
+  it("renders both bands with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(shelfPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("What we have been reading")
+    expect(markup).toContain("The Design of Everyday Things")
+    expect(markup).toContain("Don Norman")
+    expect(markup).toContain("14 Prospect Terrace, Bristol")
+    expect(markup).toContain("Offers over £120,000")
+    expect(markup).toContain("Book a viewing")
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(shelfPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(shelfPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(shelfPage(BOLD)).diagnostics).toEqual([])
+    expect(render(shelfPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("makes every specification a node, which is the whole argument against three fields", () => {
+    /**
+     * 0052 asserted rather than stated in a comment. Eight specs across three
+     * listings, each with its own address: adding the plot's *planning granted*
+     * is one `insert` and its inverse removes that one node. `beds`, `baths` and
+     * `sqft` as props would render two of these listings correctly, would render
+     * the third's acreage not at all, and every one of those properties would be
+     * gone.
+     */
+    const ids = [
+      ...render(shelfPage(EDITORIAL), true).markup.matchAll(
+        /data-loom-node="([^"]+)" data-loom-type="loom\.spec"/g
+      ),
+    ]
+
+    expect(ids).toHaveLength(8)
+    expect(new Set(ids.map((match) => match[1])).size).toBe(8)
+    /** The fourth kind of fact, which no Hermes field could have carried. */
+    expect(render(shelfPage(EDITORIAL)).markup).toContain("planning granted")
+    expect(render(shelfPage(EDITORIAL)).markup).toContain("acres")
+  })
+
+  it("puts the middot between two specs in the stylesheet, because no node can see its sibling", () => {
+    /**
+     * The position-selector case, and the reason it is not a separator element
+     * in the markup: a render is a pure function of one node (0008), so a spec
+     * cannot know it has a neighbour. The rule is scoped to a library class so
+     * it reaches nothing on the host's page.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+
+    expect(stylesheet).toContain(".loom-spec:not(:last-child)::after {\n  content: \"·\";")
+    expect(tree).not.toContain("·")
+  })
+
+  it("draws the book's cover panel whether or not there is a cover", () => {
+    /**
+     * The 2 September finding's first option, taken here and declined by
+     * `loom.recording`. Six books, four covers, six panels — so a shelf lines up
+     * rather than starting one card's text at its edge.
+     */
+    const { tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+    const panels = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.bookCover}"`, "g"))]
+    const images = [...tree.matchAll(/<img[^>]+everyday\.jpg|<img[^>]+systems\.jpg|<img[^>]+state\.jpg|<img[^>]+timeless\.jpg/g)]
+
+    expect(panels).toHaveLength(6)
+    expect(images).toHaveLength(4)
+    /** The spine is a border off the palette, never a shadow — there is no shadow slot. */
+    expect(tree).toContain("border:1px solid var(--loom-border-subtle);border-inline-start:3px solid var(--loom-border-strong)")
+    expect(tree).not.toContain("box-shadow")
+  })
+
+  it("asks how much room the card was given rather than taking a prop for it", () => {
+    /**
+     * `loom.offering`'s mechanic, third caller. `book-list` and
+     * `currently-reading` are the same node in two containers, and the flip is a
+     * `@container` query on the card's own width — so nothing in the tree says
+     * which, and a shelf dropped into one column of a `loom.split` gets the
+     * narrow rendering on the widest screen there is.
+     */
+    const { stylesheet } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+
+    expect(stylesheet).toContain(".loom-book {\n  container-type: inline-size;\n}")
+    expect(stylesheet).toContain("@container (min-width: 32rem) {\n  .loom-book-frame {\n    flex-direction: row;")
+    /** And the direction it flips is not also set inline, or the rule would lose. */
+    expect(splitStylesheet(render(shelfPage(EDITORIAL)).markup).tree).not.toContain(
+      `class="${LIBRARY_CLASS.bookFrame}" style=`
+    )
+  })
+
+  it("aims the reader at the control on a listing and at the card on a book", () => {
+    /**
+     * 0066 sorting the last two pairs, asserted from both sides. A book is read,
+     * so its title anchor stretches over the card and the primitive declares
+     * itself a target. A listing is acted on, so its address links plainly, a
+     * real control sits on the card's floor, and nothing covers it — which is
+     * why it declares nothing and the Gate does not refuse this composition.
+     */
+    const { tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+    const declarationOf = (type: string): unknown =>
+      registry.primitives.find((primitive) => primitive.type === type)?.interactive
+
+    expect(tree).toContain(LIBRARY_CLASS.coverLink)
+    expect(declarationOf("loom.book")).toEqual({ whenProps: ["href"] })
+    expect(declarationOf("loom.listing")).toBeUndefined()
+    expect(declarationOf("loom.spec")).toBeUndefined()
+    /** The listing's own anchor carries the underline and no overlay. */
+    expect(tree).toContain(`class="${LIBRARY_CLASS.underline}" style="color:inherit;text-decoration:none"`)
+  })
+
+  it("wears a listing's flags on the picture, and draws no empty strip when it has none", () => {
+    const { stylesheet, tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+    const media = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.listingMedia}"`, "g"))]
+    const flags = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.listingFlags}"`, "g"))]
+
+    /** Three listings, three media panels — the plot has no photograph and still has a frame. */
+    expect(media).toHaveLength(3)
+    expect(flags).toHaveLength(2)
+    expect(stylesheet).toContain(".loom-listing-flags:empty {\n  display: none;\n}")
+    expect(stylesheet).toContain(".loom-listing-specs:empty {\n  display: none;\n}")
+  })
+
+  it("keeps every container a floor rather than a count", () => {
+    /**
+     * The granularity doc's sharper question, asserted for the two grids added
+     * here: `columns` feeds `auto-fit` as a `minmax` floor, so changing it
+     * changes no node. A `columns` that truncated the band would be `remove` in
+     * disguise, and every book and every listing in the fixture is present under
+     * each setting.
+     */
+    const { tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+
+    expect(tree).toContain("repeat(auto-fit, minmax(min(100%, 10rem), 1fr))")
+    expect(tree).toContain("repeat(auto-fit, minmax(min(100%, 100%), 1fr))")
+    expect(tree).toContain("repeat(auto-fit, minmax(min(100%, 19rem), 1fr))")
+    expect([...splitStylesheet(render(shelfPage(EDITORIAL), true).markup).tree.matchAll(
+      /data-loom-type="loom\.book"/g
+    )]).toHaveLength(6)
+  })
+
+  it("stays total when a leaf is handed props and children it did not ask for", () => {
+    const audit = auditRegistry(registry)
+
+    expect(audit.notProbeable).toEqual([])
+    expect(audit.throwsOnDeclaredProps).toEqual([])
   })
 })

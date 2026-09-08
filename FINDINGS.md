@@ -13402,3 +13402,128 @@ The applier is thirty lines and lives in a scratchpad. **Every lane that appends
 test fixtures will hit this**, and four have consolidated already, so it belongs
 in `tools/` rather than in five separate rediscoveries. Not committed here
 because `tools/` is outside this lane.
+
+---
+
+## 2026-09-08 — 0052's rule answers a three-field listing incorrectly, and three primitives have already worked around it
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (the
+record is `Proposed` and needs a review this lane cannot give itself) ·
+**Status:** open
+
+[0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+says *a field that holds one value of which there is exactly one stays a prop*.
+Hermes' `PropertyListing` holds `beds`, `baths` and `sqft` as three such fields.
+Each passes the test individually and the answer is wrong: they are one property
+— *a measured fact about the thing* — occurring three times, with the field
+names carrying the units. As props, a listing for a plot of land can never say
+`0.4 acres`, and no runtime can register a fourth prop mid-session (0001).
+
+**This has been worked around three times without being named.** The port map
+records `hours-of-operation`'s seven weekday fields as seven nodes, and
+`loom.pin` refused a `hotspots[]` array on 4 September. Both were argued from
+scratch in a doc comment.
+[0115](decisions/0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md)
+is the rule those three were instances of, and it is filed as `Proposed` rather
+than `Accepted` because refining an Accepted record is the escalation this
+lane's brief describes.
+
+**Nothing waits on it.** `loom.spec` and `loom.listing` shipped on the precedent
+already on `main` rather than on the record. What a review would settle is
+whether the sweep it implies — re-reading the fifty-two ported blocks for the
+same shape — is worth a run. My reading is that it is not: the one block it
+plainly implicates is `hours-of-operation`, which the port map already sends to
+`loom.milestone-list` for exactly this reason.
+
+---
+
+## 2026-09-08 — the picture harness, rebuilt a third time, and this time it found three defects in one run
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — third occurrence, and the recipe in the 5 September entry was accurate
+enough to be a copy rather than a discovery
+
+The 4 and 5 September entries say *a run that needs a picture rebuilds the
+harness that takes it, every time*. This run needed four pictures and rebuilt it,
+which makes three occurrences in four days. **The 5 September recipe worked
+verbatim** — scratch `npm i playwright` with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`,
+`executablePath: /opt/pw-browsers/chromium-1194/chrome-linux/chrome`, a
+`file://` page of `renderToStaticMarkup` output — so the finding did its job and
+the cost was minutes rather than a cycle.
+
+**One thing to add to that recipe, because it cost the most time here.**
+`mediaUrlSchema` allows `http:` and `https:` and **deliberately refuses
+`data:`**, so a specimen with images cannot inline them. Placeholder artwork
+must be *served*: `python3 -m http.server` in a scratch directory and
+`http://127.0.0.1:<port>/…` as the `src`. The obvious alternatives are both
+wrong — a public placeholder service is blocked by the egress proxy, and
+widening the schema to take a `data:` URI would be weakening a security seam to
+take a screenshot.
+
+**What it bought this run, stated because the case for a shared harness is
+cumulative:** three defects no assertion in a 253-test file could have caught —
+a shelf that put one 585px cover per screen on a phone, a coverless book that
+vanished into the dark palette, and a wrapped specification row that began a
+line with a floating middot. Every one is valid CSS with no overflow. **Seventh
+consecutive run in this lane where the picture found what the tests could not.**
+
+`tools/` is outside this lane. A module there that takes a tree and writes a PNG
+would serve marketing, docs, portal and this lane, and every one of them has now
+written it privately.
+
+---
+
+## 2026-09-08 — `bg-overlay` has a second would-be consumer, and a badge over a photograph is carrying the contrast alone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — a limit rather than a defect today, recorded because the second instance
+is when a pattern is worth acting on
+
+The 4 September entry says `bg-overlay` is a slot every palette must declare and
+nothing paints, so the first primitive that floats cannot use it.
+`loom.listing` is the second: its `flags` region sits over the photograph, and
+what keeps *For sale* readable on an arbitrary image is `loom.badge`'s own
+`tone` rather than anything the listing draws.
+
+That is **safe for two of the three tones and not for the third**. `accent` and
+`neutral` are filled and opaque, so they read on any photograph. `outline` is
+transparent by construction, and a page that puts an outline badge on a listing
+gets text on a picture with nothing between them. The primitive cannot fix this
+from its side without either painting a scrim in a literal colour — which
+`tokens.ts` exists to make impossible — or overriding a child's declared tone,
+which no container in this library does.
+
+Two ways out, neither this lane's alone:
+
+| | |
+| --- | --- |
+| paint `bg-overlay` in the palettes | the slot already exists and is already declared; this is the small one |
+| have `loom.badge` refuse `outline` over a floating region | needs the badge to know where it is, which a render of one node cannot (0008) |
+
+Filed rather than worked around. Nothing is broken today because the specimen
+uses `accent`; what is missing is anything that *stops* the other case.
+
+---
+
+## 2026-09-08 — the port map's own count was wrong in two places, for the third time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by this run for the values, open as a recurrence
+
+`docs/hermes-port-map.md` opened its ledger with *"Done — 47 blocks, 73
+primitives"* while its own summary table said 52 ported. Neither figure was
+right: 52 was the true block count, and `73` was **the size of the whole
+library** at the time rather than the size of the port — two different
+quantities under one heading.
+
+Both are corrected, and the header now says which figure counts what. The
+document already predicted this in its own words: *"A count that has to be
+updated in three places is a count that will disagree with itself again;
+deriving the ported figure from the ledger's own rows is a small tool nobody has
+written."* That was written on 26 August after the same fix. **It is now the
+third occurrence**, and the tool is still unwritten — it is perhaps twenty lines
+that counts the pipe-separated block names in the ledger's rows, and it would
+make the summary table derived rather than typed.
+
+Recorded as owned by this lane because the document is this lane's to maintain.
+It is not being written today because it belongs in `tools/`, which is not.

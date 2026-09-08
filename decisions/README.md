@@ -194,3 +194,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0108 | *No record on this branch* | — | — |
 | 0109 | *No record on this branch* | — | — |
 | [0110](0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md) | An entrance the reader drives is a wrapper primitive, not a prop on every band | Accepted | §4b |
+| 0111 | *No record on this branch* | — | — |
+| 0112 | *No record on this branch* | — | — |
+| 0113 | *No record on this branch* | — | — |
+| 0114 | *No record on this branch* | — | — |
+| [0115](0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) | Three fields of one shape are a list wearing three names | Proposed — `ARCHITECTURAL — needs review` | §4b |

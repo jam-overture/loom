@@ -10,6 +10,8 @@ import { loomAvatarRow } from "./loom.avatar-row.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomBanner } from "./loom.banner.js"
 import { loomBeforeAfter } from "./loom.before-after.js"
+import { loomBook } from "./loom.book.js"
+import { loomBookGrid } from "./loom.book-grid.js"
 import { loomButton } from "./loom.button.js"
 import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
@@ -42,6 +44,8 @@ import { loomKbd } from "./loom.kbd.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
 import { loomLinkTrail } from "./loom.link-trail.js"
+import { loomListing } from "./loom.listing.js"
+import { loomListingGrid } from "./loom.listing-grid.js"
 import { loomList } from "./loom.list.js"
 import { loomListItem } from "./loom.list-item.js"
 import { loomLogo } from "./loom.logo.js"
@@ -77,6 +81,7 @@ import { loomRating } from "./loom.rating.js"
 import { loomRecording } from "./loom.recording.js"
 import { loomRecordingGrid } from "./loom.recording-grid.js"
 import { loomSection } from "./loom.section.js"
+import { loomSpec } from "./loom.spec.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
@@ -322,6 +327,25 @@ import { loomTierTable } from "./loom.tier-table.js"
  * the frame rather than on the window, because a screenshot in one column of a
  * `loom.split` is narrow on the widest screen there is.
  *
+ * **The last two pairs close the Hermes ledger**, and between them they are
+ * 0052 argued from both ends. `loom.book-grid` over `loom.book` is the *read*
+ * card the port map had left — `book-list` and `currently-reading` are one
+ * content model whose `year` and `status` are one label, and the two bands they
+ * want are one card asking how much room it was given rather than two
+ * primitives or a prop. `loom.listing-grid` over `loom.listing` is the
+ * *acted-on* one, and the reason `loom.spec` exists: Hermes' listing holds
+ * `beds`, `baths` and `sqft` as three fixed fields, which is one shape three
+ * times — repeated content that never got to be a list, exactly as
+ * `hours-of-operation`'s seven weekdays are. As nodes they take a fourth,
+ * and a listing for a plot of land can drop the bedrooms it does not have.
+ *
+ * `loom.spec` is the only one of the five with no Hermes ancestor and the one
+ * most likely to be used away from the band it was written for: a figure and
+ * the unit it counts, at reading size, run together behind a middot. It is not
+ * `loom.stat` for the reason `loom.meter` is not — same content model, different
+ * markup, and a specification set at a headline's size shouts down the price it
+ * belongs to.
+ *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
  * catalogue meets `loom.feature-grid` before it has any reason to reach for
@@ -367,6 +391,9 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomTableCell,
   loomProductGrid,
   loomProduct,
+  loomListingGrid,
+  loomListing,
+  loomSpec,
   loomQuoteGrid,
   loomQuote,
   loomPersonGrid,
@@ -374,6 +401,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomAvatarRow,
   loomArticleGrid,
   loomArticle,
+  loomBookGrid,
+  loomBook,
   loomRecordingGrid,
   loomRecording,
   loomEventGrid,
@@ -439,6 +468,8 @@ export {
   loomBadge,
   loomBanner,
   loomBeforeAfter,
+  loomBook,
+  loomBookGrid,
   loomButton,
   loomCallout,
   loomCard,
@@ -473,6 +504,8 @@ export {
   loomLinkTrail,
   loomList,
   loomListItem,
+  loomListing,
+  loomListingGrid,
   loomLogo,
   loomLogoCloud,
   loomMarquee,
@@ -506,6 +539,7 @@ export {
   loomRecording,
   loomRecordingGrid,
   loomSection,
+  loomSpec,
   loomSplit,
   loomStack,
   loomStat,

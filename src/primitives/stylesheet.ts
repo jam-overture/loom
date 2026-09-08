@@ -414,6 +414,47 @@ export const LIBRARY_CLASS = {
   pinBelow: "loom-pin-below",
   /** The still rendering it takes while somebody is editing the page. */
   pinStill: "loom-pin-still",
+  /**
+   * A `loom.book`. The card, the frame the `@container` rule flips, the 2:3
+   * cover panel, and the body beside it.
+   *
+   * `loom-offering-frame`'s reason applies unchanged: the frame's direction is
+   * the thing the rule varies, so it must not also be set inline. The cover's
+   * `flex` basis is here for the same reason — it is `auto` in the tile
+   * rendering and a fixed 7rem in the row one.
+   */
+  book: "loom-book",
+  bookFrame: "loom-book-frame",
+  bookCover: "loom-book-cover",
+  bookBody: "loom-book-body",
+  /**
+   * A `loom.listing`: the photograph, and the flags worn on it. The flags strip
+   * is positioned rather than in the flow, so it needs the media panel to be the
+   * positioned ancestor, and `:empty` keeps a listing with no flags from
+   * carrying an invisible box over its picture.
+   */
+  listingMedia: "loom-listing-media",
+  listingFlags: "loom-listing-flags",
+  /**
+   * The strip of `loom.spec` children under a listing's address, and one
+   * `loom.spec` itself.
+   *
+   * The middot between two specs is the position selector this pair needs and
+   * the reason both are here: a render is a pure function of one node (0008), so
+   * no spec can know it has a sibling. The rule is scoped to a library class, so
+   * it reaches nothing else on the host's page — the discipline the rail's
+   * `li:last-child` established.
+   *
+   * **It trails rather than leads, and a screenshot is why.** Written as
+   * `.loom-spec + .loom-spec::before` the separator belongs to the *second* of
+   * each pair, which is correct until the strip wraps — and then a line begins
+   * with a floating middot, which is what a three-specification listing did on a
+   * narrow card. As `:not(:last-child)::after` a wrapped line *ends* with the
+   * middot, which is how a typesetter would break a run and reads as
+   * continuation rather than as a bullet.
+   */
+  listingSpecs: "loom-listing-specs",
+  spec: "loom-spec",
 } as const
 
 /**
@@ -1278,6 +1319,70 @@ details[open] > summary .loom-marker {
   .loom-pin-below .loom-pin-label {
     inset-block-start: calc(100% + var(--loom-spacing-2));
   }
+}
+.loom-book {
+  container-type: inline-size;
+}
+.loom-book-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-4);
+  height: 100%;
+}
+.loom-book-cover {
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.loom-book-body {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+@container (min-width: 32rem) {
+  .loom-book-frame {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--loom-spacing-5);
+  }
+  .loom-book-cover {
+    flex: 0 0 7rem;
+  }
+}
+.loom-listing-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+.loom-listing-flags {
+  position: absolute;
+  inset-block-start: var(--loom-spacing-3);
+  inset-inline-start: var(--loom-spacing-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.loom-listing-flags:empty {
+  display: none;
+}
+.loom-listing-specs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--loom-spacing-2);
+  row-gap: var(--loom-spacing-1);
+}
+.loom-listing-specs:empty {
+  display: none;
+}
+.loom-spec {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--loom-spacing-1);
+}
+.loom-spec:not(:last-child)::after {
+  content: "·";
+  margin-inline-start: var(--loom-spacing-1);
+  color: var(--loom-fg-subtle);
 }
 @media (prefers-reduced-motion: reduce) {
   .loom-orbit-spinner, .loom-orbit-item {
