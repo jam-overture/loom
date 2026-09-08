@@ -13422,3 +13422,66 @@ Worth naming, because it is the cheap tell: **the four conflicts took about
 twenty minutes to resolve by hand and every one of them combined.** The cost of
 the pile is not that the work is irreconcilable — it is that nobody reconciles it
 until there are sixteen of them and the only affordable move is to close them all.
+
+## 2026-09-08 — the site gave two answers to where the pieces of a page come from, and never said they were halves of one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 8 September
+
+The front door's numbers band offers **"70 ready-made pieces to build with."**
+Two bands below it, the questions band answers *"can the AI write code into my
+page?"* with **"it can only use the pieces you handed it."** Two bands above it,
+a card says Loom **"only rearranges pieces you built and already trust."**
+
+All three are true. A starter library exists, a host describes its own
+components, and both end up in one list. Nowhere on the site were the two halves
+said in the same breath — so a reader going top to bottom is given two different
+answers to *where do the pieces come from*, with nothing to tell them the answers
+are compatible.
+
+That leaves open the one question that decides whether a developer can use this
+at all: **do I have to rebuild my page in somebody else's components?** The
+answer is no, has always been no, and four pages of this site did not say it.
+
+**Why nothing caught it, again.** The same shape as the front door's step count
+(1 September), the refusal band's heading (2 September) and *Put it back*
+(5 September): two individually correct sentences that had never been read next
+to each other. 985 tests passed over it because nothing here is false. The tell
+is unchanged and is cheap — **read the site across a link, in the order a visitor
+reads it** — and this is the sixth consecutive run to find one this way, which
+is the argument for making it the first thing a marketing run does rather than
+the thing it notices while doing something else.
+
+**Closed by a page rather than a word**, which is the difference from the other
+five. `/your-components` says what a host hands over, prints the description this
+site handed over for one of its own cards, reconciles ours and yours, and names
+the three things no request gets past. The front door's stat caption now says
+*"A starting point, not the deal"* and the band carrying it offers the way there.
+
+## 2026-09-08 — `@loom/runtime/sdk` exports `catalogueOf` and not the type of what it returns
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+
+`src/sdk/catalogue.ts` re-exports `catalogueOf`, and `src/sdk/index.ts` re-exports
+that module. What it does not carry is `CataloguedPrimitive`, `CataloguedProp` or
+`PrimitiveCatalogue` — those live in `src/catalogue.ts`, published from the root
+entry point. `src/sdk/catalogue.ts` imports the type it returns and does not
+pass it on.
+
+So a host that writes a function over what `catalogueOf` hands back has to import
+the function from `@loom/runtime/sdk` and the shape of its answer from
+`@loom/runtime`:
+
+```ts
+import { type CataloguedPrimitive } from "@loom/runtime"
+import { catalogueOf } from "@loom/runtime/sdk"
+```
+
+Hit here writing `/your-components`, which prints one entry of the catalogue as
+the description this site handed over for one of its own cards. Both are public
+entry points, so nothing is blocked and nothing here reaches inside the framework
+(0018) — it is a paper cut, and it is the kind a host meets in the first hour.
+
+**Recommended:** `export type * from "../catalogue.js"` in `src/sdk/catalogue.ts`,
+so the SDK entry point is complete for the one function it exists to offer. Not
+done here: `src/` is not this lane.

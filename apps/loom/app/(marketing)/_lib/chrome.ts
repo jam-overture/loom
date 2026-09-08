@@ -106,17 +106,24 @@ const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
  * The bar across the top: the mark, the menu, and the one thing the page wants
  * you to do.
  *
- * The menu is this site's pages and the surfaces marked `inMenu` — today the
- * demonstration and the documentation. The portal is the action rather than a
- * menu item, and its word is **Sign in** rather than its name: a stranger has
- * no idea what a portal is, and the bar's right-hand action is where every site
- * they have used puts the way in.
+ * The menu is the pages and the surfaces marked `inMenu` — today three of this
+ * site's five pages, the demonstration and the documentation. The portal is the
+ * action rather than a menu item, and its word is **Sign in** rather than its
+ * name: a stranger has no idea what a portal is, and the bar's right-hand action
+ * is where every site they have used puts the way in.
  *
  * It used to take *every unguarded surface*, which is a rule about permissions
  * deciding a question about attention, and it grew by one every time another
  * lane shipped a front door. `inMenu` in `site.ts` carries that decision now,
  * with the reasoning beside it; the footer below still carries the complete map,
  * so this bar can be short without anything becoming unreachable.
+ *
+ * **A page of this site can be left out on the same terms, as of 8 September.**
+ * The surfaces answered #166 and the bar was back to eight items within a week,
+ * because the flag only governed half of what the bar carries. It governs both
+ * halves now, and the guarantee is the one the surfaces already had: what the
+ * bar leaves out, the footer's map carries — marked as the page the reader is
+ * on, so a page off the bar still says where you are.
  */
 export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
   buildElement(ids, {
@@ -124,7 +131,7 @@ export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
     props: { tone: "surface", position: "sticky", align: "end" },
     children: [
       buildSlot(ids, "brand", [wordmark(ids, context)]),
-      ...SITE_ROUTES.map((route) => menuLink(ids, context, route)),
+      ...SITE_ROUTES.filter((route) => route.inMenu).map((route) => menuLink(ids, context, route)),
       ...PRODUCT_SURFACES.filter((surface) => surface.inMenu).map((surface) =>
         link(ids, surface.label, surfaceHref(context.origin, surface), { scale: "medium" })
       ),

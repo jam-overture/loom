@@ -11,8 +11,16 @@ import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { theRulesPageTree } from "./pages/the-rules"
+import { yourComponentsPageTree } from "./pages/your-components"
 import { siteRegistry, siteThemes } from "./registry"
-import { HOME, HOW_IT_WORKS, THE_RECORD, THE_RULES, type SiteRoute } from "./site"
+import {
+  HOME,
+  HOW_IT_WORKS,
+  THE_RECORD,
+  THE_RULES,
+  YOUR_COMPONENTS,
+  type SiteRoute,
+} from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -41,6 +49,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [HOW_IT_WORKS.path, howItWorksPageTree],
   [THE_RULES.path, theRulesPageTree],
   [THE_RECORD.path, theRecordPageTree],
+  [YOUR_COMPONENTS.path, yourComponentsPageTree],
 ])
 
 /** The page as it is written, before anything the visitor asked for. */

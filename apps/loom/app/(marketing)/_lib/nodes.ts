@@ -85,3 +85,27 @@ export const section = (
 
 export const stack = (ids: IdFactory, props: JsonObject, children: readonly LoomNode[]): LoomNode =>
   buildElement(ids, { type: "loom.stack", props, children: [...children] })
+
+/**
+ * The three a table costs, which two pages now pay.
+ *
+ * `loom.table` is four types deep — a table holding rows holding cells holding
+ * text, with the heading row projected into a `columns` region — so the
+ * long-hand for a five-row table is unreadable and nobody writes it twice. The
+ * rules page wrote these three locally on 28 August; the components page needed
+ * exactly them, and a second private copy is how two tables on one site start
+ * disagreeing about what a heading cell is.
+ *
+ * They sit here with `heading` and `prose` because they are the same kind of
+ * thing: constructors for nodes, registered nowhere, composing what the library
+ * already offers. Nothing about a table is decided here.
+ */
+export const cell = (ids: IdFactory, text: string, props: JsonObject = {}): LoomNode =>
+  buildElement(ids, { type: "loom.table-cell", props, children: [buildText(ids, text)] })
+
+export const row = (ids: IdFactory, cells: readonly LoomNode[]): LoomNode =>
+  buildElement(ids, { type: "loom.table-row", props: {}, children: [...cells] })
+
+/** The heading row, in the region a table projects it into (0051). */
+export const columns = (ids: IdFactory, headings: readonly string[]): LoomNode =>
+  buildSlot(ids, "columns", [row(ids, headings.map((text) => cell(ids, text, { role: "column" })))])

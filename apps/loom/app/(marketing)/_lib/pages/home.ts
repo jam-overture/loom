@@ -32,6 +32,7 @@ import {
   REPOSITORY_URL,
   SITE_THEMES,
   surfaceHref,
+  YOUR_COMPONENTS,
   type SiteThemeName,
 } from "../site"
 
@@ -274,7 +275,7 @@ const problems = (ids: IdFactory): LoomNode =>
  * itself: every one of them is held against the code by a test, and the record
  * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
  */
-const facts = (ids: IdFactory): LoomNode =>
+const facts = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     prose(
       ids,
@@ -285,12 +286,31 @@ const facts = (ids: IdFactory): LoomNode =>
       type: "loom.stat-grid",
       props: { columns: "three", align: "center" },
       children: [
+        /**
+         * The caption changed on 8 September, and it is the smallest available
+         * repair to a contradiction this page has carried since it had numbers.
+         *
+         * *"Ready-made pieces to build with"* is one screen above a questions
+         * band answering *"can the AI write code into my page?"* with *"it can
+         * only use the pieces **you handed it**"*, and one screen below a card
+         * saying it *"only rearranges pieces **you built and already trust**"*.
+         * All three are true and no test could see anything wrong, because
+         * nothing is: the library exists and a host describes its own components
+         * too. A stranger reading top to bottom is given two answers to *where do
+         * the pieces come from* and no way to tell they are halves of one.
+         *
+         * The old caption said that a piece takes its colours from the theme —
+         * true, and the site demonstrates it in the footer with a switcher rather
+         * than needing to claim it here. This one says the thing nothing else on
+         * the site says, and `/your-components` is the page that says it in full.
+         */
         buildElement(ids, {
           type: "loom.stat",
           props: {
             value: FACTS.primitives,
             label: "ready-made pieces to build with",
-            caption: "Each one takes its colours and type from whatever theme the page is wearing.",
+            caption:
+              "A starting point, not the deal: components you already built join the same list.",
           },
         }),
         buildElement(ids, {
@@ -311,11 +331,25 @@ const facts = (ids: IdFactory): LoomNode =>
         }),
       ],
     }),
-    action(ids, "Read the decisions", DECISIONS_URL, {
-      variant: "quiet",
-      scale: "small",
-      external: true,
-    }),
+    /**
+     * Two now, and the second is the way to the answer the caption above only
+     * has room to assert. It sits here rather than in the band of ways in, which
+     * is exactly the four surfaces and must stay that way, and rather than in the
+     * questions band, whose answers are props and cannot carry a link.
+     */
+    stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
+      action(
+        ids,
+        "Where the pieces come from",
+        internalHref(context.origin, YOUR_COMPONENTS.path, context.theme),
+        { variant: "quiet", scale: "small" }
+      ),
+      action(ids, "Read the decisions", DECISIONS_URL, {
+        variant: "quiet",
+        scale: "small",
+        external: true,
+      }),
+    ]),
   ])
 
 const questions = (ids: IdFactory): LoomNode =>
@@ -568,7 +602,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * page uses what renders correctly today.
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
-        facts(ids),
+        facts(ids, context),
         /**
          * The claim the facts band makes about the repository, made about this
          * page. *Not one of these numbers was typed from memory* is directly

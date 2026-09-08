@@ -16,6 +16,21 @@ export type SiteRoute = {
   readonly label: string
   readonly title: string
   readonly description: string
+  /**
+   * Whether the bar across the top carries it, as well as the footer's map.
+   *
+   * The same flag `Surface` has carried since 28 August, for the same reason and
+   * with the same guarantee behind it. The maintainer asked on #166 whether
+   * eight items in the bar was too many; it was, the surfaces answered it, and
+   * the count crept back to eight as this route group grew a fourth page. A
+   * ninth is the flagged problem made worse.
+   *
+   * So a page may be kept out of the bar — and `chrome.test.ts` holds *out of
+   * the bar* to mean exactly that and never *off the site*: whatever is left out
+   * is in the footer's map, and the footer marks it as the page the reader is on
+   * so the site still says where they are.
+   */
+  readonly inMenu: boolean
 }
 
 export const HOME: SiteRoute = {
@@ -24,6 +39,7 @@ export const HOME: SiteRoute = {
   title: "Loom — every change your AI makes, written down",
   description:
     "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules, and every change keeps a record of who asked, what moved, and how to put it back.",
+  inMenu: true,
 }
 
 export const HOW_IT_WORKS: SiteRoute = {
@@ -32,6 +48,7 @@ export const HOW_IT_WORKS: SiteRoute = {
   title: "How it works — Loom",
   description:
     "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
+  inMenu: true,
 }
 
 /**
@@ -55,6 +72,7 @@ export const THE_RULES: SiteRoute = {
   title: "The rules — what your AI may change, and what it may not",
   description:
     "You write down what may change on your page and what may never change. Every request is weighed against it before anything moves, and the answer names the rule that gave it.",
+  inMenu: true,
 }
 
 export const THE_RECORD: SiteRoute = {
@@ -63,6 +81,52 @@ export const THE_RECORD: SiteRoute = {
   title: "The record — what changed, who asked, and how to put it back",
   description:
     "Ask the front page for one change after another and watch the list fill in: what each request turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
+  inMenu: true,
+}
+
+/**
+ * The page for the question this site had four pages and no answer to.
+ *
+ * Read across its own links, the front door says two different things about
+ * where the pieces of a page come from. The numbers band offers *"N ready-made
+ * pieces to build with"*; the questions band directly below it answers *"can the
+ * AI write code into my page?"* with *"it can only use the pieces **you handed
+ * it**"*; the band above says it *"only rearranges pieces **you built and
+ * already trust**"*. Both halves are true — a starter library exists, and a host
+ * describes its own components — and nowhere on the site are the two said in the
+ * same breath.
+ *
+ * A developer reading that has to guess at the one question that decides whether
+ * they can use this at all: **do I have to rebuild my page in somebody else's
+ * components?** The answer is no, it has always been no, and the site's own copy
+ * left it open. This is the sixth run running to find two individually
+ * defensible sentences that had never been read next to each other, and the
+ * first where the fix is a page rather than a word.
+ *
+ * It is a description of code rather than a position — what a host hands over,
+ * what the machinery does with it, and what it refuses — so it could be written
+ * without waiting on the positioning answers the licence line is still waiting
+ * on.
+ *
+ * **It is `inMenu: false`,** and that is the one judgement call in it. See the
+ * flag's note above: the bar is back to the eight items the maintainer asked
+ * about on #166, and a page that resolves a contradiction is not worth a ninth.
+ */
+export const YOUR_COMPONENTS: SiteRoute = {
+  path: "/your-components",
+  label: "Your components",
+  /**
+   * The name is deliberately not in it. `share.ts` splits a title on its
+   * separator and drops the part that is exactly the wordmark, because the card
+   * already carries the name at its top left — so a title with *Loom* inside a
+   * clause prints it twice to the one reader who sees the card and not the page.
+   * Two of the four existing titles solve that by not saying it at all, and this
+   * is the third.
+   */
+  title: "Your components — the ones you already built, rearranged and never rewritten",
+  description:
+    "Loom never asks you to rebuild your page in somebody else's components. You describe the ones you already have — the name, what each is for, and which settings may be changed — and that description is the whole of what the AI is ever allowed to touch.",
+  inMenu: false,
 }
 
 /**
@@ -73,8 +137,19 @@ export const THE_RECORD: SiteRoute = {
  * you are left holding afterwards. The rules page sits before the record
  * because a record of decisions is only interesting to someone who knows the
  * decisions were theirs to set.
+ *
+ * The components page is last because it is the question that arrives after all
+ * four of those: somebody who has decided they might want this asks what it
+ * would cost them to try. It is also the one page the bar does not carry, and
+ * the footer renders this list in order, so last is where a reader meets it.
  */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RULES, THE_RECORD]
+export const SITE_ROUTES: readonly SiteRoute[] = [
+  HOME,
+  HOW_IT_WORKS,
+  THE_RULES,
+  THE_RECORD,
+  YOUR_COMPONENTS,
+]
 
 /**
  * The rest of the product, which is the rest of this same application.
