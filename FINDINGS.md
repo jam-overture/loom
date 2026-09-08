@@ -13994,3 +13994,53 @@ awkward, say so in a finding and this lane will add the export; that is a
 smaller change than a second copy of the browser discovery.
 
 That is the shape this lane recommends, and it is the portal's to write.
+
+---
+
+## 2026-09-08 — this lane built the same tool twice in twelve hours, and one half carried a record forbidding what the other half did
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+the collision is resolved by #230 (`0117`); the **mechanism is open**, because
+nothing stops the next one.
+
+`tools/screenshot/` (`pnpm shoot`, addresses) landed 6 September as the ninth
+unit of #230. `tools/specimen/` (`pnpm specimen`, trees) landed 8 September as
+#250, branched from `main`, and its record
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+**rejects `playwright-core` as a dependency by name** — which #230 adds. Merged
+in either order, `main` would have held an Accepted record and the dependency it
+refuses. It is not an argument about taste; the merged tree is **red**, on the
+harness's own test:
+
+```
+× the browser adapter > says how to install playwright-core rather than
+  throwing, when it is not there
+```
+
+Three quieter divergences came with it, all inside three days: `wide` meant
+1440×900 in one file and 1280×900 in the other, two Chromium locators, and two
+launch-flag sets each missing one of the two arguments Chromium needs here.
+
+**The mechanism, which is the part worth keeping.** `main` has not moved since
+1 September. A run that branches from `main` — which step 3 of the procedure
+says to do — reads a repository that does not contain this lane's own last two
+weeks. Two earlier runs of this lane hit the same shape from the other side and
+solved it for one file: they diffed `FINDINGS.md` across every open branch,
+because the findings a run needs are not on `main` either. The same is true of
+the *code*, and nothing checks it.
+
+What this run did, and what the next one should do before choosing work:
+
+```bash
+git fetch origin 'refs/heads/<lane>-*:refs/remotes/origin/<lane>-*'
+git diff --name-only origin/main...origin/<your-open-branch>
+```
+
+Two minutes, and it is the whole difference between a fifteenth unit and a
+second copy of the fourteenth.
+
+**Not filed as a request to anyone.** The fix is either a merge (which is the
+maintainer's and has been asked for six times) or a line in `docs/routines.md`
+step 3, which a routine may not write for itself. This entry exists so the next
+run of this lane meets the trap before it sets it again.
+

@@ -163,36 +163,62 @@ and a screenshot once there is a page worth looking at.
 
 ### Taking the screenshot
 
-`pnpm shoot <shot-list.json>` — added 6 September, after five lanes had written
-nine private versions of it and filed the recipe four times.
+One harness, two entry points, added 6–8 September after five lanes had written
+nine private versions of it and filed the recipe four times. Which one you want
+depends on what you are looking at, and nothing else differs — the browser, the
+viewports, the reduced motion, the overflow measurement and the file naming are
+shared ([0117](../decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)).
+
+`playwright-core` is deliberately **not** a dependency of this repository, so
+install it once per session into a scratch directory and point the harness at it:
+
+```bash
+mkdir -p /tmp/shot && (cd /tmp/shot && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install playwright-core)
+```
+
+**A tree** — a composition of primitives, with no server anywhere:
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm specimen <module>.specimen.ts --out reports
+```
+
+`tools/specimen/README.md` has the shape of a specimen module. It is rendered
+through the render seam, served over `http://127.0.0.1` on an ephemeral port,
+and photographed under every theme it declares.
+
+**An address** — a page something else is already serving, which is the only way
+to photograph a screen needing a session, a database or a build behind it:
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm shoot <shot-list.json>
+```
 
 ```json
 {
   "baseUrl": "http://localhost:3000",
   "outDir": "reports",
   "shots": [
-    { "path": "/the-record", "out": "2026-09-06-the-record-wide", "viewport": "wide", "waitFor": "h1" },
-    { "path": "/the-record", "out": "2026-09-06-the-record-phone", "viewport": "phone" }
+    { "path": "/the-record", "out": "2026-09-08-the-record-wide", "viewport": "wide", "waitFor": "h1" },
+    { "path": "/the-record", "out": "2026-09-08-the-record-phone", "viewport": "phone" }
   ]
 }
 ```
 
-`viewport` is `wide` (1440), `phone` (390), or an explicit `{ width, height }`.
-`waitFor` is a selector; `fullPage` is optional. What the tool already handles,
-so nothing has to rediscover it: the browser the image ships is found rather than
-downloaded (**never run `playwright install`** — its host is not reachable from
-the sandbox), Chromium is launched with the flag it needs to start as root, and
-every shot is taken with reduced motion, because a page that reveals on scroll is
-otherwise photographed blank below the fold.
+`viewport` is `wide` (1280×900), `phone` (390×844) — both at 2× — or an explicit
+`{ width, height }`. `waitFor` is a selector; `fullPage` is optional. What the
+harness already handles, so nothing has to rediscover it: the browser the image
+ships is found rather than downloaded (**never run `playwright install`** — its
+host is not reachable from the sandbox), Chromium is launched with both flags it
+needs here, every shot is taken with reduced motion because a page that reveals
+on scroll is otherwise photographed blank below the fold, and every shot prints
+`scrollWidth` against `innerWidth` so a page wider than the phone says so
+instead of being eyeballed.
 
-Two things it does not do, both worth knowing before writing a list:
-
-- **Wait on a selector, not on the network.** A form driven by `useActionState`
-  submits by fetch, so the page is idle *before* the cookie it sets exists — one
-  run photographed a sign-in page believing it was the screen behind it.
-- **Serve the pages if they are files.** `mediaUrlSchema` takes `http:`/`https:`
-  only, so a specimen carrying an image cannot be rendered over `file://`.
-  `python3 -m http.server 8123 --directory <pages>` and point `baseUrl` at it.
+One thing neither does, worth knowing before writing a list: **it does not start
+your application.** And one rule worth keeping in mind while writing one:
+**wait on a selector, not on the network.** A form driven by `useActionState`
+submits by fetch, so the page is idle *before* the cookie it sets exists — one
+run photographed a sign-in page believing it was the screen behind it.
 
 ### The three files every lane writes to
 
