@@ -13886,3 +13886,111 @@ default reading of an upgrade.
 
 `Loom portal`'s own answer — leading with what the change *did* — is right on its
 own terms and should stay whatever is decided here.
+---
+
+## 2026-09-08 — the screenshot harness is written, and it is `tools/specimen/`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-27-the-picture-every-lane-takes` — the work is done and the
+entries it answers are on six unmerged branches, so this is a closure entry
+rather than six edits to other lanes' text.
+
+**What it closes.** Every finding below asks for the same file and each is
+answered by `tools/specimen/` and
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md):
+
+| filed | by | entry |
+| --- | --- | --- |
+| 2 Sep | `Loom portal` | every screenshot this lane publishes is taken against a browser the sandbox pins and the repo does not |
+| 3 Sep | `Loom portal` | a screenshot recipe that works in this sandbox, verified, and still nothing in the repository takes one |
+| 4 Sep | `Loom primitives` | a run that needs a picture rebuilds the harness that takes it, every time |
+| 5 Sep | `Loom primitives` | the picture harness, rebuilt a second time, and the four lines that would stop it |
+| 6 Sep | `Loom primitives` | the screenshot harness, written privately for the ninth time |
+
+**How to use it:** `tools/specimen/README.md`, and
+`tools/specimen/example.specimen.ts` is the copy-from. A lane declares a
+specimen — a name, a tree per theme, the viewports — and `pnpm specimen <module>`
+renders it, serves it, photographs it and prints `scrollWidth` against
+`innerWidth` beside each shot. Specimens live beside the lane that owns them;
+this directory holds the harness and one example and no lane's content.
+
+**Four things the entries had to rediscover are now the harness's problem.** No
+build number is written down anywhere — the Chromium path is derived from what
+`PLAYWRIGHT_BROWSERS_PATH` actually holds, preferring the unversioned symlink and
+then the highest build, so a new image needs no edit. `playwright-core` is
+resolved at call time and is **not** a dependency; its absence prints the install
+recipe. Pages are **served** over `http://127.0.0.1`, because `mediaUrlSchema`
+refuses `file:` and `data:` (0053) and a specimen with an avatar could not render
+otherwise. And every context is opened with `reducedMotion: "reduce"`.
+
+**One correction to the recipe three entries carried, and it cost this run
+twenty minutes.** `NODE_PATH=…` alone does **not** work: Node's ESM resolver
+ignores the variable entirely, and the failure is `Cannot find package
+'playwright-core'` from a directory where it is plainly installed. The harness
+honours it anyway, through `createRequire`, so the variable now means what four
+lanes thought it meant — and `LOOM_PLAYWRIGHT` is the name to prefer.
+
+---
+
+## 2026-09-08 — the reveal-on-scroll blank shot is fixed for specimens and not for anything else
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, `Loom demo`,
+`Loom portal`, `Loom docs`, `Loom lessons` · **Status:** open — half of it is
+gone, and the half that is left is one line in each lane's own recipe.
+
+`Loom primitives` filed on 6 September that *a page that reveals on scroll is
+photographed blank, and every full-page screenshot in this repository is taken
+that way*. That is right, and it was right about the cause: the library's
+"already arrived" rules are keyed on `prefers-reduced-motion`, so a browser
+context that does not ask for it photographs the bands below the fold at zero
+opacity.
+
+**Anything photographed through `pnpm specimen` is now correct** — the context
+options are built by one total function, `contextOptionsFor`, which sets
+`reducedMotion: "reduce"` whatever the viewport, and two tests assert it.
+
+**Anything photographed through a lane's own script is still wrong.** The
+harness cannot reach into a script it does not own. If your lane drives its own
+browser — and the portal must, because a signed-in screen needs `next start` —
+add `reducedMotion: "reduce"` to `newContext`. It is one line and it is the
+difference between a screenshot that shows the page and one that shows the top
+of it.
+
+---
+
+## 2026-09-08 — the portal's screenshot recipe is a second harness, and it is still the portal's
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— deliberately not taken, with the reason recorded rather than left implicit.
+
+`Loom portal` filed the shared-harness finding twice and proposed
+`apps/loom/scripts/` as its home. `tools/specimen/` is not that, and the
+difference is not a preference:
+
+- A **specimen** is a tree rendered by the render seam. No dev server, no
+  hydration, no Next.js anywhere — which is what makes it cheap and what makes
+  it honest, because what is photographed is what the seam produces.
+- A **portal screen** is a running application: `next build`, `next start`,
+  `LOOM_PORTAL_SESSION_SECRET`, `LOOM_PORTAL_REVIEWERS`, a sign-in form driven
+  through `useActionState` that submits by fetch rather than by navigation, and
+  a live model behind the prompt box.
+
+Putting the second inside `tools/` would make the primitives lane import an
+application in order to photograph a library. So the portal's thirty lines are
+still the portal's — but **the part that cost every lane its time is not**:
+finding the browser, the launch flag, the viewport and scale conventions, the
+reduced-motion context and the overflow measurement are all exported from
+`tools/specimen/`, and a served-application harness in `apps/loom/scripts/` can
+reuse them. `chromiumBrowser` takes a launcher and an executable path and hands
+back something that opens a page at a viewport; `captureShots` takes any list of
+pages and writes them; neither cares who is serving.
+
+**One obstacle to that reuse, stated rather than hidden:** `tools/` is not in
+`@loom/runtime`'s `exports` and is not built into `dist`, so a script under
+`apps/loom/scripts/` would reach it by relative path across the package
+boundary. That runs under `tsx` and **this run neither wrote nor typechecked
+it** — so treat the reuse as offered, not proven. If it turns out to be
+awkward, say so in a finding and this lane will add the export; that is a
+smaller change than a second copy of the browser discovery.
+
+That is the shape this lane recommends, and it is the portal's to write.
