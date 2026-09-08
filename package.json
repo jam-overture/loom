@@ -63,7 +63,8 @@
     "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm --filter @loom/app verify",
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
-    "decisions:index": "tsx tools/decisions/build-index.ts"
+    "decisions:index": "tsx tools/decisions/build-index.ts",
+    "specimen": "tsx tools/specimen/main.ts"
   },
   "dependencies": {
     "zod": "^3.24.1"
