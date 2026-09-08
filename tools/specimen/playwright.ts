@@ -1,4 +1,6 @@
+import { mkdir } from "node:fs/promises"
 import { createRequire } from "node:module"
+import { dirname } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { err, ok, type Result } from "../../src/result.js"
@@ -25,6 +27,7 @@ import type { SpecimenViewport } from "./specimen.js"
 
 export type LaunchedPage = {
   readonly goto: (url: string, options: { readonly waitUntil: "load" }) => Promise<unknown>
+  readonly waitForSelector: (selector: string) => Promise<unknown>
   readonly evaluate: <TValue>(body: () => TValue) => Promise<TValue>
   readonly screenshot: (options: {
     readonly path: string
@@ -58,11 +61,16 @@ export type ChromiumLauncher = {
 }
 
 /**
- * Chromium refuses to start as root without this, and the failure is a launch
- * error naming a sandbox nobody asked for. Every routine in this repository
- * runs as root.
+ * The two arguments Chromium needs to start here at all.
+ *
+ * It refuses to run its own sandbox as root and exits with an error that reads
+ * like a missing binary rather than a refused one; every routine in this
+ * repository runs as root. `--disable-dev-shm-usage` is the second half of the
+ * same story: the container's `/dev/shm` is small enough that a full-page shot
+ * of a long page dies partway through, and the crash arrives as a closed target
+ * rather than as an out-of-space message.
  */
-export const LAUNCH_ARGS: readonly string[] = ["--no-sandbox"]
+export const LAUNCH_ARGS: readonly string[] = ["--no-sandbox", "--disable-dev-shm-usage"]
 
 export const contextOptionsFor = (viewport: SpecimenViewport): ContextOptions => ({
   viewport: { width: viewport.width, height: viewport.height },
@@ -95,12 +103,19 @@ export const chromiumBrowser = async (
       const page = await context.newPage()
 
       return {
-        goto: async (url) => {
+        goto: async (url, waitFor) => {
           await page.goto(url, { waitUntil: "load" })
+          if (waitFor !== undefined) await page.waitForSelector(waitFor)
         },
         measure: () => page.evaluate(measureOverflow),
-        capture: async (file) => {
-          await page.screenshot({ path: file, fullPage: true })
+        /**
+         * The directory is made here rather than in the capture loop, because
+         * this is the file that writes and the loop is exercised against a
+         * double that should not touch a disk.
+         */
+        capture: async (file, fullPage) => {
+          await mkdir(dirname(file), { recursive: true })
+          await page.screenshot({ path: file, fullPage })
         },
         close: () => context.close(),
       }

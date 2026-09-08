@@ -1,6 +1,5 @@
 import { join } from "node:path"
 
-import type { PlannedShot } from "./plan.js"
 import type { SpecimenViewport } from "./specimen.js"
 
 /**
@@ -30,15 +29,46 @@ export const overflows = (measurement: Overflow): boolean =>
   measurement.scrollWidth > measurement.innerWidth
 
 export type SpecimenPage = {
-  readonly goto: (url: string) => Promise<void>
+  readonly goto: (url: string, waitFor?: string) => Promise<void>
   readonly measure: () => Promise<Overflow>
-  readonly capture: (file: string) => Promise<void>
+  readonly capture: (file: string, fullPage: boolean) => Promise<void>
   readonly close: () => Promise<void>
 }
 
 export type SpecimenBrowser = {
   readonly open: (viewport: SpecimenViewport) => Promise<SpecimenPage>
   readonly close: () => Promise<void>
+}
+
+/**
+ * One photograph, with its subject already resolved to an address.
+ *
+ * The subject is the only thing the two entry points disagree about, so it is
+ * the only thing resolved before this type: `pnpm specimen` renders a tree and
+ * serves it, `pnpm shoot` is handed pages something else is already serving,
+ * and by the time either reaches here both are a URL and a file name. That is
+ * what lets the launch flags, the reduced motion, the overflow measurement and
+ * the naming be decided once instead of twice — which is the whole reason a
+ * second harness was worth folding into this one rather than leaving beside it.
+ */
+export type Shot = {
+  /** What a report calls this picture, and what `describeShot` prints. */
+  readonly name: string
+  readonly url: string
+  /** Where to write it, relative to `outDir`. */
+  readonly file: string
+  readonly viewport: SpecimenViewport
+  /**
+   * A selector to wait for before the shutter.
+   *
+   * Strongly preferred over waiting on the network for anything a server is
+   * rendering live. A form driven by `useActionState` submits by fetch rather
+   * than by navigation, so the load event resolves *before* the cookie it sets
+   * exists — which is how a run photographed a sign-in page believing it was
+   * the screen behind it. Wait on something only the destination has.
+   */
+  readonly waitFor?: string
+  readonly fullPage: boolean
 }
 
 export type ShotResult = {
@@ -50,7 +80,6 @@ export type ShotResult = {
 }
 
 export type CaptureOptions = {
-  readonly origin: string
   readonly outDir: string
 }
 
@@ -63,19 +92,19 @@ export type CaptureOptions = {
  * can act on.
  */
 export const captureShots = async (
-  shots: readonly PlannedShot[],
+  shots: readonly Shot[],
   browser: SpecimenBrowser,
-  { origin, outDir }: CaptureOptions
+  { outDir }: CaptureOptions
 ): Promise<readonly ShotResult[]> => {
   const results: ShotResult[] = []
 
   for (const shot of shots) {
     const page = await browser.open(shot.viewport)
     try {
-      await page.goto(`${origin}/${shot.page.file}`)
+      await page.goto(shot.url, shot.waitFor)
       const overflow = await page.measure()
       const file = join(outDir, shot.file)
-      await page.capture(file)
+      await page.capture(file, shot.fullPage)
       results.push({
         name: shot.name,
         file,

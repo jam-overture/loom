@@ -26,7 +26,7 @@ import {
 } from "./capture.js"
 import exampleSpecimen from "./example.specimen.js"
 import { escapeHtml, specimenDocument } from "./page.js"
-import { planPages, planShots, slug } from "./plan.js"
+import { planPages, planShots, shotsAt, slug } from "./plan.js"
 import {
   chromiumBrowser,
   contextOptionsFor,
@@ -252,12 +252,12 @@ const fakeBrowser = (
       opened += 1
 
       return {
-        goto: async (url) => {
-          visited.push(url)
+        goto: async (url, waitFor) => {
+          visited.push(waitFor === undefined ? url : `${url} after ${waitFor}`)
         },
         measure: async () => measurement,
-        capture: async (file) => {
-          written.push(file)
+        capture: async (file, fullPage) => {
+          written.push(fullPage ? file : `${file} (viewport only)`)
         },
         close: async () => {},
       }
@@ -272,10 +272,11 @@ describe("taking the shots", () => {
   it("visits every planned page and writes every planned file under the out directory", async () => {
     const { browser, visited, written } = fakeBrowser([])
 
-    const results = await captureShots(planShots(specimenOf()), browser, {
-      origin: "http://127.0.0.1:1234",
-      outDir: "reports",
-    })
+    const results = await captureShots(
+      shotsAt("http://127.0.0.1:1234", planShots(specimenOf())),
+      browser,
+      { outDir: "reports" }
+    )
 
     expect(visited).toEqual([
       "http://127.0.0.1:1234/a-band-editorial-serif.html",
@@ -285,16 +286,19 @@ describe("taking the shots", () => {
       "reports/a-band-editorial-serif-phone.png",
       "reports/a-band-editorial-serif-wide.png",
     ])
+    /** A composition is photographed whole; only an address shoots a viewport. */
+    expect(written.every((file) => !file.includes("viewport only"))).toBe(true)
     expect(results.map((result) => result.overflowed)).toEqual([false, false])
   })
 
   it("flags the page that is wider than the phone, and still takes its picture", async () => {
     const { browser, written } = fakeBrowser([{ scrollWidth: 1420, innerWidth: 390 }])
 
-    const [phone] = await captureShots(planShots(specimenOf({ viewports: [PHONE] })), browser, {
-      origin: "http://127.0.0.1:1234",
-      outDir: "reports",
-    })
+    const [phone] = await captureShots(
+      shotsAt("http://127.0.0.1:1234", planShots(specimenOf({ viewports: [PHONE] }))),
+      browser,
+      { outDir: "reports" }
+    )
 
     expect(phone?.overflowed).toBe(true)
     expect(written).toHaveLength(1)
@@ -317,7 +321,7 @@ describe("taking the shots", () => {
     }
 
     await expect(
-      captureShots(planShots(specimenOf()), browser, { origin: "http://x", outDir: "reports" })
+      captureShots(shotsAt("http://x", planShots(specimenOf())), browser, { outDir: "reports" })
     ).rejects.toThrow("ERR_CONNECTION_REFUSED")
     expect(closed).toBe(1)
   })
@@ -347,17 +351,20 @@ describe("the browser adapter", () => {
     contexts: ContextOptions[]
     screenshots: { path: string; fullPage: boolean }[]
     waits: string[]
+    selectors: string[]
   } => {
     const launches: LaunchOptions[] = []
     const contexts: ContextOptions[] = []
     const screenshots: { path: string; fullPage: boolean }[] = []
     const waits: string[] = []
+    const selectors: string[] = []
 
     return {
       launches,
       contexts,
       screenshots,
       waits,
+      selectors,
       launcher: {
         launch: async (options) => {
           launches.push(options)
@@ -368,6 +375,9 @@ describe("the browser adapter", () => {
                 newPage: async () => ({
                   goto: async (_url: string, options: { waitUntil: "load" }) => {
                     waits.push(options.waitUntil)
+                  },
+                  waitForSelector: async (selector: string) => {
+                    selectors.push(selector)
                   },
                   evaluate: async <TValue,>(): Promise<TValue> =>
                     ({ scrollWidth: 390, innerWidth: 390 }) as TValue,
@@ -394,6 +404,8 @@ describe("the browser adapter", () => {
       { executablePath: "/browsers/chromium", args: LAUNCH_ARGS },
     ])
     expect(LAUNCH_ARGS).toContain("--no-sandbox")
+    /** A long full-page shot dies partway through the container's small /dev/shm. */
+    expect(LAUNCH_ARGS).toContain("--disable-dev-shm-usage")
   })
 
   it("opens a context at a true viewport, at 2x, with motion reduced", async () => {
@@ -411,16 +423,45 @@ describe("the browser adapter", () => {
     expect(contextOptionsFor(WIDE).reducedMotion).toBe("reduce")
   })
 
-  it("waits for load and writes the whole page to the file it was given", async () => {
+  it("waits for load and writes the page to the file it was given", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+    const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "a.png")
+
+    await page.goto("http://127.0.0.1:1/a.html")
+    await page.capture(file, true)
+
+    expect(recorder.waits).toEqual(["load"])
+    expect(recorder.screenshots).toEqual([{ path: file, fullPage: true }])
+    expect(recorder.selectors).toEqual([])
+  })
+
+  /**
+   * The load event resolves before a form driven by `useActionState` has
+   * finished submitting, which is how a run photographed a sign-in page
+   * believing it was the screen behind it.
+   */
+  it("waits for the selector a shot names, after the load event", async () => {
     const recorder = recordingLauncher()
     const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
     const page = await browser.open(WIDE)
 
-    await page.goto("http://127.0.0.1:1/a.html")
-    await page.capture("reports/a.png")
+    await page.goto("http://127.0.0.1:1/portal", "[data-signed-in]")
 
     expect(recorder.waits).toEqual(["load"])
-    expect(recorder.screenshots).toEqual([{ path: "reports/a.png", fullPage: true }])
+    expect(recorder.selectors).toEqual(["[data-signed-in]"])
+  })
+
+  it("takes a viewport-sized shot when it is asked for one", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+    const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "b.png")
+
+    await page.capture(file, false)
+
+    expect(recorder.screenshots).toEqual([{ path: file, fullPage: false }])
   })
 
   it("collects the search paths from both variables, since NODE_PATH is what lanes reach for", () => {

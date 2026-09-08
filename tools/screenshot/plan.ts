@@ -1,13 +1,21 @@
 import { z } from "zod"
 
+import type { Shot } from "../specimen/capture.js"
+import { PHONE, WIDE, type SpecimenViewport } from "../specimen/specimen.js"
+
 /**
- * What to photograph, as a value rather than as a script.
+ * What to photograph at an address, as a value rather than as a script.
  *
- * The nine private harnesses this replaces differed in almost nothing: each was
- * a loop over some URLs at some widths, and the reason each was written again is
- * that the loop was tangled up with the browser handling that every one of them
- * also had to rediscover. Separating them makes the interesting half a list a
- * run can write in four lines and the boring half something nobody reads twice.
+ * This is the second of the harness's two subjects. `pnpm specimen` renders a
+ * tree and serves it; this one is handed pages something else is already
+ * serving — a `next start`, a preview deployment, a static directory — and is
+ * the only way to photograph a screen that needs a session or a database
+ * behind it. What it does *not* do is start that server: running your
+ * application is your lane's recipe, and it is the part that differs.
+ *
+ * Everything after the plan is shared: `../specimen/` finds the browser,
+ * launches it, sizes the viewport, reduces motion, measures the overflow and
+ * names the file, so the two subjects cannot drift apart on any of it.
  *
  * Zod rather than a hand-written type, because a shot list is input: it comes
  * from a JSON file a run wrote minutes ago, and the failure worth preventing is
@@ -15,23 +23,30 @@ import { z } from "zod"
  */
 
 /**
- * The two widths every lane has been taking pictures at.
+ * The sizes every lane has been taking pictures at, named rather than numeric.
  *
- * Named rather than numeric because that is how the reports already read —
- * `…-bold-phone.png`, `…-bold-wide.png` — and a name is what makes two lanes'
- * screenshots comparable. An explicit size stays available for the shot that
- * needs a third.
+ * They are `../specimen/specimen.ts`'s, not this file's own. Two harnesses in
+ * one repository disagreeing about what `wide` means is how two lanes' reports
+ * stop being comparable while both look right, and it had already happened —
+ * this file said 1440×900 and the specimen said 1280×900, which is the number
+ * every report in the repository has actually been quoting.
  */
-export const VIEWPORTS = {
-  phone: { width: 390, height: 844 },
-  wide: { width: 1440, height: 900 },
-} as const satisfies Record<string, { readonly width: number; readonly height: number }>
+export const VIEWPORTS = { phone: PHONE, wide: WIDE } as const satisfies Record<
+  string,
+  SpecimenViewport
+>
 
 export type ViewportName = keyof typeof VIEWPORTS
 
 const viewportSchema = z.union([
   z.enum(["phone", "wide"]),
-  z.object({ width: z.number().int().positive(), height: z.number().int().positive() }),
+  z.object({
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+    /** Named for the file, like every other viewport in the harness. */
+    label: z.string().min(1).default("custom"),
+    deviceScaleFactor: z.number().positive().default(2),
+  }),
 ])
 
 export const shotSchema = z.object({
@@ -40,15 +55,7 @@ export const shotSchema = z.object({
   /** The file to write, relative to `outDir`. `.png` is added if it is missing. */
   out: z.string().min(1),
   viewport: viewportSchema.default("wide"),
-  /**
-   * A selector to wait for before the shutter.
-   *
-   * Strongly preferred over waiting on the network. A form driven by
-   * `useActionState` submits by fetch rather than by navigation, so
-   * `networkidle` resolves *before* the cookie it sets exists — which is how a
-   * run photographed a sign-in page believing it was the screen behind it. Wait
-   * on something only the destination has.
-   */
+  /** A selector to wait for before the shutter. `Shot.waitFor` says why. */
   waitFor: z.string().min(1).optional(),
   fullPage: z.boolean().default(false),
 })
@@ -69,31 +76,14 @@ const baseUrlSchema = z
 export const shotListSchema = z.object({
   baseUrl: baseUrlSchema.optional(),
   outDir: z.string().min(1).default("."),
-  /**
-   * Milliseconds to settle after the wait condition, before the shutter.
-   *
-   * Zero by default, because a fixed sleep is the thing a selector wait exists
-   * to replace. It is here for the one case a selector cannot express — a
-   * transition that has started and is not a new element.
-   */
-  settleMs: z.number().int().min(0).default(0),
   shots: z.array(shotSchema).min(1),
 })
 
 export type ShotList = z.infer<typeof shotListSchema>
 
-/** One shot with every default resolved, ready to hand to a browser. */
-export type PlannedShot = {
-  readonly url: string
-  readonly file: string
-  readonly viewport: { readonly width: number; readonly height: number }
-  readonly waitFor?: string
-  readonly fullPage: boolean
-}
-
 const withExtension = (out: string): string => (out.endsWith(".png") ? out : `${out}.png`)
 
-const join = (left: string, right: string): string =>
+const joinPath = (left: string, right: string): string =>
   `${left.replace(/\/+$/, "")}/${right.replace(/^\/+/, "")}`
 
 /**
@@ -106,13 +96,22 @@ const urlFor = (list: ShotList, path: string): string => {
   if (/^https?:\/\//.test(path)) return path
   if (list.baseUrl === undefined) return path
 
-  return join(list.baseUrl, path)
+  return joinPath(list.baseUrl, path)
 }
 
-export const planShots = (list: ShotList): readonly PlannedShot[] =>
+/** A shot's name is its file without the extension, which is what a report quotes. */
+const nameOf = (out: string): string => out.replace(/\.png$/, "")
+
+/**
+ * `file` stays relative to the list's `outDir`, which the capture loop joins on.
+ * Resolving it here as well is how a picture ends up two directories deep in a
+ * path that reads correctly in both halves.
+ */
+export const planShots = (list: ShotList): readonly Shot[] =>
   list.shots.map((shot) => ({
+    name: nameOf(shot.out),
     url: urlFor(list, shot.path),
-    file: join(list.outDir, withExtension(shot.out)),
+    file: withExtension(shot.out),
     viewport: typeof shot.viewport === "string" ? VIEWPORTS[shot.viewport] : shot.viewport,
     ...(shot.waitFor === undefined ? {} : { waitFor: shot.waitFor }),
     fullPage: shot.fullPage,

@@ -1,70 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { bestChromium, executableIn, parseChromiumDirectory } from "./browser.js"
+import { DEFAULT_VIEWPORTS, PHONE, WIDE } from "../specimen/specimen.js"
+
 import { planShots, shotListSchema, VIEWPORTS } from "./plan.js"
-
-/** What the sandbox image this was written against actually carries. */
-const INSTALLED = ["chromium", "chromium-1194", "chromium_headless_shell-1194", "ffmpeg-1011"]
-
-describe("finding the installed browser", () => {
-  it("reads a build number off an install directory", () => {
-    expect(parseChromiumDirectory("chromium-1194")).toEqual({
-      directory: "chromium-1194",
-      build: 1194,
-      full: true,
-    })
-  })
-
-  it("tells the headless shell from the full browser", () => {
-    expect(parseChromiumDirectory("chromium_headless_shell-1194")?.full).toBe(false)
-  })
-
-  it("is not fooled by a directory that is not a Chromium", () => {
-    expect(parseChromiumDirectory("ffmpeg-1011")).toBe(null)
-    /** No build number, so nothing to point at — the versioned ones are the real installs. */
-    expect(parseChromiumDirectory("chromium")).toBe(null)
-  })
-
-  it("prefers the full browser over the shell when the image carries both", () => {
-    expect(bestChromium(INSTALLED)?.directory).toBe("chromium-1194")
-  })
-
-  it("does not depend on the order the directory is read in", () => {
-    expect(bestChromium([...INSTALLED].reverse())?.directory).toBe("chromium-1194")
-  })
-
-  it("takes the newest build of the browser it prefers", () => {
-    const names = ["chromium-1194", "chromium-1210", "chromium_headless_shell-1300"]
-
-    expect(bestChromium(names)?.build).toBe(1210)
-  })
-
-  /**
-   * The version is the image's and not this repository's, so the one thing this
-   * must not do is know a number. An image that moves to a build nobody here has
-   * heard of still resolves.
-   */
-  it("resolves a build this repository has never seen", () => {
-    expect(bestChromium(["chromium-9999"])?.build).toBe(9999)
-  })
-
-  it("reports nothing rather than guessing when no Chromium is installed", () => {
-    expect(bestChromium(["ffmpeg-1011", "firefox-1489"])).toBe(null)
-  })
-
-  it("points at the executable each kind of build actually has", () => {
-    const full = parseChromiumDirectory("chromium-1194")
-    const shell = parseChromiumDirectory("chromium_headless_shell-1194")
-    if (!full || !shell) throw new Error("both are Chromium directories")
-
-    expect(executableIn("/opt/pw-browsers", full)).toBe(
-      "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
-    )
-    expect(executableIn("/opt/pw-browsers", shell)).toBe(
-      "/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell"
-    )
-  })
-})
 
 const listOf = (source: unknown) => {
   const parsed = shotListSchema.safeParse(source)
@@ -84,7 +22,7 @@ describe("planning a shot list", () => {
     )
 
     expect(planned[0]?.url).toBe("http://localhost:3000/the-record")
-    expect(planned[0]?.file).toBe("reports/record.png")
+    expect(planned[0]?.file).toBe("record.png")
   })
 
   it("does not double a slash between the base and the path", () => {
@@ -109,7 +47,25 @@ describe("planning a shot list", () => {
   it("keeps an extension the shot already has rather than adding a second", () => {
     const planned = planShots(listOf({ shots: [{ path: "/x", out: "already.png" }] }))
 
-    expect(planned[0]?.file).toBe("./already.png")
+    expect(planned[0]?.file).toBe("already.png")
+  })
+
+  /**
+   * The file is relative to the list's `outDir` and the capture loop joins it
+   * on, because that loop is shared with `pnpm specimen` and does the same
+   * thing for both. Resolving it here as well put the picture two directories
+   * deep in a path that read correctly at each end.
+   */
+  it("leaves the out directory to the capture loop rather than joining it twice", () => {
+    const planned = planShots(listOf({ outDir: "reports/wide", shots: [{ path: "/x", out: "x" }] }))
+
+    expect(planned[0]?.file).toBe("x.png")
+  })
+
+  it("names a shot after the file it will write, which is what a report quotes", () => {
+    const planned = planShots(listOf({ shots: [{ path: "/x", out: "the-record.png" }] }))
+
+    expect(planned[0]?.name).toBe("the-record")
   })
 
   it("resolves a named viewport to the size every lane's reports already use", () => {
@@ -122,8 +78,17 @@ describe("planning a shot list", () => {
       })
     )
 
-    expect(planned[0]?.viewport).toEqual(VIEWPORTS.phone)
-    expect(planned[1]?.viewport).toEqual(VIEWPORTS.wide)
+    expect(planned[0]?.viewport).toEqual(PHONE)
+    expect(planned[1]?.viewport).toEqual(WIDE)
+  })
+
+  /**
+   * The defect this file used to carry: `wide` was 1440 here and 1280 in the
+   * specimen harness, so two lanes' "wide" screenshots of the same page were
+   * different pictures and neither said so.
+   */
+  it("takes its viewports from the harness rather than declaring its own", () => {
+    expect([VIEWPORTS.phone, VIEWPORTS.wide]).toEqual(DEFAULT_VIEWPORTS)
   })
 
   it("takes an explicit size for the shot a name does not cover", () => {
@@ -131,13 +96,18 @@ describe("planning a shot list", () => {
       listOf({ shots: [{ path: "/x", out: "x", viewport: { width: 768, height: 1024 } }] })
     )
 
-    expect(planned[0]?.viewport).toEqual({ width: 768, height: 1024 })
+    expect(planned[0]?.viewport).toEqual({
+      width: 768,
+      height: 1024,
+      label: "custom",
+      deviceScaleFactor: 2,
+    })
   })
 
   it("defaults to the wide viewport and a viewport-sized shot", () => {
     const planned = planShots(listOf({ shots: [{ path: "/x", out: "x" }] }))
 
-    expect(planned[0]?.viewport).toEqual(VIEWPORTS.wide)
+    expect(planned[0]?.viewport).toEqual(WIDE)
     expect(planned[0]?.fullPage).toBe(false)
   })
 
