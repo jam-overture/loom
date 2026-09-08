@@ -184,6 +184,16 @@ twice would be waste that could disagree with itself. A program printing from a
 different set of fences on the second run would leave the reader predicting
 against a slot that arrives empty.
 
+## Where to look
+
+The preview is
+`https://loom-git-lessons-29-the-answ-d136eb-jpizzolato36-6341s-projects.vercel.app`.
+`/lessons/20` is the lesson to open — commit the two predictions and scroll to
+Try it. `/lessons/01/held/self-check-answers` and `/lessons/20/held/transcripts`
+are the held documents themselves, which are worth opening directly: they are
+guessable and readable without answering anything, which is the limit this run
+is claiming and not overclaiming.
+
 ## Conflicts
 
 This branch is cut from `lessons-28-origin` (#249), which is cut from #247,
