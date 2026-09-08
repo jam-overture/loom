@@ -13440,3 +13440,71 @@ deployment, so the page it named did not exist behind it.
 Nothing was skipped or weakened. The screenshots in
 `reports/2026-09-07-docs-when-something-looks-wrong*.png` are this commit served
 by `next start`, at a true 390 and 1280 CSS pixels, in both themes.
+
+---
+
+## 2026-09-08 — one record has no *Alternatives considered*, and nothing in the repository would ever say so
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+
+`decisions/README.md` states the format: *"Status, Date, Section, then Context,
+Decision, Consequences, Alternatives considered"*, and says why the last one
+matters — *"the rejected options are the part a future reader cannot
+reconstruct."*
+
+101 of the 102 records have that section. **0081 does not**, and it has been
+missing since the record was written on 26 August. Nothing noticed, because
+nothing looks: `pnpm decisions:index` builds the table from the front matter and
+`record-claims.test.ts` checks numbers a record states against the code that
+states them. Neither reads the body's shape.
+
+Found by writing something that walks the section for every record —
+`(docs)/_lib/architecture/alternatives.ts` — and asking why one record came back
+empty. That is a bad way to find it: the finder is a page, and a page can only
+notice a gap the day somebody writes one.
+
+**The check is small and it belongs beside the index tool**, which already reads
+every record and already fails a build on a numbering clash (0097): a record that
+does not carry all five headings is the same class of defect and the same place
+to catch it. The one judgement call in it is whether an amendment section counts
+as an exemption — 0081 has an `## Amendment` heading and no alternatives, and
+those two facts may not be a coincidence.
+
+Not fixed here because `tools/` and `src/` are not this lane's.
+
+---
+
+## 2026-09-08 — a record says whether an alternative is still live in prose, and only prose
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+worth a decision either way, and cheap to leave alone
+
+A record's status is machine-readable: `Accepted`, `Proposed`, `Superseded by
+NNNN`, parsed from a table and rendered on the site. **The status of a single
+alternative inside a record is not.** It is written in whatever sentence the
+author reached for — *"Rejected"*, *"Deferred rather than rejected"*, *"Not
+chosen for now"*, *"Worth revisiting once there is a repair loop"*, *"Rejected
+for now on the failure mode"*.
+
+That distinction is worth something to a stranger. Of the **483 alternatives
+across 101 rulings**, **22 are ones a record declines to close** — Neon for
+preview isolation, container queries instead of a width query, compaction
+instead of deletion in the journal, a signed Gate disposition on `append`. Those
+are the constraints that might lift, and they are the honest answer to *is this
+the shape it will keep*.
+
+The costs page on the documentation site now shows them, and it has to find them
+by **matching words in a paragraph**, with one exclusion — a marker sitting
+after an `if` is a hypothetical rather than a verdict, which is 0038 exactly:
+*"the interim the last run recommended if the fix were deferred again"*, closed
+in the very next sentence. Read the word alone and a closed ruling is presented
+as open on the one page a reader uses to decide whether to adopt.
+
+**It works, it is tested, and it is a heuristic reading English.** The durable
+version is a convention in `decisions/README.md` — a bold verdict word at the
+head of each alternative, or a `Still open:` line — which would make it parsing
+rather than guessing. Filed rather than proposed, because a convention for
+`decisions/` is governance and this lane does not write the rules it reads.
+
+Until then the page prints the record's own sentence beside every row it marks,
+so nobody has to take the reading on trust.
