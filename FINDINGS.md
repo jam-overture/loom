@@ -13485,3 +13485,49 @@ entry points, so nothing is blocked and nothing here reaches inside the framewor
 **Recommended:** `export type * from "../catalogue.js"` in `src/sdk/catalogue.ts`,
 so the SDK entry point is complete for the one function it exists to offer. Not
 done here: `src/` is not this lane.
+
+## 2026-09-09 — the front door said a change either happens or is refused, and the third answer is the product
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 9 September
+
+The *see it happen* band introduced its five buttons with:
+
+> This site protects two things from being taken away: what it says it is for
+> and the way out of it. **Everything else a request may rearrange on its own —
+> and one of the five above will be refused**, which is the part worth watching.
+
+`/the-record` said the same thing in its own words: *"Everything else a request
+may rearrange on its own, and you will see one of these refused for exactly that
+reason."* Both had been there since 20 August.
+
+Run against the site's own rules, the five answer: **three land, one is refused,
+and one — *Get to the point* — is held and stops to ask the visitor.** A reader
+told the page would rearrange on its own pressed it and got a panel headed
+*Waiting for you*.
+
+**The count is the smaller half.** The middle answer is the product. Anything
+with a model in it can show a page changing and a page refusing; *it waits for
+you* is the one this site exists to argue for, and it is on `/the-rules` as one
+of three answers *"and there is no fourth"*, in the journey's fourth step, and in
+the panel's own badge. The band where a stranger first meets the mechanism
+described a world with two answers in it — on a site whose whole claim is that it
+can say in advance what will happen.
+
+**Why nothing caught it.** `adapt.test.ts` held a literal table mapping each ask
+to its verdict, including `problem: "held"`, and put every one of them through
+the real sequence. **The suite knew.** The page could not read what the suite
+knew, so the two were free to disagree, and 1,047 passing tests were consistent
+with a band contradicting its own panel eighty pixels below it. A fact a test
+holds and a page cannot reach is a fact the page will eventually contradict.
+
+Seventh consecutive run to find this shape — two individually defensible things
+nobody had read next to each other. The tell is unchanged and still cheap: read
+the site across a link, in the order a visitor reads it.
+
+**Closed by moving the declaration onto the ask.** `Ask.answer` carries what the
+rules do with each request; `_lib/adapt/answers.ts` spells the sentence off the
+tally; `answers.test.ts` holds every declaration against the real sequence and
+every page against the declaration. No sentence on this site counts what the five
+requests do any more, and `/the-rules`'s *"two of them run into the rules"* comes
+off the same list, so a sixth choice cannot leave one page behind.

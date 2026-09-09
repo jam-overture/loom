@@ -1,5 +1,6 @@
 import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } from "@loom/runtime"
 
+import { whatTheChoicesDo, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
@@ -413,12 +414,19 @@ const panels = (ids: IdFactory, context: SeeItHappenContext): readonly LoomNode[
 const COUNT_IN_WORDS: readonly string[] = ["nothing", "one thing", "two things", "three things"]
 
 /**
- * What this site protects, said before the reader meets a refusal.
+ * What this site protects, said before the reader meets a refusal — and then
+ * what the five buttons above it actually do.
  *
- * Every part of it is read off the rules: the phrases, and the count. A run that
+ * Every part of it is read off something: the protected phrases and their count
+ * off the rules, and what happens to each request off the requests. A run that
  * protects a fourth thing and forgets this sentence gets a page that says
- * "three things" and lists four, which is the kind of near-miss nobody notices
- * in review — so it cannot happen.
+ * "three things" and lists four; a run that adds a sixth choice used to get a
+ * page still calling the exception singular. Neither can happen now.
+ *
+ * The second half was **"Everything else a request may rearrange on its own —
+ * and one of the five above will be refused"** until today, and it was the one
+ * sentence on the site that denied the middle answer exists. `answers.ts` has
+ * the whole account.
  */
 const protectionNotice = (): string => {
   const protectedThings = protectedInPlainWords()
@@ -429,7 +437,7 @@ const protectionNotice = (): string => {
 
   return `This site protects ${
     COUNT_IN_WORDS[protectedThings.length] ?? `${protectedThings.length} things`
-  } from being taken away: ${listed}. Everything else a request may rearrange on its own — and one of the five above will be refused, which is the part worth watching.`
+  } from being taken away: ${listed}. ${whatTheChoicesDo()} ${worthWatching()}`
 }
 
 /**

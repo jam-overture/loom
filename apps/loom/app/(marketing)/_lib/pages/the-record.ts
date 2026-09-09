@@ -23,6 +23,7 @@ import {
   type ChangeStep,
   type ChangeToken,
 } from "../adapt/history"
+import { whatTheChoicesDo } from "../adapt/answers"
 import { protectedInPlainWords } from "../adapt/run"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
@@ -97,6 +98,13 @@ const hero = (ids: IdFactory): LoomNode =>
  * for the reason the front door's copy of this gives: a run that protects a
  * fourth thing and forgets the sentence gets a page making a promise its rules
  * no longer keep.
+ *
+ * **Its second sentence is the front door's, verbatim and from one source.**
+ * Both pages offer the same five requests and both introduced them in their own
+ * words, so both carried the same wrong claim — that everything not refused
+ * happens on its own — and either could have been fixed without the other. It
+ * is only shown when nothing has been asked for yet, which is the one state in
+ * which all five are on the page for it to be counting.
  */
 export const protectionNotice = (): string => {
   const things = protectedInPlainWords()
@@ -105,7 +113,7 @@ export const protectionNotice = (): string => {
       ? things[0]
       : `${things.slice(0, -1).join(", ")} and ${things[things.length - 1]}`
 
-  return `The front page is published under a set of rules that protect ${listed} from being taken away. Everything else a request may rearrange on its own, and you will see one of these refused for exactly that reason.`
+  return `The front page is published under a set of rules that protect ${listed} from being taken away. ${whatTheChoicesDo()}`
 }
 
 /**

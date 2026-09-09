@@ -15,6 +15,7 @@ import {
 
 import { BAND } from "../bands"
 import { REPOSITORY_URL } from "../site"
+import type { Verdict } from "./record"
 
 /**
  * The four things a visitor can ask the front door for.
@@ -47,6 +48,22 @@ export const FRONT_DOOR_INTERPRETER = "loom/front-door-ask"
 
 export type AskId = "problem" | "shorter" | "proof" | "calmer" | "drop-pitch"
 
+/**
+ * The three answers a set of rules can give, before the visitor has said
+ * anything.
+ *
+ * The same three the rules page writes out — *it happens*, *it waits for you*,
+ * *it does not happen* — and deliberately the runtime's own words for them
+ * rather than a second vocabulary, so `answers.test.ts` can hold a declared
+ * answer against what the sequence actually returns without a translation table
+ * standing between the two.
+ *
+ * `approved` is not one of them. It is what a *held* request becomes once a
+ * person says yes, so it is an answer to a second question that has not been
+ * asked yet, and a band counting what its five buttons do is counting the first.
+ */
+export type AskAnswer = Extract<Verdict, "landed" | "held" | "refused">
+
 export type Ask = {
   readonly id: AskId
   /** What a person would have typed. It is the request, verbatim, and the record shows it. */
@@ -55,6 +72,22 @@ export type Ask = {
   readonly label: string
   /** Why these changes answer that, in the words the record will show a visitor. */
   readonly rationale: string
+  /**
+   * What this site's rules do with it, as data a sentence can be spelled off.
+   *
+   * It lived in a table inside `adapt.test.ts` until today, which is exactly
+   * where it was least useful: the tests knew one of the five stops and asks,
+   * and the band offering the five told a visitor that everything except the
+   * refused one *"may rearrange on its own"*. A fact the suite holds and the
+   * page cannot read is a fact the page will eventually contradict.
+   *
+   * It is a declaration rather than a derivation because a page builder is
+   * synchronous and running the sequence is not — and running all five on every
+   * visit to compose one sentence would make the published front door depend on
+   * performing every demonstration on it. So this is the claim, and
+   * `answers.test.ts` puts each one through the real sequence and holds it here.
+   */
+  readonly answer: AskAnswer
   /**
    * The changes, or `undefined` when this page gives the choice nothing to do.
    * Absence is how the band knows not to offer it: a button whose only possible
@@ -97,6 +130,13 @@ const openingBand = (
  */
 const problem: Ask = {
   id: "problem",
+  /**
+   * Held, and it is the most instructive of the five. It moves a band the rules
+   * protect rather than destroying it — not damage, and not something the rules
+   * let a request through on its own either — so it stops and asks the visitor,
+   * which is the middle answer and the one no competitor has.
+   */
+  answer: "held",
   utterance: "Skip the tour. What problem does this actually solve?",
   label: "Get to the point",
   rationale:
@@ -120,6 +160,7 @@ const problem: Ask = {
  */
 const shorter: Ask = {
   id: "shorter",
+  answer: "landed",
   utterance: "I am in a hurry. Take the questions off the page.",
   label: "I don't have long",
   rationale:
@@ -164,6 +205,7 @@ const evidenceBand = (ids: IdFactory): LoomNode =>
 /** The addition. Nothing already on the page moves, and the record says how much arrived. */
 const proof: Ask = {
   id: "proof",
+  answer: "landed",
   utterance: "I do not believe you. Show me the evidence.",
   label: "Prove it",
   rationale:
@@ -184,6 +226,7 @@ const proof: Ask = {
  */
 const calmer: Ask = {
   id: "calmer",
+  answer: "landed",
   utterance: "The top of this page is shouting at me. Calm it down.",
   label: "Turn it down",
   rationale:
@@ -230,6 +273,8 @@ const calmer: Ask = {
  */
 const dropPitch: Ask = {
   id: "drop-pitch",
+  /** Refused, and there is no yes that moves it. See the note above. */
+  answer: "refused",
   utterance: "Cut the sales pitch. I only want to see the product.",
   label: "Cut the pitch",
   rationale:

@@ -15,6 +15,7 @@ import {
 } from "@loom/runtime"
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
+import { EXCEPTIONS_SPELLED } from "../adapt/answers"
 import { BECAUSE, WEIGHT } from "../adapt/record"
 import { FRONT_DOOR_POLICY, protectedInPlainWords } from "../adapt/run"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
@@ -359,7 +360,7 @@ const proof = (ids: IdFactory, context: PageContext): LoomNode =>
     [
       prose(
         ids,
-        "Nothing above is a description of something that happens elsewhere. The front page of this site takes requests, and two of them run into the rules in the table above.",
+        `Nothing above is a description of something that happens elsewhere. The front page of this site takes requests, and ${EXCEPTIONS_SPELLED} of them run into the rules in the table above.`,
         { size: "lead", measured: true }
       ),
       buildElement(ids, {
