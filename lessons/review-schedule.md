@@ -974,6 +974,60 @@ each of the two cases, you have not found the rule yet.
 
 ---
 
+## Set Z — two days after lesson 21
+
+Interleaved with 04, 07, 08, 12, 15, 17, 18 and 19 — and unusually heavy on Part
+II for a Part V set, which is deliberate. Set Y was about telling three seams
+apart. This one is mostly not about the seam at all: lesson 21's registry half is
+the pattern you already have, and the half worth retrieving is what happened when
+a property turned out to belong to nobody.
+
+1. Give the reason a model may not write a colour, as a property of the value
+   space rather than as a danger. Then apply the same reasoning to two cases no
+   lesson covered: the number of columns in a grid, and the alt text on an
+   image. If your rule gives the same answer for both, you have not found it
+   yet. *(01, 21)*
+2. There is no fallback theme, and a tree that names none renders unstyled. State
+   the argument, then say what it shares with lesson 18's account of a page that
+   stops being a function of its tree — and then the difference that lets
+   appearance refuse a trade data had to accept. *(18, 21)*
+3. A change that repaints every pixel of a page comes back `low` stakes, no
+   factors, reversible, accepted — identical in every column to renaming the
+   page. Defend it with both axes named, then say what a deployment does if it
+   wants re-themes held, and why that is a composition rather than a feature.
+   *(07, 08, 09, 21)*
+4. "Can a reader read this page" is answerable by no single party. Name the three
+   parties and what each holds. Then name the two things that had to be
+   *declared* because nothing could derive them, and give, for each, the reason
+   derivation fails — one of the two is a fact about probes and the other is a
+   fact about meaning. *(14, 15, 21)*
+5. `analyzeDelta` measures and the Gate judges. `auditRegistry` reports and
+   refuses nothing. `auditPalette` measures and imposes nothing. Write the rule
+   the three share as a claim about *who owns the consequences*, then name the
+   one place in the system where the same party measures and decides, and say
+   what makes it different. *(07, 15, 17, 21)*
+6. A pairing that cannot be measured is neither a pass nor a failure. Give the
+   reason it is a third answer rather than either, name what a host wanting the
+   guarantee has to assert, and name the other place in this course where a check
+   answers "I could not tell you" as a first-class result. Then the sharper half:
+   say what a host could have made disappear if `unmeasured` had been folded into
+   "pass". *(15, 20, 21)*
+7. Two colours at 1.00:1 that a reader tells apart at a glance. Explain how both
+   are true, then state what a design token promises and does not — in one
+   sentence, to somebody who has never heard of Loom — and derive from your
+   sentence the class of bug it predicts. *(21)*
+8. The theme catalogue shown to a model carries ids, names and descriptions and
+   no hex. The frame catalogue carries origins and descriptions and no `self`
+   flag. Give the single rule about projections that decides both omissions, then
+   say which of the two catalogues is a *complete list of what may be named* and
+   why the other one is not. *(12, 19, 20, 21)*
+
+Question 4 is the point of the set. Question 5 is the one where three examples
+make the rule feel obvious and stating it precisely is still hard — write the
+sentence before you look at any of the three.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1013,3 +1067,4 @@ renders this file rather than restating it.
 | W | 2 days after L18 | | |
 | X | 2 days after L19 | | |
 | Y | 2 days after L20 | | |
+| Z | 2 days after L21 | | |
