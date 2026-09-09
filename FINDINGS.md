@@ -13024,8 +13024,13 @@ import from a lane they may not edit. It wants `apps/loom/scripts/`, beside
 
 ## 2026-09-03 — the disclosure was louder than the sentence it sits under, and only a screenshot could say so
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-**fixed on one screen, not in the component.**
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by `portal-23-four-units-one-tree` — the component sets its own altitude now,
+and the hand-muting on `/portal/sign-ins` is gone with it. The sweep that went
+with it found the defect was wider than this entry says: **nine** screens had
+written `text-ink-secondary` inside a disclosure, where it meant "quieter" in a
+card and "louder" in a `StateNotice`, and two `<pre>` blocks on `/portal/pieces`
+were set to the body ink inside the record.
 
 `TechnicalDetail` sets no text colour of its own. Its body inherits whatever it
 is mounted inside, and every existing use in this route group happens to sit
@@ -13701,7 +13706,11 @@ filed rather than done.
 
 ## 2026-09-08 — a page has a name in the headings and an id in the sentence underneath
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open.
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-23-four-units-one-tree` — `scopedLead` takes a `PageName`, `<ScopedLead>`
+renders it, and `nameFor` is the one-page read the four scoped screens make. The
+sentence names the page and keeps the id beside it; a page with no heading, and a
+page the store could not read, both still read as sentences.
 
 #245's fifth unit gave a tree its name — read from the heading the page itself
 leads with — and put it in the page screen's heading, the pages list, the front
@@ -13753,3 +13762,30 @@ The general rule, which is not specific to names: **a rename needs a test for
 the absence of the old thing, not only for the presence of the new one.** The
 presence test passes the moment the new thing exists; only the absence test
 knows whether the rename finished.
+
+---
+
+## 2026-09-09 — a full-page screenshot of a portal screen paints the topbar twice
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` (the script) and
+`Loom daily build` (where it lives) · **Status:** open — a fifth entry on the
+screenshot recipe, and the first that is about the picture rather than the drive
+
+`page.screenshot({ fullPage: true })` on any portal screen taller than the
+viewport **stitches**, and the topbar is `sticky`. The result is a picture with
+the sign-out bar painted a second time across the middle of the page, and — if
+anything on the page still holds focus — the `.loom-skip-link` visible beside
+it, which is a control no reader would ever see there.
+
+It is an artefact of the capture rather than a defect in the portal, and it
+looks exactly like one. Two of this run's five pictures had to be retaken.
+
+**The fix is one line and it belongs in the script the four findings above
+already ask for:** make the viewport taller than the screen
+(`{ width: 1280, height: 2400 }`) so a full-page capture never stitches, and
+blur the active element before the shot. Not `element.screenshot` on the main
+region — the rail and the topbar are part of what a reviewer is being shown.
+
+Same home as the rest of the recipe: `apps/loom/scripts/`, or
+[#250](https://github.com/jam-overture/loom/pull/250), which is the framework
+lane taking the harness itself.
