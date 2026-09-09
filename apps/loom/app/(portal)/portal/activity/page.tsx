@@ -6,15 +6,15 @@ import { describeTelemetryError, episodesOf, tallyEpisodes } from "@loom/runtime
 
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { unattributedNote } from "@/app/(portal)/_lib/episode-view"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { nameFor } from "@/app/(portal)/_lib/page-name"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
-import { storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
 import { EpisodeCard } from "./_components/episode-card"
 import { TallyBar } from "./_components/tally-bar"
@@ -91,6 +91,17 @@ const ActivityPage = async ({
   const newestFirst = [...episodes].reverse()
   const scopeQuery = scope?.success ? `tree=${encodeURIComponent(scope.data)}&` : ""
 
+  /**
+   * What this page is called, and — because a name is only read when there is
+   * one page in view — whether this screen is scoped at all.
+   *
+   * One bounded head read on a screen that is already reading the record. A
+   * failed read costs the name and nothing else: the sentence still says which
+   * page, by id, which is the same fallback a page with no heading of its own
+   * gets.
+   */
+  const pageName = scope?.success ? await nameFor(portalStore, scope.data) : undefined
+
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-2">
@@ -103,14 +114,14 @@ const ActivityPage = async ({
          * now, and the corner link has become the strip below.
          */}
         <p className="text-ink-muted text-sm">
-          {scope?.success ? (
-            <PlainSentence line={scopedLead("asked", scope.data)} />
-          ) : (
+          {pageName === undefined ? (
             <>
               Everything anyone has asked Loom to change, newest first — including the changes it
               wasn&rsquo;t allowed to make and the requests it didn&rsquo;t understand. Those leave
               no other trace anywhere.
             </>
+          ) : (
+            <ScopedLead view="asked" page={pageName} />
           )}
         </p>
       </header>

@@ -5,13 +5,13 @@ import { treeIdSchema } from "@loom/runtime"
 import { calibrationOf, describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { nameFor } from "@/app/(portal)/_lib/page-name"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
-import { storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
 import { contradictedBands, groupMisses, missesOf } from "@/app/(portal)/_lib/calibration-misses"
 import { isOnTheMark } from "@/app/(portal)/_lib/calibration-view"
@@ -97,6 +97,17 @@ const TrustPage = async ({
   const misses = missesOf(fold)
   const lastIndex = report.buckets.length - 1
 
+  /**
+   * What this page is called, and — because a name is only read when there is
+   * one page in view — whether this screen is scoped at all.
+   *
+   * One bounded head read on a screen that is already reading the record. A
+   * failed read costs the name and nothing else: the sentence still says which
+   * page, by id, which is the same fallback a page with no heading of its own
+   * gets.
+   */
+  const pageName = scope?.success ? await nameFor(portalStore, scope.data) : undefined
+
   /*
    * Nothing scored is not the same as nothing happened, and the page used to
    * make them look identical: with no judged claims it still drew the summary,
@@ -126,14 +137,14 @@ const TrustPage = async ({
          * so on arrival.
          */}
         <p className="text-ink-muted text-sm">
-          {scope?.success ? (
-            <PlainSentence line={scopedLead("trust", scope.data)} />
-          ) : (
+          {pageName === undefined ? (
             <>
               Every time the AI proposes a change it says how sure it is. This page checks those
               claims against what actually happened, so you can tell whether &ldquo;I&rsquo;m
               sure&rdquo; from this AI is worth anything on your project.
             </>
+          ) : (
+            <ScopedLead view="trust" page={pageName} />
           )}
         </p>
       </header>

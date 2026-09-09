@@ -6,11 +6,11 @@ import { describeStoreError } from "@loom/runtime/store"
 
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { nameFor } from "@/app/(portal)/_lib/page-name"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import {
   anchorOf,
@@ -155,6 +155,14 @@ const HistoryPage = async ({
         )
 
   /**
+   * What this page is called, for the sentence that says which page it is.
+   *
+   * One bounded head read, on a screen that has already read a page of the log
+   * and one inverse per row. A failed read costs the name and nothing else.
+   */
+  const pageName = await nameFor(portalStore, scope.data)
+
+  /**
    * A revision this log does not hold is not an error to the store — it answers
    * with the entries on that side of the number instead — so the page lands
    * looking exactly like an ordinary visit. Saying which of the ways it missed
@@ -178,7 +186,7 @@ const HistoryPage = async ({
          * are looking at rather than beside a link out.
          */}
         <p className="text-ink-muted text-sm">
-          <PlainSentence line={scopedLead("changed", scope.data)} />
+          <ScopedLead view="changed" page={pageName} />
         </p>
       </header>
 

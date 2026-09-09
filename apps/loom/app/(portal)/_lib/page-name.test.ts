@@ -14,7 +14,7 @@ import { memoryTreeStore } from "@loom/runtime/store"
 
 import { seedTree } from "./seed"
 
-import { UNTITLED, nameFrom, namesOf, pageNameOf, unnamed } from "./page-name"
+import { UNTITLED, nameFor, nameFrom, nameReading, namesOf, pageNameOf, unnamed } from "./page-name"
 
 /**
  * What a page is called, derived from the page.
@@ -221,5 +221,49 @@ describe("naming a listed page of trees", () => {
       treeId: missing,
       derived: false,
     })
+  })
+})
+
+/**
+ * The scoped screens hold one id rather than a listing, so they ask for one
+ * name. Same read, same failure story, a shape that does not make a caller
+ * build a single-element array and then look up the only key in the map.
+ */
+describe("naming the one page a screen is scoped to", () => {
+  it("reads the name off the page's own head revision", async () => {
+    const store = memoryTreeStore()
+    const tree = pageOf("scopedone", (ids) => [heading(ids, 1, "Autumn arrivals")])
+    await store.create(tree)
+
+    expect(await nameFor(store, tree.treeId)).toEqual({
+      name: "Autumn arrivals",
+      treeId: tree.treeId,
+      derived: true,
+    })
+  })
+
+  it("costs the name and nothing else when the read fails", async () => {
+    const missing = treeIdSchema.parse("t_nothinghere")
+
+    expect(await nameFor(memoryTreeStore(), missing)).toEqual(unnamed(missing))
+  })
+})
+
+/**
+ * How the pair reads as one string.
+ *
+ * The `PageName` component renders the two halves as two elements and a
+ * sentence needs them as text; a space is the whole of the difference between
+ * them, and a missing one is exactly the defect 24 August produced three times.
+ */
+describe("a named page as one string", () => {
+  it("reads as the words, then the id", () => {
+    expect(nameReading({ name: "Autumn arrivals", treeId: "t_seed1", derived: true })).toBe(
+      "Autumn arrivals t_seed1"
+    )
+  })
+
+  it("still reads as two things for a page with no name of its own", () => {
+    expect(nameReading(unnamed("t_seed1"))).toBe(`${UNTITLED} t_seed1`)
   })
 })

@@ -122,6 +122,35 @@ export const unnamed = (treeId: string): PageName => ({
 })
 
 /**
+ * How a named page reads, as one string.
+ *
+ * The `PageName` component renders the two halves as two elements — the words,
+ * then the id in monospace — and a sentence that contains a page needs the same
+ * pair as text a test can assert whole. Written once here so the sentence and
+ * the component cannot disagree about the space between them, which is exactly
+ * the join that produced three defects on 24 August.
+ */
+export const nameReading = (page: PageName): string => `${page.name} ${page.treeId}`
+
+/**
+ * The name of one page, for a screen that already knows which page it is on.
+ *
+ * The scoped screens each hold one id from their `tree=` parameter rather than a
+ * listing, so `namesOf` over a single-element array is the wrong shape for them
+ * and the map it returns is a lookup with one key.
+ *
+ * A read that fails costs the name and nothing else, for the same reason it does
+ * in a listing: a screen that cannot name the page it is scoped to still knows
+ * which page it is scoped to, and refusing to draw is a worse answer than
+ * "Untitled page" beside the id the reader typed.
+ */
+export const nameFor = async (reader: TreeReader, treeId: TreeId): Promise<PageName> => {
+  const head = await reader.head(treeId)
+
+  return head.ok ? pageNameOf(head.value) : unnamed(treeId)
+}
+
+/**
  * Names for a listed page of trees, one bounded read each.
  *
  * The same trade every list in this portal already makes: `/portal/pages` reads
@@ -140,11 +169,7 @@ export const namesOf = async (
   treeIds: readonly TreeId[]
 ): Promise<ReadonlyMap<string, PageName>> => {
   const named = await Promise.all(
-    treeIds.map(async (treeId) => {
-      const head = await reader.head(treeId)
-
-      return [treeId, head.ok ? pageNameOf(head.value) : unnamed(treeId)] as const
-    })
+    treeIds.map(async (treeId) => [treeId, await nameFor(reader, treeId)] as const)
   )
 
   return new Map(named)

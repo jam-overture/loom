@@ -1,5 +1,6 @@
 import type { TreeId } from "@loom/runtime"
 
+import { nameReading, type PageName } from "./page-name"
 import { screenName } from "./screen-names"
 import type { PlainLine } from "./vocabulary"
 
@@ -142,11 +143,27 @@ export const everyPageHref = (current: PageViewKey): string => viewFor(current).
  * and "Everything anyone has asked…" are the same promise at two lengths, and
  * two files is how they drift apart.
  *
- * Each is a `PlainLine` rather than a string because the id in the middle is a
- * name — it stays verbatim and it is set in monospace — so the sentence reaches
- * a component in three pieces. That is the exact shape that produced three
- * defects on 24 August, all of them a missing space where two independently held
- * strings met, and `readingOf` is what a test asserts instead of either half.
+ * Each is a `PlainLine` rather than a string because the subject in the middle
+ * is a name — it stays verbatim — so the sentence reaches a component in three
+ * pieces. That is the exact shape that produced three defects on 24 August, all
+ * of them a missing space where two independently held strings met, and
+ * `readingOf` is what a test asserts instead of either half.
+ *
+ * ### The subject is the page, not the id
+ *
+ * It was the id until today. On 6 September a page acquired a name — read from
+ * the heading the page itself leads with — and it reached the headings, the
+ * pages list, the front door's cards and both choosers, and it did not reach
+ * here. So the front door called a page **Autumn arrivals** and its history,
+ * two clicks away, opened *"Every change that has actually been made to
+ * `t_seed1`"*: the same page, named twice, and the machine identifier was the
+ * one in the sentence a reader is meant to understand.
+ *
+ * Both halves, as everywhere else the portal names a page — the words so a
+ * reader knows which page this is, the id so they can say which page this is to
+ * a log or a URL. `nameReading` is the string the pair reads as, and
+ * `<ScopedLead>` is what renders it, so the sentence a test asserts and the
+ * sentence on the screen cannot come apart.
  */
 export type ScopedView = Exclude<PageViewKey, "page">
 
@@ -172,8 +189,8 @@ const SCOPED_LEADS: Readonly<Record<ScopedView, { readonly before: string; reado
     },
   }
 
-export const scopedLead = (view: ScopedView, treeId: TreeId): PlainLine => ({
+export const scopedLead = (view: ScopedView, page: PageName): PlainLine => ({
   before: SCOPED_LEADS[view].before,
-  subject: treeId,
+  subject: nameReading(page),
   after: SCOPED_LEADS[view].after,
 })
