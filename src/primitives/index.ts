@@ -459,6 +459,16 @@ export * from "./tokens.js"
 export * from "./control.js"
 export * from "./stylesheet.js"
 export * from "./layout.js"
+/**
+ * The bands a page starts from, as subtrees rather than as primitives.
+ *
+ * Exported beside the library because a composition is knowledge *about* this
+ * library — which of these ninety types go together, in what order, with what
+ * in their slots — and it has no meaning apart from it. It registers nothing
+ * and adds no type: everything it builds is in `STARTER_PRIMITIVES` above, and
+ * `compositions.test.ts` fails if that stops being true.
+ */
+export * from "./compositions/index.js"
 export {
   loomAction,
   loomArticle,

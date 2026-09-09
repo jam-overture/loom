@@ -199,3 +199,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0113 | *No record on this branch* | — | — |
 | 0114 | *No record on this branch* | — | — |
 | [0115](0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) | Three fields of one shape are a list wearing three names | Proposed — `ARCHITECTURAL — needs review` | §4b |
+| 0116 | *No record on this branch* | — | — |
+| 0117 | *No record on this branch* | — | — |
+| 0118 | *No record on this branch* | — | — |
+| 0119 | *No record on this branch* | — | — |
+| [0120](0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md) | A starting composition is a subtree a catalogue hands to the ordinary seam | Accepted | §4b |

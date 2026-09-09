@@ -7089,3 +7089,89 @@ describe("the shelf and the listings band", () => {
     expect(audit.throwsOnDeclaredProps).toEqual([])
   })
 })
+
+/**
+ * Three declarations that only exist because a picture was taken of six tiles
+ * and nine bands, which is a thing no fixture in this file had ever done.
+ *
+ * All three are one CSS property, all three were valid CSS before, and none of
+ * them was catchable by an assertion about markup, colour or width — the
+ * defects lived in the *geometry*, which vitest has no layout engine to
+ * measure. What is assertable is that the property is still declared, and that
+ * is what these three do: a guard against the line being deleted, not a proof
+ * that the layout is right.
+ */
+describe("the geometry a screenshot found", () => {
+  it("gives a feature tile a border box, so it cannot outgrow the row it is in", () => {
+    /**
+     * `height: 100%` plus `padding` under the default `content-box` made every
+     * tile `2 × space(5)` taller than its grid track. With one row the cards
+     * hung over the band below; with two the second row was drawn through the
+     * first. `loom.section` had written the same line, with the same reason,
+     * since it shipped.
+     */
+    const ids = sequentialIdFactory()
+    const tiles = createTree(
+      buildElement(ids, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: EDITORIAL, width: "wide", fills: true },
+        children: [
+          buildElement(ids, {
+            type: "loom.feature-grid",
+            props: { columns: "three" },
+            children: [
+              buildElement(ids, {
+                type: "loom.feature",
+                props: { title: "A tile", body: "In a card.", surface: "card" },
+              }),
+            ],
+          }),
+        ],
+      }),
+      ids
+    )
+
+    const { tree } = splitStylesheet(render(tiles).markup)
+
+    expect(tree).toContain("height:100%;box-sizing:border-box")
+  })
+
+  it("centres a band and a question list that are narrower than what holds them", () => {
+    /**
+     * `loom.page` lays its children out in a column, and a flex item defaults
+     * to `stretch`, so a `readable` section inside a `wide` page capped itself
+     * at the measure and then sat flush against the left edge. Neither
+     * primitive was wrong alone, which is why ninety of them missed it.
+     */
+    const ids = sequentialIdFactory()
+    const narrow = createTree(
+      buildElement(ids, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: EDITORIAL, width: "wide", fills: true },
+        children: [
+          buildElement(ids, {
+            type: "loom.section",
+            props: { width: "readable" },
+            children: [
+              buildElement(ids, {
+                type: "loom.faq-list",
+                props: { width: "readable" },
+                children: [
+                  buildElement(ids, {
+                    type: "loom.faq",
+                    props: { question: "Is it centred?", answer: "It is now." },
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+      ids
+    )
+
+    const { tree } = splitStylesheet(render(narrow).markup)
+
+    expect([...tree.matchAll(/margin-inline:auto/g)]).toHaveLength(2)
+  })
+})

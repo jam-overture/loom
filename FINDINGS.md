@@ -13527,3 +13527,145 @@ make the summary table derived rather than typed.
 
 Recorded as owned by this lane because the document is this lane's to maintain.
 It is not being written today because it belongs in `tools/`, which is not.
+
+---
+
+## 2026-09-09 — a feature tile has been taller than its own grid row since `loom.feature` shipped
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run — recorded rather than left silent because *how* it stayed
+hidden is the reusable part
+
+`loom.feature` sets `height: "100%"` and `padding: space(5)` and never set
+`boxSizing`. The percentage resolves against the grid track and the padding is
+then added outside it under the default `content-box`, so **every card
+overflowed its own row by `2 × space(5)`** — 66px at the comfortable preset.
+With one row the tiles hung over the top of whatever band came next; with two
+rows the second row was drawn **through** the first.
+
+Measured rather than eyeballed. Row one `240 → 558` and row two `240+252+32 =
+524`, against a declared `rowGap` of 32px: a 34px overlap. After
+`boxSizing: "border-box"`, `240 → 492` and `524 → 776`.
+
+**Why ninety primitives and 253 assertions missed it: no fixture in this
+repository had ever put six tiles in a three-column grid.** Every existing
+feature-grid fixture is one row, where the same defect only pushes the cards over
+the *bottom* of the grid into the next band — visible, but as "these two bands
+are a bit close together" rather than as a broken layout. The 9 September
+`features` composition is the first two-row feature grid the library has
+rendered.
+
+`loom.section` writes the same `boxSizing: "border-box"` line with the same
+reasoning in its own comment — *"no stylesheet resets these, so padding would
+otherwise widen the band past its parent"* — which is what makes this an omission
+rather than a difference of opinion. **Worth a sweep**: any primitive that
+combines a percentage size with padding has the same latent defect, and nothing
+checks for it. That sweep is this lane's and is not in this run.
+
+---
+
+## 2026-09-09 — a band narrower than the page sat against its left edge, and neither primitive was wrong
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run
+
+`loom.page` lays its children out in a column and a flex item defaults to
+`stretch`, so a `loom.section` at `width: "readable"` inside a `wide` page capped
+itself at the measure correctly and then sat flush against the left edge with a
+third of the page empty beside it. `loom.faq-list`'s own `width` prop did the
+same. `marginInline: "auto"` on both, which is a no-op at `full`.
+
+**The interesting half is that neither primitive was wrong on its own.** The
+section's width was right, the page's width was right, and the defect existed
+only in the pair — which is a class of defect this library has no way to test
+for, because every test here renders one primitive's markup and asserts about
+it. The three fixtures that would have caught it are the three that put a narrow
+band inside a wide page, and none existed until the composition catalogue.
+
+Recorded because the shape recurs: **a primitive is checked alone and a page is
+made of pairs.** The nine-band composition page is now the closest thing this
+repository has to a fixture that exercises pairs, and it found two of these in
+one afternoon.
+
+---
+
+## 2026-09-09 — every screenshot in this repository should be taken with reduced motion, not only the ones with a reveal in them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a harness rule, and the third variant of it
+
+The first hero screenshot this run took **had no buttons in it**. They were in
+the DOM at the right size with the right colours; the entrance animation had not
+finished at the 300ms the harness waited, and the primary action was at an
+opacity that rendered as nothing against the dark palette. It was one step from
+being written up as *`loom.hero` drops its actions slot*, which would have cost
+somebody a run to disprove.
+
+The 6 September entry says a page that reveals on scroll is photographed blank
+and names `loom.reveal`. The 7 September pull request added a
+`reducedMotion: "reduce"` flag for that primitive. **Both are narrower than the
+problem.** `loom.hero` has no reveal in it and is not scroll-driven; it has an
+entrance, which 0055 puts in a static stylesheet the primitive emits, and *any*
+primitive may have one. A harness that disables motion only when it knows a
+reveal is present will keep photographing entrances mid-flight.
+
+The rule that works is unconditional: **`reducedMotion: "reduce"` on the browser
+context for every screenshot, plus a settle longer than the longest entrance.**
+This run used 1500ms and it was sufficient for all nine bands under both
+palettes. Anyone building the shared harness — #250 is the open pull request —
+should make it the default rather than a flag, because the failure mode is a
+picture that looks like a defect rather than a picture that looks wrong.
+
+---
+
+## 2026-09-09 — the granularity doc's second half was unbuilt for twenty-seven runs, and the port map recorded the cost without noticing it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run — filed because the *shape* of the miss is worth keeping
+
+`docs/primitive-granularity.md` argues decomposition and then answers its own
+strongest objection: convenience comes from starting compositions, because
+`insert` carries a whole subtree. Eighty-nine primitives were built to the first
+half. **Nothing built the second half**, for three weeks.
+
+The cost was written down the whole time and read as a completed row.
+`docs/hermes-port-map.md` files thirteen Hermes blocks under *compositions —
+nothing to build*, which is **true of the registry and false of the page**: a
+`cta` needed no primitive and was still eight operations to put anywhere, and a
+pricing band was forty-two. The ledger's own summary counted those thirteen as
+*done*.
+
+Two things generalise from it:
+
+- **A verdict of "nothing to build" deserves a second reading**, because it can
+  mean *nothing is missing* or *the missing thing is not a primitive* and the
+  ledger has one column for both.
+- **A document that records a decision does not record its consequences.** The
+  port map was right about every one of the thirteen and still hid a three-week
+  gap, because nobody asked what a block being a composition *costs* to place.
+
+The port map's header now distinguishes *nothing to register* from *nothing to
+build*.
+
+---
+
+## 2026-09-09 — step 3 of the primitives brief and the #216 finding are still opposite instructions, for the third run
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the existing entry of 7 September is not re-filed; this is the
+count and one new fact
+
+Step 3 of this routine's standing prompt is *"Branch `primitives-NN-<slug>` off
+`main`. Never stack."* The #216 finding, which you filed and merged, is
+*"continue it rather than branching again from `main`."* This run followed the
+finding and pushed onto #248, as the two before it did.
+
+**The new fact is that it is now load-bearing rather than merely tidier.** #248
+carries this lane's last six units; a branch cut from `main` today would not have
+`loom.frame`, `loom.spec`, 0106's containment or the eighty-nine-primitive
+registry, so the composition catalogue could not have been written against the
+library it composes. Following the brief would no longer produce a conflicting
+branch — it would produce a *wrong* one.
+
+Nothing has merged since 1 September. Amending step 3 remains the fix that lasts
+and a routine cannot make it.

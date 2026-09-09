@@ -4444,6 +4444,202 @@
           ]
         },
         {
+          "module": "primitives/compositions",
+          "title": "Compositions",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "STARTER_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const STARTER_COMPOSITIONS: readonly Composition[]",
+              "truncated": false,
+              "summary": "The bands, in the order a landing page uses them."
+            },
+            {
+              "name": "compositionById",
+              "kind": "function",
+              "signature": "const compositionById: (id: string) => Composition | undefined",
+              "truncated": false,
+              "summary": "The band with this id, or `undefined`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/composition",
+          "title": "Composition",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "Composition",
+              "kind": "type",
+              "signature": "type Composition = {\n    /** Lower-case words joined by hyphens, the way an anchor or a slot name is. */\n    readonly id: string;\n    /** What a person choosing it from a list reads. */\n    readonly label: string;\n    /**\n     * What lands on the page, in one clause, said before it happens.\n     *\n     * About the page and never about the verdict, for the reason the demo's\n     * presets give: whether the Gate applies a band or holds it is computed from\n     * the tree at assessment time, so a promise about the outcome would be a\n     * surface predicting a decision it does not make.\n     */\n    readonly promise: string;\n    /** The interpreter's own words about why this subtree answers that ask. */\n    readonly rationale: string;\n    /** Every primitive type the subtree uses, for the catalogue and the audit. */\n    readonly uses: readonly string[];\n    readonly build: (ids: IdFactory) => ElementNode;\n};",
+              "truncated": false,
+              "summary": "A band of a page, dropped in whole as one operation."
+            },
+            {
+              "name": "COMPOSITION_INTERPRETER",
+              "kind": "value",
+              "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
+              "truncated": false,
+              "summary": "What produced the delta, for `Provenance.interpreter`. Not a model."
+            },
+            {
+              "name": "CompositionTarget",
+              "kind": "type",
+              "signature": "type CompositionTarget = {\n    readonly parentId?: NodeId;\n    /** Clamped to the parent's current child count, never trusted as an index. */\n    readonly index?: number;\n};",
+              "truncated": false,
+              "summary": "Where the band goes."
+            },
+            {
+              "name": "CompositionPlan",
+              "kind": "type",
+              "signature": "type CompositionPlan = {\n    readonly outcome: \"planned\";\n    readonly operations: readonly TreeOperation[];\n}\n/**\n * The named parent is not in this tree, so there is nowhere to put the band.\n *\n * A distinct outcome rather than a silent append at the root: a band that\n * quietly landed somewhere other than where it was asked for is worse than\n * one that did not land, because the second is visible.\n */\n | {\n    readonly outcome: \"no-such-parent\";\n    readonly parentId: NodeId;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "planComposition",
+              "kind": "function",
+              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "truncated": false,
+              "summary": "One `insert`, computed against the tree as it stands."
+            },
+            {
+              "name": "compositionInterpreter",
+              "kind": "function",
+              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/cta-band",
+          "title": "Cta band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "ctaBand",
+              "kind": "value",
+              "signature": "const ctaBand: Composition",
+              "truncated": false,
+              "summary": "The last band: ask again, at a reading width, on the accent ground."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/faq-band",
+          "title": "Faq band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "faqBand",
+              "kind": "value",
+              "signature": "const faqBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/features-band",
+          "title": "Features band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "featuresBand",
+              "kind": "value",
+              "signature": "const featuresBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/footer-band",
+          "title": "Footer band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "footerBand",
+              "kind": "value",
+              "signature": "const footerBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/hero-band",
+          "title": "Hero band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "heroBand",
+              "kind": "value",
+              "signature": "const heroBand: Composition",
+              "truncated": false,
+              "summary": "The first screen: an eyebrow, a claim, a sentence, and two ways in."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/metrics-band",
+          "title": "Metrics band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "metricsBand",
+              "kind": "value",
+              "signature": "const metricsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/pricing-band",
+          "title": "Pricing band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "pricingBand",
+              "kind": "value",
+              "signature": "const pricingBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/proof-band",
+          "title": "Proof band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "proofBand",
+              "kind": "value",
+              "signature": "const proofBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/testimonials-band",
+          "title": "Testimonials band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "testimonialsBand",
+              "kind": "value",
+              "signature": "const testimonialsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/control",
           "title": "Control",
           "summary": "The paint and the sizing shared by the library's two controls.",

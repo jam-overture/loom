@@ -95,7 +95,21 @@ unwritten.*
 | `book-list`, `currently-reading` | `loom.book-grid` / `loom.book` | pair ✅ — the proposed `loom.book-shelf` lost to 0054, see below |
 | `property-listings` | `loom.listing-grid` / `loom.listing` (+ `loom.spec`) | pair ✅ — a **trio**, see [0115](../decisions/0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) |
 
-**Compositions — 13 blocks, nothing to build.**
+**Compositions — 13 blocks, nothing to *register*. One of them is now in the
+starting catalogue.**
+
+*"Nothing to build" was true of the registry and false of the page, and the
+distinction went unnoticed for three weeks. A `cta` needs no primitive and was
+still eight operations to put anywhere, which made the cheapest block in Hermes
+one of the more expensive ones in Loom.
+`src/primitives/compositions/` closes that for the bands a marketing page stands
+on ([0120](../decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)):
+nine of them, each one `insert` carrying its whole subtree, of which `cta` is
+the one that appears in this table. The other twelve rows are unchanged and
+still correct — what a block is **assembled from** is the same fact whether or
+not a catalogue assembles it — and any of them could join the catalogue on the
+same terms. The eight bands the catalogue adds that Hermes never had are in the
+9 September report.*
 
 | Hermes block | Assembled from |
 | --- | --- |
