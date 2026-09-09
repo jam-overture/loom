@@ -15,6 +15,7 @@ import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib
 
 import { AnswerInView } from "./_components/answer-in-view"
 import { AskPanel } from "./_components/ask-panel"
+import { BackToTheRecord } from "./_components/back-to-the-record"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
 import { RecordCard } from "./_components/record-card"
@@ -321,6 +322,27 @@ const DemoPage = async () => {
           {rendered.element}
         </div>
       </div>
+
+      {/*
+        * The way back, and only the stacked layout ever sees it.
+        *
+        * `ChangeSpotlight` carries a visitor to an applied change, which on a
+        * phone means carrying them past the whole specimen page — measured at
+        * 390×844, the record card ends up around four thousand pixels above the
+        * mark they were brought to. What is on screen at the end of the demo's
+        * best moment is then a page and a chip, with nothing saying what was
+        * removed, who allowed it, or that it can be put back.
+        *
+        * It is rendered for the one change the page is currently about, which is
+        * the same record the marks are about and the same one the rail's legend
+        * names, so the dot on the bar, the ring on the band and the badge on the
+        * card are one colour saying one thing. `spotlitChange` prefers a held
+        * change over an applied one, which is the right preference here too: a
+        * question the visitor has not answered outranks a receipt.
+        */}
+      {spotlit && (
+        <BackToTheRecord recordId={spotlit.record.recordId} tone={spotlit.tone} />
+      )}
     </div>
   )
 }
