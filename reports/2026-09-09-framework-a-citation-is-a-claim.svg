@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">A citation is a claim, and only a link can be checked</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">294 references to a decision record in <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">src/</tspan>, across 136 files. Until this morning nothing read one.</text>
+
+  <!-- ================= THE TWO FORMS ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">TWO FORMS, AND HOW MANY FACTS EACH ONE CARRIES</text>
+
+  <!-- bare -->
+  <rect x="40" y="130" width="410" height="182" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="156" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.06em">BARE — THE ORDINARY FORM, 294 SITES</text>
+  <text x="58" y="184" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#15120e">is both halves of that seam (0095).</text>
+  <line x1="58" y1="202" x2="432" y2="202" stroke="#e4ded5"/>
+  <text x="58" y="226" font-size="11.5" fill="#5c5751"><tspan font-weight="650" fill="#15120e">One fact.</tspan> A number, and nothing to hold it against</text>
+  <text x="58" y="244" font-size="11.5" fill="#5c5751">but the set of records that exist.</text>
+  <text x="58" y="274" font-size="11.5" fill="#5c5751">One fact cannot disagree with itself, so a number</text>
+  <text x="58" y="292" font-size="11.5" fill="#5c5751">that resolves to the <tspan font-style="italic">wrong</tspan> record is invisible.</text>
+
+  <!-- linked -->
+  <rect x="470" y="130" width="410" height="182" rx="10" fill="#f5f8fa" stroke="#d7e0e6"/>
+  <text x="488" y="156" font-size="12" font-weight="700" fill="#7b8a93" letter-spacing="0.06em">LINKED — THE FORM RECORDS USE</text>
+  <text x="488" y="184" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#15120e">[0095](../../decisions/0095-a-frame-…md)</text>
+  <line x1="488" y1="202" x2="862" y2="202" stroke="#d7e0e6"/>
+  <text x="488" y="226" font-size="11.5" fill="#5c5751"><tspan font-weight="650" fill="#15120e">Two copies of one fact</tspan> — the label a reader sees,</text>
+  <text x="488" y="244" font-size="11.5" fill="#5c5751">and the file a click opens.</text>
+  <text x="488" y="274" font-size="11.5" fill="#5c5751">Two copies can disagree, and disagreement is what</text>
+  <text x="488" y="292" font-size="11.5" fill="#5c5751">a check can actually see.</text>
+
+  <!-- ================= WHAT WAS WRONG ================= -->
+  <text x="40" y="356" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT THE FIRST RUN OVER <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">src/</tspan> FOUND</text>
+
+  <rect x="40" y="370" width="840" height="1" fill="#e4ded5"/>
+
+  <!-- row 1 -->
+  <text x="40" y="398" font-size="13" font-weight="650" fill="#15120e">8</text>
+  <text x="76" y="398" font-size="12.5" fill="#15120e">the framing seam cites <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">(0094)</tspan> and means 0095</text>
+  <text x="76" y="416" font-size="11.5" fill="#8a8178">0094 is a real Accepted record about a card&#8217;s prose — a reader arrives somewhere coherent and wrong</text>
+  <text x="640" y="398" font-size="11.5" font-weight="650" fill="#a8722c">not caught</text>
+  <text x="640" y="416" font-size="11" fill="#8a8178">filed by hand, by <tspan font-style="italic">Loom lessons</tspan></text>
+
+  <line x1="40" y1="432" x2="880" y2="432" stroke="#f0ebe4"/>
+
+  <!-- row 2 -->
+  <text x="40" y="460" font-size="13" font-weight="650" fill="#15120e">2</text>
+  <text x="76" y="460" font-size="12.5" fill="#15120e">both control comments link 0009 to a filename nobody wrote</text>
+  <text x="76" y="478" font-size="11.5" fill="#8a8178">right number, right subject, dead link — unnoticed since the records were renamed</text>
+  <text x="640" y="460" font-size="11.5" font-weight="650" fill="#3f7d52">caught</text>
+  <text x="640" y="478" font-size="11" fill="#8a8178">nobody had filed it</text>
+
+  <line x1="40" y1="494" x2="880" y2="494" stroke="#f0ebe4"/>
+
+  <!-- row 3 -->
+  <text x="40" y="522" font-size="13" font-weight="650" fill="#15120e">1</text>
+  <text x="76" y="522" font-size="12.5" fill="#15120e">0081 has carried no <tspan font-style="italic">Alternatives considered</tspan> since 26 August</text>
+  <text x="76" y="540" font-size="11.5" fill="#8a8178">the section whose whole value is that a future reader cannot reconstruct it</text>
+  <text x="640" y="522" font-size="11.5" font-weight="650" fill="#3f7d52">caught</text>
+  <text x="640" y="540" font-size="11" fill="#8a8178">exempt by name, not backfilled</text>
+
+  <line x1="40" y1="556" x2="880" y2="556" stroke="#e4ded5"/>
+
+  <!-- ================= THE ADMISSION ================= -->
+  <rect x="40" y="576" width="840" height="60" rx="10" fill="#fdf9f2" stroke="#eadfc9"/>
+  <text x="58" y="600" font-size="12" font-weight="650" fill="#15120e">The check would not have caught the failure that motivated it, and nothing yet stops a ninth.</text>
+  <text x="58" y="620" font-size="11.5" fill="#5c5751">Converting <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">src/</tspan> to links turned six comments red: the API reference lifts a bare parenthetical out of a published sentence and leaves a link in it. Filed for <tspan font-style="italic">Loom docs</tspan>.</text>
+</svg>

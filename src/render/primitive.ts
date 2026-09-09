@@ -109,7 +109,7 @@ export type LoomRenderContext<
    */
   readonly submit?: SubmissionOutcome
   /**
-   * Whether the URLs this primitive said it frames may be framed (0094), by the
+   * Whether the URLs this primitive said it frames may be framed (0095), by the
    * prop name that carried each one.
    *
    * Always present, empty for the primitive that declared no framable prop —

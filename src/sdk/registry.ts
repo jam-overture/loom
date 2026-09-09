@@ -60,7 +60,7 @@ export type RegisteredPrimitive = {
   readonly interactive: InteractiveWhen | undefined
   /** Whether its author says it posts (0065). `false` for most. */
   readonly submits: boolean
-  /** The props it puts in a frame (0094). Empty for all but one primitive. */
+  /** The props it puts in a frame (0095). Empty for all but one primitive. */
   readonly frames: readonly string[]
   /** The controls it takes from the runtime's vocabulary. Empty for most. */
   readonly behaviours: readonly BehaviourName[]

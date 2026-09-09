@@ -39,7 +39,7 @@ import type { PrimitiveRole } from "../role.js"
  *   wired (0065). Optional, read by nothing at render time, and the one
  *   declaration the audit checks against behaviour rather than taking on trust.
  * - `frames` — which of its props reach an `iframe`, so the render seam can
- *   hold each one against the origins the deployment permits (0094). Optional,
+ *   hold each one against the origins the deployment permits (0095). Optional,
  *   and unlike `submits` it is read at render time: nothing else in the system
  *   can tell a `src` bound for a frame from a `src` bound for an image.
  * - `role` — what part it plays, so a consumer can ask the registry a

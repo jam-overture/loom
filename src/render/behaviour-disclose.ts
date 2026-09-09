@@ -11,7 +11,7 @@ import { controlClass, controlDisplay } from "./control.js"
  * The second control in the runtime that runs on the client, and it exists for
  * the same reason as the first: a disclosure is a behaviour, a behaviour is a
  * function, and a primitive's props are JSON
- * ([0009](../../decisions/0009-a-primitive-declares-its-props-and-the-seam-enforces-them.md)).
+ * ([0009](../../decisions/0009-primitives-receive-props-in-a-bag.md)).
  * See `behaviour.ts` for why that makes it the runtime's to build rather than
  * the primitive's, and 0091 for why the *region* is nonetheless the primitive's
  * to hide.

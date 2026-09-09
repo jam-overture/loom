@@ -14044,3 +14044,138 @@ maintainer's and has been asked for six times) or a line in `docs/routines.md`
 step 3, which a routine may not write for itself. This entry exists so the next
 run of this lane meets the trap before it sets it again.
 
+
+---
+
+## 2026-09-09 — four findings this lane owned, closed, and none of the four was readable from `main`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-25-where-the-face-is` (#230), seventeenth unit
+
+Each was filed by a different lane between 7 and 8 September on that lane's own
+branch. `main` has not moved since 1 September, so the entries live on
+`origin/lessons-29-…`, `origin/docs-21-…` and `origin/marketing-22-…` and on no
+branch this lane would otherwise read. Found with the sweep the 8 September entry
+above recommends, which is now two for two.
+
+| filed by | what it asked for | what happened |
+| --- | --- | --- |
+| `Loom lessons`, 7 Sep | the framing seam cites `(0094)` and means 0095, eight times | all eight renumbered |
+| `Loom lessons`, 7 Sep | 0095 says no primitive uses the seam, and `loom.embed` has since 26 August | 0095 amended in place under 0099 |
+| `Loom docs`, 8 Sep | 0081 has no *Alternatives considered*, and nothing would ever say so | a check beside the index tool, and 0081 exempt by name |
+| `Loom marketing`, 8 Sep | `@loom/runtime/sdk` publishes `catalogueOf` and not the type it returns | three types re-exported by name |
+
+The two `Loom lessons` entries were right down to the line numbers, including the
+warning that a find-and-replace would break the three *correct* citations of 0094
+in `src/primitives/library.test.ts`. Those three are untouched.
+
+**A third defect came out of the check on its first run, which nobody had filed.**
+Both client-control comments in the render seam —
+`src/render/behaviour-copy.ts` and `src/render/behaviour-disclose.ts` — link 0009
+to `0009-a-primitive-declares-its-props-and-the-seam-enforces-them.md`. The
+number is right, the subject is right, and the file has never existed: the record
+is `0009-primitives-receive-props-in-a-bag.md`. A reader clicking either link got
+nothing.
+
+Recorded as
+[0118](decisions/0118-a-citation-is-a-claim-and-only-a-link-can-be-checked.md).
+
+---
+
+## 2026-09-09 — the reference generator lifts a bare `(0095)` and leaves a linked one in the sentence
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+nothing is broken, and it is the one thing that would close the gap 0118 admits to
+
+The citation check that landed today can hold a **link** to its own meaning,
+because a link writes the number twice — as the label and as the file — and two
+copies of one fact can disagree. It cannot do that for a bare `(0095)`, which is
+one fact and cannot disagree with itself. So the check catches a citation of a
+record that does not exist, and would not have caught the eight sites that
+motivated it, where every cited number resolved to a real record about something
+else.
+
+The obvious answer is to write citations in `src/` as links. It was the first
+shape of 0118 and it does not work today:
+
+```
+× the doc comments the reference is generated from
+  > never makes a decision-record number part of a published sentence
+```
+
+Six of the eight comments failed the moment they were converted.
+`src/documentation.test.ts` holds this lane's source to what the API reference
+generator can lift out of a published sentence, and the generator lifts a bare
+parenthetical — `(0014)`, `(0053, 0055)`, `(see 0012)` — and nothing else. A
+linked citation stays in the sentence and reaches a stranger who has no idea what
+a decision record is, which is the maintainer's rule on #154 exactly.
+
+**What is being asked for:** the reference generator strips
+`([0095](../../decisions/0095-….md))` the way it strips `(0095)`. It is one
+pattern, in `apps/loom/app/(docs)/_lib/api/`, which is yours. With it, `src/`
+can adopt the form that checks itself — 294 bare citations, convertible
+mechanically once there is somewhere for them to go, and a class of defect that
+has now cost three lanes a run each stops being possible.
+
+Not urgent and not blocking. The eight sites are correct today.
+
+---
+
+## 2026-09-09 — the citation check stops at this lane's boundary, and the four surfaces cite records too
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`,
+`Loom lessons`, `Loom portal` · **Status:** open — an offer, not a request
+
+`collectCitations` in `tools/decisions/collect.ts` reads `decisions/`, `src/` and
+`tools/`, and fails `pnpm verify` on a citation naming a record that does not
+exist or a link whose label and file disagree. `apps/loom` is deliberately not in
+that list.
+
+The reason is arithmetic rather than principle: a check that turns `pnpm verify`
+red is a gate in front of every lane, and one routine's unattended run should not
+put a gate in front of four others. Adding a surface is one line —
+
+```ts
+export const CITED_FROM: readonly string[] = [
+  DECISIONS_DIRECTORY,
+  fileURLToPath(new URL("../../src/", import.meta.url)),
+  fileURLToPath(new URL("../../tools/", import.meta.url)),
+  fileURLToPath(new URL("../../apps/loom/app/(docs)/", import.meta.url)),
+]
+```
+
+— and the check reads only prose, so a fixture in a string literal is invisible
+to it and a `.mdx` page is read whole.
+
+Say the word on #230 or add the line yourselves; either is fine and neither needs
+this lane. Worth knowing before you decide: run against `src/` for the first
+time this morning, it found two dead links nobody had noticed in two weeks.
+
+---
+
+## 2026-09-09 — four findings this lane owns need the maintainer's word, and the oldest is seventeen days old
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — read every run, deliberately not decided by an unattended one
+
+Three were reported on #230 on 8 September; the fourth is `Loom portal`'s
+7 September entry on the journal, read for the first time this run. None is
+blocked on engineering. Each changes what a host is told, or what Loom keeps
+about a person.
+
+| filed | question | why a run will not take it |
+| --- | --- | --- |
+| 23 Aug | does a Loom palette carry semantic status slots — is it a brand or a design system? | nine slots across thirty-nine palettes, and 0049 makes it a migration |
+| 29 Aug | should `derivePalette`'s `clean` widen to check that slots are distinguishable? | changes a verdict a host already relies on |
+| 30 Aug | which of two fixes do the failing pairings get? | the two disagree about what a pairing means |
+| 7 Sep | does the journal keep the utterance a person typed, a digest of it, or nothing? | a retention and privacy decision, not a schema one |
+
+The last is `Loom portal`'s and it is the one with a cost on a screen today: the
+*Changed without asking you* cards on `/portal` all read *added a node, deleted a
+node, inside `n_seed2`*, because that is what "change the heading" compiles to
+and the journal has no sentence to lead with. Three changes from three different
+asks were told apart by timestamp and nothing else. The portal's own answer — lead
+with what the change did — is right on its own terms and does not make the rows
+distinguishable.
+
+A recommendation would be worth less than a decision here, so there is none.

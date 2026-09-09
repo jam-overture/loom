@@ -5970,6 +5970,34 @@
       "types": "./dist/sdk/index.d.ts",
       "groups": [
         {
+          "module": "catalogue",
+          "title": "The catalogue a model is shown",
+          "summary": "What a deployment can build with, as data.",
+          "symbols": [
+            {
+              "name": "CataloguedProp",
+              "kind": "type",
+              "signature": "type CataloguedProp = {\n    readonly name: string;\n    readonly required: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CataloguedPrimitive",
+              "kind": "type",
+              "signature": "type CataloguedPrimitive = {\n    readonly type: PrimitiveType;\n    /** One line, written by the primitive's author, about what it is for. */\n    readonly description: string;\n    /**\n     * Declared props, name-sorted. `undefined` when the declared schema is not an\n     * object schema and its keys therefore cannot be enumerated — unknown, which\n     * is not the same claim as \"none\".\n     */\n    readonly props: readonly CataloguedProp[] | undefined;\n    readonly slots: readonly SlotName[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PrimitiveCatalogue",
+              "kind": "type",
+              "signature": "type PrimitiveCatalogue = readonly CataloguedPrimitive[];",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "role",
           "title": "Role",
           "summary": "What part a primitive plays, said by the author who knows and asked by every consumer that needs a semantic fact about a component rather than its name.",

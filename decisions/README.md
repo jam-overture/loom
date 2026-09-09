@@ -201,3 +201,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0115](0115-a-queue-can-be-told-which-of-its-holds-are-already-dead.md) | A queue can be told which of its holds are already dead, and a head it could not read is a third answer rather than an optimistic one | Accepted | §2 |
 | [0116](0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md) | A screenshot is taken by the repository, and Playwright is never a dependency | Accepted | §1 (process) |
 | [0117](0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md) | One harness, two subjects: a tree it renders and an address you serve | Accepted | §1 (process) |
+| [0118](0118-a-citation-is-a-claim-and-only-a-link-can-be-checked.md) | A citation is a claim, and only a link can be checked | Accepted | §1 (process) |

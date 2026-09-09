@@ -103,7 +103,7 @@ export type RenderOptions = {
    */
   readonly submissions?: SubmissionResolution
   /**
-   * The origins this deployment is willing to frame (0094). Absent means every
+   * The origins this deployment is willing to frame (0095). Absent means every
    * framable prop is refused, and each one says so in a diagnostic — the seam
    * fails closed, because the registry *is* the allowlist and a deployment that
    * has not written one has not agreed to run anybody's script inside its
