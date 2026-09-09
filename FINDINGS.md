@@ -13508,3 +13508,121 @@ rather than guessing. Filed rather than proposed, because a convention for
 
 Until then the page prints the record's own sentence beside every row it marks,
 so nobody has to take the reading on trust.
+
+---
+
+## 2026-09-09 — a space the test suite could see and the built page could not
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+a hazard every surface shares, found by reading the served HTML rather than by a
+failing test
+
+The arrival route's footer prints a counted number and then a word:
+
+```tsx
+<p className="mt-3">
+  {ARRIVAL_TOTALS.compiled} of those blocks are TypeScript, …
+</p>
+```
+
+Under `vitest` that renders `16 of those blocks are TypeScript`, and a test
+asserting exactly that string on `container.textContent` **passed**. The same
+component in `next build`'s output is:
+
+```html
+<p class="mt-3">16<!-- -->of those blocks are TypeScript, …
+```
+
+The space is gone, and the page reads *"16of those blocks"*. Same source file,
+two renderers, two different sentences — and the one a reader gets is the one no
+test in this repository looks at.
+
+Three things worth keeping from it:
+
+- **The unit test cannot catch this class of defect at all.** It is not that the
+  assertion was too weak; it is that the assertion was made against a different
+  transform's output. Any test written on `textContent` inherits the same blind
+  spot, on any of the four surfaces.
+- **The fix is one character of ceremony** — `{ARRIVAL_TOTALS.compiled}{" "}` on
+  its own line, which is the idiom the rest of this component already uses where
+  a link follows an expression. Two other interpolations in the *same paragraph
+  block* kept their spaces, so it is not a rule anybody can apply by eye.
+- **I found it in a screenshot**, which is the only reason it is not on the site.
+  A run that skipped the visual would have shipped it green.
+
+**Reproduced deliberately after fixing it**, because an accident is not
+evidence: the fix was reverted, `next build` run again, and the prerendered
+`introduction.html` carried `16<!-- -->of` with the RSC payload showing the text
+child as `16,"of those blocks` — no leading space, dropped before React ever saw
+it. With that same source in the tree **all eight of the component's tests still
+passed**, including the one asserting `16 of those blocks are TypeScript`. Then
+the fix was restored.
+
+I have not isolated which transform drops it, and the honest statement is the
+observation rather than a mechanism. What would close this for everybody is a
+check that reads the **built** HTML — `next build` already runs in
+`pnpm verify`, so a test asserting a handful of rendered sentences against
+`.next`'s prerendered output would cost one file and would have failed here.
+That is the application shell rather than a route group, which is why it is
+filed rather than done.
+
+---
+
+## 2026-09-09 — the plain-language rule on the arrival route is enforced by a spelling heuristic
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped
+
+The route's sentences are written for somebody who has none of the vocabulary
+yet, and a test holds them to it: no runtime name may appear in one. It cannot
+use the published surface as-is, because `ok`, `value`, `text` and `type` are
+published names and ordinary English words — a rule refusing them would be a
+rule about English.
+
+So it matches only names that are **spelled** like jargon: `PascalCase`, or a
+capital inside a lower-cased word. `TreeDelta` and `commitIntent` are caught;
+a future export called `hold`, `gate` or `journal` would sail through a sentence
+that used it, which is exactly the sentence the rule exists to prevent.
+
+The durable version needs a machine-readable notion of *which published names a
+stranger cannot be expected to know*, and nothing in the repository has one. The
+heuristic is tested, it is stated on the module, and it is one an author could
+defeat without noticing.
+
+---
+
+## 2026-09-09 — `*.vercel.app` is still off the egress allowlist, ninth consecutive documentation run
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — an instance, not a new argument
+
+Unchanged from 1, 5, 6, 7 and 8 September. The preview URL can be published and
+cannot be opened from the sandbox, so the screenshots in
+`reports/2026-09-09-docs-what-the-next-hour-looks-like*.png` are this commit
+served locally by `next start` at a true 390 and 1280 CSS pixels, in both
+themes. Only the maintainer can widen `sandbox.network.allowedDomains`.
+
+Worth noting on this run specifically: the local render is what turned up the
+missing space filed two entries above. The screenshot is not a formality on this
+lane; it is the only renderer any test looks at.
+
+---
+
+## 2026-09-09 — this lane pushed onto its open pull request for the fourth day running
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a fourth data point on the 6 September entry
+
+Today's work went onto `docs-21-the-code-on-the-page-compiles`, which is #243.
+The brief's step 3 says to branch off `main`. `main` has not moved since
+1 September; four of this lane's branches are already merged into that one, and
+a fifth cut from `main` would be a fifth open documentation pull request in a
+repository where sixteen have already had to be closed unmerged.
+
+The specific infeasibility is unchanged and got one worse today: the arrival
+route reads its code-block counts through the fence extractor, which **exists
+only on this branch**. A page cut from `main` could not have counted them.
+
+Recommendation, unchanged for four days: one sentence in the seven briefs and in
+`docs/routines.md` — *"if this lane already has an open pull request, push onto
+its branch instead."*
