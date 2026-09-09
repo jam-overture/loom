@@ -202,3 +202,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0116](0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md) | A screenshot is taken by the repository, and Playwright is never a dependency | Accepted | §1 (process) |
 | [0117](0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md) | One harness, two subjects: a tree it renders and an address you serve | Accepted | §1 (process) |
 | [0118](0118-a-citation-is-a-claim-and-only-a-link-can-be-checked.md) | A citation is a claim, and only a link can be checked | Accepted | §1 (process) |
+| [0119](0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md) | The page a reader gets is the one `pnpm verify` reads last | Accepted | §1 (process) |

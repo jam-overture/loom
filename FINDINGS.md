@@ -14179,3 +14179,100 @@ with what the change did — is right on its own terms and does not make the row
 distinguishable.
 
 A recommendation would be worth less than a decision here, so there is none.
+
+---
+
+## 2026-09-09 — two findings this lane owned, closed, both filed after this morning's run
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-25-where-the-face-is` (#230), eighteenth unit
+
+Both were filed on their own lane's branch during the day, after this lane's
+09:47 run had already read every branch. The cross-branch sweep is now three runs
+for three, and this is the first time it has picked up work filed *the same day*
+rather than a backlog.
+
+| filed by | what it asked for | what happened |
+| --- | --- | --- |
+| `Loom docs`, 9 Sep | a check that reads the **built** HTML, because no `textContent` test can see this class | `pnpm prerender:check`, last step of `pnpm verify` ([0119](decisions/0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md)) |
+| `Loom demo`, 9 Sep | `docs/rollout.md` still puts the demo at `apps/loom/app/(portal)/portal/demo` | the path corrected to `apps/loom/app/(demo)/demo` |
+
+The docs entry's own reasoning is what shaped the check, and it is worth
+restating because it is the part that generalises: *"it is not that the assertion
+was too weak; it is that the assertion was made against a different transform's
+output."* Every test in this repository written on `textContent` shares that
+blind spot, on all four surfaces, because all four now share one build. So the
+answer is not a stricter assertion anywhere — it is reading the artefact, which
+`pnpm verify` has been producing on every run and nothing had ever opened.
+
+Measured on this branch: **73 prerendered pages, 307 text junctions, 0 run
+together.** Verified end to end rather than reasoned about — a probe page
+carrying the defect shape was built with `next build`, the check failed on it
+with exit 1 and printed `16of those blocks are TypeScript`, and the probe was
+removed.
+
+**The `Loom docs` sentence itself is not fixed here**, and should not be: the
+paragraph is in `(docs)` and that lane fixed it on `docs-21` the same day. What
+lands here is the thing that would have caught it.
+
+---
+
+## 2026-09-09 — `docs/rollout.md` is stale in three more places, and each belongs to somebody else
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — one line of it fixed, the rest deliberately not
+
+`Loom demo` filed that *Where we are* puts the demo at a path it left on
+21 August. That path is corrected. The same paragraph and the section under it
+carry three more claims that have gone stale, and none of them is this lane's to
+write:
+
+| claim in the file | what is true on this branch |
+| --- | --- |
+| "on 1,173 passing tests" | 2,130 runtime tests and 2,497 application tests |
+| "Eighteen primitives are registered" | `Loom primitives` owns the count and has landed several units since |
+| Phase 1's table lists `Loom docs` and `Loom marketing` as **disabled** | both have been running daily for weeks, and both have open pull requests today |
+
+The file's preamble says the right thing about itself — *"anything below that
+reads as a status claim goes stale quickly; check it against `main`"* — and a
+routine reading it today is still told a rollout that stopped being true in
+August. It is one of the two documents every brief names as *read first, every
+run*, which is what makes the staleness cost something rather than merely being
+untidy.
+
+Not fixed because a rollout plan is the maintainer's account of where the project
+is going, and a routine rewriting the status of four other routines inside it
+would be exactly the kind of self-report nobody asked for. The path was a fact
+about this lane's own tree, which is why that one was taken.
+
+---
+
+## 2026-09-09 — the commit-identity trap, closed the way its finding asked, seven instances late
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-25-where-the-face-is` (#230), eighteenth unit
+
+`Loom docs` filed this on 4 September as the seventh recorded instance, with the
+cause worked out and two fixes ranked. Option 1 — *"a line in `docs/routines.md`
+naming the author identity a commit must carry, next to the network policy,
+where the other environment-shaped rule already lives"* — is written, under
+**Commit identity, and the preview that goes missing**.
+
+The instruction it gives is *do not set an author at all*, which is narrower than
+naming one and is what the evidence actually supports: every commit on this
+branch is `Claude <noreply@anthropic.com>`, the session default, and #230 has had
+a Ready preview on every push. `jonathanbravecredit
+<60827135+jonathanbravecredit@users.noreply.github.com>` is recorded beside it as
+the other identity known to deploy, because that is what `main` carries and what
+the 4 September run recovered with.
+
+Option 2 — a committed repository-local `user.name` / `user.email` — is **not**
+taken. It would decide the author line for every human who clones this
+repository in order to fix a problem that only unattended sessions have, and a
+`.gitconfig` that silently renames a contributor's commits is worse than a
+paragraph they can read. Say the word on #230 if you would rather have it.
+
+This is the second environment-shaped rule in that file, after the network
+policy, and both arrived the same way: a routine cannot write the governance it
+is bound by, but it can write down a fact about the environment that cost seven
+runs to learn.

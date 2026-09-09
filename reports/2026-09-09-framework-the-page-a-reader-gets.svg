@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 640" width="920" height="640" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="640" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">The page a reader gets is the one `pnpm verify` reads last</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">One source file, two renderers, two sentences — and the one a reader was served is the one nothing looked at.</text>
+
+  <!-- ================= ONE SOURCE, TWO OUTPUTS ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">ONE SOURCE</text>
+  <rect x="40" y="128" width="840" height="58" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="154" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#15120e">&lt;p className="mt-3"&gt;</text>
+  <text x="58" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#15120e">  {ARRIVAL_TOTALS.compiled} of those blocks are TypeScript, …</text>
+
+  <!-- arrows -->
+  <path d="M300 186 L300 214" stroke="#b9b0a4" stroke-width="1.5" fill="none"/>
+  <path d="M296 208 L300 216 L304 208 Z" fill="#b9b0a4"/>
+  <path d="M620 186 L620 214" stroke="#b9b0a4" stroke-width="1.5" fill="none"/>
+  <path d="M616 208 L620 216 L624 208 Z" fill="#b9b0a4"/>
+
+  <!-- vitest -->
+  <rect x="40" y="218" width="410" height="150" rx="10" fill="#f4f8f4" stroke="#cfe0cf"/>
+  <text x="58" y="244" font-size="12" font-weight="700" fill="#4a7a53" letter-spacing="0.06em">VITEST — WHAT THE TEST ASSERTED ON</text>
+  <text x="58" y="272" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#15120e">16 of those blocks are TypeScript</text>
+  <text x="58" y="302" font-size="13" fill="#4a5c4d">Eight tests on this component.</text>
+  <text x="58" y="322" font-size="13" fill="#4a5c4d">All eight passed, including the one</text>
+  <text x="58" y="342" font-size="13" fill="#4a5c4d">asserting that exact string.</text>
+
+  <!-- next build -->
+  <rect x="470" y="218" width="410" height="150" rx="10" fill="#fbf3f1" stroke="#e8cec6"/>
+  <text x="488" y="244" font-size="12" font-weight="700" fill="#a35a44" letter-spacing="0.06em">NEXT BUILD — WHAT A READER WAS SERVED</text>
+  <text x="488" y="272" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#15120e">16<tspan fill="#a35a44">&lt;!-- --&gt;</tspan>of those blocks are TypeScript</text>
+  <text x="488" y="302" font-size="13" fill="#7a4b3c">The space is gone. The page reads</text>
+  <text x="488" y="322" font-size="13" fill="#7a4b3c">“16of those blocks”. Caught in a</text>
+  <text x="488" y="342" font-size="13" fill="#7a4b3c">screenshot, by the lane that shipped it.</text>
+
+  <!-- ================= THE RULE ================= -->
+  <text x="40" y="410" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE RULE — THE TWO CHARACTERS THE SEPARATOR SITS BETWEEN</text>
+
+  <rect x="40" y="424" width="266" height="96" rx="10" fill="#f4f8f4" stroke="#cfe0cf"/>
+  <text x="58" y="452" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#15120e">$<tspan fill="#8a8178">&lt;!-- --&gt;</tspan>16</text>
+  <text x="58" y="474" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#15120e">16<tspan fill="#8a8178">&lt;!-- --&gt;</tspan>%</text>
+  <text x="58" y="502" font-size="13" fill="#4a7a53">passes — a reader sees $16 and 16%</text>
+
+  <rect x="326" y="424" width="266" height="96" rx="10" fill="#fbf3f1" stroke="#e8cec6"/>
+  <text x="344" y="452" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#15120e">16<tspan fill="#a35a44">&lt;!-- --&gt;</tspan>of</text>
+  <text x="344" y="474" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#15120e">16<tspan fill="#a35a44">&lt;!-- --&gt;</tspan>px</text>
+  <text x="344" y="502" font-size="13" fill="#a35a44">fails — both sides run together</text>
+
+  <rect x="612" y="424" width="268" height="96" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="630" y="452" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.06em">NO EXEMPTION LIST</text>
+  <text x="630" y="476" font-size="13" fill="#5c5751">A junction that is meant to join has</text>
+  <text x="630" y="496" font-size="13" fill="#5c5751">an honest fix: make it one text child,</text>
+  <text x="630" y="514" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#15120e">{`${n}px`}</text>
+
+  <!-- ================= WHAT IT READ ================= -->
+  <rect x="40" y="548" width="840" height="58" rx="10" fill="#15120e"/>
+  <text x="58" y="578" font-size="13" fill="#cfc7bb">Last step of <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#ffffff">pnpm verify</tspan>, after the build that writes the pages:</text>
+  <text x="58" y="596" font-size="12" fill="#8a8178">A pass prints what it read, because a clean page and an unopened one are the same green tick.</text>
+  <text x="862" y="578" font-size="15" font-weight="650" fill="#ffffff" text-anchor="end">73 pages · 307 junctions · 0 run together</text>
+</svg>

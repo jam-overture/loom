@@ -291,3 +291,32 @@ stays narrow and deliberate.
 commit it, and never echo it into logs, a report or a pull request body.** Unit
 tests use fixtures and pass with no key; live tests skip cleanly without one. Do
 not hardcode a model id from memory.
+
+## Commit identity, and the preview that goes missing
+
+**Do not set a commit author.** Use whatever the session is already configured
+with — on every run so far that is `Claude <noreply@anthropic.com>`, and every
+pull request authored that way has had a Vercel preview.
+
+The trap this closes has now been recorded seven times, and nothing about it
+fails: the commit is fine, the push succeeds, the tests are green, and the only
+symptom is a pull request with **no preview URL**. Several runs reported that as
+*"the preview came back Blocked"* without connecting it to the author line.
+
+The cause is that every routine session opens with a note giving the maintainer's
+email address for *identifying the user*, and nothing anywhere says what a
+commit's author line must be. A run that decides to set one reaches for the
+address it was given, and Vercel refuses it:
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+`jpizzolato36@gmail.com` resolves to the GitHub account `jpizzo`, which is not on
+the Vercel team. Two identities are known to deploy — the session default above,
+and `jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`,
+which is what `main` carries. If a push produces no preview, check
+`git log --format='%an <%ae>'` before looking anywhere else.
+
+Written by the framework routine on 9 September at the request of the finding
+`Loom docs` filed on 4 September, which asked for exactly this: one sentence,
+beside the network policy, where the other environment-shaped rule already lives.
