@@ -191,6 +191,45 @@ describe("what every screen owes a reader", () => {
       expect(heading).toBeLessThan(disclosure)
     }
   )
+
+  /**
+   * **The record is never as loud as the sentence it sits under.**
+   *
+   * The other half of the same principle, and the half a reading-order check
+   * cannot see: a disclosure can be in the right place on the page and still
+   * be rendered darker than the plain sentence above it, which is the
+   * hierarchy inverted for anybody who reads a screen before they read it word
+   * by word. `/portal/sign-ins` shipped exactly that, and the screen fixed it
+   * by muting its own contents by hand — a fix that works on one screen and
+   * teaches the next twenty nothing.
+   *
+   * `TechnicalDetail` sets the altitude now, so what is left to guard is a
+   * screen raising it again. The bare `text-ink` utility is the body ink — the
+   * altitude of a plain sentence — and inside a disclosure it is always the
+   * record out-shouting the thing it is a footnote to. Two `<pre>` blocks on
+   * `/portal/pieces` had it when this rule was written.
+   *
+   * Bounded on the right so `text-ink-muted`, `text-ink-secondary` and
+   * `text-ink-placeholder` are untouched: those are the record's own steps and
+   * every one of them is quieter than a sentence.
+   */
+  const disclosures = sourcesUnder(GROUP).flatMap((entry) =>
+    [...entry.source.matchAll(/<TechnicalDetail[\s\S]*?<\/TechnicalDetail>/gu)].map(
+      (match, index) =>
+        [`${entry.file.slice(GROUP.length + 1)} #${index + 1}`, match[0]] as const
+    )
+  )
+
+  it("finds the disclosures this lane writes, so an empty sweep cannot pass as clean", () => {
+    expect(disclosures.length).toBeGreaterThan(20)
+  })
+
+  it.each(disclosures.map(([label, block]) => [label, block]))(
+    "%s keeps the record quieter than a plain sentence",
+    (_label, block) => {
+      expect(block).not.toMatch(/text-ink(?![a-z-])/u)
+    }
+  )
 })
 
 /**

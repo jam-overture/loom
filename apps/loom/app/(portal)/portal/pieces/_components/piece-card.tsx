@@ -85,7 +85,14 @@ export const PieceCard = ({ primitive }: { readonly primitive: CataloguedPrimiti
             </>
           )}
         </p>
-        <pre className="text-ink border-edge-subtle bg-surface-hover overflow-x-auto rounded-sm border p-2 font-mono whitespace-pre-wrap">
+        {/*
+         * The payload keeps the record's own emphasis step and not the body
+         * ink, which is the altitude of a plain sentence: the box, its border
+         * and its background are what mark this out as the thing the AI is
+         * handed, and none of them costs volume the disclosure is not entitled
+         * to.
+         */}
+        <pre className="text-ink-secondary border-edge-subtle bg-surface-hover overflow-x-auto rounded-sm border p-2 font-mono whitespace-pre-wrap">
           {catalogueLineFor(primitive)}
         </pre>
         {primitive.props === undefined && (
