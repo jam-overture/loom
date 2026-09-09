@@ -256,6 +256,12 @@ branch's and `main`'s — so the only difference in the frame is the change. Not
 preview, which this environment cannot open (`vercel.app` is not on the sandbox's
 egress allowlist; the standing 19 August finding).
 
+**Preview:**
+`https://loom-git-demo-08-the-way-bac-87945a-jpizzolato36-6341s-projects.vercel.app/demo`
+
+Read off the deployment comment on the pull request rather than opened, for the
+reason above. One push, one preview.
+
 **To see it yourself:** open `/demo` on a phone, or at 390×844 in a desktop
 browser's device mode. Press the green button, press **Apply this change**, and
 look at the bottom of the screen when the page stops moving. Then press
