@@ -10486,8 +10486,10 @@ scales past fifty pages.
 
 ## 2026-09-01 — a code block is not searchable, and that is a decision rather than an oversight
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
-stated limit of what shipped, recorded so it is revisited on purpose
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-21-the-code-on-the-page-compiles` on 10 September — fenced code is
+indexed. The half about a name between backticks stands and is unchanged:
+inline code is still elided from the prose, for the reason below.
 
 Neither fenced code nor a name between backticks is in the prose index, and the
 second rule is the one that costs something.
@@ -10514,6 +10516,17 @@ band already serves the reader who is on the reference page.
 The empty state now names this limit out loud rather than leaving a reader to
 discover it: *"Every page, every section, the words in them and every published
 name are searched. Code blocks are not."*
+
+**How it was closed, and where it went differently from the proposal above.**
+The fix proposed here was a fourth entry kind, `mention`. What shipped is a
+fourth *field* instead — the code under a heading travels with the heading entry
+that already points at it, exactly as the prose does — so the results list still
+holds three kinds of thing and a reader sees no new sort of row. The band
+problem this entry correctly predicted is real and had to be solved head-on:
+**an entry whose whole claim is a snippet drops out of the prose band** and
+ranks below the names, which keeps *sends an export name to that export* green.
+Typing `definePrimitive` really did return the heading *Defining one* first
+before that rule existed.
 
 ---
 
@@ -13123,8 +13136,10 @@ program or a fragment — is exactly what shipped.
 
 ## 2026-09-05 — a fence's declaring word is invisible to MDX, and that is why the scan is a scan
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
-constraint worth knowing, not a defect
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** the meta
+constraint stands and is not a defect. The *three scanners* half is **closed by
+`docs-21-the-code-on-the-page-compiles` on 10 September** — there is one, in
+`_lib/fences/spans.ts`, and it turned out there had been four.
 
 A fence can carry *meta* after its language — ` ```ts object-body ` — and this
 lane now uses one word of it to say what kind of block the reader is looking at.
@@ -13141,6 +13156,12 @@ are the other two, both skipping fences rather than reading them). Three hand-
 written fence scanners is one more than is comfortable. They want to be one
 reader that both halves consume, and that is a unit of its own rather than
 something to do while adding the first.
+
+**There were four, not three**: `api/mentions.ts` has the same regex and the
+same flipping boolean, wanting what is *inside* a fence rather than what is
+outside it. It became one reader on 10 September, when indexing the code gave
+the shared thing a second real consumer that reads fences rather than skipping
+them — see the entry for that date on the bug three of the four shared.
 
 The rule that keeps the word honest is worth repeating outside the code: `sketch`
 is the only way a block escapes compilation, and a sketch must contain a visible
@@ -13624,5 +13645,136 @@ route reads its code-block counts through the fence extractor, which **exists
 only on this branch**. A page cut from `main` could not have counted them.
 
 Recommendation, unchanged for four days: one sentence in the seven briefs and in
+`docs/routines.md` — *"if this lane already has an open pull request, push onto
+its branch instead."*
+
+---
+
+## 2026-09-10 — four scanners disagreed about where a fence is, and three of them were wrong the same way
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-21-the-code-on-the-page-compiles` — one reader, in `_lib/fences/spans.ts`,
+and the bug is gone with the copies
+
+Four separate things on this site needed to know whether a line is inside a
+fenced block, and all four worked it out for themselves with the same six
+characters:
+
+| Where | Wanted | How it decided |
+| --- | --- | --- |
+| `search/headings.ts` | headings outside fences | `/^\s*(?:```\|~~~)/`, flip a boolean |
+| `search/prose.ts` | prose outside fences | the same regex, the same boolean |
+| `api/mentions.ts` | names inside fences *and* in backticks | the same regex, the same boolean |
+| `fences/extract.ts` | the code inside fences, strictly | its own scan, ticks captured |
+
+**Three of the four had the same latent bug.** A boolean that flips on any run
+of three backticks cannot read a block that *contains* a fence, which is how a
+page shows what markdown looks like: ` ````md ` opening, ` ```ts ` inside. The
+inner fence would have been read as the outer one's closing tick, the rest of
+the page would have been read as code, and **nothing would have been red** — the
+page would simply have stopped being searchable half way down and stopped
+offering its headings.
+
+No `page.mdx` has such a block today, so this was latent rather than live. It is
+not hypothetical: `_lib/fences/model.ts` documents the fence vocabulary with
+exactly that shape, in a doc comment, and the day somebody moves that
+explanation onto a page is the day the search index quietly loses the second
+half of it.
+
+**What it is now.** `spans.ts` answers one question — which lines are fenced and
+what is between them — by markdown's own rule rather than by a prefix: a fence
+opens on three or more backticks or tildes, and closes on the same character, at
+least as long, with nothing after it. `outsideFences` blanks the fenced lines
+and keeps the line count, which is what the two search readers and the mention
+reader consume; `fenceSpansIn` hands over the blocks, which is what the
+extractor and the new code index consume. **What a fence claims to be** stays in
+`extract.ts` and stays strict — that is the half that must stop a build, and a
+scanner that threw on a fence with no language would make the search rules
+untestable against markdown written to exercise them.
+
+The general lesson is the one the 5 September entry was already circling.
+Building the shared reader while adding its first consumer gives an abstraction
+with one real user; waiting until there is a **second consumer that reads
+fences rather than skipping them** — the code index — is what made the seam
+obvious, and the seam is not the one that would have been guessed. It is not
+*read a fence*; it is *where is a fence* versus *what does it claim to be*.
+
+---
+
+## 2026-09-10 — a search box that ranks prose above names cannot rank code the same way
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated rule of the ranking, recorded because it is the one thing about the code
+band that could regress with nothing else noticing
+
+This site ranks its own pages above the runtime's names deliberately: a reader
+typing `gate` does not yet know what a Gate is, so no field score may lift an
+export above a page (`match.ts`, `PROSE_BAND`).
+
+Indexing the prose could take that band for free, because **prose has no names
+in it** — every span between backticks is elided. Code is nothing but names, so
+the band it inherited was wrong the moment the code arrived: typing
+`definePrimitive` returned a heading called *Defining one* ahead of the export
+spelled letter-for-letter. That is precisely the failure the band exists to
+prevent, upside down.
+
+The rule that fixes it: **an entry whose whole claim is a snippet drops out of
+the band** and takes its place below the names, keeping the same order among
+themselves. An entry that matched on anything else — a title, a section, a
+sentence — is in the band as it always was, and a second word found in its code
+costs it nothing. In a sentence a person can repeat: *a page that says it in
+words comes before the name; a page that only shows it in a block comes after.*
+
+**Why this is filed rather than only commented.** The regression is invisible
+from every angle except the screen. Nothing about `definePrimitive` ranking a
+heading first is a type error, a broken link or a payload that grew; the only
+thing that catches it is the assertion *sends an export name to that export*,
+which existed for the prose band and is now load-bearing for two. A future band
+— a fifth field, a `mention` kind, anything — must ask this question before it
+adds itself to `KIND_BONUS`.
+
+One stated limit inside the rule: a name behind a dot counts in code. `append`
+matches `store.append` in a block, where `api/mentions.ts` deliberately excludes
+it. The two are making different claims — mentions says *this page explains this
+export*, search says only *this word is on this page* — and for a search box the
+looser rule is the useful one.
+
+---
+
+## 2026-09-10 — `*.vercel.app` is still off the egress allowlist, tenth consecutive documentation run
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — only the maintainer can widen egress
+
+Unchanged from the 1, 7 and 9 September entries and from the six before them.
+The brief requires the deployed preview URL in the pull request, and the sandbox
+cannot open it: `*.vercel.app` is on neither `sandbox.network.allowedDomains`
+nor `permissions.allow`. So the URL is published unverified and every screenshot
+in every documentation report is the same commit served locally by `next start`.
+
+This run's screenshots are the search dialog, which is the one thing on this
+site that cannot be photographed from a static render at all — it needs a real
+browser, three `fetch` calls and a keystroke. `playwright-core` against
+`/opt/pw-browsers/chromium-1194` did it locally in about four seconds. Recorded
+because it is now clear what the gap costs: not *a screenshot of a preview*,
+but any check at all that the three JSON files the deployed site serves are the
+three files the tests built.
+
+---
+
+## 2026-09-10 — this lane pushed onto its open pull request for the fifth day running
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a fifth data point on the 6 September entry
+
+Today's work went onto `docs-21-the-code-on-the-page-compiles`, which is #243.
+The brief's step 3 says to branch off `main`. `main` has not moved since
+1 September, four of this lane's branches are already merged into #243, and this
+unit reads fences through `_lib/fences/spans.ts` — which exists only here, and
+which exists at all because the fence extractor on this branch was the fourth
+consumer that made the shared reader worth building. A branch cut from `main`
+would have had one consumer and no argument for the seam.
+
+Recommendation, unchanged for five days: one sentence in the seven briefs and in
 `docs/routines.md` — *"if this lane already has an open pull request, push onto
 its branch instead."*

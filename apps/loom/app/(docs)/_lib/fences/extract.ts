@@ -7,17 +7,20 @@ import {
   type FenceKind,
   type FenceLanguage,
 } from "./model"
+import { fenceSpansIn } from "./spans"
 import { writtenDocsSections } from "../nav"
 import { readPageSource } from "../search/headings"
 
 /**
  * Reading the code out of a page.
  *
- * The site already scans for fences twice — the search index skips them when it
- * reads headings, and again when it reads prose. This is the third scan and the
- * only one that wants what is *inside*, so it is the one that has to be strict:
- * a fence whose language nobody has decided about, or whose declaring word is
- * misspelled, stops the build rather than being quietly treated as a program.
+ * **Where** a fence is, is `spans.ts`, and it is now the only thing on this
+ * site that decides that — four scanners each decided it separately until this
+ * module's own scan became the fourth, which is the point at which a shared
+ * reader has two real users rather than one. **What** a fence claims to be is
+ * this module's, and it is the half that has to be strict: a fence whose
+ * language nobody has decided about, or whose declaring word is misspelled,
+ * stops the build rather than being quietly treated as a program.
  *
  * A misspelling is the failure worth being loud about. `sketchy` silently
  * meaning `program` would put an abridged snippet through the compiler and
@@ -26,21 +29,18 @@ import { readPageSource } from "../search/headings"
  * anywhere would mean the check quietly stopped looking.
  */
 
-const OPENING = /^\s*(?<ticks>```|~~~)(?<info>.*)$/
-
 const isLanguage = (word: string): word is FenceLanguage =>
   (FENCE_LANGUAGES as readonly string[]).includes(word)
 
 const isKindWord = (word: string): word is Exclude<FenceKind, "program"> =>
   word !== "program" && (FENCE_KINDS as readonly string[]).includes(word)
 
-type Opening = {
+type Declaration = {
   readonly language: FenceLanguage
   readonly kind: FenceKind
-  readonly ticks: string
 }
 
-const parseInfo = (info: string, ticks: string, where: string): Opening => {
+const parseInfo = (info: string, where: string): Declaration => {
   const words = info.trim().split(/\s+/).filter(Boolean)
   const [language, ...rest] = words
 
@@ -61,7 +61,7 @@ const parseInfo = (info: string, ticks: string, where: string): Opening => {
     throw new Error(`loom: ${where} — a fence declares one word after its language, not ${rest.length}.`)
   }
 
-  if (word === undefined) return { language, kind: "program", ticks }
+  if (word === undefined) return { language, kind: "program" }
 
   if (!isKindWord(word)) {
     throw new Error(
@@ -70,7 +70,7 @@ const parseInfo = (info: string, ticks: string, where: string): Opening => {
     )
   }
 
-  return { language, kind: word, ticks }
+  return { language, kind: word }
 }
 
 /**
@@ -93,45 +93,27 @@ const refuseALeadingAlternative = (fences: readonly Fence[], where: string): voi
 }
 
 /**
- * Every fenced block on one page, in reading order.
+ * Every fenced block on one page, in reading order, with what each one claims.
  *
- * Written as a scan rather than by compiling the markdown, because the meta word
- * is the one thing MDX throws away: it reaches neither the rendered page nor any
- * plugin this site installs. The page source is the only place it survives, so
- * the page source is what gets read.
+ * The blocks come from `spans.ts`, which is a scan rather than a markdown parse
+ * for the reason the meta word gives: MDX throws it away, so it reaches neither
+ * the rendered page nor any plugin this site installs, and the page source is
+ * the only place it survives. What is added here is the declaration and the two
+ * refusals — a fence that never closes, and a page whose first compiled block
+ * calls itself an alternative to something.
  */
 export const fencesIn = (source: string, where: string): readonly Fence[] => {
-  const lines = source.split("\n")
-  const fences: Fence[] = []
-
-  let open: (Opening & { readonly line: number }) | undefined
-  let body: string[] = []
-
-  lines.forEach((line, index) => {
-    const match = OPENING.exec(line)
-
-    if (open === undefined) {
-      if (match?.groups === undefined) return
-
-      const { ticks, info } = match.groups
-
-      open = { ...parseInfo(info ?? "", ticks ?? "```", `${where}:${index + 1}`), line: index + 1 }
-      body = []
-      return
+  const fences = fenceSpansIn(source).map((span): Fence => {
+    if (span.closesAt === undefined) {
+      throw new Error(`loom: ${where}:${span.opensAt} — a fence that is never closed.`)
     }
 
-    if (match?.groups !== undefined && match.groups["info"]?.trim() === "" && match.groups["ticks"] === open.ticks) {
-      fences.push({ language: open.language, kind: open.kind, code: body.join("\n"), line: open.line })
-      open = undefined
-      return
+    return {
+      ...parseInfo(span.info, `${where}:${span.opensAt}`),
+      code: span.code,
+      line: span.opensAt,
     }
-
-    body.push(line)
   })
-
-  if (open !== undefined) {
-    throw new Error(`loom: ${where}:${open.line} — a fence that is never closed.`)
-  }
 
   refuseALeadingAlternative(fences, where)
 

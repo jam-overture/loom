@@ -5,9 +5,9 @@ import { describe, expect, it } from "vitest"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsOrder, writtenDocsSections } from "../nav"
 
-import { buildSearchIndex, searchIndexWithoutProse, searchProse } from "./build"
+import { buildSearchIndex, searchCode, searchIndexWithoutText, searchProse } from "./build"
 import { readPageHeadings } from "./headings"
-import { parseSearchIndex, withProse } from "./model"
+import { parseSearchIndex, withCode, withProse } from "./model"
 
 /**
  * The index, held against the site it claims to describe.
@@ -158,24 +158,42 @@ describe("what the index contains", () => {
    * the number.
    *
    * **Four pages arrived at once and hit it**, at 46.7 KB against the 48. So the
-   * index was split rather than the number raised, and what is capped now is the
-   * two halves separately — which is the only way the caps stay meaningful,
-   * because the halves grow at different speeds and for different reasons.
+   * index was split rather than the number raised, and what is capped now is
+   * each file separately — which is the only way the caps stay meaningful,
+   * because the files grow at different speeds and for different reasons.
+   *
+   * **Indexing the code was the third file**, and it is the cheap one: 13.4 KB
+   * raw and **3.9 KB compressed** over 39 entries, about a ninth of what the
+   * words cost. The reason is worth recording, because it is the opposite of
+   * what a glance at the site suggests — the blocks are the same handful of
+   * imports and calls written out again and again, and repetition is what
+   * compresses. The expensive half of a search index is prose, which is why the
+   * prose is the half that had to be split off and why the code could simply be
+   * added.
    */
   it("stays small enough to send", () => {
-    const withoutProse = JSON.stringify(searchIndexWithoutProse())
+    const entries = JSON.stringify(searchIndexWithoutText())
     const prose = JSON.stringify(searchProse())
+    const code = JSON.stringify(searchCode())
 
     // What a reader waits for: the table of contents and the runtime's surface.
     // It grows when a page is added or an export is published, which is slowly.
-    expect(gzipSync(withoutProse).length).toBeLessThan(20_000)
-    expect(withoutProse.length).toBeLessThan(200_000)
+    expect(gzipSync(entries).length).toBeLessThan(20_000)
+    expect(entries.length).toBeLessThan(200_000)
 
     // What nobody waits for. It grows every time anybody writes a paragraph, so
     // it has the room — and the day it runs out, it shards by section rather
     // than taking the number up again.
     expect(gzipSync(prose).length).toBeLessThan(60_000)
     expect(prose.length).toBeLessThan(200_000)
+
+    // The blocks. Capped an order of magnitude below the words rather than
+    // beside them, because a code file that ever approached the prose file
+    // would mean something changed about how this site is written — a page
+    // pasting a generated file in, most likely — and that is worth a red test
+    // rather than a quiet doubling of what a reader downloads.
+    expect(gzipSync(code).length).toBeLessThan(12_000)
+    expect(code.length).toBeLessThan(60_000)
   })
 
   /**
@@ -187,14 +205,39 @@ describe("what the index contains", () => {
    * check that the seam holds: put the halves back together and you have what
    * `buildSearchIndex` said in the first place.
    */
-  it("comes apart and goes back together without losing a word", () => {
-    expect(withProse(searchIndexWithoutProse(), searchProse())).toEqual(index)
+  it("comes apart and goes back together without losing a word or a line", () => {
+    expect(withCode(withProse(searchIndexWithoutText(), searchProse()), searchCode())).toEqual(index)
   })
 
-  it("keys the prose by an href that names exactly one entry", () => {
+  /**
+   * And in either order, because they arrive in whichever order the network
+   * hands them over.
+   */
+  it("does not mind which of the two lands first", () => {
+    expect(withProse(withCode(searchIndexWithoutText(), searchCode()), searchProse())).toEqual(index)
+  })
+
+  it("keys the words and the code by an href that names exactly one entry", () => {
     const hrefs = searchProse().bodies.map(([href]) => href)
+    const blocks = searchCode().blocks.map(([href]) => href)
 
     expect(new Set(hrefs).size).toBe(hrefs.length)
+    expect(new Set(blocks).size).toBe(blocks.length)
+  })
+
+  /**
+   * The claim the index is for, against the site rather than a fixture: the
+   * page that shows a stranger how to install the runtime carries the command
+   * in its code, and the reference pages carry none at all.
+   */
+  it("carries the code of a page that has blocks, and none for a name", () => {
+    const withCodeOnIt = index.entries.filter((entry) => entry.code !== "")
+
+    expect(withCodeOnIt.length).toBeGreaterThan(20)
+
+    for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
+      expect(entry.code, entry.href).toBe("")
+    }
   })
 })
 
