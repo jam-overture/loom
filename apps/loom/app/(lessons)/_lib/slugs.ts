@@ -15,6 +15,26 @@
  * handed is.
  */
 
+/** What a review set is called, where the reader's record and the URL are concerned. */
+export const setSlug = (letter: string): string => `set-${letter.toLowerCase()}`
+
+/**
+ * The order the sets are worked in, which stops being alphabetical at `AA`.
+ *
+ * Twenty-six sets used the whole alphabet, and the twenty-seventh is `AA` —
+ * two letters rather than a number, so that no existing set is renamed and no
+ * reader's history is orphaned by a slug that moved.
+ *
+ * `"AA".localeCompare("B")` is negative: a dictionary puts `AA` first and a
+ * course does not. For as long as the letters are minted by counting, the
+ * course's order is length first and then alphabet, which is what this is. It
+ * lives beside the slug because it is the same fact about the same string, and
+ * because the queue that sorts by it runs in the reader's browser and must not
+ * import the parser to find out.
+ */
+export const compareSetLetters = (a: string, b: string): number =>
+  a.length === b.length ? a.localeCompare(b) : a.length - b.length
+
 /**
  * The lesson sections whose questions are answered, graded and therefore
  * missable.

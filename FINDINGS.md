@@ -13087,3 +13087,102 @@ Found while writing lesson 21, which teaches the palette-derivation constraint
 paragraph. The lesson does not mention `deriveBrandPalette`.
 
 Filed rather than fixed because `src/theme/` is not this lane's.
+
+---
+
+## 2026-09-10 — `loom.nav` declares itself a target, and the Gate now refuses every menu item
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` (§4b,
+`src/primitives/loom.nav.ts`; the rule that forced it is `src/sdk/registry.ts`)
+· **Status:** open
+
+`loom.nav` declares `interactive: "always"`. It renders a `<nav>`. Under a policy
+built the way the SDK tells a host to build one —
+`interactiveTypesFor(registry)` — **every `loom.link` inside every navigation bar
+is a nested target, and every change that puts one there is refused at
+`critical`.**
+
+Run against `main`:
+
+```
+  loom.nav declares:  "always"
+  loom.link declares: "always"
+  in the tree:        loom.link n_2 inside loom.nav n_3
+  insert a menu item           nested=1 stakes=critical gate=rejected
+      nested-target (critical): puts a target where the reader cannot reach it: loom.link n_x2 inside loom.nav n_3
+  what it renders:    <nav class="loom-nav" …
+  render diagnostics: []
+```
+
+The library's own chrome fixture is the shape that matters. Four menu links, a
+logo in the `brand` slot, an action in `actions`:
+
+```
+  pairs in the library's own chrome: 6
+  propose that chrome          nested=6 stakes=critical gate=rejected
+      nested-target (critical): puts 6 targets where the reader cannot reach them: loom.link n_2 inside loom.nav n_14; loom.link n_4 inside loom.nav n_14; loom.link n_6 inside loom.nav n_14; loom.link n_8 inside loom.nav n_14; loom.logo n_9 inside loom.nav n_14; loom.action n_12 inside loom.nav n_14
+```
+
+A deployment running the starter library, with the starter library's own derived
+vocabulary, **cannot build the starter library's own navigation bar through the
+Gate**, and cannot add a link to one it already has. `nested-target` is
+`critical`, which under the default refusal floor is a refusal with no
+confirmation path (0064), so this is not a warning a host can wave through — it
+is the strongest thing the runtime does, spent on the most ordinary edit anybody
+makes to a website.
+
+**Neither record is wrong, and that is the point.**
+[0068](decisions/0068-a-primitive-is-a-target-when-the-reader-aims-at-the-whole-of-it.md)
+defines `interactive` as *the thing a reader aims at covers the whole node*, with
+the test: **is there anywhere inside this node where a reader could put a second
+control and have it work?** A nav is a menu; the answer is yes; by 0068 it is not
+a target, and 0068 says so directly — it lists `loom.nav` among the containers
+that arrange targets and are not one.
+
+[0086](decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)
+then made a nav take the `disclose` behaviour, and `src/sdk/registry.ts:199`
+refuses a primitive that takes a control-rendering behaviour without declaring
+`interactive` (`undeclared-interactive-behaviour`). That rule is defending
+something real — a primitive that *places* a control must not be dropped inside
+an anchor. But it needs a different claim from the one `interactive` makes.
+`library.test.ts` records the change of mind ("`loom.nav` was in the list above
+until it took a disclosure control") and reads the field as *a container that
+places a `<button>` is a target*, which is the 0086 meaning rather than the 0068
+one.
+
+So one field is carrying two claims:
+
+| | claim | protects against |
+| --- | --- | --- |
+| 0068 | the whole of this node is the target | a control placed **inside** it being unreachable |
+| 0086 | this node places a control | this node being placed **inside** an anchor |
+
+They are converses, and a primitive can satisfy either without the other.
+`loom.nav` satisfies the second and not the first, and everything downstream —
+`nestedTargetsIn`, the stake factor, the refusal — reads it as the first.
+
+**Not fixed here.** `src/primitives/` and `src/sdk/` are not this lane's, and the
+fix is a decision rather than an edit: dropping the declaration re-opens what
+0086 closed, and keeping it leaves the false positive. The shape that resolves
+both is a second declaration — *places a control* beside *is a target* — with the
+registry rule pointing at the new one. That is a record for §4b to write, and
+`loom.code` (`interactive: "always"`, `behaviours: ["copy"]`) should be re-read
+under whichever answer wins; it is the only other primitive taking a
+control-rendering behaviour, and its declaration is true today only because
+nothing interactive is ever nested inside a code block.
+
+Worth knowing which way it is currently wrong: a **missing** declaration loses a
+real hazard silently, and a **false** one refuses correct pages loudly. This is
+the loud kind, which is why it is legible at all — but it has been on `main`
+since 1 September (803e346, #211) and nothing has failed, because nothing
+composes the library's own chrome fixture against the library's own derived
+vocabulary. The check that
+would have caught it is one assertion long, and it belongs beside the
+declarations test in `library.test.ts`: *no fixture in this library contains a
+nested target under this library's own vocabulary.*
+
+Found while writing lesson 22, which teaches this seam. The lesson's exercises F
+and G are the two transcripts above; they run against `src/` on every build of
+the lessons surface, so the day this is fixed, the lesson will say so and its
+prose will need the corresponding edit — that is this lane's to do, and it will
+be a welcome one.

@@ -225,6 +225,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [19](19-destinations.md) | Destinations: the address the tree never holds | Why validating a form action is the wrong shape of answer; why a binding may carry AI-authored params and a submission may not; and why moving a form's destination is held whoever asked. |
 | [20](20-origins.md) | Origins: whose document runs inside your page | Why the URL stays in the tree and the origins do not; why this seam has no plan and no resolve step; and why a sandbox is reported for a frame that worked. |
 | [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
+| [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -241,8 +242,15 @@ of the three seams that produced them — so the pattern has now survived being
 broken once and confirmed once, which is more than four confirmations would have
 told you. What lesson 21 adds is a second question the first three never raised:
 where do you check a property that belongs to *no single party* — not the tree,
-not the registry, not the primitive? How far Part V runs is still open, and the
-place to look next is that question rather than the pattern.
+not the registry, not the primitive?
+
+Lesson 22 is that question followed rather than the pattern followed, and it is
+where the pattern stops being the interesting thing: there is no document in a
+registry and nothing to resolve, because the property belongs to **two nodes**
+and neither can state it. What the registry holds is a predicate; what it is
+applied to is a pair; and the declaration that makes the pair visible is a claim
+that can be false — which, as the lesson's sixth exercise finds by running two
+decision records against each other, it currently is.
 
 ## Pacing
 

@@ -1,4 +1,5 @@
 import type { ReviewSet } from "./schedule"
+import { compareSetLetters } from "./slugs"
 import { lessonWorkedThrough, setProgress, type Progress } from "./progress"
 
 /**
@@ -143,7 +144,7 @@ export const queueFor = (
       if (a.status === "due") return b.overdueBy - a.overdueBy
       if (a.status === "upcoming") return (a.inDays ?? 0) - (b.inDays ?? 0)
 
-      return a.set.letter.localeCompare(b.set.letter)
+      return compareSetLetters(a.set.letter, b.set.letter)
     })
 
 export const dueNow = (entries: readonly QueueEntry[]): readonly QueueEntry[] =>
