@@ -141,3 +141,49 @@ describe("the demo's stylesheet", () => {
     expect(css).not.toMatch(/[^-]:focus\s*\{/)
   })
 })
+
+/**
+ * The preview of the part a held change is about — three rules, all of them
+ * decisions nothing else in this application can check.
+ */
+describe("the part in question", () => {
+  const block = (selector: string): string =>
+    new RegExp(`\\${selector}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? ""
+
+  /**
+   * A wide screen has the band ringed in amber on the stage forty pixels from
+   * the card, so a second rendering of it inside the card would be the surface
+   * talking for its own sake. In CSS rather than a `matchMedia` read at mount,
+   * for the reason the record bar gives: a media query is right between a
+   * resize and a re-render and a mount-time read is not.
+   */
+  it("removes the preview on the layout that can already see the band", () => {
+    expect(css).toMatch(/@media \(min-width: 1024px\) \{\s*\.demo-part \{\s*display: none;/)
+  })
+
+  /**
+   * The layout has to be in the stylesheet rather than in utilities on the
+   * element. Tailwind orders its layers `theme, base, components, utilities`,
+   * so a `flex` utility would outrank the `display: none` above and the preview
+   * would render on every wide screen with nothing to say why.
+   */
+  it("keeps the preview's own layout out of the utilities layer", () => {
+    expect(block(".demo-part")).toContain("display: flex")
+  })
+
+  /**
+   * The window, the fade, and the fact that nothing inside it is operable. The
+   * fade and the bottom padding are one number: a band shorter than the window
+   * ends above the fade and is never touched by it, and one taller runs into it
+   * and reads as continuing.
+   */
+  it("clips the band to a window, fades the cut, and makes none of it pressable", () => {
+    const stage = block(".demo-part-stage")
+
+    expect(stage).toContain("overflow: hidden")
+    expect(stage).toContain("pointer-events: none")
+    expect(stage).toMatch(/max-height:\s*\d+(\.\d+)?rem/)
+    expect(stage).toMatch(/padding:\s*\d+px \d+px 44px/)
+    expect(stage).toMatch(/mask-image: linear-gradient\(to bottom, #000 calc\(100% - 44px\), transparent 100%\)/)
+  })
+})

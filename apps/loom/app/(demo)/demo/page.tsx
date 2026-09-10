@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { DOCS } from "@/app/(marketing)/_lib/site"
 
+import { partInQuestion } from "@/app/(demo)/_lib/in-question"
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { availablePresets } from "@/app/(demo)/_lib/presets"
@@ -17,6 +18,7 @@ import { AnswerInView } from "./_components/answer-in-view"
 import { AskPanel } from "./_components/ask-panel"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
+import { PartInQuestionView } from "./_components/part-in-question"
 import { RecordCard } from "./_components/record-card"
 import { WhatHappens } from "./_components/what-happens"
 
@@ -103,11 +105,39 @@ const DemoPage = async () => {
     ])
   )
 
-  /** Absent rather than `undefined`: the prop is optional, not nullable. */
-  const effectProps = (record: (typeof records)[number]): { readonly effect?: ProposalEffect } => {
-    const found = record.heldProposalId === undefined ? undefined : effects.get(record.heldProposalId)
+  /**
+   * And the part of the page each waiting proposal is about, rendered.
+   *
+   * The same two conditions as the effect above and for the same reason — a
+   * change that has already landed describes a tree that is gone — plus one of
+   * this one's own: it is built here, in a Server Component, because rendering a
+   * `LoomTree` needs the registry and the registry is not something to drag
+   * across a client boundary. The card is a client component and receives it as
+   * an element, which is the boundary working as intended rather than around it.
+   */
+  const parts = new Map<string, React.ReactNode>(
+    (holds?.ok ? holds.value : []).flatMap((held) => {
+      const part = partInQuestion(tree, held.proposal.delta)
 
-    return found === undefined ? {} : { effect: found }
+      return part === undefined
+        ? []
+        : [[held.proposalId, <PartInQuestionView key={held.proposalId} part={part} {...(rendered.theme ? { theme: rendered.theme } : {})} />] as const]
+    })
+  )
+
+  /** Absent rather than `undefined`: the props are optional, not nullable. */
+  const heldProps = (
+    record: (typeof records)[number]
+  ): { readonly effect?: ProposalEffect; readonly inQuestion?: React.ReactNode } => {
+    if (record.heldProposalId === undefined) return {}
+
+    const effect = effects.get(record.heldProposalId)
+    const part = parts.get(record.heldProposalId)
+
+    return {
+      ...(effect === undefined ? {} : { effect }),
+      ...(part === undefined ? {} : { inQuestion: part }),
+    }
   }
 
   return (
@@ -241,7 +271,7 @@ const DemoPage = async () => {
 
               <ul className="flex flex-col gap-2">
                 {records.map((record) => (
-                  <RecordCard key={record.recordId} record={record} {...effectProps(record)} />
+                  <RecordCard key={record.recordId} record={record} {...heldProps(record)} />
                 ))}
               </ul>
 
