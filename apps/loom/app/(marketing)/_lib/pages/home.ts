@@ -12,7 +12,7 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 import type { AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { BAND } from "../bands"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { SIGN_IN_LABEL, siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
 import { PLAIN_WORDS, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
@@ -23,6 +23,7 @@ import {
   DECISIONS_URL,
   DEMO,
   DOCS,
+  doorOf,
   HOME,
   HOW_IT_WORKS,
   internalHref,
@@ -391,6 +392,36 @@ const questions = (ids: IdFactory): LoomNode =>
               "You put it back. Every change is stored together with the change that reverses it, and undoing is checked against your rules and written down like anything else. Nothing is erased to make room for it.",
           },
         }),
+        /**
+         * The question the bar at the top of this page has been asking on the
+         * reader's behalf since the site was written, and the fifth in a band
+         * that had four.
+         *
+         * *Sign in*, top right, on a site a stranger has never used, is an
+         * offer — and this site has nothing to offer them. A portal belongs to
+         * the Loom site it is part of. Until this run the site said the word
+         * *account* in exactly two places, the bar's button and a cost line,
+         * and explained it in neither.
+         *
+         * It is a description of code and not a position: it says what a portal
+         * is and who decides its list, and nothing about whether anybody sells
+         * one. The band's other four answer *what can it do to my page*; this is
+         * the first that answers *what would I be signing up to*, which is the
+         * question a bar with a sign-in button puts in a reader's head before
+         * they have read a word of the rest.
+         *
+         * Both halves are composed rather than typed: `PORTAL.door` is the same
+         * sentence the band of cards below carries, and `SIGN_IN_LABEL` is the
+         * button's own word, so re-wording either cannot leave this answer
+         * describing a page that no longer exists.
+         */
+        buildElement(ids, {
+          type: "loom.faq",
+          props: {
+            question: "Do I need an account to use this?",
+            answer: `No. Loom runs inside your own application, and the portal is part of what you put there rather than a service you join. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page is that door on this site's own portal — on a site of yours it would be your list, and you would be on it.`,
+          },
+        }),
       ],
     }),
   ])
@@ -435,6 +466,20 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * signing in is required rather than pretending the whole product is one click
  * away.
  *
+ * **That last clause was false from 25 August until 10 September, and it is the
+ * clearest example this lane has of a guarantee outliving the code that kept
+ * it.** The portal's blurb did say signing in was required; the run that gave
+ * every surface a `cost` moved that out to keep four blurbs one length, wrote
+ * *Costs you an account* in its place, and left this note promising a property
+ * the band no longer had. An account is not a cost a reader can pay — nobody
+ * reading this site can obtain one by deciding to — so the card had not merely
+ * gone quiet about the door, it had started describing it wrongly.
+ *
+ * `doorOf` puts it back, in the body rather than the blurb, and the type makes
+ * it structural: a guarded surface without a `door` no longer compiles. The
+ * note is checked rather than promised now — `pages.test.ts` renders this band
+ * and holds the sentence to it.
+ *
  * **It is the four surfaces and nothing else**, as of 22 August. A fifth card
  * pointed at the repository, which was fine while there were three of them and
  * wrong once the demo made it four: five cards in a grid that wraps at four
@@ -477,12 +522,22 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
           throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
         }
 
+        const door = doorOf(surface)
+
         return buildElement(ids, {
           type: "loom.card",
           props: { href: surfaceHref(context.origin, surface) },
           children: [
             heading(ids, 3, way.title),
             prose(ids, surface.blurb, { tone: "muted" }),
+            /**
+             * The one card with a door says so here, in the body, and not in
+             * the footer where the cost is. The costs are read along one line
+             * across the row — that is the whole reason they are pinned — and a
+             * sentence dropped into that line would be read as a fourth cost
+             * and would break the line for the other three.
+             */
+            ...(door === undefined ? [] : [prose(ids, door, { size: "small", tone: "muted" })]),
             buildSlot(ids, "footer", [prose(ids, surface.cost, { size: "small", tone: "muted" })]),
           ],
         })

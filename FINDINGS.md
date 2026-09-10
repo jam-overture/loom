@@ -13531,3 +13531,95 @@ tally; `answers.test.ts` holds every declaration against the real sequence and
 every page against the declaration. No sentence on this site counts what the five
 requests do any more, and `/the-rules`'s *"two of them run into the rules"* comes
 off the same list, so a sixth choice cannot leave one page behind.
+
+## 2026-09-10 — the front door's one action offers an account, and no page of this site says whose
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 10 September
+
+The maintainer's decision of 18 August is that **access to the portal is through
+the marketing site**. The site offers it four ways — the bar's *Sign in*, the
+front door's band of cards, the footer's map, and the last band of
+`/the-record` — and until this run **not one of them said whose portal it is.**
+
+A portal belongs to the Loom site it is part of. Who may sign in to one is a
+roster whoever runs that site writes; there is no way for a reader of this site
+to obtain an account here by deciding to. So the bar's *Sign in*, top right of a
+site a stranger has never used, is an offer this site cannot honour — and on this
+deployment the door behind it answers, correctly and in the portal lane's own
+words, **"This portal isn't set up yet."**
+
+**The sentence was on the site and an ordinary edit took it.** The portal's blurb
+read *"who may sign in is set by whoever runs the deployment"* until 25 August
+(#158), when the run that gave every surface a `cost` moved it out to keep four
+blurbs one length and wrote **"Costs you an account"** in its place. That was a
+fair edit — four blurbs of one length is a real thing to want — and the fact went
+with it. What replaced it is worse than silence: three of the four costs name
+something the reader can spend, so an account on the same line reads as the
+fourth.
+
+**Two tests and a docblock covered the gap while it was open.**
+
+- `pages.test.ts`'s note on the band still promised *"each card is honest about
+  what is behind it, which is why the portal's says that signing in is
+  required"* — of a card that had stopped saying so.
+- `site.test.ts` asserted that a guarded surface's blurb-plus-cost matches
+  `/\bsign|\baccount\b/`. **"Costs you an account" contains the word `account`,
+  so the assertion passed for sixteen days on a sentence that told a reader
+  something false.** A keyword is not the fact.
+
+Eighth consecutive run to find two individually defensible things nobody had read
+next to each other, and the first where a test was one of the two. The new half
+worth keeping: **an assertion that checks a page for a word, rather than for what
+the word is standing in for, will outlive the fact and go on passing.**
+
+**Why this lane cannot check the door instead of describing it.** `site.ts`
+records the contract — a surface is a destination this lane *may only point at*,
+so that a link stays correct across anything the other lane does behind it.
+`(marketing)` therefore does not import `(portal)`'s auth config and has no way
+to know whether sign-in is configured on the deployment it is served from. That
+settles what the copy may claim: not that the door opens, only what kind of door
+it is.
+
+**Closed by making the door a field the type requires.** `Surface` is now
+`SurfaceFacts` plus one of two halves, and the guarded half requires `door` — a
+guarded surface added a year from now is a compile error until somebody writes
+down what a visitor without a way in actually finds. `PORTAL.door` is rendered on
+the front door's card, in a new fifth question on its questions band (*"Do I need
+an account to use this?"*, composed from `PORTAL.door` and the bar's own
+`SIGN_IN_LABEL`), and in the last band of `/the-record` — where the heading *the
+same record, on a page of your own* stood a sentence above a button opening a
+portal that is not the reader's. The cost line is now **"Costs you an
+invitation"**. `site.test.ts` reads `door` as well and holds the fact rather than
+the keyword; `the-way-in.test.ts` scopes every assertion to the band that does
+the offering, because a page-wide search is the latitude that let this happen.
+
+**Not changed, and it is the open question:** the bar still says *Sign in*. Ten
+seconds is the whole span that bar is for and none of the above fits in it, and
+re-wording the front door's principal action is a positioning call. Raised on the
+pull request with a recommendation.
+
+## 2026-09-10 — the site can now say a portal belongs to whoever runs the site, and never says what running one is
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — proposed as this lane's next unit
+
+The entry above puts *"whoever runs the site writes the list of who may sign in"*
+on the front door, which is true and answers the question a stranger arrives
+with. It also hands them the next one immediately: **so what do I run?**
+
+The site has five pages and none of them answers it. `/how-it-works` is the
+journey one change takes. `/the-rules` is what you decide in advance.
+`/your-components` is what you hand over. `/the-record` is what you are left
+holding. Nowhere does the site say what a Loom site *is* — that it is your own
+application, with your components described to it, your rules beside them, its
+record kept where you keep things, and a portal that comes with it. A reader who
+has understood every page still does not know whether this is a library they add
+to something, a service they point at something, or a thing they host.
+
+It is a description of code rather than a position, so it does not wait on the
+licence line. The risk to watch is the documentation lane's boundary: `/docs`
+owns *how to install it*, and this would be *what the shape is*, which is the
+question somebody asks before they are willing to read an installation guide.
+Recommend agreeing the split with `Loom docs` in the finding rather than
+discovering it in a review.

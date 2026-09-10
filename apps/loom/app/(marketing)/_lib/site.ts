@@ -168,7 +168,14 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
  * contract — the path is the other lane's front door, so it stays correct
  * across anything that lane does behind it.
  */
-export type Surface = {
+/**
+ * What every surface says about itself, whatever is or is not behind its door.
+ *
+ * `Surface` is this and one of the two halves below, so **a guarded surface
+ * cannot be written down without saying what a visitor finds at the door.** See
+ * `GuardedSurface` for why that is the compiler's job rather than a test's.
+ */
+type SurfaceFacts = {
   readonly path: string
   /** What the link says. Plain words: a visitor has never heard of any of this. */
   readonly label: string
@@ -189,8 +196,6 @@ export type Surface = {
    * bottom of four cards standing side by side and a long one would wrap alone.
    */
   readonly cost: string
-  /** Whether a visitor who is not signed in is sent to a sign-in page first. */
-  readonly guarded: boolean
   /**
    * Whether the bar across the top carries it, as well as the footer's map.
    *
@@ -213,6 +218,74 @@ export type Surface = {
    */
   readonly inMenu: boolean
 }
+
+/** A surface a visitor can simply open. Most of them. */
+type OpenSurface = SurfaceFacts & {
+  /** Whether a visitor who is not signed in is sent to a sign-in page first. */
+  readonly guarded: false
+}
+
+/**
+ * A surface with a door, and the sentence a visitor meets it with.
+ *
+ * **`door` is required here, and that is the whole point of splitting the type.**
+ *
+ * The portal is the only one, and since 25 August this site has offered it four
+ * ways — the bar's *Sign in*, the front door's band of cards, the footer's map
+ * and the record page's last band — without any of them saying **whose portal
+ * it is**. A stranger reads an account as something this site could give them.
+ * It cannot: a portal belongs to the Loom site it is part of, and who may sign
+ * in to it is a list whoever runs that site writes.
+ *
+ * The sentence saying so was on the site until 25 August, inside the portal's
+ * blurb, and the run that gave every surface a `cost` moved it out to keep the
+ * blurbs one length. That was a fair edit and it took the fact with it — the
+ * band's own note still promises *each card is honest about what is behind it,
+ * which is why the portal's says that signing in is required*, of a card that
+ * had stopped saying so. Two defensible things nobody had read next to each
+ * other, at the one place the maintainer's 18 August decision makes this
+ * surface's whole job.
+ *
+ * So it is a field of its own rather than a longer blurb, and it is **required
+ * by the type** rather than asserted by a test. A guarded surface added a year
+ * from now is a compile error until somebody writes down what a visitor without
+ * a way in actually finds, which is the failure that happened here and the one
+ * a test written today would not have caught: the test would have been written
+ * against the field, and the field did not exist.
+ *
+ * **This lane cannot check the door instead of describing it.** The note above
+ * records the contract — a surface is a destination this lane *may only point
+ * at* — so `(marketing)` does not import `(portal)`'s auth config and has no
+ * way to know whether sign-in is configured on the deployment it is served
+ * from. Which settles what the copy may claim: not that the door opens, only
+ * what kind of door it is. On this deployment it does not open at all, and the
+ * portal's own sign-in page says so plainly.
+ */
+export type GuardedSurface = SurfaceFacts & {
+  readonly guarded: true
+  /**
+   * One sentence, in the same plain words as `blurb`, saying what the door is.
+   *
+   * Not what is behind it — `blurb` does that — and never a promise that it
+   * opens. It is rendered wherever this surface is offered with room for a
+   * sentence, off this one string, so the front door and the record page cannot
+   * come to describe the same door two ways.
+   */
+  readonly door: string
+}
+
+export type Surface = OpenSurface | GuardedSurface
+
+/**
+ * The door's sentence, for a caller that has a surface and does not know which
+ * kind it is.
+ *
+ * Every band that offers a surface offers all of them — the front door's is
+ * exactly `PRODUCT_SURFACES` and holds a test to it — so the narrowing happens
+ * once, here, rather than at each call site.
+ */
+export const doorOf = (surface: Surface): string | undefined =>
+  surface.guarded ? surface.door : undefined
 
 /**
  * The one surface that answers the hero's promise rather than arguing for it.
@@ -270,13 +343,35 @@ export const LESSONS: Surface = {
   inMenu: false,
 }
 
-export const PORTAL: Surface = {
+export const PORTAL: GuardedSurface = {
   path: "/portal",
   label: "Portal",
   blurb:
     "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts any of it back.",
-  cost: "Costs you an account",
+  /**
+   * *"Costs you an account"* until this run, and it is the half of the mistake
+   * a reader could act on.
+   *
+   * The four costs are read along one line by somebody choosing where to spend
+   * their afternoon, and three of them name something the reader can spend. An
+   * account is not: nobody reading this site can obtain one by deciding to.
+   * Whoever runs a Loom site writes the list of who may sign in to its portal,
+   * so the thing being asked for is somebody else's decision — which is what
+   * *an invitation* says in the same four words and the same shape.
+   */
+  cost: "Costs you an invitation",
   guarded: true,
+  /**
+   * Deliberately about every Loom site and not only this one.
+   *
+   * The reader's question is *can I get in*, and the answer that helps them is
+   * the general one: this is what a portal is, so it is also what yours would
+   * be. Saying only *this one is not open to you* would answer the question in
+   * front of them and leave them thinking the product has a door they failed
+   * to get through.
+   */
+  door:
+    "Every Loom site has a portal of its own, including this one, and whoever runs the site writes the list of who may sign in to it.",
   /**
    * False because it is the bar's *action* rather than one of its links, and
    * has been since the header was written. `inMenu` means "carried as a menu

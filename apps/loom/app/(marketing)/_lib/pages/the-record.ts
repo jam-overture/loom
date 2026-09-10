@@ -533,6 +533,18 @@ const closing = (ids: IdFactory, context: RecordContext): LoomNode =>
         "This is a landing page keeping a history in its address bar. The place built to keep one properly — every change reviewed, and any of them reversed on its own — is the portal.",
         { tone: "muted", align: "center", measured: true }
       ),
+      /**
+       * The same door, described the same way, because this band offers it in
+       * the same breath as the front door's card does.
+       *
+       * This one is the sharper of the two. *The same record, on a page of your
+       * own* is the band's heading, and the button under it opened a portal that
+       * is not the reader's — the one place on the site where *yours* and *this
+       * deployment's* were a sentence apart and read as the same thing. `door`
+       * is what makes the heading true: a portal comes with the site, so the one
+       * on a page of your own would be yours.
+       */
+      prose(ids, PORTAL.door, { size: "small", tone: "muted", align: "center", measured: true }),
       stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
         action(ids, "Open the portal", surfaceHref(context.origin, PORTAL), {
           variant: "primary",
