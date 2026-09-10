@@ -13789,3 +13789,156 @@ region — the rail and the topbar are part of what a reviewer is being shown.
 Same home as the rest of the recipe: `apps/loom/scripts/`, or
 [#250](https://github.com/jam-overture/loom/pull/250), which is the framework
 lane taking the harness itself.
+
+---
+
+## 2026-09-10 — a plain sentence names what changed and gives its location as an id
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+question rather than a defect.
+
+Today's unit gave every plain sentence in `/portal/history` a named **subject**:
+*"Deleted **the card “Autumn arrivals”** `n_seed9` and everything inside it."*
+The rest of the sentence still carries raw ids, and they are all locations:
+
+| Sentence | The id still in it |
+| --- | --- |
+| `Added the heading “…” n_new inside n_root.` | the parent |
+| `Moved the card “…” n_card inside n_seed2.` | the destination |
+| `Puts the card “…” n_card, …, back inside n_seed10.` | where it goes back |
+
+**This may be correct and that is why it is filed rather than fixed.** There is a
+real argument that *the sentence names what changed, and where it sits is an
+address* — the same reason a page keeps its `t_seed1` beside its name. A reader
+deciding whether to undo a removal cares what went; a reader checking that it goes
+back to the right place wants the id they can match against the outline.
+
+There is an equally real argument the other way: *"back inside the page"* reads
+better than *"back inside `n_seed10`"*, and a person who cannot picture `n_seed10`
+cannot picture where the card is going.
+
+**What it would cost.** `PlainLine` holds exactly one subject, and the shape is
+load-bearing — it is why the spaces and full stops belong to the sentence rather
+than to whichever span sits next to them, which is the join that has produced four
+defects in this lane. A second name in the line means a different shape, and it
+should be worth it before it is built.
+
+Whoever takes it: the names are already in hand at every call site. `namesInTree`
+and `namesInOperations` cover the parents as well as the subjects, so this is a
+wording and shape decision, not a data one.
+
+---
+
+## 2026-09-10 — `/portal/activity` names no part, because it has no inverse to read
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open.
+
+`plainOperation` takes a map of names and `/portal/history` passes one, built from
+the head tree merged under each row's own inverse. `/portal/activity` passes
+nothing, so its sentences still read `Deleted n_seed9 and everything inside it.`
+
+**The two screens are not symmetric and that is the whole finding.** History lists
+*accepted* changes and already replays the log per row to say what undoing would
+put back — so the name of a deleted part is a free by-product of a read it was
+making anyway. Activity lists *proposals*, including refused ones and ones the AI
+never understood. A refused removal has no inverse, because nothing was applied;
+the node it names is still in the tree, so the head read would answer — but
+Activity is not scoped to one tree by default, so that is a head read per distinct
+page in the listing rather than one.
+
+Three options, in the order I would try them:
+
+1. **Only on the scoped view.** `/portal/activity?tree=` already holds one id, so
+   it is one head read, exactly as History makes. The unscoped list keeps ids.
+   Cheapest, and it leaves the same screen speaking two ways at two addresses.
+2. **A bounded fan-out over the distinct trees in the page**, which is the trade
+   `namesOf` already makes on the front door for page names, and 0041 makes for
+   attribution. One read per page shown rather than per row.
+3. **Read the head once for both.** The front door calls `namesOf`, which reads
+   each head and throws the tree away; the same read could answer page names and
+   part names together. This is the one that scales to every screen, and it is a
+   refactor of a 6 September module rather than an addition to it.
+
+Not taken today because one diff answering two questions is what makes a diff
+unreviewable, and because the deleted-part case — the one nothing else in the
+ecosystem can answer — lives on History and is closed.
+
+---
+
+## 2026-09-10 — the screenshot recipe is now six entries and a competing script
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
+and **#250 is the answer**, so this is a note on it rather than a new ask.
+
+This lane has filed five traps in the throwaway screenshot script every portal run
+rewrites. Today I wrote the script from those five, ran it, and **took it back out
+of the repository before committing** — `tools/specimen/` on
+[#250](https://github.com/jam-overture/loom/pull/250) is the repository's harness
+and the right home, and a second one in `apps/loom/scripts/` plus a Playwright
+dependency in a shared `package.json` would be this lane taking a file it has said
+four times is not obviously its own.
+
+Two things worth adding to #250 from today, both of which cost this run a cycle:
+
+- **A server that outlives a crashed script serves the previous build and the
+  previous credentials.** The fifth entry says never `pkill -f "next start"`
+  because it kills the shell. The other half is that a script which throws before
+  its cleanup leaves the port held — so the *next* run's `fetch` probe succeeds
+  against the **old** server, reports "server up", and then fails to sign in with
+  a key that server has never heard of. It reads exactly like a wrong password.
+  The fix is an `uncaughtException` handler that kills the child, and a probe that
+  checks it is talking to the server this run started.
+- **`waitUntil: "networkidle"` never settles in this sandbox.** Chromium makes
+  background requests to `content-autofill.googleapis.com`, `www.google.com` and
+  `accounts.google.com`; the egress proxy denies them and they retry, so the
+  network is never idle and every navigation waits out its timeout. Two runs were
+  lost to it before I switched to `domcontentloaded` plus an explicit settle.
+  Neither domain is one anything needs — this is Chromium's own telemetry, not the
+  app's — so the fix is the wait condition rather than the allowlist.
+
+---
+
+## 2026-09-10 — the model is unreachable from `next start` in this sandbox, and `NODE_USE_ENV_PROXY=1` did not fix it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
+this is the 2026-09-04 finding recurring **with its own stated fix applied**.
+
+The 4 September entry established that Node's `fetch` does not read `HTTPS_PROXY`,
+so the Anthropic SDK inside `next start` dials directly and waits for ever with
+nothing in the log, and named `NODE_USE_ENV_PROXY=1` as the whole fix.
+
+**Today that variable was set on the server and the call still hangs.**
+`LOOM_ANTHROPIC_API_KEY` is present, `portalInterpreter` is the live model rather
+than `unconfigured`, and the sign-in, the seeding, the tree read and every screen
+work. A request typed into the real prompt box never returns: the server action
+hangs, and because the journal is written after the call, the ask never appears in
+`/portal/activity` either — the screen correctly reads *"Nothing has been asked
+for yet."*, which is indistinguishable from nobody having pressed the button.
+
+**What it costs.** Every portal run since 26 August has photographed a real
+change. This one could not, so the pull request ships with screens that are
+correct and empty, and the sentences it rewrites given as text. The portal's most
+valuable screens — the review queue, what's changed, what undoing would put back —
+are all worth nothing to look at against an empty store, and the store is empty
+until a model answers.
+
+Two things that would each close it, in the order I would try them:
+
+1. **Whether the hang is the proxy at all.** `curl https://api.anthropic.com`
+   returns 401 immediately through the proxy, which is what the 4 September entry
+   used to rule the allowlist out — but that is `curl`, with its own proxy
+   handling. The equivalent check is a bare `node -e` `fetch` to the same URL from
+   inside the sandbox, with and without `NODE_USE_ENV_PROXY=1`. If that also
+   hangs, the variable is not doing what the finding assumed and the fix is
+   elsewhere — an explicit `fetch` agent passed to the SDK, most likely.
+2. **A timeout, so the failure is visible rather than silent.** Whatever the
+   cause, a call that hangs for ever is the worst shape this can take: the button
+   spins, nothing is recorded, and the portal cannot tell the reader anything
+   because it has not been told anything. A bounded timeout would turn this into
+   a `FailureStage` the portal already knows how to say in plain language — and
+   `/portal/activity` would show the ask, which is the screen whose whole promise
+   is that *"a refusal, or an ask the AI never understood, leaves no trace
+   anywhere else."* Right now an ask that hangs leaves no trace in Loom either.
+
+The second is worth doing on its own merits even if the first turns out to be a
+sandbox-only problem, because a host's network can fail the same way.
