@@ -299,8 +299,11 @@ this branch's and `main`'s — so the only difference in the frame is the change
 Not the preview deployment, which this environment cannot open (`vercel.app` is
 not on the sandbox's egress allowlist; the standing 19 August finding).
 
-**Preview:** see the deployment comment on the pull request. One push, one
-preview.
+**Preview:**
+`https://loom-git-demo-13-the-part-it-6fdd1f-jpizzolato36-6341s-projects.vercel.app/demo`
+
+Read off the deployment comment on the pull request rather than opened, for the
+reason above. One push, one preview.
 
 **To see it yourself:** open `/demo` at 390×844 in a desktop browser's device
 mode, or on a phone. Press the green button and look at what is between the rule
