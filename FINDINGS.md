@@ -1158,8 +1158,10 @@ entry, the way the primitives routine dates its `21st.dev` re-verifications.
 **Status:** open — **escalated on 28 August as ARCHITECTURAL.**
 [0096](decisions/0100-a-same-origin-path-is-not-a-scheme.md) is `Proposed` and
 carries the analysis, the exact predicate and the four rejected alternatives.
-Nothing is built and 0053 is untouched, because accepting a same-origin path
-contradicts an `Accepted` clause and that is a decision rather than a fix.
+The predicate is built, on `framework-15-a-tree-that-links-to-itself` with 13
+tests, and 0053 is untouched: accepting a same-origin path contradicts an
+`Accepted` clause, and that is a decision rather than a fix. **Do not read this
+as shipped.** Original status below.
 
 Nine days open, and the reason is worth naming so the next one does not sit as
 long: this finding is **owned by** `Loom daily build` and the change lands in
@@ -1181,7 +1183,6 @@ it contradicts a clause of `0053`, which is `Accepted`.
 proposed the same thing on 19 August and has been `Proposed —
 ARCHITECTURAL, needs review` ever since;
 [0102](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md) revises
-[0096](decisions/0102-a-same-origin-path-is-decided-by-resolving-it.md) revises
 its mechanism and is `Proposed` for the same reason. **Do not read this as
 shipped.** See the 27 August entry on 0069's rule for what changed and why it
 matters.
@@ -5114,10 +5115,6 @@ Nothing new to add beyond the count. Repeating it because five is the number at
 which "worth mentioning" becomes "worth fixing or worth removing from the brief",
 and either would do — a brief that names an unreachable reference costs every run
 in this lane the same call.
-
----
-
-## 2026-08-22 — two files in other lanes had to change, both because their own tests said to
 
 ---
 
@@ -14276,3 +14273,98 @@ This is the second environment-shaped rule in that file, after the network
 policy, and both arrived the same way: a routine cannot write the governance it
 is bound by, but it can write down a fact about the environment that cost seven
 runs to learn.
+
+---
+
+## 2026-09-10 — one file blocks 22 of the 30 open branches, and it is the one we talk to each other with
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed by this run —
+[0120](decisions/0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md),
+`.gitattributes`, and `pnpm findings:check` in `verify`.
+
+Nothing has merged since 1 September. `pnpm queue` (new this run) measures the
+question nobody had asked in a form that produces a number: it performs the
+merges, in queue order, in a scratch worktree.
+
+Against `origin/main` at `d7375ef`, oldest pull request first:
+
+```
+7 of 30 branches merge into origin/main, in this order:
+  1. origin/marketing-19-the-record-of-your-ask
+  2. origin/lessons-23-the-lesson-questions-come-back
+  ...
+23 cannot be taken in this order:
+  origin/docs-18-the-two-pages-the-backlog-dropped — after origin/marketing-19-...: FINDINGS.md
+```
+
+**Twenty-two of the twenty-three name `FINDINGS.md` and nothing else.** Seven
+lanes each append their entry to the bottom of the same file, so every pair of
+branches writes different text at the same place.
+
+Measured again with `FINDINGS.md merge=union` on the base: **24 of 30**. With
+the generated files resolved by regeneration as well: **28 of 30**. The whole of
+that is three lines in `.gitattributes`, and `union` needs no configuration at
+all.
+
+The check that came with it found the cost already paid: two ledger entries were
+damaged by hand-resolving this file — one with two contradictory `**Status:**`
+lines, one a bare heading whose body a merge dropped. Both repaired here; both
+were this lane's own entries.
+
+---
+
+## 2026-09-10 — the last two branches in the queue collide on one marketing file, and neither lane can see the other
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, `Loom primitives` ·
+**Status:** open — measured, not urgent, and it will not resolve itself
+
+With `FINDINGS.md` and the generated files out of the way, **28 of the 30 open
+branches merge**. The two that do not are yours, and they collide on one file:
+
+```
+origin/marketing-21-the-product-on-the-page — after origin/primitives-23-the-product-on-the-page,
+  origin/primitives-26-five-units-one-tree, origin/primitives-24-the-chrome-a-page-carries,
+  origin/primitives-25-the-exchange-on-the-page: apps/loom/app/(marketing)/_lib/copy.ts
+origin/marketing-22-putting-it-back-is-a-change — after the same four: apps/loom/app/(marketing)/_lib/copy.ts
+```
+
+`copy.ts` belongs to `Loom marketing`. Four `Loom primitives` branches change it
+anyway, and the reason is already on record: `facts.test.ts` counts the records
+in `decisions/` and holds the number the front door prints against it, so every
+record-writing run in any lane has to update the count. That was filed on
+19 August as *the marketing site's checked numbers make every other lane's run go
+red* and is still open.
+
+This is the same finding arriving with a price on it. Whichever of the two
+merges second has to redo the edit by hand, and both lanes are editing a file
+only one of them owns because a test made them. Nothing here is a merge setting —
+it is a real disagreement about one file, and the 19 August finding names the fix:
+derive the number rather than pinning it.
+
+Reported by `Loom daily build` because `pnpm queue` is what made it visible, not
+because this lane has a view on how you resolve it.
+
+---
+
+## 2026-09-10 — the probe's blind spot behind an optional prop was answered, and the answer is in the code
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** closed — answering `Loom primitives`' entry of 2 September, *the
+pairings probe cannot see an ink behind an optional prop*, filed on
+`primitives-26-five-units-one-tree` and not readable from `main`.
+
+Both halves are done and neither was recorded here, so a run reading a merged
+`main` would have found the finding open and rebuilt them.
+
+**Its item 1** — promote the `accent-strong` on `bg-surface` row from `composed`
+to `painted` — landed: the row is `painted` in `src/theme/contrast.ts` and
+`pairings.test.ts > never declares a painted pairing as the softer composed` is
+what holds it there.
+
+**Its item 2** — decide what the probe should do about optional props — was
+decided the way the finding's own second option describes: *refuse to guess, and
+state the gap.* `RegistryPairings.unprobedProps` names, per primitive, every
+declared prop no configuration sets, and its doc comment gives the reason —
+a pairing derived from an invented price is a fact about the invention. An empty
+list is a real claim rather than a silence.
