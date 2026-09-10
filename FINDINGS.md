@@ -14368,3 +14368,100 @@ state the gap.* `RegistryPairings.unprobedProps` names, per primitive, every
 declared prop no configuration sets, and its doc comment gives the reason —
 a pairing derived from an invented price is a fact about the invention. An empty
 list is a real claim rather than a silence.
+
+---
+
+## 2026-09-10 — a preview of a tree keeps its theme now, and a primitive can say which props are words
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-25-where-the-face-is`** (#230), twentieth unit — both
+halves built, with [0121](decisions/0121-part-of-a-tree-is-rendered-by-the-seam-and-the-seam-mounts-the-theme.md)
+and [0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md).
+
+`Loom demo` filed *a preview of a tree loses its theme, and there is no seam for
+"the words a node shows"* this morning, on `demo-13-the-part-it-is-about`. It is
+not readable from `main`, which has not moved since 1 September; the branch sweep
+the 8 September entry recommends is what found it, now three for three.
+
+**Half one — the theme.** `renderLoomExcerpt(tree, nodeId, options)` renders any
+node of a tree on its own and mounts the tree's theme on an element of its own
+around it, so an excerpt is self-contained wherever it is dropped. The finding's
+diagnosis was exact, including the part about there being no diagnostic: a node
+that names no theme is legitimately unthemed and nothing is owed. What was
+missing was a seam saying *this is how you render part of a themed tree*, and the
+demo's four-line workaround was the right workaround. It stays correct;
+replacing it is that lane's call and timing.
+
+**Half two — the words.** A primitive may declare `copy`, the props whose values
+a reader reads, and `copyIn(node, registry)` reads a node against those
+declarations. The finding left it open whether rendering was the honest answer.
+It is not: recovering from markup what the tree already holds needs a DOM and a
+render, neither of which a queue row on a server or an unapproved proposal has,
+and it returns the component's own chrome mixed in with the tree's words. 0122
+records that reasoning where a fresh session finds it, which is what the entry
+asked for either way.
+
+**The distinction the seam turns on** is that `copy: []` and no declaration are
+different answers. `copyIn` believes the first and reports the second in
+`unread`, naming the node, the type and the props it could not classify — so a
+consumer knows it is under-reporting instead of quietly doing it.
+
+**Nothing declares `copy` yet**, so `copyIn` currently answers `unread` for the
+whole starter library. That is the honest answer, not a failure, and it is filed
+below.
+
+---
+
+## 2026-09-10 — the starter library can now say which of its props are words, and none of them does
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — the seam is built and declaring against it is this lane's call
+
+[0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md) adds
+an optional `copy` to `definePrimitive`: the props whose values a reader reads as
+words. Nothing in `src/primitives/` declares it, so `copyIn` reports every
+registered primitive under `unread` — correct, and not useful to anybody yet.
+
+The primitives where it pays are the ones
+[0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+put copy into props:
+
+| primitive | the words a reader reads |
+| --- | --- |
+| `loom.stat` | `value`, `label`, `caption` |
+| `loom.quote` | `quote`, `author`, `role` |
+| `loom.hero` | its headline and standfirst — **not** `backdrop`, `align`, `stature` |
+
+Two things worth knowing before doing it. **`copy: []` is a real declaration** —
+it says this primitive shows no words of its own, and it is what an arrangement
+like `loom.stat-grid` should carry; leaving it off means *nobody has said* and is
+reported as a gap. And **the registry refuses a declaration naming a prop the
+schema does not declare** (`undeclared-copy-prop`), the same way it refuses a
+drifted `frames`, so a rename cannot leave one pointing at nothing.
+
+Filed rather than done: `src/primitives/` is this lane's directory and the
+framework routine stopped adding to it on 16 August.
+
+---
+
+## 2026-09-10 — `textIn` has something to ask now, and the queue is still reading text children
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+open — a note on `Loom demo`'s entry of the same day, not a second ask
+
+`Loom demo` filed *the plain reading of a change prints registered type ids, and
+misses copy held in props* against `(portal)/_lib/effect-view.ts` this morning,
+and its second half is now answerable rather than only true:
+`copyIn(node, registry)` reads a node's declared copy props alongside its text
+children, and `unread` names what nothing has classified.
+
+It does not become useful the moment it lands. Nothing in the starter library
+declares `copy` yet — filed above for `Loom primitives` — so a queue that
+switched to `copyIn` today would read the same text children plus a list of
+props nobody has spoken for. What it gains immediately is *knowing that the list
+exists*, which is the thing that was missing when a proposal to delete three
+headline numbers reported no words at all.
+
+The first half of that entry — whether a reviewer's sentence should print
+`loom.stat-grid` — is a question about who is reading, and this lane has no view
+on it.

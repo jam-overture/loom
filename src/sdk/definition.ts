@@ -44,8 +44,12 @@ import type { PrimitiveRole } from "../role.js"
  *   can tell a `src` bound for a frame from a `src` bound for an image.
  * - `role` — what part it plays, so a consumer can ask the registry a
  *   categorical question instead of matching on the type string (0114).
- *   Optional, read by nothing in the runtime, and the only declaration here
+ *   Optional, read by nothing in the runtime, and one of two declarations here
  *   whose whole audience is outside this package.
+ * - `copy` — which of its props a reader reads as words, so a preview, a review
+ *   queue or a search can say what a node says (0122). Optional, read by
+ *   nothing in the runtime, and the one declaration where leaving it out and
+ *   declaring it empty are different answers.
  */
 
 export type PrimitiveDefinition<
@@ -131,6 +135,23 @@ export type PrimitiveDefinition<
    * than letting a misspelling read as "declares no role".
    */
   readonly role?: PrimitiveRole
+  /**
+   * The props whose values a reader reads as words — `["value", "label",
+   * "caption"]` on a stat, `[]` on an arrangement that shows none of its own.
+   *
+   * Optional, and the distinction between `[]` and leaving it out is the whole
+   * of what it buys (0122). `[]` says *this primitive shows no words of its
+   * own*; absence says *nobody has said*, and `copyIn` reports the second and
+   * trusts the first. A default would collapse them, which is why there is
+   * none.
+   *
+   * Read by nothing in the runtime, like `role` and `submits`: it changes no
+   * render and constrains no tree. The named props must be props the schema
+   * declares, and the registry refuses a declaration that names one it does
+   * not — the same drift `frames` and `interactive` are checked for, with less
+   * riding on it and the same silence when it happens.
+   */
+  readonly copy?: readonly string[]
   readonly component: LoomPrimitive<TProps, TText, TBehaviour>
 }
 
@@ -169,6 +190,12 @@ export type PrimitiveEntry = {
    * no part a consumer asks about, which is most of them.
    */
   readonly role: string | undefined
+  /**
+   * Declared copy prop names, still raw: the registry is what checks them.
+   * `undefined` is carried through rather than defaulted to `[]`, because the
+   * two mean different things here and all the way out to `copyIn`.
+   */
+  readonly copy: readonly string[] | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -232,6 +259,7 @@ export const definePrimitive = <
   frames: definition.frames ?? [],
   behaviours: definition.behaviours ?? [],
   role: definition.role,
+  copy: definition.copy,
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

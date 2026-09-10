@@ -204,3 +204,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0118](0118-a-citation-is-a-claim-and-only-a-link-can-be-checked.md) | A citation is a claim, and only a link can be checked | Accepted | §1 (process) |
 | [0119](0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md) | The page a reader gets is the one `pnpm verify` reads last | Accepted | §1 (process) |
 | [0120](0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md) | A shared ledger is union-merged, and a generated file is regenerated | Accepted | §1 (process) |
+| [0121](0121-part-of-a-tree-is-rendered-by-the-seam-and-the-seam-mounts-the-theme.md) | Part of a tree is rendered by the seam, and the seam is what mounts the theme | Accepted | §1 |
+| [0122](0122-a-primitive-says-which-of-its-props-a-reader-reads.md) | A primitive says which of its props a reader reads, and empty is not silence | Accepted | §1 |

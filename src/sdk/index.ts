@@ -8,6 +8,7 @@
 export * from "./audit.js"
 export * from "./catalogue.js"
 export * from "./conformance.js"
+export * from "./copy.js"
 export * from "./definition.js"
 export * from "./interactivity.js"
 export * from "./pairings.js"

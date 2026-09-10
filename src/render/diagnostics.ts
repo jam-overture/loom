@@ -217,6 +217,22 @@ export type RenderDiagnostic =
       readonly code: "theme-values-unmounted"
       readonly nodeId: NodeId
     }
+  | {
+      /**
+       * An excerpt was asked for by node id and this tree holds no such node.
+       * Nothing rendered, because there is nothing to render — the one case in
+       * this union where the element is null rather than a page missing a part
+       * of itself.
+       *
+       * It is a diagnostic rather than a thrown error for the reason every
+       * other one here is: the id came from somewhere — a URL, a row in a
+       * review queue, a link in a record — and the node it named can have been
+       * deleted by an ordinary change since. A preview of a part that is gone
+       * is a thing to say, not a crash.
+       */
+      readonly code: "excerpt-absent"
+      readonly nodeId: NodeId
+    }
 
 const describeIssues = (issues: readonly PropsIssue[]): string =>
   issues.map((issue) => `${issue.path}: ${issue.message}`).join("; ")
@@ -261,6 +277,8 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} takes the "${diagnostic.behaviour}" behaviour and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
     case "theme-values-unmounted":
       return `this render was asked for the theme's values and node ${diagnostic.nodeId} mounted no theme, so every reference on the page was left as written — nothing outside a browser will resolve them`
+    case "excerpt-absent":
+      return `an excerpt was asked for node ${diagnostic.nodeId} and this tree holds no such node, so nothing was rendered — the id may name a part a later revision removed`
     default:
       return assertNever(diagnostic, "describeRenderDiagnostic")
   }

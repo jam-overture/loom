@@ -2,6 +2,7 @@ import { createElement, Fragment, type CSSProperties, type ReactNode } from "rea
 
 import { NO_DATA, type DataResolution, type NodeData } from "../data/resolution.js"
 import type { FrameOriginRegistry } from "../frame/origin.js"
+import type { NodeId } from "../ids.js"
 import { NO_FRAMES, type NodeFrames } from "../frame/resolution.js"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
@@ -11,7 +12,7 @@ import { themeVariables, type ThemeVariables } from "../theme/apply.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
 import type { SubmissionOutcome, SubmissionResolution } from "../submit/resolution.js"
-import { textOf } from "../tree/navigation.js"
+import { findNode, textOf } from "../tree/navigation.js"
 import type { ElementNode, LoomNode, SlotNode } from "../tree/node.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -702,12 +703,21 @@ const composeText = (
   }
 }
 
-export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOutput => {
-  const diagnostics: RenderDiagnostic[] = []
-  const collect = (diagnostic: RenderDiagnostic): void => {
-    diagnostics.push(diagnostic)
-  }
-
+/**
+ * One walk, from wherever it is told to start.
+ *
+ * The theme is the *tree's* — resolved from the root's reserved props whichever
+ * node this render begins at, because a theme is a fact about the document and
+ * not about the node you happened to ask for. What differs between a page and an
+ * excerpt is only who mounts it, which is `renderLoomExcerpt`'s business and not
+ * this function's.
+ */
+const renderFrom = (
+  tree: LoomTree,
+  from: LoomNode,
+  options: RenderOptions,
+  collect: (diagnostic: RenderDiagnostic) => void
+): { readonly element: ReactNode; readonly theme: ResolvedTheme | undefined } => {
   const theme = mountedTheme(tree, options.themes, collect)
 
   /**
@@ -720,7 +730,7 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     collect({ code: "theme-values-unmounted", nodeId: tree.root.id })
   }
 
-  const element = renderNode(tree.root, {
+  const element = renderNode(from, {
     resolver: options.resolver,
     validator: options.validator,
     editMode: options.editMode ?? false,
@@ -740,5 +750,86 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     collect,
   })
 
+  return { element, theme }
+}
+
+export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOutput => {
+  const diagnostics: RenderDiagnostic[] = []
+  const collect = (diagnostic: RenderDiagnostic): void => {
+    diagnostics.push(diagnostic)
+  }
+
+  const { element, theme } = renderFrom(tree, tree.root, options, collect)
+
   return { element, diagnostics, ...(theme ? { theme } : {}) }
+}
+
+export type ExcerptOutput = RenderOutput & {
+  /**
+   * Whether the tree holds the node asked for. `false` comes with a null
+   * element and an `excerpt-absent` diagnostic; it is here because it is the
+   * one thing every caller branches on, and scanning a diagnostic array to
+   * decide whether to render a fallback is worse than being told.
+   */
+  readonly found: boolean
+}
+
+/**
+ * Part of a tree, rendered on its own and wearing the tree's theme.
+ *
+ * A preview, an inspector and a side-by-side are all the same shape: one node of
+ * a page, shown somewhere that is not the page. Rendering one by hand loses the
+ * theme silently. 0049 mounts a theme on the *root primitive* — `loom.page` puts
+ * the variables on its own element — so a walk that starts anywhere else hands
+ * `var(--loom-…)` to a subtree with nothing above it to resolve them, and
+ * `resolveTheme` is right to call that node unthemed. Nothing is wrong; there is
+ * simply no theme, and no diagnostic says so because none is owed.
+ *
+ * So the seam mounts it, on an element of its own around the excerpt:
+ *
+ * - **The excerpt is self-contained.** It carries the variables it references,
+ *   whichever node it starts from, and can be dropped into a page that owns a
+ *   different theme or none at all.
+ * - **The wrapper is always there and always carries the theme**, the root
+ *   included. An excerpt of the root then mounts the same variables twice, on
+ *   nested elements, which is the same values by construction — and the rule a
+ *   caller can hold is *the excerpt carries its theme* rather than *the excerpt
+ *   carries its theme unless you asked for the node that carries it already*.
+ *
+ * Everything else is the page render: the same walk, the same resolvers, the
+ * same diagnostics. The excerpt's root is not the tree's root, so it does not
+ * receive the root's `theme` prop, its editable attributes name no tree, and a
+ * `loom:theme` sitting on it is `theme-misplaced` — all of which is what those
+ * rules already say, applied to a node that is not the root.
+ */
+export const renderLoomExcerpt = (
+  tree: LoomTree,
+  nodeId: NodeId,
+  options: RenderOptions
+): ExcerptOutput => {
+  const diagnostics: RenderDiagnostic[] = []
+  const collect = (diagnostic: RenderDiagnostic): void => {
+    diagnostics.push(diagnostic)
+  }
+
+  const from = findNode(tree.root, nodeId)
+
+  if (!from) {
+    collect({ code: "excerpt-absent", nodeId })
+
+    return { element: null, diagnostics, found: false }
+  }
+
+  const { element, theme } = renderFrom(tree, from, options, collect)
+
+  return {
+    element: createElement(
+      "div",
+      { style: theme ? themeStyle(theme) : undefined },
+      element
+    ),
+    diagnostics,
+    found: true,
+    ...(theme ? { theme } : {}),
+  }
 }

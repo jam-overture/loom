@@ -266,3 +266,59 @@ describe("roles", () => {
     })
   })
 })
+
+describe("registering a primitive that says what a reader reads", () => {
+  const stat = (copy: readonly string[] | undefined) =>
+    definePrimitive({
+      type: "loom.stat",
+      description: "One figure and what it counts",
+      props: z.object({ value: z.string(), label: z.string() }).strict(),
+      ...(copy ? { copy } : {}),
+      component: () => null,
+    })
+
+  it("refuses a declaration naming a prop the schema does not declare", () => {
+    const built = createPrimitiveRegistry([stat(["value", "headline"])])
+
+    expect(built.ok).toBe(false)
+    if (built.ok) return
+
+    expect(built.error).toEqual({
+      code: "undeclared-copy-prop",
+      type: "loom.stat",
+      prop: "headline",
+    })
+    expect(describeRegistryError(built.error)).toContain("headline")
+  })
+
+  /**
+   * The distinction the whole declaration exists for. A default would collapse
+   * these two into one answer, and `copyIn` reports one and trusts the other.
+   */
+  it("keeps an empty declaration apart from no declaration at all", () => {
+    const declared = createPrimitiveRegistry([stat([])])
+    const silent = createPrimitiveRegistry([stat(undefined)])
+    if (!declared.ok || !silent.ok) throw new Error("expected two registries")
+
+    expect(declared.value.copyFor(type("loom.stat"))).toEqual([])
+    expect(silent.value.copyFor(type("loom.stat"))).toBeUndefined()
+  })
+
+  it("carries the declaration through, and answers for a type nobody registered", () => {
+    const built = createPrimitiveRegistry([stat(["value", "label"])])
+    if (!built.ok) throw new Error("expected a registry")
+
+    expect(built.value.copyFor(type("loom.stat"))).toEqual(["value", "label"])
+    expect(built.value.copyFor(type("acme.widget"))).toBeUndefined()
+  })
+
+  it("hands out a list that cannot be pushed to", () => {
+    const built = createPrimitiveRegistry([stat(["value"])])
+    if (!built.ok) throw new Error("expected a registry")
+
+    const copy = built.value.copyFor(type("loom.stat")) as unknown as string[]
+
+    expect(() => copy.push("label")).toThrow()
+    expect(built.value.copyFor(type("loom.stat"))).toEqual(["value"])
+  })
+})
