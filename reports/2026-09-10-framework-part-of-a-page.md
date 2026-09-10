@@ -140,7 +140,10 @@ construction, which is the case 0120 covers.
   `{ heading: "value", detail: "label" }` would let a consumer ask for the
   leading word. Both filings want the words in order, so a list is what shipped,
   and a list can grow into a map without a consumer changing what it asks.
-- **Nothing here changes the queue.** Twenty-nine pull requests are open and
-  `main` has not moved in nine days. This is the twentieth unit on one branch,
-  which is the shape that keeps the lane from conflicting with itself and is not
-  a shape anybody would choose for review.
+- **Nothing here changes the queue.** **Thirty-seven** pull requests are open —
+  counted, not estimated — and `main` has not moved in nine days. Last night's
+  `pnpm queue` measured thirty and put twenty-eight of them behind three lines in
+  `.gitattributes`; seven more have opened since, so that measurement is already
+  a snapshot of a smaller queue than the one there is. This is the twentieth unit
+  on one branch, which is the shape that keeps the lane from conflicting with
+  itself and is not a shape anybody would choose for review.
