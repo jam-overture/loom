@@ -10,7 +10,8 @@ import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { nameFor } from "@/app/(portal)/_lib/page-name"
+import { pageNameOf, unnamed } from "@/app/(portal)/_lib/page-name"
+import { namesInTree } from "@/app/(portal)/_lib/part-name"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import {
   anchorOf,
@@ -142,6 +143,26 @@ const HistoryPage = async ({
    * undo and answering on the click (the same reason `undoRevision` needs one).
    */
   const seed = seedFor(scope.data)
+
+  /**
+   * The page as it stands, read once — for its name, and for the names of the
+   * parts every sentence on this screen is about.
+   *
+   * One head read where there used to be one, doing two jobs. `nameFor` made
+   * the same read and threw the tree away; the rows below need the tree itself,
+   * because a delta names what it touched by id and the words for those ids are
+   * in the tree or nowhere.
+   *
+   * "Or nowhere" is not quite true, and the exception is the interesting half:
+   * a part a revision *deleted* is in no tree at all, and its name survives
+   * only inside the inverse of the change that removed it. Each row merges what
+   * its own inverse carries over this, which is why the map is passed down
+   * rather than applied here.
+   */
+  const head = await portalStore.head(scope.data)
+  const pageName = head.ok ? pageNameOf(head.value) : unnamed(scope.data)
+  const standing = head.ok ? namesInTree(head.value) : new Map()
+
   const reversals: ReadonlyMap<number, Reversal | undefined> =
     seed === undefined
       ? new Map()
@@ -149,18 +170,13 @@ const HistoryPage = async ({
           await Promise.all(
             newestFirst.map(
               async (stored) =>
-                [stored.revision, await previewReversal(portalStore, scope.data, seed, stored.revision)] as const
+                [
+                  stored.revision,
+                  await previewReversal(portalStore, scope.data, seed, stored.revision, standing),
+                ] as const
             )
           )
         )
-
-  /**
-   * What this page is called, for the sentence that says which page it is.
-   *
-   * One bounded head read, on a screen that has already read a page of the log
-   * and one inverse per row. A failed read costs the name and nothing else.
-   */
-  const pageName = await nameFor(portalStore, scope.data)
 
   /**
    * A revision this log does not hold is not an error to the store — it answers
@@ -221,6 +237,7 @@ const HistoryPage = async ({
               stored={stored}
               anchored={stored.revision === anchor}
               reversal={reversals.get(stored.revision)}
+              standing={standing}
             />
           ))}
         </ul>

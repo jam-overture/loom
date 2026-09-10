@@ -295,3 +295,60 @@ describe("every heading a reader meets", () => {
     }
   )
 })
+
+describe("every plain sentence a reader meets", () => {
+  /**
+   * **A `PlainLine` reaches a reader through `PlainSentence`, and nowhere else.**
+   *
+   * `PlainSentence` was written on 29 August for a reason it did not manage to
+   * enforce: a sentence held as three pieces can be perfectly assembled and
+   * still rendered with a piece dropped, and no `readingOf` test can see that.
+   * Three components went on spreading a line by hand anyway — the revision row,
+   * the reversal note and the proposal effect — for a fortnight, each with its
+   * own `<span className="font-mono">` around the subject.
+   *
+   * That stopped being cosmetic when a subject stopped always being an
+   * identifier. A named part is *words and an id*, and every one of those
+   * hand-written spans would have set the words in monospace along with the id
+   * — which undoes the naming, because a reader skims monospace as machinery
+   * and skips it. Widening `PlainLine["subject"]` broke all three at compile
+   * time. This rule is for the failure a type cannot reach: the next component,
+   * written by hand, that happens to get it right on the day it is written.
+   *
+   * The shape rather than the field name, because `before` and `after` are not
+   * `PlainLine`'s alone — `ValueChange` on `/portal/pages` uses the same two
+   * words for the value a change wrote over and the one it wrote. What is
+   * unmistakable is the spread itself: the sentence's opening, then its subject
+   * in a span of the component's own making.
+   */
+  const HAND_SPREAD = /\{[A-Za-z.]*\.before\}\s*<[^>]*>\s*\{[A-Za-z.]*\.subject\}/u
+
+  /**
+   * The detector, checked against a line written the old way.
+   *
+   * A guard that has quietly stopped matching passes for ever and reports
+   * nothing, which is worse than one that fails — this lane disarmed a demo
+   * guard exactly that way on 8 September by renaming the thing it looked for.
+   * So the pattern is proved on the markup it was written to catch before it is
+   * trusted on the markup it finds.
+   */
+  it("recognises a line spread by hand", () => {
+    expect(
+      HAND_SPREAD.test('{line.before}<span className="font-mono">{line.subject}</span>{line.after}')
+    ).toBe(true)
+  })
+
+  it("does not mistake a value that merely has a before for a sentence", () => {
+    expect(HAND_SPREAD.test('{change.before === null ? <Absent /> : <span>{change.before}</span>}')).toBe(
+      false
+    )
+  })
+
+  const byHand = sourcesUnder(GROUP)
+    .filter((entry) => HAND_SPREAD.test(entry.source))
+    .map((entry) => entry.file.slice(GROUP.length + 1))
+
+  it("finds no component in the lane rendering a sentence by hand", () => {
+    expect(byHand).toEqual([])
+  })
+})

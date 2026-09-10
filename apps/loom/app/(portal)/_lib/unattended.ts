@@ -1,7 +1,7 @@
 import type { ProposalId, TreeId } from "@loom/runtime"
 import type { IntentEpisode, ProposalEpisode } from "@loom/runtime/telemetry"
 
-import { plainOperation } from "./delta-summary"
+import { describeOperation, plainOperation, type OperationDescription } from "./delta-summary"
 import { plainMoment } from "./when"
 import {
   ASK_ORIGINS,
@@ -62,6 +62,17 @@ export type UnattendedChange = {
   /** What it did, one sentence per operation, in the delta's order. */
   readonly did: readonly PlainLine[]
   /**
+   * The same operations as the delta model states them, for the disclosure.
+   *
+   * The sentences above name a part rather than spelling its type — *the card*
+   * where they used to read `n_x1, a loom.card,`. The exact type is what a
+   * reviewer checking the portal's wording against the record needs, so it
+   * moves here rather than off the card: this disclosure held the Gate's
+   * reasoning and never the delta, which is the one thing on this card a reader
+   * cannot get anywhere else.
+   */
+  readonly record: readonly OperationDescription[]
+  /**
    * Why Loom did not stop to ask, in the Gate's own reason rather than in a
    * reassurance. Absent when the record does not carry the judgment.
    */
@@ -100,7 +111,15 @@ const changeOf = (
     whenIso,
     when: plainMoment(whenIso),
     who: actor === undefined ? `${ASK_ORIGINS[origin].label}.` : `${actor} asked for this.`,
-    did: proposal.delta.operations.map(plainOperation),
+    /*
+     * A lambda rather than `.map(plainOperation)`, and the difference is not
+     * style: `plainOperation` takes a second argument now, and `map` hands its
+     * callback the index. Passing the index where a map of names belongs is a
+     * type error today and would have been a silent one had the parameter been
+     * anything looser. The same trap is one line down in `record`.
+     */
+    did: proposal.delta.operations.map((operation) => plainOperation(operation)),
+    record: proposal.delta.operations.map((operation) => describeOperation(operation)),
     why:
       proposal.disposition === undefined
         ? undefined

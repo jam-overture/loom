@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema, primitiveTypeSchema, type TreeDelta } from "@loom/runtime"
+import { nodeIdSchema, primitiveTypeSchema, type LoomNode, type TreeDelta } from "@loom/runtime"
 
 import { describeOperation, plainOperation, summariseOperations } from "./delta-summary"
+import { partNameOf } from "./part-name"
 import { readingOf } from "./vocabulary"
 
 const nodeId = (id: string) => nodeIdSchema.parse(id)
@@ -128,11 +129,33 @@ describe("plainOperation", () => {
           children: [],
         },
       })
-    ).toBe("Added n_new, a loom.heading, inside n_root.")
+    ).toBe("Added the heading n_new inside n_root.")
   })
 
-  /** Text has no name of its own, and "text" is the runtime's word for it. */
-  it("calls inserted text the words", () => {
+  /**
+   * An insert never needs the names map: it carries the node it places, so the
+   * part is named from the operation itself and no caller can fail to pass
+   * enough for this sentence to read plainly.
+   */
+  it("names an insert from the node it carries, with no names map given", () => {
+    expect(
+      reading({
+        op: "insert",
+        parentId: nodeId("n_root"),
+        index: 0,
+        node: {
+          kind: "element",
+          id: nodeId("n_new"),
+          type: primitiveTypeSchema.parse("loom.heading"),
+          props: {},
+          children: [{ kind: "text", id: nodeId("n_t"), value: "Autumn arrivals" }],
+        },
+      })
+    ).toBe("Added the heading “Autumn arrivals” n_new inside n_root.")
+  })
+
+  /** Text has no name of its own. It is its words, so that is what it is called. */
+  it("calls inserted text the words it says", () => {
     expect(
       reading({
         op: "insert",
@@ -140,7 +163,31 @@ describe("plainOperation", () => {
         index: 0,
         node: { kind: "text", id: nodeId("n_t"), value: "Welcome" },
       })
-    ).toBe("Added n_t, the words, inside n_head.")
+    ).toBe("Added the words “Welcome” n_t inside n_head.")
+  })
+
+  /**
+   * The half an insert cannot do for itself. A removal carries an id and
+   * nothing else, so the sentence is only as plain as what the screen could
+   * find out — and where it found out nothing, it says exactly what it always
+   * said rather than a phrase standing in for the id.
+   */
+  it("names a removal from the map, and keeps the bare id when it is not in one", () => {
+    const card: LoomNode = {
+      kind: "element",
+      id: nodeId("n_card"),
+      type: primitiveTypeSchema.parse("loom.card"),
+      props: {},
+      children: [{ kind: "text", id: nodeId("n_t"), value: "Free returns" }],
+    }
+    const names = new Map([[card.id, partNameOf(card)]])
+
+    expect(readingOf(plainOperation({ op: "remove", nodeId: nodeId("n_card") }, names))).toBe(
+      "Deleted the card “Free returns” n_card and everything inside it."
+    )
+    expect(readingOf(plainOperation({ op: "remove", nodeId: nodeId("n_gone") }, names))).toBe(
+      "Deleted n_gone and everything inside it."
+    )
   })
 
   it("says a deletion takes everything under it", () => {

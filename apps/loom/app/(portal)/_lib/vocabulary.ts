@@ -18,6 +18,8 @@ import {
   type UnaddressableReason,
 } from "@loom/runtime/react"
 
+import { partReading, type PartName } from "./part-name"
+
 import { screenName } from "./screen-names"
 
 /*
@@ -110,14 +112,31 @@ export type PlainState = PlainWord & {
 export type PlainLine = {
   /** Everything before the name, ending in whatever space the sentence needs. */
   readonly before: string
-  /** The name itself. Rendered monospace; never reworded. */
-  readonly subject: string
+  /**
+   * The name itself. Never reworded.
+   *
+   * A bare `string` is an identifier and is rendered monospace. A `PartName` is
+   * a part of a page that has been named — the words and the id, in that order,
+   * with only the id in monospace — and it is what a sentence about something
+   * that happened to a page should carry wherever the caller could find one out.
+   *
+   * The union is deliberate and it is doing work beyond politeness: it made
+   * every place that renders a subject fail to compile until it went through
+   * `PlainSentence`, and there were three of them still spreading the line by
+   * hand a fortnight after that component was written to stop exactly that.
+   */
+  readonly subject: string | PartName
   /** Everything after it, including the full stop. */
   readonly after: string
 }
 
 /** The whole sentence, as a reader meets it. Assert this, not the parts. */
-export const readingOf = (line: PlainLine): string => `${line.before}${line.subject}${line.after}`
+export const readingOf = (line: PlainLine): string =>
+  `${line.before}${subjectReading(line.subject)}${line.after}`
+
+/** A subject as text, whichever of the two it is. */
+export const subjectReading = (subject: string | PartName): string =>
+  typeof subject === "string" ? subject : partReading(subject)
 
 /**
  * "title", "title and width", "title, width and gap".

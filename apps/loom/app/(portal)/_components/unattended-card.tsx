@@ -5,6 +5,7 @@ import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 import type { UnattendedChange } from "@/app/(portal)/_lib/unattended"
+import { readingOf } from "@/app/(portal)/_lib/vocabulary"
 
 /**
  * One change that reached a page with nobody asked.
@@ -47,7 +48,7 @@ export const UnattendedCard = ({
      */}
     <ul className="flex flex-col gap-1 text-sm">
       {change.did.map((line, index) => (
-        <li key={`${line.subject}-${index}`}>
+        <li key={`${readingOf(line)}-${index}`}>
           <PlainSentence line={line} />
         </li>
       ))}
@@ -120,6 +121,24 @@ export const UnattendedCard = ({
           <dd className="font-mono">{change.revision}</dd>
         </div>
       </dl>
+
+      {/*
+       * The delta, as the delta model states it. New here, and it is the half
+       * that keeps the sentences above honest: they name a part — *the card* —
+       * where they used to spell `a loom.card` at the reader, and the exact
+       * type has to stay somewhere. This is that somewhere.
+       */}
+      <ul className="flex flex-col gap-1">
+        {change.record.map((described, index) => (
+          <li
+            key={`${described.subject}-${index}`}
+            className="border-edge-subtle border-l-2 pl-3"
+          >
+            {described.verb} <span className="font-mono">{described.subject}</span>{" "}
+            <span className="text-ink-muted">{described.detail}</span>
+          </li>
+        ))}
+      </ul>
       <p>
         Nobody was asked because the Gate&rsquo;s rules did not require it. That is a property of
         the policy this deployment runs, not of this change &mdash; what Loom may do here without

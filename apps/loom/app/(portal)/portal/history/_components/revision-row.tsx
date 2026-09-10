@@ -1,10 +1,13 @@
 import type { StoredRevision } from "@loom/runtime/store"
 
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeOperation, summariseOperations } from "@/app/(portal)/_lib/delta-summary"
 import { revisionAnchorId } from "@/app/(portal)/_lib/history-link"
+import { firstNamed, namesInOperations, type PartName } from "@/app/(portal)/_lib/part-name"
 import type { Reversal } from "@/app/(portal)/_lib/reversal"
 import { revisionView } from "@/app/(portal)/_lib/revision-view"
+import { readingOf } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
 import { ReversalNote } from "./reversal-note"
@@ -52,14 +55,36 @@ export const RevisionRow = ({
   stored,
   anchored = false,
   reversal,
+  standing = new Map(),
 }: {
   readonly stored: StoredRevision
   /** True when this is the revision a link sent the reader here to read (0043). */
   readonly anchored?: boolean
   /** What undoing this would restore and cost, read from the log (0035, 0016). */
   readonly reversal?: Reversal | undefined
+  /**
+   * The parts of the page as it stands now, named, by id.
+   *
+   * A forward delta names what it touched by id and nothing else, so a row that
+   * had only its own delta could say `Deleted n_seed9` and no more. What this
+   * row can add comes from two places and they answer different halves: this
+   * map covers anything still on the page, and the row's own inverse covers the
+   * subtree the change destroyed — which is in no tree anywhere and is exactly
+   * what somebody reading a removal wants named.
+   */
+  readonly standing?: ReadonlyMap<string, PartName>
 }) => {
-  const view = revisionView(stored)
+  /**
+   * Merged in this order on purpose. A part that still exists is named as it is
+   * *today*, so a reader comparing this row against the page in front of them
+   * sees the same words; a part that does not is named as the inverse
+   * remembers it, because that is the only account of it left.
+   */
+  const names = firstNamed(
+    standing,
+    reversal?.kind === "revertable" ? namesInOperations(reversal.inverse) : new Map()
+  )
+  const view = revisionView(stored, names)
 
   return (
     <li
@@ -90,12 +115,10 @@ export const RevisionRow = ({
       <ul className="flex flex-col gap-1">
         {view.changes.map((change, index) => (
           <li
-            key={`${change.subject}-${index}`}
+            key={`${readingOf(change)}-${index}`}
             className="border-edge-subtle border-l-2 pl-3 text-xs"
           >
-            {change.before}
-            <span className="font-mono">{change.subject}</span>
-            {change.after}
+            <PlainSentence line={change} />
           </li>
         ))}
       </ul>
@@ -203,15 +226,45 @@ export const RevisionRow = ({
         </ul>
 
         {reversal?.kind === "revertable" && (
-          <p>
-            An undo would apply{" "}
-            <span className="font-mono">{summariseOperations(reversal.inverse)}</span>.{" "}
-            {reversal.discards.length === 0
-              ? "Nothing later depends on it."
-              : `It writes over ${reversal.discards.length} later revision${
-                  reversal.discards.length === 1 ? "" : "s"
-                }.`}
-          </p>
+          <>
+            <p>
+              An undo would apply{" "}
+              <span className="font-mono">{summariseOperations(reversal.inverse)}</span>.{" "}
+              {reversal.discards.length === 0
+                ? "Nothing later depends on it."
+                : `It writes over ${reversal.discards.length} later revision${
+                    reversal.discards.length === 1 ? "" : "s"
+                  }.`}
+            </p>
+
+            {/*
+             * The inverse operations in full, and they are new here.
+             *
+             * The plain sentence above used to carry the restored node's exact
+             * type as an apposition — `, a loom.card,` — because that was the
+             * only place on the row it appeared. Naming the part says "the
+             * card" instead, which reads better and says less: `loom.card` is
+             * what a reader checking the portal's wording against the delta
+             * model needs, and the summary beside it is four verbs. So the
+             * type moved down here rather than off the screen, which is the
+             * rule this whole disclosure exists to keep.
+             */}
+            <ul className="flex flex-col gap-1">
+              {reversal.inverse.map((operation, index) => {
+                const described = describeOperation(operation)
+
+                return (
+                  <li
+                    key={`inverse-${described.subject}-${index}`}
+                    className="border-edge-subtle border-l-2 pl-3"
+                  >
+                    {described.verb} <span className="font-mono">{described.subject}</span>{" "}
+                    <span className="text-ink-muted">{described.detail}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </>
         )}
 
         {reversal?.kind === "blocked" && <p className="font-mono">{reversal.technical}</p>}
