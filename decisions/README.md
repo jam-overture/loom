@@ -204,3 +204,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0118 | *No record on this branch* | — | — |
 | 0119 | *No record on this branch* | — | — |
 | [0120](0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md) | A starting composition is a subtree a catalogue hands to the ordinary seam | Accepted | §4b |
+| 0121 | *No record on this branch* | — | — |
+| 0122 | *No record on this branch* | — | — |
+| 0123 | *No record on this branch* | — | — |
+| 0124 | *No record on this branch* | — | — |
+| [0125](0125-a-geometric-property-is-asserted-over-the-page-not-the-primitive.md) | A geometric property is asserted over the page, not the primitive | Accepted | §4b |

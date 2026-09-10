@@ -29,6 +29,7 @@ import {
 } from "../frame/origin.js"
 
 import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
+import { STARTER_COMPOSITIONS } from "./compositions/index.js"
 import { LIBRARY_CLASS } from "./stylesheet.js"
 
 const registryOf = (): PrimitiveRegistry => {
@@ -900,6 +901,31 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
   return { stylesheet: matched ?? "", tree: markup.slice((matched ?? "").length) }
 }
 
+/**
+ * All nine starting compositions on one page, in the order a landing page uses
+ * them.
+ *
+ * The fixtures above are each a page somebody wrote by hand, and every one of
+ * them arranges primitives the way its author happened to need. The bands are
+ * the arrangement a *host* gets by dropping in what the catalogue offers, and
+ * they are denser than anything hand-written here — six feature tiles in a
+ * three-column grid, three tiers side by side, five questions in a column.
+ * Density is what makes a box-sizing defect visible, which is why the
+ * geometric invariant runs over this as well as over the twenty.
+ */
+const everyBandPage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory()
+): LoomTree =>
+  createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: STARTER_COMPOSITIONS.map((composition) => composition.build(idFactory)),
+    }),
+    idFactory
+  )
+
 describe("the composed vocabulary", () => {
   it("covers every registered primitive across the ten fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
@@ -933,16 +959,68 @@ describe("the composed vocabulary", () => {
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
   })
 
-  it("never pads a full-width band past the parent it sits in", () => {
+  it("never sizes a box in percent and then pads it past the track it sits in", () => {
     /**
-     * A phone-width horizontal scroll, asserted as an invariant rather than
-     * caught by eye. An inline style carries no reset, so `box-sizing` is
-     * `content-box` and a band that says `width: 100%` and then pads itself is
-     * wider than its parent by exactly its padding — on a 390px screen the
-     * library was rendering a 486px page. Nothing in a pure render can notice
-     * that, and no test before this one could either.
+     * An inline style carries no reset, so `box-sizing` is `content-box`: an
+     * element that states a **percentage size** on one axis and then pads or
+     * borders itself on that same axis is larger than its parent by exactly
+     * that padding and border. Nothing in a pure render can notice it, and
+     * nothing but a picture ever has.
+     *
+     * This started as the inline half alone — `width: 100%` plus
+     * `padding-inline`, which was rendering a 486px page on a 390px screen.
+     * The block half cost more before anybody saw it. `loom.feature` combined
+     * `height: 100%` with padding from the day it shipped, so every tile
+     * overflowed its own grid row by 66px; with one row it hung over the band
+     * below, and with two rows the second row was drawn **through** the first.
+     * It stayed invisible for a month because no fixture had ever put six
+     * tiles in a three-column grid, and the assertion that existed only looked
+     * at widths.
+     *
+     * So the invariant is stated once, for both axes, over every fixture this
+     * file builds and every band the catalogue ships — and it is stated in
+     * terms of *any* percentage rather than `100%`, because a card at `50%`
+     * overflows its track by the same padding.
+     *
+     * The three ways it was too narrow are each worth keeping in mind: it
+     * checked one axis, it checked `padding-inline` but not the `padding`
+     * shorthand every offender actually used, and it ran over twelve of the
+     * twenty fixtures. A defect class is only closed by the assertion that
+     * covers all of it.
      */
-    const offenders = [
+    const nonZero = "(?!0(?:;|$))"
+
+    const overflows = (style: string, axis: "block" | "inline"): boolean => {
+      if (style.includes("box-sizing:border-box")) return false
+      if (!new RegExp(`(?:^|;)${axis === "block" ? "height" : "width"}:[^;]*%`).test(style)) {
+        return false
+      }
+
+      const sides = axis === "block" ? "block|top|bottom" : "inline|left|right"
+
+      return (
+        new RegExp(`(?:^|;)padding(?:-(?:${sides})(?:-\\w+)?)?:${nonZero}`).test(style) ||
+        new RegExp(`(?:^|;)border(?:-(?:${sides})(?:-\\w+)?)?:${nonZero}(?!none)`).test(style)
+      )
+    }
+
+    /**
+     * Rendered in edit mode so every node carries its `data-loom-type`, which
+     * is what turns "some element overflows" into a message naming the
+     * primitive to open.
+     */
+    const blame = (markup: string): readonly string[] =>
+      [...markup.matchAll(/style="([^"]*)"/g)].flatMap((match) => {
+        const style = (match[1] ?? "").replace(/&quot;/g, '"')
+        const types = [...markup.slice(0, match.index).matchAll(/data-loom-type="([^"]+)"/g)]
+        const type = types[types.length - 1]?.[1] ?? "unknown"
+
+        return (["block", "inline"] as const)
+          .filter((axis) => overflows(style, axis))
+          .map((axis) => `${type} overflows on the ${axis} axis: ${style}`)
+      })
+
+    const fixtures = [
       samplePage,
       marketingPage,
       pricingPage,
@@ -955,18 +1033,19 @@ describe("the composed vocabulary", () => {
       prosePage,
       tablePage,
       datedPage,
-    ].flatMap((fixture) =>
-      [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
-        .map(([, style]) => style ?? "")
-        .filter(
-          (style) =>
-            /padding-inline[^:]*:(?!0)/.test(style) &&
-            style.includes("width:100%") &&
-            !style.includes("box-sizing:border-box")
-        )
-    )
+      comparisonPage,
+      motionPage,
+      bookablePage,
+      explainerPage,
+      conversationPage,
+      furniturePage,
+      productPage,
+      shelfPage,
+    ].flatMap((fixture) => blame(render(fixture(EDITORIAL), true).markup))
 
-    expect(offenders).toEqual([])
+    const bands = blame(render(everyBandPage(EDITORIAL), true).markup)
+
+    expect([...new Set([...fixtures, ...bands])]).toEqual([])
   })
 
   it("renders a marketing page with nothing left unhonoured", () => {

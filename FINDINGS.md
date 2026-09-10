@@ -13669,3 +13669,131 @@ branch — it would produce a *wrong* one.
 
 Nothing has merged since 1 September. Amending step 3 remains the fix that lasts
 and a routine cannot make it.
+
+---
+
+## 2026-09-10 — the sweep the feature-tile finding asked for: eleven offenders across nine primitives
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run
+
+The 9 September finding closed `loom.feature` and ended *"**worth a sweep**: any
+primitive that combines a percentage size with padding has the same latent
+defect, and nothing checks for it. That sweep is this lane's and is not in this
+run."* This is that run.
+
+**Eleven offenders across nine primitives**, every one of them the same shape as
+`loom.feature` and every one of them shipped: `loom.article`,
+`loom.comparison-table`, `loom.credential`, `loom.embed`, `loom.listing`,
+`loom.product`, `loom.quote` (both emphases), `loom.table`, `loom.tier` (both
+emphases). Nine of the eleven are the block axis — a card in a grid row — and
+two are the inline axis, where a bordered table wrapper was two pixels wider
+than its band.
+
+Measured in a real browser at 1280px and at a true 390px, both palettes: **18
+elements overflowing their parent before, 0 after, worst case 66px.**
+`scrollWidth === innerWidth` throughout, before and after, which is the reason
+the inline half of this had gone unnoticed — the page never scrolled sideways,
+the cards simply overlapped whatever was under them.
+
+**An invariant that was too narrow in three separate ways is why it lasted.**
+The test that existed — *"never pads a full-width band past the parent it sits
+in"* — checked the inline axis only, matched `padding-inline` but not the
+`padding` shorthand that every actual offender used, and ran over twelve of the
+twenty fixtures. It passed for a month with nine primitives in breach.
+[0125](decisions/0125-a-geometric-property-is-asserted-over-the-page-not-the-primitive.md)
+records the rule that replaces it: a property about a box and its parent is
+asserted over every fixture at once, in edit mode so the failure names the
+primitive, for both axes and any percentage.
+
+---
+
+## 2026-09-10 — a box that sits flush against its parent's edge cannot be judged from markup, and needs a browser
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a real gap, deliberately not papered over with a test
+
+The 9 September finding *"a band narrower than the page sat against its left
+edge"* was closed pointwise on `loom.section` and `loom.faq-list`. This run tried
+to close it as a **class**, the way the box-sizing one was closed, and could not.
+
+The candidate rule is *an element with a `max-width` and no auto inline margin
+sits flush left*. Over the nine-band page it finds six elements and **all six are
+correct**: centring in this library is usually the parent's job, not the child's.
+`loom.page` caps its measure column at `1120px` with no margin of its own and is
+centred by `align-items: center` on the root above it; `loom.hero`'s `44rem` text
+column and `loom.prose`'s `68ch` measure are centred or deliberately start-aligned
+by the same mechanism. A test would have been six false accusations, and making
+them pass would have meant adding auto margins that change nothing.
+
+**The property is real and is about the cascade, so it needs a layout engine.**
+The check is one line against a rendered page — `el.getBoundingClientRect()`
+against its parent's, looking for a box narrower than its parent and hard against
+one edge — and this lane has no harness to put it in. #250 is building one. When
+it lands, this is the first check to add to it, and the nine-band page is the
+fixture it wants.
+
+A second candidate was tried and rejected for the opposite reason: *a sideways
+scroller needs `min-width: 0`*. It is redundant. A flex or grid item's automatic
+minimum size is content-based **only while its overflow in that axis is
+`visible`**, and `overflow-x: auto` is exactly what these elements carry — so
+`loom.code`, `loom.table` and `loom.comparison-table` are already safe and the
+`min-width: 0` beside each is belt-and-braces. Asserting it would have meant
+editing source to satisfy a rule that states nothing.
+
+---
+
+## 2026-09-10 — a full-page screenshot of a tall dark page ghosts content between slices
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`, `Loom daily build` · **Status:**
+open — a harness rule, and the fourth variant of "the picture lied"
+
+The `bold` full-page shot of this run's specimen has two strings from the table
+at the **bottom** of the page rendered faintly across the **top** of it, above
+the first band. It reads exactly like a stacking defect and was one step from
+being written up as one.
+
+It is not in the page. A viewport-sized shot of the same URL finds one element
+within 80px of the top and it is the first eyebrow. Chromium composites a
+`fullPage: true` capture in slices, and on a 6,300px page over a near-black
+canvas a slice can retain a ghost of another.
+
+**The rule that works is to confirm anything a full-page shot shows against a
+viewport-sized shot before believing it.** Three previous variants of this
+finding are about a picture that was missing something — an unfinished
+entrance, a control that never hydrated. This is the first where the picture
+showed something that was not there, which is the more dangerous direction: the
+other three cost a cycle, this one would have cost a fix to a primitive that is
+correct.
+
+---
+
+## 2026-09-10 — three consecutive runs have added no primitive, and the breadth mandate has not been withdrawn
+
+**Filed by:** `Loom primitives` · **Owned by:** `jonathanbravecredit` · **Status:**
+open — needs the maintainer, not a routine
+
+The brief's first sentence is a breadth mandate and it says it is not negotiable.
+The last three runs in this lane added **zero** primitives, each for a reason it
+argued at the time and each, in this run's reading, correctly: 8 September closed
+the Hermes ledger, 9 September built the composition catalogue the granularity
+doc had promised for twenty-seven runs, and 10 September swept a defect class
+across nine shipped primitives.
+
+The premise that has quietly changed is that **breadth had a measurable end and
+the library reached it.** Seventy Hermes blocks are 68 settled; the named gaps a
+marketing page needs are filled — `milestone` absorbs process-steps and
+changelogs, `mosaic` is the bento grid, `code` is the terminal, `carousel` is the
+gallery. Three runs have independently gone looking for a ninetieth primitive and
+come back with a definition list.
+
+This is not a routine's call to make. Either the mandate is satisfied and the
+brief should say what replaces it — depth, or the demo surfaces, or the two
+state-shaped gaps below — or there is a range the maintainer can see and the
+routines cannot, in which case naming three or four wanted primitives would be
+worth more than the sentence that is there now.
+
+**What the library still genuinely cannot express, and both need the framework
+lane rather than this one:** a tab strip (client-side selection, wants a `select`
+member in the behaviour vocabulary that `disclose` proved the shape of) and a
+feed (wants the binding seam and a live source, not a primitive).
