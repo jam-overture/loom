@@ -26,14 +26,14 @@ const SETS: readonly ScheduledSet[] = [
 
 const PARTS = { I: [1, 2] }
 
+const TODAY = "2026-09-05"
+
 /**
  * The questions the course contains, as the index is told about them. A lesson's
  * own Self-check question is in here beside a review set's, because the corrections
  * queue draws from both and this panel has to count what the sitting can render.
  */
 const KEYS: readonly string[] = ["set-a#1", "set-a#2", "set-b#1", "lesson-01-self-check#1"]
-
-const TODAY = "2026-09-05"
 
 const stored = (progress: unknown) => {
   window.localStorage.setItem("loom.lessons.progress.v1", JSON.stringify(progress))
