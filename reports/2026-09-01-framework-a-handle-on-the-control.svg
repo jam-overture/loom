@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">A handle on the control</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">A primitive was handed an element it could not name, and could not have styled if it had.</text>
+
+  <!-- ================= BEFORE ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">BEFORE — TWO WALLS, ONE AFTER THE OTHER</text>
+
+  <rect x="40" y="130" width="400" height="196" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+
+  <text x="58" y="158" font-size="11.5" fill="#5c5751">The primitive writes the rule it needs:</text>
+  <rect x="58" y="170" width="364" height="30" rx="6" fill="#ffffff" stroke="#e4ded5"/>
+  <text x="70" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">@media (min-width: 48rem) { ??? { display: none } }</text>
+
+  <text x="58" y="228" font-size="11.5" fill="#b4442e">1. Nothing to aim it at.</text>
+  <text x="58" y="246" font-size="11.5" fill="#5c5751">No class on the control. <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">button</tspan> is a guess &#8212; and a wrong</text>
+  <text x="58" y="262" font-size="11.5" fill="#5c5751">one since <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">adjust</tspan> renders an <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">input</tspan>.</text>
+
+  <text x="58" y="290" font-size="11.5" fill="#b4442e">2. It would lose anyway.</text>
+  <text x="58" y="308" font-size="11.5" fill="#5c5751"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">style="display: inline-flex"</tspan> beats every rule.</text>
+
+  <!-- what shipped -->
+  <rect x="464" y="130" width="416" height="196" rx="10" fill="#fdf6f3" stroke="#eccfc5"/>
+  <text x="482" y="158" font-size="11.5" font-weight="650" fill="#8a4632">So the primitive built a box to select instead</text>
+  <rect x="482" y="172" width="380" height="80" rx="6" fill="#ffffff" stroke="#eccfc5"/>
+  <text x="494" y="192" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">&lt;span class="nav-toggle"&gt;</text>
+  <text x="512" y="210" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#8a8178">{ loom.behaviours.disclose }</text>
+  <text x="494" y="228" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">&lt;/span&gt;</text>
+  <text x="494" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">.nav-toggle:empty { display: none }</text>
+  <text x="482" y="278" font-size="11.5" fill="#5c5751">One element on every page, plus the <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">:empty</tspan> rule &#8212;</text>
+  <text x="482" y="296" font-size="11.5" fill="#5c5751">the box is empty until the control&#8217;s effect runs, and an</text>
+  <text x="482" y="314" font-size="11.5" fill="#5c5751">empty flex item still eats a gap.</text>
+
+  <!-- ================= AFTER ================= -->
+  <text x="40" y="374" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">AFTER — THE CONTROL CARRIES BOTH HALVES</text>
+
+  <rect x="40" y="388" width="400" height="212" rx="10" fill="#f5f8f4" stroke="#d4e2ce"/>
+  <text x="58" y="416" font-size="11.5" font-weight="650" fill="#3d6b32">What the runtime renders</text>
+  <rect x="58" y="430" width="364" height="98" rx="6" fill="#ffffff" stroke="#d4e2ce"/>
+  <text x="70" y="450" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">&lt;button</text>
+  <text x="82" y="468" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">class="loom-control loom-control-disclose"</text>
+  <text x="82" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">style="display: var(</text>
+  <text x="94" y="504" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">--loom-disclose-display,</text>
+  <text x="94" y="522" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">var(--loom-control-display, inline-flex))"</text>
+  <text x="58" y="552" font-size="11.5" fill="#5c5751">Specific name, then group name, then what the</text>
+  <text x="58" y="570" font-size="11.5" fill="#5c5751">control set for itself. Set neither and nothing moves.</text>
+
+  <rect x="464" y="388" width="416" height="212" rx="10" fill="#f5f8f4" stroke="#d4e2ce"/>
+  <text x="482" y="416" font-size="11.5" font-weight="650" fill="#3d6b32">What the primitive writes now</text>
+  <rect x="482" y="430" width="380" height="62" rx="6" fill="#ffffff" stroke="#d4e2ce"/>
+  <text x="494" y="450" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">@media (min-width: 48rem) {</text>
+  <text x="512" y="468" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">.nav { --loom-disclose-display: none }</text>
+  <text x="494" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">}</text>
+  <text x="482" y="514" font-size="11.5" fill="#5c5751">No box. No <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">:empty</tspan>. Any ancestor, any query &#8212;</text>
+  <text x="482" y="532" font-size="11.5" fill="#5c5751">a custom property inherits.</text>
+
+  <rect x="482" y="546" width="380" height="40" rx="6" fill="#fdf9ee" stroke="#e8dcc0"/>
+  <text x="494" y="564" font-size="11" font-weight="650" fill="#8a6d32">The trap, and it stays the primitive&#8217;s</text>
+  <text x="494" y="579" font-size="11" fill="#7a6a4e">A hidden button still carries its state. Lift the region rule in the same query.</text>
+
+  <text x="40" y="632" font-size="11.5" fill="#8a8178">0103 &#183; <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">src/render/control.ts</tspan> &#183; three controls, three of three hideable</text>
+</svg>

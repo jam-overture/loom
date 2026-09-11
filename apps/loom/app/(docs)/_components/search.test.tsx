@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { SEARCH_INDEX_PATH, type SearchIndex } from "@/app/(docs)/_lib/search/model"
+import { SEARCH_INDEX_PATH, SEARCH_PROSE_PATH, type SearchIndex } from "@/app/(docs)/_lib/search/model"
 
 import { Search } from "./search"
 
@@ -60,10 +60,29 @@ const index: SearchIndex = {
 
 const fetchMock = vi.fn()
 
+/**
+ * The deployment serves the index in two files, so the double does too.
+ *
+ * Serving the prose from the fixture's own entries rather than a second literal
+ * keeps the two halves in step: an entry given a body above is findable by its
+ * sentence here, and one given none is not, without anybody maintaining a
+ * parallel list.
+ */
+const prose = Object.fromEntries(
+  index.entries.filter((entry) => entry.body !== "").map((entry) => [entry.href, entry.body])
+)
+
+/** The core is served without bodies, exactly as the route builds it. */
+const core: SearchIndex = { entries: index.entries.map((entry) => ({ ...entry, body: "" })) }
+
+const serve = (payload: unknown) => ({ ok: true, json: async () => JSON.parse(JSON.stringify(payload)) })
+
 beforeEach(() => {
   push.mockReset()
   fetchMock.mockReset()
-  fetchMock.mockResolvedValue({ ok: true, json: async () => JSON.parse(JSON.stringify(index)) })
+  fetchMock.mockImplementation((path: string) =>
+    Promise.resolve(serve(path === SEARCH_PROSE_PATH ? prose : core))
+  )
   vi.stubGlobal("fetch", fetchMock)
 })
 
@@ -100,8 +119,9 @@ describe("the search box", () => {
     await open()
     await type("gate")
 
-    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_INDEX_PATH)
+    expect(fetchMock).toHaveBeenCalledWith(SEARCH_PROSE_PATH)
   })
 
   it("opens on the shortcut every reader tries", async () => {
@@ -169,7 +189,7 @@ describe("what a reader sees after typing", () => {
   })
 
   it("says the index failed rather than showing an empty list", async () => {
-    fetchMock.mockResolvedValue({ ok: false, status: 500 })
+    fetchMock.mockImplementation(() => Promise.resolve({ ok: false, status: 500 }))
 
     render(<Search />)
 
