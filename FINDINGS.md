@@ -13048,6 +13048,111 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-02 — `StoreError` has five codes and no way to list them, which is the second of four still open
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+refiled. It was first filed on #199, which was closed unmerged on 28 August, so
+it never reached `main`.
+
+`StoreError` is a discriminated union. A `switch` over one is exhaustive at
+compile time, which is right for the code that *handles* a failure. What no
+caller can do is **walk** it: nothing exports the five codes, so *Going to
+production*, which describes all five to a reader, keeps its own copy of the
+list in `(docs)/_lib/deployment/failures.ts`.
+
+The copy is typed as `Record<StoreError["code"], …>`, so a sixth code makes the
+documentation stop compiling rather than quietly describe five of six. That is
+the best a lane outside `src/` can do and it is not the fix.
+
+**This is the same hole in the same shape as three others, and two of them have
+since been closed** — `WRITE_OUTCOME_KINDS` and `TELEMETRY_EVENT_TYPES` are now
+exported, and both pages that needed them read the list instead of a copy. The
+remaining two are `StoreError` and `CliError`. The pattern the framework routine
+established on `framework-21` is exactly what is wanted here: a `STORE_ERROR_CODES`
+in `src/store/`, in the order a reader meets them, held against the union by a
+test in `src/`.
+
+---
+
+## 2026-09-02 — two closed-unmerged pages were rebuilt, and three of their claims had gone stale in the meantime
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-18-the-two-pages-the-backlog-dropped`
+
+Recorded because the *class* is what matters, not the three sentences.
+
+#183 and #199 were closed unmerged and rebuilt this run against current `main`.
+Every test in them still passed — 71 of them, unchanged — and the runtime surface
+they check had not moved under them. **What had rotted was the prose, and nothing
+in the repository could see it:**
+
+- *What every ask leaves behind* opened with *"the last four pages were about the
+  runtime deciding things."* It is now the sixth page in its section.
+- The same page rested a whole section on a sentence it said *Connecting a model*
+  ends with. That page had since been rewritten and no longer says it.
+- Its retention rules and *Going to production*'s were written as two independent
+  passages by two runs that could not see each other, and in one order they read
+  as a duplicate.
+
+A page's claims about the *runtime* are checked here — `claims.test.ts` and
+`page.test.ts` are both about exactly that, and both are good. A page's claims
+about **another page** were checked by nothing at all, which is the harder half:
+a stale link is at least visible to the reader who clicks it, while a page that
+misquotes another page reads perfectly and is wrong.
+
+`(docs)/_lib/cross-references.test.ts` closes it. Every `/docs/…` address in any
+page must resolve, and **a page quoting another page must quote words that page
+still contains** — the convention being a link followed by a blockquote, so the
+citation is a thing a test can follow rather than a paraphrase nobody can check.
+
+**The general lesson is about the backlog rather than about these two pages.** A
+branch that waits does not go stale where its tests are; it goes stale in the
+sentences that point at whatever moved while it waited. Any lane rebuilding
+closed-unmerged work should read its prose against current `main` and not trust
+a green suite to have done it.
+
+---
+
+## 2026-09-02 — a `.png` URL cannot be put in a pull-request body from a routine session, so "include a screenshot" is unsatisfiable there
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a tooling constraint outside every lane. Diagnosed, with the workaround
+in use.
+
+Several routine briefs, mine included, say to **include a screenshot in the pull
+request**. From a scheduled session that is currently not possible, and the
+shape of the failure is not the obvious one.
+
+**It is not about embedding. Any URL ending in `.png` is rewritten in transit**,
+whichever syntax carries it. Verified three ways on #225, each read back from
+the API afterwards rather than assumed:
+
+| What was sent | What arrived |
+| --- | --- |
+| `![alt](https://…/shot.png)` | backticks wrapped round the URL |
+| `<img src="https://…/shot.png" />` | the `src` attribute deleted entirely |
+| `[text](https://…/shot.png)` | backticks wrapped round the URL |
+
+In the same bodies, `https://…vercel.app/docs/the-runtime/going-to-production`
+and the bare preview URL went through **untouched**. So the discriminator is the
+image file at the end of the address, not the markdown around it, and no amount
+of rephrasing gets past it.
+
+**The workaround, which is what #225 does:** put the screenshots in the report
+and link the report *by path*. `reports/<slug>.md` renders its own images inline
+on the branch, and a path is not a URL so nothing rewrites it. The maintainer is
+one click further away than the brief intends, and that is the whole cost.
+
+**Why it is filed rather than fixed.** It is the same class as the `*.vercel.app`
+egress entry above — a property of the sandbox and its tooling, not of this
+repository. A routine cannot widen it and should not try. Two candidates if it is
+ever worth addressing: allow media URLs on the GitHub write path, or let a run
+attach an image to a comment. Until then, **a brief asking for a screenshot in
+the pull request is asking for something the session cannot do**, and the honest
+response is the report link plus this entry rather than silence.
+
+Recorded so the next run that spends twenty minutes rephrasing markdown does not
+have to.
 ## 2026-09-02 — the refusal band was counting a run it was not printing, and it was right for eight runs
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
