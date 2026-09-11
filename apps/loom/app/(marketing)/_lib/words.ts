@@ -30,6 +30,16 @@ export const PROSE_PROPS: readonly string[] = [
   "eyebrow",
   "title",
   "body",
+  /**
+   * A row of a comparison names itself in a prop, the way a feature does.
+   *
+   * Added 11 September, when `/what-you-run` put six of them on a page and the
+   * register could read none of them — the same failure this note was written
+   * about, in a second primitive, four weeks later. A criterion is the most
+   * load-bearing copy on a comparison: the marks mean nothing without it, and it
+   * is exactly the sentence a reader quotes back at you.
+   */
+  "heading",
   "label",
   "caption",
   "question",

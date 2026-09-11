@@ -16,6 +16,21 @@ export type SiteRoute = {
   readonly label: string
   readonly title: string
   readonly description: string
+  /**
+   * Whether the bar across the top carries it, as well as the footer's map.
+   *
+   * The same flag `Surface` has carried since 28 August, for the same reason and
+   * with the same guarantee behind it. The maintainer asked on #166 whether
+   * eight items in the bar was too many; it was, the surfaces answered it, and
+   * the count crept back to eight as this route group grew a fourth page. A
+   * ninth is the flagged problem made worse.
+   *
+   * So a page may be kept out of the bar — and `chrome.test.ts` holds *out of
+   * the bar* to mean exactly that and never *off the site*: whatever is left out
+   * is in the footer's map, and the footer marks it as the page the reader is on
+   * so the site still says where they are.
+   */
+  readonly inMenu: boolean
 }
 
 export const HOME: SiteRoute = {
@@ -24,6 +39,7 @@ export const HOME: SiteRoute = {
   title: "Loom — every change your AI makes, written down",
   description:
     "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules, and every change keeps a record of who asked, what moved, and how to put it back.",
+  inMenu: true,
 }
 
 export const HOW_IT_WORKS: SiteRoute = {
@@ -32,6 +48,7 @@ export const HOW_IT_WORKS: SiteRoute = {
   title: "How it works — Loom",
   description:
     "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
+  inMenu: true,
 }
 
 /**
@@ -55,6 +72,7 @@ export const THE_RULES: SiteRoute = {
   title: "The rules — what your AI may change, and what it may not",
   description:
     "You write down what may change on your page and what may never change. Every request is weighed against it before anything moves, and the answer names the rule that gave it.",
+  inMenu: true,
 }
 
 export const THE_RECORD: SiteRoute = {
@@ -63,6 +81,95 @@ export const THE_RECORD: SiteRoute = {
   title: "The record — what changed, who asked, and how to put it back",
   description:
     "Ask the front page for one change after another and watch the list fill in: what each request turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
+  inMenu: true,
+}
+
+/**
+ * The page for the question this site had four pages and no answer to.
+ *
+ * Read across its own links, the front door says two different things about
+ * where the pieces of a page come from. The numbers band offers *"N ready-made
+ * pieces to build with"*; the questions band directly below it answers *"can the
+ * AI write code into my page?"* with *"it can only use the pieces **you handed
+ * it**"*; the band above says it *"only rearranges pieces **you built and
+ * already trust**"*. Both halves are true — a starter library exists, and a host
+ * describes its own components — and nowhere on the site are the two said in the
+ * same breath.
+ *
+ * A developer reading that has to guess at the one question that decides whether
+ * they can use this at all: **do I have to rebuild my page in somebody else's
+ * components?** The answer is no, it has always been no, and the site's own copy
+ * left it open. This is the sixth run running to find two individually
+ * defensible sentences that had never been read next to each other, and the
+ * first where the fix is a page rather than a word.
+ *
+ * It is a description of code rather than a position — what a host hands over,
+ * what the machinery does with it, and what it refuses — so it could be written
+ * without waiting on the positioning answers the licence line is still waiting
+ * on.
+ *
+ * **It is `inMenu: false`,** and that is the one judgement call in it. See the
+ * flag's note above: the bar is back to the eight items the maintainer asked
+ * about on #166, and a page that resolves a contradiction is not worth a ninth.
+ */
+export const YOUR_COMPONENTS: SiteRoute = {
+  path: "/your-components",
+  label: "Your components",
+  /**
+   * The name is deliberately not in it. `share.ts` splits a title on its
+   * separator and drops the part that is exactly the wordmark, because the card
+   * already carries the name at its top left — so a title with *Loom* inside a
+   * clause prints it twice to the one reader who sees the card and not the page.
+   * Two of the four existing titles solve that by not saying it at all, and this
+   * is the third.
+   */
+  title: "Your components — the ones you already built, rearranged and never rewritten",
+  description:
+    "Loom never asks you to rebuild your page in somebody else's components. You describe the ones you already have — the name, what each is for, and which settings may be changed — and that description is the whole of what the AI is ever allowed to touch.",
+  inMenu: false,
+}
+
+/**
+ * The page for the question every other page hands the reader and none of them
+ * takes back.
+ *
+ * The entry above puts *"whoever runs the site writes the list of who may sign
+ * in"* on the front door. That is the answer a stranger arrives with, and it
+ * hands them the next one in the same breath: **so what do I run?** Five pages
+ * answered parts of it — the journey a change takes, what you decide in advance,
+ * what you hand over, what you are left holding — and none of them said what the
+ * thing on a reader's own machine would be. A reader who had understood all five
+ * still could not tell whether this is a library they add to something, a
+ * service they point something at, or a site somebody else hosts for them.
+ *
+ * It is a description of code rather than a position, so it did not wait on the
+ * licence line, and nothing on it says what Loom costs or who it is for.
+ *
+ * **The boundary with `Loom docs` was agreed in the finding rather than
+ * discovered in review.** `/docs` owns *how to install it* — the commands, the
+ * code and the API. This page owns *what the shape is*, which is the question
+ * somebody asks before they are willing to read an installation guide at all,
+ * and it ends by handing them over. It uses no vocabulary the documentation
+ * teaches and prints no code.
+ *
+ * **It is `inMenu: false`, and that is now true of two pages.** The bar is the
+ * eight items the maintainer asked about on #166; a sixth page is not worth a
+ * ninth. `chrome.test.ts` holds *off the bar* to mean *in the footer's map and
+ * nowhere unreachable*, and this page is offered from the front door's band of
+ * ways in and from the two pages either side of it in the argument.
+ */
+export const WHAT_YOU_RUN: SiteRoute = {
+  path: "/what-you-run",
+  label: "What you run",
+  /**
+   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
+   * only the half of a title that is exactly the wordmark, so the name inside a
+   * clause prints twice on the card.
+   */
+  title: "What you run — a package in your own application, not a service in front of it",
+  description:
+    "You install it into an application you already have and already host. Your components stay in your repository, your pages and their history are kept by your own application, and the only thing that ever leaves is one request to a model you chose.",
+  inMenu: false,
 }
 
 /**
@@ -73,8 +180,25 @@ export const THE_RECORD: SiteRoute = {
  * you are left holding afterwards. The rules page sits before the record
  * because a record of decisions is only interesting to someone who knows the
  * decisions were theirs to set.
+ *
+ * The last two are the questions that arrive after all four of those, from
+ * somebody who has decided they might want this and is working out what it would
+ * cost them to try: **what is the thing**, and then **what do I have to hand
+ * it**. They are in that order because the second only makes sense once the
+ * first is answered — nobody asks what to hand over to something they still
+ * think might be a hosted service.
+ *
+ * They are also the two pages the bar does not carry, and the footer renders
+ * this list in order, so the end is where a reader meets them.
  */
-export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RULES, THE_RECORD]
+export const SITE_ROUTES: readonly SiteRoute[] = [
+  HOME,
+  HOW_IT_WORKS,
+  THE_RULES,
+  THE_RECORD,
+  WHAT_YOU_RUN,
+  YOUR_COMPONENTS,
+]
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -93,7 +217,14 @@ export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, THE_RULES,
  * contract — the path is the other lane's front door, so it stays correct
  * across anything that lane does behind it.
  */
-export type Surface = {
+/**
+ * What every surface says about itself, whatever is or is not behind its door.
+ *
+ * `Surface` is this and one of the two halves below, so **a guarded surface
+ * cannot be written down without saying what a visitor finds at the door.** See
+ * `GuardedSurface` for why that is the compiler's job rather than a test's.
+ */
+type SurfaceFacts = {
   readonly path: string
   /** What the link says. Plain words: a visitor has never heard of any of this. */
   readonly label: string
@@ -114,8 +245,6 @@ export type Surface = {
    * bottom of four cards standing side by side and a long one would wrap alone.
    */
   readonly cost: string
-  /** Whether a visitor who is not signed in is sent to a sign-in page first. */
-  readonly guarded: boolean
   /**
    * Whether the bar across the top carries it, as well as the footer's map.
    *
@@ -138,6 +267,74 @@ export type Surface = {
    */
   readonly inMenu: boolean
 }
+
+/** A surface a visitor can simply open. Most of them. */
+type OpenSurface = SurfaceFacts & {
+  /** Whether a visitor who is not signed in is sent to a sign-in page first. */
+  readonly guarded: false
+}
+
+/**
+ * A surface with a door, and the sentence a visitor meets it with.
+ *
+ * **`door` is required here, and that is the whole point of splitting the type.**
+ *
+ * The portal is the only one, and since 25 August this site has offered it four
+ * ways — the bar's *Sign in*, the front door's band of cards, the footer's map
+ * and the record page's last band — without any of them saying **whose portal
+ * it is**. A stranger reads an account as something this site could give them.
+ * It cannot: a portal belongs to the Loom site it is part of, and who may sign
+ * in to it is a list whoever runs that site writes.
+ *
+ * The sentence saying so was on the site until 25 August, inside the portal's
+ * blurb, and the run that gave every surface a `cost` moved it out to keep the
+ * blurbs one length. That was a fair edit and it took the fact with it — the
+ * band's own note still promises *each card is honest about what is behind it,
+ * which is why the portal's says that signing in is required*, of a card that
+ * had stopped saying so. Two defensible things nobody had read next to each
+ * other, at the one place the maintainer's 18 August decision makes this
+ * surface's whole job.
+ *
+ * So it is a field of its own rather than a longer blurb, and it is **required
+ * by the type** rather than asserted by a test. A guarded surface added a year
+ * from now is a compile error until somebody writes down what a visitor without
+ * a way in actually finds, which is the failure that happened here and the one
+ * a test written today would not have caught: the test would have been written
+ * against the field, and the field did not exist.
+ *
+ * **This lane cannot check the door instead of describing it.** The note above
+ * records the contract — a surface is a destination this lane *may only point
+ * at* — so `(marketing)` does not import `(portal)`'s auth config and has no
+ * way to know whether sign-in is configured on the deployment it is served
+ * from. Which settles what the copy may claim: not that the door opens, only
+ * what kind of door it is. On this deployment it does not open at all, and the
+ * portal's own sign-in page says so plainly.
+ */
+export type GuardedSurface = SurfaceFacts & {
+  readonly guarded: true
+  /**
+   * One sentence, in the same plain words as `blurb`, saying what the door is.
+   *
+   * Not what is behind it — `blurb` does that — and never a promise that it
+   * opens. It is rendered wherever this surface is offered with room for a
+   * sentence, off this one string, so the front door and the record page cannot
+   * come to describe the same door two ways.
+   */
+  readonly door: string
+}
+
+export type Surface = OpenSurface | GuardedSurface
+
+/**
+ * The door's sentence, for a caller that has a surface and does not know which
+ * kind it is.
+ *
+ * Every band that offers a surface offers all of them — the front door's is
+ * exactly `PRODUCT_SURFACES` and holds a test to it — so the narrowing happens
+ * once, here, rather than at each call site.
+ */
+export const doorOf = (surface: Surface): string | undefined =>
+  surface.guarded ? surface.door : undefined
 
 /**
  * The one surface that answers the hero's promise rather than arguing for it.
@@ -195,13 +392,35 @@ export const LESSONS: Surface = {
   inMenu: false,
 }
 
-export const PORTAL: Surface = {
+export const PORTAL: GuardedSurface = {
   path: "/portal",
   label: "Portal",
   blurb:
     "Where the changes are reviewed: what was asked for, what was allowed, and the button that puts any of it back.",
-  cost: "Costs you an account",
+  /**
+   * *"Costs you an account"* until this run, and it is the half of the mistake
+   * a reader could act on.
+   *
+   * The four costs are read along one line by somebody choosing where to spend
+   * their afternoon, and three of them name something the reader can spend. An
+   * account is not: nobody reading this site can obtain one by deciding to.
+   * Whoever runs a Loom site writes the list of who may sign in to its portal,
+   * so the thing being asked for is somebody else's decision — which is what
+   * *an invitation* says in the same four words and the same shape.
+   */
+  cost: "Costs you an invitation",
   guarded: true,
+  /**
+   * Deliberately about every Loom site and not only this one.
+   *
+   * The reader's question is *can I get in*, and the answer that helps them is
+   * the general one: this is what a portal is, so it is also what yours would
+   * be. Saying only *this one is not open to you* would answer the question in
+   * front of them and leave them thinking the product has a door they failed
+   * to get through.
+   */
+  door:
+    "Every Loom site has a portal of its own, including this one, and whoever runs the site writes the list of who may sign in to it.",
   /**
    * False because it is the bar's *action* rather than one of its links, and
    * has been since the header was written. `inMenu` means "carried as a menu
@@ -356,6 +575,10 @@ export type AskedFor = {
   readonly theme?: SiteThemeName
   readonly ask?: string
   readonly approve?: boolean
+  /** Whether the visitor has pressed *Put it back* on the change above. */
+  readonly back?: boolean
+  /** And whether they have answered the rules holding *that* back. */
+  readonly backApprove?: boolean
 }
 
 /**
@@ -373,6 +596,17 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
   if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
   if (options.ask !== undefined) url.searchParams.set("ask", options.ask)
   if (options.approve === true) url.searchParams.set("approve", "1")
+  /**
+   * Two parameters rather than one with three values, because they answer two
+   * questions a visitor asks at two different moments — *put it back*, and then
+   * *yes, I mean it* — and an address that said `back=yes` would be spelling the
+   * second in a word that reads like the first.
+   *
+   * `-yes` is the suffix the record page's sequence already uses for exactly
+   * this, so the two pages name approval the same way.
+   */
+  if (options.back === true) url.searchParams.set("back", "1")
+  if (options.backApprove === true) url.searchParams.set("back-yes", "1")
 
   return url.toString()
 }

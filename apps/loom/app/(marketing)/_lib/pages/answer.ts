@@ -43,7 +43,29 @@ import { askHref, recordHref, type SiteThemeName } from "../site"
 export type AnswerContext = {
   readonly origin: string
   readonly theme: SiteThemeName
+  /**
+   * The most recent thing that happened, which is the undo once there is one.
+   *
+   * This band answers *where the visitor is being read*, so it reports the state
+   * the page is actually in rather than the first of two changes. A notice that
+   * still said "Allowed" over a page that had since been put back would be the
+   * site failing at its own claim on the band a reader reads fastest.
+   */
   readonly record: ChangeRecord
+  /** Whether the address carries the visitor's yes to a hold on the change. */
+  readonly approve?: boolean
+  /**
+   * Whether the visitor has put the change back, and whether they answered the
+   * rules holding *that*.
+   *
+   * Read off the address rather than off `record`, for the same reason the
+   * approval is. `record` is the most recent thing that happened — the undo's
+   * own record once there is one — and its verdict answers a question about the
+   * undo. What the link out of this band has to carry is the whole of what the
+   * visitor did, and only the address knows that.
+   */
+  readonly back?: boolean
+  readonly backApprove?: boolean
 }
 
 /**
@@ -60,18 +82,34 @@ export type AnswerContext = {
 const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
   const { record } = context
   const home = askHref(context.origin, { theme: context.theme })
+  /** Everything the visitor has done so far, which every link from here must keep. */
+  const sofar = {
+    theme: context.theme,
+    ask: record.ask,
+    ...(context.approve === true ? { approve: true } : {}),
+  }
+  /** There is something to put back only on a change that landed and is still on the page. */
+  const reversible = record.landed && !record.putBack
 
   return stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     record.awaitingYou
       ? action(
           ids,
           "I say yes — go ahead",
-          askHref(context.origin, { theme: context.theme, ask: record.ask, approve: true }),
+          askHref(
+            context.origin,
+            record.putBack
+              ? { ...sofar, back: true, backApprove: true }
+              : { ...sofar, approve: true }
+          ),
           { variant: "primary" }
         )
-      : action(ids, record.landed ? "Put it back" : "Start again", home, {
-          variant: record.landed ? "primary" : "secondary",
-        }),
+      : action(
+          ids,
+          reversible ? "Put it back" : "Start again",
+          reversible ? askHref(context.origin, { ...sofar, back: true }) : home,
+          { variant: reversible ? "primary" : "secondary" }
+        ),
     /**
      * The whole record, on the page built for it.
      *
@@ -92,8 +130,29 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
       "See the whole record",
       recordHref(context.origin, {
         theme: context.theme,
+        /**
+         * The whole of what the visitor did, off the address rather than off the
+         * verdict.
+         *
+         * `verdict === "approved"` said the same thing while a record could only
+         * ever be one of the five choices. It stopped being true the moment the
+         * undo got a record of its own: that record's verdict is the *undo's*,
+         * and reading it here would drop the approval that let the change it
+         * reverses happen at all — replaying a sequence nobody ran.
+         *
+         * The undo travels too, as of 7 September, because the record page can
+         * now say it. Until it could, a visitor who put a change back here and
+         * pressed *See the whole record* arrived at a list showing only the
+         * change — the site dropping, in the one step between two of its own
+         * pages, exactly the thing it is claiming never gets dropped.
+         */
         changes: writeChangeSequence([
-          { ask: record.ask, approved: record.verdict === "approved" },
+          {
+            ask: record.ask,
+            approved: context.approve === true,
+            putBack: context.back === true,
+            putBackApproved: context.backApprove === true,
+          },
         ]),
       }),
       { variant: "quiet" }

@@ -16592,6 +16592,769 @@ chosen as a deliberate near-neighbour, so every picture looks plausible.
 `fonts.googleapis.com` and `fonts.gstatic.com`. Both are static font hosts,
 neither can receive a credential, and both are already the mechanism `next/font`
 would use if it were reaching them.
+
+---
+
+## 2026-09-03 — the front door said nobody wrote it, and the button beside it said "Read the source"
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-20-the-page-showing-itself`
+
+Recorded for how it survived rather than because it is still open.
+
+The last band of the landing page has read this since 19 August:
+
+> **This page was built the way yours would be.**
+> The menu, the questions, this sentence — every one of them is a piece the AI
+> could be asked to move. **None of it was written by hand.**
+
+The first sentence is true and is the best claim this surface owns. The second
+was **false in the only reading a stranger has available**: *none of it was
+written by hand* says a machine wrote the words, and every word on this site was
+written by a person. What it was reaching for — that no band of the page is
+written out as a web page — is true, and is a different sentence.
+
+Two things about it are worth more than the fix:
+
+1. **It was falsifiable from the page itself.** The button directly under it is
+   *Read the source*, and the source is a file with that sentence typed into it.
+   The site's one uncheckable claim was sitting next to the link that checks it.
+2. **This is the fifth consecutive run to find the same shape on this surface** —
+   two things individually defensible that nobody had read next to each other.
+   The four before it were numbers. This one is a claim, which is worse, and it
+   is the first that no amount of counting would have caught.
+
+The tell that has now worked five times running is unchanged and costs one run
+in ten: **read the site the way a visitor does — across the links, in order —
+rather than a file at a time.** What is new is that the same tell has to be
+pointed at the *arguments* and not only at the arithmetic. `as-data.test.ts`
+holds the page to not telling a stranger nobody wrote it, deliberately wider
+than the wording, because the defect was a claim and not a phrase.
+
+---
+
+## 2026-09-03 — `loom.code` cannot wrap, and printed data is not code
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+The front door now prints one piece of its own page beside the rendering of it
+(`(marketing)/_lib/pages/as-data.ts`). `loom.code` is the right primitive for it
+and is the only one that could be: whitespace is the content, which its own note
+says is why nothing else in the library stands in for it.
+
+**Its one setting for a long line is `overflow-x: auto`, and for pretty-printed
+data that is the wrong answer.** A JSON string value is one line however long the
+string is — there is no line structure below the printer's to preserve, so
+nothing is lost by wrapping it and quite a lot is lost by hiding it. Measured on
+this band, against `next start` on the production build:
+
+| viewport | panel width | content width | behind the scroll |
+| --- | --- | --- | --- |
+| 1440 | 652 | 652 | **0** |
+| 1024 | 592 | 592 | **0** |
+| 768 | 726 | 726 | **0** |
+| **390** | 348 | 510 | **162px** |
+
+The document never scrolls sideways at any of the four — `scrollWidth` is exactly
+390 at 390 — so this is contained inside the panel and is not a layout bug. It is
+still the case that **on a phone the end of every long line is behind a
+horizontal gesture inside a band whose whole argument is that you can see the
+whole of it.**
+
+This lane worked around it rather than filing and stopping: the box the panel
+prints was rewritten to a sentence short enough to fit, and the argument it used
+to carry moved into prose beside it. That is a real cost — the specimen is now
+chosen partly for its length — and it does not survive the next surface that
+prints anything larger.
+
+**Recommendation: a `wrap` prop on `loom.code`**, defaulting off so code keeps
+`white-space: pre` and today's trees are untouched, and setting `pre-wrap` with
+`overflow-wrap: anywhere` when on. It is a rendering of the same content model
+rather than a second primitive, which is the `tone` and `density` test this file
+already passes twice. A tree turning wrapping on emits one `configure`.
+
+Not a fix from here: `src/primitives/` is `Loom primitives`' lane, and a
+marketing pull request that also changed the library is a pull request nobody can
+review.
+
+---
+
+## 2026-09-03 — the copy button's contrast under the bold palette, measured and fine
+
+**Filed by:** `Loom marketing` · **Owned by:** nobody — closed on measurement ·
+**Status:** closed
+
+Recorded because the wrong version of this entry was nearly filed.
+
+`loom.code`'s copy button looked dim against the dark panel in the bold palette's
+screenshot, and the obvious entry to write was a contrast finding against
+`Loom primitives`. Measured off the running page instead, at 1440:
+
+| palette | button | behind it | ratio |
+| --- | --- | --- | --- |
+| minimal | `rgb(82, 82, 91)` | `rgb(255, 255, 255)` | **7.7:1** |
+| editorial | `rgb(82, 82, 82)` | `rgb(255, 255, 255)` | **7.7:1** |
+| bold | `rgb(163, 163, 163)` | `rgb(26, 26, 26)` | **6.9:1** |
+
+All three clear AA for normal text with room to spare. **It reads dim because it
+is deliberately quieter than the code it sits beside, which is correct.**
+
+Filed as closed rather than simply dropped, because the near-miss is the useful
+part: a finding costs another lane a run whether or not it turns out to be real,
+and this one would have been written from a screenshot. Two `getComputedStyle`
+calls settled it in under a minute. **A finding about colour should carry the
+numbers, and if it cannot, it should not be filed.**
+
+---
+
+## 2026-09-04 — `loom.embed` cannot frame this deployment's own application, because its sandbox has no `allow-forms`
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+— measured against the running page; the band that found it was built, looked
+at, and withdrawn rather than shipped
+
+§4d says the marketing site **embeds the demo rather than describing it**, and
+that this is why the demo is public at all
+([0056](decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)).
+This run built that band: a `loom.embed` framing `/demo`, with
+`createFrameOriginRegistry` wired into the marketing render so the seam permits
+this deployment's own origin (0095). **It renders. It is allowlisted. It does
+not work**, and the reason is one word.
+
+```
+Blocked form submission to '' because the form's frame is sandboxed
+and the 'allow-forms' permission is not set.
+```
+
+`SANDBOX` in `loom.embed.ts` is the module constant
+`"allow-scripts allow-same-origin allow-presentation"`, and there is no prop
+that changes it. Every control in `/demo` is a server action reached through a
+`<form action={…}>` — three of them in `ask-panel.tsx` alone — so a visitor gets
+the demo rendered perfectly, presses the large green button, and **nothing
+happens, silently.** On a site whose whole argument is that it can always tell
+you what happened, that is materially worse than the link it would replace, so
+the band was withdrawn rather than shipped. Screenshot of the working-looking,
+non-working band:
+`reports/2026-09-04-marketing-the-last-typed-number-embed.png`.
+
+**This is not a bug in the primitive.** Its doc comment names the omission
+deliberately — *"No form submission, no pointer lock, no downloads, and no
+top-level navigation"* — and that is the right sandbox for the third-party video
+or map it was ported to carry. The case it does not cover is the one §4d asks
+for: **a deployment framing its own application**, where the framed document is
+already reachable by clicking a link in the menu and is not made more dangerous
+by being shown in a box.
+
+**A suggestion rather than a design, because the primitive is not this lane's.**
+The seam already knows the answer: `RegisteredFrameOrigin.self` is exactly *"this
+origin is the deployment's own"*, and the render already carries `sameOrigin` on
+the outcome and reports it as `frame-same-origin`. Granting `allow-forms` only
+when the resolved outcome is same-origin would need no new prop and no new
+allowlist, and would widen nothing for a third party — a host that has not
+registered its own origin gets today's sandbox exactly. An explicit prop would
+work too and is more honest about intent; either is yours.
+
+Until then, §4d's "embeds the demo" cannot be done, and the front door goes on
+pointing at `/demo` from the hero, the menu and a card.
+
+---
+
+## 2026-09-04 — `loom.embed` has one aspect ratio at every viewport, and a phone is not a laptop
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+— measured, low priority, and secondary to the entry above
+
+Found while building the same withdrawn band, and worth keeping even though the
+band did not ship, because the measurements cost a run to take and the next
+surface to frame anything will need them.
+
+`aspect` offers `square`, `wide` and `portrait`, and whichever is chosen applies
+at every width. Framing `/demo` in the front door's 1080px band:
+
+| aspect | frame at 1440 viewport | frame at 390 viewport |
+| --- | --- | --- |
+| `wide` (16/9) | 1080 × 608 — **12px short**: the demo's *"or type your own"* sits 619px down, so the one control the band's heading promised was the first thing below the fold of the box | 350 × 197 |
+| `square` (1/1) | 1080 × 1080 — correct, whole panel visible | 350 × 350 — the demo's bar and two paragraphs, no control |
+| `portrait` (3/4) | 1080 × 1440 — taller than a viewport | 350 × 467 |
+
+There is no shape that is right at both ends, because the framed document
+reflows and a fixed ratio cannot. A `loom.media` picture has an intrinsic shape
+and honouring it is correct; a framed *application* has a layout, and what it
+needs is a different ratio at a different width — the same thing `loom.mosaic`'s
+rhythm already expresses for spans.
+
+Nothing is asked for urgently. Recorded so that the first lane to frame a video
+does not re-measure this, and because a per-breakpoint `aspect` is the kind of
+prop that is much cheaper to add before three surfaces have worked around its
+absence.
+
+---
+
+## 2026-09-04 — the primitive count is derived, so no run that registers one has to edit a marketing file again
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`, `Loom docs` ·
+**Status:** closes the marketing half of the 25 August entry; the docs half is
+untouched and still theirs
+
+`Loom primitives` filed on 25 August that two files outside `src/primitives/`
+change on every run that registers one, and that the counts were the part worth
+looking at: they are facts about the registry asserted in lanes that own
+neither. The marketing half is now gone.
+
+`FACTS.primitives` was `"70"`, a literal, asserted equal to
+`catalogueOf(siteRegistry).length`. That assertion is why it outlived the other
+two typed numbers — it is a real comparison against the registry, so the number
+was never *wrong*, it just meant **the library could not grow without turning
+this lane red**, and the only way back to green was a primitives run editing
+`copy.ts`. It is now `String(catalogueOf(siteRegistry).length)`: the site counts
+the registry it renders with, and registering a seventy-first primitive moves the
+number on the front door by existing.
+
+The build hazard that forced `FACTS.decisions` into a floor does not apply —
+that one needs a directory listing, and `new URL(…, import.meta.url)` does not
+survive Turbopack. The registry is an ordinary module already in this file's
+bundle.
+
+`FACTS.operations` went the same way in the same change, closing the 30 August
+entry from `Loom daily build`: it counted a four-item list `copy.ts` kept, and
+now counts `TREE_OPERATIONS` from `@loom/runtime`.
+
+**`reference.generated.json` is untouched and is still `Loom docs`'.** Nothing
+here changes it.
+
+---
+
+## 2026-09-05 — a stateless surface can compute an undo and cannot assemble one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around in this lane in about thirty lines, and the workaround is
+the finding
+
+The front door's *Put it back* now runs a real undo: the inverse the runtime
+wrote when the change applied is put back through `composeChange` against the
+changed page, weighed by the same named rules, and applied only if they allow it.
+Doing that needed **an interpreter this lane had to write**, and it should not
+have.
+
+`@loom/runtime/write` already has the assembled version. `revertRevision` plans
+an undo, gates it and commits it, and `revertInterpreter` is exported beside it —
+but it takes a `RevertablePlan`, whose `target` is a `StoredRevision`. **The
+whole path is reachable only through a store.** The front door has none and is
+not getting one
+([0081](decisions/0081-the-front-door-demonstrates-statelessly-and-the-address-is-the-state.md)):
+a session per visitor on the most-crawled surface the project has is a memory
+leak with an advertising budget.
+
+The gap is smaller than it sounds, and that is what makes it worth filing:
+
+| | |
+| --- | --- |
+| **Have** | `composeChange` hands back `inverse` on every applied change |
+| **Have** | `revertInterpreter`, which turns a plan into a gateable proposal |
+| **Missing** | anything that turns *an inverse already in hand* into that proposal |
+
+`apps/loom/app/(marketing)/_lib/adapt/undo.ts` is that missing piece, written
+here. It is thirty lines and it is `revertInterpreter` with the store-shaped
+fields taken out — the same head check, the same `authoredBy: "runtime"`, the
+same confidence of 1 and the same reasoning for both.
+
+**Recommendation: export `inverseInterpreter(inverse, ids, clock)` from
+`@loom/runtime`**, and let `revertInterpreter` be it plus the rationale a store
+can write. Two things follow. Every stateless surface that offers an undo gets
+one that behaves identically to the portal's rather than one each lane rebuilt,
+and the second half of the recorded differentiator — *and how to undo it* —
+stops being the half that costs a surface a file to demonstrate.
+
+**One thing deliberately not borrowed, and it should stay that way.**
+`REVERT_INTERPRETER` is what `revertInterpreter` stamps on a delta it planned
+itself, and `(demo)/_lib/undo.ts` reads that stamp to decide whether a record is
+an undo — the runtime saying so rather than a surface pattern-matching an
+utterance. Claiming it for a delta planned somewhere else would break that, so
+the marketing lane stamps `loom/front-door-undo` instead. If the export above
+lands, the interpreter id is the one decision worth making deliberately rather
+than inheriting.
+
+---
+
+## 2026-09-05 — `/the-record` calls dropping a request "putting one back", and now the front door does not
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 7 September — **option B
+taken**, which is the one this entry recommended. `?changes=` tokens now carry
+`-back` and `-back-yes`, `runHistory` puts the inverse through the same sequence
+the change went through, and the undo is an entry in the list with a verdict of
+its own. `withoutLastChange` — the wrongly-named export this entry is about — is
+gone rather than reworded; `withPutBack` and `withPutBackApproval` replace it and
+neither subtracts anything. The front door's *See the whole record* link carries
+the undo across too, which it could not do while the record page had no way to
+say it. Seventy-one tests, `pnpm verify` green.
+
+`history.ts` has, and has always had:
+
+```ts
+/** The sequence without its most recent request, which is what putting one back is. */
+export const withoutLastChange = ...
+```
+
+It is not what putting one back is. It is the page replayed from the published
+one with the last request left out — a different page reached by a different
+route, which happens to look the same. That was the front door's behaviour too
+until this run, and on the front door it has been replaced by the undo it
+describes.
+
+**On the record page it is defensible and on the front door it was not**, which
+is why only one of them moved. A history is a list of requests in the address
+(0081), and re-running the list without its last entry is an honest way to render
+"the page as of before that change". What is now inconsistent is the *language*:
+one page reports an undo as a change with a verdict of its own, and the other
+uses the same words for dropping a token.
+
+Two ways out, and it is a run's work rather than a line's:
+
+| | |
+| --- | --- |
+| **A** — reword the record page | *"Show the page before this"*, and stop calling it putting back. Cheap, honest, and gives up the better demonstration |
+| **B** — run the inverse there too | Each step already carries its `undo`. The address would need to say *the third request, and then its undo*, which the token grammar cannot express yet |
+
+**B is the better page and A is the smaller change.** Recommending B, because the
+record page is the one surface on this site whose subject is a *sequence*, and an
+undo appended to a sequence is the case a competitor cannot show at all — but not
+taken this run, because the address grammar is the interesting part of it and
+bolting it onto a run that was about the front door would have made a pull
+request nobody can review.
+
+---
+
+## 2026-09-05 — `loom.milestone`'s marker gutter now costs the front door a 7,299px band on a phone
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — an instance on the 1 September entry, with the number it has grown into
+
+The 1 September run filed that `loom.milestone` reserves `5.5rem` for its marker
+column at every viewport and whether or not a marker is set, so at 390px each
+rung gives its title 101px of the 390 and *You asked for something* wraps to
+three lines. That was one rail. The front door now shows **two** once a visitor
+puts a change back, and the cost is no longer a wrapped heading.
+
+Measured this run against `next start` on the production build, band height:
+
+| | 1440px | 390px |
+| --- | --- | --- |
+| nothing asked | 949px | 2,090px |
+| one record | 1,351px | 4,097px |
+| **two records** | **2,114px** | **7,299px** |
+
+The document is 6,885px at 1440 and **15,682px at 390**. Two records cost 763px
+of desktop and **3,202px of phone** — four times as much, for the same words.
+
+Nothing is broken and nothing scrolls sideways at either width. What the gutter
+does is turn one line of prose into three or four on the narrow viewport, on the
+one band of this site a visitor is meant to read closely, and it now does it
+twice.
+
+**Recommendation unchanged from 1 September** — let the column collapse when
+there is no marker, or narrow it below some breakpoint. Re-filed rather than left
+alone because the earlier entry's measurement was *a title wrapping to three
+lines*, which reads as a nuisance, and the honest number is now a band five
+screens tall on a phone.
+
+**Not worked around**, for the reason the earlier entry gives: the workaround is
+a local component and this lane does not get one. The alternative within this
+lane is to stop showing the second record on a narrow viewport, which would be
+hiding the thing the band exists for from every visitor on a phone.
+
+---
+
+## 2026-09-06 — the marketing brief's step 3 tells this lane to do the thing that got sixteen pull requests closed
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+The 28 August entry above closed sixteen pull requests and gave every routine one
+instruction:
+
+> Before starting a unit, check whether you already have an open pull request. If
+> you do, **continue it rather than branching again from `main`** — push onto that
+> branch.
+
+The marketing brief's **procedure, step 3**, says:
+
+> Branch `marketing-NN-<slug>` off `main`. Never stack, never merge to main
+> yourself.
+
+These cannot both be followed, and the brief is what a run reads first. It landed
+on `main` on 1 September. **Every marketing run since then followed step 3**:
+
+| run | PR | branch | opened |
+| --- | --- | --- | --- |
+| 2 Sep | #224 | `marketing-19-the-record-of-your-ask` | after the instruction |
+| 3 Sep | #231 | `marketing-20-the-page-showing-itself` | after the instruction |
+| 4 Sep | #237 | `marketing-21-the-product-on-the-page` | after the instruction |
+| 5 Sep | #242 | `marketing-22-putting-it-back-is-a-change` | after the instruction |
+
+All four were cut from the same commit (`d7375ef`) and none stacked on another —
+so all four edited the same files from the same starting point. `home.ts` was
+rewritten by three of them, `see-it-happen.ts`, `render.ts` and `site.ts` by two
+each, and `FINDINGS.md` by all four. That is the identical shape the 28 August
+entry describes: *"overlapping rewrites of the same logic rather than additions
+that combine."*
+
+**The rebuild the entry asked for was done, and then undone by the next run.**
+#224 is the redo of closed #198, which the entry names. It has sat unmerged since
+2 September while three further runs branched past it and edited the same files.
+
+**This run consolidated instead of opening a fifth.** All four are now merged onto
+`marketing-22-putting-it-back-is-a-change`, which is PR #242, green and
+compiling. Details in `reports/2026-09-06-marketing-four-units-one-front-door.md`.
+
+**A routine cannot fix this.** It cannot edit its own brief, and the next
+marketing run will read step 3 and branch from `main` again. The fix is one
+sentence in the brief and in `docs/routines.md` — something like *"if this lane
+already has an open pull request, push onto its branch instead"* — and it is the
+maintainer's, because the same step 3 is in all seven briefs and the same pile is
+in all seven lanes. Twenty-nine pull requests are open as this is written.
+
+Worth naming, because it is the cheap tell: **the four conflicts took about
+twenty minutes to resolve by hand and every one of them combined.** The cost of
+the pile is not that the work is irreconcilable — it is that nobody reconciles it
+until there are sixteen of them and the only affordable move is to close them all.
+
+## 2026-09-08 — the site gave two answers to where the pieces of a page come from, and never said they were halves of one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 8 September
+
+The front door's numbers band offers **"70 ready-made pieces to build with."**
+Two bands below it, the questions band answers *"can the AI write code into my
+page?"* with **"it can only use the pieces you handed it."** Two bands above it,
+a card says Loom **"only rearranges pieces you built and already trust."**
+
+All three are true. A starter library exists, a host describes its own
+components, and both end up in one list. Nowhere on the site were the two halves
+said in the same breath — so a reader going top to bottom is given two different
+answers to *where do the pieces come from*, with nothing to tell them the answers
+are compatible.
+
+That leaves open the one question that decides whether a developer can use this
+at all: **do I have to rebuild my page in somebody else's components?** The
+answer is no, has always been no, and four pages of this site did not say it.
+
+**Why nothing caught it, again.** The same shape as the front door's step count
+(1 September), the refusal band's heading (2 September) and *Put it back*
+(5 September): two individually correct sentences that had never been read next
+to each other. 985 tests passed over it because nothing here is false. The tell
+is unchanged and is cheap — **read the site across a link, in the order a visitor
+reads it** — and this is the sixth consecutive run to find one this way, which
+is the argument for making it the first thing a marketing run does rather than
+the thing it notices while doing something else.
+
+**Closed by a page rather than a word**, which is the difference from the other
+five. `/your-components` says what a host hands over, prints the description this
+site handed over for one of its own cards, reconciles ours and yours, and names
+the three things no request gets past. The front door's stat caption now says
+*"A starting point, not the deal"* and the band carrying it offers the way there.
+
+## 2026-09-08 — `@loom/runtime/sdk` exports `catalogueOf` and not the type of what it returns
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+
+`src/sdk/catalogue.ts` re-exports `catalogueOf`, and `src/sdk/index.ts` re-exports
+that module. What it does not carry is `CataloguedPrimitive`, `CataloguedProp` or
+`PrimitiveCatalogue` — those live in `src/catalogue.ts`, published from the root
+entry point. `src/sdk/catalogue.ts` imports the type it returns and does not
+pass it on.
+
+So a host that writes a function over what `catalogueOf` hands back has to import
+the function from `@loom/runtime/sdk` and the shape of its answer from
+`@loom/runtime`:
+
+```ts
+import { type CataloguedPrimitive } from "@loom/runtime"
+import { catalogueOf } from "@loom/runtime/sdk"
+```
+
+Hit here writing `/your-components`, which prints one entry of the catalogue as
+the description this site handed over for one of its own cards. Both are public
+entry points, so nothing is blocked and nothing here reaches inside the framework
+(0018) — it is a paper cut, and it is the kind a host meets in the first hour.
+
+**Recommended:** `export type * from "../catalogue.js"` in `src/sdk/catalogue.ts`,
+so the SDK entry point is complete for the one function it exists to offer. Not
+done here: `src/` is not this lane.
+
+## 2026-09-09 — the front door said a change either happens or is refused, and the third answer is the product
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 9 September
+
+The *see it happen* band introduced its five buttons with:
+
+> This site protects two things from being taken away: what it says it is for
+> and the way out of it. **Everything else a request may rearrange on its own —
+> and one of the five above will be refused**, which is the part worth watching.
+
+`/the-record` said the same thing in its own words: *"Everything else a request
+may rearrange on its own, and you will see one of these refused for exactly that
+reason."* Both had been there since 20 August.
+
+Run against the site's own rules, the five answer: **three land, one is refused,
+and one — *Get to the point* — is held and stops to ask the visitor.** A reader
+told the page would rearrange on its own pressed it and got a panel headed
+*Waiting for you*.
+
+**The count is the smaller half.** The middle answer is the product. Anything
+with a model in it can show a page changing and a page refusing; *it waits for
+you* is the one this site exists to argue for, and it is on `/the-rules` as one
+of three answers *"and there is no fourth"*, in the journey's fourth step, and in
+the panel's own badge. The band where a stranger first meets the mechanism
+described a world with two answers in it — on a site whose whole claim is that it
+can say in advance what will happen.
+
+**Why nothing caught it.** `adapt.test.ts` held a literal table mapping each ask
+to its verdict, including `problem: "held"`, and put every one of them through
+the real sequence. **The suite knew.** The page could not read what the suite
+knew, so the two were free to disagree, and 1,047 passing tests were consistent
+with a band contradicting its own panel eighty pixels below it. A fact a test
+holds and a page cannot reach is a fact the page will eventually contradict.
+
+Seventh consecutive run to find this shape — two individually defensible things
+nobody had read next to each other. The tell is unchanged and still cheap: read
+the site across a link, in the order a visitor reads it.
+
+**Closed by moving the declaration onto the ask.** `Ask.answer` carries what the
+rules do with each request; `_lib/adapt/answers.ts` spells the sentence off the
+tally; `answers.test.ts` holds every declaration against the real sequence and
+every page against the declaration. No sentence on this site counts what the five
+requests do any more, and `/the-rules`'s *"two of them run into the rules"* comes
+off the same list, so a sixth choice cannot leave one page behind.
+
+## 2026-09-10 — the front door's one action offers an account, and no page of this site says whose
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` on 10 September
+
+The maintainer's decision of 18 August is that **access to the portal is through
+the marketing site**. The site offers it four ways — the bar's *Sign in*, the
+front door's band of cards, the footer's map, and the last band of
+`/the-record` — and until this run **not one of them said whose portal it is.**
+
+A portal belongs to the Loom site it is part of. Who may sign in to one is a
+roster whoever runs that site writes; there is no way for a reader of this site
+to obtain an account here by deciding to. So the bar's *Sign in*, top right of a
+site a stranger has never used, is an offer this site cannot honour — and on this
+deployment the door behind it answers, correctly and in the portal lane's own
+words, **"This portal isn't set up yet."**
+
+**The sentence was on the site and an ordinary edit took it.** The portal's blurb
+read *"who may sign in is set by whoever runs the deployment"* until 25 August
+(#158), when the run that gave every surface a `cost` moved it out to keep four
+blurbs one length and wrote **"Costs you an account"** in its place. That was a
+fair edit — four blurbs of one length is a real thing to want — and the fact went
+with it. What replaced it is worse than silence: three of the four costs name
+something the reader can spend, so an account on the same line reads as the
+fourth.
+
+**Two tests and a docblock covered the gap while it was open.**
+
+- `pages.test.ts`'s note on the band still promised *"each card is honest about
+  what is behind it, which is why the portal's says that signing in is
+  required"* — of a card that had stopped saying so.
+- `site.test.ts` asserted that a guarded surface's blurb-plus-cost matches
+  `/\bsign|\baccount\b/`. **"Costs you an account" contains the word `account`,
+  so the assertion passed for sixteen days on a sentence that told a reader
+  something false.** A keyword is not the fact.
+
+Eighth consecutive run to find two individually defensible things nobody had read
+next to each other, and the first where a test was one of the two. The new half
+worth keeping: **an assertion that checks a page for a word, rather than for what
+the word is standing in for, will outlive the fact and go on passing.**
+
+**Why this lane cannot check the door instead of describing it.** `site.ts`
+records the contract — a surface is a destination this lane *may only point at*,
+so that a link stays correct across anything the other lane does behind it.
+`(marketing)` therefore does not import `(portal)`'s auth config and has no way
+to know whether sign-in is configured on the deployment it is served from. That
+settles what the copy may claim: not that the door opens, only what kind of door
+it is.
+
+**Closed by making the door a field the type requires.** `Surface` is now
+`SurfaceFacts` plus one of two halves, and the guarded half requires `door` — a
+guarded surface added a year from now is a compile error until somebody writes
+down what a visitor without a way in actually finds. `PORTAL.door` is rendered on
+the front door's card, in a new fifth question on its questions band (*"Do I need
+an account to use this?"*, composed from `PORTAL.door` and the bar's own
+`SIGN_IN_LABEL`), and in the last band of `/the-record` — where the heading *the
+same record, on a page of your own* stood a sentence above a button opening a
+portal that is not the reader's. The cost line is now **"Costs you an
+invitation"**. `site.test.ts` reads `door` as well and holds the fact rather than
+the keyword; `the-way-in.test.ts` scopes every assertion to the band that does
+the offering, because a page-wide search is the latitude that let this happen.
+
+**Not changed, and it is the open question:** the bar still says *Sign in*. Ten
+seconds is the whole span that bar is for and none of the above fits in it, and
+re-wording the front door's principal action is a positioning call. Raised on the
+pull request with a recommendation.
+
+## 2026-09-10 — the site can now say a portal belongs to whoever runs the site, and never says what running one is
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-22-putting-it-back-is-a-change`, 11 September.**
+`/what-you-run` is the sixth page. The boundary the entry asks about is agreed
+below rather than discovered in a review.
+
+The entry above puts *"whoever runs the site writes the list of who may sign in"*
+on the front door, which is true and answers the question a stranger arrives
+with. It also hands them the next one immediately: **so what do I run?**
+
+The site has five pages and none of them answers it. `/how-it-works` is the
+journey one change takes. `/the-rules` is what you decide in advance.
+`/your-components` is what you hand over. `/the-record` is what you are left
+holding. Nowhere does the site say what a Loom site *is* — that it is your own
+application, with your components described to it, your rules beside them, its
+record kept where you keep things, and a portal that comes with it. A reader who
+has understood every page still does not know whether this is a library they add
+to something, a service they point at something, or a thing they host.
+
+It is a description of code rather than a position, so it does not wait on the
+licence line. The risk to watch is the documentation lane's boundary: `/docs`
+owns *how to install it*, and this would be *what the shape is*, which is the
+question somebody asks before they are willing to read an installation guide.
+Recommend agreeing the split with `Loom docs` in the finding rather than
+discovering it in a review.
+
+---
+
+## 2026-09-11 — where `/docs` ends and `/what-you-run` begins, agreed rather than discovered
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs` · **Status:** open —
+for agreement, and nothing is blocked on it
+
+The entry above recommended settling this in the finding rather than in a
+review, so here is the split as `/what-you-run` was built to it. It is a
+proposal from the lane that moved second; if the documentation lane reads the
+line differently, say so and this page moves rather than that one.
+
+- **`/docs` owns *how to install it*** — the commands, the code, the API, the
+  first tree, and every sentence that assumes the reader has decided to try it.
+  `getting-started/introduction` and `the-runtime/what-your-app-has-to-do` are
+  the two nearest pages and neither moves.
+- **`/what-you-run` owns *what the shape is*** — the question somebody asks
+  **before** they are willing to read an installation guide at all: is this a
+  library, a service, or something somebody else hosts. It ends by handing the
+  reader to `/docs`, twice.
+
+Two things keep the boundary from eroding a sentence at a time, and both are
+assertions rather than intentions. The page prints **no code** — a test fails on
+`npm`, `pnpm`, `yarn`, `npx` or an `import` appearing in its copy — and it uses
+**none of the reserved vocabulary**, so it cannot start teaching what the
+documentation teaches. The overlap that remains is deliberate and is one
+sentence: both say installing is the next step.
+
+---
+
+## 2026-09-11 — a derived number on a page is a re-theme the site cannot make, and the suite caught it before a reader could
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` — recorded for the shape,
+not because anything is open
+
+`/what-you-run` measures what one request sends and prints the five numbers.
+The obvious way to write that is to measure the front door **in the palette the
+reader is wearing**, which is what the first version did.
+
+It is wrong, and not subtly. A page's root carries what it is wearing, so the
+request describing that page is a few characters longer in one palette than in
+another — and a number *below the root* that changes when the palette changes is
+exactly what [0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md) says
+cannot happen. The site's whole re-theme claim is *the same tree, three ids on
+its root, nothing below it touched*.
+
+**`pages.test.ts` failed on all three palette pairs before the page had been
+looked at once.** That is worth recording on its own: this lane's standing
+failure is two individually defensible things nobody read next to each other,
+and the cheapest defence found so far has been reading the site across a link.
+Here an existing, generic, per-route assertion caught a defect that no amount of
+reading would have — nobody reads a page three times in three palettes comparing
+digits.
+
+The fix is also the honest reading. `/` is published in the house palette and
+that is the page a visitor arrives on, so the measurement is of the site as it
+is served rather than of a private re-theme of it. A test of its own now says the
+numbers are identical in all three.
+
+---
+
+## 2026-09-11 — adding a link to a band changes what a request to remove that band costs, and it cost ten tests to find out
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` — recorded because the
+lesson generalises to every lane that builds a page the rules can be run against
+
+The front door's questions band is where this page's claim is made twice —
+*nothing you have to host with us*, and *Loom runs inside your own application* —
+so it is the obvious place to offer the page that backs them. The link went
+there first.
+
+**Ten existing tests went red**, in `answers`, `history`, `undo`, `outline` and
+`the-record`. None of them is about navigation. *Take the questions off the page*
+is one of the five requests this site offers a visitor, the rules weigh how much
+a request removes, and one more row in that band pushed the verdict from
+**landed** to **held** — so the front door's own demonstration stopped being
+*three land, one is refused, one stops and asks*, which is the sentence the
+9 September run shipped and the argument of the band above it.
+
+That is the site's rules working exactly as the site says they do, on the site
+itself, and it is the most convincing thing that happened this run. It is also a
+trap for every lane that builds a page a request can be run against: **anything
+added to a removable band is a change to what removing it costs.** The link now
+sits in the facts band, where `/your-components` is already offered and where
+`home.ts` had already written down why.
+
+No fix is wanted in the framework. The number the Gate weighs is right and the
+demonstration is right; what was missing was anybody knowing the two were
+coupled, and that is now a paragraph in `home.ts` and an entry here.
+
+---
+
+## 2026-09-11 — a comparison names its rows in a prop, and the register could not read a single one of them
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change`
+
+`words.ts` carries an allowlist of the props that hold sentences rather than
+settings, and its own note records why it exists: the first version walked text
+nodes alone and reported a clean front door while every feature body and FAQ
+answer went unread.
+
+`loom.comparison-row` names itself in `heading`, which was not on the list. So
+the six criteria of `/what-you-run`'s comparison — the most load-bearing copy on
+the band, since the marks mean nothing without them — were invisible to every
+register check on this site: the reserved-vocabulary sweep, the front door's
+in-full scan, all of it. The page's own test for the row it must never soften
+failed for this reason and not because the row was missing, which is how it was
+found.
+
+`heading` is on the list now. The general shape is the one the note already
+warned about, met in a second primitive four weeks later: **an allowlist of
+prose props is a list somebody has to remember to add to, and nobody does.** A
+cheaper answer would be for the library to say which of a primitive's props are
+prose, since it is the library that knows — noted here rather than filed for
+`Loom primitives`, because it is a real design question and not a defect, and
+this lane has no evidence yet that it is worth the schema change.
+
+---
+
+## 2026-09-11 — `fonts.googleapis.com` is still not on the egress allowlist
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — restated, not re-filed
+
+Unchanged since 1 September and restated for the same reason: every screenshot
+this lane has published, including this run's four, is in the fallback face
+rather than Geist. It changes no assertion. It matters because this is the one
+surface judged by eye, and it has been judged in a font it does not ship in.
+
+Two static font hosts, `fonts.googleapis.com` and `fonts.gstatic.com`. Neither
+can receive a credential.
 ## 2026-09-02 — the pairings probe cannot see an ink behind an optional prop, and one declared row is already wrong because of it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
