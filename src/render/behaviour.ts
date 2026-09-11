@@ -71,6 +71,12 @@ import type { PrimitiveText } from "./text.js"
  * layout it has to reach, and
  * [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
  * records why the third could not be the second.
+ *
+ * What a control hands back is not the same question as what a primitive may say
+ * about it, and the second one lives in `control.ts`: the class every control
+ * carries, and the custom property that decides whether it is displayed. Both
+ * exist because a control's presentation is an inline style, which a rule cannot
+ * beat.
  */
 
 export const BEHAVIOUR_NAMES = ["copy", "disclose", "adjust"] as const

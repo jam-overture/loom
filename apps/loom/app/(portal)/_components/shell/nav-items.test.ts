@@ -62,6 +62,29 @@ describe("NAV_GROUPS", () => {
    * broken — and the fix for that failing test is not to point the rail back at
    * a redirect.
    */
+  /**
+   * The rail's first entry is the screen with something urgent on it. It is also
+   * the only href that is a prefix of every other one here, so it has to declare
+   * itself exact — otherwise it is the active item on every page in the portal
+   * and the rail stops distinguishing anything.
+   */
+  it("leads with what is waiting, and claims only its own path", () => {
+    const first = NAV_GROUPS[0]?.[0]
+
+    expect(first?.href).toBe("/portal")
+    expect(first?.label).toBe("Waiting on you")
+    expect(first?.exact).toBe(true)
+  })
+
+  it("marks every item whose href is a prefix of another's as exact", () => {
+    const hrefs = items.map((item) => item.href)
+    const ambiguous = items.filter((item) =>
+      hrefs.some((other) => other !== item.href && other.startsWith(`${item.href}/`))
+    )
+
+    expect(ambiguous.filter((item) => item.exact !== true)).toEqual([])
+  })
+
   it("finds a route served by another surface's route group", () => {
     expect(GROUPS().length).toBeGreaterThan(1)
     expect(routeExists("/demo")).toBe(true)

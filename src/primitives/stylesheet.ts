@@ -233,6 +233,39 @@ export const LIBRARY_CLASS = {
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
   /**
+   * A `loom.recording`. The card, the frame the `@container` rule flips, the
+   * artwork panel, the body beside it, the play mark over the artwork and the
+   * runtime pinned into its corner.
+   *
+   * The frame's direction is here for `loom-offering-frame`'s reason — an
+   * inline value would beat the rule that flips it — and the play mark's
+   * position is here because it is a `transform` the hover state has to
+   * *extend* rather than replace. A mark centred by an inline
+   * `translate(-50%, -50%)` and scaled by a rule would lose the centring the
+   * moment the rule fired, which is the kind of defect that only shows on
+   * hover and therefore never in a screenshot.
+   */
+  recording: "loom-recording",
+  recordingFrame: "loom-recording-frame",
+  recordingArt: "loom-recording-art",
+  recordingBody: "loom-recording-body",
+  recordingPlay: "loom-recording-play",
+  recordingTime: "loom-recording-time",
+  /**
+   * A `loom.event`. The card, the frame, the date in its margin, the body and
+   * the action pinned to the card's end.
+   *
+   * The rule between the date and the rest is on `loom-event-when` and only
+   * inside the `@container` block, because it is an inline-end border in the
+   * row arrangement and would be a horizontal line under a date — a divider
+   * between nothing — in the stacked one.
+   */
+  event: "loom-event",
+  eventFrame: "loom-event-frame",
+  eventWhen: "loom-event-when",
+  eventBody: "loom-event-body",
+  eventAction: "loom-event-action",
+  /**
    * A `loom.nav`. The bar itself, the box holding its disclosure control, and
    * the menu that control opens and closes.
    *
@@ -700,6 +733,96 @@ details[open] > summary .loom-marker {
 .loom-credential {
   position: relative;
 }
+.loom-recording {
+  position: relative;
+  container-type: inline-size;
+}
+.loom-recording-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.loom-recording-art {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+.loom-recording-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-recording-play {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform var(--loom-motion-medium) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+.loom-recording-time {
+  position: absolute;
+  inset-block-end: var(--loom-spacing-2);
+  inset-inline-end: var(--loom-spacing-2);
+}
+@container (min-width: 34rem) {
+  .loom-recording-frame {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .loom-recording-art {
+    inline-size: 11rem;
+  }
+}
+.loom-event {
+  container-type: inline-size;
+}
+.loom-event-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-3);
+  height: 100%;
+}
+.loom-event-when {
+  flex: 0 0 auto;
+}
+.loom-event-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-event-action {
+  display: grid;
+  margin-block-start: auto;
+}
+@container (min-width: 40rem) {
+  .loom-event-frame {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--loom-spacing-5);
+  }
+  .loom-event-when {
+    inline-size: 9rem;
+    align-self: stretch;
+    border-inline-end: 1px solid var(--loom-border-subtle);
+    padding-inline-end: var(--loom-spacing-5);
+  }
+  .loom-event-action {
+    flex: 0 0 auto;
+    margin-block-start: 0;
+  }
+}
 .loom-nav-menu {
   display: flex;
   flex-wrap: wrap;
@@ -856,11 +979,14 @@ details[open] > summary .loom-marker {
   .loom-marquee-echo {
     display: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > * {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play {
     transition: none;
   }
   .loom-lift:hover {
     transform: none;
+  }
+  .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+    transform: translate(-50%, -50%);
   }
 }
 `.trim()

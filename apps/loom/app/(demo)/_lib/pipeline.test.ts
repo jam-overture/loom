@@ -4,6 +4,7 @@ import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@
 import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@loom/runtime/write"
 
 import { answerNote } from "./answer"
+import { movedOn } from "./moved"
 import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
@@ -337,5 +338,99 @@ describe("the demo's policy", () => {
   it("is named, and stricter than the default about what may apply unattended", () => {
     expect(demoPolicy.policyId).toBe("demo")
     expect(demoPolicy.autoApplyCeiling["user-instruction"]).toBe("low")
+  })
+})
+
+/**
+ * Two questions open at once, and what answering one does to the other.
+ *
+ * This is the demo's most reachable dead end and it needs no ingenuity to find:
+ * five buttons, no instruction to answer one at a time, and a stranger who
+ * presses two of them. Both are held. Answering either moves the revision, and a
+ * hold names the revision it was judged against — so the second is dead the
+ * instant the first lands.
+ *
+ * The runtime is unambiguous about it (`confirmHeld`: *"it is not stale pending
+ * a retry, it is dead"*) and it had never reached the screen. The card went on
+ * saying **Waiting on you**, the page went on ringing its band in the colour of
+ * an open question, and pressing *Apply this change* spent the offer and
+ * answered with `applied, then not written: revision-conflict` in the smallest
+ * type on the card.
+ *
+ * The end-to-end test is here rather than in `moved.test.ts` because the claim
+ * is about the runtime as much as about the surface: it is that `baseRevision`
+ * really does go stale in exactly the case the surface now watches for, and that
+ * confirming one afterwards really does fail. A unit test of the predicate alone
+ * would keep passing if either half stopped being true.
+ */
+describe("a second ask held while the first is still waiting", () => {
+  const holdsOf = async (session: DemoSession) => {
+    const head = await headOf(session)
+    const found = await session.holds.forTree(head.treeId)
+    if (!found.ok) throw new Error(`no holds: ${found.error.code}`)
+
+    return { head, held: found.value }
+  }
+
+  it("goes dead the moment the first one is answered, and the surface can tell", async () => {
+    const session = await sessionFor("two-holds")
+    const first = await ask(session, "trim")
+    const second = await ask(session, "band")
+
+    expect(first.outcome).toBe("awaiting-you")
+    expect(second.outcome).toBe("awaiting-you")
+
+    /** Both were judged against the same page, so neither is stale yet. */
+    const before = await holdsOf(session)
+    expect(before.head.revision).toBe(0)
+    for (const hold of before.held) expect(movedOn(hold.baseRevision, before.head.revision)).toBeUndefined()
+
+    const allowing = beginDemoWrite(session)
+    await confirmHeld(allowing.path, {
+      proposalId: proposalIdSchema.parse(second.heldProposalId ?? ""),
+      actor: "a demo visitor",
+    })
+
+    /** One landed; the other is now aimed at a page that no longer exists. */
+    const after = await holdsOf(session)
+    expect(after.head.revision).toBe(1)
+    expect(after.held).toHaveLength(1)
+
+    const note = movedOn(after.held[0]!.baseRevision, after.head.revision)
+    expect(note?.at).toBe(0)
+    expect(note?.now).toBe(1)
+  })
+
+  /**
+   * And confirming it anyway — a second tab, or a press that crosses another —
+   * produces the record the card now reads honestly: no hold, `did-not-apply`,
+   * and the conflict kept in full.
+   */
+  it("cannot be applied afterwards, and stops claiming to be waiting when it is tried", async () => {
+    const session = await sessionFor("two-holds-answered-late")
+    const first = await ask(session, "trim")
+    const second = await ask(session, "band")
+
+    const allowing = beginDemoWrite(session)
+    await confirmHeld(allowing.path, {
+      proposalId: proposalIdSchema.parse(second.heldProposalId ?? ""),
+      actor: "a demo visitor",
+    })
+
+    const late = beginDemoWrite(session)
+    const outcome = await confirmHeld(late.path, {
+      proposalId: proposalIdSchema.parse(first.heldProposalId ?? ""),
+      actor: "a demo visitor",
+    })
+
+    expect(outcome.kind).toBe("not-written")
+
+    const record = recordFromEvents(late.narrated(), first)
+    expect(record?.heldProposalId).toBeUndefined()
+    expect(record?.outcome).toBe("did-not-apply")
+    expect(record?.failure).toContain("revision-conflict")
+
+    /** Nothing moved: the page is still where the change that did land left it. */
+    expect((await headOf(session)).revision).toBe(1)
   })
 })
