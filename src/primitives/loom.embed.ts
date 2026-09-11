@@ -163,6 +163,8 @@ export const loomEmbed = definePrimitive({
            * band above it does not jump when it arrives.
            */
           aspectRatio: ASPECT_RATIOS[aspect],
+          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
+          boxSizing: "border-box",
           width: "100%",
           overflow: "hidden",
           background: colour("bg-surface-muted"),

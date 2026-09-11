@@ -86,11 +86,219 @@ export type AskedLine = {
  * this surface pattern-matching an utterance it does not own. A record with no
  * interpretation was never assessed and has no delta to have come from
  * anywhere, so it falls through to its own words.
+ *
+ * **Exported, because it is not only the card's quotation that turns on it.**
+ * An undo's operations are ordinary inserts, removes and moves — that is the
+ * whole of 0032, and it is why everything downstream of the delta described one
+ * as an arrival. The mark on the page (`spotlight.ts`) and the plain sentence
+ * under it (`plain-change.ts`) both need the one fact the delta cannot carry:
+ * that this insert is a node **coming back**, with the id it had, rather than
+ * something new. Read from the same stamp by all three, so no two halves of the
+ * surface can disagree about whether a change is a restoration.
  */
-const isUndo = (record: ChangeRecord): boolean =>
+export const isUndo = (record: ChangeRecord): boolean =>
   record.interpretation?.interpreter === REVERT_INTERPRETER
 
-export const askedLine = (record: ChangeRecord): AskedLine =>
+/**
+ * The line at the top of the card, and which control it quotes.
+ *
+ * An undo is quoted by the words on the button that raised it, not by the
+ * runtime's synthesised utterance. Which button that was depends on what was
+ * being undone: an ordinary change offers **Put it back**, and an undo offers
+ * **Undo this change too** (`appliedWords`). So the records are what settle it,
+ * the same way they settle whether the offer is still open — the card cannot
+ * see the ask above its own.
+ *
+ * `records` defaults to empty and the quotation falls back to `UNDO_LABEL`,
+ * which is the control on every card that is not itself an undo. A caller with
+ * no list in hand is a card being rendered on its own, and that is the reading
+ * that is right for all but one of them.
+ */
+export const askedLine = (
+  record: ChangeRecord,
+  records: readonly ChangeRecord[] = []
+): AskedLine => {
+  if (!isUndo(record)) return { plain: record.utterance }
+
+  const undone = records.find((one) => one.revision?.produced === record.undoes)
+  const pressed = undone === undefined ? UNDO_LABEL : appliedWords(undone).label
+
+  return { plain: `${pressed}.`, technical: record.utterance }
+}
+
+/**
+ * Stamp a record as the undo of a revision.
+ *
+ * The caller's own knowledge about its own request, rather than something read
+ * back out of the log — see `ChangeRecord.undoes` for why the log cannot supply
+ * it without this surface parsing a sentence it does not own.
+ */
+export const undoOf = (record: ChangeRecord, revision: number): ChangeRecord => ({
+  ...record,
+  undoes: revision,
+})
+
+/**
+ * Whether the applied card still has an undo to offer, and if not, why not.
+ *
+ * **The defect this replaces.** The offer was gated on *whether an undo had been
+ * pressed* — `record.revision && !undoReport` — so it was withdrawn by any
+ * answer from the server rather than by the one that spends it. On this demo's
+ * primary path the undo is *held*, not applied: an undo is a change of its own
+ * (0032) and putting the numbers band back restructures the page as much as
+ * taking it off did, so the Gate stops it and the page does not move. The
+ * button vanished anyway, two seconds after a press that visibly did nothing,
+ * off a card still reading *"This change is live on the page beside you. 'Put
+ * it back' undoes it."* — a sentence naming a control that was no longer under
+ * it. Answer that held undo with **No thanks** and the visitor had declined
+ * their own undo and could never ask again.
+ *
+ * **Why it is computed here rather than in the card.** The card cannot see any
+ * of this. `undoReport` is `useActionState` on the applied card, and every
+ * event that resolves an undo happens somewhere else — the held undo is
+ * answered on *its own* card, whose action state is its own. So a card watching
+ * its own press can only ever learn that an undo was *asked for*, which is the
+ * one thing that does not decide anything. The records can see all of it,
+ * because the undo is a record like any other, and it is the server's answer
+ * rather than a guess that survives a re-render.
+ *
+ * The three states are what a visitor can be truthfully told:
+ *
+ * - **`offer`** — nothing is pending and the change is still live, so the
+ *   sentence is true and the button belongs under it. This is also where a
+ *   *declined* undo lands, which is the point: turning down your own undo puts
+ *   the offer back rather than spending it.
+ * - **`waiting`** — the Gate is holding an undo of this revision and it is on a
+ *   card of its own, above this one. The button is replaced rather than
+ *   repeated, because a second press would propose a second undo of the same
+ *   revision and the honest thing to do is point at the question already asked.
+ * - **`spent`** — an undo of this revision applied. The change is not live any
+ *   more, so both the button and the sentence promising it have to go.
+ *
+ * A *refused* or *misunderstood* undo falls back to `offer` deliberately.
+ * Nothing moved, the change really is still live, and the record card for that
+ * refusal is sitting above saying which rule stopped it — telling a visitor the
+ * change can never be put back would be a claim no record here makes.
+ */
+export type UndoOffer = "offer" | "waiting" | "spent"
+
+export const undoOffer = (record: ChangeRecord, records: readonly ChangeRecord[]): UndoOffer => {
+  const revision = record.revision?.produced
+  if (revision === undefined) return "offer"
+
+  const undos = records.filter((other) => other.undoes === revision)
+
+  if (undos.some((undo) => undo.outcome === "applied")) return "spent"
+  if (undos.some((undo) => undo.outcome === "awaiting-you")) return "waiting"
+
+  return "offer"
+}
+
+/**
+ * What the card says in place of the button, in the two states where there is
+ * no button to show.
+ *
+ * `waiting` points up rather than down: records are newest first
+ * (`rememberRecord`), so the undo a visitor just asked for is the card above
+ * this one.
+ *
+ * `spent` is a replacement for the applied state's own sentence rather than an
+ * addition to it. `report.ts` overrides that sentence for this surface already
+ * — the shared table sends a reader to `/portal/history`, which a demo visitor
+ * cannot open — and this is the same override one step further on: once the
+ * change has been put back, *"This change is live on the page beside you"* is
+ * not a signpost in the wrong place, it is false.
+ */
+export const UNDO_WAITING = "You’ve asked to put this back. It’s waiting on your yes, on the card above."
+
+export const UNDO_SPENT = "You put this back, so the page is as it was before this ask."
+
+/**
+ * And the same three sentences for the one card where every one of them is
+ * about the wrong direction: **an undo's own card.**
+ *
+ * At the end of the demo's sequence — ask, allow, put it back, allow — the
+ * visitor is looking at the record of the undo that just landed. On the strings
+ * above it read, top to bottom:
+ *
+ * | | |
+ * | --- | --- |
+ * | badge | **Applied** |
+ * | what was asked | *“Put it back.”* |
+ * | what became of it | *“This change is live on the page beside you. **“Put it back”** undoes it.”* |
+ * | the control | **[ Put it back ]** |
+ *
+ * Three uses of one phrase, and **the button is the odd one out: pressing it
+ * takes the numbers off again.** The card's own title is what that button would
+ * reverse, and the sentence between them is circular — *“Put it back” undoes
+ * it*, on a card whose subject is putting it back.
+ *
+ * Every one of those strings is right where it was written. `askedLine`
+ * substitutes the visitor's own press for the runtime's `Undo revision 1.`;
+ * `UNDO_LABEL` and the applied state's sentence are the words for *any* change,
+ * and every change does have an undo — an undo included, which is 0032 and is
+ * the claim this card exists to make. What was missing is that an undo's card
+ * is the one place all three collide.
+ *
+ * **So the button stays and only its words change.** Removing it would be the
+ * tidy fix and it would deny the interesting thing: that undoing is a change of
+ * its own, weighed and recorded like any other, and therefore reversible in its
+ * turn.
+ *
+ * **Why none of these names a direction.** *“Take it off again”* is the label
+ * this reads as wanting, and it is only correct because this demo's leading
+ * preset happens to be a removal: the undo of *“Add the opening hours”* puts a
+ * section back, and its undo takes it away again. A string in a table cannot
+ * know which, and this surface will not name a change by what it does to a type
+ * (`plain-change.ts`). So these say *this one too* and let the plain reading on
+ * the held card — which is computed against the tree, and which
+ * `restoringOperation` already writes in the restoring direction — say what
+ * actually moves.
+ *
+ * The one phrase that survives on the card is the quotation at the top, which
+ * is the words the visitor pressed. One phrase, one meaning.
+ */
+export const UNDO_AGAIN_LABEL = "Undo this change too"
+
+export const UNDO_AGAIN_MEANING =
+  "The page is back as it was, and this record is how it got there."
+
+export const UNDO_AGAIN_WAITING =
+  "You’ve asked to undo this one too. It’s waiting on your yes, on the card above."
+
+export const UNDO_AGAIN_SPENT = "You undid this one too, so the page is not as this record left it."
+
+/**
+ * The applied card's own words, which differ on a card that is itself an undo.
+ *
+ * One selector rather than three `isUndo` branches in the markup, because the
+ * three strings are one claim about one card and the failure they fix was
+ * exactly three strings drifting apart while each stayed true on its own.
+ *
+ * `meaning` is optional and absent for an ordinary change: that sentence is
+ * `report.ts`'s, overridden once already for this surface, and a second copy
+ * here would be the drift this file exists to stop. An undo's card is the one
+ * place it has to be replaced rather than adjusted — *“This change is live on
+ * the page beside you”* is true of the undo and useless as a description of a
+ * page that is back where it started.
+ */
+export type AppliedWords = {
+  /** The sentence under the badge, when the shared table's will not do. */
+  readonly meaning?: string
+  /** The words on the control, while the undo is still to be had. */
+  readonly label: string
+  /** In place of the control, once an undo of this card is waiting on an answer. */
+  readonly waiting: string
+  /** In place of the control, once one has been taken. */
+  readonly spent: string
+}
+
+export const appliedWords = (record: ChangeRecord): AppliedWords =>
   isUndo(record)
-    ? { plain: `${UNDO_LABEL}.`, technical: record.utterance }
-    : { plain: record.utterance }
+    ? {
+        meaning: UNDO_AGAIN_MEANING,
+        label: UNDO_AGAIN_LABEL,
+        waiting: UNDO_AGAIN_WAITING,
+        spent: UNDO_AGAIN_SPENT,
+      }
+    : { label: UNDO_LABEL, waiting: UNDO_WAITING, spent: UNDO_SPENT }

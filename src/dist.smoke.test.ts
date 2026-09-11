@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
@@ -34,6 +34,7 @@ const ENTRY_POINTS: readonly (readonly [string, string])[] = [
   ["write/index.js", "commitIntent"],
   ["store/postgres.js", "postgresTreeStore"],
   ["telemetry/index.js", "episodesOf"],
+  ["testing/index.js", "sampleTree"],
 ]
 
 describe("the compiled package", () => {
@@ -79,6 +80,44 @@ describe("the compiled package", () => {
     for (const file of controls) {
       expect(readFileSync(join(DIST, "render", file), "utf8").split("\n")[0]).toBe('"use client";')
     }
+  })
+
+  /**
+   * `testing/contracts.js` is the one entry point that cannot be imported the
+   * way the others are, and the reason is the reason it is a separate entry
+   * point: `vitest` throws on import outside a test run, by design. So the
+   * check it can still have is the one the others are really buying — that
+   * every relative specifier the emitted files name is a file that exists,
+   * which is both failures this suite was written for (`.js` pointing at a
+   * `.ts`, a re-export chain broken by a rename).
+   */
+  it("emits a resolvable module graph for the contracts entry point", () => {
+    const relativeSpecifiersIn = (file: string): readonly string[] =>
+      [...readFileSync(file, "utf8").matchAll(/from\s+"(\.[^"]+)"/g)].map(
+        (match) => match[1] as string
+      )
+
+    const seen = new Set<string>()
+    const pending = [join(DIST, "testing", "contracts.js")]
+    const missing: string[] = []
+
+    while (pending.length > 0) {
+      const file = pending.pop() as string
+      if (seen.has(file)) continue
+      seen.add(file)
+
+      if (!existsSync(file)) {
+        missing.push(file)
+        continue
+      }
+
+      for (const specifier of relativeSpecifiersIn(file)) {
+        pending.push(join(dirname(file), specifier))
+      }
+    }
+
+    expect(missing).toEqual([])
+    expect(seen.size).toBeGreaterThan(1)
   })
 
   it("keeps a node shebang on the binary, so the bin is runnable without a loader", () => {
