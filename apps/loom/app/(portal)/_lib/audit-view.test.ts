@@ -48,6 +48,26 @@ const drifted = (count: number) => {
 }
 
 describe("describeAudit", () => {
+  /**
+   * The mirror of `stoppedAt`, and the pairing a screen relies on to tell a
+   * verdict that weighed something from one that could not: a fold that stopped
+   * part-way replayed no number of changes anybody can print.
+   */
+  it("carries the revision it checked, and null exactly when nothing was compared", () => {
+    const { stored, replayed } = drifted(2)
+
+    expect(describeAudit({ outcome: "agrees", revision: 4, idReturns: [] }).revision).toBe(4)
+    expect(
+      describeAudit({ outcome: "diverged", revision: 2, stored, replayed, idReturns: [] }).revision
+    ).toBe(2)
+    expect(
+      describeAudit({
+        outcome: "unreplayable",
+        mismatch: { code: "revision-gap", expected: 3, found: 7 },
+      }).revision
+    ).toBeNull()
+  })
+
   it("says the log still produces the tree, and counts what it folded", () => {
     const report = describeAudit({ outcome: "agrees", revision: 4, idReturns: [] })
 
@@ -329,6 +349,36 @@ describe("readCheckup", () => {
     expect(verdict.label).toBe("Everything on this page adds up.")
     expect(verdict.next).toBe("Nothing to do.")
     expect(verdict.tone).toBe("applied")
+  })
+
+  /**
+   * The finding `Loom lessons` filed on 25 August, as a test. *"…so nothing on
+   * it is unexplained"* promised the history was intact; a fold compares end
+   * states, so a deployment holding a wrong starting shape sits on a green
+   * verdict from the moment a change replaces the part it was wrong about. The
+   * sentence's job is to claim exactly what was checked, which means naming the
+   * shape it started from.
+   */
+  it("does not promise a clean fold means nothing on the page is unexplained", () => {
+    const verdict = readCheckup(agreeing())
+
+    expect(verdict.meaning).not.toContain("unexplained")
+    expect(verdict.meaning).toContain("started from the shape it has on record")
+  })
+
+  /**
+   * The same miscount under a red verdict, and the more expensive one: "one of
+   * the two is wrong" sends a reviewer to look at the page and the history when
+   * the fault may be in the starting shape, which is in neither.
+   */
+  it("does not tell a reviewer the fault is in one of two things", () => {
+    const { stored, replayed } = drifted(2)
+    const verdict = readCheckup(
+      describeAudit({ outcome: "diverged", revision: 2, stored, replayed, idReturns: [] })
+    )
+
+    expect(verdict.meaning).not.toContain("One of the two")
+    expect(verdict.meaning).toContain("shape Loom has on record")
   })
 
   it("says the page and its history disagree, and where to start", () => {

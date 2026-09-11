@@ -43,7 +43,15 @@ export const isPublicPath = (pathname: string): boolean =>
  * check for a leading `/` alone lets an attacker send a reviewer somewhere else
  * entirely with a link that looks like this portal's own.
  */
-export const DEFAULT_LANDING = "/portal/pages"
+/**
+ * Where somebody lands when they sign in without having asked for a particular
+ * screen.
+ *
+ * It was the page list, back when `/portal` was a redirect to it. The front
+ * door is a screen now, and the first thing a reviewer should be shown is
+ * whether anything is waiting for them — not a list of the places it could be.
+ */
+export const DEFAULT_LANDING = "/portal"
 
 export const safeReturnPath = (value: string | undefined | null): string => {
   if (!value) return DEFAULT_LANDING
