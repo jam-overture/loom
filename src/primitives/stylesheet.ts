@@ -345,6 +345,32 @@ export const LIBRARY_CLASS = {
   reveal: "loom-reveal",
   revealFade: "loom-reveal-fade",
   revealStill: "loom-reveal-still",
+   /**
+   * A `loom.frame`. The chrome itself, which declares the containment its marks
+   * are measured against; the screen inside it; and the layer over that screen.
+   */
+  frame: "loom-frame",
+  frameScreen: "loom-frame-screen",
+  /**
+   * The layer is the whole of what separates a wide frame from a narrow one: an
+   * overlay on the screen where there is room, a legend under it where there is
+   * not. Both are in this file because a pin cannot know which it is in, the
+   * legend is the **unqueried** rule so a client that resolves no query gets the
+   * readable one (0079), and the query is the *frame's* width rather than the
+   * window's — a screenshot in one column of a split is narrow on the widest
+   * screen there is.
+   */
+  framePins: "loom-frame-pins",
+  /** One `loom.pin`: the mark, its dot, its label, and the four sides it may open to. */
+  pin: "loom-pin",
+  pinDot: "loom-pin-dot",
+  pinLabel: "loom-pin-label",
+  pinStart: "loom-pin-start",
+  pinEnd: "loom-pin-end",
+  pinAbove: "loom-pin-above",
+  pinBelow: "loom-pin-below",
+  /** The still rendering it takes while somebody is editing the page. */
+  pinStill: "loom-pin-still",
   /**
    * A `loom.link-trail`. The row, one crumb in it, and the three things that
    * may sit between two crumbs.
@@ -388,32 +414,6 @@ export const LIBRARY_CLASS = {
    */
   meterFill: "loom-meter-fill",
   meterArc: "loom-meter-arc",
-  /**
-   * A `loom.frame`. The chrome itself, which declares the containment its marks
-   * are measured against; the screen inside it; and the layer over that screen.
-   */
-  frame: "loom-frame",
-  frameScreen: "loom-frame-screen",
-  /**
-   * The layer is the whole of what separates a wide frame from a narrow one: an
-   * overlay on the screen where there is room, a legend under it where there is
-   * not. Both are in this file because a pin cannot know which it is in, the
-   * legend is the **unqueried** rule so a client that resolves no query gets the
-   * readable one (0079), and the query is the *frame's* width rather than the
-   * window's — a screenshot in one column of a split is narrow on the widest
-   * screen there is.
-   */
-  framePins: "loom-frame-pins",
-  /** One `loom.pin`: the mark, its dot, its label, and the four sides it may open to. */
-  pin: "loom-pin",
-  pinDot: "loom-pin-dot",
-  pinLabel: "loom-pin-label",
-  pinStart: "loom-pin-start",
-  pinEnd: "loom-pin-end",
-  pinAbove: "loom-pin-above",
-  pinBelow: "loom-pin-below",
-  /** The still rendering it takes while somebody is editing the page. */
-  pinStill: "loom-pin-still",
   /**
    * A `loom.book`. The card, the frame the `@container` rule flips, the 2:3
    * cover panel, and the body beside it.
@@ -1011,6 +1011,7 @@ details[open] > summary .loom-marker {
   container-type: inline-size;
 }
 /*
+ /**
  * One column until the *band* has room for six, never until the screen does.
  *
  * A container query reads an ancestor rather than the element that declared
@@ -1043,6 +1044,7 @@ details[open] > summary .loom-marker {
     grid-column: span 2;
   }
   /*
+   /**
    * Two classes rather than one, so this rule outranks the unconditional
    * .loom-mosaic > * above on specificity rather than on source order -- the
    * only rhythm rule whose selector would otherwise tie with it.
@@ -1384,6 +1386,60 @@ details[open] > summary .loom-marker {
   margin-inline-start: var(--loom-spacing-1);
   color: var(--loom-fg-subtle);
 }
+.loom-trail-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--loom-spacing-2);
+}
+.loom-trail > .loom-trail-crumb + .loom-trail-crumb::before {
+  flex: 0 0 auto;
+  color: var(--loom-fg-subtle);
+}
+.loom-trail-chevron > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "";
+  width: 0.3em;
+  height: 0.3em;
+  border-block-start: 1px solid var(--loom-border-subtle);
+  border-inline-end: 1px solid var(--loom-border-subtle);
+  transform: rotate(45deg);
+}
+.loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "/";
+}
+.loom-trail-dot > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "\\00B7";
+}
+.loom-carousel {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scroll-snap-type: inline mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--loom-border-subtle) transparent;
+  padding-block: var(--loom-spacing-2);
+}
+.loom-carousel:focus-visible {
+  outline: 2px solid var(--loom-accent);
+  outline-offset: 2px;
+}
+.loom-carousel-cell {
+  display: flex;
+  scroll-snap-align: start;
+}
+.loom-carousel-cell > * {
+  width: 100%;
+}
+.loom-carousel-centred > .loom-carousel-cell {
+  scroll-snap-align: center;
+}
+.loom-meter-fill {
+  width: var(--loom-meter-sweep);
+}
+.loom-meter-fill, .loom-meter-arc {
+  animation: loom-meter-sweep calc(var(--loom-motion-slow) * 2) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 @media (prefers-reduced-motion: reduce) {
   .loom-orbit-spinner, .loom-orbit-item {
     animation: none;
@@ -1435,6 +1491,12 @@ details[open] > summary .loom-marker {
   }
   .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
     transform: translate(-50%, -50%);
+  }
+  .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+    transform: translate(-50%, -50%);
+  }
+  .loom-carousel {
+    scroll-behavior: auto;
   }
 }
 `.trim()

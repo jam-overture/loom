@@ -68,6 +68,7 @@ was wrong too — `47` against a summary table that said 52, which is the third
 time this document has disagreed with itself about its own count and the third
 time it has been corrected by hand. The tool it keeps asking for is still
 unwritten.*
+**Done — 47 blocks, 73 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -110,6 +111,8 @@ still correct — what a block is **assembled from** is the same fact whether or
 not a catalogue assembles it — and any of them could join the catalogue on the
 same terms. The eight bands the catalogue adds that Hermes never had are in the
 9 September report.*
+
+**Compositions — 13 blocks, nothing to build.**
 
 | Hermes block | Assembled from |
 | --- | --- |
@@ -167,6 +170,15 @@ same reading this document already applies to `hours-of-operation`'s seven
 weekdays, promoted from a note to a rule.
 
 **Four proposed names had changed before these**, and the change is
+**Pairs to build — 3 blocks, 2 pairs.** Grouped by the content model they
+share, which is the order to build them in.
+
+| Group | Hermes blocks | Proposed pair |
+| --- | --- | --- |
+| Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
+| Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
+
+**Four proposed names have changed when they were built**, and the change is
 0054 being applied rather than overruled. `loom.offering-list`,
 `loom.credential-list` and `loom.episode-list` all shipped as `-grid`, because
 the arrangement word names *what the container does with its children* and what
@@ -323,6 +335,17 @@ the frame, and by 0052 they are nodes — an `insert` each, a `move` each, an
 inverse each. The port map has no row to correct here because Hermes never had
 the block; the rule is the same one that turns seven fixed weekday fields into
 seven nodes.
+**Four more joined them on 5 September, and three of the four are the page
+chrome paragraph above coming round a second time.** Hermes' app shell owned the
+top of the window, so nothing in the seventy is an announcement strip and
+nothing is a breadcrumb: `loom.banner` and `loom.link-trail` are the third and
+fourth primitives here whose absence is that same fact. `loom.carousel` is the
+fifth general arranger and the first that admits the reader has a phone — a row
+that scrolls and snaps, which no Hermes block needed because a profile was one
+column. `loom.meter` is the only one of the four with something like an
+ancestor, and the distance is the point: Hermes' `stats` block *states* a figure
+and this one draws it against a whole, which is the collapse rule read the other
+way — two blocks that want different markup are two primitives.
 
 The same run gave `loom.section`, `loom.hero` and `loom.callout` an `anchor`, so
 a band can be linked to from the page it is on. Hermes never needed one: a
@@ -380,6 +403,15 @@ job since the port started and it was never the real size of it. The honest
 closing figure is that seventy Hermes blocks came to **fifty-five ported, over
 roughly twenty-five content models**, and that the last four runs' most valuable
 primitives were all outside this ledger entirely.
+| Ported | 52 |
+| Need no primitive | 13 |
+| Pairs still to build | 3 (2 pairs) |
+| Atomic still to build | 0 |
+| Blocked on a seam | 2 |
+
+**67 of 70 are settled**, and the 3 that remain are two pairs rather than three
+primitives. That is the number worth quoting, because "70 blocks" has been the
+shape of this job since the port started and it was never the real size of it.
 
 *The three counts above were internally inconsistent before 26 August* — the
 ledger said 36 done while this table said 33, and the table still listed three

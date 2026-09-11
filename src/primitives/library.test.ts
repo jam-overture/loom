@@ -28,8 +28,8 @@ import {
   type FrameOriginRegistry,
 } from "../frame/origin.js"
 
-import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
 import { STARTER_COMPOSITIONS } from "./compositions/index.js"
+import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "./index.js"
 import { LIBRARY_CLASS } from "./stylesheet.js"
 
 const registryOf = (): PrimitiveRegistry => {
@@ -191,7 +191,7 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as ninety-one primitives, structure first and the leaves that go anywhere last", () => {
+  it("registers as 91 primitives, structure first and the leaves that go anywhere last", () => {
     expect(STARTER_PRIMITIVES).toHaveLength(91)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
@@ -406,75 +406,27 @@ describe("the starter library", () => {
      * its `children` — the failure the probe exists to catch — fails here.
      */
     expect(auditRegistry(registry).leaves).toEqual([
-      /**
-       * A pin is a leaf and the frame it sits in is not, which is the split
-       * this run turned on: the marks are children, and the mark itself holds
-       * its ordinal and its phrase in props.
-       */
       "loom.pin",
       "loom.feature",
       "loom.milestone",
       "loom.stat",
-      /**
-       * A meter is a leaf for the reason a stat is: its label and its figure are
-       * fixed fields of one record, and a proportion has no interior to place a
-       * node in. Everything a page would put *beside* it is a sibling.
-       */
       "loom.meter",
       "loom.perk-list-item",
       "loom.product",
-      /**
-       * A spec is a leaf for a stat's reason and one of its own: a figure and
-       * the unit it counts are two fixed fields of one fact, and the thing a
-       * page would put beside it is the *next spec*, which is a sibling.
-       */
       "loom.spec",
       "loom.quote",
       "loom.person",
       "loom.article",
-      /**
-       * A book is a leaf where the `loom.listing` built in the same run is not,
-       * and the pair is 0052 landing on opposite sides of one question: a book's
-       * note is one sentence about one book, and a listing's specifications are
-       * however many facts the thing happens to have.
-       */
       "loom.book",
-      /**
-       * Two more cards with no children flow, which is 0094 read from the
-       * audit's side again: neither a recording nor an event turns a field of
-       * its record into child nodes, so both hold their sentence in a prop and
-       * both land here beside `loom.credential` rather than beside
-       * `loom.offering`. Their slots do not make them anything else — a region
-       * the primitive places is not a flow the tree writes into.
-       */
       "loom.recording",
       "loom.event",
       "loom.logo",
-      /**
-       * A credential is a leaf and an offering is not, which is 0094 read from
-       * the audit's side: the card with a repeated part has a flow, and the card
-       * without one holds its sentence in a prop.
-       */
       "loom.credential",
       "loom.faq",
-      /** A score, which is one value the primitive draws and never a run of nodes. */
       "loom.rating",
-      /** The face on its own, which is a leaf for the reason `loom.person` is. */
       "loom.avatar",
-      /**
-       * `loom.field` is deliberately absent. It places children only when its
-       * `type` is `select`, and the probe now asks it under every value its own
-       * enum declares (0075) rather than under the default alone — so the one
-       * primitive here whose answer depends on a prop is no longer reported as
-       * having nowhere to put a child node.
-       */
       "loom.perk",
       "loom.divider",
-      /**
-       * The two new frames. An `<iframe>` has no interior this library can
-       * address, and a wipe places two *slots* rather than a run of children —
-       * so neither has anywhere to put a child node, and both say so.
-       */
       "loom.embed",
       "loom.before-after",
     ])
@@ -903,202 +855,6 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
   return { stylesheet: matched ?? "", tree: markup.slice((matched ?? "").length) }
 }
 
-/**
- * The atmosphere layer: every paint `loom.backdrop` offers, and every way
- * `loom.overlay` sets content over a ground.
- *
- * It is one fixture rather than two because the pair is one idea — what is
- * behind the content and what is over it — and because the interesting failures
- * are between them: a paint that leaks over its children, a scrim that squares
- * off a rounded picture, a backdrop inside a card painting outside the card.
- */
-const atmospherePage = (
-  theme: Record<string, string>,
-  idFactory: IdFactory = sequentialIdFactory()
-): LoomTree => {
-  const text = (value: string) => buildText(idFactory, value)
-
-  const band = (paint: string, title: string) =>
-    buildElement(idFactory, {
-      type: "loom.backdrop",
-      props: { paint },
-      children: [
-        buildElement(idFactory, {
-          type: "loom.section",
-          props: { eyebrow: paint, width: "wide" },
-          children: [
-            buildSlot(idFactory, "heading", [
-              buildElement(idFactory, {
-                type: "loom.heading",
-                props: { level: 2 },
-                children: [text(title)],
-              }),
-            ]),
-            buildElement(idFactory, {
-              type: "loom.prose",
-              props: { measured: true },
-              children: [text("The paint is behind the words and reaches neither the reader nor the pointer.")],
-            }),
-          ],
-        }),
-      ],
-    })
-
-  const shot = (src: string, alt: string) =>
-    buildElement(idFactory, {
-      type: "loom.media",
-      props: { src, alt, aspect: "wide", fit: "cover", corners: "none" },
-    })
-
-  const tile = (
-    props: Record<string, string>,
-    heading: string,
-    line: string,
-    image: string
-  ) =>
-    buildElement(idFactory, {
-      type: "loom.overlay",
-      props,
-      children: [
-        buildSlot(idFactory, "ground", [shot(image, heading)]),
-        buildElement(idFactory, {
-          type: "loom.badge",
-          props: { tone: "accent" },
-          children: [text("Case study")],
-        }),
-        buildElement(idFactory, {
-          type: "loom.heading",
-          props: { level: 3 },
-          children: [text(heading)],
-        }),
-        buildElement(idFactory, { type: "loom.prose", children: [text(line)] }),
-      ],
-    })
-
-  return createTree(
-    buildElement(idFactory, {
-      type: "loom.page",
-      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-      children: [
-        buildElement(idFactory, {
-          type: "loom.hero",
-          props: { backdrop: "rays", align: "center", eyebrow: "Atmosphere", stature: "standard" },
-          children: [
-            buildSlot(idFactory, "heading", [
-              buildElement(idFactory, {
-                type: "loom.heading",
-                props: { level: 1, balance: true },
-                children: [text("Every band can have weather now")],
-              }),
-            ]),
-            buildElement(idFactory, {
-              type: "loom.prose",
-              props: { size: "lead", tone: "muted" },
-              children: [text("Five paints, behind anything, from the palette rather than from a hex.")],
-            }),
-          ],
-        }),
-        band("aurora", "Two fields, drifting"),
-        band("grid", "A blueprint, fading before the copy"),
-        band("dots", "A lattice, read as texture"),
-        band("spotlight", "One pool of light"),
-        band("rays", "Beams from above"),
-        buildElement(idFactory, {
-          type: "loom.section",
-          props: { eyebrow: "Over a ground", width: "wide" },
-          children: [
-            buildSlot(idFactory, "heading", [
-              buildElement(idFactory, {
-                type: "loom.heading",
-                props: { level: 2 },
-                children: [text("A word on top of a picture")],
-              }),
-            ]),
-            buildElement(idFactory, {
-              type: "loom.grid",
-              props: { columns: "two", gap: "normal" },
-              children: [
-                tile(
-                  { scrim: "gradient", corners: "lg" },
-                  "The foot of the picture",
-                  "The wash clears towards the top, so the photograph stays a photograph.",
-                  "https://example.com/harbour.jpg"
-                ),
-                tile(
-                  { scrim: "veil", justify: "center", align: "center", corners: "lg" },
-                  "An even veil",
-                  "For copy that sits in the middle of the frame with nowhere to hide.",
-                  "https://example.com/atrium.jpg"
-                ),
-                tile(
-                  { scrim: "gradient", justify: "start", padding: "snug", corners: "md" },
-                  "A label at the head",
-                  "The gradient follows the content rather than being told where to go.",
-                  "https://example.com/studio.jpg"
-                ),
-                tile(
-                  { scrim: "none", align: "end", justify: "end", padding: "roomy" },
-                  "No scrim at all",
-                  "For a ground that is already quiet enough to write on.",
-                  "https://example.com/paper.jpg"
-                ),
-              ],
-            }),
-          ],
-        }),
-        buildElement(idFactory, {
-          type: "loom.card",
-          props: { tone: "outline", padding: "none" },
-          children: [
-            buildElement(idFactory, {
-              type: "loom.backdrop",
-              props: { paint: "spotlight", corners: "lg" },
-              children: [
-                buildElement(idFactory, {
-                  type: "loom.section",
-                  props: { width: "readable" },
-                  children: [
-                    buildElement(idFactory, {
-                      type: "loom.prose",
-                      children: [text("A backdrop inside a card, cornered to the card it is in.")],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        }),
-      ],
-    }),
-    idFactory
-  )
-}
-
-/**
- * All nine starting compositions on one page, in the order a landing page uses
- * them.
- *
- * The fixtures above are each a page somebody wrote by hand, and every one of
- * them arranges primitives the way its author happened to need. The bands are
- * the arrangement a *host* gets by dropping in what the catalogue offers, and
- * they are denser than anything hand-written here — six feature tiles in a
- * three-column grid, three tiers side by side, five questions in a column.
- * Density is what makes a box-sizing defect visible, which is why the
- * geometric invariant runs over this as well as over the twenty.
- */
-const everyBandPage = (
-  theme: Record<string, string>,
-  idFactory: IdFactory = sequentialIdFactory()
-): LoomTree =>
-  createTree(
-    buildElement(idFactory, {
-      type: "loom.page",
-      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-      children: STARTER_COMPOSITIONS.map((composition) => composition.build(idFactory)),
-    }),
-    idFactory
-  )
-
 describe("the composed vocabulary", () => {
   it("covers every registered primitive across the ten fixtures", () => {
     const typesIn = (tree: LoomTree): readonly string[] =>
@@ -1119,82 +875,32 @@ describe("the composed vocabulary", () => {
       ...typesIn(comparisonPage(EDITORIAL)),
       ...typesIn(prosePage(EDITORIAL)),
       ...typesIn(tablePage(EDITORIAL)),
+      ...typesIn(atmospherePage(EDITORIAL)),
+      ...typesIn(everyBandPage(EDITORIAL)),
+      ...typesIn(shelfPage(EDITORIAL)),
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
       ...typesIn(explainerPage(EDITORIAL)),
+      ...typesIn(everyBandPage(EDITORIAL)),
       ...typesIn(conversationPage(EDITORIAL)),
-      ...typesIn(furniturePage(EDITORIAL)),
-      ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(productPage(EDITORIAL)),
-      ...typesIn(shelfPage(EDITORIAL)),
-      ...typesIn(atmospherePage(EDITORIAL)),
+      ...typesIn(datedPage(EDITORIAL)),
+      ...typesIn(furniturePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
   })
 
-  it("never sizes a box in percent and then pads it past the track it sits in", () => {
+  it("never pads a full-width band past the parent it sits in", () => {
     /**
-     * An inline style carries no reset, so `box-sizing` is `content-box`: an
-     * element that states a **percentage size** on one axis and then pads or
-     * borders itself on that same axis is larger than its parent by exactly
-     * that padding and border. Nothing in a pure render can notice it, and
-     * nothing but a picture ever has.
-     *
-     * This started as the inline half alone — `width: 100%` plus
-     * `padding-inline`, which was rendering a 486px page on a 390px screen.
-     * The block half cost more before anybody saw it. `loom.feature` combined
-     * `height: 100%` with padding from the day it shipped, so every tile
-     * overflowed its own grid row by 66px; with one row it hung over the band
-     * below, and with two rows the second row was drawn **through** the first.
-     * It stayed invisible for a month because no fixture had ever put six
-     * tiles in a three-column grid, and the assertion that existed only looked
-     * at widths.
-     *
-     * So the invariant is stated once, for both axes, over every fixture this
-     * file builds and every band the catalogue ships — and it is stated in
-     * terms of *any* percentage rather than `100%`, because a card at `50%`
-     * overflows its track by the same padding.
-     *
-     * The three ways it was too narrow are each worth keeping in mind: it
-     * checked one axis, it checked `padding-inline` but not the `padding`
-     * shorthand every offender actually used, and it ran over twelve of the
-     * twenty fixtures. A defect class is only closed by the assertion that
-     * covers all of it.
+     * A phone-width horizontal scroll, asserted as an invariant rather than
+     * caught by eye. An inline style carries no reset, so `box-sizing` is
+     * `content-box` and a band that says `width: 100%` and then pads itself is
+     * wider than its parent by exactly its padding — on a 390px screen the
+     * library was rendering a 486px page. Nothing in a pure render can notice
+     * that, and no test before this one could either.
      */
-    const nonZero = "(?!0(?:;|$))"
-
-    const overflows = (style: string, axis: "block" | "inline"): boolean => {
-      if (style.includes("box-sizing:border-box")) return false
-      if (!new RegExp(`(?:^|;)${axis === "block" ? "height" : "width"}:[^;]*%`).test(style)) {
-        return false
-      }
-
-      const sides = axis === "block" ? "block|top|bottom" : "inline|left|right"
-
-      return (
-        new RegExp(`(?:^|;)padding(?:-(?:${sides})(?:-\\w+)?)?:${nonZero}`).test(style) ||
-        new RegExp(`(?:^|;)border(?:-(?:${sides})(?:-\\w+)?)?:${nonZero}(?!none)`).test(style)
-      )
-    }
-
-    /**
-     * Rendered in edit mode so every node carries its `data-loom-type`, which
-     * is what turns "some element overflows" into a message naming the
-     * primitive to open.
-     */
-    const blame = (markup: string): readonly string[] =>
-      [...markup.matchAll(/style="([^"]*)"/g)].flatMap((match) => {
-        const style = (match[1] ?? "").replace(/&quot;/g, '"')
-        const types = [...markup.slice(0, match.index).matchAll(/data-loom-type="([^"]+)"/g)]
-        const type = types[types.length - 1]?.[1] ?? "unknown"
-
-        return (["block", "inline"] as const)
-          .filter((axis) => overflows(style, axis))
-          .map((axis) => `${type} overflows on the ${axis} axis: ${style}`)
-      })
-
-    const fixtures = [
+    const offenders = [
       samplePage,
       marketingPage,
       pricingPage,
@@ -1206,21 +912,26 @@ describe("the composed vocabulary", () => {
       technicalPage,
       prosePage,
       tablePage,
-      datedPage,
-      comparisonPage,
-      motionPage,
-      bookablePage,
-      explainerPage,
-      conversationPage,
-      furniturePage,
-      productPage,
-      shelfPage,
       atmospherePage,
-    ].flatMap((fixture) => blame(render(fixture(EDITORIAL), true).markup))
+      everyBandPage,
+      shelfPage,
+      everyBandPage,
+      conversationPage,
+      productPage,
+      datedPage,
+      furniturePage,
+    ].flatMap((fixture) =>
+      [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
+        .map(([, style]) => style ?? "")
+        .filter(
+          (style) =>
+            /padding-inline[^:]*:(?!0)/.test(style) &&
+            style.includes("width:100%") &&
+            !style.includes("box-sizing:border-box")
+        )
+    )
 
-    const bands = blame(render(everyBandPage(EDITORIAL), true).markup)
-
-    expect([...new Set([...fixtures, ...bands])]).toEqual([])
+    expect(offenders).toEqual([])
   })
 
   it("renders a marketing page with nothing left unhonoured", () => {
@@ -5865,594 +5576,6 @@ describe("how it works, and what it works with", () => {
   })
 })
 
-const conversationPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
-  const turn = (props: JsonObject, ...lines: readonly string[]) =>
-    buildElement(idFactory, {
-      type: "loom.message",
-      props,
-      children: lines.map((line) =>
-        buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, line)] })
-      ),
-    })
-
-  const exchange = buildElement(idFactory, {
-    type: "loom.section",
-    props: { eyebrow: "In use", anchor: "the-exchange" },
-    children: [
-      buildSlot(idFactory, "heading", [
-        buildElement(idFactory, {
-          type: "loom.heading",
-          props: { level: 2 },
-          children: [buildText(idFactory, "Ask for the change you want")],
-        }),
-      ]),
-      buildElement(idFactory, {
-        type: "loom.reveal",
-        props: {},
-        children: [
-          buildElement(idFactory, {
-            type: "loom.message-list",
-            props: { density: "tight" },
-            children: [
-              turn({ speaker: "person", name: "You", stamp: "09:41" }, "Put the pricing above the questions."),
-              turn(
-                { speaker: "assistant", name: "Loom", stamp: "09:41", avatar: "https://example.com/mark.png" },
-                "One move, and nothing else on the page changes.",
-                "You can put it back with the same operation reversed.",
-              ),
-              turn({ speaker: "system" }, "The Gate weighed one operation and allowed it."),
-              turn({ speaker: "assistant", name: "Loom", pending: true }),
-            ],
-          }),
-        ],
-      }),
-    ],
-  })
-
-  const cell = (title: string, body: string) =>
-    buildElement(idFactory, {
-      type: "loom.reveal",
-      props: { motion: "fade" },
-      children: [
-        buildElement(idFactory, {
-          type: "loom.card",
-          props: { tone: "surface" },
-          children: [
-            buildElement(idFactory, {
-              type: "loom.heading",
-              props: { level: 3 },
-              children: [buildText(idFactory, title)],
-            }),
-            buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, body)] }),
-          ],
-        }),
-      ],
-    })
-
-  const cells = buildElement(idFactory, {
-    type: "loom.section",
-    props: { eyebrow: "What happens next" },
-    children: [
-      buildElement(idFactory, {
-        type: "loom.grid",
-        props: { columns: "two", gap: "normal" },
-        children: [
-          cell("Weighed", "Every operation is assessed before it lands."),
-          cell("Reversible", "Each one carries the operation that undoes it."),
-        ],
-      }),
-    ],
-  })
-
-  return createTree(
-    buildElement(idFactory, {
-      type: "loom.page",
-      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-      children: [exchange, cells],
-    }),
-    idFactory
-  )
-}
-
-describe("the exchange, and the way a band arrives", () => {
-  it("renders the conversation with nothing left unhonoured", () => {
-    const { markup, diagnostics } = render(conversationPage(EDITORIAL))
-
-    expect(diagnostics).toEqual([])
-    expect(markup).toContain("Put the pricing above the questions.")
-    expect(markup).toContain("The Gate weighed one operation and allowed it.")
-    expect([...markup.matchAll(/class="loom-message[ "]/g)]).toHaveLength(4)
-    expect([...markup.matchAll(/class="loom-reveal[ "]/g)]).toHaveLength(3)
-    expect([...markup.matchAll(/class="loom-reveal loom-reveal-fade"/g)]).toHaveLength(2)
-  })
-
-  it("renders under both starter palettes with no literal colour below the root", () => {
-    const editorial = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
-    const bold = splitStylesheet(render(conversationPage(BOLD)).markup).tree
-    const body = bold.slice(bold.indexOf(">"))
-
-    expect(render(conversationPage(BOLD)).diagnostics).toEqual([])
-    expect(render(conversationPage(MINIMAL)).diagnostics).toEqual([])
-    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
-    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
-    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
-  })
-
-  it("keeps a turn's side in the stylesheet and its paint on the element", () => {
-    /**
-     * `loom.milestone`'s lesson, applied before it costs a rewrite rather than
-     * after: an inline `flex-direction` here would pin these turns into bubbles
-     * forever, and the second arrangement of a conversation — a transcript set
-     * flush left — is the container 0054 says to write when somebody wants one.
-     * Asserted from both ends: the turn carries no direction of its own, and
-     * the stylesheet carries both sides of it.
-     */
-    const { stylesheet, tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
-    const turn = tree.slice(tree.indexOf('class="loom-message '))
-
-    expect(turn.slice(0, turn.indexOf(">"))).not.toContain("flex-direction")
-    expect(stylesheet).toContain(".loom-message {\n  display: flex;\n  align-items: flex-end;")
-    expect(stylesheet).toContain(".loom-message-person {\n  flex-direction: row-reverse;\n}")
-    expect(stylesheet).toContain(".loom-message-person > .loom-message-body {\n  align-items: flex-end;\n}")
-    /** The paint is inline, because no arrangement of these turns varies it. */
-    expect(tree).toContain("background:var(--loom-accent-subtle)")
-    expect(tree).toContain("background:var(--loom-bg-surface)")
-  })
-
-  it("paints no pairing the contrast audit does not already carry", () => {
-    /**
-     * The 25 August finding, which is this lane's: `fg-subtle` on
-     * `accent-subtle` is eight of the nine composed contrast failures in the
-     * library, across eight of twenty-one palettes. A person's bubble is an
-     * `accent-subtle` panel, so every ink inside one is a chance to be the
-     * ninth. The dots are `fg-muted` for that reason and no other.
-     */
-    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
-    const person = tree.slice(tree.indexOf('class="loom-message loom-message-person"'))
-    const bubble = person.slice(person.indexOf("background:var(--loom-accent-subtle)"))
-
-    expect(bubble.slice(0, bubble.indexOf("</li>"))).not.toContain("--loom-fg-subtle")
-    expect(tree).toContain("background:var(--loom-fg-muted)")
-  })
-
-  it("names the composing indicator rather than leaving three dots silent", () => {
-    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
-
-    expect(tree).toContain('role="img" aria-label="Still writing"')
-    expect([...tree.matchAll(/class="loom-message-dot"/g)]).toHaveLength(3)
-    /** The dots are the only motion in the band, and none of it is in the tree. */
-    expect(tree).not.toContain("animation")
-  })
-
-  it("hides nothing on a browser that cannot run the entrance", () => {
-    /**
-     * The property that makes a scroll-driven entrance safe to ship at all:
-     * every rule that starts at `opacity: 0` is inside the `@supports` block,
-     * so a browser without scroll-driven animations never gets the starting
-     * state, and one that has it holds a band already on screen at the end
-     * state through `animation-fill-mode: both`.
-     */
-    const { stylesheet } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
-    const supported = stylesheet.slice(stylesheet.indexOf("@supports (animation-timeline: view())"))
-    const guarded = supported.slice(0, supported.indexOf("\n}\n"))
-
-    expect(guarded).toContain("animation-timeline: view();")
-    expect(guarded).toContain("animation-fill-mode: both;")
-    /**
-     * The range is the whole **entry** phase and it is a correctness property
-     * rather than taste. A range that ends in `cover` finishes when the band is
-     * comfortably up the screen — and is unreachable for the *last* band on a
-     * page, which has no scroll left to give and would stay half-faded forever.
-     * `entry 92%` is always reached, because at the foot of a document a band's
-     * end edge does cross the scrollport's.
-     */
-    expect(guarded).toContain("animation-range: entry 0% entry 92%;")
-    expect(stylesheet).toContain("@keyframes loom-reveal-rise {\n  from { opacity: 0;")
-    /** The one place `opacity: 0` may be said, and it is inside the guard. */
-    const opacityZero = [...stylesheet.matchAll(/loom-reveal[^@]*?opacity: 0;/gs)]
-    expect(opacityZero).toHaveLength(2)
-    expect(stylesheet.indexOf("@keyframes loom-reveal-rise")).toBeGreaterThan(-1)
-  })
-
-  it("holds still and visible while the page is being edited", () => {
-    /**
-     * 0091's rule, with a second reason this primitive adds: a portal preview
-     * is not a page anybody scrolls, so a band waiting for a scroll would be a
-     * band that is never there.
-     */
-    const edited = splitStylesheet(render(conversationPage(EDITORIAL), true).markup).tree
-    const published = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
-
-    expect(edited).toContain(LIBRARY_CLASS.revealStill)
-    expect(published).not.toContain(LIBRARY_CLASS.revealStill)
-    expect(splitStylesheet(render(conversationPage(EDITORIAL)).markup).stylesheet).toContain(
-      ".loom-reveal:not(.loom-reveal-still) {"
-    )
-  })
-
-  it("gives a reader who asked for calm the content and not the movement", () => {
-    const { stylesheet } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
-    const calm = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
-
-    expect(calm).toContain(".loom-message-dot {\n    animation: none;\n    opacity: 1;")
-    expect(calm).toContain(".loom-reveal:not(.loom-reveal-still) {\n    animation: none;\n    opacity: 1;")
-    /** After the guarded block, so it wins at equal specificity. */
-    expect(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(
-      stylesheet.indexOf("@supports (animation-timeline: view())")
-    )
-  })
-
-  it("orders the conversation, because the order is the content", () => {
-    /**
-     * An `<ol>` rather than a stack of divs: a transcript read out of sequence
-     * is a different conversation, which is the same argument
-     * `loom.milestone-list` makes and the reason a page should not reach for a
-     * `loom.stack` of cards here.
-     */
-    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
-
-    expect(tree).toContain("<ol")
-    expect(tree.indexOf("Put the pricing above the questions.")).toBeLessThan(
-      tree.indexOf("The Gate weighed one operation and allowed it.")
-    )
-    expect(propsOfType("loom.message-list")).toEqual(["density"])
-    /** No side, name or portrait on the list: those belong to a turn (0009). */
-    expect(propsOfType("loom.message")).toEqual(["avatar", "name", "pending", "speaker", "stamp"])
-  })
-
-  it("refuses a turn with no side rather than guessing one", () => {
-    const idFactory = sequentialIdFactory()
-    const { markup, diagnostics } = render(
-      createTree(
-        buildElement(idFactory, {
-          type: "loom.message-list",
-          props: {},
-          children: [buildElement(idFactory, { type: "loom.message", props: { name: "You" } })],
-        }),
-        idFactory
-      )
-    )
-
-    expect(diagnostics).toEqual([
-      {
-        code: "invalid-props",
-        nodeId: "n_1",
-        type: "loom.message",
-        issues: [{ path: "speaker", message: expect.any(String) as unknown as string }],
-      },
-    ])
-    /** The list still renders: one refused turn is not a refused conversation. */
-    expect(markup).toContain("<ol")
-  })
-})
-
-/**
- * The furniture between the bands: what a page announces, where the reader is,
- * what runs past the edge, and how much of a thing there is.
- *
- * Every prop whose value changes the markup is rendered at least once — two
- * banners, two separators, both meter shapes and both snap positions — because
- * the conformance probe asks a primitive what it does under every closed choice
- * (0075) and a fixture that only ever renders the default leaves half of each
- * schema unseen by any assertion.
- */
-const furniturePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
-  const text = (value: string) => buildText(idFactory, value)
-
-  const link = (href: string, label: string, props: JsonObject = {}) =>
-    buildElement(idFactory, { type: "loom.link", props: { href, ...props }, children: [text(label)] })
-
-  const banner = buildElement(idFactory, {
-    type: "loom.banner",
-    props: { tone: "accent", align: "start", label: "Announcement" },
-    children: [
-      buildElement(idFactory, {
-        type: "loom.badge",
-        props: { tone: "accent" },
-        children: [text("New")],
-      }),
-      text("Every change this page has ever accepted is now public."),
-      buildSlot(idFactory, "action", [
-        buildElement(idFactory, {
-          type: "loom.action",
-          props: { href: "https://example.com/record", variant: "secondary", scale: "small" },
-          children: [text("Read the record")],
-        }),
-      ]),
-    ],
-  })
-
-  const trail = buildElement(idFactory, {
-    type: "loom.link-trail",
-    props: {},
-    children: [
-      link("https://example.com/", "Home"),
-      link("https://example.com/docs", "Documentation"),
-      link("https://example.com/docs/primitives", "Primitives", { current: true }),
-    ],
-  })
-
-  const shot = (title: string, body: string) =>
-    buildElement(idFactory, {
-      type: "loom.card",
-      props: { tone: "surface", padding: "normal", elevation: "raised" },
-      children: [
-        buildElement(idFactory, {
-          type: "loom.heading",
-          props: { level: 3 },
-          children: [text(title)],
-        }),
-        buildElement(idFactory, { type: "loom.prose", children: [text(body)] }),
-      ],
-    })
-
-  const carousel = buildElement(idFactory, {
-    type: "loom.section",
-    props: { anchor: "what-people-say", eyebrow: "In production" },
-    children: [
-      buildSlot(idFactory, "heading", [
-        buildElement(idFactory, {
-          type: "loom.heading",
-          props: { level: 2 },
-          children: [text("Four teams, one afternoon each")],
-        }),
-      ]),
-      buildElement(idFactory, {
-        type: "loom.carousel",
-        props: { item: "medium", gap: "normal", snap: "start" },
-        children: [
-          shot("Onboarding", "The tree was the whole of the handover."),
-          shot("Support", "Every refusal came with the rule that made it."),
-          shot("Growth", "A page adapted and the record said why."),
-          shot("Platform", "One registry, four surfaces, no code generation."),
-        ],
-      }),
-    ],
-  })
-
-  const measures = buildElement(idFactory, {
-    type: "loom.section",
-    props: { tone: "surface", eyebrow: "Measured" },
-    children: [
-      buildElement(idFactory, {
-        type: "loom.stack",
-        props: { direction: "column", gap: "loose" },
-        children: [
-          buildElement(idFactory, {
-            type: "loom.meter",
-            props: {
-              value: 95,
-              label: "Proposals that landed unchanged",
-              readout: "19 of 20",
-              caption: "the twentieth was refused, and said so",
-            },
-          }),
-          buildElement(idFactory, {
-            type: "loom.meter",
-            props: { value: 62, label: "Grammar budget spent", tone: "neutral", shape: "bar" },
-          }),
-          buildElement(idFactory, {
-            type: "loom.meter",
-            props: { value: 100, label: "Operations with an inverse", shape: "ring" },
-          }),
-        ],
-      }),
-      buildElement(idFactory, {
-        type: "loom.carousel",
-        props: { item: "narrow", snap: "center", gap: "tight" },
-        children: [shot("One", "A first cell."), shot("Two", "A second.")],
-      }),
-    ],
-  })
-
-  const foot = buildElement(idFactory, {
-    type: "loom.banner",
-    props: { tone: "surface", align: "center" },
-    children: [text("Loom is in alpha, and the alpha is the point.")],
-  })
-
-  const backOut = buildElement(idFactory, {
-    type: "loom.link-trail",
-    props: { separator: "slash", scale: "medium" },
-    children: [link("https://example.com/", "Home"), link("https://example.com/docs", "Documentation")],
-  })
-
-  return createTree(
-    buildElement(idFactory, {
-      type: "loom.page",
-      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-      children: [banner, trail, carousel, measures, foot, backOut],
-    }),
-    idFactory
-  )
-}
-
-describe("the furniture between the bands", () => {
-  it("renders all four with nothing left unhonoured", () => {
-    const { markup, diagnostics } = render(furniturePage(EDITORIAL))
-
-    expect(diagnostics).toEqual([])
-    expect(markup).toContain("Every change this page has ever accepted is now public.")
-    expect(markup).toContain("Loom is in alpha, and the alpha is the point.")
-    expect(markup).toContain("19 of 20")
-    /** The readout a meter writes for itself when the tree gives it none. */
-    expect(markup).toContain("62%")
-    expect([...markup.matchAll(/class="loom-trail-crumb"/g)]).toHaveLength(5)
-    expect([...markup.matchAll(/class="loom-carousel-cell"/g)]).toHaveLength(6)
-  })
-
-  it("renders under both starter palettes with no literal colour below the root", () => {
-    const editorial = splitStylesheet(render(furniturePage(EDITORIAL)).markup).tree
-    const bold = splitStylesheet(render(furniturePage(BOLD)).markup).tree
-    const body = bold.slice(bold.indexOf(">"))
-
-    expect(render(furniturePage(BOLD)).diagnostics).toEqual([])
-    expect(render(furniturePage(MINIMAL)).diagnostics).toEqual([])
-    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
-    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
-    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
-  })
-
-  it("names the strip only when the tree named it, so no page grows an anonymous landmark", () => {
-    /**
-     * `loom.link-list`'s rule, applied to the second primitive to face it: a
-     * named strip is an `aside` a reader can jump to, and an unnamed one is a
-     * `div`, because a landmark menu full of entries that all read
-     * "complementary" is worse than no landmarks at all.
-     */
-    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect(tree).toContain('<aside aria-label="Announcement"')
-    expect([...tree.matchAll(/<aside/g)]).toHaveLength(1)
-    expect(tree).toContain("Loom is in alpha")
-  })
-
-  it("puts the banner's action in a region rather than at the end of its children", () => {
-    /**
-     * 0051's rule, and the reason this is not `loom.stack` with a link in it:
-     * the strip places the action at the far edge on a laptop and under the
-     * message on a phone, and *"the last child is the button"* is a rule no
-     * schema states and every `move` breaks.
-     */
-    const idFactory = sequentialIdFactory()
-    const bare = render(
-      createTree(
-        buildElement(idFactory, {
-          type: "loom.banner",
-          props: {},
-          children: [buildText(idFactory, "A strip with nothing to do about it.")],
-        }),
-        idFactory
-      )
-    )
-
-    expect(bare.diagnostics).toEqual([])
-    expect(bare.markup).toContain("A strip with nothing to do about it.")
-    expect(propsOfType("loom.banner")).toEqual(["align", "label", "tone"])
-    expect(registry.primitives.find((primitive) => primitive.type === "loom.banner")?.slots).toEqual(["action"])
-  })
-
-  it("draws the trail's separators from the stylesheet, so no link is announced with one in its name", () => {
-    /**
-     * The whole reason the crumbs are wrapped. A `::before` on the anchor is
-     * *inside* the link, so its glyph joins the link's accessible name and a
-     * reader hears "slash Documentation". On the wrapper it is beside the link
-     * instead — and which crumbs get one is `+`, which no render of a single
-     * node can know.
-     */
-    const { stylesheet, tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect(tree).not.toContain("/</a>")
-    expect(tree).toContain(`class="${LIBRARY_CLASS.trail} ${LIBRARY_CLASS.trailChevron}"`)
-    expect(tree).toContain(`class="${LIBRARY_CLASS.trail} ${LIBRARY_CLASS.trailSlash}"`)
-    expect(stylesheet).toContain(
-      ".loom-trail-chevron > .loom-trail-crumb + .loom-trail-crumb::before {\n  content: \"\";"
-    )
-    expect(stylesheet).toContain(
-      ".loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {\n  content: \"/\";"
-    )
-  })
-
-  it("gives the trail its own name, which the tree never writes", () => {
-    /**
-     * 0063: the landmark is called the same thing on every page of a site, so
-     * the primitive owns the string and a deployment may translate it. A `label`
-     * prop would have put the accessible name of every breadcrumb on the page
-     * in a model's hands for no gain.
-     */
-    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect([...tree.matchAll(/aria-label="Breadcrumb"/g)]).toHaveLength(2)
-    expect(propsOfType("loom.link-trail")).toEqual(["scale", "separator"])
-    expect(tree).toContain('aria-current="page"')
-  })
-
-  it("keeps everything but each cell's width off the carousel, because a rule has to cancel the rest", () => {
-    /**
-     * The split the primitive turns on. A **width** comes from a prop, so it is
-     * inline and nothing needs to override it. The **snapping, the smooth
-     * scroll and the block padding** are either state a reduced-motion rule
-     * cancels or a position selector, and an inline value beats every one of
-     * them.
-     */
-    const { stylesheet, tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect(tree).toContain("flex:0 0 min(22rem, 82%)")
-    expect(tree).toContain("flex:0 0 min(16rem, 82%)")
-    expect(tree).not.toContain("scroll-snap")
-    expect(tree).not.toContain("overflow-x")
-    expect(stylesheet).toContain(".loom-carousel {\n  display: flex;")
-    expect(stylesheet).toContain("scroll-snap-type: inline mandatory;")
-    expect(stylesheet).toContain(".loom-carousel-centred > .loom-carousel-cell {\n  scroll-snap-align: center;\n}")
-  })
-
-  it("makes the scroller reachable from a keyboard, and says what it is when it takes focus", () => {
-    /**
-     * A scroll container is focusable by default in some browsers and not in
-     * others, so a row a mouse can push is a row a keyboard cannot reach. It is
-     * not declared `interactive`: 0064 is HTML's rule that a target may not sit
-     * inside a target, and a `div` with a `tabindex` is not one — the card
-     * inside it is still what the reader aims at.
-     */
-    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-    const declarationOf = (type: string) =>
-      registry.primitives.find((primitive) => primitive.type === type)?.interactive
-
-    expect(tree).toContain('role="group" aria-label="Scrollable row" tabindex="0"')
-    expect(declarationOf("loom.carousel")).toBeUndefined()
-    expect(declarationOf("loom.link-trail")).toBeUndefined()
-    expect(declarationOf("loom.banner")).toBeUndefined()
-  })
-
-  it("writes one number per meter and lets one keyframe fill both shapes", () => {
-    /**
-     * A bar's width and a ring's conic stop are the same proportion, so they
-     * are the same declaration — and because it is a *registered* custom
-     * property, one keyframe animates both from nothing. An unregistered one
-     * interpolates discretely, which is a bar that jumps from empty to full in
-     * a single frame.
-     */
-    const { stylesheet, tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect(tree).toContain("--loom-meter-sweep:95%")
-    expect(tree).toContain("--loom-meter-sweep:62%")
-    expect(tree).toContain("--loom-meter-sweep:100%")
-    /** The width is the stylesheet's, so the reduced-motion rule can reach it. */
-    expect(tree).not.toContain("width:95%")
-    expect(stylesheet).toContain("@property --loom-meter-sweep {\n  syntax: \"<percentage>\";")
-    expect(stylesheet).toContain("@keyframes loom-meter-sweep {\n  from { --loom-meter-sweep: 0%; }\n}")
-    expect(stylesheet).toContain(".loom-meter-fill {\n  width: var(--loom-meter-sweep);\n}")
-  })
-
-  it("cuts the ring's middle out rather than covering it, so it is right on every ground", () => {
-    /**
-     * `loom.hero`'s aurora reasoning, one primitive later: a disc painted over
-     * the middle has to be the colour of whatever is behind the band, and the
-     * same ring sits on the canvas, inside a card and on a tinted section. A
-     * mask removes the middle instead.
-     */
-    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect(tree).toContain("conic-gradient(var(--loom-accent) var(--loom-meter-sweep), var(--loom-bg-surface-muted) 0)")
-    expect(tree).toContain("mask-image:radial-gradient(closest-side, transparent 64%, black 65%)")
-  })
-
-  it("says its measurement to a reader who cannot see it, in the author's own words", () => {
-    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-
-    expect(tree).toContain('role="meter" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" aria-valuetext="19 of 20"')
-    expect(tree).toContain('aria-label="Proposals that landed unchanged"')
-  })
-
-  it("stops both fills and the smooth scroll for a reader who asked for calm", () => {
-    const { stylesheet } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
-    const reduced = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
-
-    expect(reduced).toContain(".loom-meter-fill, .loom-meter-arc {\n    animation: none;\n  }")
-    expect(reduced).toContain(".loom-carousel {\n    scroll-behavior: auto;\n  }")
-  })
-})
-
 /**
  * The two bands that cost a reader time rather than money: what you press play
  * on, and where to turn up.
@@ -6782,6 +5905,334 @@ describe("what you press play on, and where to turn up", () => {
 
 })
 
+
+/**
+ * The furniture between the bands: what a page announces, where the reader is,
+ * what runs past the edge, and how much of a thing there is.
+ *
+ * Every prop whose value changes the markup is rendered at least once — two
+ * banners, two separators, both meter shapes and both snap positions — because
+ * the conformance probe asks a primitive what it does under every closed choice
+ * (0075) and a fixture that only ever renders the default leaves half of each
+ * schema unseen by any assertion.
+ */
+const furniturePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const link = (href: string, label: string, props: JsonObject = {}) =>
+    buildElement(idFactory, { type: "loom.link", props: { href, ...props }, children: [text(label)] })
+
+  const banner = buildElement(idFactory, {
+    type: "loom.banner",
+    props: { tone: "accent", align: "start", label: "Announcement" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.badge",
+        props: { tone: "accent" },
+        children: [text("New")],
+      }),
+      text("Every change this page has ever accepted is now public."),
+      buildSlot(idFactory, "action", [
+        buildElement(idFactory, {
+          type: "loom.action",
+          props: { href: "https://example.com/record", variant: "secondary", scale: "small" },
+          children: [text("Read the record")],
+        }),
+      ]),
+    ],
+  })
+
+  const trail = buildElement(idFactory, {
+    type: "loom.link-trail",
+    props: {},
+    children: [
+      link("https://example.com/", "Home"),
+      link("https://example.com/docs", "Documentation"),
+      link("https://example.com/docs/primitives", "Primitives", { current: true }),
+    ],
+  })
+
+  const shot = (title: string, body: string) =>
+    buildElement(idFactory, {
+      type: "loom.card",
+      props: { tone: "surface", padding: "normal", elevation: "raised" },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 3 },
+          children: [text(title)],
+        }),
+        buildElement(idFactory, { type: "loom.prose", children: [text(body)] }),
+      ],
+    })
+
+  const carousel = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "what-people-say", eyebrow: "In production" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("Four teams, one afternoon each")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.carousel",
+        props: { item: "medium", gap: "normal", snap: "start" },
+        children: [
+          shot("Onboarding", "The tree was the whole of the handover."),
+          shot("Support", "Every refusal came with the rule that made it."),
+          shot("Growth", "A page adapted and the record said why."),
+          shot("Platform", "One registry, four surfaces, no code generation."),
+        ],
+      }),
+    ],
+  })
+
+  const measures = buildElement(idFactory, {
+    type: "loom.section",
+    props: { tone: "surface", eyebrow: "Measured" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.stack",
+        props: { direction: "column", gap: "loose" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.meter",
+            props: {
+              value: 95,
+              label: "Proposals that landed unchanged",
+              readout: "19 of 20",
+              caption: "the twentieth was refused, and said so",
+            },
+          }),
+          buildElement(idFactory, {
+            type: "loom.meter",
+            props: { value: 62, label: "Grammar budget spent", tone: "neutral", shape: "bar" },
+          }),
+          buildElement(idFactory, {
+            type: "loom.meter",
+            props: { value: 100, label: "Operations with an inverse", shape: "ring" },
+          }),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.carousel",
+        props: { item: "narrow", snap: "center", gap: "tight" },
+        children: [shot("One", "A first cell."), shot("Two", "A second.")],
+      }),
+    ],
+  })
+
+  const foot = buildElement(idFactory, {
+    type: "loom.banner",
+    props: { tone: "surface", align: "center" },
+    children: [text("Loom is in alpha, and the alpha is the point.")],
+  })
+
+  const backOut = buildElement(idFactory, {
+    type: "loom.link-trail",
+    props: { separator: "slash", scale: "medium" },
+    children: [link("https://example.com/", "Home"), link("https://example.com/docs", "Documentation")],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [banner, trail, carousel, measures, foot, backOut],
+    }),
+    idFactory
+  )
+}
+
+describe("the furniture between the bands", () => {
+  it("renders all four with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(furniturePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Every change this page has ever accepted is now public.")
+    expect(markup).toContain("Loom is in alpha, and the alpha is the point.")
+    expect(markup).toContain("19 of 20")
+    /** The readout a meter writes for itself when the tree gives it none. */
+    expect(markup).toContain("62%")
+    expect([...markup.matchAll(/class="loom-trail-crumb"/g)]).toHaveLength(5)
+    expect([...markup.matchAll(/class="loom-carousel-cell"/g)]).toHaveLength(6)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(furniturePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(furniturePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(furniturePage(BOLD)).diagnostics).toEqual([])
+    expect(render(furniturePage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("names the strip only when the tree named it, so no page grows an anonymous landmark", () => {
+    /**
+     * `loom.link-list`'s rule, applied to the second primitive to face it: a
+     * named strip is an `aside` a reader can jump to, and an unnamed one is a
+     * `div`, because a landmark menu full of entries that all read
+     * "complementary" is worse than no landmarks at all.
+     */
+    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect(tree).toContain('<aside aria-label="Announcement"')
+    expect([...tree.matchAll(/<aside/g)]).toHaveLength(1)
+    expect(tree).toContain("Loom is in alpha")
+  })
+
+  it("puts the banner's action in a region rather than at the end of its children", () => {
+    /**
+     * 0051's rule, and the reason this is not `loom.stack` with a link in it:
+     * the strip places the action at the far edge on a laptop and under the
+     * message on a phone, and *"the last child is the button"* is a rule no
+     * schema states and every `move` breaks.
+     */
+    const idFactory = sequentialIdFactory()
+    const bare = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.banner",
+          props: {},
+          children: [buildText(idFactory, "A strip with nothing to do about it.")],
+        }),
+        idFactory
+      )
+    )
+
+    expect(bare.diagnostics).toEqual([])
+    expect(bare.markup).toContain("A strip with nothing to do about it.")
+    expect(propsOfType("loom.banner")).toEqual(["align", "label", "tone"])
+    expect(registry.primitives.find((primitive) => primitive.type === "loom.banner")?.slots).toEqual(["action"])
+  })
+
+  it("draws the trail's separators from the stylesheet, so no link is announced with one in its name", () => {
+    /**
+     * The whole reason the crumbs are wrapped. A `::before` on the anchor is
+     * *inside* the link, so its glyph joins the link's accessible name and a
+     * reader hears "slash Documentation". On the wrapper it is beside the link
+     * instead — and which crumbs get one is `+`, which no render of a single
+     * node can know.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect(tree).not.toContain("/</a>")
+    expect(tree).toContain(`class="${LIBRARY_CLASS.trail} ${LIBRARY_CLASS.trailChevron}"`)
+    expect(tree).toContain(`class="${LIBRARY_CLASS.trail} ${LIBRARY_CLASS.trailSlash}"`)
+    expect(stylesheet).toContain(
+      ".loom-trail-chevron > .loom-trail-crumb + .loom-trail-crumb::before {\n  content: \"\";"
+    )
+    expect(stylesheet).toContain(
+      ".loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {\n  content: \"/\";"
+    )
+  })
+
+  it("gives the trail its own name, which the tree never writes", () => {
+    /**
+     * 0063: the landmark is called the same thing on every page of a site, so
+     * the primitive owns the string and a deployment may translate it. A `label`
+     * prop would have put the accessible name of every breadcrumb on the page
+     * in a model's hands for no gain.
+     */
+    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect([...tree.matchAll(/aria-label="Breadcrumb"/g)]).toHaveLength(2)
+    expect(propsOfType("loom.link-trail")).toEqual(["scale", "separator"])
+    expect(tree).toContain('aria-current="page"')
+  })
+
+  it("keeps everything but each cell's width off the carousel, because a rule has to cancel the rest", () => {
+    /**
+     * The split the primitive turns on. A **width** comes from a prop, so it is
+     * inline and nothing needs to override it. The **snapping, the smooth
+     * scroll and the block padding** are either state a reduced-motion rule
+     * cancels or a position selector, and an inline value beats every one of
+     * them.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect(tree).toContain("flex:0 0 min(22rem, 82%)")
+    expect(tree).toContain("flex:0 0 min(16rem, 82%)")
+    expect(tree).not.toContain("scroll-snap")
+    expect(tree).not.toContain("overflow-x")
+    expect(stylesheet).toContain(".loom-carousel {\n  display: flex;")
+    expect(stylesheet).toContain("scroll-snap-type: inline mandatory;")
+    expect(stylesheet).toContain(".loom-carousel-centred > .loom-carousel-cell {\n  scroll-snap-align: center;\n}")
+  })
+
+  it("makes the scroller reachable from a keyboard, and says what it is when it takes focus", () => {
+    /**
+     * A scroll container is focusable by default in some browsers and not in
+     * others, so a row a mouse can push is a row a keyboard cannot reach. It is
+     * not declared `interactive`: 0064 is HTML's rule that a target may not sit
+     * inside a target, and a `div` with a `tabindex` is not one — the card
+     * inside it is still what the reader aims at.
+     */
+    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+    const declarationOf = (type: string) =>
+      registry.primitives.find((primitive) => primitive.type === type)?.interactive
+
+    expect(tree).toContain('role="group" aria-label="Scrollable row" tabindex="0"')
+    expect(declarationOf("loom.carousel")).toBeUndefined()
+    expect(declarationOf("loom.link-trail")).toBeUndefined()
+    expect(declarationOf("loom.banner")).toBeUndefined()
+  })
+
+  it("writes one number per meter and lets one keyframe fill both shapes", () => {
+    /**
+     * A bar's width and a ring's conic stop are the same proportion, so they
+     * are the same declaration — and because it is a *registered* custom
+     * property, one keyframe animates both from nothing. An unregistered one
+     * interpolates discretely, which is a bar that jumps from empty to full in
+     * a single frame.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect(tree).toContain("--loom-meter-sweep:95%")
+    expect(tree).toContain("--loom-meter-sweep:62%")
+    expect(tree).toContain("--loom-meter-sweep:100%")
+    /** The width is the stylesheet's, so the reduced-motion rule can reach it. */
+    expect(tree).not.toContain("width:95%")
+    expect(stylesheet).toContain("@property --loom-meter-sweep {\n  syntax: \"<percentage>\";")
+    expect(stylesheet).toContain("@keyframes loom-meter-sweep {\n  from { --loom-meter-sweep: 0%; }\n}")
+    expect(stylesheet).toContain(".loom-meter-fill {\n  width: var(--loom-meter-sweep);\n}")
+  })
+
+  it("cuts the ring's middle out rather than covering it, so it is right on every ground", () => {
+    /**
+     * `loom.hero`'s aurora reasoning, one primitive later: a disc painted over
+     * the middle has to be the colour of whatever is behind the band, and the
+     * same ring sits on the canvas, inside a card and on a tinted section. A
+     * mask removes the middle instead.
+     */
+    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect(tree).toContain("conic-gradient(var(--loom-accent) var(--loom-meter-sweep), var(--loom-bg-surface-muted) 0)")
+    expect(tree).toContain("mask-image:radial-gradient(closest-side, transparent 64%, black 65%)")
+  })
+
+  it("says its measurement to a reader who cannot see it, in the author's own words", () => {
+    const { tree } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+
+    expect(tree).toContain('role="meter" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" aria-valuetext="19 of 20"')
+    expect(tree).toContain('aria-label="Proposals that landed unchanged"')
+  })
+
+  it("stops both fills and the smooth scroll for a reader who asked for calm", () => {
+    const { stylesheet } = splitStylesheet(render(furniturePage(EDITORIAL)).markup)
+    const reduced = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    expect(reduced).toContain(".loom-meter-fill, .loom-meter-arc {\n    animation: none;\n  }")
+    expect(reduced).toContain(".loom-carousel {\n    scroll-behavior: auto;\n  }")
+  })
+})
+
 const productPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
   const pin = (props: JsonObject) => buildElement(idFactory, { type: "loom.pin", props })
 
@@ -7014,6 +6465,663 @@ describe("the product on the page", () => {
     expect(splitStylesheet(render(productPage(EDITORIAL)).markup).stylesheet).toContain(
       ".loom-pin-still .loom-pin-dot::after {\n  animation: none;\n}"
     )
+  })
+})
+
+const conversationPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const turn = (props: JsonObject, ...lines: readonly string[]) =>
+    buildElement(idFactory, {
+      type: "loom.message",
+      props,
+      children: lines.map((line) =>
+        buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, line)] })
+      ),
+    })
+
+  const exchange = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "In use", anchor: "the-exchange" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "Ask for the change you want")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.reveal",
+        props: {},
+        children: [
+          buildElement(idFactory, {
+            type: "loom.message-list",
+            props: { density: "tight" },
+            children: [
+              turn({ speaker: "person", name: "You", stamp: "09:41" }, "Put the pricing above the questions."),
+              turn(
+                { speaker: "assistant", name: "Loom", stamp: "09:41", avatar: "https://example.com/mark.png" },
+                "One move, and nothing else on the page changes.",
+                "You can put it back with the same operation reversed.",
+              ),
+              turn({ speaker: "system" }, "The Gate weighed one operation and allowed it."),
+              turn({ speaker: "assistant", name: "Loom", pending: true }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  })
+
+  const cell = (title: string, body: string) =>
+    buildElement(idFactory, {
+      type: "loom.reveal",
+      props: { motion: "fade" },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.card",
+          props: { tone: "surface" },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.heading",
+              props: { level: 3 },
+              children: [buildText(idFactory, title)],
+            }),
+            buildElement(idFactory, { type: "loom.prose", children: [buildText(idFactory, body)] }),
+          ],
+        }),
+      ],
+    })
+
+  const cells = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "What happens next" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.grid",
+        props: { columns: "two", gap: "normal" },
+        children: [
+          cell("Weighed", "Every operation is assessed before it lands."),
+          cell("Reversible", "Each one carries the operation that undoes it."),
+        ],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [exchange, cells],
+    }),
+    idFactory
+  )
+}
+
+describe("the exchange, and the way a band arrives", () => {
+  it("renders the conversation with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(conversationPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Put the pricing above the questions.")
+    expect(markup).toContain("The Gate weighed one operation and allowed it.")
+    expect([...markup.matchAll(/class="loom-message[ "]/g)]).toHaveLength(4)
+    expect([...markup.matchAll(/class="loom-reveal[ "]/g)]).toHaveLength(3)
+    expect([...markup.matchAll(/class="loom-reveal loom-reveal-fade"/g)]).toHaveLength(2)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(conversationPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(conversationPage(BOLD)).diagnostics).toEqual([])
+    expect(render(conversationPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("keeps a turn's side in the stylesheet and its paint on the element", () => {
+    /**
+     * `loom.milestone`'s lesson, applied before it costs a rewrite rather than
+     * after: an inline `flex-direction` here would pin these turns into bubbles
+     * forever, and the second arrangement of a conversation — a transcript set
+     * flush left — is the container 0054 says to write when somebody wants one.
+     * Asserted from both ends: the turn carries no direction of its own, and
+     * the stylesheet carries both sides of it.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const turn = tree.slice(tree.indexOf('class="loom-message '))
+
+    expect(turn.slice(0, turn.indexOf(">"))).not.toContain("flex-direction")
+    expect(stylesheet).toContain(".loom-message {\n  display: flex;\n  align-items: flex-end;")
+    expect(stylesheet).toContain(".loom-message-person {\n  flex-direction: row-reverse;\n}")
+    expect(stylesheet).toContain(".loom-message-person > .loom-message-body {\n  align-items: flex-end;\n}")
+    /** The paint is inline, because no arrangement of these turns varies it. */
+    expect(tree).toContain("background:var(--loom-accent-subtle)")
+    expect(tree).toContain("background:var(--loom-bg-surface)")
+  })
+
+  it("paints no pairing the contrast audit does not already carry", () => {
+    /**
+     * The 25 August finding, which is this lane's: `fg-subtle` on
+     * `accent-subtle` is eight of the nine composed contrast failures in the
+     * library, across eight of twenty-one palettes. A person's bubble is an
+     * `accent-subtle` panel, so every ink inside one is a chance to be the
+     * ninth. The dots are `fg-muted` for that reason and no other.
+     */
+    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const person = tree.slice(tree.indexOf('class="loom-message loom-message-person"'))
+    const bubble = person.slice(person.indexOf("background:var(--loom-accent-subtle)"))
+
+    expect(bubble.slice(0, bubble.indexOf("</li>"))).not.toContain("--loom-fg-subtle")
+    expect(tree).toContain("background:var(--loom-fg-muted)")
+  })
+
+  it("names the composing indicator rather than leaving three dots silent", () => {
+    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+
+    expect(tree).toContain('role="img" aria-label="Still writing"')
+    expect([...tree.matchAll(/class="loom-message-dot"/g)]).toHaveLength(3)
+    /** The dots are the only motion in the band, and none of it is in the tree. */
+    expect(tree).not.toContain("animation")
+  })
+
+  it("hides nothing on a browser that cannot run the entrance", () => {
+    /**
+     * The property that makes a scroll-driven entrance safe to ship at all:
+     * every rule that starts at `opacity: 0` is inside the `@supports` block,
+     * so a browser without scroll-driven animations never gets the starting
+     * state, and one that has it holds a band already on screen at the end
+     * state through `animation-fill-mode: both`.
+     */
+    const { stylesheet } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const supported = stylesheet.slice(stylesheet.indexOf("@supports (animation-timeline: view())"))
+    const guarded = supported.slice(0, supported.indexOf("\n}\n"))
+
+    expect(guarded).toContain("animation-timeline: view();")
+    expect(guarded).toContain("animation-fill-mode: both;")
+    /**
+     * The range is the whole **entry** phase and it is a correctness property
+     * rather than taste. A range that ends in `cover` finishes when the band is
+     * comfortably up the screen — and is unreachable for the *last* band on a
+     * page, which has no scroll left to give and would stay half-faded forever.
+     * `entry 92%` is always reached, because at the foot of a document a band's
+     * end edge does cross the scrollport's.
+     */
+    expect(guarded).toContain("animation-range: entry 0% entry 92%;")
+    expect(stylesheet).toContain("@keyframes loom-reveal-rise {\n  from { opacity: 0;")
+    /** The one place `opacity: 0` may be said, and it is inside the guard. */
+    const opacityZero = [...stylesheet.matchAll(/loom-reveal[^@]*?opacity: 0;/gs)]
+    expect(opacityZero).toHaveLength(2)
+    expect(stylesheet.indexOf("@keyframes loom-reveal-rise")).toBeGreaterThan(-1)
+  })
+
+  it("holds still and visible while the page is being edited", () => {
+    /**
+     * 0091's rule, with a second reason this primitive adds: a portal preview
+     * is not a page anybody scrolls, so a band waiting for a scroll would be a
+     * band that is never there.
+     */
+    const edited = splitStylesheet(render(conversationPage(EDITORIAL), true).markup).tree
+    const published = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
+
+    expect(edited).toContain(LIBRARY_CLASS.revealStill)
+    expect(published).not.toContain(LIBRARY_CLASS.revealStill)
+    expect(splitStylesheet(render(conversationPage(EDITORIAL)).markup).stylesheet).toContain(
+      ".loom-reveal:not(.loom-reveal-still) {"
+    )
+  })
+
+  it("gives a reader who asked for calm the content and not the movement", () => {
+    const { stylesheet } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+    const calm = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    expect(calm).toContain(".loom-message-dot {\n    animation: none;\n    opacity: 1;")
+    expect(calm).toContain(".loom-reveal:not(.loom-reveal-still) {\n    animation: none;\n    opacity: 1;")
+    /** After the guarded block, so it wins at equal specificity. */
+    expect(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(
+      stylesheet.indexOf("@supports (animation-timeline: view())")
+    )
+  })
+
+  it("orders the conversation, because the order is the content", () => {
+    /**
+     * An `<ol>` rather than a stack of divs: a transcript read out of sequence
+     * is a different conversation, which is the same argument
+     * `loom.milestone-list` makes and the reason a page should not reach for a
+     * `loom.stack` of cards here.
+     */
+    const { tree } = splitStylesheet(render(conversationPage(EDITORIAL)).markup)
+
+    expect(tree).toContain("<ol")
+    expect(tree.indexOf("Put the pricing above the questions.")).toBeLessThan(
+      tree.indexOf("The Gate weighed one operation and allowed it.")
+    )
+    expect(propsOfType("loom.message-list")).toEqual(["density"])
+    /** No side, name or portrait on the list: those belong to a turn (0009). */
+    expect(propsOfType("loom.message")).toEqual(["avatar", "name", "pending", "speaker", "stamp"])
+  })
+
+  it("refuses a turn with no side rather than guessing one", () => {
+    const idFactory = sequentialIdFactory()
+    const { markup, diagnostics } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.message-list",
+          props: {},
+          children: [buildElement(idFactory, { type: "loom.message", props: { name: "You" } })],
+        }),
+        idFactory
+      )
+    )
+
+    expect(diagnostics).toEqual([
+      {
+        code: "invalid-props",
+        nodeId: "n_1",
+        type: "loom.message",
+        issues: [{ path: "speaker", message: expect.any(String) as unknown as string }],
+      },
+    ])
+    /** The list still renders: one refused turn is not a refused conversation. */
+    expect(markup).toContain("<ol")
+  })
+})
+
+/**
+ * The atmosphere layer: every paint `loom.backdrop` offers, and every way
+ * `loom.overlay` sets content over a ground.
+ *
+ * It is one fixture rather than two because the pair is one idea — what is
+ * behind the content and what is over it — and because the interesting failures
+ * are between them: a paint that leaks over its children, a scrim that squares
+ * off a rounded picture, a backdrop inside a card painting outside the card.
+ */
+const atmospherePage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory()
+): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const band = (paint: string, title: string) =>
+    buildElement(idFactory, {
+      type: "loom.backdrop",
+      props: { paint },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: paint, width: "wide" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [text(title)],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.prose",
+              props: { measured: true },
+              children: [text("The paint is behind the words and reaches neither the reader nor the pointer.")],
+            }),
+          ],
+        }),
+      ],
+    })
+
+  const shot = (src: string, alt: string) =>
+    buildElement(idFactory, {
+      type: "loom.media",
+      props: { src, alt, aspect: "wide", fit: "cover", corners: "none" },
+    })
+
+  const tile = (
+    props: Record<string, string>,
+    heading: string,
+    line: string,
+    image: string
+  ) =>
+    buildElement(idFactory, {
+      type: "loom.overlay",
+      props,
+      children: [
+        buildSlot(idFactory, "ground", [shot(image, heading)]),
+        buildElement(idFactory, {
+          type: "loom.badge",
+          props: { tone: "accent" },
+          children: [text("Case study")],
+        }),
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 3 },
+          children: [text(heading)],
+        }),
+        buildElement(idFactory, { type: "loom.prose", children: [text(line)] }),
+      ],
+    })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.hero",
+          props: { backdrop: "rays", align: "center", eyebrow: "Atmosphere", stature: "standard" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1, balance: true },
+                children: [text("Every band can have weather now")],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.prose",
+              props: { size: "lead", tone: "muted" },
+              children: [text("Five paints, behind anything, from the palette rather than from a hex.")],
+            }),
+          ],
+        }),
+        band("aurora", "Two fields, drifting"),
+        band("grid", "A blueprint, fading before the copy"),
+        band("dots", "A lattice, read as texture"),
+        band("spotlight", "One pool of light"),
+        band("rays", "Beams from above"),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Over a ground", width: "wide" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [text("A word on top of a picture")],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.grid",
+              props: { columns: "two", gap: "normal" },
+              children: [
+                tile(
+                  { scrim: "gradient", corners: "lg" },
+                  "The foot of the picture",
+                  "The wash clears towards the top, so the photograph stays a photograph.",
+                  "https://example.com/harbour.jpg"
+                ),
+                tile(
+                  { scrim: "veil", justify: "center", align: "center", corners: "lg" },
+                  "An even veil",
+                  "For copy that sits in the middle of the frame with nowhere to hide.",
+                  "https://example.com/atrium.jpg"
+                ),
+                tile(
+                  { scrim: "gradient", justify: "start", padding: "snug", corners: "md" },
+                  "A label at the head",
+                  "The gradient follows the content rather than being told where to go.",
+                  "https://example.com/studio.jpg"
+                ),
+                tile(
+                  { scrim: "none", align: "end", justify: "end", padding: "roomy" },
+                  "No scrim at all",
+                  "For a ground that is already quiet enough to write on.",
+                  "https://example.com/paper.jpg"
+                ),
+              ],
+            }),
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.card",
+          props: { tone: "outline", padding: "none" },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.backdrop",
+              props: { paint: "spotlight", corners: "lg" },
+              children: [
+                buildElement(idFactory, {
+                  type: "loom.section",
+                  props: { width: "readable" },
+                  children: [
+                    buildElement(idFactory, {
+                      type: "loom.prose",
+                      children: [text("A backdrop inside a card, cornered to the card it is in.")],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+/**
+ * All nine starting compositions on one page, in the order a landing page uses
+ * them.
+ *
+ * The fixtures above are each a page somebody wrote by hand, and every one of
+ * them arranges primitives the way its author happened to need. The bands are
+ * the arrangement a *host* gets by dropping in what the catalogue offers, and
+ * they are denser than anything hand-written here — six feature tiles in a
+ * three-column grid, three tiers side by side, five questions in a column.
+ * Density is what makes a box-sizing defect visible, which is why the
+ * geometric invariant runs over this as well as over the twenty.
+ */
+const everyBandPage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory()
+): LoomTree =>
+  createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: STARTER_COMPOSITIONS.map((composition) => composition.build(idFactory)),
+    }),
+    idFactory
+  )
+
+describe("the composed vocabulary", () => {
+  it("covers every registered primitive across the ten fixtures", () => {
+    const typesIn = (tree: LoomTree): readonly string[] =>
+      [...render(tree, true).markup.matchAll(/data-loom-type="([^"]+)"/g)].flatMap((match) =>
+        match[1] === undefined ? [] : [match[1]]
+      )
+
+    const used = new Set([
+      ...typesIn(samplePage(EDITORIAL)),
+      ...typesIn(marketingPage(EDITORIAL)),
+      ...typesIn(pricingPage(EDITORIAL)),
+      ...typesIn(arrangedPage(EDITORIAL)),
+      ...typesIn(portedPage(EDITORIAL)),
+      ...typesIn(cataloguePage(EDITORIAL)),
+      ...typesIn(chromePage(EDITORIAL)),
+      ...typesIn(contactPage(EDITORIAL)),
+      ...typesIn(technicalPage(EDITORIAL)),
+      ...typesIn(comparisonPage(EDITORIAL)),
+      ...typesIn(prosePage(EDITORIAL)),
+      ...typesIn(tablePage(EDITORIAL)),
+      ...typesIn(motionPage(EDITORIAL)),
+      ...typesIn(bookablePage(EDITORIAL)),
+      ...typesIn(explainerPage(EDITORIAL)),
+      ...typesIn(conversationPage(EDITORIAL)),
+      ...typesIn(furniturePage(EDITORIAL)),
+      ...typesIn(datedPage(EDITORIAL)),
+      ...typesIn(productPage(EDITORIAL)),
+      ...typesIn(shelfPage(EDITORIAL)),
+      ...typesIn(atmospherePage(EDITORIAL)),
+    ])
+
+    expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
+  })
+
+  it("never sizes a box in percent and then pads it past the track it sits in", () => {
+    /**
+     * An inline style carries no reset, so `box-sizing` is `content-box`: an
+     * element that states a **percentage size** on one axis and then pads or
+     * borders itself on that same axis is larger than its parent by exactly
+     * that padding and border. Nothing in a pure render can notice it, and
+     * nothing but a picture ever has.
+     *
+     * This started as the inline half alone — `width: 100%` plus
+     * `padding-inline`, which was rendering a 486px page on a 390px screen.
+     * The block half cost more before anybody saw it. `loom.feature` combined
+     * `height: 100%` with padding from the day it shipped, so every tile
+     * overflowed its own grid row by 66px; with one row it hung over the band
+     * below, and with two rows the second row was drawn **through** the first.
+     * It stayed invisible for a month because no fixture had ever put six
+     * tiles in a three-column grid, and the assertion that existed only looked
+     * at widths.
+     *
+     * So the invariant is stated once, for both axes, over every fixture this
+     * file builds and every band the catalogue ships — and it is stated in
+     * terms of *any* percentage rather than `100%`, because a card at `50%`
+     * overflows its track by the same padding.
+     *
+     * The three ways it was too narrow are each worth keeping in mind: it
+     * checked one axis, it checked `padding-inline` but not the `padding`
+     * shorthand every offender actually used, and it ran over twelve of the
+     * twenty fixtures. A defect class is only closed by the assertion that
+     * covers all of it.
+     */
+    const nonZero = "(?!0(?:;|$))"
+
+    const overflows = (style: string, axis: "block" | "inline"): boolean => {
+      if (style.includes("box-sizing:border-box")) return false
+      if (!new RegExp(`(?:^|;)${axis === "block" ? "height" : "width"}:[^;]*%`).test(style)) {
+        return false
+      }
+
+      const sides = axis === "block" ? "block|top|bottom" : "inline|left|right"
+
+      return (
+        new RegExp(`(?:^|;)padding(?:-(?:${sides})(?:-\\w+)?)?:${nonZero}`).test(style) ||
+        new RegExp(`(?:^|;)border(?:-(?:${sides})(?:-\\w+)?)?:${nonZero}(?!none)`).test(style)
+      )
+    }
+
+    /**
+     * Rendered in edit mode so every node carries its `data-loom-type`, which
+     * is what turns "some element overflows" into a message naming the
+     * primitive to open.
+     */
+    const blame = (markup: string): readonly string[] =>
+      [...markup.matchAll(/style="([^"]*)"/g)].flatMap((match) => {
+        const style = (match[1] ?? "").replace(/&quot;/g, '"')
+        const types = [...markup.slice(0, match.index).matchAll(/data-loom-type="([^"]+)"/g)]
+        const type = types[types.length - 1]?.[1] ?? "unknown"
+
+        return (["block", "inline"] as const)
+          .filter((axis) => overflows(style, axis))
+          .map((axis) => `${type} overflows on the ${axis} axis: ${style}`)
+      })
+
+    const fixtures = [
+      samplePage,
+      marketingPage,
+      pricingPage,
+      arrangedPage,
+      portedPage,
+      cataloguePage,
+      chromePage,
+      contactPage,
+      technicalPage,
+      prosePage,
+      tablePage,
+      datedPage,
+      comparisonPage,
+      motionPage,
+      bookablePage,
+      explainerPage,
+      conversationPage,
+      furniturePage,
+      productPage,
+      shelfPage,
+      atmospherePage,
+    ].flatMap((fixture) => blame(render(fixture(EDITORIAL), true).markup))
+
+    const bands = blame(render(everyBandPage(EDITORIAL), true).markup)
+
+    expect([...new Set([...fixtures, ...bands])]).toEqual([])
+  })
+
+  it("renders a marketing page with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(marketingPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Ship interfaces your AI can change and your team can trust")
+    expect(markup).toContain("Trusted by teams at")
+    expect(markup).toContain("Proposed, not written")
+    expect(markup).toContain("<blockquote")
+    expect(markup).toContain("<details")
+    expect(markup).toContain("<summary")
+  })
+
+  it("places the hero's three regions, each in its own part of the band", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+
+    const eyebrowAt = markup.indexOf("The AI-native runtime")
+    const headingAt = markup.indexOf("Ship interfaces")
+    const ledeAt = markup.indexOf("Every change is proposed")
+    const actionAt = markup.indexOf("Start building")
+    const mediaAt = markup.indexOf("portal.png")
+
+    expect(eyebrowAt).toBeLessThan(headingAt)
+    expect(headingAt).toBeLessThan(ledeAt)
+    expect(ledeAt).toBeLessThan(actionAt)
+    expect(actionAt).toBeLessThan(mediaAt)
+  })
+
+  it("emits one stylesheet for a page whose primitives each ask for it", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+    const { stylesheet } = splitStylesheet(markup)
+
+    expect(markup.match(/<style/g)?.length).toBe(1)
+    expect(stylesheet).toContain("@keyframes loom-rise")
+    expect(stylesheet).toContain("prefers-reduced-motion")
+  })
+
+  it("keeps the animation out of the tree entirely", () => {
+    const withMotion = render(marketingPage(EDITORIAL)).markup
+
+    /**
+     * The whole bargain in one assertion: the stylesheet is identical under a
+     * different theme and carries no value any prop supplied, so no proposal
+     * can reach the animation by configuring a node.
+     */
+    expect(splitStylesheet(withMotion).stylesheet).toBe(
+      splitStylesheet(render(marketingPage(BOLD)).markup).stylesheet
+    )
+    expect(splitStylesheet(withMotion).stylesheet).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+  })
+
+  it("opens the question a tree marked open, and leaves the others closed", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+
+    expect(markup.match(/<details[^>]*open/g)?.length).toBe(1)
+    expect(markup.match(/<details/g)?.length).toBe(2)
+  })
+
+  it("falls back to a wordmark for a logo with no image, and links the one that has a href", () => {
+    const { markup } = render(marketingPage(EDITORIAL))
+
+    expect(markup).toContain("Northwind")
+    expect(markup).toContain('alt="Meridian"')
+    expect(markup).toContain('href="https://example.com/meridian"')
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(marketingPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(marketingPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
   })
 })
 

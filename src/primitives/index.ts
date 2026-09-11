@@ -78,10 +78,10 @@ import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
 import { loomReveal } from "./loom.reveal.js"
 import { loomQuote } from "./loom.quote.js"
-import { loomQuoteGrid } from "./loom.quote-grid.js"
 import { loomRating } from "./loom.rating.js"
 import { loomRecording } from "./loom.recording.js"
 import { loomRecordingGrid } from "./loom.recording-grid.js"
+import { loomQuoteGrid } from "./loom.quote-grid.js"
 import { loomSection } from "./loom.section.js"
 import { loomSpec } from "./loom.spec.js"
 import { loomSplit } from "./loom.split.js"
@@ -276,6 +276,26 @@ import { loomTierTable } from "./loom.tier-table.js"
  * animation never gets the starting state either
  * ([0110](../../decisions/0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md)).
  *
+ * **The product three** are the band a page about *software* is built on, and
+ * the largest gap left that Hermes could not have had: it sold a person, and a
+ * photograph of a person needs no chrome around it. `loom.frame` is a browser,
+ * an app window or a phone drawn around whatever the tree puts on its screen —
+ * a screenshot, a code panel, or a composition of primitives standing in for
+ * one — and it is the difference between a picture on a page and a running
+ * interface. `loom.pin` is the numbered mark over it, which is the field
+ * `hotspots: Hotspot[]` would have been and is instead a node per mark, so a
+ * label moves with a `move` and not with a rewrite of an array. `loom.rating`
+ * is the proof this library could not show: a quote says one person liked it,
+ * a logo wall says companies use it, and neither is the score a reader looks
+ * for first.
+ *
+ * The pair is the third instance of `loom.orbit`'s shape — the repeated thing
+ * in `children`, the singular thing it is arranged around in a slot — and the
+ * first where the two arrangements of the children are *different layouts of
+ * the same nodes*: marks over the screen where the frame is wide enough, and a
+ * numbered legend under it where it is not, chosen by a `@container` query on
+ * the frame rather than on the window, because a screenshot in one column of a
+ * `loom.split` is narrow on the widest screen there is.
  * **The four between the bands** are what a page does that none of its bands
  * do: announce, orient, run past the edge, and show a proportion.
  * `loom.banner` is the strip above everything — the third primitive here whose
@@ -474,95 +494,4 @@ export * from "./layout.js"
  */
 export * from "./compositions/index.js"
 export {
-  loomAction,
-  loomArticle,
-  loomArticleGrid,
-  loomAvatar,
-  loomAvatarRow,
-  loomBackdrop,
-  loomBadge,
-  loomBanner,
-  loomBeforeAfter,
-  loomBook,
-  loomBookGrid,
-  loomButton,
-  loomCallout,
-  loomCard,
-  loomCarousel,
-  loomCode,
-  loomComparison,
-  loomComparisonRow,
-  loomComparisonTable,
-  loomCodeSpan,
-  loomCredential,
-  loomCredentialGrid,
-  loomDivider,
-  loomEmbed,
-  loomEmphasis,
-  loomEvent,
-  loomEventGrid,
-  loomFaq,
-  loomFaqList,
-  loomFeature,
-  loomFeatureGrid,
-  loomField,
-  loomFooter,
-  loomForm,
-  loomFrame,
-  loomGrid,
-  loomHeading,
-  loomHero,
-  loomIcon,
-  loomKbd,
-  loomLink,
-  loomLinkList,
-  loomLinkTrail,
-  loomList,
-  loomListItem,
-  loomListing,
-  loomListingGrid,
-  loomLogo,
-  loomLogoCloud,
-  loomMarquee,
-  loomMedia,
-  loomMessage,
-  loomMessageList,
-  loomMeter,
-  loomMilestone,
-  loomMilestoneList,
-  loomMilestoneRow,
-  loomMosaic,
-  loomNav,
-  loomOffering,
-  loomOfferingGrid,
-  loomOption,
-  loomOrbit,
-  loomOverlay,
-  loomPage,
-  loomPerk,
-  loomPerkList,
-  loomPerkListItem,
-  loomPerson,
-  loomPersonGrid,
-  loomPin,
-  loomProduct,
-  loomProductGrid,
-  loomProse,
-  loomQuote,
-  loomQuoteGrid,
-  loomReveal,
-  loomRating,
-  loomRecording,
-  loomRecordingGrid,
-  loomSection,
-  loomSpec,
-  loomSplit,
-  loomStack,
-  loomStat,
-  loomStatGrid,
-  loomTable,
-  loomTableCell,
-  loomTableRow,
-  loomTier,
-  loomTierTable,
 }

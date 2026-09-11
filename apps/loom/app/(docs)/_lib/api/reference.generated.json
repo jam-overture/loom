@@ -893,6 +893,20 @@
               "summary": ""
             },
             {
+              "name": "RepairMeasurement",
+              "kind": "type",
+              "signature": "type RepairMeasurement = {\n    readonly proposal: PromptMeasurement;\n    /** The refused delta, rendered, and the reasoning offered for it. */\n    readonly refused: number;\n    /** The Gate's reason code and its detail. */\n    readonly objection: number;\n    /** The closing sentence that makes this a revision rather than a fresh ask. */\n    readonly instruction: number;\n    /** `proposal.total` plus the three above: what the repair puts on the wire. */\n    readonly total: number;\n    /** `proposal.total + total`: the whole refused-then-repaired episode. */\n    readonly episode: number;\n};",
+              "truncated": false,
+              "summary": "What a second go costs, once the first one was refused."
+            },
+            {
+              "name": "measureRepairPrompt",
+              "kind": "function",
+              "signature": "const measureRepairPrompt: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => RepairMeasurement",
+              "truncated": false,
+              "summary": "Measures a repair without sending it, on the same terms as `measurePrompt`."
+            },
+            {
               "name": "hashPrompt",
               "kind": "function",
               "signature": "const hashPrompt: (system: string, userMessage: string) => Promise<string>",
@@ -4017,6 +4031,48 @@
           ]
         },
         {
+          "module": "render/control",
+          "title": "Control",
+          "summary": "The handle a primitive has on a control it did not build.",
+          "symbols": [
+            {
+              "name": "CONTROL_CLASS",
+              "kind": "value",
+              "signature": "const CONTROL_CLASS = \"loom-control\"",
+              "truncated": false,
+              "summary": "The class every control carries, and the stem of the second one naming which behaviour built it: `loom-control loom-control-copy`."
+            },
+            {
+              "name": "controlClass",
+              "kind": "function",
+              "signature": "const controlClass: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The classes the runtime stamps on the control one behaviour builds."
+            },
+            {
+              "name": "CONTROL_DISPLAY_PROPERTY",
+              "kind": "value",
+              "signature": "const CONTROL_DISPLAY_PROPERTY = \"--loom-control-display\"",
+              "truncated": false,
+              "summary": "The custom property that decides whether a control is displayed — every control at once."
+            },
+            {
+              "name": "controlDisplayProperty",
+              "kind": "function",
+              "signature": "const controlDisplayProperty: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The custom property that decides whether *one* behaviour's control is displayed: `--loom-copy-display`."
+            },
+            {
+              "name": "controlDisplay",
+              "kind": "function",
+              "signature": "const controlDisplay: (name: BehaviourName, resting: string) => string",
+              "truncated": false,
+              "summary": "The value a control writes for `display`: its own, behind the two properties a primitive may override it with."
+            }
+          ]
+        },
+        {
           "module": "render/decorative",
           "title": "Decorative",
           "summary": "The same children again, as a copy nothing can resolve to a node.",
@@ -4129,6 +4185,41 @@
           ]
         },
         {
+          "module": "render/inline-variables",
+          "title": "Inline variables",
+          "summary": "A render whose colours are values rather than references.",
+          "symbols": [
+            {
+              "name": "VariableSubstitution",
+              "kind": "type",
+              "signature": "type VariableSubstitution = {\n    readonly value: string;\n    /**\n     * Custom properties the theme does not declare **and** that named no\n     * fallback. A reference with a fallback is not reported: the fallback is the\n     * value, exactly as it is in a browser, and `--loom-mono-family` is written\n     * that way on purpose.\n     */\n    readonly unresolved: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A CSS value with the theme's variables resolved, and what could not be."
+            },
+            {
+              "name": "substituteVariables",
+              "kind": "function",
+              "signature": "const substituteVariables: (value: string, variables: ThemeVariables) => VariableSubstitution",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "InlinedProjection",
+              "kind": "type",
+              "signature": "type InlinedProjection = {\n    readonly element: ReactNode;\n    readonly unresolved: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A projection with the theme resolved into it, and what the theme did not answer."
+            },
+            {
+              "name": "inlineThemeVariables",
+              "kind": "function",
+              "signature": "const inlineThemeVariables: (element: ReactNode, variables: ThemeVariables) => InlinedProjection",
+              "truncated": false,
+              "summary": "The projection, with every theme reference in an inline style replaced by what the mounted theme says it is."
+            }
+          ]
+        },
+        {
           "module": "render/primitive",
           "title": "Primitive",
           "summary": "The primitive contract — what a registered component receives, and the only thing the renderer needs from a registry.",
@@ -4167,6 +4258,20 @@
               "signature": "type LoomPrimitive<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehaviour>>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "CallablePrimitive",
+              "kind": "type",
+              "signature": "type CallablePrimitive = (props: LoomPrimitiveProps) => ReactNode;",
+              "truncated": false,
+              "summary": "A primitive called as the plain function of its props, rather than mounted."
+            },
+            {
+              "name": "asCallablePrimitive",
+              "kind": "function",
+              "signature": "const asCallablePrimitive: (primitive: LoomPrimitive) => Result<CallablePrimitive, string>",
+              "truncated": false,
+              "summary": "A `LoomPrimitive` is either a function component or a class, and only the first can be called as a plain function. `typeof` cannot tell them apart — a class is a function too — so the marker React puts on a class component's prototype is what decides it."
             },
             {
               "name": "PrimitiveResolver",
@@ -4227,7 +4332,7 @@
             {
               "name": "RenderOptions",
               "kind": "type",
-              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n};",
+              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4276,7 +4381,7 @@
             {
               "name": "RenderDependencies",
               "kind": "type",
-              "signature": "type RenderDependencies = {\n    readonly source: TreeSource;\n    readonly resolver: PrimitiveResolver;\n    readonly validator?: PropsValidator;\n    /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered — see `RenderOptions.data`.\n     * Supplying a registry is what bounds the sources a proposal may name, the\n     * same way `themes` bounds the palettes.\n     */\n    readonly sources?: DataRegistry;\n    /**\n     * Absent means the tree's submissions are not answered — see\n     * `RenderOptions.submissions`. Supplying a registry is what bounds the\n     * destinations a proposal may name, and it is the only thing that does: an\n     * address never appears in a tree, so a deployment that registers nothing has\n     * no form that posts anywhere.\n     */\n    readonly endpoints?: EndpointRegistry;\n    /**\n     * The origins this deployment will frame — see `RenderOptions.origins`.\n     * Absent means every framable prop is refused with a diagnostic.\n     *\n     * It sits here beside the other three registries and, unlike them, adds no\n     * `await`: an allowlist is a static fact, so it is passed straight through to\n     * the walk rather than resolved first.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * Absent means primitives render the strings their authors declared — see\n     * `RenderOptions.text`. A host serving one language in the library's own\n     * language wires nothing here; a host serving another builds a resolver per\n     * dictionary and picks by whatever it reads the request's language from, which\n     * is its own business and not the framework's.\n     */\n    readonly text?: TextResolver;\n    readonly slots?: SlotContent;\n};",
+              "signature": "type RenderDependencies = {\n    readonly source: TreeSource;\n    readonly resolver: PrimitiveResolver;\n    readonly validator?: PropsValidator;\n    /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered — see `RenderOptions.data`.\n     * Supplying a registry is what bounds the sources a proposal may name, the\n     * same way `themes` bounds the palettes.\n     */\n    readonly sources?: DataRegistry;\n    /**\n     * Absent means the tree's submissions are not answered — see\n     * `RenderOptions.submissions`. Supplying a registry is what bounds the\n     * destinations a proposal may name, and it is the only thing that does: an\n     * address never appears in a tree, so a deployment that registers nothing has\n     * no form that posts anywhere.\n     */\n    readonly endpoints?: EndpointRegistry;\n    /**\n     * The origins this deployment will frame — see `RenderOptions.origins`.\n     * Absent means every framable prop is refused with a diagnostic.\n     *\n     * It sits here beside the other three registries and, unlike them, adds no\n     * `await`: an allowlist is a static fact, so it is passed straight through to\n     * the walk rather than resolved first.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * Absent means primitives render the strings their authors declared — see\n     * `RenderOptions.text`. A host serving one language in the library's own\n     * language wires nothing here; a host serving another builds a resolver per\n     * dictionary and picks by whatever it reads the request's language from, which\n     * is its own business and not the framework's.\n     */\n    readonly text?: TextResolver;\n    readonly slots?: SlotContent;\n    /**\n     * References or values — see `RenderOptions.themeValues`. It belongs to the\n     * request rather than to the deployment: one route serves a page to a browser\n     * and the next draws the same tree into an image, off the same dependencies.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4790,1280 +4895,6 @@
               "signature": "const ASPECT_RATIOS: Readonly<Record<AspectName, string>>",
               "truncated": false,
               "summary": "The shapes a fixed-ratio frame may take."
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.action",
-          "title": "loom.action",
-          "summary": "The one thing on a page that asks the reader to do something.",
-          "symbols": [
-            {
-              "name": "loomAction",
-              "kind": "value",
-              "signature": "const loomAction: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.article",
-          "title": "loom.article",
-          "summary": "A written piece: a cover, a small label, a title, a sentence, and a link.",
-          "symbols": [
-            {
-              "name": "loomArticle",
-              "kind": "value",
-              "signature": "const loomArticle: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.article-grid",
-          "title": "loom.article-grid",
-          "summary": "A wall of `loom.article` cells — the blog index, the press page, the case studies, the recipe box.",
-          "symbols": [
-            {
-              "name": "loomArticleGrid",
-              "kind": "value",
-              "signature": "const loomArticleGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.avatar",
-          "title": "loom.avatar",
-          "summary": "One face, or the two letters that stand in for it.",
-          "symbols": [
-            {
-              "name": "loomAvatar",
-              "kind": "value",
-              "signature": "const loomAvatar: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.avatar-row",
-          "title": "loom.avatar-row",
-          "summary": "A run of `loom.avatar` faces, overlapping — the cluster a page puts beside \"and four thousand others\".",
-          "symbols": [
-            {
-              "name": "loomAvatarRow",
-              "kind": "value",
-              "signature": "const loomAvatarRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.backdrop",
-          "title": "loom.backdrop",
-          "summary": "Atmosphere behind whatever is put inside it: drifting colour, a ruled ground, beams, or one pool of light.",
-          "symbols": [
-            {
-              "name": "loomBackdrop",
-              "kind": "value",
-              "signature": "const loomBackdrop: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.badge",
-          "title": "loom.badge",
-          "summary": "A short label attached to something else — \"Most popular\", \"Beta\", \"New\".",
-          "symbols": [
-            {
-              "name": "loomBadge",
-              "kind": "value",
-              "signature": "const loomBadge: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.banner",
-          "title": "loom.banner",
-          "summary": "The strip a site runs above everything else: one short thing to say, and one thing to do about it.",
-          "symbols": [
-            {
-              "name": "loomBanner",
-              "kind": "value",
-              "signature": "const loomBanner: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.before-after",
-          "title": "loom.before-after",
-          "summary": "Two states of one thing, superimposed, with a hard edge between them — the redesign over the old page, the room staged and unstaged, the photograph before the retouch.",
-          "symbols": [
-            {
-              "name": "loomBeforeAfter",
-              "kind": "value",
-              "signature": "const loomBeforeAfter: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.book",
-          "title": "loom.book",
-          "summary": "A book: its cover, what it is called, who wrote it, and a line about it.",
-          "symbols": [
-            {
-              "name": "loomBook",
-              "kind": "value",
-              "signature": "const loomBook: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.book-grid",
-          "title": "loom.book-grid",
-          "summary": "A shelf of `loom.book` cells — the books someone wrote, the ones they recommend, or the one they are halfway through.",
-          "symbols": [
-            {
-              "name": "loomBookGrid",
-              "kind": "value",
-              "signature": "const loomBookGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.button",
-          "title": "loom.button",
-          "summary": "The control that sends a `loom.form`. Its label is child text.",
-          "symbols": [
-            {
-              "name": "loomButton",
-              "kind": "value",
-              "signature": "const loomButton: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.callout",
-          "title": "loom.callout",
-          "summary": "The aside a page steps out of its own flow to make — a note, a caveat, the thing the reader will otherwise get wrong.",
-          "symbols": [
-            {
-              "name": "loomCallout",
-              "kind": "value",
-              "signature": "const loomCallout: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.card",
-          "title": "loom.card",
-          "summary": "A surface holding whatever is put on it, with a region above its content and a region below.",
-          "symbols": [
-            {
-              "name": "loomCard",
-              "kind": "value",
-              "signature": "const loomCard: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.carousel",
-          "title": "loom.carousel",
-          "summary": "The fifth general arranger: children in a row that runs past the edge of the page, and snaps.",
-          "symbols": [
-            {
-              "name": "loomCarousel",
-              "kind": "value",
-              "signature": "const loomCarousel: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.code",
-          "title": "loom.code",
-          "summary": "A snippet, set in monospace on a tinted surface — or a terminal, which is the same panel wearing a window bar.",
-          "symbols": [
-            {
-              "name": "loomCode",
-              "kind": "value",
-              "signature": "const loomCode: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.code-span",
-          "title": "loom.code-span",
-          "summary": "A name from the code, set in monospace inside a sentence — `ChangeInterpreter`, `--loom-accent`, `pnpm verify`.",
-          "symbols": [
-            {
-              "name": "loomCodeSpan",
-              "kind": "value",
-              "signature": "const loomCodeSpan: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.comparison",
-          "title": "loom.comparison",
-          "summary": "One intersection of a comparison: what this subject does about this criterion.",
-          "symbols": [
-            {
-              "name": "loomComparison",
-              "kind": "value",
-              "signature": "const loomComparison: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.comparison-row",
-          "title": "loom.comparison-row",
-          "summary": "One criterion, answered across every subject in the table.",
-          "symbols": [
-            {
-              "name": "loomComparisonRow",
-              "kind": "value",
-              "signature": "const loomComparisonRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.comparison-table",
-          "title": "loom.comparison-table",
-          "summary": "The band that answers *how is this different from what I use now* — subjects across the top, criteria down the side, and a verdict at every intersection.",
-          "symbols": [
-            {
-              "name": "loomComparisonTable",
-              "kind": "value",
-              "signature": "const loomComparisonTable: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.credential",
-          "title": "loom.credential",
-          "summary": "One reason to be believed: a mark, what it is called, who granted it, when, and a line about it.",
-          "symbols": [
-            {
-              "name": "loomCredential",
-              "kind": "value",
-              "signature": "const loomCredential: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.credential-grid",
-          "title": "loom.credential-grid",
-          "summary": "A wall of `loom.credential` cells — the awards, the certifications, the memberships, the tools.",
-          "symbols": [
-            {
-              "name": "loomCredentialGrid",
-              "kind": "value",
-              "signature": "const loomCredentialGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.divider",
-          "title": "loom.divider",
-          "summary": "The enum-driven one: `ornament` selects between three genuinely different renderings, not three values of the same property.",
-          "symbols": [
-            {
-              "name": "loomDivider",
-              "kind": "value",
-              "signature": "const loomDivider: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.embed",
-          "title": "loom.embed",
-          "summary": "Somebody else's document, framed and held to a shape — a product video, a map, a prototype, a track.",
-          "symbols": [
-            {
-              "name": "loomEmbed",
-              "kind": "value",
-              "signature": "const loomEmbed: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.emphasis",
-          "title": "loom.emphasis",
-          "summary": "A span inside a sentence that matters more than the words around it.",
-          "symbols": [
-            {
-              "name": "loomEmphasis",
-              "kind": "value",
-              "signature": "const loomEmphasis: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.event",
-          "title": "loom.event",
-          "summary": "Something happening on a date, in a place, that a reader can get into: the date first, then what it is, where it is, a line about it, and the way in.",
-          "symbols": [
-            {
-              "name": "loomEvent",
-              "kind": "value",
-              "signature": "const loomEvent: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.event-grid",
-          "title": "loom.event-grid",
-          "summary": "A band of `loom.event` cells — the what's-on, the tour dates, the three upcoming on a home page.",
-          "symbols": [
-            {
-              "name": "loomEventGrid",
-              "kind": "value",
-              "signature": "const loomEventGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.faq",
-          "title": "loom.faq",
-          "summary": "One question and its answer, as a disclosure that needs no JavaScript.",
-          "symbols": [
-            {
-              "name": "loomFaq",
-              "kind": "value",
-              "signature": "const loomFaq: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.faq-list",
-          "title": "loom.faq-list",
-          "summary": "The questions band: a stack of `loom.faq` disclosures.",
-          "symbols": [
-            {
-              "name": "loomFaqList",
-              "kind": "value",
-              "signature": "const loomFaqList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.feature",
-          "title": "loom.feature",
-          "summary": "One tile of a `loom.feature-grid`: a glyph, a title, and a sentence about why it matters.",
-          "symbols": [
-            {
-              "name": "loomFeature",
-              "kind": "value",
-              "signature": "const loomFeature: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.feature-grid",
-          "title": "loom.feature-grid",
-          "summary": "The \"what makes this different\" band: a wall of `loom.feature` tiles.",
-          "symbols": [
-            {
-              "name": "loomFeatureGrid",
-              "kind": "value",
-              "signature": "const loomFeatureGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": "The minimums moved to `layout.ts` when `loom.grid` needed the same four, so the two grids wrap at the same widths. The values are unchanged."
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.field",
-          "title": "loom.field",
-          "summary": "One thing a form asks for: a label, the control under it, and the note that says what to type.",
-          "symbols": [
-            {
-              "name": "loomField",
-              "kind": "value",
-              "signature": "const loomField: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.footer",
-          "title": "loom.footer",
-          "summary": "The band that closes a page: who this is, what else is here, and the small print underneath.",
-          "symbols": [
-            {
-              "name": "loomFooter",
-              "kind": "value",
-              "signature": "const loomFooter: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.form",
-          "title": "loom.form",
-          "summary": "The band where a page stops telling and starts asking: a set of `loom.field`s, the control that sends them, and the fine print underneath.",
-          "symbols": [
-            {
-              "name": "loomForm",
-              "kind": "value",
-              "signature": "const loomForm: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.frame",
-          "title": "loom.frame",
-          "summary": "The chrome a product screenshot sits in: a browser window, an app window, or a phone.",
-          "symbols": [
-            {
-              "name": "loomFrame",
-              "kind": "value",
-              "signature": "const loomFrame: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.grid",
-          "title": "loom.grid",
-          "summary": "Whatever it is given, in as many columns as will fit.",
-          "symbols": [
-            {
-              "name": "loomGrid",
-              "kind": "value",
-              "signature": "const loomGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.heading",
-          "title": "loom.heading",
-          "summary": "A heading, with its text as child nodes rather than a `text` prop.",
-          "symbols": [
-            {
-              "name": "loomHeading",
-              "kind": "value",
-              "signature": "const loomHeading: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.hero",
-          "title": "loom.hero",
-          "summary": "The first thing on a page, and the primitive that decides whether this library reads as a product or as a UI kit.",
-          "symbols": [
-            {
-              "name": "loomHero",
-              "kind": "value",
-              "signature": "const loomHero: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.icon",
-          "title": "loom.icon",
-          "summary": "One glyph, optionally in a tile.",
-          "symbols": [
-            {
-              "name": "loomIcon",
-              "kind": "value",
-              "signature": "const loomIcon: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.kbd",
-          "title": "loom.kbd",
-          "summary": "One key, as a key cap — `⌘`, `K`, `Esc`.",
-          "symbols": [
-            {
-              "name": "loomKbd",
-              "kind": "value",
-              "signature": "const loomKbd: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.link",
-          "title": "loom.link",
-          "summary": "A link that is a link — text, a destination, and nothing drawn around it.",
-          "symbols": [
-            {
-              "name": "loomLink",
-              "kind": "value",
-              "signature": "const loomLink: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.link-list",
-          "title": "loom.link-list",
-          "summary": "A run of `loom.link` under a heading — one column of a footer, a row of legal links, the \"everything else\" list in a sidebar.",
-          "symbols": [
-            {
-              "name": "loomLinkList",
-              "kind": "value",
-              "signature": "const loomLinkList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.link-trail",
-          "title": "loom.link-trail",
-          "summary": "Where the reader is, and every step back out — a run of `loom.link` with the way home between them.",
-          "symbols": [
-            {
-              "name": "loomLinkTrail",
-              "kind": "value",
-              "signature": "const loomLinkTrail: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.list",
-          "title": "loom.list",
-          "summary": "A run of points, bulleted or numbered — the list a page's prose is written in.",
-          "symbols": [
-            {
-              "name": "loomList",
-              "kind": "value",
-              "signature": "const loomList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.list-item",
-          "title": "loom.list-item",
-          "summary": "One point in a `loom.list`. An `<li>`, and named for it.",
-          "symbols": [
-            {
-              "name": "loomListItem",
-              "kind": "value",
-              "signature": "const loomListItem: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.listing",
-          "title": "loom.listing",
-          "summary": "A thing on offer at a place: a picture of it, what it costs, where it is, and the facts a buyer measures it by.",
-          "symbols": [
-            {
-              "name": "loomListing",
-              "kind": "value",
-              "signature": "const loomListing: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.listing-grid",
-          "title": "loom.listing-grid",
-          "summary": "A band of `loom.listing` cells — what is for sale, what is to let, what is on the lot.",
-          "symbols": [
-            {
-              "name": "loomListingGrid",
-              "kind": "value",
-              "signature": "const loomListingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.logo",
-          "title": "loom.logo",
-          "summary": "One mark in a `loom.logo-cloud`.",
-          "symbols": [
-            {
-              "name": "loomLogo",
-              "kind": "value",
-              "signature": "const loomLogo: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.logo-cloud",
-          "title": "loom.logo-cloud",
-          "summary": "The \"trusted by\" wall: a row of `loom.logo` marks under an optional line of context.",
-          "symbols": [
-            {
-              "name": "loomLogoCloud",
-              "kind": "value",
-              "signature": "const loomLogoCloud: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.marquee",
-          "title": "loom.marquee",
-          "summary": "A band whose children travel past, forever — the logo wall that drifts, the ticker of quotes, the strip of shots under a hero.",
-          "symbols": [
-            {
-              "name": "loomMarquee",
-              "kind": "value",
-              "signature": "const loomMarquee: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.media",
-          "title": "loom.media",
-          "summary": "The rich-schema one: seven props, two of them required, with the constraints that matter enforced by the schema rather than by the renderer coping.",
-          "symbols": [
-            {
-              "name": "loomMedia",
-              "kind": "value",
-              "signature": "const loomMedia: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.message",
-          "title": "loom.message",
-          "summary": "One turn of a conversation: who said it, and what they said.",
-          "symbols": [
-            {
-              "name": "loomMessage",
-              "kind": "value",
-              "signature": "const loomMessage: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.message-list",
-          "title": "loom.message-list",
-          "summary": "A conversation, in order: a run of `loom.message` turns down the page.",
-          "symbols": [
-            {
-              "name": "loomMessageList",
-              "kind": "value",
-              "signature": "const loomMessageList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.meter",
-          "title": "loom.meter",
-          "summary": "How much of a thing there is, drawn rather than typeset.",
-          "symbols": [
-            {
-              "name": "loomMeter",
-              "kind": "value",
-              "signature": "const loomMeter: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.milestone",
-          "title": "loom.milestone",
-          "summary": "One entry on a rail: a marker, a title, and what happened.",
-          "symbols": [
-            {
-              "name": "loomMilestone",
-              "kind": "value",
-              "signature": "const loomMilestone: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.milestone-list",
-          "title": "loom.milestone-list",
-          "summary": "A run of `loom.milestone` entries down a rail — a history, a roadmap, a changelog, or the steps of a process.",
-          "symbols": [
-            {
-              "name": "loomMilestoneList",
-              "kind": "value",
-              "signature": "const loomMilestoneList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.milestone-row",
-          "title": "loom.milestone-row",
-          "summary": "The same entries as a `loom.milestone-list`, laid **across** rather than down: the *how it works* band, three or four steps wide, each with its number over its title and a connector running to the next.",
-          "symbols": [
-            {
-              "name": "loomMilestoneRow",
-              "kind": "value",
-              "signature": "const loomMilestoneRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.mosaic",
-          "title": "loom.mosaic",
-          "summary": "Whatever it is given, in cells of deliberately unequal width — the band a page uses when a grid of identical rectangles would read as a table.",
-          "symbols": [
-            {
-              "name": "loomMosaic",
-              "kind": "value",
-              "signature": "const loomMosaic: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.nav",
-          "title": "loom.nav",
-          "summary": "The bar across the top of a page: a mark, the menu, and the one thing the page wants you to do.",
-          "symbols": [
-            {
-              "name": "loomNav",
-              "kind": "value",
-              "signature": "const loomNav: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.offering",
-          "title": "loom.offering",
-          "summary": "One thing a reader can book, join, order or give to: what it is called, what it costs, the qualifiers that narrow it, what it includes, and the control that does the deed.",
-          "symbols": [
-            {
-              "name": "loomOffering",
-              "kind": "value",
-              "signature": "const loomOffering: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.offering-grid",
-          "title": "loom.offering-grid",
-          "summary": "A band of `loom.offering` cells — the services page, the packages, the class schedule, the menu, the ways to give.",
-          "symbols": [
-            {
-              "name": "loomOfferingGrid",
-              "kind": "value",
-              "signature": "const loomOfferingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.option",
-          "title": "loom.option",
-          "summary": "One choice inside a `loom.field` of type `select`. Its label is child text.",
-          "symbols": [
-            {
-              "name": "loomOption",
-              "kind": "value",
-              "signature": "const loomOption: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.orbit",
-          "title": "loom.orbit",
-          "summary": "Whatever it is given, circling something it is given — the *works with* band: a product's mark in the middle and the logos of what it plugs into going round it.",
-          "symbols": [
-            {
-              "name": "loomOrbit",
-              "kind": "value",
-              "signature": "const loomOrbit: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.overlay",
-          "title": "loom.overlay",
-          "summary": "A ground with content set over it: a headline across a photograph, a label on a gallery tile, a caption over a product shot.",
-          "symbols": [
-            {
-              "name": "loomOverlay",
-              "kind": "value",
-              "signature": "const loomOverlay: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.page",
-          "title": "loom.page",
-          "summary": "The render root, and the only primitive in this library that mounts a theme.",
-          "symbols": [
-            {
-              "name": "loomPage",
-              "kind": "value",
-              "signature": "const loomPage: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.perk",
-          "title": "loom.perk",
-          "summary": "A perk on its own: a marker, a claim, and an optional clarification, in a `<div>` that belongs to no list.",
-          "symbols": [
-            {
-              "name": "loomPerk",
-              "kind": "value",
-              "signature": "const loomPerk: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.perk-list",
-          "title": "loom.perk-list",
-          "summary": "A run of `loom.perk` rows — what a plan includes, what it does not, and what is on its way.",
-          "symbols": [
-            {
-              "name": "loomPerkList",
-              "kind": "value",
-              "signature": "const loomPerkList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.perk-list-item",
-          "title": "loom.perk-list-item",
-          "summary": "One row of a `loom.perk-list`: a marker, a claim, and an optional clarification. An `<li>`, and named for it.",
-          "symbols": [
-            {
-              "name": "loomPerkListItem",
-              "kind": "value",
-              "signature": "const loomPerkListItem: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.person",
-          "title": "loom.person",
-          "summary": "A person: a face, a name, what they do, and optionally a sentence about them.",
-          "symbols": [
-            {
-              "name": "loomPerson",
-              "kind": "value",
-              "signature": "const loomPerson: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.person-grid",
-          "title": "loom.person-grid",
-          "summary": "A wall of `loom.person` cells — the team, the staff, the speakers.",
-          "symbols": [
-            {
-              "name": "loomPersonGrid",
-              "kind": "value",
-              "signature": "const loomPersonGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.pin",
-          "title": "loom.pin",
-          "summary": "One mark placed at a point over the thing it is explaining.",
-          "symbols": [
-            {
-              "name": "loomPin",
-              "kind": "value",
-              "signature": "const loomPin: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.product",
-          "title": "loom.product",
-          "summary": "One thing for sale: a picture of it, what it is called, what it costs, and the button that buys it.",
-          "symbols": [
-            {
-              "name": "loomProduct",
-              "kind": "value",
-              "signature": "const loomProduct: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.product-grid",
-          "title": "loom.product-grid",
-          "summary": "A wall of `loom.product` cells — the shop, the downloads, the categories.",
-          "symbols": [
-            {
-              "name": "loomProductGrid",
-              "kind": "value",
-              "signature": "const loomProductGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.prose",
-          "title": "loom.prose",
-          "summary": "",
-          "symbols": [
-            {
-              "name": "loomProse",
-              "kind": "value",
-              "signature": "const loomProse: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.quote",
-          "title": "loom.quote",
-          "summary": "Someone else saying it. The social-proof leaf every marketing page needs and the one that most often looks cheap.",
-          "symbols": [
-            {
-              "name": "loomQuote",
-              "kind": "value",
-              "signature": "const loomQuote: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.quote-grid",
-          "title": "loom.quote-grid",
-          "summary": "The proof wall: several `loom.quote` cards at once.",
-          "symbols": [
-            {
-              "name": "loomQuoteGrid",
-              "kind": "value",
-              "signature": "const loomQuoteGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.rating",
-          "title": "loom.rating",
-          "summary": "A score out of five, drawn as stars.",
-          "symbols": [
-            {
-              "name": "loomRating",
-              "kind": "value",
-              "signature": "const loomRating: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.recording",
-          "title": "loom.recording",
-          "summary": "One thing a reader can press play on: artwork with a play mark over it, how long it runs, who made it, what it is called, and what it is about.",
-          "symbols": [
-            {
-              "name": "loomRecording",
-              "kind": "value",
-              "signature": "const loomRecording: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.recording-grid",
-          "title": "loom.recording-grid",
-          "summary": "A band of `loom.recording` cells — the video reel, the episode feed, the playlist.",
-          "symbols": [
-            {
-              "name": "loomRecordingGrid",
-              "kind": "value",
-              "signature": "const loomRecordingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.reveal",
-          "title": "loom.reveal",
-          "summary": "A band that arrives as the reader reaches it: whatever is put inside lifts and fades into place, driven by the page's own scroll position.",
-          "symbols": [
-            {
-              "name": "loomReveal",
-              "kind": "value",
-              "signature": "const loomReveal: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.section",
-          "title": "loom.section",
-          "summary": "A band of the page, with a region above its content for whatever introduces it.",
-          "symbols": [
-            {
-              "name": "loomSection",
-              "kind": "value",
-              "signature": "const loomSection: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.spec",
-          "title": "loom.spec",
-          "summary": "A measured fact about the thing it sits on: a figure and the unit it counts.",
-          "symbols": [
-            {
-              "name": "loomSpec",
-              "kind": "value",
-              "signature": "const loomSpec: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.split",
-          "title": "loom.split",
-          "summary": "Two regions side by side, wrapping to one column when there is no room.",
-          "symbols": [
-            {
-              "name": "loomSplit",
-              "kind": "value",
-              "signature": "const loomSplit: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.stack",
-          "title": "loom.stack",
-          "summary": "Whatever it is given, in one direction, with a gap.",
-          "symbols": [
-            {
-              "name": "loomStack",
-              "kind": "value",
-              "signature": "const loomStack: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.stat",
-          "title": "loom.stat",
-          "summary": "One number and what it counts.",
-          "symbols": [
-            {
-              "name": "loomStat",
-              "kind": "value",
-              "signature": "const loomStat: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.stat-grid",
-          "title": "loom.stat-grid",
-          "summary": "The decomposition one. Hermes' `stats` block held its numbers in an `items` array of `StatItem` shapes; here the grid is a primitive and each number is a `loom.stat` child.",
-          "symbols": [
-            {
-              "name": "loomStatGrid",
-              "kind": "value",
-              "signature": "const loomStatGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.table",
-          "title": "loom.table",
-          "summary": "Rows and columns of whatever it is given — the ordinary table a document is written with.",
-          "symbols": [
-            {
-              "name": "loomTable",
-              "kind": "value",
-              "signature": "const loomTable: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.table-cell",
-          "title": "loom.table-cell",
-          "summary": "One cell of a `loom.table` — a value, a label, or a sentence.",
-          "symbols": [
-            {
-              "name": "loomTableCell",
-              "kind": "value",
-              "signature": "const loomTableCell: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.table-row",
-          "title": "loom.table-row",
-          "summary": "One row of a `loom.table` — its cells, and nothing else.",
-          "symbols": [
-            {
-              "name": "loomTableRow",
-              "kind": "value",
-              "signature": "const loomTableRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.tier",
-          "title": "loom.tier",
-          "summary": "One plan: what it is called, what it costs, what it gets you, and the one thing it asks you to do.",
-          "symbols": [
-            {
-              "name": "loomTier",
-              "kind": "value",
-              "signature": "const loomTier: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.tier-table",
-          "title": "loom.tier-table",
-          "summary": "The pricing band: plans side by side, at the width they need to be read.",
-          "symbols": [
-            {
-              "name": "loomTierTable",
-              "kind": "value",
-              "signature": "const loomTierTable: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
             }
           ]
         },
@@ -8024,6 +6855,482 @@
               "signature": "const loomTelemetry: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_telemetry\";\n    schema: undefined;\n    columns: {\n        seq: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"seq\";\n            tableName: \"loom_telemetry\";\n            dataType: \"number\";\n            columnType: \"PgBigSerial53\";\n            data: number;\n            driverParam: number;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        occurredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"occurred_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        event: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"event\";\n            tableName: \"loom_telemetry\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "One table, because a journal is one thing: an append-only list of what the runtime narrated."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/testing",
+      "slug": "testing",
+      "types": "./dist/testing/index.d.ts",
+      "groups": [
+        {
+          "module": "testing/definitions",
+          "title": "Definitions",
+          "summary": "The primitives of `sampleTree`, declared through the §4 contract, so registry and renderer tests run against real declarations rather than a stand-in for them. `testPrimitives` in `primitives.ts` is the same component set without declarations, which is what §3's tests need.",
+          "symbols": [
+            {
+              "name": "pageDefinition",
+              "kind": "value",
+              "signature": "const pageDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "cardDefinition",
+              "kind": "value",
+              "signature": "const cardDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "headerDefinition",
+              "kind": "value",
+              "signature": "const headerDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "footerDefinition",
+              "kind": "value",
+              "signature": "const footerDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "testDefinitions",
+              "kind": "value",
+              "signature": "const testDefinitions: readonly PrimitiveEntry[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "registryOf",
+              "kind": "function",
+              "signature": "const registryOf: (entries: readonly PrimitiveEntry[]) => PrimitiveRegistry",
+              "truncated": false,
+              "summary": "Registration is fallible, and a test that wanted a registry has nothing to say about a failure to build one, so this unwraps loudly rather than making every caller narrow a Result it does not care about."
+            },
+            {
+              "name": "testRegistry",
+              "kind": "function",
+              "signature": "const testRegistry: () => PrimitiveRegistry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/doubles",
+          "title": "Doubles",
+          "summary": "Test doubles for the impure seams this file owns — the interpreter and its repairer, the clock, and the event sink. The runtime's other two seams are doubled where they are defined: `sequentialIdFactory` in `ids.ts` and `fixedPolicy` in `runtime/policy-source.ts`.",
+          "symbols": [
+            {
+              "name": "FIXED_INSTANT",
+              "kind": "value",
+              "signature": "const FIXED_INSTANT = \"2026-07-28T00:00:00.000Z\"",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "fixedClock",
+              "kind": "function",
+              "signature": "const fixedClock: (instant?: string) => Clock",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CollectingEventSink",
+              "kind": "type",
+              "signature": "type CollectingEventSink = EventSink & {\n    readonly envelopes: readonly RuntimeEventEnvelope[];\n    readonly types: () => readonly string[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "collectingEventSink",
+              "kind": "function",
+              "signature": "const collectingEventSink: () => CollectingEventSink",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "failingEventSink",
+              "kind": "function",
+              "signature": "const failingEventSink: (failOn: readonly string[], mode?: \"throw\" | \"reject\") => CollectingEventSink",
+              "truncated": false,
+              "summary": "A sink that fails on the events it was told to fail on and collects the rest, so a test can assert both halves at once: that the change survived, and that narration carried on past the failure rather than stopping at it."
+            },
+            {
+              "name": "RecordingModelClient",
+              "kind": "type",
+              "signature": "type RecordingModelClient = ModelClient & {\n    readonly requests: readonly ModelRequest[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedModelClient",
+              "kind": "function",
+              "signature": "const scriptedModelClient: (reply: string | Result<ModelCompletion, ModelClientError>, servedBy?: string) => RecordingModelClient",
+              "truncated": false,
+              "summary": "A model that answers from a script and remembers what it was asked, so the interpreter's request assembly and its reply handling can be tested separately, and neither needs a network or a key."
+            },
+            {
+              "name": "RecordingInterpreter",
+              "kind": "type",
+              "signature": "type RecordingInterpreter = ChangeInterpreter & {\n    readonly intents: readonly EditIntent[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedInterpreter",
+              "kind": "function",
+              "signature": "const scriptedInterpreter: (script: Result<ProposedChange, InterpretationError>) => RecordingInterpreter",
+              "truncated": false,
+              "summary": "Returns whatever it was handed, so tests drive the pipeline from a fixed script, and remembers what it was asked — which is how a test asserts that a write refused before interpretation never spent a model call."
+            },
+            {
+              "name": "RecordingRepairer",
+              "kind": "type",
+              "signature": "type RecordingRepairer = ChangeRepairer & {\n    readonly requests: readonly RepairRequest[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedRepairer",
+              "kind": "function",
+              "signature": "const scriptedRepairer: (script: Result<ProposedChange, InterpretationError>) => RecordingRepairer",
+              "truncated": false,
+              "summary": "A repairer that answers from a script and remembers what it was asked, so a test can assert both that the refusal reached it and that exactly one attempt was made."
+            },
+            {
+              "name": "IntentDraft",
+              "kind": "type",
+              "signature": "type IntentDraft = {\n    readonly treeId: TreeId;\n    readonly baseRevision: number;\n    readonly utterance?: string;\n    readonly origin?: IntentOrigin;\n    readonly actor?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "buildIntent",
+              "kind": "function",
+              "signature": "const buildIntent: (idFactory: IdFactory, draft: IntentDraft) => EditIntent",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ProposalDraft",
+              "kind": "type",
+              "signature": "type ProposalDraft = {\n    readonly intentId: IntentId;\n    readonly delta: TreeDelta;\n    readonly rationale?: string;\n    readonly origin?: IntentOrigin;\n    readonly actor?: string;\n    readonly authoredBy?: AuthorKind;\n    readonly confidence?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "buildProposal",
+              "kind": "function",
+              "signature": "const buildProposal: (idFactory: IdFactory, draft: ProposalDraft) => ProposedChange",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/episode-harness",
+          "title": "Episode harness",
+          "summary": "A write path wired to a real Gate, a real store and a real journal, with only the model scripted.",
+          "symbols": [
+            {
+              "name": "EpisodeHarness",
+              "kind": "type",
+              "signature": "type EpisodeHarness = {\n    readonly path: WritePath;\n    readonly journal: TelemetryJournal;\n    readonly collector: TelemetryCollector;\n    readonly tree: LoomTree;\n    readonly ids: IdFactory;\n    readonly intent: EditIntent;\n    readonly fold: () => Promise<EpisodeFold>;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "removalDelta",
+              "kind": "function",
+              "signature": "const removalDelta: (tree: LoomTree, ids: IdFactory, nodeId: string) => TreeDelta",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "harnessWith",
+              "kind": "function",
+              "signature": "const harnessWith: (options: {\n    readonly script: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>;\n    readonly repairer?: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => ChangeRepairer;\n    readonly baseRevision?: number;\n    /**\n     * The Gate that judges this run. Defaults to the shipped one, which is what\n     * most tests want; a test about attribution needs two hosts that differ, and\n     * a policy is the only thing a disposition names.\n     */\n    readonly policy?: GatePolicy;\n}) => Promise<EpisodeHarness>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "proposalScript",
+              "kind": "function",
+              "signature": "const proposalScript: (confidence: number) => (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>",
+              "truncated": false,
+              "summary": "Confidence is the only knob most of these tests need, because it is what the default policy dispositions on: high accepts, middling holds, low refuses."
+            }
+          ]
+        },
+        {
+          "module": "testing/filesystem",
+          "title": "Filesystem",
+          "summary": "A filesystem in memory, so CLI tests assert on what would be written rather than on what a temporary directory ended up containing. Failures are injectable because \"wrote two files, then the disk refused\" is a path the CLI has to report honestly and no real filesystem will produce on demand.",
+          "symbols": [
+            {
+              "name": "MemoryFileSystem",
+              "kind": "type",
+              "signature": "type MemoryFileSystem = FileSystem & {\n    readonly files: ReadonlyMap<string, string>;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "MemoryFileSystemOptions",
+              "kind": "type",
+              "signature": "type MemoryFileSystemOptions = {\n    readonly existing?: readonly string[];\n    readonly listFails?: string;\n    readonly writeFailsAt?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "memoryFileSystem",
+              "kind": "function",
+              "signature": "const memoryFileSystem: (options?: MemoryFileSystemOptions) => MemoryFileSystem",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/fixtures",
+          "title": "Fixtures",
+          "summary": "A small, deterministic tree used across tests and, later, by the renderer and portal for smoke fixtures. Ids come from a sequential factory so assertions can name them instead of digging them out of the structure.",
+          "symbols": [
+            {
+              "name": "SampleTree",
+              "kind": "type",
+              "signature": "type SampleTree = {\n    readonly tree: LoomTree;\n    readonly ids: {\n        readonly page: NodeId;\n        readonly header: NodeId;\n        readonly headline: NodeId;\n        readonly main: NodeId;\n        readonly card: NodeId;\n        readonly body: NodeId;\n        readonly footer: NodeId;\n    };\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "sampleTree",
+              "kind": "function",
+              "signature": "const sampleTree: () => SampleTree",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FormTree",
+              "kind": "type",
+              "signature": "type FormTree = {\n    readonly tree: LoomTree;\n    readonly ids: {\n        readonly page: NodeId;\n        readonly form: NodeId;\n        /** A sibling that posts nowhere, so a test can move a destination onto one. */\n        readonly aside: NodeId;\n    };\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "formTree",
+              "kind": "function",
+              "signature": "const formTree: (to?: string) => FormTree",
+              "truncated": false,
+              "summary": "A page whose form already posts somewhere. Separate from `sampleTree` rather than a node added to it: every count in the stakes and analysis suites is asserted against that tree's exact size, and a fixture that grows is a fixture that makes unrelated tests wrong."
+            }
+          ]
+        },
+        {
+          "module": "testing/model-replies",
+          "title": "Model replies",
+          "summary": "Reply bodies of the shape a model produces under the interpreter's output schema, kept as raw strings so tests exercise the parse step rather than starting from an already-decoded object. Node ids refer to `sampleTree`.",
+          "symbols": [
+            {
+              "name": "INSERT_NOTE_REPLY",
+              "kind": "value",
+              "signature": "const INSERT_NOTE_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CONFIGURE_CARD_REPLY",
+              "kind": "value",
+              "signature": "const CONFIGURE_CARD_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NO_CHANGE_REPLY",
+              "kind": "value",
+              "signature": "const NO_CHANGE_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NOT_UNDERSTOOD_REPLY",
+              "kind": "value",
+              "signature": "const NOT_UNDERSTOOD_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "OFF_SCHEMA_REPLY",
+              "kind": "value",
+              "signature": "const OFF_SCHEMA_REPLY: string",
+              "truncated": false,
+              "summary": "Well-formed JSON, but not a shape the reply schema allows."
+            },
+            {
+              "name": "FOREIGN_ID_REPLY",
+              "kind": "value",
+              "signature": "const FOREIGN_ID_REPLY: string",
+              "truncated": false,
+              "summary": "An operation that names a node id the id scheme does not permit."
+            },
+            {
+              "name": "UNDECODABLE_PROP_REPLY",
+              "kind": "value",
+              "signature": "const UNDECODABLE_PROP_REPLY: string",
+              "truncated": false,
+              "summary": "Passes the schema, because the schema only says \"a string\", and fails the parse. This is the failure mode accepted in exchange for the grammar budget, so it is a fixture rather than an impossibility."
+            },
+            {
+              "name": "NON_OBJECT_PROPS_REPLY",
+              "kind": "value",
+              "signature": "const NON_OBJECT_PROPS_REPLY: string",
+              "truncated": false,
+              "summary": "Parseable JSON, but not an object, so it cannot be a prop bag."
+            },
+            {
+              "name": "INSERT_SLOT_REPLY",
+              "kind": "value",
+              "signature": "const INSERT_SLOT_REPLY: string",
+              "truncated": false,
+              "summary": "Passes the schema and the parse, and proposes a slot — which the reply schema no longer offers as an insertable kind, so the draft schema must refuse it."
+            },
+            {
+              "name": "TRUNCATED_REPLY",
+              "kind": "value",
+              "signature": "const TRUNCATED_REPLY = \"{\\\"outcome\\\":\\\"change\\\",\\\"rationale\\\":\\\"Adds a not\"",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/primitives",
+          "title": "Primitives",
+          "summary": "A host primitive set covering `sampleTree`, so renderer tests assert against real markup rather than a mock's call log.",
+          "symbols": [
+            {
+              "name": "undecoratedPrimitive",
+              "kind": "value",
+              "signature": "const undecoratedPrimitive: LoomPrimitive",
+              "truncated": false,
+              "summary": "A primitive that ignores `loom.editable` — the failure mode §4 has to catch."
+            },
+            {
+              "name": "testPrimitives",
+              "kind": "value",
+              "signature": "const testPrimitives: Readonly<Record<string, LoomPrimitive>>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "testPrimitiveResolver",
+              "kind": "value",
+              "signature": "const testPrimitiveResolver: PrimitiveResolver",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/testing/contracts",
+      "slug": "testing-contracts",
+      "types": "./dist/testing/contracts.d.ts",
+      "groups": [
+        {
+          "module": "testing/hold-contract",
+          "title": "Hold contract",
+          "summary": "One suite, run against every `HoldStore`.",
+          "symbols": [
+            {
+              "name": "heldProposalFixture",
+              "kind": "function",
+              "signature": "const heldProposalFixture: (options?: {\n    readonly heldAt?: string;\n    readonly treeId?: TreeId;\n    readonly actor?: string;\n    readonly policyFingerprint?: string;\n}) => HeldProposal",
+              "truncated": false,
+              "summary": "A hold against a real tree."
+            },
+            {
+              "name": "describeHoldStoreContract",
+              "kind": "function",
+              "signature": "const describeHoldStoreContract: (name: string, makeStore: () => HoldStore | Promise<HoldStore>) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/journal-contract",
+          "title": "Journal contract",
+          "summary": "One suite, run against every `TelemetryJournal`.",
+          "symbols": [
+            {
+              "name": "sampleEpisode",
+              "kind": "function",
+              "signature": "const sampleEpisode: (namespace?: string) => readonly TelemetryRecord[]",
+              "truncated": false,
+              "summary": "A whole episode, narrated: an intent, the proposal it produced, the Gate accepting it, and the change landing. Built through `recordOf` rather than by hand so the suite exercises the narrowing every host will use."
+            },
+            {
+              "name": "describeTelemetryJournalContract",
+              "kind": "function",
+              "signature": "const describeTelemetryJournalContract: (name: string, makeJournal: () => Promise<TelemetryJournal> | TelemetryJournal) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/row-security",
+          "title": "Row security",
+          "summary": "Asking Postgres whether a table really is protected.",
+          "symbols": [
+            {
+              "name": "rowSecurityOn",
+              "kind": "function",
+              "signature": "const rowSecurityOn: (db: LoomDatabase, table: string) => Promise<boolean>",
+              "truncated": false,
+              "summary": "Whether Postgres has row level security on a table, read from the catalogue rather than inferred from having run the statement."
+            }
+          ]
+        },
+        {
+          "module": "testing/store-contract",
+          "title": "Store contract",
+          "summary": "One suite, run against every `TreeStore`.",
+          "symbols": [
+            {
+              "name": "appendOf",
+              "kind": "function",
+              "signature": "const appendOf: (delta: TreeDelta, proposal?: string) => AppendRequest",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "removalOf",
+              "kind": "function",
+              "signature": "const removalOf: (tree: LoomTree, nodeId: string, baseRevision?: number) => TreeDelta",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "treeNamed",
+              "kind": "function",
+              "signature": "const treeNamed: (namespace: string) => LoomTree",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeTreeStoreContract",
+              "kind": "function",
+              "signature": "const describeTreeStoreContract: (name: string, makeStore: () => Promise<TreeStore> | TreeStore) => void",
+              "truncated": false,
+              "summary": "`makeStore` returns a store with nothing in it. Each test gets its own, so the suite never depends on the order it runs in."
             }
           ]
         }
