@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { WEIGHED_QUESTIONS } from "@/app/(demo)/_lib/weighed"
+
 import { WhatHappens } from "./what-happens"
 
 /**
@@ -43,6 +45,24 @@ describe("the three steps", () => {
 
     expect(screen.getByText(/how much damage could this do/i)).toBeTruthy()
     expect(screen.getByText(/can it be taken back/i)).toBeTruthy()
+  })
+
+  /**
+   * The promise and the answer, held to the same strings.
+   *
+   * This step said a change would be weighed on two questions, and for a
+   * fortnight the card answered neither — the facts were on the record and one
+   * click down, as `stakes: medium` and `undo carries: 4 nodes`. The gap is
+   * closed by `_lib/weighed.ts`, and what keeps it closed is that both halves
+   * read one constant. A reworded question here with an unchanged heading there
+   * is exactly the drift that opened it.
+   */
+  it("asks the two questions the record answers, in the same words", () => {
+    const { container } = render(<WhatHappens />)
+    const words = container.textContent ?? ""
+
+    expect(words).toContain(WEIGHED_QUESTIONS.damage)
+    expect(words).toContain(WEIGHED_QUESTIONS.reversal)
   })
 
   it("uses no vocabulary it has not earned", () => {
