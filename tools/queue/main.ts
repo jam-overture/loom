@@ -45,10 +45,23 @@ const candidates: readonly Candidate[] = branches.map((branch, position) => ({ b
 
 const { tree, close } = await worktreeAt(".", request.base)
 
-try {
-  const plan = await planQueue(request.base, candidates, tree)
-  for (const line of describePlan(plan)) process.stdout.write(`${line}\n`)
-  process.exit(plan.blocked.length === 0 ? 0 : 1)
-} finally {
-  await close()
-}
+/**
+ * The exit code is decided inside the `try` and taken outside it.
+ *
+ * `process.exit` in the `try` skips the `finally`, so every run that found
+ * something blocked — the exit-1 case, which is the usual one — left its scratch
+ * worktree and its registration behind. Two of them accumulated in a single
+ * afternoon of running this tool against the open queue.
+ */
+const blocked = await (async (): Promise<number> => {
+  try {
+    const plan = await planQueue(request.base, candidates, tree)
+    for (const line of describePlan(plan)) process.stdout.write(`${line}\n`)
+
+    return plan.blocked.length
+  } finally {
+    await close()
+  }
+})()
+
+process.exit(blocked === 0 ? 0 : 1)

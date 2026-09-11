@@ -95,6 +95,24 @@ the other eight in turn — and got the same seven clean and the same two
 conflicting, on the same paths. The tool is not being believed on its own word
 about its own fix.
 
+## A second defect, found by using the tool rather than reading it
+
+Running `pnpm queue` twice left two scratch worktrees behind in `/tmp`, still
+registered with the repository. `main.ts` called `process.exit` **inside** the
+`try` whose `finally` removes the worktree, and `process.exit` does not run a
+`finally`. So every run that found something blocked — exit 1, which is the
+usual outcome and the whole reason the exit code exists — leaked its worktree
+and its registration.
+
+The exit code is now decided inside the `try` and taken outside it. Confirmed by
+running a deliberately blocked queue and checking both `git worktree list` and
+`/tmp`: exit 1 still returned, nothing left behind.
+
+Worth saying how it was found: not by reading the file, which I had already read
+carefully enough to change. It showed up because `git worktree list` had two
+entries in it that I had to explain before I could clean up. A tool that is only
+ever run by the routine that wrote it gets its bugs found by being run.
+
 ## The other half: thirty-seven pull requests are nine trees
 
 Worth saying plainly because the open count is the thing that looks alarming and
@@ -176,6 +194,14 @@ Nothing was skipped and nothing is pending. The live-API smoke test
 | says which branch was offered first and why | the report line |
 | says nothing about ordering when no branch changes `.gitattributes` | silence when there is nothing to explain |
 | (existing five `describePlan` cases carried to the new plan shape) | — |
+
+The worktree leak is not among them. It is in `main.ts`, which is the entry
+script — argument parsing, one call, one exit code — and the seam this tool was
+built around puts everything testable on the other side of it. Asserting that a
+process cleaned up after `process.exit` means running the process, and a test
+that shells out to `pnpm queue` would perform real merges on real branches,
+which is the thing the double exists to avoid. Checked by hand instead, and said
+here rather than left as an implied "tested".
 
 Nothing was skipped, weakened or quarantined. `changedFiles` is now read once
 per candidate before the first merge instead of once per landed branch after the
