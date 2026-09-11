@@ -15,6 +15,7 @@ import {
 } from "@loom/runtime"
 
 import { DEMO_ALTERNATE_THEME, DEMO_STARTING_THEME, DEMO_THEME_NODE_PROP } from "./page-tree"
+import type { ChangeRecord } from "./record"
 
 /**
  * The changes the demo can make without a model.
@@ -257,6 +258,23 @@ export const DEMO_LEADING_PRESET: DemoPresetId = "trim"
 
 export const presetById = (id: string): DemoPreset | undefined =>
   DEMO_PRESETS.find((preset) => preset.id === id)
+
+/**
+ * Stamp a record as having come from one of the buttons above.
+ *
+ * The caller's own knowledge about its own request, in the shape `undoOf`
+ * established. The runtime is handed `preset.utterance` and nothing else — that
+ * is deliberate, it is what a person would have typed — so which button produced
+ * it is a fact only the action that read the form has, and only until it stops
+ * carrying it.
+ *
+ * It is what lets an ask the page has moved past offer the one honest way out:
+ * the same request, weighed again against the page as it now stands.
+ */
+export const askedWith = (record: ChangeRecord, presetId: DemoPresetId): ChangeRecord => ({
+  ...record,
+  presetId,
+})
 
 /** Which chips this tree can honour, so the surface never offers a no-op. */
 export const availablePresets = (tree: LoomTree, ids: IdFactory): readonly DemoPresetId[] =>
