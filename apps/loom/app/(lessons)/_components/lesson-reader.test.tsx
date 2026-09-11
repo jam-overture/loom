@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import { buildFragment, prose } from "../_lib/loom"
+import { forgetHeld } from "./held"
 import { LessonReader, type LessonPart } from "./lesson-reader"
 
 /**
@@ -12,7 +14,52 @@ import { LessonReader, type LessonPart } from "./lesson-reader"
  * absences are the entire argument for this surface existing — a lesson read in
  * a text editor has all three available at all times, and the reader who uses
  * them feels like they are learning.
+ *
+ * **Not on the screen was never the claim worth making**, and these tests were
+ * the reason nobody noticed. Every one of them passed while the printed answers
+ * and every transcript sat in the flight payload of the page they were rendered
+ * from — hidden by a component, and present in the document. So two of the
+ * absences below are now absences from the *page*, asserted the only way that
+ * can be: nothing is fetched until the gate opens, which means there was nothing
+ * to find until then.
  */
+
+const SELF_CHECK_ANSWERS = "/lessons/99/held/self-check-answers"
+const EXERCISE_ANSWERS = "/lessons/99/held/exercise-answers"
+const TRANSCRIPTS = "/lessons/99/held/transcripts"
+
+/**
+ * A held fragment as it actually travels: a tree, serialised, parsed back by
+ * the same boundary parse the browser uses. Nothing here is stubbed but the
+ * network — a mocked renderer would let a fixture pass that the real one would
+ * refuse, and the point of these tests is what the reader is given.
+ */
+const tree = (text: string): unknown =>
+  JSON.parse(JSON.stringify(buildFragment((ids) => [prose(ids, text)], "held")))
+
+const DOCUMENTS: Record<string, Record<string, unknown>> = {
+  [SELF_CHECK_ANSWERS]: { only: tree("Because there is no path back into the function.") },
+  [EXERCISE_ANSWERS]: { only: tree("Q1 is about what the inverse does not have to say.") },
+  [TRANSCRIPTS]: {
+    "1": tree("the first transcript"),
+    "2": tree("the second transcript"),
+    p1: tree("the output the lesson printed for itself"),
+  },
+}
+
+const served = () => {
+  const fetching = vi.fn(async (href: string) => {
+    const slots = DOCUMENTS[String(href)]
+
+    return slots === undefined
+      ? { ok: false, status: 404 }
+      : { ok: true, json: async () => ({ slots }) }
+  })
+
+  vi.stubGlobal("fetch", fetching)
+
+  return fetching
+}
 
 const PARTS: readonly LessonPart[] = [
   {
@@ -41,7 +88,7 @@ const PARTS: readonly LessonPart[] = [
     kind: "answers",
     id: "self-check-answers",
     heading: <h2>The Self-check answers</h2>,
-    node: <p>Because there is no path back into the function.</p>,
+    held: { href: SELF_CHECK_ANSWERS, slot: "only" },
     gate: { kind: "attempted", slug: "lesson-99-self-check", count: 1, of: "Self-check" },
   },
   {
@@ -68,6 +115,7 @@ const predict = (confidence: string, written: string) => {
 describe("reading a lesson", () => {
   beforeEach(() => {
     window.localStorage.clear()
+    forgetHeld()
   })
 
   it("does not show the lesson until every prediction is written down", () => {
@@ -97,20 +145,31 @@ describe("reading a lesson", () => {
     expect(screen.queryByText(/It unlocks when every prediction above/)).toBeNull()
   })
 
-  it("keeps the printed answers locked until the questions above them are attempted", () => {
+  it("does not have the printed answers until the questions above them are attempted", async () => {
+    const fetching = served()
+
     reader()
     predict("2", "A counter, initialised to one.")
     predict("4", "The reason code, and nothing else.")
 
     expect(screen.queryByText(/no path back into the function/)).toBeNull()
-    expect(screen.getByText(/Locked until you have answered all 1 Self-check/)).toBeTruthy()
+    expect(screen.getByText(/Not here until you have answered all 1 Self-check/)).toBeTruthy()
+
+    /**
+     * The assertion this file was missing. Not-on-the-screen was true of the
+     * old reader too, with the answer sitting in the page underneath it; not
+     * having asked for it yet is the thing that cannot be true of content the
+     * page is carrying.
+     */
+    expect(fetching).not.toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole("button", { name: /^3 —/ }))
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "It removes the dial." } })
     fireEvent.click(screen.getByRole("button", { name: "Submit, then check" }))
     fireEvent.click(screen.getByRole("button", { name: "Got it" }))
 
-    expect(screen.getByText(/no path back into the function/)).toBeTruthy()
+    expect(await screen.findByText(/no path back into the function/)).toBeTruthy()
+    expect(fetching).toHaveBeenCalledWith(SELF_CHECK_ANSWERS)
   })
 
   it("brings each prediction back at Reflect, carrying the rating given before the lesson", () => {
@@ -166,7 +225,7 @@ const EXERCISES: readonly LessonPart[] = [
         run: {
           number: 1,
           prompt: <p>Exercise 1. Write down what this prints.</p>,
-          transcript: <pre>the first transcript</pre>,
+          held: { href: TRANSCRIPTS, slot: "1" },
         },
       },
       {
@@ -176,16 +235,17 @@ const EXERCISES: readonly LessonPart[] = [
         run: {
           number: 2,
           prompt: <p>Exercise 2. Write down what this prints.</p>,
-          transcript: <pre>the second transcript</pre>,
+          held: { href: TRANSCRIPTS, slot: "2" },
         },
       },
+      { kind: "printed", id: "printed", held: { href: TRANSCRIPTS, slot: "p1" } },
     ],
   },
   {
     kind: "answers",
     id: "try-it-answers",
     heading: <h2>The exercise answers</h2>,
-    node: <p>Q1 is about what the inverse does not have to say.</p>,
+    held: { href: EXERCISE_ANSWERS, slot: "only" },
     gate: { kind: "written", slug: "lesson-99-try-it", count: 2, prompt: undefined },
   },
 ]
@@ -195,15 +255,19 @@ const exercises = () => render(<LessonReader lesson={99} parts={EXERCISES} />)
 describe("running a lesson's exercises", () => {
   beforeEach(() => {
     window.localStorage.clear()
+    forgetHeld()
   })
 
-  it("shows the code and holds every transcript back", () => {
+  it("shows the code and does not have a transcript in the page at all", () => {
+    const fetching = served()
+
     exercises()
 
     expect(screen.getByText(/console.log\(inverse\)/)).toBeTruthy()
     expect(screen.getByText(/console.log\(second\)/)).toBeTruthy()
     expect(screen.queryByText("the first transcript")).toBeNull()
     expect(screen.queryByText("the second transcript")).toBeNull()
+    expect(fetching).not.toHaveBeenCalled()
   })
 
   it("asks for nothing against a fence that prints nothing", () => {
@@ -218,29 +282,84 @@ describe("running a lesson's exercises", () => {
    * and revealing the first transcript when the first prediction lands would
    * quietly make exercise 2 a different question.
    */
-  it("reveals nothing until the last exercise has been predicted against", () => {
+  it("reveals nothing until the last exercise has been predicted against", async () => {
+    const fetching = served()
+
     exercises()
     predict("3", "A remove, naming the node.")
 
     expect(screen.queryByText("the first transcript")).toBeNull()
     expect(screen.getByText(/Exercise 2. Write down what this prints/)).toBeTruthy()
+    expect(fetching).not.toHaveBeenCalled()
 
     predict("2", "Two lines, and the second is empty.")
 
-    expect(screen.getByText("the first transcript")).toBeTruthy()
-    expect(screen.getByText("the second transcript")).toBeTruthy()
+    expect(await screen.findByText("the first transcript")).toBeTruthy()
+    expect(await screen.findByText("the second transcript")).toBeTruthy()
   })
 
-  it("keeps the printed answers behind the same predictions", () => {
+  /**
+   * Six transcripts are six slots of one document, and a reader who unlocks
+   * them should cost one request rather than six of the same file.
+   */
+  it("fetches the transcripts once, however many fences read from them", async () => {
+    const fetching = served()
+
+    exercises()
+    predict("3", "A remove, naming the node.")
+    predict("2", "Two lines, and the second is empty.")
+
+    await screen.findByText("the second transcript")
+
+    expect(fetching.mock.calls.filter(([href]) => href === TRANSCRIPTS)).toHaveLength(1)
+  })
+
+  it("keeps the printed answers behind the same predictions", async () => {
+    served()
+
     exercises()
 
     expect(screen.queryByText(/what the inverse does not have to say/)).toBeNull()
-    expect(screen.getByText(/Locked until every exercise above has a prediction/)).toBeTruthy()
+    expect(screen.getByText(/Not here until every exercise above has a prediction/)).toBeTruthy()
 
     predict("3", "A remove, naming the node.")
     predict("2", "Two lines, and the second is empty.")
 
-    expect(screen.getByText(/what the inverse does not have to say/)).toBeTruthy()
+    expect(await screen.findByText(/what the inverse does not have to say/)).toBeTruthy()
+  })
+
+  /**
+   * A held fragment that does not arrive is the one failure mode this split
+   * introduced, and a blank space where an answer was is the worst possible
+   * shape for it: the reader cannot tell it from a gate that has not opened.
+   */
+  /**
+   * The lesson prints its own output under the sentence asking the reader to
+   * predict it. On the page that is an answer beside its question, and it is
+   * the one thing in Try it that was never behind any gate at all.
+   */
+  it("holds the output the lesson printed for itself, under the same gate", async () => {
+    served()
+
+    exercises()
+
+    expect(screen.queryByText(/the output the lesson printed for itself/)).toBeNull()
+    expect(screen.getByText(/The lesson prints its output here/)).toBeTruthy()
+
+    predict("3", "A remove, naming the node.")
+    predict("2", "Two lines, and the second is empty.")
+
+    expect(await screen.findByText(/the output the lesson printed for itself/)).toBeTruthy()
+  })
+
+  it("says so when a held fragment does not arrive", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 500 })))
+
+    exercises()
+    predict("3", "A remove, naming the node.")
+    predict("2", "Two lines, and the second is empty.")
+
+    expect(await screen.findAllByText(/This did not arrive/)).toBeTruthy()
   })
 
   it("says so, rather than showing an empty panel, when the exercises did not run", () => {

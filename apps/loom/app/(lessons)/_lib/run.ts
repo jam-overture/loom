@@ -234,10 +234,31 @@ const execute = async (
     .sort((a, b) => a.index - b.index)
 }
 
+/** What went wrong, in the one line the page has room to say it in. */
+const describe = (error: unknown): string =>
+  error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+
 export type LessonExercises = {
   readonly chunks: readonly ExerciseChunk[]
   readonly run: ExerciseRun
 }
+
+/**
+ * One program, run once per build.
+ *
+ * Two callers now ask for the same output: the lesson page, which needs to know
+ * how many fences print something so it can count the predictions it is owed,
+ * and the held address that serves what they printed. Running twice would be
+ * waste, and — worse — it would be waste that could disagree with itself. The
+ * page's gate and the served transcripts have to be the same run, because a
+ * program that printed from a different set of fences the second time would
+ * leave the reader predicting against a slot that arrives empty.
+ *
+ * Keyed by the program rather than by the lesson, which is the honest key: the
+ * program is what determines the output, and a lesson whose Try it has not
+ * changed is the same program.
+ */
+const ran = new Map<string, Promise<readonly ExerciseOutput[]>>()
 
 export const runExercises = async (blocks: readonly Block[]): Promise<LessonExercises> => {
   const chunks = exerciseChunks(blocks)
@@ -245,19 +266,24 @@ export const runExercises = async (blocks: readonly Block[]): Promise<LessonExer
 
   if (program === "") return { chunks, run: { kind: "ran", outputs: [] } }
 
+  const already = ran.get(program)
+
+  if (already !== undefined) {
+    try {
+      return { chunks, run: { kind: "ran", outputs: await already } }
+    } catch (error) {
+      return { chunks, run: { kind: "failed", message: describe(error) } }
+    }
+  }
+
   const compile = compiler()
+  const running = execute(program, compile, sandbox(compile))
+
+  ran.set(program, running)
 
   try {
-    const outputs = await execute(program, compile, sandbox(compile))
-
-    return { chunks, run: { kind: "ran", outputs } }
+    return { chunks, run: { kind: "ran", outputs: await running } }
   } catch (error) {
-    return {
-      chunks,
-      run: {
-        kind: "failed",
-        message: error instanceof Error ? `${error.name}: ${error.message}` : String(error),
-      },
-    }
+    return { chunks, run: { kind: "failed", message: describe(error) } }
   }
 }
