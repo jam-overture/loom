@@ -109,7 +109,12 @@ const sitting = () =>
     </ClockProvider>
   )
 
-const panel = () => render(<CorrectionsPanel keys={KEYS} />)
+const panel = () =>
+  render(
+    <ClockProvider clock={() => TODAY}>
+      <CorrectionsPanel keys={KEYS} />
+    </ClockProvider>
+  )
 
 describe("a corrections sitting", () => {
   beforeEach(() => {

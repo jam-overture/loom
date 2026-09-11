@@ -111,6 +111,10 @@ export const reviewPointers = (
  * and the whole point is that they have not read it. A day later they have, so
  * the lesson is exactly where to look, and sending them to a page that is now
  * the answer is the correction working rather than a leak.
+ *
+ * A lesson's own question cites no record — a lesson's prose links its records
+ * itself, in the text, where the reader is already reading — so this returns
+ * lessons only, in the same shape a review question's pointers arrive in.
  */
 export const lessonQuestionPointers = (
   lesson: number,

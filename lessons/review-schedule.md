@@ -861,6 +861,63 @@ then be unsatisfied with, because the fourth entry is the one nobody remembers.
 
 ---
 
+## Set X — two days after lesson 19
+
+Interleaved with 04, 07, 09, 14, 15 and 18. Set W asked you to hold the system
+against something outside it. This one asks something harder and more specific:
+Part V now has two seams that look almost identical, and **most of these
+questions are about where they differ.** Two things that rhyme are the easiest
+pair in a course to conflate, and conflating them is the failure this set exists
+to catch.
+
+1. A binding carries AI-authored `params` and a submission declaration carries
+   none. Give the structural reason — the property of reads that writes do not
+   have — and then say what a deployment pays for the decision, in a concrete
+   number. Then the half most people skip: give the strongest argument for the
+   other side, and say what would have to change about who writes a registry for
+   that argument to win. *(18)*
+2. A model may write a URL into an `href` and it is checked against a scheme
+   allowlist. A model may not write one into a form action at all. State why the
+   same check is right in one place and useless in the other, as a property of
+   what the check can *see*. Then name one other value in this system where the
+   danger is in the content rather than the form, and say how Loom handles that
+   one. *(15)*
+3. Both Part V seams resolve in three steps: a pure plan, a step that may do IO,
+   and a synchronous walk. Name what the *pure* step buys in each, and then name
+   one thing a host could build from a plan alone in each case — they are not the
+   same thing, and the difference is the point. *(14, 18)*
+4. `redirected-submission` is `high`. `nested-target` is `critical`. Give the
+   property that separates them, phrased as a claim about the change rather than
+   about the damage. Then explain why the `high` one still gets a Gate rule that
+   ignores the origin ceiling, and say what that implies about when a stake
+   *level* is the wrong tool. *(07, 09)*
+5. A change moves a form's destination and then moves it back, in one delta.
+   Nothing is reported. Say why measuring between two trees rather than off the
+   operations is what produces that, then name the *other* analysis in this
+   course that is measured the same way and the one place the two disagree about
+   what counts. Then say what a reviewer loses if confirmations fire on changes
+   that changed nothing. *(04, 07)*
+6. Name the five reasons a form has no target. Say which one means the host's
+   code ran and returned successfully; say which one could not exist if the seam
+   trusted the host's own types; and say why there is no sixth reason meaning "no
+   target, and that is fine." *(18)*
+7. A primitive declares `interactive: { whenProps }` and `submits: true` — one
+   conditional, one not. Give the case the conditional form exists for, then give
+   the argument that there is no matching case for the second. Then say what the
+   audit does with each declaration, and which of the two it can be wrong about
+   in a way nobody notices. *(15)*
+8. Both Part V lessons removed something from the tree and replaced it with a
+   name pointing into a host-written registry. List every registry in this
+   system, say who writes each and what a model is shown of it, and then answer
+   the question the pattern raises: what makes something a candidate for this
+   treatment, and what makes something *not* one? *(02, 15, 18)*
+
+Question 1 is the point of the set — it is the one place two seams that look
+identical are not. Question 8 is the one to attempt last and be least satisfied
+with; if your list of registries has three entries, one is missing.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -898,3 +955,4 @@ renders this file rather than restating it.
 | U | 2 days after L17 | | |
 | V | 1 week after Part IV | | |
 | W | 2 days after L18 | | |
+| X | 2 days after L19 | | |

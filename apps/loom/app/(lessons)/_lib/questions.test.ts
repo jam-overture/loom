@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { keyOf } from "./corrections"
-import { COURSE_QUESTIONS, QUESTION_KEYS } from "./questions"
+import { COURSE_QUESTIONS, QUESTION_KEYS, type CourseQuestion } from "./questions"
 import { REVIEW_SETS } from "./schedule"
 import { lessonSlug } from "./slugs"
 
@@ -17,6 +17,18 @@ import { lessonSlug } from "./slugs"
  */
 
 const keys = new Set(QUESTION_KEYS)
+
+const pad = (number: number): string => String(number).padStart(2, "0")
+
+/**
+ * The lessons a question sends the reader to, by the name the pointer carries.
+ *
+ * *Where to check* holds two kinds of door now — a lesson and a decision record
+ * — so these assertions say which kind they are about rather than reading a
+ * field that only one of them has.
+ */
+const lessonNames = (question: CourseQuestion): readonly string[] =>
+  question.checkIn.filter((pointer) => pointer.kind === "lesson").map((pointer) => pointer.name)
 
 describe("every question in the course", () => {
   it("keeps the review sets it always had", () => {
@@ -59,7 +71,7 @@ describe("every question in the course", () => {
     for (const question of warmUps) {
       const lesson = Number(question.set.slice("lesson-".length, "lesson-".length + 2))
 
-      expect(question.checkIn.map((pointer) => pointer.name)).not.toContain(String(lesson).padStart(2, "0"))
+      expect(lessonNames(question)).not.toContain(pad(lesson))
     }
   })
 
@@ -71,7 +83,7 @@ describe("every question in the course", () => {
     for (const question of selfChecks) {
       const lesson = Number(question.set.slice("lesson-".length, "lesson-".length + 2))
 
-      expect(question.checkIn.map((pointer) => pointer.name)).toContain(String(lesson).padStart(2, "0"))
+      expect(lessonNames(question)).toContain(pad(lesson))
     }
   })
 

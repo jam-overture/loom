@@ -72,7 +72,7 @@ const alreadyHere = (report: MergeReport): readonly string[] =>
   ])
 
 export const StudyRecord = () => {
-  const { progress, ready, update, today } = useProgress()
+  const { progress, ready, today, update } = useProgress()
   const [pending, setPending] = useState<Pending | undefined>(undefined)
   const [problem, setProblem] = useState<string | undefined>(undefined)
   const [done, setDone] = useState<string | undefined>(undefined)
