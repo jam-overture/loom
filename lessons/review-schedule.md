@@ -1028,6 +1028,57 @@ sentence before you look at any of the three.
 
 ---
 
+## Set AA — two days after lesson 22
+
+The twenty-seventh set, and the letters ran out at Z — two of them from here, so
+that no set you have already done gets renamed underneath you.
+
+Interleaved with 03, 07, 08, 09, 13, 14, 15 and 21. Heavy on Part II, because
+what is worth retrieving from lesson 22 is not the declaration but what the Gate
+did with it; and heavy on 15, because two lessons running have now turned a
+primitive's promise into a claim that can be false.
+
+1. A tree is valid, every node passes its own schema, and the page has a control
+   on it that no reader can operate. Say what the fault is a property *of*, then
+   name the three seams that cannot see it and give each one's reason in the form
+   *"because it only ever sees …"*. *(14, 15, 22)*
+2. `interactive: { whenProps: ["href"] }` treats absent, `null` and `""` alike.
+   Give the argument for the empty string in terms of a specific change the
+   system must not refuse, then name the other place in this course where a check
+   had to be written so that it would not refuse its own repair. *(13, 22)*
+3. A `configure` operation that touches one node and no children produced a
+   `critical` refusal. Explain the mechanism, then state the general rule it
+   forces about what the analysis reads — and say which two of the four
+   operations you would have guessed instead, and why that guess is natural.
+   *(03, 07, 22)*
+4. `nested-target` is a stake factor and not a rule in the ladder. Give the
+   property that distinguishes it from every other factor in the system, then say
+   what refusal gives a deployment that confirmation would not — and name the
+   part of the pipeline that answer depends on. *(08, 09, 10, 13, 22)*
+5. A proposal inherits one nesting and introduces none, and is reported as
+   introducing none. Defend that, then argue the other side properly: give the
+   strongest case for reporting inherited faults, and say what it would cost the
+   repair loop and the person reading the assessment. *(07, 13, 22)*
+6. A deployment that derives no interactive vocabulary gets no check at all, and
+   this is the default — 0002 is why. State that argument, give the one-line
+   change that turns the check on, and say why that line reads the registry
+   instead of naming types. *(15, 22)*
+7. `loom.nav` declares itself a target and renders a `<nav>`. State the claim the
+   declaration makes, the claim the rule that forced it wanted to make, and the
+   two different failures each protects against. Then say which you would rather
+   ship — a missing declaration or a false one — and why. *(15, 22)*
+8. Lesson 21 said a property can belong to no single party; lesson 22 has one
+   belonging to two nodes. Write the sentence that covers both, then say what
+   each seam does about it — one measures and reports, the other measures and
+   refuses — and what decides which of those two a property gets. *(07, 09, 21,
+   22)*
+
+Question 7 is the point of the set, and question 4 is the one where a confident
+half-answer is most likely: if yours does not mention what happens to a refused
+proposal afterwards, keep going.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1068,3 +1119,4 @@ renders this file rather than restating it.
 | X | 2 days after L19 | | |
 | Y | 2 days after L20 | | |
 | Z | 2 days after L21 | | |
+| AA | 2 days after L22 | | |

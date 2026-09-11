@@ -1,3 +1,4 @@
+import { setSlug } from "./slugs"
 import { readCourseFile } from "./source"
 import { plainText, referencedLessons, referencedRecords } from "./text"
 
@@ -48,8 +49,26 @@ export type ReviewSet = {
   readonly questions: readonly ReviewQuestion[]
 }
 
-const SET_HEADING = /^## Set ([A-Z]) — (.+)$/
+/**
+ * A set's name, which ran out of alphabet at lesson 21.
+ *
+ * Twenty-six sets is the whole of `A`–`Z`, and the twenty-seventh had nowhere
+ * to go: this pattern read exactly one letter, so `## Set AA` was not a heading
+ * at all — it was a line inside Set Z, and the questions under it would have
+ * been silently appended to that set rather than rejected. A parser that reads
+ * a course and drops part of it without saying so is the worst of the three
+ * available failures, and it is the one that was on the shelf.
+ *
+ * Two letters rather than numbers, because the letter is also the slug
+ * (`/lessons/review/set-z`) and a reader's record is keyed by that slug. Numbers
+ * would have renamed twenty-six existing sets, and renaming a slug throws away
+ * the study history filed under it — the reader's own record of when they did
+ * the set and what they got wrong, which nothing else in this surface can
+ * reconstruct. `AA` costs nobody anything: every existing set keeps its name.
+ */
+const SET_HEADING = /^## Set ([A-Z]{1,2}) — (.+)$/
 const QUESTION = /^(\d+)\.\s+(.+)$/
+
 
 const DELAYS: readonly (readonly [RegExp, number])[] = [
   [/two days/i, 2],
@@ -168,7 +187,7 @@ const parseSet = (letter: string, timing: string, body: readonly string[]): Revi
 
   return {
     letter,
-    slug: `set-${letter.toLowerCase()}`,
+    slug: setSlug(letter),
     timing,
     anchor: anchorFrom(timing),
     delayDays: delayFrom(timing),
