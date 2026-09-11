@@ -6,7 +6,10 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { searchDocs, type SearchHit } from "@/app/(docs)/_lib/search/match"
 import {
   parseSearchIndex,
+  parseSearchProse,
+  withProse,
   SEARCH_INDEX_PATH,
+  SEARCH_PROSE_PATH,
   SEARCH_RESULT_LIMIT,
   type SearchIndex,
   type SearchKind,
@@ -186,13 +189,33 @@ export const Search = () => {
 
     setLoading("loading")
 
+    const asJson = (response: Response): Promise<unknown> =>
+      response.ok ? response.json() : Promise.reject(new Error(String(response.status)))
+
     void fetch(SEARCH_INDEX_PATH)
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+      .then(asJson)
       .then((body: unknown) => {
         setIndex(parseSearchIndex(body))
         setLoading("ready")
       })
       .catch(() => setLoading("failed"))
+
+    /**
+     * The prose arrives on its own, and its failure is not the box's failure.
+     *
+     * Headings are already answering by the time this lands, so a reader whose
+     * connection drops the second file keeps a working search over titles
+     * rather than an error — which is why this has its own catch and never
+     * touches `loading`.
+     */
+    void fetch(SEARCH_PROSE_PATH)
+      .then(asJson)
+      .then((body: unknown) => {
+        const prose = parseSearchProse(body)
+
+        setIndex((current) => (current === undefined ? current : withProse(current, prose)))
+      })
+      .catch(() => undefined)
   }, [open, loading])
 
   useEffect(() => {
