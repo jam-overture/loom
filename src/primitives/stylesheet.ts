@@ -314,6 +314,38 @@ export const LIBRARY_CLASS = {
   orbitReverse: "loom-orbit-reverse",
   orbitStill: "loom-orbit-still",
   /**
+   * A `loom.message`. The turn itself and the column holding its attribution
+   * above its bubble, plus the two sides that are not the base rendering.
+   *
+   * **Its layout is here and not on the element**, which is `loom.milestone`'s
+   * lesson applied before it costs anything rather than after: an inline
+   * `flex-direction` on a turn would pin these into bubbles forever, and the
+   * second arrangement of a conversation — a transcript set flush left, the way
+   * a published interview reads — is a container 0054 says to write when
+   * somebody wants one. What stays inline is the paint, which no arrangement
+   * varies.
+   */
+  message: "loom-message",
+  messageBody: "loom-message-body",
+  messagePerson: "loom-message-person",
+  messageSystem: "loom-message-system",
+  /** Its composing indicator, and one dot of the three. */
+  messageDots: "loom-message-dots",
+  messageDot: "loom-message-dot",
+  /**
+   * A `loom.reveal`: a band that arrives as the reader scrolls to it, its two
+   * variants, the cascade over its own children, and the still rendering it
+   * takes while somebody is editing the page.
+   *
+   * Every rule that sets the starting `opacity: 0` is inside
+   * `@supports (animation-timeline: view())`, so a browser that cannot run the
+   * animation never hides the content either. That is not tidiness — it is the
+   * difference between an entrance and a blank page.
+   */
+  reveal: "loom-reveal",
+  revealFade: "loom-reveal-fade",
+  revealStill: "loom-reveal-still",
+   /**
    * A `loom.frame`. The chrome itself, which declares the containment its marks
    * are measured against; the screen inside it; and the layer over that screen.
    */
@@ -938,6 +970,7 @@ details[open] > summary .loom-marker {
   container-type: inline-size;
 }
 /*
+ /**
  * One column until the *band* has room for six, never until the screen does.
  *
  * A container query reads an ancestor rather than the element that declared
@@ -970,6 +1003,7 @@ details[open] > summary .loom-marker {
     grid-column: span 2;
   }
   /*
+   /**
    * Two classes rather than one, so this rule outranks the unconditional
    * .loom-mosaic > * above on specificity rather than on source order -- the
    * only rhythm rule whose selector would otherwise tie with it.
@@ -1031,6 +1065,74 @@ details[open] > summary .loom-marker {
 }
 .loom-orbit-still .loom-orbit-spinner, .loom-orbit-still .loom-orbit-item {
   animation: none;
+}
+@keyframes loom-message-dot {
+  0%, 64%, 100% { opacity: 0.35; transform: none; }
+  32% { opacity: 1; transform: translate3d(0, -0.2rem, 0); }
+}
+.loom-message {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--loom-spacing-3);
+  margin: 0;
+  list-style: none;
+}
+.loom-message-person {
+  flex-direction: row-reverse;
+}
+.loom-message-system {
+  justify-content: center;
+}
+.loom-message-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  min-width: 0;
+  max-inline-size: min(100%, 46ch);
+}
+.loom-message-person > .loom-message-body {
+  align-items: flex-end;
+}
+.loom-message-system > .loom-message-body {
+  align-items: center;
+  max-inline-size: min(100%, 62ch);
+}
+.loom-message-dot {
+  animation: loom-message-dot calc(var(--loom-motion-slow) * 1.4) ease-in-out infinite;
+}
+.loom-message-dot:nth-child(2) {
+  animation-delay: calc(var(--loom-motion-medium) * 0.5);
+}
+.loom-message-dot:nth-child(3) {
+  animation-delay: var(--loom-motion-medium);
+}
+@keyframes loom-reveal-rise {
+  from { opacity: 0; transform: translate3d(0, 1.5rem, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes loom-reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@supports (animation-timeline: view()) {
+  .loom-reveal:not(.loom-reveal-still) {
+    animation-name: loom-reveal-rise;
+    animation-duration: auto;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 1);
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 92%;
+  }
+  .loom-reveal-fade:not(.loom-reveal-still) {
+    animation-name: loom-reveal-fade;
+  }
+}
+@media print {
+  .loom-reveal:not(.loom-reveal-still) {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes loom-pin-pulse {
   0% { transform: scale(1); opacity: 0.5; }
@@ -1182,6 +1284,16 @@ details[open] > summary .loom-marker {
 @media (prefers-reduced-motion: reduce) {
   .loom-orbit-spinner, .loom-orbit-item {
     animation: none;
+  }
+  .loom-message-dot {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .loom-reveal:not(.loom-reveal-still) {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
   .loom-pin-dot::after {
     animation: none;

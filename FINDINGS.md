@@ -13177,6 +13177,140 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-06 — the cascade inside a band needs the arranger, and a wrapper cannot fake it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — `loom.reveal` shipped without it, deliberately, and the recommendation is
+to leave it that way until a page actually wants it
+
+`loom.reveal` wraps a band and brings it in as the reader scrolls to it. The
+effect a wall of cards wants is the *diagonal* — six tiles arriving one after
+another — and it is one step further than this primitive can reach.
+
+A `stagger` prop was written and then taken out before it shipped. The reason is
+worth keeping, because it is not obvious from the outside: **a reveal's children
+are whatever it wraps, and that is almost always one grid.** `loom.reveal >
+loom.feature-grid > six tiles` staggers the *grid* against nothing; the tiles are
+grandchildren, and a `> * > *` selector reaching into a child primitive's markup
+is exactly the coupling `stylesheet.ts` says to scope away from. Making the
+wrapper `display: contents` would let the grid lay out its own tiles through it,
+and takes the reveal's own box away from the portal — a node the reviewer cannot
+click, for a flourish.
+
+**What works today**, and is what the specimen shows: a reveal around each cell.
+Every cell then arrives on its own view timeline, so a grid comes in **by row**
+because that is where the cells actually are. Six wrappers rather than one, and
+the rows are the honest granularity of a grid anyway.
+
+**What the diagonal would need**, if somebody wants it: `columns`-aware ranges on
+the *arranger*, so `loom.grid` and `loom.feature-grid` stagger their own children
+by ordinal. That is a prop on the containers rather than a prop on seventy
+schemas, which makes it a much smaller ask than the one 0110 refused — but it is
+still a second way to say "arrive", and two mechanisms for one effect is how a
+library stops being learnable. **Recommendation: leave it until a page asks.**
+
+---
+
+## 2026-09-06 — a page that reveals on scroll is photographed blank, and every full-page screenshot in this repository is taken that way
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom demo`,
+and every routine that takes a screenshot · **Status:** open — nothing is broken
+and the workaround is one flag, which is why this is filed rather than fixed
+
+A view timeline is driven by scroll position, so a band that has not entered the
+scrollport is **honestly at `opacity: 0`** — and a full-page screenshot is taken
+without scrolling. Every band below the first screen photographs blank.
+
+This is not a defect in `loom.reveal`; it is what "the reader drives the
+entrance" means. But it lands on other lanes:
+
+- **Share cards and preview images.** `(marketing)`'s share image renders a page
+  and shoots it. The moment a marketing page wraps a band in a reveal, that
+  band's picture is empty.
+- **Every routine's report screenshots**, including this one's. The five
+  specimen shots in this run are taken with Chromium's `reducedMotion: "reduce"`,
+  which switches the entrance off and gives the finished page.
+
+**The fix is one flag** — Playwright's `reducedMotion: "reduce"` on the context,
+or `--force-prefers-reduced-motion` on the browser — and it is the *right* flag
+rather than a trick: a photograph is not a reader, and the reduced-motion
+rendering is exactly "the page with the movement taken out".
+
+**Print is the same problem and it is fixed in the library**, because a printed
+page has no scrollport at all and nobody can pass it a flag: `@media print`
+holds every reveal still and visible. That one had to be found rather than
+reasoned about, and it is the entry in this finding worth copying if any other
+primitive ever animates on scroll.
+
+---
+
+## 2026-09-06 — the anchor seam has consumers, and the finding that said it had none is stale
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+**closed** — three primitives place an anchor on `main` and have since
+`primitives-19-how-it-works`
+
+The 27 August entry — *the anchor seam exists, and no primitive places it yet* —
+is closed. `src/primitives/anchor.ts` is on `main`, `loom.section`, `loom.hero`
+and `loom.callout` each take an `anchor` and render it as an `id`, and
+`library.test.ts` asserts both halves: that the three carry it and that
+`loom.card`, `loom.milestone-row`, `loom.orbit` and `loom.stack` do not.
+
+Noted here rather than by editing that entry's Status line, because the entry is
+two hundred lines up a twelve-thousand-line file and this run is not the one that
+did the work — it is the one that checked. The **address** half remains open and
+is the framework lane's: `linkUrlSchema` still refuses a bare `#how-it-works`,
+which is the 31 August entry and blocked on 0100/0102.
+
+---
+
+## 2026-09-06 — `21st.dev` blocked for the fifteenth time, and the brief still names it as the visual bar
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the existing entry is not re-filed, this is the count
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` from this lane again.
+`docs/routines.md` lists the domain under `permissions.allow`, and the primitives
+brief opens its quality bar with *"WebFetch `https://21st.dev` for the visual
+standard"*. Fifteen attempts, seven lanes, no run has ever seen it.
+
+Nothing in this run depended on it — the bar was taken from `loom.hero`,
+`loom.feature-grid` and the two starter palettes, which is what the brief says to
+do next — but it is worth one line each time so the number is a fact rather than
+an impression.
+
+---
+
+## 2026-09-06 — the screenshot harness, written privately for the ninth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (the only
+lane that owns anything at the repository root) · **Status:** open — filed with
+the recipe attached, for the third run running
+
+Seven pictures in this run needed a browser, and the script that drives it was
+written from scratch again because no lane owns a directory to keep it in. The
+whole recipe, so the tenth writing is a copy rather than a rediscovery:
+
+```
+npm i playwright-core                       # in a scratch dir; never `playwright`
+/opt/pw-browsers/chromium-1194/chrome-linux/chrome   # the binary is already here
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1          # or the postinstall re-fetches 200MB
+python3 -m http.server 8123 --directory <pages>     # `file://` refuses http(s)
+                                            # image URLs, and mediaUrlSchema
+                                            # refuses data: — so a specimen with
+                                            # an avatar needs a real origin
+chromium.launch({ executablePath }) ; newContext({ reducedMotion: "reduce" })
+```
+
+Two lines of that are new this run and are the ones that cost the time: a
+specimen with an `avatar` cannot be rendered over `file://` at all, because the
+schema takes `http:`/`https:` only (deliberately — `data:` is a script host), so
+the pages have to be **served**; and a page with a `loom.reveal` on it must be
+photographed with reduced motion or the bands below the fold come out blank.
+
+**Recommendation, unchanged:** `tools/specimen/` with the two scripts in it,
+owned by the framework lane, taking a tree module and a list of themes. Every
+surface lane has now written this privately at least once.
 ## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
