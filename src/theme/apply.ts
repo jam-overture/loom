@@ -1,3 +1,4 @@
+import { chromaValue, paletteMeasures } from "./measure.js"
 import { PALETTE_SLOTS, type ResolvedTheme } from "./theme.js"
 
 /**
@@ -24,13 +25,37 @@ export const themeVariables = (theme: ResolvedTheme): ThemeVariables => {
     if (value !== undefined) variables[`--loom-${slot}`] = value
   }
 
+  /**
+   * What the palette is, beside what it holds (0131).
+   *
+   * Derived, so a host palette gets them without declaring anything and a
+   * re-theme changes them with everything else. Omitted rather than defaulted
+   * where a colour could not be measured, for the reason `--loom-mono-family` is
+   * omitted: a primitive supplies its own `var()` fallback, and a default
+   * written here would put this file's guess above the palette's silence.
+   */
+  const measures = paletteMeasures(theme.palette)
+
+  for (const [slot, chroma] of Object.entries(measures.chroma)) {
+    variables[`--loom-${slot}-chroma`] = chromaValue(chroma)
+  }
+
+  const { scrim } = measures
+  const scrimGround = scrim && theme.palette.slots[scrim.ground]
+  const scrimInk = scrim && theme.palette.slots[scrim.foreground]
+
+  if (scrimGround !== undefined && scrimInk !== undefined) {
+    variables["--loom-scrim"] = scrimGround
+    variables["--loom-scrim-fg"] = scrimInk
+  }
+
   variables["--loom-heading-family"] = theme.fontPack.headingFamily
   variables["--loom-body-family"] = theme.fontPack.bodyFamily
   /**
    * Omitted rather than defaulted when the pack declares none. The primitive
    * asking for it supplies the system stack as its `var()` fallback, so an
    * absent variable resolves to a real face; writing a default here would
-   * instead put this file's opinion about monospace above the reader's (0084).
+   * instead put this file's opinion about monospace above the reader's (0085).
    */
   if (theme.fontPack.monoFamily) {
     variables["--loom-mono-family"] = theme.fontPack.monoFamily
