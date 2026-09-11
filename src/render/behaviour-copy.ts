@@ -2,6 +2,8 @@
 
 import { createElement, useCallback, useEffect, useState } from "react"
 
+import { controlClass, controlDisplay } from "./control.js"
+
 /**
  * The one control in the runtime that runs on the client.
  *
@@ -50,9 +52,15 @@ type ControlState = "unusable" | "idle" | "copied"
  * seam must not depend on, and a control that only looks right on a themed page
  * would render invisible in a preview pane that mounts no theme. The variables
  * themselves are this package's own — `theme/apply.ts` emits every one of them.
+ *
+ * `display` is the one line a primitive can take back, because it is the one a
+ * primitive has to: an inline declaration beats the rule a stylesheet would aim
+ * at the control's class, and whether a button belongs at this width is not
+ * something the runtime knows. See `controlDisplay` for the two names that
+ * override it.
  */
 const BUTTON_STYLE = {
-  display: "inline-flex",
+  display: controlDisplay("copy", "inline-flex"),
   alignItems: "center",
   gap: "var(--loom-spacing-1, 4px)",
   paddingBlock: "var(--loom-spacing-1, 4px)",
@@ -109,6 +117,7 @@ export const CopyControl = ({ value, label, copiedLabel }: CopyControlProps) => 
     "button",
     {
       type: "button",
+      className: controlClass("copy"),
       onClick: copy,
       style: BUTTON_STYLE,
     },

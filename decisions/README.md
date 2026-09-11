@@ -186,9 +186,9 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0100](0100-a-same-origin-path-is-not-a-scheme.md) | A same-origin path is not a scheme | Proposed — **ARCHITECTURAL, needs review.** It contradicts a clause | §4b |
 | [0101](0101-the-loom-namespace-is-the-frameworks-and-the-cli-will-not-write-in-it.md) | The `loom.` namespace is the framework's, and the CLI will not write in it | Accepted | §4 (CLI), §4c |
 | [0102](0102-a-same-origin-path-is-decided-by-resolving-it.md) | A same-origin path is decided by resolving it, not by matching it | Proposed — **ARCHITECTURAL, needs review.** It shares | §4b |
-| 0103 | *No record on this branch* | — | — |
+| [0103](0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md) | A control carries a class, and its display is a custom property | Accepted | §4b |
 | 0104 | *No record on this branch* | — | — |
-| 0105 | *No record on this branch* | — | — |
-| 0106 | *No record on this branch* | — | — |
+| [0105](0105-a-render-can-hand-back-values-instead-of-references.md) | A render can hand back values instead of references | Accepted | §3 |
+| [0106](0106-a-band-asks-its-own-container-for-a-width-not-the-window.md) | A band asks its own container for a width, not the window | Proposed — **ARCHITECTURAL, needs review.** It reverses a named | §4b |
 | 0107 | *No record on this branch* | — | — |
 | [0108](0108-a-repair-restates-the-request-and-the-runtime-measures-it.md) | A repair restates the request, and the runtime measures it rather than making it cheaper | Accepted | §2 |

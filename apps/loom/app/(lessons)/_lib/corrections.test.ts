@@ -7,7 +7,10 @@ import {
   correctionQueue,
   correctionSitting,
   dueCorrections,
+  keyOf,
+  knownOnly,
   nextCorrection,
+  wasConfident,
 } from "./corrections"
 import {
   EMPTY_PROGRESS,
@@ -200,5 +203,84 @@ describe("a record written before corrections existed", () => {
 
     expect(mixed.corrections).toHaveLength(1)
     expect(mixed.corrections[0]?.on).toBe("2026-03-02")
+  })
+})
+
+/**
+ * The other half of the queue: the questions a lesson asks in its own pages.
+ *
+ * These were recorded, graded and queued from the day the lesson route
+ * existed — `correctionQueue` walks every slug in the record and never asked
+ * what kind it was. What did not exist was anything that could render one, so
+ * the review index counted them and the sitting dropped them.
+ */
+describe("a lesson's own questions", () => {
+  it("brings back a Self-check question, which is a plain retrieval failure", () => {
+    const progress = missed(EMPTY_PROGRESS, "lesson-04-self-check", 2, 4, "2026-03-01")
+    const queue = correctionQueue(progress, "2026-03-05")
+
+    expect(queue.map((each) => keyOf(each.set, each.question))).toEqual(["lesson-04-self-check#2"])
+    expect(dueCorrections(queue)).toHaveLength(1)
+  })
+
+  it("brings back a Warm-up question, which is the spacing already working", () => {
+    const progress = missed(EMPTY_PROGRESS, "lesson-09-warm-up", 1, 2, "2026-03-01")
+
+    expect(correctionQueue(progress, "2026-03-05")).toHaveLength(1)
+  })
+
+  /**
+   * The one judgement in this file. Predict is written to be got wrong, and a
+   * reader who says they do not know and turns out not to know has done the
+   * exercise correctly — there is nothing to relearn, and three of these per
+   * lesson would bury the misses that are real.
+   */
+  it("leaves an unconfident missed prediction alone", () => {
+    const progress = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 2, "2026-03-01")
+
+    expect(correctionQueue(progress, "2026-03-05")).toHaveLength(0)
+  })
+
+  it("brings back a prediction the reader was sure about, which is a belief and not a gap", () => {
+    const progress = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 4, "2026-03-01")
+
+    expect(correctionQueue(progress, "2026-03-05")).toHaveLength(1)
+  })
+
+  it("uses the same threshold to admit a prediction as it does to rank one", () => {
+    const admitted = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 4, "2026-03-01")
+
+    expect(correctionQueue(admitted, "2026-03-05").every(wasConfident)).toBe(true)
+  })
+
+  it("puts a lesson question and a set question in one sitting, ordered by confidence", () => {
+    const both = missed(
+      missed(EMPTY_PROGRESS, "set-d", 7, 2, "2026-03-01"),
+      "lesson-04-self-check",
+      2,
+      5,
+      "2026-03-01"
+    )
+
+    expect(correctionSitting(correctionQueue(both, "2026-03-05")).map((each) => each.set)).toEqual([
+      "lesson-04-self-check",
+      "set-d",
+    ])
+  })
+})
+
+describe("the questions the course no longer contains", () => {
+  it("drops a key that points at nothing, so the index and the sitting agree", () => {
+    const progress = missed(
+      missed(EMPTY_PROGRESS, "set-d", 7, 5, "2026-03-01"),
+      "lesson-04-self-check",
+      99,
+      5,
+      "2026-03-01"
+    )
+    const queue = correctionQueue(progress, "2026-03-05")
+
+    expect(queue).toHaveLength(2)
+    expect(knownOnly(queue, new Set(["set-d#7"])).map((each) => each.set)).toEqual(["set-d"])
   })
 })
