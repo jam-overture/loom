@@ -63,6 +63,36 @@ export type SearchIndex = {
  */
 export const SEARCH_INDEX_PATH = "/docs/search-index"
 
+/**
+ * Where the browser asks for the prose, which is the other half of the index.
+ *
+ * The two are fetched separately because they are wanted at different moments
+ * and cost different amounts. Titles, headings and export names answer most
+ * searches and are a fraction of the bytes; the words under them are most of
+ * the payload and are only needed once somebody types enough to want a
+ * sentence. Splitting them lets the box open and answer immediately on a
+ * connection that is still downloading the rest.
+ *
+ * Keyed by `href`, which is unique per entry — `build.test.ts` asserts that no
+ * two results name the same place, and this depends on it.
+ */
+export const SEARCH_PROSE_PATH = "/docs/search-index/prose"
+
+/** The words under each entry, by the `href` of the entry they belong to. */
+export type SearchProse = Readonly<Record<string, string>>
+
+/**
+ * The two halves, put back together.
+ *
+ * One definition, used by the dialog when the second fetch lands and by the
+ * tests that ask what a reader can find once it has. A second copy of this
+ * would be a second answer to *what does the browser actually search*, and the
+ * tests would stop being about the thing that ships.
+ */
+export const withProse = (index: SearchIndex, prose: SearchProse): SearchIndex => ({
+  entries: index.entries.map((entry) => ({ ...entry, body: prose[entry.href] ?? "" })),
+})
+
 /** How many results the dialog shows. Beyond this a reader types more instead. */
 export const SEARCH_RESULT_LIMIT = 10
 
@@ -95,4 +125,19 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
   }
 
   return { entries: value.entries.filter(isEntry) }
+}
+
+/**
+ * The prose, checked the same way and for the same reasons.
+ *
+ * Non-string values are dropped rather than thrown over, because the prose is
+ * an enhancement to a box that is already answering: a malformed entry should
+ * cost its own sentence, not the whole second fetch.
+ */
+export const parseSearchProse = (value: unknown): SearchProse => {
+  if (!isRecord(value)) throw new Error("loom: the search prose is not a record")
+
+  return Object.fromEntries(
+    Object.entries(value).filter((pair): pair is [string, string] => typeof pair[1] === "string")
+  )
 }

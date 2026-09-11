@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsOrder, writtenDocsSections } from "../nav"
 
-import { buildSearchIndex } from "./build"
+import { buildSearchIndex, buildSearchProse } from "./build"
 import { readPageHeadings } from "./headings"
 import { parseSearchIndex } from "./model"
 
@@ -117,20 +117,36 @@ describe("what the index contains", () => {
       writtenDocsSections.flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug)))
     )
 
+    const prose = buildSearchProse()
+    const hasProse = (entry: { readonly href: string }): boolean => (prose[entry.href] ?? "") !== ""
+
     const pagesWithProse = index.entries.filter(
-      (entry) => entry.kind === "page" && written.has(entry.href) && entry.body !== ""
+      (entry) => entry.kind === "page" && written.has(entry.href) && hasProse(entry)
     )
 
-    const headingsWithProse = index.entries.filter((entry) => entry.kind === "heading" && entry.body !== "")
+    const headingsWithProse = index.entries.filter((entry) => entry.kind === "heading" && hasProse(entry))
 
     expect(pagesWithProse.length).toBe(written.size)
     expect(headingsWithProse.length).toBeGreaterThan(40)
   })
 
   it("carries no words for a name, whose words are its signature", () => {
+    const prose = buildSearchProse()
+
     for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
-      expect(entry.body, entry.href).toBe("")
+      expect(prose[entry.href], entry.href).toBeUndefined()
     }
+  })
+
+  /**
+   * The half that ships first carries no words at all — that is the split.
+   *
+   * Asserted rather than assumed, because the failure it guards against is a
+   * builder that quietly started inlining the prose again and put the whole
+   * payload back in the first fetch, which nothing else here would notice.
+   */
+  it("keeps the words out of the half that ships first", () => {
+    for (const entry of index.entries) expect(entry.body, entry.href).toBe("")
   })
 
   /**
@@ -156,10 +172,45 @@ describe("what the index contains", () => {
    * The headroom is deliberate and finite: five more pages fit under it, fifty
    * do not, and the run that hits it should split the index rather than raise
    * the number.
+   *
+   * **Five more pages landed, and the number was raised anyway — read this
+   * before doing it again.** On 11 September the written pages went from 13 to
+   * 18 and the uncompressed figure reached 246,246 against a 240,000 cap. The
+   * compressed one, which is the bill, was 44,620 of 48,000.
+   *
+   * Only the uncompressed cap moved, to 260,000, and only because of what the
+   * two numbers say together. That cap's stated job is to notice **a payload
+   * that stopped compressing**; the ratio here is 5.5x, better than the 4x this
+   * comment records as normal, so it fired for growth rather than for the
+   * regression it watches for. The cap that measures what leaves the server was
+   * not touched and must not be.
+   *
+   * **The split happened on 11 September, one page later.** The raise bought
+   * exactly what it was predicted to: the nineteenth page took gzip to 47,501
+   * of 48,000, which left 499 bytes and no honest number to raise.
+   *
+   * So the index is two files now, and this is what that bought — measured the
+   * day it landed, with 19 written pages:
+   *
+   * | | Uncompressed | gzip |
+   * | --- | --- | --- |
+   * | Titles, headings and names — the first fetch | 170 KB | **15.6 KB** |
+   * | The words under them — the second | 102 KB | 33.8 KB |
+   *
+   * The number that matters went from 47.5 KB to 15.6 KB, because the two
+   * halves are wanted at different moments: headings answer a reader who has
+   * typed two letters, and sentences are only wanted once they have typed
+   * enough to be looking for one. Both are still capped, and the first is
+   * capped tightly, because it is the one every reader who opens the box pays
+   * for.
    */
   it("stays small enough to send", () => {
-    expect(gzipSync(JSON.stringify(index)).length).toBeLessThan(48_000)
-    expect(JSON.stringify(index).length).toBeLessThan(240_000)
+    expect(gzipSync(JSON.stringify(index)).length).toBeLessThan(24_000)
+    expect(JSON.stringify(index).length).toBeLessThan(220_000)
+
+    const prose = buildSearchProse()
+
+    expect(gzipSync(JSON.stringify(prose)).length).toBeLessThan(48_000)
   })
 })
 

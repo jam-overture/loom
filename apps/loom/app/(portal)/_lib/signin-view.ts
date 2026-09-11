@@ -96,8 +96,8 @@ const headlineFor = (pressure: SignInPressure, tone: PressureTone): string => {
 const detailFor = (pressure: SignInPressure, tone: PressureTone, now: number): string => {
   if (tone === "quiet") {
     return (
-      "Every failure the throttle remembers has been forgiven or has aged out, so the next " +
-      "attempt from anywhere starts from zero."
+      "Every failure this deployment still remembers has been forgiven or has aged out, so the " +
+      "next attempt from anywhere starts from zero."
     )
   }
 
@@ -116,7 +116,7 @@ const detailFor = (pressure: SignInPressure, tone: PressureTone, now: number): s
   }
 
   return (
-    `The throttle is doing its job: ${pressure.failures} failed ` +
+    `That is the lockout working as it should: ${pressure.failures} failed ` +
     `${pressure.failures === 1 ? "attempt" : "attempts"} across ` +
     `${subjectCount(pressure.subjects)}, and the longest wait still owed is ` +
     `${describeWait(pressure.longestWaitMs)}.${since} ` +
@@ -134,6 +134,138 @@ export const describePressure = (pressure: SignInPressure, now: number): Pressur
     detail: detailFor(pressure, tone, now),
   }
 }
+
+/**
+ * What to do about it — the question this screen was the last one not to answer.
+ *
+ * Every other portal screen ends in something to do: the review queue has two
+ * buttons, the empty page list has "Try the demo", Trust names a floor worth
+ * moving. This one had *"There is nothing here to act on and nothing to click,
+ * deliberately"* — written in a source comment, where the only people who could
+ * read it were the people who did not need to.
+ *
+ * That reasoning is right and it is not the same as having no next move. A
+ * lockout is doing something to somebody, and the reader's move differs by which
+ * of two people it is doing it to: a colleague on a mistyped key, or a stranger
+ * working through a list. The log cannot tell them apart — 0039 keeps a digest
+ * and nothing else — so the honest next move is the question that does, asked in
+ * the order that costs least to answer.
+ *
+ * `label` is the move; `meaning` is why, and what it would cost to do something
+ * else. Neither ever suggests unlocking a caller from here: a button that
+ * cleared a count from a browser is a way to switch the lockout off from a
+ * browser, and the levers that exist are the key a reviewer was issued and
+ * whatever sits in front of this deployment (0034).
+ */
+export type NextMove = {
+  /** The move itself, short enough to be the first thing read after the verdict. */
+  readonly label: string
+  /** One or two sentences: why that, and why nothing else is offered. */
+  readonly meaning: string
+}
+
+const NEXT_MOVES: Readonly<Record<PressureTone, NextMove>> = {
+  quiet: {
+    label: "Nothing to do.",
+    meaning:
+      "Nobody is being turned away. Come back to this screen if somebody on your team tells " +
+      "you they cannot sign in.",
+  },
+  counting: {
+    label: "Nothing to do yet — but ask your team before you read it as an attack.",
+    meaning:
+      "A colleague on a mistyped key and a stranger working through a list produce exactly " +
+      "this screen, and nothing here can tell you which you are looking at. If it is your own " +
+      "reviewer, send them a fresh key rather than waiting the count out: a correct sign-in " +
+      "clears it immediately.",
+  },
+  locking: {
+    label: "Find out whether it is one of yours, then look in front of this app.",
+    meaning:
+      "If somebody on your team is locked out, issue them a new key — a correct sign-in clears " +
+      "the count at once, and no wait has to be served. If it is nobody you know, this app has " +
+      "already done what it can; slowing the caller down further belongs to whatever your " +
+      "traffic passes through before it reaches here. There is deliberately no button on this " +
+      "screen that lifts a lockout, because that would be a way to switch the lockout off from " +
+      "a browser.",
+  },
+}
+
+export const nextMove = (tone: PressureTone): NextMove => NEXT_MOVES[tone]
+
+/**
+ * One number, with the name a person reads and the names the record keeps.
+ *
+ * These six sat on the surface as a monospace `dl` — `callers counted`,
+ * `failures held`, `locked now`, `longest wait`, `most recent`, `oldest held` —
+ * above the fold and under no disclosure, which is the pattern the whole
+ * redirection is against. Every one of them is also already said in words
+ * directly above, by `headlineFor` and `detailFor`, so on the surface they were
+ * the runtime's phrasing of a sentence a reader had just been given.
+ *
+ * So they move behind the disclosure and none of them is dropped — including
+ * `counted`, which the screen has never shown at all despite being the number
+ * that says how much of the log the rest was computed over.
+ *
+ * `fields` is the half that keeps this honest. A fact names the `SignInPressure`
+ * members it was built from, verbatim, so a reader matching the screen against
+ * the type is not guessing, and a test can assert that **every** member of that
+ * type reaches the screen through some fact. That is the property a hand-written
+ * list of six cells could not have: it is what stops the eighth field being
+ * added to the record and quietly never rendered.
+ */
+export type PressureFact = {
+  /** What a person reads. Never a field name. */
+  readonly label: string
+  /** The number, already in words where a bare integer would not be one. */
+  readonly value: string
+  /** The `SignInPressure` members it is made of, spelled as the type spells them. */
+  readonly fields: readonly (keyof SignInPressure)[]
+}
+
+const agoOr = (at: number | null, now: number, absent: string): string =>
+  at === null ? absent : describeSince(now - at)
+
+export const pressureFacts = (
+  pressure: SignInPressure,
+  now: number
+): readonly PressureFact[] => [
+  {
+    label: "Callers with a failure counted against them",
+    value: `${pressure.subjects}`,
+    fields: ["subjects"],
+  },
+  {
+    label: "Failed attempts still counted",
+    value: `${pressure.failures}`,
+    fields: ["failures"],
+  },
+  {
+    label: "Locked out right now",
+    value: describeLocked(pressure),
+    fields: ["locked", "lockedIsExact"],
+  },
+  {
+    label: "Longest wait still owed",
+    value: pressure.longestWaitMs === 0 ? "none" : describeWait(pressure.longestWaitMs),
+    fields: ["longestWaitMs"],
+  },
+  {
+    label: "Most recent failure",
+    value: agoOr(pressure.latestFailureAt, now, "none recorded"),
+    fields: ["latestFailureAt"],
+  },
+  {
+    label: "Oldest failure still counted",
+    value: agoOr(pressure.earliestFailureAt, now, "none recorded"),
+    fields: ["earliestFailureAt"],
+  },
+  {
+    label: "How many rows the numbers above were worked out from",
+    value: `${pressure.counted}`,
+    fields: ["counted"],
+  },
+]
 
 /**
  * The policy in force, spelled out. A page that said "3 locked out" without

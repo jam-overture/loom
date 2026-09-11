@@ -74,4 +74,14 @@ export const entryPoints: readonly EntryPoint[] = [
     summary: "Scaffolding and inspection from a terminal.",
     audience: "tooling",
   },
+  {
+    specifier: "@loom/runtime/testing",
+    summary: "Fixtures and doubles: the sample trees, clocks and scripted interpreters Loom tests itself with.",
+    audience: "tooling",
+  },
+  {
+    specifier: "@loom/runtime/testing/contracts",
+    summary: "The suites that tell you whether your own store, hold store or journal keeps its promises.",
+    audience: "tooling",
+  },
 ]
