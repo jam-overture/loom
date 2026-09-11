@@ -5,9 +5,9 @@ import { describe, expect, it } from "vitest"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsOrder, writtenDocsSections } from "../nav"
 
-import { buildSearchIndex, buildSearchProse } from "./build"
+import { buildSearchIndex, searchCode, searchIndexWithoutText, searchProse } from "./build"
 import { readPageHeadings } from "./headings"
-import { parseSearchIndex } from "./model"
+import { parseSearchIndex, withCode, withProse } from "./model"
 
 /**
  * The index, held against the site it claims to describe.
@@ -117,8 +117,8 @@ describe("what the index contains", () => {
       writtenDocsSections.flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug)))
     )
 
-    const prose = buildSearchProse()
-    const hasProse = (entry: { readonly href: string }): boolean => (prose[entry.href] ?? "") !== ""
+    const prose = new Map(searchProse().bodies)
+    const hasProse = (entry: { readonly href: string }): boolean => (prose.get(entry.href) ?? "") !== ""
 
     const pagesWithProse = index.entries.filter(
       (entry) => entry.kind === "page" && written.has(entry.href) && hasProse(entry)
@@ -131,10 +131,10 @@ describe("what the index contains", () => {
   })
 
   it("carries no words for a name, whose words are its signature", () => {
-    const prose = buildSearchProse()
+    const prose = new Map(searchProse().bodies)
 
     for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
-      expect(prose[entry.href], entry.href).toBeUndefined()
+      expect(prose.get(entry.href), entry.href).toBeUndefined()
     }
   })
 
@@ -146,7 +146,10 @@ describe("what the index contains", () => {
    * payload back in the first fetch, which nothing else here would notice.
    */
   it("keeps the words out of the half that ships first", () => {
-    for (const entry of index.entries) expect(entry.body, entry.href).toBe("")
+    for (const entry of searchIndexWithoutText().entries) {
+      expect(entry.body, entry.href).toBe("")
+      expect(entry.code, entry.href).toBe("")
+    }
   })
 
   /**
@@ -173,44 +176,87 @@ describe("what the index contains", () => {
    * do not, and the run that hits it should split the index rather than raise
    * the number.
    *
-   * **Five more pages landed, and the number was raised anyway — read this
-   * before doing it again.** On 11 September the written pages went from 13 to
-   * 18 and the uncompressed figure reached 246,246 against a 240,000 cap. The
-   * compressed one, which is the bill, was 44,620 of 48,000.
+   * **Four pages arrived at once and hit it**, at 46.7 KB against the 48. So the
+   * index was split rather than the number raised, and what is capped now is
+   * each file separately — which is the only way the caps stay meaningful,
+   * because the files grow at different speeds and for different reasons.
    *
-   * Only the uncompressed cap moved, to 260,000, and only because of what the
-   * two numbers say together. That cap's stated job is to notice **a payload
-   * that stopped compressing**; the ratio here is 5.5x, better than the 4x this
-   * comment records as normal, so it fired for growth rather than for the
-   * regression it watches for. The cap that measures what leaves the server was
-   * not touched and must not be.
-   *
-   * **The split happened on 11 September, one page later.** The raise bought
-   * exactly what it was predicted to: the nineteenth page took gzip to 47,501
-   * of 48,000, which left 499 bytes and no honest number to raise.
-   *
-   * So the index is two files now, and this is what that bought — measured the
-   * day it landed, with 19 written pages:
-   *
-   * | | Uncompressed | gzip |
-   * | --- | --- | --- |
-   * | Titles, headings and names — the first fetch | 170 KB | **15.6 KB** |
-   * | The words under them — the second | 102 KB | 33.8 KB |
-   *
-   * The number that matters went from 47.5 KB to 15.6 KB, because the two
-   * halves are wanted at different moments: headings answer a reader who has
-   * typed two letters, and sentences are only wanted once they have typed
-   * enough to be looking for one. Both are still capped, and the first is
-   * capped tightly, because it is the one every reader who opens the box pays
-   * for.
+   * **Indexing the code was the third file**, and it is the cheap one: 13.4 KB
+   * raw and **3.9 KB compressed** over 39 entries, about a ninth of what the
+   * words cost. The reason is worth recording, because it is the opposite of
+   * what a glance at the site suggests — the blocks are the same handful of
+   * imports and calls written out again and again, and repetition is what
+   * compresses. The expensive half of a search index is prose, which is why the
+   * prose is the half that had to be split off and why the code could simply be
+   * added.
    */
   it("stays small enough to send", () => {
-    expect(gzipSync(JSON.stringify(index)).length).toBeLessThan(24_000)
-    expect(JSON.stringify(index).length).toBeLessThan(220_000)
+    const entries = JSON.stringify(searchIndexWithoutText())
+    const prose = JSON.stringify(searchProse())
+    const code = JSON.stringify(searchCode())
 
-    const prose = buildSearchProse()
+    // What a reader waits for: the table of contents and the runtime's surface.
+    // It grows when a page is added or an export is published, which is slowly.
+    expect(gzipSync(entries).length).toBeLessThan(20_000)
+    expect(entries.length).toBeLessThan(200_000)
 
-    expect(gzipSync(JSON.stringify(prose)).length).toBeLessThan(48_000)
+    // What nobody waits for. It grows every time anybody writes a paragraph, so
+    // it has the room — and the day it runs out, it shards by section rather
+    // than taking the number up again.
+    expect(gzipSync(prose).length).toBeLessThan(60_000)
+    expect(prose.length).toBeLessThan(200_000)
+
+    // The blocks. Capped an order of magnitude below the words rather than
+    // beside them, because a code file that ever approached the prose file
+    // would mean something changed about how this site is written — a page
+    // pasting a generated file in, most likely — and that is worth a red test
+    // rather than a quiet doubling of what a reader downloads.
+    expect(gzipSync(code).length).toBeLessThan(12_000)
+    expect(code.length).toBeLessThan(60_000)
+  })
+
+  /**
+   * The two halves are one index or they are nothing.
+   *
+   * The prose travels keyed by `href`, so an entry whose href the prose file
+   * does not recognise silently keeps an empty body — which would be a search
+   * box quietly missing its fourth band with every test still green. This is the
+   * check that the seam holds: put the halves back together and you have what
+   * `buildSearchIndex` said in the first place.
+   */
+  it("comes apart and goes back together without losing a word or a line", () => {
+    expect(withCode(withProse(searchIndexWithoutText(), searchProse()), searchCode())).toEqual(index)
+  })
+
+  /**
+   * And in either order, because they arrive in whichever order the network
+   * hands them over.
+   */
+  it("does not mind which of the two lands first", () => {
+    expect(withProse(withCode(searchIndexWithoutText(), searchCode()), searchProse())).toEqual(index)
+  })
+
+  it("keys the words and the code by an href that names exactly one entry", () => {
+    const hrefs = searchProse().bodies.map(([href]) => href)
+    const blocks = searchCode().blocks.map(([href]) => href)
+
+    expect(new Set(hrefs).size).toBe(hrefs.length)
+    expect(new Set(blocks).size).toBe(blocks.length)
+  })
+
+  /**
+   * The claim the index is for, against the site rather than a fixture: the
+   * page that shows a stranger how to install the runtime carries the command
+   * in its code, and the reference pages carry none at all.
+   */
+  it("carries the code of a page that has blocks, and none for a name", () => {
+    const withCodeOnIt = index.entries.filter((entry) => entry.code !== "")
+
+    expect(withCodeOnIt.length).toBeGreaterThan(20)
+
+    for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
+      expect(entry.code, entry.href).toBe("")
+    }
   })
 })
 

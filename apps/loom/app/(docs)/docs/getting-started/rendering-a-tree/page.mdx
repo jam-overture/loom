@@ -7,7 +7,7 @@ export const metadata = pageMetadata("getting-started", "rendering-a-tree")
 Rendering turns a tree into React elements. It is synchronous, pure, and it
 never fails.
 
-```tsx
+```tsx function-body
 import { createThemeRegistry } from "@loom/runtime"
 import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
 import { renderLoomTree } from "@loom/runtime/react"
@@ -66,7 +66,7 @@ the node it happened at:
 A theme is not a stylesheet you import. It is a palette, a font pack and a style
 preset, named by id on the root node under the reserved `loom:theme` prop:
 
-```ts
+```ts object-body
 props: {
   "loom:theme": {
     palette: "minimal",
@@ -111,7 +111,7 @@ bindings it declares — and both are IO.
 bindings, resolves them all at once, and then renders. It returns a `Result`,
 because loading and parsing are the two steps that genuinely can fail.
 
-```tsx
+```tsx function-body
 const served = await renderRequest(request, { source, resolver, validator, themes })
 
 if (!served.ok) return notFound()

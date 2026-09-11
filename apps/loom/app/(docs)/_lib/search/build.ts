@@ -2,8 +2,9 @@ import { apiAnchorFor, apiSlugFor } from "../api/model"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
+import { readPageCode } from "./code"
 import { readPageHeadings } from "./headings"
-import type { SearchEntry, SearchIndex, SearchProse } from "./model"
+import type { SearchCode, SearchEntry, SearchIndex, SearchProse } from "./model"
 import { readPageProse } from "./prose"
 
 /**
@@ -18,7 +19,9 @@ import { readPageProse } from "./prose"
  * findable **in the same commit that changes the thing**, with nobody
  * remembering to update a list. The prose is read the same way, off the same
  * pages, so a paragraph that is rewritten is searchable in its new words and
- * unsearchable in its old ones from that commit onward.
+ * unsearchable in its old ones from that commit onward. The code is read the
+ * same way and from the same files, so a snippet that stops naming a call stops
+ * being findable by it.
  *
  * Built on the server and served as one static file. `build.test.ts` holds the
  * result against the site — every href it offers is a page that exists, every
@@ -27,22 +30,32 @@ import { readPageProse } from "./prose"
  */
 
 /**
- * The prose of every written page, read once and keyed by page.
+ * The prose and the code of every written page, read once each and keyed by
+ * page.
  *
  * Read here rather than inside each list below, because two of them want the
- * same thirteen files and reading a page twice to ask two questions about it is
- * the kind of thing that is free today and is not at fifty pages.
+ * same files and reading a page twice to ask two questions about it is the kind
+ * of thing that is free today and is not at fifty pages.
  */
-const proseByHref = new Map(
-  writtenDocsSections.flatMap((section) =>
-    section.pages.map(
-      (page) => [docsHref(section.slug, page.slug), readPageProse(section.slug, page.slug)] as const
+const readByHref = <T>(
+  read: (sectionSlug: string, pageSlug: string) => T
+): ReadonlyMap<string, T> =>
+  new Map(
+    writtenDocsSections.flatMap((section) =>
+      section.pages.map(
+        (page) => [docsHref(section.slug, page.slug), read(section.slug, page.slug)] as const
+      )
     )
   )
-)
+
+const proseByHref = readByHref(readPageProse)
+const codeByHref = readByHref(readPageCode)
 
 /** The prose under one anchor of one page, or nothing where a generated page has none. */
 const bodyAt = (href: string, anchor: string): string => proseByHref.get(href)?.get(anchor) ?? ""
+
+/** The blocks under one anchor of one page, joined as `code.ts` joins them. */
+const codeAt = (href: string, anchor: string): string => codeByHref.get(href)?.get(anchor) ?? ""
 
 /**
  * A page, carrying the paragraphs above its first heading.
@@ -63,6 +76,7 @@ const pageEntries = (): readonly SearchEntry[] =>
         kind: "page" as const,
         summary: page.summary,
         body: bodyAt(href, ""),
+        code: codeAt(href, ""),
       }
     })
   )
@@ -84,6 +98,7 @@ const headingEntries = (): readonly SearchEntry[] =>
         kind: "heading" as const,
         summary: "",
         body: bodyAt(docsHref(section.slug, page.slug), heading.anchor),
+        code: codeAt(docsHref(section.slug, page.slug), heading.anchor),
       }))
     )
   )
@@ -110,6 +125,7 @@ const exportEntries = (): readonly SearchEntry[] =>
         kind: "export" as const,
         summary: "",
         body: "",
+        code: "",
       }))
     )
   )
@@ -121,27 +137,39 @@ const allEntries = (): readonly SearchEntry[] => [
 ]
 
 /**
- * The half that ships first: everything except the words.
+ * The whole index, words and blocks included.
  *
- * Carries `body: ""` rather than dropping the field, so one entry type serves
- * both halves and `match.ts` needs to know nothing about the split — an index
- * whose prose has not arrived scores exactly like one whose pages have none,
- * which is a state it already handles for generated pages and exports.
+ * Nothing is served from this — the three files below are — but it is the one
+ * place every entry is assembled, so the split is a matter of which fields each
+ * file carries rather than three walks over the site that could disagree.
  */
 export const buildSearchIndex = (): SearchIndex => ({
-  entries: allEntries().map((entry) => ({ ...entry, body: "" })),
+  entries: allEntries(),
 })
 
 /**
- * The half that follows: the words, keyed by the entry they belong to.
+ * The part a reader waits for: everything but the words and the blocks.
  *
- * Entries with nothing to say are left out rather than stored empty. Exports
- * have no prose by design and generated pages have no file to read, so about a
- * third of the index would otherwise be keys mapping to `""`.
+ * They are emptied rather than the fields removed, because what arrives in the
+ * browser is a `SearchIndex` either way — one whose two cheapest ranking bands
+ * are simply not answering yet. A reader who types before the other two files
+ * land gets the same results, ranked by title, section and summary, and each
+ * band turns on underneath them without the list flickering.
  */
-export const buildSearchProse = (): SearchProse =>
-  Object.fromEntries(
-    allEntries()
-      .filter((entry) => entry.body !== "")
-      .map((entry) => [entry.href, entry.body])
-  )
+export const searchIndexWithoutText = (): SearchIndex => ({
+  entries: buildSearchIndex().entries.map((entry) => ({ ...entry, body: "", code: "" })),
+})
+
+/** The words nobody waits for, keyed by the entry they sit under. */
+export const searchProse = (): SearchProse => ({
+  bodies: buildSearchIndex()
+    .entries.filter((entry) => entry.body !== "")
+    .map((entry) => [entry.href, entry.body] as const),
+})
+
+/** The blocks nobody waits for, keyed the same way. */
+export const searchCode = (): SearchCode => ({
+  blocks: buildSearchIndex()
+    .entries.filter((entry) => entry.code !== "")
+    .map((entry) => [entry.href, entry.code] as const),
+})

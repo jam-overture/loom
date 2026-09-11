@@ -1,7 +1,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { SEARCH_INDEX_PATH, SEARCH_PROSE_PATH, type SearchIndex } from "@/app/(docs)/_lib/search/model"
+import {
+  SEARCH_CODE_PATH,
+  SEARCH_INDEX_PATH,
+  SEARCH_PROSE_PATH,
+  type SearchIndex,
+} from "@/app/(docs)/_lib/search/model"
 
 import { Search } from "./search"
 
@@ -30,6 +35,7 @@ const index: SearchIndex = {
       kind: "page",
       summary: "Yes, ask a person, or no.",
       body: "",
+      code: "",
     },
     {
       href: "/docs/the-runtime/what-the-gate-decides#the-two-questions-it-asks",
@@ -38,6 +44,7 @@ const index: SearchIndex = {
       kind: "heading",
       summary: "",
       body: "How much damage could this do, and could it be taken back afterwards.",
+      code: "",
     },
     {
       href: "/docs/getting-started/your-first-tree#a-tree-is-more-than-its-root",
@@ -46,6 +53,7 @@ const index: SearchIndex = {
       kind: "heading",
       summary: "",
       body: "",
+      code: 'const page = buildElement({ type: "stack" })\nconst next = applyDelta(page, delta)',
     },
     {
       href: "/docs/api-reference/runtime#s-evaluateGate",
@@ -54,6 +62,7 @@ const index: SearchIndex = {
       kind: "export",
       summary: "",
       body: "",
+      code: "",
     },
   ],
 }
@@ -61,27 +70,36 @@ const index: SearchIndex = {
 const fetchMock = vi.fn()
 
 /**
- * The deployment serves the index in two files, so the double does too.
+ * The index as it really travels: three files, with the words in the second and
+ * the code in the third.
  *
- * Serving the prose from the fixture's own entries rather than a second literal
- * keeps the two halves in step: an entry given a body above is findable by its
- * sentence here, and one given none is not, without anybody maintaining a
- * parallel list.
+ * Served apart here rather than whole, because a mock that handed the component
+ * a complete index however it asked would be testing a fetch the site does not
+ * make — and the interesting moments are the ones in between, where the box
+ * works and one of the two cheapest ranking bands does not answer yet.
  */
-const prose = Object.fromEntries(
-  index.entries.filter((entry) => entry.body !== "").map((entry) => [entry.href, entry.body])
-)
+const withoutText = { entries: index.entries.map((entry) => ({ ...entry, body: "", code: "" })) }
 
-/** The core is served without bodies, exactly as the route builds it. */
-const core: SearchIndex = { entries: index.entries.map((entry) => ({ ...entry, body: "" })) }
+const prose = {
+  bodies: index.entries.filter((entry) => entry.body !== "").map((entry) => [entry.href, entry.body]),
+}
 
-const serve = (payload: unknown) => ({ ok: true, json: async () => JSON.parse(JSON.stringify(payload)) })
+const code = {
+  blocks: index.entries.filter((entry) => entry.code !== "").map((entry) => [entry.href, entry.code]),
+}
+
+const serve = (path: string): unknown => {
+  if (path === SEARCH_PROSE_PATH) return prose
+  if (path === SEARCH_CODE_PATH) return code
+
+  return withoutText
+}
 
 beforeEach(() => {
   push.mockReset()
   fetchMock.mockReset()
   fetchMock.mockImplementation((path: string) =>
-    Promise.resolve(serve(path === SEARCH_PROSE_PATH ? prose : core))
+    Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
   )
   vi.stubGlobal("fetch", fetchMock)
 })
@@ -109,7 +127,7 @@ describe("the search box", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it("asks for the index once, however many times it is opened", async () => {
+  it("asks for each file once, however many times it is opened", async () => {
     render(<Search />)
 
     await open()
@@ -119,9 +137,10 @@ describe("the search box", () => {
     await open()
     await type("gate")
 
-    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(3)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_INDEX_PATH)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_PROSE_PATH)
+    expect(fetchMock).toHaveBeenCalledWith(SEARCH_CODE_PATH)
   })
 
   it("opens on the shortcut every reader tries", async () => {
@@ -152,11 +171,70 @@ describe("what a reader sees after typing", () => {
     expect(screen.queryByRole("listbox")).toBeNull()
     expect(screen.getByText(/nothing on the site says/i)).toBeTruthy()
     /*
-     * The claim above is only worth making beside the limit under it. The box
-     * reads the prose but not the fenced code, and a reader looking at a word
-     * they can see on the page has no other way to learn that.
+     * The claim above is only worth making beside an account of what was
+     * looked at. It used to end "code blocks are not", which was the one thing
+     * a reader could see on the page and could not find; now it says the code
+     * is searched, and it has to say so only because it is.
      */
-    expect(screen.getByText(/code blocks are not/i)).toBeTruthy()
+    expect(screen.getByText(/the code in them .* are searched/i)).toBeTruthy()
+  })
+
+  /**
+   * The moment between the two files.
+   *
+   * The words are three times the size of the index and nothing waits for them,
+   * so there is a real interval in which the box is open and answering by title,
+   * section and summary alone. Two things have to hold in it: the box works, and
+   * it does not claim to have read what it has not read yet.
+   */
+  it("answers by name while the words are still on their way", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_PROSE_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("gate")
+
+    expect(screen.getByRole("listbox")).toBeTruthy()
+    expect(screen.getAllByRole("option").length).toBeGreaterThan(0)
+  })
+
+  it("does not say it read the words until it has", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_PROSE_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("kubernetes")
+
+    expect(screen.getByText(/the words in them are still loading/i)).toBeTruthy()
+    expect(screen.queryByText(/the words in them .* are searched/i)).toBeNull()
+  })
+
+  /**
+   * A word that is only in a paragraph, found once the paragraph arrives.
+   *
+   * This is the seam the split could break silently: the prose travels keyed by
+   * href, and an href the index does not carry would leave every body empty with
+   * nothing red anywhere. So the fixture's one word that lives in prose alone is
+   * searched for, and it has to come back.
+   */
+  it("finds a word that only the prose carries, once the prose has landed", async () => {
+    render(<Search />)
+
+    await open()
+    await type("damage")
+
+    expect(screen.getByRole("listbox")).toBeTruthy()
+    expect(screen.getByText("The two questions it asks")).toBeTruthy()
   })
 
   /**
@@ -288,6 +366,63 @@ describe("moving through the results", () => {
     fireEvent.keyDown(screen.getByRole("combobox"), { key: "Escape" })
 
     expect(document.activeElement).toBe(screen.getByRole("button", { name: /search the documentation/i }))
+  })
+
+  /**
+   * A name that appears on the site only inside a block a reader was invited to
+   * copy.
+   *
+   * This is the query the box could not answer for as long as it had existed:
+   * somebody who has seen `applyDelta` in a snippet, or typed an install
+   * command off a page, was told the site says nothing. The fixture's one
+   * name that lives in code alone is searched for, and it has to come back.
+   */
+  it("finds a name that only a code block carries, once the code has landed", async () => {
+    render(<Search />)
+
+    await open()
+    await type("applyDelta")
+
+    expect(screen.getByRole("listbox")).toBeTruthy()
+    expect(screen.getByText("A tree is more than its root")).toBeTruthy()
+  })
+
+  /**
+   * And it shows the line, set as code.
+   *
+   * The row is in the list because of something a reader cannot see from its
+   * title, so the line that put it there is the whole account they get — and a
+   * line of TypeScript in the prose face reads as prose that has gone wrong.
+   */
+  it("shows the line of code a result was found by, in the mono face", async () => {
+    render(<Search />)
+
+    await open()
+    await type("applyDelta")
+
+    const row = screen.getByRole("option", { name: /more than its root/i })
+    const excerpt = row.querySelector(".font-mono")
+
+    expect(excerpt?.textContent).toContain("applyDelta(page, delta)")
+    /* The other line of the same block is not the line it was found on. */
+    expect(excerpt?.textContent).not.toContain("buildElement")
+    expect(row.querySelector("mark")?.textContent).toBe("applyDelta")
+  })
+
+  it("answers by name while the code is still on its way", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_CODE_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("applyDelta")
+
+    expect(screen.queryByRole("listbox")).toBeNull()
+    expect(screen.getByText(/the code in them is still loading/i)).toBeTruthy()
   })
 
   /**

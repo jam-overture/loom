@@ -81,6 +81,8 @@ mode for this — the chips go through exactly what a request from a real user
 would:
 
 ```ts
+import { commitIntent } from "@loom/runtime/write"
+
 const outcome = await commitIntent(path, intent)
 
 switch (outcome.kind) {
@@ -100,6 +102,8 @@ And accepting a held change later — from a different person, in a different
 request — is its own call:
 
 ```ts
+import { confirmHeld } from "@loom/runtime/write"
+
 const answered = await confirmHeld(path, { proposalId, actor: reviewer.id })
 ```
 

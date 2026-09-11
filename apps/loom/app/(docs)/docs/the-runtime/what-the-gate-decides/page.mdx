@@ -96,7 +96,7 @@ typed. It answers "which primitives render a thing the reader aims at?" — a
 link, a button — and the answer already lives on each primitive, because each
 primitive declared it:
 
-```ts
+```ts sketch
 definePrimitive({ type: "loom.action", interactive: "always", … })
 definePrimitive({ type: "loom.card",   interactive: { whenProps: ["href"] }, … })
 ```
@@ -135,13 +135,22 @@ introduces — not breakage the page already had.
 
 ## Confirmation is not a way past the Gate
 
-When a change is held and a person says yes, the runtime **judges it again**
-against the page as it stands at that moment — not against the assessment made
-when it was held. If the page moved in between, the second look is a look at
-things as they are now, and a change that would now be refused stays refused.
+When a change is held and a person says yes, the runtime **judges it again** —
+the policy is resolved again and the change is assessed again, so the verdict is
+the one that holds now rather than the one recorded when it was held. A policy
+that narrowed while the change was waiting narrowed for the queue too, and a
+change that would now be refused is refused.
 
 A person answering a hold is answering the question the Gate asked. They are not
 overruling it.
+
+What the second look is **not** about is the page. A change judged against a
+revision the page has since moved past never reaches the Gate at all: it can no
+longer be applied to anything, so answering it ends its custody rather than
+re-opening the question. [Answering a held
+change](/docs/the-runtime/answering-a-held-change) is the whole of that story —
+what is waiting, how to tell those two apart before somebody spends their
+attention on the wrong one, and what each answer does.
 
 ## What a verdict tells you afterwards
 

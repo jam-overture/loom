@@ -56,7 +56,7 @@ Step 2 is the only step in the sequence that has to guess, and it is the only
 one Loom lets you swap. The thing that does it is a *change interpreter*, and
 the runtime does not care what is behind it:
 
-```ts
+```ts sketch
 type ChangeInterpreter = {
   interpret: (intent: EditIntent, tree: LoomTree) => Promise<Result<ProposedChange, …>>
 }

@@ -1,9 +1,7 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
-import { REPOSITORY_ROOT } from "../architecture/source"
+import { fenceSpansIn, outsideFences } from "../fences/spans"
 import { docsHref, writtenDocsSections, type DocsPage, type DocsSection } from "../nav"
 import { headingAnchor } from "../search/anchor"
+import { readPageSource } from "../search/headings"
 
 import { apiEntries } from "./reference"
 import type { ApiEntry } from "./model"
@@ -45,7 +43,6 @@ export type ProseMention = {
 /** Every export a page names, keyed by name, in the order the page names them. */
 export type ProseMentionIndex = ReadonlyMap<string, readonly ProseMention[]>
 
-const FENCE = /^\s*(?:```|~~~)/
 const HEADING = /^(#{2,3})\s+(.+?)\s*$/
 const INLINE_CODE = /`([^`]+)`/g
 
@@ -76,42 +73,50 @@ const identifiersIn = (code: string): readonly string[] =>
  * almost always the same discussion continuing.
  *
  * Pure, and separated from the file read for the same reason `headingsIn` is:
- * the rules with a wrong answer — the dot, the fence, which heading is nearest
- * — are testable against markdown written to exercise them rather than against
- * whichever page happens to exercise them today.
+ * the rules with a wrong answer — the dot, which heading is nearest — are
+ * testable against markdown written to exercise them rather than against
+ * whichever page happens to exercise them today. Where a fence is is no longer
+ * one of them: this was the fourth scanner on the site to decide that for
+ * itself, and `fences/spans.ts` now decides it once for all four.
  */
 export const namedExportsIn = (
   source: string,
   published: ReadonlySet<string>
 ): ReadonlyMap<string, string> => {
   const found = new Map<string, string>()
-  let fenced = false
+
+  /**
+   * The code a fence holds, indexed by the line it opens on, so one walk down
+   * the page meets a block and a paragraph in the order a reader does. The
+   * alternative is two passes and a comparison of line numbers, which is the
+   * same answer arrived at less directly.
+   */
+  const blocks = new Map(fenceSpansIn(source).map((span) => [span.opensAt, span.code]))
+
   let heading = ""
 
-  for (const line of source.split("\n")) {
-    if (FENCE.test(line)) {
-      fenced = !fenced
-      continue
-    }
+  outsideFences(source).forEach((line, index) => {
+    const match = HEADING.exec(line)
 
-    if (!fenced) {
-      const match = HEADING.exec(line)
+    /**
+     * The heading moves before its own backticks are read, so a section called
+     * *What `ok` is for* offers itself rather than whatever came before it.
+     * Stripped the same way `headings.ts` strips one, because `headingAnchor`
+     * has to produce the id `rehype-slug` really emitted.
+     */
+    if (match !== null) heading = (match[2] ?? "").replace(/[`*_]/g, "")
 
-      /**
-       * The heading moves before its own backticks are read, so a section
-       * called *What `ok` is for* offers itself rather than whatever came
-       * before it. Stripped the same way `headings.ts` strips one, because
-       * `headingAnchor` has to produce the id `rehype-slug` really emitted.
-       */
-      if (match !== null) heading = (match[2] ?? "").replace(/[`*_]/g, "")
-    }
+    const block = blocks.get(index + 1)
 
-    const code = fenced ? [line] : [...line.matchAll(INLINE_CODE)].map((match) => match[1] ?? "")
+    const code =
+      block === undefined
+        ? [...line.matchAll(INLINE_CODE)].map((inline) => inline[1] ?? "")
+        : [block]
 
     for (const name of code.flatMap(identifiersIn)) {
       if (published.has(name) && !found.has(name)) found.set(name, heading)
     }
-  }
+  })
 
   return found
 }
@@ -120,11 +125,6 @@ export const namedExportsIn = (
 export const publishedNames: ReadonlySet<string> = new Set(
   apiEntries.flatMap((entry) => entry.groups.flatMap((group) => group.symbols.map((s) => s.name)))
 )
-
-const docsRoot = join(REPOSITORY_ROOT, "apps", "loom", "app", "(docs)", "docs")
-
-const readWrittenPage = (sectionSlug: string, pageSlug: string): string =>
-  readFileSync(join(docsRoot, sectionSlug, pageSlug, "page.mdx"), "utf8")
 
 const mentionOn = (
   section: DocsSection,
@@ -154,7 +154,7 @@ export const buildProseMentions = (): ProseMentionIndex => {
   for (const section of writtenDocsSections) {
     for (const page of section.pages) {
       for (const [name, heading] of namedExportsIn(
-        readWrittenPage(section.slug, page.slug),
+        readPageSource(section.slug, page.slug),
         publishedNames
       )) {
         index.set(name, [...(index.get(name) ?? []), mentionOn(section, page, heading)])
