@@ -13105,6 +13105,80 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-03 — `no-such-source` is two different faults under one code
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+`src/data/resolution.ts:102` synthesises an outcome for a planned binding that
+has no answer in the map it was given:
+
+```ts
+const outcome: DataOutcome = !answer
+  ? {
+      status: "unavailable",
+      unavailable: { reason: "no-such-source", detail: "this binding was never resolved" },
+    }
+```
+
+The comment above it is right about what the state means — "a caller that
+resolved a different plan than the one it is rendering" — and right that
+reporting it beats ignoring it. What it borrows to report it is the reason code
+for something else.
+
+So `describeRenderDiagnostic` can tell a host **"no source is registered for it
+— this binding was never resolved"**, which is two sentences that contradict
+each other, for a fault whose fix is in the composition root rather than in the
+registry. Anything counting reasons — §6 is the obvious consumer — pools the two.
+
+This is the rule 0058's own module documents, broken inside it: a source that is
+not registered and a plan that was never resolved produce different work for
+different people, and the standing rule across this system's seams is that two
+failures with different downstream answers must not share a code.
+
+**Found while writing lesson 18**, and only because the lesson claims there are
+six reasons and I went to check that they were six distinct things. The lesson
+teaches the six as the seam intends them and does not mention this; it is a
+defect to fix rather than a behaviour to document.
+
+Suggested shape, and the choice is the owner's: a seventh reason —
+`not-resolved`, or `plan-mismatch` — with its own sentence in
+`describeDataUnavailable`. It is additive, and 0045's rule about a telemetry
+field added later suggests a consumer switching on the union will want the
+compiler to point at it.
+
+---
+
+## 2026-09-03 — a misdeclared source id gets Zod's default and the registry gets a sentence
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+A node whose `loom:data` names something that is not a valid source id renders
+this diagnostic, verbatim, from a run in lesson 18's Exercise D:
+
+```
+data-misdeclared — node n_1 declares data that is not a map of binding names to
+sources, so it rendered with none — bio.source: Invalid
+```
+
+`Invalid` is Zod's default message for a failed `.regex()`, and
+`sourceIdSchema` (`src/data/source.ts:21`) declares no message of its own.
+
+The same mistake made at registration time is described properly, by
+`describeDataRegistryError` in `src/data/adapter.ts:171`:
+
+> `"..."` is not a valid source id — expected dot-namespaced kebab-case, like
+> `"commerce.products"`
+
+The asymmetry runs the wrong way. The registry error reaches somebody with the
+code open who could have guessed; the diagnostic reaches somebody looking at a
+page that will not bind, and tells them a word. One `{ message }` on the regex
+fixes it, and `bindingNameSchema` beside it has the same gap for the same
+reason.
+
+Small, and filed rather than fixed because `src/` is not this lane's, and
+because the two messages should probably agree by sharing one string rather than
+by being written twice.
+
 ## 2026-09-03 — the front door said nobody wrote it, and the button beside it said "Read the source"
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
