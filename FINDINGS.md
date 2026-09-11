@@ -11007,7 +11007,14 @@ other three briefs carry a matching "blocked until the migration" clause, they
 need the same edit.
 ## 2026-09-01 — a runtime control carries inline styles, so a primitive cannot hide its own control with its own rule
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by #221 — the recommendation was right about the handle and short of the fix.
+A class alone still loses to an inline style, so the control now carries both:
+`loom-control loom-control-<behaviour>` to aim a rule at, and `display` read
+through `var(--loom-<behaviour>-display, var(--loom-control-display, …))` so the
+rule wins. `adjust` sets `display` too, so the property hides three of three.
+Recorded as [0103](decisions/0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md);
+the wrapper and its `:empty` rule can now come out of `loom.nav`, filed below.
 
 Placing `disclose` on `loom.nav` hit this immediately and every future placement
 of every behaviour will hit it too, so it is worth one sentence beside 0086.
@@ -13038,6 +13045,45 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-01 — `loom.nav`'s wrapper around the disclosure control can come out
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The finding this answers said the wrapper cost "one element and one `:empty`
+rule". #221 removes the reason for both, so this is the other half of it, filed
+rather than done because `src/primitives/` is not this lane's.
+
+The control now carries `class="loom-control loom-control-disclose"`, and writes
+
+```
+display: var(--loom-disclose-display, var(--loom-control-display, inline-flex))
+```
+
+so a rule aimed at the button **wins**, which is the thing that was impossible.
+The wrapper existed only because it did not. See
+[0103](decisions/0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md).
+
+What that lets `loom.nav` do instead:
+
+```css
+@media (min-width: 48rem) {
+  .nav { --loom-disclose-display: none }
+}
+```
+
+— on any ancestor, in any query, because a custom property inherits. No box, no
+`:empty`, no gap to compensate for.
+
+**One thing to carry across with it, and it is the trap.** Hiding the button does
+not clear what it publishes: `data-loom-disclosed="false"` is still on it, so the
+sibling rule that hides the links still matches, and the menu would vanish on a
+laptop. The region rule has to be lifted in the same query the button is hidden
+in. That is stated in 0103 and in `control.ts`, and it is the primitive's to hold
+because the runtime does not know which region is which.
+
+Nothing is broken today — the wrapper works. This is a removal that pays one
+element per rendered nav, and it is the shape the next primitive placing a
+control should copy rather than the wrapper.
 ## 2026-09-01 — #186 was closed unmerged, and four days of `main` moved the ground under half its argument
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
