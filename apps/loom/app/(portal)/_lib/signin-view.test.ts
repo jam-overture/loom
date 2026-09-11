@@ -9,8 +9,13 @@ import {
   describePolicy,
   describePressure,
   describeSince,
+  nextMove,
+  pressureFacts,
   toneOfPressure,
+  type PressureTone,
 } from "./signin-view"
+
+const TONES: readonly PressureTone[] = ["quiet", "counting", "locking"]
 
 const NOW = 1_700_000_000_000
 
@@ -121,6 +126,135 @@ describe("describePressure", () => {
     const tones = (["quiet", "counting", "locking"] as const).map(toneOfPressure)
 
     expect(new Set(tones).size).toBe(3)
+  })
+})
+
+/**
+ * The rule the whole redirection turns on, asserted at the one screen that did
+ * not follow it: **every screen answers "what do I do now?"**. This screen's
+ * answer used to live in a source comment, which is the same as not having one.
+ */
+describe("nextMove", () => {
+  it("has a move for every state this screen can be in", () => {
+    for (const tone of TONES) {
+      const move = nextMove(tone)
+
+      expect(move.label.length).toBeGreaterThan(0)
+      expect(move.meaning.length).toBeGreaterThan(0)
+    }
+  })
+
+  it("gives each state its own move, so the answer is never the same three times", () => {
+    expect(new Set(TONES.map((tone) => nextMove(tone).label)).size).toBe(TONES.length)
+  })
+
+  /**
+   * The reason there is no button, said to the reader rather than to whoever
+   * next opens the file. A lockout that can be lifted from a browser is a
+   * lockout that can be lifted by whoever is being locked out.
+   */
+  it("says on the screen why nothing here lifts a lockout", () => {
+    expect(nextMove("locking").meaning).toContain("no button")
+  })
+
+  /**
+   * The distinction the log cannot draw and the reader has to: a mistyped key
+   * and a stranger working through a list produce identical rows (0039), so the
+   * move for both live states is to find out which, not to react.
+   */
+  it("sends the reader to the one question the log cannot answer", () => {
+    expect(nextMove("counting").meaning).toContain("mistyped key")
+    expect(nextMove("locking").label).toContain("one of yours")
+  })
+
+  it("never leaves a live state without something to do", () => {
+    expect(nextMove("counting").label).not.toBe(nextMove("quiet").label)
+    expect(nextMove("locking").label).not.toBe(nextMove("quiet").label)
+  })
+
+  /** A next move written in the record's vocabulary is not a next move. */
+  it("puts no field name in front of a person", () => {
+    for (const tone of TONES) {
+      const move = nextMove(tone)
+
+      for (const field of ["lockedIsExact", "longestWaitMs", "latestFailureAt", "subjects"]) {
+        expect(`${move.label} ${move.meaning}`).not.toContain(field)
+      }
+    }
+  })
+})
+
+describe("pressureFacts", () => {
+  const full = pressure({
+    subjects: 3,
+    failures: 17,
+    locked: 2,
+    lockedIsExact: false,
+    longestWaitMs: 7 * MINUTE,
+    earliestFailureAt: NOW - 40 * MINUTE,
+    latestFailureAt: NOW - 30_000,
+    counted: 3,
+  })
+
+  /**
+   * The guard the six hand-written cells could not have. `SignInPressure` is
+   * the record this screen exists to report, and a member added to it that no
+   * fact names is a number the screen silently stops showing. `counted` is the
+   * proof that this happens: it has been on the type since the day the type was
+   * written and the screen has never printed it.
+   */
+  it("reaches every member of the record it reports", () => {
+    const named = new Set(pressureFacts(full, NOW).flatMap((fact) => fact.fields))
+
+    expect([...Object.keys(full)].filter((field) => !named.has(field as never))).toEqual([])
+  })
+
+  it("names no member twice, so no number is reported from two places", () => {
+    const named = pressureFacts(full, NOW).flatMap((fact) => fact.fields)
+
+    expect(named.length).toBe(new Set(named).size)
+  })
+
+  /**
+   * The plain-language rule, in the shape this table has it: what a person reads
+   * is never a field name, and the field name is never dropped — it is the
+   * column beside it.
+   */
+  it("leads with a person's words and keeps the record's own beside them", () => {
+    for (const fact of pressureFacts(full, NOW)) {
+      for (const field of fact.fields) {
+        expect(fact.label).not.toContain(field)
+      }
+
+      expect(fact.label[0]).toBe(fact.label[0]?.toUpperCase())
+    }
+  })
+
+  it("carries the floor into the locked figure rather than stating it as a total", () => {
+    const locked = pressureFacts(full, NOW).find((fact) => fact.fields.includes("locked"))
+
+    expect(locked?.value).toBe("at least 2")
+    expect(locked?.fields).toContain("lockedIsExact")
+  })
+
+  it("says a wait and a recency in words, never as a millisecond count", () => {
+    const values = pressureFacts(full, NOW).map((fact) => fact.value)
+
+    expect(values).toContain("7 minutes")
+    expect(values).toContain("less than a minute ago")
+    expect(values).toContain("40 minutes ago")
+  })
+
+  /**
+   * An empty log is the first thing a fresh deployment shows, and a table of
+   * zeroes and em dashes is what it showed. Absence gets a word.
+   */
+  it("says 'none' rather than a dash when there is nothing to report", () => {
+    const values = pressureFacts(pressure(), NOW).map((fact) => fact.value)
+
+    expect(values).toContain("none")
+    expect(values).toContain("none recorded")
+    expect(values).not.toContain("—")
   })
 })
 

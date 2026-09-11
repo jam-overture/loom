@@ -50,7 +50,7 @@ This is not a new idea; it is the second instance of one already accepted.
 `revertInterpreter` ([0032](0032-an-undo-is-a-proposal-not-a-rewind.md)) is a
 deterministic interpreter for exactly the same reason: the seam exists because
 interpretation is the *non-deterministic step*
-([0005](0005-interpretation-is-the-only-non-deterministic-step.md)), not because
+([0005](0005-model-access-is-an-optional-adapter.md)), not because
 it is always a model. This record generalises it and names it, so §4c's examples
 and §4d's marketing copy have a pattern to follow instead of each inventing one.
 
