@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { buildSearchIndex } from "./build"
+import { buildSearchIndex, buildSearchProse } from "./build"
 import { searchDocs, searchTerms } from "./match"
-import { SEARCH_RESULT_LIMIT, type SearchEntry, type SearchIndex } from "./model"
+import { SEARCH_RESULT_LIMIT, withProse, type SearchEntry, type SearchIndex } from "./model"
 
 /**
  * The ranking, checked twice over: on a handful of entries where the right
@@ -267,20 +267,20 @@ describe("what comes first", () => {
   })
 
   it("returns the same order for the same query, every time", () => {
-    const index = buildSearchIndex()
+    const index = withProse(buildSearchIndex(), buildSearchProse())
 
     expect(titles(index, "tree")).toEqual(titles(index, "tree"))
   })
 
   it("shows no more than it said it would", () => {
-    expect(searchDocs(buildSearchIndex(), "a", SEARCH_RESULT_LIMIT).length).toBeLessThanOrEqual(
+    expect(searchDocs(withProse(buildSearchIndex(), buildSearchProse()), "a", SEARCH_RESULT_LIMIT).length).toBeLessThanOrEqual(
       SEARCH_RESULT_LIMIT
     )
   })
 })
 
 describe("the queries a stranger arrives with", () => {
-  const index = buildSearchIndex()
+  const index = withProse(buildSearchIndex(), buildSearchProse())
 
   const firstFew = (query: string): readonly string[] => titles(index, query).slice(0, 4)
 

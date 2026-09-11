@@ -71,7 +71,7 @@ A primitive the probe could not call is in neither list. That is the reading
 and "this form is broken" is not a claim to make on silence.
 
 Nothing is refused at registration, per
-[0010](0010-conformance-is-probed-not-proven.md). The audit reports and the host
+[0012](0012-conformance-is-probed-and-reported-not-enforced.md). The audit reports and the host
 decides.
 
 ## Consequences
@@ -120,7 +120,7 @@ one thing the seam exists for, though — a primitive that *should* post and doe
 not is indistinguishable from one that was never meant to. That gap is only
 closable by someone saying what was intended.
 
-**Refusing registration when the two disagree.** Rejected on 0010's reasoning,
+**Refusing registration when the two disagree.** Rejected on 0012's reasoning,
 and more sharply here than elsewhere: the probe's false negative would take down
 a deployment whose forms all work.
 

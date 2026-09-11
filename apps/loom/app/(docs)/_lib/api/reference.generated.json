@@ -893,6 +893,20 @@
               "summary": ""
             },
             {
+              "name": "RepairMeasurement",
+              "kind": "type",
+              "signature": "type RepairMeasurement = {\n    readonly proposal: PromptMeasurement;\n    /** The refused delta, rendered, and the reasoning offered for it. */\n    readonly refused: number;\n    /** The Gate's reason code and its detail. */\n    readonly objection: number;\n    /** The closing sentence that makes this a revision rather than a fresh ask. */\n    readonly instruction: number;\n    /** `proposal.total` plus the three above: what the repair puts on the wire. */\n    readonly total: number;\n    /** `proposal.total + total`: the whole refused-then-repaired episode. */\n    readonly episode: number;\n};",
+              "truncated": false,
+              "summary": "What a second go costs, once the first one was refused."
+            },
+            {
+              "name": "measureRepairPrompt",
+              "kind": "function",
+              "signature": "const measureRepairPrompt: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => RepairMeasurement",
+              "truncated": false,
+              "summary": "Measures a repair without sending it, on the same terms as `measurePrompt`."
+            },
+            {
               "name": "hashPrompt",
               "kind": "function",
               "signature": "const hashPrompt: (system: string, userMessage: string) => Promise<string>",
@@ -4017,6 +4031,48 @@
           ]
         },
         {
+          "module": "render/control",
+          "title": "Control",
+          "summary": "The handle a primitive has on a control it did not build.",
+          "symbols": [
+            {
+              "name": "CONTROL_CLASS",
+              "kind": "value",
+              "signature": "const CONTROL_CLASS = \"loom-control\"",
+              "truncated": false,
+              "summary": "The class every control carries, and the stem of the second one naming which behaviour built it: `loom-control loom-control-copy`."
+            },
+            {
+              "name": "controlClass",
+              "kind": "function",
+              "signature": "const controlClass: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The classes the runtime stamps on the control one behaviour builds."
+            },
+            {
+              "name": "CONTROL_DISPLAY_PROPERTY",
+              "kind": "value",
+              "signature": "const CONTROL_DISPLAY_PROPERTY = \"--loom-control-display\"",
+              "truncated": false,
+              "summary": "The custom property that decides whether a control is displayed — every control at once."
+            },
+            {
+              "name": "controlDisplayProperty",
+              "kind": "function",
+              "signature": "const controlDisplayProperty: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The custom property that decides whether *one* behaviour's control is displayed: `--loom-copy-display`."
+            },
+            {
+              "name": "controlDisplay",
+              "kind": "function",
+              "signature": "const controlDisplay: (name: BehaviourName, resting: string) => string",
+              "truncated": false,
+              "summary": "The value a control writes for `display`: its own, behind the two properties a primitive may override it with."
+            }
+          ]
+        },
+        {
           "module": "render/decorative",
           "title": "Decorative",
           "summary": "The same children again, as a copy nothing can resolve to a node.",
@@ -4129,6 +4185,41 @@
           ]
         },
         {
+          "module": "render/inline-variables",
+          "title": "Inline variables",
+          "summary": "A render whose colours are values rather than references.",
+          "symbols": [
+            {
+              "name": "VariableSubstitution",
+              "kind": "type",
+              "signature": "type VariableSubstitution = {\n    readonly value: string;\n    /**\n     * Custom properties the theme does not declare **and** that named no\n     * fallback. A reference with a fallback is not reported: the fallback is the\n     * value, exactly as it is in a browser, and `--loom-mono-family` is written\n     * that way on purpose.\n     */\n    readonly unresolved: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A CSS value with the theme's variables resolved, and what could not be."
+            },
+            {
+              "name": "substituteVariables",
+              "kind": "function",
+              "signature": "const substituteVariables: (value: string, variables: ThemeVariables) => VariableSubstitution",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "InlinedProjection",
+              "kind": "type",
+              "signature": "type InlinedProjection = {\n    readonly element: ReactNode;\n    readonly unresolved: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A projection with the theme resolved into it, and what the theme did not answer."
+            },
+            {
+              "name": "inlineThemeVariables",
+              "kind": "function",
+              "signature": "const inlineThemeVariables: (element: ReactNode, variables: ThemeVariables) => InlinedProjection",
+              "truncated": false,
+              "summary": "The projection, with every theme reference in an inline style replaced by what the mounted theme says it is."
+            }
+          ]
+        },
+        {
           "module": "render/primitive",
           "title": "Primitive",
           "summary": "The primitive contract — what a registered component receives, and the only thing the renderer needs from a registry.",
@@ -4167,6 +4258,20 @@
               "signature": "type LoomPrimitive<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehaviour>>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "CallablePrimitive",
+              "kind": "type",
+              "signature": "type CallablePrimitive = (props: LoomPrimitiveProps) => ReactNode;",
+              "truncated": false,
+              "summary": "A primitive called as the plain function of its props, rather than mounted."
+            },
+            {
+              "name": "asCallablePrimitive",
+              "kind": "function",
+              "signature": "const asCallablePrimitive: (primitive: LoomPrimitive) => Result<CallablePrimitive, string>",
+              "truncated": false,
+              "summary": "A `LoomPrimitive` is either a function component or a class, and only the first can be called as a plain function. `typeof` cannot tell them apart — a class is a function too — so the marker React puts on a class component's prototype is what decides it."
             },
             {
               "name": "PrimitiveResolver",
@@ -4227,7 +4332,7 @@
             {
               "name": "RenderOptions",
               "kind": "type",
-              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n};",
+              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4276,7 +4381,7 @@
             {
               "name": "RenderDependencies",
               "kind": "type",
-              "signature": "type RenderDependencies = {\n    readonly source: TreeSource;\n    readonly resolver: PrimitiveResolver;\n    readonly validator?: PropsValidator;\n    /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered — see `RenderOptions.data`.\n     * Supplying a registry is what bounds the sources a proposal may name, the\n     * same way `themes` bounds the palettes.\n     */\n    readonly sources?: DataRegistry;\n    /**\n     * Absent means the tree's submissions are not answered — see\n     * `RenderOptions.submissions`. Supplying a registry is what bounds the\n     * destinations a proposal may name, and it is the only thing that does: an\n     * address never appears in a tree, so a deployment that registers nothing has\n     * no form that posts anywhere.\n     */\n    readonly endpoints?: EndpointRegistry;\n    /**\n     * The origins this deployment will frame — see `RenderOptions.origins`.\n     * Absent means every framable prop is refused with a diagnostic.\n     *\n     * It sits here beside the other three registries and, unlike them, adds no\n     * `await`: an allowlist is a static fact, so it is passed straight through to\n     * the walk rather than resolved first.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * Absent means primitives render the strings their authors declared — see\n     * `RenderOptions.text`. A host serving one language in the library's own\n     * language wires nothing here; a host serving another builds a resolver per\n     * dictionary and picks by whatever it reads the request's language from, which\n     * is its own business and not the framework's.\n     */\n    readonly text?: TextResolver;\n    readonly slots?: SlotContent;\n};",
+              "signature": "type RenderDependencies = {\n    readonly source: TreeSource;\n    readonly resolver: PrimitiveResolver;\n    readonly validator?: PropsValidator;\n    /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered — see `RenderOptions.data`.\n     * Supplying a registry is what bounds the sources a proposal may name, the\n     * same way `themes` bounds the palettes.\n     */\n    readonly sources?: DataRegistry;\n    /**\n     * Absent means the tree's submissions are not answered — see\n     * `RenderOptions.submissions`. Supplying a registry is what bounds the\n     * destinations a proposal may name, and it is the only thing that does: an\n     * address never appears in a tree, so a deployment that registers nothing has\n     * no form that posts anywhere.\n     */\n    readonly endpoints?: EndpointRegistry;\n    /**\n     * The origins this deployment will frame — see `RenderOptions.origins`.\n     * Absent means every framable prop is refused with a diagnostic.\n     *\n     * It sits here beside the other three registries and, unlike them, adds no\n     * `await`: an allowlist is a static fact, so it is passed straight through to\n     * the walk rather than resolved first.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * Absent means primitives render the strings their authors declared — see\n     * `RenderOptions.text`. A host serving one language in the library's own\n     * language wires nothing here; a host serving another builds a resolver per\n     * dictionary and picks by whatever it reads the request's language from, which\n     * is its own business and not the framework's.\n     */\n    readonly text?: TextResolver;\n    readonly slots?: SlotContent;\n    /**\n     * References or values — see `RenderOptions.themeValues`. It belongs to the\n     * request rather than to the deployment: one route serves a page to a browser\n     * and the next draws the same tree into an image, off the same dependencies.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4682,6 +4787,20 @@
           ]
         },
         {
+          "module": "primitives/loom.banner",
+          "title": "loom.banner",
+          "summary": "The strip a site runs above everything else: one short thing to say, and one thing to do about it.",
+          "symbols": [
+            {
+              "name": "loomBanner",
+              "kind": "value",
+              "signature": "const loomBanner: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.before-after",
           "title": "loom.before-after",
           "summary": "Two states of one thing, superimposed, with a hard edge between them — the redesign over the old page, the room staged and unstaged, the photograph before the retouch.",
@@ -4732,6 +4851,20 @@
               "name": "loomCard",
               "kind": "value",
               "signature": "const loomCard: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.carousel",
+          "title": "loom.carousel",
+          "summary": "The fifth general arranger: children in a row that runs past the edge of the page, and snaps.",
+          "symbols": [
+            {
+              "name": "loomCarousel",
+              "kind": "value",
+              "signature": "const loomCarousel: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -4976,6 +5109,20 @@
           ]
         },
         {
+          "module": "primitives/loom.frame",
+          "title": "loom.frame",
+          "summary": "The chrome a product screenshot sits in: a browser window, an app window, or a phone.",
+          "symbols": [
+            {
+              "name": "loomFrame",
+              "kind": "value",
+              "signature": "const loomFrame: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.grid",
           "title": "loom.grid",
           "summary": "Whatever it is given, in as many columns as will fit.",
@@ -5068,6 +5215,20 @@
               "name": "loomLinkList",
               "kind": "value",
               "signature": "const loomLinkList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.link-trail",
+          "title": "loom.link-trail",
+          "summary": "Where the reader is, and every step back out — a run of `loom.link` with the way home between them.",
+          "symbols": [
+            {
+              "name": "loomLinkTrail",
+              "kind": "value",
+              "signature": "const loomLinkTrail: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -5180,6 +5341,20 @@
               "name": "loomMessageList",
               "kind": "value",
               "signature": "const loomMessageList: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.meter",
+          "title": "loom.meter",
+          "summary": "How much of a thing there is, drawn rather than typeset.",
+          "symbols": [
+            {
+              "name": "loomMeter",
+              "kind": "value",
+              "signature": "const loomMeter: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -5396,6 +5571,20 @@
           ]
         },
         {
+          "module": "primitives/loom.pin",
+          "title": "loom.pin",
+          "summary": "One mark placed at a point over the thing it is explaining.",
+          "symbols": [
+            {
+              "name": "loomPin",
+              "kind": "value",
+              "signature": "const loomPin: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.product",
           "title": "loom.product",
           "summary": "One thing for sale: a picture of it, what it is called, what it costs, and the button that buys it.",
@@ -5460,6 +5649,20 @@
               "name": "loomQuoteGrid",
               "kind": "value",
               "signature": "const loomQuoteGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.rating",
+          "title": "loom.rating",
+          "summary": "A score out of five, drawn as stars.",
+          "symbols": [
+            {
+              "name": "loomRating",
+              "kind": "value",
+              "signature": "const loomRating: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }
@@ -5641,7 +5844,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent,\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -7576,6 +7779,482 @@
               "signature": "const loomTelemetry: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_telemetry\";\n    schema: undefined;\n    columns: {\n        seq: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"seq\";\n            tableName: \"loom_telemetry\";\n            dataType: \"number\";\n            columnType: \"PgBigSerial53\";\n            data: number;\n            driverParam: number;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        occurredAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"occurred_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        event: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"event\";\n            tableName: \"loom_telemetry\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        recordedAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"recorded_at\";\n            tableName: \"loom_telemetry\";\n            dataType: \"date\";\n            columnType: \"PgTimestamp\";\n            data: Date;\n            driverParam: string;\n            notNull: true;\n            hasDefault: true;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "One table, because a journal is one thing: an append-only list of what the runtime narrated."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/testing",
+      "slug": "testing",
+      "types": "./dist/testing/index.d.ts",
+      "groups": [
+        {
+          "module": "testing/definitions",
+          "title": "Definitions",
+          "summary": "The primitives of `sampleTree`, declared through the §4 contract, so registry and renderer tests run against real declarations rather than a stand-in for them. `testPrimitives` in `primitives.ts` is the same component set without declarations, which is what §3's tests need.",
+          "symbols": [
+            {
+              "name": "pageDefinition",
+              "kind": "value",
+              "signature": "const pageDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "cardDefinition",
+              "kind": "value",
+              "signature": "const cardDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "headerDefinition",
+              "kind": "value",
+              "signature": "const headerDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "footerDefinition",
+              "kind": "value",
+              "signature": "const footerDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "testDefinitions",
+              "kind": "value",
+              "signature": "const testDefinitions: readonly PrimitiveEntry[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "registryOf",
+              "kind": "function",
+              "signature": "const registryOf: (entries: readonly PrimitiveEntry[]) => PrimitiveRegistry",
+              "truncated": false,
+              "summary": "Registration is fallible, and a test that wanted a registry has nothing to say about a failure to build one, so this unwraps loudly rather than making every caller narrow a Result it does not care about."
+            },
+            {
+              "name": "testRegistry",
+              "kind": "function",
+              "signature": "const testRegistry: () => PrimitiveRegistry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/doubles",
+          "title": "Doubles",
+          "summary": "Test doubles for the impure seams this file owns — the interpreter and its repairer, the clock, and the event sink. The runtime's other two seams are doubled where they are defined: `sequentialIdFactory` in `ids.ts` and `fixedPolicy` in `runtime/policy-source.ts`.",
+          "symbols": [
+            {
+              "name": "FIXED_INSTANT",
+              "kind": "value",
+              "signature": "const FIXED_INSTANT = \"2026-07-28T00:00:00.000Z\"",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "fixedClock",
+              "kind": "function",
+              "signature": "const fixedClock: (instant?: string) => Clock",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CollectingEventSink",
+              "kind": "type",
+              "signature": "type CollectingEventSink = EventSink & {\n    readonly envelopes: readonly RuntimeEventEnvelope[];\n    readonly types: () => readonly string[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "collectingEventSink",
+              "kind": "function",
+              "signature": "const collectingEventSink: () => CollectingEventSink",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "failingEventSink",
+              "kind": "function",
+              "signature": "const failingEventSink: (failOn: readonly string[], mode?: \"throw\" | \"reject\") => CollectingEventSink",
+              "truncated": false,
+              "summary": "A sink that fails on the events it was told to fail on and collects the rest, so a test can assert both halves at once: that the change survived, and that narration carried on past the failure rather than stopping at it."
+            },
+            {
+              "name": "RecordingModelClient",
+              "kind": "type",
+              "signature": "type RecordingModelClient = ModelClient & {\n    readonly requests: readonly ModelRequest[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedModelClient",
+              "kind": "function",
+              "signature": "const scriptedModelClient: (reply: string | Result<ModelCompletion, ModelClientError>, servedBy?: string) => RecordingModelClient",
+              "truncated": false,
+              "summary": "A model that answers from a script and remembers what it was asked, so the interpreter's request assembly and its reply handling can be tested separately, and neither needs a network or a key."
+            },
+            {
+              "name": "RecordingInterpreter",
+              "kind": "type",
+              "signature": "type RecordingInterpreter = ChangeInterpreter & {\n    readonly intents: readonly EditIntent[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedInterpreter",
+              "kind": "function",
+              "signature": "const scriptedInterpreter: (script: Result<ProposedChange, InterpretationError>) => RecordingInterpreter",
+              "truncated": false,
+              "summary": "Returns whatever it was handed, so tests drive the pipeline from a fixed script, and remembers what it was asked — which is how a test asserts that a write refused before interpretation never spent a model call."
+            },
+            {
+              "name": "RecordingRepairer",
+              "kind": "type",
+              "signature": "type RecordingRepairer = ChangeRepairer & {\n    readonly requests: readonly RepairRequest[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedRepairer",
+              "kind": "function",
+              "signature": "const scriptedRepairer: (script: Result<ProposedChange, InterpretationError>) => RecordingRepairer",
+              "truncated": false,
+              "summary": "A repairer that answers from a script and remembers what it was asked, so a test can assert both that the refusal reached it and that exactly one attempt was made."
+            },
+            {
+              "name": "IntentDraft",
+              "kind": "type",
+              "signature": "type IntentDraft = {\n    readonly treeId: TreeId;\n    readonly baseRevision: number;\n    readonly utterance?: string;\n    readonly origin?: IntentOrigin;\n    readonly actor?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "buildIntent",
+              "kind": "function",
+              "signature": "const buildIntent: (idFactory: IdFactory, draft: IntentDraft) => EditIntent",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ProposalDraft",
+              "kind": "type",
+              "signature": "type ProposalDraft = {\n    readonly intentId: IntentId;\n    readonly delta: TreeDelta;\n    readonly rationale?: string;\n    readonly origin?: IntentOrigin;\n    readonly actor?: string;\n    readonly authoredBy?: AuthorKind;\n    readonly confidence?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "buildProposal",
+              "kind": "function",
+              "signature": "const buildProposal: (idFactory: IdFactory, draft: ProposalDraft) => ProposedChange",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/episode-harness",
+          "title": "Episode harness",
+          "summary": "A write path wired to a real Gate, a real store and a real journal, with only the model scripted.",
+          "symbols": [
+            {
+              "name": "EpisodeHarness",
+              "kind": "type",
+              "signature": "type EpisodeHarness = {\n    readonly path: WritePath;\n    readonly journal: TelemetryJournal;\n    readonly collector: TelemetryCollector;\n    readonly tree: LoomTree;\n    readonly ids: IdFactory;\n    readonly intent: EditIntent;\n    readonly fold: () => Promise<EpisodeFold>;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "removalDelta",
+              "kind": "function",
+              "signature": "const removalDelta: (tree: LoomTree, ids: IdFactory, nodeId: string) => TreeDelta",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "harnessWith",
+              "kind": "function",
+              "signature": "const harnessWith: (options: {\n    readonly script: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>;\n    readonly repairer?: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => ChangeRepairer;\n    readonly baseRevision?: number;\n    /**\n     * The Gate that judges this run. Defaults to the shipped one, which is what\n     * most tests want; a test about attribution needs two hosts that differ, and\n     * a policy is the only thing a disposition names.\n     */\n    readonly policy?: GatePolicy;\n}) => Promise<EpisodeHarness>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "proposalScript",
+              "kind": "function",
+              "signature": "const proposalScript: (confidence: number) => (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>",
+              "truncated": false,
+              "summary": "Confidence is the only knob most of these tests need, because it is what the default policy dispositions on: high accepts, middling holds, low refuses."
+            }
+          ]
+        },
+        {
+          "module": "testing/filesystem",
+          "title": "Filesystem",
+          "summary": "A filesystem in memory, so CLI tests assert on what would be written rather than on what a temporary directory ended up containing. Failures are injectable because \"wrote two files, then the disk refused\" is a path the CLI has to report honestly and no real filesystem will produce on demand.",
+          "symbols": [
+            {
+              "name": "MemoryFileSystem",
+              "kind": "type",
+              "signature": "type MemoryFileSystem = FileSystem & {\n    readonly files: ReadonlyMap<string, string>;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "MemoryFileSystemOptions",
+              "kind": "type",
+              "signature": "type MemoryFileSystemOptions = {\n    readonly existing?: readonly string[];\n    readonly listFails?: string;\n    readonly writeFailsAt?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "memoryFileSystem",
+              "kind": "function",
+              "signature": "const memoryFileSystem: (options?: MemoryFileSystemOptions) => MemoryFileSystem",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/fixtures",
+          "title": "Fixtures",
+          "summary": "A small, deterministic tree used across tests and, later, by the renderer and portal for smoke fixtures. Ids come from a sequential factory so assertions can name them instead of digging them out of the structure.",
+          "symbols": [
+            {
+              "name": "SampleTree",
+              "kind": "type",
+              "signature": "type SampleTree = {\n    readonly tree: LoomTree;\n    readonly ids: {\n        readonly page: NodeId;\n        readonly header: NodeId;\n        readonly headline: NodeId;\n        readonly main: NodeId;\n        readonly card: NodeId;\n        readonly body: NodeId;\n        readonly footer: NodeId;\n    };\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "sampleTree",
+              "kind": "function",
+              "signature": "const sampleTree: () => SampleTree",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FormTree",
+              "kind": "type",
+              "signature": "type FormTree = {\n    readonly tree: LoomTree;\n    readonly ids: {\n        readonly page: NodeId;\n        readonly form: NodeId;\n        /** A sibling that posts nowhere, so a test can move a destination onto one. */\n        readonly aside: NodeId;\n    };\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "formTree",
+              "kind": "function",
+              "signature": "const formTree: (to?: string) => FormTree",
+              "truncated": false,
+              "summary": "A page whose form already posts somewhere. Separate from `sampleTree` rather than a node added to it: every count in the stakes and analysis suites is asserted against that tree's exact size, and a fixture that grows is a fixture that makes unrelated tests wrong."
+            }
+          ]
+        },
+        {
+          "module": "testing/model-replies",
+          "title": "Model replies",
+          "summary": "Reply bodies of the shape a model produces under the interpreter's output schema, kept as raw strings so tests exercise the parse step rather than starting from an already-decoded object. Node ids refer to `sampleTree`.",
+          "symbols": [
+            {
+              "name": "INSERT_NOTE_REPLY",
+              "kind": "value",
+              "signature": "const INSERT_NOTE_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CONFIGURE_CARD_REPLY",
+              "kind": "value",
+              "signature": "const CONFIGURE_CARD_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NO_CHANGE_REPLY",
+              "kind": "value",
+              "signature": "const NO_CHANGE_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NOT_UNDERSTOOD_REPLY",
+              "kind": "value",
+              "signature": "const NOT_UNDERSTOOD_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "OFF_SCHEMA_REPLY",
+              "kind": "value",
+              "signature": "const OFF_SCHEMA_REPLY: string",
+              "truncated": false,
+              "summary": "Well-formed JSON, but not a shape the reply schema allows."
+            },
+            {
+              "name": "FOREIGN_ID_REPLY",
+              "kind": "value",
+              "signature": "const FOREIGN_ID_REPLY: string",
+              "truncated": false,
+              "summary": "An operation that names a node id the id scheme does not permit."
+            },
+            {
+              "name": "UNDECODABLE_PROP_REPLY",
+              "kind": "value",
+              "signature": "const UNDECODABLE_PROP_REPLY: string",
+              "truncated": false,
+              "summary": "Passes the schema, because the schema only says \"a string\", and fails the parse. This is the failure mode accepted in exchange for the grammar budget, so it is a fixture rather than an impossibility."
+            },
+            {
+              "name": "NON_OBJECT_PROPS_REPLY",
+              "kind": "value",
+              "signature": "const NON_OBJECT_PROPS_REPLY: string",
+              "truncated": false,
+              "summary": "Parseable JSON, but not an object, so it cannot be a prop bag."
+            },
+            {
+              "name": "INSERT_SLOT_REPLY",
+              "kind": "value",
+              "signature": "const INSERT_SLOT_REPLY: string",
+              "truncated": false,
+              "summary": "Passes the schema and the parse, and proposes a slot — which the reply schema no longer offers as an insertable kind, so the draft schema must refuse it."
+            },
+            {
+              "name": "TRUNCATED_REPLY",
+              "kind": "value",
+              "signature": "const TRUNCATED_REPLY = \"{\\\"outcome\\\":\\\"change\\\",\\\"rationale\\\":\\\"Adds a not\"",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/primitives",
+          "title": "Primitives",
+          "summary": "A host primitive set covering `sampleTree`, so renderer tests assert against real markup rather than a mock's call log.",
+          "symbols": [
+            {
+              "name": "undecoratedPrimitive",
+              "kind": "value",
+              "signature": "const undecoratedPrimitive: LoomPrimitive",
+              "truncated": false,
+              "summary": "A primitive that ignores `loom.editable` — the failure mode §4 has to catch."
+            },
+            {
+              "name": "testPrimitives",
+              "kind": "value",
+              "signature": "const testPrimitives: Readonly<Record<string, LoomPrimitive>>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "testPrimitiveResolver",
+              "kind": "value",
+              "signature": "const testPrimitiveResolver: PrimitiveResolver",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/testing/contracts",
+      "slug": "testing-contracts",
+      "types": "./dist/testing/contracts.d.ts",
+      "groups": [
+        {
+          "module": "testing/hold-contract",
+          "title": "Hold contract",
+          "summary": "One suite, run against every `HoldStore`.",
+          "symbols": [
+            {
+              "name": "heldProposalFixture",
+              "kind": "function",
+              "signature": "const heldProposalFixture: (options?: {\n    readonly heldAt?: string;\n    readonly treeId?: TreeId;\n    readonly actor?: string;\n    readonly policyFingerprint?: string;\n}) => HeldProposal",
+              "truncated": false,
+              "summary": "A hold against a real tree."
+            },
+            {
+              "name": "describeHoldStoreContract",
+              "kind": "function",
+              "signature": "const describeHoldStoreContract: (name: string, makeStore: () => HoldStore | Promise<HoldStore>) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/journal-contract",
+          "title": "Journal contract",
+          "summary": "One suite, run against every `TelemetryJournal`.",
+          "symbols": [
+            {
+              "name": "sampleEpisode",
+              "kind": "function",
+              "signature": "const sampleEpisode: (namespace?: string) => readonly TelemetryRecord[]",
+              "truncated": false,
+              "summary": "A whole episode, narrated: an intent, the proposal it produced, the Gate accepting it, and the change landing. Built through `recordOf` rather than by hand so the suite exercises the narrowing every host will use."
+            },
+            {
+              "name": "describeTelemetryJournalContract",
+              "kind": "function",
+              "signature": "const describeTelemetryJournalContract: (name: string, makeJournal: () => Promise<TelemetryJournal> | TelemetryJournal) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/row-security",
+          "title": "Row security",
+          "summary": "Asking Postgres whether a table really is protected.",
+          "symbols": [
+            {
+              "name": "rowSecurityOn",
+              "kind": "function",
+              "signature": "const rowSecurityOn: (db: LoomDatabase, table: string) => Promise<boolean>",
+              "truncated": false,
+              "summary": "Whether Postgres has row level security on a table, read from the catalogue rather than inferred from having run the statement."
+            }
+          ]
+        },
+        {
+          "module": "testing/store-contract",
+          "title": "Store contract",
+          "summary": "One suite, run against every `TreeStore`.",
+          "symbols": [
+            {
+              "name": "appendOf",
+              "kind": "function",
+              "signature": "const appendOf: (delta: TreeDelta, proposal?: string) => AppendRequest",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "removalOf",
+              "kind": "function",
+              "signature": "const removalOf: (tree: LoomTree, nodeId: string, baseRevision?: number) => TreeDelta",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "treeNamed",
+              "kind": "function",
+              "signature": "const treeNamed: (namespace: string) => LoomTree",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeTreeStoreContract",
+              "kind": "function",
+              "signature": "const describeTreeStoreContract: (name: string, makeStore: () => Promise<TreeStore> | TreeStore) => void",
+              "truncated": false,
+              "summary": "`makeStore` returns a store with nothing in it. Each test gets its own, so the suite never depends on the order it runs in."
             }
           ]
         }

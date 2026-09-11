@@ -151,8 +151,10 @@ export const buildUserMessage = (
  * across every intent: a large constant is a different kind of cost from a large
  * catalogue that arrives on every request behind a tree that keeps changing.
  *
- * A repair sends this message plus the refused delta and the objection, so a
- * repaired intent costs about twice what this reports.
+ * A repair sends this message again, plus the refused delta and the objection.
+ * What that costs is `measureRepairPrompt` below rather than a multiplier
+ * quoted here, because the ratio moves with the page
+ * (0108).
  */
 export type PromptMeasurement = {
   readonly system: number
@@ -194,22 +196,110 @@ export const measurePrompt = (
   }
 }
 
-export const buildRepairMessage = (
+/**
+ * The repair message in its parts, for the reason `UserMessageParts` exists: a
+ * measurement that rebuilt these blocks itself would be a second assembly to
+ * keep in step with this one.
+ *
+ * `proposal` is the whole first request, verbatim. That is the finding this
+ * split was made to answer — a repair does not refer back to the tree, it sends
+ * it again (0108).
+ */
+type RepairMessageParts = {
+  readonly proposal: string
+  readonly refused: string
+  readonly objection: string
+  readonly instruction: string
+}
+
+const repairMessageParts = (
   request: RepairRequest,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue,
-  themes?: ThemeCatalogue
-): string => `${buildUserMessage(request.intent, tree, catalogue, themes)}
+  catalogue: PrimitiveCatalogue | undefined,
+  themes: ThemeCatalogue | undefined
+): RepairMessageParts => ({
+  proposal: buildUserMessage(request.intent, tree, catalogue, themes),
+  refused: `
 
 You proposed this, and it was refused:
 
 ${renderDelta(request.refused.delta)}
 
-Your reasoning was: ${request.refused.rationale}
+Your reasoning was: ${request.refused.rationale}`,
+  objection: `
 
-It was refused because — ${request.disposition.reason.code}: ${request.disposition.reason.detail}
+It was refused because — ${request.disposition.reason.code}: ${request.disposition.reason.detail}`,
+  instruction: `
 
-Propose a more conservative way to satisfy the same request, or say "not-understood" if there is none.`
+Propose a more conservative way to satisfy the same request, or say "not-understood" if there is none.`,
+})
+
+export const buildRepairMessage = (
+  request: RepairRequest,
+  tree: LoomTree,
+  catalogue?: PrimitiveCatalogue,
+  themes?: ThemeCatalogue
+): string => {
+  const parts = repairMessageParts(request, tree, catalogue, themes)
+
+  return `${parts.proposal}${parts.refused}${parts.objection}${parts.instruction}`
+}
+
+/**
+ * What a second go costs, once the first one was refused.
+ *
+ * `proposal` is the measurement of the request that was refused — and, because a
+ * repair restates it whole, also the measurement of the largest part of the
+ * repair. Reading the same numbers twice is the point: the block that dominated
+ * the first request dominates the second, and on a large page that block is the
+ * tree.
+ *
+ * `total` is the repair request on the wire. `episode` is both requests together
+ * — what asking once and being refused once actually cost — and it is the number
+ * the doubling is about (0108).
+ */
+export type RepairMeasurement = {
+  readonly proposal: PromptMeasurement
+  /** The refused delta, rendered, and the reasoning offered for it. */
+  readonly refused: number
+  /** The Gate's reason code and its detail. */
+  readonly objection: number
+  /** The closing sentence that makes this a revision rather than a fresh ask. */
+  readonly instruction: number
+  /** `proposal.total` plus the three above: what the repair puts on the wire. */
+  readonly total: number
+  /** `proposal.total + total`: the whole refused-then-repaired episode. */
+  readonly episode: number
+}
+
+/**
+ * Measures a repair without sending it, on the same terms as `measurePrompt`.
+ *
+ * The intended caller is a host or a report deciding whether a refusal is worth
+ * offering a second go on: a repair is never cheaper than the request it
+ * revises, and how much dearer is a property of the page rather than a constant
+ * (0108).
+ */
+export const measureRepairPrompt = (
+  request: RepairRequest,
+  tree: LoomTree,
+  catalogue?: PrimitiveCatalogue,
+  themes?: ThemeCatalogue
+): RepairMeasurement => {
+  const parts = repairMessageParts(request, tree, catalogue, themes)
+  const proposal = measurePrompt(request.intent, tree, catalogue, themes)
+
+  const measured = {
+    refused: parts.refused.length,
+    objection: parts.objection.length,
+    instruction: parts.instruction.length,
+  }
+
+  const total =
+    proposal.total + Object.values(measured).reduce((sum, part) => sum + part, 0)
+
+  return { proposal, ...measured, total, episode: proposal.total + total }
+}
 
 const HEX = Array.from({ length: 256 }, (_, byte) => byte.toString(16).padStart(2, "0"))
 

@@ -9,6 +9,7 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { summariseOperations } from "@/app/(portal)/_lib/delta-summary"
 import { type WriteReport } from "@/app/(portal)/_lib/outcome"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+import { answerOutcomes } from "@/app/(portal)/_lib/waiting"
 import {
   STAKES,
   confidenceWord,
@@ -65,6 +66,7 @@ export const HeldProposalCard = ({
    */
   const answered = report !== null
   const stakes = STAKES[held.disposition.stakes]
+  const answers = answerOutcomes(held.disposition)
 
   return (
     <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-3">
@@ -89,6 +91,34 @@ export const HeldProposalCard = ({
       </div>
 
       <ProposalEffectView effect={effect} />
+
+      {/*
+        * What each button would set in motion, said before either is pressed.
+        *
+        * The card has always described the change and never the *answer*. Those
+        * are different questions: `ProposalEffectView` above says what would
+        * happen to the page, and a person hovering over two buttons wants to
+        * know what they are about to commit themselves to and whether they can
+        * walk it back. The undoability of a yes is the sharpest half — it was a
+        * `reversible no` pair one click down, which is the wrong altitude for
+        * the most consequential fact on the card.
+        *
+        * The sentences come from `answerOutcomes` rather than from here, so
+        * this card and the queue on `/portal` cannot describe the same two
+        * buttons differently.
+        */}
+      {!answered && (
+        <dl className="flex flex-col gap-2 text-xs">
+          <div className="flex flex-col gap-0.5">
+            <dt className="font-medium">If you say yes</dt>
+            <dd className="text-ink-muted">{answers.yes}</dd>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <dt className="font-medium">If you say no</dt>
+            <dd className="text-ink-muted">{answers.no}</dd>
+          </div>
+        </dl>
+      )}
 
       {/*
         * The buttons stay live even when the effect says the delta would not

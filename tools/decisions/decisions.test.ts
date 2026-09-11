@@ -2,7 +2,13 @@ import { readFile } from "node:fs/promises"
 
 import { describe, expect, it } from "vitest"
 
-import { blocking, collectDecisions, generatedReadme, README_PATH } from "./collect.js"
+import {
+  blocking,
+  collectDecisions,
+  DECISIONS_DIRECTORY,
+  generatedReadme,
+  README_PATH,
+} from "./collect.js"
 import { checkNumbering, missingNumbers, severityOf } from "./numbering.js"
 import { parseDecisionRecord, type DecisionRecord } from "./record.js"
 import { compressSection, renderIndex, withGeneratedIndex } from "./render.js"
@@ -288,5 +294,37 @@ describe("the decision records in this repository", () => {
     const { readme } = await generatedReadme()
 
     expect(await readFile(README_PATH, "utf8")).toBe(readme)
+  })
+
+  /**
+   * A cross-reference is written twice — once as the number a reader sees and
+   * once as the file a click opens — and a rename only moves the second. #217
+   * renumbered a record that had just collided and left two records citing it
+   * as `[0096](0099-…)`: the right file, under a number that by then belonged
+   * to something else entirely. Nothing could notice, because the numbering
+   * check reads statuses rather than prose, and the link worked.
+   *
+   * Prose is where the renaming cost lands, so prose is where this looks.
+   */
+  it("cite each other by a number that matches the file the link opens", async () => {
+    const { records } = await collectDecisions()
+    const present = new Set(records.map((record) => record.file))
+
+    const wrong: string[] = []
+
+    for (const record of records) {
+      const text = await readFile(`${DECISIONS_DIRECTORY}${record.file}`, "utf8")
+
+      for (const match of text.matchAll(/\[(\d{4})\]\(((\d{4})-[^)#]+\.md)/g)) {
+        const [link, label, file, number] = match as unknown as readonly string[]
+
+        if (label !== number) wrong.push(`${record.file}: ${link} opens ${file}`)
+        else if (!present.has(file as string)) {
+          wrong.push(`${record.file}: ${link} opens ${file}, which is not a record here`)
+        }
+      }
+    }
+
+    expect(wrong).toEqual([])
   })
 })

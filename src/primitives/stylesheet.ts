@@ -80,7 +80,7 @@ export const LIBRARY_CLASS = {
   marker: "loom-marker",
   /** A logo held back to grey until it is pointed at. */
   mark: "loom-mark",
-  /** A `loom.milestone-list`: spaces its entries and ends its own rail. */
+  /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */
   rail: "loom-rail",
   /** The same list, set tighter — a changelog to scan rather than a history to read. */
   railTight: "loom-rail-tight",
@@ -233,6 +233,39 @@ export const LIBRARY_CLASS = {
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
   /**
+   * A `loom.recording`. The card, the frame the `@container` rule flips, the
+   * artwork panel, the body beside it, the play mark over the artwork and the
+   * runtime pinned into its corner.
+   *
+   * The frame's direction is here for `loom-offering-frame`'s reason — an
+   * inline value would beat the rule that flips it — and the play mark's
+   * position is here because it is a `transform` the hover state has to
+   * *extend* rather than replace. A mark centred by an inline
+   * `translate(-50%, -50%)` and scaled by a rule would lose the centring the
+   * moment the rule fired, which is the kind of defect that only shows on
+   * hover and therefore never in a screenshot.
+   */
+  recording: "loom-recording",
+  recordingFrame: "loom-recording-frame",
+  recordingArt: "loom-recording-art",
+  recordingBody: "loom-recording-body",
+  recordingPlay: "loom-recording-play",
+  recordingTime: "loom-recording-time",
+  /**
+   * A `loom.event`. The card, the frame, the date in its margin, the body and
+   * the action pinned to the card's end.
+   *
+   * The rule between the date and the rest is on `loom-event-when` and only
+   * inside the `@container` block, because it is an inline-end border in the
+   * row arrangement and would be a horizontal line under a date — a divider
+   * between nothing — in the stacked one.
+   */
+  event: "loom-event",
+  eventFrame: "loom-event-frame",
+  eventWhen: "loom-event-when",
+  eventBody: "loom-event-body",
+  eventAction: "loom-event-action",
+  /**
    * A `loom.nav`. The bar itself, the box holding its disclosure control, and
    * the menu that control opens and closes.
    *
@@ -254,7 +287,7 @@ export const LIBRARY_CLASS = {
   navMenu: "loom-nav-menu",
   /** Its actions end, which takes the slack on a phone when no control was built. */
   navActions: "loom-nav-actions",
-  /** A `loom.mosaic`: one column until there is room for six. */
+  /** A `loom.mosaic`: one column until the band itself has room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
   mosaicAlternating: "loom-mosaic-alternating",
@@ -312,6 +345,75 @@ export const LIBRARY_CLASS = {
   reveal: "loom-reveal",
   revealFade: "loom-reveal-fade",
   revealStill: "loom-reveal-still",
+   /**
+   * A `loom.frame`. The chrome itself, which declares the containment its marks
+   * are measured against; the screen inside it; and the layer over that screen.
+   */
+  frame: "loom-frame",
+  frameScreen: "loom-frame-screen",
+  /**
+   * The layer is the whole of what separates a wide frame from a narrow one: an
+   * overlay on the screen where there is room, a legend under it where there is
+   * not. Both are in this file because a pin cannot know which it is in, the
+   * legend is the **unqueried** rule so a client that resolves no query gets the
+   * readable one (0079), and the query is the *frame's* width rather than the
+   * window's — a screenshot in one column of a split is narrow on the widest
+   * screen there is.
+   */
+  framePins: "loom-frame-pins",
+  /** One `loom.pin`: the mark, its dot, its label, and the four sides it may open to. */
+  pin: "loom-pin",
+  pinDot: "loom-pin-dot",
+  pinLabel: "loom-pin-label",
+  pinStart: "loom-pin-start",
+  pinEnd: "loom-pin-end",
+  pinAbove: "loom-pin-above",
+  pinBelow: "loom-pin-below",
+  /** The still rendering it takes while somebody is editing the page. */
+  pinStill: "loom-pin-still",
+  /**
+   * A `loom.link-trail`. The row, one crumb in it, and the three things that
+   * may sit between two crumbs.
+   *
+   * The separator is a `::before` on the *wrapper* rather than on the link,
+   * which is the only reason it can exist: a pseudo-element on the anchor is
+   * inside the link, so its glyph joins the link's accessible name and the
+   * reader hears "slash Documentation". Which crumbs get one is `+`, and where
+   * an element sits among its siblings is a fact no render of one node has.
+   */
+  trail: "loom-trail",
+  trailCrumb: "loom-trail-crumb",
+  /** The default: a rotated corner, drawn rather than typed, so nothing announces it. */
+  trailChevron: "loom-trail-chevron",
+  trailSlash: "loom-trail-slash",
+  trailDot: "loom-trail-dot",
+  /**
+   * A `loom.carousel`: the scroller, one cell in it, and the variant that snaps
+   * to the middle.
+   *
+   * Everything except each cell's width is here, and the width is the one thing
+   * that has to be inline because it comes from a prop. The rest — the snapping,
+   * the smooth scroll a reduced-motion reader does not get, the focus ring, and
+   * the block padding that keeps a card's hover shadow from becoming a vertical
+   * scrollbar — is either a state selector or a rule something else has to
+   * cancel, and an inline value would beat all of it.
+   */
+  carousel: "loom-carousel",
+  carouselCell: "loom-carousel-cell",
+  carouselCentred: "loom-carousel-centred",
+  /**
+   * A `loom.meter`'s two fills. One custom property carries the proportion, and
+   * one keyframe animates it from nothing, so a bar and a ring fill in step and
+   * a single rule stops both for a reader who asked for calm.
+   *
+   * The property is registered with `@property`, which is what makes it
+   * animate at all: an unregistered custom property interpolates discretely, so
+   * the bar would jump from empty to full in one frame. A browser that does not
+   * support the rule still renders the right proportion — the value is on the
+   * element — and simply does not animate it, which is the correct way to fail.
+   */
+  meterFill: "loom-meter-fill",
+  meterArc: "loom-meter-arc",
 } as const
 
 /**
@@ -321,9 +423,17 @@ export const LIBRARY_CLASS = {
  * for anyone who asked their system to calm it down.
  */
 const CSS = `
+@property --loom-meter-sweep {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
 @keyframes loom-rise {
   from { opacity: 0; transform: translate3d(0, 0.9rem, 0); }
   to { opacity: 1; transform: none; }
+}
+@keyframes loom-meter-sweep {
+  from { --loom-meter-sweep: 0%; }
 }
 @keyframes loom-orbit {
   from { transform: rotate(0turn); }
@@ -384,6 +494,34 @@ details[open] > summary .loom-marker {
 .loom-milestone > .loom-rail-marker {
   text-align: end;
 }
+.loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone {
+  grid-template-columns: auto 1fr;
+}
+.loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone > .loom-rail-marker {
+  display: none;
+}
+@container (max-width: 26rem) {
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone {
+    grid-template-columns: auto 1fr;
+    row-gap: var(--loom-spacing-1);
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-marker {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: start;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-track {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) .loom-rail-dot {
+    margin-block-start: 0.3em;
+  }
+}
 .loom-milestone > .loom-rail-track {
   flex-direction: column;
 }
@@ -424,6 +562,9 @@ details[open] > summary .loom-marker {
 }
 .loom-milestone-row > li:last-child .loom-rail-line {
   visibility: hidden;
+}
+.loom-rail {
+  container-type: inline-size;
 }
 .loom-rail > li .loom-rail-body {
   padding-block-end: var(--loom-spacing-5);
@@ -701,6 +842,96 @@ details[open] > summary .loom-marker {
 .loom-credential {
   position: relative;
 }
+.loom-recording {
+  position: relative;
+  container-type: inline-size;
+}
+.loom-recording-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.loom-recording-art {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+.loom-recording-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-recording-play {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform var(--loom-motion-medium) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+.loom-recording-time {
+  position: absolute;
+  inset-block-end: var(--loom-spacing-2);
+  inset-inline-end: var(--loom-spacing-2);
+}
+@container (min-width: 34rem) {
+  .loom-recording-frame {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .loom-recording-art {
+    inline-size: 11rem;
+  }
+}
+.loom-event {
+  container-type: inline-size;
+}
+.loom-event-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-3);
+  height: 100%;
+}
+.loom-event-when {
+  flex: 0 0 auto;
+}
+.loom-event-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-event-action {
+  display: grid;
+  margin-block-start: auto;
+}
+@container (min-width: 40rem) {
+  .loom-event-frame {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--loom-spacing-5);
+  }
+  .loom-event-when {
+    inline-size: 9rem;
+    align-self: stretch;
+    border-inline-end: 1px solid var(--loom-border-subtle);
+    padding-inline-end: var(--loom-spacing-5);
+  }
+  .loom-event-action {
+    flex: 0 0 auto;
+    margin-block-start: 0;
+  }
+}
 .loom-nav-menu {
   display: flex;
   flex-wrap: wrap;
@@ -734,13 +965,26 @@ details[open] > summary .loom-marker {
 }
 .loom-mosaic {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(6, 1fr);
   align-items: stretch;
+  container-type: inline-size;
 }
-@media (min-width: 48rem) {
-  .loom-mosaic {
-    grid-template-columns: repeat(6, 1fr);
-  }
+/*
+ /**
+ * One column until the *band* has room for six, never until the screen does.
+ *
+ * A container query reads an ancestor rather than the element that declared
+ * containment, so grid-template-columns -- which lives on the mosaic itself --
+ * cannot be inside the query. The six tracks are therefore unconditional and it
+ * is the *cells* that are switched: full-width by default, and cut into the
+ * rhythm's spans only where the band is wide enough to hold them. That is also
+ * the safe way round, because a browser that does not understand a container
+ * query falls back to one cell per row rather than to six columns on a phone.
+ */
+.loom-mosaic > * {
+  grid-column: span 6;
+}
+@container (min-width: 48rem) {
   .loom-mosaic-alternating > *:nth-child(4n + 1),
   .loom-mosaic-alternating > *:nth-child(4n) {
     grid-column: span 4;
@@ -758,7 +1002,13 @@ details[open] > summary .loom-marker {
   .loom-mosaic-showcase > *:nth-child(5n) {
     grid-column: span 2;
   }
-  .loom-mosaic-lead > * {
+  /*
+   /**
+   * Two classes rather than one, so this rule outranks the unconditional
+   * .loom-mosaic > * above on specificity rather than on source order -- the
+   * only rhythm rule whose selector would otherwise tie with it.
+   */
+  .loom-mosaic.loom-mosaic-lead > * {
     grid-column: span 2;
   }
   .loom-mosaic-lead > *:first-child {
@@ -884,6 +1134,153 @@ details[open] > summary .loom-marker {
     transform: none;
   }
 }
+@keyframes loom-pin-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  70%, 100% { transform: scale(2.2); opacity: 0; }
+}
+.loom-frame {
+  container-type: inline-size;
+}
+.loom-frame-pins {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  padding: var(--loom-spacing-3);
+  border-block-start: 1px solid var(--loom-border-subtle);
+}
+.loom-frame-pins:empty {
+  display: none;
+}
+.loom-pin {
+  display: flex;
+  align-items: center;
+  gap: var(--loom-spacing-2);
+}
+.loom-pin-dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding-inline: 0.3rem;
+  border-radius: var(--loom-radius-full);
+  line-height: 1;
+}
+.loom-pin-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--loom-accent);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: loom-pin-pulse calc(var(--loom-motion-slow) * 7) ease-out infinite;
+}
+.loom-pin-label {
+  display: inline-block;
+  padding: var(--loom-spacing-1) var(--loom-spacing-2);
+}
+.loom-pin-still .loom-pin-dot::after {
+  animation: none;
+}
+@container (min-width: 40rem) {
+  .loom-frame-pins {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+    border-block-start: 0;
+    pointer-events: none;
+  }
+  .loom-pin {
+    position: absolute;
+    inset-inline-start: var(--loom-pin-x);
+    inset-block-start: var(--loom-pin-y);
+    display: grid;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+  }
+  .loom-pin-label {
+    position: absolute;
+    max-width: 14rem;
+    white-space: nowrap;
+  }
+  .loom-pin-start .loom-pin-label, .loom-pin-end .loom-pin-label {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+  }
+  .loom-pin-end .loom-pin-label {
+    inset-inline-start: calc(100% + var(--loom-spacing-2));
+  }
+  .loom-pin-start .loom-pin-label {
+    inset-inline-end: calc(100% + var(--loom-spacing-2));
+  }
+  .loom-pin-above .loom-pin-label, .loom-pin-below .loom-pin-label {
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+  }
+  .loom-pin-above .loom-pin-label {
+    inset-block-end: calc(100% + var(--loom-spacing-2));
+  }
+  .loom-pin-below .loom-pin-label {
+    inset-block-start: calc(100% + var(--loom-spacing-2));
+  }
+}
+.loom-trail-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--loom-spacing-2);
+}
+.loom-trail > .loom-trail-crumb + .loom-trail-crumb::before {
+  flex: 0 0 auto;
+  color: var(--loom-fg-subtle);
+}
+.loom-trail-chevron > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "";
+  width: 0.3em;
+  height: 0.3em;
+  border-block-start: 1px solid var(--loom-border-subtle);
+  border-inline-end: 1px solid var(--loom-border-subtle);
+  transform: rotate(45deg);
+}
+.loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "/";
+}
+.loom-trail-dot > .loom-trail-crumb + .loom-trail-crumb::before {
+  content: "\\00B7";
+}
+.loom-carousel {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scroll-snap-type: inline mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--loom-border-subtle) transparent;
+  padding-block: var(--loom-spacing-2);
+}
+.loom-carousel:focus-visible {
+  outline: 2px solid var(--loom-accent);
+  outline-offset: 2px;
+}
+.loom-carousel-cell {
+  display: flex;
+  scroll-snap-align: start;
+}
+.loom-carousel-cell > * {
+  width: 100%;
+}
+.loom-carousel-centred > .loom-carousel-cell {
+  scroll-snap-align: center;
+}
+.loom-meter-fill {
+  width: var(--loom-meter-sweep);
+}
+.loom-meter-fill, .loom-meter-arc {
+  animation: loom-meter-sweep calc(var(--loom-motion-slow) * 2) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 @media (prefers-reduced-motion: reduce) {
   .loom-orbit-spinner, .loom-orbit-item {
     animation: none;
@@ -897,6 +1294,9 @@ details[open] > summary .loom-marker {
     animation: none;
     opacity: 1;
     transform: none;
+  }
+  .loom-pin-dot::after {
+    animation: none;
   }
   .loom-rise, .loom-aurora {
     animation: none;
@@ -918,11 +1318,20 @@ details[open] > summary .loom-marker {
   .loom-marquee-echo {
     display: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > * {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play {
     transition: none;
   }
   .loom-lift:hover {
     transform: none;
+  }
+  .loom-meter-fill, .loom-meter-arc {
+    animation: none;
+  }
+  .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+    transform: translate(-50%, -50%);
+  }
+  .loom-carousel {
+    scroll-behavior: auto;
   }
 }
 `.trim()
