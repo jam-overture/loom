@@ -12,7 +12,7 @@ import {
   type MergeReport,
 } from "../_lib/record"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * The one page on this surface that is about the record rather than the course.
@@ -72,7 +72,7 @@ const alreadyHere = (report: MergeReport): readonly string[] =>
   ])
 
 export const StudyRecord = () => {
-  const { progress, ready, update } = useProgress()
+  const { progress, ready, update, today } = useProgress()
   const [pending, setPending] = useState<Pending | undefined>(undefined)
   const [problem, setProblem] = useState<string | undefined>(undefined)
   const [done, setDone] = useState<string | undefined>(undefined)
@@ -82,7 +82,7 @@ export const StudyRecord = () => {
   if (!ready) return <p style={style.note}>Reading what this browser holds&hellip;</p>
 
   const summary = summariseRecord(progress)
-  const held = packRecord(progress, today())
+  const held = packRecord(progress, today)
   const asText = JSON.stringify(held, undefined, 2)
   const empty = summary.days === 0
 
@@ -157,7 +157,7 @@ export const StudyRecord = () => {
     const anchor = document.createElement("a")
 
     anchor.href = url
-    anchor.download = FILENAME(today())
+    anchor.download = FILENAME(today)
     anchor.click()
     URL.revokeObjectURL(url)
   }

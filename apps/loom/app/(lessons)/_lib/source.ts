@@ -55,4 +55,23 @@ export const COURSE_DIR = join(REPOSITORY_ROOT, "lessons")
  */
 export const RUNTIME_SRC = join(REPOSITORY_ROOT, "src")
 
+/**
+ * The decision records, which the course cites and does not contain.
+ *
+ * A lesson cites a record the way a paper cites a paper — with its number and
+ * its title, linked — because a lesson is written for somebody reading this
+ * repository. A review question inherits that citation and is read by somebody
+ * who may not be, which is what made a bare `0033` on `/lessons/review/set-k`
+ * worth filing. The number is not the problem; the missing door is.
+ */
+export const DECISIONS_DIR = join(REPOSITORY_ROOT, "decisions")
+
+/**
+ * Where a file in this repository can be opened, for a reader who has not
+ * cloned it. `loom.link` refuses a relative href (a link whose destination
+ * depends on where the tree is mounted is not a link), and a checkout path is
+ * not a route on this surface either way.
+ */
+export const REPOSITORY_BLOB = "https://github.com/jam-overture/loom/blob/main"
+
 export const readCourseFile = (name: string): string => readFileSync(join(COURSE_DIR, name), "utf8")

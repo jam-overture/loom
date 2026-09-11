@@ -41,6 +41,24 @@ export const referencedLessons = (markdown: string): readonly number[] => {
   return [...found].sort((a, b) => a - b)
 }
 
+/**
+ * A decision record cited in running prose: `the contract in 0033`.
+ *
+ * Four digits opening with a zero, which is what a record number is and what
+ * nothing else in this course is — lesson numbers are two digits, section numbers
+ * are `§6`, and a year is not zero-padded. A citation written as a link survives
+ * this too, because `plainText` leaves `[decisions/0033](…)` as its label.
+ */
+const RECORD = /\b0\d{3}\b/g
+
+export const referencedRecords = (markdown: string): readonly number[] => {
+  const found = new Set<number>()
+
+  for (const match of markdown.matchAll(RECORD)) found.add(Number(match[0]))
+
+  return [...found].sort((a, b) => a - b)
+}
+
 export const plainText = (markdown: string): string =>
   markdown
     .replace(REFERENCE, "")

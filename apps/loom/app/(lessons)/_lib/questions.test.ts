@@ -59,7 +59,7 @@ describe("every question in the course", () => {
     for (const question of warmUps) {
       const lesson = Number(question.set.slice("lesson-".length, "lesson-".length + 2))
 
-      expect(question.checkIn.map((pointer) => pointer.number)).not.toContain(lesson)
+      expect(question.checkIn.map((pointer) => pointer.name)).not.toContain(String(lesson).padStart(2, "0"))
     }
   })
 
@@ -71,7 +71,7 @@ describe("every question in the course", () => {
     for (const question of selfChecks) {
       const lesson = Number(question.set.slice("lesson-".length, "lesson-".length + 2))
 
-      expect(question.checkIn.map((pointer) => pointer.number)).toContain(lesson)
+      expect(question.checkIn.map((pointer) => pointer.name)).toContain(String(lesson).padStart(2, "0"))
     }
   })
 

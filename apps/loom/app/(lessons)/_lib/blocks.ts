@@ -2,6 +2,7 @@ import { buildElement, buildText, type IdFactory, type JsonObject, type LoomNode
 
 import { card, heading, link, prose, stack } from "./loom"
 import type { Block, TableRow } from "./markdown"
+import { REPOSITORY_BLOB } from "./source"
 import { plainText } from "./text"
 
 /**
@@ -17,8 +18,6 @@ import { plainText } from "./text"
 /** A cell that is nothing but a link, which is every cell of an "In the code" table. */
 const ONLY_LINK = /^\[(.+)\]\(([^)]+)\)$/
 
-const REPOSITORY = "https://github.com/jam-overture/loom/blob/main"
-
 /**
  * A lesson links sideways — `../src/runtime/interpreter.ts`, `../decisions/0006-…`
  * — and those are paths in a checkout, not routes on this surface. Absolute is
@@ -33,7 +32,7 @@ const repositoryUrl = (href: string, from: string): string | undefined => {
 
   const path = href.startsWith("../") ? href.slice(3) : `${from}/${href}`
 
-  return `${REPOSITORY}/${path.replace(/^\.\//, "")}`
+  return `${REPOSITORY_BLOB}/${path.replace(/^\.\//, "")}`
 }
 
 const TERMINAL = new Set(["bash", "sh", "shell", "console"])

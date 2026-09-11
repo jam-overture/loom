@@ -1,5 +1,5 @@
 import { keyOf } from "./corrections"
-import { lessonQuestionPointers, reviewPointers, type LessonPointer } from "./links"
+import { lessonQuestionPointers, reviewPointers, type CheckPointer } from "./links"
 import { promptSet, readLesson, section } from "./lesson"
 import type { Block } from "./markdown"
 import { REVIEW_SETS } from "./schedule"
@@ -56,7 +56,7 @@ export type CourseQuestion = {
    * different places has already left that behind.
    */
   readonly context: readonly Block[]
-  readonly checkIn: readonly LessonPointer[]
+  readonly checkIn: readonly CheckPointer[]
 }
 
 /** Section titles, as they are written in the lessons. */
@@ -76,7 +76,7 @@ const setQuestions: readonly CourseQuestion[] = REVIEW_SETS.flatMap((set) =>
     text: question.text,
     /** A review set's questions are written to stand alone, and always have. */
     context: [],
-    checkIn: reviewPointers(set.anchor, question.refs),
+    checkIn: reviewPointers(set.anchor, question),
   }))
 )
 
