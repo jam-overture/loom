@@ -893,6 +893,20 @@
               "summary": ""
             },
             {
+              "name": "RepairMeasurement",
+              "kind": "type",
+              "signature": "type RepairMeasurement = {\n    readonly proposal: PromptMeasurement;\n    /** The refused delta, rendered, and the reasoning offered for it. */\n    readonly refused: number;\n    /** The Gate's reason code and its detail. */\n    readonly objection: number;\n    /** The closing sentence that makes this a revision rather than a fresh ask. */\n    readonly instruction: number;\n    /** `proposal.total` plus the three above: what the repair puts on the wire. */\n    readonly total: number;\n    /** `proposal.total + total`: the whole refused-then-repaired episode. */\n    readonly episode: number;\n};",
+              "truncated": false,
+              "summary": "What a second go costs, once the first one was refused."
+            },
+            {
+              "name": "measureRepairPrompt",
+              "kind": "function",
+              "signature": "const measureRepairPrompt: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => RepairMeasurement",
+              "truncated": false,
+              "summary": "Measures a repair without sending it, on the same terms as `measurePrompt`."
+            },
+            {
               "name": "hashPrompt",
               "kind": "function",
               "signature": "const hashPrompt: (system: string, userMessage: string) => Promise<string>",
@@ -4017,6 +4031,48 @@
           ]
         },
         {
+          "module": "render/control",
+          "title": "Control",
+          "summary": "The handle a primitive has on a control it did not build.",
+          "symbols": [
+            {
+              "name": "CONTROL_CLASS",
+              "kind": "value",
+              "signature": "const CONTROL_CLASS = \"loom-control\"",
+              "truncated": false,
+              "summary": "The class every control carries, and the stem of the second one naming which behaviour built it: `loom-control loom-control-copy`."
+            },
+            {
+              "name": "controlClass",
+              "kind": "function",
+              "signature": "const controlClass: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The classes the runtime stamps on the control one behaviour builds."
+            },
+            {
+              "name": "CONTROL_DISPLAY_PROPERTY",
+              "kind": "value",
+              "signature": "const CONTROL_DISPLAY_PROPERTY = \"--loom-control-display\"",
+              "truncated": false,
+              "summary": "The custom property that decides whether a control is displayed — every control at once."
+            },
+            {
+              "name": "controlDisplayProperty",
+              "kind": "function",
+              "signature": "const controlDisplayProperty: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The custom property that decides whether *one* behaviour's control is displayed: `--loom-copy-display`."
+            },
+            {
+              "name": "controlDisplay",
+              "kind": "function",
+              "signature": "const controlDisplay: (name: BehaviourName, resting: string) => string",
+              "truncated": false,
+              "summary": "The value a control writes for `display`: its own, behind the two properties a primitive may override it with."
+            }
+          ]
+        },
+        {
           "module": "render/decorative",
           "title": "Decorative",
           "summary": "The same children again, as a copy nothing can resolve to a node.",
@@ -4129,6 +4185,41 @@
           ]
         },
         {
+          "module": "render/inline-variables",
+          "title": "Inline variables",
+          "summary": "A render whose colours are values rather than references.",
+          "symbols": [
+            {
+              "name": "VariableSubstitution",
+              "kind": "type",
+              "signature": "type VariableSubstitution = {\n    readonly value: string;\n    /**\n     * Custom properties the theme does not declare **and** that named no\n     * fallback. A reference with a fallback is not reported: the fallback is the\n     * value, exactly as it is in a browser, and `--loom-mono-family` is written\n     * that way on purpose.\n     */\n    readonly unresolved: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A CSS value with the theme's variables resolved, and what could not be."
+            },
+            {
+              "name": "substituteVariables",
+              "kind": "function",
+              "signature": "const substituteVariables: (value: string, variables: ThemeVariables) => VariableSubstitution",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "InlinedProjection",
+              "kind": "type",
+              "signature": "type InlinedProjection = {\n    readonly element: ReactNode;\n    readonly unresolved: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A projection with the theme resolved into it, and what the theme did not answer."
+            },
+            {
+              "name": "inlineThemeVariables",
+              "kind": "function",
+              "signature": "const inlineThemeVariables: (element: ReactNode, variables: ThemeVariables) => InlinedProjection",
+              "truncated": false,
+              "summary": "The projection, with every theme reference in an inline style replaced by what the mounted theme says it is."
+            }
+          ]
+        },
+        {
           "module": "render/primitive",
           "title": "Primitive",
           "summary": "The primitive contract — what a registered component receives, and the only thing the renderer needs from a registry.",
@@ -4167,6 +4258,20 @@
               "signature": "type LoomPrimitive<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehaviour>>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "CallablePrimitive",
+              "kind": "type",
+              "signature": "type CallablePrimitive = (props: LoomPrimitiveProps) => ReactNode;",
+              "truncated": false,
+              "summary": "A primitive called as the plain function of its props, rather than mounted."
+            },
+            {
+              "name": "asCallablePrimitive",
+              "kind": "function",
+              "signature": "const asCallablePrimitive: (primitive: LoomPrimitive) => Result<CallablePrimitive, string>",
+              "truncated": false,
+              "summary": "A `LoomPrimitive` is either a function component or a class, and only the first can be called as a plain function. `typeof` cannot tell them apart — a class is a function too — so the marker React puts on a class component's prototype is what decides it."
             },
             {
               "name": "PrimitiveResolver",
@@ -4227,7 +4332,7 @@
             {
               "name": "RenderOptions",
               "kind": "type",
-              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n};",
+              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4276,7 +4381,7 @@
             {
               "name": "RenderDependencies",
               "kind": "type",
-              "signature": "type RenderDependencies = {\n    readonly source: TreeSource;\n    readonly resolver: PrimitiveResolver;\n    readonly validator?: PropsValidator;\n    /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered — see `RenderOptions.data`.\n     * Supplying a registry is what bounds the sources a proposal may name, the\n     * same way `themes` bounds the palettes.\n     */\n    readonly sources?: DataRegistry;\n    /**\n     * Absent means the tree's submissions are not answered — see\n     * `RenderOptions.submissions`. Supplying a registry is what bounds the\n     * destinations a proposal may name, and it is the only thing that does: an\n     * address never appears in a tree, so a deployment that registers nothing has\n     * no form that posts anywhere.\n     */\n    readonly endpoints?: EndpointRegistry;\n    /**\n     * The origins this deployment will frame — see `RenderOptions.origins`.\n     * Absent means every framable prop is refused with a diagnostic.\n     *\n     * It sits here beside the other three registries and, unlike them, adds no\n     * `await`: an allowlist is a static fact, so it is passed straight through to\n     * the walk rather than resolved first.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * Absent means primitives render the strings their authors declared — see\n     * `RenderOptions.text`. A host serving one language in the library's own\n     * language wires nothing here; a host serving another builds a resolver per\n     * dictionary and picks by whatever it reads the request's language from, which\n     * is its own business and not the framework's.\n     */\n    readonly text?: TextResolver;\n    readonly slots?: SlotContent;\n};",
+              "signature": "type RenderDependencies = {\n    readonly source: TreeSource;\n    readonly resolver: PrimitiveResolver;\n    readonly validator?: PropsValidator;\n    /** Absent means the tree's theme is not resolved — see `RenderOptions.themes`. */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered — see `RenderOptions.data`.\n     * Supplying a registry is what bounds the sources a proposal may name, the\n     * same way `themes` bounds the palettes.\n     */\n    readonly sources?: DataRegistry;\n    /**\n     * Absent means the tree's submissions are not answered — see\n     * `RenderOptions.submissions`. Supplying a registry is what bounds the\n     * destinations a proposal may name, and it is the only thing that does: an\n     * address never appears in a tree, so a deployment that registers nothing has\n     * no form that posts anywhere.\n     */\n    readonly endpoints?: EndpointRegistry;\n    /**\n     * The origins this deployment will frame — see `RenderOptions.origins`.\n     * Absent means every framable prop is refused with a diagnostic.\n     *\n     * It sits here beside the other three registries and, unlike them, adds no\n     * `await`: an allowlist is a static fact, so it is passed straight through to\n     * the walk rather than resolved first.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * Absent means primitives render the strings their authors declared — see\n     * `RenderOptions.text`. A host serving one language in the library's own\n     * language wires nothing here; a host serving another builds a resolver per\n     * dictionary and picks by whatever it reads the request's language from, which\n     * is its own business and not the framework's.\n     */\n    readonly text?: TextResolver;\n    readonly slots?: SlotContent;\n    /**\n     * References or values — see `RenderOptions.themeValues`. It belongs to the\n     * request rather than to the deployment: one route serves a page to a browser\n     * and the next draws the same tree into an image, off the same dependencies.\n     */\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -5571,7 +5676,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries and ends its own rail. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers take the accent,\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node, so this is the only handle it has — and four of them,\n     * because each is a static rule rather than an interpolated index.\n     */\n    readonly compareFeatureFirst: \"loom-compare-feature-1\";\n    readonly compareFeatureSecond: \"loom-compare-feature-2\";\n    readonly compareFeatureThird: \"loom-compare-feature-3\";\n    readonly compareFeatureFourth: \"loom-compare-feature-4\";\n    /**\n     * A `loom.list`: its markers\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },

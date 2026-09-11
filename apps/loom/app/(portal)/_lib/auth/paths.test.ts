@@ -51,6 +51,23 @@ describe("isPublicPath", () => {
   })
 })
 
+describe("DEFAULT_LANDING", () => {
+  /**
+   * Where a reviewer with no particular destination is put. It was the page
+   * list; it is the front door, because the first thing to tell somebody who
+   * has just signed in is whether anything is waiting for them rather than
+   * where it might be.
+   */
+  it("lands a fresh sign-in on the queue rather than on a list of places", () => {
+    expect(DEFAULT_LANDING).toBe("/portal")
+  })
+
+  /** It has to be somewhere a session is required, or signing in achieves nothing. */
+  it("is not a public path", () => {
+    expect(isPublicPath(DEFAULT_LANDING)).toBe(false)
+  })
+})
+
 describe("safeReturnPath", () => {
   it("returns the path it was given", () => {
     expect(safeReturnPath("/portal/pages/t_1")).toBe("/portal/pages/t_1")
