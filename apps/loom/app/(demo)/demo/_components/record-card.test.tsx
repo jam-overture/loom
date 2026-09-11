@@ -3,8 +3,23 @@ import { describe, expect, it } from "vitest"
 
 import { REVERT_INTERPRETER } from "@loom/runtime/write"
 
+import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+
+import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
+import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
-import { UNDO_CAUTION } from "@/app/(demo)/_lib/undo"
+import { SPOT_COLOURS } from "@/app/(demo)/_lib/spotlight"
+import {
+  UNDO_AGAIN_LABEL,
+  UNDO_AGAIN_MEANING,
+  UNDO_AGAIN_SPENT,
+  UNDO_AGAIN_WAITING,
+  UNDO_CAUTION,
+  UNDO_LABEL,
+  UNDO_SPENT,
+  UNDO_WAITING,
+} from "@/app/(demo)/_lib/undo"
+import { WEIGHED_QUESTIONS } from "@/app/(demo)/_lib/weighed"
 
 import { RecordCard } from "./record-card"
 
@@ -108,6 +123,53 @@ const UNDONE: ChangeRecord = {
   heldProposalId: "p_11",
 }
 
+/**
+ * The two readings of one held proposal that the card has to keep apart: the
+ * review tool's, which names the primitive and counts the nodes, and the plain
+ * one, which quotes what is printed on the page.
+ */
+const EFFECT: ProposalEffect = {
+  operations: [
+    {
+      op: "remove",
+      verb: "delete",
+      subject: "loom.stat-grid",
+      place: ["loom.page"],
+      detail: "and 3 nodes under it",
+      into: null,
+      before: null,
+      from: null,
+      changes: [],
+      /*
+       * Empty, and that is the fixture being accurate rather than lazy. The
+       * portal's `text` walks text nodes, and a `loom.stat-grid` carries every
+       * figure it prints in props — so on the demo's leading ask this field is
+       * genuinely empty, which is the whole reason this lane harvests its own
+       * words. Filling it here would make the test agree with a page that does
+       * not exist.
+       */
+      text: [],
+      carries: 4,
+      missing: false,
+      inert: false,
+    },
+  ],
+  applies: true,
+  obstacle: null,
+  baseRevision: 0,
+  treeRevision: 0,
+  stale: false,
+  inertCount: 0,
+}
+
+const PLAIN: readonly PlainChange[] = [
+  {
+    sentence: "This comes off the page, and everything under it goes too.",
+    words: ["3,400", "24", "92%"],
+    more: 0,
+  },
+]
+
 describe("a record card", () => {
   it("shows the ask, the rationale and the provenance of the proposal", () => {
     render(<RecordCard record={APPLIED} />)
@@ -125,6 +187,92 @@ describe("a record card", () => {
     expect(screen.getByText("low")).toBeTruthy()
     expect(screen.getByText(/^yes$/)).toBeTruthy()
     expect(screen.getByText("nothing this policy watches for")).toBeTruthy()
+  })
+
+  /**
+   * The two questions the rail promised, answered on the card in the words they
+   * were asked in.
+   *
+   * Both facts were on the record from the day this surface was built and both
+   * were behind the disclosure in the runtime's shorthand, so a stranger was
+   * told what would be weighed, watched a verdict arrive, and never saw the
+   * weighing. Asserted to be *outside* the disclosure rather than merely
+   * present: the whole defect was that they were present.
+   */
+  it("answers both of the rail's questions without the visitor opening anything", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    const damage = screen.getByText(WEIGHED_QUESTIONS.damage)
+    const reversal = screen.getByText(WEIGHED_QUESTIONS.reversal)
+
+    expect(disclosure.contains(damage)).toBe(false)
+    expect(disclosure.contains(reversal)).toBe(false)
+    expect(screen.getByText(/Worth a look before you say yes/)).toBeTruthy()
+  })
+
+  /**
+   * Order, and it is the argument rather than the layout: the rail says *weighed
+   * on two questions, then a named rule decides*, so the two answers come before
+   * the rule's sentence. Reversed, the card is a verdict with its reasoning
+   * underneath — which is the shape this unit replaced.
+   */
+  it("weighs before it rules", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+    const text = container.textContent ?? ""
+
+    expect(text.indexOf(WEIGHED_QUESTIONS.damage)).toBeGreaterThan(-1)
+    expect(text.indexOf(WEIGHED_QUESTIONS.damage)).toBeLessThan(
+      text.indexOf("Riskier than a request from here")
+    )
+  })
+
+  /**
+   * The reassurance and the button it makes pressable, on one card.
+   *
+   * A held card's whole job is to be answerable. It describes a loss — *"This
+   * comes off the page, and everything under it goes too"* — directly above a
+   * green button, and until this block the only statement that the page could be
+   * put back was three clicks down as `undo carries: 4 nodes`, or one press too
+   * late on the card that appears *after* the visitor has already committed.
+   */
+  it("says the change can be taken back on the same card as the button that makes it", () => {
+    render(<RecordCard record={HELD} plain={PLAIN} />)
+
+    const reversal = screen.getByText(WEIGHED_QUESTIONS.reversal).closest("li")
+
+    expect(reversal).toBeTruthy()
+    expect(reversal?.textContent).toContain("Apply this change")
+    expect(reversal?.textContent).toContain("already exists")
+  })
+
+  /**
+   * And it stays once the change has landed. The weighing is what the Gate did
+   * with this ask; a card that dropped it the moment it stopped being urgent
+   * would be a record forgetting its own reasoning.
+   */
+  it("keeps the weighing on the card after the change is applied", () => {
+    render(<RecordCard record={ANSWERED} />)
+
+    expect(screen.getByText(WEIGHED_QUESTIONS.damage)).toBeTruthy()
+    expect(screen.getByText(WEIGHED_QUESTIONS.reversal)).toBeTruthy()
+  })
+
+  /**
+   * Nothing was removed to make room. The level and the retained count keep the
+   * rows they always had, one click down, beside the factor codes they came
+   * from.
+   */
+  it("keeps the runtime's own numbers in the record underneath", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText("medium"))).toBe(true)
+    expect(disclosure.contains(screen.getByText("0 nodes"))).toBe(true)
   })
 
   it("names the rule that fired and the policy it fired under", () => {
@@ -238,6 +386,54 @@ describe("a record card", () => {
   })
 
   /**
+   * The plain-language rule at the one moment it costs something to break: the
+   * card is asking the visitor to allow a change, and what it tells them it
+   * would do must be checkable against the page rather than against the tree.
+   *
+   * `loom.stat-grid` and `delete` are still on the card — they are the review
+   * tool's reading of the same proposal and nothing has been removed — and they
+   * are behind the click, with the fingerprint and the inverse.
+   */
+  it("asks in the words on the page, and keeps the delta's own words one click down", () => {
+    const { container } = render(<RecordCard record={HELD} effect={EFFECT} plain={PLAIN} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText(/This comes off the page/))).toBe(false)
+    expect(disclosure.contains(screen.getByText("“3,400”"))).toBe(false)
+
+    expect(disclosure.contains(screen.getByText("loom.stat-grid"))).toBe(true)
+    expect(disclosure.contains(screen.getByText(/delete loom\.stat-grid/))).toBe(true)
+  })
+
+  /**
+   * Above the buttons and not below them. A visitor deciding whether to allow
+   * something reads down to the control and presses it; a description that
+   * arrives after the press has arrived too late.
+   */
+  it("says what would happen before it offers the two answers", () => {
+    const { container } = render(<RecordCard record={HELD} effect={EFFECT} plain={PLAIN} />)
+
+    const said = screen.getByText(/This comes off the page/)
+    const answer = screen.getByRole("button", { name: "Apply this change" })
+
+    expect(said.compareDocumentPosition(answer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(container.contains(said)).toBe(true)
+  })
+
+  /**
+   * An applied change has no proposal left to picture, and a card that kept
+   * saying what a change *would* do after it had done it would be describing a
+   * page that no longer exists.
+   */
+  it("stops describing a change once it has happened", () => {
+    render(<RecordCard record={ANSWERED} />)
+
+    expect(screen.queryByText(/This comes off the page/)).toBeNull()
+  })
+
+  /**
    * The demo's whole argument, as an assertion.
    *
    * Both of these cards say **Applied**, both say the change is live on the
@@ -279,6 +475,77 @@ describe("a record card", () => {
   })
 
   /**
+   * The rule sentence on this path ends *"riskier than a request from here is
+   * allowed to be without asking"*, and until this run nothing on the card said
+   * what *here* was. The one thing that came close was the origin code in the
+   * corner, which is a token rather than a claim — so the assertion is that the
+   * card now answers the question in the light and keeps the code, one click
+   * down, rather than that it says any particular words.
+   */
+  it("says what an ask from here may do on its own, under the rule that read it", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    const said = screen.getByText(/will not let an ask like that land on its own/)
+
+    expect(disclosure.contains(said)).toBe(false)
+    expect(disclosure.contains(screen.getByText("low, for user-instruction"))).toBe(true)
+  })
+
+  /**
+   * And the order it is read in. The weighing says how much risk this ask
+   * carries, this says how much is allowed to land unasked, and the rule says
+   * the first exceeded the second — so a card that put the threshold above the
+   * measurement, or after the conclusion it explains, would be printing an
+   * inequality out of sequence.
+   */
+  it("puts the ceiling between the weighing and the answer, under the rule that used it", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const text = container.textContent ?? ""
+    const weighed = text.indexOf(WEIGHED_QUESTIONS.damage)
+    const rule = text.indexOf("Riskier than a request from here")
+    const ceiling = text.indexOf("will not let an ask like that land on its own")
+    const buttons = text.indexOf("Apply this change")
+
+    expect(weighed).toBeGreaterThanOrEqual(0)
+    expect(rule).toBeGreaterThan(weighed)
+    expect(ceiling).toBeGreaterThan(rule)
+    expect(buttons).toBeGreaterThan(ceiling)
+  })
+
+  /**
+   * And it is said only where the ceiling decided. A change that went ahead
+   * because nothing this project watches for was involved has no ceiling in its
+   * story, and a card that explained one anyway would be reasoning about a
+   * comparison the Gate never made.
+   */
+  it("says nothing about a ceiling on a change the ceiling did not decide", () => {
+    render(<RecordCard record={APPLIED} />)
+
+    expect(screen.queryByText(/land on its own above/)).toBeNull()
+  })
+
+  /**
+   * The plain-language rule applied to the oldest jargon on this card. The
+   * origin was a monospace `user-instruction` in the top right corner of every
+   * card, in the light, unexplained — the runtime's word for what kind of act
+   * the ask was. It is evidence, so it belongs with the evidence; and nothing is
+   * ever removed, so it is still on the card.
+   */
+  it("keeps the runtime's code for the ask in the record, not in the light", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const disclosure = container.querySelector("details")
+    if (!disclosure) throw new Error("the card has no disclosure")
+
+    expect(disclosure.contains(screen.getByText("user-instruction"))).toBe(true)
+    expect(disclosure.contains(screen.getByText("2026-08-12T09:00:00.000Z"))).toBe(true)
+  })
+
+  /**
    * Answering a hold ends it. A card still offering the two buttons after the
    * decision was made would be offering a decision that no longer exists.
    */
@@ -288,5 +555,348 @@ describe("a record card", () => {
     expect(screen.queryByRole("button", { name: "Apply this change" })).toBeNull()
     expect(screen.queryByRole("button", { name: "No thanks" })).toBeNull()
     expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+  })
+})
+
+/**
+ * The payoff card, and the control it spent five runs learning to keep.
+ *
+ * The offer used to be gated on whether an undo had been *pressed*, and on this
+ * demo's primary path the first thing that comes back from a press is a hold —
+ * the Gate stopping an undo exactly as it stops any other change (0032). So the
+ * button went away while the page had not moved, off a card whose own sentence
+ * still named it. Which state the card is in is decided from the record list
+ * (`undoOffer`), because the undo is answered on a different card and this one
+ * cannot see that happen.
+ */
+describe("what the payoff card offers", () => {
+  it("offers the undo, and says what pressing it may do, before anything is pressed", () => {
+    render(<RecordCard record={APPLIED} offer="offer" />)
+
+    expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+    expect(screen.getByText(new RegExp(UNDO_CAUTION.slice(0, 40)))).toBeTruthy()
+  })
+
+  /**
+   * The frame the defect produced: the undo is held, the page has not moved,
+   * and the card has to say where the question went rather than withdrawing the
+   * control and leaving the sentence pointing at nothing.
+   */
+  it("points at the waiting question instead of the button, while the undo is held", () => {
+    render(<RecordCard record={APPLIED} offer="waiting" />)
+
+    expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
+    expect(screen.getByText(UNDO_WAITING)).toBeTruthy()
+  })
+
+  /** And it must not still be claiming the change can be undone from here. */
+  it("stops promising the button once the undo has landed", () => {
+    render(<RecordCard record={APPLIED} offer="spent" />)
+
+    expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
+    expect(screen.getByText(UNDO_SPENT)).toBeTruthy()
+    expect(screen.queryByText(/live on the page beside you/)).toBeNull()
+  })
+
+  /**
+   * The badge is not the sentence. "Applied" is what became of *this ask* and
+   * stays true after the change is put back; what changes is the line under it,
+   * which is about where the page stands now.
+   */
+  it("still says the ask was applied after it has been put back", () => {
+    render(<RecordCard record={APPLIED} offer="spent" />)
+
+    expect(screen.getByText("Applied")).toBeTruthy()
+  })
+
+  /** An unanswered change has no undo to offer in any of the three states. */
+  it("offers no undo on a change that is still waiting on the visitor", () => {
+    render(<RecordCard record={HELD} offer="offer" />)
+
+    expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
+    expect(screen.queryByText(UNDO_WAITING)).toBeNull()
+  })
+})
+
+/**
+ * The last frame of the sixty seconds: the record of the undo that just landed.
+ *
+ * Everything on it was true and three of its strings were the same phrase.
+ * *“Put it back.”* as the quotation, *“‘Put it back’ undoes it”* as the
+ * sentence, and **Put it back** on a button that takes the change off again —
+ * so the card's own title was what its only control would reverse.
+ *
+ * The button stays, and that is the point: an undo is a change of its own
+ * (0032), weighed and recorded like any other, so it has an undo in its turn.
+ * Only the words change.
+ */
+describe("the card for an undo that landed", () => {
+  const APPLIED_UNDO: ChangeRecord = (({ heldProposalId: _held, ...rest }) => ({
+    ...rest,
+    outcome: "applied" as const,
+    revision: { produced: 2, replaced: 1 },
+    undoes: 1,
+    answeredBy: "a demo visitor",
+  }))(UNDONE)
+
+  /** The property the whole unit is for. */
+  it("says “Put it back” once, as the words the visitor pressed", () => {
+    const { container } = render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+    const uses = (container.textContent ?? "").split(UNDO_LABEL).length - 1
+
+    expect(uses).toBe(1)
+    expect(screen.getByText(`“${UNDO_LABEL}.”`)).toBeTruthy()
+  })
+
+  it("offers an undo of the undo, named for the card rather than for the page", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+
+    expect(screen.getByRole("button", { name: UNDO_AGAIN_LABEL })).toBeTruthy()
+    expect(screen.queryByRole("button", { name: UNDO_LABEL })).toBeNull()
+  })
+
+  /** Nothing is removed: the claim that undoing is itself a weighed change stays. */
+  it("keeps the caution that says this press is weighed like any other", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+
+    expect(screen.getByText(new RegExp(UNDO_CAUTION.slice(0, 40)))).toBeTruthy()
+  })
+
+  it("replaces the circular sentence with where the page now stands", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="offer" />)
+
+    expect(screen.getByText(UNDO_AGAIN_MEANING)).toBeTruthy()
+    expect(screen.queryByText(/live on the page beside you/)).toBeNull()
+  })
+
+  it("points at the second question while an undo of the undo is held", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="waiting" />)
+
+    expect(screen.getByText(UNDO_AGAIN_WAITING)).toBeTruthy()
+    expect(screen.queryByText(UNDO_WAITING)).toBeNull()
+  })
+
+  it("says the page has moved on once that one lands too", () => {
+    render(<RecordCard record={APPLIED_UNDO} offer="spent" />)
+
+    expect(screen.getByText(UNDO_AGAIN_SPENT)).toBeTruthy()
+    expect(screen.queryByText(UNDO_SPENT)).toBeNull()
+  })
+
+  /**
+   * The quotation the page worked out, when it differs from the one this card
+   * can reach alone — an undo of an undo was raised from *Undo this change
+   * too*, and the card cannot see the ask above its own.
+   */
+  it("quotes the line the page handed it, and keeps the runtime's own words below", () => {
+    render(
+      <RecordCard
+        record={APPLIED_UNDO}
+        offer="offer"
+        asked={{ plain: `${UNDO_AGAIN_LABEL}.`, technical: APPLIED_UNDO.utterance }}
+      />
+    )
+
+    expect(screen.getByText(`“${UNDO_AGAIN_LABEL}.”`)).toBeTruthy()
+    expect(screen.queryByText(`“${UNDO_LABEL}.”`)).toBeNull()
+  })
+
+  /**
+   * The gate is `record.revision`, not the state's name, so a card that has not
+   * produced one keeps the shared table's sentence — which is about an open
+   * question and has no direction to get wrong.
+   */
+  it("leaves the held undo's own card exactly as it was", () => {
+    render(<RecordCard record={UNDONE} offer="offer" />)
+
+    expect(screen.queryByText(UNDO_AGAIN_MEANING)).toBeNull()
+    expect(screen.getByText(/Loom will not make this change until you say yes/)).toBeTruthy()
+  })
+})
+
+/**
+ * The card an ask gets once the visitor has moved the page out from under it.
+ *
+ * Everything about the held card is about a question that is still open — the
+ * amber badge, *"Loom will not make this change until you say yes"*, the plain
+ * reading of what allowing it would do, and two buttons. This question is shut,
+ * and every one of those was still on the screen: the press was spent, the
+ * buttons vanished with nothing in their place, and the only account of it was
+ * `applied, then not written: revision-conflict` in the smallest type on the
+ * card.
+ */
+describe("an ask the page has moved past", () => {
+  const MOVED = movedOn(0, 1)
+  if (MOVED === undefined) throw new Error("two different revisions have moved on by definition")
+
+  /** The same held ask, with the suggestion it came from still on it. */
+  const FROM_A_BUTTON: ChangeRecord = { ...HELD, presetId: "band" }
+
+  it("stops offering an answer that cannot land", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.queryByRole("button", { name: "Apply this change" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "No thanks" })).toBeNull()
+  })
+
+  /**
+   * And stops saying it is waiting. The badge and the sentence under it are the
+   * two things a visitor reads first, and both were false: the Gate is not
+   * waiting on them, and no yes they can give will land this.
+   */
+  it("says what became of it, in the words the review queue uses for the same state", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.getByText("Nothing changed")).toBeTruthy()
+    expect(screen.queryByText("Waiting on you")).toBeNull()
+    expect(screen.queryByText(/will not make this change until you say yes/)).toBeNull()
+  })
+
+  it("says why, in the sentence rather than in a code", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.getByText(MOVED.sentence)).toBeTruthy()
+  })
+
+  /**
+   * The one control a dead ask can honestly offer: the same request, weighed
+   * again, against the revision the page is actually at. It is a fresh ask
+   * rather than a retry and the caution says so, for the same reason
+   * `UNDO_CAUTION` does — the Gate may hold it again.
+   */
+  it("offers the same ask again, against the page as it stands", () => {
+    const { container } = render(<RecordCard record={FROM_A_BUTTON} moved={MOVED} />)
+
+    expect(screen.getByRole("button", { name: ASK_AGAIN_LABEL })).toBeTruthy()
+    expect(screen.getByText(ASK_AGAIN_CAUTION)).toBeTruthy()
+    expect(container.querySelector('input[name="presetId"]')?.getAttribute("value")).toBe("band")
+    expect(container.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe(
+      `${MOVED.now}`
+    )
+  })
+
+  /**
+   * An ask that named no suggestion gets no button — free text needs a model
+   * that may be absent or out of budget, and an undo has its own control on the
+   * card above. What it must not lose is the sentence.
+   */
+  it("still says what happened when there is no suggestion to repeat", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.queryByRole("button", { name: ASK_AGAIN_LABEL })).toBeNull()
+    expect(screen.getByText(MOVED.sentence)).toBeTruthy()
+  })
+
+  /**
+   * Nothing is removed. The two revisions behind the sentence are one click
+   * down, with the rest of the technical account, and so is the whole weighing
+   * the Gate did — a record that dropped its own reasoning the moment the
+   * reasoning stopped being actionable would not be a record.
+   */
+  it("keeps the two revisions, and the weighing, one click down", () => {
+    render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(screen.getByText(MOVED.technical)).toBeTruthy()
+    expect(screen.getByText("stakes-above-ceiling")).toBeTruthy()
+  })
+
+  /** And a hold the page has *not* moved past is untouched by any of it. */
+  it("leaves a live hold with both of its buttons", () => {
+    render(<RecordCard record={HELD} />)
+
+    expect(screen.getByRole("button", { name: "Apply this change" })).toBeTruthy()
+    expect(screen.getByText("Waiting on you")).toBeTruthy()
+    expect(screen.queryByRole("button", { name: ASK_AGAIN_LABEL })).toBeNull()
+  })
+})
+
+/**
+ * The pill that says which of two amber rings on the page is this card's.
+ *
+ * A visitor with two questions open is doing a matching problem, and every other
+ * way of solving it — naming the ask in the rail's line, numbering the marks, a
+ * legend — asks them to read a sentence. This asks them to see that two things
+ * are the same thing, so what is asserted here is sameness: the words, and the
+ * colours, are the mark's own rather than a second copy.
+ */
+describe("the card's own mark", () => {
+  it("wears the words the page is wearing for this change", () => {
+    render(<RecordCard record={HELD} mark={{ label: "Something new would go here", tone: "awaiting" }} />)
+
+    expect(screen.getByText("Something new would go here")).toBeTruthy()
+  })
+
+  /**
+   * In the chip's colours, read from the one table the stylesheet on the stage is
+   * drawn from. A Tailwind token here would be a second definition of one
+   * colour, free to drift the first time either is retuned — and a pill that is
+   * nearly the chip's colour is worse than no pill, because the whole mechanism
+   * is a visitor recognising it without being told.
+   */
+  it("wears the mark's own colours, not a second copy of them", () => {
+    /** The DOM keeps colours as `rgb()`; the table keeps them as the CSS writes them. */
+    const rgb = (hex: string): string => {
+      const parsed = /^#([0-9a-f]{6})$/i.exec(hex)?.[1]
+      if (parsed === undefined) throw new Error(`${hex} is not a six-digit hex colour`)
+
+      const [r, g, b] = [0, 2, 4].map((at) => Number.parseInt(parsed.slice(at, at + 2), 16))
+
+      return `rgb(${r}, ${g}, ${b})`
+    }
+
+    render(<RecordCard record={HELD} mark={{ label: "This would be removed", tone: "awaiting" }} />)
+
+    const style = screen.getByText("This would be removed").getAttribute("style") ?? ""
+
+    expect(style).toContain(rgb(SPOT_COLOURS.awaiting.fill))
+    expect(style).toContain(rgb(SPOT_COLOURS.awaiting.ink))
+  })
+
+  /**
+   * And it says what it is to a reader who cannot see the page. "Waiting on you ·
+   * Something new would go here" is two badges to the eye and one run-on sentence
+   * to a screen reader.
+   */
+  it("says what the words are for, to a reader who cannot see the ring", () => {
+    render(<RecordCard record={HELD} mark={{ label: "This would be removed", tone: "awaiting" }} />)
+
+    expect(screen.getByText(/marked on the page/)).toBeTruthy()
+  })
+
+  /**
+   * And that sentence is held inside the pill, which is a layout fact rather
+   * than a style one.
+   *
+   * `sr-only` is `position: absolute`, and an absolutely positioned element is
+   * not clipped by an `overflow: hidden` ancestor that is not itself positioned
+   * — which the demo's `lg:h-screen lg:overflow-hidden` frame is not. Given no
+   * positioned parent, this span is laid out at its static position deep in the
+   * rail's own scroll, escapes the frame, and stretches the *document*: with two
+   * questions open the one-viewport layout started scrolling, carrying the top
+   * bar off screen and leaving 340px of empty ground beneath both panes.
+   *
+   * Nothing renders differently, which is why this is asserted rather than left
+   * to the eye — and why it is asserted here rather than left to a screenshot
+   * that only shows it in one of the states this card has.
+   */
+  it("keeps the words a screen reader hears inside the pill that carries them", () => {
+    render(<RecordCard record={HELD} mark={{ label: "This would be removed", tone: "awaiting" }} />)
+
+    const pill = screen.getByText(/marked on the page/).parentElement
+
+    expect(pill?.className).toContain("relative")
+  })
+
+  /**
+   * There is no pill when the page has one mark on it, which is the ordinary
+   * case and the one six runs have tuned the top of this card for. A second badge
+   * beside the state, on the first card a stranger ever sees, costs that card its
+   * one-glance reading to answer a question nobody is asking yet.
+   */
+  it("is absent when there is nothing to be told apart from", () => {
+    render(<RecordCard record={HELD} />)
+
+    expect(screen.queryByText(/marked on the page/)).toBeNull()
+    expect(screen.getByText("Waiting on you")).toBeTruthy()
   })
 })

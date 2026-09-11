@@ -3,6 +3,7 @@
 import { createElement, useCallback, useEffect, useState } from "react"
 
 import { DISCLOSED_ATTRIBUTE } from "./behaviour.js"
+import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * A button that opens and closes the region beside it.
@@ -70,9 +71,16 @@ const GLYPH_BAR = {
  * the copy control gives: those live in `src/primitives/`, which the render seam
  * must not depend on, and a control that only looks right on a themed page
  * renders invisible in a preview pane that mounts no theme.
+ *
+ * `display` is the exception a primitive may take back, and this is the control
+ * that needed it first: a menu button belongs on a phone and not on a laptop,
+ * which is a rule about the button rather than about the region beside it. See
+ * `controlDisplay` for the two names that override it, and for the sharp edge —
+ * a hidden button still carries its state, so the rule keyed on that state has
+ * to be lifted in the same query.
  */
 const BUTTON_STYLE = {
-  display: "inline-flex",
+  display: controlDisplay("disclose", "inline-flex"),
   alignItems: "center",
   gap: "var(--loom-spacing-2, 8px)",
   paddingBlock: "var(--loom-spacing-1, 4px)",
@@ -130,6 +138,7 @@ export const DiscloseControl = ({ label }: DiscloseControlProps) => {
     "button",
     {
       type: "button",
+      className: controlClass("disclose"),
       onClick: toggle,
       "aria-expanded": open,
       [DISCLOSED_ATTRIBUTE]: open ? "true" : "false",
