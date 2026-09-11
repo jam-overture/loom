@@ -196,6 +196,12 @@ const orderedSections: readonly DocsSection[] = [
           "Yes, ask a person, or no — and the two questions the runtime asks about a change before it answers.",
       },
       {
+        slug: "answering-a-held-change",
+        title: "Answering a held change",
+        summary:
+          "The queue a person answers from: what is waiting in it, how to tell a change that can still be applied from one that cannot, and what saying yes actually does.",
+      },
+      {
         slug: "the-history-of-a-page",
         title: "The history of a page",
         summary:

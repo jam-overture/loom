@@ -3,51 +3,34 @@ import {
   buildElement,
   buildText,
   compareTrees,
-  err,
-  fixedPolicy,
-  noopEventSink,
   ok,
   sequentialIdFactory,
   textOf,
   walkTree,
-  type ChangeInterpreter,
-  type Clock,
-  type EditIntent,
   type IdFactory,
-  type InterpretationError,
   type LoomNode,
   type LoomTree,
   type NodeId,
-  type ProposalId,
-  type ProposedChange,
-  type Result,
   type TreeDifference,
-  type TreeOperation,
 } from "@loom/runtime"
 import {
   attributeTree,
   auditSnapshot,
   describeStoreError,
-  memoryTreeStore,
   type NodeAttribution,
   type RevisionPage,
   type SnapshotAudit,
   type TreeReader,
-  type TreeStore,
 } from "@loom/runtime/store"
-import {
-  commitIntent,
-  confirmHeld,
-  describeHoldError,
-  memoryHoldStore,
-  type HeldProposal,
-  type HoldStore,
-  type WriteOutcome,
-  type WritePath,
-} from "@loom/runtime/write"
+import { describeHoldError, type WriteOutcome } from "@loom/runtime/write"
 
-import { docsExamples } from "../examples/catalogue"
-import { docsGatePolicy } from "../propose/policy"
+import {
+  addASentence,
+  demoteTheHeading,
+  moveTheCardUp,
+  quietenTheSentence,
+} from "../bench/changes"
+import { applied, DANA, heldIn, nodeOfType, openBench, plans, RAVI, type Bench } from "../bench/page"
 
 /**
  * The three questions an operator asks about a page that has already shipped,
@@ -75,89 +58,11 @@ import { docsGatePolicy } from "../propose/policy"
  * leaves. Neither is invented: they are the two ways an audit has anything to
  * report, and staging them is how the page can print the runtime's own verdict
  * on each rather than a sentence about what it would probably say.
- */
-
-/**
- * Fixed, so the page is byte-identical on every build.
  *
- * The same reasoning as `endings.ts`: nothing a reader sees here is a
- * timestamp, and `appliedAt` still reaches the store, where a wall clock would
- * make two builds of one commit differ for no visible reason.
+ * The store, the asks and the two ways of answering a hold are
+ * `../bench/page` — shared with *Answering a held change*, which needs the same
+ * deployment and asks it different questions.
  */
-const OPERATIONS_CLOCK: Clock = { now: () => "2026-09-07T09:00:00.000Z" }
-
-const DOCS_OPERATIONS_INTERPRETER = "loom/docs-operations"
-
-/**
- * Two names rather than one, and that is the whole reason this history exists.
- *
- * "Who put this here" is a question with an interesting answer only when more
- * than one person has been near the page. Everywhere else on this site the
- * asker is "the reader", because everywhere else the answer is not the lesson.
- */
-const DANA = "dana"
-const RAVI = "ravi"
-
-const seedTree = (): LoomTree => {
-  const example = docsExamples.get("first-tree")
-
-  if (example === undefined) {
-    throw new Error("loom: the operations page needs the first-tree example, and it is not registered")
-  }
-
-  return example.build()
-}
-
-const nodeOfType = (tree: LoomTree, type: string): LoomNode => {
-  const found = Array.from(walkTree(tree.root)).find(
-    (node) => node.kind === "element" && node.type === type
-  )
-
-  if (found === undefined) {
-    throw new Error(`loom: the operations page expected a ${type} on the page, and there is none`)
-  }
-
-  return found
-}
-
-/** What an interpreter does, minus the guessing: tree in, proposal or refusal out. */
-type Interpret = (
-  tree: LoomTree,
-  intent: EditIntent,
-  ids: IdFactory
-) => Result<ProposedChange, InterpretationError>
-
-/**
- * An interpreter that plans, with the provenance a computed delta is entitled to.
- *
- * `authoredBy: "runtime"` and a confidence of 1, for the reason `endings.ts`
- * gives: nothing here guessed, and a confidence nobody graded must not walk into
- * calibration as a model's perfect record (0031). What varies between these
- * asks is the **actor** — who asked — which is the field the attribution table
- * is about.
- */
-const plans =
-  (rationale: string, operations: (tree: LoomTree, ids: IdFactory) => readonly TreeOperation[]): Interpret =>
-  (tree, intent, ids) =>
-    ok({
-      proposalId: ids.proposalId(),
-      intentId: intent.intentId,
-      delta: {
-        deltaId: ids.deltaId(),
-        treeId: tree.treeId,
-        baseRevision: tree.revision,
-        operations: operations(tree, ids),
-      },
-      rationale,
-      provenance: {
-        origin: intent.origin,
-        ...(intent.actor === undefined ? {} : { actor: intent.actor }),
-        interpreter: DOCS_OPERATIONS_INTERPRETER,
-        authoredBy: "runtime" as const,
-        confidence: 1,
-        interpretedAt: OPERATIONS_CLOCK.now(),
-      },
-    })
 
 /**
  * One insert carrying three nodes, only one of which anybody asked for.
@@ -188,157 +93,6 @@ const addACard = plans(
     },
   ]
 )
-
-const quietenTheSentence = plans(
-  "One configure. The page's first sentence goes to the muted tone.",
-  (tree) => [
-    {
-      op: "configure",
-      nodeId: nodeOfType(tree, "loom.prose").id,
-      set: { tone: "muted" },
-      unset: [],
-    },
-  ]
-)
-
-const moveTheCardUp = plans("One move. The card goes to the top of the page.", (tree) => [
-  {
-    op: "move",
-    nodeId: nodeOfType(tree, "loom.card").id,
-    parentId: tree.root.id,
-    index: 0,
-  },
-])
-
-const demoteTheHeading = plans(
-  "One configure. The heading's level prop goes from 1 to 2, and nothing else moves.",
-  (tree) => [{ op: "configure", nodeId: nodeOfType(tree, "loom.heading").id, set: { level: 2 }, unset: [] }]
-)
-
-const addASentence = plans("One insert. A new sentence at the end of the page.", (tree, ids) => [
-  {
-    op: "insert",
-    parentId: tree.root.id,
-    index: tree.root.children.length,
-    node: buildElement(ids, {
-      type: "loom.prose",
-      props: { tone: "muted", size: "small" },
-      children: [buildText(ids, "Added while somebody was still deciding.")],
-    }),
-  },
-])
-
-type Bench = {
-  readonly seed: LoomTree
-  readonly store: TreeStore
-  readonly holds: HoldStore
-  readonly ask: (request: {
-    readonly actor: string
-    readonly utterance: string
-    readonly interpret: Interpret
-  }) => Promise<WriteOutcome>
-  readonly answer: (proposalId: ProposalId, actor: string) => Promise<WriteOutcome>
-  readonly head: () => Promise<LoomTree>
-}
-
-/**
- * A page in a store, and the two calls a host makes against it.
- *
- * Modelled on `endings.ts` for the reason that file gives — the site has one
- * way of sending an ask, and a second one would be a second thing to keep true.
- * What is different here is that the asks are **kept**: this bench builds a
- * history rather than producing one outcome and throwing the store away.
- */
-const openBench = async (namespace: string): Promise<Bench> => {
-  const seed = seedTree()
-  const store = memoryTreeStore()
-  const created = await store.create(seed)
-
-  if (!created.ok) {
-    throw new Error(`loom: the operations page could not open a store — ${created.error.code}`)
-  }
-
-  const holds = memoryHoldStore()
-  let step = 0
-
-  const pathWith = (interpret: Interpret): WritePath => {
-    step += 1
-
-    const ids = sequentialIdFactory(`${namespace}${step}`)
-
-    return {
-      store,
-      holds,
-      runtime: {
-        interpreter: {
-          interpret: (intent, against) => Promise.resolve(interpret(against, intent, ids)),
-        } satisfies ChangeInterpreter,
-        policySource: fixedPolicy(docsGatePolicy),
-        events: noopEventSink,
-        clock: OPERATIONS_CLOCK,
-        idFactory: ids,
-      },
-    }
-  }
-
-  const nothingToInterpret: Interpret = () =>
-    err({ code: "refused", detail: "answering a held proposal does not plan a new change" })
-
-  const head = async (): Promise<LoomTree> => {
-    const read = await store.head(seed.treeId)
-
-    if (!read.ok) {
-      throw new Error(`loom: the operations page could not read its own page — ${read.error.code}`)
-    }
-
-    return read.value
-  }
-
-  return {
-    seed,
-    store,
-    holds,
-
-    head,
-
-    ask: async (request) => {
-      const at = await head()
-      const path = pathWith(request.interpret)
-      const ids = sequentialIdFactory(`${namespace}i${step}`)
-
-      const intent: EditIntent = {
-        intentId: ids.intentId(),
-        treeId: seed.treeId,
-        baseRevision: at.revision,
-        origin: "user-instruction",
-        actor: request.actor,
-        utterance: request.utterance,
-        observedAt: OPERATIONS_CLOCK.now(),
-      }
-
-      return commitIntent(path, intent)
-    },
-
-    answer: (proposalId, actor) =>
-      confirmHeld(pathWith(nothingToInterpret), { proposalId, actor }),
-  }
-}
-
-/**
- * Asserts an ask reached the ending the story needs, and says which one it did
- * reach when it did not.
- *
- * Every producer below depends on its setup having worked. A history that
- * silently stopped growing would print a shorter table rather than a wrong one,
- * which is the failure most likely to survive review.
- */
-const applied = (outcome: WriteOutcome, what: string): WriteOutcome => {
-  if (outcome.kind !== "committed") {
-    throw new Error(`loom: the operations page needed ${what} to apply, and it ended ${outcome.kind}`)
-  }
-
-  return outcome
-}
 
 /**
  * The history every answer on the page is about: three asks, two people.
@@ -705,24 +459,6 @@ export type WaitingTooLong = {
   readonly queuedAfter: number
 }
 
-const heldIn = (outcome: WriteOutcome): HeldProposal => {
-  if (outcome.kind !== "held") {
-    throw new Error(`loom: the operations page needed a held change, and the ask ended ${outcome.kind}`)
-  }
-
-  return outcome.held
-}
-
-const queueLength = async (holds: HoldStore, tree: LoomTree): Promise<number> => {
-  const waiting = await holds.forTree(tree.treeId)
-
-  if (!waiting.ok) {
-    throw new Error(`loom: the review queue could not be read — ${describeHoldError(waiting.error)}`)
-  }
-
-  return waiting.value.length
-}
-
 const saidAbout = (outcome: WriteOutcome): string => {
   if (outcome.kind === "not-written") return describeStoreError(outcome.error)
   if (outcome.kind === "not-answerable") return describeHoldError(outcome.error)
@@ -738,10 +474,11 @@ export const produceWaitingTooLong = async (): Promise<WaitingTooLong> => {
       actor: RAVI,
       utterance: "make the title smaller",
       interpret: demoteTheHeading,
-    })
+    }),
+    "the change nobody answered"
   )
 
-  const queuedBefore = await queueLength(bench.holds, bench.seed)
+  const queuedBefore = (await bench.waiting()).length
 
   applied(
     await bench.ask({ actor: DANA, utterance: "add a sentence at the end", interpret: addASentence }),
@@ -749,7 +486,7 @@ export const produceWaitingTooLong = async (): Promise<WaitingTooLong> => {
   )
 
   const headWhenAnswered = (await bench.head()).revision
-  const answered = await bench.answer(held.proposalId, DANA)
+  const answered = await bench.confirm(held.proposalId, DANA)
 
   return {
     queuedBefore,
@@ -757,6 +494,6 @@ export const produceWaitingTooLong = async (): Promise<WaitingTooLong> => {
     headWhenAnswered,
     kind: answered.kind,
     said: saidAbout(answered),
-    queuedAfter: await queueLength(bench.holds, bench.seed),
+    queuedAfter: (await bench.waiting()).length,
   }
 }

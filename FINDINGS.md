@@ -13778,3 +13778,148 @@ would have had one consumer and no argument for the seam.
 Recommendation, unchanged for five days: one sentence in the seven briefs and in
 `docs/routines.md` — *"if this lane already has an open pull request, push onto
 its branch instead."*
+
+---
+
+## 2026-09-11 — the Gate says the same sentence when it asks a person and when it refuses
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/runtime/gate.ts`) ·
+**Status:** open — documented on the page as it behaves, and worked around by
+printing the code beside the sentence
+
+Found while writing *Answering a held change*, which shows the same change
+judged twice: held under this site's policy, then refused under a policy whose
+`refusalFloor` had been lowered to `high` in between. Both verdicts are
+produced by the runtime as the page builds.
+
+The two dispositions differ in `reason.code` — `stakes-above-ceiling` against
+`stakes-at-refusal-floor` — and their `reason.detail` is **byte-identical**:
+
+```
+held:    stakes-above-ceiling      touches protected loom.heading
+refused: stakes-at-refusal-floor   touches protected loom.heading
+```
+
+Both rules build their detail the same way: `assessment.stakes.factors` joined,
+which describes **the damage** rather than the verdict. That is defensible — the
+damage really is the same — but it means a review screen that renders
+`reason.detail`, which is the field that reads like a sentence and is therefore
+the field a host will render, shows a reviewer the identical words for *this
+needs you* and *this will never be offered*. The one thing they most need to
+know is only in the code beside it.
+
+The page works around it by printing the code as well, and says so out loud. The
+durable fix is in the rule rather than in every host: a detail that names what
+the policy did as well as what the change does — *"touches protected
+loom.heading, which this deployment refuses outright"* — costs one string per
+rule and removes the need for every consumer to know that `reason.detail` is
+insufficient on its own.
+
+Produced, not reasoned about: `_lib/holds/queue.ts`, `produceSecondLook`, and
+the test `reaches a different verdict on the same change, from the same damage`
+asserts the equality that makes this a finding.
+
+---
+
+## 2026-09-11 — a page said something about confirmation that the runtime has never done, and nothing could have caught it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+the correction in this unit — kept because the *check* is still missing
+
+*What the Gate decides* has said this since at least 24 August, when the route
+group moved and the page's earlier history stopped being reachable from `main`:
+
+> If the page moved in between, the second look is a look at things as they are
+> now, and a change that would now be refused stays refused.
+
+It is false, and it is the confident kind of false. `confirmHeld` compares the
+hold's `baseRevision` against head **before** anything is judged: when the page
+has moved, the hold is released and the answer comes back `not-written` with a
+`revision-conflict`. There is no second look at all. The sentence describes the
+one case where the re-judgement does not happen.
+
+What is true — and what the page now says — is that the second look is about the
+**policy**: it is resolved again, so a host that narrowed its rules while a
+change waited narrowed them for the queue too.
+
+The part worth keeping is why nothing said so. Every check this site has runs in
+one of two directions: a claim about a **number** is held against a producer, and
+a claim about a **name** is held against the published surface. A claim about
+**behaviour** written in English has neither — it compiles, it renders, it reads
+well, and it is wrong. The new page's `claims.test.ts` covers its own counts and
+imports and would not have caught this one either.
+
+No mechanism is proposed, because the honest one is expensive: the sentences that
+would need holding are the ones a reader acts on, and pinning them means
+producing the behaviour they describe, which is what this lane already does for
+the blocks it can. Recorded so the next run knows the gap is real rather than an
+oversight, and so a page that makes a behavioural claim is written knowing
+nothing behind it will object.
+
+---
+
+## 2026-09-11 — a review queue still cannot tell a dead change from a live one, and now a published page tells hosts to write the comparison themselves
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** open — a second data point on the 7 September entry, unchanged in
+substance
+
+The 7 September entry recommended a `staleHolds`-shaped helper beside
+`confirmHeld`, because `holds.forTree` returns everything waiting with no
+reference to where the page has got to. Nothing has changed; `main` has not
+moved since 1 September.
+
+What is new is the cost. *Answering a held change* is the site's page about
+building a review screen, and it now prints those three lines as **the thing a
+host has to write**:
+
+```ts
+const rows =
+  waiting.ok && page.ok
+    ? waiting.value.map((hold) => ({
+        hold,
+        stillAnswerable: hold.baseRevision === page.value.revision,
+      }))
+    : []
+```
+
+A documented workaround is harder to withdraw than an undocumented one: from
+today, the helper landing means this page is rewritten rather than merely
+extended. Recommendation unchanged and now slightly more urgent — the helper, in
+`@loom/runtime/write`, before more hosts write the comparison and half of them
+get it backwards.
+
+`Loom portal` owns a review queue screen and is still the other lane this
+reaches.
+
+---
+
+## 2026-09-11 — `*.vercel.app` is still off the egress allowlist, eleventh consecutive documentation run
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — only the maintainer can widen egress
+
+Unchanged from the 1, 7, 9 and 10 September entries and from the seven before
+them. The brief's step 8 requires the deployed preview URL and a screenshot; the
+URL is published unverified because the sandbox cannot open it, and every
+screenshot in this report is this commit served locally by `next start` at a
+true 390 and 1280 CSS pixels, in both themes.
+
+---
+
+## 2026-09-11 — this lane pushed onto its open pull request for the sixth day running
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a sixth data point on the 6 September entry
+
+Today's work went onto `docs-21-the-code-on-the-page-compiles`, which is #243.
+The brief's step 3 says to branch off `main`. `main` has not moved since
+1 September, four of this lane's branches are already merged into #243, and this
+unit is a page whose three generated blocks are produced by a bench extracted
+from `_lib/operations/checks.ts` — a file that exists only on this branch. A
+branch cut from `main` would have had to copy the bench rather than extract it,
+which is the duplication this lane filed a finding about on 5 September.
+
+Recommendation, unchanged for six days: one sentence in the seven briefs and in
+`docs/routines.md` — *"if this lane already has an open pull request, push onto
+its branch instead."*
