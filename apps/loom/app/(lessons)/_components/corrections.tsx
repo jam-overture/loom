@@ -9,6 +9,8 @@ import {
   correctionQueue,
   correctionSitting,
   dueCorrections,
+  keyOf,
+  knownOnly,
   nextCorrection,
   wasConfident,
   type PendingCorrection,
@@ -34,17 +36,26 @@ import { useProgress } from "./store"
  * the pointer appears, and the answer itself is never printed. A correction is
  * not a second chance on easier terms — it is the same terms, later.
  *
- * What is deliberately different: **the sitting does not say which set a
- * question came from until it has been answered.** Knowing that this one is
- * from Set D is knowing it is about identity, and a question you have been
- * pointed at is a question you have been given half of. Where to check appears
- * at the same moment it does everywhere else, which is after the writing.
+ * What is deliberately different: **the sitting does not say where a question
+ * came from until it has been answered.** Knowing that this one is from Set D,
+ * or from lesson 04's Self-check, is knowing it is about identity, and a
+ * question you have been pointed at is a question you have been given half of.
+ * Where to check appears at the same moment it does everywhere else, which is
+ * after the writing.
+ *
+ * A question arrives here from a review set or from a lesson's own Warm-up,
+ * Predict or Self-check, and by the time it does there is nothing to tell them
+ * apart: it is a question the reader answered, rated and got wrong, and it is
+ * asked again. That is the point of mixing them. Which of the two it was is a
+ * fact about where it was written down, and it belongs in the line that appears
+ * afterwards rather than in the question.
  */
 
 export type CorrectionQuestion = {
   readonly set: string
-  readonly letter: string
   readonly number: number
+  /** "Set D", "Lesson 04 Self-check" — shown only once it has been answered. */
+  readonly label: string
   readonly body: ReactNode
   readonly checkIn: readonly CheckPointer[]
 }
@@ -57,10 +68,8 @@ type AnsweredNote = {
   readonly done: number
 }
 
-const keyOf = (set: string, question: number): string => `${set}#${question}`
-
-const labelOf = (correction: PendingCorrection, letter: string | undefined): string =>
-  `Set ${letter ?? correction.set} q${correction.question}`
+const labelOf = (correction: PendingCorrection, label: string | undefined): string =>
+  `${label ?? correction.set} q${correction.question}`
 
 const days = (count: number): string => `${count} ${count === 1 ? "day" : "days"}`
 
@@ -103,20 +112,18 @@ export const Corrections = ({
   const seen = new Set(answered.map((note) => note.key))
 
   /**
-   * A question the schedule no longer contains is dropped, and dropped here
+   * A question the course no longer contains is dropped, and dropped here
    * rather than filtered out further down, so that every number on this page
    * counts the same things.
    *
-   * Sets get edited — a question can be reworded, renumbered or removed between
-   * the sitting that recorded the miss and the day it comes back — and a record
-   * kept in the reader's browser has no way of hearing about it. What is left is
-   * a key pointing at nothing, and the alternatives to dropping it are a blank
-   * panel with a confidence control underneath, or a queue that says one thing
-   * is due and then offers nothing.
+   * The alternatives to dropping it are a blank panel with a confidence control
+   * underneath, or a queue that says one thing is due and then offers nothing —
+   * and that second one is not hypothetical. It is what the review index said
+   * for a week, because it did this filtering nowhere and this page did it
+   * here. The filter is shared now, and the questions it filters against are
+   * every question in the course rather than only the review sets.
    */
-  const queue = correctionQueue(progress, today).filter((correction) =>
-    known.has(keyOf(correction.set, correction.question))
-  )
+  const queue = knownOnly(correctionQueue(progress, today), new Set(known.keys()))
   const due = dueCorrections(queue)
 
   const sitting = correctionSitting(queue, SITTING - answered.length).filter(
@@ -154,7 +161,7 @@ export const Corrections = ({
       ...notes,
       {
         key,
-        label: labelOf(correction, known.get(key)?.letter),
+        label: labelOf(correction, known.get(key)?.label),
         confidence: attempt.confidence,
         grade: attempt.grade,
         done: attempt.grade === "got-it" ? correction.done + 1 : 0,
@@ -231,13 +238,19 @@ export const Corrections = ({
 /**
  * The corrections line on the review queue: what is waiting, and the one number
  * worth putting in front of the reader — how many of them they were sure about.
+ *
+ * `keys` is every question the course still contains, and it is a parameter
+ * because this is a client component and that list is read off the repository
+ * on the server. It is not optional and it is not a nicety: without it this
+ * panel counted questions the sitting could not render, and a promise of work
+ * that is not there when you click through costs more than the panel is worth.
  */
-export const CorrectionsPanel = () => {
+export const CorrectionsPanel = ({ keys }: { readonly keys: readonly string[] }) => {
   const { progress, ready, today } = useProgress()
 
   if (!ready) return undefined
 
-  const queue = correctionQueue(progress, today)
+  const queue = knownOnly(correctionQueue(progress, today), new Set(keys))
   const due = dueCorrections(queue)
 
   if (queue.length === 0) return undefined

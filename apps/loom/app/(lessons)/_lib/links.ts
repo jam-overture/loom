@@ -1,5 +1,6 @@
 import { recordPointers } from "./records"
 import type { ReviewAnchor, ReviewQuestion } from "./schedule"
+import type { RecallPart } from "./slugs"
 import { lesson } from "./syllabus"
 
 /**
@@ -94,3 +95,26 @@ export const reviewPointers = (
     })
   ),
 ]
+
+/**
+ * Where to check a lesson's own question, when it comes back as a correction
+ * days after the lesson.
+ *
+ * Two of the three match what the lesson page already does. A Warm-up question
+ * points at the earlier lessons it reaches into and *not* at the lesson it
+ * appears in, because it is asked before that lesson is read and the answer is
+ * not in it. A Self-check question points at the lesson plus whatever it reaches
+ * back into.
+ *
+ * **Predict is the one that differs on purpose.** On the lesson page a Predict
+ * question has nowhere to check — the reader is standing above the explanation
+ * and the whole point is that they have not read it. A day later they have, so
+ * the lesson is exactly where to look, and sending them to a page that is now
+ * the answer is the correction working rather than a leak.
+ */
+export const lessonQuestionPointers = (
+  lesson: number,
+  part: RecallPart,
+  refs: readonly number[]
+): readonly CheckPointer[] =>
+  checkPointers(part === "warm-up" ? refs : [lesson, ...refs])

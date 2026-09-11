@@ -53,6 +53,13 @@ export type AuditReport = {
    */
   readonly stoppedAt: number | null
   /**
+   * The head revision the fold was checked against, and therefore how many
+   * accepted changes went into it (0016). Null exactly when nothing was
+   * compared — the mirror of `stoppedAt`, and the reason a screen can tell a
+   * verdict that weighed something from one that could not.
+   */
+  readonly revision: number | null
+  /**
    * Removals that were taken back. Counted rather than listed: an undo is the
    * expected shape of a working review queue, and a page that listed each one
    * beside a fault would read as a list of faults.
@@ -266,6 +273,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         differences: [],
         omitted: 0,
         stoppedAt: null,
+        revision: audit.revision,
         ...identityFindings(audit.idReturns),
       }
 
@@ -279,6 +287,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         differences: found.slice(0, DIFFERENCE_LIMIT),
         omitted: Math.max(found.length - DIFFERENCE_LIMIT, 0),
         stoppedAt: null,
+        revision: audit.revision,
         ...identityFindings(audit.idReturns),
       }
     }
@@ -296,6 +305,8 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         differences: [],
         omitted: 0,
         stoppedAt: stoppedAt(audit.mismatch),
+        /** Nothing was compared, so there is no revision this verdict is about. */
+        revision: null,
         /** A fold that stopped saw part of the log, and part of a history is not one. */
         ...NO_FINDINGS,
       }
@@ -351,8 +362,18 @@ export const readCheckup = (report: AuditReport): CheckupVerdict => {
       return {
         tone: toneOfAudit("agrees"),
         label: "Everything on this page adds up.",
+        /**
+         * *"…so nothing on it is unexplained"* was the previous clause, and it
+         * promised the thing a reader wants — the history is intact — rather
+         * than the thing that was checked. A fold compares end states, so a
+         * deployment holding a wrong starting shape sits on a green verdict
+         * from the moment a change replaces the part it was wrong about.
+         * `checkup-basis.ts` carries the counterexample and the reasoning; the
+         * sentence's own job is to stop claiming more than the fold did, which
+         * it does by naming the starting shape it began from.
+         */
         meaning:
-          "Loom replayed every change it has recorded for this page and got back exactly the page people are being served, so nothing on it is unexplained.",
+          "Loom started from the shape it has on record for this page, replayed every change it has recorded since, and got back exactly the page people are being served.",
         next: nothingToDo(report),
       }
 
@@ -360,8 +381,14 @@ export const readCheckup = (report: AuditReport): CheckupVerdict => {
       return {
         tone: toneOfAudit("diverged"),
         label: "This page does not match its own history.",
+        /**
+         * *"One of the two is wrong"* is the same miscount under a red verdict,
+         * and it is the more expensive one: it sends a reviewer to look at the
+         * log and the page when the fault may be in the starting shape, which
+         * is in neither.
+         */
         meaning:
-          "Replaying the changes Loom recorded produces a different page from the one people are being served. One of the two is wrong, and until you know which, the history cannot explain what is on screen.",
+          "Starting from the shape Loom has on record for this page and replaying every change since produces a different page from the one people are being served. Until you know which of them is wrong, the history cannot explain what is on screen.",
         next: "The parts listed below are where the two disagree. Start there.",
       }
 

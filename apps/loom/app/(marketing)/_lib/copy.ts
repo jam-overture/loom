@@ -24,6 +24,10 @@
  * change there are" is `DELTA_OPERATIONS.length` and cannot drift from it. A
  * fifth operation would move the number on the page by existing.
  */
+import { catalogueOf } from "@loom/runtime/sdk"
+
+import { siteRegistry } from "./registry"
+
 export const DELTA_OPERATIONS = ["insert", "remove", "move", "configure"] as const
 
 /**
@@ -41,10 +45,21 @@ export const DELTA_OPERATIONS = ["insert", "remove", "move", "configure"] as con
  */
 export const DECISIONS_AT_LEAST = 100
 
+/**
+ * Every type the site's own registry holds.
+ *
+ * Counted rather than spelled, which is the whole point: the literal was bumped
+ * by hand ten times in eleven days, always by a run that had not caused it — a
+ * primitives run registering a type left this file red and a marketing run came
+ * and changed a digit. Derived, a new primitive moves the number on the page in
+ * the commit that registers it, and there is nothing here to forget.
+ */
+const REGISTERED_PRIMITIVES = catalogueOf(siteRegistry)
+
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
   /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
-  primitives: "70",
+  primitives: String(REGISTERED_PRIMITIVES.length),
   /** A floor, not a count. See `DECISIONS_AT_LEAST`. */
   decisions: `${DECISIONS_AT_LEAST}+`,
   /** Delta operations. The whole vocabulary of structural change. */

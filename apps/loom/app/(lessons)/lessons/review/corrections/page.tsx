@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 
 import { Corrections, type CorrectionQuestion } from "../../../_components/corrections"
-import { reviewPointers } from "../../../_lib/links"
+import { blockNodes } from "../../../_lib/blocks"
 import { heading, prose, renderFragment } from "../../../_lib/loom"
-import { REVIEW_SETS } from "../../../_lib/schedule"
+import { COURSE_QUESTIONS } from "../../../_lib/questions"
 import * as style from "../../../_components/style"
 
 /**
@@ -15,11 +15,19 @@ import * as style from "../../../_components/style"
  * come back is derived from a study history that exists only on their machine,
  * so the server cannot know which five to send and has to send all of them.
  *
+ * "Every question in the course" now means what it says. It used to mean the
+ * review sets, which is why a reader who had missed a lesson's own Self-check
+ * question was told on the index that questions were waiting and then shown
+ * none here. The lessons' Warm-up, Predict and Self-check questions were being
+ * recorded, graded and queued all along; this page was the only thing that had
+ * not heard of them.
+ *
  * The review index makes the opposite trade for the opposite reason — it lists
- * twenty sets and ships twenty headings, because a set's questions are not
- * needed until the reader opens it. Here there is no set to open; the sitting is
- * assembled out of five sets at once, which is what makes it interleaved by
- * construction rather than by an author's care.
+ * twenty-two sets and ships twenty-two headings, because a set's questions are
+ * not needed until the reader opens it. Here there is no set to open; the
+ * sitting is assembled out of five places at once, which is what makes it
+ * interleaved by construction rather than by an author's care, and adding the
+ * lessons to it widened that from twenty-two sources to nearly seventy.
  */
 
 export const metadata: Metadata = {
@@ -27,18 +35,23 @@ export const metadata: Metadata = {
   description: "The questions you missed, asked again after a gap — and again, and again.",
 }
 
-const QUESTIONS: readonly CorrectionQuestion[] = REVIEW_SETS.flatMap((set) =>
-  set.questions.map((question) => ({
-    set: set.slug,
-    letter: set.letter,
-    number: question.number,
-    checkIn: reviewPointers(set.anchor, question),
-    body: renderFragment(
-      (ids) => [prose(ids, question.text)],
-      `${set.slug}-c${question.number}`
-    ),
-  }))
-)
+const QUESTIONS: readonly CorrectionQuestion[] = COURSE_QUESTIONS.map((question) => ({
+  set: question.set,
+  number: question.number,
+  label: question.label,
+  checkIn: question.checkIn,
+  /**
+   * The scenario first where there is one, then the question. Nothing else
+   * comes with it — not the section's rubric, which this page states its own
+   * version of, and not the paragraph that closes the section, which on the
+   * lesson page is held back until the set is finished and names the question
+   * that matters most.
+   */
+  body: renderFragment(
+    (ids) => [...blockNodes(ids, question.context), prose(ids, question.text)],
+    `${question.set}-c${question.number}`
+  ),
+}))
 
 const intro = renderFragment(
   (ids) => [

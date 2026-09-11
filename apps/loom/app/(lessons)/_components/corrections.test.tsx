@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { Corrections, type CorrectionQuestion } from "./corrections"
+import { Corrections, CorrectionsPanel, type CorrectionQuestion } from "./corrections"
 import { ClockProvider } from "./store"
 import type { Correction, Grade, Progress } from "../_lib/progress"
 
@@ -19,30 +19,39 @@ import type { Correction, Grade, Progress } from "../_lib/progress"
 const QUESTIONS: readonly CorrectionQuestion[] = [
   {
     set: "set-d",
-    letter: "D",
+    label: "Set D",
     number: 7,
     body: <p>A delta removes a card and then inserts something at the card&rsquo;s id.</p>,
     checkIn: [],
   },
   {
     set: "set-c",
-    letter: "C",
+    label: "Set C",
     number: 2,
     body: <p>Why is a half-applied delta worse than a rejected one?</p>,
     checkIn: [],
   },
   {
     set: "set-a",
-    letter: "A",
+    label: "Set A",
     number: 1,
     body: <p>Name the four questions a text diff cannot answer.</p>,
     checkIn: [],
   },
-  { set: "set-b", letter: "B", number: 1, body: <p>Why is text a node?</p>, checkIn: [] },
-  { set: "set-b", letter: "B", number: 2, body: <p>Why is there no conditional node?</p>, checkIn: [] },
-  { set: "set-g", letter: "G", number: 1, body: <p>Why does nothing throw?</p>, checkIn: [] },
-  { set: "set-g", letter: "G", number: 2, body: <p>Why is the clock injected?</p>, checkIn: [] },
+  { set: "set-b", label: "Set B", number: 1, body: <p>Why is text a node?</p>, checkIn: [] },
+  { set: "set-b", label: "Set B", number: 2, body: <p>Why is there no conditional node?</p>, checkIn: [] },
+  { set: "set-g", label: "Set G", number: 1, body: <p>Why does nothing throw?</p>, checkIn: [] },
+  { set: "set-g", label: "Set G", number: 2, body: <p>Why is the clock injected?</p>, checkIn: [] },
+  {
+    set: "lesson-04-self-check",
+    label: "Lesson 04 Self-check",
+    number: 3,
+    body: <p>What does an id promise, and what does it refuse to promise?</p>,
+    checkIn: [],
+  },
 ]
+
+const KEYS: readonly string[] = QUESTIONS.map((question) => `${question.set}#${question.number}`)
 
 const KEY = "loom.lessons.progress.v1"
 
@@ -99,6 +108,8 @@ const sitting = () =>
       <Corrections questions={QUESTIONS} />
     </ClockProvider>
   )
+
+const panel = () => render(<CorrectionsPanel keys={KEYS} />)
 
 describe("a corrections sitting", () => {
   beforeEach(() => {
@@ -262,5 +273,63 @@ describe("a corrections sitting", () => {
 
     expect(screen.queryByRole("textbox")).toBeNull()
     expect(container.textContent).toContain("Nothing has come back")
+  })
+})
+
+/**
+ * The index and the sitting, counting the same things.
+ *
+ * A lesson's own questions were recorded, graded and queued from the day the
+ * lesson route existed, and this sitting was the only thing that had never
+ * heard of them — so the panel offered work the page then refused to hand over.
+ * The filter is one function now and both call it; these are the tests that say
+ * the two numbers cannot come apart again.
+ */
+describe("a lesson's own question, come back", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("is offered by the sitting, not only counted by the index", () => {
+    seed([{ set: "lesson-04-self-check", question: 3, confidence: 5 }])
+    sitting()
+
+    expect(screen.getByText(/What does an id promise/)).toBeTruthy()
+  })
+
+  it("is promised by the index in the same breath", () => {
+    seed([{ set: "lesson-04-self-check", question: 3, confidence: 5 }])
+    const { container } = panel()
+
+    expect(container.textContent).toContain("1 question to re-answer")
+  })
+
+  it("does not say which lesson it is from until it has been answered", () => {
+    seed([{ set: "lesson-04-self-check", question: 3, confidence: 5 }])
+    const { container } = sitting()
+
+    expect(container.textContent).not.toContain("Lesson 04")
+
+    answerCurrent("4", "Got it")
+
+    expect(container.textContent).toContain("Lesson 04 Self-check q3")
+  })
+
+  it("is mixed in with the review sets rather than kept in its own list", () => {
+    seed([
+      { set: "set-d", question: 7, confidence: 2 },
+      { set: "lesson-04-self-check", question: 3, confidence: 5 },
+    ])
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("Question 1 of 2")
+    expect(screen.getByText(/What does an id promise/)).toBeTruthy()
+  })
+
+  it("leaves the index promising nothing when the course no longer has the question", () => {
+    seed([{ set: "lesson-04-self-check", question: 99, confidence: 5 }])
+    const { container } = panel()
+
+    expect(container.textContent ?? "").not.toContain("to re-answer")
   })
 })

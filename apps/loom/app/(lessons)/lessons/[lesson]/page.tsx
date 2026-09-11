@@ -15,6 +15,7 @@ import { heading, prose, renderFragment } from "../../_lib/loom"
 import { promptSet, readLesson, section, splitAnswers, type LessonDocument, type Prompt } from "../../_lib/lesson"
 import type { Block } from "../../_lib/markdown"
 import { runExercises } from "../../_lib/run"
+import { lessonSlug } from "../../_lib/slugs"
 import { WRITTEN_LESSONS, lesson as syllabusLesson } from "../../_lib/syllabus"
 
 /**
@@ -69,8 +70,6 @@ const fragment = (blocks: readonly Block[], key: string) =>
  */
 const sectionHeading = (text: string, key: string) =>
   renderFragment((ids) => [heading(ids, 2, text, { balance: true })], key)
-
-const slugFor = (lesson: number, part: string): string => `lesson-${pad(lesson)}-${part}`
 
 const questionsOf = (
   prompts: readonly Prompt[],
@@ -202,7 +201,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
         kind: "recall",
         id,
         heading: sectionHeading(title, `${id}-h`),
-        slug: slugFor(document.number, "warm-up"),
+        slug: lessonSlug(document.number, "warm-up"),
         intro: fragment(set.intro, `${key}wi`),
         outro: fragment(set.outro, `${key}wo`),
         questions: questionsOf(set.prompts, `${key}w`, (prompt) => prompt.refs),
@@ -215,7 +214,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
         kind: "predict",
         id,
         heading: sectionHeading(title, `${id}-h`),
-        slug: slugFor(document.number, "predict"),
+        slug: lessonSlug(document.number, "predict"),
         intro: fragment(set.intro, `${key}pi`),
         outro: fragment(set.outro, `${key}po`),
         questions: predictQuestions,
@@ -228,7 +227,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
         kind: "recall",
         id,
         heading: sectionHeading(title, `${id}-h`),
-        slug: slugFor(document.number, "self-check"),
+        slug: lessonSlug(document.number, "self-check"),
         intro: fragment(set.intro, `${key}si`),
         outro: fragment(set.outro, `${key}so`),
         /**
@@ -245,7 +244,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
           id: `${id}-answers`,
           heading: sectionHeading("The Self-check answers", `${id}-ah`),
           node: fragment(split.selfCheck, `${key}sa`),
-          gate: { kind: "attempted", slug: slugFor(document.number, "self-check"), count: selfCheckCount, of: "Self-check" },
+          gate: { kind: "attempted", slug: lessonSlug(document.number, "self-check"), count: selfCheckCount, of: "Self-check" },
         })
       }
 
@@ -258,7 +257,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
         id,
         heading: sectionHeading(title, `${id}-h`),
         node: fragment(each.blocks, `${key}r`),
-        slug: slugFor(document.number, "predict"),
+        slug: lessonSlug(document.number, "predict"),
         questions: predictQuestions,
       })
       continue
@@ -271,7 +270,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
         kind: "exercises",
         id,
         heading: sectionHeading(title, `${id}-h`),
-        slug: slugFor(document.number, "try-it"),
+        slug: lessonSlug(document.number, "try-it"),
         units,
         total,
         failure: exercises.kind === "failed" ? exercises.message : undefined,
@@ -285,7 +284,7 @@ const partsOf = (document: LessonDocument, exercises: ExerciseRun): readonly Les
           node: fragment(split.exercises, `${key}ea`),
           gate: {
             kind: "written",
-            slug: slugFor(document.number, "try-it"),
+            slug: lessonSlug(document.number, "try-it"),
             count: Math.max(total, 1),
             /**
              * Where the exercises run, the predictions have already been taken
