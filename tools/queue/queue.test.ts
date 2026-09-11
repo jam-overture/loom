@@ -206,12 +206,111 @@ describe("planQueue", () => {
     expect(tree.taken).toEqual([])
   })
 
+  /**
+   * The defect this ordering exists for, reduced to four branches.
+   *
+   * `ledger` is the shared append-only file every lane writes to. While the
+   * tree has no `.gitattributes`, any two branches that touched it conflict;
+   * once `attrs` lands, the union driver is in effect and they do not. In queue
+   * position `attrs` is offered third, by which time `one` has landed and
+   * `attrs` itself conflicts on the ledger — so nothing else goes in either.
+   */
+  const ledgerTree = (): MergeTree & { readonly taken: readonly string[] } => {
+    const taken: string[] = []
+    const writesLedger = new Set(["one", "two", "attrs"])
+
+    return {
+      taken,
+      attempt: (branch: string): Promise<MergeAttempt> => {
+        const unionInEffect = taken.includes("attrs")
+        const clashes =
+          writesLedger.has(branch) && !unionInEffect && taken.some((other) => writesLedger.has(other))
+
+        return Promise.resolve(clashes ? { outcome: "conflict", files: ["FINDINGS.md"] } : { outcome: "clean" })
+      },
+      take: (branch: string): Promise<void> => {
+        taken.push(branch)
+        return Promise.resolve()
+      },
+      changedFiles: (branch: string): Promise<readonly string[]> =>
+        Promise.resolve(
+          branch === "attrs" ? [".gitattributes", "FINDINGS.md"] : writesLedger.has(branch) ? ["FINDINGS.md"] : ["src/x.ts"]
+        ),
+    }
+  }
+
+  it("offers a branch that changes .gitattributes before branches that do not", async () => {
+    const tree = ledgerTree()
+
+    const plan = await planQueue("main", queue("one", "two", "attrs", "other"), tree)
+
+    expect(plan.landed[0]?.branch).toBe("attrs")
+    expect(plan.governing).toEqual(["attrs"])
+  })
+
+  /**
+   * The measurement that matters: the same four branches, the same oracle, and
+   * the count goes from one to four purely because the branch that decides how
+   * merging works was allowed to decide it first.
+   */
+  it("lands the whole queue that queue position would have blocked", async () => {
+    const plan = await planQueue("main", queue("one", "two", "attrs", "other"), ledgerTree())
+
+    expect(plan.landed.map((entry) => entry.branch)).toEqual(["attrs", "one", "two", "other"])
+    expect(plan.blocked).toEqual([])
+  })
+
+  it("keeps queue position among branches that all change .gitattributes", async () => {
+    const tree = fakeTree({
+      changed: { late: [".gitattributes"], early: [".gitattributes"], plain: ["src/x.ts"] },
+    })
+
+    const plan = await planQueue(
+      "main",
+      [
+        { branch: "plain", position: 0 },
+        { branch: "late", position: 9 },
+        { branch: "early", position: 1 },
+      ],
+      tree
+    )
+
+    expect(plan.landed.map((entry) => entry.branch)).toEqual(["early", "late", "plain"])
+    expect(plan.governing).toEqual(["early", "late"])
+  })
+
+  /**
+   * git reads the `.gitattributes` in every directory it descends into, so one
+   * added deep in the tree governs merging there just as the root one does.
+   */
+  it("counts a .gitattributes at any depth", async () => {
+    const tree = fakeTree({ changed: { deep: ["apps/loom/.gitattributes"], first: ["src/x.ts"] } })
+
+    const plan = await planQueue("main", queue("first", "deep"), tree)
+
+    expect(plan.landed.map((entry) => entry.branch)).toEqual(["deep", "first"])
+  })
+
+  /**
+   * Matched as a whole path segment. A file whose name merely ends in those
+   * characters configures nothing, and promoting it would reorder the queue for
+   * no reason.
+   */
+  it("does not promote a file that only looks like .gitattributes", async () => {
+    const tree = fakeTree({ changed: { sneaky: ["docs/notes.gitattributes"], first: ["src/x.ts"] } })
+
+    const plan = await planQueue("main", queue("first", "sneaky"), tree)
+
+    expect(plan.landed.map((entry) => entry.branch)).toEqual(["first", "sneaky"])
+    expect(plan.governing).toEqual([])
+  })
+
   it("plans an empty queue without asking the tree anything", async () => {
     const tree = fakeTree({})
 
     const plan = await planQueue("main", [], tree)
 
-    expect(plan).toEqual({ base: "main", landed: [], blocked: [] })
+    expect(plan).toEqual({ base: "main", landed: [], blocked: [], governing: [] })
     expect(tree.attempts).toEqual([])
   })
 })
@@ -225,6 +324,7 @@ describe("describePlan", () => {
         { branch: "two", order: 2 },
       ],
       blocked: [],
+      governing: [],
     })
 
     expect(lines[0]).toBe("2 of 2 branches merge into origin/main, in this order:")
@@ -237,6 +337,7 @@ describe("describePlan", () => {
       base: "origin/main",
       landed: [{ branch: "one", order: 1 }],
       blocked: [{ branch: "two", files: ["src/a.ts", "src/b.ts"], collidesWith: ["one"] }],
+      governing: [],
     })
 
     expect(lines).toContain("1 of 2 branches merge into origin/main, in this order:")
@@ -248,6 +349,7 @@ describe("describePlan", () => {
       base: "origin/main",
       landed: [],
       blocked: [{ branch: "stale", files: ["pnpm-lock.yaml"], collidesWith: [] }],
+      governing: [],
     })
 
     expect(lines).toContain("  (none)")
@@ -261,9 +363,42 @@ describe("describePlan", () => {
       base: "main",
       landed: [],
       blocked: [{ branch: "wide", files, collidesWith: [] }],
+      governing: [],
     })
 
     expect(lines).toContain("  wide — conflicts with the base itself: a.ts, b.ts, c.ts, d.ts (+2 more)")
+  })
+
+  /**
+   * Without this line the first branch appears out of queue order for no
+   * visible reason, which reads as a bug in the tool rather than as the reason
+   * the count is as high as it is.
+   */
+  it("says which branch was offered first and why", () => {
+    const lines = describePlan({
+      base: "origin/main",
+      landed: [
+        { branch: "attrs", order: 1 },
+        { branch: "one", order: 2 },
+      ],
+      blocked: [],
+      governing: ["attrs"],
+    })
+
+    expect(lines).toContain(
+      "offered first — changes .gitattributes, so it decides how the rest merge: attrs"
+    )
+  })
+
+  it("says nothing about ordering when no branch changes .gitattributes", () => {
+    const lines = describePlan({
+      base: "origin/main",
+      landed: [{ branch: "one", order: 1 }],
+      blocked: [],
+      governing: [],
+    })
+
+    expect(lines.some((line) => line.includes("offered first"))).toBe(false)
   })
 
   it("says so when a conflict reported no files at all", () => {
@@ -271,6 +406,7 @@ describe("describePlan", () => {
       base: "main",
       landed: [],
       blocked: [{ branch: "odd", files: [], collidesWith: [] }],
+      governing: [],
     })
 
     expect(lines).toContain("  odd — conflicts with the base itself: no files reported")

@@ -91,7 +91,60 @@ export type QueuePlan = {
   readonly landed: readonly Landing[]
   /** Everything the strategy could not place, each with its measured reason. */
   readonly blocked: readonly Blocked[]
+  /**
+   * The candidates that were offered before their queue position, because they
+   * change how git merges everything after them.
+   *
+   * Reported rather than kept private: the order is otherwise queue position,
+   * so a branch appearing out of turn looks arbitrary, and the reader deciding
+   * whether to trust the plan is owed the reason.
+   */
+  readonly governing: readonly string[]
 }
+
+/**
+ * The file whose contents decide how every later merge behaves.
+ *
+ * A `.gitattributes` line is not an ordinary change. `FINDINGS.md merge=union`
+ * does not change a single byte of the tree a reader sees; it changes what git
+ * *does* when the next branch touches that file, which is the oracle this whole
+ * module is a plan over. Matched at any depth, because git reads the one in
+ * each directory it descends into, not only the root.
+ */
+const MERGE_ATTRIBUTES = ".gitattributes"
+
+const governsMerging = (files: readonly string[]): boolean =>
+  files.some((path) => path === MERGE_ATTRIBUTES || path.endsWith(`/${MERGE_ATTRIBUTES}`))
+
+/**
+ * Queue position, except that a branch changing `.gitattributes` goes first.
+ *
+ * Measured on this repository on 11 September 2026, over the nine open trees:
+ * in queue position the plan lands **one** of nine and reports the other eight
+ * blocked on `FINDINGS.md`. One of those eight is the branch carrying the
+ * `merge=union` line for that very file. Offered first it goes in clean, and
+ * seven of the remaining eight then follow it in — the same nine branches, the
+ * same oracle, a different answer, because the first merge decided how the rest
+ * were allowed to happen.
+ *
+ * So this is not a tie-break or a heuristic about which branch is nicer. A
+ * candidate that installs merge configuration is measuring a different
+ * repository from the one that will exist once it lands, and a plan that tries
+ * it in arrival order is reporting a number that was never true.
+ *
+ * Among themselves such branches keep queue position, and so does everything
+ * else: two runs over the same branches still produce the same plan.
+ */
+const byMergePrecedence =
+  (changed: ReadonlyMap<string, readonly string[]>) =>
+  (left: Candidate, right: Candidate): number => {
+    const leftGoverns = governsMerging(changed.get(left.branch) ?? [])
+    const rightGoverns = governsMerging(changed.get(right.branch) ?? [])
+
+    if (leftGoverns !== rightGoverns) return leftGoverns ? -1 : 1
+
+    return left.position - right.position
+  }
 
 /**
  * The landed branches that touched any of these paths, in landing order.
@@ -119,13 +172,25 @@ const touching = (
  * quadratic in the number of branches — and it is the correct one: a branch
  * that conflicted against the tree three merges ago may go in cleanly now, and
  * a single pass would leave it out on evidence that has since expired.
+ *
+ * What each branch changes is read once, before any merge is attempted. The
+ * diff is against the merge base, so it does not move as the tree accumulates,
+ * and the order needs it before the first offer.
  */
 export const planQueue = async (
   base: string,
   candidates: readonly Candidate[],
   tree: MergeTree
 ): Promise<QueuePlan> => {
-  const remaining = [...candidates].sort((left, right) => left.position - right.position)
+  const changed = new Map<string, readonly string[]>()
+  for (const candidate of candidates) {
+    changed.set(candidate.branch, await tree.changedFiles(candidate.branch))
+  }
+
+  const remaining = [...candidates].sort(byMergePrecedence(changed))
+  const governing = remaining
+    .filter((candidate) => governsMerging(changed.get(candidate.branch) ?? []))
+    .map((candidate) => candidate.branch)
   const landed: Landing[] = []
 
   for (;;) {
@@ -151,9 +216,6 @@ export const planQueue = async (
    * final tree, and a conflict reported against a stale one names files whose
    * collision may no longer exist.
    */
-  const changed = new Map<string, readonly string[]>()
-  for (const landing of landed) changed.set(landing.branch, await tree.changedFiles(landing.branch))
-
   const blocked: Blocked[] = []
   for (const candidate of remaining) {
     const attempt = await tree.attempt(candidate.branch)
@@ -166,5 +228,5 @@ export const planQueue = async (
     })
   }
 
-  return { base, landed, blocked }
+  return { base, landed, blocked, governing }
 }

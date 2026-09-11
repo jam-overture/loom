@@ -44,6 +44,16 @@ export const describePlan = (plan: QueuePlan): readonly string[] => {
 
   if (plan.landed.length === 0) lines.push("  (none)")
 
+  /**
+   * Said after the order and not before it, because it explains something the
+   * reader has just noticed rather than something they are about to.
+   */
+  if (plan.governing.length > 0) {
+    lines.push(
+      `offered first — changes .gitattributes, so it decides how the rest merge: ${plan.governing.join(", ")}`
+    )
+  }
+
   if (plan.blocked.length > 0) {
     lines.push(`${plan.blocked.length} cannot be taken in this order:`)
     for (const entry of plan.blocked) lines.push(blockedLine(entry.branch, entry.files, entry.collidesWith))

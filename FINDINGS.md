@@ -14465,3 +14465,109 @@ headline numbers reported no words at all.
 The first half of that entry — whether a reviewer's sentence should print
 `loom.stat-grid` — is a question about who is reading, and this lane has no view
 on it.
+
+---
+
+## 2026-09-11 — thirty-seven open pull requests are nine trees, and merging one of them first takes the queue from 1 to 7
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a merge decision, not an engineering one
+
+`main` has not moved since 1 September. Thirty-seven pull requests are open,
+#219 to #255. That number is misleading in the direction that matters, and this
+entry is the measurement rather than another request to merge.
+
+**Twenty-eight of the thirty-seven are already carried by a newer branch of the
+same lane.** Measured with `git merge-base --is-ancestor` over every pair, not
+inferred from the titles:
+
+| lane | tree | carries |
+| --- | --- | --- |
+| framework | #230 | #221, #223, #228, #236, #250 |
+| primitives | #248 | #222, #229, #235, #241, #246 |
+| portal | #245 | #219, #227, #234, #240 |
+| docs | #243 | #225, #232, #238 |
+| marketing | #242 | #224, #231, #237 |
+| lessons | #254 | #226, #233, #239, #244, #247, #249, #251, #252 |
+| demo | #220, #253, #255 | — |
+
+So the queue is **nine trees**, and twenty-eight pull requests can be closed
+with no work lost the moment their lane's tree lands.
+
+**In the order they were opened, one of the nine merges.** Every other one is
+blocked on `FINDINGS.md` — this file, which seven routines append to and which
+conflicts between any two of them.
+
+**Taken in the order `pnpm queue` now reports, seven of the nine merge.** The
+difference is entirely #230: it carries the `.gitattributes` that gives this
+file `merge=union` ([0120](decisions/0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md)),
+and git reads merge attributes from the tree being merged *into*. On `main`
+there is no such file, so the fix for the conflict is itself behind the
+conflict. Merge #230 first and the ledger stops conflicting for everyone.
+
+```
+7 of 9 branches merge into origin/main, in this order:
+  1. origin/framework-25-where-the-face-is        (#230)
+  2. origin/demo-12-what-allowing-it-would-do     (#220)
+  3. origin/marketing-22-putting-it-back-is-a-change (#242)
+  4. origin/docs-21-the-code-on-the-page-compiles (#243)
+  5. origin/portal-23-four-units-one-tree         (#245)
+  6. origin/demo-08-the-way-back-to-the-record    (#253)
+  7. origin/lessons-31-reach                      (#254)
+```
+
+The two that remain are genuine content collisions, one file each, and both are
+filed below for the lanes that own them.
+
+Not done by this run: **nothing here merges anything.** A routine does not merge
+to `main`, and the ordering above is a measurement of the repository at
+11 September, not a claim about what should land.
+
+---
+
+## 2026-09-11 — `(marketing)/_lib/copy.ts` is edited by two lanes, and that is the only thing keeping #248 out
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`,
+`Loom marketing` · **Status:** open
+
+With the queue taken in the measured order, `primitives-26` (#248) is blocked on
+exactly one path:
+
+```
+origin/primitives-26-five-units-one-tree — after origin/marketing-22-…:
+  apps/loom/app/(marketing)/_lib/copy.ts
+```
+
+Both lanes changed it. On the primitives side it is `eff2cc7` *The weather on the
+page: atmosphere behind a band, and a word over a picture*; on the marketing side
+`8756b6d` *§4d: the last typed number on the front door*.
+
+The lane table in `docs/routines.md` gives `apps/loom/app/(marketing)/` to
+`Loom marketing`. A primitives change reaching into it is the boundary being
+crossed rather than a merge accident, and it will recur — so the resolution
+worth having is not a hand-merge but whichever of the two the file belongs to
+taking it back.
+
+This lane has no view on which of the two texts is right and does not edit
+either directory.
+
+---
+
+## 2026-09-11 — the demo lane has three open trees and two of them collide
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom demo` · **Status:** open
+
+Six lanes keep one tree each. `Loom demo` has three open pull requests that are
+not ancestors of one another — #220, #253 and #255 — and in the measured order
+#255 is blocked against the other two:
+
+```
+origin/demo-13-the-part-it-is-about — after origin/demo-12-…, origin/demo-08-…:
+  apps/loom/app/(demo)/demo/_components/record-card.tsx
+  apps/loom/app/(demo)/demo/page.tsx
+```
+
+All three are the same lane's own files, so nobody else can resolve it and
+nothing outside `(demo)` is waiting on it. Consolidating the three into one tree
+the way every other lane has would remove it, and would also make the demo's
+position readable from one place.
