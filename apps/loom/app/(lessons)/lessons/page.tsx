@@ -4,6 +4,7 @@ import { LessonLog } from "../_components/lesson-log"
 import { DueSummary } from "../_components/queue"
 import { lessonPointer } from "../_lib/links"
 import { heading, prose, renderFragment } from "../_lib/loom"
+import { QUESTION_KEYS } from "../_lib/questions"
 import { PART_LESSONS, SYLLABUS } from "../_lib/syllabus"
 import { REVIEW_SETS } from "../_lib/schedule"
 import * as style from "../_components/style"
@@ -64,7 +65,7 @@ const logIntro = renderFragment(
 const LessonsIndex = () => (
   <main style={style.column(5)}>
     {intro}
-    <DueSummary sets={SETS} parts={PART_LESSONS} />
+    <DueSummary sets={SETS} parts={PART_LESSONS} questionKeys={QUESTION_KEYS} />
     {logIntro}
 
     {SYLLABUS.map((part) => {

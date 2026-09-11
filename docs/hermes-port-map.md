@@ -82,6 +82,8 @@ stands alone.
 | `before-after` | `loom.before-after` | atomic ✅ |
 | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-grid` / `loom.offering` | pair ✅ — seven blocks, one record |
 | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-grid` / `loom.credential` | pair ✅ |
+| `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.recording-grid` / `loom.recording` | pair ✅ — four blocks, one record |
+| `events` | `loom.event-grid` / `loom.event` | pair ✅ |
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -112,25 +114,34 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 8 blocks, 4 pairs.** Grouped by the content model they
+**Pairs to build — 3 blocks, 2 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
-| Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
 | Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
-| Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
 
-**Two proposed names changed when they were built**, and the change is 0054
-being applied rather than overruled. `loom.offering-list` and
-`loom.credential-list` both shipped as `-grid`, because the arrangement word
-names *what the container does with its children* and what both of them do is
-`repeat(auto-fit, minmax(…))`. 0054's own consequence is the reason to get it
-right before it ships: a container that changes its arrangement changes its
-name, and a rename is a breaking change to every stored tree. The four rows
-above are proposals until the run that builds them looks at the markup — read
-the arrangement word as a prediction, not a commitment.
+**Four proposed names have changed when they were built**, and the change is
+0054 being applied rather than overruled. `loom.offering-list`,
+`loom.credential-list` and `loom.episode-list` all shipped as `-grid`, because
+the arrangement word names *what the container does with its children* and what
+all three of them do is `repeat(auto-fit, minmax(…))`. 0054's own consequence is
+the reason to get it right before it ships: a container that changes its
+arrangement changes its name, and a rename is a breaking change to every stored
+tree. The two rows above are proposals until the run that builds them looks at
+the markup — read the arrangement word as a prediction, not a commitment.
+
+**The fourth change was a noun rather than an arrangement**, and it is the one
+worth reading before the last two pairs are built. `loom.episode` shipped as
+`loom.recording`: *episode* is one of the four collapsed blocks' words rather
+than the name of what all four are, and a track on a playlist is not an episode
+of anything. Every collapse in this table has taken the general noun —
+`loom.milestone` over *timeline-item*, `loom.credential` over *award*,
+`loom.offering` over *service* — so the proposed nouns in the rows above deserve
+the same test at build time. `loom.book` survives it; `loom.listing` is a
+`property-listings` word and a run that builds it should ask what else it
+collapses first.
 
 `loom.offering-grid` also carries a **local** column vocabulary, `auto | one |
 two | three`, where `loom.credential-grid` takes the shared `COLUMN_NAMES`. That
@@ -254,13 +265,13 @@ been outside it.
 
 | | Blocks |
 | --- | --- |
-| Ported | 47 |
+| Ported | 52 |
 | Need no primitive | 13 |
-| Pairs still to build | 8 (4 pairs) |
+| Pairs still to build | 3 (2 pairs) |
 | Atomic still to build | 0 |
 | Blocked on a seam | 2 |
 
-**62 of 70 are settled**, and the 8 that remain are four pairs rather than eight
+**67 of 70 are settled**, and the 3 that remain are two pairs rather than three
 primitives. That is the number worth quoting, because "70 blocks" has been the
 shape of this job since the port started and it was never the real size of it.
 
@@ -275,8 +286,12 @@ nobody has written.
 is not their fields — it is what the reader aims at.
 [0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 settles it once for all of them: `loom.credential`, `loom.book` and
-`loom.episode` are **read**, so the card is the target; `loom.offering`,
-`loom.listing` and `loom.event` are **acted on**, so a control is. That is the
+`loom.recording` are **read**, so the card is the target; `loom.offering`,
+`loom.listing` and `loom.event` are **acted on**, so a control is. Both halves
+of that shipped together on 2 September and the pair is the clearest statement
+of the rule in the library: a recording is played, so its title's overlay covers
+the artwork; an event is booked, so nothing is covered and the ticket control is
+the aim. That is the
 one question the article/product pair had to answer that the granularity rules
 did not already answer.
 
@@ -289,5 +304,9 @@ record into child nodes. An offering has an includes list, so it has a flow and
 its prose is a node in it; a credential has no repeated part at all, so its one
 line is a prop and 0059's multi-string leaf applies unchanged. `loom.book` and
 `loom.listing` have repeated parts and take their prose as children;
-`loom.episode` and `loom.event` are to be read against their own shapes at port
-time.
+`loom.recording` and `loom.event` were read against their own shapes when they
+were built on 2 September, and **both went the credential way**: neither turns a
+field of its record into a children flow, so both hold their sentence as a prop
+and both are leaves. What looked at proposal time like a question about card
+richness turned out to be one question — *is there a repeated part?* — and the
+answer for both was no.

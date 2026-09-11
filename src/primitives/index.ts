@@ -24,6 +24,8 @@ import { loomCredentialGrid } from "./loom.credential-grid.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomEmbed } from "./loom.embed.js"
 import { loomEmphasis } from "./loom.emphasis.js"
+import { loomEvent } from "./loom.event.js"
+import { loomEventGrid } from "./loom.event-grid.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
@@ -65,6 +67,8 @@ import { loomProduct } from "./loom.product.js"
 import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
 import { loomQuote } from "./loom.quote.js"
+import { loomRecording } from "./loom.recording.js"
+import { loomRecordingGrid } from "./loom.recording-grid.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
 import { loomSection } from "./loom.section.js"
 import { loomSplit } from "./loom.split.js"
@@ -256,6 +260,23 @@ import { loomTierTable } from "./loom.tier-table.js"
  * not the page's (0008). `loom.meter` is the proportion `loom.stat` cannot
  * typeset — a stat states a figure and a meter draws it against its whole, which
  * is the only reason to draw one at all.
+ * **The two bands that cost a reader time rather than money** are the pairs
+ * either side of a clock. `recording-grid` over `recording` is four Hermes
+ * blocks — `video`, `video-playlist`, `playlist` and `podcast-episodes` — which
+ * are one record wearing four sets of words, and it is the first card in the
+ * library whose artwork is a *surface you press* rather than a picture of the
+ * thing: the play mark and the runtime in the artwork's corner are what separate
+ * it from the `loom.article` it otherwise resembles. `event-grid` over `event`
+ * is the last of the four pairs `docs/hermes-port-map.md` had left, and the one
+ * whose case had to be made against `loom.offering` rather than against the
+ * milestone the map named — same fields, opposite reading order, because a
+ * reader scanning a what's-on band is scanning *dates* and an offering's price
+ * is a trailing detail. Both cards take 0094's answer rather than
+ * `loom.offering`'s: neither turns a field into a children flow, so both hold
+ * their sentence as a prop, and both are leaves. Both are also the third and
+ * fourth callers of the containment trick `loom.offering` opened — one card that
+ * reads as a queue row or a dated row when it is given the width, and as a card
+ * when it is not.
  *
  * The general arrangers sit with page structure rather than at the top, and
  * that placement is the one nudge this file gives: a model reading down the
@@ -306,6 +327,10 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomAvatarRow,
   loomArticleGrid,
   loomArticle,
+  loomRecordingGrid,
+  loomRecording,
+  loomEventGrid,
+  loomEvent,
   loomLogoCloud,
   loomLogo,
   loomCredentialGrid,

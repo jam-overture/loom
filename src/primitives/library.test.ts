@@ -190,8 +190,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as seventy-four primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(74)
+  it("registers as seventy-eight primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(78)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -235,6 +235,10 @@ describe("the starter library", () => {
       "loom.avatar-row",
       "loom.article-grid",
       "loom.article",
+      "loom.recording-grid",
+      "loom.recording",
+      "loom.event-grid",
+      "loom.event",
       "loom.logo-cloud",
       "loom.logo",
       "loom.credential-grid",
@@ -391,41 +395,20 @@ describe("the starter library", () => {
       "loom.feature",
       "loom.milestone",
       "loom.stat",
-      /**
-       * A meter is a leaf for the reason a stat is: its label and its figure are
-       * fixed fields of one record, and a proportion has no interior to place a
-       * node in. Everything a page would put *beside* it is a sibling.
-       */
       "loom.meter",
       "loom.perk-list-item",
       "loom.product",
       "loom.quote",
       "loom.person",
       "loom.article",
+      "loom.recording",
+      "loom.event",
       "loom.logo",
-      /**
-       * A credential is a leaf and an offering is not, which is 0094 read from
-       * the audit's side: the card with a repeated part has a flow, and the card
-       * without one holds its sentence in a prop.
-       */
       "loom.credential",
       "loom.faq",
-      /** The face on its own, which is a leaf for the reason `loom.person` is. */
       "loom.avatar",
-      /**
-       * `loom.field` is deliberately absent. It places children only when its
-       * `type` is `select`, and the probe now asks it under every value its own
-       * enum declares (0075) rather than under the default alone — so the one
-       * primitive here whose answer depends on a prop is no longer reported as
-       * having nowhere to put a child node.
-       */
       "loom.perk",
       "loom.divider",
-      /**
-       * The two new frames. An `<iframe>` has no interior this library can
-       * address, and a wipe places two *slots* rather than a run of children —
-       * so neither has anywhere to put a child node, and both say so.
-       */
       "loom.embed",
       "loom.before-after",
     ])
@@ -877,6 +860,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
       ...typesIn(explainerPage(EDITORIAL)),
+      ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(furniturePage(EDITORIAL)),
     ])
 
@@ -904,6 +888,8 @@ describe("the composed vocabulary", () => {
       technicalPage,
       prosePage,
       tablePage,
+      datedPage,
+      furniturePage,
     ].flatMap((fixture) =>
       [...render(fixture(EDITORIAL)).markup.matchAll(/style="([^"]*)"/g)]
         .map(([, style]) => style ?? "")
@@ -1576,6 +1562,77 @@ describe("the ported bands", () => {
     expect(listOf({})).not.toContain(LIBRARY_CLASS.railTight)
     expect(listOf({ density: "tight" })).toContain(LIBRARY_CLASS.railTight)
     expect(listOf({ rail: "none" })).toContain(LIBRARY_CLASS.railNone)
+  })
+
+  it("stops reserving a marker column for a list where no entry sets a marker", () => {
+    const idFactory = sequentialIdFactory()
+    const { stylesheet, tree } = splitStylesheet(
+      render(
+        createTree(
+          buildElement(idFactory, {
+            type: "loom.milestone-list",
+            props: {},
+            children: [
+              buildElement(idFactory, { type: "loom.milestone", props: { title: "You ask for something" } }),
+              buildElement(idFactory, { type: "loom.milestone", props: { title: "Loom proposes a change" } }),
+            ],
+          }),
+          idFactory
+        )
+      ).markup
+    )
+
+    /**
+     * `Loom marketing` measured this on 31 August: 88px of a 188px row on a
+     * phone, reserved whether or not the prop was set, leaving 101px for a
+     * title at 20px. A process rail — the case that never sets a marker — was
+     * paying the whole of it.
+     *
+     * The question is the *list's* and only `:has()` can ask it. A render is a
+     * pure function of one node (0008), so an entry cannot see that none of its
+     * siblings set one, and the two candidate props were both worse: `markers`
+     * on the list is grammar (0014) spent on something the browser can see, and
+     * anything on the entry lets rows disagree and stop lining up.
+     */
+    expect(stylesheet).toContain(".loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone")
+    expect(stylesheet).toContain("grid-template-columns: 5.5rem auto 1fr")
+
+    /**
+     * The empty cell has to still be *rendered* for `:empty` to match it, which
+     * is the half of this an assertion on the stylesheet alone would miss: an
+     * entry that omitted the element when the prop was unset would give the
+     * list nothing to test and the column would never collapse.
+     */
+    expect(tree).toMatch(new RegExp(`class="${LIBRARY_CLASS.railMarker}"[^>]*></div>`))
+  })
+
+  it("puts the marker above the title when the rail itself is narrow, not when the screen is", () => {
+    const { stylesheet } = splitStylesheet(render(portedPage(EDITORIAL)).markup)
+
+    const rail = stylesheet.slice(stylesheet.indexOf(".loom-rail {"))
+
+    /**
+     * The same rail is one column of a `loom.split` on a laptop and the whole
+     * width of a phone, and only one of those two facts is about the screen —
+     * which is why this is a `@container` on the list's own inline size and not
+     * the `@media` the library reached for twice before.
+     */
+    expect(rail).toContain("container-type: inline-size")
+    expect(stylesheet).toContain("@container (max-width: 26rem)")
+
+    /**
+     * Scoped to lists that *do* have markers, so it can never collide with the
+     * collapse above: one rule fires or the other does, never both.
+     */
+    const narrow = stylesheet.slice(stylesheet.indexOf("@container (max-width: 26rem)"))
+    expect(narrow).toContain(".loom-rail:has(> li > .loom-rail-marker:not(:empty))")
+
+    /**
+     * The connector survives the move. The track spans both rows rather than
+     * being pushed out of the way, which is the difference between a rail that
+     * reflows on a phone and a rail that stops being one.
+     */
+    expect(narrow).toContain("grid-row: 1 / span 2")
   })
 
   it("falls back to a monogram for a person with no photograph", () => {
@@ -2612,9 +2669,20 @@ describe("the targets the library declares", () => {
     /** The submit control: the whole of it is what a reader presses (0068). */
     expect(declarationOf("loom.button")).toBe("always")
 
-    for (const type of ["loom.card", "loom.feature", "loom.logo", "loom.article"]) {
+    for (const type of ["loom.card", "loom.feature", "loom.logo", "loom.article", "loom.recording"]) {
       expect(declarationOf(type)).toEqual({ whenProps: ["href"] })
     }
+  })
+
+  it("leaves the dated card whose control is the target undeclared, for the same reason", () => {
+    /**
+     * `loom.event` reads the way `loom.product` and `loom.offering` do rather
+     * than the way `loom.recording` beside it does, and the pair shipping
+     * together is what makes the distinction legible: a recording is played, so
+     * its title covers the card; an event is booked, so the ticket control is
+     * the aim and nothing is covered.
+     */
+    expect(declarationOf("loom.event")).toBeUndefined()
   })
 
   it("leaves the card whose control is the target undeclared, which is 0066 and 0068", () => {
@@ -2634,7 +2702,7 @@ describe("the targets the library declares", () => {
   })
 
   it("declares nothing on a container, since a container is not a target", () => {
-    for (const type of ["loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.form", "loom.field"]) {
+    for (const type of ["loom.footer", "loom.link-list", "loom.article-grid", "loom.product-grid", "loom.recording-grid", "loom.event-grid", "loom.form", "loom.field"]) {
       expect(declarationOf(type)).toBeUndefined()
     }
   })
@@ -3297,17 +3365,45 @@ describe("the technical vocabulary", () => {
     const { markup } = render(technicalPage(EDITORIAL))
 
     /**
-     * 0079: the six columns exist only where there is room for them, and the
-     * markup is identical either side of the breakpoint. The cycles are
-     * asserted because a span that did not sum to six would leave a hole in
-     * every row and no test that only renders would see it.
+     * 0079: the rhythm exists only where there is room for it, and the markup
+     * is identical either side of the breakpoint. The cycles are asserted
+     * because a span that did not sum to six would leave a hole in every row
+     * and no test that only renders would see it.
+     *
+     * **The breakpoint is the band's own width.** It shipped as a viewport
+     * media query on 26 August and was filed against this lane three times: a
+     * mosaic in a column laid itself out in six tracks because the *window* was
+     * wide. A `@media` here again would be that regression.
      */
-    expect(markup).toContain("@media (min-width: 48rem)")
+    expect(markup).toContain("@container (min-width: 48rem)")
+    expect(markup).not.toContain("@media (min-width: 48rem)")
     expect(markup).toContain("grid-template-columns: repeat(6, 1fr)")
     expect(markup).toContain(".loom-mosaic-showcase > *:nth-child(5n + 1)")
     expect(markup).toContain(".loom-mosaic-lead > *:first-child")
 
     expect(markup).toMatch(/class="loom-mosaic loom-mosaic-showcase"[^>]*><figure/)
+  })
+
+  it("falls back to one cell per row rather than to six columns on a phone", () => {
+    const { stylesheet } = splitStylesheet(render(technicalPage(EDITORIAL)).markup)
+
+    const mosaic = stylesheet.slice(stylesheet.indexOf(".loom-mosaic {"), stylesheet.indexOf(".loom-orbit {"))
+
+    /**
+     * The way round this rule is written is the whole of its safety, and it is
+     * invisible from the rendered page. `grid-template-columns` lives on the
+     * mosaic itself, and a container query reads an *ancestor* — so the six
+     * tracks cannot be inside the query and the cells are switched instead.
+     * Writing it the other way — six tracks unconditional, one column inside a
+     * `@container (max-width:)` — renders six four-character columns on a phone
+     * anywhere the query does not apply.
+     */
+    expect(mosaic).toContain("container-type: inline-size")
+    expect(mosaic.indexOf(".loom-mosaic > *")).toBeLessThan(mosaic.indexOf("@container (min-width: 48rem)"))
+    expect(mosaic).not.toContain("@container (max-width")
+
+    /** The one rhythm rule whose selector would otherwise tie with the base. */
+    expect(mosaic).toContain(".loom-mosaic.loom-mosaic-lead > *")
   })
 
   it("sets no column count inline, because the rule is what has to change it", () => {
@@ -3601,11 +3697,60 @@ describe("a headline on a narrow screen", () => {
       )
     )
 
-    expect(markup).toContain("font-size:min(var(--loom-scale-8), 11vw)")
-    expect(markup).toContain("font-size:min(var(--loom-scale-7), 9vw)")
+    expect(markup).toContain("font-size:min(var(--loom-scale-8), 11cqi)")
+    expect(markup).toContain("font-size:min(var(--loom-scale-7), 9cqi)")
     /** Step 6 is 32px and fits a phone with room to spare. */
     expect(markup).toContain("font-size:var(--loom-scale-6)")
     expect(markup).not.toContain("min(var(--loom-scale-6)")
+
+    /**
+     * The unit is the container's and not the viewport's, which is the limit
+     * this file's own comment named for eleven days. `vw` would size a headline
+     * in one half of a `loom.split` as though it had the whole window.
+     */
+    expect(markup).not.toContain("vw)")
+  })
+
+  it("holds a headline to the column it is in, because the column says how wide it is", () => {
+    const idFactory = sequentialIdFactory()
+    const headline = (level: number) =>
+      buildElement(idFactory, {
+        type: "loom.heading",
+        props: { level },
+        children: [buildText(idFactory, "A tree, a delta, and a page that adapts")],
+      })
+
+    const { markup } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: MINIMAL },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.split",
+              props: { ratio: "start-wide" },
+              children: [buildSlot(idFactory, "start", [headline(1)])],
+            }),
+            buildElement(idFactory, {
+              type: "loom.card",
+              props: {},
+              children: [headline(2)],
+            }),
+          ],
+        }),
+        idFactory
+      )
+    )
+
+    /**
+     * A `cqi` with no ancestor declaring containment resolves against the small
+     * viewport, so the cap is inert until something says how wide the space
+     * around it is. These two are the things that say it — one half of a split
+     * and one card — and without them the swap from `vw` would have been a
+     * rename rather than a repair. Both columns of the split declare it, so the
+     * empty `end` region is the second match.
+     */
+    expect([...markup.matchAll(/container-type:inline-size/g)]).toHaveLength(3)
   })
 })
 
@@ -5402,6 +5547,336 @@ describe("how it works, and what it works with", () => {
 })
 
 /**
+ * The two bands that cost a reader time rather than money: what you press play
+ * on, and where to turn up.
+ *
+ * One fixture holds both because the questions worth asking of them are the
+ * same questions — do they render, do they survive a re-theme, is any colour in
+ * the output a literal, and did the port put each Hermes field where 0052 and
+ * 0094 say it goes — and because they are the two halves of one run.
+ *
+ * The three arrangements below are the three Hermes bands rather than three
+ * settings picked to exercise a prop: a video reel (`columns: "three"`), an
+ * episode feed (`columns: "one"`, the width at which a recording becomes a
+ * queue row), and a what's-on (the event grid's default column).
+ */
+const datedPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const chip = (label: string, tone?: string) =>
+    buildElement(idFactory, {
+      type: "loom.badge",
+      props: tone === undefined ? {} : { tone },
+      children: [text(label)],
+    })
+
+  const ticket = (label: string, href: string, variant = "primary") =>
+    buildElement(idFactory, {
+      type: "loom.action",
+      props: { href, variant },
+      children: [text(label)],
+    })
+
+  /** Hermes' `video` and `video-playlist`, as a reel of 16:9 cards. */
+  const reel = buildElement(idFactory, {
+    type: "loom.recording-grid",
+    props: { columns: "three", gap: "normal" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.recording",
+        props: {
+          title: "Building a page out of nothing",
+          byline: "Loom",
+          note: "Twelve minutes from an empty tree to a deployed marketing site.",
+          duration: "12:04",
+          artwork: "https://example.com/reel/empty-tree.jpg",
+          href: "https://example.com/watch/empty-tree",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Video", "accent"), chip("March 2026")])],
+      }),
+      buildElement(idFactory, {
+        type: "loom.recording",
+        props: {
+          title: "What the Gate refuses, and why",
+          duration: "8:41",
+          artwork: "https://example.com/reel/the-gate.jpg",
+          href: "https://example.com/watch/the-gate",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("Video")])],
+      }),
+      /** No artwork: the frame is drawn anyway, because the play mark is the signal. */
+      buildElement(idFactory, {
+        type: "loom.recording",
+        props: {
+          title: "Office hours, recorded",
+          duration: "51 min",
+          href: "https://example.com/watch/office-hours",
+        },
+      }),
+    ],
+  })
+
+  /** Hermes' `podcast-episodes` and `playlist`: the same primitive, given the width. */
+  const feed = buildElement(idFactory, {
+    type: "loom.recording-grid",
+    props: { columns: "one", gap: "snug" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.recording",
+        props: {
+          title: "The delta is the unit of change",
+          byline: "The Loom Podcast",
+          note: "Why a runtime that rewrites components cannot be reviewed, and what to do instead.",
+          duration: "42 min",
+          artwork: "https://example.com/pod/ep-12.jpg",
+          shape: "square",
+          href: "https://example.com/listen/12",
+        },
+        children: [
+          buildSlot(idFactory, "meta", [chip("EP 12"), chip("12 March 2026"), chip("Interview")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.recording",
+        props: {
+          title: "Sixty-four records, and the one that got renumbered",
+          byline: "The Loom Podcast",
+          duration: "1h 04m",
+          artwork: "https://example.com/pod/ep-11.jpg",
+          shape: "square",
+          href: "https://example.com/listen/11",
+        },
+        children: [buildSlot(idFactory, "meta", [chip("EP 11"), chip("26 February 2026")])],
+      }),
+      /**
+       * A track: a byline that is an artist rather than a show, and no
+       * destination at all — the one card in the fixture that is not a target,
+       * so the overlay assertion has something to be false about.
+       */
+      buildElement(idFactory, {
+        type: "loom.recording",
+        props: {
+          title: "Theme for a runtime",
+          byline: "Ada Sørensen",
+          duration: "3:58",
+          shape: "square",
+        },
+      }),
+    ],
+  })
+
+  /** Hermes' `events`, in the column a what's-on is written in. */
+  const whatsOn = buildElement(idFactory, {
+    type: "loom.event-grid",
+    props: { gap: "snug" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.event",
+        props: {
+          name: "Loom at Strange Loop",
+          date: "12 March 2026",
+          location: "St. Louis, Missouri",
+          note: "A forty-minute talk on why AI-authored interfaces need a delta model.",
+          emphasis: "featured",
+          href: "https://example.com/talks/strange-loop",
+        },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Conference", "accent"), chip("In person")]),
+          buildSlot(idFactory, "action", [ticket("Get a ticket", "https://example.com/tickets/sl")]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.event",
+        props: {
+          name: "Office hours: the render seam",
+          date: "Every second Tuesday",
+          location: "Online",
+          note: "Bring a tree that will not render and we will read the diagnostics together.",
+        },
+        children: [
+          buildSlot(idFactory, "meta", [chip("Free"), chip("Remote")]),
+          buildSlot(idFactory, "action", [
+            ticket("Join the call", "https://example.com/office-hours", "secondary"),
+          ]),
+        ],
+      }),
+      /** No control, no destination: an event a page is recording rather than selling. */
+      buildElement(idFactory, {
+        type: "loom.event",
+        props: { name: "Version 1.0", date: "Q3 2026" },
+        children: [buildSlot(idFactory, "meta", [chip("Milestone")])],
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Watch and listen" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1 },
+                children: [text("Forty minutes of your time")],
+              }),
+            ]),
+            reel,
+            feed,
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Where to find us" },
+          children: [whatsOn],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("what you press play on, and where to turn up", () => {
+  it("renders both pairs, with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(datedPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Building a page out of nothing")
+    expect(markup).toContain("The delta is the unit of change")
+    expect(markup).toContain("Loom at Strange Loop")
+    expect(markup).toContain("Every second Tuesday")
+    expect([...markup.matchAll(/class="loom-recording /g)]).toHaveLength(6)
+    expect([...markup.matchAll(/class="loom-event /g)]).toHaveLength(3)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(datedPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(datedPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(datedPage(BOLD)).diagnostics).toEqual([])
+    expect(render(datedPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial).toContain("Loom at Strange Loop")
+    expect(bold).toContain("Loom at Strange Loop")
+    /**
+     * The root carries the palette itself, so the literal check starts below
+     * it. `transparent` is not a colour a palette could have supplied and is
+     * the one word allowed through — it is how a triangle is drawn out of
+     * borders and how a plain surface reserves a border's width.
+     */
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\brgba?\(/)
+    expect(body).not.toMatch(/\bhsla?\(/)
+  })
+
+  it("puts the runtime on the artwork and the date at the head of the row", () => {
+    /**
+     * The two markup decisions that separate these cards from the ones they
+     * resemble, asserted rather than left to a screenshot. A duration that fell
+     * back into the body would make a recording a `loom.article` with an extra
+     * prop; a date that rendered after the name would make an event a
+     * `loom.offering` with one.
+     */
+    const markup = render(datedPage(EDITORIAL)).markup
+    const card = markup.slice(markup.indexOf("loom-recording-art"))
+
+    expect(card.slice(0, card.indexOf("</article>"))).toContain(LIBRARY_CLASS.recordingTime)
+    expect(card.indexOf(LIBRARY_CLASS.recordingPlay)).toBeLessThan(card.indexOf(LIBRARY_CLASS.recordingTime))
+
+    const event = markup.slice(markup.indexOf("loom-event-frame"))
+
+    expect(event.indexOf("12 March 2026")).toBeLessThan(event.indexOf("Loom at Strange Loop"))
+  })
+
+  it("draws the play mark only where there is something to play", () => {
+    /**
+     * The frame is drawn from `artwork` *or* `href`, so the three cases have to
+     * be separated: artwork and a destination, a destination and no artwork,
+     * and neither. The last is the track, and a play mark on it would be a
+     * control over nothing.
+     */
+    const markup = splitStylesheet(render(datedPage(EDITORIAL)).markup).tree
+    /**
+     * By card rather than by offset from the title: the artwork is emitted
+     * *before* the title in every recording, so slicing forward from a name
+     * silently skips the very element under test.
+     */
+    const cardWith = (needle: string): string =>
+      markup.split("<article").find((part) => part.includes(needle)) ?? ""
+
+    expect([...markup.matchAll(/loom-recording-play/g)]).toHaveLength(5)
+    expect(cardWith("Theme for a runtime")).not.toContain("loom-recording-play")
+    /** A frame with no image still carries the mark, which is the whole point of it. */
+    expect(cardWith("Office hours, recorded")).toContain("loom-recording-play")
+    expect(cardWith("Office hours, recorded")).not.toContain("<img")
+  })
+
+  it("stretches a recording's title over the whole card and nothing over an event's", () => {
+    /**
+     * 0066 from both sides in one fixture. A recording is read — played — so
+     * its title carries the overlay and the artwork is part of the target. An
+     * event is acted on, so no overlay is emitted at all and the reader's aim
+     * is the ticket control, which is why a `loom.action` inside one is
+     * reachable rather than covered.
+     */
+    const tree = splitStylesheet(render(datedPage(EDITORIAL)).markup).tree
+    const recordings = tree.slice(tree.indexOf("loom-recording"), tree.indexOf("loom-event"))
+    const events = tree.slice(tree.indexOf("loom-event"))
+
+    expect(recordings).toContain(LIBRARY_CLASS.coverLink)
+    expect(events).not.toContain(LIBRARY_CLASS.coverLink)
+    expect(events).toContain("Get a ticket")
+  })
+
+  it("holds every sentence in the pair as a prop, and every qualifier as a node", () => {
+    /**
+     * 0094 and 0052 in one assertion each. Neither card turns a field into a
+     * children flow, so neither has a `loom.prose` inside it and both keep
+     * `note` — which is what puts them beside `loom.credential` in the leaf
+     * audit. The qualifiers go the other way: an episode number and a date
+     * co-occur on one Hermes record, so they are nodes rather than the single
+     * `kicker` prop `loom.article` collapsed its label into.
+     */
+    const markup = render(datedPage(EDITORIAL)).markup
+    const episode = markup.slice(markup.indexOf("The delta is the unit of change"))
+    const body = episode.slice(0, episode.indexOf("</article>"))
+
+    expect(body).not.toContain('data-loom-type="loom.prose"')
+    expect(propsOfType("loom.recording")).toContain("note")
+    expect(propsOfType("loom.event")).toContain("note")
+    expect(markup).toContain("EP 12")
+    expect(markup).toContain("12 March 2026")
+    expect(propsOfType("loom.recording")).not.toContain("kicker")
+  })
+
+  it("refuses an event with no date, and a recording with no title", () => {
+    /**
+     * The one required field each, asserted because both are the field that
+     * makes the primitive the thing it is: an event without a date is an
+     * offering, and the library has one.
+     */
+    const idFactory = sequentialIdFactory()
+    const { diagnostics } = render(
+      createTree(
+        buildElement(idFactory, {
+          type: "loom.event-grid",
+          children: [buildElement(idFactory, { type: "loom.event", props: { name: "A thing" } })],
+        }),
+        idFactory
+      )
+    )
+
+    expect(diagnostics).toMatchObject([{ code: "invalid-props", type: "loom.event" }])
+  })
+
+})
+
+
+/**
  * The furniture between the bands: what a page announces, where the reader is,
  * what runs past the edge, and how much of a thing there is.
  *
@@ -5727,3 +6202,4 @@ describe("the furniture between the bands", () => {
     expect(reduced).toContain(".loom-carousel {\n    scroll-behavior: auto;\n  }")
   })
 })
+
