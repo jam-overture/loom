@@ -13165,6 +13165,136 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-09 — the return trip is not a scroll opinion, and a stacked layout has only one scroller
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+shape, recorded so the next run has it rather than the idea
+
+Fixed in `demo-08-the-way-back-to-the-record`, and worth the channel rather than
+only a report, because it is the fifth instance of this lane's standing
+diagnosis and the first where the diagnosis names a *category* of missing
+component rather than a missing line.
+
+**What was wrong.** At 390×844, answering the primary ask left the record card at
+`y ≈ −4,281`: the badge, the rule, the actor, the disclosure and **Put it back**
+all a screen-and-a-half above a green chip on a stranger's page, with nothing on
+screen saying they existed. The demo's whole differentiator, rendered and correct
+and off the screen.
+
+**Why nothing caught it.** Every part was right, and both of the components that
+could have been wrong argue their case correctly in their own module comments:
+
+- `SpotlightScroll` carries a visitor to an applied change, and declines to move
+  a *stacked* layout for a held one, because it would carry them away from the
+  two buttons the hold is waiting on.
+- `AnswerInView` moves the rail to the question, and says the two never act at
+  once.
+
+Both true. Neither is about coming back.
+
+**The shape, for whoever runs this lane next:**
+
+> Every opinion this surface has about scrolling is an opinion about **going**.
+> On a wide screen that is the whole story, because the rail is its own scroller
+> and the two halves are visible at once by construction. **Stacked, they are one
+> document — so going to one half is leaving the other**, and the return trip is
+> as much a part of the design as the trip out.
+>
+> The general test: for every scroll this surface performs on a stacked layout,
+> ask what is now off the screen and whether the visitor has any way of knowing
+> it is there.
+
+The measurement is the tool this rewards more than reasoning does, and the only
+one that finds it: `pnpm --filter @loom/app build`, drive the built page in
+Chromium at **390×844** rather than at 1440×900, and read the bounding rectangles
+after each press. Four of the last five defects on this surface were found that
+way and none of them by reading the components.
+
+**What is still open, and named in the report rather than fixed:** a visitor on a
+phone still answers the Gate's question without ever having seen the band it is
+about, because `SpotlightScroll` correctly declines to carry them to a held
+change. This entry's fix gives them a way *back* from a mark; it does not put the
+mark in front of them first. That is a second claim about what a stacked layout
+owes a visitor and it is a unit of its own.
+
+---
+
+## 2026-09-09 — `docs/rollout.md` still puts the demo at `/portal/demo`, nineteen days after it moved
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`, `@jonathanbravecredit` · **Status:** open
+
+`docs/rollout.md` is one of the two documents every routine brief names as *read
+first, every run*. Its **Where we are** section says:
+
+> Eighteen primitives are registered and the demo is live at
+> `apps/loom/app/(portal)/portal/demo`.
+
+That path has been a `permanentRedirect("/demo")` since 21 August. **Phase 0 —
+The demo · complete, 12 August** is likewise written against a surface that has
+since moved, been given a route group and a document of its own, and had seven
+units of work landed on it by a routine that did not exist when the paragraph was
+written.
+
+The file's own preamble says the right thing about itself — *"anything below that
+reads as a status claim goes stale quickly; check it against `main`"* — and this
+is the claim that went stale. It is small and it is in the one place a fresh
+session goes to find out where things are: a routine reading it today is told the
+wrong location for this lane's own surface.
+
+Filed rather than fixed because `docs/` is not this lane's, and because the same
+sentence carries a primitive count that is somebody else's to correct.
+
+---
+
+## 2026-09-09 — `21st.dev` is `EGRESS_BLOCKED`, an eighth time, and it cost this run nothing again
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+`docs/routines.md` lists `21st.dev` as currently allowed under both mechanisms —
+`sandbox.network.allowedDomains` for Bash and `permissions.allow` with
+`WebFetch(domain:…)` for the tool. The brief names it as the visual standard and
+tells this lane to match it. The tool returns:
+
+```
+EGRESS_BLOCKED — Access to 21st.dev is blocked by the network egress proxy.
+```
+
+Eight consecutive demo runs, same result. Recorded again with the same honest
+caveat the 27 August entry made: **it cost this run nothing.** What decided this
+unit's copy, colour, position and the shape of its entrance was building the page
+and driving it at 390×844, which is a question no reference gallery can answer.
+The value of the reference is on the runs that are about *taste*, and this one
+was about a measurement.
+
+Either the allowlist and the proxy disagree, or the entry in `routines.md` is
+aspirational. Both are one-line answers from whoever owns the policy, and the
+brief's instruction to consult it is unfollowable until one of them is given.
+
+---
+
+## 2026-09-09 — the demo brief's first task landed on 21 August, and the brief still opens with it
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Fifth consecutive run. The brief's **Two problems to fix before anything else**
+opens with:
+
+> **1. It is in the wrong place.** The demo lives at `/portal/demo` … **Move it
+> to a public path of its own** — `/demo` — in its own route group,
+> `apps/loom/app/(demo)/`.
+
+Done on 21 August, in this lane's first run. `apps/loom/app/(demo)/` exists,
+`/demo` is a public route with its own layout and document, `/portal/demo` is a
+308, and `docs/routines.md` records the lane. The instruction to update the
+marketing link by filing a finding is also spent: `(marketing)/_lib/site.ts`
+exports `DEMO` with `path: "/demo"`, and the front door's six entry points point
+at it.
+
+Costs a fresh session a build and a directory listing to establish, every run,
+before it can choose work. Dated on the four existing entries.
 ---
 
 ## 2026-09-08 — the screenshot harness is written, and it is `tools/specimen/`
