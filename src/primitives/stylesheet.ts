@@ -80,7 +80,7 @@ export const LIBRARY_CLASS = {
   marker: "loom-marker",
   /** A logo held back to grey until it is pointed at. */
   mark: "loom-mark",
-  /** A `loom.milestone-list`: spaces its entries and ends its own rail. */
+  /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */
   rail: "loom-rail",
   /** The same list, set tighter — a changelog to scan rather than a history to read. */
   railTight: "loom-rail-tight",
@@ -233,6 +233,39 @@ export const LIBRARY_CLASS = {
   /** A `loom.credential`: the positioned ancestor its stretched name anchor needs. */
   credential: "loom-credential",
   /**
+   * A `loom.recording`. The card, the frame the `@container` rule flips, the
+   * artwork panel, the body beside it, the play mark over the artwork and the
+   * runtime pinned into its corner.
+   *
+   * The frame's direction is here for `loom-offering-frame`'s reason — an
+   * inline value would beat the rule that flips it — and the play mark's
+   * position is here because it is a `transform` the hover state has to
+   * *extend* rather than replace. A mark centred by an inline
+   * `translate(-50%, -50%)` and scaled by a rule would lose the centring the
+   * moment the rule fired, which is the kind of defect that only shows on
+   * hover and therefore never in a screenshot.
+   */
+  recording: "loom-recording",
+  recordingFrame: "loom-recording-frame",
+  recordingArt: "loom-recording-art",
+  recordingBody: "loom-recording-body",
+  recordingPlay: "loom-recording-play",
+  recordingTime: "loom-recording-time",
+  /**
+   * A `loom.event`. The card, the frame, the date in its margin, the body and
+   * the action pinned to the card's end.
+   *
+   * The rule between the date and the rest is on `loom-event-when` and only
+   * inside the `@container` block, because it is an inline-end border in the
+   * row arrangement and would be a horizontal line under a date — a divider
+   * between nothing — in the stacked one.
+   */
+  event: "loom-event",
+  eventFrame: "loom-event-frame",
+  eventWhen: "loom-event-when",
+  eventBody: "loom-event-body",
+  eventAction: "loom-event-action",
+  /**
    * A `loom.nav`. The bar itself, the box holding its disclosure control, and
    * the menu that control opens and closes.
    *
@@ -254,7 +287,7 @@ export const LIBRARY_CLASS = {
   navMenu: "loom-nav-menu",
   /** Its actions end, which takes the slack on a phone when no control was built. */
   navActions: "loom-nav-actions",
-  /** A `loom.mosaic`: one column until there is room for six. */
+  /** A `loom.mosaic`: one column until the band itself has room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
   mosaicAlternating: "loom-mosaic-alternating",
@@ -352,6 +385,34 @@ details[open] > summary .loom-marker {
 .loom-milestone > .loom-rail-marker {
   text-align: end;
 }
+.loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone {
+  grid-template-columns: auto 1fr;
+}
+.loom-rail:not(:has(> li > .loom-rail-marker:not(:empty))) > .loom-milestone > .loom-rail-marker {
+  display: none;
+}
+@container (max-width: 26rem) {
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone {
+    grid-template-columns: auto 1fr;
+    row-gap: var(--loom-spacing-1);
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-marker {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: start;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-track {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) > .loom-milestone > .loom-rail-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .loom-rail:has(> li > .loom-rail-marker:not(:empty)) .loom-rail-dot {
+    margin-block-start: 0.3em;
+  }
+}
 .loom-milestone > .loom-rail-track {
   flex-direction: column;
 }
@@ -392,6 +453,9 @@ details[open] > summary .loom-marker {
 }
 .loom-milestone-row > li:last-child .loom-rail-line {
   visibility: hidden;
+}
+.loom-rail {
+  container-type: inline-size;
 }
 .loom-rail > li .loom-rail-body {
   padding-block-end: var(--loom-spacing-5);
@@ -669,6 +733,96 @@ details[open] > summary .loom-marker {
 .loom-credential {
   position: relative;
 }
+.loom-recording {
+  position: relative;
+  container-type: inline-size;
+}
+.loom-recording-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.loom-recording-art {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+.loom-recording-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-recording-play {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform var(--loom-motion-medium) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+.loom-recording-time {
+  position: absolute;
+  inset-block-end: var(--loom-spacing-2);
+  inset-inline-end: var(--loom-spacing-2);
+}
+@container (min-width: 34rem) {
+  .loom-recording-frame {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .loom-recording-art {
+    inline-size: 11rem;
+  }
+}
+.loom-event {
+  container-type: inline-size;
+}
+.loom-event-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-3);
+  height: 100%;
+}
+.loom-event-when {
+  flex: 0 0 auto;
+}
+.loom-event-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-2);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.loom-event-action {
+  display: grid;
+  margin-block-start: auto;
+}
+@container (min-width: 40rem) {
+  .loom-event-frame {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--loom-spacing-5);
+  }
+  .loom-event-when {
+    inline-size: 9rem;
+    align-self: stretch;
+    border-inline-end: 1px solid var(--loom-border-subtle);
+    padding-inline-end: var(--loom-spacing-5);
+  }
+  .loom-event-action {
+    flex: 0 0 auto;
+    margin-block-start: 0;
+  }
+}
 .loom-nav-menu {
   display: flex;
   flex-wrap: wrap;
@@ -702,13 +856,25 @@ details[open] > summary .loom-marker {
 }
 .loom-mosaic {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(6, 1fr);
   align-items: stretch;
+  container-type: inline-size;
 }
-@media (min-width: 48rem) {
-  .loom-mosaic {
-    grid-template-columns: repeat(6, 1fr);
-  }
+/*
+ * One column until the *band* has room for six, never until the screen does.
+ *
+ * A container query reads an ancestor rather than the element that declared
+ * containment, so grid-template-columns -- which lives on the mosaic itself --
+ * cannot be inside the query. The six tracks are therefore unconditional and it
+ * is the *cells* that are switched: full-width by default, and cut into the
+ * rhythm's spans only where the band is wide enough to hold them. That is also
+ * the safe way round, because a browser that does not understand a container
+ * query falls back to one cell per row rather than to six columns on a phone.
+ */
+.loom-mosaic > * {
+  grid-column: span 6;
+}
+@container (min-width: 48rem) {
   .loom-mosaic-alternating > *:nth-child(4n + 1),
   .loom-mosaic-alternating > *:nth-child(4n) {
     grid-column: span 4;
@@ -726,7 +892,12 @@ details[open] > summary .loom-marker {
   .loom-mosaic-showcase > *:nth-child(5n) {
     grid-column: span 2;
   }
-  .loom-mosaic-lead > * {
+  /*
+   * Two classes rather than one, so this rule outranks the unconditional
+   * .loom-mosaic > * above on specificity rather than on source order -- the
+   * only rhythm rule whose selector would otherwise tie with it.
+   */
+  .loom-mosaic.loom-mosaic-lead > * {
     grid-column: span 2;
   }
   .loom-mosaic-lead > *:first-child {
@@ -808,11 +979,14 @@ details[open] > summary .loom-marker {
   .loom-marquee-echo {
     display: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > * {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play {
     transition: none;
   }
   .loom-lift:hover {
     transform: none;
+  }
+  .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
+    transform: translate(-50%, -50%);
   }
 }
 `.trim()

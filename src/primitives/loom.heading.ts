@@ -44,14 +44,28 @@ const STEP_FOR_LEVEL: Readonly<Record<number, RampStep>> = { 1: 8, 2: 7, 3: 6, 4
  * clipped rather than scrolling, so no overflow measurement sees it and it
  * looks like a design choice until you read the word that lost its last letter.
  *
- * `min()` against a viewport unit is the smallest thing that fixes it: the ramp
+ * `min()` against a relative unit is the smallest thing that fixes it: the ramp
  * wins at every width that can hold it, and below that the headline is a
- * fraction of the screen instead of a fixed number of pixels. It is the same
+ * fraction of the space instead of a fixed number of pixels. It is the same
  * bargain [0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
- * makes for `loom.mosaic`'s one media query — the markup is unchanged, nothing
- * is interpolated, and the browser rather than the render function is what
- * reads the width. It has the same limit, too: a `vw` is the *viewport*, so a
- * level-1 heading inside a narrow column on a wide screen is not held back.
+ * makes for `loom.mosaic`'s rhythm — the markup is unchanged, nothing is
+ * interpolated, and the browser rather than the render function is what reads
+ * the width.
+ *
+ * **The unit is `cqi`, and it used to be `vw`.** This file named the limit of
+ * the viewport version in its own comment for eleven days: *a level-1 heading
+ * inside a narrow column on a wide screen is not held back*. A container query
+ * unit closes it, and it is a strictly safer swap than it looks — with no
+ * ancestor declaring containment, `cqi` resolves against the small viewport,
+ * which is `vw` without the scrollbar. So a heading on the open page renders as
+ * it always did, and a heading in a `loom.card` or in one half of a
+ * `loom.split` is now held to the column it is actually in, because those two
+ * declare the containment for it to read.
+ *
+ * What is still not held back is a heading in a bare `loom.grid` cell: a grid
+ * styles its children rather than wrapping them, so there is no element to
+ * declare containment on without adding one per cell. In practice a grid cell
+ * is a card, which is why this is a note rather than a finding.
  *
  * Only the two steps that overflow are capped. Step 6 is 32px and fits a phone
  * with room to spare, so capping it would shrink headings nobody complained
@@ -62,7 +76,7 @@ const STEP_FOR_LEVEL: Readonly<Record<number, RampStep>> = { 1: 8, 2: 7, 3: 6, 4
  * block it: a pack whose step 8 is already a clamp is simply a ramp that wins
  * here at every width.
  */
-const CAP_FOR_STEP: Readonly<Partial<Record<RampStep, string>>> = { 8: "11vw", 7: "9vw" }
+const CAP_FOR_STEP: Readonly<Partial<Record<RampStep, string>>> = { 8: "11cqi", 7: "9cqi" }
 
 const headingSize = (step: RampStep): string => {
   const cap = CAP_FOR_STEP[step]

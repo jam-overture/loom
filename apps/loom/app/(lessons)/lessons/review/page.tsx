@@ -2,12 +2,13 @@ import type { Metadata } from "next"
 
 import { Queue } from "../../_components/queue"
 import { heading, prose, renderFragment } from "../../_lib/loom"
+import { QUESTION_KEYS } from "../../_lib/questions"
 import { REVIEW_SETS } from "../../_lib/schedule"
 import { PART_LESSONS } from "../../_lib/syllabus"
 import * as style from "../../_components/style"
 
 /**
- * The queue: twenty-two sets, and which of them is today's.
+ * The queue: twenty-three sets, and which of them is today's.
  *
  * The schedule in the repository is the source for every question here. What
  * this page adds is the part of it that a file cannot hold — a date per set,
@@ -48,7 +49,7 @@ const intro = renderFragment(
 const ReviewQueuePage = () => (
   <main style={style.column(5)}>
     {intro}
-    <Queue sets={SETS} parts={PART_LESSONS} />
+    <Queue sets={SETS} parts={PART_LESSONS} questionKeys={QUESTION_KEYS} />
   </main>
 )
 
