@@ -7671,6 +7671,482 @@
           ]
         }
       ]
+    },
+    {
+      "specifier": "@loom/runtime/testing",
+      "slug": "testing",
+      "types": "./dist/testing/index.d.ts",
+      "groups": [
+        {
+          "module": "testing/definitions",
+          "title": "Definitions",
+          "summary": "The primitives of `sampleTree`, declared through the §4 contract, so registry and renderer tests run against real declarations rather than a stand-in for them. `testPrimitives` in `primitives.ts` is the same component set without declarations, which is what §3's tests need.",
+          "symbols": [
+            {
+              "name": "pageDefinition",
+              "kind": "value",
+              "signature": "const pageDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "cardDefinition",
+              "kind": "value",
+              "signature": "const cardDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "headerDefinition",
+              "kind": "value",
+              "signature": "const headerDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "footerDefinition",
+              "kind": "value",
+              "signature": "const footerDefinition: PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "testDefinitions",
+              "kind": "value",
+              "signature": "const testDefinitions: readonly PrimitiveEntry[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "registryOf",
+              "kind": "function",
+              "signature": "const registryOf: (entries: readonly PrimitiveEntry[]) => PrimitiveRegistry",
+              "truncated": false,
+              "summary": "Registration is fallible, and a test that wanted a registry has nothing to say about a failure to build one, so this unwraps loudly rather than making every caller narrow a Result it does not care about."
+            },
+            {
+              "name": "testRegistry",
+              "kind": "function",
+              "signature": "const testRegistry: () => PrimitiveRegistry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/doubles",
+          "title": "Doubles",
+          "summary": "Test doubles for the impure seams this file owns — the interpreter and its repairer, the clock, and the event sink. The runtime's other two seams are doubled where they are defined: `sequentialIdFactory` in `ids.ts` and `fixedPolicy` in `runtime/policy-source.ts`.",
+          "symbols": [
+            {
+              "name": "FIXED_INSTANT",
+              "kind": "value",
+              "signature": "const FIXED_INSTANT = \"2026-07-28T00:00:00.000Z\"",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "fixedClock",
+              "kind": "function",
+              "signature": "const fixedClock: (instant?: string) => Clock",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CollectingEventSink",
+              "kind": "type",
+              "signature": "type CollectingEventSink = EventSink & {\n    readonly envelopes: readonly RuntimeEventEnvelope[];\n    readonly types: () => readonly string[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "collectingEventSink",
+              "kind": "function",
+              "signature": "const collectingEventSink: () => CollectingEventSink",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "failingEventSink",
+              "kind": "function",
+              "signature": "const failingEventSink: (failOn: readonly string[], mode?: \"throw\" | \"reject\") => CollectingEventSink",
+              "truncated": false,
+              "summary": "A sink that fails on the events it was told to fail on and collects the rest, so a test can assert both halves at once: that the change survived, and that narration carried on past the failure rather than stopping at it."
+            },
+            {
+              "name": "RecordingModelClient",
+              "kind": "type",
+              "signature": "type RecordingModelClient = ModelClient & {\n    readonly requests: readonly ModelRequest[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedModelClient",
+              "kind": "function",
+              "signature": "const scriptedModelClient: (reply: string | Result<ModelCompletion, ModelClientError>, servedBy?: string) => RecordingModelClient",
+              "truncated": false,
+              "summary": "A model that answers from a script and remembers what it was asked, so the interpreter's request assembly and its reply handling can be tested separately, and neither needs a network or a key."
+            },
+            {
+              "name": "RecordingInterpreter",
+              "kind": "type",
+              "signature": "type RecordingInterpreter = ChangeInterpreter & {\n    readonly intents: readonly EditIntent[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedInterpreter",
+              "kind": "function",
+              "signature": "const scriptedInterpreter: (script: Result<ProposedChange, InterpretationError>) => RecordingInterpreter",
+              "truncated": false,
+              "summary": "Returns whatever it was handed, so tests drive the pipeline from a fixed script, and remembers what it was asked — which is how a test asserts that a write refused before interpretation never spent a model call."
+            },
+            {
+              "name": "RecordingRepairer",
+              "kind": "type",
+              "signature": "type RecordingRepairer = ChangeRepairer & {\n    readonly requests: readonly RepairRequest[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "scriptedRepairer",
+              "kind": "function",
+              "signature": "const scriptedRepairer: (script: Result<ProposedChange, InterpretationError>) => RecordingRepairer",
+              "truncated": false,
+              "summary": "A repairer that answers from a script and remembers what it was asked, so a test can assert both that the refusal reached it and that exactly one attempt was made."
+            },
+            {
+              "name": "IntentDraft",
+              "kind": "type",
+              "signature": "type IntentDraft = {\n    readonly treeId: TreeId;\n    readonly baseRevision: number;\n    readonly utterance?: string;\n    readonly origin?: IntentOrigin;\n    readonly actor?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "buildIntent",
+              "kind": "function",
+              "signature": "const buildIntent: (idFactory: IdFactory, draft: IntentDraft) => EditIntent",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ProposalDraft",
+              "kind": "type",
+              "signature": "type ProposalDraft = {\n    readonly intentId: IntentId;\n    readonly delta: TreeDelta;\n    readonly rationale?: string;\n    readonly origin?: IntentOrigin;\n    readonly actor?: string;\n    readonly authoredBy?: AuthorKind;\n    readonly confidence?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "buildProposal",
+              "kind": "function",
+              "signature": "const buildProposal: (idFactory: IdFactory, draft: ProposalDraft) => ProposedChange",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/episode-harness",
+          "title": "Episode harness",
+          "summary": "A write path wired to a real Gate, a real store and a real journal, with only the model scripted.",
+          "symbols": [
+            {
+              "name": "EpisodeHarness",
+              "kind": "type",
+              "signature": "type EpisodeHarness = {\n    readonly path: WritePath;\n    readonly journal: TelemetryJournal;\n    readonly collector: TelemetryCollector;\n    readonly tree: LoomTree;\n    readonly ids: IdFactory;\n    readonly intent: EditIntent;\n    readonly fold: () => Promise<EpisodeFold>;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "removalDelta",
+              "kind": "function",
+              "signature": "const removalDelta: (tree: LoomTree, ids: IdFactory, nodeId: string) => TreeDelta",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "harnessWith",
+              "kind": "function",
+              "signature": "const harnessWith: (options: {\n    readonly script: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>;\n    readonly repairer?: (tree: LoomTree, ids: IdFactory, intent: EditIntent) => ChangeRepairer;\n    readonly baseRevision?: number;\n    /**\n     * The Gate that judges this run. Defaults to the shipped one, which is what\n     * most tests want; a test about attribution needs two hosts that differ, and\n     * a policy is the only thing a disposition names.\n     */\n    readonly policy?: GatePolicy;\n}) => Promise<EpisodeHarness>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "proposalScript",
+              "kind": "function",
+              "signature": "const proposalScript: (confidence: number) => (tree: LoomTree, ids: IdFactory, intent: EditIntent) => Result<ProposedChange, InterpretationError>",
+              "truncated": false,
+              "summary": "Confidence is the only knob most of these tests need, because it is what the default policy dispositions on: high accepts, middling holds, low refuses."
+            }
+          ]
+        },
+        {
+          "module": "testing/filesystem",
+          "title": "Filesystem",
+          "summary": "A filesystem in memory, so CLI tests assert on what would be written rather than on what a temporary directory ended up containing. Failures are injectable because \"wrote two files, then the disk refused\" is a path the CLI has to report honestly and no real filesystem will produce on demand.",
+          "symbols": [
+            {
+              "name": "MemoryFileSystem",
+              "kind": "type",
+              "signature": "type MemoryFileSystem = FileSystem & {\n    readonly files: ReadonlyMap<string, string>;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "MemoryFileSystemOptions",
+              "kind": "type",
+              "signature": "type MemoryFileSystemOptions = {\n    readonly existing?: readonly string[];\n    readonly listFails?: string;\n    readonly writeFailsAt?: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "memoryFileSystem",
+              "kind": "function",
+              "signature": "const memoryFileSystem: (options?: MemoryFileSystemOptions) => MemoryFileSystem",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/fixtures",
+          "title": "Fixtures",
+          "summary": "A small, deterministic tree used across tests and, later, by the renderer and portal for smoke fixtures. Ids come from a sequential factory so assertions can name them instead of digging them out of the structure.",
+          "symbols": [
+            {
+              "name": "SampleTree",
+              "kind": "type",
+              "signature": "type SampleTree = {\n    readonly tree: LoomTree;\n    readonly ids: {\n        readonly page: NodeId;\n        readonly header: NodeId;\n        readonly headline: NodeId;\n        readonly main: NodeId;\n        readonly card: NodeId;\n        readonly body: NodeId;\n        readonly footer: NodeId;\n    };\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "sampleTree",
+              "kind": "function",
+              "signature": "const sampleTree: () => SampleTree",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FormTree",
+              "kind": "type",
+              "signature": "type FormTree = {\n    readonly tree: LoomTree;\n    readonly ids: {\n        readonly page: NodeId;\n        readonly form: NodeId;\n        /** A sibling that posts nowhere, so a test can move a destination onto one. */\n        readonly aside: NodeId;\n    };\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "formTree",
+              "kind": "function",
+              "signature": "const formTree: (to?: string) => FormTree",
+              "truncated": false,
+              "summary": "A page whose form already posts somewhere. Separate from `sampleTree` rather than a node added to it: every count in the stakes and analysis suites is asserted against that tree's exact size, and a fixture that grows is a fixture that makes unrelated tests wrong."
+            }
+          ]
+        },
+        {
+          "module": "testing/model-replies",
+          "title": "Model replies",
+          "summary": "Reply bodies of the shape a model produces under the interpreter's output schema, kept as raw strings so tests exercise the parse step rather than starting from an already-decoded object. Node ids refer to `sampleTree`.",
+          "symbols": [
+            {
+              "name": "INSERT_NOTE_REPLY",
+              "kind": "value",
+              "signature": "const INSERT_NOTE_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CONFIGURE_CARD_REPLY",
+              "kind": "value",
+              "signature": "const CONFIGURE_CARD_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NO_CHANGE_REPLY",
+              "kind": "value",
+              "signature": "const NO_CHANGE_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NOT_UNDERSTOOD_REPLY",
+              "kind": "value",
+              "signature": "const NOT_UNDERSTOOD_REPLY: string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "OFF_SCHEMA_REPLY",
+              "kind": "value",
+              "signature": "const OFF_SCHEMA_REPLY: string",
+              "truncated": false,
+              "summary": "Well-formed JSON, but not a shape the reply schema allows."
+            },
+            {
+              "name": "FOREIGN_ID_REPLY",
+              "kind": "value",
+              "signature": "const FOREIGN_ID_REPLY: string",
+              "truncated": false,
+              "summary": "An operation that names a node id the id scheme does not permit."
+            },
+            {
+              "name": "UNDECODABLE_PROP_REPLY",
+              "kind": "value",
+              "signature": "const UNDECODABLE_PROP_REPLY: string",
+              "truncated": false,
+              "summary": "Passes the schema, because the schema only says \"a string\", and fails the parse. This is the failure mode accepted in exchange for the grammar budget, so it is a fixture rather than an impossibility."
+            },
+            {
+              "name": "NON_OBJECT_PROPS_REPLY",
+              "kind": "value",
+              "signature": "const NON_OBJECT_PROPS_REPLY: string",
+              "truncated": false,
+              "summary": "Parseable JSON, but not an object, so it cannot be a prop bag."
+            },
+            {
+              "name": "INSERT_SLOT_REPLY",
+              "kind": "value",
+              "signature": "const INSERT_SLOT_REPLY: string",
+              "truncated": false,
+              "summary": "Passes the schema and the parse, and proposes a slot — which the reply schema no longer offers as an insertable kind, so the draft schema must refuse it."
+            },
+            {
+              "name": "TRUNCATED_REPLY",
+              "kind": "value",
+              "signature": "const TRUNCATED_REPLY = \"{\\\"outcome\\\":\\\"change\\\",\\\"rationale\\\":\\\"Adds a not\"",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/primitives",
+          "title": "Primitives",
+          "summary": "A host primitive set covering `sampleTree`, so renderer tests assert against real markup rather than a mock's call log.",
+          "symbols": [
+            {
+              "name": "undecoratedPrimitive",
+              "kind": "value",
+              "signature": "const undecoratedPrimitive: LoomPrimitive",
+              "truncated": false,
+              "summary": "A primitive that ignores `loom.editable` — the failure mode §4 has to catch."
+            },
+            {
+              "name": "testPrimitives",
+              "kind": "value",
+              "signature": "const testPrimitives: Readonly<Record<string, LoomPrimitive>>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "testPrimitiveResolver",
+              "kind": "value",
+              "signature": "const testPrimitiveResolver: PrimitiveResolver",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/testing/contracts",
+      "slug": "testing-contracts",
+      "types": "./dist/testing/contracts.d.ts",
+      "groups": [
+        {
+          "module": "testing/hold-contract",
+          "title": "Hold contract",
+          "summary": "One suite, run against every `HoldStore`.",
+          "symbols": [
+            {
+              "name": "heldProposalFixture",
+              "kind": "function",
+              "signature": "const heldProposalFixture: (options?: {\n    readonly heldAt?: string;\n    readonly treeId?: TreeId;\n    readonly actor?: string;\n    readonly policyFingerprint?: string;\n}) => HeldProposal",
+              "truncated": false,
+              "summary": "A hold against a real tree."
+            },
+            {
+              "name": "describeHoldStoreContract",
+              "kind": "function",
+              "signature": "const describeHoldStoreContract: (name: string, makeStore: () => HoldStore | Promise<HoldStore>) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/journal-contract",
+          "title": "Journal contract",
+          "summary": "One suite, run against every `TelemetryJournal`.",
+          "symbols": [
+            {
+              "name": "sampleEpisode",
+              "kind": "function",
+              "signature": "const sampleEpisode: (namespace?: string) => readonly TelemetryRecord[]",
+              "truncated": false,
+              "summary": "A whole episode, narrated: an intent, the proposal it produced, the Gate accepting it, and the change landing. Built through `recordOf` rather than by hand so the suite exercises the narrowing every host will use."
+            },
+            {
+              "name": "describeTelemetryJournalContract",
+              "kind": "function",
+              "signature": "const describeTelemetryJournalContract: (name: string, makeJournal: () => Promise<TelemetryJournal> | TelemetryJournal) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/row-security",
+          "title": "Row security",
+          "summary": "Asking Postgres whether a table really is protected.",
+          "symbols": [
+            {
+              "name": "rowSecurityOn",
+              "kind": "function",
+              "signature": "const rowSecurityOn: (db: LoomDatabase, table: string) => Promise<boolean>",
+              "truncated": false,
+              "summary": "Whether Postgres has row level security on a table, read from the catalogue rather than inferred from having run the statement."
+            }
+          ]
+        },
+        {
+          "module": "testing/store-contract",
+          "title": "Store contract",
+          "summary": "One suite, run against every `TreeStore`.",
+          "symbols": [
+            {
+              "name": "appendOf",
+              "kind": "function",
+              "signature": "const appendOf: (delta: TreeDelta, proposal?: string) => AppendRequest",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "removalOf",
+              "kind": "function",
+              "signature": "const removalOf: (tree: LoomTree, nodeId: string, baseRevision?: number) => TreeDelta",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "treeNamed",
+              "kind": "function",
+              "signature": "const treeNamed: (namespace: string) => LoomTree",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeTreeStoreContract",
+              "kind": "function",
+              "signature": "const describeTreeStoreContract: (name: string, makeStore: () => Promise<TreeStore> | TreeStore) => void",
+              "truncated": false,
+              "summary": "`makeStore` returns a store with nothing in it. Each test gets its own, so the suite never depends on the order it runs in."
+            }
+          ]
+        }
+      ]
     }
   ]
 }

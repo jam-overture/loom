@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="900" height="560" fill="#faf9f7"/>
+
+  <text x="40" y="46" font-size="21" font-weight="600" fill="#1a1917">Two doors into `src/testing/`, and the wall between them</text>
+  <text x="40" y="70" font-size="13" fill="#6b6862">0104 — the runtime publishes its fixtures and its contract suites</text>
+
+  <!-- consumers -->
+  <text x="40" y="116" font-size="12" font-weight="600" fill="#6b6862" letter-spacing="1.4">WHO ASKED</text>
+  <g font-size="13" fill="#1a1917">
+    <rect x="40" y="130" width="200" height="52" rx="8" fill="#fff" stroke="#ded9d1"/>
+    <text x="56" y="152">the course, in a browser</text>
+    <text x="56" y="170" font-size="11.5" fill="#6b6862">17 fences open with sampleTree()</text>
+
+    <rect x="40" y="194" width="200" height="52" rx="8" fill="#fff" stroke="#ded9d1"/>
+    <text x="56" y="216">a host writing a store</text>
+    <text x="56" y="234" font-size="11.5" fill="#6b6862">is it correct? nothing could say</text>
+
+    <rect x="40" y="258" width="200" height="52" rx="8" fill="#fff" stroke="#ded9d1"/>
+    <text x="56" y="280">a host writing a primitive</text>
+    <text x="56" y="298" font-size="11.5" fill="#6b6862">wants a registry and a tree</text>
+  </g>
+
+  <!-- arrows -->
+  <g stroke="#b4ada1" stroke-width="1.6" fill="none" marker-end="url(#arrow)">
+    <path d="M240 156 L 330 156"/>
+    <path d="M240 220 L 300 220 L 300 330 L 330 330"/>
+    <path d="M240 284 L 280 284 L 280 170 L 330 170"/>
+  </g>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#b4ada1"/>
+    </marker>
+  </defs>
+
+  <!-- door 1 -->
+  <rect x="330" y="128" width="300" height="118" rx="10" fill="#fff" stroke="#3d7a5c" stroke-width="2"/>
+  <text x="350" y="154" font-size="14" font-weight="600" fill="#1a1917">@loom/runtime/testing</text>
+  <text x="350" y="176" font-size="12" fill="#3f3c37">sampleTree · formTree · testRegistry</text>
+  <text x="350" y="195" font-size="12" fill="#3f3c37">scripted interpreters · clocks · sinks</text>
+  <text x="350" y="214" font-size="12" fill="#3f3c37">canned model replies · episode harness</text>
+  <text x="350" y="235" font-size="11.5" fill="#3d7a5c" font-weight="600">loads anywhere the runtime does — browser included</text>
+
+  <!-- door 2 -->
+  <rect x="330" y="302" width="300" height="118" rx="10" fill="#fff" stroke="#8a6a2f" stroke-width="2"/>
+  <text x="350" y="328" font-size="14" font-weight="600" fill="#1a1917">@loom/runtime/testing/contracts</text>
+  <text x="350" y="350" font-size="12" fill="#3f3c37">describeTreeStoreContract</text>
+  <text x="350" y="369" font-size="12" fill="#3f3c37">describeHoldStoreContract</text>
+  <text x="350" y="388" font-size="12" fill="#3f3c37">describeTelemetryJournalContract</text>
+  <text x="350" y="409" font-size="11.5" fill="#8a6a2f" font-weight="600">imports vitest — an optional peer dependency</text>
+
+  <!-- wall -->
+  <line x1="660" y1="120" x2="660" y2="440" stroke="#c9c2b6" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="676" y="150" font-size="12" font-weight="600" fill="#6b6862" letter-spacing="1.2">WHAT HOLDS IT</text>
+  <g font-size="12" fill="#3f3c37">
+    <text x="676" y="180">surface.test.ts walks the</text>
+    <text x="676" y="198">import graph from each door.</text>
+    <text x="676" y="226" font-weight="600" fill="#3d7a5c">vitest reachable from the</text>
+    <text x="676" y="244" font-weight="600" fill="#3d7a5c">fixtures → red.</text>
+    <text x="676" y="272" font-weight="600" fill="#8a6a2f">vitest *not* reachable from</text>
+    <text x="676" y="290" font-weight="600" fill="#8a6a2f">the contracts → also red.</text>
+    <text x="676" y="322">Both checked by inserting</text>
+    <text x="676" y="340">the import and watching</text>
+    <text x="676" y="358">the assertion fail.</text>
+  </g>
+
+  <!-- footer -->
+  <line x1="40" y1="462" x2="860" y2="462" stroke="#e6e1d9"/>
+  <text x="40" y="490" font-size="12.5" fill="#6b6862">A single door would have put a test framework in sampleTree()'s import graph — and vitest throws on import outside a test run,</text>
+  <text x="40" y="510" font-size="12.5" fill="#6b6862">so the failure would have landed in someone else's bundler rather than here. Verified: `node -e 'import(&quot;dist/testing/contracts.js&quot;)'` throws;</text>
+  <text x="40" y="530" font-size="12.5" fill="#6b6862">`node -e 'import(&quot;dist/testing/index.js&quot;)'` returns 35 exports.</text>
+</svg>
