@@ -186,6 +186,8 @@ export const loomTier = definePrimitive({
           display: "flex",
           flexDirection: "column",
           gap: space(5),
+          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
+          boxSizing: "border-box",
           height: "100%",
           padding: space(5),
           borderRadius: radius("lg"),

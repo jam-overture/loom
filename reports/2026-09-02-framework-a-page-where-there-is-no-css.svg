@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">A page where there is no CSS</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">A primitive paints by <tspan font-style="italic">naming</tspan> a value. An image renderer resolves no names — so the naming has to be undone before the page leaves.</text>
+
+  <!-- ================= THE PASS THAT LOOKS RIGHT ================= -->
+  <text x="40" y="118" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">THE PASS THAT LOOKS RIGHT, AND SILENTLY DOES NOTHING</text>
+
+  <rect x="40" y="132" width="400" height="188" rx="10" fill="#fdf6f4" stroke="#e8cfc7"/>
+  <text x="58" y="158" font-size="12.5" fill="#5c5751">What <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">renderLoomTree</tspan> hands back is <tspan font-weight="650">component</tspan> elements:</text>
+
+  <rect x="58" y="172" width="364" height="88" rx="7" fill="#ffffff" stroke="#e8cfc7"/>
+  <text x="74" y="194" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">&lt;loom.page&gt;</text>
+  <text x="94" y="214" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">&lt;loom.card&gt;</text>
+  <text x="114" y="234" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#a8968c">"Body copy"</text>
+  <text x="252" y="194" font-size="11.5" fill="#b4695a">no style</text>
+  <text x="252" y="214" font-size="11.5" fill="#b4695a">no style</text>
+
+  <text x="58" y="284" font-size="12.5" fill="#8a4a3c">A walk over this finds nothing to substitute. What a</text>
+  <text x="58" y="302" font-size="12.5" fill="#8a4a3c">primitive paints does not exist until React renders it.</text>
+
+  <!-- ================= WHERE THE VALUES ARE ================= -->
+  <text x="480" y="118" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">SO IT HAPPENS ONE NODE IN</text>
+
+  <rect x="480" y="132" width="400" height="188" rx="10" fill="#f6faf6" stroke="#cfe0cf"/>
+  <text x="498" y="158" font-size="12.5" fill="#5c5751">A stand-in calls the primitive and resolves its output:</text>
+
+  <rect x="498" y="172" width="364" height="88" rx="7" fill="#ffffff" stroke="#cfe0cf"/>
+  <text x="514" y="194" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">literal(loom.page)</text>
+  <text x="534" y="214" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#4a7a4a">→ &lt;main style="background:#fafaf7"&gt;</text>
+  <text x="534" y="238" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#15120e">literal(loom.card)</text>
+
+  <text x="498" y="284" font-size="12.5" fill="#3f6b3f">Each node resolves its own output and stops at the child</text>
+  <text x="498" y="302" font-size="12.5" fill="#3f6b3f">elements — the next stand-ins. Nothing is walked twice.</text>
+
+  <!-- ================= ONE DECLARATION ================= -->
+  <text x="40" y="358" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">ONE DECLARATION, THROUGH THE SEAM</text>
+
+  <rect x="40" y="372" width="840" height="104" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+
+  <text x="60" y="398" font-size="11.5" font-weight="650" fill="#8a8178">WHAT THE PRIMITIVE WROTE</text>
+  <text x="60" y="422" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#15120e">border: 1px solid var(--loom-border-subtle)</text>
+  <text x="60" y="446" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#15120e">font-family: var(--loom-mono-family, ui-monospace)</text>
+  <text x="60" y="466" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#15120e">color: var(--loom-danger)</text>
+
+  <text x="500" y="398" font-size="11.5" font-weight="650" fill="#8a8178">WHAT LEAVES, UNDER <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">editorial</tspan></text>
+  <text x="500" y="422" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#3f6b3f">border: 1px solid #efefe9</text>
+  <text x="500" y="446" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#3f6b3f">font-family: ui-monospace</text>
+  <text x="500" y="466" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#b4695a">color: var(--loom-danger)</text>
+
+  <text x="740" y="446" font-size="11" fill="#8a8178">the fallback, not a report</text>
+  <text x="740" y="466" font-size="11" fill="#8a8178">unanswered — left as written</text>
+
+  <!-- ================= LIMITS ================= -->
+  <text x="40" y="514" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT IT DOES NOT REACH — ALL ONE SHAPE: IT RESOLVES VALUES, NOT THE REST OF CSS</text>
+
+  <rect x="40" y="528" width="272" height="96" rx="10" fill="#ffffff" stroke="#e4ded5"/>
+  <text x="58" y="552" font-size="12.5" font-weight="650" fill="#15120e">The library stylesheet</text>
+  <text x="58" y="574" font-size="12" fill="#5c5751">:hover, :last-child, keyframes,</text>
+  <text x="58" y="592" font-size="12" fill="#5c5751">::after — the five things that</text>
+  <text x="58" y="610" font-size="12" fill="#5c5751">cannot be said inline anyway.</text>
+
+  <rect x="324" y="528" width="272" height="96" rx="10" fill="#ffffff" stroke="#e4ded5"/>
+  <text x="342" y="552" font-size="12.5" font-weight="650" fill="#15120e">Inside a control</text>
+  <text x="342" y="574" font-size="12" fill="#5c5751">A behaviour's control renders on</text>
+  <text x="342" y="592" font-size="12" fill="#5c5751">the client. Its own style prop is</text>
+  <text x="342" y="610" font-size="12" fill="#5c5751">resolved; its subtree is not there.</text>
+
+  <rect x="608" y="528" width="272" height="96" rx="10" fill="#ffffff" stroke="#e4ded5"/>
+  <text x="626" y="552" font-size="12.5" font-weight="650" fill="#15120e">A property with no value</text>
+  <text x="626" y="574" font-size="12" fill="#5c5751">Left exactly as written, which is</text>
+  <text x="626" y="592" font-size="12" fill="#5c5751">what a browser does with it too.</text>
+  <text x="626" y="610" font-size="12" fill="#5c5751">Nothing here invents a value.</text>
+</svg>

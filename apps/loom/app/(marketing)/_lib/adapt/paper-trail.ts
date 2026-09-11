@@ -101,20 +101,54 @@ export type TrailLine = {
 }
 
 export type PaperTrail = {
+  /** Which choice this is the record of, which is not always the default one. */
+  readonly ask: AskId
   /** The request, in the words the visitor's button stands for. */
   readonly asked: string
-  /** Every line of the run that landed, in the order the runtime said them. */
+  /** Every line of the run, in the order the runtime said them. */
   readonly lines: readonly TrailLine[]
+  /**
+   * Whether the run above reached the page, or stopped at the answer.
+   *
+   * Three of the five choices land on their own, one is held for the visitor to
+   * decide, and one is refused outright — so a page that assumed the run
+   * reached the page was a page that could only ever print the record of the
+   * one choice it was written around. It is counted off the lines rather than
+   * asserted, because the whole claim of the band is that the lines are the run.
+   */
+  readonly landed: boolean
+  /**
+   * Whether the run above is itself the request this site refuses.
+   *
+   * The contrast band below prints a refusal beside an answer that was not one.
+   * A visitor who asked for the refused change themselves has the refusal in
+   * front of them already, so that band would print the same answer twice under
+   * a heading calling it a different one.
+   */
+  readonly isRefusal: boolean
   /**
    * The one line of a second run that a refusal changes, and the only one worth
    * printing twice.
    *
-   * The first five stages of a refused change read identically to an allowed
-   * one — the same request, the same rules, the same list, the same
-   * measurement — and that is the point rather than an economy: what separates
-   * them is one answer, and the absence of everything that would have followed.
+   * A refused change reaches the same kinds of line as an allowed one — the
+   * request, the rules, the list, the measurement — and that is the point rather
+   * than an economy: what separates them is one answer, and the absence of
+   * everything that would have followed.
    */
   readonly refused: TrailLine
+  /**
+   * How many lines that refused run produced, which is **not** a fact about the
+   * run printed above it.
+   *
+   * The band that shows the refusal counts three positions while it speaks —
+   * how many kinds of line match, which one differs, and which one is missing —
+   * and every one of them is a position in the *refused* run. They were read off
+   * `lines` while `lines` could only ever be the six-line default, which gave
+   * the right three numbers for the wrong reason. The moment the page could
+   * print a five-line run above the band, the same arithmetic would have made
+   * every one of them one too small.
+   */
+  readonly refusedLines: number
 }
 
 const lineOf = (envelope: RuntimeEventEnvelope): TrailLine => {
@@ -134,17 +168,24 @@ const lineOf = (envelope: RuntimeEventEnvelope): TrailLine => {
 }
 
 /**
- * The request the page shows the whole record of.
+ * The request the page shows the whole record of **when nobody has asked for
+ * another one**.
  *
  * The quietest of the five on purpose. It changes two settings on one band and
  * not a word of the page, so every line below is legible on a screen — and the
  * shape of change it stands for is far commoner in practice than the dramatic
  * ones. A run whose record nobody can read proves nothing.
+ *
+ * It is the default rather than the subject as of this run. A visitor who has
+ * just watched a change happen on the front door is the one person on this site
+ * who wants the raw record — and until now they were shown the record of a
+ * different request from the one they made, on the page whose entire argument is
+ * that it can tell them exactly what happened.
  */
-const SHOWN: AskId = "calmer"
+export const DEFAULT_SHOWN: AskId = "calmer"
 
 /** The one the rules will not allow, whoever asks. */
-const REFUSED: AskId = "drop-pitch"
+export const REFUSED: AskId = "drop-pitch"
 
 const askOrThrow = (id: AskId): Ask => {
   const ask = askById(id)
@@ -156,39 +197,123 @@ const askOrThrow = (id: AskId): Ask => {
   return ask
 }
 
-const heardFrom = async (page: LoomTree, ask: Ask, namespace: string) => {
+const heardFrom = async (page: LoomTree, ask: Ask, namespace: string, approved: boolean) => {
   const { sink, heard } = listener()
 
-  await runAsk(page, ask, false, namespace, sink)
+  await runAsk(page, ask, approved, namespace, sink)
 
   return heard()
 }
 
+/** One request's record, before it is known whether it is the one being printed. */
+type Run = {
+  readonly ask: AskId
+  readonly asked: string
+  readonly lines: readonly TrailLine[]
+  /** The answer, which is the line every printable run has to have reached. */
+  readonly verdict: TrailLine
+  readonly landed: boolean
+}
+
 /**
- * One real request against the published front door, listened to.
+ * One request against the published front door, listened to — or nothing.
+ *
+ * **Nothing, rather than a throw, and the split is deliberate.** Two of the runs
+ * this page makes are the site's own and are checked by tests; the third is
+ * whichever request arrived in the address, and a visitor's address must not be
+ * able to take a page down. So a run that produced nothing printable comes back
+ * as `undefined` here and the caller decides: for the visitor's request that
+ * means falling back to the default, and for the site's own two it means the
+ * error that has always been right.
+ *
+ * Two things make a run unprintable, and both are checked before a line is
+ * built. It may narrate a stage this page has nothing to say about, which is
+ * `lineOf`'s error and is checked ahead of it so the choice is the caller's
+ * rather than an exception's. And it may reach no answer at all — which is not
+ * a state of the rules but a request the page had nothing to do about, and
+ * there is no record of a change that was never proposed.
+ *
+ * The guard is on the answer rather than on the change landing. Every request
+ * the rules see reaches a verdict, and that is the invariant worth holding: a
+ * run that stops *at* the verdict is one of the three answers the rules can
+ * give rather than a fault, and it is the answer a visitor most needs to read.
+ */
+const runFor = async (
+  frontDoor: LoomTree,
+  id: AskId,
+  approved: boolean,
+  namespace: string
+): Promise<Run | undefined> => {
+  const ask = askOrThrow(id)
+  const heard = await heardFrom(frontDoor, ask, namespace, approved)
+
+  if (heard.some((envelope) => STAGE[envelope.event.type] === undefined)) return undefined
+
+  const lines = heard.map(lineOf)
+  const verdict = lines.find((line) => line.type === "disposition-decided")
+
+  if (verdict === undefined) return undefined
+
+  return {
+    ask: id,
+    asked: ask.utterance,
+    lines,
+    verdict,
+    landed: lines.some((line) => line.type === "change-applied"),
+  }
+}
+
+/**
+ * The record this page prints, and the refusal it prints beside it.
  *
  * The page it runs against is the one this site serves at `/`, built fresh
  * here, so the record on the mechanism page is a record of the site rather than
- * of a fixture kept beside it. Two runs, because a refusal is the half a
- * visitor most needs to see and no single request can be both allowed and
+ * of a fixture kept beside it. More than one run, because a refusal is the half
+ * a visitor most needs to see and no single request can be both allowed and
  * refused; separate namespaces, because two runs of one namespace hand out the
- * same ids and the second would be asking the page to hold a piece it already
- * holds.
+ * same ids and nothing is gained by making two records share them.
+ *
+ * **`asked` and `approved` are the visitor's, off the address.** They are the
+ * same two values the front door read to produce the change that visitor
+ * watched happen, run again here against the same published page — so the lines
+ * printed are the lines *their* request produced, rather than the lines of a
+ * request chosen when this page was written. Absent, the default stands and this
+ * page is what it has always been, which matters more than it sounds: that is
+ * the page every crawler and every share preview is served.
+ *
+ * `ask` on the way out names whichever request was actually printed. A page that
+ * addressed the reader as the person who made this request would be wrong the
+ * moment a fallback happened, so what the page says about the reader is decided
+ * by comparing that against the address rather than by the address alone.
  */
-export const paperTrailFor = async (frontDoor: LoomTree): Promise<PaperTrail> => {
-  const shown = askOrThrow(SHOWN)
-  const lines = (await heardFrom(frontDoor, shown, "shown")).map(lineOf)
-  const refusal = (await heardFrom(frontDoor, askOrThrow(REFUSED), "refused"))
-    .map(lineOf)
-    .find((line: TrailLine) => line.type === "disposition-decided")
+export const paperTrailFor = async (
+  frontDoor: LoomTree,
+  asked?: AskId,
+  approved = false
+): Promise<PaperTrail> => {
+  const theirs =
+    asked === undefined ? undefined : await runFor(frontDoor, asked, approved, "asked")
+  const shown = theirs ?? (await runFor(frontDoor, DEFAULT_SHOWN, false, "shown"))
+
+  if (shown === undefined) {
+    throw new Error(
+      `loom: the record this page falls back to ("${DEFAULT_SHOWN}") reached no answer against the front door, so there is nothing to print`
+    )
+  }
+
+  const refusal = await runFor(frontDoor, REFUSED, false, "refused")
 
   if (refusal === undefined) {
     throw new Error("loom: the request this site refuses reached no answer, so there is none to show")
   }
 
-  if (!lines.some((line) => line.type === "change-applied")) {
-    throw new Error("loom: the request this page shows the record of did not land, so the record is short")
+  return {
+    ask: shown.ask,
+    asked: shown.asked,
+    lines: shown.lines,
+    landed: shown.landed,
+    isRefusal: shown.ask === REFUSED,
+    refused: refusal.verdict,
+    refusedLines: refusal.lines.length,
   }
-
-  return { asked: shown.utterance, lines, refused: refusal }
 }

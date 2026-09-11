@@ -57,4 +57,9 @@ describe("the checkup screen's reading order", () => {
   it("gives the screen with no page named something to do", () => {
     expect(source.indexOf("<CheckupTreeChooser")).toBeGreaterThan(-1)
   })
+
+  it("never reverses a row or a column to place something", () => {
+    expect(source).not.toContain("flex-row-reverse")
+    expect(source).not.toContain("flex-col-reverse")
+  })
 })

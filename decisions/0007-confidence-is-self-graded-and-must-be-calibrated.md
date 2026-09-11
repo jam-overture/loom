@@ -4,7 +4,7 @@
 **Date:** 2026-07-28
 **Section:** §2 — Composition Runtime, binding on §6 — Telemetry
 
-> **Amended 2026-08-28**, under [0096](0099-a-record-is-amended-when-only-the-count-moved.md).
+> **Amended 2026-08-28**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
 > The ladder's rule count below read *six* and has been seven since 19 August.
 > Two rules still read confidence; only the size of the list they sit in moved.
 > Held against `ESCALATION_LADDER` by `src/record-claims.test.ts` from now on.

@@ -1,12 +1,14 @@
 import { CONFIDENT } from "./calibration"
 import {
   correctionsFor,
+  type Attempt,
   type Confidence,
   type Correction,
   type Grade,
   type Progress,
 } from "./progress"
 import { addDays, daysBetween } from "./queue"
+import { lessonSlugParts } from "./slugs"
 
 /**
  * The questions you got wrong, coming back.
@@ -61,6 +63,43 @@ export const CORRECTION_GAPS: readonly number[] = [1, 7, 30]
  * about ten minutes.
  */
 export const SITTING = 5
+
+/**
+ * Which recorded misses come back, and it is not all of them.
+ *
+ * Every question in the course that gets graded lands in the same record under
+ * a slug — a review set, a lesson's Warm-up, its Self-check, and the
+ * predictions it grades at Reflect. Three of those four are unambiguous: the
+ * reader met the material, was asked for it later, and could not produce it.
+ * That is a retrieval failure, and a retrieval failure is exactly what this
+ * queue exists to keep bringing back.
+ *
+ * **Predict is different in kind, and only sometimes.** A Predict question is
+ * asked before the explanation and is written to be got wrong — the course says
+ * so in its own README, and calls being wrong the mechanism rather than a waste
+ * of time. A reader who rates a prediction 2, misses it, and is handed it back
+ * the next day has been told off for doing the exercise correctly. Nothing was
+ * forgotten there; they said they did not know, and they did not know, and
+ * their calibration was perfect. Feeding those into the queue would also bury
+ * the real misses under them, because a lesson generates three by design and a
+ * Self-check generates none if the lesson worked.
+ *
+ * A prediction rated **4 or 5** and missed is the opposite, and is arguably the
+ * most valuable single thing this surface records. It is not a gap — it is a
+ * belief about how the system works, held confidently, that turned out to be
+ * false. Those do not go away by being contradicted once, which is the whole
+ * reason `wasConfident` orders this queue in the first place. So the same
+ * threshold decides entry as decides precedence: if you were sure, it comes
+ * back.
+ */
+export const comesBack = (slug: string, attempt: Attempt): boolean => {
+  if (attempt.grade === "got-it") return false
+
+  return lessonSlugParts(slug)?.part === "predict" ? attempt.confidence >= CONFIDENT : true
+}
+
+/** How a question is addressed across this surface: its slug and its number. */
+export const keyOf = (set: string, question: number): string => `${set}#${question}`
 
 export type CorrectionStatus = "due" | "upcoming" | "retired"
 
@@ -201,18 +240,44 @@ const order = (a: PendingCorrection, b: PendingCorrection): number => {
  * A question leaves this list one of two ways: three clean retrievals across a
  * month, or a later go at the whole set in which it was got. Nothing else
  * removes one, and in particular reading the lesson again does not.
+ *
+ * Every slug in the record is walked, which is a review set and a lesson's own
+ * graded sections alike. That was always true of this function and used not to
+ * be true of anything downstream of it, which is the bug this is the fix for:
+ * the panel counted lesson misses and the sitting could not render them, so a
+ * reader who had missed a Self-check question and nothing else was told three
+ * questions were waiting and shown none.
  */
 export const correctionQueue = (progress: Progress, today: string): readonly PendingCorrection[] =>
   Object.entries(progress.sets)
     .flatMap(([set, record]) =>
       record.attempts
-        .filter((attempt) => attempt.grade !== "got-it")
+        .filter((attempt) => comesBack(set, attempt))
         .map((attempt) =>
           pendingFor(set, attempt.question, attempt.confidence, attempt.grade, attempt.on, progress, today)
         )
     )
     .filter((correction) => correction.status !== "retired")
     .sort(order)
+
+/**
+ * The queue, minus questions the course no longer contains.
+ *
+ * Sets and lessons get edited: a question can be reworded, renumbered or
+ * removed between the sitting that recorded the miss and the day it comes back,
+ * and a record kept in the reader's browser has no way of hearing about it.
+ * What is left is a key pointing at nothing.
+ *
+ * This exists as a function rather than as a line in the sitting because it has
+ * to happen in *two* places — the sitting and the panel that advertises it —
+ * and the one time those two disagreed about what the queue contained, the
+ * panel spent a week promising work the page then refused to hand over.
+ */
+export const knownOnly = (
+  queue: readonly PendingCorrection[],
+  keys: ReadonlySet<string>
+): readonly PendingCorrection[] =>
+  queue.filter((correction) => keys.has(keyOf(correction.set, correction.question)))
 
 export const dueCorrections = (
   queue: readonly PendingCorrection[]

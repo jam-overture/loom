@@ -10,6 +10,7 @@ import {
   type IdFactory,
   type JsonObject,
   type LoomNode,
+  type LoomTree,
   type ThemeRegistry,
 } from "@loom/runtime"
 import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
@@ -148,12 +149,22 @@ export const COURSE_THEME_STYLE: CSSProperties = themeStyle(resolved.theme)
  */
 const namespaceOf = (key: string): string => key.replace(/[^0-9a-z]/gi, "").toLowerCase().slice(0, 24)
 
-export const renderFragment = (
+/**
+ * The tree a fragment is, before anybody has rendered it.
+ *
+ * Held apart from the render because some of this course's fragments are not
+ * for the reader yet, and a fragment that has been rendered is a fragment that
+ * is on the page. What a held answer travels as is this: data, over the wire,
+ * when it has been earned — which is the one shape this course spends
+ * seventeen lessons on.
+ */
+export const buildFragment = (
   build: (ids: IdFactory) => readonly LoomNode[],
   key: string
-): ReactNode => {
+): LoomTree => {
   const ids = sequentialIdFactory(namespaceOf(key))
-  const tree = createTree(
+
+  return createTree(
     buildElement(ids, {
       type: "loom.stack",
       props: { direction: "column", gap: "normal" },
@@ -161,7 +172,17 @@ export const renderFragment = (
     }),
     ids
   )
+}
 
+/**
+ * One tree, no root theme, wearing whatever the surface mounted above it.
+ *
+ * Runs on the server for everything the reader may already see, and in the
+ * browser for a fragment that arrived later — the same function, the same
+ * registry and the same themes either way, which is what stops a held answer
+ * being rendered by a second, laxer path.
+ */
+export const renderTree = (tree: LoomTree, key: string): ReactNode => {
   const rendered = renderLoomTree(tree, {
     resolver: courseRegistry,
     validator: courseRegistry,
@@ -182,3 +203,8 @@ export const renderFragment = (
 
   return rendered.element
 }
+
+export const renderFragment = (
+  build: (ids: IdFactory) => readonly LoomNode[],
+  key: string
+): ReactNode => renderTree(buildFragment(build, key), key)

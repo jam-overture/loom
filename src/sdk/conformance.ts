@@ -9,7 +9,13 @@ import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
 import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../render/behaviour.js"
-import { NO_SLOTS, type LoomPrimitive, type LoomPrimitiveProps } from "../render/primitive.js"
+import {
+  asCallablePrimitive,
+  NO_SLOTS,
+  type CallablePrimitive,
+  type LoomPrimitive,
+  type LoomPrimitiveProps,
+} from "../render/primitive.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import { err, ok, type Result } from "../result.js"
 import { paletteSlotSchema, type PaletteSlot } from "../theme/theme.js"
@@ -231,24 +237,13 @@ const carriesDecoration = (node: ReactNode, editable: EditableAttributes): boole
 }
 
 /**
- * A `LoomPrimitive` is either a function component or a class, and only the
- * first can be called as a plain function. `typeof` cannot tell them apart — a
- * class is a function too — so the marker React puts on a class component's
- * prototype is what decides it.
+ * A probe calls a primitive rather than mounting one, and a class cannot be
+ * called — see `asCallablePrimitive`, which decides that for both the callers
+ * in this package that need it.
  */
-type ProbeableComponent = (props: LoomPrimitiveProps) => ReactNode
+type ProbeableComponent = CallablePrimitive
 
-const asProbeable = (primitive: LoomPrimitive): Result<ProbeableComponent, string> => {
-  if (typeof primitive !== "function") return err("not a function component")
-
-  const prototype: unknown = (primitive as { readonly prototype?: unknown }).prototype
-
-  if (typeof prototype === "object" && prototype !== null && "isReactComponent" in prototype) {
-    return err("class components cannot be called outside a renderer")
-  }
-
-  return ok(primitive as ProbeableComponent)
-}
+const asProbeable = asCallablePrimitive
 
 /** Calls a probeable component, turning whatever it throws into a reason. */
 const call = (probeable: ProbeableComponent, props: LoomPrimitiveProps): Result<ReactNode, string> => {

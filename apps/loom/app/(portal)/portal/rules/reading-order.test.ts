@@ -64,4 +64,9 @@ describe("the rules screen's reading order", () => {
     expect(source).not.toContain("<button")
     expect(source).not.toContain("action=")
   })
+
+  it("never reverses a row or a column to place something", () => {
+    expect(source).not.toContain("flex-row-reverse")
+    expect(source).not.toContain("flex-col-reverse")
+  })
 })

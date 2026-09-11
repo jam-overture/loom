@@ -3,6 +3,7 @@
 import { createElement, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react"
 
 import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behaviour.js"
+import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * The third control that runs on the client, and the first that hands a value
@@ -59,9 +60,16 @@ export type AdjustControlProps = {
  * range input's thumb and track without replacing the whole control with
  * pseudo-element rules per engine — which would be the hand-built handle this
  * deliberately is not.
+ *
+ * `display` is set here rather than left to the browser, which is the one line
+ * that is not about appearance. The other two controls set it inline and so
+ * cannot be hidden by a rule; making this one the exception would mean the
+ * property that hides a control hides two of three. `inline-block` is what a
+ * range input is displayed as anyway, so writing it down changes no page.
  */
 const INPUT_STYLE = {
   accentColor: "var(--loom-accent, currentColor)",
+  display: controlDisplay("adjust", "inline-block"),
   cursor: "grab",
   margin: 0,
   verticalAlign: "middle",
@@ -113,6 +121,7 @@ export const AdjustControl = ({ label }: AdjustControlProps) => {
   return createElement("input", {
     ref: input,
     type: "range",
+    className: controlClass("adjust"),
     min: ADJUST_MINIMUM,
     max: ADJUST_MAXIMUM,
     value,
