@@ -893,6 +893,20 @@
               "summary": ""
             },
             {
+              "name": "RepairMeasurement",
+              "kind": "type",
+              "signature": "type RepairMeasurement = {\n    readonly proposal: PromptMeasurement;\n    /** The refused delta, rendered, and the reasoning offered for it. */\n    readonly refused: number;\n    /** The Gate's reason code and its detail. */\n    readonly objection: number;\n    /** The closing sentence that makes this a revision rather than a fresh ask. */\n    readonly instruction: number;\n    /** `proposal.total` plus the three above: what the repair puts on the wire. */\n    readonly total: number;\n    /** `proposal.total + total`: the whole refused-then-repaired episode. */\n    readonly episode: number;\n};",
+              "truncated": false,
+              "summary": "What a second go costs, once the first one was refused."
+            },
+            {
+              "name": "measureRepairPrompt",
+              "kind": "function",
+              "signature": "const measureRepairPrompt: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => RepairMeasurement",
+              "truncated": false,
+              "summary": "Measures a repair without sending it, on the same terms as `measurePrompt`."
+            },
+            {
               "name": "hashPrompt",
               "kind": "function",
               "signature": "const hashPrompt: (system: string, userMessage: string) => Promise<string>",

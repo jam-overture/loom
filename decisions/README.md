@@ -190,3 +190,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0104 | *No record on this branch* | — | — |
 | [0105](0105-a-render-can-hand-back-values-instead-of-references.md) | A render can hand back values instead of references | Accepted | §3 |
 | [0106](0106-a-band-asks-its-own-container-for-a-width-not-the-window.md) | A band asks its own container for a width, not the window | Proposed — **ARCHITECTURAL, needs review.** It reverses a named | §4b |
+| 0107 | *No record on this branch* | — | — |
+| [0108](0108-a-repair-restates-the-request-and-the-runtime-measures-it.md) | A repair restates the request, and the runtime measures it rather than making it cheaper | Accepted | §2 |

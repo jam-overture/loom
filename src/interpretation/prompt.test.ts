@@ -17,6 +17,7 @@ import {
   buildUserMessage,
   hashPrompt,
   measurePrompt,
+  measureRepairPrompt,
   INTERPRETER_SYSTEM_PROMPT,
 } from "./prompt.js"
 
@@ -272,6 +273,149 @@ describe("buildRepairMessage", () => {
     const { request, tree } = requestFor()
 
     expect(buildRepairMessage(request, tree)).toContain("not-understood")
+  })
+})
+
+describe("measureRepairPrompt", () => {
+  const starterCatalogue = () => {
+    const registry = createStarterPrimitiveRegistry()
+    if (!registry.ok) throw new Error("the starter registry did not build")
+
+    return catalogueOf(registry.value)
+  }
+
+  const refusalOf = (tree: ReturnType<typeof sampleTree>["tree"], nodeId: NodeId, scoped: boolean) => {
+    const idFactory = sequentialIdFactory("p")
+    const base = buildIntent(idFactory, {
+      treeId: tree.treeId,
+      baseRevision: tree.revision,
+      utterance: "delete the card",
+    })
+    const intent = scoped ? { ...base, scopeNodeId: nodeId } : base
+
+    const request: RepairRequest = {
+      intent,
+      refused: buildProposal(idFactory, {
+        intentId: intent.intentId,
+        delta: {
+          deltaId: idFactory.deltaId(),
+          treeId: tree.treeId,
+          baseRevision: tree.revision,
+          operations: [{ op: "remove", nodeId }],
+        },
+        rationale: "the card is what was named",
+      }),
+      disposition: {
+        kind: "rejected",
+        reason: { code: "stakes-at-refusal-floor", detail: "destroys a protected primitive" },
+        stakes: "critical",
+        reversible: true,
+        confidence: 0.9,
+        policyId: "default",
+      },
+    }
+
+    return request
+  }
+
+  /**
+   * Both paths, because the measurement takes the restated proposal from
+   * `measurePrompt` while the message takes it from the parts, and a scope is
+   * the one thing that makes those two disagree. Held unscoped only, this
+   * passes for a repair that silently drops the scope and sends the whole page.
+   */
+  it.each([
+    ["a whole-tree", false],
+    ["a scoped", true],
+  ])("adds up to what %s repair actually sends", (_label, scoped) => {
+    const { tree, ids } = sampleTree()
+    const request = refusalOf(tree, ids.card, scoped)
+    const themes = createThemeRegistry().catalogue()
+    const catalogue = starterCatalogue()
+
+    const measured = measureRepairPrompt(request, tree, catalogue, themes)
+    const sent =
+      INTERPRETER_SYSTEM_PROMPT.length + buildRepairMessage(request, tree, catalogue, themes).length
+
+    expect(measured.total).toBe(sent)
+    expect(
+      measured.proposal.total + measured.refused + measured.objection + measured.instruction
+    ).toBe(measured.total)
+  })
+
+  /**
+   * The finding this was built for, stated as arithmetic: a repair is the first
+   * request again, not a reference to it. If `proposal` ever stops matching what
+   * the first ask measured, something started deduplicating and 0108 is stale.
+   */
+  it("restates the refused request whole, and says so in the same numbers", () => {
+    const { tree, ids } = sampleTree()
+    const request = refusalOf(tree, ids.card, false)
+    const catalogue = starterCatalogue()
+
+    const measured = measureRepairPrompt(request, tree, catalogue)
+
+    expect(measured.proposal).toEqual(measurePrompt(request.intent, tree, catalogue))
+    expect(measured.episode).toBe(measured.proposal.total + measured.total)
+  })
+
+  /**
+   * What the doubling costs, and where it does not apply.
+   *
+   * An unscoped repair on a big page pays for the whole tree twice, so the
+   * episode approaches twice the proposal as the tree grows — the three blocks a
+   * repair adds are a fixed few hundred characters and stop mattering. A scoped
+   * one pays for the scope twice, which is 0083's whole point surviving the
+   * repair path: scoping bounds the second request as well as the first.
+   */
+  it("pays for the page twice unscoped, and for the scope twice when scoped", () => {
+    const pageOf = (sections: number) => {
+      const idFactory = sequentialIdFactory()
+      const children = Array.from({ length: sections }, (_, index) =>
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { title: `Section ${index}` },
+          children: [buildText(idFactory, `Body copy for section number ${index}.`)],
+        })
+      )
+      const root = buildElement(idFactory, { type: "loom.page", children })
+      const target = children[0]
+      if (target === undefined) throw new Error("a page needs at least one section")
+
+      return { tree: createTree(root, idFactory), targetId: target.id }
+    }
+
+    const measure = (page: ReturnType<typeof pageOf>, scoped: boolean) =>
+      measureRepairPrompt(
+        refusalOf(page.tree, page.targetId, scoped),
+        page.tree,
+        starterCatalogue(),
+        createThemeRegistry().catalogue()
+      )
+
+    const small = pageOf(5)
+    const large = pageOf(500)
+
+    const unscoped = measure(large, false)
+    expect(unscoped.episode / unscoped.proposal.total).toBeGreaterThan(1.9)
+
+    expect(
+      measure(large, true).episode - measure(small, true).episode,
+      "a scoped repair has started growing with the page, so 0083's lever no longer covers the second request"
+    ).toBeLessThan(40)
+  })
+
+  /**
+   * The part a repair adds is small and fixed, which is why the ratio above is
+   * about the restatement rather than about the objection. A Gate detail is one
+   * sentence by construction; if this ever fires, something started putting a
+   * page-sized value into a reason.
+   */
+  it("keeps what a repair adds independent of the page it sits on", () => {
+    const { tree, ids } = sampleTree()
+    const measured = measureRepairPrompt(refusalOf(tree, ids.card, false), tree)
+
+    expect(measured.refused + measured.objection + measured.instruction).toBeLessThan(1_000)
   })
 })
 
