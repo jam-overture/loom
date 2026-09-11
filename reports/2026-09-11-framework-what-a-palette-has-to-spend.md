@@ -171,14 +171,16 @@ run added exports to the published surface. Generated artefact, no prose touched
    depends on nothing in it, which is the right call for this unit and makes the
    shape of the problem plainer rather than fixing it: the lane now has two open
    pull requests and the larger one is unreviewable by construction.
-2. **Where the preview URL comes from.** Step 8 asks for one and no run can
-   publish a working one while the deployment is Blocked, so this report states
-   that rather than printing a link nobody can open. The commit-identity rule
-   closed above is the candidate fix — the 4 September finding established that
-   re-authoring and pushing produced a deployment immediately — and this branch
-   is the first commit written under the rule rather than after the fact. If its
-   checks still come back Blocked, the cause is not the author line and the
-   remaining remedy is the Vercel team membership, which only you can grant.
+2. ~~**Where the preview URL comes from.**~~ **Answered by the run itself, and
+   this is the part worth reading.** The commit-identity rule closed above was
+   the candidate fix, and it worked on the first push: Vercel reports
+   **Ready**, not Blocked, and the preview is live at
+   <https://loom-git-framework-28-what-a-ce3f26-jpizzolato36-6341s-projects.vercel.app>.
+   No Vercel team membership had to change and nothing about the project
+   configuration moved — the only difference from the nine days of Blocked
+   deployments is the author line on the commit. **Every lane that reads
+   `docs/routines.md` before its next run gets its preview back**, which is the
+   whole of step 8 restored for seven routines by one sentence in a document.
 3. **The brief's headline unit.** It names the one-application migration as the
    next thing to do; it was finished twenty-three days ago. Same class of staleness
    as the demo brief's opening task, which is filed twice.

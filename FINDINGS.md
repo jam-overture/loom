@@ -14724,8 +14724,13 @@ unit of its own and this run's was a page.
 ## 2026-09-04 — the commit-identity trap, seventh time, and the address the session hands you is the wrong one
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
-**closed by `framework-28-what-a-palette-has-to-spend`** — option 1, exactly as
-specified. `docs/routines.md` gains a **Commit identity** section beside the
+**closed by `framework-28-what-a-palette-has-to-spend`**, and **confirmed by the
+push that closed it** — the first commit authored under the new rule deployed
+**Ready** rather than Blocked, after nine days in which no framework or
+documentation pull request got a preview. Nothing else changed: no Vercel team
+membership, no project configuration. The author line was the whole of it, which
+is what this finding said and what four reports had described as an unexplained
+*"no preview URL"*. Option 1, exactly as specified. `docs/routines.md` gains a **Commit identity** section beside the
 network policy, naming the author line and giving the two `git config` lines that
 set it. Option 2 was not taken: a committed `.gitconfig` only applies once
 somebody runs `git config include.path`, so it would be a file that looks like a
