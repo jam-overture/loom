@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import type { NavItem } from "@/app/(portal)/_lib/nav"
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 
 export type ShellNavItem = NavItem & {
   readonly icon: ReactNode
@@ -15,8 +16,9 @@ const strokeProps = {
 } as const
 
 /**
- * Three groups. What the runtime holds — the pages themselves, and the catalogue a
- * model is told it may build from (0013). Then the record of how they got that
+ * Three groups. What the runtime holds — the pages themselves, the catalogue a
+ * model is told it may build from (0013), and the policy every change is judged
+ * against before it reaches one (0002). Then the record of how they got that
  * way: what the runtime was asked to do and what became of it (0023), what was
  * accepted into a tree (0016), whether the model's own confidence has been worth
  * anything (0031), and whether the log still produces the snapshot.
@@ -38,6 +40,16 @@ const strokeProps = {
  * page, never before it — a nav label renamed ahead of the screen it points at
  * is a promise the screen does not keep.
  *
+ * `Sign-ins` is the one that did not move on the run that rewrote its page, and
+ * that is the decision rather than an omission. The rule is to name a thing
+ * after what a person wants, and the words the rest of the industry would use
+ * here — `Security` — is a claim four sizes larger than the screen: it reports
+ * failed sign-ins to this portal and nothing else, not the runtime's own
+ * permissions, not what a proposal was allowed to do, not who may edit a page.
+ * A rail entry that promised those would send a reader looking for them. Its
+ * heading carries the question instead, which is where a question belongs: a
+ * rail is a list of places and a noun is what names a place.
+ *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
  * about what a thing can do. It came back once its page did — and the page keeps
  * the claim honest, because a tree whose seed this host cannot reproduce is
@@ -47,9 +59,40 @@ const strokeProps = {
  * public `/demo` of its own on 21 August; `/portal/demo` is now a 308 kept for
  * old links, and a nav that routes a signed-in reviewer through a redirect is a
  * nav pointing at where something used to be.
+ *
+ * Three labels are not written here at all — they are read from
+ * `_lib/screen-names.ts`, which is the one place those screens are named.
+ * `Activity` and `History` were synonyms sitting next to each other, and the
+ * front door's `Waiting on you` had stopped describing its own screen the day
+ * that screen grew a second half. Both defects were a rail label typed
+ * independently of the heading it points at, which is a thing a file can stop
+ * being able to do. The argument in full is in that module.
+ *
+ * The rail's remaining labels stay nouns, and the rule that made them nouns is
+ * intact: a rail is a list of places, a noun names a place, and each of them is
+ * the short form of its own screen's heading rather than a different subject.
+ * `What Loom has been doing` is a sentence because the screen it leads to
+ * genuinely has two subjects and no noun covers both — the same reason its
+ * heading is one.
+ *
+ * The front door leads, because it is the one screen in the portal with
+ * something urgent on it. It is `exact` because `/portal` is the prefix of every
+ * other route in this rail.
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
+    {
+      label: screenName("/portal"),
+      href: "/portal",
+      exact: true,
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M6 3h12M6 21h12" />
+          <path d="M8 3v3.5a4 4 0 002 3.4l2 1.1 2-1.1a4 4 0 002-3.4V3" />
+          <path d="M8 21v-3.5a4 4 0 012-3.4l2-1.1 2 1.1a4 4 0 012 3.4V21" />
+        </svg>
+      ),
+    },
     {
       label: "Pages",
       href: "/portal/pages",
@@ -90,10 +133,27 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
         </svg>
       ),
     },
+    {
+      /**
+       * Beside `Pieces` rather than in the record group, because the two are one
+       * question asked twice: what the AI may *build* from, and what it may
+       * *do*. Both are true before anything has happened, which is what makes
+       * them the pair a new arrival reads first — every entry in the group below
+       * is empty on a deployment nothing has been asked of.
+       */
+      label: "Rules",
+      href: "/portal/rules",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" />
+          <polyline points="9 12 11 14 15 10" />
+        </svg>
+      ),
+    },
   ],
   [
     {
-      label: "Activity",
+      label: screenName("/portal/activity"),
       href: "/portal/activity",
       icon: (
         <svg {...strokeProps}>
@@ -102,7 +162,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "History",
+      label: screenName("/portal/history"),
       href: "/portal/history",
       icon: (
         <svg {...strokeProps}>

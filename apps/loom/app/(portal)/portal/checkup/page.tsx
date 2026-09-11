@@ -1,19 +1,20 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema } from "@loom/runtime"
+import { collectNodeIds, treeIdSchema } from "@loom/runtime"
 import { auditSnapshot, describeStoreError } from "@loom/runtime/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { nameFor } from "@/app/(portal)/_lib/page-name"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
+import { CheckupBasis } from "./_components/checkup-basis"
 import { CheckupVerdictPanel } from "./_components/checkup-verdict"
 import { CheckupTreeChooser } from "./_components/tree-chooser"
 
@@ -77,6 +78,20 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
   const problem = [found, audit].find((result) => result !== undefined && !result.ok)
   if (problem !== undefined && !problem.ok && problem.error.code === "not-found") notFound()
 
+  /**
+   * Read once, above the JSX, because two things below it need the same report
+   * and calling `describeAudit` twice would let the verdict and the basis
+   * describe two different folds.
+   */
+  const report = audit !== undefined && audit.ok ? describeAudit(audit.value) : undefined
+
+  /**
+   * What this page is called, for the sentence that says which page is being
+   * checked. One bounded head read; a failed one costs the name and nothing
+   * else.
+   */
+  const pageName = await nameFor(portalStore, scope.data)
+
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   return (
@@ -89,7 +104,7 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
          * link. The id is in the sentence now and the links are the strip.
          */}
         <p className="text-ink-muted text-sm">
-          <PlainSentence line={scopedLead("checkup", scope.data)} />
+          <ScopedLead view="checkup" page={pageName} />
         </p>
       </header>
 
@@ -109,8 +124,16 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
             <p className="font-mono">{describeStoreError(problem.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      ) : audit !== undefined && audit.ok ? (
-        <CheckupVerdictPanel report={describeAudit(audit.value)} treeId={scope.data} />
+      ) : seed !== undefined && report !== undefined ? (
+        <>
+          <CheckupVerdictPanel report={report} treeId={scope.data} />
+          {/*
+           * Below the verdict and below the differences: the answer, then what
+           * to do about it, then the parts that disagree, and only then what
+           * the check was made of.
+           */}
+          <CheckupBasis report={report} startingParts={collectNodeIds(seed.root).length} />
+        </>
       ) : (
         <StateNotice tone="notice" title="This page can't be checked here.">
           <p>

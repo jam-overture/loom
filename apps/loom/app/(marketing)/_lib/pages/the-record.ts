@@ -16,12 +16,14 @@ import {
   tallyOf,
   withApproval,
   withChange,
-  withoutLastChange,
+  withPutBack,
+  withPutBackApproval,
   writeChangeSequence,
   type ChangeHistory,
   type ChangeStep,
   type ChangeToken,
 } from "../adapt/history"
+import { whatTheChoicesDo } from "../adapt/answers"
 import { protectedInPlainWords } from "../adapt/run"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
@@ -96,6 +98,13 @@ const hero = (ids: IdFactory): LoomNode =>
  * for the reason the front door's copy of this gives: a run that protects a
  * fourth thing and forgets the sentence gets a page making a promise its rules
  * no longer keep.
+ *
+ * **Its second sentence is the front door's, verbatim and from one source.**
+ * Both pages offer the same five requests and both introduced them in their own
+ * words, so both carried the same wrong claim — that everything not refused
+ * happens on its own — and either could have been fixed without the other. It
+ * is only shown when nothing has been asked for yet, which is the one state in
+ * which all five are on the page for it to be counting.
  */
 export const protectionNotice = (): string => {
   const things = protectedInPlainWords()
@@ -104,7 +113,7 @@ export const protectionNotice = (): string => {
       ? things[0]
       : `${things.slice(0, -1).join(", ")} and ${things[things.length - 1]}`
 
-  return `The front page is published under a set of rules that protect ${listed} from being taken away. Everything else a request may rearrange on its own, and you will see one of these refused for exactly that reason.`
+  return `The front page is published under a set of rules that protect ${listed} from being taken away. ${whatTheChoicesDo()}`
 }
 
 /**
@@ -231,42 +240,76 @@ const tally = (ids: IdFactory, history: ChangeHistory): LoomNode => {
     ...(counts.refused > 0 ? [`${counts.refused} was refused`] : []),
   ]
 
+  /**
+   * Named rather than left to be inferred from the entries. An undo counted
+   * among the requests is the honest tally and it is also a surprising one — a
+   * reader who pressed three buttons and is told there were four requests should
+   * be told which the fourth was, in the same breath.
+   */
+  const back =
+    counts.putBack === 0
+      ? ""
+      : counts.putBack === 1
+        ? " One of them was a change being put back, judged like any other."
+        : ` ${counts.putBack} of them were changes being put back, judged like any other.`
+
   return prose(
     ids,
-    `${counts.asked} ${counts.asked === 1 ? "request" : "requests"}, in order: ${parts.join(", ")}.`,
+    `${counts.asked} ${counts.asked === 1 ? "request" : "requests"}, in order: ${parts.join(", ")}.${back}`,
     { size: "lead" }
   )
 }
 
+/**
+ * What the visitor can do about one entry.
+ *
+ * Two questions, and which one an entry asks depends on whether it is a change
+ * or the undo of one. Both are answered the same way — by an address — because
+ * this page holds nothing between one visit and the next (0081), and both are
+ * the *same* answer: the rules are asked again with the visitor's yes on the
+ * record, rather than being stepped around.
+ */
 const entryActions = (
   ids: IdFactory,
   context: RecordContext,
   history: ChangeHistory,
-  step: ChangeStep
+  step: ChangeStep,
+  last: boolean
 ): readonly LoomNode[] => {
-  const last = step.position === history.steps.length
+  const putsBack = step.putsBack
+  const answered =
+    putsBack === undefined
+      ? withApproval(history.tokens, step.position)
+      : withPutBackApproval(history.tokens, putsBack)
+
   const buttons = [
     ...(step.record.awaitingYou
       ? [
           action(
             ids,
-            "I say yes — go ahead",
+            putsBack === undefined ? "I say yes — go ahead" : "I say yes — put it back",
             recordHref(context.origin, {
               theme: context.theme,
-              changes: writeChangeSequence(withApproval(history.tokens, step.position)),
+              changes: writeChangeSequence(answered),
             }),
             { variant: "primary", scale: "small" }
           ),
         ]
       : []),
-    ...(last && step.record.landed
+    /**
+     * Offered on the most recent entry, and only when it is a change that
+     * landed: there is nothing to reverse in a request the rules turned down,
+     * and an undo of an undo is a thing this page can express and nobody needs
+     * to be offered a button for.
+     */
+    ...(last && putsBack === undefined && step.record.landed
       ? [
           action(
             ids,
             "Put this back",
             recordHref(context.origin, {
               theme: context.theme,
-              changes: writeChangeSequence(withoutLastChange(history.tokens)),
+              changes: writeChangeSequence(withPutBack(history.tokens, step.position)),
             }),
             { variant: "secondary", scale: "small" }
           ),
@@ -280,9 +323,31 @@ const entryActions = (
 }
 
 /**
+ * Where an entry sits in the history, in the words a reader needs.
+ *
+ * A change is numbered. An undo is not a further thing the visitor asked the
+ * page to become — it is what happened to one of the numbered ones — so it says
+ * whose it is instead of taking a number of its own. `history.tokens.length` is
+ * the count of changes rather than of entries, which is why the total is read
+ * off the address and not off the list: an undo would otherwise make the page
+ * announce a fourth change that nobody asked for.
+ */
+const entryPlace = (history: ChangeHistory, step: ChangeStep): string =>
+  step.putsBack === undefined
+    ? `Change ${step.position} of ${history.tokens.length}`
+    : `Putting change ${step.putsBack} back`
+
+/**
  * One entry, and it is the same five things the front door's panel says about a
  * single change: what was asked, what that turned out to mean, how much moved,
  * which rules answered and what putting it back would restore.
+ *
+ * **An undo is one of these entries and not a footnote to one.** That is the
+ * claim the page has been making in prose since it was written, and it now
+ * renders it: the same card, the same five lines, its own verdict from the same
+ * named rules. A visitor who reads an undo held back by the very rules that held
+ * the change has understood the product, and no arrangement of words does that
+ * as well as the page doing it in front of them.
  *
  * Only the most recent change is offered as a button to put back, and the
  * sentence under the list says why. Taking one out of the middle is a different
@@ -293,7 +358,8 @@ const entry = (
   ids: IdFactory,
   context: RecordContext,
   history: ChangeHistory,
-  step: ChangeStep
+  step: ChangeStep,
+  last: boolean
 ): LoomNode =>
   buildElement(ids, {
     type: "loom.card",
@@ -305,7 +371,7 @@ const entry = (
           props: { tone: step.record.landed ? "accent" : "outline" },
           children: [buildText(ids, step.record.verdictLabel)],
         }),
-        prose(ids, `Change ${step.position} of ${history.steps.length}`, {
+        prose(ids, entryPlace(history, step), {
           size: "small",
           tone: "muted",
         }),
@@ -315,7 +381,7 @@ const entry = (
       prose(ids, `${step.record.measured} ${step.record.weighed}`, { size: "small", tone: "muted" }),
       prose(ids, step.record.verdictLine, { size: "small", tone: "muted" }),
       prose(ids, step.record.undo, { size: "small", tone: "muted" }),
-      ...entryActions(ids, context, history, step),
+      ...entryActions(ids, context, history, step, last),
     ],
   })
 
@@ -350,10 +416,12 @@ const historyBand = (ids: IdFactory, context: RecordContext, history: ChangeHist
         ? [waiting(ids)]
         : [
             tally(ids, history),
-            ...history.steps.map((step) => alone(ids, entry(ids, context, history, step))),
+            ...history.steps.map((step, index) =>
+              alone(ids, entry(ids, context, history, step, index === history.steps.length - 1))
+            ),
             prose(
               ids,
-              "Putting back the most recent change is a link. Taking one out of the middle is a harder question — everything after it was worked out against the page it left behind — and the place built to answer that is the portal, where each entry can be reviewed and reversed on its own.",
+              "Putting the most recent change back adds an entry rather than removing one: the change that reverses it is put to the same rules, and you will see them hold it for the same reason they held the change. Taking one out of the middle is a harder question — everything after it was worked out against the page it left behind — and the place built to answer that is the portal, where each entry can be reviewed and reversed on its own.",
               { size: "small", tone: "muted" }
             ),
           ]),
@@ -465,6 +533,18 @@ const closing = (ids: IdFactory, context: RecordContext): LoomNode =>
         "This is a landing page keeping a history in its address bar. The place built to keep one properly — every change reviewed, and any of them reversed on its own — is the portal.",
         { tone: "muted", align: "center", measured: true }
       ),
+      /**
+       * The same door, described the same way, because this band offers it in
+       * the same breath as the front door's card does.
+       *
+       * This one is the sharper of the two. *The same record, on a page of your
+       * own* is the band's heading, and the button under it opened a portal that
+       * is not the reader's — the one place on the site where *yours* and *this
+       * deployment's* were a sentence apart and read as the same thing. `door`
+       * is what makes the heading true: a portal comes with the site, so the one
+       * on a page of your own would be yours.
+       */
+      prose(ids, PORTAL.door, { size: "small", tone: "muted", align: "center", measured: true }),
       stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
         action(ids, "Open the portal", surfaceHref(context.origin, PORTAL), {
           variant: "primary",

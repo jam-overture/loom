@@ -238,3 +238,4 @@ export const withCode = (index: SearchIndex, code: SearchCode): SearchIndex => {
 
   return { entries: index.entries.map((entry) => ({ ...entry, code: blocks.get(entry.href) ?? entry.code })) }
 }
+

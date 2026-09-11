@@ -130,8 +130,21 @@ const exportEntries = (): readonly SearchEntry[] =>
     )
   )
 
+const allEntries = (): readonly SearchEntry[] => [
+  ...pageEntries(),
+  ...headingEntries(),
+  ...exportEntries(),
+]
+
+/**
+ * The whole index, words and blocks included.
+ *
+ * Nothing is served from this — the three files below are — but it is the one
+ * place every entry is assembled, so the split is a matter of which fields each
+ * file carries rather than three walks over the site that could disagree.
+ */
 export const buildSearchIndex = (): SearchIndex => ({
-  entries: [...pageEntries(), ...headingEntries(), ...exportEntries()],
+  entries: allEntries(),
 })
 
 /**

@@ -117,19 +117,38 @@ describe("what the index contains", () => {
       writtenDocsSections.flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug)))
     )
 
+    const prose = new Map(searchProse().bodies)
+    const hasProse = (entry: { readonly href: string }): boolean => (prose.get(entry.href) ?? "") !== ""
+
     const pagesWithProse = index.entries.filter(
-      (entry) => entry.kind === "page" && written.has(entry.href) && entry.body !== ""
+      (entry) => entry.kind === "page" && written.has(entry.href) && hasProse(entry)
     )
 
-    const headingsWithProse = index.entries.filter((entry) => entry.kind === "heading" && entry.body !== "")
+    const headingsWithProse = index.entries.filter((entry) => entry.kind === "heading" && hasProse(entry))
 
     expect(pagesWithProse.length).toBe(written.size)
     expect(headingsWithProse.length).toBeGreaterThan(40)
   })
 
   it("carries no words for a name, whose words are its signature", () => {
+    const prose = new Map(searchProse().bodies)
+
     for (const entry of index.entries.filter((entry) => entry.kind === "export")) {
+      expect(prose.get(entry.href), entry.href).toBeUndefined()
+    }
+  })
+
+  /**
+   * The half that ships first carries no words at all — that is the split.
+   *
+   * Asserted rather than assumed, because the failure it guards against is a
+   * builder that quietly started inlining the prose again and put the whole
+   * payload back in the first fetch, which nothing else here would notice.
+   */
+  it("keeps the words out of the half that ships first", () => {
+    for (const entry of searchIndexWithoutText().entries) {
       expect(entry.body, entry.href).toBe("")
+      expect(entry.code, entry.href).toBe("")
     }
   })
 

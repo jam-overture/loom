@@ -5,6 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
+import { backdropLayers, PAINT_NAMES } from "./backdrop.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, motion, radius, size, space } from "./tokens.js"
 
@@ -36,11 +37,23 @@ import { colour, motion, radius, size, space } from "./tokens.js"
 const props = z
   .object({
     /**
-     * What is painted behind the content. Four genuinely different renderings,
-     * not four shades of one: nothing, two drifting colour fields, a ruled
-     * grid that fades at the edges, or a bordered surface panel.
+     * What is painted behind the content: nothing, one of the five paints in
+     * `backdrop.ts`, or a bordered surface panel.
+     *
+     * The five came from here — for eighty-nine primitives this was the only
+     * thing on a page that could paint anything behind its content — and they
+     * now live in `backdrop.ts` so `loom.backdrop` can put the same atmosphere
+     * behind any band. **This prop stays** rather than deferring to that
+     * wrapper, and for a reason rather than for compatibility: a hero's paint
+     * has to sit inside the hero's own padding and be clipped by its own edges,
+     * and a wrapper is outside both.
+     *
+     * `none` and `panel` are this primitive's alone. `panel` is a surface with
+     * a border rather than a painted layer, and `none` is the default a band
+     * that leads with its words wants — neither is a paint, which is why the
+     * enum is spelled out here instead of being `PAINT_NAMES` plus two.
      */
-    backdrop: z.enum(["none", "aurora", "grid", "panel"]).optional(),
+    backdrop: z.enum(["none", ...PAINT_NAMES, "panel"]).optional(),
     align: z.enum(["start", "center"]).optional(),
     /** `tall` holds the fold — a landing hero — rather than sizing to its copy. */
     stature: z.enum(["standard", "tall"]).optional(),
@@ -73,100 +86,17 @@ const rise = (order: number, content: ReactNode, extra: CSSProperties = {}): Rea
       )
 
 /**
- * Backdrop layers are `aria-hidden` and `pointer-events: none` decoration
- * behind the content, never a background on the section itself: `aurora` needs
- * two independently animated fields, and `grid` needs to fade out at the edges,
- * neither of which a single background property can express.
+ * The paints are `backdrop.ts`'s, shared with `loom.backdrop`. What stays here
+ * is the mapping from this primitive's wider enum — which also carries `none`
+ * and `panel`, neither of them a painted layer — onto that vocabulary.
+ *
+ * They are layers rather than a background on the section itself because
+ * `aurora` needs two independently animated fields and every other paint needs
+ * to fade out before it reaches the copy, neither of which a single background
+ * property can express.
  */
-const backdropLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly ReactNode[] => {
-  if (backdrop === "aurora") {
-    /**
-     * A solid colour behind a radial *mask*, rather than a radial gradient that
-     * fades to `transparent`. Fading to `transparent` interpolates towards
-     * transparent black, so an accent field greys out on its way to nothing and
-     * the element's own square edge stays visible where the gradient has not
-     * finished. A mask fades opacity alone, so the colour is the palette's to
-     * the last pixel and the field is genuinely round.
-     */
-    const FADE = "radial-gradient(closest-side, black 0%, transparent 100%)"
-
-    /**
-     * Each field sits *inside* the band and its mask reaches zero at its own
-     * edges, so the section's `overflow: hidden` never cuts through anything
-     * still bright. A field hung off the corner on negative insets is the
-     * obvious way to write this and it renders as a rectangle with two hard
-     * sides — the clip crossing the middle of the glow.
-     */
-    const field = (slot: "accent-strong" | "brand-secondary", position: CSSProperties): ReactNode =>
-      createElement("div", {
-        key: slot,
-        className: LIBRARY_CLASS.aurora,
-        "aria-hidden": true,
-        style: {
-          position: "absolute",
-          width: "min(46rem, 78%)",
-          height: "min(46rem, 100%)",
-          background: colour(slot),
-          maskImage: FADE,
-          WebkitMaskImage: FADE,
-          opacity: 0.32,
-          pointerEvents: "none",
-          ...position,
-        },
-      })
-
-    /**
-     * **`accent-strong`, not `accent`**, and the difference is a finding the
-     * marketing routine filed on 20 August. A slot cannot be both near-black
-     * text and a tinted field: `minimal` sets `accent` to `#0a0a0a` on purpose,
-     * because the library reads that slot as *ink* — eyebrows, kickers, the
-     * disclosure marker, the current nav item — far more often than as a fill.
-     * This is the one place in the library that reads a slot as a large area of
-     * colour, so it is this that has to move. On the white-paper palette the
-     * hero was rendering a grey cloud across its top-left corner.
-     *
-     * The finding suggested `accent-subtle`, and it would fix the smudge by
-     * making the field vanish: that slot is a *tile background* — `#e6ebf2` and
-     * `#effbf5` — which at 32% on a light canvas is nothing at all.
-     * `accent-strong` is the slot that must hold up as a glyph against
-     * `accent-subtle`, so every palette gives it real chroma: `#34425a`,
-     * `#e0b800`, `#176e44`. Bold keeps its gold-and-red glow, editorial gains a
-     * second blue where it previously painted one colour twice, and minimal
-     * gets Hyperion's green over its mint.
-     */
-    return [
-      field("accent-strong", { insetInlineStart: "0", insetBlockStart: "0" }),
-      /** Started part-way through the cycle so the two fields never move in step. */
-      field("brand-secondary", {
-        insetInlineEnd: "0",
-        insetBlockEnd: "0",
-        animationDelay: `calc(${motion("slow")} * -8)`,
-      }),
-    ]
-  }
-
-  if (backdrop === "grid") {
-    const lines = `repeating-linear-gradient(to right, ${colour("border-subtle")} 0 1px, transparent 1px 5rem), repeating-linear-gradient(to bottom, ${colour("border-subtle")} 0 1px, transparent 1px 5rem)`
-    const fade = "radial-gradient(ellipse at 50% 0%, black 0%, transparent 72%)"
-
-    return [
-      createElement("div", {
-        key: "grid",
-        "aria-hidden": true,
-        style: {
-          position: "absolute",
-          inset: "0",
-          background: lines,
-          maskImage: fade,
-          WebkitMaskImage: fade,
-          pointerEvents: "none",
-        },
-      }),
-    ]
-  }
-
-  return []
-}
+const heroLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly ReactNode[] =>
+  backdrop === "none" || backdrop === "panel" ? [] : [...backdropLayers(backdrop)]
 
 const PANEL: CSSProperties = {
   background: colour("bg-surface"),
@@ -257,7 +187,7 @@ export const loomHero = definePrimitive({
         },
       },
       libraryStylesheet(),
-      ...backdropLayers(backdrop),
+      ...heroLayers(backdrop),
       text,
       media === undefined
         ? null

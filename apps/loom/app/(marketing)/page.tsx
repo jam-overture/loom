@@ -55,7 +55,20 @@ const HomePage = async ({ searchParams }: { readonly searchParams: SearchParams 
   const rendered = await renderSitePage(HOME, {
     origin: siteOrigin(),
     theme: readThemeName(params["theme"]),
-    ...(ask === undefined ? {} : { ask, approve: params["approve"] === "1" }),
+    ...(ask === undefined
+      ? {}
+      : {
+          ask,
+          approve: params["approve"] === "1",
+          /**
+           * Putting it back is the visitor's second decision, so it is the
+           * address's second pair of answers. Both are ignored without an `ask`,
+           * because there is nothing to reverse — a mangled address should be a
+           * page rather than a 400, here as everywhere else on this site.
+           */
+          back: params["back"] === "1",
+          backApprove: params["back-yes"] === "1",
+        }),
   })
 
   return rendered.element

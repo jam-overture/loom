@@ -35,7 +35,7 @@ export const generateMetadata = async ({ params }: { readonly params: Params }):
 const questionsOf = (set: ReviewSet): readonly RunnableQuestion[] =>
   set.questions.map((question) => ({
     number: question.number,
-    checkIn: reviewPointers(set.anchor, question.refs),
+    checkIn: reviewPointers(set.anchor, question),
     body: renderFragment(
       (ids) => [prose(ids, question.text)],
       `${set.slug}-q${question.number}`

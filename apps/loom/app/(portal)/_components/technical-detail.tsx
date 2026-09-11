@@ -17,6 +17,28 @@ import type { ReactNode } from "react"
  * always will be; a reviewer who wants to know whether to press "Apply" is not
  * made to read past it first.
  *
+ * ## The altitude is this component's, not the screen's
+ *
+ * For a fortnight it set no text colour at all, so the record was rendered in
+ * whatever ink it happened to be mounted inside. Inside a `StateNotice`, whose
+ * content wrapper is muted, that was quiet. Inside a card, which sets nothing,
+ * it was **the body ink — the same weight as the plain sentence the disclosure
+ * is a footnote to**, and on `/portal/sign-ins` the record came out darker than
+ * the sentence above it. The rule this component exists to enforce, upside
+ * down, and no assertion about text content can see it.
+ *
+ * So the body sets `text-ink-muted` itself. The invariant it buys is worth
+ * stating as one sentence, because it is the only one that holds in both
+ * places a disclosure is mounted:
+ *
+ * > **The record is never louder than the sentence it sits under.**
+ *
+ * Muted rather than `text-ink-secondary`, which was the tempting choice and is
+ * wrong in exactly one context: a disclosure inside a `StateNotice` would then
+ * be a step *louder* than the notice's own prose, which is the same defect
+ * moved rather than fixed. Muted is quieter than a card's sentence and equal to
+ * a notice's — never above either.
+ *
  * `<details>` rather than state, deliberately. It works with JavaScript off, it
  * is a Server Component so it costs no bundle, the browser gives it keyboard
  * and screen-reader semantics for free, and — the reason that decided it —
@@ -54,6 +76,6 @@ export const TechnicalDetail = ({
       </span>
     </summary>
 
-    <div className="text-2xs mt-2 flex flex-col gap-3">{children}</div>
+    <div className="text-ink-muted text-2xs mt-2 flex flex-col gap-3">{children}</div>
   </details>
 )

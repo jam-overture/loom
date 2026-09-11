@@ -267,7 +267,7 @@ describe("what a reader sees after typing", () => {
   })
 
   it("says the index failed rather than showing an empty list", async () => {
-    fetchMock.mockResolvedValue({ ok: false, status: 500 })
+    fetchMock.mockImplementation(() => Promise.resolve({ ok: false, status: 500 }))
 
     render(<Search />)
 

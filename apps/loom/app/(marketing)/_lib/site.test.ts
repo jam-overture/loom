@@ -7,6 +7,7 @@ import {
   DEFAULT_THEME,
   DEMO,
   DOCS,
+  doorOf,
   internalHref,
   otherThemes,
   PORTAL,
@@ -168,11 +169,58 @@ describe("the rest of the product", () => {
      * signing in, which is the failure worth catching now that the warning is
      * a short phrase in a fixed position rather than a clause someone has to
      * write deliberately. Both directions, across all four.
+     *
+     * **`door` is read as well, as of 10 September, and it is the reason this
+     * assertion did not catch what went wrong.** *Costs you an account*
+     * contains the word `account` and satisfied this test for sixteen days
+     * while telling a reader something false — that an account is a thing they
+     * could go and get. A keyword is not the fact. So the fact gets an
+     * assertion of its own below, and this one keeps doing the job it is good
+     * at: that no *unguarded* surface warns about a door it does not have.
      */
     for (const surface of PRODUCT_SURFACES) {
-      const read = `${surface.blurb} ${surface.cost}`.toLowerCase()
+      const read = `${surface.blurb} ${surface.cost} ${doorOf(surface) ?? ""}`.toLowerCase()
 
       expect(/\bsign|\baccount\b/.test(read)).toBe(surface.guarded)
+    }
+  })
+
+  /**
+   * The fact the keyword above stood in for, asserted as a fact.
+   *
+   * What a reader needs to know about a door is **who decides**, and the answer
+   * is never this site: a portal belongs to the Loom site it is part of, and
+   * whoever runs that site writes the list of who may sign in to it. A cost
+   * line saying *an account* implies the opposite in three words, which is what
+   * it did from 25 August until this run.
+   *
+   * Held on `door` rather than on the whole surface because `door` is the field
+   * that exists to say it, and required by the type so a guarded surface cannot
+   * be added without one.
+   */
+  it("says who decides a door, rather than naming the door and stopping", () => {
+    for (const surface of PRODUCT_SURFACES) {
+      const door = doorOf(surface)
+
+      if (door === undefined) continue
+
+      expect(door.length).toBeGreaterThan(40)
+      expect(door.toLowerCase()).toContain("whoever runs the site")
+    }
+  })
+
+  /**
+   * And the four costs stay four things a reader can actually spend.
+   *
+   * The band offers them in ascending order of what they ask of a visitor and
+   * a reader compares them along one line, so a cost naming somebody else's
+   * decision is not a smaller cost — it is a different kind of thing wearing
+   * the same shape. *An invitation* is the honest word for the portal's, and it
+   * is still something the reader can go and seek.
+   */
+  it("does not price a surface in something only somebody else can grant", () => {
+    for (const surface of PRODUCT_SURFACES) {
+      expect(surface.cost.toLowerCase()).not.toContain("an account")
     }
   })
 

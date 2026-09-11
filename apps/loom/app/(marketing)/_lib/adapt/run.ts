@@ -16,7 +16,7 @@ import {
 } from "@loom/runtime"
 
 import { askInterpreter, type Ask } from "./asks"
-import { nothingHappened, recordOf, type ChangeRecord } from "./record"
+import { nothingHappened, recordOf, requestOf, type ChangeRecord } from "./record"
 
 /**
  * A visitor's ask, run through the whole sequence, once, for one request.
@@ -203,26 +203,29 @@ export const runAsk = async (
   const composed = await composeChange(runtime, page, intent)
 
   if (composed.kind === "not-interpreted") {
-    return { page, record: nothingHappened(ask, "There was nothing on this page for that to change.") }
+    return {
+      page,
+      record: nothingHappened(requestOf(ask), "There was nothing on this page for that to change."),
+    }
   }
 
   if (composed.kind === "not-applicable") {
     return {
       page,
-      record: nothingHappened(ask, "The change did not fit this page, so nothing was touched."),
+      record: nothingHappened(requestOf(ask), "The change did not fit this page, so nothing was touched."),
     }
   }
 
   if (composed.kind === "applied") {
     return {
       page: composed.tree,
-      record: recordOf(ask, composed.assessment, composed.disposition, true),
+      record: recordOf(requestOf(ask), composed.assessment, composed.disposition, true),
       undo: composed.inverse,
     }
   }
 
   if (composed.kind === "rejected" || !approve) {
-    return { page, record: recordOf(ask, composed.assessment, composed.disposition, false) }
+    return { page, record: recordOf(requestOf(ask), composed.assessment, composed.disposition, false) }
   }
 
   /**
@@ -239,13 +242,13 @@ export const runAsk = async (
   return confirmed.kind === "applied"
     ? {
         page: confirmed.tree,
-        record: recordOf(ask, confirmed.assessment, confirmed.disposition, true),
+        record: recordOf(requestOf(ask), confirmed.assessment, confirmed.disposition, true),
         undo: confirmed.inverse,
       }
     : confirmed.kind === "rejected"
-      ? { page, record: recordOf(ask, confirmed.assessment, confirmed.disposition, false) }
+      ? { page, record: recordOf(requestOf(ask), confirmed.assessment, confirmed.disposition, false) }
       : {
           page,
-          record: nothingHappened(ask, "The change did not fit this page, so nothing was touched."),
+          record: nothingHappened(requestOf(ask), "The change did not fit this page, so nothing was touched."),
         }
 }
