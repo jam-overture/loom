@@ -13177,6 +13177,120 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-02 — the pairings probe cannot see an ink behind an optional prop, and one declared row is already wrong because of it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is broken; a bar is looser than the library's own components
+deserve, and the fix is one row.
+
+`registryPairings` derives what the library actually paints by rendering each
+primitive through `probeColourPairings` and reading the ground/ink pairs out of
+the result. It renders each primitive **with default props**, which is the only
+thing it can do without inventing content — and the consequence is that *any ink
+a primitive only paints when an optional prop is set is invisible to it*.
+
+That is not hypothetical. `loom.offering` paints its `price` in
+`accent-strong` on the `bg-surface` of its own card:
+
+```ts
+// src/primitives/loom.offering.ts
+color: colour("accent-strong"),   // the price
+background: colour("bg-surface"), // SURFACES.plain, on the same <article>
+```
+
+`price` is optional, so the probe never renders one, so the pairing is never
+derived — and `src/theme/contrast.ts` declares it:
+
+```ts
+{ foreground: "accent-strong", background: "bg-surface", basis: "composed",
+  where: "loom.field inside a card" },
+```
+
+**`composed` means reported, not asserted** (0089). So a palette whose
+`accent-strong` fails on `bg-surface` would ship: the audit would print it and
+`auditPalette(...).failures` would stay empty, even though a `loom.offering`
+with a price is a page nobody can read. The row is not a judgement call that
+went the wrong way — it is a row written from what the probe could see.
+
+**How it surfaced.** `loom.event` was written with its date in `accent-strong`,
+and `date` is *required*, so the probe saw it immediately and
+`pairings.test.ts > never declares a painted pairing as the softer composed`
+failed with exactly one entry: `accent-strong on bg-surface`. The check works.
+It is the only reason any of this is visible.
+
+**Two things to do, and they are independent:**
+
+1. **Promote the row** to `basis: "painted"`, with a `where` naming
+   `loom.offering price` alongside the field. **Every starter palette already
+   clears it** — it is absent from the pinned composed shortfall in
+   `contrast.test.ts`, so `failures` stays empty and the shortfall assertion is
+   untouched. This is a one-row change that makes a true statement out of a
+   false one. It was not made here because `src/theme/` is another lane's.
+2. **Decide what the probe should do about optional props.** Rendering each
+   primitive once more with every optional prop set to a placeholder would
+   derive the real set, at the cost of a probe that has to invent a URL and a
+   date. Refusing to guess is a defensible answer — but then the *gap* should be
+   stated in `contrast.ts`, because a list whose own comment says it is "read off
+   `src/primitives` rather than imagined" is currently claiming more coverage
+   than the derivation gives it.
+
+**What this run did instead**, so nobody has to guess: `loom.event` sets its
+date in `accent` rather than `accent-strong`. There is an independent
+typographic argument for that — `accent-strong` exists to keep *small* emphatic
+text legible and a date at heading size does not need it — and the reasoning is
+in the file. But the pairing is the reason it was looked at, and if the row is
+promoted, `accent-strong` becomes available for the date again on the merits.
+
+---
+
+## 2026-09-02 — a queue row whose child has no artwork cannot line up with the ones that do
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit rather than a defect, recorded so the next run does not
+rediscover it. Visible in this run's screenshots.
+
+`loom.recording` draws its artwork frame when it has `artwork` *or* `href`, and
+skips it when it has neither — a track with no cover and no listen link is a
+title, a byline and a runtime. That is right for the card on its own.
+
+In a `loom.recording-grid` with `columns: "one"`, where every cell is a row with
+an 11rem artwork panel at its start, a cell with no panel starts its text at the
+card's edge instead. Two rows with covers and one without produce a ragged left
+edge that reads as a bug rather than as a decision.
+
+**A primitive cannot fix this**, because it is a fact about siblings and a render
+is a pure function of one node (0008). The three candidate answers all cost
+something:
+
+| | |
+| --- | --- |
+| always draw the panel | every coverless track gets an empty tinted rectangle, on a phone as well as in a row |
+| reserve the width without drawing | `:not(:has(.loom-recording-art))` can add an 11rem inset in the row arrangement only — it is expressible, and it is 11rem of nothing |
+| leave it | ragged, and only when a band mixes the two |
+
+Left, deliberately: in real content a playlist either has cover art throughout
+or has none, and the mixed case is the rare one. The second option is the one to
+take if a real page hits it — it is four lines in `stylesheet.ts` and it is
+confined to the arrangement where the problem exists.
+
+---
+
+## 2026-09-02 — `21st.dev` is still blocked, for the fourteenth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — unchanged, and restated only because the count is now the point.
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`. The primitives brief names
+it as *the visual standard* and instructs every run to consult it;
+`docs/routines.md` lists it under `permissions.allow`. **No run of this routine
+has ever been able to open it.**
+
+Seventh lane to file this and the fourteenth occurrence. There are two honest
+resolutions and neither is "file it again": add the domain to the sandbox's
+egress allowlist, or **strike the instruction from the brief and name the
+standard in words**, in a file the routine can actually read. The second costs
+one paragraph and would make the bar checkable; the first costs a proxy rule.
+Either is better than a brief whose first quality instruction is inoperative.
 ## 2026-09-06 — the cascade inside a band needs the arranger, and a wrapper cannot fake it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
@@ -14588,6 +14702,934 @@ gaps are closed. Two consecutive runs have now had to reason about what breadth
 
 Filed rather than assumed. The brief is the maintainer's and a routine cannot
 write the governance it is bound by.
+## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around in one token, and the workaround is invisible under every
+registered palette.
+
+`loom.pin` is the library's first primitive whose content **floats over content
+it did not draw**: a label pill lying on a screenshot, positioned by a
+percentage the primitive cannot resolve to anything it can measure. That is the
+one thing `bg-overlay` names, and it is the slot the pin wants.
+
+It cannot have it. `PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` is
+*derived from what the components paint* (0089), and `pairings.test.ts` fails a
+library that renders a pairing the list does not carry. Nothing in seventy-three
+primitives has ever painted `bg-overlay`, so there is no row for
+`fg-default on bg-overlay`, and adding one is that lane's file rather than this
+one's.
+
+The pin ships on `bg-surface` and the swap is one token when the row exists.
+**The rendering is identical today** — all three starter palettes set
+`bg-overlay` to the same value as `bg-surface` (`#ffffff`, `#1a1a1a`,
+`#ffffff`), which is the more interesting half of this finding:
+
+> **A palette slot that every palette must declare and no primitive reads is a
+> slot whose contrast nobody checks and whose value nobody can be wrong about.**
+
+Two ways to close it, and this run has no preference strong enough to
+recommend one:
+
+- **Add the row** — `{ foreground: "fg-default", background: "bg-overlay",
+  basis: "painted", where: "loom.pin label" }` — and this lane swaps the token
+  in its next run. One line, and it makes the slot mean something.
+- **Retire the slot** if nothing is ever going to float. It is one of seventeen
+  a host must supply to register a palette, and a host supplying a value that
+  changes no pixel is a host being asked a question with no answer.
+
+`bg-overlay` was presumably reserved for modals and toasts, which are the
+portal's business rather than the library's — so the second option is not
+obviously wrong, and deciding it is worth more than the row.
+
+---
+
+## 2026-09-04 — a run that needs a picture rebuilds the harness that takes it, every time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a note to this lane's own next run, and cheap to close.
+
+Every brief in this repo asks for a screenshot, and eight consecutive reports
+from this lane have said the picture found something no assertion could. This
+run found four such things (they are in the report). Getting the picture took
+about forty lines: render the tree with `renderLoomTree`, wrap the markup in a
+document, write it to a file, drive `chromium` over `file://` at two widths and
+three palettes.
+
+Those forty lines were written this run and **deleted before the pull request**,
+because `tools/` is not `src/primitives/` and a scratch harness is not a
+deliverable. That is the right call for a diff and the wrong one for the next
+run, which will write them again.
+
+What would close it: a `tools/shot.ts` taking a fixture module and a list of
+themes, owned by whichever lane wants it. It is not this lane's file to add and
+it is not worth a cross-lane diff on its own — but it is worth someone's ten
+minutes, and it would be used by every lane that ships a visual.
+
+The one thing worth knowing before writing it: **`data:` is not an allowed image
+scheme** (`url.ts`, 0053) and the sandbox blocks image hosts, so a fixture
+cannot show a photograph. Compose the screen content out of Loom primitives
+instead — a card, a table, a stat grid. It photographs better than a stock
+photo would and it exercises the library at the same time.
+## 2026-09-05 — the picture harness, rebuilt a second time, and the four lines that would stop it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+— a confirmation of the 4 September entry, with the recipe attached so the
+third run does not cost what the first two did
+
+`primitives-23` filed that *a run that needs a picture rebuilds the harness that
+takes it, every time*. This run needed six pictures and rebuilt it, which makes
+two occurrences in two days and every visual defect this lane has found — nine
+runs running — dependent on somebody re-deriving it.
+
+**What it takes, written down so it is a copy rather than a discovery:**
+
+- `playwright` is **not** a dependency of this repository or of `apps/loom`, so
+  `npx playwright` resolves nothing. It installs in a scratch directory in about
+  two seconds with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`, which is required: the
+  download is blocked by the egress proxy and the browser is already on disk.
+- The browser is at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` and has
+  to be passed as `executablePath`. The bare `chromium` directory beside it is
+  not an executable, and the failure is a launch error with no hint.
+- The page under test is **static HTML written by `renderToStaticMarkup`**, not
+  a served app. That is what makes the shot cheap and it is also what makes it
+  honest: it is the same markup the render seam produces, with no dev server and
+  no hydration to fail. A `file://` URL is enough.
+- `deviceScaleFactor: 2` and a **true 390px viewport** are what previous reports
+  in this lane mean by a phone shot, and `document.documentElement.scrollWidth
+  === window.innerWidth` beside each one is the overflow check they quote.
+
+**Where it should live is the open question and the reason this is filed rather
+than fixed.** It is nine lines of script; the cost is that no lane owns a
+`tools/screenshots` and this lane's brief is `src/primitives/` only. A `tools/`
+module that takes a tree and writes a PNG would serve marketing, docs, portal
+and this lane, and every one of them has now written it privately at least once.
+
+---
+
+## 2026-09-05 — a primitive that is a focus stop is not a target, and nothing can say so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+— nothing is broken; a declaration means less than it looks like it does, and
+the first primitive to sit in the gap shipped today
+
+`loom.carousel` renders `tabindex="0"` on the scroll container it is. It has to:
+a scroll region is focusable by default in some browsers and not in others, so a
+row a mouse can push is a row a keyboard cannot reach.
+
+That makes it the first primitive in the library that a reader can **focus** and
+cannot **activate**, and the vocabulary has no word for it. `interactive`
+(0064/0068) declares one thing — *the reader aims at the whole of this node* —
+and it exists to enforce HTML's rule that a target may not sit inside a target.
+A `div[tabindex]` is not interactive content by that rule, so the honest
+declaration is to leave it undeclared, which is what shipped and what the tests
+assert.
+
+**Two things a deployment cannot ask, as a result:**
+
+1. *Which primitives put a stop in the tab order?* A page whose reading order and
+   tab order differ is the defect `loom.nav` reported on 1 September, and nothing
+   can enumerate the nodes that participate.
+2. *Is this focusable thing inside another focusable thing?* Legal in HTML,
+   usually a mistake, and invisible to the audit.
+
+**Recommendation: nothing, yet.** One primitive is not a pattern, and a third
+field on every definition to serve one node is the cost 0014 keeps naming. It is
+filed because the *next* one — a tab strip, a resizable split, anything that
+takes `tabindex` for the same reason — is the second data point, and whoever
+adds it should find this rather than the silence.
+## 2026-09-06 — the cascade inside a band needs the arranger, and a wrapper cannot fake it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — `loom.reveal` shipped without it, deliberately, and the recommendation is
+to leave it that way until a page actually wants it
+
+`loom.reveal` wraps a band and brings it in as the reader scrolls to it. The
+effect a wall of cards wants is the *diagonal* — six tiles arriving one after
+another — and it is one step further than this primitive can reach.
+
+A `stagger` prop was written and then taken out before it shipped. The reason is
+worth keeping, because it is not obvious from the outside: **a reveal's children
+are whatever it wraps, and that is almost always one grid.** `loom.reveal >
+loom.feature-grid > six tiles` staggers the *grid* against nothing; the tiles are
+grandchildren, and a `> * > *` selector reaching into a child primitive's markup
+is exactly the coupling `stylesheet.ts` says to scope away from. Making the
+wrapper `display: contents` would let the grid lay out its own tiles through it,
+and takes the reveal's own box away from the portal — a node the reviewer cannot
+click, for a flourish.
+
+**What works today**, and is what the specimen shows: a reveal around each cell.
+Every cell then arrives on its own view timeline, so a grid comes in **by row**
+because that is where the cells actually are. Six wrappers rather than one, and
+the rows are the honest granularity of a grid anyway.
+
+**What the diagonal would need**, if somebody wants it: `columns`-aware ranges on
+the *arranger*, so `loom.grid` and `loom.feature-grid` stagger their own children
+by ordinal. That is a prop on the containers rather than a prop on seventy
+schemas, which makes it a much smaller ask than the one 0110 refused — but it is
+still a second way to say "arrive", and two mechanisms for one effect is how a
+library stops being learnable. **Recommendation: leave it until a page asks.**
+
+---
+
+## 2026-09-06 — a page that reveals on scroll is photographed blank, and every full-page screenshot in this repository is taken that way
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom demo`,
+and every routine that takes a screenshot · **Status:** open — nothing is broken
+and the workaround is one flag, which is why this is filed rather than fixed
+
+A view timeline is driven by scroll position, so a band that has not entered the
+scrollport is **honestly at `opacity: 0`** — and a full-page screenshot is taken
+without scrolling. Every band below the first screen photographs blank.
+
+This is not a defect in `loom.reveal`; it is what "the reader drives the
+entrance" means. But it lands on other lanes:
+
+- **Share cards and preview images.** `(marketing)`'s share image renders a page
+  and shoots it. The moment a marketing page wraps a band in a reveal, that
+  band's picture is empty.
+- **Every routine's report screenshots**, including this one's. The five
+  specimen shots in this run are taken with Chromium's `reducedMotion: "reduce"`,
+  which switches the entrance off and gives the finished page.
+
+**The fix is one flag** — Playwright's `reducedMotion: "reduce"` on the context,
+or `--force-prefers-reduced-motion` on the browser — and it is the *right* flag
+rather than a trick: a photograph is not a reader, and the reduced-motion
+rendering is exactly "the page with the movement taken out".
+
+**Print is the same problem and it is fixed in the library**, because a printed
+page has no scrollport at all and nobody can pass it a flag: `@media print`
+holds every reveal still and visible. That one had to be found rather than
+reasoned about, and it is the entry in this finding worth copying if any other
+primitive ever animates on scroll.
+
+---
+
+## 2026-09-06 — the anchor seam has consumers, and the finding that said it had none is stale
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+**closed** — three primitives place an anchor on `main` and have since
+`primitives-19-how-it-works`
+
+The 27 August entry — *the anchor seam exists, and no primitive places it yet* —
+is closed. `src/primitives/anchor.ts` is on `main`, `loom.section`, `loom.hero`
+and `loom.callout` each take an `anchor` and render it as an `id`, and
+`library.test.ts` asserts both halves: that the three carry it and that
+`loom.card`, `loom.milestone-row`, `loom.orbit` and `loom.stack` do not.
+
+Noted here rather than by editing that entry's Status line, because the entry is
+two hundred lines up a twelve-thousand-line file and this run is not the one that
+did the work — it is the one that checked. The **address** half remains open and
+is the framework lane's: `linkUrlSchema` still refuses a bare `#how-it-works`,
+which is the 31 August entry and blocked on 0100/0102.
+
+---
+
+## 2026-09-06 — `21st.dev` blocked for the fifteenth time, and the brief still names it as the visual bar
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the existing entry is not re-filed, this is the count
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` from this lane again.
+`docs/routines.md` lists the domain under `permissions.allow`, and the primitives
+brief opens its quality bar with *"WebFetch `https://21st.dev` for the visual
+standard"*. Fifteen attempts, seven lanes, no run has ever seen it.
+
+Nothing in this run depended on it — the bar was taken from `loom.hero`,
+`loom.feature-grid` and the two starter palettes, which is what the brief says to
+do next — but it is worth one line each time so the number is a fact rather than
+an impression.
+
+---
+
+## 2026-09-06 — the screenshot harness, written privately for the ninth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (the only
+lane that owns anything at the repository root) · **Status:** open — filed with
+the recipe attached, for the third run running
+
+Seven pictures in this run needed a browser, and the script that drives it was
+written from scratch again because no lane owns a directory to keep it in. The
+whole recipe, so the tenth writing is a copy rather than a rediscovery:
+
+```
+npm i playwright-core                       # in a scratch dir; never `playwright`
+/opt/pw-browsers/chromium-1194/chrome-linux/chrome   # the binary is already here
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1          # or the postinstall re-fetches 200MB
+python3 -m http.server 8123 --directory <pages>     # `file://` refuses http(s)
+                                            # image URLs, and mediaUrlSchema
+                                            # refuses data: — so a specimen with
+                                            # an avatar needs a real origin
+chromium.launch({ executablePath }) ; newContext({ reducedMotion: "reduce" })
+```
+
+Two lines of that are new this run and are the ones that cost the time: a
+specimen with an `avatar` cannot be rendered over `file://` at all, because the
+schema takes `http:`/`https:` only (deliberately — `data:` is a script host), so
+the pages have to be **served**; and a page with a `loom.reveal` on it must be
+photographed with reduced motion or the bands below the fold come out blank.
+
+**Recommendation, unchanged:** `tools/specimen/` with the two scripts in it,
+owned by the framework lane, taking a tree module and a list of themes. Every
+surface lane has now written this privately at least once.
+
+---
+
+## 2026-09-07 — the brief tells this routine to do the thing that cost sixteen pull requests
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (the brief
+is the maintainer's) · **Status:** open — worked around this run, and it
+regenerates every run until the brief changes
+
+The standing prompt for `Loom primitives` says, at step 3 of its procedure:
+
+> Branch `primitives-NN-<slug>` off `main`. Never stack, never merge to main
+> yourself.
+
+The finding merged as #216 on 1 September, filed by the maintainer after sixteen
+pull requests were closed unmerged, says:
+
+> Before starting a unit, check whether you already have an open pull request. If
+> you do, **continue it rather than branching again from `main`** — push onto
+> that branch.
+
+**These are opposite instructions and the routine cannot obey both.** Following
+the brief is what produced the pile the finding was written about, and this lane
+was the case the finding named: *"all four primitives runs edited
+`library.test.ts`, `stylesheet.ts` and `index.ts`"*.
+
+**It recurred.** Between 2 and 6 September this lane opened five more pull
+requests — #222, #229, #235, #241, #246 — every one cut from `d7375ef`, every one
+touching `library.test.ts` and `stylesheet.ts`, four of the five touching
+`index.ts`, `copy.ts` and `hermes-port-map.md`. That is the same collision one
+branch worse than the round that was thrown away, and it happened because each
+run did what its brief told it to.
+
+**Five of the seven lanes have resolved this by ignoring the brief** — #242,
+#243, #245 and #247 are consolidations, and `primitives-26` is now the fifth.
+That works, and it is not a fix: it means the governance says one thing, every
+routine does another, and the correction survives only as long as each run
+happens to read `FINDINGS.md` before it reads its own procedure.
+
+**Two honest resolutions, and neither is a routine's to make:**
+
+| | |
+| --- | --- |
+| **A** — amend step 3 in each routine's stored prompt to *"continue your open pull request; branch from `main` only when you have none"* | the finding then agrees with the brief, and no run has to notice the conflict |
+| **B** — merge or close each lane's open pull requests before the next run fires | the brief becomes true again, because a lane with no open pull request should branch from `main` |
+
+**B without A only works until the queue rebuilds**, which took nine days last
+time. A routine cannot write the governance it is bound by, which is why this is
+filed rather than fixed.
+
+**What it costs while open:** twenty-nine pull requests are open as of
+2026-09-07 and nothing has merged to `main` since 1 September. Every lane's work
+is finished, green, and unreachable.
+
+---
+
+## 2026-09-07 — two branches that append same-shaped test fixtures cannot be merged by git, and the recipe keeps being rediscovered
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — worked around; the tool is thirty lines and is not committed
+
+Consolidating five branches of this lane, every conflict in `library.test.ts`
+had one cause. Two branches each append a page fixture, and the fixtures end
+identically:
+
+```ts
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+```
+
+git takes that shared tail as common context and splices the two function
+*bodies* around it, producing one function with two heads. `git apply -3` makes
+the same mistake for the same reason. Neither side can be chosen, because both
+fixtures are wanted — this is the "resolving them mechanically produced code
+that would not compile" that #216 recorded, and now with the mechanism named.
+
+**What works:** re-apply each branch's `merge-base..branch` diff onto the
+already-merged file **one contiguous insertion run at a time**, anchoring each
+run on the context lines immediately preceding it and requiring a *unique* match
+in the target. Every hunk across all four branches was a pure insertion except
+the registered-count assertion, which is a real rewrite and the one line that
+has to be decided by hand.
+
+**Two traps, both of which cost time here:**
+
+- **Context width matters.** At `-U8`, the count-line hunk merges with the three
+  insertion hunks below it, so a tool that skips any hunk containing a deletion
+  silently drops those insertions too — the tests then fail on ordering rather
+  than on anything real. `-U3` separates them.
+- **`reference.generated.json` must be regenerated after the final `pnpm build`,
+  not before.** It extracts from `dist`, so a copy generated mid-merge is missing
+  the last branch's primitives and `extract.test.ts` fails on the difference.
+
+The applier is thirty lines and lives in a scratchpad. **Every lane that appends
+test fixtures will hit this**, and four have consolidated already, so it belongs
+in `tools/` rather than in five separate rediscoveries. Not committed here
+because `tools/` is outside this lane.
+
+---
+
+## 2026-09-08 — 0052's rule answers a three-field listing incorrectly, and three primitives have already worked around it
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (the
+record is `Proposed` and needs a review this lane cannot give itself) ·
+**Status:** open
+
+[0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+says *a field that holds one value of which there is exactly one stays a prop*.
+Hermes' `PropertyListing` holds `beds`, `baths` and `sqft` as three such fields.
+Each passes the test individually and the answer is wrong: they are one property
+— *a measured fact about the thing* — occurring three times, with the field
+names carrying the units. As props, a listing for a plot of land can never say
+`0.4 acres`, and no runtime can register a fourth prop mid-session (0001).
+
+**This has been worked around three times without being named.** The port map
+records `hours-of-operation`'s seven weekday fields as seven nodes, and
+`loom.pin` refused a `hotspots[]` array on 4 September. Both were argued from
+scratch in a doc comment.
+[0115](decisions/0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md)
+is the rule those three were instances of, and it is filed as `Proposed` rather
+than `Accepted` because refining an Accepted record is the escalation this
+lane's brief describes.
+
+**Nothing waits on it.** `loom.spec` and `loom.listing` shipped on the precedent
+already on `main` rather than on the record. What a review would settle is
+whether the sweep it implies — re-reading the fifty-two ported blocks for the
+same shape — is worth a run. My reading is that it is not: the one block it
+plainly implicates is `hours-of-operation`, which the port map already sends to
+`loom.milestone-list` for exactly this reason.
+
+---
+
+## 2026-09-08 — the picture harness, rebuilt a third time, and this time it found three defects in one run
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — third occurrence, and the recipe in the 5 September entry was accurate
+enough to be a copy rather than a discovery
+
+The 4 and 5 September entries say *a run that needs a picture rebuilds the
+harness that takes it, every time*. This run needed four pictures and rebuilt it,
+which makes three occurrences in four days. **The 5 September recipe worked
+verbatim** — scratch `npm i playwright` with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`,
+`executablePath: /opt/pw-browsers/chromium-1194/chrome-linux/chrome`, a
+`file://` page of `renderToStaticMarkup` output — so the finding did its job and
+the cost was minutes rather than a cycle.
+
+**One thing to add to that recipe, because it cost the most time here.**
+`mediaUrlSchema` allows `http:` and `https:` and **deliberately refuses
+`data:`**, so a specimen with images cannot inline them. Placeholder artwork
+must be *served*: `python3 -m http.server` in a scratch directory and
+`http://127.0.0.1:<port>/…` as the `src`. The obvious alternatives are both
+wrong — a public placeholder service is blocked by the egress proxy, and
+widening the schema to take a `data:` URI would be weakening a security seam to
+take a screenshot.
+
+**What it bought this run, stated because the case for a shared harness is
+cumulative:** three defects no assertion in a 253-test file could have caught —
+a shelf that put one 585px cover per screen on a phone, a coverless book that
+vanished into the dark palette, and a wrapped specification row that began a
+line with a floating middot. Every one is valid CSS with no overflow. **Seventh
+consecutive run in this lane where the picture found what the tests could not.**
+
+`tools/` is outside this lane. A module there that takes a tree and writes a PNG
+would serve marketing, docs, portal and this lane, and every one of them has now
+written it privately.
+
+---
+
+## 2026-09-08 — `bg-overlay` has a second would-be consumer, and a badge over a photograph is carrying the contrast alone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — a limit rather than a defect today, recorded because the second instance
+is when a pattern is worth acting on
+
+The 4 September entry says `bg-overlay` is a slot every palette must declare and
+nothing paints, so the first primitive that floats cannot use it.
+`loom.listing` is the second: its `flags` region sits over the photograph, and
+what keeps *For sale* readable on an arbitrary image is `loom.badge`'s own
+`tone` rather than anything the listing draws.
+
+That is **safe for two of the three tones and not for the third**. `accent` and
+`neutral` are filled and opaque, so they read on any photograph. `outline` is
+transparent by construction, and a page that puts an outline badge on a listing
+gets text on a picture with nothing between them. The primitive cannot fix this
+from its side without either painting a scrim in a literal colour — which
+`tokens.ts` exists to make impossible — or overriding a child's declared tone,
+which no container in this library does.
+
+Two ways out, neither this lane's alone:
+
+| | |
+| --- | --- |
+| paint `bg-overlay` in the palettes | the slot already exists and is already declared; this is the small one |
+| have `loom.badge` refuse `outline` over a floating region | needs the badge to know where it is, which a render of one node cannot (0008) |
+
+Filed rather than worked around. Nothing is broken today because the specimen
+uses `accent`; what is missing is anything that *stops* the other case.
+
+---
+
+## 2026-09-08 — the port map's own count was wrong in two places, for the third time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by this run for the values, open as a recurrence
+
+`docs/hermes-port-map.md` opened its ledger with *"Done — 47 blocks, 73
+primitives"* while its own summary table said 52 ported. Neither figure was
+right: 52 was the true block count, and `73` was **the size of the whole
+library** at the time rather than the size of the port — two different
+quantities under one heading.
+
+Both are corrected, and the header now says which figure counts what. The
+document already predicted this in its own words: *"A count that has to be
+updated in three places is a count that will disagree with itself again;
+deriving the ported figure from the ledger's own rows is a small tool nobody has
+written."* That was written on 26 August after the same fix. **It is now the
+third occurrence**, and the tool is still unwritten — it is perhaps twenty lines
+that counts the pipe-separated block names in the ledger's rows, and it would
+make the summary table derived rather than typed.
+
+Recorded as owned by this lane because the document is this lane's to maintain.
+It is not being written today because it belongs in `tools/`, which is not.
+
+---
+
+## 2026-09-09 — a feature tile has been taller than its own grid row since `loom.feature` shipped
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run — recorded rather than left silent because *how* it stayed
+hidden is the reusable part
+
+`loom.feature` sets `height: "100%"` and `padding: space(5)` and never set
+`boxSizing`. The percentage resolves against the grid track and the padding is
+then added outside it under the default `content-box`, so **every card
+overflowed its own row by `2 × space(5)`** — 66px at the comfortable preset.
+With one row the tiles hung over the top of whatever band came next; with two
+rows the second row was drawn **through** the first.
+
+Measured rather than eyeballed. Row one `240 → 558` and row two `240+252+32 =
+524`, against a declared `rowGap` of 32px: a 34px overlap. After
+`boxSizing: "border-box"`, `240 → 492` and `524 → 776`.
+
+**Why ninety primitives and 253 assertions missed it: no fixture in this
+repository had ever put six tiles in a three-column grid.** Every existing
+feature-grid fixture is one row, where the same defect only pushes the cards over
+the *bottom* of the grid into the next band — visible, but as "these two bands
+are a bit close together" rather than as a broken layout. The 9 September
+`features` composition is the first two-row feature grid the library has
+rendered.
+
+`loom.section` writes the same `boxSizing: "border-box"` line with the same
+reasoning in its own comment — *"no stylesheet resets these, so padding would
+otherwise widen the band past its parent"* — which is what makes this an omission
+rather than a difference of opinion. **Worth a sweep**: any primitive that
+combines a percentage size with padding has the same latent defect, and nothing
+checks for it. That sweep is this lane's and is not in this run.
+
+---
+
+## 2026-09-09 — a band narrower than the page sat against its left edge, and neither primitive was wrong
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run
+
+`loom.page` lays its children out in a column and a flex item defaults to
+`stretch`, so a `loom.section` at `width: "readable"` inside a `wide` page capped
+itself at the measure correctly and then sat flush against the left edge with a
+third of the page empty beside it. `loom.faq-list`'s own `width` prop did the
+same. `marginInline: "auto"` on both, which is a no-op at `full`.
+
+**The interesting half is that neither primitive was wrong on its own.** The
+section's width was right, the page's width was right, and the defect existed
+only in the pair — which is a class of defect this library has no way to test
+for, because every test here renders one primitive's markup and asserts about
+it. The three fixtures that would have caught it are the three that put a narrow
+band inside a wide page, and none existed until the composition catalogue.
+
+Recorded because the shape recurs: **a primitive is checked alone and a page is
+made of pairs.** The nine-band composition page is now the closest thing this
+repository has to a fixture that exercises pairs, and it found two of these in
+one afternoon.
+
+---
+
+## 2026-09-09 — every screenshot in this repository should be taken with reduced motion, not only the ones with a reveal in them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a harness rule, and the third variant of it
+
+The first hero screenshot this run took **had no buttons in it**. They were in
+the DOM at the right size with the right colours; the entrance animation had not
+finished at the 300ms the harness waited, and the primary action was at an
+opacity that rendered as nothing against the dark palette. It was one step from
+being written up as *`loom.hero` drops its actions slot*, which would have cost
+somebody a run to disprove.
+
+The 6 September entry says a page that reveals on scroll is photographed blank
+and names `loom.reveal`. The 7 September pull request added a
+`reducedMotion: "reduce"` flag for that primitive. **Both are narrower than the
+problem.** `loom.hero` has no reveal in it and is not scroll-driven; it has an
+entrance, which 0055 puts in a static stylesheet the primitive emits, and *any*
+primitive may have one. A harness that disables motion only when it knows a
+reveal is present will keep photographing entrances mid-flight.
+
+The rule that works is unconditional: **`reducedMotion: "reduce"` on the browser
+context for every screenshot, plus a settle longer than the longest entrance.**
+This run used 1500ms and it was sufficient for all nine bands under both
+palettes. Anyone building the shared harness — #250 is the open pull request —
+should make it the default rather than a flag, because the failure mode is a
+picture that looks like a defect rather than a picture that looks wrong.
+
+---
+
+## 2026-09-09 — the granularity doc's second half was unbuilt for twenty-seven runs, and the port map recorded the cost without noticing it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run — filed because the *shape* of the miss is worth keeping
+
+`docs/primitive-granularity.md` argues decomposition and then answers its own
+strongest objection: convenience comes from starting compositions, because
+`insert` carries a whole subtree. Eighty-nine primitives were built to the first
+half. **Nothing built the second half**, for three weeks.
+
+The cost was written down the whole time and read as a completed row.
+`docs/hermes-port-map.md` files thirteen Hermes blocks under *compositions —
+nothing to build*, which is **true of the registry and false of the page**: a
+`cta` needed no primitive and was still eight operations to put anywhere, and a
+pricing band was forty-two. The ledger's own summary counted those thirteen as
+*done*.
+
+Two things generalise from it:
+
+- **A verdict of "nothing to build" deserves a second reading**, because it can
+  mean *nothing is missing* or *the missing thing is not a primitive* and the
+  ledger has one column for both.
+- **A document that records a decision does not record its consequences.** The
+  port map was right about every one of the thirteen and still hid a three-week
+  gap, because nobody asked what a block being a composition *costs* to place.
+
+The port map's header now distinguishes *nothing to register* from *nothing to
+build*.
+
+---
+
+## 2026-09-09 — step 3 of the primitives brief and the #216 finding are still opposite instructions, for the third run
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the existing entry of 7 September is not re-filed; this is the
+count and one new fact
+
+Step 3 of this routine's standing prompt is *"Branch `primitives-NN-<slug>` off
+`main`. Never stack."* The #216 finding, which you filed and merged, is
+*"continue it rather than branching again from `main`."* This run followed the
+finding and pushed onto #248, as the two before it did.
+
+**The new fact is that it is now load-bearing rather than merely tidier.** #248
+carries this lane's last six units; a branch cut from `main` today would not have
+`loom.frame`, `loom.spec`, 0106's containment or the eighty-nine-primitive
+registry, so the composition catalogue could not have been written against the
+library it composes. Following the brief would no longer produce a conflicting
+branch — it would produce a *wrong* one.
+
+Nothing has merged since 1 September. Amending step 3 remains the fix that lasts
+and a routine cannot make it.
+
+---
+
+## 2026-09-10 — the sweep the feature-tile finding asked for: eleven offenders across nine primitives
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by this run
+
+The 9 September finding closed `loom.feature` and ended *"**worth a sweep**: any
+primitive that combines a percentage size with padding has the same latent
+defect, and nothing checks for it. That sweep is this lane's and is not in this
+run."* This is that run.
+
+**Eleven offenders across nine primitives**, every one of them the same shape as
+`loom.feature` and every one of them shipped: `loom.article`,
+`loom.comparison-table`, `loom.credential`, `loom.embed`, `loom.listing`,
+`loom.product`, `loom.quote` (both emphases), `loom.table`, `loom.tier` (both
+emphases). Nine of the eleven are the block axis — a card in a grid row — and
+two are the inline axis, where a bordered table wrapper was two pixels wider
+than its band.
+
+Measured in a real browser at 1280px and at a true 390px, both palettes: **18
+elements overflowing their parent before, 0 after, worst case 66px.**
+`scrollWidth === innerWidth` throughout, before and after, which is the reason
+the inline half of this had gone unnoticed — the page never scrolled sideways,
+the cards simply overlapped whatever was under them.
+
+**An invariant that was too narrow in three separate ways is why it lasted.**
+The test that existed — *"never pads a full-width band past the parent it sits
+in"* — checked the inline axis only, matched `padding-inline` but not the
+`padding` shorthand that every actual offender used, and ran over twelve of the
+twenty fixtures. It passed for a month with nine primitives in breach.
+[0125](decisions/0125-a-geometric-property-is-asserted-over-the-page-not-the-primitive.md)
+records the rule that replaces it: a property about a box and its parent is
+asserted over every fixture at once, in edit mode so the failure names the
+primitive, for both axes and any percentage.
+
+---
+
+## 2026-09-10 — a box that sits flush against its parent's edge cannot be judged from markup, and needs a browser
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a real gap, deliberately not papered over with a test
+
+The 9 September finding *"a band narrower than the page sat against its left
+edge"* was closed pointwise on `loom.section` and `loom.faq-list`. This run tried
+to close it as a **class**, the way the box-sizing one was closed, and could not.
+
+The candidate rule is *an element with a `max-width` and no auto inline margin
+sits flush left*. Over the nine-band page it finds six elements and **all six are
+correct**: centring in this library is usually the parent's job, not the child's.
+`loom.page` caps its measure column at `1120px` with no margin of its own and is
+centred by `align-items: center` on the root above it; `loom.hero`'s `44rem` text
+column and `loom.prose`'s `68ch` measure are centred or deliberately start-aligned
+by the same mechanism. A test would have been six false accusations, and making
+them pass would have meant adding auto margins that change nothing.
+
+**The property is real and is about the cascade, so it needs a layout engine.**
+The check is one line against a rendered page — `el.getBoundingClientRect()`
+against its parent's, looking for a box narrower than its parent and hard against
+one edge — and this lane has no harness to put it in. #250 is building one. When
+it lands, this is the first check to add to it, and the nine-band page is the
+fixture it wants.
+
+A second candidate was tried and rejected for the opposite reason: *a sideways
+scroller needs `min-width: 0`*. It is redundant. A flex or grid item's automatic
+minimum size is content-based **only while its overflow in that axis is
+`visible`**, and `overflow-x: auto` is exactly what these elements carry — so
+`loom.code`, `loom.table` and `loom.comparison-table` are already safe and the
+`min-width: 0` beside each is belt-and-braces. Asserting it would have meant
+editing source to satisfy a rule that states nothing.
+
+---
+
+## 2026-09-10 — a full-page screenshot of a tall dark page ghosts content between slices
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`, `Loom daily build` · **Status:**
+open — a harness rule, and the fourth variant of "the picture lied"
+
+The `bold` full-page shot of this run's specimen has two strings from the table
+at the **bottom** of the page rendered faintly across the **top** of it, above
+the first band. It reads exactly like a stacking defect and was one step from
+being written up as one.
+
+It is not in the page. A viewport-sized shot of the same URL finds one element
+within 80px of the top and it is the first eyebrow. Chromium composites a
+`fullPage: true` capture in slices, and on a 6,300px page over a near-black
+canvas a slice can retain a ghost of another.
+
+**The rule that works is to confirm anything a full-page shot shows against a
+viewport-sized shot before believing it.** Three previous variants of this
+finding are about a picture that was missing something — an unfinished
+entrance, a control that never hydrated. This is the first where the picture
+showed something that was not there, which is the more dangerous direction: the
+other three cost a cycle, this one would have cost a fix to a primitive that is
+correct.
+
+---
+
+## 2026-09-10 — three consecutive runs have added no primitive, and the breadth mandate has not been withdrawn
+
+**Filed by:** `Loom primitives` · **Owned by:** `jonathanbravecredit` · **Status:**
+open — needs the maintainer, not a routine
+
+The brief's first sentence is a breadth mandate and it says it is not negotiable.
+The last three runs in this lane added **zero** primitives, each for a reason it
+argued at the time and each, in this run's reading, correctly: 8 September closed
+the Hermes ledger, 9 September built the composition catalogue the granularity
+doc had promised for twenty-seven runs, and 10 September swept a defect class
+across nine shipped primitives.
+
+The premise that has quietly changed is that **breadth had a measurable end and
+the library reached it.** Seventy Hermes blocks are 68 settled; the named gaps a
+marketing page needs are filled — `milestone` absorbs process-steps and
+changelogs, `mosaic` is the bento grid, `code` is the terminal, `carousel` is the
+gallery. Three runs have independently gone looking for a ninetieth primitive and
+come back with a definition list.
+
+This is not a routine's call to make. Either the mandate is satisfied and the
+brief should say what replaces it — depth, or the demo surfaces, or the two
+state-shaped gaps below — or there is a range the maintainer can see and the
+routines cannot, in which case naming three or four wanted primitives would be
+worth more than the sentence that is there now.
+
+**What the library still genuinely cannot express, and both need the framework
+lane rather than this one:** a tab strip (client-side selection, wants a `select`
+member in the behaviour vocabulary that `disclose` proved the shape of) and a
+feed (wants the binding seam and a live source, not a primitive).
+
+---
+
+## 2026-09-11 — the port ledger is not a measure of the library, and three runs used it as one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by this run, recorded because the *mechanism* will recur
+
+`docs/hermes-port-map.md` says of itself, and has said since 26 August, *"it is a
+measure of the port, not of the library."* Its "to build" tables emptied on
+8 September. The three runs after that each treated the empty tables as *the
+range is finished*, went looking for a ninetieth content model, and each
+independently came back with a definition list. The 10 September run filed that
+as a question for the maintainer.
+
+**What the ledger was hiding, measured:** of eighty-nine primitives, **one** could
+paint anything behind its content (`loom.hero`, whose paints were inline where
+nothing else could reach them) and **none** could put a word on top of a picture.
+Every band that was not the hero got `loom.section`'s three flat washes.
+
+Neither gap can appear in that document, and the reason generalises: **a port
+ledger cannot show you what the source product never had to name.** Hermes' eleven
+hero variants each baked a background into a registered block, so atmosphere never
+existed apart from a block; its app shell meant a page was never composed as one
+surface, so superimposition was never an arrangement.
+
+Closed by `loom.backdrop` and `loom.overlay`
+([0130](decisions/0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md)).
+The lesson worth keeping is the instrument, not the two primitives: **the next run
+that concludes the library is finished should say which *surfaces* it checked, not
+only which content models.**
+
+---
+
+## 2026-09-11 — a palette may have no chroma to spend, and every paint assumes it has some
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
+· **Status:** open
+
+This is the 20 August finding's unresolved half, now measurable because the same
+paints run behind a short band as well as behind a hero.
+
+`backdrop.ts` reads `accent-strong` and `brand-secondary` as large areas of
+colour. Under `bold` — gold and red — the result is genuinely light behind the
+band and it is the best the library has ever looked. Under `editorial`, where
+both slots are slate (`#34425a`, `#4a5b78`), the same code at the same opacity is
+a **grey blob**, because a low-chroma tint spread over a light canvas is
+indistinguishable from dirt.
+
+Moving from `accent` to `accent-strong` on 20 August fixed the *slot*. Nothing
+fixed the fact that **a palette may simply have very little chroma, and no
+primitive can know that it does** — `var(--loom-accent-strong)` is a string here,
+not a colour anyone can measure.
+
+Mitigated, not fixed: the aurora's opacity is `0.26` rather than `0.32` and the
+spotlight's `0.18` rather than `0.22`, which makes the editorial blob softer and
+the bold glow slightly weaker. That is one number serving two palettes that want
+different ones.
+
+**Two shapes of fix, both `src/theme/`'s:** a palette could declare how much
+chroma its accent has, so a paint could scale itself; or the ramp could carry a
+slot whose contract is *a tint that reads as light on this palette's canvas*,
+which is what these paints actually want and what `accent-strong` only
+approximates.
+
+---
+
+## 2026-09-11 — a dark scrim is not expressible, because no palette slot means "dark"
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
+· **Status:** open
+
+`loom.overlay` puts text over a photograph, and the standard way to keep it
+legible is a dark wash with light type. **This theme model cannot say it.**
+`bg-overlay` is a *surface* — `#ffffff` under nine of the starter palettes and
+`#1a1a1a` under the dark ones — so reading it as a dark wash gives white on white
+for most of them.
+
+What shipped instead is honest and re-themes correctly: the scrim is `bg-overlay`
+used as what it is, and the content takes `fg-default`, which that slot is
+guaranteed to pair with. Under a light palette it is a bright veil with dark type.
+That is a real editorial look rather than a consolation, and it is **not** the
+cinematic one, which the library therefore does not have.
+
+A hard-coded black would render one page correctly and break
+[0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md) for every other
+palette, so it was not written.
+
+**The fix is one slot** with the contract *a ground that darkens what is under it,
+paired with a foreground that reads on it* — a pair, not a colour, because the two
+have to be guaranteed together.
+
+---
+
+## 2026-09-11 — `scrim: "none"` cannot be made safe, and the library cannot check it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — recorded as a limit, not a defect waiting on a fix
+
+`loom.overlay` offers `scrim: "none"` because a ground is sometimes already quiet
+enough to write on. Over a *photograph* it is a foot-gun in both directions: the
+text colour is the page's and the picture is the author's, so a pale photograph
+is illegible under a dark palette and a dark one is illegible under a light
+palette. **Whichever image you pick, one of the two starter palettes is wrong**,
+and this was found by picking one and photographing it.
+
+It is not removable — an overlay over a palette-derived ground (a painted
+backdrop, a card, a flat surface) genuinely wants no wash, and that use *is* safe
+because both sides come from the palette. So the option stays, the file says what
+it costs, and the specimen demonstrates it the safe way round.
+
+**What would actually close it** is a contrast check, and nothing in a pure render
+can do one: the ground is a URL at render time and its luminance is not knowable
+without decoding the image. A host that wanted this would have to measure at
+upload and hand the answer back through the binding seam
+([0058](decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)).
+
+---
+
+## 2026-09-11 — a full-page screenshot does not load lazy images, and the result looks like a dropped slot
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`,
+`Loom daily build` (#250's harness) · **Status:** open
+
+`loom.media` writes `loading="lazy"`. A `fullPage: true` screenshot taken without
+scrolling therefore captures **every image below the first viewport as an empty
+box**, with the content that sits over or beside it rendered normally.
+
+Two of four `loom.overlay` tiles photographed as flat grey panels with text
+floating on them — under both palettes, consistently, and at both widths. It reads
+exactly like *`loom.overlay` drops its ground below the fold*, and it was one step
+from being written up as a defect in a primitive that is correct.
+
+**Sixth variant of *the picture lied* from this lane, and the second in the
+direction that costs a fix rather than a cycle** — the other being the
+mid-entrance hero whose buttons were "missing".
+
+The rule that works is unconditional and the same shape as the reduced-motion one:
+**scroll the full height, then await every `HTMLImageElement.complete`, before
+shooting.** Not "when the fixture has images in it" — any primitive may hold one,
+and the failure mode is a picture that looks like a bug. Belongs in #250's harness
+beside `reducedMotion: "reduce"` and the settle.
+
+---
+
+## 2026-09-11 — `21st.dev` blocked for the fifteenth time, and no run has ever seen it
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open
+
+`WebFetch` on `https://21st.dev` returns `EGRESS_BLOCKED`. `docs/routines.md`
+lists the domain under `permissions.allow`; the sandbox's egress proxy does not.
+
+The primitives brief names it as **the visual standard** — *"WebFetch
+`https://21st.dev` for the visual standard: considered motion, real spacing,
+blocks that read as a product rather than a UI kit"* — and it is the only external
+reference the brief has. **Fifteen attempts across seven lanes; not one has
+loaded.** Every judgement this lane has made about whether the library "pops" has
+been made without it.
+
+Unchanged in substance from the fourteen previous filings and repeated only
+because the count is the argument: either the domain reaches the allowlist the
+sandbox actually reads, or the brief should name a reference a routine can
+actually open.
 ## 2026-09-02 — the seam the hand-drawn share card was waiting for exists, and one primitive's colours are the whole of what it does not carry
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open

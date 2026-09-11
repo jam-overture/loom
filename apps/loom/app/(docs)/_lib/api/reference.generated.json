@@ -4549,6 +4549,202 @@
           ]
         },
         {
+          "module": "primitives/compositions",
+          "title": "Compositions",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "STARTER_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const STARTER_COMPOSITIONS: readonly Composition[]",
+              "truncated": false,
+              "summary": "The bands, in the order a landing page uses them."
+            },
+            {
+              "name": "compositionById",
+              "kind": "function",
+              "signature": "const compositionById: (id: string) => Composition | undefined",
+              "truncated": false,
+              "summary": "The band with this id, or `undefined`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/composition",
+          "title": "Composition",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "Composition",
+              "kind": "type",
+              "signature": "type Composition = {\n    /** Lower-case words joined by hyphens, the way an anchor or a slot name is. */\n    readonly id: string;\n    /** What a person choosing it from a list reads. */\n    readonly label: string;\n    /**\n     * What lands on the page, in one clause, said before it happens.\n     *\n     * About the page and never about the verdict, for the reason the demo's\n     * presets give: whether the Gate applies a band or holds it is computed from\n     * the tree at assessment time, so a promise about the outcome would be a\n     * surface predicting a decision it does not make.\n     */\n    readonly promise: string;\n    /** The interpreter's own words about why this subtree answers that ask. */\n    readonly rationale: string;\n    /** Every primitive type the subtree uses, for the catalogue and the audit. */\n    readonly uses: readonly string[];\n    readonly build: (ids: IdFactory) => ElementNode;\n};",
+              "truncated": false,
+              "summary": "A band of a page, dropped in whole as one operation."
+            },
+            {
+              "name": "COMPOSITION_INTERPRETER",
+              "kind": "value",
+              "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
+              "truncated": false,
+              "summary": "What produced the delta, for `Provenance.interpreter`. Not a model."
+            },
+            {
+              "name": "CompositionTarget",
+              "kind": "type",
+              "signature": "type CompositionTarget = {\n    readonly parentId?: NodeId;\n    /** Clamped to the parent's current child count, never trusted as an index. */\n    readonly index?: number;\n};",
+              "truncated": false,
+              "summary": "Where the band goes."
+            },
+            {
+              "name": "CompositionPlan",
+              "kind": "type",
+              "signature": "type CompositionPlan = {\n    readonly outcome: \"planned\";\n    readonly operations: readonly TreeOperation[];\n}\n/**\n * The named parent is not in this tree, so there is nowhere to put the band.\n *\n * A distinct outcome rather than a silent append at the root: a band that\n * quietly landed somewhere other than where it was asked for is worse than\n * one that did not land, because the second is visible.\n */\n | {\n    readonly outcome: \"no-such-parent\";\n    readonly parentId: NodeId;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "planComposition",
+              "kind": "function",
+              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "truncated": false,
+              "summary": "One `insert`, computed against the tree as it stands."
+            },
+            {
+              "name": "compositionInterpreter",
+              "kind": "function",
+              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/cta-band",
+          "title": "Cta band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "ctaBand",
+              "kind": "value",
+              "signature": "const ctaBand: Composition",
+              "truncated": false,
+              "summary": "The last band: ask again, at a reading width, on the accent ground."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/faq-band",
+          "title": "Faq band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "faqBand",
+              "kind": "value",
+              "signature": "const faqBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/features-band",
+          "title": "Features band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "featuresBand",
+              "kind": "value",
+              "signature": "const featuresBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/footer-band",
+          "title": "Footer band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "footerBand",
+              "kind": "value",
+              "signature": "const footerBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/hero-band",
+          "title": "Hero band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "heroBand",
+              "kind": "value",
+              "signature": "const heroBand: Composition",
+              "truncated": false,
+              "summary": "The first screen: an eyebrow, a claim, a sentence, and two ways in."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/metrics-band",
+          "title": "Metrics band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "metricsBand",
+              "kind": "value",
+              "signature": "const metricsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/pricing-band",
+          "title": "Pricing band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "pricingBand",
+              "kind": "value",
+              "signature": "const pricingBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/proof-band",
+          "title": "Proof band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "proofBand",
+              "kind": "value",
+              "signature": "const proofBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/testimonials-band",
+          "title": "Testimonials band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "testimonialsBand",
+              "kind": "value",
+              "signature": "const testimonialsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/control",
           "title": "Control",
           "summary": "The paint and the sizing shared by the library's two controls.",
@@ -4699,1126 +4895,6 @@
               "signature": "const ASPECT_RATIOS: Readonly<Record<AspectName, string>>",
               "truncated": false,
               "summary": "The shapes a fixed-ratio frame may take."
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.action",
-          "title": "loom.action",
-          "summary": "The one thing on a page that asks the reader to do something.",
-          "symbols": [
-            {
-              "name": "loomAction",
-              "kind": "value",
-              "signature": "const loomAction: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.article",
-          "title": "loom.article",
-          "summary": "A written piece: a cover, a small label, a title, a sentence, and a link.",
-          "symbols": [
-            {
-              "name": "loomArticle",
-              "kind": "value",
-              "signature": "const loomArticle: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.article-grid",
-          "title": "loom.article-grid",
-          "summary": "A wall of `loom.article` cells — the blog index, the press page, the case studies, the recipe box.",
-          "symbols": [
-            {
-              "name": "loomArticleGrid",
-              "kind": "value",
-              "signature": "const loomArticleGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.avatar",
-          "title": "loom.avatar",
-          "summary": "One face, or the two letters that stand in for it.",
-          "symbols": [
-            {
-              "name": "loomAvatar",
-              "kind": "value",
-              "signature": "const loomAvatar: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.avatar-row",
-          "title": "loom.avatar-row",
-          "summary": "A run of `loom.avatar` faces, overlapping — the cluster a page puts beside \"and four thousand others\".",
-          "symbols": [
-            {
-              "name": "loomAvatarRow",
-              "kind": "value",
-              "signature": "const loomAvatarRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.badge",
-          "title": "loom.badge",
-          "summary": "A short label attached to something else — \"Most popular\", \"Beta\", \"New\".",
-          "symbols": [
-            {
-              "name": "loomBadge",
-              "kind": "value",
-              "signature": "const loomBadge: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.banner",
-          "title": "loom.banner",
-          "summary": "The strip a site runs above everything else: one short thing to say, and one thing to do about it.",
-          "symbols": [
-            {
-              "name": "loomBanner",
-              "kind": "value",
-              "signature": "const loomBanner: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.before-after",
-          "title": "loom.before-after",
-          "summary": "Two states of one thing, superimposed, with a hard edge between them — the redesign over the old page, the room staged and unstaged, the photograph before the retouch.",
-          "symbols": [
-            {
-              "name": "loomBeforeAfter",
-              "kind": "value",
-              "signature": "const loomBeforeAfter: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.button",
-          "title": "loom.button",
-          "summary": "The control that sends a `loom.form`. Its label is child text.",
-          "symbols": [
-            {
-              "name": "loomButton",
-              "kind": "value",
-              "signature": "const loomButton: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.callout",
-          "title": "loom.callout",
-          "summary": "The aside a page steps out of its own flow to make — a note, a caveat, the thing the reader will otherwise get wrong.",
-          "symbols": [
-            {
-              "name": "loomCallout",
-              "kind": "value",
-              "signature": "const loomCallout: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.card",
-          "title": "loom.card",
-          "summary": "A surface holding whatever is put on it, with a region above its content and a region below.",
-          "symbols": [
-            {
-              "name": "loomCard",
-              "kind": "value",
-              "signature": "const loomCard: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.carousel",
-          "title": "loom.carousel",
-          "summary": "The fifth general arranger: children in a row that runs past the edge of the page, and snaps.",
-          "symbols": [
-            {
-              "name": "loomCarousel",
-              "kind": "value",
-              "signature": "const loomCarousel: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.code",
-          "title": "loom.code",
-          "summary": "A snippet, set in monospace on a tinted surface — or a terminal, which is the same panel wearing a window bar.",
-          "symbols": [
-            {
-              "name": "loomCode",
-              "kind": "value",
-              "signature": "const loomCode: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.code-span",
-          "title": "loom.code-span",
-          "summary": "A name from the code, set in monospace inside a sentence — `ChangeInterpreter`, `--loom-accent`, `pnpm verify`.",
-          "symbols": [
-            {
-              "name": "loomCodeSpan",
-              "kind": "value",
-              "signature": "const loomCodeSpan: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.comparison",
-          "title": "loom.comparison",
-          "summary": "One intersection of a comparison: what this subject does about this criterion.",
-          "symbols": [
-            {
-              "name": "loomComparison",
-              "kind": "value",
-              "signature": "const loomComparison: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.comparison-row",
-          "title": "loom.comparison-row",
-          "summary": "One criterion, answered across every subject in the table.",
-          "symbols": [
-            {
-              "name": "loomComparisonRow",
-              "kind": "value",
-              "signature": "const loomComparisonRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.comparison-table",
-          "title": "loom.comparison-table",
-          "summary": "The band that answers *how is this different from what I use now* — subjects across the top, criteria down the side, and a verdict at every intersection.",
-          "symbols": [
-            {
-              "name": "loomComparisonTable",
-              "kind": "value",
-              "signature": "const loomComparisonTable: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.credential",
-          "title": "loom.credential",
-          "summary": "One reason to be believed: a mark, what it is called, who granted it, when, and a line about it.",
-          "symbols": [
-            {
-              "name": "loomCredential",
-              "kind": "value",
-              "signature": "const loomCredential: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.credential-grid",
-          "title": "loom.credential-grid",
-          "summary": "A wall of `loom.credential` cells — the awards, the certifications, the memberships, the tools.",
-          "symbols": [
-            {
-              "name": "loomCredentialGrid",
-              "kind": "value",
-              "signature": "const loomCredentialGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.divider",
-          "title": "loom.divider",
-          "summary": "The enum-driven one: `ornament` selects between three genuinely different renderings, not three values of the same property.",
-          "symbols": [
-            {
-              "name": "loomDivider",
-              "kind": "value",
-              "signature": "const loomDivider: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.embed",
-          "title": "loom.embed",
-          "summary": "Somebody else's document, framed and held to a shape — a product video, a map, a prototype, a track.",
-          "symbols": [
-            {
-              "name": "loomEmbed",
-              "kind": "value",
-              "signature": "const loomEmbed: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.emphasis",
-          "title": "loom.emphasis",
-          "summary": "A span inside a sentence that matters more than the words around it.",
-          "symbols": [
-            {
-              "name": "loomEmphasis",
-              "kind": "value",
-              "signature": "const loomEmphasis: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.faq",
-          "title": "loom.faq",
-          "summary": "One question and its answer, as a disclosure that needs no JavaScript.",
-          "symbols": [
-            {
-              "name": "loomFaq",
-              "kind": "value",
-              "signature": "const loomFaq: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.faq-list",
-          "title": "loom.faq-list",
-          "summary": "The questions band: a stack of `loom.faq` disclosures.",
-          "symbols": [
-            {
-              "name": "loomFaqList",
-              "kind": "value",
-              "signature": "const loomFaqList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.feature",
-          "title": "loom.feature",
-          "summary": "One tile of a `loom.feature-grid`: a glyph, a title, and a sentence about why it matters.",
-          "symbols": [
-            {
-              "name": "loomFeature",
-              "kind": "value",
-              "signature": "const loomFeature: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.feature-grid",
-          "title": "loom.feature-grid",
-          "summary": "The \"what makes this different\" band: a wall of `loom.feature` tiles.",
-          "symbols": [
-            {
-              "name": "loomFeatureGrid",
-              "kind": "value",
-              "signature": "const loomFeatureGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": "The minimums moved to `layout.ts` when `loom.grid` needed the same four, so the two grids wrap at the same widths. The values are unchanged."
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.field",
-          "title": "loom.field",
-          "summary": "One thing a form asks for: a label, the control under it, and the note that says what to type.",
-          "symbols": [
-            {
-              "name": "loomField",
-              "kind": "value",
-              "signature": "const loomField: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.footer",
-          "title": "loom.footer",
-          "summary": "The band that closes a page: who this is, what else is here, and the small print underneath.",
-          "symbols": [
-            {
-              "name": "loomFooter",
-              "kind": "value",
-              "signature": "const loomFooter: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.form",
-          "title": "loom.form",
-          "summary": "The band where a page stops telling and starts asking: a set of `loom.field`s, the control that sends them, and the fine print underneath.",
-          "symbols": [
-            {
-              "name": "loomForm",
-              "kind": "value",
-              "signature": "const loomForm: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.frame",
-          "title": "loom.frame",
-          "summary": "The chrome a product screenshot sits in: a browser window, an app window, or a phone.",
-          "symbols": [
-            {
-              "name": "loomFrame",
-              "kind": "value",
-              "signature": "const loomFrame: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.grid",
-          "title": "loom.grid",
-          "summary": "Whatever it is given, in as many columns as will fit.",
-          "symbols": [
-            {
-              "name": "loomGrid",
-              "kind": "value",
-              "signature": "const loomGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.heading",
-          "title": "loom.heading",
-          "summary": "A heading, with its text as child nodes rather than a `text` prop.",
-          "symbols": [
-            {
-              "name": "loomHeading",
-              "kind": "value",
-              "signature": "const loomHeading: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.hero",
-          "title": "loom.hero",
-          "summary": "The first thing on a page, and the primitive that decides whether this library reads as a product or as a UI kit.",
-          "symbols": [
-            {
-              "name": "loomHero",
-              "kind": "value",
-              "signature": "const loomHero: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.icon",
-          "title": "loom.icon",
-          "summary": "One glyph, optionally in a tile.",
-          "symbols": [
-            {
-              "name": "loomIcon",
-              "kind": "value",
-              "signature": "const loomIcon: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.kbd",
-          "title": "loom.kbd",
-          "summary": "One key, as a key cap — `⌘`, `K`, `Esc`.",
-          "symbols": [
-            {
-              "name": "loomKbd",
-              "kind": "value",
-              "signature": "const loomKbd: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.link",
-          "title": "loom.link",
-          "summary": "A link that is a link — text, a destination, and nothing drawn around it.",
-          "symbols": [
-            {
-              "name": "loomLink",
-              "kind": "value",
-              "signature": "const loomLink: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.link-list",
-          "title": "loom.link-list",
-          "summary": "A run of `loom.link` under a heading — one column of a footer, a row of legal links, the \"everything else\" list in a sidebar.",
-          "symbols": [
-            {
-              "name": "loomLinkList",
-              "kind": "value",
-              "signature": "const loomLinkList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.link-trail",
-          "title": "loom.link-trail",
-          "summary": "Where the reader is, and every step back out — a run of `loom.link` with the way home between them.",
-          "symbols": [
-            {
-              "name": "loomLinkTrail",
-              "kind": "value",
-              "signature": "const loomLinkTrail: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.list",
-          "title": "loom.list",
-          "summary": "A run of points, bulleted or numbered — the list a page's prose is written in.",
-          "symbols": [
-            {
-              "name": "loomList",
-              "kind": "value",
-              "signature": "const loomList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.list-item",
-          "title": "loom.list-item",
-          "summary": "One point in a `loom.list`. An `<li>`, and named for it.",
-          "symbols": [
-            {
-              "name": "loomListItem",
-              "kind": "value",
-              "signature": "const loomListItem: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.logo",
-          "title": "loom.logo",
-          "summary": "One mark in a `loom.logo-cloud`.",
-          "symbols": [
-            {
-              "name": "loomLogo",
-              "kind": "value",
-              "signature": "const loomLogo: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.logo-cloud",
-          "title": "loom.logo-cloud",
-          "summary": "The \"trusted by\" wall: a row of `loom.logo` marks under an optional line of context.",
-          "symbols": [
-            {
-              "name": "loomLogoCloud",
-              "kind": "value",
-              "signature": "const loomLogoCloud: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.marquee",
-          "title": "loom.marquee",
-          "summary": "A band whose children travel past, forever — the logo wall that drifts, the ticker of quotes, the strip of shots under a hero.",
-          "symbols": [
-            {
-              "name": "loomMarquee",
-              "kind": "value",
-              "signature": "const loomMarquee: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.media",
-          "title": "loom.media",
-          "summary": "The rich-schema one: seven props, two of them required, with the constraints that matter enforced by the schema rather than by the renderer coping.",
-          "symbols": [
-            {
-              "name": "loomMedia",
-              "kind": "value",
-              "signature": "const loomMedia: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.message",
-          "title": "loom.message",
-          "summary": "One turn of a conversation: who said it, and what they said.",
-          "symbols": [
-            {
-              "name": "loomMessage",
-              "kind": "value",
-              "signature": "const loomMessage: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.message-list",
-          "title": "loom.message-list",
-          "summary": "A conversation, in order: a run of `loom.message` turns down the page.",
-          "symbols": [
-            {
-              "name": "loomMessageList",
-              "kind": "value",
-              "signature": "const loomMessageList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.meter",
-          "title": "loom.meter",
-          "summary": "How much of a thing there is, drawn rather than typeset.",
-          "symbols": [
-            {
-              "name": "loomMeter",
-              "kind": "value",
-              "signature": "const loomMeter: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.milestone",
-          "title": "loom.milestone",
-          "summary": "One entry on a rail: a marker, a title, and what happened.",
-          "symbols": [
-            {
-              "name": "loomMilestone",
-              "kind": "value",
-              "signature": "const loomMilestone: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.milestone-list",
-          "title": "loom.milestone-list",
-          "summary": "A run of `loom.milestone` entries down a rail — a history, a roadmap, a changelog, or the steps of a process.",
-          "symbols": [
-            {
-              "name": "loomMilestoneList",
-              "kind": "value",
-              "signature": "const loomMilestoneList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.milestone-row",
-          "title": "loom.milestone-row",
-          "summary": "The same entries as a `loom.milestone-list`, laid **across** rather than down: the *how it works* band, three or four steps wide, each with its number over its title and a connector running to the next.",
-          "symbols": [
-            {
-              "name": "loomMilestoneRow",
-              "kind": "value",
-              "signature": "const loomMilestoneRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.mosaic",
-          "title": "loom.mosaic",
-          "summary": "Whatever it is given, in cells of deliberately unequal width — the band a page uses when a grid of identical rectangles would read as a table.",
-          "symbols": [
-            {
-              "name": "loomMosaic",
-              "kind": "value",
-              "signature": "const loomMosaic: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.nav",
-          "title": "loom.nav",
-          "summary": "The bar across the top of a page: a mark, the menu, and the one thing the page wants you to do.",
-          "symbols": [
-            {
-              "name": "loomNav",
-              "kind": "value",
-              "signature": "const loomNav: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.offering",
-          "title": "loom.offering",
-          "summary": "One thing a reader can book, join, order or give to: what it is called, what it costs, the qualifiers that narrow it, what it includes, and the control that does the deed.",
-          "symbols": [
-            {
-              "name": "loomOffering",
-              "kind": "value",
-              "signature": "const loomOffering: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.offering-grid",
-          "title": "loom.offering-grid",
-          "summary": "A band of `loom.offering` cells — the services page, the packages, the class schedule, the menu, the ways to give.",
-          "symbols": [
-            {
-              "name": "loomOfferingGrid",
-              "kind": "value",
-              "signature": "const loomOfferingGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.option",
-          "title": "loom.option",
-          "summary": "One choice inside a `loom.field` of type `select`. Its label is child text.",
-          "symbols": [
-            {
-              "name": "loomOption",
-              "kind": "value",
-              "signature": "const loomOption: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.orbit",
-          "title": "loom.orbit",
-          "summary": "Whatever it is given, circling something it is given — the *works with* band: a product's mark in the middle and the logos of what it plugs into going round it.",
-          "symbols": [
-            {
-              "name": "loomOrbit",
-              "kind": "value",
-              "signature": "const loomOrbit: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.page",
-          "title": "loom.page",
-          "summary": "The render root, and the only primitive in this library that mounts a theme.",
-          "symbols": [
-            {
-              "name": "loomPage",
-              "kind": "value",
-              "signature": "const loomPage: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.perk",
-          "title": "loom.perk",
-          "summary": "A perk on its own: a marker, a claim, and an optional clarification, in a `<div>` that belongs to no list.",
-          "symbols": [
-            {
-              "name": "loomPerk",
-              "kind": "value",
-              "signature": "const loomPerk: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.perk-list",
-          "title": "loom.perk-list",
-          "summary": "A run of `loom.perk` rows — what a plan includes, what it does not, and what is on its way.",
-          "symbols": [
-            {
-              "name": "loomPerkList",
-              "kind": "value",
-              "signature": "const loomPerkList: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.perk-list-item",
-          "title": "loom.perk-list-item",
-          "summary": "One row of a `loom.perk-list`: a marker, a claim, and an optional clarification. An `<li>`, and named for it.",
-          "symbols": [
-            {
-              "name": "loomPerkListItem",
-              "kind": "value",
-              "signature": "const loomPerkListItem: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.person",
-          "title": "loom.person",
-          "summary": "A person: a face, a name, what they do, and optionally a sentence about them.",
-          "symbols": [
-            {
-              "name": "loomPerson",
-              "kind": "value",
-              "signature": "const loomPerson: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.person-grid",
-          "title": "loom.person-grid",
-          "summary": "A wall of `loom.person` cells — the team, the staff, the speakers.",
-          "symbols": [
-            {
-              "name": "loomPersonGrid",
-              "kind": "value",
-              "signature": "const loomPersonGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.pin",
-          "title": "loom.pin",
-          "summary": "One mark placed at a point over the thing it is explaining.",
-          "symbols": [
-            {
-              "name": "loomPin",
-              "kind": "value",
-              "signature": "const loomPin: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.product",
-          "title": "loom.product",
-          "summary": "One thing for sale: a picture of it, what it is called, what it costs, and the button that buys it.",
-          "symbols": [
-            {
-              "name": "loomProduct",
-              "kind": "value",
-              "signature": "const loomProduct: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.product-grid",
-          "title": "loom.product-grid",
-          "summary": "A wall of `loom.product` cells — the shop, the downloads, the categories.",
-          "symbols": [
-            {
-              "name": "loomProductGrid",
-              "kind": "value",
-              "signature": "const loomProductGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.prose",
-          "title": "loom.prose",
-          "summary": "",
-          "symbols": [
-            {
-              "name": "loomProse",
-              "kind": "value",
-              "signature": "const loomProse: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.quote",
-          "title": "loom.quote",
-          "summary": "Someone else saying it. The social-proof leaf every marketing page needs and the one that most often looks cheap.",
-          "symbols": [
-            {
-              "name": "loomQuote",
-              "kind": "value",
-              "signature": "const loomQuote: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.quote-grid",
-          "title": "loom.quote-grid",
-          "summary": "The proof wall: several `loom.quote` cards at once.",
-          "symbols": [
-            {
-              "name": "loomQuoteGrid",
-              "kind": "value",
-              "signature": "const loomQuoteGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.rating",
-          "title": "loom.rating",
-          "summary": "A score out of five, drawn as stars.",
-          "symbols": [
-            {
-              "name": "loomRating",
-              "kind": "value",
-              "signature": "const loomRating: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.reveal",
-          "title": "loom.reveal",
-          "summary": "A band that arrives as the reader reaches it: whatever is put inside lifts and fades into place, driven by the page's own scroll position.",
-          "symbols": [
-            {
-              "name": "loomReveal",
-              "kind": "value",
-              "signature": "const loomReveal: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.section",
-          "title": "loom.section",
-          "summary": "A band of the page, with a region above its content for whatever introduces it.",
-          "symbols": [
-            {
-              "name": "loomSection",
-              "kind": "value",
-              "signature": "const loomSection: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.split",
-          "title": "loom.split",
-          "summary": "Two regions side by side, wrapping to one column when there is no room.",
-          "symbols": [
-            {
-              "name": "loomSplit",
-              "kind": "value",
-              "signature": "const loomSplit: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.stack",
-          "title": "loom.stack",
-          "summary": "Whatever it is given, in one direction, with a gap.",
-          "symbols": [
-            {
-              "name": "loomStack",
-              "kind": "value",
-              "signature": "const loomStack: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.stat",
-          "title": "loom.stat",
-          "summary": "One number and what it counts.",
-          "symbols": [
-            {
-              "name": "loomStat",
-              "kind": "value",
-              "signature": "const loomStat: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.stat-grid",
-          "title": "loom.stat-grid",
-          "summary": "The decomposition one. Hermes' `stats` block held its numbers in an `items` array of `StatItem` shapes; here the grid is a primitive and each number is a `loom.stat` child.",
-          "symbols": [
-            {
-              "name": "loomStatGrid",
-              "kind": "value",
-              "signature": "const loomStatGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.table",
-          "title": "loom.table",
-          "summary": "Rows and columns of whatever it is given — the ordinary table a document is written with.",
-          "symbols": [
-            {
-              "name": "loomTable",
-              "kind": "value",
-              "signature": "const loomTable: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.table-cell",
-          "title": "loom.table-cell",
-          "summary": "One cell of a `loom.table` — a value, a label, or a sentence.",
-          "symbols": [
-            {
-              "name": "loomTableCell",
-              "kind": "value",
-              "signature": "const loomTableCell: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.table-row",
-          "title": "loom.table-row",
-          "summary": "One row of a `loom.table` — its cells, and nothing else.",
-          "symbols": [
-            {
-              "name": "loomTableRow",
-              "kind": "value",
-              "signature": "const loomTableRow: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.tier",
-          "title": "loom.tier",
-          "summary": "One plan: what it is called, what it costs, what it gets you, and the one thing it asks you to do.",
-          "symbols": [
-            {
-              "name": "loomTier",
-              "kind": "value",
-              "signature": "const loomTier: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
-            }
-          ]
-        },
-        {
-          "module": "primitives/loom.tier-table",
-          "title": "loom.tier-table",
-          "summary": "The pricing band: plans side by side, at the width they need to be read.",
-          "symbols": [
-            {
-              "name": "loomTierTable",
-              "kind": "value",
-              "signature": "const loomTierTable: import(\"../sdk/definition.js\").PrimitiveEntry",
-              "truncated": false,
-              "summary": ""
             }
           ]
         },

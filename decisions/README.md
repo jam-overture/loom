@@ -198,5 +198,19 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0112 | *No record on this branch* | — | — |
 | 0113 | *No record on this branch* | — | — |
 | 0114 | *No record on this branch* | — | — |
-| 0115 | *No record on this branch* | — | — |
+| [0115](0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) | Three fields of one shape are a list wearing three names | Proposed — `ARCHITECTURAL — needs review` | §4b |
 | [0116](0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md) | A screenshot is taken by the repository, and Playwright is never a dependency | Accepted | §1 (process) |
+| 0117 | *No record on this branch* | — | — |
+| 0118 | *No record on this branch* | — | — |
+| 0119 | *No record on this branch* | — | — |
+| [0120](0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md) | A starting composition is a subtree a catalogue hands to the ordinary seam | Accepted | §4b |
+| 0121 | *No record on this branch* | — | — |
+| 0122 | *No record on this branch* | — | — |
+| 0123 | *No record on this branch* | — | — |
+| 0124 | *No record on this branch* | — | — |
+| [0125](0125-a-geometric-property-is-asserted-over-the-page-not-the-primitive.md) | A geometric property is asserted over the page, not the primitive | Accepted | §4b |
+| 0126 | *No record on this branch* | — | — |
+| 0127 | *No record on this branch* | — | — |
+| 0128 | *No record on this branch* | — | — |
+| 0129 | *No record on this branch* | — | — |
+| [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |
