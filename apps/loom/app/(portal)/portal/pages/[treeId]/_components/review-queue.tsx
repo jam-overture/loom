@@ -45,16 +45,16 @@ export const ReviewQueue = ({ changes }: { readonly changes: readonly HeldChange
     </div>
 
     {changes.length === 0 ? (
-      <StateNotice tone="empty" title="Nothing is waiting for you.">
+      <StateNotice tone="settled" title="Nothing is waiting for you.">
         <p>
           When Loom is unsure about a change, it stops and asks you here instead of guessing.
           Nothing has stopped for you on this page.
         </p>
-        <TechnicalDetail summary="What an empty queue does and doesn't mean">
+        <TechnicalDetail summary="What this does and doesn't mean">
           <p>
             Changes the Gate accepts are written without asking, and ones it refuses outright
             never reach you — a hold is the middle case, where the stakes were high enough that
-            the Gate declined to decide alone. An empty queue is the Gate having decided, not
+            the Gate declined to decide alone. Nothing waiting is the Gate having decided, not
             having stalled.
           </p>
         </TechnicalDetail>

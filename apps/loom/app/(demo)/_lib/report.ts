@@ -43,10 +43,10 @@ export { toneClasses } from "@/app/(portal)/_lib/vocabulary"
  * The one sentence in the shared table that is written about somewhere else.
  *
  * `applied` reads *"This change is live on the page. You can undo it from
- * History."* — true in the portal, where undo is offered on `/portal/history`,
- * and wrong here twice over: a demo visitor has no account, so `/portal/history`
- * is a page they cannot open, and the undo they are being sent away to find is
- * a button on the card they are already reading.
+ * What's changed."* — true in the portal, where undo is offered on
+ * `/portal/history`, and wrong here twice over: a demo visitor has no account,
+ * so that screen is a page they cannot open, and the undo they are being sent
+ * away to find is a button on the card they are already reading.
  *
  * So the demo overrides the *meaning* and keeps the label, the tone and the
  * technical name. That is the whole shape of this: the two surfaces must agree

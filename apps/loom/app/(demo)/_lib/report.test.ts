@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 
+import { screenName } from "@/app/(portal)/_lib/screen-names"
+
 import { CHANGE_STATES, plainState, type ChangeState } from "@/app/(portal)/_lib/vocabulary"
 
 import { demoState, invalidReport, stateReport } from "./report"
@@ -24,7 +26,22 @@ import { demoState, invalidReport, stateReport } from "./report"
 const STATES = Object.keys(CHANGE_STATES) as readonly ChangeState[]
 
 /** Places this surface does not have, in the words the portal would name them. */
-const NOWHERE_HERE = [/history/i, /review queue/i, /sign in/i, /signed in/i, /dashboard/i]
+/**
+ * The portal's screen is named from `screen-names.ts` rather than spelled here.
+ *
+ * It was `/history/i`, and on 8 September the portal renamed that screen to
+ * `What's changed` — at which point this guard went on passing while no longer
+ * matching the one sentence it was written for. A guard that names another
+ * surface's screen by hand is a guard that disarms itself the day that surface
+ * renames it, silently, which is the failure mode this list exists to prevent.
+ */
+const NOWHERE_HERE = [
+  new RegExp(screenName("/portal/history"), "iu"),
+  /review queue/i,
+  /sign in/i,
+  /signed in/i,
+  /dashboard/i,
+]
 
 describe("the states the demo says out loud", () => {
   it("keeps every label, tone and technical name exactly as the shared table has them", () => {
@@ -48,12 +65,13 @@ describe("the states the demo says out loud", () => {
 
   /**
    * The override earns its existence only while the sentence it replaces is
-   * still the wrong one. If a portal run rewrites `applied` to stop naming
-   * History, this fails and the override should be deleted rather than kept as
-   * a second copy of a sentence that already agrees.
+   * still the wrong one. If a portal run rewrites `applied` to stop sending a
+   * reader to a screen this surface does not have, this fails and the override
+   * should be deleted rather than kept as a second copy of a sentence that
+   * already agrees.
    */
-  it("overrides applied because the shared sentence still points at History", () => {
-    expect(plainState("applied").meaning).toMatch(/history/i)
+  it("overrides applied because the shared sentence still points at the portal's own screen", () => {
+    expect(plainState("applied").meaning).toContain(screenName("/portal/history"))
     expect(demoState("applied").meaning).toContain("beside you")
     expect(demoState("applied").meaning).toContain("Put it back")
   })

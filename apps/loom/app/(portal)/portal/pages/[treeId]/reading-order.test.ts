@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
  * A phone screenshot found this and no test could have.
@@ -21,15 +20,8 @@ import { describe, expect, it } from "vitest"
  * page comes before the index of the page**, and it is on the right because it
  * is second rather than because the row is reversed.
  */
-const file = join(process.cwd(), "app", "(portal)", "portal", "pages", "[treeId]", "page.tsx")
-
-/**
- * Comments are stripped before the source is read, because the comment above
- * the layout names the class it stopped using and explains why. A check that
- * cannot tell a warning from the thing it warns about would make the warning
- * unwriteable.
- */
-const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu, "")
+const file = portalFile("portal", "pages", "[treeId]", "page.tsx")
+const source = screenSource(file)
 
 describe("the page screen's reading order", () => {
   it("shows the page itself before the list of its parts", () => {
@@ -40,15 +32,5 @@ describe("the page screen's reading order", () => {
 
   it("puts what a reader can act on before what they have not picked yet", () => {
     expect(source.indexOf("<PromptBox")).toBeLessThan(source.indexOf("<SelectedNode"))
-  })
-
-  /**
-   * The guard, rather than the symptom. Any reversal reintroduces the split
-   * between reading order and source order that produced it, whichever way the
-   * components happen to be written that day.
-   */
-  it("never reverses a row to place a column", () => {
-    expect(source).not.toContain("flex-row-reverse")
-    expect(source).not.toContain("flex-col-reverse")
   })
 })

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest"
 
 import type { TreeId } from "@loom/runtime"
 
+import { screenName } from "@/app/(portal)/_lib/screen-names"
+
 import { PageViews } from "./page-views"
 
 const TREE = "t_seed1" as TreeId
@@ -32,7 +34,7 @@ describe("PageViews", () => {
     const current = links(container).filter((link) => link.getAttribute("aria-current") === "page")
 
     expect(current).toHaveLength(1)
-    expect(current[0]?.textContent).toBe("What's changed")
+    expect(current[0]?.textContent).toBe(screenName("/portal/history"))
     expect(current[0]?.getAttribute("href")).toBe("/portal/history?tree=t_seed1")
   })
 
@@ -65,8 +67,8 @@ describe("PageViews", () => {
 
     expect(links(container).map((link) => link.textContent)).toEqual([
       "The page",
-      "What's been asked",
-      "What's changed",
+      screenName("/portal/activity"),
+      screenName("/portal/history"),
       "Can you trust it?",
       "Does it add up?",
       "Every page →",

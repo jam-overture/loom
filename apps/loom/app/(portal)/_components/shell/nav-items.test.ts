@@ -3,6 +3,8 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
+import { screenName } from "@/app/(portal)/_lib/screen-names"
+
 import { NAV_GROUPS } from "./nav-items"
 
 /**
@@ -68,12 +70,55 @@ describe("NAV_GROUPS", () => {
    * itself exact — otherwise it is the active item on every page in the portal
    * and the rail stops distinguishing anything.
    */
-  it("leads with what is waiting, and claims only its own path", () => {
+  it("leads with the front door, and claims only its own path", () => {
     const first = NAV_GROUPS[0]?.[0]
 
     expect(first?.href).toBe("/portal")
-    expect(first?.label).toBe("Waiting on you")
     expect(first?.exact).toBe(true)
+  })
+
+  /**
+   * The rail does not name a screen; it reads the name.
+   *
+   * `Waiting on you` was this entry's label from the day the rail existed, and
+   * it stopped describing its screen on 7 September when that screen grew a
+   * second half — without anything failing, because the label and the heading
+   * were two independent strings. It also named two other things on this
+   * surface: the front door's first section, and the state of a change on every
+   * badge in the portal.
+   *
+   * Asserted against `screenName` rather than against a literal, which is the
+   * point: a test carrying its own copy of the name would be a fourth place to
+   * update and would pass while the rail said something else.
+   */
+  it("reads the name of every screen that has one", () => {
+    const labelled = items.filter((item) =>
+      ["/portal", "/portal/activity", "/portal/history"].includes(item.href)
+    )
+
+    expect(labelled).toHaveLength(3)
+    expect(labelled.map((item) => item.label)).toEqual([
+      screenName("/portal"),
+      screenName("/portal/activity"),
+      screenName("/portal/history"),
+    ])
+  })
+
+  /**
+   * Two rail entries a reader cannot tell apart make the rail worth less than
+   * one. `Activity` and `History` were exactly that pair for a fortnight — the
+   * two screens are nearly opposites and their names were synonyms — so the
+   * property is asserted rather than left to whoever adds the tenth entry.
+   *
+   * Case and punctuation are normalised because the failure this catches is a
+   * reader's, and a reader does not distinguish `Sign-ins` from `sign ins`.
+   */
+  it("gives no two entries the same label", () => {
+    const normalised = items.map((item) =>
+      item.label.toLowerCase().replace(/[^a-z0-9]+/gu, " ").trim()
+    )
+
+    expect(new Set(normalised).size).toBe(normalised.length)
   })
 
   it("marks every item whose href is a prefix of another's as exact", () => {

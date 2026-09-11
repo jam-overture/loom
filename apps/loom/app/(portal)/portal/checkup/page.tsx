@@ -5,12 +5,12 @@ import { collectNodeIds, treeIdSchema } from "@loom/runtime"
 import { auditSnapshot, describeStoreError } from "@loom/runtime/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { nameFor } from "@/app/(portal)/_lib/page-name"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
@@ -85,6 +85,13 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
    */
   const report = audit !== undefined && audit.ok ? describeAudit(audit.value) : undefined
 
+  /**
+   * What this page is called, for the sentence that says which page is being
+   * checked. One bounded head read; a failed one costs the name and nothing
+   * else.
+   */
+  const pageName = await nameFor(portalStore, scope.data)
+
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   return (
@@ -97,7 +104,7 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
          * link. The id is in the sentence now and the links are the strip.
          */}
         <p className="text-ink-muted text-sm">
-          <PlainSentence line={scopedLead("checkup", scope.data)} />
+          <ScopedLead view="checkup" page={pageName} />
         </p>
       </header>
 

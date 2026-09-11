@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest"
 import { primitiveTypeSchema, treeIdSchema, type NodeId } from "@loom/runtime"
 import type { RenderDiagnostic } from "@loom/runtime/react"
 
+import type { PageName } from "@/app/(portal)/_lib/page-name"
+
 import { PreviewFrame } from "./preview-frame"
 
 /**
@@ -17,6 +19,8 @@ import { PreviewFrame } from "./preview-frame"
  */
 
 const treeId = treeIdSchema.parse("t_seed1")
+
+const page: PageName = { name: "Autumn arrivals", treeId, derived: true }
 
 const unregistered: RenderDiagnostic = {
   code: "unknown-primitive",
@@ -34,13 +38,53 @@ const badProps: RenderDiagnostic = {
 describe("PreviewFrame", () => {
   it("leads with the page's own name rather than with the name of the pane", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={4} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
 
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("t_seed1")
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Autumn arrivals")
     expect(document.body.textContent).not.toContain("preview")
+  })
+
+  /**
+   * The heading was `t_seed1` for a fortnight — the portal's largest text, on
+   * its busiest screen, saying the least a string can say. Both halves are
+   * pinned: the words are the heading, and the id is still on the screen.
+   */
+  it("keeps the id on the surface, under the name rather than instead of it", () => {
+    const { container } = render(
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
+        <p>rendered</p>
+      </PreviewFrame>
+    )
+
+    const heading = screen.getByRole("heading", { level: 1 })
+
+    expect(heading.textContent).not.toContain("t_seed1")
+    expect(document.body.textContent).toContain("t_seed1")
+    expect(container.querySelector("details")).toBeNull()
+  })
+
+  /**
+   * A page that has not said what it is called is headed by the portal's own
+   * word for that, not by a blank and not by the id promoted back into the
+   * heading.
+   */
+  it("says a page with no heading of its own is untitled, and still shows its id", () => {
+    render(
+      <PreviewFrame
+        page={{ name: "Untitled page", treeId, derived: false }}
+        treeId={treeId}
+        revision={4}
+        diagnostics={[]}
+      >
+        <p>rendered</p>
+      </PreviewFrame>
+    )
+
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Untitled page")
+    expect(document.body.textContent).toContain("t_seed1")
   })
 
   /**
@@ -49,7 +93,7 @@ describe("PreviewFrame", () => {
    */
   it("says the page can be clicked, and what clicking it is for", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={4} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -60,7 +104,7 @@ describe("PreviewFrame", () => {
 
   it("counts the changes behind the page rather than printing a bare number", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={4} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -76,7 +120,7 @@ describe("PreviewFrame", () => {
    */
   it("says a page nothing has happened to yet has had nothing happen to it", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={0} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={0} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -87,7 +131,7 @@ describe("PreviewFrame", () => {
 
   it("leads with the sentence and follows it with the revision, never the reverse", () => {
     const { container } = render(
-      <PreviewFrame treeId={treeId} revision={4} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -116,7 +160,7 @@ describe("PreviewFrame", () => {
    */
   it("keeps a space on both sides of the separator", () => {
     const { container } = render(
-      <PreviewFrame treeId={treeId} revision={4} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -131,7 +175,7 @@ describe("PreviewFrame", () => {
 
   it("says one change in the singular", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={1} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={1} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -141,7 +185,7 @@ describe("PreviewFrame", () => {
 
   it("shows nothing about drawing when everything drew", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={1} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={1} diagnostics={[]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -156,7 +200,7 @@ describe("PreviewFrame", () => {
    */
   it("says the rest of the page is fine before it says what failed", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={2} diagnostics={[unregistered]}>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -167,7 +211,7 @@ describe("PreviewFrame", () => {
 
   it("counts them when there is more than one", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -181,7 +225,7 @@ describe("PreviewFrame", () => {
    */
   it("keeps the renderer's own account of every diagnostic, one click down", () => {
     const { container } = render(
-      <PreviewFrame treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}>
         <p>rendered</p>
       </PreviewFrame>
     )
@@ -196,7 +240,7 @@ describe("PreviewFrame", () => {
 
   it("renders the tree it was given", () => {
     render(
-      <PreviewFrame treeId={treeId} revision={2} diagnostics={[]}>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[]}>
         <p>the page itself</p>
       </PreviewFrame>
     )

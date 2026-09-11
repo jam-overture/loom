@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import type { NavItem } from "@/app/(portal)/_lib/nav"
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 
 export type ShellNavItem = NavItem & {
   readonly icon: ReactNode
@@ -59,16 +60,29 @@ const strokeProps = {
  * old links, and a nav that routes a signed-in reviewer through a redirect is a
  * nav pointing at where something used to be.
  *
- * `Waiting on you` leads, and it is the only entry whose label is a sentence
- * about the reader rather than a name for a thing. That is deliberate: it is
- * the one screen in the portal with something urgent on it, and "Home" or
- * "Overview" would have said where it is rather than why to press it. It is
- * `exact` because `/portal` is the prefix of every other route in this rail.
+ * Three labels are not written here at all — they are read from
+ * `_lib/screen-names.ts`, which is the one place those screens are named.
+ * `Activity` and `History` were synonyms sitting next to each other, and the
+ * front door's `Waiting on you` had stopped describing its own screen the day
+ * that screen grew a second half. Both defects were a rail label typed
+ * independently of the heading it points at, which is a thing a file can stop
+ * being able to do. The argument in full is in that module.
+ *
+ * The rail's remaining labels stay nouns, and the rule that made them nouns is
+ * intact: a rail is a list of places, a noun names a place, and each of them is
+ * the short form of its own screen's heading rather than a different subject.
+ * `What Loom has been doing` is a sentence because the screen it leads to
+ * genuinely has two subjects and no noun covers both — the same reason its
+ * heading is one.
+ *
+ * The front door leads, because it is the one screen in the portal with
+ * something urgent on it. It is `exact` because `/portal` is the prefix of every
+ * other route in this rail.
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
     {
-      label: "Waiting on you",
+      label: screenName("/portal"),
       href: "/portal",
       exact: true,
       icon: (
@@ -139,7 +153,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   ],
   [
     {
-      label: "Activity",
+      label: screenName("/portal/activity"),
       href: "/portal/activity",
       icon: (
         <svg {...strokeProps}>
@@ -148,7 +162,7 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
-      label: "History",
+      label: screenName("/portal/history"),
       href: "/portal/history",
       icon: (
         <svg {...strokeProps}>

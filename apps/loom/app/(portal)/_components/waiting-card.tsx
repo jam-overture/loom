@@ -1,6 +1,8 @@
 import Link from "next/link"
 
+import { PageName } from "@/app/(portal)/_components/page-name"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 import type { WaitingChange } from "@/app/(portal)/_lib/waiting"
 
 /**
@@ -20,7 +22,20 @@ import type { WaitingChange } from "@/app/(portal)/_lib/waiting"
  * exactly the sort of quick approval this whole surface exists to prevent
  * (0019).
  */
-export const WaitingCard = ({ change }: { readonly change: WaitingChange }) => (
+export const WaitingCard = ({
+  change,
+  page,
+}: {
+  readonly change: WaitingChange
+  /**
+   * Which page this is waiting on, named.
+   *
+   * Passed in rather than read here: this card is one row of a queue drawn from
+   * several pages, and a component that read a store per row would turn one
+   * listing into one read per waiting change.
+   */
+  readonly page: PageNameValue
+}) => (
   <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-4">
     <header className="flex flex-col gap-1">
       {/*
@@ -31,7 +46,7 @@ export const WaitingCard = ({ change }: { readonly change: WaitingChange }) => (
       <p className="text-sm">&ldquo;{change.asked}&rdquo;</p>
       <p className="text-ink-muted text-xs">
         {change.actor === null ? change.origin.label : `${change.actor} asked for this`} ·{" "}
-        <span className="font-mono">{change.treeId}</span> ·{" "}
+        <PageName page={page} layout="inline" /> ·{" "}
         <time dateTime={change.sinceIso}>waiting since {change.since}</time>
       </p>
     </header>

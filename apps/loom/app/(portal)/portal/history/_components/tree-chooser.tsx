@@ -2,8 +2,10 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
 import { portalStore } from "@/app/(portal)/_lib/store"
 
 /**
@@ -33,6 +35,16 @@ export const TreeChooser = async () => {
   }
 
   const { trees } = page.value
+  /**
+   * Named before the rows are drawn, so a chooser lists pages a person
+   * recognises rather than a column of ids. One bounded read per listed page,
+   * and a page whose name will not read is still offered — with its id, as
+   * every row carries anyway.
+   */
+  const names = await namesOf(
+    portalStore,
+    trees.map((listing) => listing.treeId)
+  )
 
   if (trees.length === 0) {
     return (
@@ -68,7 +80,7 @@ export const TreeChooser = async () => {
               href={`/portal/history?tree=${encodeURIComponent(listing.treeId)}`}
               className="border-edge-subtle bg-surface-base hover:bg-surface-hover block rounded-md border p-4 no-underline"
             >
-              <span className="font-mono text-sm">{listing.treeId}</span>
+              <PageName page={nameFrom(names, listing.treeId)} />
               <span className="text-ink-muted mt-1 block text-xs">
                 {listing.revision === 0
                   ? "No changes yet"

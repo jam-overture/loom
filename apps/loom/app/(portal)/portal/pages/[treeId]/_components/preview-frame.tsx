@@ -5,6 +5,7 @@ import { describeRenderDiagnostic, type RenderDiagnostic } from "@loom/runtime/r
 
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import type { PageName } from "@/app/(portal)/_lib/page-name"
 
 /**
  * The chrome around a rendered tree: whose page it is, how much has happened to
@@ -17,10 +18,14 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
  * thing that makes this screen different from a screenshot: **the page is
  * clickable, and clicking it is how you point at what you want changed.**
  *
- * The name stays monospace and stays verbatim. It is an identifier, but the
- * 22 August layout defect settled that identity is not technical detail — a
- * reviewer who cannot see which page they are on cannot act, and a filename is
- * a name even when it looks like a runtime word.
+ * That heading then read `t_seed1` for a fortnight — the portal's most-read
+ * heading, and a machine identifier. It is the page's own name now, derived from
+ * the heading the page itself leads with (`_lib/page-name.ts`), and **the id has
+ * not moved behind anything**: it sits directly under the name, in monospace and
+ * quieter. The 22 August layout defect settled that identity is not technical
+ * detail — a reviewer who cannot see which tree they are on cannot act — and the
+ * fix for a screen that showed only the id is not a screen that shows only the
+ * name.
  *
  * Diagnostics are shown rather than logged because 0008 made the renderer total —
  * it degrades instead of throwing — which only helps if the degradation is
@@ -31,12 +36,24 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
  * consequence now lead, and every original sentence is one click down, unedited.
  */
 export const PreviewFrame = ({
+  page,
   treeId,
   revision,
   diagnostics,
   views,
   children,
 }: {
+  /** What this page is called, and the id it is called by. Both are shown. */
+  readonly page: PageName
+  /**
+   * The same id, branded, because the revision link is built from it.
+   *
+   * `PageName` carries the id as a plain `string`: it is a value on its way to a
+   * screen. A URL builder takes a `TreeId` because a link is a read, and the
+   * brand is what stops one being built from a string nobody parsed. So the
+   * frame takes the printable half and the readable half separately rather than
+   * casting one into the other.
+   */
   readonly treeId: TreeId
   readonly revision: number
   readonly diagnostics: readonly RenderDiagnostic[]
@@ -54,7 +71,16 @@ export const PreviewFrame = ({
 }) => (
   <div className="flex flex-col gap-4">
     <header className="flex flex-col gap-1">
-      <h1 className="truncate font-mono text-2xl tracking-tight">{treeId}</h1>
+      <h1 className="truncate text-2xl tracking-tight" title={page.name}>
+        {page.name}
+      </h1>
+      {/*
+        * The id, immediately under the name and never instead of it. It is the
+        * string a reader types into a URL, quotes in a support thread, or looks
+        * for in a log, so it stays on the surface rather than inside the
+        * disclosure below.
+        */}
+      <p className="text-ink-muted truncate font-mono text-xs">{page.treeId}</p>
       <p className="text-ink-muted text-sm">
         This is your page as people are being served it right now. Click anything on it to point
         at that part, then ask for a change below.
