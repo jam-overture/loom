@@ -363,7 +363,23 @@ const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
   "discards-later-work": "It would write over work already done, so nobody may do it alone.",
   "redirected-submission":
     "It would send what people type into a form to a different place than before, so nobody may do it alone.",
-  "stakes-above-ceiling": "Riskier than a request from here is allowed to be without asking.",
+  /*
+   * Was "Riskier than a request from here is allowed to be without asking."
+   *
+   * Found by looking at the new queue on `/portal`, and it is a good example of
+   * why a screenshot keeps catching what a test cannot. "From here" is a
+   * reference to the *origin* of the ask, and on the page screen there is an
+   * origin a line or two above it, so the sentence resolves. The queue draws
+   * changes from every page and leads with what somebody typed — so "here" has
+   * no referent on screen, and the one sentence explaining why a person is being
+   * asked to decide something reads like a fragment of a longer sentence that
+   * was cut.
+   *
+   * The origin is not lost: it is in the technical record on the same card,
+   * spelled `user-instruction`. What is gone is a word that only worked in one
+   * of the two places this sentence is now read.
+   */
+  "stakes-above-ceiling": "A change this big is not something Loom may make on its own.",
   "confidence-below-minimum": "Sure enough to suggest, not sure enough to do without asking.",
 }
 
