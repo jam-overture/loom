@@ -51,6 +51,14 @@ export const loomFaqList = definePrimitive({
           columnGap: space(6),
           width: "100%",
           maxWidth: WIDTHS[given.width ?? "full"],
+          /**
+           * Centred when it is narrower than what holds it, for the reason
+           * `loom.section` now gives: a `readable` list inside a `wide` band
+           * capped its measure correctly and then sat against the left edge.
+           * A no-op at `full`, which is the default and every list that was
+           * right before.
+           */
+          marginInline: "auto",
           borderBlockEnd: `1px solid ${colour("border-subtle")}`,
           alignContent: "start",
         },
