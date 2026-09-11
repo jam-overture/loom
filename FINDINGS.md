@@ -15742,7 +15742,9 @@ is now in `vocabulary.test.ts` and rejects *here*, *this page*, *above* and
 
 ## 2026-09-11 — the search index is one page from its real cap, and must be split
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** closed — split
+the same day, one page later, when the nineteenth page took gzip to 47,501 of
+48,000. The first fetch is now 15.6 KB gzipped and the prose follows separately.
 
 `build.test.ts` caps the search index twice: 48,000 bytes gzipped, which is what
 leaves the server, and 240,000 uncompressed, which watches for a payload that has
