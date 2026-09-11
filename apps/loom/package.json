@@ -11,6 +11,7 @@
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm test && pnpm build",
     "docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
+    "docs:fences": "tsx \"app/(docs)/_lib/fences/generate.ts\"",
     "db:push": "tsx scripts/db-push.ts",
     "telemetry:prune": "tsx scripts/telemetry-prune.ts"
   },

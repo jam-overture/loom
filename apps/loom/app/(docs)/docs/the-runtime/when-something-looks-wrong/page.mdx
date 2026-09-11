@@ -1,0 +1,212 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  AnswerArrivingLate,
+  BoundedRead,
+  SnapshotAudits,
+  WhoPlacedIt,
+} from "@/app/(docs)/_components/operations"
+
+export const metadata = pageMetadata("the-runtime", "when-something-looks-wrong")
+
+# When something looks wrong
+
+Every page before this one is about building. This one is about the Tuesday
+morning six weeks later, when the thing is live, people have been asking it for
+changes, and something is off.
+
+There are three questions you will actually ask, and each has one call that
+answers it:
+
+- **Who put that there?** Nobody remembers agreeing to it, and you want a name.
+- **Is the page still what its history says?** It looks wrong and you cannot
+  tell whether anything is broken or you are misremembering.
+- **Somebody was asked to approve a change and nothing happened.** It has been
+  sitting there for days.
+
+None of the three needs a table you have to add, a field you have to set, or a
+service you have to run. **All three are answered from the log**, which has been
+filling up since your first change, and each one is a function you can call from
+a script.
+
+The page underneath everything below is this one:
+
+<Example id="first-tree" />
+
+Three changes were made to a copy of it as this documentation was being built,
+by two people:
+
+1. **dana** added a card at the bottom, with a sentence inside it.
+2. **ravi** made the opening sentence quieter.
+3. **dana** moved her card to the top.
+
+Every number, name and machine-written sentence on this page came out of that
+history. Nothing below was typed by hand.
+
+## Who put this here?
+
+A card is on the page. You did not put it there, and neither did the person
+sitting next to you.
+
+**Nothing on that card says who added it.** A node in a Loom tree carries a
+type, some props and its children — there is no author field, and adding one
+would be the second copy of a fact the log already holds. So the answer is
+*derived*: walk the log backwards from now, and the first change that put this
+node on the page is the one that put it there.
+
+That is one call:
+
+```ts
+import { attributeTree } from "@loom/runtime/store"
+
+const attributed = await attributeTree(store, page)
+```
+
+It takes the tree you are looking at rather than an id, which matters more than
+it sounds like it should: you are asking about the page **on somebody's screen**,
+and re-reading the page inside the call could answer about a revision that
+arrived while you were asking.
+
+Here is what it says about the page above.
+
+<WhoPlacedIt />
+
+Read the second and third rows together, because the difference between them is
+the whole reason this is worth having.
+
+**Dana asked for a card. She got a card with a sentence in it.** Both nodes were
+put there by revision 1, and only one of them was ever mentioned: an insert
+carries a whole subtree, so a change that names one node can place five. *"Dana
+added a card"* and *"dana added the sentence inside the card she added"* are
+different sentences, and only one of them is fair. The `Asked for?` column is
+which.
+
+<Callout>
+  **The two rows that name nobody are not a failure.** A page starts somewhere —
+  the tree you first created, before any change was applied — and the nodes that
+  came with it were placed by no revision at all. The runtime calls that
+  `seeded`, and it is a different fact from *we could not find out*, which is why
+  it is a different word.
+</Callout>
+
+### The answer is bounded, and says when it ran out
+
+A page that has been edited for two years has a log nothing should read all of
+to answer a question about one card. So the walk has a budget — five pages of
+log by default — and it stops when it runs out.
+
+<BoundedRead />
+
+**This is the third answer, and the one a hand-written version of this function
+would get wrong.** When the budget runs out, the honest thing to say is *I do
+not know*, not *nobody changed it* — the second is a sentence that credits the
+seed with somebody's work. `examinedTo` is the number that makes it useful: the
+node was placed at or before that revision, and asking again with a bigger
+budget will say where.
+
+## Is the page still what its history says?
+
+A store keeps two things: **the log**, which is every change that was ever
+applied, and **the snapshot**, which is the page as it stands. The snapshot
+exists so that showing somebody a page does not mean replaying its whole history
+first.
+
+Two copies of one truth can disagree. When they do, [the log is the one that is
+right](/docs/the-runtime/the-history-of-a-page) — and the function that finds
+out is:
+
+```ts
+import { auditSnapshot } from "@loom/runtime/store"
+
+const audited = await auditSnapshot(store, treeId, seed)
+```
+
+`seed` is the page at revision 0, before anything was applied. It is a parameter
+rather than something the store hands you, and that is a real limitation rather
+than an oversight: a store that has been compacted may no longer have revision
+0, and an audit that started from the snapshot it is checking would be starting
+from the answer.
+
+**Run it on a schedule, or in a test. Never on a request** — it folds a whole
+log, which is exactly the work the snapshot exists to avoid.
+
+There are three things it can say.
+
+<SnapshotAudits />
+
+<Callout kind="warning">
+  **The second and third of those were staged on purpose, and it is worth saying
+  how.** Nothing in Loom will damage a store on request, so the audit was handed
+  a reader whose snapshot had been edited without the log being told — which is
+  what a hand-run `UPDATE` leaves behind — and then one with revision 2 missing,
+  which is what a restore from two backups leaves behind. The verdicts are the
+  runtime's. The damage is this page's.
+</Callout>
+
+The middle one is the one to look at twice. **"Diverged" on its own is not
+something you can act on** — it tells you the page and its history disagree and
+leaves you to find out how. So the audit carries both trees, and `compareTrees`
+turns them into the line above: which node, and what about it differs. That is
+a sentence you can take to whoever ran the update.
+
+## Somebody was asked, and nothing happened
+
+When the Gate says *ask a person*, the change is not applied and it is not
+thrown away — it waits in a store of its own, keyed by the proposal's id. To see
+what is waiting for a page:
+
+```ts
+const waiting = await holds.forTree(treeId)
+```
+
+Oldest first, each carrying the Gate's reason. That is your review queue, and
+building one is [ten lines in your own
+app](/docs/the-runtime/what-your-app-has-to-do).
+
+Now the part nobody expects.
+
+<AnswerArrivingLate />
+
+**A held change names the revision it was judged against, so a change that
+waited while the page moved on can never apply again.** It is not stale pending
+a retry — it is dead, and answering it is how you find out. The runtime does not
+hold it back for a person to try a second time: custody ends, the queue goes
+back to empty, and what comes back is `revision-conflict` with both numbers in
+it.
+
+<Callout>
+  This is the same rule that refuses a change written against a page that has
+  since moved, seen from the other end. A proposal is written against a revision
+  and applies to that revision or to nothing — which is what lets two people edit
+  a page without a lock, and is also why an answer that takes three days is
+  usually an answer to a question nobody can act on any more. **The fix is not a
+  longer timeout. It is a shorter queue.**
+</Callout>
+
+## What Loom will not do about any of this
+
+Three things, and each one is a decision rather than a gap.
+
+**It will not repair a diverged snapshot.** An audit tells you the log and the
+page disagree and stops there. Whether the edit somebody made by hand was wanted
+is not a question a framework can answer, and a runtime that quietly overwrote
+one copy with the other would be destroying evidence in an incident.
+
+**It will not expire a held change.** Nothing times a hold out, and the queue
+will keep showing changes that can no longer apply. How long a person gets to
+answer is your policy, not the runtime's — and a queue you never look at is a
+signal about your process rather than a bug in the store.
+
+**None of these run on their own.** There is no background job, no scheduler,
+nothing on a request path. `auditSnapshot` in a nightly script and
+`attributeTree` behind an admin screen is the whole of what a deployment
+typically does with them, and both are ordinary code you write in the language
+you were already writing.
+
+<Callout>
+  Every answer on this page came out of the log, and the log exists because
+  **nothing on a Loom page can change except by a written plan that was judged
+  first.** That is the bargain the whole framework asks you to take, collected at
+  the end: a bounded vocabulary buys you a change you can review — and, six weeks
+  later, a page that can tell you who changed it, whether it is intact, and what
+  is still waiting on somebody.
+</Callout>

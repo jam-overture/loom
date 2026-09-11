@@ -125,3 +125,29 @@ black would render one page correctly and break
   page still had no weather and no word on a picture. The gaps that have mattered
   most in the last six runs have all been outside that ledger, which the document
   itself already says in its own words.
+
+## Alternatives considered
+
+**A `backdrop` prop on every band.** The obvious reading of the gap, since
+`loom.hero` already had one. Rejected because it puts the same enum on dozens of
+schemas and makes every band that grows atmosphere grow it independently — the
+condition that left the paints written inline in `loom.hero.ts` where nothing
+else could reach them. A wrapper is one primitive a page composes rather than a
+prop every primitive has to carry.
+
+**More `tone` values on `loom.section`.** The smallest change, and it answers the
+wrong question. `tone` picks a flat wash from the palette; atmosphere is a
+rendering with its own geometry and motion. Widening an enum of washes until it
+covers drifting colour fields would make one prop mean two unrelated things.
+
+**A ninetieth content model.** What three consecutive runs in this lane actually
+did, each reading the breadth mandate off `docs/hermes-port-map.md` and each
+returning with a definition list. Rejected because the ledger cannot show this
+gap: it counts Hermes blocks, Hermes was a creator-profile toolkit, and
+atmosphere is a surface rather than a shape — there is no block to port, so
+there is no row to be missing.
+
+**One wrapper for both jobs.** Painting behind content and putting words over a
+picture are close enough to look like one primitive. They are kept apart because
+their grounds differ in kind: a backdrop's ground is a paint this library
+defines, and an overlay's is a slot the page fills with anything at all.

@@ -96,3 +96,24 @@ were tried in the same run and rejected, and the reasons are the useful part:
 screenshot was being asked to find. The picture is still what proves a specimen
 reads as a product, and it is still the only thing that catches a marker
 rendering as a text underline on a laptop and a full-width rule on a phone.
+
+## Alternatives considered
+
+**Take more pictures.** The answer eight consecutive runs in this lane reached
+for, and it is necessary without being sufficient. A screenshot needs somebody
+to look at it, it needs the arrangement to have been drawn in the first place —
+no fixture here had ever put six tiles in a three-column grid — and a full-page
+capture of a tall dark page ghosts content between slices and invents defects
+that are not there. Pictures stay; they are what found this one. They are not
+what would have prevented it.
+
+**Assert it inside `loom.feature`, or inside `loom.feature-grid`.** Where the
+test for a primitive already lives, and where this defect is invisible. Each was
+correct read on its own: a card that fills its track and pads its contents, and
+a grid of rows with a declared gap. The defect existed only in the pair, so an
+assertion scoped to either one could not see it.
+
+**Assert it over the fixtures whose author thought of it.** The narrower version
+of what was chosen, and the reason the class stays open: the library was already
+tested against the arrangements its authors happened to write, which is exactly
+how a defect survives a month.

@@ -77,7 +77,7 @@ A delta says "insert here", where *here* is an id.
 `buildElement` does not invent one. It asks the `IdFactory` you passed, and
 which factory you pass is a real decision:
 
-```ts
+```ts sketch
 import { randomIdFactory, sequentialIdFactory } from "@loom/runtime"
 
 sequentialIdFactory("demo") // n_demo1, n_demo2, … — the same tree every time
@@ -121,7 +121,7 @@ The builders above make it hard to produce an invalid tree. When the tree comes
 from somewhere else — a database row, a request body, a file — you do not have
 that guarantee, so there is a boundary parse instead:
 
-```ts
+```ts function-body
 import { parseTree } from "@loom/runtime"
 
 const parsed = parseTree(await request.json())
