@@ -5109,6 +5109,20 @@
           ]
         },
         {
+          "module": "primitives/loom.frame",
+          "title": "loom.frame",
+          "summary": "The chrome a product screenshot sits in: a browser window, an app window, or a phone.",
+          "symbols": [
+            {
+              "name": "loomFrame",
+              "kind": "value",
+              "signature": "const loomFrame: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.grid",
           "title": "loom.grid",
           "summary": "Whatever it is given, in as many columns as will fit.",
@@ -5501,6 +5515,20 @@
           ]
         },
         {
+          "module": "primitives/loom.pin",
+          "title": "loom.pin",
+          "summary": "One mark placed at a point over the thing it is explaining.",
+          "symbols": [
+            {
+              "name": "loomPin",
+              "kind": "value",
+              "signature": "const loomPin: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.product",
           "title": "loom.product",
           "summary": "One thing for sale: a picture of it, what it is called, what it costs, and the button that buys it.",
@@ -5565,6 +5593,20 @@
               "name": "loomQuoteGrid",
               "kind": "value",
               "signature": "const loomQuoteGrid: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.rating",
+          "title": "loom.rating",
+          "summary": "A score out of five, drawn as stars.",
+          "symbols": [
+            {
+              "name": "loomRating",
+              "kind": "value",
+              "signature": "const loomRating: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

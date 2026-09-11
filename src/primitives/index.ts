@@ -32,6 +32,7 @@ import { loomFeature } from "./loom.feature.js"
 import { loomFeatureGrid } from "./loom.feature-grid.js"
 import { loomField } from "./loom.field.js"
 import { loomFooter } from "./loom.footer.js"
+import { loomFrame } from "./loom.frame.js"
 import { loomForm } from "./loom.form.js"
 import { loomGrid } from "./loom.grid.js"
 import { loomHeading } from "./loom.heading.js"
@@ -61,12 +62,14 @@ import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
 import { loomPerson } from "./loom.person.js"
 import { loomPersonGrid } from "./loom.person-grid.js"
+import { loomPin } from "./loom.pin.js"
 import { loomPerkList } from "./loom.perk-list.js"
 import { loomPerkListItem } from "./loom.perk-list-item.js"
 import { loomProduct } from "./loom.product.js"
 import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
 import { loomQuote } from "./loom.quote.js"
+import { loomRating } from "./loom.rating.js"
 import { loomRecording } from "./loom.recording.js"
 import { loomRecordingGrid } from "./loom.recording-grid.js"
 import { loomQuoteGrid } from "./loom.quote-grid.js"
@@ -247,6 +250,26 @@ import { loomTierTable } from "./loom.tier-table.js"
  * take one, which is the first `id` this library renders and the reason a Loom
  * page can link to its own second screen (`anchor.ts`).
  *
+ * **The product three** are the band a page about *software* is built on, and
+ * the largest gap left that Hermes could not have had: it sold a person, and a
+ * photograph of a person needs no chrome around it. `loom.frame` is a browser,
+ * an app window or a phone drawn around whatever the tree puts on its screen —
+ * a screenshot, a code panel, or a composition of primitives standing in for
+ * one — and it is the difference between a picture on a page and a running
+ * interface. `loom.pin` is the numbered mark over it, which is the field
+ * `hotspots: Hotspot[]` would have been and is instead a node per mark, so a
+ * label moves with a `move` and not with a rewrite of an array. `loom.rating`
+ * is the proof this library could not show: a quote says one person liked it,
+ * a logo wall says companies use it, and neither is the score a reader looks
+ * for first.
+ *
+ * The pair is the third instance of `loom.orbit`'s shape — the repeated thing
+ * in `children`, the singular thing it is arranged around in a slot — and the
+ * first where the two arrangements of the children are *different layouts of
+ * the same nodes*: marks over the screen where the frame is wide enough, and a
+ * numbered legend under it where it is not, chosen by a `@container` query on
+ * the frame rather than on the window, because a screenshot in one column of a
+ * `loom.split` is narrow on the widest screen there is.
  * **The four between the bands** are what a page does that none of its bands
  * do: announce, orient, run past the edge, and show a proportion.
  * `loom.banner` is the strip above everything — the third primitive here whose
@@ -297,6 +320,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomCarousel,
   loomOrbit,
   loomCard,
+  loomFrame,
+  loomPin,
   loomHero,
   loomFeatureGrid,
   loomFeature,
@@ -352,6 +377,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomCodeSpan,
   loomEmphasis,
   loomBadge,
+  loomRating,
   loomIcon,
   loomAvatar,
   loomKbd,
@@ -410,6 +436,7 @@ export {
   loomField,
   loomFooter,
   loomForm,
+  loomFrame,
   loomGrid,
   loomHeading,
   loomHero,
@@ -438,11 +465,13 @@ export {
   loomPerkListItem,
   loomPerson,
   loomPersonGrid,
+  loomPin,
   loomProduct,
   loomProductGrid,
   loomProse,
   loomQuote,
   loomQuoteGrid,
+  loomRating,
   loomSection,
   loomSplit,
   loomStack,

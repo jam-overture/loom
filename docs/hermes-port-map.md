@@ -239,6 +239,20 @@ a mark the primitive places, which is the claim a logo wall cannot make and the
 fourth general arranger. Neither has a row above, and the count below is
 unmoved by either — which is the point of the paragraph above.
 
+**Three more joined them on 4 September, and they are the same gap read one
+level up.** Hermes sold a *person*: a photograph is a photograph, a profile is
+never reviewed, and nothing on a creator's page is a running interface. A page
+selling **software** has three things it cannot do without and none of the
+seventy is any of them — the chrome a screenshot sits in, the marks that say
+which part of it matters, and a score. `loom.frame`, `loom.pin` and
+`loom.rating` have no row above for that reason.
+
+`loom.pin` is worth reading twice for the same reason `hours-of-operation` is,
+from the other side: Hermes would have held the marks as a `hotspots[]` field on
+the frame, and by 0052 they are nodes — an `insert` each, a `move` each, an
+inverse each. The port map has no row to correct here because Hermes never had
+the block; the rule is the same one that turns seven fixed weekday fields into
+seven nodes.
 **Four more joined them on 5 September, and three of the four are the page
 chrome paragraph above coming round a second time.** Hermes' app shell owned the
 top of the window, so nothing in the seventy is an announcement strip and

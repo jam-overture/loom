@@ -190,8 +190,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as seventy-eight primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(78)
+  it("registers as eighty-one primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(81)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -205,6 +205,8 @@ describe("the starter library", () => {
       "loom.carousel",
       "loom.orbit",
       "loom.card",
+      "loom.frame",
+      "loom.pin",
       "loom.hero",
       "loom.feature-grid",
       "loom.feature",
@@ -260,6 +262,7 @@ describe("the starter library", () => {
       "loom.code-span",
       "loom.emphasis",
       "loom.badge",
+      "loom.rating",
       "loom.icon",
       "loom.avatar",
       "loom.kbd",
@@ -392,6 +395,7 @@ describe("the starter library", () => {
      * its `children` — the failure the probe exists to catch — fails here.
      */
     expect(auditRegistry(registry).leaves).toEqual([
+      "loom.pin",
       "loom.feature",
       "loom.milestone",
       "loom.stat",
@@ -406,6 +410,7 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.credential",
       "loom.faq",
+      "loom.rating",
       "loom.avatar",
       "loom.perk",
       "loom.divider",
@@ -860,6 +865,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(motionPage(EDITORIAL)),
       ...typesIn(bookablePage(EDITORIAL)),
       ...typesIn(explainerPage(EDITORIAL)),
+      ...typesIn(productPage(EDITORIAL)),
       ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(furniturePage(EDITORIAL)),
     ])
@@ -888,6 +894,7 @@ describe("the composed vocabulary", () => {
       technicalPage,
       prosePage,
       tablePage,
+      productPage,
       datedPage,
       furniturePage,
     ].flatMap((fixture) =>
@@ -6203,3 +6210,237 @@ describe("the furniture between the bands", () => {
   })
 })
 
+const productPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const pin = (props: JsonObject) => buildElement(idFactory, { type: "loom.pin", props })
+
+  const shot = buildElement(idFactory, {
+    type: "loom.frame",
+    props: { chrome: "browser", label: "loom.dev/portal/proposals/8f21" },
+    children: [
+      buildSlot(idFactory, "surface", [
+        buildElement(idFactory, {
+          type: "loom.media",
+          props: {
+            src: "https://example.com/portal.png",
+            alt: "The review portal, holding a proposal mid-assessment",
+            aspect: "wide",
+            corners: "none",
+          },
+        }),
+      ]),
+      pin({ x: 22, y: 30, marker: "1", label: "The proposal, as four operations" }),
+      pin({ x: 79, y: 44, marker: "2", label: "What the Gate weighed", side: "start" }),
+      pin({ x: 50, y: 86, marker: "3", label: "Its inverse, already written", side: "above" }),
+    ],
+  })
+
+  const handset = buildElement(idFactory, {
+    type: "loom.frame",
+    props: { chrome: "phone", label: "Loom" },
+    children: [
+      buildSlot(idFactory, "surface", [
+        buildElement(idFactory, {
+          type: "loom.media",
+          props: {
+            src: "https://example.com/portal-phone.png",
+            alt: "The same proposal on a phone",
+            aspect: "portrait",
+            corners: "none",
+          },
+        }),
+      ]),
+    ],
+  })
+
+  const band = buildElement(idFactory, {
+    type: "loom.section",
+    props: { anchor: "see-it", eyebrow: "See it" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [buildText(idFactory, "Every change, before it lands")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.split",
+        props: { ratio: "start-wide", align: "center" },
+        children: [
+          buildSlot(idFactory, "start", [shot]),
+          buildSlot(idFactory, "end", [handset]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.rating",
+        props: { score: 4.3, caption: "1,284 reviews", size: "large" },
+      }),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [band],
+    }),
+    idFactory
+  )
+}
+
+describe("the product on the page", () => {
+  it("renders the band with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(productPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Every change, before it lands")
+    expect(markup).toContain("loom.dev/portal/proposals/8f21")
+    expect(markup).toContain("The proposal, as four operations")
+    expect([...markup.matchAll(new RegExp(`class="${LIBRARY_CLASS.pin} `, "g"))]).toHaveLength(3)
+    expect([...markup.matchAll(new RegExp(`class="${LIBRARY_CLASS.frame}"`, "g"))]).toHaveLength(2)
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(productPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(productPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(productPage(BOLD)).diagnostics).toEqual([])
+    expect(render(productPage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  it("makes each mark a node with an address, which is the whole argument against a hotspots array", () => {
+    /**
+     * The 0052 claim, asserted rather than stated in a comment. Three pins are
+     * three addressable nodes: moving one is a `configure` on that node, and
+     * its inverse restores that mark rather than all three. A `hotspots: []`
+     * prop on the frame would render the same picture and be one node, and
+     * every one of those properties would be gone.
+     */
+    const ids = [
+      ...render(productPage(EDITORIAL), true).markup.matchAll(
+        /data-loom-node="([^"]+)" data-loom-type="loom\.pin"/g
+      ),
+    ]
+
+    expect(ids).toHaveLength(3)
+    expect(new Set(ids.map((match) => match[1])).size).toBe(3)
+  })
+
+  it("puts the coordinates on the mark and every other rule in the stylesheet", () => {
+    /**
+     * The split `loom.orbit` established, applied to a second band. **Where a
+     * mark is** is a fact about one node that no static rule can express, so it
+     * is inline. **How a mark is drawn** is a fact about the arrangement, and
+     * an inline value would beat the rule that changes it — which is not a
+     * theoretical cost here, because the phone rendering changes `position`
+     * itself.
+     */
+    const { stylesheet, tree } = splitStylesheet(render(productPage(EDITORIAL)).markup)
+    const pins = [...tree.matchAll(/style="--loom-pin-x:([0-9.]+%);--loom-pin-y:([0-9.]+%)"/g)]
+
+    expect(pins).toHaveLength(3)
+    expect(pins[0]?.slice(1, 3)).toEqual(["22%", "30%"])
+    expect(tree).not.toContain("translate(-50%, -50%)")
+    expect(stylesheet).toContain(".loom-pin {\n  display: flex;")
+    expect(stylesheet).toContain("  .loom-pin {\n    position: absolute;\n    inset-inline-start: var(--loom-pin-x);")
+  })
+
+  it("makes the legend the unqueried rule and the overlay the one that needs room", () => {
+    /**
+     * 0079's preference, read the way it asks to be read. A client that
+     * resolves no media query at all gets marks stacked under the screenshot,
+     * labelled and readable; the arrangement that needs 48rem of width is the
+     * one inside the query. Written the other way round the two are
+     * indistinguishable on any browser anybody would test on, which is why this
+     * is asserted rather than trusted.
+     */
+    const { stylesheet } = splitStylesheet(render(productPage(EDITORIAL)).markup)
+    const overlay = stylesheet.indexOf("@container (min-width: 40rem) {\n  .loom-frame-pins {\n    position: absolute;")
+    const legend = stylesheet.indexOf(".loom-frame-pins {\n  display: flex;\n  flex-direction: column;")
+
+    expect(legend).toBeGreaterThan(-1)
+    expect(overlay).toBeGreaterThan(legend)
+    /** And a frame with no marks has no legend strip under its screen. */
+    expect(stylesheet).toContain(".loom-frame-pins:empty {\n  display: none;\n}")
+  })
+
+  it("draws three machines and tells assistive technology none of them is real", () => {
+    /**
+     * The chrome is a picture of a browser, and its address bar is not an
+     * address. Read out, it is a page claiming to be at a URL nobody can visit
+     * — so the whole bar is hidden and what remains is the screenshot's own alt
+     * text, which is the only thing on the frame that was ever content.
+     */
+    const idFactory = sequentialIdFactory()
+    const frameOf = (props: JsonObject): string =>
+      splitStylesheet(
+        render(
+          createTree(
+            buildElement(idFactory, {
+              type: "loom.frame",
+              props,
+              children: [buildSlot(idFactory, "surface", [buildElement(idFactory, { type: "loom.divider" })])],
+            }),
+            idFactory
+          )
+        ).markup
+      ).tree
+
+    const browser = frameOf({ chrome: "browser", label: "loom.dev" })
+    const window = frameOf({ chrome: "window", label: "proposal.json" })
+    const phone = frameOf({ chrome: "phone", label: "Loom" })
+
+    expect(browser).toContain("aria-hidden=\"true\"")
+    expect(browser).toContain("font-family:var(--loom-mono-family")
+    expect(window).toContain("text-align:center")
+    expect(window).not.toContain("var(--loom-mono-family")
+    /** The bezel is ink, so it is dark on a light page and light on a dark one. */
+    expect(phone).toContain("border:0.55rem solid var(--loom-fg-default)")
+    expect(phone).toContain("max-width:22rem")
+    expect(browser).not.toContain("max-width:22rem")
+  })
+
+  it("clips a second run of stars to the score rather than rounding it to the nearest half", () => {
+    /**
+     * 4.3 is 86% of a five-star run, and a renderer that picked *full, half or
+     * empty* per star would draw it as 4.5 and be wrong by two tenths on a
+     * number the page is quoting as proof. The two runs are the same glyphs at
+     * the same size, so they cannot fall out of register.
+     */
+    const { tree } = splitStylesheet(render(productPage(EDITORIAL)).markup)
+
+    expect(tree).toContain("width:86%")
+    expect(tree).toContain("color:var(--loom-accent-strong)")
+    expect(tree).toContain("color:var(--loom-fg-subtle);opacity:0.3")
+    /** The numeral says what it is out of, so nothing needs a label restating it. */
+    expect(tree).toContain("4.3")
+    expect(tree).toContain(" / 5")
+    expect([...tree.matchAll(/★★★★★/g)]).toHaveLength(2)
+  })
+
+  it("stays a rating when the props it is given are not one", () => {
+    /**
+     * The conformance probe renders every primitive under `{}` before anything
+     * else (0075), and a component that calls a method on a prop throws there
+     * rather than being reported on. Asserted from the audit's own side: the
+     * probe answers for this primitive, which is what "rendering is total"
+     * (0008) means for a leaf that does arithmetic.
+     */
+    const audit = auditRegistry(registry)
+
+    expect(audit.notProbeable).toEqual([])
+    expect(audit.throwsOnDeclaredProps).toEqual([])
+  })
+
+  it("holds the mark still while the page is being edited, the way a marquee does", () => {
+    expect(splitStylesheet(render(productPage(EDITORIAL), true).markup).tree).toContain(LIBRARY_CLASS.pinStill)
+    expect(splitStylesheet(render(productPage(EDITORIAL)).markup).tree).not.toContain(LIBRARY_CLASS.pinStill)
+    expect(splitStylesheet(render(productPage(EDITORIAL)).markup).stylesheet).toContain(
+      ".loom-pin-still .loom-pin-dot::after {\n  animation: none;\n}"
+    )
+  })
+})
