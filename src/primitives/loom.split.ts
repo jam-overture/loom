@@ -21,6 +21,10 @@ import { space } from "./tokens.js"
  * It wraps by flex-basis rather than a media query. Rendering is a pure function
  * with no stylesheet to attach, so responsiveness has to come from layout that
  * is intrinsically responsive — which is also why nothing here reads a viewport.
+ *
+ * Each column declares its own inline-size containment, which is the other half
+ * of that sentence: this primitive reads no width itself, and it is the reason
+ * anything inside it can.
  */
 
 const props = z
@@ -57,6 +61,19 @@ const column = (basis: string, ...content: readonly ReactNode[]): ReactNode =>
         gap: space(3),
         flex: `1 1 calc(${basis} - ${space(5)})`,
         minWidth: "min(100%, 18rem)",
+        /**
+         * **A column says how wide it is, so what is in it can ask.** This is
+         * the narrow column on a wide screen that `loom.heading` names as the
+         * limit of a viewport unit — a level-1 headline beside a picture at
+         * 1000px is in 460px of space and was sized as though it had the
+         * window. Declaring containment here is what makes `cqi` mean this
+         * column, and it costs nothing to a child that never asks.
+         *
+         * The flex basis is definite and the minimum is explicit, so inline-size
+         * containment takes nothing away: this column's width was never
+         * decided by its contents.
+         */
+        containerType: "inline-size",
       },
     },
     ...content

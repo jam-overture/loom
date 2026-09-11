@@ -21,7 +21,7 @@ export const SidebarNav = () => {
         <div key={group[0]?.href ?? index}>
           {index > 0 && <div className="border-edge-subtle mx-4 my-2 border-t" />}
           {group.map((item) => {
-            const active = isNavItemActive(pathname, item.href)
+            const active = isNavItemActive(pathname, item.href, item.exact)
 
             return (
               <Link

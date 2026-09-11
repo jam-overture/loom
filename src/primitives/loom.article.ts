@@ -159,6 +159,8 @@ export const loomArticle = definePrimitive({
          */
         style: {
           display: "flex",
+          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
+          boxSizing: "border-box",
           height: "100%",
           overflow: "hidden",
           background: colour("bg-surface"),

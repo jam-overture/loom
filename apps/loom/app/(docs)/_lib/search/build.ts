@@ -3,7 +3,7 @@ import { apiEntries } from "../api/reference"
 import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageHeadings } from "./headings"
-import type { SearchEntry, SearchIndex } from "./model"
+import type { SearchEntry, SearchIndex, SearchProse } from "./model"
 import { readPageProse } from "./prose"
 
 /**
@@ -114,6 +114,34 @@ const exportEntries = (): readonly SearchEntry[] =>
     )
   )
 
+const allEntries = (): readonly SearchEntry[] => [
+  ...pageEntries(),
+  ...headingEntries(),
+  ...exportEntries(),
+]
+
+/**
+ * The half that ships first: everything except the words.
+ *
+ * Carries `body: ""` rather than dropping the field, so one entry type serves
+ * both halves and `match.ts` needs to know nothing about the split — an index
+ * whose prose has not arrived scores exactly like one whose pages have none,
+ * which is a state it already handles for generated pages and exports.
+ */
 export const buildSearchIndex = (): SearchIndex => ({
-  entries: [...pageEntries(), ...headingEntries(), ...exportEntries()],
+  entries: allEntries().map((entry) => ({ ...entry, body: "" })),
 })
+
+/**
+ * The half that follows: the words, keyed by the entry they belong to.
+ *
+ * Entries with nothing to say are left out rather than stored empty. Exports
+ * have no prose by design and generated pages have no file to read, so about a
+ * third of the index would otherwise be keys mapping to `""`.
+ */
+export const buildSearchProse = (): SearchProse =>
+  Object.fromEntries(
+    allEntries()
+      .filter((entry) => entry.body !== "")
+      .map((entry) => [entry.href, entry.body])
+  )

@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema } from "@loom/runtime"
+import { collectNodeIds, treeIdSchema } from "@loom/runtime"
 import { auditSnapshot, describeStoreError } from "@loom/runtime/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
@@ -14,6 +14,7 @@ import { scopedLead } from "@/app/(portal)/_lib/page-views"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
+import { CheckupBasis } from "./_components/checkup-basis"
 import { CheckupVerdictPanel } from "./_components/checkup-verdict"
 import { CheckupTreeChooser } from "./_components/tree-chooser"
 
@@ -77,6 +78,13 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
   const problem = [found, audit].find((result) => result !== undefined && !result.ok)
   if (problem !== undefined && !problem.ok && problem.error.code === "not-found") notFound()
 
+  /**
+   * Read once, above the JSX, because two things below it need the same report
+   * and calling `describeAudit` twice would let the verdict and the basis
+   * describe two different folds.
+   */
+  const report = audit !== undefined && audit.ok ? describeAudit(audit.value) : undefined
+
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   return (
@@ -109,8 +117,16 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
             <p className="font-mono">{describeStoreError(problem.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      ) : audit !== undefined && audit.ok ? (
-        <CheckupVerdictPanel report={describeAudit(audit.value)} treeId={scope.data} />
+      ) : seed !== undefined && report !== undefined ? (
+        <>
+          <CheckupVerdictPanel report={report} treeId={scope.data} />
+          {/*
+           * Below the verdict and below the differences: the answer, then what
+           * to do about it, then the parts that disagree, and only then what
+           * the check was made of.
+           */}
+          <CheckupBasis report={report} startingParts={collectNodeIds(seed.root).length} />
+        </>
       ) : (
         <StateNotice tone="notice" title="This page can't be checked here.">
           <p>

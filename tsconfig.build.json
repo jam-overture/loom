@@ -20,5 +20,11 @@
     "noEmit": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.test.ts", "src/testing/**", "src/cli/scaffold-fixture/**"]
+  /**
+   * `src/testing/**` was excluded until 2026-09-02, when it became a published
+   * entry point (0104). Its own `*.test.ts` files are still excluded by the
+   * first pattern, so what is emitted is the fixtures and the contract suites
+   * and nothing that runs them.
+   */
+  "exclude": ["src/**/*.test.ts", "src/cli/scaffold-fixture/**"]
 }
