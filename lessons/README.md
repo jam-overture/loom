@@ -251,19 +251,11 @@ and neither can state it. What the registry holds is a predicate; what it is
 applied to is a pair; and the declaration that makes the pair visible is a claim
 that can be false — which, as the lesson's sixth exercise finds by running two
 decision records against each other, it currently is.
-not the registry, not the primitive? How far Part V runs is still open, and the
-place to look next is that question rather than the pattern.
-which two were two examples agreeing. How far Part V runs is still open, and the
-next one will be found the same way this one was — by applying the pattern and
-watching where it does not fit.
-tree names something a deployment owns and holds none of it. Two lessons in, the
-shape is clear enough to state — *a name in the tree, an address in a registry,
-resolved before the walk* — and how far it runs is still open. A frame's origin
-is the next thing of that shape, and whether it is a lesson or a footnote is a
-tree names something a deployment owns and holds none of it. It has one lesson in
-it, and how far it runs is an open question — a submission's destination and a
-frame's origin are the same shape as a binding, and whether they are lessons is a
-decision for whoever is learning this, not for whoever is writing it down.
+
+How far Part V runs is still open. On the evidence of this one, the place to look
+is not another registry — it is another fact that exists only between two things,
+and the question to bring to it is the one lesson 22 answered the hard way: who
+is allowed to declare it, and what happens when they are wrong?
 
 ## Pacing
 
