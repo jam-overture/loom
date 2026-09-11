@@ -209,10 +209,19 @@ tree. Everything else in the system follows from protecting that one property.
 | --- | --- | --- |
 | [18](18-data.md) | Data: the question the tree asks | Why an answer may never be in the tree, what a page stops being a function of, and what a reviewer's approval covers once it covers a question. |
 | [19](19-destinations.md) | Destinations: the address the tree never holds | Why validating a form action is the wrong shape of answer; why a binding may carry AI-authored params and a submission may not; and why moving a form's destination is held whoever asked. |
+| [20](20-origins.md) | Origins: whose document runs inside your page | Why the URL stays in the tree and the origins do not; why this seam has no plan and no resolve step; and why a sandbox is reported for a frame that worked. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
 can hold at once. Part V is what came after the system was whole: places where a
+tree names something a deployment owns and holds none of it. After two lessons
+the shape looked stateable — *a name in the tree, an address in a registry,
+resolved before the walk* — and lesson 20 is the third instance, which breaks two
+of those three clauses and keeps the middle one. That is the more useful thing to
+have learned than the pattern would have been: which clause was load-bearing, and
+which two were two examples agreeing. How far Part V runs is still open, and the
+next one will be found the same way this one was — by applying the pattern and
+watching where it does not fit.
 tree names something a deployment owns and holds none of it. Two lessons in, the
 shape is clear enough to state — *a name in the tree, an address in a registry,
 resolved before the walk* — and how far it runs is still open. A frame's origin

@@ -918,6 +918,62 @@ with; if your list of registries has three entries, one is missing.
 
 ---
 
+## Set Y — two days after lesson 20
+
+Interleaved with 05, 07, 12, 14, 15, 18 and 19 — the widest set so far.
+
+Set X asked you to hold two seams apart. There are now three, and that is a
+different problem rather than a bigger one: with two, telling them apart is a
+list of differences, and with three you have to know **which differences were
+the rule and which were a coincidence.** Most of this set is that question in
+various disguises.
+
+1. Write the sentence that is true of all three Part V seams — data, submissions
+   and frames — as a single rule about what goes in a registry. Then say what
+   lesson 19's version of it (*a name in the tree, an address in a registry,
+   resolved before the walk*) got right and what it got wrong, and name which of
+   its three clauses survived. *(18, 19)*
+2. Give the test that decides whether a value belongs in the tree or in a
+   host-written registry, in one sentence, without using the words "dangerous"
+   or "trusted". Then apply it to two cases neither lesson covered: the list of
+   locales a page may be translated into, and the API key an embed provider
+   wants in a query string. *(18, 19)*
+3. The frame seam has no plan step and no resolve step where the two before it
+   have both. Name the property that buys that, name the two things the shape
+   costs, and say what the record tells a deployment to do if it wants an
+   asynchronous verdict anyway. *(14, 18)*
+4. `sandbox="allow-scripts allow-same-origin"` on a frame whose document comes
+   from the framing page's own origin. Say what it protects the page from, then
+   answer both design questions: why is it permitted rather than refused, and
+   why is it reported rather than left alone? The second half is the one to
+   write most carefully. *(14)*
+5. `resolveFrame` given the number `42` returns a refusal rather than throwing,
+   and `createFrameOriginRegistry` given `https://example.com/embed` returns an
+   error rather than ignoring the path. Both are the same discipline. Name it,
+   name where it was established, and then say which of the two would still be
+   correct if the value came from a *host* rather than from a model — and why
+   the answer is not the same for both. *(05, 14)*
+6. A `frames` declaration and an `interactive: { whenProps }` declaration are
+   both prop names an author writes and the registry checks. Give the property
+   that makes a drifted `frames` worse. Then name the drift the registry cannot
+   catch, say why it cannot, and say what kind of tool would. *(15)*
+7. The endpoint catalogue is the complete list of what a model may name; the
+   frame catalogue is not a complete list of anything. Explain what each is
+   *for*, then say why `self` is not projected into the second — and give the
+   general rule about projections that decides it. *(12, 15, 19)*
+8. An AI-authored URL in an `href` is refused at the props schema and the node
+   is omitted. An AI-authored URL in a frame is refused by a seam and the
+   primitive renders a notice. Same mechanism, two answers. Give the reason,
+   phrased as a claim about what kind of *fact* each refusal is — then say what
+   would be true of a page's structure if the second worked like the first.
+   *(02, 07, 14)*
+
+Question 1 is the point of the set and Question 8 is the one most people can
+feel the answer to and not state. If your answer to 2 needs a different rule for
+each of the two cases, you have not found the rule yet.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -956,3 +1012,4 @@ renders this file rather than restating it.
 | V | 1 week after Part IV | | |
 | W | 2 days after L18 | | |
 | X | 2 days after L19 | | |
+| Y | 2 days after L20 | | |
