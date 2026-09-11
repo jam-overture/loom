@@ -8,6 +8,8 @@ import {
   plainObstacle,
   plainOperationEffect,
 } from "./effect-view"
+import { runtimeWordsIn } from "../_test/plain-language"
+import type { PartName } from "./part-name"
 import type { OperationEffect, ProposalEffect } from "./proposal-effect"
 import { readingOf } from "./vocabulary"
 
@@ -21,11 +23,25 @@ import { readingOf } from "./vocabulary"
  * pinned directly at the bottom of this file.
  */
 
+/**
+ * Three named parts, as `proposal-effect` would have named them.
+ *
+ * Written out rather than derived, because this file is about the sentences and
+ * not about where a name comes from — `part-name.test.ts` owns that. What
+ * matters here is the shape: a name that carries its own article, so a sentence
+ * built around it must not supply a second one.
+ */
+const HEADING: PartName = { name: "the heading “Ship faster”", nodeId: "n_h1" }
+const CARD: PartName = { name: "the card “Autumn arrivals”", nodeId: "n_new" }
+const BAND: PartName = { name: "the band “Prices”", nodeId: "n_band" }
+
 const operation = (over: Partial<OperationEffect> = {}): OperationEffect => ({
   op: "configure",
   verb: "reconfigure",
-  subject: "loom.heading",
+  subject: HEADING,
+  label: "loom.heading",
   place: ["loom.page", "loom.card"],
+  placeNames: ["the page", "the card"],
   detail: "1 value",
   into: null,
   before: null,
@@ -59,13 +75,13 @@ describe("plainOperationEffect", () => {
         reading({
           op: "insert",
           verb: "add",
-          subject: "loom.card",
-          into: "loom.band",
-          before: "loom.heading",
+          subject: CARD,
+          into: "the band",
+          before: "the heading",
           changes: [],
           carries: 1,
         })
-      ).toBe("Adds a loom.card inside loom.band, just before loom.heading.")
+      ).toBe("Adds the card “Autumn arrivals” n_new inside the band, just before the heading.")
     })
 
     it("says the end of a list rather than naming a part that is not there", () => {
@@ -73,13 +89,13 @@ describe("plainOperationEffect", () => {
         reading({
           op: "insert",
           verb: "add",
-          subject: "loom.card",
-          into: "loom.band",
+          subject: CARD,
+          into: "the band",
           before: null,
           changes: [],
           carries: 1,
         })
-      ).toBe("Adds a loom.card at the end of loom.band.")
+      ).toBe("Adds the card “Autumn arrivals” n_new at the end of the band.")
     })
 
     /** `carries` counts the node itself, so what is being announced is the rest. */
@@ -88,13 +104,15 @@ describe("plainOperationEffect", () => {
         reading({
           op: "insert",
           verb: "add",
-          subject: "loom.card",
-          into: "loom.band",
+          subject: CARD,
+          into: "the band",
           before: null,
           changes: [],
           carries: 4,
         })
-      ).toBe("Adds a loom.card at the end of loom.band. It brings 3 more pieces with it.")
+      ).toBe(
+        "Adds the card “Autumn arrivals” n_new at the end of the band. It brings 3 more pieces with it."
+      )
     })
 
     it("says nothing about what it brings when it brings nothing", () => {
@@ -102,8 +120,8 @@ describe("plainOperationEffect", () => {
         reading({
           op: "insert",
           verb: "add",
-          subject: "loom.card",
-          into: "loom.band",
+          subject: CARD,
+          into: "the band",
           before: null,
           changes: [],
           carries: 1,
@@ -116,33 +134,35 @@ describe("plainOperationEffect", () => {
         reading({
           op: "insert",
           verb: "add",
-          subject: "loom.card",
+          subject: CARD,
           into: null,
           changes: [],
           carries: 1,
           missing: true,
         })
-      ).toBe("Would add a loom.card, but the part it would go inside isn't on this page any more.")
+      ).toBe(
+        "Would add the card “Autumn arrivals” n_new, but the part it would go inside isn't on this page any more."
+      )
     })
   })
 
   describe("deleting", () => {
     it("counts what goes with it", () => {
       expect(
-        reading({ op: "remove", verb: "delete", subject: "loom.band", changes: [], carries: 5 })
-      ).toBe("Deletes the loom.band, and the 4 pieces inside it.")
+        reading({ op: "remove", verb: "delete", subject: BAND, changes: [], carries: 5 })
+      ).toBe("Deletes the band “Prices” n_band, and the 4 pieces inside it.")
     })
 
     it("says a leaf is a leaf rather than counting nothing", () => {
       expect(
-        reading({ op: "remove", verb: "delete", subject: "loom.heading", changes: [], carries: 1 })
-      ).toBe("Deletes the loom.heading, which has nothing inside it.")
+        reading({ op: "remove", verb: "delete", subject: HEADING, changes: [], carries: 1 })
+      ).toBe("Deletes the heading “Ship faster” n_h1, which has nothing inside it.")
     })
 
     it("spells the one number that grates as a digit mid-sentence", () => {
       expect(
-        reading({ op: "remove", verb: "delete", subject: "loom.band", changes: [], carries: 2 })
-      ).toBe("Deletes the loom.band, and the one piece inside it.")
+        reading({ op: "remove", verb: "delete", subject: BAND, changes: [], carries: 2 })
+      ).toBe("Deletes the band “Prices” n_band, and the one piece inside it.")
     })
 
     it("puts a part that is gone in the conditional", () => {
@@ -165,12 +185,12 @@ describe("plainOperationEffect", () => {
         reading({
           op: "move",
           verb: "move",
-          subject: "loom.card",
-          from: "loom.band",
-          into: "loom.grid",
+          subject: CARD,
+          from: "the band",
+          into: "the grid",
           changes: [],
         })
-      ).toBe("Moves the loom.card out of loom.band and into loom.grid.")
+      ).toBe("Moves the card “Autumn arrivals” n_new out of the band and into the grid.")
     })
 
     /** Reordering inside one parent is not a change of address, and must not read as one. */
@@ -179,12 +199,12 @@ describe("plainOperationEffect", () => {
         reading({
           op: "move",
           verb: "move",
-          subject: "loom.card",
+          subject: CARD,
           from: null,
-          into: "loom.band",
+          into: "the band",
           changes: [],
         })
-      ).toBe("Moves the loom.card to a different place inside loom.band.")
+      ).toBe("Moves the card “Autumn arrivals” n_new to a different place inside the band.")
     })
 
     it("distinguishes a missing destination from a missing part", () => {
@@ -192,12 +212,14 @@ describe("plainOperationEffect", () => {
         reading({
           op: "move",
           verb: "move",
-          subject: "loom.card",
-          from: "loom.band",
+          subject: CARD,
+          from: "the band",
           into: null,
           changes: [],
         })
-      ).toBe("Would move loom.card, but the part it would go into isn't on this page any more.")
+      ).toBe(
+        "Would move the card “Autumn arrivals” n_new, but the part it would go into isn't on this page any more."
+      )
     })
   })
 
@@ -210,14 +232,14 @@ describe("plainOperationEffect", () => {
             { key: "width", before: "12", after: "16", inert: false },
           ],
         })
-      ).toBe("Changes the loom.heading's title and width.")
+      ).toBe("Changes the title and width of the heading “Ship faster” n_h1.")
     })
 
     /** Taking a setting away is different news from giving it a new value. */
     it("gives clearing its own verb", () => {
       expect(
         reading({ changes: [{ key: "gap", before: "4", after: null, inert: false }] })
-      ).toBe("Takes away the loom.heading's gap.")
+      ).toBe("Takes away the gap of the heading “Ship faster” n_h1.")
     })
 
     it("says both when it does both", () => {
@@ -228,12 +250,14 @@ describe("plainOperationEffect", () => {
             { key: "gap", before: "4", after: null, inert: false },
           ],
         })
-      ).toBe("Changes the loom.heading's title, and takes away its gap.")
+      ).toBe(
+        "Changes the title of the heading “Ship faster” n_h1, and takes away its gap."
+      )
     })
 
     it("does not claim a change when the operation lists no settings", () => {
       expect(reading({ changes: [], detail: "no values" })).toBe(
-        "Changes nothing about the loom.heading — it lists no settings."
+        "Changes nothing about the heading “Ship faster” n_h1 — it lists no settings."
       )
     })
 
@@ -299,10 +323,21 @@ describe("plainOperationEffect", () => {
     ).toBe("reconfigure loom.heading — 2 values, 1 already set this way")
   })
 
-  it("carries the place and the before-and-after through untouched", () => {
+  /**
+   * Both readings of the path, and the point is that there are two of them.
+   *
+   * The breadcrumb under a step used to be `loom.page › loom.card` and was
+   * defended as "the labels a reader recognises rather than the ids the delta
+   * names" — true against an id, and no longer the best available reading now
+   * that the sentence above it says *the card*. One row cannot name one part two
+   * ways. So the surface says the plain path and the record keeps the labels,
+   * which is the governing principle applied to a breadcrumb.
+   */
+  it("shows the plain path and keeps the labelled one for the record", () => {
     const plain = plainOperationEffect(operation())
 
-    expect(plain.place).toEqual(["loom.page", "loom.card"])
+    expect(plain.place).toEqual(["the page", "the card"])
+    expect(plain.technicalPlace).toEqual(["loom.page", "loom.card"])
     expect(plain.changes).toHaveLength(1)
   })
 
@@ -313,20 +348,43 @@ describe("plainOperationEffect", () => {
    */
   it("keeps the delta model's words out of every reading", () => {
     const cases: readonly Partial<OperationEffect>[] = [
-      { op: "insert", verb: "add", into: "loom.band", before: "loom.heading", changes: [], carries: 3 },
+      { op: "insert", verb: "add", into: "the band", before: "the heading", changes: [], carries: 3 },
       { op: "remove", verb: "delete", changes: [], carries: 2 },
-      { op: "move", verb: "move", from: "loom.band", into: "loom.grid", changes: [] },
       {},
-      { missing: true, changes: [] },
+      { missing: true, subject: "the heading", changes: [] },
+      { op: "move", verb: "move", from: "the band", into: "the grid", changes: [] },
+      { changes: [{ key: "gap", before: "4", after: null, inert: false }] },
+      { missing: true, subject: "n_gone", changes: [] },
     ]
 
     for (const one of cases) {
-      const sentence = reading(one).toLowerCase()
+      const sentence = reading(one)
 
-      for (const word of ["insert", "reconfigure", "node", "delta", "tree", "prop", "index"]) {
-        expect(sentence).not.toContain(word)
-      }
+      expect(runtimeWordsIn(sentence), sentence).toEqual([])
     }
+  })
+
+  /**
+   * The other half of the rule, and the half that is easy to lose: **nothing is
+   * removed.** If the record ever stops using the runtime's words, the
+   * disclosure has become a second plain reading and the delta's own account
+   * exists nowhere on the screen.
+   */
+  it("says it again in the runtime's own words, one click down", () => {
+    const plain = plainOperationEffect(
+      operation({ op: "remove", verb: "delete", detail: "and 3 nodes under it", changes: [] })
+    )
+
+    expect(plain.technical).toBe("delete loom.heading — and 3 nodes under it")
+    expect(runtimeWordsIn(plain.technical)).toEqual(["nodes"])
+
+    /**
+     * The labelled path is judged by what it *is* rather than by the word list:
+     * `loom.page` is a registered type id and contains no banned word, which is
+     * the limit of a vocabulary guard and worth pinning rather than papering
+     * over. What the record owes is the labels themselves, unchanged.
+     */
+    expect(plain.technicalPlace).toEqual(["loom.page", "loom.card"])
   })
 
   it("ends every reading in a full stop", () => {
@@ -444,12 +502,12 @@ describe("plainEffect", () => {
     const plain = plainEffect(
       effect({
         operations: [
-          operation({ op: "remove", verb: "delete", subject: "loom.card", changes: [], carries: 1 }),
+          operation({ op: "remove", verb: "delete", subject: CARD, changes: [], carries: 1 }),
           operation({
             op: "insert",
             verb: "add",
-            subject: "loom.heading",
-            into: "loom.band",
+            subject: HEADING,
+            into: "the band",
             before: null,
             changes: [],
             carries: 1,
@@ -459,8 +517,8 @@ describe("plainEffect", () => {
     )
 
     expect(plain.operations.map((one) => readingOf(one.reading))).toEqual([
-      "Deletes the loom.card, which has nothing inside it.",
-      "Adds a loom.heading at the end of loom.band.",
+      "Deletes the card “Autumn arrivals” n_new, which has nothing inside it.",
+      "Adds the heading “Ship faster” n_h1 at the end of the band.",
     ])
   })
 

@@ -16260,8 +16260,16 @@ say precisely what it does. What was wrong is that the portal said more.
 
 ## 2026-09-02 — the guard that keeps the runtime's vocabulary off the surface now exists in two copies
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-nothing is broken, and it is one regex away from drifting
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-24-the-queue-names-its-parts`, as
+`app/(portal)/_test/plain-language.ts` — the recommendation below, taken, with
+one change: it is inside the route group rather than in `apps/loom/test/`, so
+six other lanes are not importing a file this lane owns. It had reached **three**
+copies by the time it was taken, the third being the hand-rolled word list in
+`effect-view.test.ts` that used `toContain` rather than a bounded match. All
+three read one list now, and the module has a test of its own that proves the
+detector still matches — a guard that has quietly stopped matching passes for
+ever.
 
 `audit-view.test.ts` carries a regex — `fold|snapshot|seed|delta|node|tree|
 revision|log|gate|id` — and asserts that no sentence a screen shows unasked
@@ -19432,3 +19440,141 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-11 — the review queue's own outline names parts the way the sentence beside it no longer does
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+found by looking at the screenshot of the change that closed the other half
+
+`portal-24-the-queue-names-its-parts` made every sentence on `/portal/pages/
+[treeId]` say *the card “Starter Free for personal projects. One…”* where it had
+said `loom.card`. The screenshot of that screen shows the rail on the right —
+**Parts of this page, 22 parts** — still reading
+
+```
+loom.page
+  loom.heading
+    · Loom
+  loom.prose
+  loom.card
+    loom.heading
+      · Starter
+```
+
+in monospace, four inches from a sentence about the same card in a person's
+words. One screen, two names for one part, which is the exact thing the diff
+below it was written to stop happening on one row.
+
+**Not taken in that diff, on purpose, and the reason is worth keeping.** It is a
+different shape of problem: a *list of kinds* rather than a sentence, and it is
+what a reader clicks to point at a part, so what it owes them is a stable
+correspondence with the outline the technical record uses. `_lib/vocabulary.ts`
+already holds `PART_KINDS`, which answers *what is this?* for one node, and
+`_lib/part-name.ts` holds `placeNameOf`, which answers *what do I call it in the
+middle of a line* — the rail wants the first and the tree structure around it,
+and picking between them is a unit's worth of thinking rather than a rename.
+
+The honest summary of where that screen stands: **the sentences are a person's
+and the index of the page is not.** That is better than both being the
+runtime's, and it is not finished.
+
+---
+
+## 2026-09-11 — a card is named by its heading *and* its body, and the body crowds the heading out
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+cosmetic, and the first thing a reader's eye lands on
+
+`saidBy` joins every text run under a node with a space, which is right and was
+found the hard way — concatenating them produced *the card “Every change is a
+deltaNothing here was…”* on 10 September. What the live screenshot shows is the
+other end of the same choice. A pricing card holding a heading *Starter* and a
+paragraph *Free for personal projects. One tree, one editor, no card required.*
+is named
+
+> the card **“Starter Free for personal projects. One…”**
+
+The 40-character limit is spent on the body, and the one word that identifies
+the card — its heading — is followed by a run-on that reads as a transcription
+error. Three of the five rows in the screenshot look like this.
+
+**The likely answer is not a longer limit.** A container's *first* run is almost
+always its heading, and *the card “Starter”* is both shorter and more
+identifying than any truncation of the join. But the join is correct for a node
+whose text is genuinely several runs of one sentence, and telling those two
+apart is a judgement this lane has not made yet: the candidate rules are "first
+run only for an element with element children" and "first run only when there is
+more than one", and they disagree on a card holding two paragraphs.
+
+`saidBy`'s current behaviour is load-bearing for `page-name.ts` as well, so
+whoever takes this should read both callers before changing the join.
+
+---
+
+## 2026-09-11 — the model was reachable from `next start` this run, and the 4 September hang did not reproduce
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+for this run — **not** closed as a standing fact, because nothing was fixed and
+nothing explains the difference
+
+The 2026-09-04 finding — *a Node server in this sandbox cannot reach the model,
+and the failure is a hang* — was restated on 10 September, when it cost that run
+its screenshots: the portal's prompt box was driven for real and the server
+action never returned, so every screen in that report is empty.
+
+**Today the same recipe worked twice.** `next build`, `next start` with
+`LOOM_PORTAL_SESSION_SECRET` and `LOOM_PORTAL_REVIEWERS` set, signed in through
+the form, an ask typed into the real prompt box: both asks came back well inside
+45 seconds, the first applied and the second held. Every screenshot in
+`reports/2026-09-11-portal-the-queue-names-its-parts.md` is a production build of
+its own commit with a live model behind it and a real held proposal on the
+screen.
+
+What was *not* done: `NODE_USE_ENV_PROXY` was not set, and nothing about the
+environment was changed. A plain `fetch` to `api.anthropic.com` from Node 22
+answered `200` in 736ms before the server was started, which is the cheap probe
+worth running first — **if that probe passes, do not plan around the hang.**
+
+So the entry above it stands as a report of what happened on two days and not as
+a property of the sandbox. A run that hits it again should say so, because two
+sightings and one non-sighting is not yet a pattern anybody can act on.
+
+---
+
+## 2026-09-11 — `pkill -f "next start"` kills the shell that runs it, and the port stays held
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+third road into the trap the 10 September report filed as number four
+
+That report's trap four is: *a script that throws before its cleanup leaves the
+server holding the port, so the next run's readiness probe succeeds against the
+**old** server* — with the old configuration, which then reads as a wrong
+password. It cost that run an attempt. It cost this one two, by a different
+route.
+
+`pkill -f "next start"` matches **its own invoking shell**, because `-f` tests
+the whole command line and the command line contains that string. The shell dies
+mid-script, so everything after the `pkill` — including the restart — never runs,
+and the exit code is a bare `1` with no output to explain it. The server the
+`pkill` was meant to replace is often still there, and the readiness probe then
+passes against it.
+
+Both times the symptom was the same and it is the misleading part: **the portal
+answered `200` and said "This portal isn't set up yet"**, which reads as a
+configuration bug in the diff under test rather than as an old process.
+
+What works, for whoever writes the shared recipe:
+
+- Find the pid and `kill -9 <pid>` it, or match on the port rather than on
+  `next start`.
+- **Start the server on a port no previous attempt used.** It costs nothing and
+  it makes "am I talking to the server I just started" un-askable.
+- Probe for a string only the *new* configuration produces — here, the absence of
+  "This portal isn't set up yet" — rather than for `200`.
+
+The key length is the other half worth writing down: `LOOM_PORTAL_REVIEWERS`
+takes `actor:key` and **the key must be at least 24 characters**, or the sign-in
+form renders disabled with the reason in the operator's disclosure. The form has
+one field, and it is the key — the actor is derived from it.
