@@ -99,7 +99,7 @@ describe("the queue on a given day", () => {
   it("leaves a reader who has done nothing with every set and no queue", () => {
     const entries = queueFor(REVIEW_SETS, EMPTY_PROGRESS, PART_LESSONS, "2026-03-09")
 
-    expect(entries).toHaveLength(25)
+    expect(entries).toHaveLength(26)
     expect(entries.every((entry) => entry.status === "unscheduled")).toBe(true)
     expect(dueNow(entries)).toEqual([])
   })

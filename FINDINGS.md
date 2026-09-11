@@ -13401,6 +13401,51 @@ itself, asking the reader what it means about which parts of a record should be
 expected to age.
 
 Filed rather than fixed because `decisions/` is not this lane's.
+
+---
+
+## 2026-09-09 — `derive.ts` documents a function that has never existed
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` (§4b, `src/theme/`)
+· **Status:** open
+
+`src/theme/derive.ts`'s module comment ends on a paragraph about the one thing
+the solver cannot do for you, and closes it by naming the tool that can:
+
+> `deriveBrandPalette` is the shape of that answer: give it the brand colour and
+> it decides, by measuring, whether it can be ink or has to be an area.
+
+There is no `deriveBrandPalette`. The identifier appears exactly once in the
+repository — in that sentence:
+
+```
+$ grep -rn "deriveBrandPalette" src/ apps/ tools/
+src/theme/derive.ts:37: * `deriveBrandPalette` is the shape of that answer: give it the brand colour and
+```
+
+`derive.ts` exports `hslHex`, `solveLightness`, `derivePalette`,
+`derivePaletteChecked` and `canCarryText`, and none of them takes a brand colour
+and decides whether it can carry text — `canCarryText` answers half of it, for
+one colour against one ground, and does not place the colour.
+
+Small, and worth filing because of who the comment is written for.
+[0080](decisions/0080-a-doc-comment-in-src-is-written-to-a-stranger.md) says a
+doc comment in `src` is written to a stranger, and this is the paragraph a
+stranger arrives at holding exactly the problem it describes: a brand colour
+that will not clear the bar as ink. It ends by telling them the answer exists
+and naming it. They then grep for it. What they find is a comment.
+
+Either fix is fine and they are different sizes: delete the sentence, or write
+the function. The comment reads as though the second was intended — the
+paragraph above it works through what such a function would have to decide, and
+`minimal`'s green living in `border-accent` and `brand-secondary` is given as
+the worked example of its output.
+
+Found while writing lesson 21, which teaches the palette-derivation constraint
+(0077 — derive once, look, commit as literals) and quotes the surrounding
+paragraph. The lesson does not mention `deriveBrandPalette`.
+
+Filed rather than fixed because `src/theme/` is not this lane's.
 ## 2026-09-02 — the pairings probe cannot see an ink behind an optional prop, and one declared row is already wrong because of it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**

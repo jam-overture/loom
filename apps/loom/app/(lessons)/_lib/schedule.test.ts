@@ -16,13 +16,13 @@ import { plainText, referencedLessons } from "./text"
 
 describe("the review schedule, read as a queue", () => {
   it("finds every set in the file, in order", () => {
-    expect(REVIEW_SETS.map((set) => set.letter).join("")).toBe("ABCDEFGHIJKLMNOPQRSTUVWXY")
+    expect(REVIEW_SETS.map((set) => set.letter).join("")).toBe("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
   })
 
   it("stops at the tracking table rather than reading it as a set", () => {
     const last = REVIEW_SETS.at(-1)
 
-    expect(last?.letter).toBe("Y")
+    expect(last?.letter).toBe("Z")
     expect(last?.questions).toHaveLength(8)
     expect(last?.closing.join(" ")).not.toContain("Confident-and-wrong")
   })

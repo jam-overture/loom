@@ -224,6 +224,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [18](18-data.md) | Data: the question the tree asks | Why an answer may never be in the tree, what a page stops being a function of, and what a reviewer's approval covers once it covers a question. |
 | [19](19-destinations.md) | Destinations: the address the tree never holds | Why validating a form action is the wrong shape of answer; why a binding may carry AI-authored params and a submission may not; and why moving a form's destination is held whoever asked. |
 | [20](20-origins.md) | Origins: whose document runs inside your page | Why the URL stays in the tree and the origins do not; why this seam has no plan and no resolve step; and why a sandbox is reported for a frame that worked. |
+| [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -233,6 +234,15 @@ the shape looked stateable — *a name in the tree, an address in a registry,
 resolved before the walk* — and lesson 20 is the third instance, which breaks two
 of those three clauses and keeps the middle one. That is the more useful thing to
 have learned than the pattern would have been: which clause was load-bearing, and
+which two were two examples agreeing.
+
+Lesson 21 then satisfies all three clauses exactly, having been built before any
+of the three seams that produced them — so the pattern has now survived being
+broken once and confirmed once, which is more than four confirmations would have
+told you. What lesson 21 adds is a second question the first three never raised:
+where do you check a property that belongs to *no single party* — not the tree,
+not the registry, not the primitive? How far Part V runs is still open, and the
+place to look next is that question rather than the pattern.
 which two were two examples agreeing. How far Part V runs is still open, and the
 next one will be found the same way this one was — by applying the pattern and
 watching where it does not fit.
