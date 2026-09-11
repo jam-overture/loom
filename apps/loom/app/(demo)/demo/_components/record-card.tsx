@@ -67,6 +67,7 @@ const Section = ({ title, children }: { readonly title: string; readonly childre
 export const RecordCard = ({
   record,
   effect,
+  inQuestion,
   plain = [],
   moved,
   offer = "offer",
@@ -94,6 +95,12 @@ export const RecordCard = ({
    * useful.
    */
   readonly effect?: ProposalEffect
+  /**
+   * The part of the page this change is about, already rendered. Present on the
+   * same terms as `effect` and absent for the same reasons, plus the ones
+   * `_lib/in-question.ts` gives for a change that has no showable subject.
+   */
+  readonly inQuestion?: React.ReactNode
   /**
    * The same proposal in the words on the page, for the same reason and under
    * the same condition: only a change nobody has answered yet is a change a
@@ -354,6 +361,22 @@ export const RecordCard = ({
           {answered.meaning}
         </p>
       )}
+
+      {/*
+        * The part of the page the question is about, above the two buttons that
+        * answer it — so on the one layout where the band is five screens away,
+        * the visitor sees what they are deciding about before they decide.
+        *
+        * Above rather than below, which is the whole placement: under the
+        * buttons it would be an explanation offered to somebody who has already
+        * pressed one. It costs the wide layout nothing, because there the band
+        * is ringed on the stage and `globals.css` removes this entirely.
+        *
+        * A rendered element rather than a record field: the card is a client
+        * component and rendering a tree needs the registry, so the page builds
+        * it and hands it across (`part-in-question.tsx`).
+        */}
+      {record.heldProposalId && !answerReport && inQuestion}
 
       {/*
         * What allowing it would do to the page, in the words on the page, the

@@ -13204,6 +13204,119 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-10 — the plain reading of a change prints registered type ids, and misses copy held in props
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+
+`(portal)/_lib/effect-view.ts` composes the sentence a person reads before they
+approve a held proposal, and `(portal)/_lib/proposal-effect.ts` supplies the
+facts. The demo renders both, on the one card where a stranger is asked to allow
+something. Two things in them are worth a look from the lane that owns them, and
+neither is a bug — the demo worked around both rather than reaching into another
+route group.
+
+**1. The subject is a registered type id.** For the demo's leading ask the whole
+plain reading is:
+
+> Deletes the `loom.stat-grid`, and the 3 pieces inside it.
+> Inside `loom.page`
+
+`loom.stat-grid` and `loom.page` are the delta's own names, in monospace, in the
+sentence that is supposed to be the plain half. `effect-view`'s own module
+comment anticipates this and argues the other way — *"`loom.card` and `n_gone` are
+what tell one row from another, and a sentence that said 'a piece of the page'
+four times would be friendlier and useless"* — and for a reviewer in the queue
+that is very likely right: they know the library and the id is how they find the
+row. It is not right for a stranger sixty seconds into a public URL, and that is
+a difference between the two surfaces rather than a defect in one file. Flagged
+rather than fixed for exactly that reason: **the fix, if there is one, is a
+plainer subject the portal is willing to print too**, and that is the portal's
+call.
+
+**2. `textIn` misses copy that lives in props, which is most of it.** The words
+preview — *The words it takes away: …* — walks a node for children of kind
+`text`. `loom.stat` holds its figure, its label and its caption as **props**,
+because 0052 says a fixed field stays a prop and only repeated content earns a
+node. So a proposal to delete the clinic's three headline numbers reports *no
+words at all*, and the reviewer sees `3 pieces` where the page says
+*"3,400 · appointments last year"*. The same is true of `loom.quote` (`quote`,
+`author`, `role`), and of every primitive that follows 0052's rule — which is
+the library's whole direction, so this widens rather than narrows.
+
+Both were found by driving the built demo at 390×844, where the card's text is
+the *only* account of the change: the band it is about is 4,620px below the
+question. The demo's answer is to render the part itself
+(`app/(demo)/_lib/in-question.ts`, `demo-13-the-part-it-is-about`), which is
+available to it because it holds the tree and the registry. The review queue
+holds both as well, if that turns out to be the answer there too.
+
+---
+
+## 2026-09-10 — a preview of a tree loses its theme, and there is no seam for "the words a node shows"
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open
+
+Two small gaps found building a second rendering of one node of a page. Neither
+blocked the unit — both were worked around inside the demo's lane — and both are
+about the same thing: the runtime is excellent at rendering *a page* and has no
+particular answer for rendering *a part of one*, which is what any preview,
+inspector or side-by-side is.
+
+**1. A theme is mounted on the root primitive, not on the tree.** `mountedTheme`
+resolves the theme from the root's reserved props and `renderContextFor` hands it
+to whichever primitive is the root, which then decides what to do with it —
+`loom.page` puts the variables on its own element. Render a tree rooted anywhere
+else and there is no theme at all: the excerpt comes out with every
+`var(--loom-…)` falling back, in a typeface and palette the page does not own,
+and **no diagnostic** — `resolveTheme` on a node with no theme prop is
+legitimately "unthemed". The demo works around it by reading `RenderOutput.theme`
+off the page render it already does and putting `themeStyle(theme)` on the frame
+around the excerpt. That is fine and it is four lines in a component; what is
+missing is anything in the runtime that says *this is how you render part of a
+themed tree*.
+
+**2. Nothing can answer "what words does this node show?"** A node's visible copy
+is split between text children and props, and which props are copy is known only
+to the component: `loom.stat`'s `value`, `label` and `caption` are copy;
+`loom.hero`'s `backdrop`, `align` and `stature` are not. `definePrimitive` has
+`description` (one line, for the catalogue) and the text seam
+(`PrimitiveText`, for strings the *component* owns) and neither is this. Every
+surface that wants to say "the part that says *3,400 appointments last year*"
+therefore either renders the subtree and reads it back, or guesses. Filed as a
+gap rather than a request: it may well be that rendering *is* the answer and the
+honest fix is the one above, in which case this entry is the reason to write that
+down somewhere a fresh session finds it.
+
+---
+
+## 2026-09-10 — `21st.dev` is `EGRESS_BLOCKED`, ninth consecutive run
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Verified again from this lane, unchanged since 27 August and reported by every
+demo run since. `docs/routines.md` lists `21st.dev` as allowed under both
+mechanisms; `WebFetch` returns `EGRESS_BLOCKED`. Either the committed allowlist
+and the proxy disagree, or the entry is aspirational — and the demo brief's
+instruction to *match the quality of `loom.hero` and `loom.feature-grid`* by
+consulting it is unfollowable either way.
+
+It cost this run nothing, for the ninth time. What decided this unit's window
+height, its fade and its placement was driving the built page at 390×844, 360×640
+and 1440×900 and looking at what was on the screen — a reference gallery cannot
+answer where to clip a band so the two buttons under it stay above the fold.
+
+---
+
+## 2026-09-10 — the demo brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Sixth consecutive run. The brief's first named task is moving the demo off
+`/portal/demo` onto `/demo`; it landed in `demo-01-a-public-front-door` and
+`main` has carried `apps/loom/app/(demo)/` since. The marketing link the brief
+says to file a finding for already points at `/demo`. Two paragraphs of every
+run's *read first* are about work that is done, which is a small tax on the one
+document a fresh session cannot check against anything.
 ## 2026-09-03 — `no-such-source` is two different faults under one code
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
