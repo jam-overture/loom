@@ -120,6 +120,8 @@ export const loomTable = definePrimitive({
            */
           borderCollapse: "separate",
           borderSpacing: "0",
+          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
+          boxSizing: "border-box",
           width: "100%",
           fontFamily: family("body"),
           color: colour("fg-default"),
@@ -134,6 +136,8 @@ export const loomTable = definePrimitive({
       {
         ...loom.editable,
         style: {
+          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
+          boxSizing: "border-box",
           minWidth: "0",
           width: "100%",
           ...(panel

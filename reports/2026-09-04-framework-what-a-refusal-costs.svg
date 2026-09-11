@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">What a refusal costs</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">A repair sends the request again. The <tspan font-style="italic">ratio</tspan> never moves. The <tspan font-style="italic">gap</tspan> between scoping and not is the whole story.</text>
+  <rect x="40" y="94" width="404" height="68" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="118" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">THE FINDING SAID THE RATIO WIDENS</text>
+  <text x="58" y="140" font-size="13" fill="#5c5751">It is flat: <tspan font-weight="650" fill="#15120e">2.015 → 2.004</tspan> from 5 to 500 sections,</text>
+  <text x="58" y="156" font-size="13" fill="#5c5751">drifting <tspan font-style="italic">towards</tspan> 2 as the fixed 305 characters shrink.</text>
+  <rect x="476" y="94" width="404" height="68" rx="10" fill="#f5f8fa" stroke="#d5e0e6"/>
+  <text x="494" y="118" font-size="10.5" font-weight="700" fill="#7a94a3" letter-spacing="0.06em">WHAT ACTUALLY WIDENS</text>
+  <text x="494" y="140" font-size="13" fill="#4d6472">The absolute gap: <tspan font-weight="650" fill="#15120e">502 → 98,922</tspan> characters.</text>
+  <text x="494" y="156" font-size="13" fill="#4d6472">A scope is worth <tspan font-style="italic">twice</tspan> as much on the repair path.</text>
+  <text x="40" y="196" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">AN EPISODE — ONE REQUEST, REFUSED, THEN REPAIRED — IN CHARACTERS</text>
+  <line x1="120" y1="536.0" x2="880" y2="536.0" stroke="#e4ded5" stroke-dasharray="none"/>
+  <text x="112" y="540.0" font-size="10.5" fill="#8a8178" text-anchor="end">0k</text>
+  <line x1="120" y1="436.0" x2="880" y2="436.0" stroke="#e4ded5" stroke-dasharray="3 4"/>
+  <text x="112" y="440.0" font-size="10.5" fill="#8a8178" text-anchor="end">50k</text>
+  <line x1="120" y1="336.0" x2="880" y2="336.0" stroke="#e4ded5" stroke-dasharray="3 4"/>
+  <text x="112" y="340.0" font-size="10.5" fill="#8a8178" text-anchor="end">100k</text>
+  <line x1="120" y1="236.0" x2="880" y2="236.0" stroke="#e4ded5" stroke-dasharray="3 4"/>
+  <text x="112" y="240.0" font-size="10.5" fill="#8a8178" text-anchor="end">150k</text>
+  <rect x="143.0" y="494.1" width="78" height="41.9" fill="#b06a4a"/>
+  <rect x="143.0" y="451.6" width="78" height="42.5" fill="#e5b9a4"/>
+  <line x1="143.0" y1="494.1" x2="221.0" y2="494.1" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="182.0" y="442.6" font-size="12" font-weight="650" fill="#15120e" text-anchor="middle">42,191</text>
+  <text x="182.0" y="554" font-size="11.5" fill="#5c5751" text-anchor="middle">whole tree</text>
+  <text x="182.0" y="569" font-size="10.5" fill="#8a8178" text-anchor="middle">×2.015</text>
+  <rect x="239.0" y="494.6" width="78" height="41.4" fill="#4a7d95"/>
+  <rect x="239.0" y="452.6" width="78" height="42.0" fill="#a8c6d4"/>
+  <line x1="239.0" y1="494.6" x2="317.0" y2="494.6" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="278.0" y="443.6" font-size="12" font-weight="650" fill="#15120e" text-anchor="middle">41,689</text>
+  <text x="278.0" y="554" font-size="11.5" fill="#5c5751" text-anchor="middle">scoped</text>
+  <text x="278.0" y="569" font-size="10.5" fill="#8a8178" text-anchor="middle">×2.015</text>
+  <text x="230" y="592" font-size="12.5" font-weight="650" fill="#15120e" text-anchor="middle">5 sections</text>
+  <text x="230" y="610" font-size="11" fill="#8a8178" text-anchor="middle">gap 502</text>
+  <rect x="393.0" y="485.5" width="78" height="50.5" fill="#b06a4a"/>
+  <rect x="393.0" y="434.4" width="78" height="51.1" fill="#e5b9a4"/>
+  <line x1="393.0" y1="485.5" x2="471.0" y2="485.5" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="432.0" y="425.4" font-size="12" font-weight="650" fill="#15120e" text-anchor="middle">50,815</text>
+  <text x="432.0" y="554" font-size="11.5" fill="#5c5751" text-anchor="middle">whole tree</text>
+  <text x="432.0" y="569" font-size="10.5" fill="#8a8178" text-anchor="middle">×2.012</text>
+  <rect x="489.0" y="494.6" width="78" height="41.4" fill="#4a7d95"/>
+  <rect x="489.0" y="452.6" width="78" height="42.0" fill="#a8c6d4"/>
+  <line x1="489.0" y1="494.6" x2="567.0" y2="494.6" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="528.0" y="443.6" font-size="12" font-weight="650" fill="#15120e" text-anchor="middle">41,693</text>
+  <text x="528.0" y="554" font-size="11.5" fill="#5c5751" text-anchor="middle">scoped</text>
+  <text x="528.0" y="569" font-size="10.5" fill="#8a8178" text-anchor="middle">×2.015</text>
+  <text x="480" y="592" font-size="12.5" font-weight="650" fill="#15120e" text-anchor="middle">50 sections</text>
+  <text x="480" y="610" font-size="11" fill="#8a8178" text-anchor="middle">gap 9,122</text>
+  <rect x="643.0" y="395.7" width="78" height="140.3" fill="#b06a4a"/>
+  <rect x="643.0" y="254.8" width="78" height="140.9" fill="#e5b9a4"/>
+  <line x1="643.0" y1="395.7" x2="721.0" y2="395.7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="682.0" y="245.8" font-size="12" font-weight="650" fill="#15120e" text-anchor="middle">140,619</text>
+  <text x="682.0" y="554" font-size="11.5" fill="#5c5751" text-anchor="middle">whole tree</text>
+  <text x="682.0" y="569" font-size="10.5" fill="#8a8178" text-anchor="middle">×2.004</text>
+  <rect x="739.0" y="494.6" width="78" height="41.4" fill="#4a7d95"/>
+  <rect x="739.0" y="452.6" width="78" height="42.0" fill="#a8c6d4"/>
+  <line x1="739.0" y1="494.6" x2="817.0" y2="494.6" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="778.0" y="443.6" font-size="12" font-weight="650" fill="#15120e" text-anchor="middle">41,697</text>
+  <text x="778.0" y="554" font-size="11.5" fill="#5c5751" text-anchor="middle">scoped</text>
+  <text x="778.0" y="569" font-size="10.5" fill="#8a8178" text-anchor="middle">×2.015</text>
+  <text x="730" y="592" font-size="12.5" font-weight="650" fill="#15120e" text-anchor="middle">500 sections</text>
+  <text x="730" y="610" font-size="11" fill="#8a8178" text-anchor="middle">gap 98,922</text>
+  <rect x="150" y="258" width="12" height="12" fill="#e5b9a4"/>
+  <text x="168" y="268" font-size="11.5" fill="#5c5751">the repair — which restates the request whole</text>
+  <rect x="150" y="278" width="12" height="12" fill="#b06a4a"/>
+  <text x="168" y="288" font-size="11.5" fill="#5c5751">the proposal that was refused</text>
+  <text x="40" y="646" font-size="11" fill="#8a8178">Measured by <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">measureRepairPrompt</tspan>, starter catalogues wired, nothing sent. Record 0108.</text>
+</svg>

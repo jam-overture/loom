@@ -15,8 +15,9 @@ const strokeProps = {
 } as const
 
 /**
- * Three groups. What the runtime holds — the pages themselves, and the catalogue a
- * model is told it may build from (0013). Then the record of how they got that
+ * Three groups. What the runtime holds — the pages themselves, the catalogue a
+ * model is told it may build from (0013), and the policy every change is judged
+ * against before it reaches one (0002). Then the record of how they got that
  * way: what the runtime was asked to do and what became of it (0023), what was
  * accepted into a tree (0016), whether the model's own confidence has been worth
  * anything (0031), and whether the log still produces the snapshot.
@@ -38,6 +39,16 @@ const strokeProps = {
  * page, never before it — a nav label renamed ahead of the screen it points at
  * is a promise the screen does not keep.
  *
+ * `Sign-ins` is the one that did not move on the run that rewrote its page, and
+ * that is the decision rather than an omission. The rule is to name a thing
+ * after what a person wants, and the words the rest of the industry would use
+ * here — `Security` — is a claim four sizes larger than the screen: it reports
+ * failed sign-ins to this portal and nothing else, not the runtime's own
+ * permissions, not what a proposal was allowed to do, not who may edit a page.
+ * A rail entry that promised those would send a reader looking for them. Its
+ * heading carries the question instead, which is where a question belongs: a
+ * rail is a list of places and a noun is what names a place.
+ *
  * `audit` was here from day 10 with no route behind it, and a nav is a claim
  * about what a thing can do. It came back once its page did — and the page keeps
  * the claim honest, because a tree whose seed this host cannot reproduce is
@@ -47,9 +58,27 @@ const strokeProps = {
  * public `/demo` of its own on 21 August; `/portal/demo` is now a 308 kept for
  * old links, and a nav that routes a signed-in reviewer through a redirect is a
  * nav pointing at where something used to be.
+ *
+ * `Waiting on you` leads, and it is the only entry whose label is a sentence
+ * about the reader rather than a name for a thing. That is deliberate: it is
+ * the one screen in the portal with something urgent on it, and "Home" or
+ * "Overview" would have said where it is rather than why to press it. It is
+ * `exact` because `/portal` is the prefix of every other route in this rail.
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
+    {
+      label: "Waiting on you",
+      href: "/portal",
+      exact: true,
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M6 3h12M6 21h12" />
+          <path d="M8 3v3.5a4 4 0 002 3.4l2 1.1 2-1.1a4 4 0 002-3.4V3" />
+          <path d="M8 21v-3.5a4 4 0 012-3.4l2-1.1 2 1.1a4 4 0 012 3.4V21" />
+        </svg>
+      ),
+    },
     {
       label: "Pages",
       href: "/portal/pages",
@@ -87,6 +116,23 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
           <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
           <line x1="12" y1="12" x2="12" y2="16" />
           <line x1="10" y1="14" x2="14" y2="14" />
+        </svg>
+      ),
+    },
+    {
+      /**
+       * Beside `Pieces` rather than in the record group, because the two are one
+       * question asked twice: what the AI may *build* from, and what it may
+       * *do*. Both are true before anything has happened, which is what makes
+       * them the pair a new arrival reads first — every entry in the group below
+       * is empty on a deployment nothing has been asked of.
+       */
+      label: "Rules",
+      href: "/portal/rules",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" />
+          <polyline points="9 12 11 14 15 10" />
         </svg>
       ),
     },

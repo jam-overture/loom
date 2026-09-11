@@ -140,6 +140,32 @@ describe("the demo's stylesheet", () => {
   it("never styles bare :focus, which would ring a mouse click too", () => {
     expect(css).not.toMatch(/[^-]:focus\s*\{/)
   })
+
+  /**
+   * The way back exists because a stacked layout can scroll its record off the
+   * screen. A wide one cannot — the rail is its own scroller — so the bar there
+   * would be an offer to show something already on show.
+   *
+   * Asserted here rather than in the component because that is where the
+   * decision is: a `matchMedia` read at mount is right until somebody resizes a
+   * window, and this is a surface whose whole job is a first impression on a
+   * viewport nobody controls.
+   */
+  it("keeps the way back off the layout that cannot lose its record", () => {
+    expect(css).toMatch(/@media\s*\(min-width:\s*1024px\)\s*\{\s*\.loom-reach\s*\{\s*display:\s*none/)
+  })
+
+  /**
+   * Hidden by `visibility` and not by `display` or a conditional render, which
+   * is what lets it leave the way it arrived — and, more importantly, what keeps
+   * it out of the tab order while it is gone. A bar sitting at opacity zero over
+   * the page would still be the next thing a keyboard visitor reached.
+   */
+  it("takes the way back out of the tab order while it is out of the way", () => {
+    const reach = /\.loom-reach\s*\{([^}]*)\}/.exec(css)?.[1] ?? ""
+
+    expect(reach).toContain("visibility: hidden")
+  })
 })
 
 /**

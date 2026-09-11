@@ -5,7 +5,7 @@ import { useState } from "react"
 import type { LessonPointer } from "../_lib/links"
 import { lessonWorkedThrough, withLessonWorkedThrough } from "../_lib/progress"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * When each lesson was worked through — the one fact the queue cannot derive.
@@ -22,7 +22,7 @@ import { today, useProgress } from "./store"
  */
 
 export const LessonLog = ({ lessons }: { readonly lessons: readonly LessonPointer[] }) => {
-  const { progress, ready, update } = useProgress()
+  const { progress, ready, today, update } = useProgress()
   const [editing, setEditing] = useState<number | undefined>(undefined)
 
   if (!ready) return <p style={style.note}>Reading your progress&hellip;</p>
@@ -49,7 +49,7 @@ export const LessonLog = ({ lessons }: { readonly lessons: readonly LessonPointe
                 <button
                   type="button"
                   style={style.button(false)}
-                  onClick={() => update((state) => withLessonWorkedThrough(state, lesson.number, today()))}
+                  onClick={() => update((state) => withLessonWorkedThrough(state, lesson.number, today))}
                 >
                   I worked through this today
                 </button>
@@ -66,8 +66,8 @@ export const LessonLog = ({ lessons }: { readonly lessons: readonly LessonPointe
               {editing === lesson.number ? (
                 <input
                   type="date"
-                  defaultValue={on ?? today()}
-                  max={today()}
+                  defaultValue={on ?? today}
+                  max={today}
                   style={{ ...style.button(false), cursor: "text" }}
                   onChange={(event) => {
                     const value = event.target.value

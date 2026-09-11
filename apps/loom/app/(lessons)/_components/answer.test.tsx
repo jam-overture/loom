@@ -21,7 +21,9 @@ const question = (onRecord = vi.fn()) => {
       body={<p>Why is a half-applied delta worse than a rejected one?</p>}
       resolve={{
         kind: "check",
-        checkIn: [{ number: 3, title: "Change as data: the delta", href: "/lessons/03" }],
+        checkIn: [
+          { kind: "lesson", name: "03", title: "Change as data: the delta", href: "/lessons/03" },
+        ],
         onRecord,
       }}
     />
