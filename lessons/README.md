@@ -101,7 +101,12 @@ what it adds is only the part paper cannot do:
   same question, asked again a day later, a week after you get it, and a month
   after that. Three clean retrievals retire one; missing it once sends it back
   to the start. This is the schedule's own instruction after a miss, which is
-  the hardest thing in this document to do by hand and the easiest to drop.
+  the hardest thing in this document to do by hand and the easiest to drop. It
+  draws on the lessons' own Warm-up and Self-check questions as well as the
+  review sets, so a question you got wrong on the way through lesson 09 comes
+  back beside one from Set D and does not announce which is which — and a
+  prediction you were **sure** about and wrong about comes back too, because
+  that is a belief rather than a gap.
 
 The lessons themselves run there too, at `/lessons/04` and so on, and reading
 one there differs from reading the file in exactly three ways — all of them

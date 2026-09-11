@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behaviour.js"
 import { AdjustControl } from "./behaviour-adjust.js"
+import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * The third control that needs a browser to be tested, for the reason the other
@@ -156,5 +157,22 @@ describe("where an adjust control puts its value", () => {
     await act(async () => root.unmount())
 
     expect(published()).toBe("")
+  })
+
+  it("carries the classes a primitive aims a rule at", async () => {
+    await mount()
+
+    expect(slider()?.getAttribute("class")).toBe(controlClass("adjust"))
+  })
+
+  /**
+   * The one control whose display a rule could already have reached, because it
+   * did not set the property inline. It sets it now anyway: a property that hid
+   * two controls of three would be a worse contract than one that hides none.
+   */
+  it("takes its display through the properties a primitive can override", async () => {
+    await mount()
+
+    expect(slider()?.style.display).toBe(controlDisplay("adjust", "inline-block"))
   })
 })

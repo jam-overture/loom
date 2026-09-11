@@ -84,6 +84,12 @@ export type RenderDependencies = {
    */
   readonly text?: TextResolver
   readonly slots?: SlotContent
+  /**
+   * References or values — see `RenderOptions.themeValues`. It belongs to the
+   * request rather than to the deployment: one route serves a page to a browser
+   * and the next draws the same tree into an image, off the same dependencies.
+   */
+  readonly themeValues?: "variables" | "literals"
 }
 
 export type RenderRequestError =
@@ -155,6 +161,7 @@ export const renderRequest = async (
     ...(dependencies.origins ? { origins: dependencies.origins } : {}),
     ...(dependencies.text ? { text: dependencies.text } : {}),
     ...(dependencies.slots ? { slots: dependencies.slots } : {}),
+    ...(dependencies.themeValues ? { themeValues: dependencies.themeValues } : {}),
   })
 
   return ok({ ...rendered, tree })
