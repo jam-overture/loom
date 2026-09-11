@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest"
 import { applyDelta, sequentialIdFactory, systemClock, type LoomTree, type TreeOperation } from "@loom/runtime"
 
 import { DEMO_ALTERNATE_THEME, DEMO_THEME_NODE_PROP, demoPageTree } from "./page-tree"
+import type { ChangeRecord } from "./record"
 import {
+  askedWith,
   availablePresets,
   DEMO_LEADING_PRESET,
   DEMO_PRESETS,
@@ -230,5 +232,38 @@ describe("a preset as an interpreter", () => {
 
     expect(proposed.ok).toBe(false)
     if (!proposed.ok) expect(proposed.error.code).toBe("refused")
+  })
+})
+
+/**
+ * Which button an ask came from, kept because nothing else can give it back.
+ *
+ * The runtime is handed `preset.utterance` — a sentence a person would have
+ * typed, deliberately — so the log has no idea a button produced it. Recovering
+ * it by matching the utterance against this table afterwards would be the
+ * surface pattern-matching a string to get back something it knew and dropped,
+ * which is the move `undo.ts` refuses for the same reason.
+ */
+describe("stamping a record with the suggestion it came from", () => {
+  const RECORD: ChangeRecord = {
+    recordId: "i_1",
+    askedAt: "2026-09-06T00:00:00.000Z",
+    utterance: "Take the numbers band off the page.",
+    origin: "user-instruction",
+    outcome: "awaiting-you",
+    repaired: false,
+    touched: [],
+  }
+
+  it("names the preset and changes nothing else", () => {
+    expect(askedWith(RECORD, "trim")).toEqual({ ...RECORD, presetId: "trim" })
+  })
+
+  /** And the id it stamps is one this table can still find, which is what the
+   * ask-again form posts back. */
+  it("stamps an id the table can resolve", () => {
+    for (const preset of DEMO_PRESETS) {
+      expect(presetById(askedWith(RECORD, preset.id).presetId ?? "")).toBe(preset)
+    }
   })
 })

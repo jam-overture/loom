@@ -15,6 +15,7 @@ export * from "./anchor.js"
  * page now holds a target.
  */
 export * from "./behaviour.js"
+export * from "./control.js"
 export * from "./decorative.js"
 export * from "./diagnostics.js"
 export * from "./editable.js"

@@ -4017,6 +4017,48 @@
           ]
         },
         {
+          "module": "render/control",
+          "title": "Control",
+          "summary": "The handle a primitive has on a control it did not build.",
+          "symbols": [
+            {
+              "name": "CONTROL_CLASS",
+              "kind": "value",
+              "signature": "const CONTROL_CLASS = \"loom-control\"",
+              "truncated": false,
+              "summary": "The class every control carries, and the stem of the second one naming which behaviour built it: `loom-control loom-control-copy`."
+            },
+            {
+              "name": "controlClass",
+              "kind": "function",
+              "signature": "const controlClass: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The classes the runtime stamps on the control one behaviour builds."
+            },
+            {
+              "name": "CONTROL_DISPLAY_PROPERTY",
+              "kind": "value",
+              "signature": "const CONTROL_DISPLAY_PROPERTY = \"--loom-control-display\"",
+              "truncated": false,
+              "summary": "The custom property that decides whether a control is displayed — every control at once."
+            },
+            {
+              "name": "controlDisplayProperty",
+              "kind": "function",
+              "signature": "const controlDisplayProperty: (name: BehaviourName) => string",
+              "truncated": false,
+              "summary": "The custom property that decides whether *one* behaviour's control is displayed: `--loom-copy-display`."
+            },
+            {
+              "name": "controlDisplay",
+              "kind": "function",
+              "signature": "const controlDisplay: (name: BehaviourName, resting: string) => string",
+              "truncated": false,
+              "summary": "The value a control writes for `display`: its own, behind the two properties a primitive may override it with."
+            }
+          ]
+        },
+        {
           "module": "render/decorative",
           "title": "Decorative",
           "summary": "The same children again, as a copy nothing can resolve to a node.",
