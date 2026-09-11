@@ -19432,3 +19432,94 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-11 — the ring was a claim about a band that had not changed, and it was drawn at the demo's payoff
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-14-a-ring-is-a-claim`** — recorded because the diagnosis outlives the fix
+and because the mechanism the 27 August entry could not find turned out to be one
+it already had
+
+The 27 August entry closed with what it had not done:
+
+> For a `near` mark **the ring still encircles a band that did not change.** The
+> chip now says where the change was and the ring still says *look here*, and
+> those are no longer the same place, which is an improvement and is not the
+> whole answer. The honest version is to drop the ring for a `near` mark and draw
+> a rule along the seam instead — and it needs a mechanism this run did not have.
+
+Fifteen days and six units later it was still the last frame of the demo's best
+sixty seconds. Press **Take the numbers off**, say yes, be carried to the change:
+a green ring around a patient's testimonial, labelled *Something was removed
+here*, over a sentence plainly still on the page. The card three inches away says
+the change took the numbers off.
+
+**The mechanism was not missing.** That entry ruled out `::before` (it is the
+testimonial's own quotation glyph), `box-shadow` (it would silently replace a
+card's own) and one-sided `outline` (there is no such thing), and concluded a
+rule along the seam needed something new. All three are ways of drawing a *second*
+thing beside the chip. The answer was that the chip did not need a second thing:
+**widen it.** `right: 6px` becomes `right: 0` and the chip is a bar the width of
+the seam — already lying where the change is, already carrying the words, and no
+longer needing a ring to say which band it is beside.
+
+What the fix actually required was a **name for the distinction**, and this
+surface had been carrying it in prose for three weeks: `spotFor`'s `placed`
+argument, `"node"` against `"near"`, which had always decided the *label* —
+*"This was removed"* against *"Something was removed here"* — and had never been
+allowed to decide the geometry. It is now `Spotlight.subject`, and the rule it
+carries is one line:
+
+> **A ring is a claim about the thing inside it.** Only a mark whose subject is
+> the node may draw one.
+
+`border-radius` went with it, and that is the part worth the channel. It was on
+the node unconditionally to round the outline — so on an unringed band it rounded
+corners the page had never asked to have rounded. `outline` was chosen over
+`border` precisely so that marking a band could not move it, and the property
+that came along to serve the outline was quietly restyling it.
+
+**The standing diagnosis, seventh instance and the second where the earlier entry
+named the fix in advance.** Nothing was broken. `spotFor` was right about the
+subject, `labelFor` was right about the words, `chipPosition` was right about the
+gap, and `spotlightCss` applied one geometry to two kinds of claim.
+
+---
+
+## 2026-09-11 — `21st.dev` re-verified blocked, from the demo lane a thirteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` on the run of
+11 September. The standing answer is on the 21 August entry and nothing is added
+to it: `.claude/settings.json` allows the domain for the tool, the proxy does
+not, and `docs/routines.md` has listed it under *Currently allowed* for three
+weeks.
+
+No cost this run, and it is worth saying why rather than only that. What decided
+the width of the mark, the ten pixels of air under it and whether the bar reads
+as a mark on the seam or as a header on the band below was building the page
+twice and photographing the same two presses against each. A gallery of other
+people's components could not have answered any of the three.
+
+---
+
+## 2026-09-11 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+*"Two problems to fix before anything else"* still opens with **"It is in the
+wrong place"** — the move from `/portal/demo` to `/demo`. Verified again on this
+branch: `app/(demo)/demo/page.tsx` exists, `/demo` serves it and
+`(portal)/portal/demo/page.tsx` is the 308 shim. Twenty-one days, and the
+seventh consecutive run to say so.
+
+`docs/rollout.md:19` still points at the old path, which is the same fact filed
+separately for `Loom daily build` on 9 September and unchanged since.
+
+The brief's *second* problem — *"it is clunky"* — is live, and is what this unit
+and the thirteen before it are.
