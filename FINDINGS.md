@@ -13602,7 +13602,9 @@ pull request with a recommendation.
 ## 2026-09-10 — the site can now say a portal belongs to whoever runs the site, and never says what running one is
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — proposed as this lane's next unit
+**closed by `marketing-22-putting-it-back-is-a-change`, 11 September.**
+`/what-you-run` is the sixth page. The boundary the entry asks about is agreed
+below rather than discovered in a review.
 
 The entry above puts *"whoever runs the site writes the list of who may sign in"*
 on the front door, which is true and answers the question a stranger arrives
@@ -13623,3 +13625,138 @@ owns *how to install it*, and this would be *what the shape is*, which is the
 question somebody asks before they are willing to read an installation guide.
 Recommend agreeing the split with `Loom docs` in the finding rather than
 discovering it in a review.
+
+---
+
+## 2026-09-11 — where `/docs` ends and `/what-you-run` begins, agreed rather than discovered
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs` · **Status:** open —
+for agreement, and nothing is blocked on it
+
+The entry above recommended settling this in the finding rather than in a
+review, so here is the split as `/what-you-run` was built to it. It is a
+proposal from the lane that moved second; if the documentation lane reads the
+line differently, say so and this page moves rather than that one.
+
+- **`/docs` owns *how to install it*** — the commands, the code, the API, the
+  first tree, and every sentence that assumes the reader has decided to try it.
+  `getting-started/introduction` and `the-runtime/what-your-app-has-to-do` are
+  the two nearest pages and neither moves.
+- **`/what-you-run` owns *what the shape is*** — the question somebody asks
+  **before** they are willing to read an installation guide at all: is this a
+  library, a service, or something somebody else hosts. It ends by handing the
+  reader to `/docs`, twice.
+
+Two things keep the boundary from eroding a sentence at a time, and both are
+assertions rather than intentions. The page prints **no code** — a test fails on
+`npm`, `pnpm`, `yarn`, `npx` or an `import` appearing in its copy — and it uses
+**none of the reserved vocabulary**, so it cannot start teaching what the
+documentation teaches. The overlap that remains is deliberate and is one
+sentence: both say installing is the next step.
+
+---
+
+## 2026-09-11 — a derived number on a page is a re-theme the site cannot make, and the suite caught it before a reader could
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` — recorded for the shape,
+not because anything is open
+
+`/what-you-run` measures what one request sends and prints the five numbers.
+The obvious way to write that is to measure the front door **in the palette the
+reader is wearing**, which is what the first version did.
+
+It is wrong, and not subtly. A page's root carries what it is wearing, so the
+request describing that page is a few characters longer in one palette than in
+another — and a number *below the root* that changes when the palette changes is
+exactly what [0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md) says
+cannot happen. The site's whole re-theme claim is *the same tree, three ids on
+its root, nothing below it touched*.
+
+**`pages.test.ts` failed on all three palette pairs before the page had been
+looked at once.** That is worth recording on its own: this lane's standing
+failure is two individually defensible things nobody read next to each other,
+and the cheapest defence found so far has been reading the site across a link.
+Here an existing, generic, per-route assertion caught a defect that no amount of
+reading would have — nobody reads a page three times in three palettes comparing
+digits.
+
+The fix is also the honest reading. `/` is published in the house palette and
+that is the page a visitor arrives on, so the measurement is of the site as it
+is served rather than of a private re-theme of it. A test of its own now says the
+numbers are identical in all three.
+
+---
+
+## 2026-09-11 — adding a link to a band changes what a request to remove that band costs, and it cost ten tests to find out
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change` — recorded because the
+lesson generalises to every lane that builds a page the rules can be run against
+
+The front door's questions band is where this page's claim is made twice —
+*nothing you have to host with us*, and *Loom runs inside your own application* —
+so it is the obvious place to offer the page that backs them. The link went
+there first.
+
+**Ten existing tests went red**, in `answers`, `history`, `undo`, `outline` and
+`the-record`. None of them is about navigation. *Take the questions off the page*
+is one of the five requests this site offers a visitor, the rules weigh how much
+a request removes, and one more row in that band pushed the verdict from
+**landed** to **held** — so the front door's own demonstration stopped being
+*three land, one is refused, one stops and asks*, which is the sentence the
+9 September run shipped and the argument of the band above it.
+
+That is the site's rules working exactly as the site says they do, on the site
+itself, and it is the most convincing thing that happened this run. It is also a
+trap for every lane that builds a page a request can be run against: **anything
+added to a removable band is a change to what removing it costs.** The link now
+sits in the facts band, where `/your-components` is already offered and where
+`home.ts` had already written down why.
+
+No fix is wanted in the framework. The number the Gate weighs is right and the
+demonstration is right; what was missing was anybody knowing the two were
+coupled, and that is now a paragraph in `home.ts` and an entry here.
+
+---
+
+## 2026-09-11 — a comparison names its rows in a prop, and the register could not read a single one of them
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-22-putting-it-back-is-a-change`
+
+`words.ts` carries an allowlist of the props that hold sentences rather than
+settings, and its own note records why it exists: the first version walked text
+nodes alone and reported a clean front door while every feature body and FAQ
+answer went unread.
+
+`loom.comparison-row` names itself in `heading`, which was not on the list. So
+the six criteria of `/what-you-run`'s comparison — the most load-bearing copy on
+the band, since the marks mean nothing without them — were invisible to every
+register check on this site: the reserved-vocabulary sweep, the front door's
+in-full scan, all of it. The page's own test for the row it must never soften
+failed for this reason and not because the row was missing, which is how it was
+found.
+
+`heading` is on the list now. The general shape is the one the note already
+warned about, met in a second primitive four weeks later: **an allowlist of
+prose props is a list somebody has to remember to add to, and nobody does.** A
+cheaper answer would be for the library to say which of a primitive's props are
+prose, since it is the library that knows — noted here rather than filed for
+`Loom primitives`, because it is a real design question and not a defect, and
+this lane has no evidence yet that it is worth the schema change.
+
+---
+
+## 2026-09-11 — `fonts.googleapis.com` is still not on the egress allowlist
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — restated, not re-filed
+
+Unchanged since 1 September and restated for the same reason: every screenshot
+this lane has published, including this run's four, is in the fallback face
+rather than Geist. It changes no assertion. It matters because this is the one
+surface judged by eye, and it has been judged in a font it does not ship in.
+
+Two static font hosts, `fonts.googleapis.com` and `fonts.gstatic.com`. Neither
+can receive a credential.

@@ -33,6 +33,7 @@ import {
   REPOSITORY_URL,
   SITE_THEMES,
   surfaceHref,
+  WHAT_YOU_RUN,
   YOUR_COMPONENTS,
   type SiteThemeName,
 } from "../site"
@@ -333,12 +334,34 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
       ],
     }),
     /**
-     * Two now, and the second is the way to the answer the caption above only
-     * has room to assert. It sits here rather than in the band of ways in, which
-     * is exactly the four surfaces and must stay that way, and rather than in the
-     * questions band, whose answers are props and cannot carry a link.
+     * Three now, and the new one leads. It sits here rather than in the band of
+     * ways in, which is exactly the four surfaces and must stay that way, and
+     * rather than in the questions band, whose answers are props and cannot
+     * carry a link.
+     *
+     * **There is a second reason for not putting it in the questions band, and
+     * it cost ten tests to learn.** The first version of this link went there,
+     * under the two answers that make its claim — *nothing you have to host with
+     * us*, and *Loom runs inside your own application*. That is where a reader
+     * meets the question, and it is still the wrong place: *Take the questions
+     * off the page* is one of the five requests this site offers, the rules
+     * weigh how much a request removes, and one more row in that band pushed the
+     * removal from **landed** to **held**. The front door's own demonstration —
+     * three land, one is refused, one stops and asks — is the argument of the
+     * band above it and was declared in code two days ago. A navigation link is
+     * not worth quietly re-answering it.
+     *
+     * That is the site's rules working exactly as the site says they do, on the
+     * site itself, and it is worth knowing that adding anything to a band a
+     * request can remove is a change to what that request costs.
      */
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
+      action(
+        ids,
+        "What you would be running",
+        internalHref(context.origin, WHAT_YOU_RUN.path, context.theme),
+        { variant: "quiet", scale: "small" }
+      ),
       action(
         ids,
         "Where the pieces come from",

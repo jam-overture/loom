@@ -6,7 +6,14 @@ import { BAND } from "../bands"
 import { RESERVED_VOCABULARY } from "../copy"
 import { siteRegistry } from "../registry"
 import { pageTreeFor, treeFor } from "../render"
-import { DEFAULT_THEME, HOME, internalHref, SITE_ROUTES, YOUR_COMPONENTS } from "../site"
+import {
+  DEFAULT_THEME,
+  HOME,
+  internalHref,
+  SITE_ROUTES,
+  WHAT_YOU_RUN,
+  YOUR_COMPONENTS,
+} from "../site"
 import { uses, wordsOf } from "../words"
 
 import { SPECIMEN_ROWS } from "./your-components"
@@ -37,10 +44,18 @@ describe("the page about your own components", () => {
    * The one judgement call on this page, asserted so that it is a decision
    * somebody made rather than something that drifted. The bar was back to the
    * eight items #166 asked about; a fifth page is not worth a ninth.
+   *
+   * **It was *the only page that is* until 11 September**, and `/what-you-run`
+   * joined it on the same reasoning — so the assertion is the whole off-bar list
+   * rather than this one page. Widened deliberately and not relaxed: it is still
+   * an exact list, so a third page leaving the bar fails here and has to be
+   * argued for, which is the property the original assertion was protecting.
+   * Every one of them is still reachable, and `chrome.test.ts` is where that is
+   * held.
    */
-  it("is kept off the bar deliberately, and is the only page that is", () => {
+  it("is kept off the bar deliberately, and is one of the two pages that are", () => {
     expect(YOUR_COMPONENTS.inMenu).toBe(false)
-    expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([YOUR_COMPONENTS])
+    expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([WHAT_YOU_RUN, YOUR_COMPONENTS])
   })
 
   it("answers the question the site had four pages and no answer to", () => {

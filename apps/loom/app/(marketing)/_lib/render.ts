@@ -11,6 +11,7 @@ import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { theRulesPageTree } from "./pages/the-rules"
+import { whatYouRunPageTree } from "./pages/what-you-run"
 import { yourComponentsPageTree } from "./pages/your-components"
 import { siteRegistry, siteThemes } from "./registry"
 import {
@@ -18,6 +19,7 @@ import {
   HOW_IT_WORKS,
   THE_RECORD,
   THE_RULES,
+  WHAT_YOU_RUN,
   YOUR_COMPONENTS,
   type SiteRoute,
 } from "./site"
@@ -49,6 +51,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [HOW_IT_WORKS.path, howItWorksPageTree],
   [THE_RULES.path, theRulesPageTree],
   [THE_RECORD.path, theRecordPageTree],
+  [WHAT_YOU_RUN.path, whatYouRunPageTree],
   [YOUR_COMPONENTS.path, yourComponentsPageTree],
 ])
 

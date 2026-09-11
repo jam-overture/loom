@@ -130,6 +130,49 @@ export const YOUR_COMPONENTS: SiteRoute = {
 }
 
 /**
+ * The page for the question every other page hands the reader and none of them
+ * takes back.
+ *
+ * The entry above puts *"whoever runs the site writes the list of who may sign
+ * in"* on the front door. That is the answer a stranger arrives with, and it
+ * hands them the next one in the same breath: **so what do I run?** Five pages
+ * answered parts of it — the journey a change takes, what you decide in advance,
+ * what you hand over, what you are left holding — and none of them said what the
+ * thing on a reader's own machine would be. A reader who had understood all five
+ * still could not tell whether this is a library they add to something, a
+ * service they point something at, or a site somebody else hosts for them.
+ *
+ * It is a description of code rather than a position, so it did not wait on the
+ * licence line, and nothing on it says what Loom costs or who it is for.
+ *
+ * **The boundary with `Loom docs` was agreed in the finding rather than
+ * discovered in review.** `/docs` owns *how to install it* — the commands, the
+ * code and the API. This page owns *what the shape is*, which is the question
+ * somebody asks before they are willing to read an installation guide at all,
+ * and it ends by handing them over. It uses no vocabulary the documentation
+ * teaches and prints no code.
+ *
+ * **It is `inMenu: false`, and that is now true of two pages.** The bar is the
+ * eight items the maintainer asked about on #166; a sixth page is not worth a
+ * ninth. `chrome.test.ts` holds *off the bar* to mean *in the footer's map and
+ * nowhere unreachable*, and this page is offered from the front door's band of
+ * ways in and from the two pages either side of it in the argument.
+ */
+export const WHAT_YOU_RUN: SiteRoute = {
+  path: "/what-you-run",
+  label: "What you run",
+  /**
+   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
+   * only the half of a title that is exactly the wordmark, so the name inside a
+   * clause prints twice on the card.
+   */
+  title: "What you run — a package in your own application, not a service in front of it",
+  description:
+    "You install it into an application you already have and already host. Your components stay in your repository, your pages and their history are kept by your own application, and the only thing that ever leaves is one request to a model you chose.",
+  inMenu: false,
+}
+
+/**
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
@@ -138,16 +181,22 @@ export const YOUR_COMPONENTS: SiteRoute = {
  * because a record of decisions is only interesting to someone who knows the
  * decisions were theirs to set.
  *
- * The components page is last because it is the question that arrives after all
- * four of those: somebody who has decided they might want this asks what it
- * would cost them to try. It is also the one page the bar does not carry, and
- * the footer renders this list in order, so last is where a reader meets it.
+ * The last two are the questions that arrive after all four of those, from
+ * somebody who has decided they might want this and is working out what it would
+ * cost them to try: **what is the thing**, and then **what do I have to hand
+ * it**. They are in that order because the second only makes sense once the
+ * first is answered — nobody asks what to hand over to something they still
+ * think might be a hosted service.
+ *
+ * They are also the two pages the bar does not carry, and the footer renders
+ * this list in order, so the end is where a reader meets them.
  */
 export const SITE_ROUTES: readonly SiteRoute[] = [
   HOME,
   HOW_IT_WORKS,
   THE_RULES,
   THE_RECORD,
+  WHAT_YOU_RUN,
   YOUR_COMPONENTS,
 ]
 
