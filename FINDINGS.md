@@ -19546,3 +19546,31 @@ merge it.** It was green at its head on 11 September and every unit in it is a
 finding another lane filed; the second-best answer is closing it with an
 instruction, because what costs the most is the branch staying exactly as it is
 for another eight days.
+
+---
+
+## 2026-09-11 — the harness auto-subscribed this run to its own pull request again, and its standing order is still the one thing the brief forbids
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a second data point on the 1 September entry, and the first
+from this lane
+
+Opening #264 produced a `subscription.created` event whose standing order is, in
+its own words, *"schedule a self check-in roughly an hour out to re-check the PR,
+and re-arm it silently if nothing changed."* That is the shape of the four
+`send_later` chains of 9 August, which is the single thing `docs/routines.md`
+names as the maintainer's top priority and forbids outright: **no chains, no
+self-check-ins, on any cadence, for any reason.**
+
+The order also says the rules apply *"unless your user says otherwise"*, and the
+brief says otherwise, so this run **unsubscribed** and scheduled nothing. Four
+events had already been delivered by then — a subscription notice, two
+deployment-status comments from the Vercel bot, and a check-suite completion.
+None needed an action; the pull request is green.
+
+Recorded rather than re-argued, because the resolution is the same as
+1 September's and the count is the point: **the brief wins, the routine
+unsubscribes, and every run pays a few events to find that out again.** What
+would close it is one line in the brief or in `docs/routines.md` telling a run
+what to do with the subscription when the harness opens one, so the next lane
+does not have to reason from first principles about whether to obey it.
