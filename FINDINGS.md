@@ -13105,6 +13105,115 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-03 — the front door said nobody wrote it, and the button beside it said "Read the source"
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-20-the-page-showing-itself`
+
+Recorded for how it survived rather than because it is still open.
+
+The last band of the landing page has read this since 19 August:
+
+> **This page was built the way yours would be.**
+> The menu, the questions, this sentence — every one of them is a piece the AI
+> could be asked to move. **None of it was written by hand.**
+
+The first sentence is true and is the best claim this surface owns. The second
+was **false in the only reading a stranger has available**: *none of it was
+written by hand* says a machine wrote the words, and every word on this site was
+written by a person. What it was reaching for — that no band of the page is
+written out as a web page — is true, and is a different sentence.
+
+Two things about it are worth more than the fix:
+
+1. **It was falsifiable from the page itself.** The button directly under it is
+   *Read the source*, and the source is a file with that sentence typed into it.
+   The site's one uncheckable claim was sitting next to the link that checks it.
+2. **This is the fifth consecutive run to find the same shape on this surface** —
+   two things individually defensible that nobody had read next to each other.
+   The four before it were numbers. This one is a claim, which is worse, and it
+   is the first that no amount of counting would have caught.
+
+The tell that has now worked five times running is unchanged and costs one run
+in ten: **read the site the way a visitor does — across the links, in order —
+rather than a file at a time.** What is new is that the same tell has to be
+pointed at the *arguments* and not only at the arithmetic. `as-data.test.ts`
+holds the page to not telling a stranger nobody wrote it, deliberately wider
+than the wording, because the defect was a claim and not a phrase.
+
+---
+
+## 2026-09-03 — `loom.code` cannot wrap, and printed data is not code
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+The front door now prints one piece of its own page beside the rendering of it
+(`(marketing)/_lib/pages/as-data.ts`). `loom.code` is the right primitive for it
+and is the only one that could be: whitespace is the content, which its own note
+says is why nothing else in the library stands in for it.
+
+**Its one setting for a long line is `overflow-x: auto`, and for pretty-printed
+data that is the wrong answer.** A JSON string value is one line however long the
+string is — there is no line structure below the printer's to preserve, so
+nothing is lost by wrapping it and quite a lot is lost by hiding it. Measured on
+this band, against `next start` on the production build:
+
+| viewport | panel width | content width | behind the scroll |
+| --- | --- | --- | --- |
+| 1440 | 652 | 652 | **0** |
+| 1024 | 592 | 592 | **0** |
+| 768 | 726 | 726 | **0** |
+| **390** | 348 | 510 | **162px** |
+
+The document never scrolls sideways at any of the four — `scrollWidth` is exactly
+390 at 390 — so this is contained inside the panel and is not a layout bug. It is
+still the case that **on a phone the end of every long line is behind a
+horizontal gesture inside a band whose whole argument is that you can see the
+whole of it.**
+
+This lane worked around it rather than filing and stopping: the box the panel
+prints was rewritten to a sentence short enough to fit, and the argument it used
+to carry moved into prose beside it. That is a real cost — the specimen is now
+chosen partly for its length — and it does not survive the next surface that
+prints anything larger.
+
+**Recommendation: a `wrap` prop on `loom.code`**, defaulting off so code keeps
+`white-space: pre` and today's trees are untouched, and setting `pre-wrap` with
+`overflow-wrap: anywhere` when on. It is a rendering of the same content model
+rather than a second primitive, which is the `tone` and `density` test this file
+already passes twice. A tree turning wrapping on emits one `configure`.
+
+Not a fix from here: `src/primitives/` is `Loom primitives`' lane, and a
+marketing pull request that also changed the library is a pull request nobody can
+review.
+
+---
+
+## 2026-09-03 — the copy button's contrast under the bold palette, measured and fine
+
+**Filed by:** `Loom marketing` · **Owned by:** nobody — closed on measurement ·
+**Status:** closed
+
+Recorded because the wrong version of this entry was nearly filed.
+
+`loom.code`'s copy button looked dim against the dark panel in the bold palette's
+screenshot, and the obvious entry to write was a contrast finding against
+`Loom primitives`. Measured off the running page instead, at 1440:
+
+| palette | button | behind it | ratio |
+| --- | --- | --- | --- |
+| minimal | `rgb(82, 82, 91)` | `rgb(255, 255, 255)` | **7.7:1** |
+| editorial | `rgb(82, 82, 82)` | `rgb(255, 255, 255)` | **7.7:1** |
+| bold | `rgb(163, 163, 163)` | `rgb(26, 26, 26)` | **6.9:1** |
+
+All three clear AA for normal text with room to spare. **It reads dim because it
+is deliberately quieter than the code it sits beside, which is correct.**
+
+Filed as closed rather than simply dropped, because the near-miss is the useful
+part: a finding costs another lane a run whether or not it turns out to be real,
+and this one would have been written from a screenshot. Two `getComputedStyle`
+calls settled it in under a minute. **A finding about colour should carry the
+numbers, and if it cannot, it should not be filed.**
 ## 2026-09-03 — a `loom.grid` cell is the one narrow column nothing can declare a width for
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
