@@ -5,7 +5,7 @@ import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { BAND } from "../bands"
 import { heading, prose, stack } from "../nodes"
-import { askHref, DEMO, surfaceHref, type SiteThemeName } from "../site"
+import { askHref, DEMO, mechanismHref, surfaceHref, type SiteThemeName } from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -31,6 +31,15 @@ export type SeeItHappenContext = {
   readonly theme: SiteThemeName
   /** Which choice the address is asking for, if any. */
   readonly ask?: AskId
+  /**
+   * Whether the address also said the visitor allowed a change the rules held.
+   *
+   * Taken from the address rather than read back off the record, because the
+   * record cannot tell the two apart: once a held change has been allowed it has
+   * landed and is waiting for nobody, which is exactly what a change that never
+   * needed allowing looks like. Only the address knows which happened.
+   */
+  readonly approve?: boolean
   /** What happened, once it has. Absent before the visitor has asked for anything. */
   readonly record?: ChangeRecord
 }
@@ -177,6 +186,43 @@ const verdictBadge = (ids: IdFactory, record: ChangeRecord): LoomNode =>
  * against the page as it stands rather than trusting the one made a moment ago,
  * so it is a real answer to a real question and not a bypass.
  */
+/**
+ * The way down a level, offered only to somebody who has just been up here.
+ *
+ * The five steps above are the record said in words a stranger can read, and
+ * that is the right thing to put on a front door. It is not the whole of what
+ * this product has: underneath each of those steps is a line the machinery
+ * actually wrote, and the mechanism page prints them in full.
+ *
+ * Until now it printed the same request every time — the quietest of the five,
+ * chosen when that page was written — so a visitor who had just watched *Prove
+ * it* add a band, and clicked through to read the record of it, was shown the
+ * record of *Turn it down* instead. The two claims a stranger has to believe are
+ * that the record is real and that it is of the thing that just happened to
+ * them, and the second was quietly false at the one moment it could be checked.
+ *
+ * The approval travels because the record does, and `context` rather than
+ * `record` is where it comes from: see `approve` above for why the record cannot
+ * be asked.
+ */
+const readTheRecord = (
+  ids: IdFactory,
+  context: SeeItHappenContext,
+  record: ChangeRecord
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.action",
+    props: {
+      href: mechanismHref(context.origin, {
+        theme: context.theme,
+        ask: record.ask,
+        approve: context.approve === true,
+      }),
+      variant: "quiet",
+    },
+    children: [buildText(ids, "See every line the machinery wrote")],
+  })
+
 const panelActions = (
   ids: IdFactory,
   context: SeeItHappenContext,
@@ -207,6 +253,7 @@ const panelActions = (
         props: { href: home, variant: record.landed ? "primary" : "secondary" },
         children: [buildText(ids, record.landed ? "Put it back" : "Start again")],
       }),
+      readTheRecord(ids, context, record),
     ]),
   ]
 }

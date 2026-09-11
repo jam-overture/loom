@@ -83,14 +83,75 @@ export type Spotlight = {
 export const MAX_SPOTS = 3
 
 /**
+ * What to call it when the change is putting something back.
+ *
+ * **This is the demo's own claim, and the page was contradicting it.** An undo
+ * is a change of its own (0032) and its operations are ordinary ones — the
+ * inverse of a `remove` is an `insert` — so every label below was reached
+ * through the `added` branch and the restored numbers band was marked **New —
+ * just added**. Three inches away, on the card that produced it, the record said
+ * the opposite in two places: *"the 4 pieces it takes off the page are kept, so
+ * the exact opposite of this change already exists"*, and the interpreter's own
+ * rationale, *"undoing this restores every node with the id it had"*.
+ *
+ * That is not a wording nit. *The same nodes come back, not new ones* is the
+ * single thing that distinguishes Loom's undo from a rewind, it is the last
+ * thing a visitor is shown before they leave, and the chip on the band was
+ * telling them a fresh one had been inserted.
+ *
+ * So a restoring change says **back** wherever an ordinary one says *new*. The
+ * two tables are separate rather than one table with a prefix, because the
+ * sentences are not the same sentence: an undo of an *insert* takes something
+ * off, and calling that "removed" would lose the half that matters — that what
+ * went is the thing this visitor had just added.
+ */
+const restoringLabel = (kind: TouchKind, tone: SpotTone, placed: "node" | "near"): string => {
+  if (tone === "awaiting") {
+    switch (kind) {
+      case "added":
+        return placed === "near" ? "What was here would come back" : "This would come back"
+      case "removed":
+        return placed === "near" ? "What was added here would go" : "This would go back off"
+      case "moved":
+        return "This would move back"
+      case "changed":
+        return "This would change back"
+    }
+  }
+
+  switch (kind) {
+    case "added":
+      return placed === "near" ? "What was here is back" : "Back — exactly as it was"
+    case "removed":
+      return placed === "near" ? "What was added here has gone" : "Taken back off"
+    case "moved":
+      return "Moved back"
+    case "changed":
+      return "Changed back"
+  }
+}
+
+/**
  * What to call it, in the fewest words that survive being read at a glance.
  *
  * `placed` is the difference between pointing at the thing and pointing at where
  * the thing is not. A removed node has left the tree and an added one has not
  * arrived yet, so both are marked on a neighbour — and a chip reading "Removed"
  * on a band that is still there would be a lie the size of the whole surface.
+ *
+ * `restoring` is the difference between a thing arriving and a thing coming
+ * back, and it cannot be read off the operation: both are an `insert`. It is the
+ * runtime's `REVERT_INTERPRETER` stamp, read through `undo.ts`, which is the
+ * same source the card's own quotation uses.
  */
-const labelFor = (kind: TouchKind, tone: SpotTone, placed: "node" | "near"): string => {
+const labelFor = (
+  kind: TouchKind,
+  tone: SpotTone,
+  placed: "node" | "near",
+  restoring: boolean
+): string => {
+  if (restoring) return restoringLabel(kind, tone, placed)
+
   if (tone === "awaiting") {
     switch (kind) {
       case "added":
@@ -174,7 +235,12 @@ const neighbourOf = (
   return over ? { node: over, placement: "below" } : undefined
 }
 
-const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotlight | undefined => {
+const spotFor = (
+  tree: LoomTree,
+  touched: TouchedNode,
+  tone: SpotTone,
+  restoring: boolean
+): Spotlight | undefined => {
   /*
    * The root is never marked. A change to the page node is a change to
    * everything on the page — the re-theme is exactly this — and a ring around
@@ -184,7 +250,12 @@ const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotligh
   const own = touched.nodeId === tree.root.id ? undefined : elementInTree(tree, touched.nodeId)
 
   if (own) {
-    return { nodeId: own.id, tone, label: labelFor(touched.kind, tone, "node"), placement: "inside" }
+    return {
+      nodeId: own.id,
+      tone,
+      label: labelFor(touched.kind, tone, "node", restoring),
+      placement: "inside",
+    }
   }
 
   const near = neighbourOf(tree, touched)
@@ -193,60 +264,159 @@ const spotFor = (tree: LoomTree, touched: TouchedNode, tone: SpotTone): Spotligh
   return {
     nodeId: near.node.id,
     tone,
-    label: labelFor(touched.kind, tone, "near"),
+    label: labelFor(touched.kind, tone, "near", restoring),
     placement: near.placement,
   }
 }
 
+/** One change to be marked: what it touched, in what colour, and which way round. */
+export type SpotlightRequest = {
+  readonly touched: readonly TouchedNode[]
+  readonly tone: SpotTone
+  /** Whether this change is putting something back rather than doing it. */
+  readonly restoring: boolean
+}
+
 /**
- * Which nodes on this tree to mark for this change.
+ * The marks for several changes at once, **and the budget is the page's rather
+ * than each change's**.
+ *
+ * A visitor may have two questions open at the same time — five buttons and
+ * nothing telling them to answer one at a time — and until now the page marked
+ * one of them. The newest won, silently, so a stranger who pressed *Take the
+ * numbers off* and then *Add the opening hours* was looking at a page marked for
+ * the second while the first sat unmarked underneath it, both cards reading
+ * *Waiting on you*, and one line above them saying *"the page is marked where
+ * **this** would happen"* about neither in particular.
+ *
+ * `MAX_SPOTS` is why this cannot be a loop over `spotlightsFor`. Three is the
+ * point past which a marked page stops saying *this changed* and starts saying
+ * *everything changed*, and that is a fact about **the page**, not about one
+ * delta: two changes drawing three marks each is the quiz the cap exists to
+ * prevent, however well each of them behaved on its own.
+ *
+ * So the rounds are the rule: **every change gets its first mark before any
+ * change gets a second**. A page with two open questions marks both, and the
+ * change with nine configures in it cannot take the whole budget and leave the
+ * other one invisible.
+ *
+ * One list per request, in the order asked, so a caller can tell which marks
+ * belong to which change — a change whose only node is already marked by an
+ * earlier one gets an empty list, which is the truthful answer and the thing a
+ * card must not contradict.
+ */
+export const spotlightsAcross = (
+  tree: LoomTree,
+  requests: readonly SpotlightRequest[]
+): readonly (readonly Spotlight[])[] => {
+  /** Everything each change could mark, in the order its operations named it. */
+  const queues = requests.map((request) =>
+    request.touched.flatMap((one) => spotFor(tree, one, request.tone, request.restoring) ?? [])
+  )
+
+  const taken = new Set<string>()
+  const drawn: Spotlight[][] = requests.map(() => [])
+
+  for (let round = 0; round < MAX_SPOTS; round += 1) {
+    for (const [index, queue] of queues.entries()) {
+      if (taken.size >= MAX_SPOTS) return drawn
+
+      const into = drawn[index]
+      if (into === undefined) continue
+
+      /*
+       * Past every node already marked — by an earlier round of this change,
+       * which is what keeps one node from wearing two chips, or by a change
+       * earlier in this one, which is what keeps two changes from claiming the
+       * same band and lets the second fall through to its next.
+       */
+      let spot = queue.shift()
+      while (spot !== undefined && taken.has(spot.nodeId)) spot = queue.shift()
+      if (spot === undefined) continue
+
+      taken.add(spot.nodeId)
+      into.push(spot)
+    }
+  }
+
+  return drawn
+}
+
+/**
+ * Which nodes on this tree to mark for one change.
  *
  * Read against the tree the visitor is looking at, which is what makes one
  * function serve both halves: for a change that applied, the tree is the result
  * and the marks land on what moved; for one still waiting, the tree is what it
  * would move and the marks land on what it is asking about.
+ *
+ * `restoring` is a fact about the *change*, not about any one operation, which
+ * is why it is a parameter here rather than something `touched.ts` could put on
+ * a `TouchedNode`: the delta of an undo is indistinguishable from the delta of
+ * any other change, and the only thing that knows otherwise is the record's
+ * provenance. Defaulted, because a caller with no record in hand is describing
+ * an ordinary change and should not have to say so.
  */
 export const spotlightsFor = (
   tree: LoomTree,
   touched: readonly TouchedNode[],
-  tone: SpotTone
-): readonly Spotlight[] => {
-  const spots = touched.flatMap((one) => spotFor(tree, one, tone) ?? [])
-  const seen = new Set<string>()
+  tone: SpotTone,
+  restoring = false
+): readonly Spotlight[] => spotlightsAcross(tree, [{ touched, tone, restoring }])[0] ?? []
 
-  return spots
-    .filter((spot) => (seen.has(spot.nodeId) ? false : (seen.add(spot.nodeId), true)))
-    .slice(0, MAX_SPOTS)
-}
+export type SpotlitChange = { readonly record: ChangeRecord; readonly tone: SpotTone }
 
 /**
- * Which of a visitor's changes the page is currently about — and only one, ever.
+ * Which of a visitor's changes the page is currently about.
  *
- * Two marks in two colours on one page is a quiz rather than an explanation, so
- * the ordering has to be a rule rather than "the newest".
+ * **Every question still waiting on an answer**, newest first, because each of
+ * them is asking the visitor for something and a page that marks one of two open
+ * questions has silently chosen for them. It used to return exactly one, and the
+ * reason given was that *"two marks in two colours on one page is a quiz rather
+ * than an explanation"*. That reasoning is about two **colours** — a green mark
+ * saying *this landed* beside an amber one saying *this is waiting* asks a
+ * stranger to hold two ideas at once — and it still stands. Two marks in the
+ * same colour, both amber, both saying *this would happen if you say yes*, are
+ * not a quiz: they are two questions, marked, which is what the rail says there
+ * are.
  *
- * **A change waiting on an answer wins**, because it is the only thing on the
- * screen that is asking the visitor for something. Failing that, the change that
- * produced *the revision now on the stage* — which is a stricter test than "the
- * most recent record", and deliberately: answering a hold moves that record back
- * to where it was asked, so a rail read newest-first would mark the wrong one at
- * exactly the moment a visitor is watching.
+ * So the tones never mix. Either the page is asking, and every open question is
+ * marked in amber; or it is not, and the one change that produced *the revision
+ * now on the stage* is marked in green — a stricter test than "the most recent
+ * record", and deliberately: answering a hold completes that record where it was
+ * asked, so a rail read newest-first would mark the wrong one at exactly the
+ * moment a visitor is watching.
  *
  * Everything else — refused, discarded, never interpreted — marks nothing,
  * because nothing on the page moved.
+ *
+ * **`movedOn` is the exception to "a hold is marked", and it is not a
+ * preference.** A hold whose page has moved under it can never apply
+ * (`_lib/moved.ts`), so ringing the page amber and labelling it *This would be
+ * removed* promises a visitor something that will not happen — on the very band
+ * they are looking at, in the tone this surface reserves for a question it is
+ * still asking them. It is not asking. Those fall out here, and where they were
+ * the only holds the mark falls through to the change actually on the stage.
+ *
+ * Passed in rather than read here, because a record does not carry the revision
+ * its hold was judged against — `HeldProposal.baseRevision` does, and only the
+ * page has the holds and the tree in hand together.
  */
-export const spotlitChange = (
+export const spotlitChanges = (
   records: readonly ChangeRecord[],
-  tree: LoomTree
-): { readonly record: ChangeRecord; readonly tone: SpotTone } | undefined => {
-  const waiting = records.find((record) => record.outcome === "awaiting-you")
-  if (waiting) return { record: waiting, tone: "awaiting" }
+  tree: LoomTree,
+  movedOn: ReadonlySet<string> = new Set()
+): readonly SpotlitChange[] => {
+  const waiting = records.filter(
+    (record) => record.outcome === "awaiting-you" && !movedOn.has(record.recordId)
+  )
+  if (waiting.length > 0) return waiting.map((record) => ({ record, tone: "awaiting" }))
 
   const onTheStage = records.find(
     (record) => record.outcome === "applied" && record.revision?.produced === tree.revision
   )
 
-  return onTheStage ? { record: onTheStage, tone: "applied" } : undefined
+  return onTheStage ? [{ record: onTheStage, tone: "applied" }] : []
 }
 
 const cssString = (value: string): string => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
