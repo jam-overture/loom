@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { REVERT_INTERPRETER } from "@loom/runtime/write"
 
+import { ruleSentence } from "@/app/(portal)/_lib/vocabulary"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
 import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
@@ -225,7 +226,7 @@ describe("a record card", () => {
 
     expect(text.indexOf(WEIGHED_QUESTIONS.damage)).toBeGreaterThan(-1)
     expect(text.indexOf(WEIGHED_QUESTIONS.damage)).toBeLessThan(
-      text.indexOf("Riskier than a request from here")
+      text.indexOf(ruleSentence("stakes-above-ceiling"))
     )
   })
 
@@ -506,7 +507,7 @@ describe("a record card", () => {
 
     const text = container.textContent ?? ""
     const weighed = text.indexOf(WEIGHED_QUESTIONS.damage)
-    const rule = text.indexOf("Riskier than a request from here")
+    const rule = text.indexOf(ruleSentence("stakes-above-ceiling"))
     const ceiling = text.indexOf("will not let an ask like that land on its own")
     const buttons = text.indexOf("Apply this change")
 
