@@ -1,5 +1,7 @@
 import type { ComponentType, CSSProperties, ReactNode } from "react"
 
+import { err, ok, type Result } from "../result.js"
+
 import type { NodeData } from "../data/resolution.js"
 import type { NodeFrames } from "../frame/resolution.js"
 import type { NodeId } from "../ids.js"
@@ -212,6 +214,35 @@ export type LoomPrimitive<
   TText extends string = never,
   TBehaviour extends BehaviourName = never,
 > = ComponentType<LoomPrimitiveProps<TProps, TText, TBehaviour>>
+
+/** A primitive called as the plain function of its props, rather than mounted. */
+export type CallablePrimitive = (props: LoomPrimitiveProps) => ReactNode
+
+/**
+ * A `LoomPrimitive` is either a function component or a class, and only the
+ * first can be called as a plain function. `typeof` cannot tell them apart — a
+ * class is a function too — so the marker React puts on a class component's
+ * prototype is what decides it.
+ *
+ * Two things in this package want to call a primitive rather than mount one, for
+ * unrelated reasons — the conformance probes ask what a primitive does with what
+ * it is handed, and the literal-theme render resolves what one painted — and
+ * both have to decline the same case in the same way. It lives beside the type
+ * because that is what it is about.
+ */
+export const asCallablePrimitive = (
+  primitive: LoomPrimitive
+): Result<CallablePrimitive, string> => {
+  if (typeof primitive !== "function") return err("not a function component")
+
+  const prototype: unknown = (primitive as { readonly prototype?: unknown }).prototype
+
+  if (typeof prototype === "object" && prototype !== null && "isReactComponent" in prototype) {
+    return err("class components cannot be called outside a renderer")
+  }
+
+  return ok(primitive as CallablePrimitive)
+}
 
 /**
  * The renderer's whole dependency on the registry: one lookup. §4 owns

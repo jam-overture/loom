@@ -1,0 +1,219 @@
+import type { IdFactory, NodeId } from "../../ids.js"
+import { err, ok, type Result } from "../../result.js"
+import type { Clock } from "../../runtime/events.js"
+import type { EditIntent } from "../../runtime/intent.js"
+import type { ChangeInterpreter, InterpretationError } from "../../runtime/interpreter.js"
+import type { ProposedChange } from "../../runtime/proposal.js"
+import type { ElementNode, LoomNode } from "../../tree/node.js"
+import { findNode } from "../../tree/navigation.js"
+import type { LoomTree } from "../../tree/tree.js"
+import type { InsertOperation, TreeOperation } from "../../tree/delta.js"
+
+/**
+ * A band of a page, dropped in whole as one operation.
+ *
+ * ## Why this exists
+ *
+ * This library is decomposed on purpose. `docs/primitive-granularity.md` argues
+ * it at length and 0052 rules on it: repeated content is child nodes, so a
+ * pricing band is a `loom.tier-table` holding three `loom.tier` nodes, each
+ * holding a `loom.perk-list` holding five rows. The reason is reachability —
+ * "move the second plan's button above its perks" is a `move` against a tree
+ * and is *unreachable* against a prop bag nobody predicted.
+ *
+ * That argument has a second half, and until now the library had only paid the
+ * first. The granularity doc's own answer to *"does every pricing band start as
+ * thirty operations?"* is:
+ *
+ * > No — because `insert` carries a whole subtree, not a single node. So a
+ * > starting composition is **one `insert` operation** carrying a six-node
+ * > hero. Drop in the whole thing in a single reviewable step, then rearrange
+ * > it freely afterwards because it is structure rather than configuration.
+ *
+ * Nothing built it. Eighty-nine primitives shipped and the convenience they
+ * were promised against did not, so *add a pricing band* has been thirty
+ * separate operations for every one of them. This is that half.
+ *
+ * ## What a composition is, and what it is emphatically not
+ *
+ * It is **a pure function from an `IdFactory` to a subtree**, and everything
+ * else here is the small amount of plumbing that gets that subtree into a tree
+ * through the front door. It registers nothing, renders nothing, and adds no
+ * primitive: every node it builds is a type already in the registry, and a test
+ * in `compositions.test.ts` fails if that ever stops being true.
+ *
+ * It is **not a fat primitive wearing a different hat**. A `loom.pricing-band`
+ * with `tierNames: string[]` would render the same pixels and would put the
+ * whole band back behind a prop bag. The difference is what exists afterwards:
+ * a composition leaves thirty addressable nodes behind it and then has no
+ * further opinion about them, because *it is not in the tree at all*. Nothing
+ * records which composition a band came from and nothing can: what landed is
+ * ordinary nodes, indistinguishable from nodes a model wrote one at a time.
+ * That is the property that keeps this a convenience over the delta model
+ * rather than a second way to author one.
+ *
+ * ## Why it is an interpreter and not a function a surface calls
+ *
+ * 0057 settled this for the demo's chips and the reasoning transfers without a
+ * change of a word: the interpretation seam exists because interpretation is
+ * the *non-deterministic step* (0005), not because it is always a model. A
+ * composition is handed to `commitIntent` like anything else, so it is
+ * assessed, gated, held for a person when the policy says so, logged, and
+ * revertable — and its inverse is a `remove` of one node, which is the cheapest
+ * undo in the system.
+ *
+ * The alternative a page builder would reach for — a surface that builds the
+ * subtree and writes it to the store — is the one thing the brief for this
+ * library forbids by name: *a catalogue of them must never become a parallel
+ * channel into the tree.* A band that arrived without passing the Gate would be
+ * the only change on the page nobody judged.
+ *
+ * ## The one thing it re-plans
+ *
+ * `build` mints fresh ids from the factory it is handed on every call, and the
+ * insertion point is resolved **against the tree the interpreter is given**,
+ * never against the tree the button was drawn from. A composition planned
+ * against a page that has since grown two bands appends after them. One that
+ * names a parent since removed declines rather than proposing an operation the
+ * runtime would refuse — 0057's first honesty property, and the reason this is
+ * a plan rather than a recording.
+ */
+export type Composition = {
+  /** Lower-case words joined by hyphens, the way an anchor or a slot name is. */
+  readonly id: string
+  /** What a person choosing it from a list reads. */
+  readonly label: string
+  /**
+   * What lands on the page, in one clause, said before it happens.
+   *
+   * About the page and never about the verdict, for the reason the demo's
+   * presets give: whether the Gate applies a band or holds it is computed from
+   * the tree at assessment time, so a promise about the outcome would be a
+   * surface predicting a decision it does not make.
+   */
+  readonly promise: string
+  /** The interpreter's own words about why this subtree answers that ask. */
+  readonly rationale: string
+  /** Every primitive type the subtree uses, for the catalogue and the audit. */
+  readonly uses: readonly string[]
+  readonly build: (ids: IdFactory) => ElementNode
+}
+
+/** What produced the delta, for `Provenance.interpreter`. Not a model. */
+export const COMPOSITION_INTERPRETER = "loom/composition"
+
+/**
+ * Where the band goes.
+ *
+ * Both fields are optional and the defaults are the ones a page wants: bands
+ * are the root's own children, and a new band goes at the end. A caller that
+ * knows better — a portal dropping a band between two others — says so.
+ */
+export type CompositionTarget = {
+  readonly parentId?: NodeId
+  /** Clamped to the parent's current child count, never trusted as an index. */
+  readonly index?: number
+}
+
+export type CompositionPlan =
+  | { readonly outcome: "planned"; readonly operations: readonly TreeOperation[] }
+  /**
+   * The named parent is not in this tree, so there is nowhere to put the band.
+   *
+   * A distinct outcome rather than a silent append at the root: a band that
+   * quietly landed somewhere other than where it was asked for is worse than
+   * one that did not land, because the second is visible.
+   */
+  | { readonly outcome: "no-such-parent"; readonly parentId: NodeId }
+
+const childrenOf = (node: LoomNode): readonly LoomNode[] => (node.kind === "text" ? [] : node.children)
+
+/**
+ * One `insert`, computed against the tree as it stands.
+ *
+ * The index is clamped rather than validated, and that is the right severity
+ * for what it is: an index past the end of a list that has since shrunk is a
+ * stale *position*, and a band appended at the end is what the caller asked for
+ * to within the only thing that changed. A missing parent is different in kind
+ * — the caller named a place that no longer exists — so it refuses.
+ */
+export const planComposition = (
+  composition: Composition,
+  tree: LoomTree,
+  ids: IdFactory,
+  target: CompositionTarget = {}
+): CompositionPlan => {
+  const parentId = target.parentId ?? tree.root.id
+  const parent = findNode(tree.root, parentId)
+
+  if (parent === null) return { outcome: "no-such-parent", parentId }
+
+  const count = childrenOf(parent).length
+  const index = target.index === undefined ? count : Math.min(Math.max(target.index, 0), count)
+
+  const operation: InsertOperation = {
+    op: "insert",
+    parentId,
+    index,
+    node: composition.build(ids),
+  }
+
+  return { outcome: "planned", operations: [operation] }
+}
+
+/**
+ * A composition as an ordinary `ChangeInterpreter`.
+ *
+ * Everything downstream of this is unable to tell that no model was involved,
+ * which is exactly the point: a band arriving from a catalogue is judged on the
+ * same terms as a band a model proposed, by the same rules, under the same
+ * policy, into the same log.
+ *
+ * `confidence` is 1 and `authoredBy` is `runtime` for 0031's reason, not for
+ * modesty: a self-grade only means something when something graded itself, and
+ * a computed subtree has no opinion to be right or wrong about. Calibration
+ * segments these out rather than letting a catalogue of bands walk a model's
+ * record to a perfect score it never earned.
+ */
+export const compositionInterpreter = (
+  composition: Composition,
+  idFactory: IdFactory,
+  clock: Clock,
+  target: CompositionTarget = {}
+): ChangeInterpreter => ({
+  interpret: (intent: EditIntent, tree: LoomTree): Promise<Result<ProposedChange, InterpretationError>> => {
+    const plan = planComposition(composition, tree, idFactory, target)
+
+    if (plan.outcome === "no-such-parent") {
+      return Promise.resolve(
+        err({
+          code: "not-understood",
+          detail: `the band was to be added under node ${plan.parentId}, which is not in this tree`,
+        })
+      )
+    }
+
+    return Promise.resolve(
+      ok({
+        proposalId: idFactory.proposalId(),
+        intentId: intent.intentId,
+        delta: {
+          deltaId: idFactory.deltaId(),
+          treeId: tree.treeId,
+          baseRevision: tree.revision,
+          operations: plan.operations,
+        },
+        rationale: composition.rationale,
+        provenance: {
+          origin: intent.origin,
+          ...(intent.actor === undefined ? {} : { actor: intent.actor }),
+          interpreter: COMPOSITION_INTERPRETER,
+          /** Computed, not guessed — so calibration leaves it out (0031). */
+          authoredBy: "runtime" as const,
+          confidence: 1,
+          interpretedAt: clock.now(),
+        },
+      })
+    )
+  },
+})

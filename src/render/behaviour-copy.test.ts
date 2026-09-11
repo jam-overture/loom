@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { CopyControl } from "./behaviour-copy.js"
+import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * The one part of the runtime that needs a browser to be tested, because it is
@@ -142,5 +143,25 @@ describe("the copy control", () => {
     await mount()
 
     expect(container.querySelector("[aria-live]")?.getAttribute("aria-live")).toBe("polite")
+  })
+
+  /**
+   * The same handle every control carries. It matters here rather than only on
+   * the disclosure because a copy button that appears on hover, or only above a
+   * width, is the next thing a code panel will want, and neither is expressible
+   * against an element with no name.
+   */
+  it("carries the classes a primitive aims a rule at", async () => {
+    withClipboard(() => Promise.resolve())
+    await mount()
+
+    expect(button()?.getAttribute("class")).toBe(controlClass("copy"))
+  })
+
+  it("takes its display through the properties a primitive can override", async () => {
+    withClipboard(() => Promise.resolve())
+    await mount()
+
+    expect(button()?.style.display).toBe(controlDisplay("copy", "inline-flex"))
   })
 })

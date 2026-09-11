@@ -217,6 +217,9 @@ tree names something a deployment owns and holds none of it. Two lessons in, the
 shape is clear enough to state — *a name in the tree, an address in a registry,
 resolved before the walk* — and how far it runs is still open. A frame's origin
 is the next thing of that shape, and whether it is a lesson or a footnote is a
+tree names something a deployment owns and holds none of it. It has one lesson in
+it, and how far it runs is an open question — a submission's destination and a
+frame's origin are the same shape as a binding, and whether they are lessons is a
 decision for whoever is learning this, not for whoever is writing it down.
 
 ## Pacing

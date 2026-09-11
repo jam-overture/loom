@@ -42,12 +42,23 @@ import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
  *
  * The layout cannot be said inline, for two reasons and the second is new here:
  * a span belongs to a child this primitive does not style, and **the whole
- * rhythm has to switch off on a narrow screen**. Below the breakpoint every
- * cell is full width, because six columns on a phone is six columns of four
- * characters. That is the first width media query in this library, and
+ * rhythm has to switch off in a narrow band**. Below the breakpoint every cell
+ * is full width, because six columns on a phone is six columns of four
+ * characters.
  * [0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
- * is where it is argued: the markup is unchanged by it, so the render stays the
- * pure function of the tree that 0008 requires.
+ * is where that is argued: the markup is unchanged by it, so the render stays
+ * the pure function of the tree that 0008 requires.
+ *
+ * **The breakpoint is the band's own width, not the screen's**, which is the
+ * repair this primitive waited three filings for. It shipped on 26 August as
+ * the library's first width media query and was filed against this lane the
+ * same week: a mosaic in a `loom.split` column, in a card, or in any half of a
+ * page laid itself out as six columns because the *window* was wide, and the
+ * cells came out four characters across on a laptop. It now declares its own
+ * containment and the rhythm rules are a `@container` query, which is the
+ * pattern `loom.marquee`, `loom.offering` and `loom.orbit` already use. The
+ * mechanic that makes it possible without a wrapper element is in
+ * `stylesheet.ts` beside the rules.
  */
 
 const RHYTHMS = ["alternating", "showcase", "lead"] as const
@@ -98,8 +109,8 @@ export const loomMosaic = definePrimitive({
           /**
            * `display` and `grid-template-columns` are **not** here, and that is
            * load-bearing rather than an omission: an inline style beats a rule,
-           * so a column count set here would be unreachable from the media
-           * query that has to change it. The gap has no breakpoint, so it stays.
+           * so a column count set here would be unreachable from the query that
+           * has to change it. The gap has no breakpoint, so it stays.
            */
           gap: GAPS[given.gap ?? "normal"],
           width: "100%",

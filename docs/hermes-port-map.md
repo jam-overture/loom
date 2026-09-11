@@ -59,7 +59,16 @@ stands alone.
 
 ## The ledger
 
-**Done — 47 blocks, 70 primitives.**
+**Done — 55 blocks, 46 primitives.**
+
+*The second figure counts the primitives **these rows name**, and the header was
+wrong before this run: it read `73`, which was the size of the whole library at
+the time rather than the size of the port. The library is 89. The first figure
+was wrong too — `47` against a summary table that said 52, which is the third
+time this document has disagreed with itself about its own count and the third
+time it has been corrected by hand. The tool it keeps asking for is still
+unwritten.*
+**Done — 47 blocks, 73 primitives.**
 
 | Hermes block | Becomes | Verdict |
 | --- | --- | --- |
@@ -82,6 +91,26 @@ stands alone.
 | `before-after` | `loom.before-after` | atomic ✅ |
 | `services`, `coaching-packages`, `mentorship-tracks`, `donation-tiers`, `class-schedule`, `volunteer-opportunities`, `restaurant-menu` | `loom.offering-grid` / `loom.offering` | pair ✅ — seven blocks, one record |
 | `awards`, `certifications`, `affiliations`, `favorite-tools` | `loom.credential-grid` / `loom.credential` | pair ✅ |
+| `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.recording-grid` / `loom.recording` | pair ✅ — four blocks, one record |
+| `events` | `loom.event-grid` / `loom.event` | pair ✅ |
+| `book-list`, `currently-reading` | `loom.book-grid` / `loom.book` | pair ✅ — the proposed `loom.book-shelf` lost to 0054, see below |
+| `property-listings` | `loom.listing-grid` / `loom.listing` (+ `loom.spec`) | pair ✅ — a **trio**, see [0115](../decisions/0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) |
+
+**Compositions — 13 blocks, nothing to *register*. One of them is now in the
+starting catalogue.**
+
+*"Nothing to build" was true of the registry and false of the page, and the
+distinction went unnoticed for three weeks. A `cta` needs no primitive and was
+still eight operations to put anywhere, which made the cheapest block in Hermes
+one of the more expensive ones in Loom.
+`src/primitives/compositions/` closes that for the bands a marketing page stands
+on ([0120](../decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)):
+nine of them, each one `insert` carrying its whole subtree, of which `cta` is
+the one that appears in this table. The other twelve rows are unchanged and
+still correct — what a block is **assembled from** is the same fact whether or
+not a catalogue assembles it — and any of them could join the catalogue on the
+same terms. The eight bands the catalogue adds that Hermes never had are in the
+9 September report.*
 
 **Compositions — 13 blocks, nothing to build.**
 
@@ -112,25 +141,63 @@ fields** — `monday` through `sunday` — which is repeated content that never 
 to be a list. By 0052 those are seven nodes, and a day with hours is exactly a
 marker and a line of text. It ports to a band that already exists.
 
-**Pairs to build — 8 blocks, 4 pairs.** Grouped by the content model they
+**Pairs to build — none. The table is empty**, closed on 8 September by
+`primitives-27-the-last-two-pairs`. Both rows below are how it read until then,
+kept because both proposals were changed by the run that built them and the
+changes are the two rules this document exists to apply.
+
+| Group | Hermes blocks | Proposed pair | Shipped as |
+| --- | --- | --- | --- |
+| Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` | `loom.book-grid` / `loom.book` |
+| Property | `property-listings` | `loom.listing-grid` / `loom.listing` | `loom.listing-grid` / `loom.listing` / **`loom.spec`** |
+
+**`-shelf` lost to 0054, and it is the fifth proposed name to change.** A shelf
+is a metaphor for books rather than a word for what the container does with its
+children, which is `repeat(auto-fit, minmax(…))` — the same thing seven other
+containers do under the name `-grid`. The noun test the row below describes
+catches a child wearing one block's word; this is the same test applied to the
+*arrangement* half of the name, and it fails for a reason worth keeping: a
+reader who has met `loom.article-grid` can predict `loom.book-grid`, and nobody
+can predict `-shelf` except by already knowing it is about books.
+
+**The property row grew a third primitive, and the row was not wrong about the
+pair — it was silent about the child.** `beds`, `baths` and `sqft` are three
+fields of one shape, which is a list the schema had already flattened into named
+columns, so they are `loom.spec` nodes. 0115 is the record; the short form is
+that a field holding one value of which there is exactly one still stays a prop,
+and *three fields holding one value each of the same shape* do not. It is the
+same reading this document already applies to `hours-of-operation`'s seven
+weekdays, promoted from a note to a rule.
+
+**Four proposed names had changed before these**, and the change is
+**Pairs to build — 3 blocks, 2 pairs.** Grouped by the content model they
 share, which is the order to build them in.
 
 | Group | Hermes blocks | Proposed pair |
 | --- | --- | --- |
-| Playable media | `video`, `video-playlist`, `playlist`, `podcast-episodes` | `loom.episode-list` / `loom.episode` |
 | Reading | `book-list`, `currently-reading` | `loom.book-shelf` / `loom.book` |
 | Property | `property-listings` | `loom.listing-grid` / `loom.listing` |
-| Dated things | `events` | its own pair — an `EventItem` carries a venue and a ticket link a milestone has nowhere to put |
 
-**Two proposed names changed when they were built**, and the change is 0054
-being applied rather than overruled. `loom.offering-list` and
-`loom.credential-list` both shipped as `-grid`, because the arrangement word
-names *what the container does with its children* and what both of them do is
-`repeat(auto-fit, minmax(…))`. 0054's own consequence is the reason to get it
-right before it ships: a container that changes its arrangement changes its
-name, and a rename is a breaking change to every stored tree. The four rows
-above are proposals until the run that builds them looks at the markup — read
-the arrangement word as a prediction, not a commitment.
+**Four proposed names have changed when they were built**, and the change is
+0054 being applied rather than overruled. `loom.offering-list`,
+`loom.credential-list` and `loom.episode-list` all shipped as `-grid`, because
+the arrangement word names *what the container does with its children* and what
+all three of them do is `repeat(auto-fit, minmax(…))`. 0054's own consequence is
+the reason to get it right before it ships: a container that changes its
+arrangement changes its name, and a rename is a breaking change to every stored
+tree. The two rows above are proposals until the run that builds them looks at
+the markup — read the arrangement word as a prediction, not a commitment.
+
+**The fourth change was a noun rather than an arrangement**, and it is the one
+worth reading before the last two pairs are built. `loom.episode` shipped as
+`loom.recording`: *episode* is one of the four collapsed blocks' words rather
+than the name of what all four are, and a track on a playlist is not an episode
+of anything. Every collapse in this table has taken the general noun —
+`loom.milestone` over *timeline-item*, `loom.credential` over *award*,
+`loom.offering` over *service* — so the proposed nouns in the rows above deserve
+the same test at build time. `loom.book` survives it; `loom.listing` is a
+`property-listings` word and a run that builds it should ask what else it
+collapses first.
 
 `loom.offering-grid` also carries a **local** column vocabulary, `auto | one |
 two | three`, where `loom.credential-grid` takes the shared `COLUMN_NAMES`. That
@@ -217,6 +284,20 @@ reason, and their absence was invisible from this document because this document
 counts Hermes blocks: the library could draw a pricing table and a timeline and a
 comparison band while being unable to write three bullet points.
 
+**Three more joined them on 6 September, and the first two are the gap a page
+about a product that *answers you* has and a creator's profile never did.**
+Hermes sold a person's services; nothing in the seventy is an **exchange** —
+the conversation itself, shown rather than described, which is the band every
+assistant's marketing page opens with. `loom.message-list` over `loom.message`
+is that band: an `<ol>` because the order is the content, a turn whose body is a
+flow of nodes (0094) and whose side, name, time and portrait are one record's
+worth of props. `loom.reveal` is not a content model at all — it is the first
+primitive here that renders nothing of its own, wrapping a band so that it
+arrives as the reader scrolls to it ([0110](../decisions/0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md)).
+The library has had an entrance since 0055 and it fires on load, which means
+every band below the fold finished arriving before anybody saw it. None of the
+three has a row above, and the count of Hermes blocks is unmoved by any of them.
+
 **Two more joined them on 31 August, and they are the first gap this document
 predicted rather than discovered.** Hermes sold a person; a page that sells a
 *product* has two bands it never needed — *how it works*, and *what it works
@@ -228,27 +309,107 @@ a mark the primitive places, which is the claim a logo wall cannot make and the
 fourth general arranger. Neither has a row above, and the count below is
 unmoved by either — which is the point of the paragraph above.
 
+**Four more joined them on 5 September, and three of the four are the page
+chrome paragraph above coming round a second time.** Hermes' app shell owned the
+top of the window, so nothing in the seventy is an announcement strip and
+nothing is a breadcrumb: `loom.banner` and `loom.link-trail` are the third and
+fourth primitives here whose absence is that same fact. `loom.carousel` is the
+fifth general arranger and the first that admits the reader has a phone — a row
+that scrolls and snaps, which no Hermes block needed because a profile was one
+column. `loom.meter` is the only one of the four with something like an
+ancestor, and the distance is the point: Hermes' `stats` block *states* a figure
+and this one draws it against a whole, which is the collapse rule read the other
+way — two blocks that want different markup are two primitives.
+
+**Three more joined them on 4 September, and they are the same gap read one
+level up.** Hermes sold a *person*: a photograph is a photograph, a profile is
+never reviewed, and nothing on a creator's page is a running interface. A page
+selling **software** has three things it cannot do without and none of the
+seventy is any of them — the chrome a screenshot sits in, the marks that say
+which part of it matters, and a score. `loom.frame`, `loom.pin` and
+`loom.rating` have no row above for that reason.
+
+`loom.pin` is worth reading twice for the same reason `hours-of-operation` is,
+from the other side: Hermes would have held the marks as a `hotspots[]` field on
+the frame, and by 0052 they are nodes — an `insert` each, a `move` each, an
+inverse each. The port map has no row to correct here because Hermes never had
+the block; the rule is the same one that turns seven fixed weekday fields into
+seven nodes.
+**Four more joined them on 5 September, and three of the four are the page
+chrome paragraph above coming round a second time.** Hermes' app shell owned the
+top of the window, so nothing in the seventy is an announcement strip and
+nothing is a breadcrumb: `loom.banner` and `loom.link-trail` are the third and
+fourth primitives here whose absence is that same fact. `loom.carousel` is the
+fifth general arranger and the first that admits the reader has a phone — a row
+that scrolls and snaps, which no Hermes block needed because a profile was one
+column. `loom.meter` is the only one of the four with something like an
+ancestor, and the distance is the point: Hermes' `stats` block *states* a figure
+and this one draws it against a whole, which is the collapse rule read the other
+way — two blocks that want different markup are two primitives.
+
 The same run gave `loom.section`, `loom.hero` and `loom.callout` an `anchor`, so
 a band can be linked to from the page it is on. Hermes never needed one: a
 profile was a single screen with an app shell above it. A marketing site is not,
 and until 31 August a Loom page could link to any document on the web except
 itself.
 
+**Two more joined them on 11 September, and this pair is the sharpest case yet
+of what this section is for — because three consecutive runs read the closed
+ledger above as a finished library and were wrong.** `loom.backdrop` and
+`loom.overlay` are not content models at all. One paints atmosphere behind a
+band; the other sets content over a ground. Hermes needed neither: its heroes
+baked an image background into each registered variant, so the *arrangement*
+never had to exist on its own, and its app shell meant a page was never
+composed as a whole surface.
+
+The consequence was that **for eighty-nine primitives exactly one thing on a
+Loom page could paint anything behind its content** — `loom.hero`, whose two
+paints were written inline where nothing else could reach them — and **nothing
+at all could put a word on top of a picture.** Neither absence is visible from
+any table above, because there is no Hermes block to be missing.
+
+This is the warning below, sharpened: the ledger's *"to build"* tables emptying
+on 8 September measured the **port**, and three runs after it each went looking
+for a ninetieth content model and came back with a definition list. The range
+that was missing was a **surface**, not a shape.
+[0130](../decisions/0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md)
+is the record; the five paints now live in `src/primitives/backdrop.ts` and
+`loom.hero` reads them from there, so the hero's own enum widened from two
+paints to five without a second implementation.
+
 Read the ledger below accordingly. **It is a measure of the port, not of the
-library**, and the gaps that have mattered most in the last four runs have all
+library**, and the gaps that have mattered most in the last six runs have all
 been outside it.
 
 ## Where this leaves the count
 
 | | Blocks |
 | --- | --- |
-| Ported | 47 |
+| Ported | 55 |
 | Need no primitive | 13 |
-| Pairs still to build | 8 (4 pairs) |
+| Pairs still to build | 0 |
 | Atomic still to build | 0 |
 | Blocked on a seam | 2 |
 
-**62 of 70 are settled**, and the 8 that remain are four pairs rather than eight
+**68 of 70 are settled, and the 2 that remain are not primitives to build.**
+`tabs` wants a state seam and `feed` wants a binding
+([0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md))
+— neither is waiting on this document, and neither is work a primitives run can
+do alone. **Every table in this ledger that names something to build is now
+empty.**
+
+That is the number worth quoting, because "70 blocks" has been the shape of this
+job since the port started and it was never the real size of it. The honest
+closing figure is that seventy Hermes blocks came to **fifty-five ported, over
+roughly twenty-five content models**, and that the last four runs' most valuable
+primitives were all outside this ledger entirely.
+| Ported | 52 |
+| Need no primitive | 13 |
+| Pairs still to build | 3 (2 pairs) |
+| Atomic still to build | 0 |
+| Blocked on a seam | 2 |
+
+**67 of 70 are settled**, and the 3 that remain are two pairs rather than three
 primitives. That is the number worth quoting, because "70 blocks" has been the
 shape of this job since the port started and it was never the real size of it.
 
@@ -263,8 +424,12 @@ nobody has written.
 is not their fields — it is what the reader aims at.
 [0066](../decisions/0066-a-card-is-the-target-when-it-is-read-and-the-control-is-the-target-when-it-is-bought.md)
 settles it once for all of them: `loom.credential`, `loom.book` and
-`loom.episode` are **read**, so the card is the target; `loom.offering`,
-`loom.listing` and `loom.event` are **acted on**, so a control is. That is the
+`loom.recording` are **read**, so the card is the target; `loom.offering`,
+`loom.listing` and `loom.event` are **acted on**, so a control is. Both halves
+of that shipped together on 2 September and the pair is the clearest statement
+of the rule in the library: a recording is played, so its title's overlay covers
+the artwork; an event is booked, so nothing is covered and the ticket control is
+the aim. That is the
 one question the article/product pair had to answer that the granularity rules
 did not already answer.
 
@@ -277,5 +442,9 @@ record into child nodes. An offering has an includes list, so it has a flow and
 its prose is a node in it; a credential has no repeated part at all, so its one
 line is a prop and 0059's multi-string leaf applies unchanged. `loom.book` and
 `loom.listing` have repeated parts and take their prose as children;
-`loom.episode` and `loom.event` are to be read against their own shapes at port
-time.
+`loom.recording` and `loom.event` were read against their own shapes when they
+were built on 2 September, and **both went the credential way**: neither turns a
+field of its record into a children flow, so both hold their sentence as a prop
+and both are leaves. What looked at proposal time like a question about card
+richness turned out to be one question — *is there a repeated part?* — and the
+answer for both was no.
