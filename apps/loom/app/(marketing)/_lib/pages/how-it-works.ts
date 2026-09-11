@@ -229,8 +229,30 @@ const glossary = (ids: IdFactory): LoomNode =>
  * label as a language"*. Seven panels all announcing the same format tell a
  * reader nothing; seven announcing what each line *is* are a contents page.
  */
-const stage = (ids: IdFactory, line: TrailLine, index: number): readonly LoomNode[] => [
-  heading(ids, 3, `${index + 1}. ${line.title}`),
+/**
+ * The one stage whose title is about a person, and who that person is.
+ *
+ * Every other stage narrates the machinery — the rules were settled, the change
+ * was measured — and reads the same whoever is looking at it. The first one
+ * names whoever asked, and it said *"Somebody asked for something"* two
+ * paragraphs under a lead sentence that had just told the reader they were the
+ * somebody. The front door's own panel says *"You asked for something"* for the
+ * same line, so the page a visitor arrives from and the page they arrive at
+ * would have disagreed about who they were.
+ *
+ * Only the title is ours to vary. The line under it is the runtime's and says
+ * `"actor": "a visitor"` whoever is reading, which is correct and stays.
+ */
+const titleOf = (line: TrailLine, theirs: boolean): string =>
+  theirs && line.type === "intent-received" ? "You asked for something" : line.title
+
+const stage = (
+  ids: IdFactory,
+  line: TrailLine,
+  index: number,
+  theirs: boolean
+): readonly LoomNode[] => [
+  heading(ids, 3, `${index + 1}. ${titleOf(line, theirs)}`),
   prose(ids, line.plainly, { tone: "muted", measured: true }),
   buildElement(ids, {
     type: "loom.code",
@@ -264,35 +286,84 @@ const stage = (ids: IdFactory, line: TrailLine, index: number): readonly LoomNod
  * It is long, and the length is the argument. A record you can fit on a slide
  * is a record that left something out.
  */
-const paperTrail = (ids: IdFactory, trail: PaperTrail): LoomNode =>
+/**
+ * Whose request this is the record of, in the one clause that varies.
+ *
+ * *"A moment ago somebody asked"* is true of the default and wrong of the
+ * interesting case. A visitor arriving from the front door's panel has just made
+ * this exact request and watched it happen; telling them somebody did is the
+ * page failing to notice the one reader it was worth writing for.
+ *
+ * One sentence with one clause swapped rather than two sentences that agree
+ * today. Two copies of a paragraph this long is the shape of defect this lane
+ * has shipped a fix for three runs running, and it is cheaper not to write it.
+ */
+const whoAsked = (trail: PaperTrail, theirs: boolean): string =>
+  `${theirs ? "You have just asked" : "A moment ago somebody asked"} the front page of this site for something — “${trail.asked}” — and this is everything the machinery said while it dealt with it. It is what a Loom site hands its own logging as a change goes through, and a deployment collects it by writing eight lines that put each one in a list.`
+
+/** How many times the rules answered, which is one unless the visitor said yes. */
+const answers = (trail: PaperTrail): readonly number[] =>
+  trail.lines.flatMap((line, index) => (line.type === "disposition-decided" ? [index + 1] : []))
+
+/**
+ * How long the record is, and why — read off the run rather than typed beside it.
+ *
+ * It said *six lines for the five steps above* while the page could only ever
+ * print one request, and every one of the three runs it can print now would have
+ * made that sentence wrong in a different way. There are three shapes, and each
+ * of them is a real answer the rules can give rather than a case being handled:
+ *
+ * - **It landed.** Six lines for five steps, and the extra one is the rules.
+ *   The sentence this page has always carried.
+ * - **It stopped at the answer.** A held change and a refused one produce no
+ *   final line, because that line is the page changing and the page did not
+ *   change. Saying six here would be wrong on exactly the two runs a visitor
+ *   most wants to read.
+ * - **It was held, and then the visitor said yes.** The change is put to the
+ *   rules a second time and the whole second pass is in the record, so the run
+ *   is far longer than five — and the length is the argument. A person
+ *   approving is not the rules being skipped; it is the rules being asked again
+ *   with the answer written down both times, and nothing else on this site can
+ *   show that.
+ *
+ * Every number in all three is counted. The last shape is reachable only from
+ * the front door's *I say yes* button, so the page a crawler fetches is
+ * untouched by any of it.
+ */
+const lineCount = (trail: PaperTrail): string => {
+  const lines = trail.lines.length
+  const answered = answers(trail)
+  const held = answered[0] ?? lines
+
+  if (answered.length > 1) {
+    return `${spellCapitalised(lines)} lines for the ${STEPS} steps above, because this change went through them twice: ${spell(held)} for the request your rules held, and ${spell(lines - held)} more for the same change put again after you said yes. The second answer is your rules being asked a second time rather than overruled.`
+  }
+
+  return trail.landed
+    ? `${spellCapitalised(lines)} lines for the ${STEPS} steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards.`
+    : `${spellCapitalised(lines)} lines for the ${STEPS} steps above, and no ${ordinal(lines + 1)}: the last one is the answer, and nothing follows it because nothing happened to the page. One of the ${spell(lines)} is the rules themselves, written down before anything was worked out.`
+}
+
+const paperTrail = (ids: IdFactory, trail: PaperTrail, theirs: boolean): LoomNode =>
   section(
     ids,
     { tone: "surface", width: "wide", eyebrow: "The record itself" },
-    "The same change, as this site wrote it down",
+    theirs ? "Your change, as this site wrote it down" : "The same change, as this site wrote it down",
     [
-      prose(
-        ids,
-        `A moment ago somebody asked the front page of this site for something — “${trail.asked}” — and this is everything the machinery said while it dealt with it. It is what a Loom site hands its own logging as a change goes through, and a deployment collects it by writing eight lines that put each one in a list.`,
-        { size: "lead", measured: true }
-      ),
-      prose(
-        ids,
-        `${spellCapitalised(trail.lines.length)} lines for the ${STEPS} steps above. The extra one is the rules themselves: which set was in force is written down before anything is worked out, so nobody has to work that out afterwards.`,
-        { tone: "muted", measured: true }
-      ),
+      prose(ids, whoAsked(trail, theirs), { size: "lead", measured: true }),
+      prose(ids, lineCount(trail), { tone: "muted", measured: true }),
       glossary(ids),
-      ...trail.lines.flatMap((line, index) => stage(ids, line, index)),
+      ...trail.lines.flatMap((line, index) => stage(ids, line, index, theirs)),
     ]
   )
 
 /**
  * The one this site will not do, and the only line of it that differs.
  *
- * A refused change produces the same opening lines as an allowed one — the same
- * request, the same rules, the same list, the same measurement — and then one
- * answer that is not the same, followed by nothing. Printing the verdict line
- * on its own is not an economy: the absence of the line after it is half of
- * what this band is showing.
+ * A refused change reaches the same kinds of line as an allowed one — a request,
+ * the rules, a list, a measurement — and then one answer that is not the same,
+ * followed by nothing. Printing the verdict line on its own is not an economy:
+ * the absence of the line after it is half of what this band is showing.
  *
  * **The heading and the sentence under it used to disagree**, and the disagreement
  * survived every check on this site: the heading said *the same five lines* and
@@ -301,29 +372,37 @@ const paperTrail = (ids: IdFactory, trail: PaperTrail): LoomNode =>
  * differs, so it is not one of the ones that match — and the heading was
  * counting the verdict among the things it is about to say is different.
  *
- * Both come off the trail now, which is the only reason to trust either.
+ * Both come off the refused run now, which is the only reason to trust either.
  */
 const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode => {
   /**
-   * Where the two records stop matching, counted off the one this page holds.
+   * Where the two records stop matching, counted off **the refused run**.
    *
-   * A refusal is the allowed trail without its final line: everything up to the
-   * verdict is identical, the verdict itself is the line that differs, and the
-   * line that would have recorded a changed page is simply not there. All three
-   * of those positions were English words typed into prose until this run.
+   * All three positions are facts about the record this band is printing: how
+   * many kinds of line it reaches before the answer, which line the answer is,
+   * and the one that is not there. They were read off `trail.lines` instead,
+   * which gave the same three numbers for as long as the page above could only
+   * ever be the six-line default — and would have made every one of them one too
+   * small the first time a visitor arrived having asked for a change the rules
+   * held. Two correct-looking sentences, never read next to each other.
+   *
+   * *Kinds* of line rather than the same lines. The run above is now whichever
+   * one the visitor asked for, so its request, its list and its measurement are
+   * its own; what is the same is that a refused change is measured and weighed
+   * exactly as thoroughly as an allowed one before the answer differs.
    */
-  const matching = trail.lines.length - 2
-  const verdict = trail.lines.length - 1
-  const absent = trail.lines.length
+  const matching = trail.refusedLines - 1
+  const verdict = trail.refusedLines
+  const absent = trail.refusedLines + 1
 
   return section(
     ids,
     { width: "wide", eyebrow: "And when the answer is no" },
-    `The same ${spell(matching)} lines, and then a different answer`,
+    `The same ${spell(matching)} kinds of line, and then a different answer`,
     [
       prose(
         ids,
-        `The front page will not let anything take away the statement of what this site is for. Ask it to and the first ${spell(matching)} lines read exactly as they do above — the request, the rules, the list, the measurement. This is the ${ordinal(verdict)}. There is no ${ordinal(absent)}, because nothing happened to the page.`,
+        `The front page will not let anything take away the statement of what this site is for. Ask it to and it reaches the same ${spell(matching)} kinds of line as the run above — the request, the rules, the list, the measurement — and then this, its ${ordinal(verdict)}. There is no ${ordinal(absent)}, because nothing happened to the page.`,
         { measured: true }
       ),
       buildElement(ids, {
@@ -446,9 +525,27 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
         journey(ids),
         weighed(ids),
         record(ids),
+        /**
+         * The record, and — unless the record *is* one — the refusal beside it.
+         *
+         * `isRefusal` is the only thing that takes the contrast band away, and
+         * it takes it away for the one visitor who does not need it: somebody
+         * who asked the front door for the change this site refuses has the
+         * refusal in front of them already, and a band captioned *and when the
+         * answer is no* printing that same answer a second time reads as the
+         * page having lost track of what it just said.
+         *
+         * **`theirs` is the trail agreeing with the address, not the address
+         * alone.** A request that reached no answer falls back to the default
+         * record, and a page that had greeted the reader as the person who made
+         * *this* request would then be naming a request it is not printing.
+         */
         ...(context.trail === undefined
           ? []
-          : [paperTrail(ids, context.trail), refusal(ids, context.trail)]),
+          : [
+              paperTrail(ids, context.trail, context.trail.ask === context.ask),
+              ...(context.trail.isRefusal ? [] : [refusal(ids, context.trail)]),
+            ]),
         questions(ids),
         closing(ids, context),
         siteFooter(ids, chrome),
