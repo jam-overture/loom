@@ -65,16 +65,16 @@ export const PressureSummary = ({
       </div>
 
       {/*
-       * `text-ink-muted` on everything inside, because `TechnicalDetail` sets no
-       * colour of its own and inherits whatever it is mounted in. Inside a
-       * `StateNotice` that is already muted; at page level it is the body ink,
-       * which rendered the record *louder* than the plain sentence above it — the
-       * hierarchy the whole disclosure rule exists to establish, upside down. It
-       * is fixed here rather than in the component because the component's
-       * default is ten screens wide and this run can only look at one of them.
+       * This screen used to mute everything inside the disclosure by hand,
+       * because `TechnicalDetail` set no colour of its own and inherited
+       * whatever it was mounted in — at page level, the body ink, which
+       * rendered the record *louder* than the plain sentence above it. The
+       * component sets its own altitude now, so the compensation is gone: a
+       * screen that has to restate the rule is a screen that can forget to, and
+       * eight others never knew they had to.
        */}
       <TechnicalDetail summary="The numbers this is counted from">
-        <dl className="text-ink-muted flex flex-col gap-1">
+        <dl className="flex flex-col gap-1">
           {pressureFacts(pressure, now).map((fact) => (
             <div key={fact.label} className="flex flex-wrap items-baseline gap-x-2">
               <dt>{fact.label}</dt>
@@ -84,7 +84,7 @@ export const PressureSummary = ({
           ))}
         </dl>
 
-        <p className="text-ink-muted">
+        <p>
           The third column is what each number is called in the record this page reads, so a
           reviewer with the type in front of them does not have to guess which cell is which.
         </p>

@@ -15,7 +15,14 @@ import {
   type UnrevertablePlan,
 } from "@loom/runtime/store"
 
-import { namedList, partPhrase, type PlainLine } from "./vocabulary"
+import {
+  firstNamed,
+  namesInOperations,
+  partNameOf,
+  subjectFor,
+  type PartName,
+} from "./part-name"
+import { namedList, type PlainLine } from "./vocabulary"
 
 /**
  * What a revision replaced, and what undoing it would cost — before anyone
@@ -102,29 +109,39 @@ const countUnder = (node: LoomNode): number =>
  * onto the line, which is the whole reason to show the inverse rather than the
  * delta the reviewer can already see above it.
  */
-export const describeRestoration = (operation: TreeOperation): Restoration => {
+export const describeRestoration = (
+  operation: TreeOperation,
+  names: ReadonlyMap<string, PartName> = new Map()
+): Restoration => {
   switch (operation.op) {
+    /*
+     * The one sentence in the portal that can name something that no longer
+     * exists. This inverse `insert` undoes a removal, so the node it carries is
+     * the subtree the revision destroyed — gone from the tree, absent from the
+     * forward delta, and present nowhere else at all. Naming it from the
+     * operation is not a convenience here; it is the only opportunity.
+     */
     case "insert": {
       const under = countUnder(operation.node)
       const carried =
-        under === 0 ? "" : ` with the ${under} thing${under === 1 ? "" : "s"} that were inside it`
+        under === 0 ? "" : `, with the ${under} thing${under === 1 ? "" : "s"} that were inside it`
 
       return {
         before: "Puts ",
-        subject: operation.node.id,
-        after: `, ${partPhrase(operation.node)}${carried}, back inside ${operation.parentId}.`,
+        subject: partNameOf(operation.node),
+        after: `${carried}, back inside ${operation.parentId}.`,
       }
     }
     case "remove":
       return {
         before: "Takes ",
-        subject: operation.nodeId,
+        subject: subjectFor(names, operation.nodeId),
         after: " back out again, along with anything now inside it.",
       }
     case "move":
       return {
         before: "Moves ",
-        subject: operation.nodeId,
+        subject: subjectFor(names, operation.nodeId),
         after: ` back inside ${operation.parentId}, where it was.`,
       }
     case "configure": {
@@ -136,7 +153,7 @@ export const describeRestoration = (operation: TreeOperation): Restoration => {
 
       return {
         before: "Puts ",
-        subject: operation.nodeId,
+        subject: subjectFor(names, operation.nodeId),
         after:
           named.length === 0
             ? " back as it was, though it had no settings to restore."
@@ -174,15 +191,32 @@ const blockedReason = (plan: UnrevertablePlan): { reason: string; technical: str
   }
 }
 
-export const reversalOf = (plan: RevertPlan): Reversal =>
-  plan.outcome === "revertable"
-    ? {
-        kind: "revertable",
-        restores: plan.operations.map(describeRestoration),
-        inverse: plan.operations,
-        discards: plan.discards,
-      }
-    : { kind: "blocked", ...blockedReason(plan) }
+/**
+ * The plan, read.
+ *
+ * `known` is what the caller could find out about parts the inverse only names
+ * by id — in practice the tree as it stands now, which covers a move or a
+ * reconfigure, since those touch something that is still there. It is merged
+ * *under* what the inverse itself carries, so a subtree the undo would restore
+ * is named from the operation that carries it whether or not anything else
+ * knows about it: that is the removal case, and it is the one nothing else can
+ * answer.
+ */
+export const reversalOf = (
+  plan: RevertPlan,
+  known: ReadonlyMap<string, PartName> = new Map()
+): Reversal => {
+  if (plan.outcome !== "revertable") return { kind: "blocked", ...blockedReason(plan) }
+
+  const names = firstNamed(known, namesInOperations(plan.operations))
+
+  return {
+    kind: "revertable",
+    restores: plan.operations.map((operation) => describeRestoration(operation, names)),
+    inverse: plan.operations,
+    discards: plan.discards,
+  }
+}
 
 /**
  * The reversal of one revision, read from the log.
@@ -198,9 +232,11 @@ export const previewReversal = async (
   reader: TreeReader,
   treeId: TreeId,
   seed: LoomTree,
-  revision: number
+  revision: number,
+  /** Parts the caller already knows the names of — see `reversalOf`. */
+  known: ReadonlyMap<string, PartName> = new Map()
 ): Promise<Reversal | undefined> => {
   const planned = await planRevert(reader, { treeId, revision, seed })
 
-  return planned.ok ? reversalOf(planned.value) : undefined
+  return planned.ok ? reversalOf(planned.value, known) : undefined
 }

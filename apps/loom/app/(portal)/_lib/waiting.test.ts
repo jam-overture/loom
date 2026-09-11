@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 
+import { screenName } from "./screen-names"
+
 import {
   deltaIdSchema,
   intentIdSchema,
@@ -97,7 +99,7 @@ describe("answerOutcomes", () => {
     const no = answerOutcomes(disposition).no
 
     expect(no).toContain("left exactly as it is")
-    expect(no).toContain("stays in Activity")
+    expect(no).toContain(`stays in ${screenName("/portal/activity")}`)
   })
 
   /**

@@ -230,6 +230,80 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   THE PART IN QUESTION — the band, brought to the question
+
+   Stacked, the band a held change is about is roughly five screens
+   below the two buttons deciding its fate: measured on the built page
+   at 390×844, *Apply this change* lands at y≈646 and the marked band
+   at y≈4,620. `SpotlightScroll` declines to carry a visitor there and
+   is right to. So the part comes to the question instead, rendered
+   from the same tree through the same registry.
+
+   **Wide screens are exempt, in the stylesheet.** There the stage and
+   the rail are two scrollers side by side and the band is ringed in
+   amber forty pixels away, so a second rendering of it inside the
+   card would be the surface talking for its own sake. In CSS rather
+   than a `matchMedia` read at mount, for the reason the record bar
+   gives: a media query is right between a resize and a re-render and
+   a mount-time read is not.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /*
+   * The layout is here rather than in utilities on the element, and that is
+   * what makes the exemption below work at all. Tailwind orders its layers
+   * `theme, base, components, utilities`, so a `flex` utility on this element
+   * would outrank a `display: none` written in any earlier layer and the
+   * preview would render on every wide screen with nothing to show why.
+   */
+  .demo-part {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  @media (min-width: 1024px) {
+    .demo-part {
+      display: none;
+    }
+  }
+
+  .demo-part-stage {
+    /*
+     * A window, not the whole band. At rail width the clinic’s stat grid
+     * falls to one column and stands about 330px tall, which would push
+     * the two buttons the question is waiting on off the bottom of a
+     * phone — the exact defect `AnswerInView` exists to prevent, caused
+     * by the fix for a different one.
+     */
+    max-height: 13rem;
+    overflow: hidden;
+    border-radius: var(--radius-medium);
+    /*
+     * The bottom padding and the fade are the same 44px on purpose, and both
+     * numbers are the same decision. A band shorter than the window ends
+     * above the fade and is never touched by it; one taller than the window
+     * runs into it and reads as continuing, which it does.
+     *
+     * 44px because it is a line of the clinic's display face rather than a
+     * hairline. At 20px the fade cut the second line of *Where to find us*
+     * across the middle of the letters and read as a rendering fault; over a
+     * whole line the same clip reads as a page going on past the window.
+     */
+    padding: 12px 12px 44px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 44px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 44px), transparent 100%);
+    /*
+     * Nothing in here is operable. It is the clinic's page rendered a second
+     * time inside Loom's question, so a visitor who pressed *Book an
+     * assessment* in a preview would be pressing a button that is not on the
+     * page they are looking at.
+     */
+    pointer-events: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    FOCUS — one ring, everywhere
    `:focus-visible` rather than `:focus`. Applied universally because
    the alternative is remembering it per component, and the one that

@@ -4,15 +4,17 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeTelemetryError, episodesOf, tallyEpisodes } from "@loom/runtime/telemetry"
 
+import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { unattributedNote } from "@/app/(portal)/_lib/episode-view"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { nameFor } from "@/app/(portal)/_lib/page-name"
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
-import { storeIsDurable } from "@/app/(portal)/_lib/store"
+import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
 import { EpisodeCard } from "./_components/episode-card"
 import { TallyBar } from "./_components/tally-bar"
@@ -30,12 +32,21 @@ import { TallyBar } from "./_components/tally-bar"
  * happened recently" is the question, and paging forward from the beginning
  * would answer it only after reading everything that ever happened.
  *
- * The heading used to be the word `activity`, lowercase, which named the route
- * rather than the thing. The route keeps its name — it is already a person's
- * word — and the heading now says what a reader is looking at, because the one
- * thing this screen has that nothing else does is the asks that left no trace:
- * a refusal, or a request the AI never understood, changes nothing and so
- * appears in no diff, no log and no page.
+ * The heading was the word `activity`, lowercase, which named the route rather
+ * than the thing; then `Activity`, which named it in the right case and still
+ * said nothing. It is `What's been asked` now, and it is not written here — the
+ * strip on every scoped screen has called this destination that since 29 August
+ * while the rail and this heading said `Activity`, so the name is read from
+ * `_lib/screen-names.ts` and there is one of it.
+ *
+ * The route keeps its name. A route is an address rather than a label, and
+ * `/portal/activity` is already a person's word — renaming it would cost every
+ * link written to it for the sake of a string no reader is shown.
+ *
+ * What this screen has that nothing else does is the asks that left no trace: a
+ * refusal, or a request the AI never understood, changes nothing and so appears
+ * in no diff, no log and no page. That is also exactly what separates it from
+ * `What's changed`, which is why the two screens name each other.
  */
 const ActivityPage = async ({
   searchParams,
@@ -57,7 +68,7 @@ const ActivityPage = async ({
   if (!page.ok) {
     return (
       <div className="flex max-w-3xl flex-col gap-4 p-8">
-        <h1 className="text-2xl tracking-tight">Activity</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal/activity")}</h1>
         <StateNotice tone="failure" title="We couldn't read the record.">
           <p>
             Nothing has been lost and nothing has changed — this is a screen that could not load,
@@ -80,10 +91,21 @@ const ActivityPage = async ({
   const newestFirst = [...episodes].reverse()
   const scopeQuery = scope?.success ? `tree=${encodeURIComponent(scope.data)}&` : ""
 
+  /**
+   * What this page is called, and — because a name is only read when there is
+   * one page in view — whether this screen is scoped at all.
+   *
+   * One bounded head read on a screen that is already reading the record. A
+   * failed read costs the name and nothing else: the sentence still says which
+   * page, by id, which is the same fallback a page with no heading of its own
+   * gets.
+   */
+  const pageName = scope?.success ? await nameFor(portalStore, scope.data) : undefined
+
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">Activity</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal/activity")}</h1>
         {/*
          * Scoped, this screen used to make the deployment's claim over one
          * page's rows: the heading said `Activity`, the sentence said
@@ -92,19 +114,29 @@ const ActivityPage = async ({
          * now, and the corner link has become the strip below.
          */}
         <p className="text-ink-muted text-sm">
-          {scope?.success ? (
-            <PlainSentence line={scopedLead("asked", scope.data)} />
-          ) : (
+          {pageName === undefined ? (
             <>
               Everything anyone has asked Loom to change, newest first — including the changes it
               wasn&rsquo;t allowed to make and the requests it didn&rsquo;t understand. Those leave
               no other trace anywhere.
             </>
+          ) : (
+            <ScopedLead view="asked" page={pageName} />
           )}
         </p>
       </header>
 
       {scope?.success && <PageViews treeId={scope.data} current="asked" />}
+
+      {/*
+       * Under the strip rather than in the header: a reader who already knows
+       * which of the two screens they want should not have to read past the
+       * difference between them to reach the list.
+       */}
+      <ElsewhereNote
+        from="/portal/activity"
+        {...(scope?.success ? { treeId: scope.data } : {})}
+      />
 
       {episodes.length === 0 ? (
         <StateNotice

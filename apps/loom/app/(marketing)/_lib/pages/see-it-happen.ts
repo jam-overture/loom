@@ -1,5 +1,6 @@
 import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } from "@loom/runtime"
 
+import { whatTheChoicesDo, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
@@ -38,10 +39,24 @@ export type SeeItHappenContext = {
    * record cannot tell the two apart: once a held change has been allowed it has
    * landed and is waiting for nobody, which is exactly what a change that never
    * needed allowing looks like. Only the address knows which happened.
+   *
+   * It is also why the band builds its own links rather than reading them off
+   * the record: every control here has to keep the whole of what the visitor has
+   * done so far, because the address *is* the state (0081). A *Put it back* that
+   * forgot the approval one press earlier would send the reader to a page where
+   * the change they are putting back never happened.
    */
   readonly approve?: boolean
   /** What happened, once it has. Absent before the visitor has asked for anything. */
   readonly record?: ChangeRecord
+  /**
+   * And what happened when they put it back, once they have.
+   *
+   * A second record rather than a flag, because that is what it is: an undo is a
+   * change of its own (0032), interpreted, measured and put to the same rules,
+   * and the panel reports it exactly as it reports the first one.
+   */
+  readonly undone?: ChangeRecord
 }
 
 /**
@@ -229,6 +244,14 @@ const panelActions = (
   record: ChangeRecord
 ): readonly LoomNode[] => {
   const home = askHref(context.origin, { theme: context.theme })
+  /** Everything the visitor has done so far, which every link from here must keep. */
+  const sofar = {
+    theme: context.theme,
+    ask: record.ask,
+    ...(context.approve === true ? { approve: true } : {}),
+  }
+  /** There is something to put back only on a change that landed and is still on the page. */
+  const reversible = record.landed && !record.putBack && context.undone === undefined
 
   return [
     stack(ids, { direction: "row", gap: "snug", wrap: true }, [
@@ -237,58 +260,151 @@ const panelActions = (
             buildElement(ids, {
               type: "loom.action",
               props: {
-                href: askHref(context.origin, {
-                  theme: context.theme,
-                  ask: record.ask,
-                  approve: true,
-                }),
+                href: askHref(
+                  context.origin,
+                  record.putBack
+                    ? { ...sofar, back: true, backApprove: true }
+                    : { ...sofar, approve: true }
+                ),
                 variant: "primary",
               },
               children: [buildText(ids, "I say yes — go ahead")],
             }),
           ]
         : []),
+      /**
+       * *Put it back* is offered once, and only while there is something to put
+       * back: on a change that landed, on its own card, and before the visitor
+       * has already asked.
+       *
+       * Not on the undo's own card, which is the one place the recursion would
+       * be free and worthless — a visitor putting back the putting-back is
+       * asking for the change again, and the five buttons above already say that
+       * in words. And not on the change's card once the undo has run, where the
+       * button would still be lit under a panel reporting that it had already
+       * been pressed. Both cards offer the way out instead.
+       */
       buildElement(ids, {
         type: "loom.action",
-        props: { href: home, variant: record.landed ? "primary" : "secondary" },
-        children: [buildText(ids, record.landed ? "Put it back" : "Start again")],
+        props: {
+          href: reversible ? askHref(context.origin, { ...sofar, back: true }) : home,
+          variant: reversible ? "primary" : "secondary",
+        },
+        children: [buildText(ids, reversible ? "Put it back" : "Start again")],
       }),
       readTheRecord(ids, context, record),
     ]),
   ]
 }
 
-const panel = (ids: IdFactory, context: SeeItHappenContext): LoomNode => {
-  const { record } = context
+/**
+ * The undo did what the rung above it said it would, and this is the sentence
+ * that says so.
+ *
+ * It is the whole point of the band and it is worth being exact about. Putting a
+ * change back is not the page being rebuilt from its source: the inverse carries
+ * the pieces the change took away, and they come back with the ids they left
+ * with (0044), so the page under this panel is the page the visitor arrived on
+ * rather than a fresh one that resembles it. `undo.test.ts` holds the restored
+ * tree against the published one, node for node, so this sentence is a test
+ * result rather than a promise.
+ */
+const RESTORED =
+  "Nothing here was rebuilt. The pieces came back carried by the undo itself, each with the name it left with — so this is the page you arrived on, not a fresh copy that reads the same."
 
-  return buildElement(ids, {
+/**
+ * And what the same slot says when the rules stopped the undo, which they do.
+ *
+ * The sentence above is the payoff and it is only true once something has been
+ * put back. Printing it under a held undo would be this band claiming a
+ * restoration that has not happened, on the run where the rules holding an undo
+ * is the most interesting thing on the page — the exact shape of defect this
+ * change exists to remove, reintroduced one card lower.
+ */
+const STILL_THERE =
+  "Nothing has moved. The change is still on the page below and stays there until you answer, which is what your rules asked for."
+
+/** What the badge row says above each rail, so two records cannot be read as one. */
+const panelIntro = (record: ChangeRecord): string =>
+  record.putBack ? "And what it wrote down when you put it back" : "What the page wrote down"
+
+const panelCard = (
+  ids: IdFactory,
+  context: SeeItHappenContext,
+  record: ChangeRecord
+): LoomNode =>
+  buildElement(ids, {
     type: "loom.card",
     props: { tone: "surface", padding: "roomy" },
-    children:
-      record === undefined
-        ? [...waiting(ids)]
-        : [
-            stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
-              verdictBadge(ids, record),
-              prose(ids, "What the page wrote down", { size: "small", tone: "muted" }),
-            ]),
-            rail(ids, "loose", stepsOf(ids, record)),
-            /**
-             * The disclosure, and it is a selling point rather than a caveat.
-             * What worked this change out was the page itself, not a model — and
-             * the rules cannot tell, because they judge the change and never its
-             * author. That is the property that makes the whole sequence
-             * testable, and hiding it would be the site being coy about the one
-             * thing it is right about.
-             */
-            prose(
-              ids,
-              "This change was worked out from the page itself rather than asked of an AI, which is why it is so sure of itself. Your rules do not treat the two differently: they weigh the change, never who wrote it.",
-              { size: "small", tone: "muted" }
-            ),
-            ...panelActions(ids, context, record),
-          ],
+    children: [
+      stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
+        verdictBadge(ids, record),
+        prose(ids, panelIntro(record), { size: "small", tone: "muted" }),
+      ]),
+      rail(ids, "loose", stepsOf(ids, record)),
+      /**
+       * The disclosure, and it is a selling point rather than a caveat.
+       * What worked this change out was the page itself, not a model — and
+       * the rules cannot tell, because they judge the change and never its
+       * author. That is the property that makes the whole sequence
+       * testable, and hiding it would be the site being coy about the one
+       * thing it is right about.
+       *
+       * The undo's card says the other half instead. Repeating this under a
+       * second rail would spend the reader's attention on a sentence they read
+       * ninety seconds ago, and the thing they have just watched happen is more
+       * interesting than the thing they already know.
+       */
+      prose(
+        ids,
+        record.putBack
+          ? record.landed
+            ? RESTORED
+            : STILL_THERE
+          : "This change was worked out from the page itself rather than asked of an AI, which is why it is so sure of itself. Your rules do not treat the two differently: they weigh the change, never who wrote it.",
+        { size: "small", tone: "muted" }
+      ),
+      /**
+       * The controls sit on the last card and nowhere else.
+       *
+       * Both cards offered them for one commit, and a record with two entries
+       * ended in two identical *Start again* buttons a hand's width apart —
+       * which reads as a page that has lost track of what it is offering. The
+       * change's card has nothing left to ask once its undo has run: the
+       * question moved down with the story.
+       */
+      ...(record.putBack || context.undone === undefined
+        ? panelActions(ids, context, record)
+        : []),
+    ],
   })
+
+/**
+ * The record, which is one card until the visitor puts a change back and two
+ * afterwards.
+ *
+ * Stacked rather than side by side, for the reason the band as a whole is
+ * stacked: each rail is five steps of prose, and a column each would squeeze
+ * both into a gutter forty characters wide. Stacked they read as what they are —
+ * two entries in one record, in the order they happened.
+ */
+const panels = (ids: IdFactory, context: SeeItHappenContext): readonly LoomNode[] => {
+  const { record, undone } = context
+
+  if (record === undefined) {
+    return [
+      buildElement(ids, {
+        type: "loom.card",
+        props: { tone: "surface", padding: "roomy" },
+        children: [...waiting(ids)],
+      }),
+    ]
+  }
+
+  return [
+    panelCard(ids, context, record),
+    ...(undone === undefined ? [] : [panelCard(ids, context, undone)]),
+  ]
 }
 
 /**
@@ -298,12 +414,19 @@ const panel = (ids: IdFactory, context: SeeItHappenContext): LoomNode => {
 const COUNT_IN_WORDS: readonly string[] = ["nothing", "one thing", "two things", "three things"]
 
 /**
- * What this site protects, said before the reader meets a refusal.
+ * What this site protects, said before the reader meets a refusal — and then
+ * what the five buttons above it actually do.
  *
- * Every part of it is read off the rules: the phrases, and the count. A run that
+ * Every part of it is read off something: the protected phrases and their count
+ * off the rules, and what happens to each request off the requests. A run that
  * protects a fourth thing and forgets this sentence gets a page that says
- * "three things" and lists four, which is the kind of near-miss nobody notices
- * in review — so it cannot happen.
+ * "three things" and lists four; a run that adds a sixth choice used to get a
+ * page still calling the exception singular. Neither can happen now.
+ *
+ * The second half was **"Everything else a request may rearrange on its own —
+ * and one of the five above will be refused"** until today, and it was the one
+ * sentence on the site that denied the middle answer exists. `answers.ts` has
+ * the whole account.
  */
 const protectionNotice = (): string => {
   const protectedThings = protectedInPlainWords()
@@ -314,7 +437,7 @@ const protectionNotice = (): string => {
 
   return `This site protects ${
     COUNT_IN_WORDS[protectedThings.length] ?? `${protectedThings.length} things`
-  } from being taken away: ${listed}. Everything else a request may rearrange on its own — and one of the five above will be refused, which is the part worth watching.`
+  } from being taken away: ${listed}. ${whatTheChoicesDo()} ${worthWatching()}`
 }
 
 /**
@@ -423,7 +546,7 @@ export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): Lo
        * visitor reads and one they scroll past.
        */
       choices(ids, context),
-      panel(ids, context),
+      ...panels(ids, context),
       ...typeYourOwn(ids, context),
     ],
   })

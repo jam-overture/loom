@@ -10,6 +10,7 @@ import {
 } from "@loom/runtime"
 import type { HeldProposal } from "@loom/runtime/write"
 
+import type { PageName } from "@/app/(portal)/_lib/page-name"
 import { waitingChange } from "@/app/(portal)/_lib/waiting"
 
 import { WaitingCard } from "./waiting-card"
@@ -68,10 +69,12 @@ const held: HeldProposal = {
   heldAt: "2026-08-19T09:00:00.000Z",
 }
 
-const card = (proposal: HeldProposal = held) =>
+const page: PageName = { name: "Autumn arrivals", treeId: "t_1", derived: true }
+
+const card = (proposal: HeldProposal = held, named: PageName = page) =>
   render(
     <ul>
-      <WaitingCard change={waitingChange(proposal)} />
+      <WaitingCard change={waitingChange(proposal)} page={named} />
     </ul>
   )
 
@@ -85,11 +88,31 @@ describe("WaitingCard", () => {
   it("names the page the change is waiting on, and how long it has waited", () => {
     const { container } = card()
 
+    expect(container.textContent).toContain("Autumn arrivals")
     expect(container.textContent).toContain("t_1")
     expect(container.querySelector("time")?.getAttribute("dateTime")).toBe(
       "2026-08-19T09:00:00.000Z"
     )
     expect(container.textContent).toContain("waiting since 19 August 2026 at 09:00 UTC")
+  })
+
+  /**
+   * The queue this card sits in is drawn from every page at once, so the page is
+   * what tells one row from the next — and for a fortnight it told a reader
+   * `t_1`. Both halves are pinned, in order: the words, then the id.
+   */
+  it("says which page in words before it says which page in an id", () => {
+    const { container } = card()
+    const text = container.textContent ?? ""
+
+    expect(text.indexOf("Autumn arrivals")).toBeLessThan(text.indexOf("t_1"))
+  })
+
+  it("still names the page by its id when it could not be named in words", () => {
+    const { container } = card(held, { name: "Untitled page", treeId: "t_1", derived: false })
+
+    expect(container.textContent).toContain("Untitled page")
+    expect(container.textContent).toContain("t_1")
   })
 
   it("says why it stopped before it says what either answer would do", () => {

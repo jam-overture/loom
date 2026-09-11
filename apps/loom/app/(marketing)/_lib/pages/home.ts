@@ -12,7 +12,7 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 import type { AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { BAND } from "../bands"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { SIGN_IN_LABEL, siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
 import { PLAIN_WORDS, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
@@ -23,6 +23,7 @@ import {
   DECISIONS_URL,
   DEMO,
   DOCS,
+  doorOf,
   HOME,
   HOW_IT_WORKS,
   internalHref,
@@ -32,6 +33,8 @@ import {
   REPOSITORY_URL,
   SITE_THEMES,
   surfaceHref,
+  WHAT_YOU_RUN,
+  YOUR_COMPONENTS,
   type SiteThemeName,
 } from "../site"
 
@@ -66,8 +69,20 @@ export type PageContext = {
    * this site is a function of.
    */
   readonly approve?: boolean
+  /**
+   * Whether the visitor has pressed *Put it back* on a change that landed, and
+   * whether they have answered the rules holding the undo itself back.
+   *
+   * Two more things the address says, for the same reason as the two above: the
+   * undo is a change of its own (0032) and it is judged by the same rules, so it
+   * can be held for a person exactly as the change it reverses can.
+   */
+  readonly back?: boolean
+  readonly backApprove?: boolean
   /** What happened, once it has. See `render.ts` for why this arrives in a second pass. */
   readonly record?: ChangeRecord
+  /** And what happened when the visitor put it back, once they have. */
+  readonly undone?: ChangeRecord
 }
 
 const hero = (ids: IdFactory, context: PageContext): LoomNode =>
@@ -262,7 +277,7 @@ const problems = (ids: IdFactory): LoomNode =>
  * itself: every one of them is held against the code by a test, and the record
  * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
  */
-const facts = (ids: IdFactory): LoomNode =>
+const facts = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "surface", width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     prose(
       ids,
@@ -273,12 +288,31 @@ const facts = (ids: IdFactory): LoomNode =>
       type: "loom.stat-grid",
       props: { columns: "three", align: "center" },
       children: [
+        /**
+         * The caption changed on 8 September, and it is the smallest available
+         * repair to a contradiction this page has carried since it had numbers.
+         *
+         * *"Ready-made pieces to build with"* is one screen above a questions
+         * band answering *"can the AI write code into my page?"* with *"it can
+         * only use the pieces **you handed it**"*, and one screen below a card
+         * saying it *"only rearranges pieces **you built and already trust**"*.
+         * All three are true and no test could see anything wrong, because
+         * nothing is: the library exists and a host describes its own components
+         * too. A stranger reading top to bottom is given two answers to *where do
+         * the pieces come from* and no way to tell they are halves of one.
+         *
+         * The old caption said that a piece takes its colours from the theme —
+         * true, and the site demonstrates it in the footer with a switcher rather
+         * than needing to claim it here. This one says the thing nothing else on
+         * the site says, and `/your-components` is the page that says it in full.
+         */
         buildElement(ids, {
           type: "loom.stat",
           props: {
             value: FACTS.primitives,
             label: "ready-made pieces to build with",
-            caption: "Each one takes its colours and type from whatever theme the page is wearing.",
+            caption:
+              "A starting point, not the deal: components you already built join the same list.",
           },
         }),
         buildElement(ids, {
@@ -299,11 +333,47 @@ const facts = (ids: IdFactory): LoomNode =>
         }),
       ],
     }),
-    action(ids, "Read the decisions", DECISIONS_URL, {
-      variant: "quiet",
-      scale: "small",
-      external: true,
-    }),
+    /**
+     * Three now, and the new one leads. It sits here rather than in the band of
+     * ways in, which is exactly the four surfaces and must stay that way, and
+     * rather than in the questions band, whose answers are props and cannot
+     * carry a link.
+     *
+     * **There is a second reason for not putting it in the questions band, and
+     * it cost ten tests to learn.** The first version of this link went there,
+     * under the two answers that make its claim — *nothing you have to host with
+     * us*, and *Loom runs inside your own application*. That is where a reader
+     * meets the question, and it is still the wrong place: *Take the questions
+     * off the page* is one of the five requests this site offers, the rules
+     * weigh how much a request removes, and one more row in that band pushed the
+     * removal from **landed** to **held**. The front door's own demonstration —
+     * three land, one is refused, one stops and asks — is the argument of the
+     * band above it and was declared in code two days ago. A navigation link is
+     * not worth quietly re-answering it.
+     *
+     * That is the site's rules working exactly as the site says they do, on the
+     * site itself, and it is worth knowing that adding anything to a band a
+     * request can remove is a change to what that request costs.
+     */
+    stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
+      action(
+        ids,
+        "What you would be running",
+        internalHref(context.origin, WHAT_YOU_RUN.path, context.theme),
+        { variant: "quiet", scale: "small" }
+      ),
+      action(
+        ids,
+        "Where the pieces come from",
+        internalHref(context.origin, YOUR_COMPONENTS.path, context.theme),
+        { variant: "quiet", scale: "small" }
+      ),
+      action(ids, "Read the decisions", DECISIONS_URL, {
+        variant: "quiet",
+        scale: "small",
+        external: true,
+      }),
+    ]),
   ])
 
 const questions = (ids: IdFactory): LoomNode =>
@@ -343,6 +413,36 @@ const questions = (ids: IdFactory): LoomNode =>
             question: "What happens when a change is wrong?",
             answer:
               "You put it back. Every change is stored together with the change that reverses it, and undoing is checked against your rules and written down like anything else. Nothing is erased to make room for it.",
+          },
+        }),
+        /**
+         * The question the bar at the top of this page has been asking on the
+         * reader's behalf since the site was written, and the fifth in a band
+         * that had four.
+         *
+         * *Sign in*, top right, on a site a stranger has never used, is an
+         * offer — and this site has nothing to offer them. A portal belongs to
+         * the Loom site it is part of. Until this run the site said the word
+         * *account* in exactly two places, the bar's button and a cost line,
+         * and explained it in neither.
+         *
+         * It is a description of code and not a position: it says what a portal
+         * is and who decides its list, and nothing about whether anybody sells
+         * one. The band's other four answer *what can it do to my page*; this is
+         * the first that answers *what would I be signing up to*, which is the
+         * question a bar with a sign-in button puts in a reader's head before
+         * they have read a word of the rest.
+         *
+         * Both halves are composed rather than typed: `PORTAL.door` is the same
+         * sentence the band of cards below carries, and `SIGN_IN_LABEL` is the
+         * button's own word, so re-wording either cannot leave this answer
+         * describing a page that no longer exists.
+         */
+        buildElement(ids, {
+          type: "loom.faq",
+          props: {
+            question: "Do I need an account to use this?",
+            answer: `No. Loom runs inside your own application, and the portal is part of what you put there rather than a service you join. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page is that door on this site's own portal — on a site of yours it would be your list, and you would be on it.`,
           },
         }),
       ],
@@ -389,6 +489,20 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * signing in is required rather than pretending the whole product is one click
  * away.
  *
+ * **That last clause was false from 25 August until 10 September, and it is the
+ * clearest example this lane has of a guarantee outliving the code that kept
+ * it.** The portal's blurb did say signing in was required; the run that gave
+ * every surface a `cost` moved that out to keep four blurbs one length, wrote
+ * *Costs you an account* in its place, and left this note promising a property
+ * the band no longer had. An account is not a cost a reader can pay — nobody
+ * reading this site can obtain one by deciding to — so the card had not merely
+ * gone quiet about the door, it had started describing it wrongly.
+ *
+ * `doorOf` puts it back, in the body rather than the blurb, and the type makes
+ * it structural: a guarded surface without a `door` no longer compiles. The
+ * note is checked rather than promised now — `pages.test.ts` renders this band
+ * and holds the sentence to it.
+ *
  * **It is the four surfaces and nothing else**, as of 22 August. A fifth card
  * pointed at the repository, which was fine while there were three of them and
  * wrong once the demo made it four: five cards in a grid that wraps at four
@@ -431,12 +545,22 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
           throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
         }
 
+        const door = doorOf(surface)
+
         return buildElement(ids, {
           type: "loom.card",
           props: { href: surfaceHref(context.origin, surface) },
           children: [
             heading(ids, 3, way.title),
             prose(ids, surface.blurb, { tone: "muted" }),
+            /**
+             * The one card with a door says so here, in the body, and not in
+             * the footer where the cost is. The costs are read along one line
+             * across the row — that is the whole reason they are pinned — and a
+             * sentence dropped into that line would be read as a fourth cost
+             * and would break the line for the other three.
+             */
+            ...(door === undefined ? [] : [prose(ids, door, { size: "small", tone: "muted" })]),
             buildSlot(ids, "footer", [prose(ids, surface.cost, { size: "small", tone: "muted" })]),
           ],
         })
@@ -483,6 +607,12 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
 
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
+  /**
+   * The most recent thing that happened to this page, which the notice at the
+   * top reports: the undo once the visitor has put a change back, and the change
+   * itself until then.
+   */
+  const latest = context.undone ?? context.record
   const chrome: ChromeContext = {
     origin: context.origin,
     theme: context.theme,
@@ -513,13 +643,16 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * Nothing is spread here when there is no record: the arrival page is
          * the tree it has always been, node for node.
          */
-        ...(context.record === undefined
+        ...(latest === undefined
           ? []
           : [
               answerBand(ids, {
                 origin: context.origin,
                 theme: context.theme,
-                record: context.record,
+                record: latest,
+                ...(context.approve === undefined ? {} : { approve: context.approve }),
+                ...(context.back === undefined ? {} : { back: context.back }),
+                ...(context.backApprove === undefined ? {} : { backApprove: context.backApprove }),
               }),
             ]),
         hero(ids, context),
@@ -537,6 +670,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
             ? {}
             : { ask: context.ask, approve: context.approve === true }),
           ...(context.record === undefined ? {} : { record: context.record }),
+          ...(context.undone === undefined ? {} : { undone: context.undone }),
         }),
         problems(ids),
         /**
@@ -546,7 +680,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * page uses what renders correctly today.
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
-        facts(ids),
+        facts(ids, context),
         /**
          * The claim the facts band makes about the repository, made about this
          * page. *Not one of these numbers was typed from memory* is directly

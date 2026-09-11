@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { screenName } from "./_lib/screen-names"
+
 import { StateNotice } from "./_components/state-notice"
 import { TechnicalDetail } from "./_components/technical-detail"
 
@@ -23,7 +25,12 @@ const NotFound = () => (
       action={
         <>
           <Link href="/portal/pages">Your pages →</Link>
-          <Link href="/portal/activity">Activity →</Link>
+          {/*
+           * The screen is named rather than spelled. This read `Activity →`,
+           * which is what the rail called it until 8 September — on the one
+           * screen where a reader is already lost, offered as the way out.
+           */}
+          <Link href="/portal/activity">{screenName("/portal/activity")} →</Link>
         </>
       }
     >

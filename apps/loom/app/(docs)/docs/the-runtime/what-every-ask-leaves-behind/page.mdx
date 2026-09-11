@@ -59,6 +59,7 @@ turning it on.
 ## Turning it on is six lines and one decision
 
 ```ts
+import { commitIntent } from "@loom/runtime/write"
 import { collectTelemetry } from "@loom/runtime/telemetry"
 import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
 
@@ -237,7 +238,7 @@ only destructive operation anywhere in Loom's storage.
 ```ts
 import { applyRetention } from "@loom/runtime/telemetry"
 
-const outcome = await applyRetention(journal, { policy: { maxAgeMs: 30 * 24 * 60 * 60 * 1000 } })
+const pruned = await applyRetention(journal, { policy: { maxAgeMs: 30 * 24 * 60 * 60 * 1000 } })
 ```
 
 Here is what one run against this site's corpus would do, under a fortnight's

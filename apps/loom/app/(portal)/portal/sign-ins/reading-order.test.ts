@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
  * The order a reader meets this screen in, pinned at the source.
@@ -13,15 +12,8 @@ import { describe, expect, it } from "vitest"
  * of caveat came *before* anything that had happened, so a reader met the limits
  * of the table before they met the table.
  */
-const file = join(process.cwd(), "app", "(portal)", "portal", "sign-ins", "page.tsx")
-
-/**
- * Comments are stripped first, for the reason the other three guards strip them:
- * the comments here quote the words this screen stopped using, and a check that
- * could not tell a warning from the thing it warns about would make the warning
- * unwriteable.
- */
-const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu, "")
+const file = portalFile("portal", "sign-ins", "page.tsx")
+const source = screenSource(file)
 
 describe("the sign-ins screen's reading order", () => {
   /**

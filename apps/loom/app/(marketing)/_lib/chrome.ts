@@ -54,6 +54,19 @@ import {
  */
 export const PALETTE_SWITCHER_LABEL = "The same page, a different palette:"
 
+/**
+ * The word on the bar's one action, and the way this site names the portal to
+ * somebody who has never heard of a portal.
+ *
+ * Exported for the same reason as the label above, and for one more: the front
+ * door's questions band now answers *do I need an account to use this?*, and
+ * the sentence that closes the answer is about **this word, in this bar**. A
+ * question naming a button by typing its label out again is a question that
+ * goes stale the day the button is re-worded, and it would go stale silently —
+ * the wrong half of the answer still reads like an answer.
+ */
+export const SIGN_IN_LABEL = "Sign in"
+
 export type ChromeContext = {
   readonly origin: string
   readonly theme: SiteThemeName
@@ -106,17 +119,35 @@ const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
  * The bar across the top: the mark, the menu, and the one thing the page wants
  * you to do.
  *
- * The menu is this site's pages and the surfaces marked `inMenu` — today the
- * demonstration and the documentation. The portal is the action rather than a
- * menu item, and its word is **Sign in** rather than its name: a stranger has
- * no idea what a portal is, and the bar's right-hand action is where every site
- * they have used puts the way in.
+ * The menu is the pages and the surfaces marked `inMenu` — today three of this
+ * site's five pages, the demonstration and the documentation. The portal is the
+ * action rather than a menu item, and its word is **Sign in** rather than its
+ * name: a stranger has no idea what a portal is, and the bar's right-hand action
+ * is where every site they have used puts the way in.
+ *
+ * **A bar cannot say whose account it means, and this one was the only place the
+ * site said anything about accounts at all.** *Sign in* at the top right of a
+ * site a stranger has never used reads as *you may have one of these* — and a
+ * portal belongs to the Loom site it is part of, so this site can no more issue
+ * one than it can sign you in to somebody else's. Ten seconds is the whole span
+ * this bar is for and none of that fits in it, which is an argument for saying
+ * it somewhere with room rather than for leaving it unsaid: `PORTAL.door` is
+ * the sentence, the front door's questions band and its band of cards carry it,
+ * and `SIGN_IN_LABEL` is exported so the question can name this button without
+ * spelling it a second time.
  *
  * It used to take *every unguarded surface*, which is a rule about permissions
  * deciding a question about attention, and it grew by one every time another
  * lane shipped a front door. `inMenu` in `site.ts` carries that decision now,
  * with the reasoning beside it; the footer below still carries the complete map,
  * so this bar can be short without anything becoming unreachable.
+ *
+ * **A page of this site can be left out on the same terms, as of 8 September.**
+ * The surfaces answered #166 and the bar was back to eight items within a week,
+ * because the flag only governed half of what the bar carries. It governs both
+ * halves now, and the guarantee is the one the surfaces already had: what the
+ * bar leaves out, the footer's map carries — marked as the page the reader is
+ * on, so a page off the bar still says where you are.
  */
 export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
   buildElement(ids, {
@@ -124,12 +155,12 @@ export const siteHeader = (ids: IdFactory, context: ChromeContext): LoomNode =>
     props: { tone: "surface", position: "sticky", align: "end" },
     children: [
       buildSlot(ids, "brand", [wordmark(ids, context)]),
-      ...SITE_ROUTES.map((route) => menuLink(ids, context, route)),
+      ...SITE_ROUTES.filter((route) => route.inMenu).map((route) => menuLink(ids, context, route)),
       ...PRODUCT_SURFACES.filter((surface) => surface.inMenu).map((surface) =>
         link(ids, surface.label, surfaceHref(context.origin, surface), { scale: "medium" })
       ),
       buildSlot(ids, "actions", [
-        action(ids, "Sign in", surfaceHref(context.origin, PORTAL), {
+        action(ids, SIGN_IN_LABEL, surfaceHref(context.origin, PORTAL), {
           variant: "secondary",
           scale: "small",
         }),

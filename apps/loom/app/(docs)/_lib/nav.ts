@@ -72,10 +72,12 @@ const apiReferenceSection: DocsSection = {
  * purpose.
  *
  * It comes after the reference because a reader who wants to know *why* has
- * usually already tried to build something. Two pages is the whole of it —
- * anything longer would be the third copy of an argument that already exists in
- * `lessons/` and `decisions/`, and the copy on a docs site is the one that goes
- * stale, because nothing fails when it does.
+ * usually already tried to build something. Three pages is the whole of it, and
+ * the limit that keeps it there is not a page count: **no page in this section
+ * may explain a ruling.** They may name one, count them, say what a stranger
+ * needs in order to decide whether to open one — and the argument itself has to
+ * stay in `lessons/` and `decisions/`, because the copy on a documentation site
+ * is the one that goes stale, since nothing fails when it does.
  */
 const architectureSection: DocsSection = {
   slug: "architecture",
@@ -87,6 +89,12 @@ const architectureSection: DocsSection = {
       title: "How it fits together",
       summary:
         "The eight ideas the whole system rests on, a paragraph each, and where to go for the reasoning and for the ruling.",
+    },
+    {
+      slug: "what-it-costs-you",
+      title: "What it costs you",
+      summary:
+        "Eight things you can no longer do, the ruling behind each one, and the handful of constraints that are not settled.",
     },
     {
       slug: "decision-records",
@@ -188,6 +196,12 @@ const orderedSections: readonly DocsSection[] = [
           "Yes, ask a person, or no — and the two questions the runtime asks about a change before it answers.",
       },
       {
+        slug: "answering-a-held-change",
+        title: "Answering a held change",
+        summary:
+          "The queue a person answers from: what is waiting in it, how to tell a change that can still be applied from one that cannot, and what saying yes actually does.",
+      },
+      {
         slug: "the-history-of-a-page",
         title: "The history of a page",
         summary:
@@ -216,6 +230,12 @@ const orderedSections: readonly DocsSection[] = [
         title: "Going to production",
         summary:
           "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
+      },
+      {
+        slug: "when-something-looks-wrong",
+        title: "When something looks wrong",
+        summary:
+          "Who put this node here, whether the page still matches its own history, and why a change nobody answered for three days can no longer be answered at all.",
       },
     ],
   },

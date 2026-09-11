@@ -1,20 +1,21 @@
-import { buildSearchProse } from "@/app/(docs)/_lib/search/build"
+import { searchProse } from "@/app/(docs)/_lib/search/build"
 
 /**
- * The words under every heading, as a second static file.
+ * The site's words, as the second static file.
  *
- * Split from the index itself on 11 September, when the single file reached
- * 47,501 bytes gzipped against a 48,000 cap that exists because this ships to
- * every reader who opens the box. The prose is most of that and the least
- * urgent part of it: a reader who has typed two letters wants headings, and
- * only wants sentences once they have typed enough to be looking for one.
+ * Everything the route beside this one says applies here — built once by
+ * `next build`, served from a CDN, never touching the filesystem for a request.
+ * What is different is who waits for it: **nobody**. The search box opens on the
+ * index and answers by title, section and summary while this is still in flight,
+ * and the words turn on the fourth ranking band when they land.
  *
- * Same `force-static` bargain as the index — assembled by `next build`, served
- * from a CDN, no request ever runs this.
+ * That is the whole reason for two files. This half is 35 KB compressed against
+ * the index's 14.6, and it is the half that grows every time anybody writes a
+ * paragraph.
  */
 export const dynamic = "force-static"
 
 export const GET = (): Response =>
-  Response.json(buildSearchProse(), {
+  Response.json(searchProse(), {
     headers: { "cache-control": "public, max-age=0, must-revalidate" },
   })

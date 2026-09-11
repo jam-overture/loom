@@ -2,9 +2,11 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 
@@ -66,11 +68,26 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
 
   const { trees, cursor } = listed.value
 
+  /**
+   * The names, read alongside the holds rather than after them.
+   *
+   * A listing gives an id and a revision and nothing a person recognises, so
+   * each row's name comes from the page itself — one bounded read each, the same
+   * trade this screen already makes for the waiting count. A name that cannot be
+   * read costs the name only: the row still lists, still links, and still shows
+   * its id.
+   */
+  const names = await namesOf(
+    portalStore,
+    trees.map((listing) => listing.treeId)
+  )
+
   const summaries = await Promise.all(
     trees.map(async (listing) => {
       const holds = await portalHolds.forTree(listing.treeId)
 
       return {
+        page: nameFrom(names, listing.treeId),
         treeId: listing.treeId,
         revision: listing.revision,
         waiting: holds.ok ? holds.value.length : null,
@@ -129,7 +146,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
                 className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
               >
                 <span className="flex min-w-0 flex-col gap-1">
-                  <span className="truncate font-mono text-sm">{page.treeId}</span>
+                  <PageName page={page.page} />
                   <span className="text-ink-muted text-xs">
                     {page.revision} {page.revision === 1 ? "change" : "changes"} applied
                   </span>

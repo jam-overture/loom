@@ -156,12 +156,9 @@ A deployment swaps the store and changes nothing else:
 import { memoryTreeStore } from "@loom/runtime/store"
 import { postgresTreeStore } from "@loom/runtime/postgres"
 
-const path = {
-  store: memoryTreeStore(),        // this site
-  store: postgresTreeStore(db),    // a deployment
-  holds,
-  runtime,
-}
+const onThisSite = { store: memoryTreeStore(), holds, runtime }
+
+const inADeployment = { store: postgresTreeStore(db), holds, runtime }
 ```
 
 `TreeStore` is an interface with five methods: `create`, `head`, `revisions`,

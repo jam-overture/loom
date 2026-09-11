@@ -1,7 +1,6 @@
 import {
   buildElement,
   buildSlot,
-  buildText,
   ceilingFor,
   createTree,
   dispositionKindSchema,
@@ -11,16 +10,16 @@ import {
   type DispositionReasonCode,
   type IdFactory,
   type IntentOrigin,
-  type JsonObject,
   type LoomNode,
   type LoomTree,
 } from "@loom/runtime"
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
+import { EXCEPTIONS_SPELLED } from "../adapt/answers"
 import { BECAUSE, WEIGHT } from "../adapt/record"
 import { FRONT_DOOR_POLICY, protectedInPlainWords } from "../adapt/run"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
-import { action, heading, link, prose, section, stack } from "../nodes"
+import { action, cell, columns, heading, link, prose, row, section, stack } from "../nodes"
 import {
   askHref,
   DOCS,
@@ -238,21 +237,6 @@ const questions = (ids: IdFactory): LoomNode =>
     ]
   )
 
-const cell = (ids: IdFactory, text: string, props: JsonObject = {}): LoomNode =>
-  buildElement(ids, {
-    type: "loom.table-cell",
-    props,
-    children: [buildText(ids, text)],
-  })
-
-const row = (ids: IdFactory, cells: readonly LoomNode[]): LoomNode =>
-  buildElement(ids, { type: "loom.table-row", props: {}, children: [...cells] })
-
-const columns = (ids: IdFactory, headings: readonly string[]): LoomNode =>
-  buildSlot(ids, "columns", [
-    row(ids, headings.map((text) => cell(ids, text, { role: "column" }))),
-  ])
-
 /** A percentage a reader can hold in their head, off a number between nought and one. */
 const outOfHundred = (confidence: number): string => `${Math.round(confidence * 100)} out of 100`
 
@@ -376,7 +360,7 @@ const proof = (ids: IdFactory, context: PageContext): LoomNode =>
     [
       prose(
         ids,
-        "Nothing above is a description of something that happens elsewhere. The front page of this site takes requests, and two of them run into the rules in the table above.",
+        `Nothing above is a description of something that happens elsewhere. The front page of this site takes requests, and ${EXCEPTIONS_SPELLED} of them run into the rules in the table above.`,
         { size: "lead", measured: true }
       ),
       buildElement(ids, {

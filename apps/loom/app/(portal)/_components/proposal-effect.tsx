@@ -1,6 +1,7 @@
 import { plainEffect, type PlainOperation } from "@/app/(portal)/_lib/effect-view"
 import type { ProposalEffect, ValueChange } from "@/app/(portal)/_lib/proposal-effect"
 
+import { PlainSentence } from "./plain-sentence"
 import { TechnicalDetail } from "./technical-detail"
 
 /**
@@ -62,15 +63,14 @@ const OperationRow = ({ operation }: { readonly operation: PlainOperation }) => 
   <li className="border-edge-subtle flex flex-col gap-1 border-l-2 pl-2.5">
     <p className="flex flex-wrap items-baseline gap-x-1.5">
       {/*
-        * One sentence, held as three pieces because the part's name in the
-        * middle of it is monospace and the sentence around it is not. `PlainLine`
-        * is why the spaces and the full stop belong to the sentence rather than
-        * to whichever span happens to sit next to them.
+        * One sentence, rendered by the component that owns the spread. This was
+        * three pieces set side by side here, which is what `PlainSentence` was
+        * written to stop and what a subject that is no longer always a bare
+        * identifier made impossible to keep: a named part is words *and* an id,
+        * and this markup would have set both in monospace.
         */}
       <span>
-        {operation.reading.before}
-        <span className="font-mono">{operation.reading.subject}</span>
-        {operation.reading.after}
+        <PlainSentence line={operation.reading} />
       </span>
 
       {operation.standing !== null && (

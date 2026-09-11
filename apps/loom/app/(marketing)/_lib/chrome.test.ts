@@ -27,6 +27,10 @@ import {
 
 const ORIGIN = "https://loom.example"
 
+/** The pages the bar carries, and the ones it deliberately does not. */
+const IN_MENU = SITE_ROUTES.filter((route) => route.inMenu)
+const OFF_MENU = SITE_ROUTES.filter((route) => !route.inMenu)
+
 const context = (current = HOME): ChromeContext => ({
   origin: ORIGIN,
   theme: DEFAULT_THEME,
@@ -77,14 +81,14 @@ describe("the header", () => {
    * the way in is a button, and five quiet buttons in a row are neither.
    */
   it("builds its menu out of links, not buttons", () => {
-    expect(ofType(header(), "loom.link").length).toBeGreaterThanOrEqual(SITE_ROUTES.length)
+    expect(ofType(header(), "loom.link").length).toBeGreaterThanOrEqual(IN_MENU.length)
     expect(ofType(slot(header(), "actions") as LoomNode, "loom.link")).toHaveLength(0)
   })
 
-  it("offers every page of this site, and the surfaces the bar is meant to carry", () => {
+  it("offers the pages and the surfaces the bar is meant to carry", () => {
     const hrefs = hrefsIn(header())
 
-    for (const route of SITE_ROUTES) {
+    for (const route of IN_MENU) {
       expect(hrefs).toContain(internalHref(ORIGIN, route.path, DEFAULT_THEME))
     }
 
@@ -123,11 +127,35 @@ describe("the header", () => {
     }
   })
 
-  it("still reaches every surface it left out, from the foot of the page", () => {
+  /**
+   * The same pair, for the pages — as of 8 September, when `inMenu` stopped
+   * governing only half of what the bar carries.
+   *
+   * The flag answered #166 for the surfaces and the bar was back to eight items
+   * within a week, because a route group growing a fourth page could not use it.
+   * The guarantee is the surfaces' guarantee and it is the reason the flag is
+   * safe: whatever the bar leaves out, the footer's map carries. Without the
+   * second assertion, `inMenu: false` would be a quiet way to delete a page.
+   */
+  it("leaves a page of this site out of the menu only by that decision", () => {
+    const menu = ofType(header(), "loom.link").flatMap((item) =>
+      typeof item.props["href"] === "string" ? [item.props["href"]] : []
+    )
+
+    for (const route of SITE_ROUTES) {
+      expect(menu.includes(internalHref(ORIGIN, route.path, DEFAULT_THEME))).toBe(route.inMenu)
+    }
+  })
+
+  it("still reaches every surface and page it left out, from the foot", () => {
     const foot = hrefsIn(footer())
 
     for (const surface of PRODUCT_SURFACES.filter((one) => !one.inMenu)) {
       expect(foot).toContain(surfaceHref(ORIGIN, surface))
+    }
+
+    for (const route of OFF_MENU) {
+      expect(foot).toContain(internalHref(ORIGIN, route.path, DEFAULT_THEME))
     }
   })
 
@@ -146,17 +174,34 @@ describe("the header", () => {
     expect(hrefsIn(actions)).toEqual([surfaceHref(ORIGIN, PORTAL)])
   })
 
-  it("marks the page the reader is on, and keeps it in the menu", () => {
+  /**
+   * Marked wherever it is carried, and carried somewhere on every page.
+   *
+   * The bar marking the current page was the whole of this assertion until a
+   * page could be off the bar. The property worth keeping is not *the bar marks
+   * it* — it is that **the site always says where the reader is**, and for a
+   * page the bar does not carry, the footer's map is where it says so. So the
+   * bar is held to marking exactly what it carries and nothing else, and the map
+   * is held to marking every page without exception.
+   */
+  it("marks the page the reader is on wherever it carries it, and never drops it", () => {
     const carried = PRODUCT_SURFACES.filter((surface) => surface.inMenu).length
 
     for (const route of SITE_ROUTES) {
       const menu = ofType(header(route), "loom.link")
-      const marked = menu.filter((item) => item.props["current"] === true)
+      const inBar = menu.filter((item) => item.props["current"] === true)
+      const inMap = ofType(footer(route), "loom.link").filter(
+        (item) => item.props["current"] === true
+      )
 
-      expect(marked).toHaveLength(1)
-      expect(labelOf(marked[0] as LoomNode)).toBe(route.label)
+      expect(inBar).toHaveLength(route.inMenu ? 1 : 0)
+      if (route.inMenu) expect(labelOf(inBar[0] as LoomNode)).toBe(route.label)
+
+      expect(inMap).toHaveLength(1)
+      expect(labelOf(inMap[0] as LoomNode)).toBe(route.label)
+
       /** The menu is the same length on every page: marked, never dropped. */
-      expect(menu).toHaveLength(SITE_ROUTES.length + carried)
+      expect(menu).toHaveLength(IN_MENU.length + carried)
     }
   })
 

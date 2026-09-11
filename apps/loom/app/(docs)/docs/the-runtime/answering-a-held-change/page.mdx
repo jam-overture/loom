@@ -1,0 +1,210 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  TheSecondLook,
+  WhatAnsweringDoes,
+  WhatIsWaiting,
+} from "@/app/(docs)/_components/review-queue"
+
+export const metadata = pageMetadata("the-runtime", "answering-a-held-change")
+
+# Answering a held change
+
+The Gate gives one of three answers, and only two of them are answers. Yes
+applies the change. No refuses it. The third one — **ask a person** — is not a
+decision at all: it is the runtime saying *this is somebody's to make*, and then
+waiting.
+
+This page is about that somebody. What they are looking at, what they need to
+know before they click, and what actually happens when they do.
+
+On [Your first change](/docs/getting-started/your-first-change) you played both
+parts: you asked for something, the Gate held it, and you said yes yourself, in
+the same box, seconds later. That is the loop with the waiting taken out of it.
+Here it is put back — because on a deployment the person who asks and the person
+who answers are different people, and the gap between them is where everything
+on this page happens.
+
+Try it again on the page below. Press **Demote the page's heading** and watch
+nothing happen to it.
+
+<Example id="first-tree" />
+
+The change was planned, judged and then set aside. It is waiting for a person.
+
+## Where a waiting change waits
+
+Not on the page. A page's history is a list of changes that were **applied**, and
+a change nobody has answered was not applied — putting it there would make the
+history a list of two different things.
+
+Not in the browser either. The person who eventually says yes may be somebody
+else, on another day, and a browser that held the change would have to send it
+back when they did — which is the one thing a visitor's browser is never allowed
+to do.
+
+So it waits on your server, in a **hold store**: a small table of changes that
+have been judged and not yet answered, each under the id of the proposal that
+made it. Loom gives you one the same way it gives you a place to keep pages.
+
+```ts
+import { postgresHoldStore } from "@loom/runtime/postgres"
+
+const holds = postgresHoldStore(db)
+
+const waiting = await holds.forTree(treeId)
+```
+
+`forTree` is the whole of the read side. It gives you everything waiting on one
+page, oldest first, and it is what a review screen is built out of.
+
+<Callout>
+  **A hold is scoped to a page, and that is deliberate.** There is no call that
+  lists everything waiting everywhere, because a handle in Loom is the scope of
+  what it can see ([0020](/docs/architecture/decision-records)). A dashboard
+  across twenty pages asks twenty times, which is a loop you write and can see
+  the cost of.
+</Callout>
+
+## What a person is owed before they decide
+
+A held change is not a diff to approve. Somebody asked for something in their
+own words, something planned what that would mean, and the Gate decided it was
+not going to do that on its own authority. A reviewer needs all three, or they
+are guessing.
+
+Here is a real queue, built while this page was being built: two changes asked
+for by a colleague, waiting on the example page above.
+
+<WhatIsWaiting />
+
+Both are waiting, and they are waiting for completely different reasons.
+
+**The first is about what the change does.** This site says its headings matter,
+so reconfiguring one is more than a plain instruction gets to do on its own. A
+reviewer answering it is being asked *do we want this*, and they can answer it by
+reading it.
+
+**The second is about how sure the planner was.** It is a small change to a
+sentence, nothing protected anywhere near it — and the thing that planned it
+said it was about half confident. A reviewer answering *that* is being asked
+something else entirely: *is this actually what was meant?* The change is
+harmless; the guess behind it may not be right.
+
+A screen that printed the word **held** over both would be hiding the only thing
+that tells a reviewer what job they are doing. Every hold carries the Gate's own
+reason, in a code and in a sentence, and both are on the cards above.
+
+## The one thing the queue cannot tell you
+
+Look at the badge on each card again.
+
+**One of those two changes can never be applied, no matter who says yes.** It is
+not broken, nobody did anything wrong, and there is nothing in the queue that
+says so.
+
+Here is what happened. A change is judged against the page **as it was at that
+moment** — a specific revision, the one the asker was looking at. While it sat
+waiting, somebody else's change landed. The page moved. The plan that was made
+describes a page that no longer exists.
+
+A hold records the revision it was judged against, so the comparison is there to
+be made. It is one read and one equality:
+
+```ts
+const page = await store.head(treeId)
+
+const rows =
+  waiting.ok && page.ok
+    ? waiting.value.map((hold) => ({
+        hold,
+        stillAnswerable: hold.baseRevision === page.value.revision,
+      }))
+    : []
+```
+
+`baseRevision` is the revision the change was judged against. `page.revision` is
+where the page has got to. If they are the same, the change can still land. If
+they are not, it cannot, and no amount of answering will change that.
+
+<Callout kind="warning">
+  **Nothing in the runtime makes that comparison for you**, and until it does,
+  every review screen has to write those three lines itself. That is filed as a
+  gap rather than papered over here, because a page that implied the badge came
+  from `forTree` would cost somebody an afternoon. Until it exists, write the
+  comparison. Getting it backwards is the easiest mistake on this page.
+</Callout>
+
+## What saying yes does
+
+Three answers, given in one sitting on the queue above:
+
+<WhatAnsweringDoes />
+
+The first row is the ordinary one, and it is what a yes button calls:
+`confirmHeld`, naming the proposal and whoever answered it. A person says yes,
+the change applies, the page advances by one revision, and the history has their
+name on it as the one who answered.
+
+**The second row is the one to read twice.** Saying yes to the older change did
+not apply it — it could not — and it did not put it back in the queue either.
+The change is simply gone. Custody ends on the attempt.
+
+That last part is deliberate and it is worth saying plainly: **a change that
+cannot be applied is dead, not stale.** Leaving it in the queue would invite a
+second person to read it, decide, click, and be told the same thing. So the
+runtime lets go of it the moment somebody tries. The cost is that a reviewer can
+spend their attention on a change that was never going to land — which is why
+the badge in the section above is worth the three lines it costs you.
+
+The third row is a person saying no, which is `discardHeld`. Nothing is applied
+and no revision is written. It is the cheapest thing that happens on this page
+and the most informative: the Gate was willing to offer this change and a human
+did not want it, which is the only signal that tells a policy that is too
+permissive from one that is calibrated.
+
+## Saying yes is not a rubber stamp
+
+A confirmation is not a way past the Gate. When a person says yes, the change is
+**judged again** — the policy is resolved again, the change is assessed again,
+and the verdict is the one that holds now.
+
+Most of the time that second look is uneventful and reaches the same place. It
+is not uneventful when the rules changed while the change was waiting:
+
+<TheSecondLook />
+
+The same change, the same damage, two different verdicts — because the
+deployment decided in between that changes to its protected primitives were not
+to be offered at all. A person clicked yes and the runtime said no, and it was
+right to.
+
+<Callout>
+  **The second look is about the policy, not about the page.** If the *page* has
+  moved, there is no second look at all — that is the dead change from two
+  sections up, and it never reaches the Gate. The judgement is re-run only for a
+  change that could still be applied.
+</Callout>
+
+Read the two halves of that block together and you will notice something a
+screen has to work around: **the sentence is identical.** `touches protected
+loom.heading` is what the Gate says when it asks a person and what it says when
+it refuses outright, because the sentence describes the damage and the verdict is
+a separate field. A reviewer shown only the sentence cannot tell why the answer
+changed. Show the reason **code** beside it, as the blocks on this page do.
+
+## What your screen owes the person using it
+
+Four things, and none of them is a diff viewer:
+
+1. **What was asked, in the asker's words.** The utterance is on the intent the
+   hold carries. A reviewer deciding without it is reviewing a plan with no idea
+   what it was trying to do.
+2. **Why it is waiting.** The reason code, not only its sentence — the two
+   sections above are what happens when you pick one.
+3. **Whether it can still be applied.** Your three lines. Sort by it if you like;
+   a reviewer's attention is the scarce thing here.
+4. **A way to say no.** A queue with only a yes button is a queue that will be
+   answered yes.
+
+And one thing your screen does not owe anybody: a way to override the Gate.
+Confirming is answering the question the Gate asked. It is not overruling it.

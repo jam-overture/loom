@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { DOCS } from "@/app/(marketing)/_lib/site"
 
+import { partInQuestion } from "@/app/(demo)/_lib/in-question"
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { markedPage } from "@/app/(demo)/_lib/marked"
 import { movedOn, type MovedNote } from "@/app/(demo)/_lib/moved"
@@ -22,6 +23,7 @@ import { AskPanel } from "./_components/ask-panel"
 import { BackToTheRecord } from "./_components/back-to-the-record"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
+import { PartInQuestionView } from "./_components/part-in-question"
 import { RecordCard } from "./_components/record-card"
 import { WhatHappens } from "./_components/what-happens"
 
@@ -221,11 +223,32 @@ const DemoPage = async () => {
     ])
   )
 
+  /**
+   * And the part of the page each waiting proposal is about, rendered.
+   *
+   * The same two conditions as the effect above and for the same reason — a
+   * change that has already landed describes a tree that is gone — plus one of
+   * this one's own: it is built here, in a Server Component, because rendering a
+   * `LoomTree` needs the registry and the registry is not something to drag
+   * across a client boundary. The card is a client component and receives it as
+   * an element, which is the boundary working as intended rather than around it.
+   */
+  const parts = new Map<string, React.ReactNode>(
+    (holds?.ok ? holds.value : []).flatMap((held) => {
+      const part = partInQuestion(tree, held.proposal.delta)
+
+      return part === undefined
+        ? []
+        : [[held.proposalId, <PartInQuestionView key={held.proposalId} part={part} {...(rendered.theme ? { theme: rendered.theme } : {})} />] as const]
+    })
+  )
+
   /** Absent rather than `undefined`: the props are optional, not nullable. */
   const heldProps = (
     record: (typeof records)[number]
   ): {
     readonly effect?: ProposalEffect
+    readonly inQuestion?: React.ReactNode
     readonly plain?: readonly PlainChange[]
     readonly moved?: MovedNote
   } => {
@@ -233,11 +256,13 @@ const DemoPage = async () => {
     if (id === undefined) return {}
 
     const effect = effects.get(id)
+    const part = parts.get(id)
     const plain = plains.get(id)
     const moved = movedNotes.get(record.recordId)
 
     return {
       ...(effect === undefined ? {} : { effect }),
+      ...(part === undefined ? {} : { inQuestion: part }),
       ...(plain === undefined ? {} : { plain }),
       ...(moved === undefined ? {} : { moved }),
     }
@@ -371,6 +396,9 @@ const DemoPage = async () => {
               )}
 
               <ul className="flex flex-col gap-2">
+                {records.map((record) => (
+                  <RecordCard key={record.recordId} record={record} {...heldProps(record)} />
+                ))}
                 {records.map((record) => {
                   /*
                    * The words the page is wearing for this card, when there is

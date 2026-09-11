@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
-
 import { describe, expect, it } from "vitest"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 
 /**
  * The order a reader meets this screen in, pinned at the source.
@@ -17,14 +16,8 @@ import { describe, expect, it } from "vitest"
  * basis is context and never an action, and a screen that led with its own
  * methodology would be the runtime talking about itself again.
  */
-const file = join(process.cwd(), "app", "(portal)", "portal", "checkup", "page.tsx")
-
-/**
- * Comments stripped first, for the reason the other three guards strip them:
- * the comments here name the order they are enforcing, and a check that could
- * not tell a note from the thing it describes would make the note unwriteable.
- */
-const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu, "")
+const file = portalFile("portal", "checkup", "page.tsx")
+const source = screenSource(file)
 
 describe("the checkup screen's reading order", () => {
   it("says what the screen is before it renders a verdict", () => {

@@ -2,6 +2,7 @@ import { describeStoreError } from "@loom/runtime/store"
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { namesOf } from "@/app/(portal)/_lib/page-name"
 import { isAuditable } from "@/app/(portal)/_lib/seeds"
 import { portalStore } from "@/app/(portal)/_lib/store"
 
@@ -37,5 +38,16 @@ export const CheckupTreeChooser = async () => {
     )
   }
 
-  return <CheckupChoices trees={page.value.trees} checkable={isAuditable} />
+  /**
+   * The names are read here rather than in `CheckupChoices` for the same reason
+   * the listing is: a component that reads the store cannot be rendered by a
+   * test. They arrive as a map so the rows stay a pure function of what they
+   * were handed.
+   */
+  const names = await namesOf(
+    portalStore,
+    page.value.trees.map((listing) => listing.treeId)
+  )
+
+  return <CheckupChoices trees={page.value.trees} names={names} checkable={isAuditable} />
 }
