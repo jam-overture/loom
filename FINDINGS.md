@@ -4050,8 +4050,13 @@ snippet would be exactly that.
 ## 2026-08-21 — `loom.mosaic` reads the viewport where it should read its container
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
-**Status:** open — a known limit of the thing that shipped, recorded so it is
-revisited deliberately
+**Status:** **closed** by `primitives-22-the-width-you-actually-have` — the
+support floor moved and the fallback objection turned out to be answerable in
+the CSS rather than in the argument, which is what
+[0106](decisions/0106-a-band-asks-its-own-container-for-a-width-not-the-window.md)
+says. The cost was measured before it was fixed: in a 524px column at a 1280px
+window the four cells were **343 / 161 / 161 / 343**. 0106 is `Proposed`, not
+`Accepted`, because it reverses a named alternative in 0079
 
 [0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
 allows the library's first width media query, for the band that cannot be laid
@@ -9966,8 +9971,14 @@ across the boundary.
 ## 2026-08-26 — a container query is the second thing a primitive wants to ask about its own width, and there is still no seam for the first
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
-open — nothing is broken; this is a pattern worth naming before a third
-primitive reaches for it
+**closed** by `primitives-22-the-width-you-actually-have` — the pattern this
+entry asked to have named is named, as
+[0106](decisions/0106-a-band-asks-its-own-container-for-a-width-not-the-window.md),
+and the mosaic that made it the odd one out reads its container now. The
+wrapper-element mechanic below has a second form worth knowing and it is in
+0106: where the property that has to change lives on the container itself, you
+can switch the **children** inside the query instead of wrapping the parent, and
+the fallback comes out safer for it
 
 `loom.offering` reads as a full-width menu row past 40rem and as a card below
 it, decided by one `@container` rule rather than by a prop. That is the right
@@ -10090,7 +10101,15 @@ it is bound by, which is the rule that file states about itself.
 
 ## 2026-08-31 — `loom.milestone` reserves 5.5rem for its marker at every viewport, and a phone has 390 of them
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by `primitives-22-the-width-you-actually-have`, taking the first of
+the three ways out below *and* a version of the second. The column is not
+reserved for a list where no entry sets a marker — asked with `:has()` rather
+than with the `markers` prop the third option proposed — and where a list does
+set markers, a `@container` query on the list's own inline size puts the marker
+above the title below 26rem. Measured after, at 390px on a 350px rail: the
+marker-less rail's cell is `display: none`, and the dated rail's title went from
+**two lines to one**
 
 `loom.milestone` lays each row out as a three-column grid:
 
@@ -11148,6 +11167,13 @@ Two ways out, and both are the maintainer's:
 
 Either is better than a thirteenth identical entry. There is no third option a
 routine can take.
+
+**Fifteenth on 2026-09-03**, from this lane again, recorded here rather than as a
+new entry because a fifteenth heading would say nothing a fourteenth did not.
+`EGRESS_BLOCKED`, unchanged. The `Loom primitives` brief still opens *"WebFetch
+`https://21st.dev` for the visual standard"*, and this run judged its own work
+against `loom.hero` and `loom.feature-grid` — the floor the brief names in its
+next sentence — because that is the only half of the bar a routine can read.
 
 ---
 
@@ -13079,6 +13105,72 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-03 — a `loom.grid` cell is the one narrow column nothing can declare a width for
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a bounded gap, named so it is not rediscovered as a bug
+
+[0106](decisions/0106-a-band-asks-its-own-container-for-a-width-not-the-window.md)
+makes a `loom.split` column and a `loom.card` declare their own inline-size
+containment, so anything inside either can measure the space it actually has.
+`loom.grid` cannot do the same, and the reason is structural rather than an
+oversight: a grid **styles its children** through
+`grid-template-columns: repeat(auto-fit, …)` rather than wrapping each one, so
+there is no element belonging to the grid on which to declare containment. A
+cell is whatever node the tree put there.
+
+So a `loom.heading` placed **directly** in a three-across grid on a 1440px page
+still caps itself against the window rather than against its 440px cell. In
+practice a grid cell is a `loom.card`, which does declare it, so the case that
+bites is narrow. It is filed rather than fixed because the two ways out are both
+worse than the gap:
+
+- **Wrap every child in a containment div.** One extra element per cell, and it
+  breaks `auto-fit`'s intrinsic sizing being a fact about the *child* — which is
+  the property `loom.grid`'s own comment says the columns being a floor rests on.
+- **Ask children to declare it themselves.** A leaf that declared containment
+  would be measuring *itself*, which is exactly the thing a container query
+  cannot do, so this does not even work.
+
+The honest third option is that a heading in a bare grid cell is a composition a
+tree should not often produce, and the description of `loom.grid` could say so.
+Not done: changing a description is changing what a model reads first, and it
+wants its own run.
+
+---
+
+## 2026-09-03 — the primitives brief still opens on "about twenty primitives are already ported"
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — costs nothing today, and it is the first thing every run in
+this lane reads
+
+The `Loom primitives` brief says *"About twenty primitives are already ported and
+the pattern is settled"* and lists, as work still to do, `stack`, `grid`,
+`container`, `card`, `badge`, `icon`, `avatar`, `kbd`, `code`, pricing tiers,
+testimonials, a comparison table, a timeline, a bento grid, nav, footer and a
+CTA. **Every one of those is registered**, and the library is at **seventy
+primitives** with the Hermes port at 52 of 70 ported and 67 of 70 settled.
+
+It is not a harmless staleness. The brief's breadth mandate is the standing
+order a run weighs everything else against, and a run that takes the list
+literally spends its first minutes discovering that fifteen of seventeen named
+gaps are closed. Two consecutive runs have now had to reason about what breadth
+*means* now rather than what it meant on 16 August, because the brief cannot say.
+
+**The two things worth updating, if the brief is edited at all:**
+
+1. The count and the port state — or better, a pointer to
+   `docs/hermes-port-map.md`, which is derived and cannot go stale the same way.
+2. **What breadth means once the catalogue is broad.** The library can now build
+   every band a marketing page needs; what it cannot do is render some of them
+   well on a phone, which is where the last two runs' findings have been. If the
+   answer is still "more primitives", saying so settles it. If it is "the ones
+   you have, at the bar", that is a different instruction and neither run could
+   read it from the brief.
+
+Filed rather than assumed. The brief is the maintainer's and a routine cannot
+write the governance it is bound by.
 ## 2026-09-02 — the seam the hand-drawn share card was waiting for exists, and one primitive's colours are the whole of what it does not carry
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open

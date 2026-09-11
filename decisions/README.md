@@ -189,3 +189,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0103](0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md) | A control carries a class, and its display is a custom property | Accepted | §4b |
 | 0104 | *No record on this branch* | — | — |
 | [0105](0105-a-render-can-hand-back-values-instead-of-references.md) | A render can hand back values instead of references | Accepted | §3 |
+| [0106](0106-a-band-asks-its-own-container-for-a-width-not-the-window.md) | A band asks its own container for a width, not the window | Proposed — **ARCHITECTURAL, needs review.** It reverses a named | §4b |
