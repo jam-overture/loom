@@ -13797,3 +13797,85 @@ days ago. Verified again on this branch: `app/(demo)/demo/page.tsx` exists,
 
 The brief's *second* problem — *"it is clunky"* — is live, and is what every unit
 on #220 has been.
+## 2026-09-01 — a hold store has no deployment-wide read, so the portal's headline screen costs one query per page
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— worked around on the surface, said out loud on screen, not fixed
+
+`HoldStore` offers `hold`, `get`, `forTree` and `release`. `forTree` is the only
+listing, and its comment says why: *"scoped by tree because that is the only
+listing a review queue needs; like `TreeStore` (0020), a handle is the scope of
+what it can see."*
+
+That was true while the review queue was a section of one page screen. It stopped
+being true the moment the portal's front door became **the queue over every
+page**, which is where the brief's first value item has always pointed. To answer
+*"does anything need me?"* the screen now has to:
+
+1. `TreeStore.list` — one bounded page of trees, plus a cursor;
+2. `HoldStore.forTree` — **once per tree on that page**.
+
+Two consequences, and the second is the one worth a framework run:
+
+**It is O(pages) queries for a question with a one-row answer.** On Postgres that
+is fifty round trips to find out that nothing is waiting. It also blocks the
+obvious next thing on this surface — a count beside *Waiting on you* in the rail —
+because a badge in the shell would pay that cost on **every screen in the portal**
+rather than on one. That is why the badge is deliberately absent; it is worth
+adding the day this is taken and not before.
+
+**It cannot be complete.** A listing is bounded by contract, so a deployment with
+more pages than the bound has changes the screen never looks for — and unlike a
+page whose read fails, *nothing fails*. The queue simply prints the same confident
+"Nothing is waiting for you." it prints when it has swept everything. This branch
+makes that visible rather than fixing it: the cursor is read, and the screen says
+what it did not check. **An incomplete answer a reader knows to distrust is worth
+something; one they do not is worth less than nothing.**
+
+The shape that would fix it is a read the store can answer in one query and that
+0020 permits, because it does not widen what a handle can see:
+
+```ts
+readonly waiting: (request?: { limit?: number }) => Promise<Result<TreeListPage-ish, HoldError>>
+```
+
+— every hold this handle can see, bounded and cursored like every other read in
+the contract, ordered by `heldAt` ascending the way `forTree` already is. A count
+alone would be cheaper still and would serve the rail badge, but the queue wants
+the rows, so one read that returns them is the smaller addition.
+
+`src/` is not this lane's, and this is a change to a public interface with a
+contract suite and two implementations behind it. So it is filed rather than
+attempted. The surface half — the cursor, the sentence, the notice — is done and
+does not depend on it.
+
+---
+
+## 2026-09-01 — the demo's `answer.ts` quotes a portal sentence that no longer exists
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom demo` · **Status:** open — one
+comment, no behaviour
+
+`app/(portal)/_lib/vocabulary.ts` changed the rule sentence for
+`stakes-above-ceiling`. It read *"Riskier than a request from here is allowed to
+be without asking."* and now reads *"A change this big is not something Loom may
+make on its own."*
+
+The reason is worth the demo lane knowing rather than just the wording: **"from
+here" pointed at the origin of the ask.** On the page screen the origin sits a
+line or two above it, so the sentence resolves. `/portal` is now a queue drawn
+from every page, leading with what somebody typed — so "here" has no referent on
+screen, and the one sentence explaining why a person is being asked to decide
+something read like the tail of a sentence that had been cut. The origin is not
+lost; it is on the same card in the technical record, spelled `user-instruction`.
+
+`app/(demo)/_lib/answer.ts:21` quotes the old sentence in a comment illustrating
+what the demo prints. No demo test asserts it and nothing renders differently —
+the demo reads the table rather than a copy of it, which is exactly why this is a
+comment and not a bug. But it is now a quotation of something that does not
+exist, in another lane's file, so it is filed rather than edited.
+
+Worth one line of that lane's next run, alongside the reason: **a sentence read on
+more than one screen may not point at a place.** The portal's own guard for that
+is now in `vocabulary.test.ts` and rejects *here*, *this page*, *above* and
+*below* in any rule sentence.
