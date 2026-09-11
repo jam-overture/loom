@@ -1,10 +1,11 @@
-import { defaultGatePolicy, fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
+import { fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
 import { postgresHoldStore } from "@loom/runtime/postgres"
 import { collectTelemetry } from "@loom/runtime/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
 
 import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"
+import { portalPolicy } from "./policy"
 import { portalStore } from "./store"
 import { portalTelemetry } from "./telemetry"
 
@@ -91,7 +92,7 @@ export const beginWrite = (): PortalWrite => {
       holds: portalHolds,
       runtime: {
         interpreter: portalInterpreter,
-        policySource: fixedPolicy(defaultGatePolicy),
+        policySource: fixedPolicy(portalPolicy),
         events: collector.sink,
         clock: systemClock,
         idFactory: randomIdFactory,

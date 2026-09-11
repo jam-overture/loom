@@ -13126,6 +13126,176 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-04 — twenty typed requests, four that asked to delete most of the page, and the Gate refused none of them
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open — a
+fact about this deployment, surfaced by the screen built to surface it, and
+deliberately not fixed
+
+`/portal/rules` landed this run and its first honest run against a live model
+produced a finding about the deployment it was built on.
+
+**Twenty requests were typed into the real prompt box across four server
+lifetimes. Not one was refused.** Exactly one was ever held — the confidence rule,
+once. Everything else the Gate judged, it allowed, unattended. That includes:
+
+- *"Delete every single part of this page"*
+- *"Replace everything on the page with a single card that says nothing"*
+- *"Take out the card, the intro, the heading and everything under them, and put
+  four new cards in their place"*
+- *"Delete the card and everything inside it"*
+
+The arithmetic is now on the screen, which is the point of it. This portal builds
+its write path with `defaultGatePolicy`:
+
+| | |
+| --- | --- |
+| `autoApplyCeiling.user-instruction` | `medium` |
+| `removalThresholds.medium` | 3 parts |
+| `removalThresholds.high` | 12 parts |
+| `breadthThreshold` | 8 parts |
+
+The seeded tree has about ten parts in it. A removal has to reach **twelve** to
+be judged `high`, and only `high` is *above* a `medium` ceiling — so on a page
+this size no removal a person can ask for ever exceeds what the Gate will do on
+its own. **A visitor can delete a card and everything in it, unattended, on the
+deployment the maintainer opens.**
+
+**Nothing is misconfigured and no runtime rule is wrong.** `defaultGatePolicy` is
+documented, the thresholds are deliberate, and the shape-only stakes are exactly
+what the record says a host that declares no vocabulary gets. What was missing was
+anybody being able to see the consequence, and that is what changed today.
+
+**Owned by the maintainer because it is a choice rather than a defect.** Two
+things could be done and both are decisions rather than fixes:
+
+- **Declare some vocabulary.** `protectedPrimitiveTypes` naming `loom.card`, or
+  `protectedPropKeys`, would raise the stakes of touching them and put those
+  changes in the review queue instead of on the page.
+- **Lower `autoApplyCeiling.user-instruction` to `low`.** Then anything the Gate
+  weighs above a small change asks first — which on a demo deployment is arguably
+  what a reviewer wants to see happen.
+
+I did not take either. Choosing this portal's policy decides what a visitor to
+the deployment can do to it, and it should be decided rather than done by a
+routine on the way past.
+
+---
+
+## 2026-09-04 — the plain-reading test helper now exists in three copies, and the two it was to be merged with are still unmerged
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+count on the 2 September entry, not a new argument
+
+`surfaceOf`/`recordOf` — the pair that separates what a reader meets from what is
+behind a `<details>` — is the sharpest test this lane has, because it turns "speak
+like a person" from taste into a property. It is now in **three** files:
+`portal/pieces/_components/piece-card.test.tsx`, `_components/proposal-effect.test.tsx`,
+and as of this run `portal/rules/_components/rule-card.test.tsx`.
+
+The second copy's own comment says why it was copied rather than shared —
+*"that file is open on another branch and a shared helper landing in two places at
+once is the collision this repository already knows about; worth lifting into one
+module once both have merged"*. Both are still on `main`, and **three of this
+lane's pull requests are open and unmerged** (#219, #227, #234), any of which may
+touch either file. So the third copy is the same trade, made once more, and it is
+the last time it is defensible: a helper in four places is not a helper.
+
+**The fix is one module and it is cheap** — the pair, plus the banned-word list,
+somewhere both a `.test.ts` and a `.test.tsx` can import. It wants the portal's
+open branches merged first, which is the same recommendation this lane has now
+made on four consecutive runs.
+
+---
+
+## 2026-09-04 — a Node server in this sandbox cannot reach the model unless it is told to use the proxy, and the failure is a hang
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
+a recipe, so the next run does not spend forty minutes rediscovering it
+
+Screenshotting any portal screen that needs real data means running `next start`
+and typing into the real prompt box. In this sandbox that hangs, silently, with
+nothing in the server log and the button stuck on *"Working on it…"* until the
+harness gives up.
+
+**The cause is not the sandbox allowlist and not the key.** Outbound HTTPS goes
+through the agent proxy at `$HTTPS_PROXY`, and `curl https://api.anthropic.com`
+returns `401` immediately — reachable, just unauthenticated. **Node's `fetch`
+(undici) does not read `HTTPS_PROXY`**, so the Anthropic SDK inside the Next
+server dials directly, gets nowhere, and waits.
+
+The whole fix is one environment variable on the server:
+
+```
+NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt npx next start -p 3123
+```
+
+Three more traps, all of which cost an attempt this run and none of which is
+guessable:
+
+- **`pkill -f "next start"` kills the shell that runs it**, because the pattern
+  matches that shell's own command line. The old server survives, the new one
+  never starts, `curl` still answers `200`, and you photograph the previous build
+  believing it is the current one. Kill by pid from `ps -eo pid,cmd | grep
+  "[n]ext-server"` instead.
+- **`form button[type="submit"]` first is the shell's sign-out button**, not
+  *Ask Loom*. Click by label.
+- **Nothing settles the network after a server action.** `waitForLoadState("networkidle")`
+  never resolves; the only signal is the submit button's own pending text
+  returning to *Ask Loom*.
+
+This belongs with the screenshot recipe already filed for `apps/loom/scripts/` —
+same script, and without this variable that script produces pictures of a portal
+that cannot compose a change.
+
+---
+
+## 2026-09-04 — `/portal/pieces` puts the way out between the heading and its own sentence, on a phone
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — the
+same defect fixed on `/portal/rules` this run, in a screen this diff did not touch
+
+A header built as `<div className="flex flex-wrap items-baseline justify-between">`
+holding an `<h1>` and a link puts the two on one line at 1280 and wraps the link
+**underneath the heading and above the lead paragraph** at 390. The reading order
+becomes *what am I looking at → what else can I do → what this is*, which is the
+order 29 August settled is wrong.
+
+`/portal/rules` had it, a 390px screenshot found it, and the fix is to let the
+link follow the lead paragraph at every width. **`/portal/pieces` has the same
+header, with "Ask for a change →" in it**, and it is unfixed.
+
+Not fixed here because it is a different screen and this branch is one unit. It is
+two lines and a line in `reading-order.test.ts`, which `/portal/pieces` does not
+yet have.
+
+---
+
+## 2026-09-04 — the auto-subscription, ninth day, and its standing order is still the one thing the brief forbids
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open — an
+occurrence on the 1 September entry, with the one thing that has changed
+
+The harness subscribed this session to #240 the moment it was opened, and the
+subscription's standing order asks for **a self check-in roughly an hour out,
+re-armed silently if nothing changed**. That is a re-arming poll, which is
+precisely what `docs/routines.md` forbids after four such chains cost a week's
+allowance in August, and both the portal brief and that document say *run,
+report, exit*. The brief wins, so: unsubscribed by hand, no check-in scheduled.
+
+**What is different this time is that the events proved the point.** Three
+arrived within ninety seconds and all three were the deployment bot talking about
+itself — subscription created, `Building`, `Ready`. Nothing needed a decision.
+Had the check-in been armed, it would have woken this session hourly to re-read a
+green pull request nobody had touched, which is the 9 August failure exactly.
+
+One thing worth keeping from it: **the `Ready` event carried the preview URL**,
+which is the piece the brief requires in every pull request and which no run has
+been able to include at open time. Reading the notification once, then
+unsubscribing, is the cheap version of that — the events are already queued, and
+what costs is the standing order, not the delivery.
+
+Nothing a routine can fix. Filed for the ninth consecutive day.
 ## 2026-09-04 — a field added to `gatePolicySchema` and not to `GatePolicy` compiles, and every consumer keyed on the type silently omits it
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
