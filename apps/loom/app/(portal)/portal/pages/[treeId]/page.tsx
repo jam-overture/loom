@@ -13,6 +13,7 @@ import { nodeCredits } from "@/app/(portal)/_lib/attribution-view"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { isInterpreterConfigured } from "@/app/(portal)/_lib/interpreter"
 import { outlineRows } from "@/app/(portal)/_lib/outline"
+import { pageNameOf } from "@/app/(portal)/_lib/page-name"
 import { describeProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
@@ -65,10 +66,21 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
      */
     return (
       <div className="flex max-w-xl flex-col gap-4 p-8">
-        <h1 className="truncate font-mono text-2xl tracking-tight">{parsed.data}</h1>
+        {/*
+          * The heading names the failure rather than the page, and this is the
+          * one screen in the portal where that is right. Everywhere else a page
+          * is headed by what it is called — but a page that would not draw has
+          * not told us what it is called, and heading it with an id was the
+          * portal's largest text saying the least it could. What a reader needs
+          * first here is what went wrong; which page it went wrong on is the
+          * line under it, verbatim, as it is everywhere else.
+          */}
+        <header className="flex flex-col gap-1">
+          <h1 className="text-2xl tracking-tight">We couldn&rsquo;t draw this page.</h1>
+          <p className="text-ink-muted truncate font-mono text-xs">{parsed.data}</p>
+        </header>
         <StateNotice
           tone="failure"
-          title="We couldn't draw this page."
           action={
             <Link href="/portal/pages" className="no-underline">
               ← Back to your pages
@@ -88,6 +100,14 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
   }
 
   const rows = outlineRows(rendered.value.tree, portalDecoration)
+  /**
+   * Derived from the tree this screen has already rendered, so the name over the
+   * page is the name *on* the page. A second read could name it after a revision
+   * the reader is not looking at, which is the same class of mistake the holds
+   * and the attribution below both avoid by using this tree rather than a fresh
+   * one.
+   */
+  const page = pageNameOf(rendered.value.tree)
   const holds = await portalHolds.forTree(parsed.data)
 
   /**
@@ -128,6 +148,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
       <div className="flex flex-col gap-6 p-8 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           <PreviewFrame
+            page={page}
             treeId={rendered.value.tree.treeId}
             revision={rendered.value.tree.revision}
             diagnostics={rendered.value.diagnostics}

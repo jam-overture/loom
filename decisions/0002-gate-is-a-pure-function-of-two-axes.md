@@ -8,7 +8,7 @@
 > decision shipped with §2; this record exists because the two-axis separation
 > is a contract the renderer, the portal, and telemetry all depend on.
 
-> **Amended 2026-08-28**, under [0096](0099-a-record-is-amended-when-only-the-count-moved.md).
+> **Amended 2026-08-28**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
 > The rule count below read *six* and the ladder has had seven rungs since 19
 > August: 0035 added the sixth and 0071 the seventh, and neither reverses
 > anything here. The number is now held against `ESCALATION_LADDER` by

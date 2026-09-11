@@ -113,7 +113,7 @@ const PiecesPage = async () => {
             is the same catalogue this screen is built from, rendered by the runtime rather
             than by this page, so the two cannot disagree.
           </p>
-          <pre className="text-ink border-edge-subtle bg-surface-hover overflow-x-auto rounded-sm border p-2 font-mono whitespace-pre-wrap">
+          <pre className="text-ink-secondary border-edge-subtle bg-surface-hover overflow-x-auto rounded-sm border p-2 font-mono whitespace-pre-wrap">
             {renderCatalogue(catalogue)}
           </pre>
           <p>

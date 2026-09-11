@@ -2,8 +2,10 @@ import Link from "next/link"
 
 import type { TreeListing } from "@loom/runtime/store"
 
+import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { nameFrom, type PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 
 /**
  * The pages this deployment can check, and the ones it cannot.
@@ -26,9 +28,12 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
  */
 export const CheckupChoices = ({
   trees,
+  names,
   checkable,
 }: {
   readonly trees: readonly TreeListing[]
+  /** What each listed page is called. A page missing from it still lists, by its id. */
+  readonly names: ReadonlyMap<string, PageNameValue>
   /** Whether this host can reproduce the shape a page started as (0028). */
   readonly checkable: (treeId: TreeListing["treeId"]) => boolean
 }) => {
@@ -71,7 +76,7 @@ export const CheckupChoices = ({
               className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
             >
               <span className="flex min-w-0 flex-col gap-1">
-                <span className="truncate font-mono text-sm">{listing.treeId}</span>
+                <PageName page={nameFrom(names, listing.treeId)} />
                 <span className="text-ink-muted text-xs">
                   {listing.revision} {listing.revision === 1 ? "change" : "changes"} to replay
                 </span>
@@ -86,7 +91,7 @@ export const CheckupChoices = ({
             key={listing.treeId}
             className="border-edge-subtle flex flex-col gap-1 rounded-md border border-dashed p-4"
           >
-            <span className="text-ink-muted truncate font-mono text-sm">{listing.treeId}</span>
+            <PageName page={nameFrom(names, listing.treeId)} />
             <span className="text-ink-muted text-xs">
               This one can&rsquo;t be checked here: this deployment doesn&rsquo;t know the shape
               the page started as, and a check that started from the page being served would agree

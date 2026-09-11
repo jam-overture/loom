@@ -1,6 +1,7 @@
 import type { TreeDelta } from "@loom/runtime"
 
-import { namedList, partPhrase, type PlainLine } from "./vocabulary"
+import { partNameOf, subjectFor, type PartName } from "./part-name"
+import { namedList, type PlainLine } from "./vocabulary"
 
 /**
  * What a delta did, in the words a reviewer uses.
@@ -116,30 +117,41 @@ const settingWords = (set: Readonly<Record<string, unknown>>, unset: readonly st
   return `'s ${namedList(changed)}, and cleared its ${namedList(unset)}.`
 }
 
-export const plainOperation = (operation: TreeDelta["operations"][number]): PlainLine => {
+export const plainOperation = (
+  operation: TreeDelta["operations"][number],
+  names: ReadonlyMap<string, PartName> = new Map()
+): PlainLine => {
   switch (operation.op) {
+    /*
+     * An insert needs no map: it carries the node it places, so the part can
+     * always be named from the operation itself. The apposition that used to
+     * say `, a loom.card,` is gone from this sentence because the name says
+     * "the card" already — and the exact type has not left the screen, it is in
+     * `describeOperation` beside the raw delta, one click down, which is where
+     * the rule puts it.
+     */
     case "insert":
       return {
         before: PLAIN_VERBS.insert,
-        subject: operation.node.id,
-        after: `, ${partPhrase(operation.node)}, inside ${operation.parentId}.`,
+        subject: partNameOf(operation.node),
+        after: ` inside ${operation.parentId}.`,
       }
     case "remove":
       return {
         before: PLAIN_VERBS.remove,
-        subject: operation.nodeId,
+        subject: subjectFor(names, operation.nodeId),
         after: " and everything inside it.",
       }
     case "move":
       return {
         before: PLAIN_VERBS.move,
-        subject: operation.nodeId,
+        subject: subjectFor(names, operation.nodeId),
         after: ` inside ${operation.parentId}.`,
       }
     case "configure":
       return {
         before: PLAIN_VERBS.configure,
-        subject: operation.nodeId,
+        subject: subjectFor(names, operation.nodeId),
         after: settingWords(operation.set, operation.unset),
       }
   }

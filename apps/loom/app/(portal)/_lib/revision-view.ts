@@ -1,7 +1,8 @@
 import type { StoredRevision } from "@loom/runtime/store"
 
 import { plainOperation } from "./delta-summary"
-import { ASK_ORIGINS, confidenceWord, type PlainLine } from "./vocabulary"
+import type { PartName } from "./part-name"
+import { ASK_ORIGINS, confidenceWord, NO_CONFIDENCE_TO_JUDGE, type PlainLine } from "./vocabulary"
 
 /**
  * One accepted change, read as sentences.
@@ -64,12 +65,22 @@ export const whoAllowed = (stored: StoredRevision): string | undefined =>
  */
 export const surenessOf = (stored: StoredRevision): string =>
   stored.provenance.authoredBy === "runtime"
-    ? "Loom worked this change out from the record rather than asking a model, so there is no confidence to judge."
+    ? NO_CONFIDENCE_TO_JUDGE
     : `${confidenceWord(stored.provenance.confidence)}.`
 
-/** What the change did, one plain sentence per operation, in the delta's order. */
-export const changesOf = (stored: StoredRevision): readonly PlainLine[] =>
-  stored.delta.operations.map(plainOperation)
+/**
+ * What the change did, one plain sentence per operation, in the delta's order.
+ *
+ * `names` is what the screen could find out about the parts this delta touches.
+ * A forward delta records what it *did* and names its subjects by id alone
+ * (0016), so every name here is derived from somewhere else — the tree as it
+ * stands, or the revision's own inverse for a part that no longer exists. What
+ * it cannot name keeps the id, and the sentence reads as it always did.
+ */
+export const changesOf = (
+  stored: StoredRevision,
+  names: ReadonlyMap<string, PartName> = new Map()
+): readonly PlainLine[] => stored.delta.operations.map((op) => plainOperation(op, names))
 
 export type RevisionView = {
   readonly who: string
@@ -79,9 +90,12 @@ export type RevisionView = {
   readonly changes: readonly PlainLine[]
 }
 
-export const revisionView = (stored: StoredRevision): RevisionView => ({
+export const revisionView = (
+  stored: StoredRevision,
+  names: ReadonlyMap<string, PartName> = new Map()
+): RevisionView => ({
   who: whoAsked(stored),
   allowed: whoAllowed(stored),
   sure: surenessOf(stored),
-  changes: changesOf(stored),
+  changes: changesOf(stored, names),
 })

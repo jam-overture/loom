@@ -18,6 +18,10 @@ import {
   type UnaddressableReason,
 } from "@loom/runtime/react"
 
+import { partReading, type PartName } from "./part-name"
+
+import { screenName } from "./screen-names"
+
 /*
  * The demo moved out of this route group to `app/(demo)` on 21 August, and this
  * is the one line of the portal a demo run had to touch to move it: a
@@ -108,14 +112,31 @@ export type PlainState = PlainWord & {
 export type PlainLine = {
   /** Everything before the name, ending in whatever space the sentence needs. */
   readonly before: string
-  /** The name itself. Rendered monospace; never reworded. */
-  readonly subject: string
+  /**
+   * The name itself. Never reworded.
+   *
+   * A bare `string` is an identifier and is rendered monospace. A `PartName` is
+   * a part of a page that has been named — the words and the id, in that order,
+   * with only the id in monospace — and it is what a sentence about something
+   * that happened to a page should carry wherever the caller could find one out.
+   *
+   * The union is deliberate and it is doing work beyond politeness: it made
+   * every place that renders a subject fail to compile until it went through
+   * `PlainSentence`, and there were three of them still spreading the line by
+   * hand a fortnight after that component was written to stop exactly that.
+   */
+  readonly subject: string | PartName
   /** Everything after it, including the full stop. */
   readonly after: string
 }
 
 /** The whole sentence, as a reader meets it. Assert this, not the parts. */
-export const readingOf = (line: PlainLine): string => `${line.before}${line.subject}${line.after}`
+export const readingOf = (line: PlainLine): string =>
+  `${line.before}${subjectReading(line.subject)}${line.after}`
+
+/** A subject as text, whichever of the two it is. */
+export const subjectReading = (subject: string | PartName): string =>
+  typeof subject === "string" ? subject : partReading(subject)
 
 /**
  * "title", "title and width", "title, width and gap".
@@ -189,7 +210,13 @@ export type ChangeState =
 export const CHANGE_STATES: Readonly<Record<ChangeState, PlainState>> = {
   applied: {
     label: "Applied",
-    meaning: "This change is live on the page. You can undo it from History.",
+    /*
+     * The screen is named rather than spelled. This read "you can undo it from
+     * History" — a screen whose rail entry, heading and strip label had all
+     * moved to `What's changed` — and it is the sentence under every applied
+     * change in the portal, so it was the widest-read copy of the wrong name.
+     */
+    meaning: `This change is live on the page. You can undo it from ${screenName("/portal/history")}.`,
     technical: "committed",
     tone: "applied",
   },
@@ -363,11 +390,44 @@ const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
   "discards-later-work": "It would write over work already done, so nobody may do it alone.",
   "redirected-submission":
     "It would send what people type into a form to a different place than before, so nobody may do it alone.",
-  "stakes-above-ceiling": "Riskier than a request from here is allowed to be without asking.",
+  /*
+   * Was "Riskier than a request from here is allowed to be without asking."
+   *
+   * Found by looking at the new queue on `/portal`, and it is a good example of
+   * why a screenshot keeps catching what a test cannot. "From here" is a
+   * reference to the *origin* of the ask, and on the page screen there is an
+   * origin a line or two above it, so the sentence resolves. The queue draws
+   * changes from every page and leads with what somebody typed — so "here" has
+   * no referent on screen, and the one sentence explaining why a person is being
+   * asked to decide something reads like a fragment of a longer sentence that
+   * was cut.
+   *
+   * The origin is not lost: it is in the technical record on the same card,
+   * spelled `user-instruction`. What is gone is a word that only worked in one
+   * of the two places this sentence is now read.
+   */
+  "stakes-above-ceiling": "A change this big is not something Loom may make on its own.",
   "confidence-below-minimum": "Sure enough to suggest, not sure enough to do without asking.",
 }
 
 export const ruleSentence = (code: DispositionReasonCode): string => RULE_SENTENCES[code]
+
+/**
+ * What to say instead, when the thing that wrote the change was not a model.
+ *
+ * A delta the runtime computed — an inverse, a repair it derived from the log —
+ * carries a confidence the way every delta does, and it is meaningless: only a
+ * model grades itself (0007), and 0031 makes calibration the reader of that
+ * self-grade. Printing "The AI says it is very sure" over an inverse the
+ * runtime worked out would attribute a claim to a model that never made one.
+ *
+ * Here rather than in one screen because two now say it — `/portal/history` on
+ * a revision, and the front door on a change nobody was asked about — and two
+ * screens holding their own copy of one sentence is the drift `vocabulary.ts`
+ * exists to prevent.
+ */
+export const NO_CONFIDENCE_TO_JUDGE =
+  "Loom worked this change out from the record rather than asking a model, so there is no confidence to judge."
 
 /**
  * A self-graded confidence, as a word.
@@ -397,6 +457,21 @@ export const confidenceWord = (confidence: number): string => {
  */
 export const reversibilityWord = (reversible: boolean): string =>
   reversible ? "you could undo it" : "this one can't be undone"
+
+/**
+ * A clause, shaped to stand on its own.
+ *
+ * The clauses above are written to follow something — a stakes label, another
+ * sentence — and read as a dropped fragment anywhere else. The front door's
+ * first screenshot had `you could undo it` sitting in grey beside a button,
+ * which reads as a caption somebody forgot to finish.
+ *
+ * This shapes rather than rewords, deliberately. A second string saying the
+ * same thing in the standalone case is exactly the drift this module exists to
+ * prevent: one wording, capitalised and stopped where a sentence is wanted.
+ */
+export const asSentence = (clause: string): string =>
+  `${clause.slice(0, 1).toUpperCase()}${clause.slice(1)}.`
 
 /**
  * What became of one ask, in the portal's words.

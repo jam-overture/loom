@@ -99,9 +99,21 @@ describe("the queue on a given day", () => {
   it("leaves a reader who has done nothing with every set and no queue", () => {
     const entries = queueFor(REVIEW_SETS, EMPTY_PROGRESS, PART_LESSONS, "2026-03-09")
 
-    expect(entries).toHaveLength(22)
+    expect(entries).toHaveLength(27)
     expect(entries.every((entry) => entry.status === "unscheduled")).toBe(true)
     expect(dueNow(entries)).toEqual([])
+  })
+
+  /**
+   * Within a band the sets keep the course's order, which stopped being the
+   * alphabet's at `AA`: `localeCompare` alone puts the twenty-seventh set
+   * second, between A and B, so a reader with everything unscheduled would have
+   * been offered lesson 22's set before lesson 02's.
+   */
+  it("orders the twenty-seventh set last rather than second", () => {
+    const entries = queueFor(REVIEW_SETS, EMPTY_PROGRESS, PART_LESSONS, "2026-03-09")
+
+    expect(entries.map((entry) => entry.set.letter).slice(-3)).toEqual(["Y", "Z", "AA"])
   })
 
   it("gives a reader who has finished Part I exactly the sets Part I earns", () => {

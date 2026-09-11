@@ -35,8 +35,21 @@ missed — and to ask it of yourself without reading the rest of the set around
 it. `/lessons/review/corrections` does it instead: a question you missed comes
 back the next day, a week after you get it, and a month after that. **Three
 clean retrievals retire it; missing it once sends it back to the beginning.**
-Five at a time, drawn from whichever sets they happen to be in, which makes a
+Five at a time, drawn from wherever they happen to be from, which makes a
 corrections sitting the most interleaved ten minutes in the course.
+
+**Wherever** now means the lessons as well as these sets. A Warm-up or
+Self-check question you got wrong inside a lesson is the same kind of event as
+one you got wrong here — you had met the material, you were asked for it, and it
+did not come — so it comes back on the same terms and in the same sitting, and
+by the time it arrives there is nothing to tell the two apart.
+
+A missed **Predict** question is the one exception, and only sometimes. Predict
+is written to be got wrong; saying you do not know and turning out not to know
+is the exercise working, and there is nothing there to relearn. But a prediction
+you rated **4 or 5** and missed is not a gap — it is a belief about how the
+system works, held confidently, that turned out to be false. Those are the ones
+that survive being contradicted once, so those are the ones that come back.
 
 ---
 
@@ -757,9 +770,10 @@ thing in the course. Question 7 is the point of the set.
 
 ## Set V — one week after Part IV
 
-Part IV ends at lesson 17, which is the end of the syllabus, so this is the last
-scheduled set and the counterpart to Sets E, M and Q. Do it **out loud**, and do
-not do it the same day as Set U. It reaches into all four parts on purpose:
+Part IV ends at lesson 17, which is the end of the system, so this is the
+counterpart to Sets E, M and Q and the one that closes it. Do it **out loud**,
+and do not do it the same day as Set U. It reaches into all four parts on
+purpose:
 everything before this asked you to hold one part in your head, and the thing
 worth having at the end is the system.
 
@@ -794,6 +808,274 @@ worth having at the end is the system.
 
 Question 6 is the one that tells you whether the course worked. Question 7 is the
 one to still be thinking about tomorrow.
+
+---
+
+## Set W — two days after lesson 18
+
+Interleaved with 02, 05, 09, 12, 14, 15 and 16. Set V asked you to hold the
+system; this set is the first that asks you to hold the system **against
+something outside it**, which is what Part V is. Half of these questions are
+about a seam and the other half are about a claim the seam made false — and the
+second half is the harder one.
+
+1. State what a binding contains and what it may never contain. Then give the
+   reason twice: once as an argument about the tree, and once as an argument
+   about what the Gate would find itself weighing. Say which of your two is the
+   one that actually kills the alternative. *(03, 08)*
+2. `renderLoomTree` is synchronous and `renderRequest` is not. Name the two
+   seams that forced that, say where each one's work happens instead, and then
+   give the general rule both are instances of — the one lesson 05 stated first
+   about something much smaller. *(05, 14)*
+3. A source declares what it answers with, and the adapter that answers is
+   already typed by that declaration. Say why the answer is validated anyway.
+   Then name the other place in this course where a value is re-checked at a
+   boundary its own types already described, and say what the two boundaries
+   have in common about who wrote what is on the far side. *(14, 16)*
+4. "The page is a function of the tree alone" was true through Part IV. State
+   what replaced it, exactly, and then state what a reviewer can still conclude
+   from a revision because of the weaker claim. Then the harder half: name what
+   a reviewer approved when they approved a bound node, and say what would have
+   to be stored for them to have approved more. *(09, 10)*
+5. A source with nothing to report answers `ready` with an empty list rather
+   than reporting that it has nothing. Give the failure this prevents, in terms
+   of what a *visitor* concludes. Then find the same argument in lesson 12 and
+   in lesson 14, name the party it is protecting in each of the three, and say
+   which of the three is the one you would have been most likely to get wrong on
+   your own. *(12, 14)*
+6. A node declares three bindings and one of them is malformed. Say what the
+   other two get, then say what a page looks like under the *other* decision and
+   why that is worse — the answer is about which failures a person notices, not
+   about which is more correct. *(14)*
+7. Name every place in this system where a name in the tree points at something
+   the tree does not contain, and for each, name the party that owns the far
+   side. There are at least four. Then say what all four do when the far side is
+   missing, and whether they all do the same thing. *(02, 15)*
+8. Loom's own code contains exactly one `try`. Say what is on the far side of it
+   and why that one is the exception to lesson 05's rule rather than a hole in
+   it. Then name two other places where Loom treats something as foreign that a
+   less careful library would treat as its own. *(05, 15, 16)*
+
+Question 5 is the point of the set. Question 7 is the one to write as a list and
+then be unsatisfied with, because the fourth entry is the one nobody remembers.
+
+---
+
+## Set X — two days after lesson 19
+
+Interleaved with 04, 07, 09, 14, 15 and 18. Set W asked you to hold the system
+against something outside it. This one asks something harder and more specific:
+Part V now has two seams that look almost identical, and **most of these
+questions are about where they differ.** Two things that rhyme are the easiest
+pair in a course to conflate, and conflating them is the failure this set exists
+to catch.
+
+1. A binding carries AI-authored `params` and a submission declaration carries
+   none. Give the structural reason — the property of reads that writes do not
+   have — and then say what a deployment pays for the decision, in a concrete
+   number. Then the half most people skip: give the strongest argument for the
+   other side, and say what would have to change about who writes a registry for
+   that argument to win. *(18)*
+2. A model may write a URL into an `href` and it is checked against a scheme
+   allowlist. A model may not write one into a form action at all. State why the
+   same check is right in one place and useless in the other, as a property of
+   what the check can *see*. Then name one other value in this system where the
+   danger is in the content rather than the form, and say how Loom handles that
+   one. *(15)*
+3. Both Part V seams resolve in three steps: a pure plan, a step that may do IO,
+   and a synchronous walk. Name what the *pure* step buys in each, and then name
+   one thing a host could build from a plan alone in each case — they are not the
+   same thing, and the difference is the point. *(14, 18)*
+4. `redirected-submission` is `high`. `nested-target` is `critical`. Give the
+   property that separates them, phrased as a claim about the change rather than
+   about the damage. Then explain why the `high` one still gets a Gate rule that
+   ignores the origin ceiling, and say what that implies about when a stake
+   *level* is the wrong tool. *(07, 09)*
+5. A change moves a form's destination and then moves it back, in one delta.
+   Nothing is reported. Say why measuring between two trees rather than off the
+   operations is what produces that, then name the *other* analysis in this
+   course that is measured the same way and the one place the two disagree about
+   what counts. Then say what a reviewer loses if confirmations fire on changes
+   that changed nothing. *(04, 07)*
+6. Name the five reasons a form has no target. Say which one means the host's
+   code ran and returned successfully; say which one could not exist if the seam
+   trusted the host's own types; and say why there is no sixth reason meaning "no
+   target, and that is fine." *(18)*
+7. A primitive declares `interactive: { whenProps }` and `submits: true` — one
+   conditional, one not. Give the case the conditional form exists for, then give
+   the argument that there is no matching case for the second. Then say what the
+   audit does with each declaration, and which of the two it can be wrong about
+   in a way nobody notices. *(15)*
+8. Both Part V lessons removed something from the tree and replaced it with a
+   name pointing into a host-written registry. List every registry in this
+   system, say who writes each and what a model is shown of it, and then answer
+   the question the pattern raises: what makes something a candidate for this
+   treatment, and what makes something *not* one? *(02, 15, 18)*
+
+Question 1 is the point of the set — it is the one place two seams that look
+identical are not. Question 8 is the one to attempt last and be least satisfied
+with; if your list of registries has three entries, one is missing.
+
+---
+
+## Set Y — two days after lesson 20
+
+Interleaved with 05, 07, 12, 14, 15, 18 and 19 — the widest set so far.
+
+Set X asked you to hold two seams apart. There are now three, and that is a
+different problem rather than a bigger one: with two, telling them apart is a
+list of differences, and with three you have to know **which differences were
+the rule and which were a coincidence.** Most of this set is that question in
+various disguises.
+
+1. Write the sentence that is true of all three Part V seams — data, submissions
+   and frames — as a single rule about what goes in a registry. Then say what
+   lesson 19's version of it (*a name in the tree, an address in a registry,
+   resolved before the walk*) got right and what it got wrong, and name which of
+   its three clauses survived. *(18, 19)*
+2. Give the test that decides whether a value belongs in the tree or in a
+   host-written registry, in one sentence, without using the words "dangerous"
+   or "trusted". Then apply it to two cases neither lesson covered: the list of
+   locales a page may be translated into, and the API key an embed provider
+   wants in a query string. *(18, 19)*
+3. The frame seam has no plan step and no resolve step where the two before it
+   have both. Name the property that buys that, name the two things the shape
+   costs, and say what the record tells a deployment to do if it wants an
+   asynchronous verdict anyway. *(14, 18)*
+4. `sandbox="allow-scripts allow-same-origin"` on a frame whose document comes
+   from the framing page's own origin. Say what it protects the page from, then
+   answer both design questions: why is it permitted rather than refused, and
+   why is it reported rather than left alone? The second half is the one to
+   write most carefully. *(14)*
+5. `resolveFrame` given the number `42` returns a refusal rather than throwing,
+   and `createFrameOriginRegistry` given `https://example.com/embed` returns an
+   error rather than ignoring the path. Both are the same discipline. Name it,
+   name where it was established, and then say which of the two would still be
+   correct if the value came from a *host* rather than from a model — and why
+   the answer is not the same for both. *(05, 14)*
+6. A `frames` declaration and an `interactive: { whenProps }` declaration are
+   both prop names an author writes and the registry checks. Give the property
+   that makes a drifted `frames` worse. Then name the drift the registry cannot
+   catch, say why it cannot, and say what kind of tool would. *(15)*
+7. The endpoint catalogue is the complete list of what a model may name; the
+   frame catalogue is not a complete list of anything. Explain what each is
+   *for*, then say why `self` is not projected into the second — and give the
+   general rule about projections that decides it. *(12, 15, 19)*
+8. An AI-authored URL in an `href` is refused at the props schema and the node
+   is omitted. An AI-authored URL in a frame is refused by a seam and the
+   primitive renders a notice. Same mechanism, two answers. Give the reason,
+   phrased as a claim about what kind of *fact* each refusal is — then say what
+   would be true of a page's structure if the second worked like the first.
+   *(02, 07, 14)*
+
+Question 1 is the point of the set and Question 8 is the one most people can
+feel the answer to and not state. If your answer to 2 needs a different rule for
+each of the two cases, you have not found the rule yet.
+
+---
+
+## Set Z — two days after lesson 21
+
+Interleaved with 04, 07, 08, 12, 15, 17, 18 and 19 — and unusually heavy on Part
+II for a Part V set, which is deliberate. Set Y was about telling three seams
+apart. This one is mostly not about the seam at all: lesson 21's registry half is
+the pattern you already have, and the half worth retrieving is what happened when
+a property turned out to belong to nobody.
+
+1. Give the reason a model may not write a colour, as a property of the value
+   space rather than as a danger. Then apply the same reasoning to two cases no
+   lesson covered: the number of columns in a grid, and the alt text on an
+   image. If your rule gives the same answer for both, you have not found it
+   yet. *(01, 21)*
+2. There is no fallback theme, and a tree that names none renders unstyled. State
+   the argument, then say what it shares with lesson 18's account of a page that
+   stops being a function of its tree — and then the difference that lets
+   appearance refuse a trade data had to accept. *(18, 21)*
+3. A change that repaints every pixel of a page comes back `low` stakes, no
+   factors, reversible, accepted — identical in every column to renaming the
+   page. Defend it with both axes named, then say what a deployment does if it
+   wants re-themes held, and why that is a composition rather than a feature.
+   *(07, 08, 09, 21)*
+4. "Can a reader read this page" is answerable by no single party. Name the three
+   parties and what each holds. Then name the two things that had to be
+   *declared* because nothing could derive them, and give, for each, the reason
+   derivation fails — one of the two is a fact about probes and the other is a
+   fact about meaning. *(14, 15, 21)*
+5. `analyzeDelta` measures and the Gate judges. `auditRegistry` reports and
+   refuses nothing. `auditPalette` measures and imposes nothing. Write the rule
+   the three share as a claim about *who owns the consequences*, then name the
+   one place in the system where the same party measures and decides, and say
+   what makes it different. *(07, 15, 17, 21)*
+6. A pairing that cannot be measured is neither a pass nor a failure. Give the
+   reason it is a third answer rather than either, name what a host wanting the
+   guarantee has to assert, and name the other place in this course where a check
+   answers "I could not tell you" as a first-class result. Then the sharper half:
+   say what a host could have made disappear if `unmeasured` had been folded into
+   "pass". *(15, 20, 21)*
+7. Two colours at 1.00:1 that a reader tells apart at a glance. Explain how both
+   are true, then state what a design token promises and does not — in one
+   sentence, to somebody who has never heard of Loom — and derive from your
+   sentence the class of bug it predicts. *(21)*
+8. The theme catalogue shown to a model carries ids, names and descriptions and
+   no hex. The frame catalogue carries origins and descriptions and no `self`
+   flag. Give the single rule about projections that decides both omissions, then
+   say which of the two catalogues is a *complete list of what may be named* and
+   why the other one is not. *(12, 19, 20, 21)*
+
+Question 4 is the point of the set. Question 5 is the one where three examples
+make the rule feel obvious and stating it precisely is still hard — write the
+sentence before you look at any of the three.
+
+---
+
+## Set AA — two days after lesson 22
+
+The twenty-seventh set, and the letters ran out at Z — two of them from here, so
+that no set you have already done gets renamed underneath you.
+
+Interleaved with 03, 07, 08, 09, 13, 14, 15 and 21. Heavy on Part II, because
+what is worth retrieving from lesson 22 is not the declaration but what the Gate
+did with it; and heavy on 15, because two lessons running have now turned a
+primitive's promise into a claim that can be false.
+
+1. A tree is valid, every node passes its own schema, and the page has a control
+   on it that no reader can operate. Say what the fault is a property *of*, then
+   name the three seams that cannot see it and give each one's reason in the form
+   *"because it only ever sees …"*. *(14, 15, 22)*
+2. `interactive: { whenProps: ["href"] }` treats absent, `null` and `""` alike.
+   Give the argument for the empty string in terms of a specific change the
+   system must not refuse, then name the other place in this course where a check
+   had to be written so that it would not refuse its own repair. *(13, 22)*
+3. A `configure` operation that touches one node and no children produced a
+   `critical` refusal. Explain the mechanism, then state the general rule it
+   forces about what the analysis reads — and say which two of the four
+   operations you would have guessed instead, and why that guess is natural.
+   *(03, 07, 22)*
+4. `nested-target` is a stake factor and not a rule in the ladder. Give the
+   property that distinguishes it from every other factor in the system, then say
+   what refusal gives a deployment that confirmation would not — and name the
+   part of the pipeline that answer depends on. *(08, 09, 10, 13, 22)*
+5. A proposal inherits one nesting and introduces none, and is reported as
+   introducing none. Defend that, then argue the other side properly: give the
+   strongest case for reporting inherited faults, and say what it would cost the
+   repair loop and the person reading the assessment. *(07, 13, 22)*
+6. A deployment that derives no interactive vocabulary gets no check at all, and
+   this is the default — 0002 is why. State that argument, give the one-line
+   change that turns the check on, and say why that line reads the registry
+   instead of naming types. *(15, 22)*
+7. `loom.nav` declares itself a target and renders a `<nav>`. State the claim the
+   declaration makes, the claim the rule that forced it wanted to make, and the
+   two different failures each protects against. Then say which you would rather
+   ship — a missing declaration or a false one — and why. *(15, 22)*
+8. Lesson 21 said a property can belong to no single party; lesson 22 has one
+   belonging to two nodes. Write the sentence that covers both, then say what
+   each seam does about it — one measures and reports, the other measures and
+   refuses — and what decides which of those two a property gets. *(07, 09, 21,
+   22)*
+
+Question 7 is the point of the set, and question 4 is the one where a confident
+half-answer is most likely: if yours does not mention what happens to a refused
+proposal afterwards, keep going.
 
 ---
 
@@ -833,3 +1115,8 @@ renders this file rather than restating it.
 | T | 2 days after L16 | | |
 | U | 2 days after L17 | | |
 | V | 1 week after Part IV | | |
+| W | 2 days after L18 | | |
+| X | 2 days after L19 | | |
+| Y | 2 days after L20 | | |
+| Z | 2 days after L21 | | |
+| AA | 2 days after L22 | | |

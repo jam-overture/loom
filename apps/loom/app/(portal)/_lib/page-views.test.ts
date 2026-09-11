@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest"
 
 import type { TreeId } from "@loom/runtime"
 
+import { UNTITLED, type PageName } from "./page-name"
 import {
   everyPageHref,
   pageViewsFor,
@@ -15,6 +16,9 @@ import {
 import { readingOf } from "./vocabulary"
 
 const TREE = "t_seed1" as TreeId
+
+/** A page as every caller of `scopedLead` now holds one: named, with its id kept. */
+const NAMED: PageName = { name: "Autumn arrivals", treeId: TREE, derived: true }
 
 const KEYS: readonly PageViewKey[] = ["page", "asked", "changed", "trust", "checkup"]
 const SCOPED: readonly ScopedView[] = ["asked", "changed", "trust", "checkup"]
@@ -120,18 +124,43 @@ describe("scopedLead", () => {
    * `…asked Loom to change ont_seed1` on the screen.
    */
   it("reads as one sentence with the page's name in it", () => {
-    expect(readingOf(scopedLead("asked", TREE))).toBe(
-      "Everything anyone has asked Loom to change on t_seed1, newest first — including the changes it wasn’t allowed to make and the requests it didn’t understand. Those leave no other trace anywhere."
+    expect(readingOf(scopedLead("asked", NAMED))).toBe(
+      "Everything anyone has asked Loom to change on Autumn arrivals t_seed1, newest first — including the changes it wasn’t allowed to make and the requests it didn’t understand. Those leave no other trace anywhere."
     )
   })
 
   it("names the page on every scoped screen, and ends in a full stop", () => {
     for (const view of SCOPED) {
-      const reading = readingOf(scopedLead(view, TREE))
+      const reading = readingOf(scopedLead(view, NAMED))
 
-      expect(reading).toContain(" t_seed1")
+      expect(reading).toContain(" Autumn arrivals t_seed1")
       expect(reading.endsWith(".")).toBe(true)
     }
+  })
+
+  /**
+   * The id never leaves, on any of the four. It is what a reader pastes into a
+   * URL, quotes in a support thread and matches against a log line, and 22
+   * August settled that identity is not technical detail — so the words are
+   * added beside it rather than in place of it.
+   */
+  it("keeps the id in the sentence beside the words", () => {
+    for (const view of SCOPED) {
+      expect(readingOf(scopedLead(view, NAMED))).toContain("t_seed1")
+    }
+  })
+
+  /**
+   * A page that never said what it is called still has to be talked about. The
+   * sentence reads "Untitled page t_seed1" rather than losing its subject —
+   * which is also what a failed store read produces, deliberately: a screen
+   * that cannot name the page it is scoped to still knows which page it is.
+   */
+  it("still reads as a sentence when the page has no name of its own", () => {
+    const reading = readingOf(scopedLead("changed", { name: UNTITLED, treeId: TREE, derived: false }))
+
+    expect(reading).toContain(`${UNTITLED} t_seed1`)
+    expect(reading.startsWith("Every change")).toBe(true)
   })
 
   /**
@@ -141,12 +170,14 @@ describe("scopedLead", () => {
    */
   it("never claims to be showing every page", () => {
     for (const view of SCOPED) {
-      expect(readingOf(scopedLead(view, TREE)).toLowerCase()).not.toContain("every page")
+      expect(readingOf(scopedLead(view, NAMED)).toLowerCase()).not.toContain("every page")
     }
   })
 
   it("keeps the name verbatim, so two pages are told apart by it", () => {
-    expect(scopedLead("changed", "t_other" as TreeId).subject).toBe("t_other")
+    expect(
+      scopedLead("changed", { name: "Winter sale", treeId: "t_other", derived: true }).subject
+    ).toBe("Winter sale t_other")
   })
 })
 

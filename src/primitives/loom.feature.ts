@@ -132,6 +132,23 @@ export const loomFeature = definePrimitive({
           alignItems: "flex-start",
           gap: space(3),
           height: "100%",
+          /**
+           * `height: 100%` and padding, without this, make a tile taller than
+           * the row it is in.
+           *
+           * The percentage resolves against the grid track; the padding is then
+           * added *outside* it under the default `content-box`, so every card
+           * overflowed its own row by `2 × space(5)`. With one row that put the
+           * cards 66px over the bottom of the grid and into whatever band came
+           * next; with two rows the second row was drawn *through* the first.
+           * Both are visible in a screenshot and invisible to every assertion,
+           * because the markup, the colours and the widths were all correct.
+           *
+           * `loom.section` writes the same line with the same reasoning —
+           * *"no stylesheet resets these"* — which is what makes this an
+           * omission rather than a difference of opinion.
+           */
+          boxSizing: "border-box",
           textDecoration: "none",
           color: colour("fg-default"),
           ...(card ? CARD : PLAIN),

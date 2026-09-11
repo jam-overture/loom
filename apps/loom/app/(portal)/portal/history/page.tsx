@@ -4,12 +4,15 @@ import { notFound } from "next/navigation"
 import { treeIdSchema } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 
+import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
-import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
+import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { scopedLead } from "@/app/(portal)/_lib/page-views"
+import { pageNameOf, unnamed } from "@/app/(portal)/_lib/page-name"
+import { namesInTree } from "@/app/(portal)/_lib/part-name"
+import { screenName } from "@/app/(portal)/_lib/screen-names"
 import {
   anchorOf,
   describeAnchorMiss,
@@ -75,12 +78,13 @@ const HistoryPage = async ({
     return (
       <div className="flex max-w-3xl flex-col gap-6 p-8">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl tracking-tight">History</h1>
+          <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
           <p className="text-ink-muted text-sm">
             Every change that has actually been made to one of your pages, newest first &mdash; and,
             for each one, exactly what undoing it would put back.
           </p>
         </div>
+        <ElsewhereNote from="/portal/history" />
         <TreeChooser />
       </div>
     )
@@ -101,7 +105,7 @@ const HistoryPage = async ({
 
     return (
       <div className="flex max-w-3xl flex-col gap-4 p-8">
-        <h1 className="text-2xl tracking-tight">History</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
         <StateNotice tone="failure" title="We couldn&rsquo;t read this page&rsquo;s history.">
           <p>
             Nothing has been lost and nothing has changed &mdash; this is a screen that could not
@@ -139,6 +143,26 @@ const HistoryPage = async ({
    * undo and answering on the click (the same reason `undoRevision` needs one).
    */
   const seed = seedFor(scope.data)
+
+  /**
+   * The page as it stands, read once — for its name, and for the names of the
+   * parts every sentence on this screen is about.
+   *
+   * One head read where there used to be one, doing two jobs. `nameFor` made
+   * the same read and threw the tree away; the rows below need the tree itself,
+   * because a delta names what it touched by id and the words for those ids are
+   * in the tree or nowhere.
+   *
+   * "Or nowhere" is not quite true, and the exception is the interesting half:
+   * a part a revision *deleted* is in no tree at all, and its name survives
+   * only inside the inverse of the change that removed it. Each row merges what
+   * its own inverse carries over this, which is why the map is passed down
+   * rather than applied here.
+   */
+  const head = await portalStore.head(scope.data)
+  const pageName = head.ok ? pageNameOf(head.value) : unnamed(scope.data)
+  const standing = head.ok ? namesInTree(head.value) : new Map()
+
   const reversals: ReadonlyMap<number, Reversal | undefined> =
     seed === undefined
       ? new Map()
@@ -146,7 +170,10 @@ const HistoryPage = async ({
           await Promise.all(
             newestFirst.map(
               async (stored) =>
-                [stored.revision, await previewReversal(portalStore, scope.data, seed, stored.revision)] as const
+                [
+                  stored.revision,
+                  await previewReversal(portalStore, scope.data, seed, stored.revision, standing),
+                ] as const
             )
           )
         )
@@ -167,7 +194,7 @@ const HistoryPage = async ({
   return (
     <div className="flex max-w-3xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">History</h1>
+        <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
         {/*
          * "this page" meant the tree and nothing on screen said which tree it
          * was, except an id in the corner with an arrow after it. The id is in
@@ -175,11 +202,13 @@ const HistoryPage = async ({
          * are looking at rather than beside a link out.
          */}
         <p className="text-ink-muted text-sm">
-          <PlainSentence line={scopedLead("changed", scope.data)} />
+          <ScopedLead view="changed" page={pageName} />
         </p>
       </header>
 
       <PageViews treeId={scope.data} current="changed" />
+
+      <ElsewhereNote from="/portal/history" treeId={scope.data} />
 
       <RevisionBox treeId={scope.data} typed={echoOf(named)} />
 
@@ -208,6 +237,7 @@ const HistoryPage = async ({
               stored={stored}
               anchored={stored.revision === anchor}
               reversal={reversals.get(stored.revision)}
+              standing={standing}
             />
           ))}
         </ul>

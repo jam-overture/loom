@@ -7,6 +7,7 @@ import type {
   RuntimeEvent,
   RuntimeEventEnvelope,
   StakeFactor,
+  StakeLevel,
   TreeDelta,
 } from "@loom/runtime"
 
@@ -49,7 +50,16 @@ export type InterpretationView = {
 }
 
 export type StakesView = {
-  readonly level: string
+  /**
+   * The runtime's level, not a string that happens to hold one.
+   *
+   * It was widened to `string` when this view was written and nothing needed it
+   * narrow, because the only consumer printed it. `weighed.ts` reads it against
+   * the portal's four-entry `STAKES` table, and a `string` there is either a
+   * cast or an unreachable fallback branch — both of which are a surface
+   * pretending it might be handed a level the Gate cannot produce.
+   */
+  readonly level: StakeLevel
   readonly factors: readonly StakeFactor[]
 }
 
@@ -91,6 +101,41 @@ export type ChangeRecord = {
   readonly revision?: RevisionView
   /** Set while a proposal sits in custody, so the surface can offer the answer. */
   readonly heldProposalId?: string
+  /**
+   * The revision this ask was asking to put back, when it was an undo.
+   *
+   * Not read off the events, because the log does not carry it in a form this
+   * surface may read: `revertRevision` synthesises `Undo revision 1.` and a
+   * rationale saying the same thing in prose, and both are the runtime's
+   * sentences rather than a field. Parsing either would be this surface
+   * pattern-matching a string it does not own — the exact thing `undo.ts`
+   * refuses to do when it decides whether a record *is* an undo.
+   *
+   * So it is stamped by the action that asked, which knows the number because
+   * it is the number it passed. That makes it the surface's own knowledge about
+   * its own request, which is honest, and it is why `undoOf` lives next to the
+   * predicate rather than here.
+   */
+  readonly undoes?: number
+  /**
+   * Which suggestion this ask came from, when it came from one.
+   *
+   * Stamped by the action that asked, for the reason `undoes` is: it is the
+   * surface's own knowledge about its own request. The runtime is handed a
+   * *sentence* — `preset.utterance`, verbatim, because that is what a person
+   * would have typed — and has no idea a button produced it, so nothing in the
+   * log can give this back. Matching the utterance against the table afterwards
+   * would be the surface pattern-matching a string to recover something it knew
+   * and threw away.
+   *
+   * A `string` rather than a `DemoPresetId`, so this module stays clear of the
+   * preset table: `presets.ts` reads the record, and typing the field would turn
+   * that into a cycle. Same trade `undoes` makes by being a number.
+   *
+   * What it is for is the one control a dead ask can honestly offer — asking for
+   * the same thing again, against the page as it now stands (`moved.ts`).
+   */
+  readonly presetId?: string
   /**
    * Who allowed a held change. Never the same field as `actor`: a hold exists
    * because the Gate wanted a second person, and provenance records only the
@@ -180,6 +225,19 @@ type Draft = {
   revision?: RevisionView
   held?: string | undefined
   answeredBy?: string | undefined
+  /**
+   * Carried rather than derived, and this is the only reason `Draft` knows about
+   * it at all: answering a held undo folds a second assessment and verdict onto
+   * the record that was waiting (`recordAwaiting`), so a fold that dropped this
+   * would sever the undo from the revision it undoes at exactly the moment it
+   * lands. The card offering the undo would then go on offering it after the
+   * page had been put back.
+   */
+  undoes?: number
+  /** Carried for the same reason `undoes` is: answering a hold folds onto the
+   * record that was waiting, and a fold that dropped this would take the way out
+   * of a dead ask with it. */
+  presetId?: string
   discarded: boolean
   failure?: string
   repaired: boolean
@@ -212,6 +270,8 @@ const draftFrom = (base: ChangeRecord | undefined): Draft =>
         ...(base.revision === undefined ? {} : { revision: base.revision }),
         ...(base.heldProposalId === undefined ? {} : { held: base.heldProposalId }),
         ...(base.answeredBy === undefined ? {} : { answeredBy: base.answeredBy }),
+        ...(base.undoes === undefined ? {} : { undoes: base.undoes }),
+        ...(base.presetId === undefined ? {} : { presetId: base.presetId }),
         discarded: base.outcome === "discarded",
         repaired: base.repaired,
         touched: base.touched,
@@ -282,6 +342,31 @@ const fold = (draft: Draft, envelope: RuntimeEventEnvelope): Draft => {
       }
     case "repair-requested":
       return { ...draft, repaired: true }
+    /**
+     * A commit that failed is a hold that is over.
+     *
+     * Both places the runtime narrates this have already released custody —
+     * `persist` is reached only after `confirmHeld` took the hold, and the
+     * revision-conflict branch releases it first, saying why: *"A hold names a
+     * revision, so a hold whose tree has moved on can never apply again — it is
+     * not stale pending a retry, it is dead."*
+     *
+     * Leaving `held` set made the record outlive the custody it described. The
+     * card went on reading **Waiting on you** and *"Loom will not make this
+     * change until you say yes"* over a proposal no yes could reach, with the
+     * conflict code in the smallest type on the card as the only correction.
+     * Cleared here, the same record reads `no-change` — *"The change no longer
+     * fits this page"* — which is what happened, in the words the portal and
+     * the demo already share.
+     *
+     * The failure itself still lands, through the default branch below: this
+     * clears custody and says nothing about why, which is `failureOf`'s to say.
+     */
+    case "commit-failed": {
+      const failure = failureOf(event)
+
+      return { ...draft, held: undefined, ...(failure === undefined ? {} : { failure }) }
+    }
     default: {
       const failure = failureOf(event)
 
@@ -336,6 +421,8 @@ export const recordFromEvents = (
     ...(draft.revision === undefined ? {} : { revision: draft.revision }),
     ...(draft.held === undefined ? {} : { heldProposalId: draft.held }),
     ...(draft.answeredBy === undefined ? {} : { answeredBy: draft.answeredBy }),
+    ...(draft.undoes === undefined ? {} : { undoes: draft.undoes }),
+    ...(draft.presetId === undefined ? {} : { presetId: draft.presetId }),
     ...(draft.failure === undefined ? {} : { failure: draft.failure }),
     repaired: draft.repaired,
     touched: draft.touched,
