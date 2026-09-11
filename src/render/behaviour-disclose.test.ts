@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import { DISCLOSED_ATTRIBUTE } from "./behaviour.js"
+import { controlClass, controlDisplay } from "./control.js"
 import { DiscloseControl } from "./behaviour-disclose.js"
 
 /**
@@ -143,5 +144,29 @@ describe("the disclosure control", () => {
     await mount()
 
     expect(button()?.querySelector("[aria-hidden]")).not.toBeNull()
+  })
+
+  /**
+   * The handle the primitive gets, asserted on the rendered element rather than
+   * on the helper that builds the string: a class that only agrees with itself
+   * is not a contract with anybody's stylesheet.
+   */
+  it("carries the classes a primitive aims a rule at", async () => {
+    await mount()
+
+    expect(button()?.getAttribute("class")).toBe(controlClass("disclose"))
+    expect(container.querySelector(".loom-control-disclose")).toBe(button())
+  })
+
+  /**
+   * The reason this control needed the property first: the button belongs on a
+   * phone and not on a laptop, which is a rule about the button — and a rule
+   * cannot beat an inline style. Substituting the property into the inline
+   * declaration is what makes the primitive's media query win.
+   */
+  it("takes its display through the properties a primitive can override", async () => {
+    await mount()
+
+    expect(button()?.style.display).toBe(controlDisplay("disclose", "inline-flex"))
   })
 })

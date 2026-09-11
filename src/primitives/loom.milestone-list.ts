@@ -33,6 +33,28 @@ import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
  * Nothing is interpolated into those rules, every value in them is a `var()`,
  * and they are byte-identical under every theme — which is the bargain 0055
  * struck for motion, holding equally for the selectors that are about position.
+ *
+ * **The marker column is the list's decision, and it is two questions rather
+ * than one.** `Loom marketing` measured the cost on 31 August: an entry lays
+ * itself out as `5.5rem auto 1fr`, unconditionally, so on a 390px phone the
+ * marker column took 88px of a 188px row and left 101px for a title set at
+ * 20px — three lines for four words. Both halves of the repair are here rather
+ * than on the entry, because an entry cannot see either fact about itself:
+ *
+ * - **Nobody sets a marker.** `:has()` asks it of the whole list, so a
+ *   `process-steps` rail — the case that never has one — stops reserving the
+ *   column at every width. A render is a pure function of one node, so no entry
+ *   can know that none of its siblings set a marker either.
+ * - **There is no room to put it beside the title.** A `@container` query on
+ *   this element's own inline size moves the marker above the title below
+ *   26rem, keeping the dot and the connecting line where they are. It is the
+ *   container's width and not the viewport's, because the same rail is a column
+ *   of a `loom.split` on a laptop and the whole of a phone, and only one of
+ *   those two facts is about the screen.
+ *
+ * Neither is a prop, and that is the point worth keeping: a `markers` enum
+ * would spend grammar (0014) on a question the browser can answer, and it would
+ * be a prop a model could set to disagree with what its children actually hold.
  */
 
 const props = z

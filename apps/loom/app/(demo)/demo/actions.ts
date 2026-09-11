@@ -7,7 +7,7 @@ import { proposalIdSchema, randomIdFactory, systemClock } from "@loom/runtime"
 import { commitIntent, confirmHeld, discardHeld, describeHoldError, revertRevision } from "@loom/runtime/write"
 
 import { demoModelInterpreter } from "@/app/(demo)/_lib/interpreter"
-import { presetById, presetInterpreter } from "@/app/(demo)/_lib/presets"
+import { askedWith, presetById, presetInterpreter } from "@/app/(demo)/_lib/presets"
 import { recordFromEvents } from "@/app/(demo)/_lib/record"
 import {
   beginDemoWrite,
@@ -17,6 +17,7 @@ import {
   rememberRecord,
   spendModelCall,
 } from "@/app/(demo)/_lib/session"
+import { undoOf } from "@/app/(demo)/_lib/undo"
 import { DEMO_ACTOR, DEMO_PATH, readVisitorId, rememberVisitorId } from "@/app/(demo)/_lib/visitor"
 import {
   invalidReport,
@@ -126,7 +127,14 @@ export const askForChange = async (
   })
 
   const record = recordFromEvents(write.narrated())
-  if (record) rememberRecord(session, record)
+
+  /**
+   * Which button was pressed, kept on the record because nothing downstream can
+   * recover it: the runtime was handed the preset's utterance and nothing to say
+   * a button produced it. It is what an ask the page has moved past needs to be
+   * able to offer itself again (`_lib/moved.ts`).
+   */
+  if (record) rememberRecord(session, preset ? askedWith(record, preset.id) : record)
 
   revalidatePath(DEMO_PATH)
 
@@ -216,8 +224,14 @@ export const undoRevision = async (
     actor: DEMO_ACTOR,
   })
 
+  /**
+   * Stamped with the revision it is undoing, which is knowledge this call has
+   * and the events do not carry in a readable form. It is what lets the applied
+   * card know whether its undo is still to be had, still waiting, or already
+   * spent — none of which the card can see from its own press.
+   */
   const record = recordFromEvents(write.narrated())
-  if (record) rememberRecord(session, record)
+  if (record) rememberRecord(session, undoOf(record, parsed.data.revision))
 
   revalidatePath(DEMO_PATH)
 

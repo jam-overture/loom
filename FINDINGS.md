@@ -8,6 +8,226 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-08 — a string that quotes a control is coupled to that control, and renaming the control falsifies the quotation without touching it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open as a
+standing note — the instance is fixed on #220; the shape is what is filed
+
+This lane's cards quote the visitor back to themselves. An undo has no utterance
+anybody typed — `revertRevision` synthesises `Undo revision 1.` — so `askedLine`
+quotes **the words on the button that was pressed** instead, which the 26 August
+run established and which is right.
+
+That makes the quotation a *reference* to a control, held as a copy of its
+string. Today's unit renamed the control on an undo's card from **Put it back**
+to **Undo this change too**, and the quotation kept saying *“Put it back.”* —
+naming a button that was no longer anywhere on the screen. Nothing pointed at
+it: not the types, not the diff, not the twenty-four tests in the file, because
+every one of them still passed. Both strings were `UNDO_LABEL` and `UNDO_LABEL`
+was still correct *somewhere*.
+
+**What found it** was pressing one press past the fix on the built page and
+reading the card that came back. That is the sixth consecutive run where the
+thing that decided the unit was a browser, and the fourth where driving *past*
+the state being fixed found the next one.
+
+**The shape, for the lanes that have it too.** Any surface that echoes a control's
+words somewhere else — a confirmation quoting the button that opened it, a
+history row naming the action that wrote it, a toast repeating the menu item —
+has this coupling, and a rename is the event that breaks it. The portal's review
+queue and history screens both print settled decisions in words a control
+elsewhere also uses.
+
+**The fix that holds here**, and it generalises: the quotation is not a constant.
+It is *derived from whatever the control would say for that record*, through the
+same function the control reads (`appliedWords`), so renaming the control renames
+the quotation. Where the control is on a different card, the list is read where
+the whole list is in hand — `page.tsx`, beside `undoOffer` — rather than guessed
+at by the card.
+
+---
+
+## 2026-09-08 — `21st.dev` re-verified blocked, from the demo lane a thirteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` again, on the run of
+8 September. **Thirteenth filed from this lane.** The standing answer is on the
+21 August entry: `.claude/settings.json` allows the domain for the tool and the
+proxy does not, so `docs/routines.md` has listed it as allowed for three weeks and
+it has never once been reachable.
+
+The cost this run was nil. What decided this unit was building both trees and
+photographing the same six presses against each — whether a card's last control
+points forward or backward is a question about *this* card with *this* record on
+it, and no reference gallery could answer it.
+
+---
+
+## 2026-09-08 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, eighteen days on
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+Line 19, verified on `d7375ef` and on this branch this run:
+
+> Eighteen primitives are registered and the demo is live at
+> `apps/loom/app/(portal)/portal/demo`.
+
+It moved to a public `/demo` on 21 August, and `docs/routines.md:115` records the
+move as this lane's first task. `rollout.md` names this lane the conversion
+artifact for launch, so the one document that says what the demo is *for* is also
+the one still pointing at where it was.
+
+Re-verified rather than re-dated, per the correction this lane had to make on
+3 September. Also re-checked and **not** stale: the portal references previous
+runs listed are all accurate.
+
+The brief's opening task — *move it off `/portal/demo`* — has been complete for
+eighteen days and twelve runs. Its second problem, *“it is clunky”*, is live, and
+is what every unit on #220 is.
+
+---
+
+## 2026-09-07 — `sr-only` is `position: absolute`, and an unpositioned `overflow: hidden` frame does not clip it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom primitives` · **Status:** open —
+a trap, not a bug in anything that exists
+
+Two words no one can see moved this lane's whole layout, and every surface that
+uses a one-viewport frame can meet the same thing.
+
+The demo's outer frame is `lg:h-screen lg:overflow-hidden`, with a stage and a
+rail scrolling independently inside it. A card gained a visually-hidden label —
+`<span className="sr-only">marked on the page: </span>` — so a screen reader
+hears what a badge's words are for. At two open questions the entire page began
+scrolling: the top bar went off screen and 340 pixels of empty ground appeared
+under both panes.
+
+Tailwind's `sr-only` is `position: absolute`. **An absolutely positioned element
+is not clipped by an `overflow: hidden` ancestor that is not itself positioned**
+— the clip only applies down a containing-block chain, and a `static` ancestor is
+not in one. With no positioned parent, the span's containing block was the page,
+so it was laid out at its static position deep inside the rail's own scroll,
+escaped the frame, and stretched the document by the height of the rail's
+overflow.
+
+Measured, at 1440×900, `document.scrollingElement.scrollHeight`: 900 · 900 · 900
+before, 900 · 900 · **1240** with the span, 900 · 900 · 900 with `relative` added
+to its parent.
+
+**Why it is filed for `Loom primitives` rather than fixed here.** It is fixed
+here — one class. What does not generalise is that a contributor has to know it.
+The library has no visually-hidden primitive or utility, so every surface that
+wants an accessible label for a badge, an icon or an abbreviation writes
+`sr-only` by hand, and the ones that write it inside a scrolling frame will find
+this the way this lane did: not in the diff, not in the types, not in a test —
+only by driving the built page and noticing the top bar had gone.
+
+**Recommendation:** a registered visually-hidden seam that carries `relative` on
+whatever it is nested in, or — cheaper and possibly enough — a line in the
+primitives' own guidance saying `sr-only` needs a positioned parent inside any
+clipping frame. Either is worth more than four surfaces each finding it once.
+
+Nothing is blocked on this. The demo ships correct.
+
+---
+
+## 2026-09-07 — the rail scrolls to the newest question, and the stage scrolls to its mark, and neither knows the other did
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — next
+run's candidate unless the maintainer points elsewhere
+
+Found while building the unit above, and left because it is a design question
+rather than a defect, in the same shape as the finding this run closed.
+
+With two questions open, the two halves of the screen are scrolled by two
+different components that do not consult each other:
+
+- `AnswerInView` scrolls **the rail** to the newest question, so the buttons a
+  visitor just raised are in view;
+- `SpotlightScroll` scrolls **the stage** to `spots[0]`, which is that same
+  question's mark.
+
+They agree, which is why nothing looks wrong on the press. They stop agreeing the
+moment the visitor scrolls either pane by hand. Scroll the stage down to the
+*other* question's ring — now on the page for the first time, this unit's whole
+point — and the rail is still showing the newest card, whose pill reads different
+words from the ring in front of them. The screen is honest and the two halves are
+describing different questions.
+
+The pill makes this legible rather than confusing, which is why it is not urgent:
+different words on the pill and the ring is exactly the signal *this ring is not
+this card's*. But a visitor who has just been told each question is marked and
+then goes looking for the second one has to find its card themselves.
+
+**Three shapes:**
+
+1. **The stage tells the rail.** The mark that scrolls into view scrolls its card
+   to the top of the rail. Largest, and the only one where looking at the page
+   answers the question by itself. Needs an observer on the stage, which is a
+   script on a surface that has been careful to draw its marks as rules.
+2. **The card is reachable from the mark.** The chip becomes a link to its card.
+   Small; makes the mark a control, which it has never been.
+3. **Leave it.** The pill already distinguishes them, and a visitor who scrolls
+   the stage is exploring rather than deciding.
+
+**Recommendation: 2**, if anything. 1 is a lot of machinery for a state reached
+by scrolling, and this surface's standing rule is that the mark decorates and
+never restructures.
+
+---
+
+## 2026-09-07 — `21st.dev` re-verified blocked, from the demo lane a twelfth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` again, on the run of
+7 September. **Twelfth filed from this lane, thirteenth attempt**; the counts were
+reconciled in the 6 September entry and this one continues them. The standing
+answer is on the 21 August entry: `.claude/settings.json` allows the domain for
+the tool and the proxy does not, so `docs/routines.md` has listed it as allowed
+for a fortnight and it has never once been reachable.
+
+The cost this run was nil, and it is worth saying so plainly. What decided this
+unit was building both trees and driving them in a browser: whether two amber
+marks read as two questions or as a quiz is a question about *this* page with
+*this* content at *this* width, and no reference gallery could have answered it.
+The one thing that did answer it — and found a layout regression on the way — was
+a screenshot.
+
+---
+
+## 2026-09-07 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, seventeen days on
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+Line 19, verified on `d7375ef` and on this branch this run:
+
+> Eighteen primitives are registered and the demo is live at
+> `apps/loom/app/(portal)/portal/demo`.
+
+It moved to a public `/demo` on 21 August, and `docs/routines.md:115` records the
+move as this lane's first task. `rollout.md` names this lane the conversion
+artifact for launch, so the one document that says what the demo is *for* is also
+the one still pointing at where it was.
+
+Re-verified rather than re-dated: this lane filed a stale finding three times by
+date on 3 September and had to correct itself, and the correction is worth more
+than the count. Also checked this run, and **not** stale: the four references
+previous runs listed are all accurate now — `nav-items.tsx` is repointed, and
+`(portal)/_lib/auth/paths.ts`'s `DEMO_PATH` is the public-path exemption that
+keeps the 308 working for a signed-out visitor on an old bookmark, which is not a
+link to the demo and documents itself correctly.
+
+The brief's opening task — *move it off `/portal/demo`* — has been complete for
+seventeen days and eleven runs. Its second problem, *"it is clunky"*, is live, and
+is what this unit and the six before it are.
+
+---
 
 ## 2026-08-15 — `FINDINGS.md` did not exist, and neither do two of the four docs
 
@@ -3830,8 +4050,13 @@ snippet would be exactly that.
 ## 2026-08-21 — `loom.mosaic` reads the viewport where it should read its container
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
-**Status:** open — a known limit of the thing that shipped, recorded so it is
-revisited deliberately
+**Status:** **closed** by `primitives-22-the-width-you-actually-have` — the
+support floor moved and the fallback objection turned out to be answerable in
+the CSS rather than in the argument, which is what
+[0106](decisions/0106-a-band-asks-its-own-container-for-a-width-not-the-window.md)
+says. The cost was measured before it was fixed: in a 524px column at a 1280px
+window the four cells were **343 / 161 / 161 / 343**. 0106 is `Proposed`, not
+`Accepted`, because it reverses a named alternative in 0079
 
 [0079](decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
 allows the library's first width media query, for the band that cannot be laid
@@ -7977,7 +8202,10 @@ created or change what the event says.
 
 ## 2026-08-25 — an `agrees` audit is described as a fact about the page's history
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-20-what-a-green-check-checked`** — the argument was right, and the
+same miscount turned out to be in the red verdict too. See the 2 September entry
+below.
 
 Found while writing lesson 16, which teaches `auditSnapshot`. Not fixed here —
 `apps/loom/app/(portal)/` is not this routine's lane, and this is a wording
@@ -9194,7 +9422,16 @@ Two limits, stated so they are not discovered:
 
 ## 2026-08-27 — 0002 records six ordered rules, and the Gate has had seven since 19 August
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+closed by #181 and #205 — the second remedy was taken, and then the class was
+closed rather than the instance. 0002 was amended in place under a rule written
+for it ([0099](decisions/0099-a-record-is-amended-when-only-the-count-moved.md)),
+and `src/record-claims.test.ts` now holds the counted sentence in 0002, 0007 and
+0001 against the list each one counts — so the next rung the Gate gains turns
+`pnpm verify` red in the record that miscounts it rather than in a lesson a week
+later. The wider version this entry named — *nothing connects a list in `src/` to
+a sentence that counts it* — is answered for records and still open for lessons,
+documentation pages and marketing claims.
 
 [0002](decisions/0002-gate-is-a-pure-function-of-two-axes.md) states the decision
 as *"six ordered rules, first match wins"*. `ESCALATION_RULES` in
@@ -9734,8 +9971,14 @@ across the boundary.
 ## 2026-08-26 — a container query is the second thing a primitive wants to ask about its own width, and there is still no seam for the first
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
-open — nothing is broken; this is a pattern worth naming before a third
-primitive reaches for it
+**closed** by `primitives-22-the-width-you-actually-have` — the pattern this
+entry asked to have named is named, as
+[0106](decisions/0106-a-band-asks-its-own-container-for-a-width-not-the-window.md),
+and the mosaic that made it the odd one out reads its container now. The
+wrapper-element mechanic below has a second form worth knowing and it is in
+0106: where the property that has to change lives on the container itself, you
+can switch the **children** inside the query instead of wrapping the parent, and
+the fallback comes out safer for it
 
 `loom.offering` reads as a full-width menu row past 40rem and as a card below
 it, decided by one `@container` rule rather than by a prop. That is the right
@@ -9858,7 +10101,15 @@ it is bound by, which is the rule that file states about itself.
 
 ## 2026-08-31 — `loom.milestone` reserves 5.5rem for its marker at every viewport, and a phone has 390 of them
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+**closed** by `primitives-22-the-width-you-actually-have`, taking the first of
+the three ways out below *and* a version of the second. The column is not
+reserved for a list where no entry sets a marker — asked with `:has()` rather
+than with the `markers` prop the third option proposed — and where a list does
+set markers, a `@container` query on the list's own inline size puts the marker
+above the title below 26rem. Measured after, at 390px on a 350px rail: the
+marker-less rail's cell is `display: none`, and the dated rail's title went from
+**two lines to one**
 
 `loom.milestone` lays each row out as a three-column grid:
 
@@ -10082,7 +10333,12 @@ red recognises it rather than diagnosing it again, and so the cost of leaving
 ## 2026-08-28 — the Gate asks its rules in an order nothing outside the runtime can read
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open
+closed by #181 — option 1, as recommended. `ESCALATION_LADDER` is exported from
+`src/runtime/gate.ts`, is the ordered reason codes derived from `ESCALATION_RULES`
+itself rather than a second copy of them, and `gate.test.ts` holds the two
+together. It has been on `main` since `e7c8494` and this entry simply had not
+been marked; `/the-rules` can derive its order and drop its hand-written list
+whenever that lane next opens the file.
 
 `/the-rules` lists the seven questions the rules ask of every change. The **set**
 is derived and safe: `dispositionReasonCodeSchema` is exported, and the page's
@@ -10787,7 +11043,14 @@ other three briefs carry a matching "blocked until the migration" clause, they
 need the same edit.
 ## 2026-09-01 — a runtime control carries inline styles, so a primitive cannot hide its own control with its own rule
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed
+by #221 — the recommendation was right about the handle and short of the fix.
+A class alone still loses to an inline style, so the control now carries both:
+`loom-control loom-control-<behaviour>` to aim a rule at, and `display` read
+through `var(--loom-<behaviour>-display, var(--loom-control-display, …))` so the
+rule wins. `adjust` sets `display` too, so the property hides three of three.
+Recorded as [0103](decisions/0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md);
+the wrapper and its `:empty` rule can now come out of `loom.nav`, filed below.
 
 Placing `disclose` on `loom.nav` hit this immediately and every future placement
 of every behaviour will hit it too, so it is worth one sentence beside 0086.
@@ -10904,6 +11167,13 @@ Two ways out, and both are the maintainer's:
 
 Either is better than a thirteenth identical entry. There is no third option a
 routine can take.
+
+**Fifteenth on 2026-09-03**, from this lane again, recorded here rather than as a
+new entry because a fifteenth heading would say nothing a fourteenth did not.
+`EGRESS_BLOCKED`, unchanged. The `Loom primitives` brief still opens *"WebFetch
+`https://21st.dev` for the visual standard"*, and this run judged its own work
+against `loom.hero` and `loom.feature-grid` — the floor the brief names in its
+next sentence — because that is the only half of the bar a routine can read.
 
 ---
 
@@ -11620,7 +11890,21 @@ far been an inference from a diff and is now a number from a clean checkout.
 recurring**; #182 turns them green until the ninety-sixth record.
 ## 2026-08-29 — a tree has one projection, and a share card needs a second
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-24-a-page-where-there-is-no-css` — option 2 taken, and
+recorded as [0105](decisions/0105-a-render-can-hand-back-values-instead-of-references.md).
+`renderLoomTree(tree, { themeValues: "literals" })` resolves every
+`var(--loom-…)` in an inline style into what the mounted theme says it is, so a
+real tree of registered primitives renders into a medium with no cascade. The
+substitution happens at each primitive's own output rather than as a pass over
+the projection, because the projection is component elements and their styles do
+not exist until something renders them — the pass this lane built first, and it
+silently did nothing. Three limits are in the record: the library stylesheet
+(`:hover`, `:last-child`, keyframes) is unreachable and unreachable by any
+cascade-less renderer anyway, a control's own subtree renders on the client, and
+a reference the theme does not answer is left exactly as written. The
+hand-drawn card is `Loom marketing`'s to retire when it wants to; nothing was
+touched on that surface.
 
 The marketing site now draws an image for every address a visitor can send
 somebody. It is **the only file on this surface that is not a Loom tree**, and it
@@ -12698,7 +12982,10 @@ for yourself, and the cost lands on the maintainer, not on the run.
 ### Loom marketing
 
 - **#198** — §4d: the record of the change you actually made — and main was red  
-  branch `marketing-16-the-record-of-your-ask`
+  branch `marketing-16-the-record-of-your-ask` — **redone 2 September** as
+  `marketing-19-the-record-of-your-ask`. Rebuilt rather than revived, and the
+  rebuild found three defects in it; see the 2 September entry at the foot of
+  this file. This lane's share of the list is clear.
 
 ### Loom portal
 
@@ -12815,3 +13102,1656 @@ so that run is short.
 **If nothing takes it, `main` stays red on one test for every lane.** That is the
 reason this is filed rather than left in a pull-request thread.
 
+
+---
+
+## 2026-09-03 — the front door said nobody wrote it, and the button beside it said "Read the source"
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-20-the-page-showing-itself`
+
+Recorded for how it survived rather than because it is still open.
+
+The last band of the landing page has read this since 19 August:
+
+> **This page was built the way yours would be.**
+> The menu, the questions, this sentence — every one of them is a piece the AI
+> could be asked to move. **None of it was written by hand.**
+
+The first sentence is true and is the best claim this surface owns. The second
+was **false in the only reading a stranger has available**: *none of it was
+written by hand* says a machine wrote the words, and every word on this site was
+written by a person. What it was reaching for — that no band of the page is
+written out as a web page — is true, and is a different sentence.
+
+Two things about it are worth more than the fix:
+
+1. **It was falsifiable from the page itself.** The button directly under it is
+   *Read the source*, and the source is a file with that sentence typed into it.
+   The site's one uncheckable claim was sitting next to the link that checks it.
+2. **This is the fifth consecutive run to find the same shape on this surface** —
+   two things individually defensible that nobody had read next to each other.
+   The four before it were numbers. This one is a claim, which is worse, and it
+   is the first that no amount of counting would have caught.
+
+The tell that has now worked five times running is unchanged and costs one run
+in ten: **read the site the way a visitor does — across the links, in order —
+rather than a file at a time.** What is new is that the same tell has to be
+pointed at the *arguments* and not only at the arithmetic. `as-data.test.ts`
+holds the page to not telling a stranger nobody wrote it, deliberately wider
+than the wording, because the defect was a claim and not a phrase.
+
+---
+
+## 2026-09-03 — `loom.code` cannot wrap, and printed data is not code
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+The front door now prints one piece of its own page beside the rendering of it
+(`(marketing)/_lib/pages/as-data.ts`). `loom.code` is the right primitive for it
+and is the only one that could be: whitespace is the content, which its own note
+says is why nothing else in the library stands in for it.
+
+**Its one setting for a long line is `overflow-x: auto`, and for pretty-printed
+data that is the wrong answer.** A JSON string value is one line however long the
+string is — there is no line structure below the printer's to preserve, so
+nothing is lost by wrapping it and quite a lot is lost by hiding it. Measured on
+this band, against `next start` on the production build:
+
+| viewport | panel width | content width | behind the scroll |
+| --- | --- | --- | --- |
+| 1440 | 652 | 652 | **0** |
+| 1024 | 592 | 592 | **0** |
+| 768 | 726 | 726 | **0** |
+| **390** | 348 | 510 | **162px** |
+
+The document never scrolls sideways at any of the four — `scrollWidth` is exactly
+390 at 390 — so this is contained inside the panel and is not a layout bug. It is
+still the case that **on a phone the end of every long line is behind a
+horizontal gesture inside a band whose whole argument is that you can see the
+whole of it.**
+
+This lane worked around it rather than filing and stopping: the box the panel
+prints was rewritten to a sentence short enough to fit, and the argument it used
+to carry moved into prose beside it. That is a real cost — the specimen is now
+chosen partly for its length — and it does not survive the next surface that
+prints anything larger.
+
+**Recommendation: a `wrap` prop on `loom.code`**, defaulting off so code keeps
+`white-space: pre` and today's trees are untouched, and setting `pre-wrap` with
+`overflow-wrap: anywhere` when on. It is a rendering of the same content model
+rather than a second primitive, which is the `tone` and `density` test this file
+already passes twice. A tree turning wrapping on emits one `configure`.
+
+Not a fix from here: `src/primitives/` is `Loom primitives`' lane, and a
+marketing pull request that also changed the library is a pull request nobody can
+review.
+
+---
+
+## 2026-09-03 — the copy button's contrast under the bold palette, measured and fine
+
+**Filed by:** `Loom marketing` · **Owned by:** nobody — closed on measurement ·
+**Status:** closed
+
+Recorded because the wrong version of this entry was nearly filed.
+
+`loom.code`'s copy button looked dim against the dark panel in the bold palette's
+screenshot, and the obvious entry to write was a contrast finding against
+`Loom primitives`. Measured off the running page instead, at 1440:
+
+| palette | button | behind it | ratio |
+| --- | --- | --- | --- |
+| minimal | `rgb(82, 82, 91)` | `rgb(255, 255, 255)` | **7.7:1** |
+| editorial | `rgb(82, 82, 82)` | `rgb(255, 255, 255)` | **7.7:1** |
+| bold | `rgb(163, 163, 163)` | `rgb(26, 26, 26)` | **6.9:1** |
+
+All three clear AA for normal text with room to spare. **It reads dim because it
+is deliberately quieter than the code it sits beside, which is correct.**
+
+Filed as closed rather than simply dropped, because the near-miss is the useful
+part: a finding costs another lane a run whether or not it turns out to be real,
+and this one would have been written from a screenshot. Two `getComputedStyle`
+calls settled it in under a minute. **A finding about colour should carry the
+numbers, and if it cannot, it should not be filed.**
+## 2026-09-03 — a `loom.grid` cell is the one narrow column nothing can declare a width for
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a bounded gap, named so it is not rediscovered as a bug
+
+[0106](decisions/0106-a-band-asks-its-own-container-for-a-width-not-the-window.md)
+makes a `loom.split` column and a `loom.card` declare their own inline-size
+containment, so anything inside either can measure the space it actually has.
+`loom.grid` cannot do the same, and the reason is structural rather than an
+oversight: a grid **styles its children** through
+`grid-template-columns: repeat(auto-fit, …)` rather than wrapping each one, so
+there is no element belonging to the grid on which to declare containment. A
+cell is whatever node the tree put there.
+
+So a `loom.heading` placed **directly** in a three-across grid on a 1440px page
+still caps itself against the window rather than against its 440px cell. In
+practice a grid cell is a `loom.card`, which does declare it, so the case that
+bites is narrow. It is filed rather than fixed because the two ways out are both
+worse than the gap:
+
+- **Wrap every child in a containment div.** One extra element per cell, and it
+  breaks `auto-fit`'s intrinsic sizing being a fact about the *child* — which is
+  the property `loom.grid`'s own comment says the columns being a floor rests on.
+- **Ask children to declare it themselves.** A leaf that declared containment
+  would be measuring *itself*, which is exactly the thing a container query
+  cannot do, so this does not even work.
+
+The honest third option is that a heading in a bare grid cell is a composition a
+tree should not often produce, and the description of `loom.grid` could say so.
+Not done: changing a description is changing what a model reads first, and it
+wants its own run.
+
+---
+
+## 2026-09-03 — the primitives brief still opens on "about twenty primitives are already ported"
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — costs nothing today, and it is the first thing every run in
+this lane reads
+
+The `Loom primitives` brief says *"About twenty primitives are already ported and
+the pattern is settled"* and lists, as work still to do, `stack`, `grid`,
+`container`, `card`, `badge`, `icon`, `avatar`, `kbd`, `code`, pricing tiers,
+testimonials, a comparison table, a timeline, a bento grid, nav, footer and a
+CTA. **Every one of those is registered**, and the library is at **seventy
+primitives** with the Hermes port at 52 of 70 ported and 67 of 70 settled.
+
+It is not a harmless staleness. The brief's breadth mandate is the standing
+order a run weighs everything else against, and a run that takes the list
+literally spends its first minutes discovering that fifteen of seventeen named
+gaps are closed. Two consecutive runs have now had to reason about what breadth
+*means* now rather than what it meant on 16 August, because the brief cannot say.
+
+**The two things worth updating, if the brief is edited at all:**
+
+1. The count and the port state — or better, a pointer to
+   `docs/hermes-port-map.md`, which is derived and cannot go stale the same way.
+2. **What breadth means once the catalogue is broad.** The library can now build
+   every band a marketing page needs; what it cannot do is render some of them
+   well on a phone, which is where the last two runs' findings have been. If the
+   answer is still "more primitives", saying so settles it. If it is "the ones
+   you have, at the bar", that is a different instruction and neither run could
+   read it from the brief.
+
+Filed rather than assumed. The brief is the maintainer's and a routine cannot
+write the governance it is bound by.
+## 2026-09-02 — the seam the hand-drawn share card was waiting for exists, and one primitive's colours are the whole of what it does not carry
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:** open
+
+The 29 August entry above is closed: `renderLoomTree(tree, { themeValues: "literals" })`
+and the same option on `renderRequest` resolve every `var(--loom-…)` in an inline
+style into the mounted theme's value, so a real tree of registered primitives can
+be handed to a renderer that reads no cascade. `substituteVariables` and
+`inlineThemeVariables` are exported from `@loom/runtime/react` for a surface
+holding an element tree it built itself.
+
+**What that does and does not buy the share card**, so nobody spends a run
+finding out:
+
+- Every colour, size, radius, weight and family a primitive names off the theme
+  arrives as a literal. That is all of `tokens.ts`, which is the only way a
+  library primitive is allowed to name one.
+- The **library stylesheet** does not arrive — `:hover`, `:last-child`,
+  keyframes, `::after`. A card is a still image, so none of those were going to
+  be evaluated by an image renderer either; the ones that matter are the
+  position selectors, and a band that only reads right because of
+  `:first-of-type` will read differently in the card than on the page.
+- A **control** renders on the client. A share card containing a primitive that
+  places one gets the control's own `style` resolved and nothing inside it. No
+  card should contain one.
+- The **font is still a family name, not a face** — the 29 August entry beside
+  this one, unchanged and still owned by this lane's framework counterpart. A
+  card drawn this way wears the palette exactly and the typeface not at all,
+  which is the same caveat the hand-drawn one carries today.
+
+**Recommendation: retire the hand-drawn card when this lane next opens that
+file, not before.** It works, it is on-palette, and swapping it for a rendered
+tree is a change to the one asset other people's servers fetch. Nothing on
+`(marketing)` was touched by the PR that closes the finding.
+
+---
+
+## 2026-09-02 — `WriteOutcome` still has no list of its kinds, six days after it was asked for and after the same addition was made three times elsewhere
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+
+Filed against my own lane so the next run does not have to re-derive it. `Loom docs`
+asked on 27 August for `WRITE_OUTCOME_KINDS` beside `WriteOutcome`, in the shape
+`EPISODE_RESOLUTION_KINDS` and `PALETTE_SLOTS` already settled. The 30 August
+run built `TELEMETRY_EVENT_TYPES`, `TREE_OPERATIONS` and
+`COMPOSITION_OUTCOME_KINDS` in exactly that shape, wrote in
+`src/runtime/pipeline.ts` that *"the same addition `WRITE_OUTCOME_KINDS` is for
+the write path, one level up"*, and did not make it. The comment is still there
+and the export still is not.
+
+It is one exported line, ordered however the runtime prefers, plus a
+`Record<WriteOutcome["kind"], true>` in the test so an eighth ending fails to
+compile rather than fails to be noticed. It was not done this run because it
+belongs to no part of what this run built and a PR carrying two unrelated things
+is a PR nobody reviews. It is the first thing on the next run's list.
+
+---
+
+## 2026-09-02 — the auto-subscription woke this run three times for a deployment bot, and unsubscribing turns out to be possible
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` · **Status:** open
+
+Third lane to file this and eighth day. Opening #228 auto-subscribed the session
+to its own pull request, and the three events that followed were the
+subscription being created and `vercel[bot]` editing one comment from *Building*
+to *Ready*. No human said anything. The standing order attached to that
+subscription asks for **a self check-in roughly an hour out, re-armed silently if
+nothing changed**, which is the exact shape of the 9 August runaway the framework
+brief and `docs/routines.md` both forbid by name.
+
+**What is new: this run unsubscribed.** `unsubscribe_pr_activity` is available to
+the routine and it worked — one call, no events since. The two earlier filings
+(`Loom marketing` and `Loom docs`, both 1 September) each concluded the
+subscription could not be declined and reported the conflict instead. It can.
+Nothing was scheduled at any point.
+
+**The conflict is still yours to resolve**, because a routine deciding case by
+case which standing order to ignore is not a stable arrangement, and a run that
+did the polite thing instead would have cost roughly a session an hour for as
+long as the pull request stayed open. The two clean fixes: stop auto-subscribing
+a routine's session to the pull request it just opened, or strip the check-in
+clause from what the subscription tells it to do. Either one, once, ends this for
+all seven lanes.
+
+**Cost this run:** three wakes, all bot noise, none of which needed an action.
+Cost of the alternative, unfixed, per open pull request: one session an hour,
+indefinitely.
+## 2026-09-02 — a green checkup compared three things and said two, and the red one said two as well
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-20-what-a-green-check-checked` — closing the `Loom lessons` entry of 25
+August, with what taking it turned up
+
+The entry was about one sentence: `readCheckup`'s `agrees` reading promised
+*"…so nothing on it is unexplained"*, which is a claim about the page's history,
+and `auditSnapshot` compares end states rather than histories. The
+counterexample is nine lines and is Exercise D of lesson 16, executed. It is
+exactly right.
+
+**What it did not say is that the red verdict had the same defect, and worse.**
+`diverged` read *"One of the two is wrong, and until you know which, the history
+cannot explain what is on screen."* A fold has three inputs — the seed, the log,
+and the snapshot — so "one of the two" names two suspects out of three and sends
+a reviewer to look at the page and its history when the fault may be in
+**neither**. Under a green verdict the miscount costs false confidence; under a
+red one it costs a search in the wrong place, which is the more expensive of the
+two.
+
+**So the fix is not a softer sentence.** Removing the overclaim leaves a screen
+that is merely quieter about a check nobody can see the shape of. Both verdicts
+now name the shape they started from, and the screen carries the three inputs
+with the real numbers in them — *10 parts*, *2 changes* — plus the assumption
+nothing on the screen checks, on the surface rather than behind a disclosure. A
+correction a reader has to open a disclosure to find is the same wrong thing the
+sentence used to tell them.
+
+**One thing worth keeping from the build.** The basis renders nothing at all
+under `unreplayable`. A fold that stopped part-way replayed no number of changes
+anybody can print, and a basis reading *"it replayed 12 changes"* under a verdict
+reading *"nothing could be checked"* would be the same class of overclaim one
+screen further down. `AuditReport` gained `revision: number | null` — null
+exactly when nothing was compared, the mirror of `stoppedAt` — so that guard is a
+type and not a habit.
+
+**Not taken, and it is the honest limit of this unit:** nothing here makes a
+drifted seed detectable. It cannot be detected from inside the audit, because the
+audit is what the seed is an input to. Detecting it needs a second, independent
+record of a tree's original shape, and this portal has exactly one — a builder in
+source. That is a framework-shaped question rather than a portal one and it is
+not filed as work, because nothing about `auditSnapshot` is wrong: 0016 and 0028
+say precisely what it does. What was wrong is that the portal said more.
+
+---
+
+## 2026-09-02 — the guard that keeps the runtime's vocabulary off the surface now exists in two copies
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is broken, and it is one regex away from drifting
+
+`audit-view.test.ts` carries a regex — `fold|snapshot|seed|delta|node|tree|
+revision|log|gate|id` — and asserts that no sentence a screen shows unasked
+matches it, then asserts that the technical reading *does*. It is the sharpest
+test in this lane: it turns the plain-language rule from taste into a property,
+and it catches the failure mode nobody notices, which is a rewrite that leaves
+one runtime word behind.
+
+`checkup-basis.test.ts` now carries a second copy, because the basis is four more
+sentences shown unasked and they deserve the same guard.
+
+**Two copies of one rule is how a rule stops being one.** A word added to one
+list and not the other means two screens disagree about what plain language is,
+and neither test fails. It is not fixed here because there is nowhere obvious for
+it to live: it is a test concern, so it does not belong in `_lib/vocabulary.ts`
+with the production tables, and `apps/loom/test/` currently holds only the server
+action stubs the vitest config imports.
+
+**Recommendation:** a `apps/loom/test/plain-language.ts` exporting the regex and
+a `readsPlainly` helper, imported by both — and then applied to the screens that
+have no such guard at all, which is most of them. Roughly one small unit, and it
+is the kind of thing worth doing once rather than per screen.
+
+---
+
+## 2026-09-02 — every screenshot this lane publishes is taken against a browser the sandbox pins and the repo does not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— nothing is broken, and every lane that ships a visual is solving this from
+scratch
+
+The brief for four of the seven surfaces asks for a screenshot, and
+`docs/routines.md` asks for one "once there is a page worth looking at". Nothing
+in the repository takes one. There is no Playwright dependency, no script, and no
+recorded recipe — so each run rediscovers the same three obstacles:
+
+1. **Playwright is not installed anywhere in the workspace.** It has to be
+   installed outside the repo so the lockfile is not touched, which is right, and
+   which means every run pays for it.
+2. **`npx playwright install` does not work here.** The sandbox ships browsers at
+   `/opt/pw-browsers`, and `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` is set for exactly
+   that reason.
+3. **The pinned browser and a fresh Playwright disagree about the build number.**
+   A current `playwright` looks for `chromium_headless_shell-1234`; the sandbox
+   has `-1194`. The launch fails with *"Executable doesn't exist"* and a message
+   telling you to run the install command that cannot work. The way through is
+   `chromium.launch({ executablePath:
+   "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" })`, and the number in it
+   will go stale.
+
+The portal's own recipe, for whoever writes the shared one: `next build`, then
+`next start` with `LOOM_PORTAL_SESSION_SECRET` (32+ chars) and
+`LOOM_PORTAL_REVIEWERS` set to `actor:key`, sign in through the form at
+`/portal/sign-in`, and drive the real prompt box with `LOOM_ANTHROPIC_API_KEY`
+from the environment. Every screenshot in this run's report is a production build
+of its own commit with a live model behind it, and that is worth keeping — but it
+is thirty lines that seven lanes are each writing separately.
+
+**Not fixed here.** A screenshot harness is application-shell work rather than a
+route group's, and putting it in `app/(portal)/` would make six other lanes
+import from a lane they may not edit. It wants `apps/loom/scripts/`, beside
+`db-push.ts`.
+## 2026-09-02 — `StoreError` has five codes and no way to list them, which is the second of four still open
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+refiled. It was first filed on #199, which was closed unmerged on 28 August, so
+it never reached `main`.
+
+`StoreError` is a discriminated union. A `switch` over one is exhaustive at
+compile time, which is right for the code that *handles* a failure. What no
+caller can do is **walk** it: nothing exports the five codes, so *Going to
+production*, which describes all five to a reader, keeps its own copy of the
+list in `(docs)/_lib/deployment/failures.ts`.
+
+The copy is typed as `Record<StoreError["code"], …>`, so a sixth code makes the
+documentation stop compiling rather than quietly describe five of six. That is
+the best a lane outside `src/` can do and it is not the fix.
+
+**This is the same hole in the same shape as three others, and two of them have
+since been closed** — `WRITE_OUTCOME_KINDS` and `TELEMETRY_EVENT_TYPES` are now
+exported, and both pages that needed them read the list instead of a copy. The
+remaining two are `StoreError` and `CliError`. The pattern the framework routine
+established on `framework-21` is exactly what is wanted here: a `STORE_ERROR_CODES`
+in `src/store/`, in the order a reader meets them, held against the union by a
+test in `src/`.
+
+---
+
+## 2026-09-02 — two closed-unmerged pages were rebuilt, and three of their claims had gone stale in the meantime
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+`docs-18-the-two-pages-the-backlog-dropped`
+
+Recorded because the *class* is what matters, not the three sentences.
+
+#183 and #199 were closed unmerged and rebuilt this run against current `main`.
+Every test in them still passed — 71 of them, unchanged — and the runtime surface
+they check had not moved under them. **What had rotted was the prose, and nothing
+in the repository could see it:**
+
+- *What every ask leaves behind* opened with *"the last four pages were about the
+  runtime deciding things."* It is now the sixth page in its section.
+- The same page rested a whole section on a sentence it said *Connecting a model*
+  ends with. That page had since been rewritten and no longer says it.
+- Its retention rules and *Going to production*'s were written as two independent
+  passages by two runs that could not see each other, and in one order they read
+  as a duplicate.
+
+A page's claims about the *runtime* are checked here — `claims.test.ts` and
+`page.test.ts` are both about exactly that, and both are good. A page's claims
+about **another page** were checked by nothing at all, which is the harder half:
+a stale link is at least visible to the reader who clicks it, while a page that
+misquotes another page reads perfectly and is wrong.
+
+`(docs)/_lib/cross-references.test.ts` closes it. Every `/docs/…` address in any
+page must resolve, and **a page quoting another page must quote words that page
+still contains** — the convention being a link followed by a blockquote, so the
+citation is a thing a test can follow rather than a paraphrase nobody can check.
+
+**The general lesson is about the backlog rather than about these two pages.** A
+branch that waits does not go stale where its tests are; it goes stale in the
+sentences that point at whatever moved while it waited. Any lane rebuilding
+closed-unmerged work should read its prose against current `main` and not trust
+a green suite to have done it.
+
+---
+
+## 2026-09-02 — a `.png` URL cannot be put in a pull-request body from a routine session, so "include a screenshot" is unsatisfiable there
+
+**Filed by:** `Loom docs` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a tooling constraint outside every lane. Diagnosed, with the workaround
+in use.
+
+Several routine briefs, mine included, say to **include a screenshot in the pull
+request**. From a scheduled session that is currently not possible, and the
+shape of the failure is not the obvious one.
+
+**It is not about embedding. Any URL ending in `.png` is rewritten in transit**,
+whichever syntax carries it. Verified three ways on #225, each read back from
+the API afterwards rather than assumed:
+
+| What was sent | What arrived |
+| --- | --- |
+| `![alt](https://…/shot.png)` | backticks wrapped round the URL |
+| `<img src="https://…/shot.png" />` | the `src` attribute deleted entirely |
+| `[text](https://…/shot.png)` | backticks wrapped round the URL |
+
+In the same bodies, `https://…vercel.app/docs/the-runtime/going-to-production`
+and the bare preview URL went through **untouched**. So the discriminator is the
+image file at the end of the address, not the markdown around it, and no amount
+of rephrasing gets past it.
+
+**The workaround, which is what #225 does:** put the screenshots in the report
+and link the report *by path*. `reports/<slug>.md` renders its own images inline
+on the branch, and a path is not a URL so nothing rewrites it. The maintainer is
+one click further away than the brief intends, and that is the whole cost.
+
+**Why it is filed rather than fixed.** It is the same class as the `*.vercel.app`
+egress entry above — a property of the sandbox and its tooling, not of this
+repository. A routine cannot widen it and should not try. Two candidates if it is
+ever worth addressing: allow media URLs on the GitHub write path, or let a run
+attach an image to a comment. Until then, **a brief asking for a screenshot in
+the pull request is asking for something the session cannot do**, and the honest
+response is the report link plus this entry rather than silence.
+
+Recorded so the next run that spends twenty minutes rephrasing markdown does not
+have to.
+## 2026-09-02 — the refusal band was counting a run it was not printing, and it was right for eight runs
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-19-the-record-of-your-ask`
+
+Recorded for **how it survived**, not because it is still open.
+
+The mechanism page's contrast band states three numbers while it speaks: how many
+kinds of line a refused change reaches before the answer, which line the answer
+is, and the one that is not there. All three are positions in the **refused**
+run. All three were read off `trail.lines` — the run printed *above* the band.
+
+Those are different runs and the arithmetic gave the right three numbers anyway,
+because the run above could only ever be the six-line default. `matching =
+lines.length - 2` is four when `lines.length` is six, and four is correct. The
+moment that page could print a five-line run — which is what this run's own change
+makes possible — every one of the three would have been one too small, on a band
+whose entire subject is a count.
+
+**Nothing on this site could have seen it.** The band was correct on every page
+that existed, its two sentences agreed with each other, and `journey.test.ts`
+checked exactly that agreement — against a page where both were derived from the
+same wrong list. It is the third occurrence in this lane of one shape: **two
+individually correct things that had never been read next to each other.** 30
+August was four sentences hardened into facts about the one ask ever exercised;
+31 August was a prose promise beside an empty panel; 1 September was four versus
+five across a link.
+
+The tell that would have caught all four is the same and is cheap: **when a value
+becomes variable, re-read every sentence that was derived from it while it was
+not.** A derivation is only as correct as the thing it derives from is stable, and
+the eight runs of stability are what make it invisible.
+
+---
+
+## 2026-09-02 — a change the visitor allows is nine lines, and nothing had looked at it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-19-the-record-of-your-ask`
+
+`runAsk` with `approve` puts a held change to the rules a **second** time, and
+`confirmChange` narrates the whole second pass to the listener. So the record of
+an approved change is `intent-received`, `policy-resolved`, `change-proposed`,
+`change-assessed`, `disposition-decided` — and then `policy-resolved`,
+`change-assessed`, `disposition-decided`, `change-applied` again. Nine lines,
+measured, for `problem` with `approve=1`.
+
+That is correct and it is the most interesting record this site can print. It is
+also a length nobody had written a sentence for: #198 branched on *landed* and had
+two shapes, six and five, and would have described this one as six with one extra
+line for the rules.
+
+Worth keeping beyond the fix, because it is a fact about the runtime rather than
+about this page: **an approval is not a bypass and the record proves it.** The
+rules are asked again, they answer again, and both answers are in the log. Any
+surface that reports on a held-then-allowed change — the portal's history, the
+demo's payoff card — is reporting on two passes, not one, and a count written for
+the single-pass case will be wrong there too.
+
+---
+
+## 2026-09-02 — `fonts.googleapis.com` is still not reachable, and this is the twelfth screenshot set in the wrong face
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — restated from 1 September with a measurement rather than a new
+argument.
+
+Nine images ship with this run's report and none of them is in Geist. The house
+theme names the family, the stylesheet asks for it, and the sandbox does not
+allow the host — so Chromium falls back to the platform grotesque, which was
+chosen as a deliberate near-neighbour and therefore looks entirely plausible.
+Nothing on the page announces it.
+
+No assertion depends on the face. `font.test.ts` passes because it checks what the
+theme *names*, which is right. The cost is that **this surface is judged by eye
+and has been judged in a font it does not ship in**, for as long as it has had
+screenshots.
+
+Two static font hosts, `fonts.googleapis.com` and `fonts.gstatic.com`. Neither
+can receive a credential; both are already the mechanism `next/font` would use.
+Widening egress is explicitly a finding rather than a fix, which is why this is
+here for the twelfth time rather than in a diff.
+
+---
+
+## 2026-09-02 — #198's work is back on `main`'s doorstep, and the rebuild was worth more than the branch
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed — this lane's entry on the 28 August backlog list is done.
+
+The 28 August entry names one marketing branch,
+`marketing-16-the-record-of-your-ask` (#198), and says to **redo the work against
+current `main` rather than revive the branch**. That instruction was right and is
+worth confirming with evidence, because reviving would have been cheaper and the
+diff would have applied.
+
+The branch was read, not cherry-picked. Rebuilding it found three things it had
+wrong: a refusal band counting the wrong run, a guard that let a query string
+throw on a live page, and a nine-line record it would have called six. Two of
+those are only visible once the surrounding code has moved on — `journey.ts` and
+the derived counts landed on 1 September, after #198 was written — and the third
+was never visible from the branch at all.
+
+The general form, for whoever redoes the other fifteen: **a closed branch is a
+statement of intent, not a patch.** What it was trying to do survives; how it did
+it was written against a repository that no longer exists.
+
+---
+
+## 2026-09-02 — a routine cannot open the preview URL it is required to publish
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open
+
+Every routine brief says to **include the deployed preview URL** in the pull
+request, and the marketing brief adds that the maintainer judges this surface by
+eye. Both are right. Neither is checkable from inside a run: `*.vercel.app` is
+not on the sandbox egress allowlist, so the URL a routine publishes is one it has
+never opened.
+
+Measured on #224, whose deployment reported `Ready` and whose only check is
+`success`:
+
+```
+loom-git-marketing-19-the-re-3e7ff4-…vercel.app:443 — connect_rejected ×5
+```
+
+**This is not the 19 August finding.** That one was about a routine being unable
+to *produce* a preview URL at all, and it is fixed — Vercel builds and posts one.
+This is the next step: the URL exists, it is in the pull request, and nobody who
+wrote the pull request has ever seen what is behind it.
+
+**What it costs today is small and what it will cost is not.** This run verified
+every state locally against `next start` on the production build, which is the
+same artifact Vercel serves, so the pictures in the report are honest. What
+cannot be caught from here is anything that differs *because* it is deployed —
+an environment variable that is set in one place and not the other, `VERCEL_URL`
+resolving differently from `LOOM_SITE_ORIGIN`, a route that is static locally and
+dynamic in production. `siteOrigin()` reads exactly those two variables, so this
+lane has a standing reason to care.
+
+**Recommendation:** allow `*.vercel.app` for Bash. It is this project's own
+deployment output and a preview URL is already public to anyone holding the link,
+so nothing is disclosed that the pull request does not already disclose. A
+`WebFetch(domain:*.vercel.app)` entry would cover the other half.
+
+---
+
+## 2026-09-02 — the font finding, with the failed connections rather than the argument
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — evidence for the entry above it, gathered without meaning to.
+
+The font host has been filed eleven times as an inference: the theme names Geist,
+the screenshots are not in Geist, therefore the stylesheet is not arriving. The
+agent proxy's own log settles it. During this run's screenshot pass, Chromium
+attempted the host on every page load and was cut off each time:
+
+```
+fonts.googleapis.com:443 — ws_closed_mid_exchange
+  "tunnel closed (code 1006) after 6s; 1826 B sent, 39 B received, client reading"
+```
+
+Six seconds, per page, per screenshot. So it is not only the wrong typeface — it
+is **six seconds of dead wait on every page load in every run of every lane that
+photographs anything**, silently, because the page renders fine once the request
+gives up.
+
+Nothing about the site is wrong. `font.test.ts` checks what the theme *names*,
+which is correct and passes. The face simply never arrives, and the fallback was
+chosen as a deliberate near-neighbour, so every picture looks plausible.
+
+**Recommendation is unchanged and now cheaper to justify:** add
+`fonts.googleapis.com` and `fonts.gstatic.com`. Both are static font hosts,
+neither can receive a credential, and both are already the mechanism `next/font`
+would use if it were reaching them.
+## 2026-09-02 — the pairings probe cannot see an ink behind an optional prop, and one declared row is already wrong because of it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is broken; a bar is looser than the library's own components
+deserve, and the fix is one row.
+
+`registryPairings` derives what the library actually paints by rendering each
+primitive through `probeColourPairings` and reading the ground/ink pairs out of
+the result. It renders each primitive **with default props**, which is the only
+thing it can do without inventing content — and the consequence is that *any ink
+a primitive only paints when an optional prop is set is invisible to it*.
+
+That is not hypothetical. `loom.offering` paints its `price` in
+`accent-strong` on the `bg-surface` of its own card:
+
+```ts
+// src/primitives/loom.offering.ts
+color: colour("accent-strong"),   // the price
+background: colour("bg-surface"), // SURFACES.plain, on the same <article>
+```
+
+`price` is optional, so the probe never renders one, so the pairing is never
+derived — and `src/theme/contrast.ts` declares it:
+
+```ts
+{ foreground: "accent-strong", background: "bg-surface", basis: "composed",
+  where: "loom.field inside a card" },
+```
+
+**`composed` means reported, not asserted** (0089). So a palette whose
+`accent-strong` fails on `bg-surface` would ship: the audit would print it and
+`auditPalette(...).failures` would stay empty, even though a `loom.offering`
+with a price is a page nobody can read. The row is not a judgement call that
+went the wrong way — it is a row written from what the probe could see.
+
+**How it surfaced.** `loom.event` was written with its date in `accent-strong`,
+and `date` is *required*, so the probe saw it immediately and
+`pairings.test.ts > never declares a painted pairing as the softer composed`
+failed with exactly one entry: `accent-strong on bg-surface`. The check works.
+It is the only reason any of this is visible.
+
+**Two things to do, and they are independent:**
+
+1. **Promote the row** to `basis: "painted"`, with a `where` naming
+   `loom.offering price` alongside the field. **Every starter palette already
+   clears it** — it is absent from the pinned composed shortfall in
+   `contrast.test.ts`, so `failures` stays empty and the shortfall assertion is
+   untouched. This is a one-row change that makes a true statement out of a
+   false one. It was not made here because `src/theme/` is another lane's.
+2. **Decide what the probe should do about optional props.** Rendering each
+   primitive once more with every optional prop set to a placeholder would
+   derive the real set, at the cost of a probe that has to invent a URL and a
+   date. Refusing to guess is a defensible answer — but then the *gap* should be
+   stated in `contrast.ts`, because a list whose own comment says it is "read off
+   `src/primitives` rather than imagined" is currently claiming more coverage
+   than the derivation gives it.
+
+**What this run did instead**, so nobody has to guess: `loom.event` sets its
+date in `accent` rather than `accent-strong`. There is an independent
+typographic argument for that — `accent-strong` exists to keep *small* emphatic
+text legible and a date at heading size does not need it — and the reasoning is
+in the file. But the pairing is the reason it was looked at, and if the row is
+promoted, `accent-strong` becomes available for the date again on the merits.
+
+---
+
+## 2026-09-02 — a queue row whose child has no artwork cannot line up with the ones that do
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit rather than a defect, recorded so the next run does not
+rediscover it. Visible in this run's screenshots.
+
+`loom.recording` draws its artwork frame when it has `artwork` *or* `href`, and
+skips it when it has neither — a track with no cover and no listen link is a
+title, a byline and a runtime. That is right for the card on its own.
+
+In a `loom.recording-grid` with `columns: "one"`, where every cell is a row with
+an 11rem artwork panel at its start, a cell with no panel starts its text at the
+card's edge instead. Two rows with covers and one without produce a ragged left
+edge that reads as a bug rather than as a decision.
+
+**A primitive cannot fix this**, because it is a fact about siblings and a render
+is a pure function of one node (0008). The three candidate answers all cost
+something:
+
+| | |
+| --- | --- |
+| always draw the panel | every coverless track gets an empty tinted rectangle, on a phone as well as in a row |
+| reserve the width without drawing | `:not(:has(.loom-recording-art))` can add an 11rem inset in the row arrangement only — it is expressible, and it is 11rem of nothing |
+| leave it | ragged, and only when a band mixes the two |
+
+Left, deliberately: in real content a playlist either has cover art throughout
+or has none, and the mixed case is the rare one. The second option is the one to
+take if a real page hits it — it is four lines in `stylesheet.ts` and it is
+confined to the arrangement where the problem exists.
+
+---
+
+## 2026-09-02 — `21st.dev` is still blocked, for the fourteenth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — unchanged, and restated only because the count is now the point.
+
+`WebFetch https://21st.dev` returns `EGRESS_BLOCKED`. The primitives brief names
+it as *the visual standard* and instructs every run to consult it;
+`docs/routines.md` lists it under `permissions.allow`. **No run of this routine
+has ever been able to open it.**
+
+Seventh lane to file this and the fourteenth occurrence. There are two honest
+resolutions and neither is "file it again": add the domain to the sandbox's
+egress allowlist, or **strike the instruction from the brief and name the
+standard in words**, in a file the routine can actually read. The second costs
+one paragraph and would make the bar checkable; the first costs a proxy rule.
+Either is better than a brief whose first quality instruction is inoperative.
+## 2026-09-01 — `loom.nav`'s wrapper around the disclosure control can come out
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:** open
+
+The finding this answers said the wrapper cost "one element and one `:empty`
+rule". #221 removes the reason for both, so this is the other half of it, filed
+rather than done because `src/primitives/` is not this lane's.
+
+The control now carries `class="loom-control loom-control-disclose"`, and writes
+
+```
+display: var(--loom-disclose-display, var(--loom-control-display, inline-flex))
+```
+
+so a rule aimed at the button **wins**, which is the thing that was impossible.
+The wrapper existed only because it did not. See
+[0103](decisions/0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md).
+
+What that lets `loom.nav` do instead:
+
+```css
+@media (min-width: 48rem) {
+  .nav { --loom-disclose-display: none }
+}
+```
+
+— on any ancestor, in any query, because a custom property inherits. No box, no
+`:empty`, no gap to compensate for.
+
+**One thing to carry across with it, and it is the trap.** Hiding the button does
+not clear what it publishes: `data-loom-disclosed="false"` is still on it, so the
+sibling rule that hides the links still matches, and the menu would vanish on a
+laptop. The region rule has to be lifted in the same query the button is hidden
+in. That is stated in 0103 and in `control.ts`, and it is the primitive's to hold
+because the runtime does not know which region is which.
+
+Nothing is broken today — the wrapper works. This is a removal that pays one
+element per rendered nav, and it is the shape the next primitive placing a
+control should copy rather than the wrapper.
+## 2026-09-01 — #186 was closed unmerged, and four days of `main` moved the ground under half its argument
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-12-what-allowing-it-would-do` for #186; **still open for #194, #202 and
+#209**
+
+The 28 August backlog entry names four `Loom demo` pull requests closed unmerged
+and says each lane should redo that work against current `main`. This run redid
+**#186** — *what allowing it would do, in the words on the page* — and nothing
+else, because one coherent unit is one unit.
+
+The redo is filed rather than just done, because **what it cost is the useful
+part**, and the next lane to redo one of these should expect the same shape.
+Cherry-picking `e234a63` onto `d7375ef` produced three conflicts and two of them
+were noise (`FINDINGS.md`, and the `FACTS.decisions` bump that `#174` has since
+made unnecessary). The third was not:
+
+- **`OperationEffect` gained four fields** — `op`, `into`, `before`, `from` — so
+  the branch's test fixture no longer typechecked.
+- **`ProposalEffectView` was rewritten by its owner**, and rewritten *towards the
+  same rule this unit is about*. On 28 August it read
+  `what this would change · delete · loom.stat-grid · loom.page · and 3 nodes
+  under it`. On `d7375ef` it reads **"Deletes the `loom.stat-grid`, and the 3
+  pieces inside it. Inside `loom.page`"**, with the verb list one click down
+  under *What the change record says*. `delete` is no longer a bare text node,
+  so an assertion looking for one failed.
+
+**Half of #186's premise is therefore gone, and it is worth saying so plainly
+rather than shipping the old argument.** The portal did the plain-language pass
+on its own component. What is left is the half only this lane can do, and it is
+still three things:
+
+1. **It names the thing by its type.** `loom.stat-grid` and `loom.page`, in
+   monospace, in the one sentence a stranger has to act on. The portal is right
+   to keep them — a reviewer tells one row from another by them — and a visitor
+   who has never heard of Loom cannot read either.
+2. **"the 3 pieces inside it" is a count, not the words.** The three pieces are
+   `"3,400"`, `"24"` and `"92%"`, and they are printed six inches to the left
+   inside an amber ring. A count cannot be checked against a page; a quotation
+   can.
+3. **It sat below the two buttons.** That one is this lane's own and was fixed
+   here: on `main` the order is *Apply this change* → *What this would do to
+   your page*, so a visitor reading down to the control and pressing it meets the
+   description after the press.
+
+**The lesson for the other three redos.** A closed branch is a *proposal*, not a
+patch — three of #186's four files applied unchanged and the fourth was arguing
+against a component that no longer says what it said. Read what the owning lane
+did in the meantime before rebuilding, and expect part of the case to have been
+answered by somebody else.
+
+---
+
+## 2026-09-01 — `OperationEffect.text` finds no words on a primitive that carries its content in props
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+
+`(portal)/_lib/proposal-effect.ts:169` — `textIn` walks the subtree and keeps
+only nodes whose `kind` is `"text"`. A `loom.stat-grid` carries every figure it
+prints in **props** (`value`, `label`, `caption` on each `loom.stat`), so it has
+no text nodes at all and `effect.text` comes back empty.
+
+The consequence is on your own review-queue card, not just here: a reviewer
+answering a hold on the demo's leading ask is shown *"Deletes the
+`loom.stat-grid`, and the 3 pieces inside it"* and **no `its words` line**, on a
+band that is nothing but words. Every primitive that carries content in props
+has the same hole, and the starter library has many.
+
+The mechanism is in `(demo)/_lib/plain-change.ts` on this branch if you want it,
+and it is not a straight lift — its rules are tuned for a stranger rather than a
+reviewer:
+
+- **one string per node, never all of them**, or a `loom.stat`'s three strings
+  fill the whole allowance from the first figure and report the band as *"3,400"
+  · "appointments last year" · "four clinicians, six days a week"* — one figure
+  described three ways;
+- **which props are words is `RegisteredPrimitive.choices`' answer**, not a list
+  — `tone`, `align`, `variant` are closed vocabularies their authors declared, so
+  a primitive that gains one is excluded on the next render with nothing to
+  maintain;
+- **addresses are not words** — `mailto:` and `https://` are strings a primitive
+  carries and nobody reads off a page.
+
+Not fixed here: it is your file and your reviewers. Filed originally on the
+closed #186 and re-filed because that entry never reached `main`.
+
+---
+
+## 2026-09-01 — the four portal links to `/portal/demo` are still unrepointed, and the 308 cannot go until they are
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open — a
+date on the 21 August entry, not a new argument
+
+Verified on `d7375ef`: `(portal)/portal/demo/page.tsx` is still a
+`permanentRedirect("/demo")` shim, and `DEMO_PATH`, the rail entry, the sign-in
+hero and the `/portal/pages` empty state still name the old path. Nothing is
+broken while they stay — every link lands — and the shim is a file in the
+portal's route group, so deleting it is a change this lane will make on the
+portal's word rather than guess at. Eleven days.
+
+---
+
+## 2026-09-01 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24, 25, 26 and 27 August entries
+
+Fifth consecutive run opening by establishing that its headline instruction —
+*"Two problems to fix before anything else"*, the first being the move off
+`/portal/demo` — describes this lane's first unit, landed eleven days ago.
+`docs/rollout.md:19` still points at the old path. Neither is fixable by a
+routine.
+
+The second of the two, *"it is clunky"*, is not stale and this run acted on it.
+Worth separating, because a brief that is half-stale reads as wholly stale on the
+sixth pass and the live half is the one that matters.
+
+---
+
+## 2026-09-01 — `21st.dev` blocked for the fourteenth time, and the visual standard was set by a browser instead
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — only the maintainer can widen egress
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. The brief names it as the visual
+standard and `docs/routines.md` lists it as allowed for `WebFetch`, so the two
+disagree and the second has been wrong for a fortnight.
+
+At no cost to this unit, again: what decided the amber rule's position and its
+three quoted figures was building both trees, driving them in Chromium at
+1440×900 and 390×844, and putting the two frames side by side. A reference
+gallery could not have answered where a sentence goes relative to the button it
+describes.
+
+---
+
+## 2026-09-01 — `main` is green at `d7375ef`, including the lesson-09 test filed red the same day
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom lessons` · **Status:** closed —
+observed green, filed so the next run does not budget for a repair that is done
+
+The 1 September entry *"lesson 09's preamble does not import what exercise G
+uses"* says `main` is red on one test and that fix **A** — adding `formTree` to
+the preamble fence — was deliberately not taken. On `d7375ef` it has been:
+`lessons/09-the-gate.md:524` now reads
+`import { formTree, sampleTree } from "./testing/fixtures.js"`, and
+`pnpm verify` is **exit 0** with 2519 app tests and 1860 runtime tests passing.
+
+Recorded because this lane budgeted a repair run on the strength of that entry
+and did not need one, and because the reader-facing half of the diagnosis
+survives: the instruction at `lessons/09-the-gate.md:806` now tells a reader to
+add an import the preamble already has. That is a pedagogical edit and it is
+`Loom lessons`' to make.
+
+---
+
+## 2026-09-01 — the harness re-subscribed this run to its own pull request after it had unsubscribed, and the standing order it carries is the one thing the brief forbids
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — second occurrence, and the first where the subscription arrived *after* an
+explicit unsubscribe
+
+Sequence, this run, from the session log:
+
+1. #220 opened at 20:08:49.
+2. `unsubscribe_pr_activity` called immediately, which returned
+   *"Unsubscribed from activity on jam-overture/loom#220."*
+3. At **20:08:51 — two seconds later** — a `subscription.created` event arrived
+   for the same pull request, and a Vercel build comment behind it.
+
+So the unsubscribe did not stick, or the subscription was created after it. The
+earlier 1 September entry records the auto-subscription; this adds that
+**unsubscribing does not reliably prevent it**, which is the part that matters,
+because the two are not equally cheap to live with.
+
+**What the subscription instructs, verbatim in its own payload:**
+
+> *If the `send_later` tool is available, schedule a self check-in roughly an hour
+> out to re-check the PR, and re-arm it silently if nothing changed.*
+
+That is a **self-re-arming hourly poll on an open pull request** — the exact
+mechanism `docs/routines.md` was written about. On 9 August four of those cost a
+week's allowance and checked one pull request sixty-nine consecutive times. The
+brief says *never schedule a follow-up or a self-check-in; run, report, exit*,
+and `docs/routines.md` says *no self-check-ins, on any cadence, for any reason*.
+
+**Declined, and unsubscribed a second time.** No check-in is scheduled. The
+grounds are the brief, which outranks a standing order arriving through a
+notification channel, and the pull request is green and mergeable with no review
+comments, so there is nothing red to drive even under the posture the
+subscription assumes.
+
+**Why this is filed rather than shrugged at.** The conflict is not a nuisance —
+it is a harness default that costs money on a schedule, pointed at a routine
+whose brief names token discipline as the maintainer's top priority. Three
+routines have now met some version of it. A run that follows the subscription
+faithfully is not misbehaving; it is obeying the more recent instruction. The fix
+is not in this repository.
+
+---
+
+## 2026-09-01 — the pull-request body mangling, fifth lane, and the length-threshold case reproduced
+
+**Filed by:** `Loom demo` · **Owned by:** every lane that publishes a screenshot ·
+**Status:** open — a data point on the 26 August entry, whose workaround holds
+
+Wrote #220's body with ordinary `![alt](url)` markdown and five screenshots, then
+read it back. Two of the four manglings the 26 August entry names did **not**
+reproduce this run — the leading `!` survived on four of five images. The
+**fourth** one did, and it is the least predictable:
+
+| written | arrived as |
+| --- | --- |
+| `![phone before](https://…-phone-before.png?raw=true)` | the URL **wrapped in double backticks**, so the image renders as inline code |
+
+That is the one URL of the five long enough to cross whatever the threshold is —
+`-phone-before` is nine characters longer than its siblings, and it is the only
+one that broke. It supports the entry's guess of a length threshold rather than a
+character.
+
+A third effect the entry does not list: **`"` inside a code span arrives as
+`&#34;`**, which markdown renders literally inside backticks. `` `"3,400"` ``
+came out as `` `&#34;3,400&#34;` `` on the rendered page. Curly quotes pass
+through untouched, which is the cheap avoidance.
+
+**The 26 August workaround was applied and works.** The body was rewritten with
+explicit `<img src="…" width="…">` tags, curly quotes throughout, and the preview
+URL as `[text](url)` rather than a bare autolink. All five images survived the
+second write intact, verified by reading the body back a second time. The entry's
+recommendation — that this goes into `docs/routines.md` beside the sentence
+asking for the screenshot — is now a week old and would have saved this run two
+round-trips.
+
+---
+
+## 2026-09-02 — the demo's payoff card withdrew its own undo, and the press that withdrew it was the one that changed nothing
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-12-what-allowing-it-would-do` (#220) — the redo of #194
+
+Recorded because the *shape* is now three for three and belongs in the channel
+rather than only in a report. This lane's standing diagnosis, filed 25 August,
+is that its failures are **machinery that does not reach the screen**. This one
+is the inverse and the same thing: machinery that reaches the screen and then
+takes itself away.
+
+The offer was gated on `record.revision && !undoReport` — withdraw as soon as
+the server answers *anything*. On the demo's primary path the first answer is a
+**hold**: an undo is a change of its own (0032) and putting the numbers band
+back restructures the page as much as taking it off did, so the Gate stops it
+and the page does not move. Every part of that is correct and the button
+vanished anyway, two seconds after a press that visibly did nothing, off a card
+still reading *"This change is live on the page beside you. 'Put it back' undoes
+it."*
+
+The half worth naming separately: answer that held undo with **No thanks** and
+the visitor has declined their own undo and **can never ask again**. The offer
+was spent by a press, not by an outcome.
+
+**Why the card could not have got this right on its own**, which is the part
+worth keeping. `undoReport` is `useActionState` on the applied card, and every
+event that resolves an undo happens on a *different* card — the held undo is
+answered on its own. So a card watching its own press can only ever learn that
+an undo was **asked for**, which is the one fact that settles nothing. The
+records can see all of it. The fix is a function over the record list
+(`undoOffer`), and it is server-derived, so declining the undo puts the offer
+back with no client state to go stale.
+
+---
+
+## 2026-09-02 — a revert does not say which revision it reverts, except in two sentences it synthesised
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around inside this lane, and the workaround is the evidence
+
+`revertRevision` stamps `REVERT_INTERPRETER` on the proposal's provenance, so a
+surface can ask the runtime *whether* a change is an undo and get a real answer
+rather than pattern-matching English — `(demo)/_lib/undo.ts` has done exactly
+that since 26 August and the comment there explains why it matters.
+
+**What it cannot ask is which revision the undo is of.** That number appears in
+the narrated events only inside strings the runtime composed for people:
+`utterance` is `Undo revision 1.` and `interpretation.rationale` is *"Undoes
+revision 1, applied … from proposal …"*. Both are correct and neither is a
+field. A surface that needs the link — to know whether an applied change has
+already been put back — has to either parse a sentence it does not own, which is
+the thing the provenance stamp exists to avoid, or carry the number itself.
+
+This lane carried it: `undoRevision` stamps `ChangeRecord.undoes` from the
+argument it passed, which is honest because it is the surface's own knowledge
+about its own request. It does not generalise. A surface reading a log it did not
+write — the portal's history screen is the obvious one — has no such argument to
+stamp from, and would be left with the sentences.
+
+**The ask:** a structured `revision` on what a revert narrates, so the link is
+the runtime's rather than each surface's. Not urgent for the demo, which is
+whole without it. Filed because the next surface to want it will not have the
+workaround available.
+
+---
+
+## 2026-09-02 — `21st.dev` re-verified blocked, from the demo lane an eighth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 1 September entry, not a new argument
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. Fifteenth recorded refusal
+across six lanes; `docs/routines.md` still lists it as allowed for `WebFetch`,
+and has been wrong for a fortnight.
+
+No cost to this unit again, and for the same reason as yesterday: what decided
+where the waiting line goes and what it says was building the tree, driving it in
+Chromium, pressing **Put it back** and looking at what the card did next. A
+reference gallery cannot answer whether a control should still be under a
+sentence that names it.
+
+---
+
+## 2026-09-02 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24–27 August and 1 September entries
+
+Sixth consecutive run. *"Two problems to fix before anything else"* — the first
+being the move off `/portal/demo` — describes this lane's first unit, landed
+twelve days ago. `docs/rollout.md:19` still says the demo is live at
+`apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
+
+The second of the two, *"it is clunky"*, is live and is what this run acted on.
+
+---
+
+## 2026-09-02 — the four portal links to `/portal/demo` are still unrepointed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open — a
+date on the 21 August and 1 September entries
+
+Verified again on `d7375ef`: the shim, `DEMO_PATH`, the rail entry, the sign-in
+hero and the `/portal/pages` empty state all still name the old path. Nothing is
+broken while they stay. Twelve days.
+
+---
+
+## 2026-09-03 — the rail promised two questions and the card answered neither: #202, redone
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+this run, on the branch behind #220
+
+The third of the four demo pull requests closed unmerged on 28 August. Rebuilt
+against `d7375ef` rather than revived: `demo-10-the-two-questions-it-promised`
+is preserved and was read, and two of its decisions did not survive contact with
+what the lane has shipped since.
+
+**The gap.** `WhatHappens` step two tells a first-time visitor, before they have
+pressed anything, that *every ask is weighed on two questions: how much damage
+could this do, and can it be taken back?* Then the card answered neither. In
+plain view a held change printed the rule's conclusion — *"Riskier than a request
+from here is allowed to be without asking."* — and stopped. Both answers had been
+on the record since this surface was built, one click down, in the runtime's own
+shorthand: `stakes: medium`, `reversible: yes`, `undo carries: 4 nodes`.
+
+**The half the 30 August branch did not name, and it is the bigger one.** The
+card describes a loss directly above the button that commits to it — *"This comes
+off the page, and everything under it goes too. '3,400' '24' '92%'"*, shipped on
+1 September — and until this unit there was nothing anywhere near that button
+saying the page could be put back. The visitor met the undo *after* saying yes.
+The demo's whole argument is reversibility and it was arriving one press too
+late.
+
+`_lib/weighed.ts` reads the two answers off the record and says them in the words
+the rail asked them in; the questions are one exported constant read by both
+halves, so the promise and the answer cannot drift apart again without a test
+going red. No new vocabulary: the stakes sentences are the portal's `STAKES`
+table and the reversibility clause its `reversibilityWord`. Nothing was removed —
+the level, the factor codes, `reversible` and `undo carries` keep the rows they
+had, one click down, as the evidence.
+
+Two changes against the closed branch:
+
+- **The block is headed *what Loom weighed*.** It was unheaded there, which was
+  survivable on a held card and is not on an answered one: the portal's sentence
+  for `medium` is *"Worth a look before you say yes"*, and under an **Applied**
+  badge three lines above *"You said yes"* that reads as stale advice. Named as
+  Loom's working, it is the reasoning that was in hand when the Gate decided,
+  which is what it is. The alternative was a second stakes table in this lane
+  phrased for two tenses, which is the drift the module exists to refuse.
+- **No `id` on the block.** The closed branch's `aria-labelledby` would have been
+  fine on a singleton and this renders once per card, so a page with a dozen
+  records would have carried a dozen elements sharing one id.
+
+`#209` is the last of the four still to redo.
+
+---
+
+## 2026-09-03 — three of the four portal links to `/portal/demo` were already repointed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** closed —
+the 21 August, 1 September and 2 September entries were stale when filed
+
+This lane has re-filed *"the four portal links to `/portal/demo` are still
+unrepointed"* on three runs, most recently yesterday, claiming the rail entry,
+the sign-in hero and the `/portal/pages` empty state all still name the old path.
+**On `d7375ef` none of them does**, and the rail entry was repointed by this
+lane's own #153 on 24 August:
+
+- `_components/shell/nav-items.tsx:70` — `href: "/demo"`
+- `portal/sign-in/_components/sign-in-hero.tsx:87` — `href="/demo"`
+- `portal/pages/page.tsx:102` — `href="/demo"`
+
+What is left is the 308 at `portal/demo/page.tsx` and `DEMO_PATH` in
+`_lib/auth/paths.ts`, and the second is not a link to the demo — it is the
+public-path exemption that *keeps the 308 working* for a signed-out visitor
+following an old bookmark. `paths.ts` already documents itself that way, and
+accurately. So nothing here is broken and nothing is pending on this lane's
+account: whether the shim is retired at all is a judgement about links outside
+this repository, which is the portal routine's to make and not this one's.
+
+Recorded rather than quietly dropped, because a finding re-filed by date without
+being re-verified is worse than no finding: it spends the owning routine's
+attention on work that was done a fortnight ago.
+
+---
+
+## 2026-09-03 — a `PlainState.meaning` that is advice reads oddly on a decision already made
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open —
+worked around here, and the workaround may be all it needs
+
+`STAKES.medium.meaning` is *"Worth a look before you say yes, but nothing
+drastic."* It is the right sentence in the place it was written for — a queue
+where somebody is about to answer — and it is a sentence in the future tense
+about a decision, so it goes slightly wrong anywhere the decision has already
+been made. This lane hit it as soon as the plain answers went on a card that
+also gets rendered after the visitor has said yes.
+
+Worked around with a heading (*what Loom weighed*) that puts the whole block in
+the past, which is cheap and honest and may well be the whole answer. Filed
+because the portal's own history and audit screens print records of settled
+decisions too, and if it reads wrong there the fix belongs in the table rather
+than in each reader's heading.
+
+---
+
+## 2026-09-03 — `21st.dev` re-verified blocked, from the demo lane a ninth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 2 September entry, not a new argument
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. Sixteenth recorded refusal;
+`docs/routines.md` still lists it as allowed for `WebFetch`.
+
+No cost to this unit. What decided where the block sits, whether it needed a
+heading and whether the card still fit above the fold with it was building the
+tree, driving it in Chromium at 1440×900 and 390×844, and looking at the frames.
+
+---
+
+## 2026-09-03 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24–27 August, 1 September and 2 September entries
+
+Seventh consecutive run. *"Two problems to fix before anything else"* — the first
+being the move off `/portal/demo` — describes this lane's first unit, landed
+thirteen days ago. `docs/rollout.md:19` still says the demo is live at
+`apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
+
+The second of the two, *"it is clunky"*, is live and is what this run acted on.
+
+---
+
+## 2026-09-04 — the sentence the demo's primary path ends on had no referent, and the code that was standing in for it was jargon: #209, redone
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+this run, on the branch behind #220
+
+The last of the four demo pull requests closed unmerged on 28 August. Rebuilt
+against `d7375ef` rather than revived, and the branch
+`demo-11-what-an-ask-from-here-may-do` is preserved and was read.
+
+**The gap.** Press the demo's one green button, meet the hold, and the rule the
+Gate cited reads, in the portal's shared words:
+
+> *Riskier than a request from here is allowed to be without asking.*
+
+*From here* is the whole of the claim, and nothing on the card said what *here*
+was. The one thing that came close was `user-instruction`, set in monospace in
+the card's top right corner, at the size of a footnote, on the first card this
+surface ever shows anybody.
+
+**It is not a label. It is an input the rule read.** `autoApplyCeiling` is keyed
+by origin, and `demoPolicy` sets `user-instruction` to `low` on purpose —
+`session.ts` says why: under the shipped default every change this demo offers
+would auto-apply and the hold would never appear. So the Gate's comparison on
+this exact card is *this origin's ceiling* against *these stakes*, and
+`src/runtime/policy.ts` states the idea plainly: *"An explicit human instruction
+earns more latitude than an adaptation nobody requested."* That is one of the
+genuinely distinctive things in this project, and the demo was demonstrating it
+as a hyphenated string with no verb.
+
+**And what changed since the branch was closed makes it worse rather than
+better.** `_lib/weighed.ts` landed on 3 September and put the stakes in the light
+directly above that rule — *"Some risk"*. So the card printed one side of the
+Gate's inequality, then a sentence saying a limit was exceeded, and never the
+limit. Both terms and no threshold.
+
+`_lib/ceiling.ts` says the threshold, in one sentence, on the one rule of the
+eight that reads it. The words are the shared tables' — `ASK_ORIGINS[…].label`
+and `STAKES[…].label` — and the level is asked of the runtime through the same
+`ceilingFor` the Gate called, so a retune of the policy rewrites the sentence
+rather than leaving it confidently wrong. The origin code moved into the
+disclosure under a new `the ask` section, with `askedAt` beside it — a field the
+record has carried since this surface was built and neither half of the card had
+ever printed. Nothing was removed.
+
+The three lines now read as the Gate's arithmetic in the order it happened:
+*this much risk · this much is allowed to land unasked · so it waits for you.*
+
+**All four of the 28 August demo branches have now been redone**, all on the one
+pull request, per the backlog entry's own instruction.
+
+---
+
+## 2026-09-04 — `21st.dev` re-verified blocked, from the demo lane a tenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 2–3 September entries, not a new argument
+
+`WebFetch https://21st.dev` → `EGRESS_BLOCKED`. Seventeenth recorded refusal;
+`docs/routines.md` still lists it as allowed for `WebFetch`, and has been wrong
+about that for a fortnight.
+
+No cost to this unit. What decided where the sentence sits, how quiet it is set
+and whether the card still fits on one phone screen with it was building the
+tree, driving it in Chromium at 1440×900 and 390×844, and looking at the frames.
+
+---
+
+## 2026-09-04 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a date on the 24–27 August, 1–3 September entries
+
+Eighth consecutive run. *"Two problems to fix before anything else"* — the first
+being the move off `/portal/demo` — describes this lane's first unit, landed
+fourteen days ago. `docs/rollout.md:19` still says the demo is live at
+`apps/loom/app/(portal)/portal/demo`. Neither is fixable by a routine.
+
+The second of the two, *"it is clunky"*, is live and is what this run acted on.
+
+---
+
+## 2026-09-05 — the undo's own card says "Put it back" three times and means two different things by it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+unit 8 of `demo-12-what-allowing-it-would-do` (#220), 8 September** — shapes 1
+and 2 together rather than in sequence, and shape 1 by naming the card instead of
+the change
+
+Two corrections to the reasoning below, made by building it:
+
+- **Shape 2 alone was not enough**, and the recommendation to take it first was
+  wrong. A sentence is read once; a control is pressed. Fixing the circular
+  sentence and leaving the button would have left a visitor able to read the card
+  correctly and still press the thing that undoes what the card is about.
+- **Shape 1 does not need the words on the page**, which is what made it look
+  large. An applied record carries `inverseOperations` as strings and no delta,
+  so `plainChange` cannot be reached from that card without new plumbing. Naming
+  the *card* — **Undo this change too** — needs nothing new and generalises to
+  every undo, which the words-on-the-page reading would too but at the cost of a
+  resolution this surface would have had to invent.
+
+The refusal below is intact and is why the label reads as it does: *“Take it off
+again”* is right only because this demo's leading preset is a removal, and no
+string in a table can know which way an arbitrary undo's undo goes. A test holds
+the four new strings to naming no direction.
+
+Found in the frame this run fixed the other half of, and left because the answer
+is not obvious. At the end of the demo's own sequence — ask, allow, put it back,
+allow — the visitor is looking at the card for the undo that just landed. It
+reads, top to bottom:
+
+| | |
+| --- | --- |
+| badge | **Applied** |
+| what was asked | **“Put it back.”** |
+| what became of it | *“This change is live on the page beside you. **“Put it back”** undoes it.”* |
+| the control | **[ Put it back ]** |
+| under it | *“Undoing is a change of its own, so Loom weighs it like any other.”* |
+
+Three uses of one phrase, and the button is the odd one out: **pressing it takes
+the numbers off again.** The card's own title is what that button would reverse.
+A visitor reading the sentence in the middle gets a circular instruction — *"Put
+it back" undoes it* — on a card whose subject is putting it back.
+
+Both strings are right where they were written. `askedLine` substitutes the
+visitor's own words for `Undo revision 1.` because the runtime's sentence is not
+one anybody said (26 August, correct and worth keeping). `outcome.meaning` and
+`UNDO_LABEL` are the applied state's words for *any* change, and every change
+does have an undo, an undo included — that is 0032 and the demo should keep
+demonstrating it. What is missing is that **an undo's card is the one card where
+those three strings collide.**
+
+**Why it was not taken here.** The obvious label for undoing an undo is *"Take it
+off again"*, and this surface has a standing refusal to name a change by what it
+does to a *type* — `plain-change.ts` gives the reasoning, and the 1 September
+question to the maintainer is exactly this refusal. Naming it by its words —
+*Take “3,400” “24” “92%” off again* — is available, since `plainChange` already
+computes those, and is a different unit: it means the applied card carries a
+plain reading of the *inverse*, which no card does today.
+
+**Three shapes, for whoever takes it:**
+
+1. **Say what the button would do, not what it is.** Keep `UNDO_LABEL` for an
+   ordinary change; on a record where `isUndo` is true, the control says what
+   reversing *this* change comes to, in the words on the page. Largest, and the
+   only one that leaves the visitor able to predict the press.
+2. **Keep the button and fix the sentence around it.** On an undo's card,
+   `outcome.meaning` becomes something that does not name the control — *"The page
+   is back as it was. This is a change too, so it has an undo of its own."* Small,
+   honest, and leaves the button's words still pointing the wrong way.
+3. **Do nothing and say so.** Defensible: a visitor who has got this far has
+   already seen the interesting thing twice, and the third press is not on the
+   sixty-second path. Worth stating rather than leaving as an accident.
+
+**Recommendation: 2 now, 1 when the applied card next earns a rewrite.** 2 removes
+the circular sentence, which is the half a visitor actually reads, at the cost of
+one string and no new concept.
+
+`isUndo` is exported as of this run and is the predicate all three shapes need.
+
+## 2026-09-06 — the demo's primary button, on a card that could never land it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+#220** — the diagnosis is kept because the shape recurs
+
+Recorded rather than only fixed, because it is the fourth instance this lane has
+found of one shape and the shape is worth having written down where the other
+routines can read it: **a fact the runtime carries deliberately, for a reader, that
+no reader ever read.**
+
+A stranger with five buttons and nothing telling them to answer one at a time
+presses two. Both are held. They answer one — and the other is dead the instant
+it lands, because a hold names the revision it was judged against.
+
+`confirmHeld` is explicit about it: *"A hold names a revision, so a hold whose
+tree has moved on can never apply again — it is not stale pending a retry, it is
+dead."* It releases custody and narrates the conflict. And
+`HeldProposal.baseRevision` exists in the runtime's own words *"so a reader can
+tell a hold is stale without parsing the delta"* — a field put on the type for a
+surface, which no surface had read.
+
+What the demo showed instead: the card still reading **Waiting on you** and
+*"Loom will not make this change until you say yes"*; the page still ringing the
+band amber and labelling it *This would be removed*, which is this surface's
+colour for a question it is still asking; two buttons that spent the press and
+vanished; and `applied, then not written: revision-conflict` in the smallest type
+on the card as the only account of it.
+
+Fixed on #220. The card now reads `no-change` — the shared table already had the
+right sentence — says why in plain words, keeps the two revisions one click down,
+and offers **Ask for this again**, which posts the same suggestion against the
+revision the page is actually at.
+
+**The generalisable half, for the other lanes.** The tidy fix was to stop a
+visitor holding two changes at once. It would have removed the failure and the
+lesson with it: *a verdict belongs to one version of the page* is a real property
+of this runtime, it is what 0028 protects for undo, and it had never appeared on
+any surface. A guard that prevents a state also prevents anybody learning why the
+state exists.
+
+## 2026-09-06 — two live holds draw one mark, and nothing says which card it belongs to
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+#220 (unit 7, 7 September) — shape 1 taken, with a light form of 2 alongside it.
+Every open question is marked, in its own words; the rail's line stops pointing
+at *this* once there is more than one thing it could mean; and each card wears
+its own mark as a pill carrying the chip's words in the chip's colours, so the
+pairing is a thing to look at rather than a sentence to reason about. Driving it
+confirmed the recommendation: two amber marks read as two questions, and the cap
+of three had to become the *page's* budget rather than each change's, spent in
+rounds, or two well-behaved changes would break it together.
+
+The state directly before the one #220 fixed, and it is honest rather than wrong,
+which is why it was left. Press two presets that both hold. Two cards read
+**Waiting on you**, each with its own **Apply this change** and **No thanks**. The
+page carries **one** amber mark, and the rail's single line above the cards reads:
+
+> The page is marked where this would happen, if you say yes.
+
+*This* has two possible referents and the line does not choose. A visitor
+comparing the mark against the two cards has to work out which is which from the
+words, and the newest card is the one that wins the mark — which is not something
+the screen says anywhere.
+
+**Why one mark is not obviously the bug.** `spotlitChange` gives a reason and it
+is a good one: *"Two marks in two colours on one page is a quiz rather than an
+explanation, so the ordering has to be a rule rather than 'the newest'."* That
+reasoning is about **two colours**. Two marks in the *same* colour, both amber,
+both saying *this would happen if you say yes*, may be exempt from it — or may be
+worse, because two identical marks and two identical cards give a visitor a
+matching problem rather than a demonstration.
+
+**Three shapes, for whoever takes it:**
+
+1. **Mark both, and name each.** The chip already carries words (*This would be
+   removed*, *Something new would go here*), so two amber marks are already
+   distinguishable by what they say. Largest, and the only one where the page
+   answers the question by itself.
+2. **Keep one mark and say which.** The rail line names the ask it belongs to —
+   *"The page is marked where “Take the numbers band off the page.” would
+   happen"* — and the unmarked card says so on itself. Small, and leaves a
+   visitor comparing text rather than looking.
+3. **Only ever hold one at a time.** Answer or decline before another ask is
+   offered. Removes the state, and with it a true thing about the runtime: the
+   Gate holds each ask independently and does not queue them.
+
+**Recommendation: 1, with 2 as the fallback if two amber marks test badly by
+eye.** 3 is the one to avoid, for the reason the finding above gives.
+
+Not urgent: unlike the state it precedes, nothing here is false and nothing eats
+a press.
+
+## 2026-09-06 — `21st.dev` re-verified blocked, from the demo lane an eleventh time (a twelfth attempt)
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` again. **Eleventh filed
+from this lane, twelfth attempt** — 5 September verified it and reported it on
+the pull request without filing here, so the two counts have been one apart since.
+Stated rather than left, because a finding re-dated without being re-verified
+spends the owning routine's attention on work already done, and a count nobody
+can reconcile is the same failure one step earlier.
+
+The `Loom demo`
+brief names it as the visual standard and says it "is allowed by the committed
+network policy"; `docs/routines.md` still lists it under *Currently allowed*.
+Both have been wrong for a fortnight.
+
+No cost this run. What decided the position, the colour and the weight of the new
+block was building both trees and photographing the same four presses against
+each — the left rule replaced a `bg-inapplicable` panel that turned out to be
+within a shade of the card's own ground, which no reference site would have told
+me and one screenshot did.
+
+## 2026-09-06 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-dated, and re-verified this run rather than only re-filed
+
+*"Two problems to fix before anything else"* still opens with **"It is in the
+wrong place"** — the move from `/portal/demo` to `/demo`, which landed sixteen
+days ago. Verified again on this branch: `app/(demo)/demo/page.tsx` exists,
+`/demo` serves it, and `(portal)/portal/demo/page.tsx` is the 308 shim.
+`docs/rollout.md:19` still points at the old path.
+
+The brief's *second* problem — *"it is clunky"* — is live, and is what every unit
+on #220 has been.
+## 2026-09-01 — a hold store has no deployment-wide read, so the portal's headline screen costs one query per page
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— worked around on the surface, said out loud on screen, not fixed
+
+`HoldStore` offers `hold`, `get`, `forTree` and `release`. `forTree` is the only
+listing, and its comment says why: *"scoped by tree because that is the only
+listing a review queue needs; like `TreeStore` (0020), a handle is the scope of
+what it can see."*
+
+That was true while the review queue was a section of one page screen. It stopped
+being true the moment the portal's front door became **the queue over every
+page**, which is where the brief's first value item has always pointed. To answer
+*"does anything need me?"* the screen now has to:
+
+1. `TreeStore.list` — one bounded page of trees, plus a cursor;
+2. `HoldStore.forTree` — **once per tree on that page**.
+
+Two consequences, and the second is the one worth a framework run:
+
+**It is O(pages) queries for a question with a one-row answer.** On Postgres that
+is fifty round trips to find out that nothing is waiting. It also blocks the
+obvious next thing on this surface — a count beside *Waiting on you* in the rail —
+because a badge in the shell would pay that cost on **every screen in the portal**
+rather than on one. That is why the badge is deliberately absent; it is worth
+adding the day this is taken and not before.
+
+**It cannot be complete.** A listing is bounded by contract, so a deployment with
+more pages than the bound has changes the screen never looks for — and unlike a
+page whose read fails, *nothing fails*. The queue simply prints the same confident
+"Nothing is waiting for you." it prints when it has swept everything. This branch
+makes that visible rather than fixing it: the cursor is read, and the screen says
+what it did not check. **An incomplete answer a reader knows to distrust is worth
+something; one they do not is worth less than nothing.**
+
+The shape that would fix it is a read the store can answer in one query and that
+0020 permits, because it does not widen what a handle can see:
+
+```ts
+readonly waiting: (request?: { limit?: number }) => Promise<Result<TreeListPage-ish, HoldError>>
+```
+
+— every hold this handle can see, bounded and cursored like every other read in
+the contract, ordered by `heldAt` ascending the way `forTree` already is. A count
+alone would be cheaper still and would serve the rail badge, but the queue wants
+the rows, so one read that returns them is the smaller addition.
+
+`src/` is not this lane's, and this is a change to a public interface with a
+contract suite and two implementations behind it. So it is filed rather than
+attempted. The surface half — the cursor, the sentence, the notice — is done and
+does not depend on it.
+
+---
+
+## 2026-09-01 — the demo's `answer.ts` quotes a portal sentence that no longer exists
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom demo` · **Status:** open — one
+comment, no behaviour
+
+`app/(portal)/_lib/vocabulary.ts` changed the rule sentence for
+`stakes-above-ceiling`. It read *"Riskier than a request from here is allowed to
+be without asking."* and now reads *"A change this big is not something Loom may
+make on its own."*
+
+The reason is worth the demo lane knowing rather than just the wording: **"from
+here" pointed at the origin of the ask.** On the page screen the origin sits a
+line or two above it, so the sentence resolves. `/portal` is now a queue drawn
+from every page, leading with what somebody typed — so "here" has no referent on
+screen, and the one sentence explaining why a person is being asked to decide
+something read like the tail of a sentence that had been cut. The origin is not
+lost; it is on the same card in the technical record, spelled `user-instruction`.
+
+`app/(demo)/_lib/answer.ts:21` quotes the old sentence in a comment illustrating
+what the demo prints. No demo test asserts it and nothing renders differently —
+the demo reads the table rather than a copy of it, which is exactly why this is a
+comment and not a bug. But it is now a quotation of something that does not
+exist, in another lane's file, so it is filed rather than edited.
+
+Worth one line of that lane's next run, alongside the reason: **a sentence read on
+more than one screen may not point at a place.** The portal's own guard for that
+is now in `vocabulary.test.ts` and rejects *here*, *this page*, *above* and
+*below* in any rule sentence.

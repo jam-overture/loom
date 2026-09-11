@@ -199,6 +199,18 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "The one function that writes, the seven ways a write can end, and what your own code owes a person for each of them.",
       },
+      {
+        slug: "what-every-ask-leaves-behind",
+        title: "What every ask leaves behind",
+        summary:
+          "The record of what was asked rather than of what happened: what a telemetry record keeps, the eight ways an ask can end, whether a confidence was worth anything, and how a journal is allowed to forget.",
+      },
+      {
+        slug: "going-to-production",
+        title: "Going to production",
+        summary:
+          "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
+      },
     ],
   },
   apiReferenceSection,
