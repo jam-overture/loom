@@ -7,6 +7,7 @@ import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { ANCHOR_PROP_KEY, DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { assertNever } from "../result.js"
+import { themeVariables, type ThemeVariables } from "../theme/apply.js"
 import type { ThemeRegistry } from "../theme/registry.js"
 import type { ResolvedTheme } from "../theme/theme.js"
 import type { SubmissionOutcome, SubmissionResolution } from "../submit/resolution.js"
@@ -30,6 +31,7 @@ import {
 } from "./behaviour.js"
 import type { DecorativeChildren } from "./decorative.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
+import { literalThemeElement } from "./inline-variables.js"
 import { editableAttributes } from "./editable.js"
 import { isFrameResolver, resolveNodeFrames, type FrameResolver } from "./frame.js"
 import {
@@ -129,6 +131,19 @@ export type RenderOptions = {
   /** Off by default: decoration is opt-in per request, never ambient. */
   readonly editMode?: boolean
   readonly slots?: SlotContent
+  /**
+   * How the mounted theme reaches the elements: as the `var()` references
+   * primitives write, or as the values those references stand for.
+   *
+   * `"variables"` is the default and is what a browser wants — one mount on the
+   * root, the cascade underneath it, and a re-theme that touches no node (0049,
+   * 0050). `"literals"` is for a medium with no cascade to read them: an image
+   * renderer takes inline styles and literal values, and resolves no custom
+   * properties, so a share card or an email built out of a real tree needs the
+   * substitution done before it leaves here. See `inline-variables.ts` for what
+   * this reaches and what it cannot.
+   */
+  readonly themeValues?: "variables" | "literals"
 }
 
 export type RenderOutput = {
@@ -172,6 +187,13 @@ type RenderContext = {
    * identity whether or not anyone is editing.
    */
   readonly decorative: boolean
+  /**
+   * The mounted theme's variables, when this render was asked for values rather
+   * than references. Absent is the ordinary case and the default: a browser
+   * resolves them itself, and one mount on the root is what keeps a re-theme
+   * from touching a node (0049).
+   */
+  readonly literals: ThemeVariables | undefined
   readonly collect: (diagnostic: RenderDiagnostic) => void
 }
 
@@ -564,8 +586,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
   const behaviours = nodeBehavioursFor(node, text, context)
   const body = renderElementBody(node, context)
 
-  return createElement(primitive, {
-    key: node.id,
+  const rendered = {
     loom: renderContextFor(
       node,
       body.slots,
@@ -579,7 +600,11 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     ),
     props,
     children: body.children,
-  })
+  }
+
+  return context.literals
+    ? literalThemeElement(primitive, context.literals, node.id, rendered)
+    : createElement(primitive, { key: node.id, ...rendered })
 }
 
 /**
@@ -685,6 +710,16 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
 
   const theme = mountedTheme(tree, options.themes, collect)
 
+  /**
+   * There is nothing to substitute against when no theme mounted, so the render
+   * proceeds as it always would and says why. The caller asked for values
+   * because whatever it is feeding cannot resolve a reference, and in that
+   * medium nothing downstream would have noticed they never arrived.
+   */
+  if (options.themeValues === "literals" && !theme) {
+    collect({ code: "theme-values-unmounted", nodeId: tree.root.id })
+  }
+
   const element = renderNode(tree.root, {
     resolver: options.resolver,
     validator: options.validator,
@@ -700,6 +735,8 @@ export const renderLoomTree = (tree: LoomTree, options: RenderOptions): RenderOu
     behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
     anchors: createAnchorLedger(),
     decorative: false,
+    literals:
+      options.themeValues === "literals" && theme ? themeVariables(theme) : undefined,
     collect,
   })
 

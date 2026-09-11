@@ -141,6 +141,19 @@ export const loomCard = definePrimitive({
           borderRadius: radius("lg"),
           color: colour("fg-default"),
           textDecoration: "none",
+          /**
+           * **A card says how wide it is, so what is on it can ask.** A card is
+           * the narrow column on a wide screen in almost every band here — a
+           * cell of a `loom.grid`, one of three across a section — and until it
+           * declared this, a `loom.heading` inside it was capped against the
+           * window rather than against the surface it sits on. The card's own
+           * width comes from whatever is arranging it, never from its contents,
+           * so inline-size containment takes nothing away.
+           *
+           * `overflow: hidden` above already isolated it visually; this is the
+           * same isolation stated as a measurement anything inside can read.
+           */
+          containerType: "inline-size",
         },
       },
       libraryStylesheet(),

@@ -35,8 +35,21 @@ missed — and to ask it of yourself without reading the rest of the set around
 it. `/lessons/review/corrections` does it instead: a question you missed comes
 back the next day, a week after you get it, and a month after that. **Three
 clean retrievals retire it; missing it once sends it back to the beginning.**
-Five at a time, drawn from whichever sets they happen to be in, which makes a
+Five at a time, drawn from wherever they happen to be from, which makes a
 corrections sitting the most interleaved ten minutes in the course.
+
+**Wherever** now means the lessons as well as these sets. A Warm-up or
+Self-check question you got wrong inside a lesson is the same kind of event as
+one you got wrong here — you had met the material, you were asked for it, and it
+did not come — so it comes back on the same terms and in the same sitting, and
+by the time it arrives there is nothing to tell the two apart.
+
+A missed **Predict** question is the one exception, and only sometimes. Predict
+is written to be got wrong; saying you do not know and turning out not to know
+is the exercise working, and there is nothing there to relearn. But a prediction
+you rated **4 or 5** and missed is not a gap — it is a belief about how the
+system works, held confidently, that turned out to be false. Those are the ones
+that survive being contradicted once, so those are the ones that come back.
 
 ---
 
