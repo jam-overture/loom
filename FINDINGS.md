@@ -13126,6 +13126,73 @@ reason this is filed rather than left in a pull-request thread.
 
 ---
 
+## 2026-09-05 — the picture harness, rebuilt a second time, and the four lines that would stop it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+— a confirmation of the 4 September entry, with the recipe attached so the
+third run does not cost what the first two did
+
+`primitives-23` filed that *a run that needs a picture rebuilds the harness that
+takes it, every time*. This run needed six pictures and rebuilt it, which makes
+two occurrences in two days and every visual defect this lane has found — nine
+runs running — dependent on somebody re-deriving it.
+
+**What it takes, written down so it is a copy rather than a discovery:**
+
+- `playwright` is **not** a dependency of this repository or of `apps/loom`, so
+  `npx playwright` resolves nothing. It installs in a scratch directory in about
+  two seconds with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`, which is required: the
+  download is blocked by the egress proxy and the browser is already on disk.
+- The browser is at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` and has
+  to be passed as `executablePath`. The bare `chromium` directory beside it is
+  not an executable, and the failure is a launch error with no hint.
+- The page under test is **static HTML written by `renderToStaticMarkup`**, not
+  a served app. That is what makes the shot cheap and it is also what makes it
+  honest: it is the same markup the render seam produces, with no dev server and
+  no hydration to fail. A `file://` URL is enough.
+- `deviceScaleFactor: 2` and a **true 390px viewport** are what previous reports
+  in this lane mean by a phone shot, and `document.documentElement.scrollWidth
+  === window.innerWidth` beside each one is the overflow check they quote.
+
+**Where it should live is the open question and the reason this is filed rather
+than fixed.** It is nine lines of script; the cost is that no lane owns a
+`tools/screenshots` and this lane's brief is `src/primitives/` only. A `tools/`
+module that takes a tree and writes a PNG would serve marketing, docs, portal
+and this lane, and every one of them has now written it privately at least once.
+
+---
+
+## 2026-09-05 — a primitive that is a focus stop is not a target, and nothing can say so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
+— nothing is broken; a declaration means less than it looks like it does, and
+the first primitive to sit in the gap shipped today
+
+`loom.carousel` renders `tabindex="0"` on the scroll container it is. It has to:
+a scroll region is focusable by default in some browsers and not in others, so a
+row a mouse can push is a row a keyboard cannot reach.
+
+That makes it the first primitive in the library that a reader can **focus** and
+cannot **activate**, and the vocabulary has no word for it. `interactive`
+(0064/0068) declares one thing — *the reader aims at the whole of this node* —
+and it exists to enforce HTML's rule that a target may not sit inside a target.
+A `div[tabindex]` is not interactive content by that rule, so the honest
+declaration is to leave it undeclared, which is what shipped and what the tests
+assert.
+
+**Two things a deployment cannot ask, as a result:**
+
+1. *Which primitives put a stop in the tab order?* A page whose reading order and
+   tab order differ is the defect `loom.nav` reported on 1 September, and nothing
+   can enumerate the nodes that participate.
+2. *Is this focusable thing inside another focusable thing?* Legal in HTML,
+   usually a mistake, and invisible to the audit.
+
+**Recommendation: nothing, yet.** One primitive is not a pattern, and a third
+field on every definition to serve one node is the cost 0014 keeps naming. It is
+filed because the *next* one — a tab strip, a resizable split, anything that
+takes `tabindex` for the same reason — is the second data point, and whoever
+adds it should find this rather than the silence.
 ## 2026-09-04 — twenty typed requests, four that asked to delete most of the page, and the Gate refused none of them
 
 **Filed by:** `Loom portal` · **Owned by:** the maintainer · **Status:** open — a
