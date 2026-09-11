@@ -12,8 +12,9 @@ import {
   type LoomTree,
   type NodeId,
 } from "@loom/runtime"
-import { commitIntent, confirmHeld } from "@loom/runtime/write"
+import { commitIntent, confirmHeld, revertRevision } from "@loom/runtime/write"
 
+import { markedPage, MARKED_AWAITING, MARKED_MANY } from "./marked"
 import { demoPageTree } from "./page-tree"
 import { presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
@@ -22,11 +23,13 @@ import {
   MAX_SPOTS,
   SPOT_COLOURS,
   spotlightCss,
+  spotlightsAcross,
   spotlightsFor,
-  spotlitChange,
+  spotlitChanges,
   type Spotlight,
 } from "./spotlight"
 import type { TouchedNode } from "./touched"
+import { isUndo } from "./undo"
 
 /**
  * Where the mark lands, proved against the page a visitor actually sees.
@@ -92,12 +95,49 @@ const answer = async (session: DemoSession, held: ChangeRecord): Promise<ChangeR
   return record
 }
 
-/** The mark for a change, read against the tree that change left behind. */
+/**
+ * Ask to put a revision back, exactly as the card's button does.
+ *
+ * Through `revertRevision` rather than through a fixture, because the whole
+ * point of the cases below is that an undo's delta is an *ordinary* delta — the
+ * inverse of a remove is an insert — and a hand-written record would let the
+ * test agree with the code about something the runtime decides.
+ */
+const undo = async (session: DemoSession, revision: number): Promise<ChangeRecord> => {
+  const write = beginDemoWrite(session)
+
+  await revertRevision(write.path, {
+    treeId: session.seed.treeId,
+    revision,
+    seed: session.seed,
+    origin: "user-instruction",
+    actor: "a demo visitor",
+  })
+
+  const record = recordFromEvents(write.narrated())
+  if (!record) throw new Error("the undo narrated nothing")
+
+  return record
+}
+
+/**
+ * The mark for a change, read against the tree that change left behind.
+ *
+ * `isUndo` is passed here for the same reason `page.tsx` passes it: it is the
+ * only thing on the record that says an insert is a node coming *back*, and a
+ * helper that dropped it would test a page nobody is looking at.
+ */
 const marksFor = async (session: DemoSession, record: ChangeRecord): Promise<readonly Spotlight[]> => {
   const tree = await headOf(session)
-  const spotlit = spotlitChange([record], tree)
 
-  return spotlit ? spotlightsFor(tree, spotlit.record.touched, spotlit.tone) : []
+  return spotlightsAcross(
+    tree,
+    spotlitChanges([record], tree).map((one) => ({
+      touched: one.record.touched,
+      tone: one.tone,
+      restoring: isUndo(one.record),
+    }))
+  ).flat()
 }
 
 const typeOf = (tree: LoomTree, nodeId: string): string => {
@@ -166,6 +206,101 @@ describe("marking a change on the page", () => {
     expect(after[0]?.label).toBe("New — just added")
     expect(after[0]?.placement).toBe("inside")
     expect(typeOf(await headOf(session), after[0]!.nodeId)).toBe("loom.section")
+  })
+
+  /**
+   * The last frame of the demo's own sixty seconds, and it used to say the
+   * opposite of the card beside it.
+   *
+   * A visitor takes the numbers off, allows it, and presses *Put it back*. The
+   * inverse of a `remove` is an `insert` (0032), so every label reached the
+   * `added` branch: the held undo was marked **Something new would go here** and
+   * the restored band was marked **New — just added** — over three figures the
+   * visitor had watched come off that exact spot two presses earlier, on a card
+   * whose own rationale reads *"undoing this restores every node with the id it
+   * had"*.
+   *
+   * *The same nodes come back, not new ones* is what separates this from a
+   * rewind. It is the whole argument, it is the last thing anybody sees, and the
+   * page was denying it.
+   */
+  it("says a held undo would put the band back, rather than add a new one", async () => {
+    const session = await sessionFor("undo-held")
+    const applied = await answer(session, await ask(session, "trim"))
+    const revision = applied.revision?.produced
+    if (revision === undefined) throw new Error("the change produced no revision")
+
+    const held = await undo(session, revision)
+    const marks = await marksFor(session, held)
+
+    expect(held.outcome).toBe("awaiting-you")
+    expect(marks[0]?.tone).toBe("awaiting")
+    expect(marks[0]?.label).toBe("What was here would come back")
+    /** The gap the numbers left, which is above the band that moved up into it. */
+    expect(marks[0]?.placement).toBe("above")
+  })
+
+  it("marks the restored band as the one that was there, not as something new", async () => {
+    const session = await sessionFor("undo-applied")
+    const first = await answer(session, await ask(session, "trim"))
+    const revision = first.revision?.produced
+    if (revision === undefined) throw new Error("the change produced no revision")
+
+    const restored = await answer(session, await undo(session, revision))
+    const marks = await marksFor(session, restored)
+
+    expect(restored.outcome).toBe("applied")
+    expect(marks[0]?.tone).toBe("applied")
+    expect(marks[0]?.label).toBe("Back — exactly as it was")
+    expect(marks[0]?.placement).toBe("inside")
+
+    /**
+     * And the label is a fact rather than a kinder word for the same thing: the
+     * band carrying it is the node that was removed, with the id it had when the
+     * visitor arrived. If this ever stops holding, the mark is the lie and this
+     * test is how it is caught.
+     */
+    const before = demoPageTree()
+    const original = before.root.children.find(
+      (node) => node.kind === "element" && node.type === "loom.stat-grid"
+    )
+    expect(marks[0]?.nodeId).toBe(original?.id)
+    expect(typeOf(await headOf(session), marks[0]!.nodeId)).toBe("loom.stat-grid")
+  })
+
+  /**
+   * The other direction, which is why the restoring labels are a table of their
+   * own rather than a prefix on the ordinary ones. Undoing an *insert* takes
+   * something off — and what a visitor needs told is not that a band was
+   * removed, but that the one they just added has gone again.
+   */
+  it("says an undone insert has gone back off, rather than reporting a removal", async () => {
+    const session = await sessionFor("undo-insert")
+    const added = await answer(session, await ask(session, "band"))
+    const revision = added.revision?.produced
+    if (revision === undefined) throw new Error("the change produced no revision")
+
+    const held = await undo(session, revision)
+    expect((await marksFor(session, held))[0]?.label).toBe("This would go back off")
+
+    const gone = await answer(session, held)
+    const marks = await marksFor(session, gone)
+
+    expect(gone.outcome).toBe("applied")
+    expect(marks[0]?.label).toBe("What was added here has gone")
+  })
+
+  /**
+   * And nothing else moved. An ordinary change is the overwhelming majority of
+   * what this surface marks, and a restoring label leaking onto one would be the
+   * same defect pointing the other way.
+   */
+  it("leaves an ordinary change's words alone", async () => {
+    const session = await sessionFor("ordinary")
+    const record = await ask(session, "trim")
+
+    expect(isUndo(record)).toBe(false)
+    expect((await marksFor(session, record))[0]?.label).toBe("This would be removed")
   })
 
   /**
@@ -275,21 +410,52 @@ describe("which change the page is about", () => {
     touched: [],
   })
 
-  const waiting: ChangeRecord = {
-    recordId: "i_held",
+  const held = (name: string): ChangeRecord => ({
+    recordId: name,
     askedAt: "2026-08-22T00:00:00.000Z",
     utterance: "something else",
     origin: "user-instruction",
     outcome: "awaiting-you",
-    heldProposalId: "p_1",
+    heldProposalId: `p_${name}`,
     repaired: false,
     touched: [],
-  }
+  })
+
+  const waiting = held("i_held")
 
   const at = (revision: number): LoomTree => ({ ...demoPageTree(), revision })
 
+  const ids = (spotlit: ReturnType<typeof spotlitChanges>): readonly string[] =>
+    spotlit.map((one) => one.record.recordId)
+
   it("prefers the change that is asking the visitor for an answer", () => {
-    expect(spotlitChange([applied(2), waiting], at(2))?.record.recordId).toBe("i_held")
+    expect(ids(spotlitChanges([applied(2), waiting], at(2)))).toEqual(["i_held"])
+  })
+
+  /**
+   * The state this unit exists for, and the reason it is a list at all.
+   *
+   * A stranger is given five buttons and nothing telling them to answer one at a
+   * time, so two asks held at once is a state they reach by doing the obvious
+   * thing twice. Both cards said **Waiting on you**, both carried **Apply this
+   * change** — and the page drew one mark, which the newest silently won.
+   */
+  it("marks every question still waiting, not just the newest", () => {
+    expect(ids(spotlitChanges([held("i_b"), held("i_a")], at(0)))).toEqual(["i_b", "i_a"])
+  })
+
+  /**
+   * And never in two colours at once. *"Two marks in two colours on one page is a
+   * quiz rather than an explanation"* is the rule this list had to be reconciled
+   * with, and it survives intact: green says *this landed* and amber says *this
+   * is waiting*, and a page showing both asks a stranger to hold two ideas at
+   * once. Two amber marks ask them to hold one idea, twice.
+   */
+  it("never mixes a landed change in with the questions", () => {
+    const spotlit = spotlitChanges([held("i_b"), applied(2), held("i_a")], at(2))
+
+    expect(ids(spotlit)).toEqual(["i_b", "i_a"])
+    expect(spotlit.every((one) => one.tone === "awaiting")).toBe(true)
   })
 
   /**
@@ -298,16 +464,51 @@ describe("which change the page is about", () => {
    * older change at the moment the visitor is watching a newer one land.
    */
   it("otherwise marks whichever change produced the revision now on the stage", () => {
-    expect(spotlitChange([applied(1), applied(2)], at(2))?.record.recordId).toBe("i_2")
-    expect(spotlitChange([applied(1), applied(2)], at(1))?.record.recordId).toBe("i_1")
+    expect(ids(spotlitChanges([applied(1), applied(2)], at(2)))).toEqual(["i_2"])
+    expect(ids(spotlitChanges([applied(1), applied(2)], at(1)))).toEqual(["i_1"])
   })
 
   it("marks nothing for a change that never reached the page", () => {
     const { revision: _, ...refused } = { ...applied(1), outcome: "refused" as const }
 
-    expect(spotlitChange([applied(1)], at(2))).toBeUndefined()
-    expect(spotlitChange([refused], at(0))).toBeUndefined()
-    expect(spotlitChange([], at(0))).toBeUndefined()
+    expect(spotlitChanges([applied(1)], at(2))).toEqual([])
+    expect(spotlitChanges([refused], at(0))).toEqual([])
+    expect(spotlitChanges([], at(0))).toEqual([])
+  })
+
+  /**
+   * The one case where a hold is not marked, and it is the one that was drawing
+   * the most misleading frame this surface can draw.
+   *
+   * Answering either of two holds kills the other where it stands
+   * (`_lib/moved.ts`). The page went on ringing the dead one's band in amber and
+   * labelling it *This would be removed*, which is this surface's colour for a
+   * question it is still asking. It is not asking, and no answer will land it.
+   */
+  it("does not mark a hold the page has moved past", () => {
+    expect(spotlitChanges([waiting], at(2), new Set(["i_held"]))).toEqual([])
+  })
+
+  /** And the mark falls through to the change that really is on the stage. */
+  it("marks the change on the stage instead of a hold that can never land", () => {
+    const spotlit = spotlitChanges([waiting, applied(2)], at(2), new Set(["i_held"]))
+
+    expect(ids(spotlit)).toEqual(["i_2"])
+    expect(spotlit[0]?.tone).toBe("applied")
+  })
+
+  /** A hold that can still land is still the thing the visitor is being asked about. */
+  it("still prefers a hold the page has not moved past", () => {
+    expect(ids(spotlitChanges([applied(2), waiting], at(2), new Set(["i_other"])))).toEqual([
+      "i_held",
+    ])
+  })
+
+  /** And a dead one drops out of a list the live one stays in. */
+  it("keeps the live question and drops the dead one", () => {
+    expect(ids(spotlitChanges([held("i_dead"), held("i_live")], at(2), new Set(["i_dead"])))).toEqual(
+      ["i_live"]
+    )
   })
 })
 
@@ -337,6 +538,152 @@ describe("how many marks one change may draw", () => {
 
   it("marks nothing for a node this tree has never heard of", () => {
     expect(spotlightsFor(demoPageTree(), [{ kind: "changed", nodeId: id("nowhere") }], "applied")).toEqual([])
+  })
+
+  /**
+   * And the cap is the *page's*, which is the whole reason two changes cannot be
+   * marked by calling the one-change function twice.
+   *
+   * Three is the point past which a marked page stops saying *this changed* and
+   * starts saying *everything changed*. Two changes obeying that cap separately
+   * draw six marks and break it together, each of them faultless.
+   */
+  it("spends one budget of three across every change on the page", () => {
+    const tree = demoPageTree()
+    const bands = tree.root.children.filter((node) => node.kind === "element")
+    const half = Math.ceil(bands.length / 2)
+
+    const drawn = spotlightsAcross(tree, [
+      {
+        touched: bands.slice(0, half).map((node) => ({ kind: "changed" as const, nodeId: node.id })),
+        tone: "awaiting",
+        restoring: false,
+      },
+      {
+        touched: bands.slice(half).map((node) => ({ kind: "changed" as const, nodeId: node.id })),
+        tone: "awaiting",
+        restoring: false,
+      },
+    ])
+
+    expect(bands.length).toBeGreaterThan(MAX_SPOTS)
+    expect(drawn.flat()).toHaveLength(MAX_SPOTS)
+  })
+
+  /**
+   * And it is spent in rounds, which is the property a straight `slice` of a
+   * concatenated list would not have: a change with nine configures in it would
+   * take the whole budget and leave the question beside it unmarked — the exact
+   * failure this unit is fixing, reached by a different road.
+   */
+  it("gives every change a mark before it gives any change a second", () => {
+    const tree = demoPageTree()
+    const bands = tree.root.children.filter((node) => node.kind === "element")
+    const greedy = bands.map((node) => ({ kind: "changed" as const, nodeId: node.id }))
+    const modest = bands.slice(-1).map((node) => ({ kind: "changed" as const, nodeId: node.id }))
+
+    const drawn = spotlightsAcross(tree, [
+      { touched: greedy, tone: "awaiting", restoring: false },
+      { touched: modest, tone: "awaiting", restoring: false },
+    ])
+
+    expect(greedy.length).toBeGreaterThanOrEqual(MAX_SPOTS)
+    expect(drawn[1]).toHaveLength(1)
+    expect(drawn[0]?.length).toBe(MAX_SPOTS - 1)
+  })
+
+  /**
+   * Two changes about the same band get one mark between them, and the second is
+   * told it has none rather than being given the first one's.
+   *
+   * A card wears its own mark's words (`_lib/marked.ts`), so a change credited
+   * with a mark the page is not drawing for it would point a visitor at somebody
+   * else's ring.
+   */
+  it("gives one band to one change, and says so", () => {
+    const tree = demoPageTree()
+    const band = tree.root.children.find((node) => node.kind === "element")
+    if (band === undefined) throw new Error("the demo page has no bands")
+
+    const both = [{ kind: "changed" as const, nodeId: band.id }]
+    const drawn = spotlightsAcross(tree, [
+      { touched: both, tone: "awaiting", restoring: false },
+      { touched: both, tone: "awaiting", restoring: false },
+    ])
+
+    expect(drawn[0]).toHaveLength(1)
+    expect(drawn[1]).toEqual([])
+  })
+})
+
+/**
+ * The two questions a stranger reaches by pressing twice, driven through the
+ * write path the browser uses rather than through fixtures.
+ *
+ * The presets are the two the Gate holds, which is not a coincidence to be
+ * asserted around: `trim` is the demo's lead precisely because it is held, and
+ * `band` is the other structural one. If a policy retune ever let either through
+ * this fails, which is the right place to find out.
+ */
+describe("two questions open at once", () => {
+  const marksAcross = async (
+    session: DemoSession,
+    records: readonly ChangeRecord[]
+  ): Promise<readonly (readonly Spotlight[])[]> => {
+    const tree = await headOf(session)
+
+    return spotlightsAcross(
+      tree,
+      spotlitChanges(records, tree).map((one) => ({
+        touched: one.record.touched,
+        tone: one.tone,
+        restoring: isUndo(one.record),
+      }))
+    )
+  }
+
+  it("marks both, in each change's own words", async () => {
+    const session = await sessionFor("two-holds")
+    const first = await ask(session, "trim")
+    const second = await ask(session, "band")
+
+    expect(first.outcome).toBe("awaiting-you")
+    expect(second.outcome).toBe("awaiting-you")
+
+    /** Newest first, as the rail lists them. */
+    const drawn = await marksAcross(session, [second, first])
+
+    expect(drawn.flat()).toHaveLength(2)
+    expect(drawn[0]?.[0]?.label).toBe("Something new would go here")
+    expect(drawn[1]?.[0]?.label).toBe("This would be removed")
+    expect(drawn.flat().every((spot) => spot.tone === "awaiting")).toBe(true)
+  })
+
+  /**
+   * And the rail stops saying *this*.
+   *
+   * The old line — *"The page is marked where **this** would happen, if you say
+   * yes"* — had two referents and chose neither, and the card that won the mark
+   * was decided by an ordering rule the screen never states.
+   */
+  it("stops pointing at “this” once there is more than one of them", async () => {
+    const session = await sessionFor("two-holds-line")
+    const first = await ask(session, "trim")
+    const second = await ask(session, "band")
+    const drawn = await marksAcross(session, [second, first])
+
+    const one = markedPage([{ recordId: second.recordId, spots: drawn[0] ?? [] }])
+    const two = markedPage([
+      { recordId: second.recordId, spots: drawn[0] ?? [] },
+      { recordId: first.recordId, spots: drawn[1] ?? [] },
+    ])
+
+    expect(one.line).toBe(MARKED_AWAITING)
+    expect(one.words.size).toBe(0)
+
+    expect(two.line).toBe(MARKED_MANY)
+    expect(two.words.get(second.recordId)).toBe("Something new would go here")
+    expect(two.words.get(first.recordId)).toBe("This would be removed")
   })
 })
 

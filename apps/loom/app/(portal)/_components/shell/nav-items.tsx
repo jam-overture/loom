@@ -57,9 +57,27 @@ const strokeProps = {
  * public `/demo` of its own on 21 August; `/portal/demo` is now a 308 kept for
  * old links, and a nav that routes a signed-in reviewer through a redirect is a
  * nav pointing at where something used to be.
+ *
+ * `Waiting on you` leads, and it is the only entry whose label is a sentence
+ * about the reader rather than a name for a thing. That is deliberate: it is
+ * the one screen in the portal with something urgent on it, and "Home" or
+ * "Overview" would have said where it is rather than why to press it. It is
+ * `exact` because `/portal` is the prefix of every other route in this rail.
  */
 export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
   [
+    {
+      label: "Waiting on you",
+      href: "/portal",
+      exact: true,
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M6 3h12M6 21h12" />
+          <path d="M8 3v3.5a4 4 0 002 3.4l2 1.1 2-1.1a4 4 0 002-3.4V3" />
+          <path d="M8 21v-3.5a4 4 0 012-3.4l2-1.1 2 1.1a4 4 0 012 3.4V21" />
+        </svg>
+      ),
+    },
     {
       label: "Pages",
       href: "/portal/pages",
