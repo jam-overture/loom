@@ -1,3 +1,5 @@
+import { WEIGHED_QUESTIONS } from "@/app/(demo)/_lib/weighed"
+
 /**
  * What is about to happen, before anything has.
  *
@@ -32,6 +34,15 @@
  * over-promises the payoff is worse than one that says less: the sentence now
  * says the undo is weighed like any other change, which is both the honest
  * expectation and the better claim.
+ *
+ * **Step two's two questions are a constant rather than prose**, because the
+ * card now answers them in the words they were asked in (`_lib/weighed.ts`).
+ * They were a promise this surface made and did not keep for a fortnight — the
+ * answers were on the record the whole time, one click down, as `stakes:
+ * medium` and `undo carries: 4 nodes`. Sharing the strings is what stops a
+ * future edit to either half from quietly reopening the gap: a reworded
+ * question here and an unchanged heading there is exactly the drift that put
+ * them out of step in the first place.
  */
 
 const STEPS: readonly { readonly title: string; readonly body: string }[] = [
@@ -41,7 +52,7 @@ const STEPS: readonly { readonly title: string; readonly body: string }[] = [
   },
   {
     title: "Loom decides",
-    body: "Every ask is weighed on two questions: how much damage could this do, and can it be taken back? A named rule decides whether it lands on its own or waits for you to say yes.",
+    body: `Every ask is weighed on two questions — “${WEIGHED_QUESTIONS.damage}” and “${WEIGHED_QUESTIONS.reversal}” — and both answers land on the record below. A named rule reads them and decides whether the change goes ahead on its own or waits for you to say yes.`,
   },
   {
     title: "The record appears",

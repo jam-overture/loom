@@ -63,6 +63,9 @@ const LessonsLayout = ({ children }: { readonly children: ReactNode }) => (
           <Link href="/lessons/review" style={{ color: style.inkMuted, textDecoration: "none" }}>
             Review queue
           </Link>
+          <Link href="/lessons/record" style={{ color: style.inkMuted, textDecoration: "none" }}>
+            Your record
+          </Link>
         </nav>
 
         {children}

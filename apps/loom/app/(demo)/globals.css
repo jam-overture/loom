@@ -274,6 +274,69 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   THE WAY BACK — only where the record can be lost
+
+   On a stacked layout the rail and the stage share one scroller, so
+   carrying a visitor to a marked band near the foot of the page takes
+   the record off the top of the screen and leaves them looking at a
+   change with nothing to account for it. `BackToTheRecord` is the
+   offer to go back, and these are the two rules it cannot express as
+   utility classes.
+
+   **Hidden above 1024px, in the stylesheet rather than in the
+   component.** The wide layout gives the rail its own scroller, so the
+   card never leaves the screen and a bar offering to show it would be
+   the surface talking for its own sake. A media query is right between
+   a resize and a re-render; a `matchMedia` read at mount is not.
+
+   **`visibility` rather than a conditional render**, so the bar can
+   leave the way it arrived and still cannot be tabbed into while it is
+   gone. The delay on the visibility transition is what lets the slide
+   finish before it is taken out of the tree.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  .loom-reach {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 50;
+    padding: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(calc(100% + 10px));
+    transition:
+      transform 200ms ease,
+      opacity 200ms ease,
+      visibility 0s linear 200ms;
+  }
+
+  .loom-reach[data-away="true"] {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      transform 200ms ease,
+      opacity 200ms ease,
+      visibility 0s;
+  }
+
+  @media (min-width: 1024px) {
+    .loom-reach {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loom-reach,
+    .loom-reach[data-away="true"] {
+      transition: none;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    The disclosure marker. `list-none` removes the triangle everywhere
    except Safari, which still draws `::-webkit-details-marker` and
    would give every disclosure two arrows — its own and ours.

@@ -1,10 +1,11 @@
-import { defaultGatePolicy, fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
+import { fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
 import { postgresHoldStore } from "@loom/runtime/postgres"
 import { collectTelemetry } from "@loom/runtime/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
 
 import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"
+import { portalPolicy } from "./policy"
 import { portalStore } from "./store"
 import { portalTelemetry } from "./telemetry"
 
@@ -60,6 +61,18 @@ const carrier = globalThis as unknown as Carrier
 export const portalHolds: HoldStore = (carrier[CARRIER_KEY] ??=
   portalDatabase === undefined ? memoryHoldStore() : postgresHoldStore(portalDatabase))
 
+/**
+ * Whether a change waiting for an answer outlives the process holding it.
+ *
+ * The branch above is the deployment decision and this is the one fact about it
+ * a reader of the queue is entitled to. It is not a duplicate of the condition:
+ * the queue screen must not import `portalDatabase` to work out what kind of
+ * deployment it is on — that is a handle to a database on a screen that only
+ * reads holds — so the answer travels as a boolean and the decision stays here,
+ * beside the branch it describes.
+ */
+export const holdsAreDurable = portalDatabase !== undefined
+
 export type PortalWrite = {
   readonly path: WritePath
   /**
@@ -79,7 +92,7 @@ export const beginWrite = (): PortalWrite => {
       holds: portalHolds,
       runtime: {
         interpreter: portalInterpreter,
-        policySource: fixedPolicy(defaultGatePolicy),
+        policySource: fixedPolicy(portalPolicy),
         events: collector.sink,
         clock: systemClock,
         idFactory: randomIdFactory,

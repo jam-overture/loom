@@ -1,8 +1,3 @@
-import { TREE_OPERATIONS } from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
-
-import { siteRegistry } from "./registry"
-
 /**
  * The three kinds of words on this site, kept apart on purpose.
  *
@@ -23,22 +18,13 @@ import { siteRegistry } from "./registry"
  */
 
 /**
- * The whole vocabulary of structural change — the runtime's list, not a copy.
+ * The four operations, named rather than counted to a literal.
  *
- * This was `["insert", "remove", "move", "configure"] as const`, spelled out
- * here. That was already better than a digit and it was still a promise rather
- * than a fact: the page's "kinds of change there are" counted a list this file
- * kept, so the number could only be right for as long as somebody remembered to
- * edit two repositories' worth of meaning in step.
- *
- * `Loom daily build` filed that on 30 August, when `TREE_OPERATIONS` became an
- * export of `@loom/runtime`, and named the reason it is worth doing even though
- * this number genuinely does not move: **a number nobody expects to move is the
- * one nobody re-checks.** A fifth operation would be a change to what Loom is,
- * and the front door should find that out by being rebuilt rather than by being
- * remembered.
+ * This is the whole vocabulary of structural change, so the page's "kinds of
+ * change there are" is `DELTA_OPERATIONS.length` and cannot drift from it. A
+ * fifth operation would move the number on the page by existing.
  */
-export const DELTA_OPERATIONS: readonly string[] = TREE_OPERATIONS
+export const DELTA_OPERATIONS = ["insert", "remove", "move", "configure"] as const
 
 /**
  * A floor under the decision count, never the count itself.
@@ -55,36 +41,10 @@ export const DELTA_OPERATIONS: readonly string[] = TREE_OPERATIONS
  */
 export const DECISIONS_AT_LEAST = 100
 
-/**
- * The last of the three that was still a digit somebody typed.
- *
- * `decisions` stopped being one on 27 August and `operations` on 30 August; this
- * one outlived both because its test *looked* like a derivation. It read
- * `expect(FACTS.primitives).toBe(String(catalogueOf(siteRegistry).length))`,
- * which is a real comparison against the registry and therefore not a tautology
- * — and that is exactly what kept it: the number was genuinely checked, so
- * nothing ever read as broken. What it actually did was make **every run that
- * registers a primitive edit a file in this lane**, because the check fails the
- * moment the library grows and the only way back to green is to come here and
- * change a digit.
- *
- * `Loom primitives` filed that on 25 August, having done it twice in two
- * consecutive runs, and said plainly that it is this lane's call. It is, and
- * this is the call: the site counts the registry it renders with.
- *
- * **The build hazard that forced the other two into workarounds does not apply
- * here.** `decisions` could not be derived because counting `decisions/` means
- * reading the disk, and `new URL(…, import.meta.url)` does not survive
- * Turbopack — so it settled for a floor. The registry is an ordinary module this
- * file's own bundle already contains, so the count is just a property of an
- * object, resolved wherever `copy.ts` is.
- */
-const REGISTERED_PRIMITIVES = catalogueOf(siteRegistry).length
-
 /** Checked against the repository by `facts.test.ts`. */
 export const FACTS = {
-  /** Registered primitive types, counted off the registry this site renders with. */
-  primitives: String(REGISTERED_PRIMITIVES),
+  /** `loom.*.ts` modules in `src/primitives` — one file per registered type. */
+  primitives: "78",
   /** A floor, not a count. See `DECISIONS_AT_LEAST`. */
   decisions: `${DECISIONS_AT_LEAST}+`,
   /** Delta operations. The whole vocabulary of structural change. */

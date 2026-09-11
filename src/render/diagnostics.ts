@@ -203,6 +203,20 @@ export type RenderDiagnostic =
       readonly behaviour: string
       readonly key: string
     }
+  | {
+      /**
+       * The render was asked for values rather than references
+       * (`themeValues: "literals"`) and no theme mounted, so there was nothing
+       * to resolve them against and the page keeps the references it was
+       * written with. Worth saying because of who asks: a caller wants values
+       * when whatever it is feeding cannot resolve a reference, and in that
+       * medium nothing downstream would notice they never arrived.
+       *
+       * On the root, because the theme is the root's (0049).
+       */
+      readonly code: "theme-values-unmounted"
+      readonly nodeId: NodeId
+    }
 
 const describeIssues = (issues: readonly PropsIssue[]): string =>
   issues.map((issue) => `${issue.path}: ${issue.message}`).join("; ")
@@ -245,6 +259,8 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} names the anchor "${diagnostic.anchor}" and node ${diagnostic.holder} already holds it, so only the first one is a fragment target`
     case "behaviour-unnamed":
       return `node ${diagnostic.nodeId} takes the "${diagnostic.behaviour}" behaviour and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
+    case "theme-values-unmounted":
+      return `this render was asked for the theme's values and node ${diagnostic.nodeId} mounted no theme, so every reference on the page was left as written — nothing outside a browser will resolve them`
     default:
       return assertNever(diagnostic, "describeRenderDiagnostic")
   }
