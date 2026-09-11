@@ -14755,3 +14755,36 @@ Worth one line of that lane's next run, alongside the reason: **a sentence read 
 more than one screen may not point at a place.** The portal's own guard for that
 is now in `vocabulary.test.ts` and rejects *here*, *this page*, *above* and
 *below* in any rule sentence.
+
+---
+
+## 2026-09-11 — the search index is one page from its real cap, and must be split
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+
+`build.test.ts` caps the search index twice: 48,000 bytes gzipped, which is what
+leaves the server, and 240,000 uncompressed, which watches for a payload that has
+stopped compressing. The written pages went from 13 to 18 and it failed on the
+second:
+
+| | Measured 11 September | Cap |
+| --- | --- | --- |
+| gzip | **44,620** | 48,000 |
+| uncompressed | **246,246** | 240,000 → raised to 260,000 |
+
+**Only the uncompressed cap was raised, and only to unblock `main`.** The ratio
+is 5.5x, better than the 4x that comment records as normal, so it fired for
+growth rather than the compression regression it exists to catch. The cap that
+measures the bill was not touched.
+
+That comment already says what to do here — *the run that hits it should split
+the index rather than raise the number* — and it was right. **gzip has 3,380
+bytes of headroom.** The next written page spends most of it, and then there is
+no honest number left to raise.
+
+So the split is the next piece of search work rather than a later one. The
+obvious shape, from what the comment already reasons about: ship the titles,
+headings and export names eagerly, since that half is 12.1 KB gzipped and
+answers most searches, and fetch the prose half on the first keystroke. Nothing
+here settles that — it is the lane's call, and it needs making before the next
+page lands.
