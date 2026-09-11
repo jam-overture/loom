@@ -209,3 +209,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0123 | *No record on this branch* | — | — |
 | 0124 | *No record on this branch* | — | — |
 | [0125](0125-a-geometric-property-is-asserted-over-the-page-not-the-primitive.md) | A geometric property is asserted over the page, not the primitive | Accepted | §4b |
+| 0126 | *No record on this branch* | — | — |
+| 0127 | *No record on this branch* | — | — |
+| 0128 | *No record on this branch* | — | — |
+| 0129 | *No record on this branch* | — | — |
+| [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |

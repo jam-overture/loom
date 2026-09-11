@@ -330,8 +330,32 @@ profile was a single screen with an app shell above it. A marketing site is not,
 and until 31 August a Loom page could link to any document on the web except
 itself.
 
+**Two more joined them on 11 September, and this pair is the sharpest case yet
+of what this section is for — because three consecutive runs read the closed
+ledger above as a finished library and were wrong.** `loom.backdrop` and
+`loom.overlay` are not content models at all. One paints atmosphere behind a
+band; the other sets content over a ground. Hermes needed neither: its heroes
+baked an image background into each registered variant, so the *arrangement*
+never had to exist on its own, and its app shell meant a page was never
+composed as a whole surface.
+
+The consequence was that **for eighty-nine primitives exactly one thing on a
+Loom page could paint anything behind its content** — `loom.hero`, whose two
+paints were written inline where nothing else could reach them — and **nothing
+at all could put a word on top of a picture.** Neither absence is visible from
+any table above, because there is no Hermes block to be missing.
+
+This is the warning below, sharpened: the ledger's *"to build"* tables emptying
+on 8 September measured the **port**, and three runs after it each went looking
+for a ninetieth content model and came back with a definition list. The range
+that was missing was a **surface**, not a shape.
+[0130](../decisions/0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md)
+is the record; the five paints now live in `src/primitives/backdrop.ts` and
+`loom.hero` reads them from there, so the hero's own enum widened from two
+paints to five without a second implementation.
+
 Read the ledger below accordingly. **It is a measure of the port, not of the
-library**, and the gaps that have mattered most in the last four runs have all
+library**, and the gaps that have mattered most in the last six runs have all
 been outside it.
 
 ## Where this leaves the count

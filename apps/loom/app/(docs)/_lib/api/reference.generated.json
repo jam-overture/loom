@@ -4864,6 +4864,20 @@
           ]
         },
         {
+          "module": "primitives/loom.backdrop",
+          "title": "loom.backdrop",
+          "summary": "Atmosphere behind whatever is put inside it: drifting colour, a ruled ground, beams, or one pool of light.",
+          "symbols": [
+            {
+              "name": "loomBackdrop",
+              "kind": "value",
+              "signature": "const loomBackdrop: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/loom.badge",
           "title": "loom.badge",
           "summary": "A short label attached to something else — \"Most popular\", \"Beta\", \"New\".",
@@ -5656,6 +5670,20 @@
               "name": "loomOrbit",
               "kind": "value",
               "signature": "const loomOrbit: import(\"../sdk/definition.js\").PrimitiveEntry",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/loom.overlay",
+          "title": "loom.overlay",
+          "summary": "A ground with content set over it: a headline across a photograph, a label on a gallery tile, a caption over a product shot.",
+          "symbols": [
+            {
+              "name": "loomOverlay",
+              "kind": "value",
+              "signature": "const loomOverlay: import(\"../sdk/definition.js\").PrimitiveEntry",
               "truncated": false,
               "summary": ""
             }

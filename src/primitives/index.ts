@@ -7,6 +7,7 @@ import { loomArticle } from "./loom.article.js"
 import { loomArticleGrid } from "./loom.article-grid.js"
 import { loomAvatar } from "./loom.avatar.js"
 import { loomAvatarRow } from "./loom.avatar-row.js"
+import { loomBackdrop } from "./loom.backdrop.js"
 import { loomBadge } from "./loom.badge.js"
 import { loomBanner } from "./loom.banner.js"
 import { loomBeforeAfter } from "./loom.before-after.js"
@@ -61,6 +62,7 @@ import { loomMilestoneRow } from "./loom.milestone-row.js"
 import { loomMosaic } from "./loom.mosaic.js"
 import { loomNav } from "./loom.nav.js"
 import { loomOrbit } from "./loom.orbit.js"
+import { loomOverlay } from "./loom.overlay.js"
 import { loomOffering } from "./loom.offering.js"
 import { loomOfferingGrid } from "./loom.offering-grid.js"
 import { loomOption } from "./loom.option.js"
@@ -365,6 +367,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomCarousel,
   loomOrbit,
   loomReveal,
+  loomBackdrop,
+  loomOverlay,
   loomCard,
   loomFrame,
   loomPin,
@@ -475,6 +479,7 @@ export {
   loomArticleGrid,
   loomAvatar,
   loomAvatarRow,
+  loomBackdrop,
   loomBadge,
   loomBanner,
   loomBeforeAfter,
@@ -532,6 +537,7 @@ export {
   loomOfferingGrid,
   loomOption,
   loomOrbit,
+  loomOverlay,
   loomPage,
   loomPerk,
   loomPerkList,

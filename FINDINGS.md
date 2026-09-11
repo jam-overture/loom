@@ -13797,3 +13797,167 @@ worth more than the sentence that is there now.
 lane rather than this one:** a tab strip (client-side selection, wants a `select`
 member in the behaviour vocabulary that `disclose` proved the shape of) and a
 feed (wants the binding seam and a live source, not a primitive).
+
+---
+
+## 2026-09-11 — the port ledger is not a measure of the library, and three runs used it as one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by this run, recorded because the *mechanism* will recur
+
+`docs/hermes-port-map.md` says of itself, and has said since 26 August, *"it is a
+measure of the port, not of the library."* Its "to build" tables emptied on
+8 September. The three runs after that each treated the empty tables as *the
+range is finished*, went looking for a ninetieth content model, and each
+independently came back with a definition list. The 10 September run filed that
+as a question for the maintainer.
+
+**What the ledger was hiding, measured:** of eighty-nine primitives, **one** could
+paint anything behind its content (`loom.hero`, whose paints were inline where
+nothing else could reach them) and **none** could put a word on top of a picture.
+Every band that was not the hero got `loom.section`'s three flat washes.
+
+Neither gap can appear in that document, and the reason generalises: **a port
+ledger cannot show you what the source product never had to name.** Hermes' eleven
+hero variants each baked a background into a registered block, so atmosphere never
+existed apart from a block; its app shell meant a page was never composed as one
+surface, so superimposition was never an arrangement.
+
+Closed by `loom.backdrop` and `loom.overlay`
+([0130](decisions/0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md)).
+The lesson worth keeping is the instrument, not the two primitives: **the next run
+that concludes the library is finished should say which *surfaces* it checked, not
+only which content models.**
+
+---
+
+## 2026-09-11 — a palette may have no chroma to spend, and every paint assumes it has some
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
+· **Status:** open
+
+This is the 20 August finding's unresolved half, now measurable because the same
+paints run behind a short band as well as behind a hero.
+
+`backdrop.ts` reads `accent-strong` and `brand-secondary` as large areas of
+colour. Under `bold` — gold and red — the result is genuinely light behind the
+band and it is the best the library has ever looked. Under `editorial`, where
+both slots are slate (`#34425a`, `#4a5b78`), the same code at the same opacity is
+a **grey blob**, because a low-chroma tint spread over a light canvas is
+indistinguishable from dirt.
+
+Moving from `accent` to `accent-strong` on 20 August fixed the *slot*. Nothing
+fixed the fact that **a palette may simply have very little chroma, and no
+primitive can know that it does** — `var(--loom-accent-strong)` is a string here,
+not a colour anyone can measure.
+
+Mitigated, not fixed: the aurora's opacity is `0.26` rather than `0.32` and the
+spotlight's `0.18` rather than `0.22`, which makes the editorial blob softer and
+the bold glow slightly weaker. That is one number serving two palettes that want
+different ones.
+
+**Two shapes of fix, both `src/theme/`'s:** a palette could declare how much
+chroma its accent has, so a paint could scale itself; or the ramp could carry a
+slot whose contract is *a tint that reads as light on this palette's canvas*,
+which is what these paints actually want and what `accent-strong` only
+approximates.
+
+---
+
+## 2026-09-11 — a dark scrim is not expressible, because no palette slot means "dark"
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
+· **Status:** open
+
+`loom.overlay` puts text over a photograph, and the standard way to keep it
+legible is a dark wash with light type. **This theme model cannot say it.**
+`bg-overlay` is a *surface* — `#ffffff` under nine of the starter palettes and
+`#1a1a1a` under the dark ones — so reading it as a dark wash gives white on white
+for most of them.
+
+What shipped instead is honest and re-themes correctly: the scrim is `bg-overlay`
+used as what it is, and the content takes `fg-default`, which that slot is
+guaranteed to pair with. Under a light palette it is a bright veil with dark type.
+That is a real editorial look rather than a consolation, and it is **not** the
+cinematic one, which the library therefore does not have.
+
+A hard-coded black would render one page correctly and break
+[0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md) for every other
+palette, so it was not written.
+
+**The fix is one slot** with the contract *a ground that darkens what is under it,
+paired with a foreground that reads on it* — a pair, not a colour, because the two
+have to be guaranteed together.
+
+---
+
+## 2026-09-11 — `scrim: "none"` cannot be made safe, and the library cannot check it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — recorded as a limit, not a defect waiting on a fix
+
+`loom.overlay` offers `scrim: "none"` because a ground is sometimes already quiet
+enough to write on. Over a *photograph* it is a foot-gun in both directions: the
+text colour is the page's and the picture is the author's, so a pale photograph
+is illegible under a dark palette and a dark one is illegible under a light
+palette. **Whichever image you pick, one of the two starter palettes is wrong**,
+and this was found by picking one and photographing it.
+
+It is not removable — an overlay over a palette-derived ground (a painted
+backdrop, a card, a flat surface) genuinely wants no wash, and that use *is* safe
+because both sides come from the palette. So the option stays, the file says what
+it costs, and the specimen demonstrates it the safe way round.
+
+**What would actually close it** is a contrast check, and nothing in a pure render
+can do one: the ground is a URL at render time and its luminance is not knowable
+without decoding the image. A host that wanted this would have to measure at
+upload and hand the answer back through the binding seam
+([0058](decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)).
+
+---
+
+## 2026-09-11 — a full-page screenshot does not load lazy images, and the result looks like a dropped slot
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`,
+`Loom daily build` (#250's harness) · **Status:** open
+
+`loom.media` writes `loading="lazy"`. A `fullPage: true` screenshot taken without
+scrolling therefore captures **every image below the first viewport as an empty
+box**, with the content that sits over or beside it rendered normally.
+
+Two of four `loom.overlay` tiles photographed as flat grey panels with text
+floating on them — under both palettes, consistently, and at both widths. It reads
+exactly like *`loom.overlay` drops its ground below the fold*, and it was one step
+from being written up as a defect in a primitive that is correct.
+
+**Sixth variant of *the picture lied* from this lane, and the second in the
+direction that costs a fix rather than a cycle** — the other being the
+mid-entrance hero whose buttons were "missing".
+
+The rule that works is unconditional and the same shape as the reduced-motion one:
+**scroll the full height, then await every `HTMLImageElement.complete`, before
+shooting.** Not "when the fixture has images in it" — any primitive may hold one,
+and the failure mode is a picture that looks like a bug. Belongs in #250's harness
+beside `reducedMotion: "reduce"` and the settle.
+
+---
+
+## 2026-09-11 — `21st.dev` blocked for the fifteenth time, and no run has ever seen it
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open
+
+`WebFetch` on `https://21st.dev` returns `EGRESS_BLOCKED`. `docs/routines.md`
+lists the domain under `permissions.allow`; the sandbox's egress proxy does not.
+
+The primitives brief names it as **the visual standard** — *"WebFetch
+`https://21st.dev` for the visual standard: considered motion, real spacing,
+blocks that read as a product rather than a UI kit"* — and it is the only external
+reference the brief has. **Fifteen attempts across seven lanes; not one has
+loaded.** Every judgement this lane has made about whether the library "pops" has
+been made without it.
+
+Unchanged in substance from the fourteen previous filings and repeated only
+because the count is the argument: either the domain reaches the allowlist the
+sandbox actually reads, or the brief should name a reference a routine can
+actually open.

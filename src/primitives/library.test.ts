@@ -191,8 +191,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as eighty-nine primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(89)
+  it("registers as ninety-one primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(91)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -206,6 +206,8 @@ describe("the starter library", () => {
       "loom.carousel",
       "loom.orbit",
       "loom.reveal",
+      "loom.backdrop",
+      "loom.overlay",
       "loom.card",
       "loom.frame",
       "loom.pin",
@@ -902,6 +904,177 @@ const splitStylesheet = (markup: string): { stylesheet: string; tree: string } =
 }
 
 /**
+ * The atmosphere layer: every paint `loom.backdrop` offers, and every way
+ * `loom.overlay` sets content over a ground.
+ *
+ * It is one fixture rather than two because the pair is one idea — what is
+ * behind the content and what is over it — and because the interesting failures
+ * are between them: a paint that leaks over its children, a scrim that squares
+ * off a rounded picture, a backdrop inside a card painting outside the card.
+ */
+const atmospherePage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory()
+): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const band = (paint: string, title: string) =>
+    buildElement(idFactory, {
+      type: "loom.backdrop",
+      props: { paint },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: paint, width: "wide" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [text(title)],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.prose",
+              props: { measured: true },
+              children: [text("The paint is behind the words and reaches neither the reader nor the pointer.")],
+            }),
+          ],
+        }),
+      ],
+    })
+
+  const shot = (src: string, alt: string) =>
+    buildElement(idFactory, {
+      type: "loom.media",
+      props: { src, alt, aspect: "wide", fit: "cover", corners: "none" },
+    })
+
+  const tile = (
+    props: Record<string, string>,
+    heading: string,
+    line: string,
+    image: string
+  ) =>
+    buildElement(idFactory, {
+      type: "loom.overlay",
+      props,
+      children: [
+        buildSlot(idFactory, "ground", [shot(image, heading)]),
+        buildElement(idFactory, {
+          type: "loom.badge",
+          props: { tone: "accent" },
+          children: [text("Case study")],
+        }),
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 3 },
+          children: [text(heading)],
+        }),
+        buildElement(idFactory, { type: "loom.prose", children: [text(line)] }),
+      ],
+    })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.hero",
+          props: { backdrop: "rays", align: "center", eyebrow: "Atmosphere", stature: "standard" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1, balance: true },
+                children: [text("Every band can have weather now")],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.prose",
+              props: { size: "lead", tone: "muted" },
+              children: [text("Five paints, behind anything, from the palette rather than from a hex.")],
+            }),
+          ],
+        }),
+        band("aurora", "Two fields, drifting"),
+        band("grid", "A blueprint, fading before the copy"),
+        band("dots", "A lattice, read as texture"),
+        band("spotlight", "One pool of light"),
+        band("rays", "Beams from above"),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Over a ground", width: "wide" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [text("A word on top of a picture")],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.grid",
+              props: { columns: "two", gap: "normal" },
+              children: [
+                tile(
+                  { scrim: "gradient", corners: "lg" },
+                  "The foot of the picture",
+                  "The wash clears towards the top, so the photograph stays a photograph.",
+                  "https://example.com/harbour.jpg"
+                ),
+                tile(
+                  { scrim: "veil", justify: "center", align: "center", corners: "lg" },
+                  "An even veil",
+                  "For copy that sits in the middle of the frame with nowhere to hide.",
+                  "https://example.com/atrium.jpg"
+                ),
+                tile(
+                  { scrim: "gradient", justify: "start", padding: "snug", corners: "md" },
+                  "A label at the head",
+                  "The gradient follows the content rather than being told where to go.",
+                  "https://example.com/studio.jpg"
+                ),
+                tile(
+                  { scrim: "none", align: "end", justify: "end", padding: "roomy" },
+                  "No scrim at all",
+                  "For a ground that is already quiet enough to write on.",
+                  "https://example.com/paper.jpg"
+                ),
+              ],
+            }),
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.card",
+          props: { tone: "outline", padding: "none" },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.backdrop",
+              props: { paint: "spotlight", corners: "lg" },
+              children: [
+                buildElement(idFactory, {
+                  type: "loom.section",
+                  props: { width: "readable" },
+                  children: [
+                    buildElement(idFactory, {
+                      type: "loom.prose",
+                      children: [text("A backdrop inside a card, cornered to the card it is in.")],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+/**
  * All nine starting compositions on one page, in the order a landing page uses
  * them.
  *
@@ -954,6 +1127,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(productPage(EDITORIAL)),
       ...typesIn(shelfPage(EDITORIAL)),
+      ...typesIn(atmospherePage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -1041,6 +1215,7 @@ describe("the composed vocabulary", () => {
       furniturePage,
       productPage,
       shelfPage,
+      atmospherePage,
     ].flatMap((fixture) => blame(render(fixture(EDITORIAL), true).markup))
 
     const bands = blame(render(everyBandPage(EDITORIAL), true).markup)
@@ -7252,5 +7427,245 @@ describe("the geometry a screenshot found", () => {
     const { tree } = splitStylesheet(render(narrow).markup)
 
     expect([...tree.matchAll(/margin-inline:auto/g)]).toHaveLength(2)
+  })
+})
+
+describe("the atmosphere behind a band, and the words over a picture", () => {
+  it("paints every band and puts a word on a picture, with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(atmospherePage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Every band can have weather now")
+    expect(markup).toContain("The foot of the picture")
+    expect(markup).toContain("An even veil")
+    expect(markup).toContain("A backdrop inside a card, cornered to the card it is in.")
+  })
+
+  it("renders under both starter palettes with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(atmospherePage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(atmospherePage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(atmospherePage(BOLD)).diagnostics).toEqual([])
+    expect(render(atmospherePage(MINIMAL)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+
+  /**
+   * A backdrop is decoration, and decoration that can be tabbed into or read
+   * out is content pretending otherwise. Every layer the five paints emit is
+   * hidden from assistive technology and transparent to the pointer — asserted
+   * over all five rather than over the one somebody happened to render.
+   */
+  it("never lets a paint reach the reader", () => {
+    for (const paint of ["aurora", "grid", "dots", "rays", "spotlight"]) {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.backdrop",
+              props: { paint },
+              children: [
+                buildElement(idFactory, {
+                  type: "loom.prose",
+                  children: [buildText(idFactory, "Over the top")],
+                }),
+              ],
+            }),
+          ],
+        }),
+        idFactory
+      )
+
+      const { tree: body } = splitStylesheet(render(tree).markup)
+      const layers = [...body.matchAll(/<div [^>]*aria-hidden="true"[^>]*>/g)]
+
+      expect(layers.length).toBeGreaterThan(0)
+      for (const layer of layers) expect(layer[0]).toContain("pointer-events:none")
+      expect(body).toContain("Over the top")
+    }
+  })
+
+  /**
+   * Five paints, and the claim made for them is that a reader tells them apart
+   * — not that there are five of them. The cheap way to fail that claim is a
+   * sixth member which is an existing paint at a different opacity, so the
+   * assertion is on the rendered layers being pairwise distinct rather than on
+   * the enum having five names.
+   */
+  it("renders five paints that are five different things", () => {
+    const painted = (paint: string): string => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [buildElement(idFactory, { type: "loom.backdrop", props: { paint }, children: [] })],
+        }),
+        idFactory
+      )
+
+      return [...splitStylesheet(render(tree).markup).tree.matchAll(/<div [^>]*aria-hidden="true"[^>]*>/g)]
+        .map((match) => match[0])
+        .join("")
+    }
+
+    const rendered = ["aurora", "grid", "dots", "rays", "spotlight"].map(painted)
+
+    expect(new Set(rendered).size).toBe(5)
+  })
+
+  /**
+   * The point of moving the paints into `backdrop.ts` rather than copying them:
+   * a hero on `dots` and a backdrop on `dots` are the same layers, so the five
+   * cannot drift into ten. This fails the moment anybody re-implements one of
+   * them in either file, which is the failure the extraction exists to prevent.
+   */
+  it("paints a hero and a backdrop from one implementation", () => {
+    const layersOf = (node: { type: string; props: JsonObject }): string => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [buildElement(idFactory, { ...node, children: [] })],
+        }),
+        idFactory
+      )
+
+      return [...splitStylesheet(render(tree).markup).tree.matchAll(/<div [^>]*aria-hidden="true"[^>]*>/g)]
+        .map((match) => match[0])
+        .join("")
+    }
+
+    for (const paint of ["aurora", "grid", "dots", "rays", "spotlight"]) {
+      expect(layersOf({ type: "loom.hero", props: { backdrop: paint } })).toBe(
+        layersOf({ type: "loom.backdrop", props: { paint } })
+      )
+    }
+  })
+
+  /**
+   * Which way the wash clears is derived from where the content sits, so there
+   * is no second prop to disagree with the first. `veil` has no direction at
+   * all, and `none` emits no scrim element rather than a transparent one.
+   */
+  it("runs the scrim away from the content, and emits none when asked for none", () => {
+    const scrimOf = (props: JsonObject): string => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.overlay",
+              props,
+              children: [
+                buildSlot(idFactory, "ground", [
+                  buildElement(idFactory, {
+                    type: "loom.media",
+                    props: { src: "https://example.com/ground.jpg", alt: "A ground" },
+                  }),
+                ]),
+                buildElement(idFactory, {
+                  type: "loom.prose",
+                  children: [buildText(idFactory, "Over it")],
+                }),
+              ],
+            }),
+          ],
+        }),
+        idFactory
+      )
+
+      const body = splitStylesheet(render(tree).markup).tree
+      return body.match(/<div [^>]*aria-hidden="true"[^>]*>/)?.[0] ?? ""
+    }
+
+    expect(scrimOf({ justify: "end" })).toContain("to top")
+    expect(scrimOf({ justify: "start" })).toContain("to bottom")
+    expect(scrimOf({ justify: "center" })).toContain("radial-gradient")
+    expect(scrimOf({ scrim: "veil" })).not.toContain("mask-image")
+    expect(scrimOf({ scrim: "none" })).toBe("")
+  })
+
+  /**
+   * A ground that has not been filled in yet is a half-built node, not an
+   * error: it renders its own children on the page's ordinary ground with no
+   * scrim over them, which is what a portal preview should show.
+   */
+  it("degrades to its children when nothing is on the ground", () => {
+    const idFactory = sequentialIdFactory()
+    const tree = createTree(
+      buildElement(idFactory, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: EDITORIAL },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.overlay",
+            props: {},
+            children: [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [buildText(idFactory, "Still readable")],
+              }),
+            ],
+          }),
+        ],
+      }),
+      idFactory
+    )
+
+    const { markup, diagnostics } = render(tree)
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Still readable")
+    expect(splitStylesheet(markup).tree).not.toMatch(/<div [^>]*aria-hidden="true"/)
+  })
+
+  /**
+   * The ground, the wash and the words are three layers in one grid cell, and
+   * the order they stack in is stated rather than left to source order — source
+   * order stops deciding the moment a child positions itself, which is a class
+   * of bug that shows up only on the page that does it.
+   */
+  it("stacks the words over the wash over the ground", () => {
+    const idFactory = sequentialIdFactory()
+    const tree = createTree(
+      buildElement(idFactory, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: EDITORIAL },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.overlay",
+            props: {},
+            children: [
+              buildSlot(idFactory, "ground", [
+                buildElement(idFactory, {
+                  type: "loom.media",
+                  props: { src: "https://example.com/ground.jpg", alt: "A ground" },
+                }),
+              ]),
+              buildElement(idFactory, {
+                type: "loom.prose",
+                children: [buildText(idFactory, "Over it")],
+              }),
+            ],
+          }),
+        ],
+      }),
+      idFactory
+    )
+
+    const body = splitStylesheet(render(tree).markup).tree
+
+    expect([...body.matchAll(/z-index:(\d)/g)].map((match) => Number(match[1]))).toEqual([0, 1, 2])
   })
 })
