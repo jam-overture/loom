@@ -218,5 +218,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0132 | *No record on this branch* | — | — |
 | 0133 | *No record on this branch* | — | — |
 | 0134 | *No record on this branch* | — | — |
-| 0135 | *No record on this branch* | — | — |
+| [0135](0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md) | A same-origin frame is granted what its own document needs | Accepted — it changes no schema, no tree and no delta model, and | §4d |
 | [0136](0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md) | A published page broadcasts reader signals when its host asks | Accepted | §3, §6 |

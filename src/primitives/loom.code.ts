@@ -86,6 +86,34 @@ const props = z
      * hero — the panel sized to the line rather than to a listing.
      */
     density: z.enum(["comfortable", "compact"]).optional(),
+    /**
+     * Whether a line too long for the panel wraps, or goes behind a horizontal
+     * scroll. **Off by default, because a command is not data.**
+     *
+     * The default is `overflow-x: auto` and the note on the `pre` below says
+     * why: a shell line broken across two visual rows reads as two commands,
+     * and the content's own breaks are the only breaks that mean anything.
+     * That is right for the thing this primitive was ported for.
+     *
+     * It is wrong for the thing it has since been asked to hold. `Loom
+     * marketing` filed on 3 September that the front door prints a piece of its
+     * own page beside the rendering of it, and that **a pretty-printed JSON
+     * string value is one line however long the string is** — there is no line
+     * structure below the printer's to preserve, so nothing is lost by wrapping
+     * it and 162px of every long line is lost by not. Measured on that band at
+     * 390: the panel is 348 wide, the content 510, and the end of each line is
+     * behind a gesture inside a band whose whole argument is that you can see
+     * the whole of it. That lane worked around it by choosing a shorter
+     * specimen, which is a cost it should not have had to pay.
+     *
+     * So this is a rendering of one content model rather than a second
+     * primitive — 0052's display-mode clause, the same call `tone` and
+     * `density` already make — and a tree that wants wrapping emits one
+     * `configure`. **It changes no node**, which is the granularity doc's
+     * sharper question answered: turning it on adds, drops and reorders
+     * nothing.
+     */
+    wrap: z.boolean().optional(),
   })
   .strict()
 
@@ -131,6 +159,7 @@ export const loomCode = definePrimitive({
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, CodeTextKey, "copy">) => {
     const terminal = given.tone === "terminal"
     const compact = given.density === "compact"
+    const wrapping = given.wrap === true
 
     const bar = createElement(
       "div",
@@ -200,6 +229,12 @@ export const loomCode = definePrimitive({
          * narrower than its content, which is what `minWidth: 0` on the root
          * below buys — the phone-scrollbar failure filed on 20 August, in the
          * one primitive whose content is deliberately unwrappable.
+         *
+         * `overflowX` stays `auto` in both modes rather than being switched
+         * off with the wrap. It is what contains the overflow to this panel,
+         * and a wrapped listing simply has nothing to scroll — where dropping
+         * it would let a single unbreakable token out onto the page, which is
+         * the failure the line above exists to prevent.
          */
         style: {
           margin: "0",
@@ -210,8 +245,26 @@ export const loomCode = definePrimitive({
           fontSize: size(2),
           lineHeight: compact ? 1.5 : 1.7,
           color: colour("fg-default"),
-          /** `pre-wrap` would silently rewrap a command; the content's own breaks are the content. */
-          whiteSpace: "pre",
+          /**
+           * `pre-wrap` rather than `pre` when wrapping, and it is worth being
+           * precise about what changes: **the content's own breaks survive
+           * either way.** `pre-wrap` preserves every newline and every run of
+           * spaces exactly as `pre` does; the only difference is that a line
+           * with nowhere left to go also breaks. So the default is not
+           * protecting the snippet's newlines — nothing threatens them — it is
+           * protecting a *shell command* from reading as two commands, which
+           * is a claim about the content rather than about the whitespace.
+           *
+           * `overflow-wrap: anywhere` is the half that makes it work on a
+           * phone. `pre-wrap` alone breaks at spaces, and the lines this is
+           * for — a URL, a base64 value, a 90-character JSON string — have
+           * none, so they would still run past the panel. `anywhere` rather
+           * than `break-word` because only `anywhere` is taken into account
+           * when the browser computes the element's min-content width, which
+           * is what stops the panel itself from being stretched by the line.
+           */
+          whiteSpace: wrapping ? "pre-wrap" : "pre",
+          ...(wrapping ? { overflowWrap: "anywhere" as const } : {}),
           tabSize: 2,
         },
       },
