@@ -152,6 +152,47 @@ export const partNameOf = (node: LoomNode): PartName => {
 }
 
 /**
+ * One part named as a **place** rather than as a subject: what it is, without
+ * what it says and without its id.
+ *
+ * The rule this file now holds two halves of:
+ *
+ * > **The subject of a sentence is named by what it says. A place is named by
+ * > what it is.**
+ *
+ * A sentence on the review queue names two or three parts — *"Adds the card
+ * “Autumn arrivals” `n_new` inside the band, just before the heading."* — and
+ * only the first of them is the news. Putting the full name on all three costs
+ * a reader the sentence and gains them nothing, because the other two are an
+ * address.
+ *
+ * There is a harder reason than length, and it is why this is a separate
+ * function rather than a shorter format of the same one. **A container's words
+ * are its contents' words.** `saidBy` walks the subtree, which is exactly right
+ * for naming a card by the heading inside it and exactly wrong for naming the
+ * page a change lands in: *the page “Autumn arrivals Nothing here was written
+ * by…”* names the page's contents while claiming to name the place. The noun on
+ * its own — *the page*, *the band* — is the part of that reading which is true
+ * at every depth.
+ *
+ * An id is not carried for the same reason a place is not quoted: the
+ * identifier that matters on a row is the one belonging to the part being
+ * changed, and 22 August's rule is that a name stays on the surface, not that
+ * every noun drags one along. The delta's own account — `into loom.band, before
+ * loom.heading` — is a click away with every label in it.
+ */
+export const placeNameOf = (node: LoomNode): string => {
+  switch (node.kind) {
+    case "element":
+      return `the ${nounOf(node.type)}`
+    case "slot":
+      return `the ${node.name} space`
+    case "text":
+      return "the words"
+  }
+}
+
+/**
  * How a named part reads, as one string.
  *
  * The component renders the two halves as two elements — the words, then the id

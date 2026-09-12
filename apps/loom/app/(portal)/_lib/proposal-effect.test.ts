@@ -145,8 +145,10 @@ describe("describeProposalEffect", () => {
 
     expect(effect.operations[0]).toMatchObject({
       verb: "delete",
-      subject: "loom.heading",
+      subject: { name: "the heading “Ship faster”", nodeId: HEADING },
+      label: "loom.heading",
       place: ["loom.page"],
+      placeNames: ["the page"],
       detail: "and 1 node under it",
       text: ["Ship faster"],
       carries: 2,
@@ -186,8 +188,15 @@ describe("describeProposalEffect", () => {
 
     expect(effect.operations[0]).toMatchObject({
       verb: "add",
-      subject: "loom.card",
+      /**
+       * Named from the delta, not from the tree. `n_new1` is not on the page —
+       * it is what the proposal would put there — so nothing but the proposal
+       * itself can say that what is arriving is a card that reads *New band*.
+       */
+      subject: { name: "the card “New band”", nodeId: "n_new1" },
+      label: "loom.card",
       place: ["loom.page"],
+      placeNames: ["the page"],
       detail: "into loom.page, before loom.card, bringing 2 nodes",
       text: ["New band"],
       carries: 2,
@@ -264,8 +273,8 @@ describe("describeProposalEffect", () => {
 
       expect(effect.operations[0]).toMatchObject({
         op: "insert",
-        into: "loom.page",
-        before: "loom.card",
+        into: "the page",
+        before: "the card",
         from: null,
       })
     })
@@ -284,7 +293,7 @@ describe("describeProposalEffect", () => {
         ])
       )
 
-      expect(effect.operations[0]).toMatchObject({ into: "loom.page", before: null })
+      expect(effect.operations[0]).toMatchObject({ into: "the page", before: null })
     })
 
     it("names both ends of a move that leaves where it was", () => {
@@ -296,8 +305,8 @@ describe("describeProposalEffect", () => {
 
       expect(effect.operations[0]).toMatchObject({
         op: "move",
-        from: "loom.heading",
-        into: "loom.card",
+        from: "the heading",
+        into: "the card",
       })
     })
 
@@ -313,7 +322,7 @@ describe("describeProposalEffect", () => {
         deltaOf(tree, [{ op: "move", nodeId: FIRST_CARD, parentId: PAGE, index: 2 }])
       )
 
-      expect(effect.operations[0]).toMatchObject({ from: null, into: "loom.page" })
+      expect(effect.operations[0]).toMatchObject({ from: null, into: "the page" })
     })
 
     it("names no destination when the part an insert would go inside is gone", () => {
@@ -346,6 +355,117 @@ describe("describeProposalEffect", () => {
       )
 
       expect(effect.operations[0]).toMatchObject({ op: "remove", verb: "delete" })
+    })
+  })
+
+  /**
+   * Who names a part, and what they are allowed to say about it.
+   *
+   * The review queue was the last screen in this portal calling every part
+   * `loom.card`. `/portal/history` had been saying *the card “Autumn arrivals”*
+   * since 10 September, so two screens of one portal named one part two ways —
+   * and the worse of the two was the screen with the buttons on it.
+   */
+  describe("naming the parts a sentence is about", () => {
+    /**
+     * **The only account of what a proposal would add is the proposal itself.**
+     *
+     * The node is not on the page — that is the whole of what an insert
+     * proposes — so no walk of the tree can say what is arriving. It is the
+     * mirror of a removal, whose only surviving account is its inverse, and
+     * between the two of them there is no moment in a change's life that the
+     * portal cannot name. Nothing in the repository holds either: the tree was
+     * never markup in a file.
+     */
+    it("names what an insert would add from the delta, because the page has never held it", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [
+          {
+            op: "insert",
+            parentId: PAGE,
+            index: 0,
+            node: {
+              kind: "element",
+              id: nodeIdSchema.parse("n_unseen"),
+              type: primitiveTypeSchema.parse("acme.price-tag"),
+              props: {},
+              children: [{ kind: "text", id: nodeIdSchema.parse("n_unseen2"), value: "£42" }],
+            },
+          },
+        ])
+      )
+
+      /** `acme.price-tag` is registered nowhere here. The noun is read, not looked up. */
+      expect(effect.operations[0]?.subject).toEqual({
+        name: "the price tag “£42”",
+        nodeId: "n_unseen",
+      })
+      expect(effect.operations[0]?.label).toBe("acme.price-tag")
+    })
+
+    /**
+     * A place is named by what it is, and the page is the case that proves why.
+     *
+     * Naming it the way a subject is named walks its whole subtree for words,
+     * so an insert into this fixture's page would land *inside the page “Ship
+     * faster Talk to us”* — a container described by its contents, in the one
+     * clause that was supposed to be an address.
+     */
+    it("names the place a change lands in by what it is, not by what is inside it", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [
+          {
+            op: "insert",
+            parentId: PAGE,
+            index: 0,
+            node: { kind: "text", id: nodeIdSchema.parse("n_ins9"), value: "New" },
+          },
+        ])
+      )
+
+      expect(effect.operations[0]?.into).toBe("the page")
+      expect(effect.operations[0]?.into).not.toContain("Ship faster")
+      expect(effect.operations[0]?.placeNames).toEqual(["the page"])
+    })
+
+    /**
+     * Both readings of one path, and the point is that there are two. The
+     * breadcrumb a reviewer reads is in the voice of the sentence above it; the
+     * labels it replaced are carried for the record rather than dropped.
+     */
+    it("carries the path in both vocabularies, so naming one takes nothing from the other", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [{ op: "remove", nodeId: HEADING_TEXT }])
+      )
+
+      expect(effect.operations[0]?.placeNames).toEqual(["the page", "the heading"])
+      expect(effect.operations[0]?.place).toEqual(["loom.page", "loom.heading"])
+    })
+
+    /**
+     * The fallback, unchanged and load-bearing: where no node can be found the
+     * subject is the identifier itself rather than a phrase standing in for it.
+     * `part-name.ts` holds the argument — *"this part `n_p99`"* spends a
+     * reader's attention on a word that adds nothing and hands them the id
+     * anyway — and it is why no sentence here reads worse than it did before
+     * names existed.
+     */
+    it("leaves a part it cannot find as the bare id it has always been", () => {
+      const tree = pageTree()
+      const effect = describeProposalEffect(
+        tree,
+        deltaOf(tree, [{ op: "remove", nodeId: nodeIdSchema.parse("n_p99") }])
+      )
+
+      expect(effect.operations[0]?.subject).toBe("n_p99")
+      expect(effect.operations[0]?.label).toBe("n_p99")
+      expect(effect.operations[0]?.placeNames).toEqual([])
     })
   })
 
@@ -417,8 +537,10 @@ describe("describeProposalEffect", () => {
 
     expect(effect.applies).toBe(true)
     expect(effect.operations[1]).toMatchObject({
-      subject: "loom.heading",
+      subject: { name: "the heading", nodeId: inserted },
+      label: "loom.heading",
       place: ["loom.page", "loom.card"],
+      placeNames: ["the page", "the card"],
       missing: false,
       changes: [{ key: "tone", before: `"loud"`, after: `"quiet"`, inert: false }],
     })
@@ -441,6 +563,9 @@ describe("describeProposalEffect", () => {
 
     expect(effect.applies).toBe(false)
     expect(effect.operations).toHaveLength(2)
-    expect(effect.operations[1]).toMatchObject({ subject: "loom.heading", missing: false })
+    expect(effect.operations[1]).toMatchObject({
+      subject: { name: "the heading “Ship faster”", nodeId: HEADING },
+      missing: false,
+    })
   })
 })

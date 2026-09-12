@@ -8,9 +8,18 @@ import { TopBar } from "./_components/shell/topbar"
 
 import "./globals.css"
 
+/**
+ * The one sentence a browser tab, a bookmark and a search result show, and it
+ * was the last unqualified piece of runtime vocabulary the portal said to a
+ * person before they had opened anything: *"Inspect, propose and gate changes
+ * to a stored Loom tree."* Four words of it — *gate*, *stored*, *Loom tree* —
+ * are the runtime talking to itself, in the sentence that has to explain the
+ * portal to somebody who has never seen it. There is no disclosure to move it
+ * behind, so it is said the way the sign-in page already says it.
+ */
 export const metadata: Metadata = {
   title: "Loom Portal",
-  description: "Inspect, propose and gate changes to a stored Loom tree",
+  description: "Review the changes an AI proposes to your pages, before any of them go live",
 }
 
 export const viewport: Viewport = {
