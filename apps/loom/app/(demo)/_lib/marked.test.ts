@@ -23,6 +23,7 @@ describe("what the rail says about the marks", () => {
     tone,
     label,
     placement: "inside",
+    subject: "node",
   })
 
   it("says nothing at all when the page carries no mark", () => {

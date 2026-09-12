@@ -134,8 +134,17 @@ const EFFECT: ProposalEffect = {
     {
       op: "remove",
       verb: "delete",
-      subject: "loom.stat-grid",
+      /*
+       * Named on 11 September, when the portal's review queue started saying
+       * *the stat grid* where it had said `loom.stat-grid`. `label` and
+       * `placeNames` are the two halves that change with it: the runtime's word
+       * is kept for the record, and the path a reader is shown is the path in
+       * the same voice as the sentence above it.
+       */
+      subject: { name: "the stat grid", nodeId: "n_9" },
+      label: "loom.stat-grid",
       place: ["loom.page"],
+      placeNames: ["the page"],
       detail: "and 3 nodes under it",
       into: null,
       before: null,
@@ -404,8 +413,18 @@ describe("a record card", () => {
     expect(disclosure.contains(screen.getByText(/This comes off the page/))).toBe(false)
     expect(disclosure.contains(screen.getByText("“3,400”"))).toBe(false)
 
-    expect(disclosure.contains(screen.getByText("loom.stat-grid"))).toBe(true)
-    expect(disclosure.contains(screen.getByText(/delete loom\.stat-grid/))).toBe(true)
+    /*
+     * Read off the disclosure's own text rather than by finding an element
+     * whose whole content is `loom.stat-grid`. There was one until 11
+     * September — the review queue set the type in monospace as the subject of
+     * its sentence — and there is not one now that the same sentence says *the
+     * stat grid*. The rule this test is for is unchanged and is the stronger
+     * reading: the runtime's word is behind the click, and not in front of it.
+     */
+    expect(disclosure.textContent).toContain("delete loom.stat-grid")
+    expect(container.textContent?.replace(disclosure.textContent ?? "", "")).not.toContain(
+      "loom.stat-grid"
+    )
   })
 
   /**
