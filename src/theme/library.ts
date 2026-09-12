@@ -252,7 +252,7 @@ export const minimalSansFontPack: FontPack = fontPackSchema.parse({
    * `loom.code` panel on that site rendered in the system stack beside prose
    * set in Geist and a `<pre>` set in Geist Mono — three faces where the pack
    * describes one pairing. Ordered like the other two: the served face first,
-   * a real stack behind it (0084).
+   * a real stack behind it (0085).
    */
   monoFamily:
     '"Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',

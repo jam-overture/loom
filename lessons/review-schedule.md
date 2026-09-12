@@ -663,9 +663,13 @@ adjacent.
    and blocks nothing. State the single rule both follow — it is about a fact,
    not about a return type — and then find the third instance of it, which is
    in lesson 14. *(09, 14)*
-6. A component throws under every configuration; another throws under one.
-   Name both reports, say what a host does about each, and say why the first
-   one's verdict is not a false reassurance.
+6. A component throws under every configuration; another throws under one. Both
+   are reported in the same list, and one field separates them. Name the field,
+   say which value is the *certain* one and why the other cannot be, and then
+   give the legitimate primitive that lands in the uncertain half — the reason
+   it does is a fact about React rather than about Loom. Then say what a host
+   that ships none of those asserts, and what a host that ships one asserts
+   instead.
 7. A model may not name the nodes it inserts. Give the reason without the word
    "trust", then say what the catalogue adds to that reason — the two are about
    different halves of the same proposal. *(04, 12)*

@@ -265,9 +265,19 @@ describe("the front door, which asserted this twice and never showed it", () => 
  * this holds the decision itself, so that it is a decision rather than a drift.
  */
 describe("its place in the navigation", () => {
-  it("is off the bar deliberately, with one other page", () => {
+  /**
+   * Widened on 12 September, not relaxed: `HOME` came off the bar so that a
+   * seventh page could go on it without taking the count past the eight items
+   * #166 asked about. The list is still exact, so a fourth page leaving the bar
+   * still fails here and still has to be argued for.
+   */
+  it("is off the bar deliberately, with two other pages", () => {
     expect(WHAT_YOU_RUN.inMenu).toBe(false)
-    expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([WHAT_YOU_RUN, YOUR_COMPONENTS])
+    expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
+      HOME,
+      WHAT_YOU_RUN,
+      YOUR_COMPONENTS,
+    ])
   })
 
   it("is reachable from the front door without the footer", () => {

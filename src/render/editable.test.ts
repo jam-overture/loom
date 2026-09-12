@@ -133,3 +133,30 @@ describe("edit mode on", () => {
     expect(markup).toBe("<div></div>")
   })
 })
+
+describe("addressed", () => {
+  const render = (options: { editMode?: boolean; addressed?: boolean }): string => {
+    const { tree } = sampleTree()
+
+    return renderToStaticMarkup(
+      renderLoomTree(tree, { resolver: testPrimitiveResolver, ...options }).element
+    )
+  }
+
+  it("stamps exactly the attributes edit mode stamps, so a published page can name its nodes", () => {
+    expect(render({ addressed: true })).toBe(render({ editMode: true }))
+  })
+
+  it("puts the tree and its revision on the root, which is what a reader signal is filed under", () => {
+    const { tree } = sampleTree()
+    const markup = render({ addressed: true })
+
+    expect(markup).toContain(`${LOOM_TREE_ATTRIBUTE}="${tree.treeId}"`)
+    expect(markup).toContain(`${LOOM_REVISION_ATTRIBUTE}="${tree.revision}"`)
+  })
+
+  it("is off by default, and off leaves the markup untouched", () => {
+    expect(render({})).toBe(render({ addressed: false }))
+    expect(render({})).not.toContain("data-loom")
+  })
+})

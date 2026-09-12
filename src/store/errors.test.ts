@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { nodeIdSchema, treeIdSchema } from "../ids.js"
 
-import { describeStoreError, type StoreError } from "./errors.js"
+import { describeStoreError, STORE_ERROR_CODES, type StoreError } from "./errors.js"
 
 const treeId = treeIdSchema.parse("t_1")
 
@@ -36,6 +36,22 @@ describe("describeStoreError", () => {
 
     expect(described).toContain("2")
     expect(described).toContain("3")
+  })
+
+  /**
+   * The list is what a consumer outside the runtime reads instead of keeping its
+   * own copy, so the thing worth testing is that it says the same five things the
+   * union does — in both directions. `everyMemberOf` already stops a code being
+   * *missing* at compile time; what it cannot see is a code left behind after one
+   * is renamed, which is a string in a list matching nothing.
+   */
+  it("publishes every code the union has, and none it does not", () => {
+    expect([...STORE_ERROR_CODES].sort()).toEqual([...everyError.map((error) => error.code)].sort())
+  })
+
+  it("publishes the codes in an order a reader can rely on, with nothing said twice", () => {
+    expect(new Set(STORE_ERROR_CODES).size).toBe(STORE_ERROR_CODES.length)
+    expect(STORE_ERROR_CODES[0]).toBe("not-found")
   })
 
   it("carries the underlying tree error through a rejected delta", () => {

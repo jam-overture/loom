@@ -25,6 +25,7 @@ import {
   DIFFERENCE_LIMIT,
   RECYCLING_LIMIT,
 } from "./audit-view"
+import { runtimeWordsIn } from "../_test/plain-language"
 
 const pageOf = (labels: readonly string[]): LoomTree => {
   const ids = sequentialIdFactory("aud")
@@ -465,8 +466,6 @@ describe("readCheckup", () => {
    */
   it("keeps the runtime's vocabulary out of all three sentences", () => {
     const { stored, replayed } = drifted(1)
-    const jargon =
-      /\b(fold|folding|folded|snapshot|seed|delta|node|nodes|tree|revision|log|gate|id|ids)\b/i
 
     const reports = [
       agreeing(),
@@ -482,14 +481,14 @@ describe("readCheckup", () => {
       const verdict = readCheckup(report)
 
       for (const sentence of [verdict.label, verdict.meaning, verdict.next]) {
-        expect(sentence, sentence).not.toMatch(jargon)
+        expect(runtimeWordsIn(sentence), sentence).toEqual([])
       }
     }
   })
 
-  /** Guards the guard: the technical reading must actually trip that regex. */
+  /** Guards the guard: the technical reading must actually trip the same list. */
   it("finds the vocabulary it bans in the reading it is kept out of", () => {
-    expect(agreeing().detail).toMatch(/\b(fold|folding|snapshot|seed)\b/i)
+    expect(runtimeWordsIn(agreeing().detail)).not.toEqual([])
   })
 })
 

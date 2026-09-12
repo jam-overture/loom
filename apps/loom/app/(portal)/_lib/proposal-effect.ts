@@ -16,6 +16,8 @@ import {
   type TreeOperation,
 } from "@loom/runtime"
 
+import { partNameOf, placeNameOf, type PartName } from "./part-name"
+
 /**
  * What a proposal would replace, read against the tree it names.
  *
@@ -95,14 +97,35 @@ export type OperationEffect = {
   readonly op: TreeOperation["op"]
   /** The portal's verb, not the delta model's — `delta-summary` owns the mapping. */
   readonly verb: string
-  /** The node as a reader recognises it: a primitive type, a slot name, or "text". */
-  readonly subject: string
+  /**
+   * The part the operation is about, named — its words, its noun and its id.
+   *
+   * A bare `string` only where no node could be found under the id the
+   * operation names, and then it is that id exactly. `part-name.ts` holds why
+   * the fallback is the identifier itself rather than a phrase standing in for
+   * it.
+   *
+   * **An insert's subject is named from the delta rather than from the tree.**
+   * The node it places does not exist on the page yet, so the only account of
+   * what is arriving is the one the proposal carries — the mirror of a removal,
+   * whose only surviving account is its inverse.
+   */
+  readonly subject: string | PartName
+  /**
+   * The runtime's own word for the same part — `loom.card`, a slot's name,
+   * `text` — or the bare id where there is no node. Kept because the technical
+   * reading is composed from it and must go on saying what it always said.
+   */
+  readonly label: string
   /** Where it sits, root first, in labels rather than in minted ids. */
   readonly place: readonly string[]
+  /** The same path, each step named as a place. What the plain row shows. */
+  readonly placeNames: readonly string[]
   /** Where and how much, in one sentence. */
   readonly detail: string
   /**
-   * Where it lands, and where it comes from, as labels rather than as prose.
+   * Where it lands, and where it comes from, named as places rather than as
+   * prose.
    *
    * `detail` above says the same things and says them in one composed string —
    * `into loom.band, before loom.heading` — which is exactly the shape a plain
@@ -111,6 +134,10 @@ export type OperationEffect = {
    * `detail` verbatim. `null` throughout means the operation has no such part:
    * a remove lands nowhere, a move within one parent comes from and goes to the
    * same place, an insert at the end sits before nothing.
+   *
+   * Named by `placeNameOf`, which is what it is and not what it says: a
+   * container's words are its contents' words, so quoting the page a change
+   * lands in names the page's contents rather than the place.
    */
   readonly into: string | null
   readonly before: string | null
@@ -150,18 +177,28 @@ const VERBS: Readonly<Record<TreeOperation["op"], string>> = {
   configure: "reconfigure",
 }
 
-/** The labels from the root down to — but not including — the node itself. */
-const placeOf = (root: LoomNode, nodeId: NodeId): readonly string[] => {
+/**
+ * The path to a node, in both vocabularies at once.
+ *
+ * Read once and mapped twice rather than walked twice: the two readings are the
+ * same path and a caller that could take one without the other would eventually
+ * show a breadcrumb that disagrees with the record beside it.
+ *
+ * `through` is what a *parent's* place is — the path down to and including the
+ * node — and the default is the path down to but not including it, which is
+ * where the node itself sits.
+ */
+const pathReadings = (
+  root: LoomNode,
+  nodeId: NodeId,
+  through = false
+): { readonly labels: readonly string[]; readonly names: readonly string[] } => {
   const path = nodePath(root, nodeId)
+  if (path === null) return { labels: [], names: [] }
 
-  return path === null ? [] : path.slice(0, -1).map(nodeLabel)
-}
+  const steps = through ? path : path.slice(0, -1)
 
-/** The path down to and including the node, which is what a parent's place is. */
-const placeThrough = (root: LoomNode, nodeId: NodeId): readonly string[] => {
-  const path = nodePath(root, nodeId)
-
-  return path === null ? [] : path.map(nodeLabel)
+  return { labels: steps.map(nodeLabel), names: steps.map(placeNameOf) }
 }
 
 const countNodes = (node: LoomNode): number => Array.from(walkTree(node)).length
@@ -270,15 +307,18 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
       const carries = countNodes(operation.node)
       const parent = findNode(root, operation.parentId)
       const occupant = childrenOfNode(parent)[operation.index]
+      const path = pathReadings(root, operation.parentId, true)
 
       return {
         op: operation.op,
         verb,
-        subject: nodeLabel(operation.node),
-        place: placeThrough(root, operation.parentId),
+        subject: partNameOf(operation.node),
+        label: nodeLabel(operation.node),
+        place: path.labels,
+        placeNames: path.names,
         detail: insertDetail(root, operation.parentId, operation.index, carries),
-        into: parent === null ? null : nodeLabel(parent),
-        before: occupant === undefined ? null : nodeLabel(occupant),
+        into: parent === null ? null : placeNameOf(parent),
+        before: occupant === undefined ? null : placeNameOf(occupant),
         from: null,
         changes: [],
         text: textIn(operation.node),
@@ -291,12 +331,15 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
     case "remove": {
       const node = findNode(root, operation.nodeId)
       const carries = node === null ? null : countNodes(node)
+      const path = pathReadings(root, operation.nodeId)
 
       return {
         op: operation.op,
         verb,
-        subject: node === null ? operation.nodeId : nodeLabel(node),
-        place: placeOf(root, operation.nodeId),
+        subject: node === null ? operation.nodeId : partNameOf(node),
+        label: node === null ? operation.nodeId : nodeLabel(node),
+        place: path.labels,
+        placeNames: path.names,
         detail:
           node === null
             ? "this tree has no such node"
@@ -318,17 +361,20 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
       const node = findNode(root, operation.nodeId)
       const from = findParent(root, operation.nodeId)
       const to = findNode(root, operation.parentId)
+      const path = pathReadings(root, operation.nodeId)
 
       return {
         op: operation.op,
         verb,
-        subject: node === null ? operation.nodeId : nodeLabel(node),
-        place: placeOf(root, operation.nodeId),
+        subject: node === null ? operation.nodeId : partNameOf(node),
+        label: node === null ? operation.nodeId : nodeLabel(node),
+        place: path.labels,
+        placeNames: path.names,
         detail: node === null ? "this tree has no such node" : moveDetail(root, operation),
-        into: to === null ? null : nodeLabel(to),
+        into: to === null ? null : placeNameOf(to),
         before: null,
         /** `null` when it is not leaving: a move within one parent has no elsewhere to name. */
-        from: from === null || from.id === operation.parentId ? null : nodeLabel(from),
+        from: from === null || from.id === operation.parentId ? null : placeNameOf(from),
         changes: [],
         text: [],
         carries: null,
@@ -340,12 +386,15 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
     case "configure": {
       const node = findNode(root, operation.nodeId)
       const changes = node === null ? [] : changesFor(node, operation)
+      const path = pathReadings(root, operation.nodeId)
 
       return {
         op: operation.op,
         verb,
-        subject: node === null ? operation.nodeId : nodeLabel(node),
-        place: placeOf(root, operation.nodeId),
+        subject: node === null ? operation.nodeId : partNameOf(node),
+        label: node === null ? operation.nodeId : nodeLabel(node),
+        place: path.labels,
+        placeNames: path.names,
         detail: node === null ? "this tree has no such node" : configureDetail(changes),
         into: null,
         before: null,

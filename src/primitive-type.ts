@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { NAMESPACED_ID_PATTERN } from "./grammar.js"
+
 /**
  * The names a tree uses to reach what a deployment registered.
  *
@@ -8,18 +10,7 @@ import { z } from "zod"
  * it.
  */
 
-const SEGMENT = "[a-z][a-z0-9]*(?:-[a-z0-9]+)*"
-
-/**
- * The grammar of every name a tree uses to reach something a deployment
- * registered: a primitive, a data source, a submission endpoint. Dot-namespaced
- * kebab-case — `stack`, `commerce.product-card`, `contact.enquiry`.
- *
- * One pattern rather than one per registry, because the sameness is the point.
- * A tree names a capability and a registry decides what that name reaches; a
- * second grammar would say those are different kinds of name when they are not.
- */
-export const NAMESPACED_ID_PATTERN = new RegExp(`^${SEGMENT}(?:\\.${SEGMENT})*$`)
+export { NAMESPACED_ID_PATTERN } from "./grammar.js"
 
 /**
  * The identifier of a registered primitive — the contract between an element
