@@ -19469,3 +19469,26 @@ destination it has no way to link at.
 
 **What would close it:** allow `#fragment` where the fragment is a valid id, in
 the same schema and with the same test that covers the scheme allowlist.
+
+## 2026-09-12 — a broadcaster's `types` filter applies to every kind at once
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** open
+
+Found switching `prototypes/ski-apparel` to `@loom/runtime/signals`.
+
+`broadcastReaderSignals` takes one `types` list, and it filters all four kinds by
+it. A host rarely wants that. The ski rail wants **time on screen** for sections
+(`loom.hero`, `loom.section`), **activations** for the links and buttons inside
+them (`loom.link`, `loom.action`), and **disclosures** for questions (`loom.faq`).
+With one list it has to name all five types for all four kinds, so every batch
+also carries `viewed` and `dwelled` for every link and button on screen — about
+ten `dwelled` signals a second on this page, most of which nobody asked for.
+
+The alternative a host has today is filtering after the fact, which means paying
+to gather, batch and send signals only to throw them away.
+
+**What would close it:** let `types` be keyed by kind —
+`types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] }` —
+with a plain list still meaning "these types, every kind". The ledger already
+separates the two paths (visibility and events), so the filter splits along a
+seam that exists. A decision record would amend 0136's configuration paragraph.

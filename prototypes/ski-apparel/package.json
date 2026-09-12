@@ -12,5 +12,8 @@
     "@loom/runtime": "file:../..",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1"
   }
 }

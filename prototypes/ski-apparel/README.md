@@ -30,18 +30,25 @@ call.
 
 ## The signal rail
 
-`pnpm dev` serves the page with a rail down the right-hand side showing what the
-page can observe about being read: time on each section, clicks on the nav links
-that jump to one, questions opened, and a feed of those events as they happen.
+`pnpm dev` serves the page with a rail down the right-hand side, driven by the
+framework's own broadcaster, `@loom/runtime/signals`. There is no hand-written
+collector.
 
-It is a development instrument, not part of the tree. And it observes only — it
-draws no conclusions and changes nothing on the page.
+What happens, end to end:
 
-- **`sidebar.mjs`** collects. An `IntersectionObserver` for which section fills
-  the screen, a one-second tick for how long it stayed, and one document-level
-  click listener. The page is not instrumented for any of it: the hooks are the
-  `anchor` props it already had.
-- **`signals.mjs`** folds each event into the readings. Pure; the server holds
-  the result.
+1. **The page is rendered `addressed: true`**, so every component carries its node
+   id and type, and the root carries the tree id and revision. `?rail=off` is the
+   page a visitor gets: no rail and no ids.
+2. **`rail.client.mjs` starts `broadcastReaderSignals`** with the settings a host
+   would choose — which primitive types to report on, and a one-second batch. The
+   dev server bundles it with esbuild at startup.
+3. **Each batch is read twice.** The rail listens for the `loom:signals` DOM event
+   and folds batches into what it shows (`readings.mjs`). `send` posts the same
+   batch to the dev server, which checks it with `parseReaderSignalBatch` and
+   prints what arrived — or why it refused it. Nothing is stored.
+4. **Words come from the tree, not the signal.** A signal names a node and never
+   its content, so the page embeds a small legend built from the tree
+   (`legend.mjs`): which node is which section, where each link jumps, what each
+   question asks.
 
-`?rail=off` serves the page without it. **Start over** clears the readings.
+**Start over** clears what the rail has counted.

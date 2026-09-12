@@ -1,73 +1,84 @@
 import { createServer } from "node:http"
 
+import { build } from "esbuild"
+import { parseReaderSignalBatch } from "@loom/runtime/signals"
+
 import { buildPage } from "./page.mjs"
 import { renderPage } from "./render.mjs"
-import { emptyReadings, questionsOpened, record, summarise } from "./signals.mjs"
 
 /**
  * A dev server, in the smallest form that makes the point.
  *
- * There is no bundler and no framework: a Loom page is data, and serving it is a
- * function call and a string.
- *
- * The readings live in one variable for the life of the process. That is wrong
- * for anything real — a second reader would pollute the first — and right here,
- * because the demo is one person scrolling and a session store would be the only
- * interesting thing in the file.
+ * It does three things. It renders the tree. It bundles `rail.client.mjs` —
+ * which imports the framework's broadcaster — once at startup, because a
+ * browser cannot resolve `@loom/runtime/signals` on its own. And it receives
+ * every batch the broadcaster sends, parses it the way a real receiver must, and
+ * prints what arrived. It stores nothing.
  */
 
 const PORT = Number(process.env.PORT ?? 4321)
 
 const tree = buildPage()
 
-/** The section order, read off the tree the page is rendered from. */
-const order = tree.root.children
-  .map((child) => child.props?.anchor)
-  .filter((anchor) => typeof anchor === "string")
-
-let readings = emptyReadings()
-
-const json = (response, status, body) => {
-  response.writeHead(status, { "content-type": "application/json" })
-  response.end(JSON.stringify(body))
-}
+const bundled = await build({
+  entryPoints: [new URL("./rail.client.mjs", import.meta.url).pathname],
+  bundle: true,
+  format: "iife",
+  platform: "browser",
+  write: false,
+  logLevel: "warning",
+})
+const railScript = bundled.outputFiles[0].text
 
 const readBody = async (request) => {
   const chunks = []
   for await (const chunk of request) chunks.push(chunk)
-  return chunks.length === 0 ? {} : JSON.parse(Buffer.concat(chunks).toString("utf8"))
+  return Buffer.concat(chunks).toString("utf8")
 }
 
-/** What the rail gets back on every tick. */
-const state = () => ({
-  sections: summarise(readings, order),
-  questions: questionsOpened(readings),
-  feed: readings.feed,
-})
+const countsOf = (signals) =>
+  Object.entries(
+    signals.reduce((counts, signal) => ({ ...counts, [signal.kind]: (counts[signal.kind] ?? 0) + 1 }), {})
+  )
+    .map(([kind, count]) => `${kind} ${count}`)
+    .join(", ")
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", `http://localhost:${PORT}`)
 
+  /**
+   * A browser is not a trusted author, so the batch is parsed rather than
+   * believed. A malformed one is refused with the reasons, and a good one is
+   * printed — which is the whole of what "readable" means before anything is
+   * stored.
+   */
   if (request.method === "POST" && url.pathname === "/signals") {
+    let input
     try {
-      const { events = [] } = await readBody(request)
-      const at = Date.now()
-      for (const event of events) readings = record(readings, event, at)
-      json(response, 200, state())
-    } catch (error) {
-      json(response, 400, { error: String(error) })
+      input = JSON.parse(await readBody(request))
+    } catch {
+      input = undefined
     }
+
+    const parsed = parseReaderSignalBatch(input)
+
+    if (!parsed.ok) {
+      process.stdout.write(`refused a batch: ${JSON.stringify(parsed.error.issues)}\n`)
+      response.writeHead(400, { "content-type": "application/json" })
+      response.end(JSON.stringify(parsed.error))
+      return
+    }
+
+    const batch = parsed.value
+    process.stdout.write(`batch ${batch.treeId} rev ${batch.revision} — ${countsOf(batch.signals)}\n`)
+    response.writeHead(204)
+    response.end()
     return
   }
 
-  /**
-   * Clears the readings. POST, because a GET that changes state is one a link
-   * prefetcher or a page scanner can fire without anybody asking.
-   */
-  if (request.method === "POST" && url.pathname === "/reset") {
-    readings = emptyReadings()
-    process.stdout.write("reset — readings cleared\n")
-    json(response, 200, { ok: true })
+  if (url.pathname === "/rail.js") {
+    response.writeHead(200, { "content-type": "text/javascript; charset=utf-8" })
+    response.end(railScript)
     return
   }
 
@@ -77,7 +88,7 @@ const server = createServer(async (request, response) => {
       const { document, diagnostics, nodeCount } = renderPage({ rail, tree })
 
       const note = diagnostics.length === 0 ? "clean" : `${diagnostics.length} diagnostic(s)`
-      process.stdout.write(`rendered ${nodeCount} nodes — ${note}\n`)
+      process.stdout.write(`rendered ${nodeCount} nodes${rail ? ", addressed" : ""} — ${note}\n`)
       for (const diagnostic of diagnostics) process.stdout.write(`  ! ${JSON.stringify(diagnostic)}\n`)
 
       response.writeHead(200, { "content-type": "text/html; charset=utf-8" })
@@ -96,5 +107,5 @@ const server = createServer(async (request, response) => {
 
 server.listen(PORT, () => {
   process.stdout.write(`ski apparel prototype — http://localhost:${PORT}\n`)
-  process.stdout.write(`  ?rail=off  the page on its own\n`)
+  process.stdout.write(`  ?rail=off  the page a visitor gets: no rail, no node ids\n`)
 })

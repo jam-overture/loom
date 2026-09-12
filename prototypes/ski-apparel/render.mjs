@@ -4,7 +4,8 @@ import { renderLoomTree } from "@loom/runtime/react"
 import { renderToStaticMarkup } from "react-dom/server"
 
 import { buildPage } from "./page.mjs"
-import { SIDEBAR_MARKUP, SIDEBAR_SCRIPT, SIDEBAR_STYLES } from "./sidebar.mjs"
+import { legendOf } from "./legend.mjs"
+import { SIDEBAR_MARKUP, SIDEBAR_STYLES } from "./sidebar.mjs"
 
 /**
  * The page, as one HTML document.
@@ -24,6 +25,11 @@ export const renderPage = ({ rail = false, tree = buildPage() } = {}) => {
     resolver: registry.value,
     validator: registry.value,
     themes: createThemeRegistry(),
+    /**
+     * Node ids on the markup only when the rail is on. `?rail=off` is the page a
+     * visitor would get, and a published page carries no ids unless asked.
+     */
+    addressed: rail,
   })
 
   const body = renderToStaticMarkup(output.element)
@@ -43,12 +49,16 @@ ${rail ? SIDEBAR_STYLES : ""}
 <body>
 <div class="loom-page-host">${body}</div>
 ${rail ? SIDEBAR_MARKUP : ""}
-${rail ? `<script>${SIDEBAR_SCRIPT}</script>` : ""}
+${rail ? `<script type="application/json" id="loom-legend">${safeJson(legendOf(tree))}</script>` : ""}
+${rail ? `<script src="/rail.js"></script>` : ""}
 </body>
 </html>`
 
   return { document, diagnostics: output.diagnostics, nodeCount: count(tree.root) }
 }
+
+/** JSON inside a script element, with nothing in it that could close the element. */
+const safeJson = (value) => JSON.stringify(value).replace(/</g, "\\u003c")
 
 const count = (node) =>
   node.kind === "text" ? 1 : 1 + node.children.reduce((total, child) => total + count(child), 0)

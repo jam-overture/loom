@@ -6,7 +6,8 @@
  * one: the rail is a person watching the page being read, not something the
  * page contains.
  *
- * It is a development tool. Nothing here ships to a visitor.
+ * It is a development tool. Nothing here ships to a visitor. What drives it is
+ * `rail.client.mjs`, bundled by the dev server.
  */
 
 export const SIDEBAR_STYLES = `
@@ -66,9 +67,12 @@ export const SIDEBAR_STYLES = `
   .feed li:first-child { animation: arrive .6s ease-out; }
   .feed .t { color: #3f4b5c; font-variant-numeric: tabular-nums; }
   .feed .k { color: #61708a; }
-  .feed .k.nav-click { color: #2f81f7; }
-  .feed .k.faq-click { color: #d3a75f; }
-  .feed .k.reached { color: #6fbd94; }
+  .feed .k.activated { color: #2f81f7; }
+  .feed .k.opened, .feed .k.closed { color: #d3a75f; }
+  .feed .k.viewed { color: #6fbd94; }
+  .feed li.batch .k, .feed li.batch .s { color: #3f4b5c; }
+  .totals { margin: -4px 0 10px; font-size: 11px; color: #4e5c70; }
+  #rail .sub code { font: inherit; color: #6ee7d7; }
   .feed .s { color: #b6c4d6; word-break: break-word; }
   .idle { color: #4e5c70; font-size: 12.5px; margin: 0; }
 
@@ -81,12 +85,12 @@ export const SIDEBAR_MARKUP = `
   <header>
     <div>
       <h2>Signals</h2>
-      <p class="sub">What this page notices about being read</p>
+      <p class="sub">From <code>@loom/runtime/signals</code></p>
     </div>
-    <button class="again" id="again" title="Clear the readings">Start over</button>
+    <button class="again" id="again" title="Clear what the rail has counted">Start over</button>
   </header>
   <section>
-    <h3>Time on each section &middot; clicks</h3>
+    <h3>Time on each section &middot; jumps to it</h3>
     <div id="dwell"></div>
   </section>
   <section id="qwrap" hidden>
@@ -94,143 +98,9 @@ export const SIDEBAR_MARKUP = `
     <div id="questions"></div>
   </section>
   <section>
-    <h3>Events, newest first</h3>
+    <h3>Signals, newest first</h3>
+    <p class="totals" id="totals"></p>
     <ul class="feed" id="feed"><li><span class="idle">Scroll or click something.</span></li></ul>
   </section>
 </aside>
-`
-
-/**
- * The collector.
- *
- * \`IntersectionObserver\` for what is on screen and a one-second tick for how
- * long it stayed — which is the cheapest honest measure of reading. A scroll
- * position would count a section somebody flew past.
- */
-export const SIDEBAR_SCRIPT = `
-(() => {
-  const SECTIONS = ["top", "layers", "helmets", "goggles", "fit"]
-  const onScreen = new Set()
-
-  /**
-   * How much of the *screen* a section fills — not how much of the section is on
-   * screen. \`intersectionRatio\` is the second thing, and it caps at
-   * viewport ÷ section height: the goggles section is 2575px tall against a
-   * 768px window, so it can never exceed 0.30 no matter how squarely a reader is
-   * looking at it. A long section would never have registered.
-   */
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        const filled = entry.intersectionRect.height / Math.max(1, window.innerHeight)
-        if (entry.isIntersecting && filled > 0.3) onScreen.add(entry.target.id)
-        else onScreen.delete(entry.target.id)
-      }
-    },
-    { threshold: Array.from({ length: 21 }, (_unused, step) => step / 20) }
-  )
-
-  for (const id of SECTIONS) {
-    const node = document.getElementById(id)
-    if (node) observer.observe(node)
-  }
-
-  const post = async (events) => {
-    const response = await fetch("/signals", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ events }),
-    })
-    return response.json()
-  }
-
-  const send = async (events) => paint(await post(events))
-
-  /**
-   * Clicks, read off the page rather than wired into it.
-   *
-   * One listener on the document, matching on what the reader actually hit. The
-   * page is a Loom tree and nothing in it knows this collector exists — the
-   * moment a primitive has to be instrumented to be measurable, only
-   * instrumented primitives get measured.
-   */
-  document.addEventListener("click", (event) => {
-    const link = event.target.closest && event.target.closest('a[href*="#"]')
-    if (link) {
-      const section = link.getAttribute("href").split("#")[1]
-      if (SECTIONS.includes(section)) send([{ kind: "nav-click", section }])
-      return
-    }
-
-    const summary = event.target.closest && event.target.closest("summary")
-    if (summary) {
-      const question = (summary.querySelector("span")?.textContent ?? "").trim()
-      if (question) send([{ kind: "faq-click", question }])
-    }
-  })
-
-  const escape = (value) =>
-    String(value).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
-
-  const clock = (at) => new Date(at).toLocaleTimeString([], { hour12: false })
-
-  const LABELS = { "nav-click": "nav click", "faq-click": "question", reached: "reached" }
-
-  /** The feed is only rebuilt when a new entry arrived, so its highlight marks an arrival, not a tick. */
-  let newest = null
-
-  const paint = (state) => {
-    const rows = state.sections
-    const most = Math.max(1, ...rows.map((r) => r.seconds))
-    document.getElementById("dwell").innerHTML = rows
-      .map((r) => {
-        const cls = !r.reached ? "row unseen" : r.seconds === most && most > 0 ? "row top" : "row"
-        const width = Math.round((r.seconds / most) * 100)
-        const hits = r.clicks > 0
-          ? \`<span class="hits">\${r.clicks} click\${r.clicks === 1 ? "" : "s"}</span>\`
-          : '<span class="hits none">—</span>'
-        return \`<div class="\${cls}"><span class="name">\${escape(r.label)}</span>\${hits}<span class="secs">\${r.seconds}s</span><span class="bar"><i style="width:\${width}%"></i></span></div>\`
-      })
-      .join("")
-
-    const questions = state.questions
-    document.getElementById("qwrap").hidden = questions.length === 0
-    document.getElementById("questions").innerHTML = questions
-      .map((q) => \`<div class="q"><span class="qt">\${escape(q.question)}</span><span class="qc">\${q.count}×</span></div>\`)
-      .join("")
-
-    const head = state.feed[0]
-    const signature = head ? head.at + head.kind + head.subject + state.feed.length : "empty"
-    if (signature === newest) return
-    newest = signature
-
-    document.getElementById("feed").innerHTML = state.feed.length === 0
-      ? '<li><span class="idle">Scroll or click something.</span></li>'
-      : state.feed
-          .map((e) => \`<li><span class="t">\${clock(e.at)}</span><span class="k \${e.kind}">\${LABELS[e.kind]}</span><span class="s">\${escape(e.subject)}</span></li>\`)
-          .join("")
-  }
-
-  document.getElementById("again").onclick = async () => {
-    await fetch("/reset", { method: "POST" })
-    newest = null
-    paint(await post([]))
-  }
-
-  /**
-   * A hidden tab is not reading, so it neither reports nor polls — and a page the
-   * browser has kept alive after navigating away would otherwise go on ticking
-   * alongside the one in front of you.
-   */
-  let awake = document.visibilityState === "visible"
-  document.addEventListener("visibilitychange", () => { awake = document.visibilityState === "visible" })
-
-  setInterval(async () => {
-    if (!awake) return
-    const events = [...onScreen].map((section) => ({ kind: "dwell", section, ms: 1000 / onScreen.size }))
-    paint(await post(events))
-  }, 1000)
-
-  post([]).then(paint)
-})()
 `
