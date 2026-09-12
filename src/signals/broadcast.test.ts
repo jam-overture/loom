@@ -177,14 +177,43 @@ describe("broadcastReaderSignals", () => {
     expect(signals.flatMap((signal) => (signal.kind === "dwelled" ? [signal.ms] : []))).toEqual([3_000, 1_000])
   })
 
-  it("broadcasts only the kinds and the primitive types the host asked for", () => {
-    const batches = start({ kinds: ["activated"], types: ["loom.nav"] })
+  it("reads a plain types list as that list for every kind", () => {
+    const batches = start({ types: ["loom.card"] })
+    const details = byId("n_4") as HTMLDetailsElement
 
+    reportVisibility([
+      { target: byId("n_2"), visible: true },
+      { target: byId("n_3"), visible: true },
+    ])
+    clock = 2_000
     ;(document.getElementById("link-text") as HTMLElement).click()
-    reportVisibility?.([{ target: byId("n_2"), visible: true }])
+    details.open = true
+    details.dispatchEvent(new Event("toggle"))
     broadcast?.flush()
 
-    expect(batches).toEqual([])
+    expect(kindsIn(batches).sort()).toEqual(["activated:n_3", "dwelled:n_3", "viewed:n_3"])
+  })
+
+  /**
+   * Written after #278 pointed out what the test this replaces could not see: it
+   * paired one kind with a `types` list that excluded everything, so no signal
+   * ever reached the point where its kind is read, and it would have passed with
+   * the kind filter deleted. Here every signal the page could make is in range
+   * of `types`, and one time-based kind is asked for so the observer is really
+   * running — so only `kinds` can be what leaves `viewed` and `disclosed` out.
+   */
+  it("broadcasts only the kinds the host asked for, when the types would allow them all", () => {
+    const batches = start({ kinds: ["activated", "dwelled"] })
+    const details = byId("n_4") as HTMLDetailsElement
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+    clock = 2_000
+    ;(document.getElementById("link-text") as HTMLElement).click()
+    details.open = true
+    details.dispatchEvent(new Event("toggle"))
+    broadcast?.flush()
+
+    expect(kindsIn(batches).sort()).toEqual(["activated:n_3", "dwelled:n_2"])
   })
 
   it("takes types per kind — time on screen for sections, activations for cards", () => {
@@ -213,6 +242,16 @@ describe("broadcastReaderSignals", () => {
     broadcast?.flush()
 
     expect(kindsIn(batches)).toEqual(["disclosed:n_4"])
+  })
+
+  it("counts no time on screen when the host asked only for viewed", () => {
+    const batches = start({ kinds: ["viewed"] })
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+    clock = 5_000
+    broadcast?.flush()
+
+    expect(kindsIn(batches)).toEqual(["viewed:n_2"])
   })
 
   it("sends no viewed when the host asked only for time on screen", () => {
