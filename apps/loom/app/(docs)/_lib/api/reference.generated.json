@@ -1658,9 +1658,9 @@
             {
               "name": "GatePolicy",
               "kind": "type",
-              "signature": "type GatePolicy = {\n    readonly policyId: string;\n    readonly protectedPrimitiveTypes: readonly PrimitiveType[];\n    readonly outOfTreeEffectTypes: readonly PrimitiveType[];\n    readonly protectedPropKeys: readonly string[];\n    readonly interactiveTypes: InteractiveTypes;\n    readonly removalThresholds: {\n        readonly medium: number;\n        readonly high: number;\n    };\n    readonly breadthThreshold: number;\n    readonly shallowDepthThreshold: number;\n    readonly inverseRetentionBudget: number;\n    readonly minimumConfidence: number;\n    readonly confidenceFloor: number;\n    readonly autoApplyCeiling: Readonly<Partial<Record<IntentOrigin, StakeLevel>>>;\n    readonly refusalFloor: StakeLevel;\n};",
+              "signature": "type GatePolicy = Readonly<z.infer<typeof gatePolicySchema>>;",
               "truncated": false,
-              "summary": ""
+              "summary": "The policy's fields, stated once."
             },
             {
               "name": "defaultGatePolicy",
@@ -5172,6 +5172,34 @@
       "types": "./dist/sdk/index.d.ts",
       "groups": [
         {
+          "module": "catalogue",
+          "title": "The catalogue a model is shown",
+          "summary": "What a deployment can build with, as data.",
+          "symbols": [
+            {
+              "name": "CataloguedProp",
+              "kind": "type",
+              "signature": "type CataloguedProp = {\n    readonly name: string;\n    readonly required: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CataloguedPrimitive",
+              "kind": "type",
+              "signature": "type CataloguedPrimitive = {\n    readonly type: PrimitiveType;\n    /** One line, written by the primitive's author, about what it is for. */\n    readonly description: string;\n    /**\n     * Declared props, name-sorted. `undefined` when the declared schema is not an\n     * object schema and its keys therefore cannot be enumerated — unknown, which\n     * is not the same claim as \"none\".\n     */\n    readonly props: readonly CataloguedProp[] | undefined;\n    readonly slots: readonly SlotName[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PrimitiveCatalogue",
+              "kind": "type",
+              "signature": "type PrimitiveCatalogue = readonly CataloguedPrimitive[];",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "sdk/audit",
           "title": "Audit",
           "summary": "The registration-time check, as a function a host calls rather than a side effect of building a registry.",
@@ -5611,6 +5639,20 @@
               "summary": ""
             },
             {
+              "name": "CliErrorCode",
+              "kind": "type",
+              "signature": "type CliErrorCode = CliError[\"code\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CLI_ERROR_CODES",
+              "kind": "value",
+              "signature": "const CLI_ERROR_CODES: readonly CliErrorCode[]",
+              "truncated": false,
+              "summary": "Every way a command can refuse, in the order a user meets them."
+            },
+            {
               "name": "PlannedFile",
               "kind": "type",
               "signature": "type PlannedFile = {\n    readonly path: string;\n    readonly contents: string;\n};",
@@ -5847,6 +5889,20 @@
               "signature": "type StoreError = \n/** No tree under this id — distinct from a tree with an empty history. */\n{\n    readonly code: \"not-found\";\n    readonly treeId: TreeId;\n} | {\n    readonly code: \"already-exists\";\n    readonly treeId: TreeId;\n}\n/**\n * The delta names a base revision that is not the current head. This is the\n * whole of concurrency control: two writers racing at the same base means the\n * second one is refused rather than silently applied to a tree it never saw.\n */\n | {\n    readonly code: \"revision-conflict\";\n    readonly treeId: TreeId;\n    readonly expected: number;\n    readonly found: number;\n} | {\n    readonly code: \"delta-rejected\";\n    readonly treeId: TreeId;\n    readonly error: TreeError;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "StoreErrorCode",
+              "kind": "type",
+              "signature": "type StoreErrorCode = StoreError[\"code\"];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "STORE_ERROR_CODES",
+              "kind": "value",
+              "signature": "const STORE_ERROR_CODES: readonly StoreErrorCode[]",
+              "truncated": false,
+              "summary": "Every way persistence can refuse, in the order a reader meets them."
             },
             {
               "name": "describeStoreError",
