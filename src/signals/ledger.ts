@@ -66,23 +66,31 @@ const accrue = (ledger: SignalLedger, entry: OnScreen, now: number): SignalLedge
 }
 
 /**
- * A node came into view. The first time in the page's life it is also `viewed`;
- * after that, returning is dwell and nothing else.
+ * A node is seen for the first time: `viewed`, once for the life of the page.
+ *
+ * Only ever called while the page is visible. A node that is on screen in a tab
+ * nobody is looking at has not been viewed — a page opened in the background
+ * would otherwise report its whole first screen as read.
  */
+const sighted = (ledger: SignalLedger, address: SignalAddress, now: number): SignalLedger =>
+  ledger.seen.has(address.nodeId)
+    ? ledger
+    : {
+        ...ledger,
+        seen: new Set(ledger.seen).add(address.nodeId),
+        queued: [...ledger.queued, { kind: "viewed", ...address, at: now }],
+      }
+
+/** A node came into view. Returning after the first time is dwell and nothing else. */
 export const entered = (ledger: SignalLedger, address: SignalAddress, now: number): SignalLedger => {
   if (ledger.onScreen.has(address.nodeId)) return ledger
 
-  const firstTime = !ledger.seen.has(address.nodeId)
-
-  return {
+  const placed = {
     ...ledger,
-    onScreen: withEntry(ledger.onScreen, address.nodeId, {
-      address,
-      since: ledger.hidden ? null : now,
-    }),
-    seen: firstTime ? new Set(ledger.seen).add(address.nodeId) : ledger.seen,
-    queued: firstTime ? [...ledger.queued, { kind: "viewed", ...address, at: now }] : ledger.queued,
+    onScreen: withEntry(ledger.onScreen, address.nodeId, { address, since: ledger.hidden ? null : now }),
   }
+
+  return ledger.hidden ? placed : sighted(placed, address, now)
 }
 
 export const left = (ledger: SignalLedger, nodeId: NodeId, now: number): SignalLedger => {
@@ -114,14 +122,18 @@ export const hid = (ledger: SignalLedger, now: number): SignalLedger => {
   }
 }
 
-export const showed = (ledger: SignalLedger, now: number): SignalLedger =>
-  ledger.hidden
-    ? {
-        ...ledger,
-        hidden: false,
-        onScreen: new Map([...ledger.onScreen].map(([id, entry]) => [id, { ...entry, since: now }])),
-      }
-    : ledger
+/** The page is being looked at again. Whatever is on screen starts counting, and is viewed if it never was. */
+export const showed = (ledger: SignalLedger, now: number): SignalLedger => {
+  if (!ledger.hidden) return ledger
+
+  const resumed: SignalLedger = {
+    ...ledger,
+    hidden: false,
+    onScreen: new Map([...ledger.onScreen].map(([id, entry]) => [id, { ...entry, since: now }])),
+  }
+
+  return [...resumed.onScreen.values()].reduce((next, entry) => sighted(next, entry.address, now), resumed)
+}
 
 /**
  * Everything owed since the last drain, and the ledger that is left.

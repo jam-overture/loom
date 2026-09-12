@@ -59,6 +59,16 @@ describe("the signal ledger", () => {
     expect(dwellOf(drain(ledger, 10_500).signals)).toEqual([500])
   })
 
+  it("does not call a node viewed while nobody can see the page, and does once someone can", () => {
+    const hiddenTab = entered(emptyLedger(true), goggles, 0)
+    const whileHidden = drain(hiddenTab, 5000)
+
+    expect(whileHidden.signals).toEqual([])
+
+    const shown = drain(showed(whileHidden.ledger, 8000), 8000)
+    expect(shown.signals).toEqual([{ kind: "viewed", ...goggles, at: 8000 }])
+  })
+
   it("has nothing to say about a node that was never on screen", () => {
     expect(drain(emptyLedger(), 5000).signals).toEqual([])
   })

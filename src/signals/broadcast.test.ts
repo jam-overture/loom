@@ -132,6 +132,21 @@ describe("broadcastReaderSignals", () => {
     ])
   })
 
+  it("does not report a details the page authored open as a reader opening it", () => {
+    const details = byId("n_4") as HTMLDetailsElement
+    details.open = true
+    const batches = start()
+
+    details.dispatchEvent(new Event("toggle"))
+    broadcast?.flush()
+    expect(batches).toEqual([])
+
+    details.open = false
+    details.dispatchEvent(new Event("toggle"))
+    broadcast?.flush()
+    expect(batches.flatMap((batch) => batch.signals)).toMatchObject([{ kind: "disclosed", open: false }])
+  })
+
   it("reports the disclose control through the attribute it stamps, and not also as a click", async () => {
     const batches = start()
     const menu = document.getElementById("menu") as HTMLElement

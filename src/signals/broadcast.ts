@@ -250,9 +250,24 @@ export const broadcastReaderSignals = (
     onActivated(control)
   }
 
+  /**
+   * The last state each `details` was seen in, so only a change is reported.
+   *
+   * A browser fires `toggle` for a `details` that was *authored* open, as the
+   * page loads — nobody opened it. Snapshotting every one when broadcasting
+   * starts, and reporting a toggle only when it disagrees with the snapshot, is
+   * what keeps a page's own markup from reading as a reader's action. One added
+   * to the page later has no snapshot, and its first toggle is taken at its word.
+   */
+  const lastOpen = new WeakMap<HTMLDetailsElement, boolean>(
+    Array.from(root.querySelectorAll("details")).map((details) => [details, details.open])
+  )
+
   const onToggle = (event: Event): void => {
     const details = event.target
     if (!(details instanceof HTMLDetailsElement)) return
+    if (lastOpen.get(details) === details.open) return
+    lastOpen.set(details, details.open)
     record("disclosed", (address) => ({ kind: "disclosed", ...address, open: details.open, at: now() }))(details)
   }
 
