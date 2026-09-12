@@ -57,7 +57,7 @@ export const fold = (readings, batch, legend) => {
     .filter((line) => line !== undefined)
     .map((line) => ({ ...line, at: batch.sentAt }))
 
-  const header = { kind: "batch", at: batch.sentAt, subject: `rev ${batch.revision} · ${batch.signals.length} signals` }
+  const header = { kind: "batch", at: batch.sentAt, subject: `rev ${batch.revision} · ${batch.signals.length} signal${batch.signals.length === 1 ? "" : "s"}` }
 
   return {
     ...folded,
