@@ -44,7 +44,7 @@ import { fontPackSchema, type FontPack } from "./theme.js"
  *
  * ## The mono family, and why most packs decline it
  *
- * `monoFamily` is optional (0084), and five of the seventeen below set it: the
+ * `monoFamily` is optional (0085), and five of the seventeen below set it: the
  * two built out of a monospace, `typewriter`, and the two whose named face has
  * a mono sibling a host serving one is almost certainly serving too. The rest
  * say nothing on purpose. A pack that paired, say, Garamond with an arbitrary mono

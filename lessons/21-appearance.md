@@ -749,7 +749,7 @@ not one. **The value space closed one layer earlier than you might look for it:*
 there is no point at which a colour is checked and rejected, because there is no
 point at which a colour is expected.
 
-### Exercise B — one id, forty-five variables, one attribute
+### Exercise B — one id, fifty-two variables, one attribute
 
 ```ts
 describe("B", () => {
@@ -791,9 +791,9 @@ one of these two documents to turn it into the other.
 The output:
 
 ```
-  variables from three ids:  45
+  variables from three ids:  52
   palette slots:             17
-  changed by the palette id: 17
+  changed by the palette id: 23
   --loom-accent:             #4a5b78 -> #ffd400
   --loom-scale-5:            24px -> 24px
   the two documents are identical:          false
@@ -801,10 +801,15 @@ The output:
   occurrences of --loom-accent in a page:   1
 ```
 
-Seventeen of forty-five, which is the orthogonality claim in numbers: the palette
-id moves every colour and no type or spacing value, so `--loom-scale-5` is 24px
-in both. Swapping *one* of the three ids changes exactly the variables that id
-owns.
+Twenty-three of fifty-two, which is the orthogonality claim in numbers: the
+palette id moves every colour and no type or spacing value, so `--loom-scale-5` is
+24px in both. Twenty-three rather than seventeen because a palette's variables are
+not only its seventeen slots — the runtime also measures a chroma for five of them
+and derives a scrim pair from its body copy
+([0131](../decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md)),
+and those move with the palette too. (The scrim's ground happens to measure the
+same under these two palettes, so six of the seven change here.) Swapping *one* of
+the three ids changes exactly the variables that id owns.
 
 The last two lines are the load-bearing ones. Two pages in wildly different
 colour schemes are **the same document with one attribute different**, and

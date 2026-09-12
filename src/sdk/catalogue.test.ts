@@ -5,7 +5,12 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { registryOf, testDefinitions } from "../testing/definitions.js"
 
-import { catalogueOf } from "./catalogue.js"
+import {
+  catalogueOf,
+  type CataloguedPrimitive,
+  type CataloguedProp,
+  type PrimitiveCatalogue,
+} from "./catalogue.js"
 import { definePrimitive } from "./definition.js"
 
 const unenumerable = definePrimitive({
@@ -47,5 +52,20 @@ describe("catalogueOf", () => {
     const catalogue = catalogueOf(registryOf(testDefinitions))
 
     expect(JSON.parse(JSON.stringify(catalogue))).toEqual(catalogue)
+  })
+
+  /**
+   * A host writing a function over the answer should not have to import the
+   * function from one entry point and the shape of its result from another. The
+   * types below are imported from *this* module rather than from `../catalogue.js`
+   * on purpose: that is the whole assertion, and it is a compile-time one.
+   */
+  it("carries the shape of its own answer, so one import serves a host writing over it", () => {
+    const catalogue: PrimitiveCatalogue = catalogueOf(registryOf(testDefinitions))
+    const first: CataloguedPrimitive | undefined = catalogue[0]
+    const props: readonly CataloguedProp[] | undefined = first?.props
+
+    expect(first?.type).toBe("loom.page")
+    expect(props?.some((prop) => prop.name === "title")).toBe(true)
   })
 })

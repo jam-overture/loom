@@ -26,7 +26,8 @@ const rows: readonly OutlineRow[] = [
     nodeId: "n_shot2",
     depth: 0,
     kind: "element",
-    label: "loom.heading",
+    label: "Heading",
+    technical: "loom.heading",
     addressing: { outcome: "addressable", nodeId: "n_shot2" as NodeId },
   },
 ]
@@ -91,13 +92,31 @@ describe("PromptBox", () => {
   it("names the picked part, and posts it as the scope", () => {
     const { container } = box(true)
 
-    fireEvent.click(screen.getByRole("button", { name: /loom.heading/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
 
-    expect(document.body.textContent).toContain("Just this part:")
+    expect(document.body.textContent).toContain("Just this part: Heading")
     expect(container.querySelector('input[name="scopeNodeId"]')).toHaveProperty(
       "value",
       "n_shot2"
     )
+  })
+
+  /**
+   * The line exists so a reader recognises what they are about to change. An
+   * id is the one name they cannot check against the page in front of them, so
+   * it follows the part's own name rather than standing in for it — and it
+   * still stands there, because it is what the ask actually posts.
+   */
+  it("leads that line with the part's name and keeps its id after it", () => {
+    const { container } = box(true)
+
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
+
+    const line = [...container.querySelectorAll("span")]
+      .map((element) => element.textContent ?? "")
+      .find((text) => text.startsWith("Just this part:"))
+
+    expect(line).toBe("Just this part: Heading n_shot2")
   })
 
   it("posts the page and the revision it was looking at, and never a delta", () => {
