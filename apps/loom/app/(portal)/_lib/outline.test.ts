@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { buildElement, buildText, createTree, sequentialIdFactory } from "@loom/runtime"
+import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } from "@loom/runtime"
 import type { DecorationLookup } from "@loom/runtime/react"
 
 import { portalDecoration } from "./addressing"
@@ -26,10 +26,59 @@ describe("outlineRows", () => {
     const rows = outlineRows(treeWith("Title"), everything)
 
     expect(rows.map((row) => [row.label, row.depth])).toEqual([
-      ["loom.page", 0],
-      ["loom.heading", 1],
+      ["Page", 0],
+      ["Heading", 1],
       ["Title", 2],
     ])
+  })
+
+  /**
+   * The rail printed `loom.page` over `loom.heading` over the words, which is
+   * the registry describing itself to somebody who has a page with a heading on
+   * it. A row is a place, and a place is named by what it is.
+   */
+  it("names a part by what it is, not by the type that draws it", () => {
+    const rows = outlineRows(treeWith("Title"), everything)
+
+    for (const row of rows) expect(row.label).not.toContain("loom.")
+  })
+
+  /**
+   * The half that keeps this a disclosure rather than a deletion: the type is
+   * still on the row, for the pane that prints it one click down.
+   */
+  it("keeps the registered type on the row rather than dropping it", () => {
+    const rows = outlineRows(treeWith("Title"), everything)
+
+    expect(rows.map((row) => row.technical)).toEqual(["loom.page", "loom.heading", null])
+  })
+
+  /**
+   * A name nobody has to write down. `part-name.ts` owns the rule and this is
+   * the case that proves the rail is using it rather than a table of the four
+   * primitives this deployment happens to register.
+   */
+  it("reads a host's own namespaced, hyphenated type as words", () => {
+    const ids = sequentialIdFactory("o")
+    const tree = createTree(buildElement(ids, { type: "acme.buy-button" }), ids)
+
+    expect(outlineRows(tree, everything)[0]?.label).toBe("Buy button")
+  })
+
+  it("calls a slot by its own name and says what a slot is", () => {
+    const ids = sequentialIdFactory("o")
+    const tree = createTree(
+      buildElement(ids, {
+        type: "loom.card",
+        children: [buildSlot(ids, "body", [buildText(ids, "Inside")])],
+      }),
+      ids
+    )
+
+    const slot = outlineRows(tree, everything)[1]
+
+    expect(slot?.label).toBe("Body space")
+    expect(slot?.technical).toBe("body")
   })
 
   it("labels a text node with its own text, collapsed and cut to fit", () => {

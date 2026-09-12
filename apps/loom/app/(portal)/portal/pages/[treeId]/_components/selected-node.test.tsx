@@ -33,18 +33,22 @@ const row = (
   nodeId: string,
   kind: OutlineRow["kind"],
   label: string,
+  technical: string | null,
   addressing: OutlineRow["addressing"]
-): OutlineRow => ({ nodeId, depth: 0, kind, label, addressing })
+): OutlineRow => ({ nodeId, depth: 0, kind, label, technical, addressing })
 
 const rows: readonly OutlineRow[] = [
-  row("n_card", "element", "loom.card", { outcome: "addressable", nodeId: "n_card" as NodeId }),
-  row("n_words", "text", "Hello there", {
+  row("n_card", "element", "Card", "loom.card", {
+    outcome: "addressable",
+    nodeId: "n_card" as NodeId,
+  }),
+  row("n_words", "text", "Hello there", null, {
     outcome: "delegated",
     nodeId: "n_card" as NodeId,
     requested: "n_words" as NodeId,
     reason: "not-an-element",
   }),
-  row("n_lost", "element", "loom.mystery", {
+  row("n_lost", "element", "Mystery", "loom.mystery", {
     outcome: "unaddressable",
     requested: "n_lost" as NodeId,
     reason: "undecorated-primitive",
@@ -69,6 +73,16 @@ const pane = (credits: Record<string, NodeCredit> = {}) =>
   )
 
 const pick = (name: RegExp) => fireEvent.click(screen.getByRole("button", { name }))
+
+/**
+ * The pane's own disclosure. The outline rendered beside it has one too — its
+ * legend — so a test reaching for the first `<details>` in the tree would be
+ * asserting about the wrong pane.
+ */
+const addressing = (container: HTMLElement): HTMLDetailsElement | undefined =>
+  [...container.querySelectorAll("details")].find((element) =>
+    element.textContent?.includes("addresses")
+  )
 
 describe("SelectedNode", () => {
   /**
@@ -117,10 +131,55 @@ describe("SelectedNode", () => {
     expect(document.body.textContent).toContain("Words")
   })
 
+  /**
+   * The pane led with `n_seed9` in the largest text it had. An id answers
+   * *which part is this* for the log and for nothing a person can see, and the
+   * reader has just clicked the thing — what they want back is its name.
+   */
+  it("leads with what the part is, and keeps the id under it", () => {
+    const { container } = pane()
+
+    pick(/Card/)
+
+    const lines = [...container.querySelectorAll("p")].map((line) => line.textContent)
+    const name = lines.indexOf("Card")
+    const id = lines.indexOf("n_card")
+
+    expect(name).toBeGreaterThan(-1)
+    expect(id).toBeGreaterThan(name)
+  })
+
+  /**
+   * Where `loom.card` went when the rail stopped printing it on every row —
+   * into the disclosure that already held the node and the kind. Moved, not
+   * deleted: this is the test that would fail if a later run made the screen
+   * simpler by losing it.
+   */
+  it("keeps the registered type the rail used to print, one click down", () => {
+    const { container } = pane()
+
+    pick(/Card/)
+
+    const surface = container.cloneNode(true) as HTMLElement
+    for (const details of surface.querySelectorAll("details")) details.remove()
+
+    expect(surface.textContent).not.toContain("loom.card")
+    expect(addressing(container)?.textContent).toContain("loom.card")
+  })
+
+  /** A text row is its words, and the runtime would only say them back. */
+  it("adds no type pair for a part that has no name of its own", () => {
+    const { container } = pane()
+
+    pick(/Hello there/)
+
+    expect(addressing(container)?.textContent).not.toContain("type")
+  })
+
   it("says plainly when the page can be clicked to reach it", () => {
     pane()
 
-    pick(/loom.card/)
+    pick(/Card/)
 
     expect(document.body.textContent).toContain("picks exactly this part")
   })
@@ -142,7 +201,7 @@ describe("SelectedNode", () => {
   it("says the same of a part with nothing clickable around it either", () => {
     pane()
 
-    pick(/loom.mystery/)
+    pick(/Mystery/)
 
     expect(document.body.textContent).toContain("still applies to it")
   })
@@ -155,7 +214,7 @@ describe("SelectedNode", () => {
   it("does not colour a part nobody can click as a refusal", () => {
     const { container } = pane()
 
-    pick(/loom.mystery/)
+    pick(/Mystery/)
 
     expect(container.querySelector(".bg-rejected")).toBeNull()
     expect(container.querySelector(".bg-inapplicable")).toBeInstanceOf(HTMLElement)
@@ -181,9 +240,7 @@ describe("SelectedNode", () => {
 
     pick(/Hello there/)
 
-    const details = [...container.querySelectorAll("details")].find((element) =>
-      element.textContent?.includes("addresses")
-    )
+    const details = addressing(container)
 
     expect(details?.open).toBe(false)
     expect(details?.textContent).toContain("node")
@@ -203,11 +260,9 @@ describe("SelectedNode", () => {
   it("says a click reaches nothing, rather than leaving the pair blank", () => {
     const { container } = pane()
 
-    pick(/loom.mystery/)
+    pick(/Mystery/)
 
-    const details = [...container.querySelectorAll("details")].find((element) =>
-      element.textContent?.includes("addresses")
-    )
+    const details = addressing(container)
 
     expect(details?.textContent).toContain("nothing")
   })
