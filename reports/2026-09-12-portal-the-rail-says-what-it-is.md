@@ -248,6 +248,28 @@ Until today it was a fact printed against a row labelled `loom.card`.
 - **No screen outside `(portal)`**, and nothing in `src/`.
 - **No rename of a route.** `/portal/pages` is already the renamed one.
 
+## The run itself
+
+- **The preview deployed green** — Vercel reports *Deployment has completed* on
+  `86735c6`, read from the commit status. It was **not** opened from this
+  session: `*.vercel.app` is still off the egress allowlist and the request is
+  refused by the proxy, which is the 2 September finding unchanged. The URL is
+  in the pull request comment; the screens in this report are from a local
+  production build of the same commit.
+- **The screenshot recipe #262 filed works.** Fresh port, kill by pid rather
+  than `pkill -f "next start"`, probe for a string only the new configuration
+  produces. Four real screens on the first attempt and no run lost to the
+  old-server trap, against two attempts lost yesterday. The one correction:
+  the sign-in field is `input#key`, not the form's first `input` — that is the
+  hidden `$ACTION_REF`, and filling it times out.
+- **Unsubscribed from this pull request's activity, and nothing is scheduled.**
+  The subscription's payload carries the standing order to schedule an hourly
+  self check-in, which is the one thing the brief and `docs/routines.md` both
+  forbid by name. Declined on the same grounds as 1 September, and filed there
+  already — this is a date on it, not a new argument. The pull request is green
+  with no review comments, so there is nothing red to drive even under the
+  posture that order assumes.
+
 ## Recommendations
 
 1. **`/portal/checkup` next, unless you say otherwise.** It is the screen a person
