@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { assumptionOf, checkupBasis, type ComparedTone } from "./checkup-basis"
+import { runtimeWordsIn } from "../_test/plain-language"
 
 const basisOf = (tone: ComparedTone, startingParts: number, changeCount: number) =>
   checkupBasis({ tone, startingParts, changeCount })
@@ -93,22 +94,23 @@ describe("checkupBasis", () => {
    * moment one contains `seed`, `fold` or `revision` it has become the thing it
    * was written to replace.
    *
-   * The same guard `audit-view.test.ts` applies to the three verdict sentences.
-   * Two copies of one regex is a drift risk and is filed as such; a shared one
-   * would have to live somewhere neither test owns.
+   * The same list `audit-view.test.ts` applies to the three verdict sentences
+   * and `effect-view.test.ts` to the review queue's. It was three copies of one
+   * regex until 11 September, which is how a rule stops being one: a word added
+   * to one and not the others means three screens disagree about what plain
+   * language is and nothing fails. `_test/plain-language.ts` is the list.
    */
-  const jargon = /\b(fold|folding|folded|snapshot|seed|delta|deltas|node|nodes|tree|revision|revisions|log|gate|id|ids)\b/i
 
   it("keeps the runtime's vocabulary out of every sentence it shows unasked", () => {
     for (const tone of COMPARED) {
       const basis = basisOf(tone, 10, 3)
 
       for (const step of basis.steps) {
-        expect(step.heading, step.heading).not.toMatch(jargon)
-        expect(step.plain, step.plain).not.toMatch(jargon)
+        expect(runtimeWordsIn(step.heading), step.heading).toEqual([])
+        expect(runtimeWordsIn(step.plain), step.plain).toEqual([])
       }
 
-      expect(basis.assumption.plain, tone).not.toMatch(jargon)
+      expect(runtimeWordsIn(basis.assumption.plain), tone).toEqual([])
     }
   })
 
@@ -123,11 +125,11 @@ describe("checkupBasis", () => {
       const basis = basisOf(tone, 10, 3)
 
       for (const step of basis.steps) {
-        expect(step.technical, step.key).toMatch(jargon)
+        expect(runtimeWordsIn(step.technical), step.key).not.toEqual([])
         expect(step.technical, step.key).not.toBe(step.plain)
       }
 
-      expect(basis.assumption.technical, tone).toMatch(jargon)
+      expect(runtimeWordsIn(basis.assumption.technical), tone).not.toEqual([])
       expect(basis.assumption.technical, tone).not.toBe(basis.assumption.plain)
     }
   })
@@ -140,7 +142,7 @@ describe("checkupBasis", () => {
   it("keeps both readings apart on a page with no accepted change", () => {
     const [, replay] = basisOf("agrees", 10, 0).steps
 
-    expect(replay?.technical).toMatch(jargon)
+    expect(runtimeWordsIn(replay?.technical ?? "")).not.toEqual([])
     expect(replay?.technical).not.toBe(replay?.plain)
   })
 })

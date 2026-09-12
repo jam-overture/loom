@@ -17,3 +17,4 @@ next-env.d.ts
 
 # Lesson exercises — scribble freely (see lessons/README.md)
 src/scratch.test.ts
+prototypes/ski-apparel/out/
