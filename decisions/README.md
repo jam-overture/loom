@@ -214,7 +214,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0128 | *No record on this branch* | — | — |
 | 0129 | *No record on this branch* | — | — |
 | [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |
-| 0131 | *No record on this branch* | — | — |
+| [0131](0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md) | What a palette cannot say about itself is measured from it, never declared on it | Accepted | §4b |
 | 0132 | *No record on this branch* | — | — |
 | 0133 | *No record on this branch* | — | — |
 | 0134 | *No record on this branch* | — | — |

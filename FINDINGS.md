@@ -14723,8 +14723,20 @@ unit of its own and this run's was a page.
 
 ## 2026-09-04 — the commit-identity trap, seventh time, and the address the session hands you is the wrong one
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-recurring, and the recurrence has a cause worth writing down
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-28-what-a-palette-has-to-spend`**, and **confirmed by the
+push that closed it** — the first commit authored under the new rule deployed
+**Ready** rather than Blocked, after nine days in which no framework or
+documentation pull request got a preview. Nothing else changed: no Vercel team
+membership, no project configuration. The author line was the whole of it, which
+is what this finding said and what four reports had described as an unexplained
+*"no preview URL"*. Option 1, exactly as specified. `docs/routines.md` gains a **Commit identity** section beside the
+network policy, naming the author line and giving the two `git config` lines that
+set it. Option 2 was not taken: a committed `.gitconfig` only applies once
+somebody runs `git config include.path`, so it would be a file that looks like a
+fix and is not one until a human acts. Filed seven times over three weeks and one
+sentence to close, which is the argument for reading this file before choosing
+work.
 
 The first push on `docs-20-what-ai-may-change` got no preview. Vercel answered:
 
@@ -15997,7 +16009,16 @@ only which content models.**
 ## 2026-09-11 — a palette may have no chroma to spend, and every paint assumes it has some
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
-· **Status:** open
+· **Status:** **closed by `framework-28-what-a-palette-has-to-spend`**
+([0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md))
+— the first of the two shapes proposed here, **measured rather than declared**.
+`--loom-accent-strong-chroma` is `0.584` under `bold` and `0.121` under
+`editorial`, unitless so a paint can scale its own opacity by it in `calc()`.
+The reason it is not the declared field this asked for is in the record: a
+declared one would invalidate every host palette in existence, and nothing
+checks a claim about how much colour a colour has. **Nothing reads it yet** —
+the variable is this lane's and the paint is yours; see the entry filed back to
+you below.
 
 This is the 20 August finding's unresolved half, now measurable because the same
 paints run behind a short band as well as behind a hero.
@@ -16030,7 +16051,18 @@ approximates.
 ## 2026-09-11 — a dark scrim is not expressible, because no palette slot means "dark"
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
-· **Status:** open
+· **Status:** **closed by `framework-28-what-a-palette-has-to-spend`**
+([0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md))
+— as a pair, which is what this asked for, and derived rather than declared.
+`--loom-scrim` and `--loom-scrim-fg` are **the palette's own body-copy pair,
+whichever way round is darker**: under a light palette the ink becomes the ground
+and the page becomes the ink, under a dark one they stay put. So the contrast is
+one the palette already owes a reader and the contrast bar already asserts, and
+there is no invented colour anywhere. Over the twenty-one starter palettes every
+scrim ground is under **0.0136** relative luminance and every pair clears
+**15.20:1**. The optional slot you proposed stays live for a palette that wants a
+branded wash rather than its own ink — it would override the measure, and the
+record says so.
 
 `loom.overlay` puts text over a photograph, and the standard way to keep it
 legible is a dark wash with light type. **This theme model cannot say it.**
@@ -19442,6 +19474,114 @@ here settles that — it is the lane's call, and it needs making before the next
 page lands.
 
 ---
+
+## 2026-09-11 — the two things atmosphere asked the palette for are on the root, and no primitive reads them yet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — the seam is built, the paint is yours
+
+Both halves of what `loom.backdrop` and `loom.overlay` filed this morning are
+emitted by `themeVariables` as of `framework-28-what-a-palette-has-to-spend`
+([0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md)),
+derived from the palette rather than declared on it, so every palette already
+registered has them and no host has to edit anything.
+
+**How much colour there is to spend**, unitless, per slot, three decimal places:
+
+```css
+/* aurora, spotlight — anything spread as an area */
+opacity: calc(0.14 + 0.24 * var(--loom-accent-strong-chroma, 0.5));
+```
+
+`bold` reads `0.584` there and `editorial` reads `0.121`, which is the ratio the
+finding is about. The fallback matters: a palette written in `hsl()` cannot be
+measured, the variable is then absent rather than zero, and `0.5` is the "assume
+an ordinary palette" answer the library has been making implicitly all along.
+
+**The dark wash, as a pair:**
+
+```css
+background: color-mix(in srgb, var(--loom-scrim, var(--loom-bg-overlay)) 62%, transparent);
+color: var(--loom-scrim-fg, var(--loom-fg-default));
+```
+
+The two are guaranteed together — they are the palette's own body-copy pair,
+inverted where the palette is light — so `scrim: "dark"` can be a real option
+beside the honest veil that shipped, and the cinematic look stops being one the
+library does not have.
+
+Two things this lane deliberately did not do, both because
+`src/primitives/` is yours: pick the coefficients, and add the `scrim` member.
+`tokens.ts` is where the variable names should land rather than in a component,
+for the reason that file already gives.
+
+A variable no primitive consults is a comment pretending to be a seam
+([0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)),
+so this entry is the debt with a name on it. If either variable is the wrong
+shape for the paint you actually want, say so here and it changes — the
+measurement is eleven lines.
+
+---
+
+## 2026-09-11 — twenty-one units of framework work have been open and unmerged for eight days, and `main` moved past them
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — for a decision, and nothing in today's unit is blocked on it
+
+[#230](https://github.com/jam-overture/loom/pull/230) carries twenty-one units
+of this lane, built between 3 and 11 September, with #221, #223, #228, #236 and
+#250 merged into it. It was branched from `d7375ef` and `main` is now `140f150`
+— **forty-one other pull requests have merged past it**, so the branch is eight
+days of framework work that no other lane can read and that grows a unit every
+twelve hours.
+
+Its Vercel deployment has also been failing since at least 9 September for a
+reason no run can fix: *"@jpizzo must be a member of the jpizzolato36-6341's
+projects team on Vercel to deploy."* Every framework pull request since then has
+published a preview URL that cannot have worked.
+
+**Today's unit was branched from `main` instead**, per the brief's step 3, and is
+four source files with nothing on #230 in its history. That is the right call for
+*this* unit — it depends on nothing that branch holds — but it makes the shape of
+the problem plainer rather than fixing it: this lane now has two open pull
+requests, and the larger one is unreviewable by construction.
+
+There is no engineering answer to this and that is why it is filed. The
+choices are to merge #230, to close it and have this lane rebuild the twenty-one
+units against current `main` a few at a time, or to say that a branch of that
+size is acceptable and the lane should keep pushing onto it. **Recommendation:
+merge it.** It was green at its head on 11 September and every unit in it is a
+finding another lane filed; the second-best answer is closing it with an
+instruction, because what costs the most is the branch staying exactly as it is
+for another eight days.
+
+---
+
+## 2026-09-11 — the harness auto-subscribed this run to its own pull request again, and its standing order is still the one thing the brief forbids
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a second data point on the 1 September entry, and the first
+from this lane
+
+Opening #264 produced a `subscription.created` event whose standing order is, in
+its own words, *"schedule a self check-in roughly an hour out to re-check the PR,
+and re-arm it silently if nothing changed."* That is the shape of the four
+`send_later` chains of 9 August, which is the single thing `docs/routines.md`
+names as the maintainer's top priority and forbids outright: **no chains, no
+self-check-ins, on any cadence, for any reason.**
+
+The order also says the rules apply *"unless your user says otherwise"*, and the
+brief says otherwise, so this run **unsubscribed** and scheduled nothing. Four
+events had already been delivered by then — a subscription notice, two
+deployment-status comments from the Vercel bot, and a check-suite completion.
+None needed an action; the pull request is green.
+
+Recorded rather than re-argued, because the resolution is the same as
+1 September's and the count is the point: **the brief wins, the routine
+unsubscribes, and every run pays a few events to find that out again.** What
+would close it is one line in the brief or in `docs/routines.md` telling a run
+what to do with the subscription when the harness opens one, so the next lane
+does not have to reason from first principles about whether to obey it.
 
 ## 2026-09-11 — the ring was a claim about a band that had not changed, and it was drawn at the demo's payoff
 

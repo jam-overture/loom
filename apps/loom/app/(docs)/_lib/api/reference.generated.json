@@ -2349,6 +2349,13 @@
               "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
             },
             {
+              "name": "relativeLuminance",
+              "kind": "function",
+              "signature": "const relativeLuminance: (colour: string) => number | undefined",
+              "truncated": false,
+              "summary": "Relative luminance, or `undefined` for a form `channelsOf` declines to guess at."
+            },
+            {
               "name": "contrastRatio",
               "kind": "function",
               "signature": "const contrastRatio: (a: string, b: string) => number | undefined",
@@ -2589,6 +2596,34 @@
           ]
         },
         {
+          "module": "theme/lab",
+          "title": "Lab",
+          "summary": "A colour in CIELAB, which is where every perceptual question about a palette gets answered.",
+          "symbols": [
+            {
+              "name": "linearise",
+              "kind": "function",
+              "signature": "const linearise: (value: number) => number",
+              "truncated": false,
+              "summary": "sRGB channel, linearised."
+            },
+            {
+              "name": "Lab",
+              "kind": "type",
+              "signature": "type Lab = readonly [number, number, number];",
+              "truncated": false,
+              "summary": "Lightness, green–red, blue–yellow."
+            },
+            {
+              "name": "labOf",
+              "kind": "function",
+              "signature": "const labOf: (colour: string) => Lab | undefined",
+              "truncated": false,
+              "summary": "L*a*b* under D65, the white point sRGB is defined against, or `undefined` when the colour is a form `channelsOf` declines to guess at."
+            }
+          ]
+        },
+        {
           "module": "theme/library",
           "title": "Library",
           "summary": "The starter vocabulary, ported from the Hermes registry.",
@@ -2676,6 +2711,83 @@
               "signature": "const STARTER_STYLE_PRESETS: readonly StylePreset[]",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "theme/measure",
+          "title": "Measure",
+          "summary": "What a palette *is*, as numbers a stylesheet can use.",
+          "symbols": [
+            {
+              "name": "MAX_SRGB_CHROMA",
+              "kind": "value",
+              "signature": "const MAX_SRGB_CHROMA = 133.82",
+              "truncated": false,
+              "summary": "The greatest chroma sRGB can reach: pure blue, `#0000ff`, at C* 133.82."
+            },
+            {
+              "name": "PALETTE_CHROMA_SLOTS",
+              "kind": "value",
+              "signature": "const PALETTE_CHROMA_SLOTS: readonly PaletteSlot[]",
+              "truncated": false,
+              "summary": "The slots a palette puts its colour in, and the only ones whose chroma tells anybody anything."
+            },
+            {
+              "name": "SCRIM_DARK_CEILING",
+              "kind": "value",
+              "signature": "const SCRIM_DARK_CEILING = 0.15",
+              "truncated": false,
+              "summary": "Relative luminance at or under which a wash genuinely darkens what is beneath it."
+            },
+            {
+              "name": "Scrim",
+              "kind": "type",
+              "signature": "type Scrim = {\n    readonly ground: PaletteSlot;\n    readonly foreground: PaletteSlot;\n    /** Of the ground. How much this wash can actually darken. */\n    readonly luminance: number;\n    /** Of the pair, which is the palette's own body-copy ratio. */\n    readonly ratio: number;\n    /** Whether the ground is under `SCRIM_DARK_CEILING`. */\n    readonly darkens: boolean;\n};",
+              "truncated": false,
+              "summary": "A ground that darkens what is under it, and the ink that is guaranteed to read on it."
+            },
+            {
+              "name": "slotChroma",
+              "kind": "function",
+              "signature": "const slotChroma: (colour: string) => number | undefined",
+              "truncated": false,
+              "summary": "How much colour is in one slot, as a fraction of the most sRGB can hold, or `undefined` when the colour is a form `channelsOf` declines to guess at."
+            },
+            {
+              "name": "paletteScrim",
+              "kind": "function",
+              "signature": "const paletteScrim: (palette: Palette) => Scrim | undefined",
+              "truncated": false,
+              "summary": "The palette's scrim pair, or `undefined` when either end is a colour this cannot measure — `undefined` rather than a guess, so a host whose palette is written in `hsl()` is told the wash is unavailable instead of being handed a pair that might be the wrong way round."
+            },
+            {
+              "name": "PaletteMeasures",
+              "kind": "type",
+              "signature": "type PaletteMeasures = {\n    readonly palette: ThemeId;\n    /**\n     * Chroma per slot, normalised, for the slots that carry colour. A slot whose\n     * colour could not be measured is **absent** rather than zero: zero is a real\n     * answer meaning grey, and `graphite`'s accent really is 0.000.\n     */\n    readonly chroma: Readonly<Partial<Record<PaletteSlot, number>>>;\n    readonly scrim: Scrim | undefined;\n};",
+              "truncated": false,
+              "summary": "Everything measurable about one palette that its slots do not say."
+            },
+            {
+              "name": "paletteMeasures",
+              "kind": "function",
+              "signature": "const paletteMeasures: (palette: Palette) => PaletteMeasures",
+              "truncated": false,
+              "summary": "Measures one palette. Refuses nothing, and reports what it could not measure by leaving it out."
+            },
+            {
+              "name": "CHROMA_PLACES",
+              "kind": "value",
+              "signature": "const CHROMA_PLACES = 3",
+              "truncated": false,
+              "summary": "The decimal places a chroma is emitted to."
+            },
+            {
+              "name": "chromaValue",
+              "kind": "function",
+              "signature": "const chromaValue: (chroma: number) => string",
+              "truncated": false,
+              "summary": "A chroma as a stylesheet reads it: unitless, so `calc()` can multiply by it."
             }
           ]
         },
