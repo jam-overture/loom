@@ -30,29 +30,18 @@ call.
 
 ## The signal rail
 
-`pnpm dev` serves the page with a rail down the right-hand side. It is a
-development instrument, not part of the tree — deliberately, because the moment
-the observer is a node on the page it starts proposing changes to itself.
+`pnpm dev` serves the page with a rail down the right-hand side showing what the
+page can observe about being read: time on each section, clicks on the nav links
+that jump to one, questions opened, and a feed of those events as they happen.
 
-It closes a loop:
+It is a development instrument, not part of the tree. And it observes only — it
+draws no conclusions and changes nothing on the page.
 
-1. **`sidebar.mjs`** watches. An `IntersectionObserver` for which section fills
-   the screen, a one-second tick for how long it stayed, and one document-level
-   click listener for nav links and questions. The page is not instrumented for
-   any of it — the hooks are the `anchor` props it already had.
-2. **`signals.mjs`** concludes. Readings are observations and never opinions; a
-   *derivation* is the one sentence a person could argue with. It draws two:
-   a much-opened question should start open, and a section readers actually
-   spend their time in is too far down the page.
-3. **`propose.mjs`** runs it through the ordinary pipeline. The derivation
-   becomes an `EditIntent` with `origin: "system-signal"` — no special path.
-4. **The Gate decides.** The default policy caps a behaviour-derived change at
-   `low` stakes, so opening a question lands on its own and reordering the page
-   comes back for a human. Saying yes calls `confirmChange`, which re-assesses
-   against the tree as it stands.
+- **`sidebar.mjs`** collects. An `IntersectionObserver` for which section fills
+  the screen, a one-second tick for how long it stayed, and one document-level
+  click listener. The page is not instrumented for any of it: the hooks are the
+  `anchor` props it already had.
+- **`signals.mjs`** folds each event into the readings. Pure; the server holds
+  the result.
 
-`?rail=off` serves the page without it. `/reset` rebuilds the tree and clears
-the readings, which is worth having twice in a row.
-
-The tree is mutable state in the server process — one reader, one page, for the
-life of the process. Wrong for anything real and right here.
+`?rail=off` serves the page without it. **Start over** clears the readings.

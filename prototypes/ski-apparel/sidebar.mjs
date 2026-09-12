@@ -3,9 +3,8 @@
  *
  * Everything in the tree is a registered primitive rendered by Loom. This is
  * hand-written markup bolted alongside it, and that separation is the honest
- * one: the sidebar is a person watching the page being read, not something the
- * page contains. Putting it in the tree would make the observer part of what it
- * observes, and the first proposal would start moving the instrument around.
+ * one: the rail is a person watching the page being read, not something the
+ * page contains.
  *
  * It is a development tool. Nothing here ships to a visitor.
  */
@@ -23,8 +22,9 @@ export const SIDEBAR_STYLES = `
     overflow-y: auto; z-index: 9999;
   }
   #rail header {
+    display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 8px;
     padding: 14px 16px; border-bottom: 1px solid #1e2734;
-    position: sticky; top: 0; background: #0b0f16;
+    position: sticky; top: 0; background: #0b0f16; z-index: 1;
   }
   #rail h2 { margin: 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #6ee7d7; }
   #rail .sub { margin: 4px 0 0; font-size: 11.5px; color: #61708a; }
@@ -34,72 +34,56 @@ export const SIDEBAR_STYLES = `
     text-transform: uppercase; color: #61708a; font-weight: 400;
   }
 
-  .row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 7px; }
-  .row .name { color: #9fb0c6; }
-  .row .secs { color: #e6edf6; font-variant-numeric: tabular-nums; }
-  .row .hits {
-    font-size: 11px; color: #0b0f16; background: #6ee7d7; border-radius: 8px;
-    padding: 1px 6px; font-variant-numeric: tabular-nums;
-  }
-  .row .hits.none { background: none; color: #2b3646; }
-  .bar { grid-column: 1 / -1; height: 3px; background: #16202c; border-radius: 2px; overflow: hidden; }
-  .bar i { display: block; height: 100%; background: #2f81f7; }
-  .row.top .bar i { background: #6ee7d7; }
-  .row.unseen .name, .row.unseen .secs { color: #3f4b5c; }
-
-  .verdict { border-radius: 4px; padding: 11px 12px; margin-bottom: 10px; }
-  .verdict.held { background: #2a2115; border: 1px solid #4a3a1c; }
-  .verdict.applied { background: #16281f; border: 1px solid #234d38; }
-  .verdict .k { font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 11px; }
-  .verdict.held .k { color: #d3a75f; }
-  .verdict.applied .k { color: #6fbd94; }
-  .verdict p { margin: 7px 0 0; color: #b6c4d6; font-size: 12.5px; }
-
-  .said { color: #e6edf6; font-size: 12.5px; line-height: 1.5; margin: 0 0 10px; }
-  .said b { color: #6ee7d7; font-weight: 400; }
-  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12px; }
-  dt { color: #61708a; }
-  dd { margin: 0; color: #d6e0ec; word-break: break-word; }
-  .idle { color: #4e5c70; font-size: 12.5px; margin: 0; }
-  .acts { display: flex; gap: 8px; margin-top: 12px; }
-  .acts button {
-    font: inherit; font-size: 12px; padding: 7px 12px; border-radius: 4px; cursor: pointer;
-    border: 1px solid transparent; flex: 1;
-  }
-  .acts .yes { background: #6ee7d7; color: #06231f; font-weight: 700; }
-  .acts .yes:hover { background: #8df0e3; }
-  .acts .no { background: transparent; border-color: #2b3646; color: #8496ad; }
-  .acts .no:hover { border-color: #3d4c60; color: #b6c4d6; }
-  .acts button:focus-visible { outline: 2px solid #6ee7d7; outline-offset: 2px; }
-  .rev { color: #4e5c70; font-size: 11px; margin: 0; }
-  .rev b { color: #6ee7d7; font-weight: 400; }
-  .ev { color: #4e5c70; font-size: 11px; word-break: break-word; }
-
-  .q { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 6px; font-size: 12px; }
-  .q .qt { color: #9fb0c6; }
-  .q .qc { color: #6ee7d7; font-variant-numeric: tabular-nums; }
-
-  .did { font-size: 12px; color: #7f8ea3; margin: 0 0 8px; padding-left: 14px; position: relative; }
-  .did:before { content: "✓"; position: absolute; left: 0; color: #6fbd94; }
-  .did b { color: #a9b8cb; font-weight: 400; }
-
-  #rail header { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 8px; }
-  #rail header .ht { grid-column: 1; }
   .again {
     font: inherit; font-size: 11px; background: none; color: #61708a;
     border: 1px solid #2b3646; border-radius: 4px; padding: 4px 8px; cursor: pointer;
   }
   .again:hover { color: #b6c4d6; border-color: #3d4c60; }
+  .again:focus-visible { outline: 2px solid #6ee7d7; outline-offset: 2px; }
+
+  .row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 7px; }
+  .row .name { color: #9fb0c6; }
+  .row .secs { color: #e6edf6; font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+  .row .hits {
+    font-size: 11px; color: #0b0f16; background: #6ee7d7; border-radius: 8px;
+    padding: 1px 6px; font-variant-numeric: tabular-nums;
+  }
+  .row .hits.none { background: none; color: #2b3646; }
+  .row.unseen .name, .row.unseen .secs { color: #3f4b5c; }
+  .bar { grid-column: 1 / -1; height: 3px; background: #16202c; border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: #2f81f7; }
+  .row.top .bar i { background: #6ee7d7; }
+
+  .q { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+  .q .qt { color: #9fb0c6; }
+  .q .qc { color: #6ee7d7; font-variant-numeric: tabular-nums; }
+
+  .feed { list-style: none; margin: 0; padding: 0; }
+  .feed li {
+    display: grid; grid-template-columns: 7.5ch 9ch 1fr; gap: 8px;
+    font-size: 11.5px; padding: 4px 0; border-bottom: 1px solid #121923;
+  }
+  .feed li:first-child { animation: arrive .6s ease-out; }
+  .feed .t { color: #3f4b5c; font-variant-numeric: tabular-nums; }
+  .feed .k { color: #61708a; }
+  .feed .k.nav-click { color: #2f81f7; }
+  .feed .k.faq-click { color: #d3a75f; }
+  .feed .k.reached { color: #6fbd94; }
+  .feed .s { color: #b6c4d6; word-break: break-word; }
+  .idle { color: #4e5c70; font-size: 12.5px; margin: 0; }
+
+  @keyframes arrive { from { background: #16283a; } to { background: transparent; } }
+  @media (prefers-reduced-motion: reduce) { .feed li:first-child { animation: none; } }
 `
 
 export const SIDEBAR_MARKUP = `
 <aside id="rail" aria-label="Signal collector">
   <header>
-    <div class="ht">
+    <div>
       <h2>Signals</h2>
       <p class="sub">What this page notices about being read</p>
     </div>
-    <button class="again" id="again" title="Rebuild the page and clear the readings">Start over</button>
+    <button class="again" id="again" title="Clear the readings">Start over</button>
   </header>
   <section>
     <h3>Time on each section &middot; clicks</h3>
@@ -110,21 +94,8 @@ export const SIDEBAR_MARKUP = `
     <div id="questions"></div>
   </section>
   <section>
-    <h3>What it concluded</h3>
-    <div id="verdict"><p class="idle">Watching. Scroll and read — it needs two sections and eight seconds before it will say anything.</p></div>
-  </section>
-  <section id="dwrap" hidden>
-    <h3>Already changed</h3>
-    <div id="done"></div>
-  </section>
-  <section>
-    <h3>Runtime events</h3>
-    <p class="ev" id="events">—</p>
-  </section>
-  <section>
-    <h3>The page</h3>
-    <p class="rev" id="rev">revision <b>0</b></p>
-    <p class="rev" id="order"></p>
+    <h3>Events, newest first</h3>
+    <ul class="feed" id="feed"><li><span class="idle">Scroll or click something.</span></li></ul>
   </section>
 </aside>
 `
@@ -132,26 +103,21 @@ export const SIDEBAR_MARKUP = `
 /**
  * The collector.
  *
- * `IntersectionObserver` for what is on screen and a one-second tick for how
+ * \`IntersectionObserver\` for what is on screen and a one-second tick for how
  * long it stayed — which is the cheapest honest measure of reading. A scroll
  * position would count a section somebody flew past.
- *
- * Hidden tabs are not reading, so the tick stops on `visibilitychange`. Without
- * that, leaving the page open over lunch is the strongest signal on the page.
  */
 export const SIDEBAR_SCRIPT = `
 (() => {
   const SECTIONS = ["top", "layers", "helmets", "goggles", "fit"]
   const onScreen = new Set()
-  let latest = null
 
   /**
    * How much of the *screen* a section fills — not how much of the section is on
    * screen. \`intersectionRatio\` is the second thing, and it caps at
    * viewport ÷ section height: the goggles section is 2575px tall against a
    * 768px window, so it can never exceed 0.30 no matter how squarely a reader is
-   * looking at it. A threshold of 0.25 was one browser-window resize away from
-   * counting nothing at all, and a longer section would never have registered.
+   * looking at it. A long section would never have registered.
    */
   const observer = new IntersectionObserver(
     (entries) => {
@@ -169,13 +135,24 @@ export const SIDEBAR_SCRIPT = `
     if (node) observer.observe(node)
   }
 
+  const post = async (events) => {
+    const response = await fetch("/signals", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ events }),
+    })
+    return response.json()
+  }
+
+  const send = async (events) => paint(await post(events))
+
   /**
    * Clicks, read off the page rather than wired into it.
    *
    * One listener on the document, matching on what the reader actually hit. The
-   * page is a Loom tree and nothing in it knows this collector exists — which is
-   * the property worth keeping, because the moment a primitive has to be
-   * instrumented to be measurable, only instrumented primitives get measured.
+   * page is a Loom tree and nothing in it knows this collector exists — the
+   * moment a primitive has to be instrumented to be measurable, only
+   * instrumented primitives get measured.
    */
   document.addEventListener("click", (event) => {
     const link = event.target.closest && event.target.closest('a[href*="#"]')
@@ -192,32 +169,15 @@ export const SIDEBAR_SCRIPT = `
     }
   })
 
-  const post = async (body) => {
-    const response = await fetch("/signals", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    })
-    return response.json()
-  }
+  const escape = (value) =>
+    String(value).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
 
-  const send = async (events) => paint(await post({ events }))
+  const clock = (at) => new Date(at).toLocaleTimeString([], { hour12: false })
 
-  const act = async (path, answering) => {
-    const response = await fetch(path, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ answering }),
-    })
-    const body = await response.json()
-    if (body.applied) location.reload()
-    else {
-      painted = null
-      paint(await post({ events: [] }))
-    }
-  }
+  const LABELS = { "nav-click": "nav click", "faq-click": "question", reached: "reached" }
 
-  let painted = null
+  /** The feed is only rebuilt when a new entry arrived, so its highlight marks an arrival, not a tick. */
+  let newest = null
 
   const paint = (state) => {
     const rows = state.sections
@@ -229,105 +189,48 @@ export const SIDEBAR_SCRIPT = `
         const hits = r.clicks > 0
           ? \`<span class="hits">\${r.clicks} click\${r.clicks === 1 ? "" : "s"}</span>\`
           : '<span class="hits none">—</span>'
-        return \`<div class="\${cls}"><span class="name">\${r.label}</span>\${hits}<span class="secs">\${r.seconds}s</span><span class="bar"><i style="width:\${width}%"></i></span></div>\`
+        return \`<div class="\${cls}"><span class="name">\${escape(r.label)}</span>\${hits}<span class="secs">\${r.seconds}s</span><span class="bar"><i style="width:\${width}%"></i></span></div>\`
       })
       .join("")
 
-    const questions = state.questions || []
+    const questions = state.questions
     document.getElementById("qwrap").hidden = questions.length === 0
     document.getElementById("questions").innerHTML = questions
-      .map((q) => \`<div class="q"><span class="qt">\${q.question}</span><span class="qc">\${q.count}×</span></div>\`)
+      .map((q) => \`<div class="q"><span class="qt">\${escape(q.question)}</span><span class="qc">\${q.count}×</span></div>\`)
       .join("")
 
-    const done = state.done || []
-    document.getElementById("dwrap").hidden = done.length === 0
-    document.getElementById("done").innerHTML = done
-      .map((d) => \`<p class="did">\${d.utterance} <b>(\${d.asked ? "you accepted it" : "applied on its own"}, rev \${d.revision})</b></p>\`)
-      .join("")
+    const head = state.feed[0]
+    const signature = head ? head.at + head.kind + head.subject + state.feed.length : "empty"
+    if (signature === newest) return
+    newest = signature
 
-    document.getElementById("rev").innerHTML = "revision <b>" + state.revision + "</b>"
-    document.getElementById("order").textContent = (state.order || []).join(" › ")
-
-    const p = state.proposal
-    const verdict = document.getElementById("verdict")
-
-    /**
-     * Only redraw the verdict when it actually changed.
-     *
-     * The rail repaints every second, and innerHTML builds new buttons each
-     * time — so a click that lands in the same tick as a repaint hits an element
-     * that no longer exists and does nothing. The numbers above can be rewritten
-     * freely; anything a person aims at has to hold still.
-     */
-    const signature = !p || p.status !== "proposed" ? "idle" : p.derivation.id + ":" + p.awaitingYou
-    if (signature === painted) return
-    painted = signature
-
-    if (!p || p.status !== "proposed") {
-      verdict.innerHTML = '<p class="idle">Watching. Scroll and read — it needs two sections and eight seconds before it will say anything.</p>'
-      document.getElementById("events").textContent = "—"
-      return
-    }
-
-    const waiting = p.awaitingYou === true
-    verdict.innerHTML =
-      \`<p class="said"><b>It said:</b> "\${p.derivation.utterance}"</p>\` +
-      \`<div class="verdict \${waiting ? "held" : "applied"}">\` +
-      \`<span class="k">\${waiting ? "waiting on you" : "applied on its own"}</span>\` +
-      \`<p>\${p.detail || ""}</p></div>\` +
-      \`<dl>\` +
-      \`<dt>rule</dt><dd>\${p.rule}</dd>\` +
-      \`<dt>origin</dt><dd>system-signal</dd>\` +
-      \`<dt>stakes</dt><dd>\${p.stakes}\${p.factors.length ? " — " + p.factors.join("; ") : ""}</dd>\` +
-      \`<dt>reversible</dt><dd>\${p.reversible ? "yes" : "no"}</dd>\` +
-      \`<dt>undo</dt><dd>\${p.inverse.length ? p.inverse.join(", ") : "—"}</dd>\` +
-      \`</dl>\` +
-      (waiting
-        ? '<div class="acts"><button class="yes" id="yes">Make the change</button><button class="no" id="no">Not now</button></div>'
-        : "")
-
-    if (waiting) {
-      document.getElementById("yes").onclick = () => act("/confirm", p.derivation.id)
-      document.getElementById("no").onclick = () => act("/dismiss", p.derivation.id)
-    }
-
-    document.getElementById("events").textContent = (p.events || []).join(" → ")
+    document.getElementById("feed").innerHTML = state.feed.length === 0
+      ? '<li><span class="idle">Scroll or click something.</span></li>'
+      : state.feed
+          .map((e) => \`<li><span class="t">\${clock(e.at)}</span><span class="k \${e.kind}">\${LABELS[e.kind]}</span><span class="s">\${escape(e.subject)}</span></li>\`)
+          .join("")
   }
 
   document.getElementById("again").onclick = async () => {
-    await fetch("/reset")
-    location.reload()
+    await fetch("/reset", { method: "POST" })
+    newest = null
+    paint(await post([]))
   }
 
+  /**
+   * A hidden tab is not reading, so it neither reports nor polls — and a page the
+   * browser has kept alive after navigating away would otherwise go on ticking
+   * alongside the one in front of you.
+   */
   let awake = document.visibilityState === "visible"
   document.addEventListener("visibilitychange", () => { awake = document.visibilityState === "visible" })
 
-  /**
-   * Two jobs, deliberately not the same job.
-   *
-   * Reporting what was read needs a section actually on screen. *Asking what
-   * the page concludes* does not — a suggestion can arrive from a reading
-   * posted a while ago, and a reader who has stopped scrolling is exactly the
-   * reader with something to look at. Gating the poll on there being new dwell
-   * to report froze the rail wherever no section happened to fill the screen,
-   * and a proposal sitting on the server was never collected.
-   *
-   * A hidden tab does neither. It is not reading, and it is not looking at the
-   * rail — and a page the browser has kept alive after navigating away goes on
-   * ticking otherwise, which shows up as several documents polling at once.
-   */
   setInterval(async () => {
     if (!awake) return
-
-    const events =
-      onScreen.size === 0
-        ? []
-        : [...onScreen].map((section) => ({ kind: "dwell", section, ms: 1000 / onScreen.size }))
-
-    latest = await post({ events })
-    paint(latest)
+    const events = [...onScreen].map((section) => ({ kind: "dwell", section, ms: 1000 / onScreen.size }))
+    paint(await post(events))
   }, 1000)
 
-  post({ events: [] }).then(paint)
+  post([]).then(paint)
 })()
 `
