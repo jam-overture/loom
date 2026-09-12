@@ -165,6 +165,12 @@ const orderedSections: readonly DocsSection[] = [
           "How a primitive holds other primitives: an ordered list of children, and named regions the primitive places itself.",
       },
       {
+        slug: "where-content-comes-from",
+        title: "Where the content comes from",
+        summary:
+          "A node can ask your app a question — for a list, a field, a price — and read the answer beside its props, with a named reason when there is none.",
+      },
+      {
         slug: "theming",
         title: "Making it look like yours",
         summary:
