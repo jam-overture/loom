@@ -6346,9 +6346,16 @@
               "summary": ""
             },
             {
+              "name": "ReaderSignalTypes",
+              "kind": "type",
+              "signature": "type ReaderSignalTypes = readonly string[] | {\n    readonly [Kind in ReaderSignalKind]?: readonly string[];\n};",
+              "truncated": false,
+              "summary": "The primitive types to report on: one list for every kind, or a list per kind."
+            },
+            {
               "name": "ReaderSignalOptions",
               "kind": "type",
-              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /** Which primitive types to broadcast about. Every addressed type when absent. */\n    readonly types?: readonly string[];\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
               "truncated": false,
               "summary": ""
             },

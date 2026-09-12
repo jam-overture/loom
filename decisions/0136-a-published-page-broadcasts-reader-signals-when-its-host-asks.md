@@ -4,6 +4,16 @@
 **Date:** 2026-09-12
 **Section:** §3 — Rendering, §6 — Telemetry
 
+> **Amended 2026-09-12**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
+> `types` may now be set per kind as well as once for all of them —
+> `{ dwelled: ["loom.section"], activated: ["loom.link"] }` — and a kind it does
+> not name reports every type. A list still applies to every kind. Found by the
+> ski prototype, whose rail wanted time on screen for sections and activations
+> for links and could only ask for both on all five types. The same change
+> fixed `kinds: ["dwelled"]` also sending `viewed`: kinds and types are now
+> applied to every signal at the moment a batch is built. Nothing here is
+> reversed — the configuration is still the host's and never the tree's.
+
 ## Context
 
 Loom is an adaptive UI runtime. The pipeline that lets a page change from how it

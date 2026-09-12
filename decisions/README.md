@@ -49,7 +49,7 @@ ordered list of rules and says how many — the first half is still exactly true
 and the second was wrong for three weeks.
 
 Superseding that would be false, because nothing was reversed. So **a record is
-amended in place when only the shape moved** (0096): a dated block under the
+amended in place when only the shape moved** (0099): a dated block under the
 header, before `## Context`, naming what moved, which records moved it, and
 saying that nothing is reversed. The record keeps its number, its status and its
 trail. The test is what a reader would do differently — a reader who would now

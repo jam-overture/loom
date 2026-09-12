@@ -71,13 +71,49 @@ export type VisibilityEntry = {
 
 export type ObserveVisibility = (onChange: (entries: readonly VisibilityEntry[]) => void) => VisibilityObserver
 
+/** The primitive types to report on: one list for every kind, or a list per kind (0136). */
+export type ReaderSignalTypes =
+  | readonly string[]
+  | { readonly [Kind in ReaderSignalKind]?: readonly string[] }
+
+/**
+ * The host's `kinds` and `types`, as one question: is this kind of signal about
+ * this type of primitive wanted?
+ */
+const selectionOf = (
+  kinds: readonly ReaderSignalKind[] | undefined,
+  types: ReaderSignalTypes | undefined
+): ((kind: ReaderSignalKind, type: string) => boolean) => {
+  const enabled = new Set<ReaderSignalKind>(kinds ?? READER_SIGNAL_KINDS)
+
+  const allowed = new Map<ReaderSignalKind, ReadonlySet<string>>(
+    types === undefined
+      ? []
+      : Array.isArray(types)
+        ? READER_SIGNAL_KINDS.map((kind) => [kind, new Set(types)])
+        : READER_SIGNAL_KINDS.flatMap((kind) => {
+            const listed = (types as Exclude<ReaderSignalTypes, readonly string[]>)[kind]
+            return listed === undefined ? [] : [[kind, new Set(listed)] as const]
+          })
+  )
+
+  return (kind, type) => enabled.has(kind) && (allowed.get(kind)?.has(type) ?? true)
+}
+
 export type ReaderSignalOptions = {
   /** Called with every batch. A throw or rejection here is contained and never reaches the page. */
   readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>
   /** Which kinds to broadcast. Every kind when absent. */
   readonly kinds?: readonly ReaderSignalKind[]
-  /** Which primitive types to broadcast about. Every addressed type when absent. */
-  readonly types?: readonly string[]
+  /**
+   * Which primitive types to broadcast about. Every addressed type when absent.
+   *
+   * A list applies to every kind. An object sets it per kind — time on screen
+   * for sections, activations for links — and a kind it does not name is
+   * reported for every type, exactly as if `types` were absent for that kind.
+   * Whether a kind is reported at all is still `kinds`.
+   */
+  readonly types?: ReaderSignalTypes
   /** How often a batch is delivered. Five seconds when absent. */
   readonly flushEveryMs?: number
   /**
@@ -187,11 +223,9 @@ export const broadcastReaderSignals = (
   if (!page.ok) return page
 
   const now = options.now ?? Date.now
-  const kinds = new Set<ReaderSignalKind>(options.kinds ?? READER_SIGNAL_KINDS)
-  const types = options.types === undefined ? undefined : new Set(options.types)
+  const wants = selectionOf(options.kinds, options.types)
   const document = root.ownerDocument
 
-  const wanted = (address: SignalAddress): boolean => types === undefined || types.has(address.type)
 
   let ledger = emptyLedger(document.visibilityState === "hidden")
   let stopped = false
@@ -200,27 +234,37 @@ export const broadcastReaderSignals = (
     (element: Element): void => {
       const target = nearestAddressed(root, element)
       const address = target === undefined ? undefined : addressOf(target)
-      if (!kinds.has(kind) || address === undefined || !wanted(address)) return
+      if (address === undefined || !wants(kind, address.type)) return
       ledger = noted(ledger, signal(address))
     }
 
   const flush = (): void => {
     const drained = drain(ledger, now())
     ledger = drained.ledger
-    if (drained.signals.length === 0) return
+
+    /**
+     * Viewed and dwelled are gathered together, because one observer serves both,
+     * and are selected here — so a host asking only for time on screen gets no
+     * `viewed`, and a type watched for one kind reports nothing for the other.
+     */
+    const signals = drained.signals.filter((signal) => wants(signal.kind, signal.type))
+    if (signals.length === 0) return
 
     const batch: ReaderSignalBatch = {
       treeId: page.value.treeId,
       revision: page.value.revision,
       sentAt: now(),
-      signals: [...drained.signals],
+      signals,
     }
 
     root.dispatchEvent(new CustomEvent(READER_SIGNALS_EVENT, { detail: batch, bubbles: true }))
     deliverSafely(options.send, batch)
   }
 
-  const watchesTime = kinds.has("viewed") || kinds.has("dwelled")
+  const watched = (type: string): boolean => wants("viewed", type) || wants("dwelled", type)
+
+  const enabled = options.kinds ?? READER_SIGNAL_KINDS
+  const watchesTime = enabled.includes("viewed") || enabled.includes("dwelled")
 
   const visibility = watchesTime
     ? (options.observeVisibility ?? intersectionVisibility)((entries) => {
@@ -236,7 +280,7 @@ export const broadcastReaderSignals = (
     const candidates = [root, ...Array.from(root.querySelectorAll(`[${LOOM_NODE_ATTRIBUTE}]`))]
     for (const element of candidates) {
       const address = addressOf(element)
-      if (address !== undefined && wanted(address)) visibility.observe(element)
+      if (address !== undefined && watched(address.type)) visibility.observe(element)
     }
   }
 
