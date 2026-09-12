@@ -472,12 +472,14 @@ name three you are sure of and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 70
-  of those, declaring a target: 10
+  primitives registered: 91
+  of those, declaring a target: 12
     loom.nav         "always"
     loom.card        {"whenProps":["href"]}
     loom.feature     {"whenProps":["href"]}
     loom.article     {"whenProps":["href"]}
+    loom.book        {"whenProps":["href"]}
+    loom.recording   {"whenProps":["href"]}
     loom.logo        {"whenProps":["href"]}
     loom.credential  {"whenProps":["href"]}
     loom.code        "always"
@@ -486,8 +488,8 @@ The output:
     loom.link        "always"
 ```
 
-Ten of seventy. Most of a component library arranges targets rather than being
-one, which is the ratio that makes this check affordable.
+Twelve of ninety-one. Most of a component library arranges targets rather than
+being one, which is the ratio that makes this check affordable.
 
 Two entries in that list should stop you. `loom.code` is a code block — an
 `"always"` target, which is not what a block of text sounds like. And

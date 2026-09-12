@@ -161,6 +161,8 @@ describe("marking a change on the page", () => {
     expect(marks[0]?.tone).toBe("awaiting")
     expect(marks[0]?.label).toBe("This would be removed")
     expect(marks[0]?.placement).toBe("inside")
+    /** The band is the subject, so this is the one mark of the four that rings. */
+    expect(marks[0]?.subject).toBe("node")
     expect(typeOf(await headOf(session), marks[0]!.nodeId)).toBe("loom.stat-grid")
   })
 
@@ -188,6 +190,13 @@ describe("marking a change on the page", () => {
      * be pointing at a stretch of page where nothing was taken away.
      */
     expect(marks[0]?.placement).toBe("above")
+    /**
+     * And the band it is drawn on is not what the mark is about, so it is not
+     * ringed. This is the assertion the payoff screenshot is of: a green ring
+     * around the testimonial said the quote had been removed, three inches under
+     * a card saying the numbers had.
+     */
+    expect(marks[0]?.subject).toBe("place")
   })
 
   it("marks where a held insert would go, and the node itself once it exists", async () => {
@@ -199,12 +208,14 @@ describe("marking a change on the page", () => {
     expect(before[0]?.tone).toBe("awaiting")
     /** The band it would be inserted before, so the space it would fill is above it. */
     expect(before[0]?.placement).toBe("above")
+    expect(before[0]?.subject).toBe("place")
 
     const applied = await answer(session, held)
     const after = await marksFor(session, applied)
 
     expect(after[0]?.label).toBe("New — just added")
     expect(after[0]?.placement).toBe("inside")
+    expect(after[0]?.subject).toBe("node")
     expect(typeOf(await headOf(session), after[0]!.nodeId)).toBe("loom.section")
   })
 
@@ -758,7 +769,13 @@ describe("the mark's stylesheet", () => {
 
   it("keys the rule on the attribute edit mode already puts on the node", () => {
     const rules = spotlightCss([
-      { nodeId: id("demo-n7"), tone: "applied", label: "Just changed", placement: "inside" },
+      {
+        nodeId: id("demo-n7"),
+        tone: "applied",
+        label: "Just changed",
+        placement: "inside",
+        subject: "node",
+      },
     ])
 
     expect(rules).toContain('[data-loom-node="demo-n7"]')
@@ -767,48 +784,98 @@ describe("the mark's stylesheet", () => {
   })
 
   /**
-   * The chip's position, which is the difference between pointing at a band and
+   * The mark's position, which is the difference between pointing at a band and
    * pointing at the space beside it.
    *
    * Asserted as geometry rather than as a string of CSS: `bottom: 100%` puts the
-   * chip's lower edge on the band's top edge, so it is drawn in the gap above;
+   * mark's lower edge on the band's top edge, so it is drawn in the gap above;
    * `top: 100%` puts it under the band; and the corner case keeps the chip
    * inside, where a clipping primitive cannot cut it in half.
    */
-  const chipRule = (placement: "inside" | "above" | "below"): string => {
-    const rules = spotlightCss([
-      { nodeId: id("n_1"), tone: "applied", label: "Something was removed here", placement },
-    ])
-    const after = rules.split("::after")[1]
-    if (after === undefined) throw new Error("the mark drew no chip")
+  const markRule = (spot: Spotlight): string => {
+    const after = spotlightCss([spot]).split("::after")[1]
+    if (after === undefined) throw new Error("the mark drew nothing")
 
     return after
   }
 
-  it("draws a mark on a band inside its own corner", () => {
-    expect(chipRule("inside")).toContain("inset: 6px 6px auto auto;")
+  const place = (placement: "inside" | "above" | "below"): Spotlight => ({
+    nodeId: id("n_1"),
+    tone: "applied",
+    label: "Something was removed here",
+    placement,
+    subject: "place",
   })
 
-  it("draws a mark on a gap in the gap, clear of the band beside it", () => {
-    expect(chipRule("above")).toContain("inset: auto 6px 100% auto;")
-    expect(chipRule("above")).toContain("margin: 0 0 5px 0;")
+  const onTheNode: Spotlight = {
+    nodeId: id("n_1"),
+    tone: "applied",
+    label: "Just changed",
+    placement: "inside",
+    subject: "node",
+  }
 
-    expect(chipRule("below")).toContain("inset: 100% 6px auto auto;")
-    expect(chipRule("below")).toContain("margin: 5px 0 0 0;")
+  it("draws a mark on a band inside its own corner", () => {
+    expect(markRule(onTheNode)).toContain("inset: 6px 6px auto auto;")
   })
 
   /**
-   * A chip under a band overlaps the band that follows it, and that band paints
+   * And a mark on a gap spans it. The seam is as wide as the page's content
+   * column, so the bar is too — `right: 0` rather than `right: 6px` is the whole
+   * difference between a chip beside a band and a bar across the space where a
+   * band was.
+   */
+  it("draws a mark on a gap across the gap, clear of the band beside it", () => {
+    expect(markRule(place("above"))).toContain("inset: auto 0 100% 0;")
+    expect(markRule(place("above"))).toContain("margin: 0 0 10px 0;")
+
+    expect(markRule(place("below"))).toContain("inset: 100% 0 auto 0;")
+    expect(markRule(place("below"))).toContain("margin: 10px 0 0 0;")
+  })
+
+  /**
+   * **The defect this whole distinction exists for.**
+   *
+   * A `place` mark is borrowed onto a band that did not change — the label has
+   * said so since the first version of this file, in the word *here*. For one
+   * run the geometry did not: the same ring was drawn either way, so the demo's
+   * payoff moment ended on a green ring around a patient's testimonial that is
+   * plainly still on the page, under a chip reading *Something was removed
+   * here*.
+   *
+   * A ring is a claim about the thing inside it. Only a mark whose subject is
+   * the node may draw one.
+   */
+  it("rings a band it is about, and never one it has only borrowed", () => {
+    for (const spot of [place("above"), place("below"), place("inside")]) {
+      const node = spotlightCss([spot]).split("::after")[0] ?? ""
+
+      expect(node).not.toContain("outline")
+      expect(node).toContain("position: relative;")
+    }
+
+    expect(spotlightCss([onTheNode]).split("::after")[0]).toMatch(/outline:\s*2px solid/)
+  })
+
+  /**
+   * `border-radius` on the node exists to round the outline. Left on an unringed
+   * band it rounds corners the page never asked to have rounded — the mark
+   * changing the page it is describing, which is the one thing `outline` was
+   * chosen over `border` to avoid.
+   */
+  it("rounds nothing on a band it does not ring", () => {
+    expect(spotlightCss([place("above")]).split("::after")[0]).not.toContain("border-radius")
+    expect(spotlightCss([onTheNode]).split("::after")[0]).toContain("border-radius: 4px;")
+  })
+
+  /**
+   * A bar under a band overlaps the band that follows it, and that band paints
    * later. Without this the mark disappears behind any section carrying a ground
    * of its own — which on this page is every other one.
    */
-  it("lifts a band carrying a chip beneath it above the band that follows", () => {
-    const below = spotlightCss([
-      { nodeId: id("n_1"), tone: "applied", label: "gone", placement: "below" },
-    ])
-    const above = spotlightCss([
-      { nodeId: id("n_1"), tone: "applied", label: "gone", placement: "above" },
-    ])
+  it("lifts a band carrying a bar beneath it above the band that follows", () => {
+    const below = spotlightCss([{ ...place("below"), label: "gone" }])
+    const above = spotlightCss([{ ...place("above"), label: "gone" }])
 
     expect(below.split("::after")[0]).toContain("z-index: 1;")
     expect(above.split("::after")[0]).not.toContain("z-index: 1;")
@@ -820,9 +887,7 @@ describe("the mark's stylesheet", () => {
    * would be shown a shift the change did not make.
    */
   it("draws with an outline, so marking a band does not move it", () => {
-    const rules = spotlightCss([
-      { nodeId: id("n_1"), tone: "applied", label: "Just changed", placement: "inside" },
-    ])
+    const rules = spotlightCss([onTheNode])
 
     expect(rules).toMatch(/outline:\s*2px solid/)
     expect(rules).not.toMatch(/^\s*border:/m)
@@ -830,7 +895,13 @@ describe("the mark's stylesheet", () => {
 
   it("escapes a label so a quotation mark cannot end the rule early", () => {
     const rules = spotlightCss([
-      { nodeId: id('a"b'), tone: "awaiting", label: 'say "no"', placement: "inside" },
+      {
+        nodeId: id('a"b'),
+        tone: "awaiting",
+        label: 'say "no"',
+        placement: "inside",
+        subject: "node",
+      },
     ])
 
     expect(rules).toContain('content: "say \\"no\\""')
