@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { primitiveTypeSchema } from "../primitive-type.js"
+import { primitiveTypeSchema, type PrimitiveType } from "../primitive-type.js"
 
-import { ceilingFor, defaultGatePolicy, gatePolicySchema } from "./policy.js"
+import { ceilingFor, defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 
 describe("defaultGatePolicy", () => {
   it("ships opinionated structural knobs", () => {
@@ -15,6 +15,60 @@ describe("defaultGatePolicy", () => {
     expect(defaultGatePolicy.protectedPrimitiveTypes).toEqual([])
     expect(defaultGatePolicy.outOfTreeEffectTypes).toEqual([])
     expect(defaultGatePolicy.protectedPropKeys).toEqual([])
+  })
+
+  /**
+   * `GatePolicy` is derived from the schema, so a field in one and not the other
+   * is now a thing that cannot be written rather than a thing that is checked.
+   * This is here anyway because the derivation is the *claim*, and because the
+   * check it replaces lived on the documentation site — `knobs.test.ts` holding
+   * its `KNOB_ORDER` against `gatePolicySchema.shape`, which is a surface telling
+   * the runtime about a mismatch inside the runtime. A second consumer keying off
+   * `keyof GatePolicy` got no such warning. The runtime owns it now.
+   */
+  it("has a default for every field the schema declares, and no field the schema does not", () => {
+    expect(Object.keys(defaultGatePolicy).sort()).toEqual(Object.keys(gatePolicySchema.shape).sort())
+  })
+
+  /**
+   * A `Record<keyof GatePolicy, true>` is the compile-time half: a fourteenth
+   * field added to the schema reaches `keyof GatePolicy` by derivation, and this
+   * object then fails to compile until it is named here too. Before the
+   * derivation the added field never reached the type at all, so nothing in
+   * `src/` could have been written that would notice it.
+   */
+  it("reaches every field through the type, not only through the parsed value", () => {
+    const named: Record<keyof GatePolicy, true> = {
+      policyId: true,
+      protectedPrimitiveTypes: true,
+      outOfTreeEffectTypes: true,
+      protectedPropKeys: true,
+      interactiveTypes: true,
+      removalThresholds: true,
+      breadthThreshold: true,
+      shallowDepthThreshold: true,
+      inverseRetentionBudget: true,
+      minimumConfidence: true,
+      confidenceFloor: true,
+      autoApplyCeiling: true,
+      refusalFloor: true,
+    }
+
+    expect(Object.keys(named).sort()).toEqual(Object.keys(gatePolicySchema.shape).sort())
+  })
+
+  /**
+   * The three host-vocabulary lists carry `.readonly()` so that the derived type
+   * keeps the `readonly` arrays the hand-written one promised. Without it the
+   * derivation would have narrowed a public type — a caller holding a
+   * `readonly PrimitiveType[]` could no longer pass it — which is the one place
+   * `z.infer` and the old mirror disagreed.
+   */
+  it("keeps the vocabulary lists readonly for callers that already hold one", () => {
+    const types: readonly PrimitiveType[] = [primitiveTypeSchema.parse("app.card")]
+    const policy: GatePolicy = gatePolicySchema.parse({ protectedPrimitiveTypes: types })
+
+    expect(policy.protectedPrimitiveTypes).toEqual(types)
   })
 })
 

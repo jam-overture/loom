@@ -214,3 +214,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0128 | *No record on this branch* | — | — |
 | 0129 | *No record on this branch* | — | — |
 | [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |
+| 0131 | *No record on this branch* | — | — |
+| [0132](0132-a-type-that-mirrors-a-schema-is-derived-from-it.md) | A type that mirrors a schema is derived from it | Accepted | §2 |

@@ -14622,8 +14622,25 @@ what costs is the standing order, not the delivery.
 Nothing a routine can fix. Filed for the ninth consecutive day.
 ## 2026-09-04 — a field added to `gatePolicySchema` and not to `GatePolicy` compiles, and every consumer keyed on the type silently omits it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-a hole in a guarantee two lanes are now relying on
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-29-the-lists-nothing-could-walk`, taking **option 1** —
+`GatePolicy` is now `Readonly<z.infer<typeof gatePolicySchema>>`, and
+[0132](decisions/0132-a-type-that-mirrors-a-schema-is-derived-from-it.md) records
+the rule. This entry's guess was right: `z.infer` very nearly worked, and
+disagreed in exactly one place — the three vocabulary arrays, which infer mutable
+and were promised `readonly`. `.readonly()` in the schema closes that without a
+mapped type, and is already this package's idiom in seven other array schemas.
+
+**Two things worth having from the build.** The drift was confirmed by experiment
+rather than argued: a fourteenth field added to the schema on `main` type-checks
+the whole repository with **no errors at all**, and the same field on this branch
+fails to compile in two places. The second of those is `policy-fingerprint.ts`,
+whose `PolicyProjection` is the **second consumer keyed on `keyof GatePolicy`**
+this entry predicted would get no warning — it existed already, inside `src/`,
+projecting thirteen of fourteen fields with nothing to say so.
+
+`knobs.test.ts` keeps passing and is no longer load-bearing. Whether that lane
+retires it is its own call.
 
 `src/runtime/policy.ts` states the policy's thirteen fields **twice**: once as
 `gatePolicySchema`, and once as the hand-written `GatePolicy` type beneath it.
@@ -16163,7 +16180,14 @@ tree is a change to the one asset other people's servers fetch. Nothing on
 
 ## 2026-09-02 — `WriteOutcome` still has no list of its kinds, six days after it was asked for and after the same addition was made three times elsewhere
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+closed — **it was done, and nobody closed the entry.** `WRITE_OUTCOME_KINDS` is
+in `src/write/commit.ts` on `main` with its seven endings and a test holding them
+against the union, and has been since `framework-21`. This entry stayed open for
+ten days saying it was *"the first thing on the next run's list"* while the thing
+it asked for was already there — which is its own small lesson about a channel
+that is appended to and not read back: an entry nobody closes is indistinguishable
+from work nobody did, and costs the next run the time to tell them apart.
 
 Filed against my own lane so the next run does not have to re-derive it. `Loom docs`
 asked on 27 August for `WRITE_OUTCOME_KINDS` beside `WriteOutcome`, in the shape
@@ -16326,9 +16350,14 @@ import from a lane they may not edit. It wants `apps/loom/scripts/`, beside
 `db-push.ts`.
 ## 2026-09-02 — `StoreError` has five codes and no way to list them, which is the second of four still open
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-refiled. It was first filed on #199, which was closed unmerged on 28 August, so
-it never reached `main`.
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-29-the-lists-nothing-could-walk` — **and it closes the fourth as
+well.** `STORE_ERROR_CODES` is in `src/store/errors.ts` and `CLI_ERROR_CODES` in
+`src/cli/plan.ts`, both `everyMemberOf` in the shape this entry asked for, both
+held against their union by a test in `src/`. All four of the unions that could
+be reacted to and not walked now publish their list. *Going to production* can
+drop its copy in `(docs)/_lib/deployment/failures.ts` and `scaffold.ts` its
+`CliError["code"]` table — filed below for that lane rather than done here.
 
 `StoreError` is a discriminated union. A `switch` over one is exhaustive at
 compile time, which is right for the code that *handles* a failure. What no
@@ -16434,8 +16463,25 @@ have to.
 
 ## 2026-09-04 — a field added to `gatePolicySchema` and not to `GatePolicy` compiles, and every consumer keyed on the type silently omits it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-a hole in a guarantee two lanes are now relying on
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-29-the-lists-nothing-could-walk`, taking **option 1** —
+`GatePolicy` is now `Readonly<z.infer<typeof gatePolicySchema>>`, and
+[0132](decisions/0132-a-type-that-mirrors-a-schema-is-derived-from-it.md) records
+the rule. This entry's guess was right: `z.infer` very nearly worked, and
+disagreed in exactly one place — the three vocabulary arrays, which infer mutable
+and were promised `readonly`. `.readonly()` in the schema closes that without a
+mapped type, and is already this package's idiom in seven other array schemas.
+
+**Two things worth having from the build.** The drift was confirmed by experiment
+rather than argued: a fourteenth field added to the schema on `main` type-checks
+the whole repository with **no errors at all**, and the same field on this branch
+fails to compile in two places. The second of those is `policy-fingerprint.ts`,
+whose `PolicyProjection` is the **second consumer keyed on `keyof GatePolicy`**
+this entry predicted would get no warning — it existed already, inside `src/`,
+projecting thirteen of fourteen fields with nothing to say so.
+
+`knobs.test.ts` keeps passing and is no longer load-bearing. Whether that lane
+retires it is its own call.
 
 `src/runtime/policy.ts` states the policy's thirteen fields **twice**: once as
 `gatePolicySchema`, and once as the hand-written `GatePolicy` type beneath it.
@@ -18103,7 +18149,18 @@ the three things no request gets past. The front door's stat caption now says
 
 ## 2026-09-08 — `@loom/runtime/sdk` exports `catalogueOf` and not the type of what it returns
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+closed by `framework-29-the-lists-nothing-could-walk`. `CataloguedPrimitive`,
+`CataloguedProp` and `PrimitiveCatalogue` now come out of
+`@loom/runtime/sdk`, so the two imports in this entry are one.
+
+**Not by `export type *`, which is what was recommended and is wrong here** — see
+the entry filed below against `Loom docs`. The reference generator resolves a
+star re-export by walking the target module and does not honour the `type`
+modifier, so starring published `catalogueFields` and `closedChoices` on the API
+reference as functions this door offers. It does not offer them: they are values,
+`export type *` never carried them, and `sdk.catalogueFields` is `undefined`
+against the built package. Naming the three types says the true thing.
 
 `src/sdk/catalogue.ts` re-exports `catalogueOf`, and `src/sdk/index.ts` re-exports
 that module. What it does not carry is `CataloguedPrimitive`, `CataloguedProp` or
@@ -19432,3 +19489,142 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-12 — the reference generator resolves `export type *` by walking the target, and publishes its values as functions the door does not offer
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+worked around in `src/` today; the generator itself is untouched
+
+Found closing the 8 September entry asking for `@loom/runtime/sdk` to carry the
+type of what `catalogueOf` hands back. The recommended fix was one line:
+
+```ts
+export type * from "../catalogue.js"
+```
+
+It is correct TypeScript and it produced a **false page**. After
+`pnpm --filter @loom/app docs:api`, the API reference listed under
+`@loom/runtime/sdk`:
+
+| Symbol | Reference says | The door actually offers |
+| --- | --- | --- |
+| `CataloguedProp`, `CataloguedPrimitive`, `PrimitiveCatalogue` | type | type ✓ |
+| `ClosedChoice` | type | type ✓ |
+| **`catalogueFields`** | **function** | nothing |
+| **`closedChoices`** | **function** | nothing |
+
+`catalogueFields` and `closedChoices` are `export const`. `export type *` cannot
+carry a value and does not: the emitted `dist/sdk/catalogue.d.ts` says
+`export type * from "../catalogue.js"`, and importing the built package gives
+
+```
+catalogueOf: function
+catalogueFields: undefined
+closedChoices: undefined
+```
+
+So the generator reads a star re-export by walking the target module's symbols
+and does not honour the `type` modifier on the re-export. The page it produced
+told a host to import two functions that are not there — the same class as a
+stale snippet, except that nothing on the site could catch it, because the
+generator is what the site trusts.
+
+**Worked around rather than fixed**, by naming the three types instead of
+starring: the reference is truthful and `src/` needed no generator change. The
+workaround is fragile as a *rule* — the next `export type *` anywhere in `src/`
+reintroduces it silently, and there is currently nothing that would say so.
+
+**Two things that would close it**, and the choice is this lane's:
+
+1. **Honour the modifier** in whatever resolves re-exports in
+   `(docs)/_lib/api/generate.ts` — a `type` star contributes only type symbols.
+2. **Check the reference against the built package** rather than only against the
+   generator: every symbol the reference calls a `function` should be a function
+   on the entry point it is listed under. That is a handful of lines over
+   `dist/`, it catches this whole class rather than this instance, and it would
+   have failed on the starred version.
+
+The second is the one worth having. `extract.test.ts` already pins the reference
+to what the generator produces *right now*, which is exactly the property that
+did not help here: the generator produced it, so it matched.
+
+---
+
+## 2026-09-12 — three copies of a runtime list can come out, now that the runtime publishes all four
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+an offer rather than a defect; nothing is wrong today
+
+`framework-29-the-lists-nothing-could-walk` closes the last two of the four
+unions that could be reacted to and not walked. `STORE_ERROR_CODES` and
+`CLI_ERROR_CODES` are exported from `src/store/errors.ts` and `src/cli/plan.ts`,
+joining `WRITE_OUTCOME_KINDS` and `TELEMETRY_EVENT_TYPES`.
+
+Three places in `(docs)` keep a copy because there was nothing to read:
+
+| File | Copy | Can now read |
+| --- | --- | --- |
+| `_lib/deployment/failures.ts` | the five store codes | `STORE_ERROR_CODES` |
+| `_lib/scaffold.ts` | the nine CLI codes | `CLI_ERROR_CODES` |
+| `_lib/policy/knobs.test.ts` | `KNOB_ORDER` vs `gatePolicySchema.shape` | nothing — see below |
+
+The first two are `Record<Union["code"], …>`, so they already fail to compile
+when a code is *added*. What they cannot see is a code **renamed**, or their own
+order drifting from the order the runtime publishes. Reading the list closes
+both, and it is the thing the lists were built for.
+
+`knobs.test.ts` is a different case: `GatePolicy` is now derived from the schema
+([0132](decisions/0132-a-type-that-mirrors-a-schema-is-derived-from-it.md)), so
+the mismatch it guards against cannot be written any more. It is not wrong and it
+is no longer load-bearing. Retiring it, keeping it as a cheap belt-and-braces, or
+repointing it at the knob *prose* rather than the keys are all defensible; it is
+this lane's call and none of them is urgent.
+
+---
+
+## 2026-09-12 — `FINDINGS.md` is 1 MB and 30 of its entries are filed twice
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — measured, not fixed; a routine should not quietly rewrite the
+shared channel
+
+Every routine brief names this file as *read first, every run, before choosing
+work*. It is now **1,015 KB across ~19,400 lines and 524 entries**, and reading
+it is a meaningful fraction of a run's budget before any work starts. Seven lanes
+pay that twice a day.
+
+**494 of the 524 entry headers are unique**, so **30 are exact duplicates** —
+whole entries appearing twice, byte for byte, not two lanes reporting the same
+thing in their own words. The 4 September entry on `gatePolicySchema` closed by
+today's pull request was one of them; both copies were edited together, which is
+the only reason the file does not now disagree with itself about whether it is
+closed. That is the actual hazard: **a duplicated entry can be closed in one copy
+and left open in the other**, and the next run reading the stale one redoes work
+that is already on `main`. Today's run met the near-miss version of this from a
+different direction — the `WRITE_OUTCOME_KINDS` entry sat open for ten days
+describing work that had already landed.
+
+The duplication looks like merge residue rather than anyone appending twice: this
+file is append-only by convention, so two branches appending different entries
+and being merged produces exactly this.
+
+**Filed rather than fixed, and the reason is the convention itself** — *append; do
+not rewrite someone else's entry.* Deleting 30 entries is rewriting the channel
+wholesale, and a routine deciding on its own which copy of a finding survives is
+not an arrangement that stays safe. Three options, cheapest first, none of them a
+routine's to pick:
+
+1. **De-duplicate once, by hand or by script**, keeping the copy whose Status is
+   furthest along. Roughly a 3% size cut and it removes the disagree-with-itself
+   hazard entirely.
+2. **Archive by date.** Entries closed more than a month ago move to
+   `FINDINGS-archive-YYYY-MM.md`; the live file carries open findings and the last
+   few weeks. This is the one that actually addresses the size, and it is what the
+   file's own growth rate argues for.
+3. **Nothing, deliberately**, with a note in `docs/routines.md` telling runs to
+   grep rather than read. Honest, and it is roughly what every lane already does.
+
+A verify check that fails on a duplicate header would stop it getting worse
+whichever of the three is chosen, and is a few lines.
