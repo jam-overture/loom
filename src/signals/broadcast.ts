@@ -1,5 +1,6 @@
-import { nodeIdSchema, treeIdSchema, type TreeId } from "../ids.js"
-import { primitiveTypeSchema } from "../primitive-type.js"
+import { NAMESPACED_ID_PATTERN, NODE_ID_PATTERN, TREE_ID_PATTERN } from "../grammar.js"
+import type { NodeId, TreeId } from "../ids.js"
+import type { PrimitiveType } from "../primitive-type.js"
 import { DISCLOSED_ATTRIBUTE } from "../render/disclosed.js"
 import {
   LOOM_NODE_ATTRIBUTE,
@@ -9,13 +10,9 @@ import {
 } from "../render/editable.js"
 import { err, ok, type Result } from "../result.js"
 
-import { drain, emptyLedger, entered, hid, left, noted, showed, type SignalAddress } from "./ledger.js"
-import {
-  READER_SIGNAL_KINDS,
-  type ReaderSignal,
-  type ReaderSignalBatch,
-  type ReaderSignalKind,
-} from "./signal.js"
+import { createSignalLedger, type SignalAddress } from "./ledger.js"
+import { READER_SIGNAL_KINDS } from "./kinds.js"
+import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal.js"
 
 /**
  * Broadcasting reader signals from a rendered Loom page.
@@ -164,16 +161,26 @@ const intersectionVisibility: ObserveVisibility = (onChange) => {
   return { observe: (element) => observer.observe(element), disconnect: () => observer.disconnect() }
 }
 
+/**
+ * Recognisers built from the id grammar rather than the schemas, so the
+ * broadcaster ships no schema library to the browser. The check is the same
+ * pattern the schemas apply; the brand is a claim that pattern earns.
+ */
+const isNodeId = (value: string | null): value is NodeId => value !== null && NODE_ID_PATTERN.test(value)
+const isTreeId = (value: string | null): value is TreeId => value !== null && TREE_ID_PATTERN.test(value)
+const isPrimitiveType = (value: string | null): value is PrimitiveType =>
+  value !== null && NAMESPACED_ID_PATTERN.test(value)
+
 /** The identity an element carries, or `undefined` when it carries none worth trusting. */
 const addressOf = (element: Element): SignalAddress | undefined => {
-  const nodeId = nodeIdSchema.safeParse(element.getAttribute(LOOM_NODE_ATTRIBUTE))
-  const type = primitiveTypeSchema.safeParse(element.getAttribute(LOOM_TYPE_ATTRIBUTE))
+  const nodeId = element.getAttribute(LOOM_NODE_ATTRIBUTE)
+  const type = element.getAttribute(LOOM_TYPE_ATTRIBUTE)
 
-  return nodeId.success && type.success ? { nodeId: nodeId.data, type: type.data } : undefined
+  return isNodeId(nodeId) && isPrimitiveType(type) ? { nodeId, type } : undefined
 }
 
 const pageOf = (root: Element): Result<{ treeId: TreeId; revision: number }, ReaderSignalBroadcastError> => {
-  const treeId = treeIdSchema.safeParse(root.getAttribute(LOOM_TREE_ATTRIBUTE))
+  const treeId = root.getAttribute(LOOM_TREE_ATTRIBUTE)
   /**
    * Matched as digits before it is converted. `Number(null)` and `Number("")` are
    * both 0, so a page with no revision at all would otherwise pass as revision 0
@@ -182,8 +189,8 @@ const pageOf = (root: Element): Result<{ treeId: TreeId; revision: number }, Rea
   const written = root.getAttribute(LOOM_REVISION_ATTRIBUTE) ?? ""
   const revision = /^\d+$/.test(written) ? Number(written) : Number.NaN
 
-  return treeId.success && Number.isSafeInteger(revision)
-    ? ok({ treeId: treeId.data, revision })
+  return isTreeId(treeId) && Number.isSafeInteger(revision)
+    ? ok({ treeId, revision })
     : err({
         code: "unaddressed",
         detail: `the root element carries no ${LOOM_TREE_ATTRIBUTE} and ${LOOM_REVISION_ATTRIBUTE}; render the page with addressed: true`,
@@ -227,7 +234,7 @@ export const broadcastReaderSignals = (
   const document = root.ownerDocument
 
 
-  let ledger = emptyLedger(document.visibilityState === "hidden")
+  const ledger = createSignalLedger(document.visibilityState === "hidden")
   let stopped = false
 
   const record = (kind: ReaderSignalKind, signal: (address: SignalAddress) => ReaderSignal) =>
@@ -235,19 +242,18 @@ export const broadcastReaderSignals = (
       const target = nearestAddressed(root, element)
       const address = target === undefined ? undefined : addressOf(target)
       if (address === undefined || !wants(kind, address.type)) return
-      ledger = noted(ledger, signal(address))
+      ledger.noted(signal(address))
     }
 
   const flush = (): void => {
-    const drained = drain(ledger, now())
-    ledger = drained.ledger
+    const drained = ledger.drain(now())
 
     /**
      * Viewed and dwelled are gathered together, because one observer serves both,
      * and are selected here — so a host asking only for time on screen gets no
      * `viewed`, and a type watched for one kind reports nothing for the other.
      */
-    const signals = drained.signals.filter((signal) => wants(signal.kind, signal.type))
+    const signals = drained.filter((signal) => wants(signal.kind, signal.type))
     if (signals.length === 0) return
 
     const batch: ReaderSignalBatch = {
@@ -263,15 +269,25 @@ export const broadcastReaderSignals = (
 
   const watched = (type: string): boolean => wants("viewed", type) || wants("dwelled", type)
 
+  /**
+   * Each observed element's address, read once when observing starts. The
+   * observer calls back at every threshold an element crosses — eleven times on
+   * the way into view — and reading two attributes and testing two patterns on
+   * each of those is work whose answer cannot have changed.
+   */
+  const addresses = new WeakMap<Element, SignalAddress>()
+
   const enabled = options.kinds ?? READER_SIGNAL_KINDS
   const watchesTime = enabled.includes("viewed") || enabled.includes("dwelled")
 
   const visibility = watchesTime
     ? (options.observeVisibility ?? intersectionVisibility)((entries) => {
+        const at = now()
         for (const entry of entries) {
-          const address = addressOf(entry.target)
+          const address = addresses.get(entry.target)
           if (address === undefined) continue
-          ledger = entry.visible ? entered(ledger, address, now()) : left(ledger, address.nodeId, now())
+          if (entry.visible) ledger.entered(address, at)
+          else ledger.left(address.nodeId, at)
         }
       })
     : undefined
@@ -280,7 +296,9 @@ export const broadcastReaderSignals = (
     const candidates = [root, ...Array.from(root.querySelectorAll(`[${LOOM_NODE_ATTRIBUTE}]`))]
     for (const element of candidates) {
       const address = addressOf(element)
-      if (address !== undefined && watched(address.type)) visibility.observe(element)
+      if (address === undefined || !watched(address.type)) continue
+      addresses.set(element, address)
+      visibility.observe(element)
     }
   }
 
@@ -327,12 +345,31 @@ export const broadcastReaderSignals = (
     }
   })
 
+  /**
+   * The batch timer runs only while the page is visible. A hidden page gathers
+   * nothing — the ledger has stopped counting — so a timer ticking in a
+   * background tab would wake the page every few seconds to find that out.
+   */
+  const flushEveryMs = options.flushEveryMs ?? DEFAULT_FLUSH_MS
+  let timer: ReturnType<typeof setInterval> | undefined
+
+  const startTimer = (): void => {
+    if (timer === undefined) timer = setInterval(flush, flushEveryMs)
+  }
+
+  const stopTimer = (): void => {
+    if (timer !== undefined) clearInterval(timer)
+    timer = undefined
+  }
+
   const onVisibility = (): void => {
     if (document.visibilityState === "hidden") {
-      ledger = hid(ledger, now())
+      ledger.hid(now())
       flush()
+      stopTimer()
     } else {
-      ledger = showed(ledger, now())
+      ledger.showed(now())
+      startTimer()
     }
   }
 
@@ -348,13 +385,13 @@ export const broadcastReaderSignals = (
   })
   document.addEventListener("visibilitychange", onVisibility)
   document.defaultView?.addEventListener("pagehide", onPageHide)
-  const timer = setInterval(flush, options.flushEveryMs ?? DEFAULT_FLUSH_MS)
+  if (document.visibilityState !== "hidden") startTimer()
 
   const stop = (): void => {
     if (stopped) return
     stopped = true
     flush()
-    clearInterval(timer)
+    stopTimer()
     visibility?.disconnect()
     disclosures.disconnect()
     root.removeEventListener("click", onClick)

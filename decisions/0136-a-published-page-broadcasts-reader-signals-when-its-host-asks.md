@@ -14,6 +14,18 @@
 > applied to every signal at the moment a batch is built. Nothing here is
 > reversed — the configuration is still the host's and never the tree's.
 
+> **Amended 2026-09-12 (second)**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
+> The broadcaster has a second entry point, `@loom/runtime/signals/broadcast`,
+> for browser bundles. `@loom/runtime/signals` also carries the schemas, and a
+> bundler cannot leave the schema library out once that entry is imported: 66 KB
+> minified against 4.8 KB for the broadcaster alone. The id patterns the
+> broadcaster checks moved to `src/grammar.ts`, which the schemas are now built
+> from, so there is still one definition of an id. The ledger holds its state in
+> place rather than returning copies — the copying version cost the square of the
+> page (315 ms against 10 ms for 6,000 nodes in the benchmark) — and the batch
+> timer stops while the page is hidden. Signals and batches are unchanged, and
+> nothing is reversed.
+
 ## Context
 
 Loom is an adaptive UI runtime. The pipeline that lets a page change from how it

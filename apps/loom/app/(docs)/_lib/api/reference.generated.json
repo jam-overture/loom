@@ -545,6 +545,20 @@
           ]
         },
         {
+          "module": "grammar",
+          "title": "Grammar",
+          "summary": "The grammar of Loom's identifiers, as plain patterns and nothing else.",
+          "symbols": [
+            {
+              "name": "NAMESPACED_ID_PATTERN",
+              "kind": "value",
+              "signature": "const NAMESPACED_ID_PATTERN: RegExp",
+              "truncated": false,
+              "summary": "The grammar of every name a tree uses to reach something a deployment registered: a primitive, a data source, a submission endpoint. Dot-namespaced kebab-case — `stack`, `commerce.product-card`, `contact.enquiry`."
+            }
+          ]
+        },
+        {
           "module": "ids",
           "title": "Ids",
           "summary": "Identity scheme.",
@@ -1081,13 +1095,6 @@
           "title": "Primitive names",
           "summary": "The names a tree uses to reach what a deployment registered.",
           "symbols": [
-            {
-              "name": "NAMESPACED_ID_PATTERN",
-              "kind": "value",
-              "signature": "const NAMESPACED_ID_PATTERN: RegExp",
-              "truncated": false,
-              "summary": "The grammar of every name a tree uses to reach something a deployment registered: a primitive, a data source, a submission endpoint. Dot-namespaced kebab-case — `stack`, `commerce.product-card`, `contact.enquiry`."
-            },
             {
               "name": "primitiveTypeSchema",
               "kind": "schema",
@@ -6383,9 +6390,9 @@
           ]
         },
         {
-          "module": "signals/signal",
-          "title": "Signal",
-          "summary": "What a published page may say about how it is being read.",
+          "module": "signals/kinds",
+          "title": "Kinds",
+          "summary": "The four kinds of reader signal, with nothing else in the module.",
           "symbols": [
             {
               "name": "READER_SIGNAL_KINDS",
@@ -6393,7 +6400,14 @@
               "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\"]",
               "truncated": false,
               "summary": ""
-            },
+            }
+          ]
+        },
+        {
+          "module": "signals/signal",
+          "title": "Signal",
+          "summary": "What a published page may say about how it is being read.",
+          "symbols": [
             {
               "name": "readerSignalKindSchema",
               "kind": "schema",
@@ -6449,6 +6463,83 @@
               "signature": "const parseReaderSignalBatch: (input: unknown) => Result<ReaderSignalBatch, ReaderSignalParseError>",
               "truncated": false,
               "summary": "Read a batch that arrived from somewhere untrusted — a request body, a queue."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/signals/broadcast",
+      "slug": "signals-broadcast",
+      "types": "./dist/signals/broadcast.d.ts",
+      "groups": [
+        {
+          "module": "signals/broadcast",
+          "title": "Broadcast",
+          "summary": "Broadcasting reader signals from a rendered Loom page.",
+          "symbols": [
+            {
+              "name": "READER_SIGNALS_EVENT",
+              "kind": "value",
+              "signature": "const READER_SIGNALS_EVENT = \"loom:signals\"",
+              "truncated": false,
+              "summary": "The DOM event a batch is dispatched as, on the root element. It bubbles."
+            },
+            {
+              "name": "VisibilityObserver",
+              "kind": "type",
+              "signature": "type VisibilityObserver = {\n    readonly observe: (element: Element) => void;\n    readonly disconnect: () => void;\n};",
+              "truncated": false,
+              "summary": "Something that reports elements coming into and out of view. The browser's `IntersectionObserver` unless a host passes its own."
+            },
+            {
+              "name": "VisibilityEntry",
+              "kind": "type",
+              "signature": "type VisibilityEntry = {\n    readonly target: Element;\n    readonly visible: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ObserveVisibility",
+              "kind": "type",
+              "signature": "type ObserveVisibility = (onChange: (entries: readonly VisibilityEntry[]) => void) => VisibilityObserver;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalTypes",
+              "kind": "type",
+              "signature": "type ReaderSignalTypes = readonly string[] | {\n    readonly [Kind in ReaderSignalKind]?: readonly string[];\n};",
+              "truncated": false,
+              "summary": "The primitive types to report on: one list for every kind, or a list per kind."
+            },
+            {
+              "name": "ReaderSignalOptions",
+              "kind": "type",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalBroadcast",
+              "kind": "type",
+              "signature": "type ReaderSignalBroadcast = {\n    /** Deliver whatever has been gathered, now. */\n    readonly flush: () => void;\n    /** Deliver what is left and stop observing. Safe to call twice. */\n    readonly stop: () => void;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalBroadcastError",
+              "kind": "type",
+              "signature": "type ReaderSignalBroadcastError = {\n    /** The root carries no tree id or revision — the page was not rendered with `addressed: true`. */\n    readonly code: \"unaddressed\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "broadcastReaderSignals",
+              "kind": "function",
+              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "truncated": false,
+              "summary": "Start broadcasting reader signals from the page under `root`."
             }
           ]
         }

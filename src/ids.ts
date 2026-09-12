@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { ID_BODY_ALPHABET, ID_BODY_MAX_LENGTH, idPattern } from "./grammar.js"
+
 /**
  * Identity scheme.
  *
@@ -19,37 +21,33 @@ import { z } from "zod"
  * NodeId belongs; the brand types are the real enforcement.
  */
 
-const ID_BODY_MAX_LENGTH = 32
-const ID_BODY_ALPHABET = "[0-9a-z]"
-const ID_BODY = `${ID_BODY_ALPHABET}{1,${ID_BODY_MAX_LENGTH}}`
-
 export const nodeIdSchema = z
   .string()
-  .regex(new RegExp(`^n_${ID_BODY}$`))
+  .regex(idPattern("n"))
   .brand<"NodeId">()
 export type NodeId = z.infer<typeof nodeIdSchema>
 
 export const treeIdSchema = z
   .string()
-  .regex(new RegExp(`^t_${ID_BODY}$`))
+  .regex(idPattern("t"))
   .brand<"TreeId">()
 export type TreeId = z.infer<typeof treeIdSchema>
 
 export const deltaIdSchema = z
   .string()
-  .regex(new RegExp(`^d_${ID_BODY}$`))
+  .regex(idPattern("d"))
   .brand<"DeltaId">()
 export type DeltaId = z.infer<typeof deltaIdSchema>
 
 export const intentIdSchema = z
   .string()
-  .regex(new RegExp(`^i_${ID_BODY}$`))
+  .regex(idPattern("i"))
   .brand<"IntentId">()
 export type IntentId = z.infer<typeof intentIdSchema>
 
 export const proposalIdSchema = z
   .string()
-  .regex(new RegExp(`^p_${ID_BODY}$`))
+  .regex(idPattern("p"))
   .brand<"ProposalId">()
 export type ProposalId = z.infer<typeof proposalIdSchema>
 
