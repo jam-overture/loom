@@ -74,7 +74,7 @@ export const buildPage = (ids = sequentialIdFactory()) => {
     [
       slot("heading", [heading(2, "Four things that actually changed")]),
       prose(
-        "Not colourways. The four below alter what you would buy, and three of them push in the same direction: less fabric, worn longer.",
+        "Not colorways. The four below alter what you would buy, and three of them push in the same direction: less fabric, worn longer.",
         { tone: "muted" }
       ),
       el("loom.feature-grid", { columns: "two", density: "loose" }, [
@@ -84,7 +84,7 @@ export const buildPage = (ids = sequentialIdFactory()) => {
         ),
         feature(
           "The mid-layer is where the money moved",
-          "Shells got commoditised. Grid fleece, active insulation and the 60g synthetic puffy are where brands are competing now, because that is the layer you actually take on and off six times a day."
+          "Shells got commoditized. Grid fleece, active insulation and the 60g synthetic puffy are where brands are competing now, because that is the layer you actually take on and off six times a day."
         ),
         feature(
           "Insulated jackets are becoming a resort-only purchase",
@@ -150,9 +150,9 @@ export const buildPage = (ids = sequentialIdFactory()) => {
             cell({ mark: "no" }, "Shell only"),
           ]),
           row({ heading: "What you pay", note: "jacket, mid-market" }, [
-            cell({ role: "value" }, "£180–£320"),
-            cell({ role: "value" }, "£140–£260"),
-            cell({ role: "value" }, "£380–£700"),
+            cell({ role: "value" }, "$240–$420"),
+            cell({ role: "value" }, "$180–$340"),
+            cell({ role: "value" }, "$480–$850"),
           ]),
         ]
       ),
