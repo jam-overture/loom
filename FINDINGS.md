@@ -8,6 +8,176 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-12 — the demo asked its leading question twice, and the duplicate was the one everything addressed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-15-the-question-asked-twice` for the instance; filed for the shape
+
+`main` has, since 11 September, rendered **every record card twice**. Two
+`records.map` calls inside one `<ul>` in `demo/page.tsx` — the second carrying
+the offer, the quoted ask and the mark pill, the first carrying none of them.
+It arrived in the merge of #255, whose own report does not mention a card list,
+so it is a merge artefact rather than a decision anybody made.
+
+Measured on the built page at 1440×900, two seconds after the leading ask:
+
+| | |
+| --- | --- |
+| cards for one question | **2**, 503px each |
+| **Apply this change** buttons | **2**, tops at y=509 and y=1020 |
+| the record section | **1,063px** in an 857px rail |
+| elements carrying the record's id | **2**, the same id |
+
+So the demo's best sixty seconds ended with a stranger being asked the same
+question twice and having to guess which of two identical green buttons the page
+meant. It was live on the deployed demo for a day.
+
+**The duplicate id is the half that was not merely ugly.** The card's element id
+is an address: `AnswerInView` finds the waiting question with `getElementById`,
+and `BackToTheRecord` sends a phone visitor back up to it. Both resolve to
+whichever element comes first, which was the copy with no offer, no quoted ask
+and no mark on it — so three runs' worth of scroll work was pointing at the
+undecorated card.
+
+**Nothing caught it and nothing in this repository could have.** Every module
+involved was correct on its own, both copies were valid React, and `page.tsx` is
+an async Server Component that reads a cookie, opens a session and renders a
+`LoomTree`, so no test has ever mounted it. The only witness was a browser.
+Sixth instance of this lane's standing diagnosis (25 August) arriving from a new
+direction: not a last hop missing, but a last hop performed twice.
+
+**The fix that holds:** the list is a component (`demo/_components/the-record.tsx`)
+with a test that *counts* — one card per ask, one element per record id, one pair
+of controls per question. Reintroducing the duplicate loop fails six of its
+twelve tests.
+
+---
+
+## 2026-09-12 — a route's `page.tsx` is the one file in a surface nothing can mount, and four lanes render lists in one
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open — a
+shape, and it is `(lessons)`' and `(docs)`' as much as the portal's
+
+The entry above is this lane's instance. The condition that made it invisible is
+not this lane's:
+
+> A Next route's `page.tsx` is an async Server Component that reads request
+> state. There is no test in this repository that renders one. So **the last
+> composition step of every surface — which components, how many, in what
+> order — is the one step with no coverage at all**, and it is exactly the step
+> a merge conflict resolves badly.
+
+`grep -rln "\.map(" --include=page.tsx` finds lists composed inline in five
+portal routes (`trees`, `activity`, `history`, `pieces`, `audit`), five lessons
+routes, and one docs route. Each is a place where a card could render twice, a
+row could go missing, or a list could lose its decoration, and the suite would
+stay green.
+
+**The cheap half is worth more than the complete one.** Nobody needs a way to
+mount a route. What closes it is moving the list into a component that takes the
+rows and renders them, and asserting the count — three lines of test per list,
+and the assertion is *how many*, which is the thing a test of one row cannot see.
+
+---
+
+## 2026-09-12 — `git checkout -b <branch> main` branched off a `main` forty-one commits stale, silently
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — the 16 August entry, recurring with a bigger number
+
+A session's container starts with **`HEAD` detached at the real `main`** and the
+local `main` and `origin/main` refs pointing somewhere else entirely. This run:
+
+```
+HEAD (detached)   140f150   11 September
+main              d7375ef    1 September   — 41 commits behind
+origin/main       d7375ef    1 September
+```
+
+So step 3 of the procedure — *branch off `main`* — written in the obvious way,
+`git checkout -b demo-15-… main`, produced a branch off **ten-day-old code**. It
+is silent: git says `Switched to a new branch`, the working tree changes under
+you, and the only symptom is that files you read minutes earlier no longer say
+what they said. This run caught it because an `Edit` failed to match a string it
+had just read.
+
+Caught by luck, in other words, and a routine that had not just read the file
+would have spent the run rebuilding work that is already on `main` and opened a
+pull request reverting forty-one commits.
+
+The fix is one line in the procedure or one line in the session's setup:
+**`git fetch origin main` before branching, and branch off `origin/main`.**
+`docs/routines.md` step 3 currently says only *branch off `main`*, which is the
+instruction that produces the bug. Filed rather than fixed because
+`docs/routines.md` is governance and a routine cannot write the governance it is
+bound by.
+
+---
+
+## 2026-09-12 — `21st.dev` re-verified blocked, from the demo lane a fourteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` on the run of
+12 September. The standing answer is on the 21 August entry: the tool's
+allowlist permits the domain and the proxy does not, so `docs/routines.md` has
+listed it under *Currently allowed* for three weeks without it ever being
+reachable.
+
+The cost this run was nil, and for the reason it has been nil thirteen times
+before: what decided this unit was building the page and photographing the same
+two presses. No reference gallery can tell you that a card has rendered twice.
+
+---
+
+## 2026-09-12 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, twenty-two days on
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+Line 19, verified on `140f150` this run:
+
+> Eighteen primitives are registered and the demo is live at
+> `apps/loom/app/(portal)/portal/demo`.
+
+It moved to a public `/demo` on 21 August. `rollout.md` names this lane the
+conversion artifact for launch, so the one document saying what the demo is *for*
+is the one still pointing at where it was. Eighth consecutive run to say so.
+
+---
+
+## 2026-09-12 — the demo's ceiling line is the second half of a sentence the portal has since rewritten
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
+question for a run with the screen in front of it, not a defect
+
+`Loom portal` filed on 1 September that `stakes-above-ceiling` changed from
+*"Riskier than a request from here is allowed to be without asking."* to
+*"A change this big is not something Loom may make on its own."*, because *here*
+had no referent on a queue drawn from every page. The comment that finding names
+is fixed on this branch and the finding is closed.
+
+What it did not name is the **feature** built on the old wording.
+`_lib/ceiling.ts` exists to supply the missing half of *from here*: it prints
+*"Somebody using the site asked for this, and Loom will not let an ask like that
+land on its own above Low risk."* under the rule, and its module comment argues
+the case entirely in terms of a sentence that no longer says *from here*.
+
+The line may still earn its place — it is the only place either surface states
+the threshold the Gate compared against, and printing both sides of an
+inequality without it was the defect it fixed. But it is now answering a question
+the sentence above it stops asking, and three module comments in this lane
+(`ceiling.ts`, `weighed.ts`, `record-card.tsx`) narrate a card that no longer
+exists. Left alone this run: changing it is a copy decision that wants the built
+page beside it, and this run was already one unit.
+
+The narratives were **not** rewritten to the new sentence, deliberately.
+`ceiling.ts`'s argument is *about* the words *from here* having no referent; a
+find-and-replace would leave a paragraph reasoning about a phrase that is not in
+the quotation above it.
+
+---
 ## 2026-09-08 — a string that quotes a control is coupled to that control, and renaming the control falsifies the quotation without touching it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open as a
@@ -19504,8 +19674,13 @@ does not depend on it.
 
 ## 2026-09-01 — the demo's `answer.ts` quotes a portal sentence that no longer exists
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom demo` · **Status:** open — one
-comment, no behaviour
+**Filed by:** `Loom portal` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-15-the-question-asked-twice`** — the comment now quotes the sentence the
+shared vocabulary prints today, and says that it is quoting today's rather than
+the one that was there when it was written. The three other module comments in
+this lane holding the old sentence were left as they are and filed as a question
+of their own (12 September), because each is narrating the card as it *was* and
+one of them reasons about the exact words.
 
 `app/(portal)/_lib/vocabulary.ts` changed the rule sentence for
 `stakes-above-ceiling`. It read *"Riskier than a request from here is allowed to
