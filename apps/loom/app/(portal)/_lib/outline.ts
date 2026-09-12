@@ -1,19 +1,48 @@
 import { assertNever, outlineTree, type LoomNode, type LoomTree, type NodeKind } from "@loom/runtime"
 import { addressNode, type Addressing, type DecorationLookup } from "@loom/runtime/react"
 
+import { nounOf } from "./part-name"
+
 /**
  * The outline pane's view model: one flat, serialisable row per node.
  *
  * It is built on the server because addressability depends on the registry, and
  * it is flat because it crosses into a Client Component — a row holding its own
  * subtree would send every node down the wire once per ancestor.
+ *
+ * ## The rail was the last thing on this screen speaking the runtime's words
+ *
+ * Every row of it printed a registered type — `loom.page`, `loom.heading`,
+ * `loom.card` — four inches from a sentence about the same card in a person's
+ * words. A reader who has a page has a heading and a card; `loom.heading` is
+ * what the registry calls the thing that draws it.
+ *
+ * **A rail is an address book, and every row of it is a place.** So a row is
+ * named by *what it is* and not by what it says — the rule the review queue
+ * settled for the second and third parts a sentence names. The words are on the
+ * rail already, on the text rows nested under each part, and repeating them on
+ * the container above would say the same thing twice at two indents.
+ *
+ * ## And the type is kept, not dropped
+ *
+ * `technical` carries the registry's own word for the same row. The pane beside
+ * the list prints it under *What this addresses*, closed, with the node id and
+ * the kind it has always kept there. Nothing a reader could read off this rail
+ * before has gone; it is one disclosure further down than it was.
  */
 
 export type OutlineRow = {
   readonly nodeId: string
   readonly depth: number
   readonly kind: NodeKind
+  /** What this part is, in a person's words. Never a registered type. */
   readonly label: string
+  /**
+   * The runtime's own name for the same row — a registered type, or a slot's
+   * name — and `null` for a text node, which has none to add beyond the words
+   * the row is already showing.
+   */
+  readonly technical: string | null
   /** Where a click meant for this node would actually land. */
   readonly addressing: Addressing
 }
@@ -27,16 +56,45 @@ const summarise = (value: string): string => {
   return collapsed.length > LABEL_LIMIT ? `${collapsed.slice(0, LABEL_LIMIT)}…` : collapsed
 }
 
+/**
+ * A noun at the head of a row rather than inside a sentence.
+ *
+ * `part-name.ts` owns the rule that turns `acme.buy-button` into *buy button*
+ * and this is the only thing added to it: a list item starts with a capital and
+ * carries no article, because *the card* under *the page* under *the heading*
+ * reads as three fragments of a sentence nobody wrote.
+ */
+const asRow = (noun: string): string => `${noun.slice(0, 1).toUpperCase()}${noun.slice(1)}`
+
 const labelOf = (node: LoomNode): string => {
+  switch (node.kind) {
+    case "element":
+      return asRow(nounOf(node.type))
+    /**
+     * A slot is the one node that already has a name, and it is the name the
+     * person who registered the primitive chose — `body`, `footer`. The word
+     * after it is the legend's: a space is what a slot is to somebody who has
+     * never read the schema.
+     */
+    case "slot":
+      return `${asRow(node.name)} space`
+    case "text":
+      return summarise(node.value)
+    default:
+      return assertNever(node, "labelOf")
+  }
+}
+
+const technicalOf = (node: LoomNode): string | null => {
   switch (node.kind) {
     case "element":
       return node.type
     case "slot":
       return node.name
     case "text":
-      return summarise(node.value)
+      return null
     default:
-      return assertNever(node, "labelOf")
+      return assertNever(node, "technicalOf")
   }
 }
 
@@ -56,5 +114,6 @@ export const outlineRows = (
     depth: entry.depth,
     kind: entry.node.kind,
     label: labelOf(entry.node),
+    technical: technicalOf(entry.node),
     addressing: addressNode(tree.root, entry.node.id, decorates),
   }))

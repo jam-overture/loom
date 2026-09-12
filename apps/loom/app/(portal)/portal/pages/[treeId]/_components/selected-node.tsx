@@ -36,6 +36,14 @@ import { useSelection } from "./selection-context"
  * plain sentence describes a class, and what tells two of them apart is the name
  * of the thing. `n_shot2` is a name the way a filename is.
  *
+ * It is no longer the *first* thing here, though, and that is this pane's half
+ * of the rail's change. A filename is a name for the file you already know you
+ * want; a reader who has just clicked something wants to know what they clicked.
+ * So the part's own word leads, the id follows it, and the registry's word for
+ * the same part — the `loom.card` the rail beside this used to print on every
+ * row — is the pair added to the disclosure that already holds the node and the
+ * kind.
+ *
  * Credits are handed down from the server rather than fetched on selection.
  * Selection is a click, and a click that costs a round trip to the log would make
  * the outline feel like it was loading something; the whole tree's attribution is
@@ -69,12 +77,25 @@ export const SelectedNode = ({
 
   return (
     <div className="border-edge-subtle bg-surface-base flex flex-col gap-2 rounded-md border p-3">
+      {/*
+        * The pane led with `n_seed9` in the largest text it had, and the one
+        * thing a reader wants from it first is *which part of my page is this*.
+        * An id answers that for the log and for nothing a person can see.
+        *
+        * So the order is 6 September's: the words first, the identifier under
+        * them, quieter and in monospace. The id does not go behind a disclosure
+        * — 22 August settled that identity is not technical detail — and the
+        * kind sits between the two as the category the name belongs to.
+        */}
       <div className="flex flex-col gap-0.5">
         <p className="text-ink-muted text-2xs tracking-wide uppercase">Picked</p>
-        <p className="truncate font-mono text-sm" title={selected.nodeId}>
-          {selected.nodeId}
+        <p className="truncate text-sm" title={selected.label}>
+          {selected.label}
         </p>
         <p className="text-ink-muted text-xs">{kind.label}</p>
+        <p className="text-ink-muted truncate font-mono text-2xs" title={selected.nodeId}>
+          {selected.nodeId}
+        </p>
       </div>
 
       {isDirect ? (
@@ -102,6 +123,17 @@ export const SelectedNode = ({
             <dt className="text-ink-muted">kind</dt>
             <dd className="font-mono">{kind.technical}</dd>
           </div>
+          {/*
+            * Where `loom.card` went when the rail stopped printing it. A text
+            * node has no pair here because it has no name of its own: the row
+            * is its words, and the runtime would say the same thing back.
+            */}
+          {selected.technical !== null && (
+            <div className="flex justify-between gap-3">
+              <dt className="text-ink-muted">{selected.kind === "slot" ? "slot" : "type"}</dt>
+              <dd className="truncate font-mono">{selected.technical}</dd>
+            </div>
+          )}
           <div className="flex justify-between gap-3">
             <dt className="text-ink-muted">addresses</dt>
             <dd className="truncate font-mono">{addressed ?? "nothing"}</dd>

@@ -19432,3 +19432,61 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+## 2026-09-12 — `/portal/checkup` prints `loom.footer` on its surface, and the tree that could name it is in the same function
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+found while taking the rail on the page screen, deliberately not taken with it
+
+`checkup-verdict.tsx:81` renders each difference as
+`<span className="font-mono">{difference.label}</span>` on the **surface**, and
+`TreeDifference.label` is the runtime's own word for the part — `loom.footer`,
+per `src/store/replay.test.ts:174`. The list under *This page does not match its
+own history* is therefore a column of registered types, in monospace, on the one
+screen a person opens when they already suspect something is wrong.
+
+It is the same defect the rail had this run, one screen across, and the fix is
+not the same one. The rail holds nodes, so it can name them; a difference is a
+*comparison* and the missing node is missing from one of the two trees by
+definition. But `checkupReport` has both trees in hand, and `partNameOf` reads a
+node — so a `missing` difference can be named from the base tree and an `added`
+one from the compared tree, which is exactly the asymmetry the history screen
+already handles by reading a removal's name out of its inverse.
+
+**Not taken here because it is a screen, not a component.** The row also carries
+the difference's code through `explainDifference`, the identity findings under it
+name ids, and the disclosure under the list is already the runtime's version of
+the same rows — which is the right shape and is where the type should end up.
+One unit, on that screen, with the seeded checkup in front of it.
+
+---
+## 2026-09-12 — a part is named in three formats by three functions, and two of them were written eight days apart
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+consolidation to make once #262 lands, and an argument for not making it before
+
+The same noun now reaches a reader three ways:
+
+| Where | Function | Reads |
+| --- | --- | --- |
+| A sentence's subject | `partNameOf` | *the card “Starter Free for personal…”* |
+| A place in a sentence | `placeNameOf` (on #262, unmerged) | *the card* |
+| A row in a list | `labelOf` (this run, `outline.ts`) | *Card* |
+
+All three call `nounOf`, so the rule that turns `acme.buy-button` into *buy
+button* has one home and a host registering a primitive still gets named without
+editing the portal. What is duplicated is the **shaping** — article, quotation,
+capital — and it is duplicated because the three places genuinely differ: a list
+item with an article in front of it reads as a fragment of a sentence nobody
+wrote, and a sentence without one reads as a telegram.
+
+**The case for leaving it alone for now:** three call sites is not yet a table,
+and the wrong consolidation here is a `format` enum threaded through every
+caller. The case for doing it later: if a fourth shape appears, the rule stops
+being *how a part is named* and starts being *how this component happens to
+print it*, which is the drift `vocabulary.ts` exists to prevent.
+
+**Do not take this until #262 is on `main`.** This run could not build on
+`placeNameOf` for exactly that reason, and a consolidation written against two
+of the three would have to be written again.
