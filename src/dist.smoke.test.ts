@@ -33,6 +33,7 @@ const ENTRY_POINTS: readonly (readonly [string, string])[] = [
   ["store/index.js", "memoryTreeStore"],
   ["write/index.js", "commitIntent"],
   ["store/postgres.js", "postgresTreeStore"],
+  ["signals/index.js", "broadcastReaderSignals"],
   ["telemetry/index.js", "episodesOf"],
   ["testing/index.js", "sampleTree"],
 ]

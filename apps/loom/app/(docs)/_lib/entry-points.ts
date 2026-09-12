@@ -55,6 +55,11 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "host",
   },
   {
+    specifier: "@loom/runtime/signals",
+    summary: "Reader signals — what a published page reports about how it is read, and the parser a receiver checks them with.",
+    audience: "host",
+  },
+  {
     specifier: "@loom/runtime/telemetry",
     summary: "The journal — proposal, provenance, disposition and outcome, recorded as they happen.",
     audience: "host",
