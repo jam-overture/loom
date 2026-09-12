@@ -1083,6 +1083,56 @@ proposal afterwards, keep going.
 
 ---
 
+## Set AB — two days after lesson 23
+
+Interleaved with 04, 05, 06, 08, 12, 14, 15, 19 and 22. Heavy on 04, because
+lesson 23 is where the id you were told carries no position turns out to carry
+the *opposite* of position; and heavy on 19, because the comparison between a
+moved destination and a renamed anchor is where this lesson's argument about
+stakes actually lives.
+
+1. Naming a place inside a document raises three questions: whether the name is
+   validated, whether two nodes may share one, and whether a copy carries it.
+   Say which of the three a per-node props schema can answer, and for each of
+   the other two give the argument it structurally cannot see. *(15, 23)*
+2. An anchor is held to a grammar much narrower than an `id` attribute permits.
+   State the grammar, justify two of its exclusions as failures of a *round
+   trip* rather than of HTML, and then say why a value that fails it is reported
+   rather than rewritten into one that passes. *(13, 14, 23)*
+3. Two nodes name the same anchor and the first in document order keeps it.
+   Explain what makes that ordering true of the *tree* rather than of the
+   renderer's recursion, then say which of an ancestor and its descendant has the
+   lower node id in a fixture that builds children first — and why the two
+   orderings disagreeing is the point rather than a quirk. *(04, 23)*
+4. The ledger that records who holds which anchor is created inside
+   `renderLoomTree` and dies with it. Give the failure that prevents in one
+   sentence, then name two other places in this course where the same argument is
+   made about a different piece of state. *(05, 14, 23)*
+5. A refused frame is handed to the primitive as a refusal; a refused anchor is
+   not handed over at all. Both seams distinguish *nothing was asked* from
+   *something was asked and refused*. Say why one keeps that distinction in the
+   value and the other keeps it only in the diagnostics. *(20, 23)*
+6. A renamed anchor breaks every link anybody ever shared to it, and undo
+   restores it exactly. Say what the reversibility axis reports and why it is
+   right by its own definition, then state precisely what it is measured over —
+   and use that to explain why a deployment that cares has to reach for
+   `protectedPropKeys` rather than expecting the axis to notice. *(06, 08, 23)*
+7. A `loom.section` carrying `loom:anchor` renders with no `id` and no
+   diagnostic, while a `loom.section` carrying an `anchor` prop renders one.
+   Walk the whole path without anything being broken, then say what a model is
+   told about each of the two and why that follows from what a catalogue is.
+   *(12, 15, 23)*
+8. Part V's first four seams answer *what the tree cannot hold* by making a host
+   register it. Say why lesson 23's seam cannot use that answer, name the party
+   it is unable to see, and state the general question this lesson leaves for the
+   next seam — the one about scope. *(18, 19, 20, 21, 23)*
+
+Question 7 is the point of the set. Question 6 is the one where a confident
+half-answer is most likely: if yours does not say what "reversible" is measured
+over, you have restated the axis rather than used it.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1124,3 +1174,4 @@ renders this file rather than restating it.
 | Y | 2 days after L20 | | |
 | Z | 2 days after L21 | | |
 | AA | 2 days after L22 | | |
+| AB | 2 days after L23 | | |

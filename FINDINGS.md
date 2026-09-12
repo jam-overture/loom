@@ -19568,6 +19568,106 @@ page lands.
 
 ---
 
+## 2026-09-12 — the anchor seam the runtime checks reaches no primitive, and the mechanism 0098 rejected is the one shipping
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:** open
+
+Found by writing lesson 23, which teaches
+[0098](decisions/0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md).
+Every claim below is an executed exercise in `lessons/23-anchors.md`, run
+against `main`.
+
+**Not one of the 91 primitives in the starter library spreads `loom.anchor`.**
+`grep -rn "loom\.anchor" src/primitives` is empty; the only spreads in the
+repository are in `src/render/anchor.test.ts`. So the whole runtime path works
+and ends nowhere:
+
+```
+  loom:anchor, the reserved key
+    ids:         []
+    diagnostics: none
+```
+
+The tree named a usable slug, `resolveAnchor` checked it against the grammar,
+the ledger recorded `loom.section` as its holder, `nodeAnchorFor` built the
+attribute bundle and the render context offered it — and the primitive did not
+place it. **No diagnostic, because nothing the render seam can see went wrong.**
+The claim is still spent: a second node naming that slug would be refused in
+favour of a holder that emits no `id`.
+
+**What does emit an `id` is the `anchor` prop** on `loom.section`, `loom.hero`
+and `loom.callout` (`src/primitives/anchor.ts`) — the mechanism 0098 examined
+under *Alternatives considered* and rejected by name, landed in the same pull
+request (#179) as the seam that replaced it. It behaves exactly as that record
+predicted it would:
+
+```
+  anchor, the prop
+    ids:         ["pricing"]
+    diagnostics: none
+  the prop, on two bands
+    ids:         ["pricing","pricing"]
+    diagnostics: none
+```
+
+**Two elements, one `id`, nothing reported** — the document 0098 exists to
+prevent. A props schema validates one node and duplication is a fact about a
+pair, which is the argument the record makes and this is that argument
+executed. The prop also cannot be stripped from a decorative copy (0093), for
+the same structural reason.
+
+**And the model is told about the prop and not about the key.**
+`catalogueOf(registry)` carries `anchor` on three entries because it is in three
+schemas; `"loom:anchor"` appears nowhere in the catalogue, since reserved keys
+are split off props before any of this. So a model asked to link a page to its
+own second screen will reach for the prop — correctly, because it is the only
+one it has been shown.
+
+**Why neither suite caught it.** `src/render/anchor.test.ts` asserts that a
+primitive which spreads `loom.anchor` receives an `id`; `src/primitives/library.test.ts`
+asserts that the three bands' prop emits one. Both pass. Both describe a system
+that works. Neither can see that they are not the same system, because no
+assertion anywhere ranges over *the library* and asks whether any registered
+primitive places what the runtime hands it.
+
+**What this lane suggests, without deciding it** — the call is the owner's:
+
+1. Spread `{...loom.anchor}` on the bands that are worth anchoring, beside the
+   `{...loom.editable}` already there, and delete the `anchor` prop and
+   `src/primitives/anchor.ts` with it. `anchorStyle`'s `scroll-margin` is worth
+   keeping and should key off the reserved attribute's presence rather than the
+   prop.
+2. One assertion in `library.test.ts` that would have failed the day this
+   shipped: render each registered primitive with `loom:anchor` set and require
+   that a stated list of them emits the `id` — a list is fine here, where the
+   registry is the thing under test.
+3. If the prop is instead the intended mechanism, 0098 is the record to
+   supersede, and the collision and decorative-copy questions come back open.
+
+Nothing was changed here: this is a lessons pull request and the fix is two
+lanes away from it.
+
+---
+
+## 2026-09-12 — `ANCHOR_PROP_KEY` cites 0096, and the record is 0098
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+
+`src/reserved-props.ts:28`:
+
+```ts
+/** The fragment a node answers to, so the page's own links can point at it, on any node (0096). */
+export const ANCHOR_PROP_KEY = `${RESERVED_PROP_PREFIX}anchor`
+```
+
+0096 is *a behaviour publishes a value on the element the primitive placed it
+in*. The anchor record is
+[0098](decisions/0098-an-anchor-is-a-reserved-key-the-runtime-checks-and-a-primitive-places.md),
+which the neighbouring `src/render/anchor.ts` cites correctly. One character,
+and it is the line a reader of that file follows to find out why the key exists
+— the three keys above it all cite correctly, so the odd one out reads as
+deliberate.
+
 ## 2026-09-12 — the data seam has been published for four weeks and nothing in the library reads one
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
