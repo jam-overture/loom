@@ -28,6 +28,20 @@ Sections 1–6 are built and run end to end. What is still open in each is track
 in the latest report in [`reports/`](reports/) rather than here, because a marker
 in a README is a thing that goes stale quietly.
 
+### Reader signals
+
+The part of adaptation that happens on a live page. A render with
+`addressed: true` puts node ids on published markup, and
+`@loom/runtime/signals/broadcast` reports four closed kinds of signal from it —
+`viewed`, `dwelled`, `activated`, `disclosed` — naming nodes and never content,
+filed under the tree and revision the page was rendered from
+([0136](decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md)).
+Off unless a host starts it, and configured by the host rather than the tree.
+
+Broadcasting is built. **Capturing, storing and interpreting signals are not, and
+are deferred by the maintainer** — see `reports/2026-09-12-reader-signals.md`
+before starting anything that consumes them.
+
 ### 4b — The primitive library
 
 §4 built the contract a primitive registers under. It never built anything to

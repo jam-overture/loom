@@ -19493,3 +19493,40 @@ to gather, batch and send signals only to throw them away.
 with a plain list still meaning "these types, every kind". The ledger already
 separates the two paths (visibility and events), so the filter splits along a
 seam that exists. A decision record would amend 0136's configuration paragraph.
+
+## 2026-09-12 — the reader-signal broadcaster observes only the nodes present when it starts
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+
+`broadcastReaderSignals` finds the addressed elements under its root once, when
+it is called, and observes those. Anything rendered later is never observed for
+`viewed` or `dwelled`: a band streamed in behind a Suspense boundary, a region a
+client component mounts after hydration, a list that grows. Clicks and
+disclosures are unaffected, because both are delegated from the root and read the
+nearest addressed element at the moment they happen.
+
+A client-side navigation is the sharpest case: the host gets a new tree and
+revision, and a broadcaster left running on the old root reports nothing more.
+Today the host must `stop()` and start again, and nothing says so.
+
+**What would close it:** a `MutationObserver` on the root for added and removed
+addressed elements (the broadcaster already runs one for disclosures), and a
+sentence in the module documentation that a new root or revision is a new
+broadcast. **Not in scope:** anything about storing or interpreting signals — the
+maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
+
+## 2026-09-12 — reader signals have an API reference and no guide
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+
+`@loom/runtime/signals` and `@loom/runtime/signals/broadcast` shipped today (0136)
+and appear in the generated reference. Nothing tells a host how the pieces fit:
+render with `addressed: true`, start the broadcaster from the browser entry (the
+package entry pulls in about 60 KB of schema library a browser does not need),
+choose `kinds` and per-kind `types`, and parse what arrives with
+`parseReaderSignalBatch`.
+
+The two facts most worth a paragraph: **a signal carries no content** — words
+come from the tree at the revision the batch names — and **measurement is the
+host's setting, never a prop in the tree**. `prototypes/ski-apparel` is a working
+end-to-end example to read from, not to copy code out of.
