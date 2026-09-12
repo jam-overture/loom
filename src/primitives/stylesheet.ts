@@ -92,7 +92,8 @@ export const LIBRARY_CLASS = {
    * the container it is in.** An inline style beats a rule, so the marker
    * column, the rail's direction and the dot's optical offset were all
    * unreachable from any parent — and a second arrangement of the same content
-   * model is exactly what 0054 says a second container is for. Moving four
+   * model is exactly what the naming rule — a container is its child's name
+   * plus the arrangement — says a second container is for. Moving four
    * declarations into this file is what let `loom.milestone-row` exist without
    * a second child type that renders the same three fields.
    *
@@ -113,6 +114,12 @@ export const LIBRARY_CLASS = {
   railBody: "loom-rail-body",
   /** A `loom.milestone-row`: the same entries laid across, as a process band. */
   milestoneRow: "loom-milestone-row",
+  /**
+   * A `loom.embed` frame whose shape follows its own width — portrait while it
+   * is narrow, 16/10 once it is not. The one shape that cannot be an inline
+   * `aspect-ratio`, because there is no single ratio to write down.
+   */
+  frameAdaptive: "loom-frame-adaptive",
   /** A card whose title anchor is stretched over the whole surface. */
   cover: "loom-cover",
   /** That anchor. Its `::after` is what makes the surface clickable. */
@@ -152,15 +159,16 @@ export const LIBRARY_CLASS = {
   /**
    * The three verdicts. Their colour is here rather than on the element because
    * a tinted column re-inks the two that recede — `fg-subtle` on `accent-subtle`
-   * measures 3.76:1 across the registered palettes, under the bar 0074 holds a
-   * text slot to — and an inline colour would beat the rule that does it.
+   * measures 3.76:1 across the registered palettes, under the bar a palette
+   * slot carrying text is held to — and an inline colour would beat the rule that does it.
    */
   compareYes: "loom-compare-yes",
   compareNo: "loom-compare-no",
   comparePartial: "loom-compare-partial",
   /**
    * The subject column a page is steering towards, by position. A column is
-   * not a node (0084), so this is the only handle it has — and four of them,
+   * not a node — in a two-dimensional band rows are nodes and columns are
+   * positions — so this is the only handle it has — and four of them,
    * because each is a static rule rather than an interpolated index.
    */
   compareFeatureFirst: "loom-compare-feature-1",
@@ -270,8 +278,9 @@ export const LIBRARY_CLASS = {
    * the menu that control opens and closes.
    *
    * The menu's `display` is here rather than on the element, and that is the
-   * whole reason the disclosure works at all: 0092's contract is a rule that
-   * hides the region, and an inline `display: flex` would beat it. Its
+   * whole reason the disclosure works at all: the disclosure contract — the control
+   * owns its button and the primitive owns the region — is a rule that hides
+   * the region, and an inline `display: flex` would beat it. Its
    * alignment stays inline, because that varies by prop and nothing needs to
    * override it.
    *
@@ -321,8 +330,8 @@ export const LIBRARY_CLASS = {
    * lesson applied before it costs anything rather than after: an inline
    * `flex-direction` on a turn would pin these into bubbles forever, and the
    * second arrangement of a conversation — a transcript set flush left, the way
-   * a published interview reads — is a container 0054 says to write when
-   * somebody wants one. What stays inline is the paint, which no arrangement
+   * a published interview reads — is a container the same naming rule says to write
+   * when somebody wants one. What stays inline is the paint, which no arrangement
    * varies.
    */
   message: "loom-message",
@@ -356,7 +365,8 @@ export const LIBRARY_CLASS = {
    * overlay on the screen where there is room, a legend under it where there is
    * not. Both are in this file because a pin cannot know which it is in, the
    * legend is the **unqueried** rule so a client that resolves no query gets the
-   * readable one (0079), and the query is the *frame's* width rather than the
+   * readable one, which is what the rule about a layout CSS alone can express
+   * asks for, and the query is the *frame's* width rather than the
    * window's — a screenshot in one column of a split is narrow on the widest
    * screen there is.
    */
@@ -440,7 +450,7 @@ export const LIBRARY_CLASS = {
    * `loom.spec` itself.
    *
    * The middot between two specs is the position selector this pair needs and
-   * the reason both are here: a render is a pure function of one node (0008), so
+   * the reason both are here: a render is a total pure projection of one node, so
    * no spec can know it has a sibling. The rule is scoped to a library class, so
    * it reaches nothing else on the host's page — the discipline the rail's
    * `li:last-child` established.
@@ -618,6 +628,14 @@ details[open] > summary .loom-marker {
 }
 .loom-rail > li:last-child .loom-rail-line, .loom-rail-none .loom-rail-line {
   visibility: hidden;
+}
+.loom-frame-adaptive {
+  aspect-ratio: 3 / 4;
+}
+@container (min-width: 36rem) {
+  .loom-frame-adaptive {
+    aspect-ratio: 16 / 10;
+  }
 }
 .loom-cover {
   position: relative;

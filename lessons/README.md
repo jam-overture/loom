@@ -226,6 +226,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [20](20-origins.md) | Origins: whose document runs inside your page | Why the URL stays in the tree and the origins do not; why this seam has no plan and no resolve step; and why a sandbox is reported for a frame that worked. |
 | [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
 | [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
+| [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -252,10 +253,14 @@ applied to is a pair; and the declaration that makes the pair visible is a claim
 that can be false — which, as the lesson's sixth exercise finds by running two
 decision records against each other, it currently is.
 
-How far Part V runs is still open. On the evidence of this one, the place to look
-is not another registry — it is another fact that exists only between two things,
-and the question to bring to it is the one lesson 22 answered the hard way: who
-is allowed to declare it, and what happens when they are wrong?
+Lesson 23 took that instruction — find another fact that exists only between two
+things — and found one where both ends are in the tree and nothing is registered
+at all. What makes it a Part V seam is not a missing document but a **scope**: an
+anchor has to be unique in a whole document, and the document includes a host
+page the runtime cannot see. So the pattern the first four lessons agreed on is
+now the minority reading, and the question to carry into a seventh seam is
+lesson 23's rather than lesson 22's: *what is the scope of the thing you just
+named, and is the checker allowed to see all of it?*
 
 ## Pacing
 

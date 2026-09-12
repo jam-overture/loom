@@ -65,12 +65,37 @@ export const SPOT_COLOURS: Readonly<Record<SpotTone, { readonly edge: string; re
  */
 export type SpotPlacement = "inside" | "above" | "below"
 
+/**
+ * What the mark is *about*, which is not the same as where it is drawn.
+ *
+ * `node` is a mark on a thing: the band carrying it is the band that changed, so
+ * the mark may say *this*, and a ring around it is true. `place` is a mark on a
+ * space: the node the change is about is not in this tree at all, the band
+ * carrying the mark is only the nearest thing the DOM gives us to hang it on,
+ * and the mark may only say *here*.
+ *
+ * `placed` inside `spotFor` has drawn this distinction in the label since the
+ * first version of this file — *"This was removed"* against *"Something was
+ * removed here"*. It is a field because the **geometry** needs it too, and for
+ * one run it did not have it: a `place` mark drew the same ring as a `node` one,
+ * so the demo's payoff — press *Take the numbers off*, say yes, get carried to
+ * the change — ended on a green ring around a patient's testimonial, which is
+ * plainly still there, over a chip reading *Something was removed here*. The
+ * chip pointed at the gap and the ring pointed at a bystander.
+ *
+ * The rule this establishes, and it is the one a future run should not have to
+ * rediscover: **a ring is a claim about the thing inside it.** Only a mark whose
+ * subject is a node may draw one.
+ */
+export type SpotSubject = "node" | "place"
+
 export type Spotlight = {
   /** A node that is in the tree on the stage, so the DOM has somewhere to draw. */
   readonly nodeId: NodeId
   readonly tone: SpotTone
   readonly label: string
   readonly placement: SpotPlacement
+  readonly subject: SpotSubject
 }
 
 /**
@@ -255,6 +280,7 @@ const spotFor = (
       tone,
       label: labelFor(touched.kind, tone, "node", restoring),
       placement: "inside",
+      subject: "node",
     }
   }
 
@@ -266,6 +292,7 @@ const spotFor = (
     tone,
     label: labelFor(touched.kind, tone, "near", restoring),
     placement: near.placement,
+    subject: "place",
   }
 }
 
@@ -422,7 +449,21 @@ export const spotlitChanges = (
 const cssString = (value: string): string => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
 
 /**
- * Where the chip is drawn, given what it is pointing at.
+ * Whether this mark has a gap of its own to be drawn in.
+ *
+ * A `place` mark normally has one on the side its `placement` names. The one
+ * exception is the position at the very top of a parent, which `neighbourOf`
+ * reports as `inside`: above the first band is the edge of the stage, which
+ * cannot be scrolled to and which a clipping primitive would cut off anyway. A
+ * mark there goes back in the corner — imprecise and legible, rather than exact
+ * and invisible — and it still draws no ring, because the band under it did not
+ * change either way.
+ */
+const inTheGap = (spot: Spotlight): boolean =>
+  spot.subject === "place" && spot.placement !== "inside"
+
+/**
+ * Where the mark is drawn, given what it is about.
  *
  * **A mark on a band sits wholly inside its top-right corner**, and both halves
  * of that are corrections rather than preferences. *Inside*, because a primitive
@@ -432,49 +473,69 @@ const cssString = (value: string): string => `"${value.replace(/\\/g, "\\\\").re
  * grid a left chip lands on the first figure, and a mark that covers what it is
  * pointing at has undone itself.
  *
- * **A mark on a gap sits in the gap**, outside the neighbour's box, which is the
- * same rule read against a different target: the thing being pointed at is the
- * empty space where a band was or would be, and the corner of the band beside it
- * is the one place in reach that is *not* empty. On the specimen page the
- * inside-corner version landed on the second line of the testimonial and said
- * "Something was removed here" over a sentence still plainly there.
+ * **A mark on a gap is drawn across the whole gap**, outside the neighbour's
+ * box. The thing being pointed at is the empty space where a band was or is
+ * about to be, and that space is as wide as the page's content column, so the
+ * mark is too: a bar the width of the seam, with its words in it.
  *
- * The gap is free by construction — a band left it, or a band is about to fill
- * it — so nothing is covered, and `margin` keeps the chip clear of the ring
- * rather than `inset` alone, so the two never touch at any zoom.
+ * That width is what lets the ring go. A corner chip needs something ringed to
+ * say *which* band it is beside; a bar lying across the seam is already lying
+ * where the change is, and the band under it is left alone.
+ *
+ * **The 10px is the difference between a mark on the gap and a header on the
+ * band below it.** The chip that preceded the bar sat 5px off the band, which
+ * was right for something an inch wide in a corner and wrong the moment it ran
+ * the whole width: flush against the band's top edge, the two read as one
+ * object, and a bar saying *something was removed here* that looks like part of
+ * the testimonial is the defect this unit exists to remove, said more quietly.
+ * The two seams the demo's own changes mark measure about 90px and 120px, so ten
+ * is air rather than risk — and it is `margin` rather than `inset` alone so the
+ * bar and the band never touch at any zoom.
  */
-const chipPosition = (placement: SpotPlacement): string => {
-  switch (placement) {
-    case "inside":
-      return "inset: 6px 6px auto auto;\n  margin: 0;"
-    case "above":
-      return "inset: auto 6px 100% auto;\n  margin: 0 0 5px 0;"
-    case "below":
-      return "inset: 100% 6px auto auto;\n  margin: 5px 0 0 0;"
-  }
+const markPosition = (spot: Spotlight): string => {
+  if (!inTheGap(spot)) return "inset: 6px 6px auto auto;\n  margin: 0;"
+
+  return spot.placement === "above"
+    ? "inset: auto 0 100% 0;\n  margin: 0 0 10px 0;"
+    : "inset: 100% 0 auto 0;\n  margin: 10px 0 0 0;"
 }
 
 /**
- * A band carrying a chip in the gap *below* it overlaps the band that follows,
- * which paints later and would cover the chip if it has a ground of its own.
+ * A band carrying a bar in the gap *below* it overlaps the band that follows,
+ * which paints later and would cover the bar if it has a ground of its own.
  * Raising the marked band one step fixes the order without moving anything: it
- * is already `position: relative` for the chip's sake, and a page whose bands do
+ * is already `position: relative` for the bar's sake, and a page whose bands do
  * not overlap cannot tell the difference.
  *
- * Only where it is needed. A chip in the gap *above* overlaps the band before
- * it, which has already painted.
+ * Only where it is needed. A bar in the gap *above* overlaps the band before it,
+ * which has already painted.
  */
-const stackingFor = (placement: SpotPlacement): string =>
-  placement === "below" ? "\n  z-index: 1;" : ""
+const stackingFor = (spot: Spotlight): string =>
+  inTheGap(spot) && spot.placement === "below" ? "\n  z-index: 1;" : ""
 
 /**
- * The mark, as rules.
+ * The ring, and **only for a mark whose subject is the node it is drawn on.**
  *
  * `outline` rather than `border`, because an outline takes no space and a border
  * would move the page it is describing.
  *
+ * `border-radius` travels with the ring for the same reason it is here at all:
+ * it exists to round the outline, and on an unringed band it would round corners
+ * the page did not ask to have rounded — the mark changing the page it is
+ * describing, in the one property `outline` was chosen to avoid.
+ */
+const ringFor = (spot: Spotlight, colour: (typeof SPOT_COLOURS)[SpotTone]): string =>
+  spot.subject === "node"
+    ? `\n  outline: 2px solid ${colour.edge};\n  outline-offset: -1px;\n  border-radius: 4px;`
+    : ""
+
+/**
+ * The mark, as rules.
+ *
  * It names its own font, because it is Loom speaking inside a page wearing
- * somebody else's typeface.
+ * somebody else's typeface — and `border-radius` is set on the mark itself
+ * rather than inherited, because the bar in a gap and the chip in a corner are
+ * the same object seen at two widths.
  */
 export const spotlightCss = (spots: readonly Spotlight[]): string =>
   spots
@@ -484,16 +545,13 @@ export const spotlightCss = (spots: readonly Spotlight[]): string =>
 
       return `
 ${selector} {
-  position: relative;
-  outline: 2px solid ${colour.edge};
-  outline-offset: -1px;
-  border-radius: 4px;
-  scroll-margin: 4rem;${stackingFor(spot.placement)}
+  position: relative;${ringFor(spot, colour)}
+  scroll-margin: 4rem;${stackingFor(spot)}
 }
 ${selector}::after {
   content: ${cssString(spot.label)};
   position: absolute;
-  ${chipPosition(spot.placement)}
+  ${markPosition(spot)}
   transform: none;
   z-index: 5;
   padding: 4px 8px;
@@ -506,6 +564,7 @@ ${selector}::after {
   font-style: normal;
   line-height: 1.2;
   letter-spacing: 0;
+  text-align: left;
   text-transform: none;
   white-space: nowrap;
   pointer-events: none;

@@ -87,7 +87,7 @@ export type Palette = z.infer<typeof paletteSchema>
  * nothing, while `loom.code` and `loom.kbd` needed a monospace face the
  * vocabulary had no word for. A variable a host can set and no primitive
  * consults is worse than an absent one — it looks like a seam and behaves like
- * a comment (0084).
+ * a comment (0085).
  *
  * `monoFamily` is optional where the other two are required, and the asymmetry
  * is deliberate rather than an oversight. A palette declares every slot because

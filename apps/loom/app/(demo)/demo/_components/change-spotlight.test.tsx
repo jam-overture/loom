@@ -25,12 +25,14 @@ const APPLIED: Spotlight = {
   tone: "applied",
   label: "Just changed",
   placement: "inside",
+  subject: "node",
 }
 const AWAITING: Spotlight = {
   nodeId: id("demo-n7"),
   tone: "awaiting",
   label: "This would be removed",
   placement: "inside",
+  subject: "node",
 }
 
 /**

@@ -65,7 +65,7 @@ describe("the mono family a pack may declare", () => {
 
   /**
    * The seam has an other end on the day it ships, which is the whole reason
-   * this field exists and `accentFamily` did not (0084). If this ever drops to
+   * this field exists and `accentFamily` did not (0085). If this ever drops to
    * zero the field is a comment again.
    */
   it("is declared by at least one registered pack", () => {

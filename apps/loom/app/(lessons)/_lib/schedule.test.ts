@@ -19,29 +19,30 @@ describe("the review schedule, read as a queue", () => {
     expect(REVIEW_SETS.map((set) => set.letter)).toEqual([
       ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
       "AA",
+      "AB",
     ])
   })
 
   /**
-   * The twenty-seventh set, which is the one the parser could not read.
-   * `## Set AA` under a one-letter pattern was not a heading at all — it was a
-   * line inside Set Z, and its questions would have been appended there in
-   * silence. Asserted by name rather than by count, because the count is what
-   * the old parser would still have got right.
+   * The sets past Z, which are the ones the parser could not read. `## Set AA`
+   * under a one-letter pattern was not a heading at all — it was a line inside
+   * Set Z, and its questions would have been appended there in silence.
+   * Asserted by name rather than by position, because the count is what the old
+   * parser would still have got right, and because the last set changes every
+   * time a lesson lands.
    */
   it("reads a two-letter set, and gives it a slug a record can be filed under", () => {
-    const last = REVIEW_SETS.at(-1)
-
-    expect(last?.letter).toBe("AA")
-    expect(last?.slug).toBe("set-aa")
+    expect(reviewSet("set-aa")?.letter).toBe("AA")
+    expect(reviewSet("set-ab")?.letter).toBe("AB")
     expect(reviewSet("set-aa")?.questions).toHaveLength(8)
+    expect(reviewSet("set-ab")?.questions).toHaveLength(8)
     expect(reviewSet("set-z")?.questions).toHaveLength(8)
   })
 
   it("stops at the tracking table rather than reading it as a set", () => {
     const last = REVIEW_SETS.at(-1)
 
-    expect(last?.letter).toBe("AA")
+    expect(last?.letter).toBe("AB")
     expect(last?.questions).toHaveLength(8)
     expect(last?.closing.join(" ")).not.toContain("Confident-and-wrong")
   })

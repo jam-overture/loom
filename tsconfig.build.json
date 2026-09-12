@@ -25,6 +25,16 @@
    * entry point (0104). Its own `*.test.ts` files are still excluded by the
    * first pattern, so what is emitted is the fixtures and the contract suites
    * and nothing that runs them.
+   *
+   * `*.specimen.ts` joins them on 2026-09-12 for the same reason and with the
+   * same consequence. `tools/specimen/README.md` tells a lane to put a specimen
+   * **beside the code it photographs**, and for every lane whose code is under
+   * `src/` that was impossible: a specimen imports `defineSpecimen` from
+   * `tools/`, which is outside `rootDir`, so `tsc -p` refuses to emit and
+   * `pnpm build` fails — the documented instruction and the build could not
+   * both be followed. A specimen is no more part of the published runtime than
+   * a test is, so excluding it is the same call rather than a new one. It is
+   * still **typechecked**, by `tsconfig.json`, which sets no `rootDir`.
    */
-  "exclude": ["src/**/*.test.ts", "src/cli/scaffold-fixture/**"]
+  "exclude": ["src/**/*.test.ts", "src/**/*.specimen.ts", "src/cli/scaffold-fixture/**"]
 }

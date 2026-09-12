@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 
@@ -36,6 +37,33 @@ export type CliError =
   | { readonly code: "already-registered"; readonly type: string }
   | { readonly code: "file-exists"; readonly path: string }
   | { readonly code: "filesystem-failed"; readonly path: string; readonly detail: string }
+
+export type CliErrorCode = CliError["code"]
+
+/**
+ * Every way a command can refuse, in the order a user meets them.
+ *
+ * The fourth and last of the unions that could be reacted to and not walked.
+ * `scaffold.ts` on the documentation site already keys a table off
+ * `CliError["code"]`, so a tenth code takes that page red rather than letting it
+ * quietly describe nine of ten — which is the best a lane outside `src/` can do,
+ * and is not the same as the runtime publishing the list itself.
+ *
+ * The order follows a command's own path: what is wrong with the words typed,
+ * then what is wrong with the primitive type they name, then what is already on
+ * disk, then the filesystem failing underneath all of it.
+ */
+export const CLI_ERROR_CODES: readonly CliErrorCode[] = everyMemberOf<CliErrorCode>()([
+  "unknown-command",
+  "missing-argument",
+  "unexpected-argument",
+  "invalid-primitive-type",
+  "reserved-primitive-type",
+  "framework-namespace",
+  "already-registered",
+  "file-exists",
+  "filesystem-failed",
+])
 
 export type PlannedFile = {
   readonly path: string

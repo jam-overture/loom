@@ -49,7 +49,7 @@ ordered list of rules and says how many — the first half is still exactly true
 and the second was wrong for three weeks.
 
 Superseding that would be false, because nothing was reversed. So **a record is
-amended in place when only the shape moved** (0096): a dated block under the
+amended in place when only the shape moved** (0099): a dated block under the
 header, before `## Context`, naming what moved, which records moved it, and
 saying that nothing is reversed. The record keeps its number, its status and its
 trail. The test is what a reader would do differently — a reader who would now
@@ -214,3 +214,9 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0128 | *No record on this branch* | — | — |
 | 0129 | *No record on this branch* | — | — |
 | [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |
+| [0131](0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md) | What a palette cannot say about itself is measured from it, never declared on it | Accepted | §4b |
+| [0132](0132-a-type-that-mirrors-a-schema-is-derived-from-it.md) | A type that mirrors a schema is derived from it | Accepted | §2 |
+| 0133 | *No record on this branch* | — | — |
+| 0134 | *No record on this branch* | — | — |
+| [0135](0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md) | A same-origin frame is granted what its own document needs | Accepted — it changes no schema, no tree and no delta model, and | §4d |
+| [0136](0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md) | A published page broadcasts reader signals when its host asks | Accepted | §3, §6 |
