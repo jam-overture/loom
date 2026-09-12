@@ -16260,8 +16260,16 @@ say precisely what it does. What was wrong is that the portal said more.
 
 ## 2026-09-02 — the guard that keeps the runtime's vocabulary off the surface now exists in two copies
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-nothing is broken, and it is one regex away from drifting
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-24-the-queue-names-its-parts`, as
+`app/(portal)/_test/plain-language.ts` — the recommendation below, taken, with
+one change: it is inside the route group rather than in `apps/loom/test/`, so
+six other lanes are not importing a file this lane owns. It had reached **three**
+copies by the time it was taken, the third being the hand-rolled word list in
+`effect-view.test.ts` that used `toContain` rather than a bounded match. All
+three read one list now, and the module has a test of its own that proves the
+detector still matches — a guard that has quietly stopped matching passes for
+ever.
 
 `audit-view.test.ts` carries a regex — `fold|snapshot|seed|delta|node|tree|
 revision|log|gate|id` — and asserts that no sentence a screen shows unasked
@@ -19523,3 +19531,235 @@ separately for `Loom daily build` on 9 September and unchanged since.
 
 The brief's *second* problem — *"it is clunky"* — is live, and is what this unit
 and the thirteen before it are.
+
+## 2026-09-11 — the review queue's own outline names parts the way the sentence beside it no longer does
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+found by looking at the screenshot of the change that closed the other half
+
+`portal-24-the-queue-names-its-parts` made every sentence on `/portal/pages/
+[treeId]` say *the card “Starter Free for personal projects. One…”* where it had
+said `loom.card`. The screenshot of that screen shows the rail on the right —
+**Parts of this page, 22 parts** — still reading
+
+```
+loom.page
+  loom.heading
+    · Loom
+  loom.prose
+  loom.card
+    loom.heading
+      · Starter
+```
+
+in monospace, four inches from a sentence about the same card in a person's
+words. One screen, two names for one part, which is the exact thing the diff
+below it was written to stop happening on one row.
+
+**Not taken in that diff, on purpose, and the reason is worth keeping.** It is a
+different shape of problem: a *list of kinds* rather than a sentence, and it is
+what a reader clicks to point at a part, so what it owes them is a stable
+correspondence with the outline the technical record uses. `_lib/vocabulary.ts`
+already holds `PART_KINDS`, which answers *what is this?* for one node, and
+`_lib/part-name.ts` holds `placeNameOf`, which answers *what do I call it in the
+middle of a line* — the rail wants the first and the tree structure around it,
+and picking between them is a unit's worth of thinking rather than a rename.
+
+The honest summary of where that screen stands: **the sentences are a person's
+and the index of the page is not.** That is better than both being the
+runtime's, and it is not finished.
+
+---
+
+## 2026-09-11 — a card is named by its heading *and* its body, and the body crowds the heading out
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+cosmetic, and the first thing a reader's eye lands on
+
+`saidBy` joins every text run under a node with a space, which is right and was
+found the hard way — concatenating them produced *the card “Every change is a
+deltaNothing here was…”* on 10 September. What the live screenshot shows is the
+other end of the same choice. A pricing card holding a heading *Starter* and a
+paragraph *Free for personal projects. One tree, one editor, no card required.*
+is named
+
+> the card **“Starter Free for personal projects. One…”**
+
+The 40-character limit is spent on the body, and the one word that identifies
+the card — its heading — is followed by a run-on that reads as a transcription
+error. Three of the five rows in the screenshot look like this.
+
+**The likely answer is not a longer limit.** A container's *first* run is almost
+always its heading, and *the card “Starter”* is both shorter and more
+identifying than any truncation of the join. But the join is correct for a node
+whose text is genuinely several runs of one sentence, and telling those two
+apart is a judgement this lane has not made yet: the candidate rules are "first
+run only for an element with element children" and "first run only when there is
+more than one", and they disagree on a card holding two paragraphs.
+
+`saidBy`'s current behaviour is load-bearing for `page-name.ts` as well, so
+whoever takes this should read both callers before changing the join.
+
+---
+
+## 2026-09-11 — the model was reachable from `next start` this run, and the 4 September hang did not reproduce
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+for this run — **not** closed as a standing fact, because nothing was fixed and
+nothing explains the difference
+
+The 2026-09-04 finding — *a Node server in this sandbox cannot reach the model,
+and the failure is a hang* — was restated on 10 September, when it cost that run
+its screenshots: the portal's prompt box was driven for real and the server
+action never returned, so every screen in that report is empty.
+
+**Today the same recipe worked twice.** `next build`, `next start` with
+`LOOM_PORTAL_SESSION_SECRET` and `LOOM_PORTAL_REVIEWERS` set, signed in through
+the form, an ask typed into the real prompt box: both asks came back well inside
+45 seconds, the first applied and the second held. Every screenshot in
+`reports/2026-09-11-portal-the-queue-names-its-parts.md` is a production build of
+its own commit with a live model behind it and a real held proposal on the
+screen.
+
+What was *not* done: `NODE_USE_ENV_PROXY` was not set, and nothing about the
+environment was changed. A plain `fetch` to `api.anthropic.com` from Node 22
+answered `200` in 736ms before the server was started, which is the cheap probe
+worth running first — **if that probe passes, do not plan around the hang.**
+
+So the entry above it stands as a report of what happened on two days and not as
+a property of the sandbox. A run that hits it again should say so, because two
+sightings and one non-sighting is not yet a pattern anybody can act on.
+
+---
+
+## 2026-09-11 — `pkill -f "next start"` kills the shell that runs it, and the port stays held
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+third road into the trap the 10 September report filed as number four
+
+That report's trap four is: *a script that throws before its cleanup leaves the
+server holding the port, so the next run's readiness probe succeeds against the
+**old** server* — with the old configuration, which then reads as a wrong
+password. It cost that run an attempt. It cost this one two, by a different
+route.
+
+`pkill -f "next start"` matches **its own invoking shell**, because `-f` tests
+the whole command line and the command line contains that string. The shell dies
+mid-script, so everything after the `pkill` — including the restart — never runs,
+and the exit code is a bare `1` with no output to explain it. The server the
+`pkill` was meant to replace is often still there, and the readiness probe then
+passes against it.
+
+Both times the symptom was the same and it is the misleading part: **the portal
+answered `200` and said "This portal isn't set up yet"**, which reads as a
+configuration bug in the diff under test rather than as an old process.
+
+What works, for whoever writes the shared recipe:
+
+- Find the pid and `kill -9 <pid>` it, or match on the port rather than on
+  `next start`.
+- **Start the server on a port no previous attempt used.** It costs nothing and
+  it makes "am I talking to the server I just started" un-askable.
+- Probe for a string only the *new* configuration produces — here, the absence of
+  "This portal isn't set up yet" — rather than for `200`.
+
+The key length is the other half worth writing down: `LOOM_PORTAL_REVIEWERS`
+takes `actor:key` and **the key must be at least 24 characters**, or the sign-in
+form renders disabled with the reason in the operator's disclosure. The form has
+one field, and it is the key — the actor is derived from it.
+
+## 2026-09-12 — a link cannot point at a heading on the page it is already on
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:** open
+
+`linkUrlSchema` accepts an absolute URL or a path beginning with `/`, and
+rejects everything else. A bare fragment is everything else:
+
+```
+{"code":"invalid-props","type":"loom.link",
+ "issues":[{"path":"href","message":"must be an absolute URL, or a path beginning with / on this site"}]}
+```
+
+Found building `prototypes/ski-apparel`, a single long page with a nav bar
+across the top. `href: "#helmets"` is refused, so the page uses `href:
+"/#helmets"` instead — which works here only because the page *is* the site
+root. On any page that is not `/`, that link leaves the page the reader is on
+and jumps to the front door's anchor instead, which is a worse failure than a
+refusal because nothing reports it.
+
+**Why the schema is right to be suspicious.** It exists so a proposal cannot
+point a visitor at `javascript:` or an attacker's origin
+([0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)),
+and a fragment is not a scheme it can check. But a same-page anchor reaches no
+origin at all — it is the one href that provably cannot leave the page — so the
+argument for the allowlist does not reach it.
+
+Every primitive taking an `href` has this: `loom.link`, `loom.action`,
+`loom.card`, `loom.feature`, `loom.logo`. Six sections and a nav bar is an
+ordinary shape for a marketing page, and `loom.section` already takes an
+`anchor` prop to be linked *to* — so the library can currently mark a
+destination it has no way to link at.
+
+**What would close it:** allow `#fragment` where the fragment is a valid id, in
+the same schema and with the same test that covers the scheme allowlist.
+
+## 2026-09-12 — a broadcaster's `types` filter applies to every kind at once
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** closed
+by `framework-signal-types-per-kind` — `types` takes a list per kind, and 0136 is amended. The ski rail now asks for exactly what it shows.
+
+Found switching `prototypes/ski-apparel` to `@loom/runtime/signals`.
+
+`broadcastReaderSignals` takes one `types` list, and it filters all four kinds by
+it. A host rarely wants that. The ski rail wants **time on screen** for sections
+(`loom.hero`, `loom.section`), **activations** for the links and buttons inside
+them (`loom.link`, `loom.action`), and **disclosures** for questions (`loom.faq`).
+With one list it has to name all five types for all four kinds, so every batch
+also carries `viewed` and `dwelled` for every link and button on screen — about
+ten `dwelled` signals a second on this page, most of which nobody asked for.
+
+The alternative a host has today is filtering after the fact, which means paying
+to gather, batch and send signals only to throw them away.
+
+**What would close it:** let `types` be keyed by kind —
+`types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] }` —
+with a plain list still meaning "these types, every kind". The ledger already
+separates the two paths (visibility and events), so the filter splits along a
+seam that exists. A decision record would amend 0136's configuration paragraph.
+
+## 2026-09-12 — the reader-signal broadcaster observes only the nodes present when it starts
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+
+`broadcastReaderSignals` finds the addressed elements under its root once, when
+it is called, and observes those. Anything rendered later is never observed for
+`viewed` or `dwelled`: a band streamed in behind a Suspense boundary, a region a
+client component mounts after hydration, a list that grows. Clicks and
+disclosures are unaffected, because both are delegated from the root and read the
+nearest addressed element at the moment they happen.
+
+A client-side navigation is the sharpest case: the host gets a new tree and
+revision, and a broadcaster left running on the old root reports nothing more.
+Today the host must `stop()` and start again, and nothing says so.
+
+**What would close it:** a `MutationObserver` on the root for added and removed
+addressed elements (the broadcaster already runs one for disclosures), and a
+sentence in the module documentation that a new root or revision is a new
+broadcast. **Not in scope:** anything about storing or interpreting signals — the
+maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
+
+## 2026-09-12 — reader signals have an API reference and no guide
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+
+`@loom/runtime/signals` and `@loom/runtime/signals/broadcast` shipped today (0136)
+and appear in the generated reference. Nothing tells a host how the pieces fit:
+render with `addressed: true`, start the broadcaster from the browser entry (the
+package entry pulls in about 60 KB of schema library a browser does not need),
+choose `kinds` and per-kind `types`, and parse what arrives with
+`parseReaderSignalBatch`.
+
+The two facts most worth a paragraph: **a signal carries no content** — words
+come from the tree at the revision the batch names — and **measurement is the
+host's setting, never a prop in the tree**. `prototypes/ski-apparel` is a working
+end-to-end example to read from, not to copy code out of.
