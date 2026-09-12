@@ -177,7 +177,7 @@ one tells somebody their data is gone.
 
 ## When there is no answer
 
-Six ways a question goes unanswered, produced by causing all six:
+Six of the ways a question goes unanswered, produced by causing all six:
 
 <WhenThereIsNoAnswer />
 
@@ -187,7 +187,12 @@ worth writing. The other four are your deployment's own afternoon: a timeout, a
 refusal, an answer that no longer matches its own schema, and an integration that
 threw instead of answering.
 
-The fourth of those is worth a sentence on its own. An adapter is not Loom's
+There is a seventh, `not-resolved`, and no single page can cause it: it means
+the render was handed answers resolved for a *different* tree than the one it
+drew. Nothing about your data is wrong. Whoever calls the render resolved one
+plan and rendered another, and that is where the fix goes.
+
+The integration that threw is worth a sentence on its own. An adapter is not Loom's
 code — it is a query against somebody's database, or a call to an integration
 having a bad day — so it is wrapped in the one `try` in the whole runtime. A
 rejected promise from one source is one region of a page, never a page that
