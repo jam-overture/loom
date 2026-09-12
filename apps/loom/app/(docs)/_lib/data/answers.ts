@@ -213,6 +213,7 @@ export type MissingAnswer = {
  */
 const WHAT_HAPPENED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["when"]>> = {
   "no-such-source": "The plan named a source this deployment never registered.",
+  "not-resolved": "The render was handed answers resolved for a different tree than the one it drew.",
   "invalid-params": "The plan asked for forty services, and the source accepts at most twelve.",
   "invalid-answer": "A column was renamed, so the source answered with something its own schema refuses.",
   "adapter-threw": "The integration threw instead of answering.",
@@ -223,6 +224,7 @@ const WHAT_HAPPENED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["w
 /** Whether the host's own code got as far as running. */
 const REACHED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["reached"]>> = {
   "no-such-source": "the adapter was never called",
+  "not-resolved": "the adapter was never called",
   "invalid-params": "the adapter was never called",
   "invalid-answer": "the adapter answered",
   "adapter-threw": "the adapter answered",

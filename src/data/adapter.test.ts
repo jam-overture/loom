@@ -139,6 +139,7 @@ describe("defineSource", () => {
   it("describes every reason a binding can go unanswered", () => {
     const reasons = [
       "no-such-source",
+      "not-resolved",
       "invalid-params",
       "invalid-answer",
       "adapter-threw",
@@ -149,6 +150,18 @@ describe("defineSource", () => {
     for (const reason of reasons) {
       expect(describeDataUnavailable({ reason, detail: "why" })).toContain("why")
     }
+  })
+
+  /**
+   * The two were one code until 12 September, and the sentence it produced said
+   * both things at once. Different work for different people: a registry, or a
+   * composition root.
+   */
+  it("does not say a source is unregistered when nothing went looking for one", () => {
+    const notResolved = describeDataUnavailable({ reason: "not-resolved", detail: "why" })
+
+    expect(notResolved).not.toContain("registered")
+    expect(notResolved).not.toBe(describeDataUnavailable({ reason: "no-such-source", detail: "why" }))
   })
 })
 

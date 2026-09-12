@@ -4,7 +4,7 @@ import { catalogueFields, type CataloguedProp } from "../catalogue.js"
 import type { JsonObject, JsonValue } from "../json.js"
 import { err, ok, type Result } from "../result.js"
 
-import { sourceIdSchema, type SourceId } from "./source.js"
+import { SOURCE_ID_EXPECTATION, sourceIdSchema, type SourceId } from "./source.js"
 
 /**
  * The host's half of the data seam: what answers a binding.
@@ -47,10 +47,20 @@ export interface DataAdapter<TParams = JsonObject, TAnswer extends JsonValue = J
  * Why a binding has no value. Every one of these is something a primitive may
  * be told about and a diagnostic says out loud; none of them is an exception
  * anyone catches.
+ *
+ * `no-such-source` and `not-resolved` are the pair worth keeping apart, and they
+ * were one code until 12 September. An unregistered source is fixed in the
+ * registry by whoever owns the data; a binding nothing resolved is fixed in the
+ * composition root by whoever wired the render — a caller that resolved a
+ * different plan than the one it is rendering. Sharing a code made a diagnostic
+ * say "no source is registered for it — this binding was never resolved", which
+ * is two sentences contradicting each other, and pooled the two for anything
+ * counting reasons.
  */
 export type DataUnavailable = {
   readonly reason:
     | "no-such-source"
+    | "not-resolved"
     | "invalid-params"
     | "invalid-answer"
     | "adapter-threw"
@@ -62,6 +72,8 @@ export const describeDataUnavailable = (unavailable: DataUnavailable): string =>
   switch (unavailable.reason) {
     case "no-such-source":
       return `no source is registered for it — ${unavailable.detail}`
+    case "not-resolved":
+      return `nothing resolved it — ${unavailable.detail}`
     case "invalid-params":
       return `the params in the tree are not what the source accepts — ${unavailable.detail}`
     case "invalid-answer":
@@ -170,7 +182,7 @@ export type DataRegistryError =
 
 export const describeDataRegistryError = (error: DataRegistryError): string =>
   error.code === "invalid-source-id"
-    ? `"${error.id}" is not a valid source id — expected dot-namespaced kebab-case, like "commerce.products"`
+    ? `"${error.id}" is not a valid source id — ${SOURCE_ID_EXPECTATION}`
     : `"${error.id}" is registered twice; a binding naming it would reach whichever registration won`
 
 export interface DataRegistry {

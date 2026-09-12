@@ -50,6 +50,34 @@ describe("parseBindings", () => {
     expect(parseBindings({ "my-services": { source: "profile" } }).ok).toBe(false)
   })
 
+  /**
+   * This message reaches somebody looking at a page that will not bind, through
+   * a render diagnostic. Zod's default for a failed `.regex()` is the word
+   * `Invalid`, which told that reader nothing — while the same mistake made at
+   * registration time was described properly. The asymmetry ran the wrong way.
+   */
+  describe("says what it expected, to whichever reader got it wrong", () => {
+    it("names the grammar for a source id, rather than calling it invalid", () => {
+      const parsed = parseBindings({ bio: { source: "Catalogue_Services" } })
+
+      expect(parsed.ok).toBe(false)
+      if (parsed.ok) return
+
+      expect(describeBindingError(parsed.error)).toBe(
+        'bio.source: expected dot-namespaced kebab-case, like "commerce.products"'
+      )
+    })
+
+    it("names the grammar for a binding name", () => {
+      const parsed = parseBindings({ "my-services": { source: "profile" } })
+
+      expect(parsed.ok).toBe(false)
+      if (parsed.ok) return
+
+      expect(describeBindingError(parsed.error)).toContain('expected camelCase, like "services"')
+    })
+  })
+
   it("refuses anything that is not a map", () => {
     expect(parseBindings("profile").ok).toBe(false)
     expect(parseBindings(["profile"]).ok).toBe(false)

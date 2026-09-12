@@ -102,7 +102,10 @@ export const buildDataResolution = (
     const outcome: DataOutcome = !answer
       ? {
           status: "unavailable",
-          unavailable: { reason: "no-such-source", detail: "this binding was never resolved" },
+          unavailable: {
+            reason: "not-resolved",
+            detail: "the answers came from resolving a different plan than this tree",
+          },
         }
       : answer.ok
         ? { status: "ready", value: answer.value }

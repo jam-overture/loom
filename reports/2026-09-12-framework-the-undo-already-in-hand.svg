@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" width="920" height="520" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="920" height="520" fill="#fbfaf8"/>
+
+  <text x="32" y="44" font-size="19" font-weight="650" fill="#1c1917">Two callers, one interpreter</text>
+  <text x="32" y="68" font-size="13.5" fill="#57534e">The head check, the provenance of a computed change, and the shape of the proposal are now written once.</text>
+
+  <!-- store lane -->
+  <rect x="32" y="96" width="392" height="196" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="124" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">A CALLER WITH A STORE</text>
+  <text x="52" y="144" font-size="12.5" fill="#57534e">the portal, the demo</text>
+
+  <rect x="52" y="160" width="150" height="40" rx="7" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="127" y="185" font-size="13" text-anchor="middle" fill="#292524">planRevert(store)</text>
+
+  <path d="M 202 180 L 238 180" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 238 180 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <rect x="240" y="160" width="164" height="40" rx="7" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="322" y="185" font-size="13" text-anchor="middle" fill="#292524">RevertablePlan</text>
+
+  <rect x="52" y="216" width="352" height="58" rx="7" fill="#fdfcfb" stroke="#e7e5e4"/>
+  <text x="68" y="238" font-size="12.5" fill="#57534e">revertInterpreter fills in the log's half:</text>
+  <text x="68" y="258" font-size="12.5" fill="#57534e">the loom/revert stamp, the rationale, the discards.</text>
+
+  <!-- stateless lane -->
+  <rect x="32" y="308" width="392" height="180" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="336" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">A CALLER WITH NO STORE</text>
+  <text x="52" y="356" font-size="12.5" fill="#57534e">the front door (0081), a preview</text>
+
+  <rect x="52" y="372" width="150" height="40" rx="7" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="127" y="397" font-size="13" text-anchor="middle" fill="#292524">composeChange</text>
+
+  <path d="M 202 392 L 238 392" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 238 392 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <rect x="240" y="372" width="164" height="40" rx="7" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="322" y="397" font-size="13" text-anchor="middle" fill="#292524">inverse, already in hand</text>
+
+  <rect x="52" y="428" width="352" height="42" rx="7" fill="#fdfcfb" stroke="#e7e5e4"/>
+  <text x="68" y="454" font-size="12.5" fill="#57534e">the caller names its own stamp, and writes its own words.</text>
+
+  <!-- converging arrows -->
+  <path d="M 424 246 C 466 246, 466 292, 508 292" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 508 292 l -7 -4 v 8 z" fill="#a8a29e"/>
+  <path d="M 424 392 C 466 392, 466 306, 508 306" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 508 306 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <!-- the shared seam -->
+  <rect x="512" y="216" width="376" height="166" rx="10" fill="#ffffff" stroke="#1c1917" stroke-width="1.6"/>
+  <text x="536" y="248" font-size="15" font-weight="650" fill="#1c1917">inverseInterpreter</text>
+  <text x="536" y="270" font-size="12" fill="#78716c">src/runtime/inverse.ts — no store anywhere in it</text>
+
+  <line x1="536" y1="286" x2="864" y2="286" stroke="#e7e5e4"/>
+
+  <text x="536" y="310" font-size="12.5" fill="#44403c">declines a tree at any other revision</text>
+  <text x="536" y="332" font-size="12.5" fill="#44403c">authoredBy: runtime, confidence 1 — not guessed</text>
+  <text x="536" y="354" font-size="12.5" fill="#44403c">declares discards only when a log was read</text>
+  <text x="536" y="374" font-size="12.5" fill="#44403c">interpreter id: required, never defaulted</text>
+
+  <path d="M 700 382 L 700 416" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 700 416 l -4 -7 h 8 z" fill="#a8a29e"/>
+
+  <rect x="560" y="420" width="280" height="46" rx="7" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="700" y="441" font-size="13" text-anchor="middle" fill="#292524">a proposal the Gate weighs</text>
+  <text x="700" y="459" font-size="11.5" text-anchor="middle" fill="#78716c">on the same terms as an AI-authored change</text>
+
+  <text x="512" y="120" font-size="12.5" fill="#57534e">Before today the whole path ran through a store, so a surface</text>
+  <text x="512" y="140" font-size="12.5" fill="#57534e">with none wrote the box below by hand — thirty lines encoding</text>
+  <text x="512" y="160" font-size="12.5" fill="#57534e">four judgements that are silent when they are wrong.</text>
+</svg>

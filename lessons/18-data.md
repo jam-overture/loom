@@ -715,7 +715,7 @@ one good binding: requests=1 problems=0 markup=<main><section data-state="ready"
 one good binding: 0 diagnostic(s)
 one good, one misspelled: requests=0 problems=1 markup=<main><section data-state="unbound"></section></main>
 one good, one misspelled: 1 diagnostic(s)
-  - data-misdeclared — node n_1 declares data that is not a map of binding names to sources, so it rendered with none — bio.source: Invalid
+  - data-misdeclared — node n_1 declares data that is not a map of binding names to sources, so it rendered with none — bio.source: expected dot-namespaced kebab-case, like "commerce.products"
 ```
 
 **`requests=0`.** The valid binding was not asked. It was not asked *and* it was
@@ -746,12 +746,13 @@ one.** Lesson 14 rejected promoting an unknown primitive's children for this
 reason ("it looks like a layout bug"), and this seam rejects "empty" as a
 failure state for it too.
 
-One honest note about that diagnostic. It ends `bio.source: Invalid`, which is
-Zod's default message for a failed pattern and tells a reader nothing about what
-a source id is meant to look like — while the registry's own error for the same
-mistake says "expected dot-namespaced kebab-case, like `commerce.products`".
-That is a real gap and it is not this lane's to fix; it is written up in this
-lesson's report.
+One note about that diagnostic's last clause. When this lesson was written it
+ended `bio.source: Invalid` — Zod's default message for a failed pattern, which
+told a reader nothing about what a source id is meant to look like, while the
+registry's own error for the same mistake already said "expected dot-namespaced
+kebab-case, like `commerce.products`". This lesson's report filed the gap, and on
+12 September the parser started saying what it expected, in the registry's words.
+The output above is today's.
 
 ### Exercise E — everything at once, or one page's latency is a sum
 
