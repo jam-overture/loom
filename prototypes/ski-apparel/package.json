@@ -1,0 +1,16 @@
+{
+  "name": "ski-apparel-prototype",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "description": "A Loom page about ski kit, built only from registered primitives.",
+  "scripts": {
+    "dev": "node server.mjs",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@loom/runtime": "file:../..",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

@@ -19432,3 +19432,40 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-12 — a link cannot point at a heading on the page it is already on
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:** open
+
+`linkUrlSchema` accepts an absolute URL or a path beginning with `/`, and
+rejects everything else. A bare fragment is everything else:
+
+```
+{"code":"invalid-props","type":"loom.link",
+ "issues":[{"path":"href","message":"must be an absolute URL, or a path beginning with / on this site"}]}
+```
+
+Found building `prototypes/ski-apparel`, a single long page with a nav bar
+across the top. `href: "#helmets"` is refused, so the page uses `href:
+"/#helmets"` instead — which works here only because the page *is* the site
+root. On any page that is not `/`, that link leaves the page the reader is on
+and jumps to the front door's anchor instead, which is a worse failure than a
+refusal because nothing reports it.
+
+**Why the schema is right to be suspicious.** It exists so a proposal cannot
+point a visitor at `javascript:` or an attacker's origin
+([0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)),
+and a fragment is not a scheme it can check. But a same-page anchor reaches no
+origin at all — it is the one href that provably cannot leave the page — so the
+argument for the allowlist does not reach it.
+
+Every primitive taking an `href` has this: `loom.link`, `loom.action`,
+`loom.card`, `loom.feature`, `loom.logo`. Six sections and a nav bar is an
+ordinary shape for a marketing page, and `loom.section` already takes an
+`anchor` prop to be linked *to* — so the library can currently mark a
+destination it has no way to link at.
+
+**What would close it:** allow `#fragment` where the fragment is a valid id, in
+the same schema and with the same test that covers the scheme allowlist.
