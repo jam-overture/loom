@@ -42,6 +42,10 @@
       "types": "./dist/store/postgres.d.ts",
       "default": "./dist/store/postgres.js"
     },
+    "./signals": {
+      "types": "./dist/signals/index.d.ts",
+      "default": "./dist/signals/index.js"
+    },
     "./telemetry": {
       "types": "./dist/telemetry/index.d.ts",
       "default": "./dist/telemetry/index.js"
