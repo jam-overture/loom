@@ -13990,9 +13990,14 @@ instead — a card, a table, a stat grid. It photographs better than a stock
 photo would and it exercises the library at the same time.
 ## 2026-09-04 — `loom.embed` cannot frame this deployment's own application, because its sandbox has no `allow-forms`
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
-— measured against the running page; the band that found it was built, looked
-at, and withdrawn rather than shipped
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed 12 September by
+[0135](decisions/0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md)
+— the first of the two suggestions below, which is the one this entry called
+"needs no new prop and no new allowlist". A frame the deployment's registry
+resolved as `self` is granted `allow-forms`; nothing in a tree can ask for it;
+`allow-top-navigation` is still withheld from every frame. §4d is unblocked, and
+the band can be rebuilt.
 
 §4d says the marketing site **embeds the demo rather than describing it**, and
 that this is why the demo is public at all
@@ -14042,8 +14047,15 @@ pointing at `/demo` from the hero, the menu and a card.
 
 ## 2026-09-04 — `loom.embed` has one aspect ratio at every viewport, and a phone is not a laptop
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
-— measured, low priority, and secondary to the entry above
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed 12 September — `aspect: "adaptive"`, which is 3/4 while the frame is
+narrow and 16/10 once it is not. Two departures from what this entry asked for,
+both argued in the prop's own comment: the member is **local to `loom.embed`**
+rather than joining the shared `ASPECT_NAMES`, because a photograph has an
+intrinsic shape; and the threshold is read off **the frame's own width rather
+than the viewport's**, so an embed in one column of a `loom.split` gets the
+narrow shape on a 1440px screen. Measured: 1016 × 635 at 1280 full width,
+492 × 656 in half a split at the same 1280, 286 × 381 at 390.
 
 Found while building the same withdrawn band, and worth keeping even though the
 band did not ship, because the measurements cost a run to take and the next
@@ -15061,7 +15073,10 @@ than the wording, because the defect was a claim and not a phrase.
 
 ## 2026-09-03 — `loom.code` cannot wrap, and printed data is not code
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed 12 September — the recommendation below was taken as written: a `wrap`
+prop, off by default, `pre-wrap` with `overflow-wrap: anywhere` when on. The
+lane that filed it can drop the short-specimen workaround.
 
 The front door now prints one piece of its own page beside the rendering of it
 (`(marketing)/_lib/pages/as-data.ts`). `loom.code` is the right primitive for it
@@ -17683,7 +17698,10 @@ than the wording, because the defect was a claim and not a phrase.
 
 ## 2026-09-03 — `loom.code` cannot wrap, and printed data is not code
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed 12 September — the recommendation below was taken as written: a `wrap`
+prop, off by default, `pre-wrap` with `overflow-wrap: anywhere` when on. The
+lane that filed it can drop the short-specimen workaround.
 
 The front door now prints one piece of its own page beside the rendering of it
 (`(marketing)/_lib/pages/as-data.ts`). `loom.code` is the right primitive for it
@@ -17757,9 +17775,14 @@ numbers, and if it cannot, it should not be filed.**
 
 ## 2026-09-04 — `loom.embed` cannot frame this deployment's own application, because its sandbox has no `allow-forms`
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
-— measured against the running page; the band that found it was built, looked
-at, and withdrawn rather than shipped
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed 12 September by
+[0135](decisions/0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md)
+— the first of the two suggestions below, which is the one this entry called
+"needs no new prop and no new allowlist". A frame the deployment's registry
+resolved as `self` is granted `allow-forms`; nothing in a tree can ask for it;
+`allow-top-navigation` is still withheld from every frame. §4d is unblocked, and
+the band can be rebuilt.
 
 §4d says the marketing site **embeds the demo rather than describing it**, and
 that this is why the demo is public at all
@@ -17809,8 +17832,15 @@ pointing at `/demo` from the hero, the menu and a card.
 
 ## 2026-09-04 — `loom.embed` has one aspect ratio at every viewport, and a phone is not a laptop
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
-— measured, low priority, and secondary to the entry above
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed 12 September — `aspect: "adaptive"`, which is 3/4 while the frame is
+narrow and 16/10 once it is not. Two departures from what this entry asked for,
+both argued in the prop's own comment: the member is **local to `loom.embed`**
+rather than joining the shared `ASPECT_NAMES`, because a photograph has an
+intrinsic shape; and the threshold is read off **the frame's own width rather
+than the viewport's**, so an embed in one column of a `loom.split` gets the
+narrow shape on a 1440px screen. Measured: 1016 × 635 at 1280 full width,
+492 × 656 in half a split at the same 1280, 286 × 381 at 390.
 
 Found while building the same withdrawn band, and worth keeping even though the
 band did not ship, because the measurements cost a run to take and the next
@@ -17976,7 +18006,13 @@ request nobody can review.
 ## 2026-09-05 — `loom.milestone`'s marker gutter now costs the front door a 7,299px band on a phone
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — an instance on the 1 September entry, with the number it has grown into
+closed — **it was already fixed by the time anyone came back to it.** #229 landed
+the `:has()` rule and the 26rem container query on 11 September, six days after
+this was filed, and did not know it was closing this. Verified 12 September at a
+true 390: the grid
+is `12px 326px`, the 88px column is gone, the marker sits above the title, and
+the body gets 326px of 390 against the 101px this entry recorded. No code was
+written for it on 12 September.
 
 The 1 September run filed that `loom.milestone` reserves `5.5rem` for its marker
 column at every viewport and whether or not a marker is set, so at 390px each
@@ -19432,3 +19468,182 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-12 — four findings this library owed, three closed by code and one already closed by #229
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed — see the four entries it answers, dated 3, 4, 4 and 5 September
+
+Recorded as one entry rather than four edits, because the *set* is the finding:
+every open item against this library on 12 September was filed by another lane,
+every one was measured against the running front door, and **not one of them was
+a missing primitive.** The port ledger has been empty since 8 September and the
+library has been read as finished four times since. It was not finished; it was
+in debt.
+
+| filed | finding | closed by |
+| --- | --- | --- |
+| 3 Sep | `loom.code` cannot wrap, and printed data is not code | a `wrap` prop, off by default |
+| 4 Sep | `loom.embed`'s sandbox has no `allow-forms`, so §4d cannot be built | [0135](decisions/0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md) |
+| 4 Sep | `loom.embed` has one aspect ratio at every viewport | an `adaptive` shape, read off the frame |
+| 5 Sep | `loom.milestone`'s marker gutter costs a 7,299px band on a phone | **#229, on 11 September** |
+
+**The fourth was already fixed and nobody had said so**, which is the part worth
+a line of somebody's next run. #229 landed the `:has()` rule and the 26rem
+container query on 11 September — six days after the finding, in this lane's own
+previous run — and closed it without knowing it was closing it, because the run
+was working from `docs/hermes-port-map.md` rather than from here. Measured this
+run against the same rail at a true 390:
+
+| | grid columns | body column | marker |
+| --- | --- | --- | --- |
+| as filed, 1 Sep | `5.5rem auto 1fr` | **101px of 390** | beside the title |
+| measured, 12 Sep | `12px 326px` | **326px of 390** | above the title |
+
+The 88px column is gone below 26rem and present above it (`88px 12px 481px` at
+1280), which is exactly the recommendation the 1 September entry made and the
+5 September entry restated. **No code was written for it this run.** It is
+recorded here so the next lane to read this file does not spend a run fixing it
+a second time.
+
+**Three of the four entries appear in this file twice**, at two different
+offsets, with identical text — the 3 September one at 15062 and 17684, and both
+4 September ones likewise. Each copy was closed this run, so nothing is left
+saying `open` that is not. It looks like a backlog merge that appended a block
+it had already appended; it is worth somebody checking whether other entries
+duplicate too, because **a finding read from the earlier copy looks open after
+the later copy has been closed**, and a file this size is read by search.
+
+**What the other three cost to close: one prop, one enum member, one branch on a
+value the seam was already handing over.** None needed a framework change, and
+the one that touches a security surface got a record rather than a commit
+message — see 0135 for the argument, which is that `allow-same-origin` has
+already conceded everything `allow-forms` could concede.
+
+## What this says about how this lane picks work
+
+Worth stating plainly, because it is the third run in a row to rediscover it.
+`docs/hermes-port-map.md` says of itself that *"it is a measure of the port, not
+of the library"*, and its tables have been empty for four days. Three runs read
+that as *the range is finished* and went looking for a ninetieth content model.
+The 11 September run found two real primitives by asking what a **page** could
+not do; this run found four real defects by reading what other lanes had already
+**measured**.
+
+Neither instrument is the ledger. **`FINDINGS.md` is the better one of the two**,
+and the brief already says to read it before choosing work — what it does not say,
+and what these four entries argue it should, is that an open finding filed by the
+lane that ships the surface outranks a primitive nobody has asked for.
+
+---
+
+## 2026-09-12 — a specimen cannot be put "beside the code it photographs" for any lane whose code is under `src/`
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/` and
+the build config) · **Status:** open in its general form — unblocked here by one
+line, which is in this branch and is the whole of its diff outside
+`src/primitives/`
+
+`tools/specimen/README.md` says, under *Writing a specimen*:
+
+> Put it beside the code it photographs. Nothing in this directory is any lane's
+> content, and the harness imports no specimen but the example.
+
+That is good guidance and it **cannot be followed by this lane**, or by the
+framework lane, or by anyone else working under `src/`. A specimen imports
+`defineSpecimen` from `tools/specimen/specimen.js`. `tsconfig.build.json` sets
+`rootDir: "./src"` and includes `src/**/*.ts`. So the first specimen committed
+beside primitives code produced:
+
+```
+src/primitives/debts.specimen.ts(7,32): error TS6059: File
+'/home/user/loom/tools/specimen/specimen.ts' is not under 'rootDir'
+'/home/user/loom/src'. 'rootDir' is expected to contain all source files.
+```
+
+`pnpm build` fails, so `pnpm verify` fails, so the merge gate fails — **for
+following the instruction the harness gives.** The four route-group lanes never
+hit it because `apps/` is a different project; this is the first lane under
+`src/` to commit one, which is why a harness that landed on 3 September has gone
+nine days without anyone noticing.
+
+**Unblocked here rather than filed and stopped**, because the fix is one line and
+has an exact precedent sitting beside it: `src/**/*.specimen.ts` joins
+`src/**/*.test.ts` in `exclude`. The argument is the same argument —
+*a specimen is no more part of the published runtime than a test is* — and the
+consequence is the same too: it is still typechecked, by `tsconfig.json`, which
+sets no `rootDir`. So a specimen that does not compile still fails `pnpm verify`;
+it just is not emitted into `dist`.
+
+**What is still open is the general form**, and it is worth one line of the
+owning lane's next run rather than a fix: there are now **two** places that must
+agree about what is not published — `tsconfig.build.json`'s exclude list and
+whatever the next non-runtime file convention turns out to be — and the second
+one will be discovered the same way this was, by a merge gate going red on a
+lane that was following a README. A glob for "anything with a compound
+extension under `src/`" would cover both and is one line instead of two; whether
+that is worth doing is the owning lane's call, not this one's.
+
+**A second, smaller thing found on the way**, recorded because it cost fifteen
+minutes and will cost somebody else the same: `pnpm verify 2>&1 | tail -35`
+reports **exit 0 on a failed verify**, because the exit code is the pipe's. The
+`ELIFECYCLE` lines are in the output and easy to read past. Nothing in the
+repository does this; it is a thing a *run* does, so it belongs in
+`docs/routines.md` next to the token discipline rather than in any lane's code:
+**redirect and check `$?`, never pipe a gate into `tail`.**
+
+---
+
+## 2026-09-12 — the "no decision number in front of a reader" check sees only the part of a type TypeScript did not truncate
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open —
+the instance that fired is fixed in `src/primitives/`; the check's coverage is
+not, and that is the finding
+
+`extract.test.ts`'s *never puts a decision-record number in front of a reader*
+is a good rule and the right place to enforce it. It failed this run on
+`LIBRARY_CLASS's signature`, for a citation **this branch did not write**:
+
+```
+AssertionError: a decision number reached the page:
+expected [ "LIBRARY_CLASS's signature" ] to deeply equal []
+```
+
+`LIBRARY_CLASS` is an object literal with a doc comment on nearly every member,
+so its inferred type is 4,700-odd characters and **TypeScript truncates it**.
+The signature the extractor publishes therefore ends in `…`, and what is inside
+that window depends on every comment before it.
+
+| | length | truncates at | numbers visible |
+| --- | --- | --- | --- |
+| `main` | 4,773 | `loom.list`'s markers | **0** |
+| this branch, before the fix | 4,780 | the comparison table's steer column | **1** — `0084` |
+
+**There were seven decision numbers in that object the whole time**, and the
+check could see one of them. Adding a sixteen-word comment for a new class moved
+the boundary far enough to expose a citation written weeks ago, in a member this
+branch does not touch. The failure is real — a reader would have seen `(0084)` —
+but *which* of the seven fires is decided by where a type happens to be cut.
+
+**Fixed in this lane's file rather than worked around**: all seven now name the
+rule instead of the number — *a container is its child's name plus the
+arrangement* rather than `0054`, *a render is a total pure projection of one
+node* rather than `(0008)` — which is better prose for a reader who cannot open
+the record anyway, and defuses the whole object rather than the one that fired.
+
+**What is still open is the check.** As written it is a spot check wearing the
+clothes of an invariant: it will go on passing over citations it cannot see, and
+will go on failing on unrelated branches whose only crime is changing the length
+of something. Two candidate fixes, both the owning lane's:
+
+- **Read the declaration rather than the printed type.** The numbers are in the
+  source comments; a truncated type is a rendering of them.
+- **Ask TypeScript not to truncate** (`noTruncation` on the printer the extractor
+  uses) for the purposes of this check, even if the published signature stays
+  short. That is the one-line version and it makes the check honest immediately.
+
+Worth doing either way, because the trap is not confined to `LIBRARY_CLASS`: any
+exported object literal with per-member comments has the same shape, and there
+are several in `src/primitives/` alone.

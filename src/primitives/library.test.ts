@@ -3341,6 +3341,84 @@ describe("the technical vocabulary", () => {
     expect(markup).toMatch(/<figure[^>]*min-width:0/)
   })
 
+  /**
+   * The 3 September finding: the front door prints a piece of its own page, and
+   * `overflow-x: auto` put 162px of every long line behind a horizontal gesture
+   * at 390 — inside a band whose whole argument is that you can see the whole
+   * of it. That lane chose a shorter specimen rather than shipping it.
+   *
+   * A pretty-printed JSON string value is **one line however long the string
+   * is**, so there is no line structure below the printer's to protect. A shell
+   * command is a different claim about the same whitespace, which is why this
+   * is a prop rather than a change of default.
+   */
+  describe("printed data, which is not code", () => {
+    const printed = (theme: Record<string, string>, wrap: boolean): LoomTree => {
+      const idFactory = sequentialIdFactory()
+
+      return createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: theme },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.code",
+              props: wrap ? { wrap: true } : {},
+              children: [buildText(idFactory, '{"note":"one line, however long"}')],
+            }),
+          ],
+        }),
+        idFactory
+      )
+    }
+
+    it("wraps only when asked, under both palettes", () => {
+      for (const theme of [EDITORIAL, BOLD]) {
+        expect(render(printed(theme, true)).markup).toMatch(/<pre[^>]*white-space:pre-wrap/)
+        expect(render(printed(theme, false)).markup).toMatch(/<pre[^>]*white-space:pre[;"]/)
+        expect(render(printed(theme, false)).markup).not.toContain("pre-wrap")
+      }
+    })
+
+    /**
+     * The half that makes it work on a phone. `pre-wrap` alone breaks at
+     * spaces, and the lines this is for — a URL, a base64 value, a
+     * 90-character JSON string — have none. `anywhere` rather than
+     * `break-word` because only `anywhere` is counted in the element's
+     * min-content width, which is what stops the *panel* being stretched.
+     */
+    it("breaks a line that offers nowhere to break, and only then", () => {
+      expect(render(printed(EDITORIAL, true)).markup).toMatch(
+        /<pre[^>]*overflow-wrap:anywhere/
+      )
+      expect(render(printed(EDITORIAL, false)).markup).not.toContain("overflow-wrap")
+    })
+
+    /**
+     * `overflow-x: auto` survives the wrap rather than being switched off with
+     * it. A wrapped listing has nothing to scroll; what the declaration is
+     * still doing is containing an unbreakable token to this panel instead of
+     * letting it out onto the page, which is the 20 August finding above.
+     */
+    it("keeps the overflow contained to the panel in both modes", () => {
+      for (const wrap of [true, false]) {
+        expect(render(printed(EDITORIAL, wrap)).markup).toMatch(/<pre[^>]*overflow-x:auto/)
+      }
+    })
+
+    /** A rendering of one content model: turning it on adds and drops nothing. */
+    it("changes no node", () => {
+      const nodesIn = (markup: string): readonly string[] =>
+        [...markup.matchAll(/data-loom-node="([^"]+)"/g)].flatMap((match) =>
+          match[1] === undefined ? [] : [match[1]]
+        )
+
+      expect(nodesIn(render(printed(EDITORIAL, true), true).markup)).toEqual(
+        nodesIn(render(printed(EDITORIAL, false), true).markup)
+      )
+    })
+  })
+
   it("gives a terminal its window bar and a source listing none", () => {
     const { markup } = render(technicalPage(EDITORIAL))
 
@@ -4796,6 +4874,216 @@ describe("the band that moves", () => {
         expect(markup).toContain(`src="${PERMITTED}"`)
         expect(markup).not.toContain("This content cannot be shown here.")
       }
+    })
+
+    /**
+     * The 4 September finding: §4d cannot be built, because every control in
+     * `/demo` is a server action reached through a `<form action={…}>` and this
+     * sandbox had no `allow-forms`. The band rendered, looked right, silently
+     * did nothing when pressed, and was withdrawn.
+     *
+     * What these hold is the *shape* of the grant rather than the fact of it —
+     * that it follows the deployment's `self` flag and nothing else, and that
+     * a deployment which registered no origin of its own is byte-for-byte
+     * where it was.
+     */
+    describe("the frame that is this deployment's own", () => {
+      const OWN = "https://loom.example.com"
+      const THIRD_PARTY = "https://player.example.com"
+
+      const bothOrigins = originsOf(
+        { origin: OWN, description: "This deployment", self: true },
+        { origin: THIRD_PARTY, description: "The fixture video player" }
+      )
+
+      const sandboxesIn = (markup: string): readonly string[] =>
+        [...markup.matchAll(/sandbox="([^"]*)"/g)].flatMap((match) =>
+          match[1] === undefined ? [] : [match[1]]
+        )
+
+      const pair = (theme: Record<string, string>): LoomTree => {
+        const idFactory = sequentialIdFactory()
+
+        return createTree(
+          buildElement(idFactory, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: theme },
+            children: [
+              buildElement(idFactory, {
+                type: "loom.embed",
+                props: { src: `${OWN}/demo`, title: "The demo, framed by the site that ships it" },
+              }),
+              buildElement(idFactory, {
+                type: "loom.embed",
+                props: { src: `${THIRD_PARTY}/embed/x`, title: "A film about the framework" },
+              }),
+            ],
+          }),
+          idFactory
+        )
+      }
+
+      it("grants allow-forms to its own origin and to no one else, under both palettes", () => {
+        for (const theme of [EDITORIAL, BOLD]) {
+          const sandboxes = sandboxesIn(render(pair(theme), false, bothOrigins).markup)
+
+          expect(sandboxes).toEqual([
+            "allow-scripts allow-same-origin allow-presentation allow-forms",
+            "allow-scripts allow-same-origin allow-presentation",
+          ])
+        }
+      })
+
+      /**
+       * The grant is the *registry's*, so there is nothing a tree can say to
+       * obtain it. This is the assertion that keeps it that way: the same node,
+       * the same props, the same URL — and an allowlist that does not call the
+       * origin its own gets the sandbox it has today.
+       */
+      it("withholds it when the same origin is registered without self", () => {
+        const notOwn = originsOf(
+          { origin: OWN, description: "Registered, but not as this deployment's own" },
+          { origin: THIRD_PARTY, description: "The fixture video player" }
+        )
+
+        expect(sandboxesIn(render(pair(EDITORIAL), false, notOwn).markup)).toEqual([
+          "allow-scripts allow-same-origin allow-presentation",
+          "allow-scripts allow-same-origin allow-presentation",
+        ])
+      })
+
+      /**
+       * The one grant that turns an embedded document into a redirect. It is
+       * withheld from **every** frame including a same-origin one, and this
+       * fails the moment somebody widens the constant rather than the case.
+       */
+      it("grants no frame the ability to move the page it sits on", () => {
+        const sandboxes = sandboxesIn(render(pair(EDITORIAL), false, bothOrigins).markup)
+
+        expect(sandboxes).toHaveLength(2)
+        for (const sandbox of sandboxes) {
+          expect(sandbox).not.toContain("allow-top-navigation")
+          expect(sandbox).not.toContain("allow-popups")
+          expect(sandbox).not.toContain("allow-downloads")
+          expect(sandbox).not.toContain("allow-modals")
+        }
+      })
+
+      /** `allow-same-origin` is never dropped: doing so gives the document a null origin. */
+      it("keeps allow-same-origin on the frame it just widened", () => {
+        for (const sandbox of sandboxesIn(render(pair(EDITORIAL), false, bothOrigins).markup)) {
+          expect(sandbox).toContain("allow-same-origin")
+        }
+      })
+    })
+
+    /**
+     * The other half of the 4 September pair: one ratio at every viewport, and
+     * `wide` is 12px short of the control the band promised at 1440 while
+     * `square` shows no control at all at 390.
+     */
+    describe("a shape that is not the same at every width", () => {
+      const shaped = (aspect: string, theme: Record<string, string>): LoomTree => {
+        const idFactory = sequentialIdFactory()
+
+        return createTree(
+          buildElement(idFactory, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: theme },
+            children: [
+              buildElement(idFactory, {
+                type: "loom.embed",
+                props: { src: PERMITTED, title: "A framed application", aspect },
+              }),
+            ],
+          }),
+          idFactory
+        )
+      }
+
+      /**
+       * **An inline style beats a rule**, which is the trap `stylesheet.ts`
+       * names first. An `adaptive` frame that also wrote a ratio inline would
+       * render as whichever shape that inline value said and the query would be
+       * dead — visible in no screenshot, because one of the two shapes is
+       * always right.
+       */
+      it("writes no inline ratio for adaptive, and one for every fixed shape", () => {
+        for (const theme of [EDITORIAL, BOLD]) {
+          const { tree } = splitStylesheet(render(shaped("adaptive", theme)).markup)
+
+          expect(tree).toContain(LIBRARY_CLASS.frameAdaptive)
+          expect(tree).not.toContain("aspect-ratio")
+
+          for (const [aspect, ratio] of [
+            ["wide", "16 / 9"],
+            ["square", "1 / 1"],
+            ["portrait", "3 / 4"],
+          ]) {
+            const fixed = splitStylesheet(render(shaped(aspect ?? "", theme)).markup).tree
+
+            expect(fixed).toContain(`aspect-ratio:${ratio}`)
+            expect(fixed).not.toContain(LIBRARY_CLASS.frameAdaptive)
+          }
+        }
+      })
+
+      /**
+       * The unqueried rule is the **narrow** one, which is the shape #229
+       * established for this library's container queries: a browser that
+       * answers no query at all gets the shape that fits the smaller box,
+       * rather than the one that overflows it.
+       */
+      it("declares the narrow shape unqueried and the wide shape inside a container query", () => {
+        const { stylesheet } = splitStylesheet(render(shaped("adaptive", EDITORIAL)).markup)
+
+        expect(stylesheet).toContain(`.${LIBRARY_CLASS.frameAdaptive} {\n  aspect-ratio: 3 / 4;\n}`)
+        expect(stylesheet).toContain(
+          `@container (min-width: 36rem) {\n  .${LIBRARY_CLASS.frameAdaptive} {\n    aspect-ratio: 16 / 10;\n  }\n}`
+        )
+      })
+
+      /**
+       * A container query is answered by an **ancestor**, so the figure is what
+       * declares containment — and only for `adaptive`, so a page of videos
+       * establishes no containment context it has no use for.
+       */
+      it("declares containment for adaptive and for nothing else", () => {
+        expect(splitStylesheet(render(shaped("adaptive", EDITORIAL)).markup).tree).toContain(
+          "container-type:inline-size"
+        )
+        expect(splitStylesheet(render(shaped("wide", EDITORIAL)).markup).tree).not.toContain(
+          "container-type:inline-size"
+        )
+      })
+
+      /**
+       * The shape is geometry, so it is the same under every palette. This
+       * fails if a ratio is ever derived from something a theme can vary.
+       */
+      it("renders the same shape under both palettes", () => {
+        const shapeOf = (markup: string): readonly string[] => [
+          ...markup.matchAll(/(aspect-ratio:[^;"]*|loom-frame-adaptive)/g),
+        ].map(([matched]) => matched)
+
+        for (const aspect of ["adaptive", "wide", "square", "portrait"]) {
+          expect(shapeOf(render(shaped(aspect, EDITORIAL)).markup)).toEqual(
+            shapeOf(render(shaped(aspect, BOLD)).markup)
+          )
+        }
+      })
+
+      /** A shape is a rendering of one content model, so it adds and drops nothing. */
+      it("changes no node when the shape changes", () => {
+        const nodesIn = (markup: string): readonly string[] =>
+          [...markup.matchAll(/data-loom-node="([^"]+)"/g)].flatMap((match) =>
+            match[1] === undefined ? [] : [match[1]]
+          )
+
+        expect(nodesIn(render(shaped("adaptive", EDITORIAL), true).markup)).toEqual(
+          nodesIn(render(shaped("wide", EDITORIAL), true).markup)
+        )
+      })
     })
   })
 

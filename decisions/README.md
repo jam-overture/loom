@@ -214,3 +214,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0128 | *No record on this branch* | — | — |
 | 0129 | *No record on this branch* | — | — |
 | [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |
+| 0131 | *No record on this branch* | — | — |
+| 0132 | *No record on this branch* | — | — |
+| 0133 | *No record on this branch* | — | — |
+| 0134 | *No record on this branch* | — | — |
+| [0135](0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md) | A same-origin frame is granted what its own document needs | Accepted — it changes no schema, no tree and no delta model, and | §4d |
