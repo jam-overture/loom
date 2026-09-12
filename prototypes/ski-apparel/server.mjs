@@ -1,9 +1,9 @@
 import { createServer } from "node:http"
 
 import { buildPage } from "./page.mjs"
-import { confirmHeld, proposeFrom } from "./propose.mjs"
+import { confirmHeld, orderOf, proposeFrom } from "./propose.mjs"
 import { renderPage } from "./render.mjs"
-import { emptyReadings, record, summarise } from "./signals.mjs"
+import { emptyReadings, questionsOpened, record, summarise } from "./signals.mjs"
 
 /**
  * A dev server, in the smallest form that makes the point.
@@ -27,8 +27,16 @@ const PORT = Number(process.env.PORT ?? 4321)
 let tree = buildPage()
 let readings = emptyReadings()
 let held
-/** Derivations the reader has waved away. Re-offering them would be nagging. */
+/** Derivations already acted on or waved away. Re-offering them would be nagging. */
 let dismissed = []
+/**
+ * What has actually happened this session.
+ *
+ * Kept because a suggestion that lands and then vanishes from the rail looks
+ * exactly like one that was never made. The rail is the only place a person can
+ * see that their reading changed the page.
+ */
+let done = []
 
 const json = (response, status, body) => {
   response.writeHead(status, { "content-type": "application/json" })
@@ -43,9 +51,11 @@ const readBody = async (request) => {
 
 /** What the sidebar gets back on every tick. */
 const state = (proposal) => ({
-  sections: summarise(readings),
+  sections: summarise(readings, orderOf(tree)),
+  questions: questionsOpened(readings),
   revision: tree.revision,
-  order: tree.root.children.map((child) => child.props?.anchor).filter((anchor) => anchor !== undefined),
+  order: orderOf(tree),
+  done,
   proposal,
 })
 
@@ -57,6 +67,7 @@ const look = async () => {
   if (result.tree !== undefined) {
     tree = result.tree
     dismissed = [...dismissed, result.summary.derivation.id]
+    done = [...done, { utterance: result.summary.derivation.utterance, asked: false, revision: tree.revision }]
     process.stdout.write(`applied on its own: ${result.summary.derivation.utterance}\n`)
   }
 
@@ -96,11 +107,29 @@ const server = createServer(async (request, response) => {
       return
     }
 
+    /**
+     * The answer has to name what it is answering.
+     *
+     * The proposal itself still never leaves the server (0021) — the id here is
+     * the *derivation*, which the rail was already shown. It costs nothing and
+     * it means a bare POST cannot apply whatever happens to be held: a stray
+     * request, a replayed one, or a click on a prompt that has since been
+     * replaced by a different suggestion.
+     */
+    const { answering } = await readBody(request).catch(() => ({}))
+
+    if (answering !== held.derivation.id) {
+      process.stdout.write(`refused a confirmation naming ${JSON.stringify(answering)}; holding ${held.derivation.id}\n`)
+      json(response, 409, { error: "that is not what is waiting", waiting: held.derivation.id })
+      return
+    }
+
     const outcome = confirmHeld(held, tree)
 
     if (outcome.applied && outcome.tree !== undefined) {
       tree = outcome.tree
       dismissed = [...dismissed, held.derivation.id]
+      done = [...done, { utterance: held.derivation.utterance, asked: true, revision: tree.revision }]
       process.stdout.write(`applied: ${held.derivation.utterance} — revision ${tree.revision}\n`)
     }
 
@@ -110,6 +139,13 @@ const server = createServer(async (request, response) => {
   }
 
   if (request.method === "POST" && url.pathname === "/dismiss") {
+    const { answering } = await readBody(request).catch(() => ({}))
+
+    if (held !== undefined && answering !== held.derivation.id) {
+      json(response, 409, { error: "that is not what is waiting", waiting: held.derivation.id })
+      return
+    }
+
     if (held !== undefined) {
       dismissed = [...dismissed, held.derivation.id]
       process.stdout.write(`dismissed: ${held.derivation.utterance}\n`)
@@ -125,6 +161,7 @@ const server = createServer(async (request, response) => {
     readings = emptyReadings()
     held = undefined
     dismissed = []
+    done = []
     process.stdout.write("reset — tree rebuilt, readings cleared\n")
     json(response, 200, { ok: true })
     return

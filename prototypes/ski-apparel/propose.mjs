@@ -36,21 +36,56 @@ const runtimeWith = (interpreter, events) => ({
   idFactory: ids,
 })
 
+/**
+ * The page's section order, read off the tree rather than remembered.
+ *
+ * Everything that reasons about position asks the tree, because the tree is the
+ * thing that moves. A remembered order survives exactly one accepted proposal.
+ */
+export const orderOf = (tree) =>
+  tree.root.children
+    .map((child) => child.props?.anchor)
+    .filter((anchor) => typeof anchor === "string")
+
 /** Every node in the tree, depth first, so an operation can find what it names. */
 const walk = function* (node) {
   yield node
   if (node.kind !== "text") for (const child of node.children) yield* walk(child)
 }
 
+/**
+ * Move a section to the Nth *anchored* position.
+ *
+ * These are two different coordinate systems and conflating them is a quiet
+ * disaster. A derivation counts sections a reader can see — "section 4 of 5".
+ * A `move` operation counts the parent's children, and this page's root has
+ * eight of them: the nav bar, the hero and the footer carry no anchor and are
+ * invisible to the derivation but very much present in the index.
+ *
+ * So the position is translated here, against the tree, at the moment the
+ * operation is built — never carried along as a number that was right once.
+ */
+const moveToPosition = (tree, section, position) => {
+  const children = tree.root.children
+  const from = children.findIndex((child) => child.props?.anchor === section)
+
+  if (from === -1) return undefined
+
+  /** `index` on a move is the final position, so measure the list without it. */
+  const remaining = children.filter((_child, at) => at !== from)
+  const anchored = remaining
+    .map((child, at) => ({ at, anchor: child.props?.anchor }))
+    .filter((entry) => typeof entry.anchor === "string")
+
+  const landBefore = anchored[position]
+  const index = landBefore === undefined ? remaining.length : landBefore.at
+
+  return [{ op: "move", nodeId: children[from].id, parentId: tree.root.id, index }]
+}
+
 const operationsFor = (derivation, tree) => {
   if (derivation.kind === "move-section") {
-    const target = tree.root.children.find(
-      (child) => child.kind === "element" && child.props.anchor === derivation.section
-    )
-
-    return target === undefined
-      ? undefined
-      : [{ op: "move", nodeId: target.id, parentId: tree.root.id, index: derivation.toIndex }]
+    return moveToPosition(tree, derivation.section, derivation.toPosition)
   }
 
   const faq = [...walk(tree.root)].find(
@@ -109,7 +144,7 @@ const summaryOf = (derivation, outcome, events) => ({
  * so a page cannot invent one (0021).
  */
 export const proposeFrom = async (readings, tree, { skip = [] } = {}) => {
-  const derivation = derive(readings, { skip })
+  const derivation = derive(readings, orderOf(tree), { skip })
 
   if (derivation === undefined) return { summary: { status: "watching" } }
 

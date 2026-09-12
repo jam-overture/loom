@@ -15,9 +15,14 @@
  * nothing about where they live.
  */
 
-/** A section, as the page's own `anchor` props name it, in the order they appear. */
-export const SECTION_ORDER = ["top", "layers", "helmets", "goggles", "fit"]
-
+/**
+ * The sections this page has, by the `anchor` props that name them.
+ *
+ * Their *order* is deliberately not here. It lives in the tree, and the tree
+ * moves — the whole point of this file is to propose moving it. A constant
+ * order would go stale the first time a proposal was accepted, and the page
+ * would then be told it is section 4 of 5 while sitting second.
+ */
 export const SECTION_LABELS = {
   top: "the opening",
   layers: "shell construction",
@@ -25,6 +30,8 @@ export const SECTION_LABELS = {
   goggles: "goggles",
   fit: "the questions",
 }
+
+const isSection = (anchor) => Object.hasOwn(SECTION_LABELS, anchor)
 
 export const emptyReadings = () => ({ dwell: {}, reached: {}, navClicks: {}, faqClicks: {}, events: 0 })
 
@@ -39,7 +46,7 @@ const bump = (counts, key) => ({ ...counts, [key]: (counts[key] ?? 0) + 1 })
  * not the first.
  */
 export const record = (readings, event) => {
-  if (event.kind === "dwell" && SECTION_ORDER.includes(event.section)) {
+  if (event.kind === "dwell" && isSection(event.section)) {
     return {
       ...readings,
       events: readings.events + 1,
@@ -48,7 +55,7 @@ export const record = (readings, event) => {
     }
   }
 
-  if (event.kind === "nav-click" && SECTION_ORDER.includes(event.section)) {
+  if (event.kind === "nav-click" && isSection(event.section)) {
     return { ...readings, events: readings.events + 1, navClicks: bump(readings.navClicks, event.section) }
   }
 
@@ -59,11 +66,11 @@ export const record = (readings, event) => {
   return readings
 }
 
-/** Dwell per section in seconds, in page order, with the sections never reached at zero. */
-export const summarise = (readings) =>
-  SECTION_ORDER.map((section, index) => ({
+/** Dwell per section in seconds, in the order the page currently has them. */
+export const summarise = (readings, order) =>
+  order.map((section, index) => ({
     section,
-    label: SECTION_LABELS[section],
+    label: SECTION_LABELS[section] ?? section,
     index,
     seconds: Math.round((readings.dwell[section] ?? 0) / 100) / 10,
     clicks: readings.navClicks[section] ?? 0,
@@ -87,28 +94,33 @@ const ENOUGH = { sections: 2, seconds: 8, faqClicks: 2 }
  * the small one is offered first, and the Gate — not this function — is what
  * decides whether either may land unattended.
  *
+ * `order` is the page's own current order, passed in rather than assumed. A
+ * derivation that claims a position has to be reading the position the visitor
+ * is actually looking at.
+ *
  * Returns `undefined` when the readings support neither, which is most of the
  * time and is the correct answer. A signal source that always has a suggestion
  * is not observing anything.
  */
-export const derive = (readings, { skip = [] } = {}) => {
+export const derive = (readings, order, { skip = [] } = {}) => {
   const wanted = questionsOpened(readings).find(
     (row) => row.count >= ENOUGH.faqClicks && !skip.includes(`faq:${row.question}`)
   )
 
   if (wanted !== undefined) {
+    const times = wanted.count === 2 ? "twice" : `${wanted.count} times`
     return {
       id: `faq:${wanted.question}`,
       kind: "open-faq",
       question: wanted.question,
       count: wanted.count,
       utterance:
-        `Readers opened "${wanted.question}" ${wanted.count} times — more than any other question. ` +
+        `Readers opened "${wanted.question}" ${times} — more than any other question. ` +
         `Have it open when the page loads.`,
     }
   }
 
-  const rows = summarise(readings).filter((row) => row.reached && row.seconds > 0)
+  const rows = summarise(readings, order).filter((row) => row.reached && row.seconds > 0)
   const total = rows.reduce((sum, row) => sum + row.seconds, 0)
 
   if (rows.length < ENOUGH.sections || total < ENOUGH.seconds) return undefined
@@ -116,9 +128,13 @@ export const derive = (readings, { skip = [] } = {}) => {
   /** Attention is time plus deliberate returns. A nav click is worth five seconds. */
   const weighted = rows.map((row) => ({ ...row, weight: row.seconds + row.clicks * 5 }))
   const longest = weighted.reduce((best, row) => (row.weight > best.weight ? row : best))
-  const midpoint = Math.floor(SECTION_ORDER.length / 2)
+  const midpoint = Math.floor(order.length / 2)
 
-  if (longest.index <= midpoint || longest.section === "top") return undefined
+  /**
+   * The opening is exempt. It is read first by everyone, so it always wins on
+   * time, and "move the top section to the top" is not a suggestion.
+   */
+  if (longest.index <= midpoint || longest.section === order[0]) return undefined
   if (skip.includes(`move:${longest.section}`)) return undefined
 
   const share = Math.round((longest.seconds / total) * 100)
@@ -130,13 +146,13 @@ export const derive = (readings, { skip = [] } = {}) => {
     kind: "move-section",
     section: longest.section,
     label: longest.label,
-    fromIndex: longest.index,
-    toIndex: 2,
+    fromPosition: longest.index,
+    toPosition: 1,
     share,
     clicks: longest.clicks,
     seconds: longest.seconds,
     utterance:
       `Readers spend ${share}% of their time on ${longest.label}${clicked}. ` +
-      `It is section ${longest.index + 1} of ${SECTION_ORDER.length} — move it nearer the top.`,
+      `It is section ${longest.index + 1} of ${order.length} — move it nearer the top.`,
   }
 }
