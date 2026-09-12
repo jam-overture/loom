@@ -545,6 +545,20 @@
           ]
         },
         {
+          "module": "grammar",
+          "title": "Grammar",
+          "summary": "The grammar of Loom's identifiers, as plain patterns and nothing else.",
+          "symbols": [
+            {
+              "name": "NAMESPACED_ID_PATTERN",
+              "kind": "value",
+              "signature": "const NAMESPACED_ID_PATTERN: RegExp",
+              "truncated": false,
+              "summary": "The grammar of every name a tree uses to reach something a deployment registered: a primitive, a data source, a submission endpoint. Dot-namespaced kebab-case — `stack`, `commerce.product-card`, `contact.enquiry`."
+            }
+          ]
+        },
+        {
           "module": "ids",
           "title": "Ids",
           "summary": "Identity scheme.",
@@ -1081,13 +1095,6 @@
           "title": "Primitive names",
           "summary": "The names a tree uses to reach what a deployment registered.",
           "symbols": [
-            {
-              "name": "NAMESPACED_ID_PATTERN",
-              "kind": "value",
-              "signature": "const NAMESPACED_ID_PATTERN: RegExp",
-              "truncated": false,
-              "summary": "The grammar of every name a tree uses to reach something a deployment registered: a primitive, a data source, a submission endpoint. Dot-namespaced kebab-case — `stack`, `commerce.product-card`, `contact.enquiry`."
-            },
             {
               "name": "primitiveTypeSchema",
               "kind": "schema",
@@ -3924,13 +3931,6 @@
               "summary": ""
             },
             {
-              "name": "DISCLOSED_ATTRIBUTE",
-              "kind": "value",
-              "signature": "const DISCLOSED_ATTRIBUTE = \"data-loom-disclosed\"",
-              "truncated": false,
-              "summary": "The attribute a disclosure control stamps on its own button: `\"true\"` when the region it names is open, `\"false\"` when it is closed."
-            },
-            {
               "name": "ADJUST_PROPERTY",
               "kind": "value",
               "signature": "const ADJUST_PROPERTY = \"--loom-adjust\"",
@@ -4104,6 +4104,20 @@
               "signature": "const describeRenderDiagnostic: (diagnostic: RenderDiagnostic) => string",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "render/disclosed",
+          "title": "Disclosed",
+          "summary": "The disclose contract's one name, in a module with nothing else in it.",
+          "symbols": [
+            {
+              "name": "DISCLOSED_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const DISCLOSED_ATTRIBUTE = \"data-loom-disclosed\"",
+              "truncated": false,
+              "summary": "The attribute a disclosure control stamps on its own button: `\"true\"` when the region it names is open, `\"false\"` when it is closed."
             }
           ]
         },
@@ -4332,7 +4346,7 @@
             {
               "name": "RenderOptions",
               "kind": "type",
-              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    readonly slots?: SlotContent;\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
+              "signature": "type RenderOptions = {\n    readonly resolver: PrimitiveResolver;\n    /**\n     * Absent means props are not checked against declared schemas. A registry\n     * built by §4's SDK satisfies both this and `resolver`, so wiring the same\n     * object into both is the ordinary case.\n     */\n    readonly validator?: PropsValidator;\n    /**\n     * Absent means the tree's theme is not resolved and nothing is mounted, and\n     * a tree that names one says so in a diagnostic. Supplying a registry is what\n     * bounds the palettes, font packs and style presets a proposal may name.\n     */\n    readonly themes?: ThemeRegistry;\n    /**\n     * Absent means the tree's bindings are not answered, and a tree that declares\n     * one says so in a diagnostic. Resolution is async and rendering is not, so it\n     * happens before the walk — `renderRequest` does it, and a caller driving\n     * `renderLoomTree` itself resolves with `resolveTreeData` first.\n     */\n    readonly data?: DataResolution;\n    /**\n     * Absent means the tree's submissions are not answered, and a tree that names\n     * an endpoint says so in a diagnostic. Resolution may do IO — minting a token\n     * usually does — so it happens before the walk, the same way data does;\n     * `renderRequest` does it, and a caller driving `renderLoomTree` itself\n     * resolves with `resolveTreeSubmissions` first.\n     */\n    readonly submissions?: SubmissionResolution;\n    /**\n     * The origins this deployment is willing to frame. Absent means every\n     * framable prop is refused, and each one says so in a diagnostic — the seam\n     * fails closed, because the registry *is* the allowlist and a deployment that\n     * has not written one has not agreed to run anybody's script inside its\n     * pages.\n     *\n     * Unlike `data` and `submissions` there is nothing to resolve first: an\n     * allowlist is static, so the check happens in the walk.\n     */\n    readonly origins?: FrameOriginRegistry;\n    /**\n     * The host's answer for the strings primitives declared — a dictionary, in the\n     * language this deployment serves. Absent means the declared strings render as\n     * their authors wrote them, which is what an untranslated deployment wants and\n     * needs no wiring: the renderer reads declarations off `resolver` when that\n     * resolver is a registry. `textResolverFor` builds one of these from a\n     * registry and a dictionary.\n     *\n     * A key this does not answer keeps its declared string, so a partial\n     * dictionary is a partial translation rather than a missing accessible name.\n     * There is deliberately no wiring that suppresses a declared string: a control\n     * with no accessible name is the failure the seam exists to prevent, and it\n     * should not be reachable by leaving something out.\n     */\n    readonly text?: TextResolver;\n    /** Off by default: decoration is opt-in per request, never ambient. */\n    readonly editMode?: boolean;\n    /**\n     * Stamp each element's identity on the markup without anything else edit mode\n     * means, so a published page can say which node a reader saw or clicked.\n     *\n     * Off by default, and the markup is byte-identical when it is off. It writes\n     * exactly the attributes edit mode writes — node id and type on every\n     * decorated element, the tree id and revision on the root — because those are\n     * the addresses an event about a reader has to carry.\n     */\n    readonly addressed?: boolean;\n    readonly slots?: SlotContent;\n    readonly themeValues?: \"variables\" | \"literals\";\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4360,7 +4374,7 @@
             {
               "name": "RenderRequest",
               "kind": "type",
-              "signature": "type RenderRequest = {\n    readonly treeId: TreeId;\n    /** Decoration is a property of the request, so one process can serve both. */\n    readonly editMode: boolean;\n    /** Opaque host context — audience, locale, flags — passed through to the source. */\n    readonly context?: JsonObject;\n};",
+              "signature": "type RenderRequest = {\n    readonly treeId: TreeId;\n    /** Decoration is a property of the request, so one process can serve both. */\n    readonly editMode: boolean;\n    /**\n     * Identity on a published page's markup, so reader signals can name the node\n     * they are about. Off when absent.\n     */\n    readonly addressed?: boolean;\n    /** Opaque host context — audience, locale, flags — passed through to the source. */\n    readonly context?: JsonObject;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6295,6 +6309,237 @@
               "signature": "const loomHolds: import(\"drizzle-orm/pg-core\").PgTableWithColumns<{\n    name: \"loom_holds\";\n    schema: undefined;\n    columns: {\n        proposalId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: true;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        treeId: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"tree_id\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        baseRevision: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"base_revision\";\n            tableName: \"loom_holds\";\n            dataType: \"number\";\n            columnType: \"PgInteger\";\n            data: number;\n            driverParam: string | number;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        intent: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"intent\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        proposal: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"proposal\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        disposition: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"disposition\";\n            tableName: \"loom_holds\";\n            dataType: \"json\";\n            columnType: \"PgJsonb\";\n            data: unknown;\n            driverParam: unknown;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: undefined;\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n        heldAt: import(\"drizzle-orm/pg-core\").PgColumn<{\n            name: \"held_at\";\n            tableName: \"loom_holds\";\n            dataType: \"string\";\n            columnType: \"PgText\";\n            data: string;\n            driverParam: string;\n            notNull: true;\n            hasDefault: false;\n            isPrimaryKey: false;\n            isAutoincrement: false;\n            hasRuntimeDefault: false;\n            enumValues: [string, ...string[]];\n            baseColumn: never;\n            identity: undefined;\n            generated: undefined;\n        }, {}, {}>;\n    };\n    dialect: \"pg\";\n}>",
               "truncated": false,
               "summary": "The custody of what the Gate held back."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/signals",
+      "slug": "signals",
+      "types": "./dist/signals/index.d.ts",
+      "groups": [
+        {
+          "module": "signals/broadcast",
+          "title": "Broadcast",
+          "summary": "Broadcasting reader signals from a rendered Loom page.",
+          "symbols": [
+            {
+              "name": "READER_SIGNALS_EVENT",
+              "kind": "value",
+              "signature": "const READER_SIGNALS_EVENT = \"loom:signals\"",
+              "truncated": false,
+              "summary": "The DOM event a batch is dispatched as, on the root element. It bubbles."
+            },
+            {
+              "name": "VisibilityObserver",
+              "kind": "type",
+              "signature": "type VisibilityObserver = {\n    readonly observe: (element: Element) => void;\n    readonly disconnect: () => void;\n};",
+              "truncated": false,
+              "summary": "Something that reports elements coming into and out of view. The browser's `IntersectionObserver` unless a host passes its own."
+            },
+            {
+              "name": "VisibilityEntry",
+              "kind": "type",
+              "signature": "type VisibilityEntry = {\n    readonly target: Element;\n    readonly visible: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ObserveVisibility",
+              "kind": "type",
+              "signature": "type ObserveVisibility = (onChange: (entries: readonly VisibilityEntry[]) => void) => VisibilityObserver;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalTypes",
+              "kind": "type",
+              "signature": "type ReaderSignalTypes = readonly string[] | {\n    readonly [Kind in ReaderSignalKind]?: readonly string[];\n};",
+              "truncated": false,
+              "summary": "The primitive types to report on: one list for every kind, or a list per kind."
+            },
+            {
+              "name": "ReaderSignalOptions",
+              "kind": "type",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalBroadcast",
+              "kind": "type",
+              "signature": "type ReaderSignalBroadcast = {\n    /** Deliver whatever has been gathered, now. */\n    readonly flush: () => void;\n    /** Deliver what is left and stop observing. Safe to call twice. */\n    readonly stop: () => void;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalBroadcastError",
+              "kind": "type",
+              "signature": "type ReaderSignalBroadcastError = {\n    /** The root carries no tree id or revision — the page was not rendered with `addressed: true`. */\n    readonly code: \"unaddressed\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "broadcastReaderSignals",
+              "kind": "function",
+              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "truncated": false,
+              "summary": "Start broadcasting reader signals from the page under `root`."
+            }
+          ]
+        },
+        {
+          "module": "signals/kinds",
+          "title": "Kinds",
+          "summary": "The four kinds of reader signal, with nothing else in the module.",
+          "symbols": [
+            {
+              "name": "READER_SIGNAL_KINDS",
+              "kind": "value",
+              "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\"]",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "signals/signal",
+          "title": "Signal",
+          "summary": "What a published page may say about how it is being read.",
+          "symbols": [
+            {
+              "name": "readerSignalKindSchema",
+              "kind": "schema",
+              "signature": "const readerSignalKindSchema: z.ZodEnum<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalKind",
+              "kind": "type",
+              "signature": "type ReaderSignalKind = z.infer<typeof readerSignalKindSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readerSignalSchema",
+              "kind": "schema",
+              "signature": "const readerSignalSchema: z.ZodDiscriminatedUnion<…>",
+              "truncated": false,
+              "summary": "The four kinds."
+            },
+            {
+              "name": "ReaderSignal",
+              "kind": "type",
+              "signature": "type ReaderSignal = z.infer<typeof readerSignalSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readerSignalBatchSchema",
+              "kind": "schema",
+              "signature": "const readerSignalBatchSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": "One delivery: the signals a page gathered since the last one, all about the same tree at the same revision."
+            },
+            {
+              "name": "ReaderSignalBatch",
+              "kind": "type",
+              "signature": "type ReaderSignalBatch = z.infer<typeof readerSignalBatchSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalParseError",
+              "kind": "type",
+              "signature": "type ReaderSignalParseError = {\n    readonly code: \"invalid-batch\";\n    readonly issues: readonly {\n        readonly path: string;\n        readonly message: string;\n    }[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "parseReaderSignalBatch",
+              "kind": "function",
+              "signature": "const parseReaderSignalBatch: (input: unknown) => Result<ReaderSignalBatch, ReaderSignalParseError>",
+              "truncated": false,
+              "summary": "Read a batch that arrived from somewhere untrusted — a request body, a queue."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/signals/broadcast",
+      "slug": "signals-broadcast",
+      "types": "./dist/signals/broadcast.d.ts",
+      "groups": [
+        {
+          "module": "signals/broadcast",
+          "title": "Broadcast",
+          "summary": "Broadcasting reader signals from a rendered Loom page.",
+          "symbols": [
+            {
+              "name": "READER_SIGNALS_EVENT",
+              "kind": "value",
+              "signature": "const READER_SIGNALS_EVENT = \"loom:signals\"",
+              "truncated": false,
+              "summary": "The DOM event a batch is dispatched as, on the root element. It bubbles."
+            },
+            {
+              "name": "VisibilityObserver",
+              "kind": "type",
+              "signature": "type VisibilityObserver = {\n    readonly observe: (element: Element) => void;\n    readonly disconnect: () => void;\n};",
+              "truncated": false,
+              "summary": "Something that reports elements coming into and out of view. The browser's `IntersectionObserver` unless a host passes its own."
+            },
+            {
+              "name": "VisibilityEntry",
+              "kind": "type",
+              "signature": "type VisibilityEntry = {\n    readonly target: Element;\n    readonly visible: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ObserveVisibility",
+              "kind": "type",
+              "signature": "type ObserveVisibility = (onChange: (entries: readonly VisibilityEntry[]) => void) => VisibilityObserver;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalTypes",
+              "kind": "type",
+              "signature": "type ReaderSignalTypes = readonly string[] | {\n    readonly [Kind in ReaderSignalKind]?: readonly string[];\n};",
+              "truncated": false,
+              "summary": "The primitive types to report on: one list for every kind, or a list per kind."
+            },
+            {
+              "name": "ReaderSignalOptions",
+              "kind": "type",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalBroadcast",
+              "kind": "type",
+              "signature": "type ReaderSignalBroadcast = {\n    /** Deliver whatever has been gathered, now. */\n    readonly flush: () => void;\n    /** Deliver what is left and stop observing. Safe to call twice. */\n    readonly stop: () => void;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalBroadcastError",
+              "kind": "type",
+              "signature": "type ReaderSignalBroadcastError = {\n    /** The root carries no tree id or revision — the page was not rendered with `addressed: true`. */\n    readonly code: \"unaddressed\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "broadcastReaderSignals",
+              "kind": "function",
+              "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
+              "truncated": false,
+              "summary": "Start broadcasting reader signals from the page under `root`."
             }
           ]
         }
