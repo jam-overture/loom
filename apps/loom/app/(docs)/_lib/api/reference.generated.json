@@ -6346,9 +6346,16 @@
               "summary": ""
             },
             {
+              "name": "ReaderSignalTypeFilter",
+              "kind": "type",
+              "signature": "type ReaderSignalTypeFilter = Partial<Record<ReaderSignalKind, readonly string[]>>;",
+              "truncated": false,
+              "summary": "Which primitive types are worth which kind of signal."
+            },
+            {
               "name": "ReaderSignalOptions",
               "kind": "type",
-              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /** Which primitive types to broadcast about. Every addressed type when absent. */\n    readonly types?: readonly string[];\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A plain list is that list for every kind. Keyed by kind, it is that list for\n     * each kind named and no restriction on the rest.\n     */\n    readonly types?: readonly string[] | ReaderSignalTypeFilter;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
               "truncated": false,
               "summary": ""
             },

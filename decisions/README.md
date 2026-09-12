@@ -220,3 +220,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0134 | *No record on this branch* | — | — |
 | 0135 | *No record on this branch* | — | — |
 | [0136](0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md) | A published page broadcasts reader signals when its host asks | Accepted | §3, §6 |
+| 0137 | *No record on this branch* | — | — |
+| [0138](0138-a-signal-filter-is-two-axes-and-is-asked-where-a-signal-leaves.md) | A signal filter is two axes, and is asked where a signal leaves | Accepted | §3, §6 |

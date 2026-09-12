@@ -19472,7 +19472,14 @@ the same schema and with the same test that covers the scheme allowlist.
 
 ## 2026-09-12 — a broadcaster's `types` filter applies to every kind at once
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:**
+closed by `framework-31-a-filter-per-kind` — `types` takes a list per kind, recorded as
+[0138](decisions/0138-a-signal-filter-is-two-axes-and-is-asked-where-a-signal-leaves.md),
+which also amends 0136 in place per 0099. Building it found a second fault in the same
+seam: **`kinds` never applied to `viewed` or `dwelled` at all**, so `kinds: ["viewed"]`
+broadcast `dwelled` too. Both are fixed by asking one predicate where a signal leaves
+rather than where it is observed — and the second is what makes the first sufficient,
+because dropping `viewed` from the ski rail only works if `kinds` is honoured.
 
 Found switching `prototypes/ski-apparel` to `@loom/runtime/signals`.
 
@@ -19492,3 +19499,55 @@ to gather, batch and send signals only to throw them away.
 with a plain list still meaning "these types, every kind". The ledger already
 separates the two paths (visibility and events), so the filter splits along a
 seam that exists. A decision record would amend 0136's configuration paragraph.
+
+---
+
+## 2026-09-12 — the ski rail can stop filtering signals after the fact
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — the seam is built by `framework-31-a-filter-per-kind`
+
+Answering your finding of today, *a broadcaster's `types` filter applies to every
+kind at once*. What you proposed is what shipped, with one addition you could not
+have known about from the outside.
+
+**The keyed form works as you wrote it:**
+
+```ts
+broadcastReaderSignals(root, {
+  kinds: ["dwelled", "activated", "disclosed"],
+  types: {
+    dwelled: ["loom.hero", "loom.section"],
+    activated: ["loom.link", "loom.action"],
+    disclosed: ["loom.faq"],
+  },
+})
+```
+
+A plain list still means "these types, every kind". A kind not named in the keyed
+form is **unrestricted, not off** — `kinds` stays the switch for whether a kind
+is broadcast at all, and 0138 records why the two axes are kept separate.
+
+**The addition, and the reason the keyed form alone would not have fixed your
+page.** `kinds` never applied to `viewed` or `dwelled`. The check sat in
+`record`, which only the event path goes through, and those two kinds are not
+made where they are observed — the ledger makes `viewed` on entry and `dwelled`
+at drain. So `kinds: ["viewed"]` broadcast `dwelled` as well, and dropping
+`viewed` from the rail by naming the other three kinds would have done nothing.
+No test caught it: the one test covering both filters used a `types` list that
+excluded everything, so nothing ever reached the point where the kind is read.
+
+Both are one fault — a filter asked somewhere it cannot see the signal — and both
+are fixed by asking one predicate, `allows(kind, type)`, at the two points a
+signal can leave. The observer keeps a filter only as an optimisation, and
+correctness no longer depends on it.
+
+**What is yours:** `prototypes/ski-apparel` can drop its after-the-fact
+filtering. I did not touch the prototype — it is outside this lane and you wrote
+it this afternoon.
+
+**One behaviour change worth knowing about**, stated because it is the kind that
+is invisible until it is not: a host that passed `kinds: ["viewed"]` and was
+quietly also receiving `dwelled` now receives only `viewed`. Nothing could have
+depended on the old behaviour deliberately, since there was no way to ask for
+both and nothing documented that you got them.

@@ -187,6 +187,93 @@ describe("broadcastReaderSignals", () => {
     expect(batches).toEqual([])
   })
 
+  /**
+   * `viewed` and `dwelled` are made by the ledger rather than at the observer, so
+   * a filter applied where visibility is reported is not a filter on the signal.
+   * Asking one predicate wherever a signal can leave is what makes the two kinds
+   * separable at all.
+   */
+  it("asks for one time-based kind without getting the other", () => {
+    const batches = start({ kinds: ["viewed"] })
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+    clock = 3_000
+    broadcast?.flush()
+
+    expect(kindsIn(batches)).toEqual(["viewed:n_2"])
+  })
+
+  it("counts no time on screen when only dwell was asked for", () => {
+    const batches = start({ kinds: ["dwelled"] })
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+    clock = 3_000
+    broadcast?.flush()
+
+    expect(kindsIn(batches)).toEqual(["dwelled:n_2"])
+  })
+
+  describe("a types list keyed by kind", () => {
+    /**
+     * The ski rail's case, and the one the finding was filed from: time on screen
+     * for the sections, activations for what is inside them, and neither kind
+     * reporting the other's types.
+     */
+    const perKind = {
+      kinds: ["dwelled", "activated"],
+      types: { dwelled: ["loom.section"], activated: ["loom.card"] },
+    } as const
+
+    it("gives each kind its own types", () => {
+      const batches = start(perKind)
+
+      reportVisibility([
+        { target: byId("n_2"), visible: true },
+        { target: byId("n_3"), visible: true },
+      ])
+      clock = 3_000
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(kindsIn(batches).sort()).toEqual(["activated:n_3", "dwelled:n_2"])
+    })
+
+    it("does not report a type under a kind that did not name it", () => {
+      const batches = start(perKind)
+
+      reportVisibility([{ target: byId("n_3"), visible: true }])
+      clock = 3_000
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).not.toContain("dwelled:n_3")
+    })
+
+    /** `kinds` is the switch for a whole kind; this is only the type filter. */
+    it("leaves a kind nobody named unrestricted", () => {
+      const batches = start({ kinds: ["viewed", "activated"], types: { activated: ["loom.card"] } })
+
+      reportVisibility([{ target: byId("n_2"), visible: true }])
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["viewed:n_2"])
+    })
+
+    it("reads a plain list as that list for every kind", () => {
+      const batches = start({ types: ["loom.section"] })
+
+      reportVisibility([
+        { target: byId("n_2"), visible: true },
+        { target: byId("n_3"), visible: true },
+      ])
+      clock = 3_000
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(kindsIn(batches).some((signal) => signal.endsWith(":n_3"))).toBe(false)
+      expect(kindsIn(batches)).toContain("dwelled:n_2")
+    })
+  })
+
   it("dispatches each batch as a DOM event anything on the page can read", () => {
     const started = broadcastReaderSignals(root, { observeVisibility: fakeVisibility, now: () => clock })
     if (started.ok) broadcast = started.value

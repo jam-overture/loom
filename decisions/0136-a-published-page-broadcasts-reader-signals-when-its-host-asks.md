@@ -4,6 +4,13 @@
 **Date:** 2026-09-12
 **Section:** §3 — Rendering, §6 — Telemetry
 
+**Amended 2026-09-12 by [0138](0138-a-signal-filter-is-two-axes-and-is-asked-where-a-signal-leaves.md)**
+(amended in place per [0099](0099-a-record-is-amended-when-only-the-count-moved.md)).
+`types` may now be keyed by kind as well as given as one list for all four.
+**Nothing here is reversed** — configuration is still the host's and still an
+argument to the call, never a prop; only the shape of one argument grew. The
+configuration paragraph below is corrected.
+
 ## Context
 
 Loom is an adaptive UI runtime. The pipeline that lets a page change from how it
@@ -66,6 +73,10 @@ primitive types are broadcast, how often, and where batches go are arguments to
 the call. None of it is a prop, because a prop is something a model may propose
 and the Gate weighs as a small reversible change — and "start measuring readers"
 is not a change to a page.
+
+Which types are broadcast is given either as one list covering every kind or as a
+list per kind (0138); `kinds` remains the separate switch for whether a kind is
+broadcast at all.
 
 **A batch goes out two ways.** It is dispatched as a bubbling `loom:signals` DOM
 event on the root, so anything on the page can read it without being wired to

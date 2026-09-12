@@ -71,13 +71,34 @@ export type VisibilityEntry = {
 
 export type ObserveVisibility = (onChange: (entries: readonly VisibilityEntry[]) => void) => VisibilityObserver
 
+/**
+ * Which primitive types are worth which kind of signal.
+ *
+ * A page rarely wants the same list for all four. A rail wants time on screen for
+ * its sections, activations for the links and buttons inside them, and
+ * disclosures for its questions; one list for every kind makes it name all of
+ * those types for all of those kinds and then throw away what it did not want —
+ * paying to gather, batch and send signals in order to discard them.
+ *
+ * **A kind not named here is unrestricted, not off.** `kinds` is the switch for
+ * whether a kind is broadcast at all, and this is the filter for which types it
+ * covers; keeping the two axes separate means neither has to be read to
+ * understand the other.
+ */
+export type ReaderSignalTypeFilter = Partial<Record<ReaderSignalKind, readonly string[]>>
+
 export type ReaderSignalOptions = {
   /** Called with every batch. A throw or rejection here is contained and never reaches the page. */
   readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>
   /** Which kinds to broadcast. Every kind when absent. */
   readonly kinds?: readonly ReaderSignalKind[]
-  /** Which primitive types to broadcast about. Every addressed type when absent. */
-  readonly types?: readonly string[]
+  /**
+   * Which primitive types to broadcast about. Every addressed type when absent.
+   *
+   * A plain list is that list for every kind. Keyed by kind, it is that list for
+   * each kind named and no restriction on the rest.
+   */
+  readonly types?: readonly string[] | ReaderSignalTypeFilter
   /** How often a batch is delivered. Five seconds when absent. */
   readonly flushEveryMs?: number
   /**
@@ -126,6 +147,33 @@ const intersectionVisibility: ObserveVisibility = (onChange) => {
   )
 
   return { observe: (element) => observer.observe(element), disconnect: () => observer.disconnect() }
+}
+
+/**
+ * Both spellings of `types`, as one lookup.
+ *
+ * A plain list is the keyed form with every kind given the same list, so the
+ * rest of the module asks one question and never learns which spelling a host
+ * used. `undefined` for a kind means unrestricted.
+ */
+const typesByKind = (
+  types: ReaderSignalOptions["types"]
+): Partial<Record<ReaderSignalKind, ReadonlySet<string>>> | undefined => {
+  if (types === undefined) return undefined
+
+  if (Array.isArray(types)) {
+    const every = new Set(types as readonly string[])
+
+    return Object.fromEntries(READER_SIGNAL_KINDS.map((kind) => [kind, every]))
+  }
+
+  return Object.fromEntries(
+    READER_SIGNAL_KINDS.flatMap((kind) => {
+      const allowed = (types as ReaderSignalTypeFilter)[kind]
+
+      return allowed === undefined ? [] : [[kind, new Set(allowed)] as const]
+    })
+  )
 }
 
 /** The identity an element carries, or `undefined` when it carries none worth trusting. */
@@ -188,10 +236,25 @@ export const broadcastReaderSignals = (
 
   const now = options.now ?? Date.now
   const kinds = new Set<ReaderSignalKind>(options.kinds ?? READER_SIGNAL_KINDS)
-  const types = options.types === undefined ? undefined : new Set(options.types)
+  const types = typesByKind(options.types)
   const document = root.ownerDocument
 
-  const wanted = (address: SignalAddress): boolean => types === undefined || types.has(address.type)
+  /**
+   * The one rule about what may be broadcast, asked wherever a signal could
+   * leave. Both axes are here rather than split across the two paths, because
+   * `viewed` and `dwelled` are not produced where they are observed — the ledger
+   * makes them — so a check at the observer is not a check on the signal.
+   */
+  const allows = (kind: ReaderSignalKind, type: string): boolean => {
+    if (!kinds.has(kind)) return false
+    const allowed = types?.[kind]
+
+    return allowed === undefined || allowed.has(type)
+  }
+
+  /** Worth watching if any kind that reads visibility would report on this type. */
+  const watchable = (address: SignalAddress): boolean =>
+    allows("viewed", address.type) || allows("dwelled", address.type)
 
   let ledger = emptyLedger(document.visibilityState === "hidden")
   let stopped = false
@@ -200,20 +263,22 @@ export const broadcastReaderSignals = (
     (element: Element): void => {
       const target = nearestAddressed(root, element)
       const address = target === undefined ? undefined : addressOf(target)
-      if (!kinds.has(kind) || address === undefined || !wanted(address)) return
+      if (address === undefined || !allows(kind, address.type)) return
       ledger = noted(ledger, signal(address))
     }
 
   const flush = (): void => {
     const drained = drain(ledger, now())
     ledger = drained.ledger
-    if (drained.signals.length === 0) return
+
+    const signals = drained.signals.filter((signal) => allows(signal.kind, signal.type))
+    if (signals.length === 0) return
 
     const batch: ReaderSignalBatch = {
       treeId: page.value.treeId,
       revision: page.value.revision,
       sentAt: now(),
-      signals: [...drained.signals],
+      signals,
     }
 
     root.dispatchEvent(new CustomEvent(READER_SIGNALS_EVENT, { detail: batch, bubbles: true }))
@@ -236,7 +301,7 @@ export const broadcastReaderSignals = (
     const candidates = [root, ...Array.from(root.querySelectorAll(`[${LOOM_NODE_ATTRIBUTE}]`))]
     for (const element of candidates) {
       const address = addressOf(element)
-      if (address !== undefined && wanted(address)) visibility.observe(element)
+      if (address !== undefined && watchable(address)) visibility.observe(element)
     }
   }
 
