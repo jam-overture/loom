@@ -19432,3 +19432,63 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-12 — a link cannot point at a heading on the page it is already on
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:** open
+
+`linkUrlSchema` accepts an absolute URL or a path beginning with `/`, and
+rejects everything else. A bare fragment is everything else:
+
+```
+{"code":"invalid-props","type":"loom.link",
+ "issues":[{"path":"href","message":"must be an absolute URL, or a path beginning with / on this site"}]}
+```
+
+Found building `prototypes/ski-apparel`, a single long page with a nav bar
+across the top. `href: "#helmets"` is refused, so the page uses `href:
+"/#helmets"` instead — which works here only because the page *is* the site
+root. On any page that is not `/`, that link leaves the page the reader is on
+and jumps to the front door's anchor instead, which is a worse failure than a
+refusal because nothing reports it.
+
+**Why the schema is right to be suspicious.** It exists so a proposal cannot
+point a visitor at `javascript:` or an attacker's origin
+([0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)),
+and a fragment is not a scheme it can check. But a same-page anchor reaches no
+origin at all — it is the one href that provably cannot leave the page — so the
+argument for the allowlist does not reach it.
+
+Every primitive taking an `href` has this: `loom.link`, `loom.action`,
+`loom.card`, `loom.feature`, `loom.logo`. Six sections and a nav bar is an
+ordinary shape for a marketing page, and `loom.section` already takes an
+`anchor` prop to be linked *to* — so the library can currently mark a
+destination it has no way to link at.
+
+**What would close it:** allow `#fragment` where the fragment is a valid id, in
+the same schema and with the same test that covers the scheme allowlist.
+
+## 2026-09-12 — a broadcaster's `types` filter applies to every kind at once
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** open
+
+Found switching `prototypes/ski-apparel` to `@loom/runtime/signals`.
+
+`broadcastReaderSignals` takes one `types` list, and it filters all four kinds by
+it. A host rarely wants that. The ski rail wants **time on screen** for sections
+(`loom.hero`, `loom.section`), **activations** for the links and buttons inside
+them (`loom.link`, `loom.action`), and **disclosures** for questions (`loom.faq`).
+With one list it has to name all five types for all four kinds, so every batch
+also carries `viewed` and `dwelled` for every link and button on screen — about
+ten `dwelled` signals a second on this page, most of which nobody asked for.
+
+The alternative a host has today is filtering after the fact, which means paying
+to gather, batch and send signals only to throw them away.
+
+**What would close it:** let `types` be keyed by kind —
+`types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] }` —
+with a plain list still meaning "these types, every kind". The ledger already
+separates the two paths (visibility and events), so the filter splits along a
+seam that exists. A decision record would amend 0136's configuration paragraph.
