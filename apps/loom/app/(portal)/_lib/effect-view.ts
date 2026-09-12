@@ -28,10 +28,26 @@ import type { OperationEffect, ProposalEffect, ValueChange } from "./proposal-ef
  * one click away, nothing is ever removed** — and the last clause is the one
  * this file is arranged around.
  *
- * Names stay on the surface. `loom.card` and `n_gone` are what tell one row from
- * another, and a sentence that said "a piece of the page" four times would be
- * friendlier and useless. They are the subject of a `PlainLine`, which is the
- * shape a test can assert whole.
+ * Names stay on the surface. `n_gone` is what tells one row from another, and a
+ * sentence that said "a piece of the page" four times would be friendlier and
+ * useless. They are the subject of a `PlainLine`, which is the shape a test can
+ * assert whole.
+ *
+ * ## What a part is called, 11 September
+ *
+ * Those names were the *runtime's* — `loom.card`, `loom.band`, `loom.heading` —
+ * on the one screen in the portal that asks somebody to decide something.
+ * `/portal/history`, which only reports what already happened, had been saying
+ * *the card “Autumn arrivals”* since 10 September. Two screens of one portal
+ * named the same part two different ways and the worse of the two was on the
+ * screen with the buttons.
+ *
+ * So the subject of every sentence here is a `PartName` now, and the sentences
+ * around it changed shape to take one: a name arrives with its own article
+ * attached, so *"Adds a "* is *"Adds "*, and a possessive that used to sit
+ * against the type — *"the loom.heading's title"* — would now sit against an id.
+ * `"Changes the title and width of the heading “Prices” n_h."` puts the name
+ * where a name belongs, at the end of the clause and not inside a contraction.
  */
 
 const plural = (count: number, noun: string): string =>
@@ -101,12 +117,15 @@ const clearedKeys = (changes: readonly ValueChange[]): readonly string[] =>
  * building a list, which is what stops the review queue and History disagreeing
  * about whether there is an "and" before the last item.
  */
-const settingSentence = (subject: string, changes: readonly ValueChange[]): PlainLine => {
+const settingSentence = (
+  subject: PlainLine["subject"],
+  changes: readonly ValueChange[]
+): PlainLine => {
   const changed = changedKeys(changes)
   const cleared = clearedKeys(changes)
 
   if (changed.length === 0 && cleared.length === 0) {
-    return { before: "Changes nothing about the ", subject, after: " — it lists no settings." }
+    return { before: "Changes nothing about ", subject, after: " — it lists no settings." }
   }
 
   /**
@@ -115,23 +134,31 @@ const settingSentence = (subject: string, changes: readonly ValueChange[]): Plai
    * scanning six of these should be able to tell them apart at the first word.
    */
   if (changed.length === 0) {
-    return { before: "Takes away the ", subject, after: `'s ${namedList(cleared)}.` }
+    return { before: `Takes away the ${namedList(cleared)} of `, subject, after: "." }
   }
 
+  /**
+   * The settings come before the part, which is the one sentence here that had
+   * to be turned around rather than re-worded.
+   *
+   * It used to read *"Changes the loom.heading's title"* — a possessive hung on
+   * the subject. A named part ends in its id, so the same shape would produce
+   * *"the heading “Prices” n_h's title"*, which reads as though the identifier
+   * owns the setting. Nothing is lost by naming the settings first and the part
+   * afterwards, and the subject then ends the clause, where a name can be
+   * quoted without tripping over an apostrophe.
+   */
   return {
-    before: "Changes the ",
+    before: `Changes the ${namedList(changed)} of `,
     subject,
-    after:
-      cleared.length === 0
-        ? `'s ${namedList(changed)}.`
-        : `'s ${namedList(changed)}, and takes away its ${namedList(cleared)}.`,
+    after: cleared.length === 0 ? "." : `, and takes away its ${namedList(cleared)}.`,
   }
 }
 
 const insertSentence = (effect: OperationEffect): PlainLine => {
   if (effect.into === null) {
     return {
-      before: "Would add a ",
+      before: "Would add ",
       subject: effect.subject,
       after: ", but the part it would go inside isn't on this page any more.",
     }
@@ -152,14 +179,14 @@ const insertSentence = (effect: OperationEffect): PlainLine => {
       ? ` It brings ${effect.carries === 2 ? "one more piece" : `${effect.carries - 1} more pieces`} with it.`
       : ""
 
-  return { before: "Adds a ", subject: effect.subject, after: `${where}${brings}` }
+  return { before: "Adds ", subject: effect.subject, after: `${where}${brings}` }
 }
 
 const removeSentence = (effect: OperationEffect): PlainLine =>
   effect.missing
     ? { before: "Would delete ", subject: effect.subject, after: GONE }
     : {
-        before: "Deletes the ",
+        before: "Deletes ",
         subject: effect.subject,
         after:
           effect.carries !== null && effect.carries > 1
@@ -184,7 +211,7 @@ const moveSentence = (effect: OperationEffect): PlainLine => {
    * as a change of address that is not happening.
    */
   return {
-    before: "Moves the ",
+    before: "Moves ",
     subject: effect.subject,
     after:
       effect.from === null
@@ -221,7 +248,7 @@ export type PlainOperation = {
   readonly reading: PlainLine
   /** Set only when the operation cannot happen, or would achieve nothing. */
   readonly standing: PlainWord | null
-  /** Where the part sits, root first, in labels. */
+  /** Where the part sits, root first, each step named as a place. */
   readonly place: readonly string[]
   /** The words arriving or leaving, said in the direction they travel. */
   readonly words: string | null
@@ -229,6 +256,12 @@ export type PlainOperation = {
   readonly changes: readonly ValueChange[]
   /** The delta's own account of this operation, verbatim. Belongs one click down. */
   readonly technical: string
+  /**
+   * The same path as `place`, in the runtime's labels. Belongs one click down
+   * beside `technical`, and exists so that naming the breadcrumb on the surface
+   * takes nothing away from the record under it.
+   */
+  readonly technicalPlace: readonly string[]
 }
 
 export const plainOperationEffect = (effect: OperationEffect): PlainOperation => {
@@ -248,10 +281,17 @@ export const plainOperationEffect = (effect: OperationEffect): PlainOperation =>
   return {
     reading,
     standing: effect.missing ? NOT_ON_PAGE : effect.inert ? NO_CHANGE : null,
-    place: effect.place,
+    place: effect.placeNames,
     words: wordsSentence(effect),
     changes: effect.changes,
-    technical: `${effect.verb} ${effect.subject} — ${effect.detail}`,
+    /**
+     * `label` rather than `subject`: the record says what it has always said.
+     * The subject is a named part now, and composing this from it would put a
+     * reader's sentence in the middle of the delta's account — and, before the
+     * types were widened to stop it, would have printed `[object Object]`.
+     */
+    technical: `${effect.verb} ${effect.label} — ${effect.detail}`,
+    technicalPlace: effect.place,
   }
 }
 

@@ -16,6 +16,9 @@ const SECTION_LABELS = {
   fit: "the questions",
 }
 
+/** The primitives that make up the page's bands, top to bottom. */
+const BANDS = ["loom.hero", "loom.section"]
+
 const walk = function* (node) {
   yield node
   if (node.kind !== "text") for (const child of node.children) yield* walk(child)
@@ -27,12 +30,18 @@ const anchorOf = (href) => (typeof href === "string" ? /^\/?#([\w-]+)$/.exec(hre
 export const legendOf = (tree) => {
   const elements = [...walk(tree.root)].filter((node) => node.kind === "element")
 
+  /**
+   * Every band, not only the ones a link can jump to. A band without an `anchor`
+   * is read as much as any other — the broadcaster reports it by node id either
+   * way — and listing only anchored bands silently dropped "This season" from
+   * the rail. It takes its name from its eyebrow instead.
+   */
   const sections = tree.root.children
-    .filter((child) => child.kind === "element" && typeof child.props.anchor === "string")
+    .filter((child) => child.kind === "element" && BANDS.includes(child.type))
     .map((child) => ({
       nodeId: child.id,
       anchor: child.props.anchor,
-      label: SECTION_LABELS[child.props.anchor] ?? child.props.anchor,
+      label: SECTION_LABELS[child.props.anchor] ?? String(child.props.eyebrow ?? child.type).toLowerCase(),
     }))
 
   const jumps = Object.fromEntries(
@@ -49,5 +58,16 @@ export const legendOf = (tree) => {
   return { revision: tree.revision, sections, jumps, questions }
 }
 
-/** The primitive types the rail has anything to say about — the host's `types` setting. */
-export const RAIL_TYPES = ["loom.hero", "loom.section", "loom.link", "loom.action", "loom.faq"]
+/**
+ * What the rail asks the broadcaster for, per kind — the host's `types` setting.
+ *
+ * Time on screen for the five bands, activations for what jumps between them,
+ * disclosures for the questions. Asking per kind is what keeps a batch to what
+ * the rail shows: one list for all four would also buy dwell for every link.
+ */
+export const RAIL_TYPES = {
+  viewed: BANDS,
+  dwelled: BANDS,
+  activated: ["loom.link", "loom.action"],
+  disclosed: ["loom.faq"],
+}

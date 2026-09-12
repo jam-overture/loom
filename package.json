@@ -46,6 +46,10 @@
       "types": "./dist/signals/index.d.ts",
       "default": "./dist/signals/index.js"
     },
+    "./signals/broadcast": {
+      "types": "./dist/signals/broadcast.d.ts",
+      "default": "./dist/signals/broadcast.js"
+    },
     "./telemetry": {
       "types": "./dist/telemetry/index.d.ts",
       "default": "./dist/telemetry/index.js"

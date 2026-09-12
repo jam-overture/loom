@@ -45,7 +45,12 @@ export const OutlineRowButton = ({
       <span className="text-ink-placeholder" aria-hidden="true">
         {KIND_MARK[row.kind]}
       </span>
-      <span className={`truncate ${row.kind === "element" ? "font-mono" : ""}`}>{row.label}</span>
+      {/*
+        * Monospace was right while this said `loom.card`, because that is a
+        * string you might paste somewhere. `Card` is a word, and setting a word
+        * in the typeface a screen keeps for identifiers says it is one.
+        */}
+      <span className="truncate">{row.label}</span>
       {row.addressing.outcome !== "addressable" && (
         <span className="text-ink-placeholder ml-auto text-2xs" aria-hidden="true">
           ↑

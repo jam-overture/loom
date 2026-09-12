@@ -14,17 +14,16 @@ import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { spotlightsAcross, spotlitChanges } from "@/app/(demo)/_lib/spotlight"
-import { askedLine, isUndo, undoOffer } from "@/app/(demo)/_lib/undo"
+import { isUndo } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
-import { AnswerInView } from "./_components/answer-in-view"
 import { AskPanel } from "./_components/ask-panel"
 import { BackToTheRecord } from "./_components/back-to-the-record"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
 import { PartInQuestionView } from "./_components/part-in-question"
-import { RecordCard } from "./_components/record-card"
+import { TheRecord, type HeldReading } from "./_components/the-record"
 import { WhatHappens } from "./_components/what-happens"
 
 /**
@@ -159,17 +158,6 @@ const DemoPage = async () => {
   )
 
   /**
-   * The one record, if any, that has asked the visitor something and is waiting
-   * for the answer. Newest first, so this is the question in front of them
-   * rather than one they have already dealt with — and never one the page has
-   * moved past, because scrolling a visitor to a question nobody can answer is
-   * worse than leaving them where they are.
-   */
-  const awaiting = records.find(
-    (record) => record.heldProposalId !== undefined && !movedNotes.has(record.recordId)
-  )
-
-  /**
    * Both readings are computed for a hold that can still land, and neither for
    * one the page has moved past.
    *
@@ -243,30 +231,41 @@ const DemoPage = async () => {
     })
   )
 
-  /** Absent rather than `undefined`: the props are optional, not nullable. */
-  const heldProps = (
-    record: (typeof records)[number]
-  ): {
-    readonly effect?: ProposalEffect
-    readonly inQuestion?: React.ReactNode
-    readonly plain?: readonly PlainChange[]
-    readonly moved?: MovedNote
-  } => {
-    const id = record.heldProposalId
-    if (id === undefined) return {}
+  /**
+   * The four readings of a waiting change, gathered by the record they belong
+   * to, which is the key the list renders by.
+   *
+   * A map rather than a function the list calls, because the list is a component
+   * now (`TheRecord`) and this is the whole of what it cannot work out for
+   * itself: three of these need the held proposal, which lives in the store, and
+   * the fourth needs the revision that proposal was judged against.
+   *
+   * Absent rather than `undefined` inside each entry: the card's props are
+   * optional, not nullable.
+   */
+  const heldReadings = new Map<string, HeldReading>(
+    records.flatMap((record) => {
+      const id = record.heldProposalId
+      if (id === undefined) return []
 
-    const effect = effects.get(id)
-    const part = parts.get(id)
-    const plain = plains.get(id)
-    const moved = movedNotes.get(record.recordId)
+      const effect = effects.get(id)
+      const part = parts.get(id)
+      const plain = plains.get(id)
+      const moved = movedNotes.get(record.recordId)
 
-    return {
-      ...(effect === undefined ? {} : { effect }),
-      ...(part === undefined ? {} : { inQuestion: part }),
-      ...(plain === undefined ? {} : { plain }),
-      ...(moved === undefined ? {} : { moved }),
-    }
-  }
+      return [
+        [
+          record.recordId,
+          {
+            ...(effect === undefined ? {} : { effect }),
+            ...(part === undefined ? {} : { inQuestion: part }),
+            ...(plain === undefined ? {} : { plain }),
+            ...(moved === undefined ? {} : { moved }),
+          },
+        ] as const,
+      ]
+    })
+  )
 
   return (
     /* On a wide screen the demo is one viewport: the bar is fixed, and the
@@ -366,91 +365,20 @@ const DemoPage = async () => {
             * The record goes directly under the controls that produced it, so
             * the newest card is the first thing under the button a visitor just
             * pressed rather than the last thing on a rail they have to scroll.
+            *
+            * It is a component rather than a list written here, and that is a
+            * defect's doing: two `records.map` calls ended up inside the one
+            * `<ul>` on 11 September and every card rendered twice, with two
+            * **Apply this change** buttons under one question. `the-record.tsx`
+            * says what that cost and holds the three assertions that would have
+            * caught it.
             */}
-          {records.length > 0 && (
-            <section aria-labelledby="the-record" className="flex flex-col gap-2">
-              <h2 id="the-record" className="text-ink-muted text-2xs tracking-wide uppercase">
-                the record
-              </h2>
-
-              {/*
-                * The sentence that joins the two halves of the screen.
-                *
-                * The dot is the same colour as the ring on the page and as the
-                * badge on the card underneath, and that is the whole teaching:
-                * a visitor is never told "the marks mean X", they are shown one
-                * colour in three places at once and read it in a glance. It
-                * appears only when there is a mark to explain, so it is never a
-                * legend for something that is not on screen.
-                */}
-              {marked.line && (
-                <p className="text-ink-secondary flex items-start gap-2 text-xs">
-                  <span
-                    aria-hidden="true"
-                    className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                      marked.tone === "applied" ? "bg-applied-ink" : "bg-awaiting-ink"
-                    }`}
-                  />
-                  {marked.line}
-                </p>
-              )}
-
-              <ul className="flex flex-col gap-2">
-                {records.map((record) => (
-                  <RecordCard key={record.recordId} record={record} {...heldProps(record)} />
-                ))}
-                {records.map((record) => {
-                  /*
-                   * The words the page is wearing for this card, when there is
-                   * more than one mark on it to be told apart.
-                   *
-                   * `marked.tone` rather than the record's own state, because
-                   * this pill exists to be recognised as *the same object* as
-                   * the chip on the band — same words, same fill, same ink — and
-                   * the chip's colour is a fact about the marks the page drew.
-                   */
-                  const words = marked.words.get(record.recordId)
-
-                  return (
-                    <RecordCard
-                      key={record.recordId}
-                      record={record}
-                      offer={undoOffer(record, records)}
-                      /*
-                       * An undo is quoted by the control that raised it, and
-                       * which control that was is a fact about the card above
-                       * this one: an ordinary change offers *Put it back*, an
-                       * undo offers *Undo this change too*. Read from the
-                       * records here for the same reason `offer` is — a card
-                       * cannot see the ask it undoes.
-                       */
-                      asked={askedLine(record, records)}
-                      {...(words === undefined || marked.tone === undefined
-                        ? {}
-                        : { mark: { label: words, tone: marked.tone } })}
-                      {...heldProps(record)}
-                    />
-                  )
-                })}
-              </ul>
-
-              {/*
-                * The rail's own scroll, and only when the demo has asked the
-                * visitor a question it cannot proceed without.
-                *
-                * The stage scrolls itself (`ChangeSpotlight`); on a wide screen
-                * that is a different scroller, so a marked band arriving in view
-                * says nothing about whether the two buttons deciding its fate
-                * are on screen. Measured at 1440×800 they were not — sixty-nine
-                * pixels under the fold, on the first press of the primary ask.
-                * Stacked, it is further still: the whole panel of secondary
-                * asks sits between the button and the question it raised.
-                */}
-              {awaiting && (
-                <AnswerInView recordId={awaiting.recordId} token={`${tree.revision}`} />
-              )}
-            </section>
-          )}
+          <TheRecord
+            records={records}
+            marked={marked}
+            held={heldReadings}
+            revision={tree.revision}
+          />
 
           {/*
             * The sequence stays whether or not there are records, because it is

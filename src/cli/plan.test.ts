@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { existingPrimitives, planCommand, type CliError, type WritePlan } from "./plan.js"
+import {
+  CLI_ERROR_CODES,
+  existingPrimitives,
+  planCommand,
+  type CliError,
+  type WritePlan,
+} from "./plan.js"
 
 const planOf = (
   command: Parameters<typeof planCommand>[0],
@@ -114,5 +120,38 @@ describe("existingPrimitives", () => {
         "loom/primitives/Loom.Card.ts",
       ])
     ).toEqual([])
+  })
+})
+
+describe("CLI_ERROR_CODES", () => {
+  /**
+   * `everyMemberOf` stops a code being missing from the list at compile time.
+   * What it cannot see is the opposite drift — a code renamed in the union and
+   * left behind in the list, which compiles as a string matching nothing.
+   */
+  it("names the nine codes once each, in the order a command meets them", () => {
+    expect(new Set(CLI_ERROR_CODES).size).toBe(CLI_ERROR_CODES.length)
+    expect(CLI_ERROR_CODES.length).toBe(9)
+    expect(CLI_ERROR_CODES[0]).toBe("unknown-command")
+    expect(CLI_ERROR_CODES.at(-1)).toBe("filesystem-failed")
+  })
+
+  /**
+   * A weaker claim than it looks, and deliberately so: this says the two refusals
+   * the planner produces here are *in* the published list, not that all nine are
+   * reachable. Proving reachability for every code would mean driving the CLI
+   * nine ways from one test, and `run.test.ts` already holds the stronger
+   * property — a `Record<CliErrorCode, CliError>` that stops compiling when a
+   * tenth code lands.
+   */
+  it("contains the codes the planner actually hands back", () => {
+    expect(CLI_ERROR_CODES).toContain(
+      errorOf({ kind: "init", directory: "loom" }, ["loom/primitives/registry.ts"]).code
+    )
+    expect(CLI_ERROR_CODES).toContain(
+      errorOf({ kind: "add-primitive", directory: "loom", type: "commerce.product-card" }, [
+        "loom/primitives/commerce.product-card.ts",
+      ]).code
+    )
   })
 })

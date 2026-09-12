@@ -4,6 +4,28 @@
 **Date:** 2026-09-12
 **Section:** §3 — Rendering, §6 — Telemetry
 
+> **Amended 2026-09-12**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
+> `types` may now be set per kind as well as once for all of them —
+> `{ dwelled: ["loom.section"], activated: ["loom.link"] }` — and a kind it does
+> not name reports every type. A list still applies to every kind. Found by the
+> ski prototype, whose rail wanted time on screen for sections and activations
+> for links and could only ask for both on all five types. The same change
+> fixed `kinds: ["dwelled"]` also sending `viewed`: kinds and types are now
+> applied to every signal at the moment a batch is built. Nothing here is
+> reversed — the configuration is still the host's and never the tree's.
+
+> **Amended 2026-09-12 (second)**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
+> The broadcaster has a second entry point, `@loom/runtime/signals/broadcast`,
+> for browser bundles. `@loom/runtime/signals` also carries the schemas, and a
+> bundler cannot leave the schema library out once that entry is imported: 66 KB
+> minified against 4.8 KB for the broadcaster alone. The id patterns the
+> broadcaster checks moved to `src/grammar.ts`, which the schemas are now built
+> from, so there is still one definition of an id. The ledger holds its state in
+> place rather than returning copies — the copying version cost the square of the
+> page (315 ms against 10 ms for 6,000 nodes in the benchmark) — and the batch
+> timer stops while the page is hidden. Signals and batches are unchanged, and
+> nothing is reversed.
+
 ## Context
 
 Loom is an adaptive UI runtime. The pipeline that lets a page change from how it

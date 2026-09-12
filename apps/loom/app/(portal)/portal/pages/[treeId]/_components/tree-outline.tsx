@@ -75,6 +75,16 @@ export const TreeOutline = () => {
           <span className="font-mono">slot</span> and a <span className="font-mono">text</span>{" "}
           node, and the arrow marks one whose selection delegates to an ancestor.
         </p>
+        {/*
+          * The rows used to print the registered type — `loom.card` — and now
+          * print what it is. The type is still here, under the pane below, and
+          * this is the sentence that says where it went: a reader who came to
+          * this rail *for* the type should not have to find that out by
+          * clicking around.
+          */}
+        <p className="text-ink-secondary">
+          Pick a row to see its registered type, its id and what a click on the page would reach.
+        </p>
       </TechnicalDetail>
     </nav>
   )

@@ -1,3 +1,4 @@
+import { everyMemberOf } from "../closed-set.js"
 import type { TreeId } from "../ids.js"
 import type { TreeError } from "../tree/errors.js"
 
@@ -28,6 +29,30 @@ export type StoreError =
     }
   | { readonly code: "delta-rejected"; readonly treeId: TreeId; readonly error: TreeError }
   | { readonly code: "unavailable"; readonly detail: string }
+
+export type StoreErrorCode = StoreError["code"]
+
+/**
+ * Every way persistence can refuse, in the order a reader meets them.
+ *
+ * A `switch` over a `StoreError` is exhaustive without this and always was. What
+ * needs a list is everything that *walks* the taxonomy rather than reacting to
+ * one member: a page that tells a host what it has to handle before going to
+ * production, a dashboard wanting a bucket per code, a conformance check written
+ * against the store contract. Each of those otherwise keeps its own copy, and a
+ * copy is a list that is silently wrong the day a sixth code lands.
+ *
+ * The order is the order a deployment meets them rather than one of severity:
+ * the two that are about a tree's identity, then the two a write is refused by,
+ * then the one that is about the storage itself rather than anything in it.
+ */
+export const STORE_ERROR_CODES: readonly StoreErrorCode[] = everyMemberOf<StoreErrorCode>()([
+  "not-found",
+  "already-exists",
+  "revision-conflict",
+  "delta-rejected",
+  "unavailable",
+])
 
 export const describeStoreError = (error: StoreError): string => {
   switch (error.code) {

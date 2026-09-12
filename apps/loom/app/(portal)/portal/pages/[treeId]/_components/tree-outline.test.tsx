@@ -21,8 +21,9 @@ const row = (
   nodeId: string,
   kind: OutlineRow["kind"],
   label: string,
+  technical: string | null,
   addressing: OutlineRow["addressing"]
-): OutlineRow => ({ nodeId, depth: 0, kind, label, addressing })
+): OutlineRow => ({ nodeId, depth: 0, kind, label, technical, addressing })
 
 const addressable = (nodeId: string): OutlineRow["addressing"] => ({
   outcome: "addressable",
@@ -37,9 +38,9 @@ const delegated: OutlineRow["addressing"] = {
 }
 
 const rows: readonly OutlineRow[] = [
-  row("n_card", "element", "loom.card", addressable("n_card")),
-  row("n_body", "slot", "body", delegated),
-  row("n_words", "text", "Hello there", delegated),
+  row("n_card", "element", "Card", "loom.card", addressable("n_card")),
+  row("n_body", "slot", "Body space", "body", delegated),
+  row("n_words", "text", "Hello there", null, delegated),
 ]
 
 const outline = (given: readonly OutlineRow[] = rows) =>
@@ -127,10 +128,36 @@ describe("TreeOutline", () => {
    * surface. It used to read `this node renders without an element of its own,
    * so selection falls back to n_card`.
    */
+  /**
+   * The rail was the last thing on this screen speaking the runtime's
+   * vocabulary: `loom.page` over `loom.heading` over `loom.card`, four inches
+   * from a sentence about the same card in a person's words.
+   */
+  it("names every row in a person's words, and none of them by a registered type", () => {
+    outline()
+
+    const names = screen.getAllByRole("button").map((button) => button.textContent ?? "")
+
+    expect(names.some((name) => name.includes("Card"))).toBe(true)
+    expect(names.some((name) => name.includes("Body space"))).toBe(true)
+    for (const name of names) expect(name).not.toContain("loom.")
+  })
+
+  /**
+   * Nothing is deleted to make a screen simpler. The type each row used to
+   * print is one pick away, in the pane under this list, and the legend is
+   * where a reader who came for it is told so.
+   */
+  it("says where the type each row used to print has gone", () => {
+    const { container } = outline()
+
+    expect(container.querySelector("details")?.textContent).toContain("registered type")
+  })
+
   it("says in a person's words what each row is and whether it can be clicked", () => {
     outline()
 
-    const clickable = screen.getByRole("button", { name: /loom.card/ })
+    const clickable = screen.getByRole("button", { name: /Card/ })
     const words = screen.getByRole("button", { name: /Hello there/ })
 
     expect(clickable.getAttribute("title")).toBe(
