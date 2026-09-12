@@ -4,6 +4,7 @@ import { renderLoomTree } from "@loom/runtime/react"
 import { renderToStaticMarkup } from "react-dom/server"
 
 import { buildPage } from "./page.mjs"
+import { SIDEBAR_MARKUP, SIDEBAR_SCRIPT, SIDEBAR_STYLES } from "./sidebar.mjs"
 
 /**
  * The page, as one HTML document.
@@ -18,8 +19,7 @@ const registry = createStarterPrimitiveRegistry()
 
 if (!registry.ok) throw new Error(`registry: ${JSON.stringify(registry.error)}`)
 
-export const renderPage = () => {
-  const tree = buildPage()
+export const renderPage = ({ rail = false, tree = buildPage() } = {}) => {
   const output = renderLoomTree(tree, {
     resolver: registry.value,
     validator: registry.value,
@@ -37,9 +37,14 @@ export const renderPage = () => {
 <style>
   html, body { margin: 0; padding: 0; }
   body { background: var(--loom-bg-canvas, #111827); }
+${rail ? SIDEBAR_STYLES : ""}
 </style>
 </head>
-<body>${body}</body>
+<body>
+<div class="loom-page-host">${body}</div>
+${rail ? SIDEBAR_MARKUP : ""}
+${rail ? `<script>${SIDEBAR_SCRIPT}</script>` : ""}
+</body>
 </html>`
 
   return { document, diagnostics: output.diagnostics, nodeCount: count(tree.root) }
