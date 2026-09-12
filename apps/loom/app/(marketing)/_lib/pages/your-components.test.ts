@@ -53,9 +53,18 @@ describe("the page about your own components", () => {
    * Every one of them is still reachable, and `chrome.test.ts` is where that is
    * held.
    */
-  it("is kept off the bar deliberately, and is one of the two pages that are", () => {
+  /**
+   * Widened on 12 September, not relaxed, for the reason recorded on the same
+   * assertion in `what-you-run.test.ts`: `HOME` came off the bar to make room
+   * for a seventh page. Still an exact list, so a fourth still fails here.
+   */
+  it("is kept off the bar deliberately, and is one of the three pages that are", () => {
     expect(YOUR_COMPONENTS.inMenu).toBe(false)
-    expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([WHAT_YOU_RUN, YOUR_COMPONENTS])
+    expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
+      HOME,
+      WHAT_YOU_RUN,
+      YOUR_COMPONENTS,
+    ])
   })
 
   it("answers the question the site had four pages and no answer to", () => {

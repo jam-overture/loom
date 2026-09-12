@@ -33,13 +33,35 @@ export type SiteRoute = {
   readonly inMenu: boolean
 }
 
+/**
+ * The front door, and **the one page the bar does not carry a link to.**
+ *
+ * That is a change of 12 September and it is navigation rather than attention,
+ * which is what makes it a different judgement from the two below. The bar's
+ * left-hand end is a `loom.logo` carrying `HOME.path`, on every page of the
+ * site, in the place every site a visitor has ever used puts the way home — so
+ * *Home* beside it was the same destination offered twice, and it was spending
+ * one of the eight slots the maintainer asked about on #166 to do it.
+ *
+ * The guarantee `inMenu: false` has carried since 8 September holds here
+ * unchanged and is what makes it safe: what the bar leaves out, the footer's
+ * map carries, marked as the page the reader is on. The front door is also the
+ * wordmark on every page, the destination of two closing bands, and the only
+ * route the palette switcher preserves an ask across.
+ *
+ * The one thing genuinely lost is the underline on `/`: a menu item can say
+ * *you are here* and a wordmark cannot. `chrome.test.ts` holds the footer's map
+ * to marking it instead, which is where the other two off-bar pages are already
+ * marked, and a visitor who cannot tell they are on the front door of a site
+ * they are looking at is not a reader this site has.
+ */
 export const HOME: SiteRoute = {
   path: "/",
   label: "Home",
   title: "Loom — every change your AI makes, written down",
   description:
     "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules, and every change keeps a record of who asked, what moved, and how to put it back.",
-  inMenu: true,
+  inMenu: false,
 }
 
 export const HOW_IT_WORKS: SiteRoute = {
@@ -173,6 +195,56 @@ export const WHAT_YOU_RUN: SiteRoute = {
 }
 
 /**
+ * The page for the question every page of this site so far has answered only in
+ * its happy form.
+ *
+ * `/` shows a change happening. `/how-it-works` walks one from the request to
+ * the record. `/the-rules` says what you decide in advance, and `/the-record`
+ * what you are left holding afterwards. Every one of them is a page about a
+ * change that **worked**, and the reader this site's recorded positioning names
+ * — somebody who cannot ship un-reviewed output because they answer to a client,
+ * a regulator or a board — reads all four and asks the only question they were
+ * ever going to ask: **and when it doesn't?**
+ *
+ * The answer is unusually good and the site was not making it. A request to
+ * change a page can end five ways and exactly one of them touches the page; the
+ * other four leave it as it was, and two of them never reach the rules at all.
+ * That is not reassurance, it is the shape of the code, which is why this page
+ * could be written without waiting on the licence line: nothing on it says what
+ * Loom costs, who it is for, or what may be built on it.
+ *
+ * **The five endings are the runtime's own list, not a copy of it.** They are
+ * read off `COMPOSITION_OUTCOME_KINDS` in the order it publishes them, and a
+ * sixth ending arriving there is a page that refuses to build rather than a
+ * page that goes on telling a reader there are five. The list's own note in
+ * `pipeline.ts` names "a surface explaining what a host must handle" as one of
+ * the things that would want to walk it, and says such a walker keeps its own
+ * copy — so this page keeps one, and holds it to the original in both
+ * directions instead of letting the two drift.
+ *
+ * **It is `inMenu: true`, and the entry above is how it got there.** A seventh
+ * page carried by a bar already at the eight items #166 asked about would be
+ * the flagged problem made worse; *Home* leaving the bar is what makes room,
+ * and the count is unchanged. What the bar cannot yet do — hold these seven
+ * under two or three grouped headings, the way the reference site does — needs
+ * a menu that opens, and nothing in the library has one. Filed for
+ * `Loom primitives` rather than worked around here.
+ */
+export const WHEN_IT_GOES_WRONG: SiteRoute = {
+  path: "/when-it-goes-wrong",
+  label: "When it goes wrong",
+  /**
+   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
+   * only the half of a title that is exactly the wordmark, so the name inside a
+   * clause prints twice on the card.
+   */
+  title: "When it goes wrong — the four endings that leave your page exactly as it was",
+  description:
+    "A request to change your page can end five ways, and only one of them changes anything. Here is what each of the other four is, what your page looks like afterwards, and what is written down either way.",
+  inMenu: true,
+}
+
+/**
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
@@ -181,21 +253,30 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * because a record of decisions is only interesting to someone who knows the
  * decisions were theirs to set.
  *
- * The last two are the questions that arrive after all four of those, from
+ * **Then the objection**, which arrives the moment a reader believes the four
+ * above rather than before it: *and when it doesn't work?* It sits fifth
+ * because a reader who has not yet understood that a change is weighed at all
+ * has no use for the list of ways one can fail to happen.
+ *
+ * The last two are the questions that arrive after all five of those, from
  * somebody who has decided they might want this and is working out what it would
  * cost them to try: **what is the thing**, and then **what do I have to hand
  * it**. They are in that order because the second only makes sense once the
  * first is answered — nobody asks what to hand over to something they still
  * think might be a hosted service.
  *
- * They are also the two pages the bar does not carry, and the footer renders
- * this list in order, so the end is where a reader meets them.
+ * The footer renders this list in order, and the end is where a reader meets
+ * the two pages the bar does not carry. The front door is the third the bar
+ * leaves out and it is first here, because the footer's map is a map of the
+ * site and a map that omitted the front door would be the navigation failure
+ * this list exists to prevent.
  */
 export const SITE_ROUTES: readonly SiteRoute[] = [
   HOME,
   HOW_IT_WORKS,
   THE_RULES,
   THE_RECORD,
+  WHEN_IT_GOES_WRONG,
   WHAT_YOU_RUN,
   YOUR_COMPONENTS,
 ]
