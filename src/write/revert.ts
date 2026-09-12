@@ -1,8 +1,8 @@
 import type { IdFactory, TreeId } from "../ids.js"
-import { err, ok } from "../result.js"
 import type { Clock } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
 import type { ChangeInterpreter } from "../runtime/interpreter.js"
+import { inverseInterpreter } from "../runtime/inverse.js"
 import type { CompositionRuntime } from "../runtime/pipeline.js"
 import { describeRevertPlan, planRevert, type RevertPlan, type UnrevertablePlan } from "../store/revert.js"
 import type { LoomTree } from "../tree/tree.js"
@@ -59,67 +59,43 @@ const rationaleFor = (plan: RevertablePlan): string => {
 }
 
 /**
- * An interpreter that has nothing to interpret.
+ * The same interpreter every undo uses, with the log's half filled in.
  *
- * The seam exists because interpretation is the non-deterministic step (0005),
- * not because it is always a model — and a revert is the case that proves the
- * seam was drawn in the right place. Everything downstream of it cannot tell
- * that no model was involved, which is exactly what makes an undo gateable on
- * the same terms as an AI-authored change.
- *
- * `confidence` is 1 because the inverse is computed, not guessed. That is the
- * honest self-grade (0007), and it is also why `authoredBy` is `runtime`: a 1
- * nobody graded is not a claim, and calibration (0031) segments these out of its
- * score rather than letting every undo walk the top band toward a perfect record
- * the model never earned.
+ * Everything specific to a revert is here — the stamp that says this came off a
+ * log, the rationale that names the revision and what it costs, and the work the
+ * plan found to declare. What is left is `inverseInterpreter`, which a surface
+ * with no store reaches for directly: the head check, the provenance of a
+ * computed change, and the shape of the proposal are one implementation rather
+ * than two that drift.
  */
 export const revertInterpreter = (
   plan: RevertablePlan,
   idFactory: IdFactory,
   clock: Clock
-): ChangeInterpreter => ({
-  interpret: (intent: EditIntent, tree: LoomTree) =>
-    Promise.resolve(
+): ChangeInterpreter =>
+  inverseInterpreter(
+    {
+      operations: plan.operations,
       /**
        * The plan's contest check was made against one head. Judging it at a
-       * different one would be judging a different question, so it declines
-       * rather than proposing something whose reasoning has expired. The write
-       * path refuses a moved head before reaching here; this is what keeps the
-       * interpreter safe to wire into a runtime directly.
+       * different one would be judging a different question, so the interpreter
+       * declines rather than proposing something whose reasoning has expired.
+       * The write path refuses a moved head before reaching here; this is what
+       * keeps the interpreter safe to wire into a runtime directly.
        */
-      tree.revision === plan.headRevision
-        ? ok({
-            proposalId: idFactory.proposalId(),
-            intentId: intent.intentId,
-            delta: {
-              deltaId: idFactory.deltaId(),
-              treeId: tree.treeId,
-              baseRevision: tree.revision,
-              operations: plan.operations,
-            },
-            rationale: rationaleFor(plan),
-            /**
-             * Declared only when there is something to declare, so absence keeps
-             * meaning "nobody looked at a log" rather than "a log was checked
-             * and was clean" (0035).
-             */
-            ...(plan.discards.length === 0 ? {} : { discards: plan.discards }),
-            provenance: {
-              origin: intent.origin,
-              ...(intent.actor === undefined ? {} : { actor: intent.actor }),
-              interpreter: REVERT_INTERPRETER,
-              /** Computed, not inferred — so calibration leaves it out (0031). */
-              authoredBy: "runtime",
-              confidence: 1,
-              interpretedAt: clock.now(),
-            },
-          })
-        : err({
-            code: "refused",
-            detail: `the revert was planned at revision ${plan.headRevision}, and this tree is at ${tree.revision}`,
-          })
-    ),
-})
+      headRevision: plan.headRevision,
+      interpreter: REVERT_INTERPRETER,
+      rationale: rationaleFor(plan),
+      /**
+       * Declared only when there is something to declare, so absence keeps
+       * meaning "nobody looked at a log" rather than "a log was checked and was
+       * clean" (0035).
+       */
+      ...(plan.discards.length === 0 ? {} : { discards: plan.discards }),
+    },
+    idFactory,
+    clock
+  )
 
 export type RevertRequest = {
   readonly treeId: TreeId

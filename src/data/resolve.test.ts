@@ -204,6 +204,27 @@ describe("buildDataResolution", () => {
     expect(resolution.problemsFor(nodeId)).toHaveLength(1)
   })
 
+  /**
+   * The fix for this is in the composition root and the fix for an unregistered
+   * source is in the registry, so they are not the same fault and must not share
+   * a code — which they did until 12 September.
+   */
+  it("calls a binding nothing resolved unresolved, and not unregistered", () => {
+    const nodeId = "n_1" as NodeId
+    const resolution = buildDataResolution(
+      {
+        requests: [{ key: "profile {}", source: "profile" as SourceId, params: {} }],
+        bindings: [{ nodeId, name: "bio" as BindingName, key: "profile {}" }],
+        problems: [],
+      },
+      new Map()
+    )
+
+    const outcome = resolution.lookup(nodeId)["bio"]
+
+    expect(outcome?.status === "unavailable" && outcome.unavailable.reason).toBe("not-resolved")
+  })
+
   it("answers a binding named after something on Object.prototype", () => {
     const nodeId = "n_1" as NodeId
     const resolution = buildDataResolution(

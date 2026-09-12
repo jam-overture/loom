@@ -83,7 +83,7 @@
             {
               "name": "DataUnavailable",
               "kind": "type",
-              "signature": "type DataUnavailable = {\n    readonly reason: \"no-such-source\" | \"invalid-params\" | \"invalid-answer\" | \"adapter-threw\" | SourceFailure[\"code\"];\n    readonly detail: string;\n};",
+              "signature": "type DataUnavailable = {\n    readonly reason: \"no-such-source\" | \"not-resolved\" | \"invalid-params\" | \"invalid-answer\" | \"adapter-threw\" | SourceFailure[\"code\"];\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": "Why a binding has no value. Every one of these is something a primitive may be told about and a diagnostic says out loud; none of them is an exception anyone catches."
             },
@@ -375,6 +375,13 @@
           "summary": "What a data source is, from the tree's side of the seam.",
           "symbols": [
             {
+              "name": "SOURCE_ID_EXPECTATION",
+              "kind": "value",
+              "signature": "const SOURCE_ID_EXPECTATION = \"expected dot-namespaced kebab-case, like \\\"commerce.products\\\"\"",
+              "truncated": false,
+              "summary": "The grammar a source id has to satisfy, in words, said once."
+            },
+            {
               "name": "sourceIdSchema",
               "kind": "schema",
               "signature": "const sourceIdSchema: z.ZodBranded<…>",
@@ -387,6 +394,13 @@
               "signature": "type SourceId = z.infer<typeof sourceIdSchema>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "BINDING_NAME_EXPECTATION",
+              "kind": "value",
+              "signature": "const BINDING_NAME_EXPECTATION = \"expected camelCase, like \\\"services\\\"\"",
+              "truncated": false,
+              "summary": "The grammar a binding name has to satisfy, for the same reader."
             },
             {
               "name": "bindingNameSchema",
@@ -1528,6 +1542,27 @@
               "signature": "interface ChangeRepairer {\n    readonly repair: (request: RepairRequest, tree: LoomTree) => Promise<Result<ProposedChange, InterpretationError>>;\n}",
               "truncated": false,
               "summary": "Revising a refused proposal is a different job from interpreting an utterance, so it is a different interface. A runtime that is handed no repairer cannot repair, which makes \"this deployment lets AI have a second go\" a visible choice at the composition root rather than a property of whichever interpreter happened to be wired in."
+            }
+          ]
+        },
+        {
+          "module": "runtime/inverse",
+          "title": "Inverse",
+          "summary": "An undo that is already computed, offered as a change like any other.",
+          "symbols": [
+            {
+              "name": "ComputedInverse",
+              "kind": "type",
+              "signature": "type ComputedInverse = {\n    /** The undo, as operations. The delta's id and base belong to the proposal. */\n    readonly operations: readonly TreeOperation[];\n    /**\n     * The revision the operations were computed against.\n     *\n     * An inverse is only an inverse of one arrangement. Offered against another it\n     * would be proposing something whose reasoning has expired, so the interpreter\n     * declines rather than proposing it — which is what makes this safe to wire\n     * into a runtime directly, with no write path in front of it.\n     */\n    readonly headRevision: number;\n    /** What produced the delta, for `Provenance.interpreter`. Not a model. */\n    readonly interpreter: string;\n    /** Why, in the words the person answering a hold reads. */\n    readonly rationale: string;\n    /**\n     * Work this undo writes over, when the caller knows of some.\n     *\n     * Only a caller that read a log can know, so it is absent by default and\n     * absence keeps meaning \"nobody looked\" rather than \"a log was checked and was\n     * clean\".\n     */\n    readonly discards?: readonly DiscardedWork[];\n};",
+              "truncated": false,
+              "summary": "The operations that put something back, and what to say about them."
+            },
+            {
+              "name": "inverseInterpreter",
+              "kind": "function",
+              "signature": "const inverseInterpreter: (inverse: ComputedInverse, idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "An interpreter that has nothing to interpret."
             }
           ]
         },
@@ -6161,7 +6196,7 @@
               "kind": "function",
               "signature": "const revertInterpreter: (plan: RevertablePlan, idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
               "truncated": false,
-              "summary": "An interpreter that has nothing to interpret."
+              "summary": "The same interpreter every undo uses, with the log's half filled in."
             },
             {
               "name": "RevertRequest",

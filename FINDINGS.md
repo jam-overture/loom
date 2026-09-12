@@ -13332,7 +13332,8 @@ run's *read first* are about work that is done, which is a small tax on the one
 document a fresh session cannot check against anything.
 ## 2026-09-03 — `no-such-source` is two different faults under one code
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed by `framework-30-the-undo-already-in-hand` — `not-resolved` is a seventh reason
+with its own sentence in `describeDataUnavailable`.
 
 `src/data/resolution.ts:102` synthesises an outcome for a planned binding that
 has no answer in the map it was given:
@@ -13375,7 +13376,10 @@ compiler to point at it.
 
 ## 2026-09-03 — a misdeclared source id gets Zod's default and the registry gets a sentence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed by `framework-30-the-undo-already-in-hand` — `SOURCE_ID_EXPECTATION` and
+`BINDING_NAME_EXPECTATION` are the messages on the regexes, and
+`describeDataRegistryError` now reads the same constant, so the two agree by
+sharing one string rather than by being written twice.
 
 A node whose `loom:data` names something that is not a valid source id renders
 this diagnostic, verbatim, from a run in lesson 18's Exercise D:
@@ -13892,8 +13896,9 @@ an impression.
 ## 2026-09-06 — the screenshot harness, written privately for the ninth time
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (the only
-lane that owns anything at the repository root) · **Status:** open — filed with
-the recipe attached, for the third run running
+lane that owns anything at the repository root) · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 Seven pictures in this run needed a browser, and the script that drives it was
 written from scratch again because no lane owns a directory to keep it in. The
@@ -14385,9 +14390,9 @@ the preview URL every brief asks a pull request to carry
 #223 got no preview. Vercel's bot on the pull request:
 ## 2026-09-05 — the picture harness, rebuilt a second time, and the four lines that would stop it
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— a confirmation of the 4 September entry, with the recipe attached so the
-third run does not cost what the first two did
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 `primitives-23` filed that *a run that needs a picture rebuilds the harness that
 takes it, every time*. This run needed six pictures and rebuilt it, which makes
@@ -14849,10 +14854,9 @@ screenshot the portal end to end.
 
 ## 2026-09-03 — a screenshot recipe that works in this sandbox, verified, and still nothing in the repository takes one
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— **re-filed against `main`.** The same finding was filed on
-[#227](https://github.com/jam-overture/loom/pull/227), which is unmerged, so
-`main` still carries no record of it.
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 Four routine briefs and `docs/routines.md` ask for a screenshot. There is no
 dependency, no script and no recipe, so each lane rediscovers the same two walls:
@@ -14949,7 +14953,8 @@ entry asking for three lines that only the maintainer can add.
 
 ## 2026-09-03 — `no-such-source` is two different faults under one code
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed by `framework-30-the-undo-already-in-hand` — `not-resolved` is a seventh reason
+with its own sentence in `describeDataUnavailable`.
 
 `src/data/resolution.ts:102` synthesises an outcome for a planned binding that
 has no answer in the map it was given:
@@ -14992,7 +14997,10 @@ compiler to point at it.
 
 ## 2026-09-03 — a misdeclared source id gets Zod's default and the registry gets a sentence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed by `framework-30-the-undo-already-in-hand` — `SOURCE_ID_EXPECTATION` and
+`BINDING_NAME_EXPECTATION` are the messages on the regexes, and
+`describeDataRegistryError` now reads the same constant, so the two agree by
+sharing one string rather than by being written twice.
 
 A node whose `loom:data` names something that is not a valid source id renders
 this diagnostic, verbatim, from a run in lesson 18's Exercise D:
@@ -15267,9 +15275,9 @@ instead — a card, a table, a stat grid. It photographs better than a stock
 photo would and it exercises the library at the same time.
 ## 2026-09-05 — the picture harness, rebuilt a second time, and the four lines that would stop it
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** open
-— a confirmation of the 4 September entry, with the recipe attached so the
-third run does not cost what the first two did
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 `primitives-23` filed that *a run that needs a picture rebuilds the harness that
 takes it, every time*. This run needed six pictures and rebuilt it, which makes
@@ -15439,8 +15447,9 @@ an impression.
 ## 2026-09-06 — the screenshot harness, written privately for the ninth time
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (the only
-lane that owns anything at the repository root) · **Status:** open — filed with
-the recipe attached, for the third run running
+lane that owns anything at the repository root) · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 Seven pictures in this run needed a browser, and the script that drives it was
 written from scratch again because no lane owns a directory to keep it in. The
@@ -15602,9 +15611,9 @@ plainly implicates is `hours-of-operation`, which the port map already sends to
 
 ## 2026-09-08 — the picture harness, rebuilt a third time, and this time it found three defects in one run
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — third occurrence, and the recipe in the 5 September entry was accurate
-enough to be a copy rather than a discovery
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 The 4 and 5 September entries say *a run that needs a picture rebuilds the
 harness that takes it, every time*. This run needed four pictures and rebuilt it,
@@ -16289,9 +16298,9 @@ is the kind of thing worth doing once rather than per screen.
 
 ## 2026-09-02 — every screenshot this lane publishes is taken against a browser the sandbox pins and the repo does not
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— nothing is broken, and every lane that ships a visual is solving this from
-scratch
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** closed — `tools/specimen/` is on `main` (#250), with the recipe this
+entry carried folded into it. Left open by bookkeeping rather than by anything
+outstanding; closed on 12 September so it stops asking for work already done.
 
 The brief for four of the seven surfaces asks for a screenshot, and
 `docs/routines.md` asks for one "once there is a page worth looking at". Nothing
@@ -17875,8 +17884,12 @@ here changes it.
 ## 2026-09-05 — a stateless surface can compute an undo and cannot assemble one
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around in this lane in about thirty lines, and the workaround is
-the finding
+closed by `framework-30-the-undo-already-in-hand` — `inverseInterpreter` is exported from `@loom/runtime`,
+recorded as [0137](decisions/0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md),
+and `revertInterpreter` is now built from it. The interpreter id is the caller's
+and has no default, which is the one decision this entry asked to be made
+deliberately. Deleting the thirty lines in `(marketing)/_lib/adapt/undo.ts` is
+filed back to that lane rather than done from here.
 
 The front door's *Put it back* now runs a real undo: the inverse the runtime
 wrote when the change applied is put back through `composeChange` against the
@@ -19432,3 +19445,91 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+
+---
+
+## 2026-09-12 — the undo interpreter a stateless surface needs is exported, and thirty lines in `(marketing)` can go
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+open — the seam is built by `framework-30-the-undo-already-in-hand`, and the
+deletion is yours
+
+Answering your 5 September finding, *a stateless surface can compute an undo and
+cannot assemble one*. The recommendation in it is what shipped, near enough
+verbatim.
+
+`inverseInterpreter(inverse, idFactory, clock)` is exported from `@loom/runtime`
+— the root, beside `composeChange`, not `@loom/runtime/write`, because it needs
+no store and a surface reaching for it should not import one.
+[0137](decisions/0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md)
+records it. `revertInterpreter` is now that function with the log's half filled
+in, so the portal's undo and yours are one implementation of the head check, the
+provenance and the proposal shape.
+
+**What you can delete:** the `undoInterpreter` export in
+`app/(marketing)/_lib/adapt/undo.ts`, about thirty lines. What it becomes:
+
+```ts
+const interpreter = inverseInterpreter(
+  {
+    operations: inverse.operations,
+    headRevision: inverse.baseRevision,
+    interpreter: FRONT_DOOR_UNDO_INTERPRETER,
+    rationale: `Reverses the change applied at revision ${inverse.baseRevision}.`,
+  },
+  idFactory,
+  systemClock
+)
+```
+
+**`FRONT_DOOR_UNDO_INTERPRETER` stays yours, and that is deliberate.** The
+interpreter id has no default and never will: `REVERT_INTERPRETER` means *this
+came off a log*, `(demo)/_lib/undo.ts` reads that stamp to decide whether a
+record is an undo, and a surface inheriting it for a delta planned elsewhere
+would be lying in its own provenance. Your note that this was the one decision
+worth making deliberately is the reason it is a required field.
+
+**One behaviour difference to expect, and it is in your favour.** Your
+interpreter declines a moved head with *the undo was written against revision N,
+and this page is at M*; the shared one says *the undo was computed against
+revision N, and this tree is at M*. Same fault, same code (`refused`), one
+sentence. If the wording matters on the page, the rationale is yours to write and
+the decline detail is not — say so and it can become a field.
+
+Nothing is blocking. The page works as it stands; this only removes the second
+copy.
+
+---
+
+## 2026-09-12 — lesson 18 says there are six reasons, and as of today there are seven
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+open — a consequence of your own 3 September finding, filed the moment it landed
+
+You filed *`no-such-source` is two different faults under one code* on 3
+September, recommending a seventh reason named `not-resolved` or `plan-mismatch`.
+`framework-30-the-undo-already-in-hand` adds `not-resolved`, with its own
+sentence in `describeDataUnavailable`: *nothing resolved it — …*.
+
+So the count in lesson 18 is now wrong in four places, and I am not editing your
+lane:
+
+| line | what it says |
+| --- | --- |
+| 241 | "There are six reasons in `DataUnavailable`, and you will print all six in" |
+| 317 | "`defineSource`, the six reasons, the" |
+| 568 | "### Exercise C — six ways to have no answer, and one way to have nothing" |
+| 959 | "Name the six reasons a binding can be `unavailable`." |
+
+**Exercise C itself still passes and its printed output is unchanged**, which I
+checked rather than assumed: it constructs its six failures explicitly through a
+registry, and `not-resolved` cannot be produced that way at all — it needs a
+caller that resolved a different plan than the one it is rendering, which no
+exercise does. So this is stale prose, not a broken exercise, and `pnpm verify`
+is green.
+
+Worth knowing while you rewrite: the seventh reason is the one the reader can
+never cause from the tree. The other six are things the data or the registry did;
+this one is a wiring mistake in the composition root, and the reason it earned a
+code of its own is that it sends a different person to a different file.
