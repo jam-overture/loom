@@ -19,6 +19,7 @@ import {
   nounOf,
   partNameOf,
   partReading,
+  placeNameOf,
   saidBy,
   subjectFor,
 } from "./part-name"
@@ -163,6 +164,56 @@ describe("partNameOf", () => {
 
       expect(named.name).not.toContain(named.nodeId)
       expect(named.nodeId).toBe(node.id)
+    }
+  })
+})
+
+describe("placeNameOf", () => {
+  it("names a place by what it is", () => {
+    expect(placeNameOf(element("n_band", "loom.band"))).toBe("the band")
+  })
+
+  /**
+   * The defect this function exists for, pinned with the two readings side by
+   * side.
+   *
+   * `saidBy` walks the subtree, which is what lets a card be named by the
+   * heading inside it — and what makes *the page “Autumn arrivals Free
+   * returns”* the reading of the page a change lands in. A container's words
+   * are its contents' words, so quoting a place names the contents and claims
+   * to name the place. The noun alone is the part of that reading which is true
+   * at every depth.
+   */
+  it("does not quote a container by the words of everything inside it", () => {
+    const page = element("n_page", "loom.page", [
+      element("n_h", "loom.heading", [text("n_t1", "Autumn arrivals")]),
+      element("n_p", "loom.prose", [text("n_t2", "Free returns")]),
+    ])
+
+    expect(partNameOf(page).name).toBe("the page “Autumn arrivals Free returns”")
+    expect(placeNameOf(page)).toBe("the page")
+  })
+
+  it("keeps a slot's own name, exactly as a subject does", () => {
+    expect(placeNameOf(slot("n_s", "body"))).toBe("the body space")
+  })
+
+  it("calls text the words without quoting them", () => {
+    expect(placeNameOf(text("n_t", "Welcome"))).toBe("the words")
+  })
+
+  /**
+   * A place carries no identifier, and that is the other half of the rule. The
+   * id that matters on a row belongs to the part being changed; one on every
+   * noun in the sentence is three identifiers where the reader needed one.
+   */
+  it("never carries an id", () => {
+    for (const node of [
+      element("n_card", "loom.card", [text("n_t", "Hi")]),
+      text("n_t", "Hi"),
+      slot("n_s", "body"),
+    ]) {
+      expect(placeNameOf(node)).not.toContain(node.id)
     }
   })
 })

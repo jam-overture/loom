@@ -14735,8 +14735,20 @@ unit of its own and this run's was a page.
 
 ## 2026-09-04 — the commit-identity trap, seventh time, and the address the session hands you is the wrong one
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-recurring, and the recurrence has a cause worth writing down
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-28-what-a-palette-has-to-spend`**, and **confirmed by the
+push that closed it** — the first commit authored under the new rule deployed
+**Ready** rather than Blocked, after nine days in which no framework or
+documentation pull request got a preview. Nothing else changed: no Vercel team
+membership, no project configuration. The author line was the whole of it, which
+is what this finding said and what four reports had described as an unexplained
+*"no preview URL"*. Option 1, exactly as specified. `docs/routines.md` gains a **Commit identity** section beside the
+network policy, naming the author line and giving the two `git config` lines that
+set it. Option 2 was not taken: a committed `.gitconfig` only applies once
+somebody runs `git config include.path`, so it would be a file that looks like a
+fix and is not one until a human acts. Filed seven times over three weeks and one
+sentence to close, which is the argument for reading this file before choosing
+work.
 
 The first push on `docs-20-what-ai-may-change` got no preview. Vercel answered:
 
@@ -16012,7 +16024,16 @@ only which content models.**
 ## 2026-09-11 — a palette may have no chroma to spend, and every paint assumes it has some
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
-· **Status:** open
+· **Status:** **closed by `framework-28-what-a-palette-has-to-spend`**
+([0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md))
+— the first of the two shapes proposed here, **measured rather than declared**.
+`--loom-accent-strong-chroma` is `0.584` under `bold` and `0.121` under
+`editorial`, unitless so a paint can scale its own opacity by it in `calc()`.
+The reason it is not the declared field this asked for is in the record: a
+declared one would invalidate every host palette in existence, and nothing
+checks a claim about how much colour a colour has. **Nothing reads it yet** —
+the variable is this lane's and the paint is yours; see the entry filed back to
+you below.
 
 This is the 20 August finding's unresolved half, now measurable because the same
 paints run behind a short band as well as behind a hero.
@@ -16045,7 +16066,18 @@ approximates.
 ## 2026-09-11 — a dark scrim is not expressible, because no palette slot means "dark"
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/theme/`)
-· **Status:** open
+· **Status:** **closed by `framework-28-what-a-palette-has-to-spend`**
+([0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md))
+— as a pair, which is what this asked for, and derived rather than declared.
+`--loom-scrim` and `--loom-scrim-fg` are **the palette's own body-copy pair,
+whichever way round is darker**: under a light palette the ink becomes the ground
+and the page becomes the ink, under a dark one they stay put. So the contrast is
+one the palette already owes a reader and the contrast bar already asserts, and
+there is no invented colour anywhere. Over the twenty-one starter palettes every
+scrim ground is under **0.0136** relative luminance and every pair clears
+**15.20:1**. The optional slot you proposed stays live for a palette that wants a
+branded wash rather than its own ink — it would override the measure, and the
+record says so.
 
 `loom.overlay` puts text over a photograph, and the standard way to keep it
 legible is a dark wash with light type. **This theme model cannot say it.**
@@ -16275,8 +16307,16 @@ say precisely what it does. What was wrong is that the portal said more.
 
 ## 2026-09-02 — the guard that keeps the runtime's vocabulary off the surface now exists in two copies
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-nothing is broken, and it is one regex away from drifting
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-24-the-queue-names-its-parts`, as
+`app/(portal)/_test/plain-language.ts` — the recommendation below, taken, with
+one change: it is inside the route group rather than in `apps/loom/test/`, so
+six other lanes are not importing a file this lane owns. It had reached **three**
+copies by the time it was taken, the third being the hand-rolled word list in
+`effect-view.test.ts` that used `toContain` rather than a bounded match. All
+three read one list now, and the module has a test of its own that proves the
+detector still matches — a guard that has quietly stopped matching passes for
+ever.
 
 `audit-view.test.ts` carries a regex — `fold|snapshot|seed|delta|node|tree|
 revision|log|gate|id` — and asserts that no sentence a screen shows unasked
@@ -19647,3 +19687,432 @@ of something. Two candidate fixes, both the owning lane's:
 Worth doing either way, because the trap is not confined to `LIBRARY_CLASS`: any
 exported object literal with per-member comments has the same shape, and there
 are several in `src/primitives/` alone.
+
+## 2026-09-11 — the two things atmosphere asked the palette for are on the root, and no primitive reads them yet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — the seam is built, the paint is yours
+
+Both halves of what `loom.backdrop` and `loom.overlay` filed this morning are
+emitted by `themeVariables` as of `framework-28-what-a-palette-has-to-spend`
+([0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md)),
+derived from the palette rather than declared on it, so every palette already
+registered has them and no host has to edit anything.
+
+**How much colour there is to spend**, unitless, per slot, three decimal places:
+
+```css
+/* aurora, spotlight — anything spread as an area */
+opacity: calc(0.14 + 0.24 * var(--loom-accent-strong-chroma, 0.5));
+```
+
+`bold` reads `0.584` there and `editorial` reads `0.121`, which is the ratio the
+finding is about. The fallback matters: a palette written in `hsl()` cannot be
+measured, the variable is then absent rather than zero, and `0.5` is the "assume
+an ordinary palette" answer the library has been making implicitly all along.
+
+**The dark wash, as a pair:**
+
+```css
+background: color-mix(in srgb, var(--loom-scrim, var(--loom-bg-overlay)) 62%, transparent);
+color: var(--loom-scrim-fg, var(--loom-fg-default));
+```
+
+The two are guaranteed together — they are the palette's own body-copy pair,
+inverted where the palette is light — so `scrim: "dark"` can be a real option
+beside the honest veil that shipped, and the cinematic look stops being one the
+library does not have.
+
+Two things this lane deliberately did not do, both because
+`src/primitives/` is yours: pick the coefficients, and add the `scrim` member.
+`tokens.ts` is where the variable names should land rather than in a component,
+for the reason that file already gives.
+
+A variable no primitive consults is a comment pretending to be a seam
+([0085](decisions/0085-a-font-pack-declares-a-face-when-something-reads-it.md)),
+so this entry is the debt with a name on it. If either variable is the wrong
+shape for the paint you actually want, say so here and it changes — the
+measurement is eleven lines.
+
+---
+
+## 2026-09-11 — twenty-one units of framework work have been open and unmerged for eight days, and `main` moved past them
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — for a decision, and nothing in today's unit is blocked on it
+
+[#230](https://github.com/jam-overture/loom/pull/230) carries twenty-one units
+of this lane, built between 3 and 11 September, with #221, #223, #228, #236 and
+#250 merged into it. It was branched from `d7375ef` and `main` is now `140f150`
+— **forty-one other pull requests have merged past it**, so the branch is eight
+days of framework work that no other lane can read and that grows a unit every
+twelve hours.
+
+Its Vercel deployment has also been failing since at least 9 September for a
+reason no run can fix: *"@jpizzo must be a member of the jpizzolato36-6341's
+projects team on Vercel to deploy."* Every framework pull request since then has
+published a preview URL that cannot have worked.
+
+**Today's unit was branched from `main` instead**, per the brief's step 3, and is
+four source files with nothing on #230 in its history. That is the right call for
+*this* unit — it depends on nothing that branch holds — but it makes the shape of
+the problem plainer rather than fixing it: this lane now has two open pull
+requests, and the larger one is unreviewable by construction.
+
+There is no engineering answer to this and that is why it is filed. The
+choices are to merge #230, to close it and have this lane rebuild the twenty-one
+units against current `main` a few at a time, or to say that a branch of that
+size is acceptable and the lane should keep pushing onto it. **Recommendation:
+merge it.** It was green at its head on 11 September and every unit in it is a
+finding another lane filed; the second-best answer is closing it with an
+instruction, because what costs the most is the branch staying exactly as it is
+for another eight days.
+
+---
+
+## 2026-09-11 — the harness auto-subscribed this run to its own pull request again, and its standing order is still the one thing the brief forbids
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a second data point on the 1 September entry, and the first
+from this lane
+
+Opening #264 produced a `subscription.created` event whose standing order is, in
+its own words, *"schedule a self check-in roughly an hour out to re-check the PR,
+and re-arm it silently if nothing changed."* That is the shape of the four
+`send_later` chains of 9 August, which is the single thing `docs/routines.md`
+names as the maintainer's top priority and forbids outright: **no chains, no
+self-check-ins, on any cadence, for any reason.**
+
+The order also says the rules apply *"unless your user says otherwise"*, and the
+brief says otherwise, so this run **unsubscribed** and scheduled nothing. Four
+events had already been delivered by then — a subscription notice, two
+deployment-status comments from the Vercel bot, and a check-suite completion.
+None needed an action; the pull request is green.
+
+Recorded rather than re-argued, because the resolution is the same as
+1 September's and the count is the point: **the brief wins, the routine
+unsubscribes, and every run pays a few events to find that out again.** What
+would close it is one line in the brief or in `docs/routines.md` telling a run
+what to do with the subscription when the harness opens one, so the next lane
+does not have to reason from first principles about whether to obey it.
+
+## 2026-09-11 — the ring was a claim about a band that had not changed, and it was drawn at the demo's payoff
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-14-a-ring-is-a-claim`** — recorded because the diagnosis outlives the fix
+and because the mechanism the 27 August entry could not find turned out to be one
+it already had
+
+The 27 August entry closed with what it had not done:
+
+> For a `near` mark **the ring still encircles a band that did not change.** The
+> chip now says where the change was and the ring still says *look here*, and
+> those are no longer the same place, which is an improvement and is not the
+> whole answer. The honest version is to drop the ring for a `near` mark and draw
+> a rule along the seam instead — and it needs a mechanism this run did not have.
+
+Fifteen days and six units later it was still the last frame of the demo's best
+sixty seconds. Press **Take the numbers off**, say yes, be carried to the change:
+a green ring around a patient's testimonial, labelled *Something was removed
+here*, over a sentence plainly still on the page. The card three inches away says
+the change took the numbers off.
+
+**The mechanism was not missing.** That entry ruled out `::before` (it is the
+testimonial's own quotation glyph), `box-shadow` (it would silently replace a
+card's own) and one-sided `outline` (there is no such thing), and concluded a
+rule along the seam needed something new. All three are ways of drawing a *second*
+thing beside the chip. The answer was that the chip did not need a second thing:
+**widen it.** `right: 6px` becomes `right: 0` and the chip is a bar the width of
+the seam — already lying where the change is, already carrying the words, and no
+longer needing a ring to say which band it is beside.
+
+What the fix actually required was a **name for the distinction**, and this
+surface had been carrying it in prose for three weeks: `spotFor`'s `placed`
+argument, `"node"` against `"near"`, which had always decided the *label* —
+*"This was removed"* against *"Something was removed here"* — and had never been
+allowed to decide the geometry. It is now `Spotlight.subject`, and the rule it
+carries is one line:
+
+> **A ring is a claim about the thing inside it.** Only a mark whose subject is
+> the node may draw one.
+
+`border-radius` went with it, and that is the part worth the channel. It was on
+the node unconditionally to round the outline — so on an unringed band it rounded
+corners the page had never asked to have rounded. `outline` was chosen over
+`border` precisely so that marking a band could not move it, and the property
+that came along to serve the outline was quietly restyling it.
+
+**The standing diagnosis, seventh instance and the second where the earlier entry
+named the fix in advance.** Nothing was broken. `spotFor` was right about the
+subject, `labelFor` was right about the words, `chipPosition` was right about the
+gap, and `spotlightCss` applied one geometry to two kinds of claim.
+
+---
+
+## 2026-09-11 — `21st.dev` re-verified blocked, from the demo lane a thirteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified, not re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` on the run of
+11 September. The standing answer is on the 21 August entry and nothing is added
+to it: `.claude/settings.json` allows the domain for the tool, the proxy does
+not, and `docs/routines.md` has listed it under *Currently allowed* for three
+weeks.
+
+No cost this run, and it is worth saying why rather than only that. What decided
+the width of the mark, the ten pixels of air under it and whether the bar reads
+as a mark on the seam or as a header on the band below was building the page
+twice and photographing the same two presses against each. A gallery of other
+people's components could not have answered any of the three.
+
+---
+
+## 2026-09-11 — the `Loom demo` brief still opens with a task that landed on 21 August
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — re-verified on this branch rather than re-dated
+
+*"Two problems to fix before anything else"* still opens with **"It is in the
+wrong place"** — the move from `/portal/demo` to `/demo`. Verified again on this
+branch: `app/(demo)/demo/page.tsx` exists, `/demo` serves it and
+`(portal)/portal/demo/page.tsx` is the 308 shim. Twenty-one days, and the
+seventh consecutive run to say so.
+
+`docs/rollout.md:19` still points at the old path, which is the same fact filed
+separately for `Loom daily build` on 9 September and unchanged since.
+
+The brief's *second* problem — *"it is clunky"* — is live, and is what this unit
+and the thirteen before it are.
+
+## 2026-09-11 — the review queue's own outline names parts the way the sentence beside it no longer does
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+found by looking at the screenshot of the change that closed the other half
+
+`portal-24-the-queue-names-its-parts` made every sentence on `/portal/pages/
+[treeId]` say *the card “Starter Free for personal projects. One…”* where it had
+said `loom.card`. The screenshot of that screen shows the rail on the right —
+**Parts of this page, 22 parts** — still reading
+
+```
+loom.page
+  loom.heading
+    · Loom
+  loom.prose
+  loom.card
+    loom.heading
+      · Starter
+```
+
+in monospace, four inches from a sentence about the same card in a person's
+words. One screen, two names for one part, which is the exact thing the diff
+below it was written to stop happening on one row.
+
+**Not taken in that diff, on purpose, and the reason is worth keeping.** It is a
+different shape of problem: a *list of kinds* rather than a sentence, and it is
+what a reader clicks to point at a part, so what it owes them is a stable
+correspondence with the outline the technical record uses. `_lib/vocabulary.ts`
+already holds `PART_KINDS`, which answers *what is this?* for one node, and
+`_lib/part-name.ts` holds `placeNameOf`, which answers *what do I call it in the
+middle of a line* — the rail wants the first and the tree structure around it,
+and picking between them is a unit's worth of thinking rather than a rename.
+
+The honest summary of where that screen stands: **the sentences are a person's
+and the index of the page is not.** That is better than both being the
+runtime's, and it is not finished.
+
+---
+
+## 2026-09-11 — a card is named by its heading *and* its body, and the body crowds the heading out
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+cosmetic, and the first thing a reader's eye lands on
+
+`saidBy` joins every text run under a node with a space, which is right and was
+found the hard way — concatenating them produced *the card “Every change is a
+deltaNothing here was…”* on 10 September. What the live screenshot shows is the
+other end of the same choice. A pricing card holding a heading *Starter* and a
+paragraph *Free for personal projects. One tree, one editor, no card required.*
+is named
+
+> the card **“Starter Free for personal projects. One…”**
+
+The 40-character limit is spent on the body, and the one word that identifies
+the card — its heading — is followed by a run-on that reads as a transcription
+error. Three of the five rows in the screenshot look like this.
+
+**The likely answer is not a longer limit.** A container's *first* run is almost
+always its heading, and *the card “Starter”* is both shorter and more
+identifying than any truncation of the join. But the join is correct for a node
+whose text is genuinely several runs of one sentence, and telling those two
+apart is a judgement this lane has not made yet: the candidate rules are "first
+run only for an element with element children" and "first run only when there is
+more than one", and they disagree on a card holding two paragraphs.
+
+`saidBy`'s current behaviour is load-bearing for `page-name.ts` as well, so
+whoever takes this should read both callers before changing the join.
+
+---
+
+## 2026-09-11 — the model was reachable from `next start` this run, and the 4 September hang did not reproduce
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+for this run — **not** closed as a standing fact, because nothing was fixed and
+nothing explains the difference
+
+The 2026-09-04 finding — *a Node server in this sandbox cannot reach the model,
+and the failure is a hang* — was restated on 10 September, when it cost that run
+its screenshots: the portal's prompt box was driven for real and the server
+action never returned, so every screen in that report is empty.
+
+**Today the same recipe worked twice.** `next build`, `next start` with
+`LOOM_PORTAL_SESSION_SECRET` and `LOOM_PORTAL_REVIEWERS` set, signed in through
+the form, an ask typed into the real prompt box: both asks came back well inside
+45 seconds, the first applied and the second held. Every screenshot in
+`reports/2026-09-11-portal-the-queue-names-its-parts.md` is a production build of
+its own commit with a live model behind it and a real held proposal on the
+screen.
+
+What was *not* done: `NODE_USE_ENV_PROXY` was not set, and nothing about the
+environment was changed. A plain `fetch` to `api.anthropic.com` from Node 22
+answered `200` in 736ms before the server was started, which is the cheap probe
+worth running first — **if that probe passes, do not plan around the hang.**
+
+So the entry above it stands as a report of what happened on two days and not as
+a property of the sandbox. A run that hits it again should say so, because two
+sightings and one non-sighting is not yet a pattern anybody can act on.
+
+---
+
+## 2026-09-11 — `pkill -f "next start"` kills the shell that runs it, and the port stays held
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
+third road into the trap the 10 September report filed as number four
+
+That report's trap four is: *a script that throws before its cleanup leaves the
+server holding the port, so the next run's readiness probe succeeds against the
+**old** server* — with the old configuration, which then reads as a wrong
+password. It cost that run an attempt. It cost this one two, by a different
+route.
+
+`pkill -f "next start"` matches **its own invoking shell**, because `-f` tests
+the whole command line and the command line contains that string. The shell dies
+mid-script, so everything after the `pkill` — including the restart — never runs,
+and the exit code is a bare `1` with no output to explain it. The server the
+`pkill` was meant to replace is often still there, and the readiness probe then
+passes against it.
+
+Both times the symptom was the same and it is the misleading part: **the portal
+answered `200` and said "This portal isn't set up yet"**, which reads as a
+configuration bug in the diff under test rather than as an old process.
+
+What works, for whoever writes the shared recipe:
+
+- Find the pid and `kill -9 <pid>` it, or match on the port rather than on
+  `next start`.
+- **Start the server on a port no previous attempt used.** It costs nothing and
+  it makes "am I talking to the server I just started" un-askable.
+- Probe for a string only the *new* configuration produces — here, the absence of
+  "This portal isn't set up yet" — rather than for `200`.
+
+The key length is the other half worth writing down: `LOOM_PORTAL_REVIEWERS`
+takes `actor:key` and **the key must be at least 24 characters**, or the sign-in
+form renders disabled with the reason in the operator's disclosure. The form has
+one field, and it is the key — the actor is derived from it.
+
+## 2026-09-12 — a link cannot point at a heading on the page it is already on
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:** open
+
+`linkUrlSchema` accepts an absolute URL or a path beginning with `/`, and
+rejects everything else. A bare fragment is everything else:
+
+```
+{"code":"invalid-props","type":"loom.link",
+ "issues":[{"path":"href","message":"must be an absolute URL, or a path beginning with / on this site"}]}
+```
+
+Found building `prototypes/ski-apparel`, a single long page with a nav bar
+across the top. `href: "#helmets"` is refused, so the page uses `href:
+"/#helmets"` instead — which works here only because the page *is* the site
+root. On any page that is not `/`, that link leaves the page the reader is on
+and jumps to the front door's anchor instead, which is a worse failure than a
+refusal because nothing reports it.
+
+**Why the schema is right to be suspicious.** It exists so a proposal cannot
+point a visitor at `javascript:` or an attacker's origin
+([0053](decisions/0053-a-url-in-the-tree-is-checked-against-a-scheme-allowlist.md)),
+and a fragment is not a scheme it can check. But a same-page anchor reaches no
+origin at all — it is the one href that provably cannot leave the page — so the
+argument for the allowlist does not reach it.
+
+Every primitive taking an `href` has this: `loom.link`, `loom.action`,
+`loom.card`, `loom.feature`, `loom.logo`. Six sections and a nav bar is an
+ordinary shape for a marketing page, and `loom.section` already takes an
+`anchor` prop to be linked *to* — so the library can currently mark a
+destination it has no way to link at.
+
+**What would close it:** allow `#fragment` where the fragment is a valid id, in
+the same schema and with the same test that covers the scheme allowlist.
+
+## 2026-09-12 — a broadcaster's `types` filter applies to every kind at once
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** closed
+by `framework-signal-types-per-kind` — `types` takes a list per kind, and 0136 is amended. The ski rail now asks for exactly what it shows.
+
+Found switching `prototypes/ski-apparel` to `@loom/runtime/signals`.
+
+`broadcastReaderSignals` takes one `types` list, and it filters all four kinds by
+it. A host rarely wants that. The ski rail wants **time on screen** for sections
+(`loom.hero`, `loom.section`), **activations** for the links and buttons inside
+them (`loom.link`, `loom.action`), and **disclosures** for questions (`loom.faq`).
+With one list it has to name all five types for all four kinds, so every batch
+also carries `viewed` and `dwelled` for every link and button on screen — about
+ten `dwelled` signals a second on this page, most of which nobody asked for.
+
+The alternative a host has today is filtering after the fact, which means paying
+to gather, batch and send signals only to throw them away.
+
+**What would close it:** let `types` be keyed by kind —
+`types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] }` —
+with a plain list still meaning "these types, every kind". The ledger already
+separates the two paths (visibility and events), so the filter splits along a
+seam that exists. A decision record would amend 0136's configuration paragraph.
+
+## 2026-09-12 — the reader-signal broadcaster observes only the nodes present when it starts
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+
+`broadcastReaderSignals` finds the addressed elements under its root once, when
+it is called, and observes those. Anything rendered later is never observed for
+`viewed` or `dwelled`: a band streamed in behind a Suspense boundary, a region a
+client component mounts after hydration, a list that grows. Clicks and
+disclosures are unaffected, because both are delegated from the root and read the
+nearest addressed element at the moment they happen.
+
+A client-side navigation is the sharpest case: the host gets a new tree and
+revision, and a broadcaster left running on the old root reports nothing more.
+Today the host must `stop()` and start again, and nothing says so.
+
+**What would close it:** a `MutationObserver` on the root for added and removed
+addressed elements (the broadcaster already runs one for disclosures), and a
+sentence in the module documentation that a new root or revision is a new
+broadcast. **Not in scope:** anything about storing or interpreting signals — the
+maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
+
+## 2026-09-12 — reader signals have an API reference and no guide
+
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+
+`@loom/runtime/signals` and `@loom/runtime/signals/broadcast` shipped today (0136)
+and appear in the generated reference. Nothing tells a host how the pieces fit:
+render with `addressed: true`, start the broadcaster from the browser entry (the
+package entry pulls in about 60 KB of schema library a browser does not need),
+choose `kinds` and per-kind `types`, and parse what arrives with
+`parseReaderSignalBatch`.
+
+The two facts most worth a paragraph: **a signal carries no content** — words
+come from the tree at the revision the batch names — and **measurement is the
+host's setting, never a prop in the tree**. `prototypes/ski-apparel` is a working
+end-to-end example to read from, not to copy code out of.

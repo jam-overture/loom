@@ -635,8 +635,8 @@ The output:
 
 ```
 registry built? true
-loom.exploding: could not be probed (calling it outside a renderer threw: boom); placement not probed (calling it outside a renderer threw: boom)
-throwsOnDeclaredProps: []
+loom.exploding: could not be probed (threw under every configuration probed: {} (boom), {"tone":"calm"} (boom), {"tone":"loud"} (boom)); placement not probed (threw under every configuration probed: {} (boom), {"tone":"calm"} (boom), {"tone":"loud"} (boom))
+throwsOnDeclaredProps: [{"type":"loom.exploding","failures":[{"props":{},"reason":"boom"},{"props":{"tone":"calm"},"reason":"boom"},{"props":{"tone":"loud"},"reason":"boom"}],"everyConfiguration":true}]
 notProbeable: ["loom.exploding"]
 notDecorated: []
 ```
@@ -645,14 +645,45 @@ A component that throws unconditionally **registers fine**. That is the purity
 rule with a face on it: nothing in `createPrimitiveRegistry` calls it, so
 nothing in `createPrimitiveRegistry` can find out.
 
-Now the answer most readers get wrong: it is in `notProbeable` and **not** in
-`throwsOnDeclaredProps`, and `notDecorated` is empty. A component that throws
-under *every* configuration answered nothing at all, so the verdict is "I could
-not judge this" rather than "this fails". `throwsOnDeclaredProps` is for a
-component that answered under some configurations and threw under others — a
-different fault, which Exercise E produces.
+It is in **both** lists, and the second one carries a flag. `notProbeable` says
+the probe never got an answer; `throwsOnDeclaredProps` says what it threw on,
+under `everyConfiguration: true`. Write down, before reading on, what that flag
+has to be *for* — a list that reports everything and distinguishes nothing would
+not need one.
 
-And `notDecorated` being empty is the point of the whole three-valued design. A
+Here is what it is for, and it is the distinction the two lists exist to hold
+apart. `everyConfiguration: false` means some configurations rendered and this
+one threw: the component is callable and a value its own schema accepts crashes
+it. **Certain**, and Exercise E produces it. `everyConfiguration: true` means
+nothing answered at all — and from outside a renderer, a broken component and a
+*hook-using* one are indistinguishable. Both are functions, both throw, and the
+error React raises for a hook outside a render is a message rather than a type.
+A hook-using component is a legitimate primitive
+([0012](../decisions/0012-conformance-is-probed-and-reported-not-enforced.md)),
+so the audit reports rather than concludes.
+
+Which means a host reads the two halves differently: one with no hook-using
+primitives asserts the whole list empty, and one that ships them asserts the
+`false` half and reads the rest.
+
+**This is the paragraph that used to teach the opposite**, and the reason is
+worth more than the correction. Run on 24 August, this exercise printed
+`throwsOnDeclaredProps: []` — the component that throws on *every* value its
+schema accepts was absent from the list whose stated purpose is the fault where
+*a tree the validator accepts can take the page down*. The most extreme
+instance of the fault was missing from the list that names the fault, and it was
+sitting instead in the one list a host cannot assert empty, beside the class and
+hook-using components that belong there.
+
+That was filed, and it became
+[0090](../decisions/0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md),
+which draws the line at *whether the probe got as far as calling the component*
+and adds the flag rather than the silence. So the transcript above is the second
+answer this exercise has given, and the first one is why the design changed.
+Neither reading was a misunderstanding of the code; the code was wrong, and
+running it is how anybody found out.
+
+And `notDecorated` being empty is still the point of the three-valued design. A
 host asserting `notDecorated` is empty is asserting something true. It is not
 asserting that everything is fine.
 
@@ -784,7 +815,7 @@ configurations: [{},{"kind":"text"},{"kind":"select"},{"required":false},{"requi
 loom.conditional: spreads loom.editable; renders its children
 loom.single: spreads loom.editable; renders its children; threw on {"kind":"select"} (no)
 unplacedSlots: []
-throwsOnDeclaredProps: [{"type":"loom.single","failures":[{"props":{"kind":"select"},"reason":"no"}]}]
+throwsOnDeclaredProps: [{"type":"loom.single","failures":[{"props":{"kind":"select"},"reason":"no"}],"everyConfiguration":false}]
 ```
 
 **Five configurations, not eight.** The sum of the choices — the default, then
@@ -799,7 +830,10 @@ anyway, which is the better way to know it.
 
 **`loom.single` is caught, and named rather than counted.** The failure carries
 `{"kind":"select"}` — the whole reproduction, in the report, because a person
-reading it has to reproduce it.
+reading it has to reproduce it. And it carries `everyConfiguration: false`: this
+is the certain half of the list from Exercise C, the one a host asserts empty
+whatever else it ships, because something rendered and this configuration did
+not.
 
 **Neither slot is reported unplaced**, and this is the row of the table you
 should check your prediction against. `loom.conditional` places `options` under
@@ -980,9 +1014,13 @@ answer, then check.**
    about a declared slot, one about decoration. Then say what the third one
    would hide if it were resolved like the first two.
 4. A component that throws under every configuration and a component that throws
-   under one are reported differently. Name both reports and say what a host
-   should do about each. Then say which of the two `notProbeable` shares a
-   verdict with, and why that is not a false reassurance.
+   under one reach the same list and are told apart by one field. Name the field
+   and say which value the audit is *certain* of. Then the part worth getting
+   exactly right: say which of the two also appears in `notProbeable`, name the
+   legitimate primitive that appears there for a reason that is not a fault at
+   all, and say what a host asserts about the list in each case. Finally: this
+   was not the reporting when this lesson was first written. Say what the old
+   reporting was and what was wrong with it, in terms of what the list is *for*.
 5. `createPrimitiveRegistry` is pure and never calls a component. Give both
    reasons — they are different kinds of reason — and say which of the two would
    still hold if every React component in the world could be called as a plain

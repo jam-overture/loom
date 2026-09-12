@@ -8,8 +8,10 @@ import { ProposalEffectView } from "./proposal-effect"
 const operation = (over: Partial<OperationEffect> = {}): OperationEffect => ({
   op: "configure",
   verb: "reconfigure",
-  subject: "loom.heading",
+  subject: { name: "the heading “Ship faster”", nodeId: "n_h1" },
+  label: "loom.heading",
   place: ["loom.page", "loom.card"],
+  placeNames: ["the page", "the card"],
   detail: "1 value",
   into: null,
   before: null,
@@ -62,7 +64,9 @@ describe("ProposalEffectView", () => {
   it("leads with what would happen, in a sentence", () => {
     const { container } = render(<ProposalEffectView effect={effect()} />)
 
-    expect(surfaceOf(container)).toContain("Changes the loom.heading's title.")
+    expect(surfaceOf(container)).toContain(
+      "Changes the title of the heading “Ship faster” n_h1."
+    )
   })
 
   /**
@@ -103,10 +107,18 @@ describe("ProposalEffectView", () => {
     expect(surfaceOf(container)).toContain("taken away")
   })
 
-  it("says what the breadcrumb is a path to", () => {
+  /**
+   * The breadcrumb is prose now, and the labelled path it replaced is under the
+   * disclosure rather than gone. One row naming one part two ways — *the card*
+   * in the sentence and `loom.card` in monospace directly under it — is the
+   * thing this pair of assertions exists to stop coming back.
+   */
+  it("says what the breadcrumb is a path to, in the voice of the sentence above it", () => {
     const { container } = render(<ProposalEffectView effect={effect()} />)
 
-    expect(surfaceOf(container)).toContain("Inside loom.page › loom.card")
+    expect(surfaceOf(container)).toContain("Inside the page › the card")
+    expect(surfaceOf(container)).not.toContain("loom.page")
+    expect(recordOf(container)).toContain("loom.page › loom.card")
   })
 
   /**
@@ -275,12 +287,20 @@ describe("ProposalEffectView", () => {
       <ProposalEffectView
         effect={effect({
           operations: [
-            operation({ op: "remove", verb: "delete", subject: "loom.card", changes: [], carries: 1 }),
+            operation({
+              op: "remove",
+              verb: "delete",
+              subject: { name: "the card “Autumn arrivals”", nodeId: "n_c1" },
+              label: "loom.card",
+              changes: [],
+              carries: 1,
+            }),
             operation({
               op: "insert",
               verb: "add",
-              subject: "loom.heading",
-              into: "loom.band",
+              subject: { name: "the heading “Prices”", nodeId: "n_h9" },
+              label: "loom.heading",
+              into: "the band",
               changes: [],
               carries: 1,
             }),
@@ -295,8 +315,8 @@ describe("ProposalEffectView", () => {
     )
 
     expect(steps).toEqual([
-      "Deletes the loom.card, which has nothing inside it.",
-      "Adds a loom.heading at the end of loom.band.",
+      "Deletes the card “Autumn arrivals” n_c1, which has nothing inside it.",
+      "Adds the heading “Prices” n_h9 at the end of the band.",
     ])
   })
 })
