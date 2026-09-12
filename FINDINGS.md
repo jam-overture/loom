@@ -19472,7 +19472,8 @@ the same schema and with the same test that covers the scheme allowlist.
 
 ## 2026-09-12 — a broadcaster's `types` filter applies to every kind at once
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom framework` · **Status:** closed
+by `framework-signal-types-per-kind` — `types` takes a list per kind, and 0136 is amended. The ski rail now asks for exactly what it shows.
 
 Found switching `prototypes/ski-apparel` to `@loom/runtime/signals`.
 

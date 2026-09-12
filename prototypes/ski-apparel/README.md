@@ -40,7 +40,8 @@ What happens, end to end:
    id and type, and the root carries the tree id and revision. `?rail=off` is the
    page a visitor gets: no rail and no ids.
 2. **`rail.client.mjs` starts `broadcastReaderSignals`** with the settings a host
-   would choose — which primitive types to report on, and a one-second batch. The
+   would choose — which primitive types to report on for each kind of signal, and
+   a one-second batch. The
    dev server bundles it with esbuild at startup.
 3. **Each batch is read twice.** The rail listens for the `loom:signals` DOM event
    and folds batches into what it shows (`readings.mjs`). `send` posts the same

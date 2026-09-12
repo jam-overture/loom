@@ -49,5 +49,18 @@ export const legendOf = (tree) => {
   return { revision: tree.revision, sections, jumps, questions }
 }
 
-/** The primitive types the rail has anything to say about — the host's `types` setting. */
-export const RAIL_TYPES = ["loom.hero", "loom.section", "loom.link", "loom.action", "loom.faq"]
+/**
+ * What the rail asks the broadcaster for, per kind — the host's `types` setting.
+ *
+ * Time on screen for the five bands, activations for what jumps between them,
+ * disclosures for the questions. Asking per kind is what keeps a batch to what
+ * the rail shows: one list for all four would also buy dwell for every link.
+ */
+const BANDS = ["loom.hero", "loom.section"]
+
+export const RAIL_TYPES = {
+  viewed: BANDS,
+  dwelled: BANDS,
+  activated: ["loom.link", "loom.action"],
+  disclosed: ["loom.faq"],
+}
