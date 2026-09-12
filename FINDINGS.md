@@ -19568,6 +19568,118 @@ page lands.
 
 ---
 
+## 2026-09-12 — the data seam has been published for four weeks and nothing in the library reads one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+the page that needed it shipped around it
+
+*Where the content comes from* is the site's page on `loom:data`. Writing it
+meant answering a reader's obvious next question — *so which primitive do I put
+this on?* — and the honest answer is **none of them**. No primitive in
+`src/primitives/` reads `loom.data`, four weeks after
+[0058](decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)
+shipped the seam and named the gap in its own consequences:
+
+> **No primitive in the starter library binds anything yet.** The seam exists and
+> is proved by tests; what is not yet built is the authoring half — a primitive
+> declaring which binding names it reads, so the catalogue can tell a model that
+> `loom.services` wants a `services` binding. **That is the next unit**, and it
+> changes `definePrimitive` rather than anything decided here.
+
+It was not the next unit. It has not been any unit since 15 August, and the page
+had to say so out loud in a warning callout, because a reader who copies the
+example needs to know that both halves of it are theirs to write.
+
+**Two separate things are missing and one field would settle both.**
+
+1. **Which binding names a primitive reads.** `PrimitiveDefinition` declares
+   `type`, `description`, `props`, `slots` and `submits`. Nothing says this
+   primitive wants a `services` binding, so nothing can check that a node
+   carrying one is a node that will use it, and the catalogue cannot tell a model
+   which primitive to reach for when somebody asks for their services.
+2. **What shape it expects back.** The seam validates an answer against the
+   **source's** schema. A primitive does not know which source it was bound to,
+   so it receives `JsonValue` and re-parses by hand — the documented example
+   carries a second Zod schema and three exits for that reason alone. A
+   `catalogue.services` answer bound to a node whose primitive wants a string is
+   a mistake nothing catches until render.
+
+Recommendation, unchanged from 0058's own: a declared `data` field on
+`definePrimitive` naming each binding this primitive reads and the schema it
+expects, projected into the catalogue beside `props`. The docs page is written to
+survive it — the callout is the only part that would be deleted.
+
+`Loom primitives` is the other lane this reaches: once the field exists, a
+starter primitive that actually reads a binding is what makes the seam
+demonstrable on a page rather than describable.
+
+---
+
+## 2026-09-12 — `dataCatalogue` is projected for a model that is never shown it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+
+0058 says why the projection exists, in the record's own words: *"a source a
+model was never told about is one it can only guess at"*. `dataCatalogue` builds
+that projection from the registry, and **nothing in the repository calls it.**
+
+`InterpreterConfig` takes `catalogue` (the primitives) and `themeCatalogue` (the
+palettes, font packs and presets), and `buildUserMessage` puts both in the
+prompt. There is no third field. So a model asked to put somebody's services on
+a page has no way to know that `catalogue.services` exists, what params it takes,
+or that a source registry is a thing at all — and a binding it invents is refused
+at the seam as `no-such-source`, which is the right refusal for a guess nobody
+gave it the information to avoid.
+
+The consequence for this site is small and worth naming: the new page teaches
+bindings as something **you** write, because that is what is true today, and
+says nothing about a model proposing one. If the catalogue reaches the prompt,
+that section is rewritten rather than merely extended.
+
+Recommendation: a `dataCatalogue` field on `InterpreterConfig`, rendered in the
+prompt beside the primitive catalogue, under the same rule the primitives block
+already follows — absent when the host wired none.
+
+---
+
+## 2026-09-12 — a repointed form is weighed by the runtime; a repointed binding is not
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around on the page, and the workaround is one line of policy
+
+A binding decides which of a deployment's data appears on a public page.
+Repointing one is a single `configure` against a single prop — `loom:data` from
+`catalogue.services` to `orders.mine` — and this is what the Gate makes of it,
+produced by *Where the content comes from* as it builds:
+
+| Policy | Verdict | Stakes | Reason |
+| --- | --- | --- | --- |
+| `defaultGatePolicy` | **accepted** | low | `within-policy` — reversible, within the stakes ceiling, and confidently interpreted |
+| the same, plus `loom:data` in `protectedPropKeys` | requires confirmation | high | `stakes-above-ceiling` — configures protected `loom:data` |
+
+The workaround exists, it is one line, and the page tells a reader to add it. The
+finding is the **asymmetry** beside it. `loom:submit` has its own stake factor,
+host-independent and unskippable, and `stakes.ts` gives the reason:
+
+> Host-independent, so no vocabulary knob: `loom:submit` is the runtime's own
+> key, and both endpoints were registered by the host in either case. […] Where a
+> visitor's data goes should not depend on who asked for it to move.
+
+Every clause of that is true of `loom:data` with one word changed: a binding is
+the runtime's own key, both sources were registered by the host in either case,
+and **which of a deployment's data comes out** should not depend on who asked for
+it to change. The two keys are the two ends of the same pipe — one is where a
+visitor's data goes, the other is which of the host's data arrives — and only one
+of them is weighed.
+
+Recommendation: a `repointed-binding` factor in `src/runtime/stakes.ts` in the
+shape `redirectedSubmission` already has, measured on both trees, `high`, and
+firing on a node that bound one source before and another after. A node that
+*gains* or *loses* a binding is a different change and `redirection.ts`'s
+reasoning for the submission case probably carries over unchanged. It is the
+framework lane's call and it wants a record; the documentation page is written
+against today's behaviour and would need one sentence changed.
+
 ## 2026-09-12 — the bar cannot group, so a seventh page costs a sixth one its place
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**

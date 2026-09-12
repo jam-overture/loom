@@ -1,0 +1,323 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  WhatComesBack,
+  WhatTheTreeAsks,
+  WhenThereIsNoAnswer,
+  WhoMayRepointIt,
+} from "@/app/(docs)/_components/data-seam"
+
+export const metadata = pageMetadata("building-with-loom", "where-content-comes-from")
+
+# Where the content comes from
+
+Every example on this site so far has had its words written into it. "Hello from
+a tree" is in the tree. The three features in the grid below are in the tree.
+Somebody typed them, or asked for them and the Gate let the change through, and
+there they sit.
+
+<Example id="a-container-and-its-children" />
+
+A real page is mostly not like that. A shop's list of services lives in the
+shop's database. It changes on a Tuesday afternoon because somebody added a
+price, and nobody proposes that change, reviews it or undoes it. It is not part
+of the page's history because it is not part of the page.
+
+So a tree can **ask** for it instead. The page says *put the services here*, and
+your app answers when somebody loads it.
+
+That is the whole of this page: the question, who answers it, and what happens
+when nobody can.
+
+## A binding is a question
+
+Here is what asking looks like, on the node that wants the answer:
+
+```ts object-body
+"loom:data": {
+  services: { source: "catalogue.services", params: { tag: "baking", limit: 3 } },
+}
+```
+
+Three things and no more.
+
+**`services`** is the name this node will read the answer under — your own word,
+like a slot name. **`source`** names something your deployment registered; the
+node cannot reach anything else. **`params`** is what to ask with.
+
+Nothing about the reply is in there, and that is the point. A tree stays a
+document rather than a copy of your database: two deployments serving the same
+revision show the same page asking the same questions, and differ only where
+their data differs.
+
+A whole page of them, read out of a real tree:
+
+<WhatTheTreeAsks />
+
+Four bindings, three questions. The band and the grid inside it both want the
+shop's services, and both wrote the same thing with the keys the other way
+round — which is what happens when two changes are planned months apart. The
+planner canonicalises the order, so that is **one** question and one answer
+shared between them.
+
+<Callout>
+  **Asking twice is the cost you never stop paying.** The block that started
+  this design bound three fields of one profile to one card, and three round
+  trips for one row is a cost paid on every request forever. Deduplication is
+  not an optimisation here; it is the reason the questions are collected before
+  any of them is asked.
+</Callout>
+
+## Your half: registering a source
+
+A source is the thing that answers. It has a name, a line about itself, what it
+will accept, what it promises to answer with, and the code that actually goes
+and gets it.
+
+```ts
+import { z } from "zod"
+import { createDataRegistry, defineSource, describeDataRegistryError } from "@loom/runtime"
+
+const services = defineSource({
+  id: "catalogue.services",
+  description: "What this shop offers, most popular first.",
+  params: z.object({
+    tag: z.string().min(1).max(40),
+    limit: z.number().int().min(1).max(12),
+  }),
+  answers: z.array(z.object({ name: z.string(), price: z.string() })),
+  adapter: {
+    fetch: async ({ params }) => {
+      const rows = await db.services(params.tag, params.limit)
+
+      return { ok: true, value: rows }
+    },
+  },
+})
+
+const built = createDataRegistry([services])
+
+if (!built.ok) throw new Error(describeDataRegistryError(built.error))
+
+const sources = built.value
+```
+
+If that shape looks familiar, it is meant to: it is `definePrimitive` with a
+different noun. A deployment declares what exists, a registry is the allowlist,
+and nothing in a tree can reach past it.
+
+**Two schemas, and they are checked at different moments.** `params` is checked
+before your adapter is called. `answers` is checked after it returns.
+
+The first one is there because **params live in the tree**, and everything in a
+tree got there through a proposal. Anything that can ask for a `configure` can
+ask for different params. A source that accepted a free-form query string would
+be handing that to whatever plans changes on your deployment — and a cap of
+twelve in the schema is a query that never runs, where a cap of twelve inside
+your adapter is a query that does.
+
+The second is there because your adapter's *type* is a claim about a database,
+and the schema is the only thing that makes the claim true on the day somebody
+renames a column.
+
+<Callout>
+  **Today you write the bindings yourself.** A model is shown the primitives your
+  deployment registered and the themes it can name — and not the sources. It can
+  emit a binding, but only by guessing at a source id, and a guess is refused at
+  the seam. So in practice a binding is written by whoever builds the page, and
+  the schema above is what will still be true on the day that changes. Filed.
+</Callout>
+
+## Asking, before anything is drawn
+
+Rendering a tree is synchronous. It has no `await` in it anywhere, which is what
+lets it run inside a Server Component and what makes two renders of one revision
+agree. Going and getting somebody's services is the opposite of that.
+
+So the asking happens **before** the walk, and it is two lines in whatever
+already loads the page:
+
+```ts
+import { resolveTreeData } from "@loom/runtime"
+import { renderLoomTree } from "@loom/runtime/react"
+
+const data = await resolveTreeData(page, { registry: sources })
+
+const rendered = renderLoomTree(page, { resolver: primitives, validator: primitives, data })
+```
+
+`resolveTreeData` reads the tree, works out the questions, asks all of them at
+once, and hands back the answers keyed the way the renderer wants them. Asking
+them at once rather than one after another is the difference between a page
+waiting for its slowest integration and a page waiting for all of them added up.
+
+Forget the first line and nothing breaks silently: the render comes back with a
+`data-unresolved` diagnostic against every bound node, because a page missing
+the data it asked for should say so.
+
+## What comes back
+
+<WhatComesBack />
+
+The grid does not repeat the list. It says where its answer came from, because
+it is the *same* answer — one question, asked once, handed to both of the nodes
+that asked it.
+
+Every binding gets one of exactly two things: **`ready`, with a value**, or
+**`unavailable`, with a reason**. There is no third state and, in particular,
+there is no way for an answer to be merely absent.
+
+Look at the opening hours. This shop has not filled them in, so the source
+answered `ready` with an empty list — not `unavailable`, and not nothing.
+
+**That distinction is the most important one on this page.** "You have not added
+your opening hours yet" and "we could not reach your opening hours" are different
+sentences, shown to different people, doing different jobs. A shape that could
+not tell them apart would eventually show a reader the wrong one, and the wrong
+one tells somebody their data is gone.
+
+## When there is no answer
+
+Six ways a question goes unanswered, produced by causing all six:
+
+<WhenThereIsNoAnswer />
+
+Two of those never reach your code at all. A source nobody registered and params
+the source refuses are both settled at the seam, which is what makes the schema
+worth writing. The other four are your deployment's own afternoon: a timeout, a
+refusal, an answer that no longer matches its own schema, and an integration that
+threw instead of answering.
+
+The fourth of those is worth a sentence on its own. An adapter is not Loom's
+code — it is a query against somebody's database, or a call to an integration
+having a bad day — so it is wrapped in the one `try` in the whole runtime. A
+rejected promise from one source is one region of a page, never a page that
+500s.
+
+The last row in the table is not one of the six. It is what happens when the
+declaration in the tree is not a binding map at all — a page that came back from
+a database with something the seam cannot read. The whole map is refused
+together and the node renders without data, because answering half of a
+declaration nobody could read would be the hardest kind of failure to notice.
+
+<Callout>
+  **Nothing here takes the page down, and nothing here is thrown.** A node whose
+  binding failed still renders; it is simply handed `unavailable` and a reason,
+  and what to show is its own decision. The render also collects a diagnostic, so
+  the failure is visible to you as well as to whoever is reading.
+</Callout>
+
+## Reading it, in a primitive of your own
+
+The answers arrive beside `props` rather than mixed into them, because the two
+have different authors: props are in the tree, proposed and weighed and
+attributed; data is your answer to a question the tree asked, and it belongs to
+whoever runs the deployment.
+
+```tsx
+import { createElement } from "react"
+import { z } from "zod"
+import { definePrimitive } from "@loom/runtime/sdk"
+import type { LoomPrimitiveProps } from "@loom/runtime/react"
+
+const rows = z.array(z.object({ name: z.string(), price: z.string() }))
+
+export const serviceList = definePrimitive({
+  type: "shop.service-list",
+  description: "The shop's services, read from a catalogue.services binding.",
+  props: z.object({}).strict(),
+  slots: [],
+  component: ({ loom }: LoomPrimitiveProps<Record<string, never>>) => {
+    const answer = loom.data["services"]
+
+    if (answer === undefined || answer.status === "unavailable") {
+      return createElement("p", loom.editable, "We could not load our services just now.")
+    }
+
+    const services = rows.safeParse(answer.value)
+
+    if (!services.success) {
+      return createElement("p", loom.editable, "We could not load our services just now.")
+    }
+
+    if (services.data.length === 0) {
+      return createElement("p", loom.editable, "We have not listed any services yet.")
+    }
+
+    return createElement(
+      "ul",
+      loom.editable,
+      services.data.map((service) =>
+        createElement("li", { key: service.name }, `${service.name} — ${service.price}`)
+      )
+    )
+  },
+})
+```
+
+`loom.data` is always there, empty for the overwhelming majority of nodes that
+bind nothing, so a primitive reads `loom.data.services` without first proving the
+map exists. The three endings in that component are the three cases in order:
+could not be answered, answered with nothing, answered.
+
+<Callout kind="warning">
+  **You have to check the shape yourself, and no primitive you were given reads a
+  binding at all.** The seam validated the answer against the *source's* schema,
+  and a primitive does not know which source it was bound to — so it parses what
+  it can render, as above. And the starter library has no primitive that reads
+  `loom.data`: the ruling that created this seam said the authoring half — a
+  primitive declaring which binding names it reads — was the next thing to build,
+  and it has not been built yet. Until it is, both halves of an example like this
+  one are yours to write. Both gaps are filed rather than papered over here.
+</Callout>
+
+Writing a primitive is [one command and one
+file](/docs/getting-started/scaffolding-a-project), and what a primitive is made
+of is on [Primitives and the registry](/docs/building-with-loom/primitives).
+
+## Who may change a question
+
+A binding decides which of your data appears on a public page. So it matters who
+is allowed to change one — and *repointing* a binding is one `configure` against
+one prop, which is the smallest change there is.
+
+Here is that exact ask, judged twice, against two policies that differ by one
+line:
+
+<WhoMayRepointIt />
+
+The first column is a deployment that has said nothing about its own data. The
+change is reversible, it touches nothing the policy protects, and the Gate
+applies it — so a band that was showing the shop's services quietly starts
+showing somebody's orders instead.
+
+The second column has added one line:
+
+```ts object-body
+protectedPropKeys: ["loom:data"],
+```
+
+`loom:data` is an ordinary prop key as far as that setting is concerned, which is
+why no new knob is needed. A deployment that cares which questions its pages ask
+says so once, and every change to one goes to a person.
+
+<Callout kind="warning">
+  **Nothing makes that decision for you.** A change that repoints a *form* is
+  weighed by the runtime whatever your policy says, because where a visitor's
+  data goes should not depend on who asked for it to move. A change that repoints
+  a *binding* — which of your data comes out — is weighed like any other prop.
+  The asymmetry is filed. Until it is settled, add the line.
+</Callout>
+
+## What your app owes a reader
+
+Four things, and the first two are the ones people forget:
+
+1. **A different sentence for empty and for broken.** They arrive as different
+   shapes precisely so you can tell them apart. Spending them on one message
+   throws away the only thing the seam did for you.
+2. **Something to look at either way.** A node whose binding failed still
+   renders. What it renders is your decision, and blank is a decision.
+3. **A cap in every params schema.** A binding is a prop like any other, and
+   anything that can propose a `configure` can change what you are asked for.
+4. **A line in your policy if the questions matter.** One key, once, before
+   somebody asks for the interesting one.
