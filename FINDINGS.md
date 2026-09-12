@@ -19432,3 +19432,105 @@ headings and export names eagerly, since that half is 12.1 KB gzipped and
 answers most searches, and fetch the prose half on the first keystroke. Nothing
 here settles that — it is the lane's call, and it needs making before the next
 page lands.
+
+---
+
+## 2026-09-12 — the bar cannot group, so a seventh page costs a sixth one its place
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is blocked on it, and the site has paid for it once
+
+`loom.nav` takes a brand region, `loom.link` children as a flat menu, and an
+actions region. There is no way for one item of that menu to **open**, so there
+is no way for a bar to carry seven destinations under two or three headings.
+
+That is the shape of the reference site this lane's brief names. `supabase.com`
+has far more than seven places to send you and a bar of four words, because
+*Product* and *Developers* open. Every marketing site of any size solves the
+same problem the same way, and this one cannot state it.
+
+**What it has cost so far.** The maintainer asked on #166 whether eight items in
+the bar was too many. It was. Since then the answer has been `inMenu: false` —
+a page kept off the bar, reachable from the footer's map and from the pages
+either side of it in the argument — and it has been taken **three times**, for
+`/your-components`, `/what-you-run`, and now for `/` itself, which came off this
+run so that `/when-it-goes-wrong` could go on without the count reaching nine.
+
+Three of seven pages off the bar is a navigation answer nobody would choose. It
+is the answer available.
+
+**Why this lane cannot fix it.** 0067 and this lane's brief both say it plainly:
+a missing primitive is a finding, never a local component. Composing a disclosure
+out of what exists is not available either — `loom.nav` is the only primitive in
+the library that declares the `disclose` behaviour, and 0092 gives the button to
+the runtime and the region to the primitive, so the region has to be a
+primitive's.
+
+**What would answer it.** Either a `loom.nav` that accepts a group among its
+children — a label and a set of links, opening on the same `disclose` contract
+the phone menu already uses — or a `loom.menu-group` that may only be a child of
+one. The second is probably better by 0052's lights: a group is repeated
+content, and a menu grows and shrinks by `insert` and `remove`.
+
+**Not urgent, and worth doing before launch.** The site is navigable today and
+the footer carries the complete map. What it is not is *short at the top*, which
+is the thing the bar is for and the thing #166 asked about.
+
+---
+
+## 2026-09-12 — an hour spent fixing a defect that was not there, and the assertion that refused the fix
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed on the branch — recorded for the method, not because anything is open
+
+`/when-it-goes-wrong`'s opening band offers *See one refused, here*, pointing at
+a band 2,400px below it. Clicked in a browser, it appeared to do nothing: the
+address bar took the fragment and the page stayed at the top.
+
+**The diagnosis was plausible and wrong.** This site keeps the palette in the
+URL, so `internalHref` writes `?theme=minimal` into every link — and a reader on
+the default palette is served the *bare* path. So the link was a different
+address from the one they were on, which makes it a navigation rather than a
+fragment jump. A `selfHref` was written to omit the palette when it is the
+default, so that a self-link is always the reader's own address plus a fragment.
+
+**`pages.test.ts` failed it immediately, on both palette pairs**, and was right
+to: on one palette the link had a query and on the other two it did not, which
+is markup below the root differing under a re-theme — exactly what
+[0049](decisions/0049-a-theme-is-three-ids-in-the-tree.md) forbids, and the one
+difference `withoutPaletteNames` cannot normalise away because it normalises the
+palette's *name* and not the parameter's absence.
+
+**The measurement was the defect.** The scroll was read 900ms after a click that
+triggers a full document load in a development build — before the load had
+finished. With the load waited for, every combination of entry address and link
+form lands the band at the top of the viewport, on both palettes, with the
+ordinary `internalHref` the rest of the site uses. The link had never been
+broken.
+
+Two things worth keeping, and the second is the one that generalises:
+
+- **A browser measurement taken before the page has settled is evidence of
+  nothing.** This lane's last nine runs have been decided by driving the built
+  page, which is right and is why this happened: the instrument that has been
+  finding the real defects produced a confident false one.
+- **The suite refused a change that would have been a real regression**, for a
+  defect that did not exist, before a reviewer saw it. A generic per-route
+  assertion caught a second one this week — the palette in a measurement on
+  11 September, and this. Both were invisible to reading and neither was about
+  the page being worked on.
+
+---
+
+## 2026-09-12 — `fonts.googleapis.com` is still not on the egress allowlist
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — restated, not re-filed
+
+Unchanged since 1 September. Every screenshot this lane has published, including
+this run's six, is in the fallback face rather than Geist. It changes no
+assertion and it matters because this is the one surface judged by eye, and it
+has been judged in a font it does not ship in.
+
+Two static font hosts, `fonts.googleapis.com` and `fonts.gstatic.com`. Neither
+can receive a credential.

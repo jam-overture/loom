@@ -12,6 +12,13 @@ import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { theRulesPageTree } from "./pages/the-rules"
 import { whatYouRunPageTree } from "./pages/what-you-run"
+import {
+  DEMONSTRATED_ASK,
+  piecesIn,
+  whenItGoesWrongPageTree,
+  type RefusalContext,
+  type RefusedRun,
+} from "./pages/when-it-goes-wrong"
 import { yourComponentsPageTree } from "./pages/your-components"
 import { siteRegistry, siteThemes } from "./registry"
 import {
@@ -20,6 +27,7 @@ import {
   THE_RECORD,
   THE_RULES,
   WHAT_YOU_RUN,
+  WHEN_IT_GOES_WRONG,
   YOUR_COMPONENTS,
   type SiteRoute,
 } from "./site"
@@ -42,7 +50,7 @@ import {
  * the front door for, and the run of changes the record page is reporting on —
  * so a page that does not read a field cannot be broken by one arriving.
  */
-export type SitePageContext = RecordContext & MechanismContext
+export type SitePageContext = RecordContext & MechanismContext & RefusalContext
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
 
@@ -51,6 +59,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [HOW_IT_WORKS.path, howItWorksPageTree],
   [THE_RULES.path, theRulesPageTree],
   [THE_RECORD.path, theRecordPageTree],
+  [WHEN_IT_GOES_WRONG.path, whenItGoesWrongPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
   [YOUR_COMPONENTS.path, yourComponentsPageTree],
 ])
@@ -171,10 +180,45 @@ export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
     context.approve === true
   )
 
+/**
+ * The refusal the *when it goes wrong* page prints, run while the page is built.
+ *
+ * The same seam as the three above and the same reason — a page builder is
+ * synchronous and a request through the whole sequence is not — with one
+ * difference worth naming: the request is **fixed here rather than read off the
+ * address**. That page is an argument about what always happens rather than a
+ * place to try things, so every reader of it sees the same refusal, and the one
+ * they see is the one the front door's fifth button runs.
+ *
+ * The counts are taken off the page the request was handed and the page the
+ * sequence gave back. They are the band's whole claim, so they are measured
+ * rather than asserted: `runAsk` returns the page it was given when nothing is
+ * applied, and two equal numbers are that fact printed instead of promised.
+ */
+export const refusalFor = async (context: SitePageContext): Promise<RefusedRun | undefined> => {
+  const ask = askById(DEMONSTRATED_ASK)
+  if (ask === undefined) return undefined
+
+  const page = treeFor(HOME, { origin: context.origin, theme: context.theme })
+  const run = await runAsk(page, ask)
+
+  return {
+    record: run.record,
+    piecesBefore: piecesIn(page.root),
+    piecesAfter: piecesIn(run.page.root),
+  }
+}
+
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<LoomTree> => {
+  if (route.path === WHEN_IT_GOES_WRONG.path) {
+    const refusal = await refusalFor(context)
+
+    return treeFor(route, refusal === undefined ? context : { ...context, refusal })
+  }
+
   if (route.path === HOW_IT_WORKS.path) {
     return treeFor(route, { ...context, trail: await trailFor(context) })
   }
