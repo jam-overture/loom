@@ -60,6 +60,11 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "host",
   },
   {
+    specifier: "@loom/runtime/signals/broadcast",
+    summary: "The reader-signal broadcaster alone, for a browser bundle — about 5 KB, with no schema library.",
+    audience: "host",
+  },
+  {
     specifier: "@loom/runtime/telemetry",
     summary: "The journal — proposal, provenance, disposition and outcome, recorded as they happen.",
     audience: "host",

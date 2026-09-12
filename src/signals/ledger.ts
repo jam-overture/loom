@@ -12,6 +12,15 @@ import type { ReaderSignal } from "./signal.js"
  * arithmetic out of the DOM code is what lets the one part that can be wrong in
  * a subtle way (time counted twice, or counted while nobody was looking) be
  * tested exactly.
+ *
+ * **Its state is held inside the ledger and changed in place.** A ledger that
+ * returned a fresh copy on every call was the first version, and it cost the
+ * square of the page: every node seen for the first time copied the set of every
+ * node seen before it, so scrolling a 6,000-node page took twelve times as long
+ * as a 1,000-node one rather than six. A ledger is one broadcaster's private
+ * accumulator, reached by nothing else, which is the same shape
+ * `collectTelemetry` holds its buffer in — the state is contained, and every
+ * call is constant time.
  */
 
 export type SignalAddress = {
@@ -19,150 +28,110 @@ export type SignalAddress = {
   readonly type: PrimitiveType
 }
 
+export type SignalLedger = {
+  /** A node came into view. The first time it is seen while the page is visible, it is also `viewed`. */
+  readonly entered: (address: SignalAddress, now: number) => void
+  readonly left: (nodeId: NodeId, now: number) => void
+  /** Something a reader did, queued as it happened. */
+  readonly noted: (signal: ReaderSignal) => void
+  /** The page stopped being looked at. Open stretches close; the nodes stay on screen. */
+  readonly hid: (now: number) => void
+  /** The page is looked at again. What is on screen starts counting, and is viewed if it never was. */
+  readonly showed: (now: number) => void
+  /**
+   * Everything owed since the last drain. Open stretches are cut at `now` and
+   * restarted from it, so a node that stays on screen across many batches is
+   * counted once per millisecond, in whichever batch that millisecond fell.
+   * Sub-millisecond remainders are dropped: a `dwelled` must be a whole number.
+   */
+  readonly drain: (now: number) => readonly ReaderSignal[]
+}
+
 type OnScreen = {
   readonly address: SignalAddress
   /** When the current stretch started, or `null` while the page is hidden. */
-  readonly since: number | null
+  since: number | null
 }
 
-export type SignalLedger = {
-  readonly onScreen: ReadonlyMap<NodeId, OnScreen>
-  readonly seen: ReadonlySet<NodeId>
-  readonly dwell: ReadonlyMap<NodeId, { readonly address: SignalAddress; readonly ms: number }>
-  readonly queued: readonly ReaderSignal[]
-  readonly hidden: boolean
-}
+export const createSignalLedger = (hiddenAtStart = false): SignalLedger => {
+  const onScreen = new Map<NodeId, OnScreen>()
+  const seen = new Set<NodeId>()
+  const dwell = new Map<NodeId, { readonly address: SignalAddress; ms: number }>()
+  let queued: ReaderSignal[] = []
+  let hidden = hiddenAtStart
 
-export const emptyLedger = (hidden = false): SignalLedger => ({
-  onScreen: new Map(),
-  seen: new Set(),
-  dwell: new Map(),
-  queued: [],
-  hidden,
-})
+  const accrue = (entry: OnScreen, now: number): void => {
+    if (entry.since === null || now <= entry.since) return
 
-const withEntry = <K, V>(map: ReadonlyMap<K, V>, key: K, value: V): ReadonlyMap<K, V> =>
-  new Map(map).set(key, value)
+    const total = dwell.get(entry.address.nodeId)
+    if (total === undefined) dwell.set(entry.address.nodeId, { address: entry.address, ms: now - entry.since })
+    else total.ms += now - entry.since
+  }
 
-const withoutEntry = <K, V>(map: ReadonlyMap<K, V>, key: K): ReadonlyMap<K, V> => {
-  const next = new Map(map)
-  next.delete(key)
-  return next
-}
-
-/** Close one stretch of time on screen into the dwell total. */
-const accrue = (ledger: SignalLedger, entry: OnScreen, now: number): SignalLedger => {
-  if (entry.since === null || now <= entry.since) return ledger
-
-  const current = ledger.dwell.get(entry.address.nodeId)?.ms ?? 0
+  /** Only ever while visible: a node on screen in a tab nobody is looking at has not been viewed. */
+  const sighted = (address: SignalAddress, now: number): void => {
+    if (seen.has(address.nodeId)) return
+    seen.add(address.nodeId)
+    queued.push({ kind: "viewed", ...address, at: now })
+  }
 
   return {
-    ...ledger,
-    dwell: withEntry(ledger.dwell, entry.address.nodeId, {
-      address: entry.address,
-      ms: current + (now - entry.since),
-    }),
-  }
-}
+    entered: (address, now) => {
+      if (onScreen.has(address.nodeId)) return
+      onScreen.set(address.nodeId, { address, since: hidden ? null : now })
+      if (!hidden) sighted(address, now)
+    },
 
-/**
- * A node is seen for the first time: `viewed`, once for the life of the page.
- *
- * Only ever called while the page is visible. A node that is on screen in a tab
- * nobody is looking at has not been viewed — a page opened in the background
- * would otherwise report its whole first screen as read.
- */
-const sighted = (ledger: SignalLedger, address: SignalAddress, now: number): SignalLedger =>
-  ledger.seen.has(address.nodeId)
-    ? ledger
-    : {
-        ...ledger,
-        seen: new Set(ledger.seen).add(address.nodeId),
-        queued: [...ledger.queued, { kind: "viewed", ...address, at: now }],
+    left: (nodeId, now) => {
+      const entry = onScreen.get(nodeId)
+      if (entry === undefined) return
+      accrue(entry, now)
+      onScreen.delete(nodeId)
+    },
+
+    noted: (signal) => {
+      queued.push(signal)
+    },
+
+    hid: (now) => {
+      if (hidden) return
+      hidden = true
+      for (const entry of onScreen.values()) {
+        accrue(entry, now)
+        entry.since = null
+      }
+    },
+
+    showed: (now) => {
+      if (!hidden) return
+      hidden = false
+      for (const entry of onScreen.values()) {
+        entry.since = now
+        sighted(entry.address, now)
+      }
+    },
+
+    drain: (now) => {
+      if (queued.length === 0 && dwell.size === 0 && (hidden || onScreen.size === 0)) return []
+
+      if (!hidden) {
+        for (const entry of onScreen.values()) {
+          accrue(entry, now)
+          entry.since = now
+        }
       }
 
-/** A node came into view. Returning after the first time is dwell and nothing else. */
-export const entered = (ledger: SignalLedger, address: SignalAddress, now: number): SignalLedger => {
-  if (ledger.onScreen.has(address.nodeId)) return ledger
+      const dwelled: ReaderSignal[] = []
+      for (const { address, ms } of dwell.values()) {
+        const whole = Math.floor(ms)
+        if (whole > 0) dwelled.push({ kind: "dwelled", ...address, ms: whole })
+      }
 
-  const placed = {
-    ...ledger,
-    onScreen: withEntry(ledger.onScreen, address.nodeId, { address, since: ledger.hidden ? null : now }),
-  }
+      const signals = queued.length === 0 ? dwelled : [...queued, ...dwelled]
+      queued = []
+      dwell.clear()
 
-  return ledger.hidden ? placed : sighted(placed, address, now)
-}
-
-export const left = (ledger: SignalLedger, nodeId: NodeId, now: number): SignalLedger => {
-  const entry = ledger.onScreen.get(nodeId)
-  if (entry === undefined) return ledger
-
-  return { ...accrue(ledger, entry, now), onScreen: withoutEntry(ledger.onScreen, nodeId) }
-}
-
-/** Something a reader did, queued as it happened. */
-export const noted = (ledger: SignalLedger, signal: ReaderSignal): SignalLedger => ({
-  ...ledger,
-  queued: [...ledger.queued, signal],
-})
-
-/**
- * The page stopped being looked at. Every open stretch closes now, and the nodes
- * stay on screen — they did not move, nobody is reading them.
- */
-export const hid = (ledger: SignalLedger, now: number): SignalLedger => {
-  if (ledger.hidden) return ledger
-
-  const closed = [...ledger.onScreen.values()].reduce((next, entry) => accrue(next, entry, now), ledger)
-
-  return {
-    ...closed,
-    hidden: true,
-    onScreen: new Map([...ledger.onScreen].map(([id, entry]) => [id, { ...entry, since: null }])),
-  }
-}
-
-/** The page is being looked at again. Whatever is on screen starts counting, and is viewed if it never was. */
-export const showed = (ledger: SignalLedger, now: number): SignalLedger => {
-  if (!ledger.hidden) return ledger
-
-  const resumed: SignalLedger = {
-    ...ledger,
-    hidden: false,
-    onScreen: new Map([...ledger.onScreen].map(([id, entry]) => [id, { ...entry, since: now }])),
-  }
-
-  return [...resumed.onScreen.values()].reduce((next, entry) => sighted(next, entry.address, now), resumed)
-}
-
-/**
- * Everything owed since the last drain, and the ledger that is left.
- *
- * Open stretches are cut at `now` and restarted from it, so a node that stays on
- * screen across many batches is counted once per millisecond, in whichever batch
- * that millisecond fell. Sub-millisecond remainders are dropped rather than
- * carried: a `dwelled` must be a positive whole number, and a fraction nobody
- * could perceive is not worth a rule for carrying it.
- */
-export const drain = (
-  ledger: SignalLedger,
-  now: number
-): { readonly signals: readonly ReaderSignal[]; readonly ledger: SignalLedger } => {
-  const closed = [...ledger.onScreen.values()].reduce((next, entry) => accrue(next, entry, now), ledger)
-
-  const dwelled: ReaderSignal[] = [...closed.dwell.values()]
-    .map(({ address, ms }) => ({ kind: "dwelled" as const, ...address, ms: Math.floor(ms) }))
-    .filter((signal) => signal.ms > 0)
-
-  return {
-    signals: [...closed.queued, ...dwelled],
-    ledger: {
-      ...closed,
-      dwell: new Map(),
-      queued: [],
-      onScreen: new Map(
-        [...closed.onScreen].map(([id, entry]) => [id, { ...entry, since: closed.hidden ? null : now }])
-      ),
+      return signals
     },
   }
 }

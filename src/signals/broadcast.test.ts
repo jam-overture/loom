@@ -267,6 +267,26 @@ describe("broadcastReaderSignals", () => {
     }
   })
 
+  it("keeps no timer running while the page is hidden, and starts one when it is shown", () => {
+    vi.useFakeTimers()
+    try {
+      Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true })
+      start({ flushEveryMs: 1_000 })
+      expect(vi.getTimerCount()).toBe(0)
+
+      Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+      document.dispatchEvent(new Event("visibilitychange"))
+      expect(vi.getTimerCount()).toBe(1)
+
+      Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true })
+      document.dispatchEvent(new Event("visibilitychange"))
+      expect(vi.getTimerCount()).toBe(0)
+    } finally {
+      Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+      vi.useRealTimers()
+    }
+  })
+
   it("reads a page the render seam addressed", () => {
     const { tree } = sampleTree()
     document.body.innerHTML = renderToStaticMarkup(

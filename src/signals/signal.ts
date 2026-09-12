@@ -4,6 +4,8 @@ import { nodeIdSchema, treeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 
+import { READER_SIGNAL_KINDS } from "./kinds.js"
+
 /**
  * What a published page may say about how it is being read.
  *
@@ -27,7 +29,7 @@ import { err, ok, type Result } from "../result.js"
  * means exactly one thing forever (0136).
  */
 
-export const READER_SIGNAL_KINDS = ["viewed", "dwelled", "activated", "disclosed"] as const
+export { READER_SIGNAL_KINDS } from "./kinds.js"
 
 export const readerSignalKindSchema = z.enum(READER_SIGNAL_KINDS)
 
