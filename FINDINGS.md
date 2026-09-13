@@ -22295,7 +22295,18 @@ maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
 
 ## 2026-09-12 — reader signals have an API reference and no guide
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom docs` · **Status:**
+**closed by `docs-23-reader-signals`** — */docs/the-runtime/what-your-readers-do*,
+between *What every ask leaves behind* and *Going to production*. It covers, in
+this order: what a signal is and the four kinds, what one does not carry, the two
+steps that turn it on, which entry point to import from and why, a live
+broadcaster the reader can drive, choosing kinds and types, parsing a batch back,
+and the four things the seam does not do yet. Both facts the finding asked for
+have a section: *What a signal does not carry* is written around the parser
+refusing a signal with a `label` on it, and the configuration callout says
+measurement is an argument to a function rather than a prop a proposal could set.
+`prototypes/ski-apparel` was read rather than copied — the live block's `types`
+is the shape the ski rail wanted, which is what the amendment to 0136 was for.
 
 `@loom/runtime/signals` and `@loom/runtime/signals/broadcast` shipped today (0136)
 and appear in the generated reference. Nothing tells a host how the pieces fit:
@@ -22308,3 +22319,89 @@ The two facts most worth a paragraph: **a signal carries no content** — words
 come from the tree at the revision the batch names — and **measurement is the
 host's setting, never a prop in the tree**. `prototypes/ski-apparel` is a working
 end-to-end example to read from, not to copy code out of.
+
+---
+
+## 2026-09-13 — the screenshot harness cannot photograph a block that only exists once you press it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around this run with a throwaway script, and the workaround is the finding
+
+`pnpm shoot` takes a path, a viewport and a selector to wait for. It has no way
+to **do** anything before the shutter, and no way to photograph **one element**
+rather than the whole viewport or the whole page.
+
+*What your readers do* has a block that is empty until a reader uses it: a real
+broadcaster on a real tree, which reports nothing at all until somebody scrolls,
+presses or opens something. Photographed through the harness it is a correct
+picture of a component with nothing to say, which is the one thing the page is
+trying to prove it does not do.
+
+So this run wrote about forty lines of Playwright in `/tmp` to press the call to
+action, open a question, wait out a batch and photograph the figure — and the
+report's best visual is the one image in it the harness did not take. That is
+exactly the private-harness situation [0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+consolidated, reappearing for the one thing the consolidated harness left out.
+
+**What would close it.** Two optional fields on a shot, both small against what
+the harness already does:
+
+- **`do`** — an ordered list of `{ click: <selector> }` / `{ wait: <ms> }` steps
+  run after `waitFor` and before the shutter. A page whose interesting state is
+  three presses in cannot be photographed any other way.
+- **`clip`** — a selector to photograph instead of the viewport. Every lane
+  already crops by hand or ships a screenshot of a page when it meant to ship a
+  screenshot of a table.
+
+One thing worth knowing before writing `do`: a click on a real `a[href]` in the
+starter library navigates, and the page under the shutter is then a different
+page. The scratch script handled it with an init script that calls
+`preventDefault` on links to `example.com` — the listener the broadcaster
+installed has already run by then, so nothing about what is being measured
+changes. A `do` step that clicks probably wants that behaviour by default.
+
+**Not urgent.** Nothing is blocked: the pictures exist, and any lane can do what
+this one did. What it costs is that they are taken by a script nobody reviewed,
+against flags and a viewport that are copies of the harness's rather than the
+harness's — which is the drift 0117 was written to stop.
+
+---
+
+## 2026-09-13 — every guide to a browser-side seam is unphotographable and unrenderable by the same two rules
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+recorded for the next page in this shape, not because anything is broken
+
+Two constraints met on this page for the first time, and they will meet again.
+
+**Next refuses `react-dom/server` inside a Server Component.** The first version
+of *What your readers do* rendered its example tree twice — plain and
+`addressed: true` — and printed the byte difference, which is the most direct
+possible proof of [0010](decisions/0010-edit-mode-decorates-and-never-restructures.md)'s
+promise. `pnpm verify` was green through typecheck and 4,064 tests and failed at
+`next build`, because a producer a page imports is application code and that
+import is refused there.
+
+**A `.test.tsx` has a DOM and a page does not.** The answer was to split the
+claim: the page's block is produced from `editableAttributes`, which is the
+function that decides what addressing writes, and the *other* half — that
+stripping those attributes gives the unaddressed document byte for byte — moved
+to `addressing.test.tsx`, which renders both ways in jsdom. The page states the
+claim; the test holds it.
+
+That is a better arrangement than the one it replaced, and it took a failed build
+to find. Writing it down so the next page about something that only happens in a
+browser starts there:
+
+- **What a seam writes** can usually be asked of the function that writes it, on
+  a server, with no render at all.
+- **What a seam does not disturb** needs a real render, and that belongs in a
+  `.test.tsx` beside the producer rather than in the page.
+- **What a seam does while somebody uses it** needs a browser, and belongs in a
+  client component that runs the real thing — with a `.test.tsx` driving it, so
+  the block is not the one thing on the page nothing checks.
+
+The third is the one worth the entry. This lane's instinct with a browser-only
+seam would have been a code sample and a description, and the page would have
+been unfalsifiable — which is the failure mode §4c's registry rule exists to
+prevent for trees, and had no equivalent for behaviour until this page.

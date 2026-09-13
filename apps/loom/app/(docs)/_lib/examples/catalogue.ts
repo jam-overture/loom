@@ -231,6 +231,75 @@ const cardWithAControl = (): LoomTree => {
 }
 
 /**
+ * A page with somewhere to look, something to press and something to open.
+ *
+ * *What your readers do* needs a tree that can produce all four kinds of reader
+ * signal, and the four kinds are not arbitrary: two are about a node being on
+ * screen, one is about a target a reader aims at, and one is about a region that
+ * opens. A tree of three paragraphs can only ever demonstrate half of them.
+ *
+ * So: two sections to come into view and stay there, a link and a call to action
+ * inside them, and a questions band whose rows disclose. Nothing on it is
+ * instrumented — the broadcaster reads the markup, which is the point the page
+ * makes by pointing at this and at the attribute table beside it.
+ */
+const aPageAReaderScrolls = (): LoomTree => {
+  const ids = sequentialIdFactory("readersignals")
+
+  return page(ids, MINIMAL, { width: "readable" }, [
+    buildElement(ids, {
+      type: "loom.section",
+      props: { tone: "surface", width: "readable", eyebrow: "Vaughan & Rill" },
+      children: [
+        buildSlot(ids, "heading", [heading(ids, 2, "Bicycles built for one road")]),
+        prose(ids, "Hand-brazed frames, made to measure, delivered anywhere in the country.", {
+          measured: true,
+        }),
+        buildElement(ids, {
+          type: "loom.action",
+          props: { href: "https://example.com/frames", variant: "primary", scale: "small" },
+          children: [buildText(ids, "See the frames")],
+        }),
+      ],
+    }),
+    buildElement(ids, {
+      type: "loom.section",
+      props: { tone: "canvas", width: "readable" },
+      children: [
+        buildSlot(ids, "heading", [heading(ids, 2, "Before you order")]),
+        buildElement(ids, {
+          type: "loom.faq-list",
+          props: { columns: "one", width: "readable" },
+          children: [
+            buildElement(ids, {
+              type: "loom.faq",
+              props: {
+                question: "How long does a frame take?",
+                answer: "Between nine and fourteen weeks, depending on the finish you choose.",
+              },
+            }),
+            buildElement(ids, {
+              type: "loom.faq",
+              props: {
+                question: "Can I be measured remotely?",
+                answer:
+                  "Yes. We send a fitting kit and a short video call does the rest — most people never come to the workshop.",
+              },
+            }),
+          ],
+        }),
+        prose(ids, "Anything else, ask us.", { tone: "muted", size: "small" }),
+        buildElement(ids, {
+          type: "loom.link",
+          props: { href: "https://example.com/contact", tone: "accent" },
+          children: [buildText(ids, "Send a question")],
+        }),
+      ],
+    }),
+  ])
+}
+
+/**
  * The same shape again, wearing three ids nobody on this project chose by hand.
  *
  * `tide` is one of the eighteen palettes in `palettes.ts` that were *derived*
@@ -309,6 +378,13 @@ const entries: readonly DocsExample[] = [
     caption:
       "A perfectly ordinary composition: a surface with a heading, a sentence and a button on it. Ask to make the whole card a link and watch what the Gate says.",
     build: cardWithAControl,
+  },
+  {
+    id: "a-page-a-reader-scrolls",
+    title: "A page with something to look at, press and open",
+    caption:
+      "Two sections, a call to action, a link, and two questions that open. Nothing on it is instrumented — the same tree is measured further down this page by reading its markup.",
+    build: aPageAReaderScrolls,
   },
 ]
 
