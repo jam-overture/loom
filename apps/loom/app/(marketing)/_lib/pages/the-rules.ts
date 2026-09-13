@@ -1,24 +1,24 @@
 import {
   buildElement,
   buildSlot,
-  ceilingFor,
   createTree,
   dispositionKindSchema,
-  intentOriginSchema,
+  ESCALATION_LADDER,
   sequentialIdFactory,
   type DispositionKind,
   type DispositionReasonCode,
   type IdFactory,
-  type IntentOrigin,
   type LoomNode,
   type LoomTree,
 } from "@loom/runtime"
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
 import { EXCEPTIONS_SPELLED } from "../adapt/answers"
+import { ASKERS, ceilingOf } from "../adapt/askers"
 import { BECAUSE, WEIGHT } from "../adapt/record"
 import { FRONT_DOOR_POLICY, protectedInPlainWords } from "../adapt/run"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { spellCapitalised } from "../journey"
 import { action, cell, columns, heading, link, prose, row, section, stack } from "../nodes"
 import {
   askHref,
@@ -29,6 +29,7 @@ import {
   SITE_THEMES,
   surfaceHref,
   THE_RULES,
+  WHO_CAN_ASK,
 } from "../site"
 
 import type { PageContext } from "./home"
@@ -66,12 +67,22 @@ import type { PageContext } from "./home"
  * asymmetry this lane settled on 27 August: a number that moves without changing
  * a claim should need nobody, and this page's claim is *these are all of them*.
  *
- * The **order** is this file's, and that is the honest limit. The runtime asks
- * them in the order of `ESCALATION_RULES` in `src/runtime/gate.ts`, which is not
- * exported and cannot be read from here — filed for `Loom daily build`. Until it
- * is, a reordering there would leave this page listing the right seven questions
- * in a stale order, so the page claims the set and the precedence rule (*the
- * first no wins*) rather than claiming the sequence is derived.
+ * The **order is the runtime's too, as of 13 September.** It was this file's
+ * until today, and the note here said so and called it the honest limit: the
+ * Gate asks them in the order of `ESCALATION_RULES` in `src/runtime/gate.ts`,
+ * that constant was not exported, and a reordering there would have left this
+ * page listing the right seven questions in a stale order. Filed for
+ * `Loom daily build` on 28 August and answered by #181 — `ESCALATION_LADDER` is
+ * exported from `@loom/runtime`, **derived from the rules themselves rather than
+ * declared beside them**, so it cannot disagree with the order it describes.
+ *
+ * The finding recorded that this file *"still writes the order by hand and can
+ * now stop"*, and the whole point of the band is *the first no wins*, which is a
+ * claim about precedence. So the questions are now written in any order that
+ * reads well and **sorted into the runtime's** before they are printed: a rung
+ * inserted in the middle of the ladder moves on this page in the same deploy,
+ * and a question for a rule the ladder does not have throws while the page is
+ * being built.
  */
 type Rule = {
   readonly code: Exclude<DispositionReasonCode, "within-policy">
@@ -79,7 +90,8 @@ type Rule = {
   readonly asks: string
 }
 
-export const RULES: readonly Rule[] = [
+/** What each rung asks, unordered — `RULES` is this list in the ladder's order. */
+const QUESTIONS: readonly Rule[] = [
   { code: "confidence-below-floor", asks: "Did whatever asked for this actually know what it was asking?" },
   { code: "stakes-at-refusal-floor", asks: "Is this the kind of change you said may never happen?" },
   { code: "irreversible", asks: "Could you put the page back afterwards?" },
@@ -90,14 +102,22 @@ export const RULES: readonly Rule[] = [
 ]
 
 /**
- * The one code that is not a rule.
+ * The seven questions, in the order the rules are actually asked in.
  *
- * It is what the runtime records when none of the seven fired, so it belongs in
- * the band about the three answers rather than in the list of questions — and
- * naming it here rather than inline is what lets the test say *every code is
- * either a question on this page or this one* without a literal in two files.
+ * Built by walking the ladder rather than by sorting the list, so the runtime's
+ * order is the one thing that decides: a rung with no question here is a rule
+ * this page does not print, and the page refuses to build rather than claiming
+ * to list all of them.
  */
-export const NOT_A_RULE: DispositionReasonCode = "within-policy"
+export const RULES: readonly Rule[] = ESCALATION_LADDER.map((code) => {
+  const question = QUESTIONS.find((rule) => rule.code === code)
+
+  if (question === undefined) {
+    throw new Error(`loom: the rules ask about "${code}" and ${THE_RULES.path} does not`)
+  }
+
+  return question
+})
 
 /**
  * The three answers, in plain words, one per kind the runtime can return.
@@ -122,13 +142,16 @@ const ANSWER: Readonly<Record<DispositionKind, { readonly title: string; readonl
   },
 }
 
-/** Who asked, in words a reader can place themselves in. */
-const WHO: Readonly<Record<IntentOrigin, string>> = {
-  "user-instruction": "A person, typing what they want",
-  "system-signal": "Something the page noticed on its own",
-  "scheduled-adaptation": "A job that runs on a timer",
-  developer: "The people who build the page",
-}
+/**
+ * Who asked, in words a reader can place themselves in.
+ *
+ * The four phrases were written here on 28 August and moved to
+ * `adapt/askers.ts` on 13 September, when `/who-can-ask` needed the same four
+ * askers and two more shapes of each — a two-word column heading and a
+ * sentence. Two pages naming the same four people two ways is how a site starts
+ * telling a reader that *a job that runs on a timer* and *a scheduled job* are
+ * different things.
+ */
 
 const plainly = <Value,>(map: Readonly<Record<string, Value>>, key: string, what: string): Value => {
   const found = map[key]
@@ -216,7 +239,7 @@ const questions = (ids: IdFactory): LoomNode =>
     [
       prose(
         ids,
-        `${RULES.length} questions, asked in this order, of every request from anyone. The first one that says no is the answer — and the sentence beside each of them is the sentence this site will show you on the day it happens, word for word.`,
+        `${spellCapitalised(RULES.length)} questions, asked in this order, of every request from anyone. The first one that says no is the answer — and the sentence beside each of them is the sentence this site will show you on the day it happens, word for word.`,
         { size: "lead", measured: true }
       ),
       buildElement(ids, {
@@ -311,8 +334,14 @@ const published = (ids: IdFactory): LoomNode =>
  * a developer may ship on their own is not the same change when a timer asks
  * for it at four in the morning, and a set of rules that could not tell those
  * apart would be a set of rules nobody could sign off.
+ *
+ * **It states, and a page of its own now shows.** The table below is four lines
+ * of prose about a threshold; `/who-can-ask` puts four real requests to all four
+ * of them and prints what each was told. This band keeps the summary because a
+ * reader of the rules needs it here, and hands over the moment they want to see
+ * it — which is the division the rest of the site already runs on.
  */
-const whoMay = (ids: IdFactory): LoomNode =>
+const whoMay = (ids: IdFactory, context: PageContext): LoomNode =>
   section(
     ids,
     { tone: "surface", width: "wide", eyebrow: "And who asked" },
@@ -327,10 +356,10 @@ const whoMay = (ids: IdFactory): LoomNode =>
         },
         children: [
           columns(ids, ["Who asked", "May go ahead up to"]),
-          ...intentOriginSchema.options.map((origin) =>
+          ...ASKERS.map((asker) =>
             row(ids, [
-              cell(ids, plainly(WHO, origin, "origin"), { role: "row" }),
-              cell(ids, `Anything ${plainly(WEIGHT, ceilingFor(FRONT_DOOR_POLICY, origin), "weight")}`),
+              cell(ids, asker.who, { role: "row" }),
+              cell(ids, `Anything ${plainly(WEIGHT, ceilingOf(asker), "weight")}`),
             ])
           ),
         ],
@@ -340,6 +369,14 @@ const whoMay = (ids: IdFactory): LoomNode =>
         "Above their line, the change is not refused — it stops and asks. That is the difference between a rule that keeps working and a rule people route around.",
         { measured: true }
       ),
+      stack(ids, { direction: "row", gap: "snug", wrap: true }, [
+        action(
+          ids,
+          "See all four asked the same thing",
+          internalHref(context.origin, WHO_CAN_ASK.path, context.theme),
+          { variant: "secondary", scale: "medium" }
+        ),
+      ]),
     ]
   )
 
@@ -502,7 +539,7 @@ export const theRulesPageTree = (context: PageContext): LoomTree => {
         answers(ids),
         questions(ids),
         published(ids),
-        whoMay(ids),
+        whoMay(ids, context),
         proof(ids, context),
         asked(ids),
         closing(ids, context),

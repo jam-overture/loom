@@ -12,6 +12,7 @@ import {
   internalHref,
   SITE_ROUTES,
   WHAT_YOU_RUN,
+  WHO_CAN_ASK,
   YOUR_COMPONENTS,
 } from "../site"
 import { uses, wordsOf } from "../words"
@@ -54,14 +55,17 @@ describe("the page about your own components", () => {
    * held.
    */
   /**
-   * Widened on 12 September, not relaxed, for the reason recorded on the same
-   * assertion in `what-you-run.test.ts`: `HOME` came off the bar to make room
-   * for a seventh page. Still an exact list, so a fourth still fails here.
+   * Widened twice, never relaxed, for the reason recorded on the same assertion
+   * in `what-you-run.test.ts`: on 12 September `HOME` came off the bar to make
+   * room for a seventh page, and on 13 September `/who-can-ask` was added off
+   * it. Still an exact list, so a fifth still fails here and still has to be
+   * argued for.
    */
-  it("is kept off the bar deliberately, and is one of the three pages that are", () => {
+  it("is kept off the bar deliberately, and is one of the four pages that are", () => {
     expect(YOUR_COMPONENTS.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
+      WHO_CAN_ASK,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

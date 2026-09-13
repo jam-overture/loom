@@ -245,6 +245,52 @@ export const WHEN_IT_GOES_WRONG: SiteRoute = {
 }
 
 /**
+ * The page for the one input to a verdict that is about people rather than
+ * about the change.
+ *
+ * `/the-rules` has said since 28 August that the same change is weighed
+ * differently depending on who wanted it, and it says it in a two-column table:
+ * four kinds of asker, and the weight each may go ahead with unwatched. That is
+ * the site **stating** its strongest structural fact on a site whose whole
+ * method is to show. [0002](../../../../../decisions/0002-the-gate-is-a-pure-function-of-two-independent-axes.md)
+ * calls the per-origin ceiling *the one place origin is load-bearing rather than
+ * merely recorded*, and nothing anywhere demonstrated it.
+ *
+ * This page puts four of the front door's own requests — one for each weight the
+ * rules can give a change — to all four askers, while the page is being built,
+ * and prints the sixteen answers as marks. It also answers the question the
+ * table invites and never addresses: **what does being the trusted asker not
+ * buy you?** Three of the seven rules refuse to consult who asked at all, and
+ * the floor is sovereign over all of them.
+ *
+ * It is a description of code rather than a position, so it did not wait on the
+ * licence line: nothing on it says what Loom costs, who it is for, or what may
+ * be built on it.
+ *
+ * **It is `inMenu: false`, and that is now true of four of the eight pages.**
+ * See the flag's note on `HOME`. The bar is the eight items the maintainer asked
+ * about on #166, and the honest reading of this page is that it is the second
+ * question a reader of `/the-rules` asks rather than something anybody arrives
+ * wanting — so it is reached from that page's own band, from the front door's
+ * band of facts, and from the footer's map. Four off the bar is a bad answer to
+ * a real problem and the good answer is a bar that groups, which no primitive in
+ * the library can do; see the finding rather than a fifth judgement call here.
+ */
+export const WHO_CAN_ASK: SiteRoute = {
+  path: "/who-can-ask",
+  label: "Who can ask",
+  /**
+   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
+   * only the half of a title that is exactly the wordmark, so the name inside a
+   * clause prints twice on the card.
+   */
+  title: "Who can ask — the same request, weighed by who wanted it",
+  description:
+    "A person typing what they want, the page reacting to something it saw, a job on a timer, and the people who built it. You decide in advance how far each may go before somebody has to look. Here are four real requests put by all four, and what each was told.",
+  inMenu: false,
+}
+
+/**
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
@@ -252,6 +298,13 @@ export const WHEN_IT_GOES_WRONG: SiteRoute = {
  * you are left holding afterwards. The rules page sits before the record
  * because a record of decisions is only interesting to someone who knows the
  * decisions were theirs to set.
+ *
+ * **`/who-can-ask` sits directly after the rules**, because it is not a subject
+ * of its own — it is the second half of one question. The rules page says what
+ * may change; this one says that *who wanted it* is an input to the same
+ * decision, and shows the four askers being told four different things. A
+ * reader who has not yet been told a change is weighed at all has no use for
+ * the news that it is weighed differently for a timer.
  *
  * **Then the objection**, which arrives the moment a reader believes the four
  * above rather than before it: *and when it doesn't work?* It sits fifth
@@ -275,6 +328,7 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
   HOME,
   HOW_IT_WORKS,
   THE_RULES,
+  WHO_CAN_ASK,
   THE_RECORD,
   WHEN_IT_GOES_WRONG,
   WHAT_YOU_RUN,
