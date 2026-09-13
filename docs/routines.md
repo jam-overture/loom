@@ -59,6 +59,7 @@ Each routine owns one part of the repository and does not edit another's.
 | Marketing (`Loom marketing`) | `apps/loom/app/(marketing)/` |
 | Lessons (`Loom lessons`) | `apps/loom/app/(lessons)/` and `lessons/` |
 | Demo (`Loom demo`) | `apps/loom/app/(demo)/` |
+| Merge (`Loom merge`) | No directory. Merge commits on open pull requests, and landing them on `main` |
 
 `Loom primitives` was split out of the framework routine on 16 August, once
 [0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
@@ -118,6 +119,40 @@ the one path that reads as private, onto a public `/demo` of its own.
 Work that belongs to another lane is **filed in `FINDINGS.md` for its owner**,
 not done.
 
+## Merging
+
+**`Loom merge` is the only routine that merges to `main`.** The maintainer created
+it on 13 September 2026 after a morning spent landing four pull requests by hand,
+each conflicting with the one merged before it. It runs once a day at 15:00 UTC
+(08:00 Pacific in summer, 07:00 in winter), after most lanes have opened their
+pull requests for the day.
+
+For each open pull request, oldest first, it merges `main` into the branch,
+regenerates the decisions index and the API reference, resolves the conflicts
+that decide nothing, and merges only on a green `pnpm verify`. What that means for
+every other lane:
+
+- **Your branch gets merge commits you did not write.** It merges `main` in and
+  pushes; it never rebases or force-pushes. Fetch before you push to a branch
+  you left open.
+- **It may make small edits outside your lane** when an earlier merge made your
+  branch's tests go stale — a lesson transcript, a count, a docs table listing a
+  union — by running the code and recording what it prints. It says which file
+  and why in a comment on your pull request.
+- **It renumbers a decision record that clashes with one already on `main`**,
+  with a dated note under the record's header. What the record decides is never
+  changed.
+- **Anything that is not mechanical it does not merge.** Two implementations of
+  one feature, two records settling one question, a conflict in security-relevant
+  code, a red verify it cannot explain: it leaves the branch as it was and
+  comments `## Not merged — needs your decision` for the maintainer.
+- **It skips** drafts, pull requests labelled `hold`, `do-not-merge` or `wip`,
+  anything with `ARCHITECTURAL — needs review` or a `Proposed` record, anything
+  the maintainer has asked to hold, and changes to egress, deployment or
+  credentials without the maintainer's approval on the pull request.
+
+It never closes a pull request, deletes a branch, or schedules anything.
+
 ## Read first, every run
 
 - **`FINDINGS.md`** — before choosing work. It is the channel between routines:
@@ -142,7 +177,8 @@ not done.
    one lane touching one file is a conflict the lane created for itself, and the
    cost lands on the maintainer at merge time rather than on the run. If you do
    not, **branch off `main`. Never stack** on another lane's branch — a stack
-   once cost four days of visibility. **Never merge to `main` yourself.**
+   once cost four days of visibility. **Never merge to `main` yourself** — that is
+   `Loom merge`'s job, and only its (see *Merging* below).
 4. Build **one coherent unit**, with tests.
 5. `pnpm install && pnpm verify`. **Never open a pull request on red**; say so
    rather than weakening a test to get green.
