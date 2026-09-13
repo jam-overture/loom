@@ -123,6 +123,39 @@ describe("defineSource", () => {
     expect(seen).toEqual([{ audience: "member" }])
   })
 
+  /**
+   * The render's ceiling, so an adapter can hand it to whatever does the IO and
+   * let a connection go when nobody is waiting for the answer any more (0140).
+   */
+  it("passes the render's signal through to the adapter", async () => {
+    const seen: (AbortSignal | undefined)[] = []
+    const entry = servicesSource({
+      fetch: (request) => {
+        seen.push(request.signal)
+        return Promise.resolve(ok({ items: [] }))
+      },
+    })
+
+    const signal = AbortSignal.abort()
+    await entry.answer({ limit: 6 }, undefined, signal)
+
+    expect(seen).toEqual([signal])
+  })
+
+  it("hands an adapter no signal rather than a fake one when the caller has none", async () => {
+    const seen: (AbortSignal | undefined)[] = []
+    const entry = servicesSource({
+      fetch: (request) => {
+        seen.push(request.signal)
+        return Promise.resolve(ok({ items: [] }))
+      },
+    })
+
+    await entry.answer({ limit: 6 }, undefined)
+
+    expect(seen).toEqual([undefined])
+  })
+
   it("hands the adapter the parsed params, so a source is typed by its own schema", async () => {
     const seen: unknown[] = []
     const entry = defineSource({

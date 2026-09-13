@@ -23,6 +23,18 @@ export type ModelRequest = {
   readonly outputSchema: JsonObject
 }
 
+/**
+ * How the call is being made, as distinct from what is being asked.
+ *
+ * `signal` is aborted when the runtime has stopped waiting — its ceiling was
+ * reached, or whatever asked for the change went away. An implementation is free
+ * to ignore it and the caller will still get an answer on time; what it loses by
+ * ignoring it is the connection it is holding, which nobody is going to read.
+ */
+export type ModelCallOptions = {
+  readonly signal?: AbortSignal
+}
+
 export type ModelCompletion = {
   /** The reply body, expected to be JSON matching `outputSchema`. */
   readonly text: string
@@ -55,6 +67,16 @@ export type ModelClientError =
   | { readonly code: "refused"; readonly detail: string }
   | { readonly code: "incomplete"; readonly detail: string }
 
+/**
+ * An implementation is allowed to take as long as it likes; it is not allowed to
+ * decide how long the runtime waits. `modelInterpreter` puts a ceiling on every
+ * call it makes (0140), so a client that hangs is reported as `unavailable`
+ * rather than becoming a page that never finishes loading — which is true of a
+ * host's own client as much as of the Anthropic adapter.
+ */
 export interface ModelClient {
-  readonly complete: (request: ModelRequest) => Promise<Result<ModelCompletion, ModelClientError>>
+  readonly complete: (
+    request: ModelRequest,
+    options?: ModelCallOptions
+  ) => Promise<Result<ModelCompletion, ModelClientError>>
 }

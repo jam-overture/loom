@@ -281,6 +281,84 @@ describe("resolveTreeSubmissions", () => {
   })
 })
 
+/**
+ * The ceiling (0140). The seam says resolution is allowed to be slow, and it is;
+ * what it is not allowed to be is unbounded. Before this, the first of these
+ * tests did not finish.
+ */
+describe("an endpoint that does not answer", () => {
+  const hangingEndpoint = (id: string): EndpointEntry =>
+    defineEndpoint({
+      id,
+      description: "never answers",
+      endpoint: { target: () => new Promise(() => undefined) },
+    })
+
+  it("is reported as unavailable rather than waited out", async () => {
+    const tree = posting({ to: "contact.enquiry" })
+    const resolution = await resolveTreeSubmissions(tree, {
+      registry: registryOf(hangingEndpoint("contact.enquiry")),
+      ceilingMs: 5,
+    })
+
+    const outcome = resolution.lookup(tree.root.id)
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable).toEqual({ reason: "unavailable", detail: "no answer in 5ms" })
+  })
+
+  it("costs its own form and not the page", async () => {
+    const tree = posting({ to: "contact.enquiry" }, { to: "newsletter.subscribe" })
+    const child = tree.root.children[0]
+    if (!child) throw new Error("the fixture built no child")
+
+    const resolution = await resolveTreeSubmissions(tree, {
+      registry: registryOf(
+        hangingEndpoint("contact.enquiry"),
+        countingEndpoint("newsletter.subscribe", "/api/newsletter")
+      ),
+      ceilingMs: 5,
+    })
+
+    expect(resolution.lookup(tree.root.id)?.status).toBe("unavailable")
+    expect(resolution.lookup(child.id)?.status).toBe("ready")
+  })
+
+  it("is aborted, so the token store is not left holding a connection", async () => {
+    let aborted: string | undefined
+
+    const listening = defineEndpoint({
+      id: "contact.enquiry",
+      description: "never answers, but listens",
+      endpoint: {
+        target: ({ signal }) =>
+          new Promise(() => {
+            signal?.addEventListener("abort", () => {
+              aborted = signal.reason instanceof Error ? signal.reason.message : "unnamed"
+            })
+          }),
+      },
+    })
+
+    await resolveTreeSubmissions(posting({ to: "contact.enquiry" }), {
+      registry: registryOf(listening),
+      ceilingMs: 5,
+    })
+
+    expect(aborted).toBe("no answer in 5ms")
+  })
+
+  it("does not bound an endpoint that answers inside the ceiling", async () => {
+    const tree = posting({ to: "contact.enquiry" })
+    const resolution = await resolveTreeSubmissions(tree, {
+      registry: registryOf(countingEndpoint("contact.enquiry", "/api/contact")),
+    })
+
+    expect(resolution.lookup(tree.root.id)?.status).toBe("ready")
+  })
+})
+
 describe("buildSubmissionResolution", () => {
   /**
    * A caller that resolved one plan and rendered another. Reported rather than
