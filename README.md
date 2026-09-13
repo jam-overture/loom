@@ -38,9 +38,13 @@ filed under the tree and revision the page was rendered from
 ([0136](decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md)).
 Off unless a host starts it, and configured by the host rather than the tree.
 
-Broadcasting is built. **Capturing, storing and interpreting signals are not, and
-are deferred by the maintainer** — see `reports/2026-09-12-reader-signals.md`
-before starting anything that consumes them.
+Broadcasting is built. **Capturing, storing and showing signals are approved as
+of 13 September** and planned in [`docs/signals.md`](docs/signals.md), which
+supersedes the deferral in `reports/2026-09-12-reader-signals.md`: five steps in
+order, each with the lane that owns it, and the rules the seam keeps — a signal
+stays anonymous and node-shaped, and a funnel is correlated inside one page view
+([0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)).
+Read it before starting anything that consumes signals.
 
 ### 4b — The primitive library
 

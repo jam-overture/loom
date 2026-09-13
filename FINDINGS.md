@@ -22415,8 +22415,15 @@ Today the host must `stop()` and start again, and nothing says so.
 **What would close it:** a `MutationObserver` on the root for added and removed
 addressed elements (the broadcaster already runs one for disclosures), and a
 sentence in the module documentation that a new root or revision is a new
-broadcast. **Not in scope:** anything about storing or interpreting signals — the
-maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
+broadcast.
+
+> **Promoted 13 September.** The scope note here used to say storing and
+> interpreting signals were deferred. That deferral is lifted
+> ([`docs/signals.md`](docs/signals.md)), and this finding is now **step 1 of the
+> approved plan and the first thing to build** — because every band the Gate
+> changes is rendered after the broadcaster started, so *before versus after a
+> change* is precisely the measurement this gap breaks. Storage built on top of
+> it would understate every adapted region, quietly.
 
 ## 2026-09-12 — reader signals have an API reference and no guide
 
@@ -22653,3 +22660,41 @@ record says so in as many words and names the revisit condition — when somethi
 actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
+
+---
+
+## 2026-09-13 — the signals deferral is lifted, and four lanes have something approved waiting for them
+
+**Filed by:** `Loom daily build`, at the maintainer's instruction · **Owned by:**
+`Loom daily build`, `Loom portal`, `Loom docs`, `Loom lessons`, `Loom marketing`
+· **Status:** open — a direction change, not a defect
+
+`reports/2026-09-12-reader-signals.md` told every lane that capture, storage,
+aggregation and interpretation of reader signals were deferred, and told
+`Loom portal` specifically not to build a signals view. Four routines have been
+reading that as standing direction for a day.
+
+**The maintainer lifted it on 13 September.** The plan is
+[`docs/signals.md`](docs/signals.md) — five steps in order, each with the lane
+that owns it — and the shape it is built to is
+[0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md).
+The old section is marked superseded where it sits; nothing in it should be
+followed except the line about `prototypes/`.
+
+What each lane needs to know, so nobody reads the wrong document first:
+
+- **`Loom daily build`** — steps 1 to 3 are yours: the broadcaster's mutation
+  gap (the finding above, now promoted to first), a `completed` kind, then
+  ingestion, storage, rollup and the fold module. Build them in that order.
+- **`Loom portal`** — step 4 is approved and is the commercial reason the portal
+  gets opened daily. **It has no input until step 3 is on `main`**, so do not
+  start it yet; a screen built against an imagined shape is a screen rebuilt.
+- **`Loom docs`**, **`Loom lessons`**, **`Loom marketing`** — step 5, and the
+  same rule: after step 3 lands, not during. The broadcasting guide that landed
+  on 13 September stays correct; it will need the capture half added.
+
+Two things that are decided rather than open, so no lane spends a run
+re-litigating them: **a signal never identifies a reader**, and **a funnel is
+correlated inside one page view** by an opaque key that never persists. A kind
+carrying content, a visitor id, or a tree prop that turns measurement on are all
+supersessions of 0136 or 0146, not judgement calls inside a pull request.
