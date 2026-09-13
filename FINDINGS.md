@@ -8,6 +8,102 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around here, and the workaround does not generalise
+
+`tokens.ts` already carries the warning in prose: a token *"promises the value
+comes from the theme. It promises nothing about that value being different from
+the one beside it."* It was written after `loom.emphasis` marked a stressed word
+with `weight("heading")` and rendered it identically to the sentence around it
+under `bold-sans`. **The colour axis has the same hole, and this run walked
+into it.**
+
+`editorial` declares `accent: "#4a5b78"` and `brand-secondary: "#4a5b78"` — the
+same hex, legitimately, because a single-accent palette mirrors its accent into
+its secondary and `palettes.ts` says so on purpose. So the obvious spelling of
+an accent wash, `linear-gradient(accent, brand-secondary)`, is **a gradient
+between a colour and itself**: a flat fill, under one of the two starter
+palettes, in which every screenshot in this repository is taken first. Nothing
+fails. No test sees it. The render is correct, the tokens are correct, and the
+effect is invisible.
+
+**Worked around rather than fixed.** `loom.emphasis`'s `washed` tone and
+`loom.halo`'s rims both read `accent-strong` and `brand-secondary` instead —
+the pair `loom.hero`'s aurora already paints, which every palette gives real
+chroma because they are painted as areas — and `library.test.ts` now asserts
+those two differ in every registered palette. That closes it for the two things
+built here and for nothing else.
+
+**Why it is filed for the framework lane.** The workaround is a pair of slots
+this lane happened to check. The general fact — *which slots a palette has
+collapsed* — is knowable, and `src/theme/` is already the place that knows this
+kind of thing:
+[0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md)
+established that what a palette cannot say about itself is measured from it, and
+`measure.ts` already walks the slots. A distinctness measure is the same shape
+as the contrast one — a pair of slots, a threshold, a report — and would let a
+primitive that needs two visibly different colours say so, or at least let a
+palette author see which of their slots are collapsed before a page depends on
+it.
+
+The cheap version is a test rather than a seam: `contrast.test.ts` iterates
+`STARTER_PALETTES` already, and an assertion that the area pair is never
+collapsed would have caught this before any primitive did. That is worth having
+whether or not the measure is built, and it is `src/theme/`'s file rather than
+this lane's.
+
+**Not urgent, and nothing is blocked.** Both primitives ship correct under every
+registered palette. What is open is the next lane to reach for two slots and a
+gradient, who has no way to find out that one palette holds one colour in both.
+
+---
+## 2026-09-13 — a lesson transcript pins the size of the library, so every primitive added falsifies another lane's prose
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:** open
+— the mechanical half is done on `primitives-28-what-catches-the-eye`; the
+editorial half is yours
+
+`lessons/22-reach.md` and `lessons/23-anchors.md` each print
+`primitives registered: N` in a saved transcript, and
+`app/(lessons)/_lib/transcripts.test.ts` checks those lines against what the
+program actually prints. That is a good test and it did its job: adding
+`loom.halo` turned it red immediately, which is exactly when a stale transcript
+should be found.
+
+**What this run changed in your lane, and why it could not be filed instead.**
+`pnpm verify` green is the merge gate for every lane, so the two transcript
+lines had to move from 91 to 92 on this branch. Three prose sentences naming
+"ninety-one" went with them, because a lesson that prints 92 two paragraphs
+below a sentence saying ninety-one is worse than either number alone. Five
+one-word edits, no pedagogy touched, and none of the counts the lessons actually
+turn on — targets is still 12, the anchor answer is still zero, and `loom.halo`
+declares neither.
+
+**What is left, and it is genuinely yours.** `lessons/22-reach.md` line 468
+says *"Seventy primitives ship in the starter library"* immediately above a
+transcript that has printed a different number since at least 91. That one was
+already stale before this run and is not mechanical — it sets up a prediction
+the reader is asked to make, so rewriting it is an editorial call about the
+exercise rather than a find-and-replace.
+
+**The shape, which outlives both instances.** The library's size is a number
+this lane changes on purpose and a number your lessons quote in prose. It will
+drift again on the next primitive, and the next. Three options, and the choice
+is yours:
+
+- **Have the lesson print it and never say it** — the transcript is already
+  generated, so the prose could say *"however many the library registers"* and
+  the number would maintain itself.
+- **Keep the number and accept a one-word edit per primitive**, which is what
+  happened here and costs a cross-lane diff each time.
+- **Make it the point.** A lesson about a library that grows could quote the
+  number *and* the date it was true, which is honest and never goes stale.
+
+Nothing is blocked. Both lessons are correct on this branch.
+
+---
 ## 2026-09-12 — the demo asked its leading question twice, and the duplicate was the one everything addressed
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by

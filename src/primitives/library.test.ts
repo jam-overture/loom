@@ -19,6 +19,7 @@ import { describeRegistryError, type PrimitiveRegistry } from "../sdk/registry.j
 import { renderLoomTree } from "../render/render.js"
 import { THEME_PROP_KEY } from "../render/theme.js"
 import { createThemeRegistry } from "../theme/registry.js"
+import { STARTER_PALETTES } from "../theme/library.js"
 import { PALETTE_SLOTS } from "../theme/theme.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
@@ -191,8 +192,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 91 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(91)
+  it("registers as 92 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(92)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -208,6 +209,7 @@ describe("the starter library", () => {
       "loom.reveal",
       "loom.backdrop",
       "loom.overlay",
+      "loom.halo",
       "loom.card",
       "loom.frame",
       "loom.pin",
@@ -7018,13 +7020,16 @@ describe("the exchange, and the way a band arrives", () => {
 })
 
 /**
- * The atmosphere layer: every paint `loom.backdrop` offers, and every way
- * `loom.overlay` sets content over a ground.
+ * The atmosphere layer: every paint `loom.backdrop` offers, every way
+ * `loom.overlay` sets content over a ground, and every light `loom.halo` puts
+ * around one thing among several.
  *
- * It is one fixture rather than two because the pair is one idea — what is
- * behind the content and what is over it — and because the interesting failures
- * are between them: a paint that leaks over its children, a scrim that squares
- * off a rounded picture, a backdrop inside a card painting outside the card.
+ * It is one fixture rather than three because they are one idea in three
+ * positions — what is behind the content, what is over it, and what is around
+ * one of it — and because the interesting failures are between them: a paint
+ * that leaks over its children, a scrim that squares off a rounded picture, a
+ * backdrop inside a card painting outside the card, and a halo that clips the
+ * light it exists to let out.
  */
 const atmospherePage = (
   theme: Record<string, string>,
@@ -7053,6 +7058,35 @@ const atmospherePage = (
               props: { measured: true },
               children: [text("The paint is behind the words and reaches neither the reader nor the pointer.")],
             }),
+          ],
+        }),
+      ],
+    })
+
+  const tier = (light: string, name: string, line: string, featured: boolean) =>
+    buildElement(idFactory, {
+      type: "loom.halo",
+      props: { light, corners: "lg" },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.card",
+          props: { tone: "surface", padding: "roomy" },
+          children: [
+            ...(featured
+              ? [
+                  buildElement(idFactory, {
+                    type: "loom.badge",
+                    props: { tone: "accent" },
+                    children: [text("Most popular")],
+                  }),
+                ]
+              : []),
+            buildElement(idFactory, {
+              type: "loom.heading",
+              props: { level: 3 },
+              children: [text(name)],
+            }),
+            buildElement(idFactory, { type: "loom.prose", children: [text(line)] }),
           ],
         }),
       ],
@@ -7156,6 +7190,35 @@ const atmospherePage = (
                   "For a ground that is already quiet enough to write on.",
                   "https://example.com/paper.jpg"
                 ),
+              ],
+            }),
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "One among several", width: "wide" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [
+                  text("The tier a page is actually "),
+                  buildElement(idFactory, {
+                    type: "loom.emphasis",
+                    props: { tone: "washed" },
+                    children: [text("selling")],
+                  }),
+                ],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.grid",
+              props: { columns: "three", gap: "normal" },
+              children: [
+                tier("ring", "Starter", "A hairline of gradient, traced round the edge.", false),
+                tier("trace", "Studio", "The same rim, with the light travelling round it.", true),
+                tier("glow", "Agency", "A bloom outside the box, which is the half a backdrop cannot draw.", false),
               ],
             }),
           ],
@@ -7826,7 +7889,35 @@ describe("the geometry a screenshot found", () => {
   })
 })
 
-describe("the atmosphere behind a band, and the words over a picture", () => {
+/** One halo round one card, which is the shape every assertion below needs. */
+const haloTree = (light: string, idFactory: IdFactory = sequentialIdFactory()): LoomTree =>
+  createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: EDITORIAL },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.halo",
+          props: { light, corners: "lg" },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.card",
+              props: { tone: "surface" },
+              children: [
+                buildElement(idFactory, {
+                  type: "loom.prose",
+                  children: [buildText(idFactory, "The one being sold")],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    }),
+    idFactory
+  )
+
+describe("the atmosphere behind a band, the words over a picture, and the one among several", () => {
   it("paints every band and puts a word on a picture, with nothing left unhonoured", () => {
     const { markup, diagnostics } = render(atmospherePage(EDITORIAL))
 
@@ -7835,6 +7926,201 @@ describe("the atmosphere behind a band, and the words over a picture", () => {
     expect(markup).toContain("The foot of the picture")
     expect(markup).toContain("An even veil")
     expect(markup).toContain("A backdrop inside a card, cornered to the card it is in.")
+  })
+
+  /**
+   * The wash and the rim both read `accent-strong` and `brand-secondary`, and
+   * both are invisible if a palette happens to hold the same colour in the two
+   * slots. That is not hypothetical: `editorial` mirrors its accent into
+   * `brand-secondary` — `#4a5b78` in both — so the obvious spelling of the wash,
+   * `accent` to `brand-secondary`, would have rendered a gradient nobody could
+   * see under one of the two starter palettes.
+   *
+   * This is `tokens.ts`' standing warning one axis across from where it bit
+   * `weight("heading")`: a token promises the value comes from the theme and
+   * promises nothing about it differing from the one beside it. So the pair
+   * actually used is asserted to differ everywhere, rather than assumed to.
+   */
+  it("has two area slots that differ in every registered palette", () => {
+    const flat = STARTER_PALETTES.filter(
+      (palette) => palette.slots["accent-strong"] === palette.slots["brand-secondary"]
+    )
+
+    expect(flat.map((palette) => palette.id)).toEqual([])
+
+    const mirrored = STARTER_PALETTES.filter(
+      (palette) => palette.slots.accent === palette.slots["brand-secondary"]
+    )
+
+    /** The case that motivated the assertion above still exists; it is simply not used. */
+    expect(mirrored.map((palette) => palette.id)).toContain("editorial")
+  })
+
+  /**
+   * A halo is decoration, and decoration that can be tabbed into or read out is
+   * content pretending otherwise — the claim `loom.backdrop` makes for its
+   * paints, asserted over all three lights rather than over the one a fixture
+   * happens to render.
+   */
+  it("never lets a light reach the reader", () => {
+    for (const light of ["ring", "trace", "glow"]) {
+      const { tree: body } = splitStylesheet(render(haloTree(light)).markup)
+      const layers = [...body.matchAll(/<div [^>]*aria-hidden="true"[^>]*>/g)]
+
+      expect(layers.length, light).toBe(1)
+      expect(layers[0]?.[0], light).toContain("pointer-events:none")
+      expect(body, light).toContain("The one being sold")
+    }
+  })
+
+  /**
+   * Three lights, and the claim is that a reader tells them apart — not that
+   * there are three of them. `ring` and `trace` are the pair that could fail
+   * it, because their markup differs only by a class name, so the assertion
+   * runs on both halves: distinct layers, and a rule in the stylesheet that
+   * gives `trace` movement `ring` does not have. A `trace` that quietly became
+   * a second spelling of `ring` fails the second half while passing the first.
+   */
+  it("draws three lights that are three different things", () => {
+    const layerOf = (light: string): string =>
+      splitStylesheet(render(haloTree(light)).markup).tree.match(
+        /<div [^>]*aria-hidden="true"[^>]*>/
+      )?.[0] ?? ""
+
+    expect(new Set(["ring", "trace", "glow"].map(layerOf)).size).toBe(3)
+
+    const { stylesheet } = splitStylesheet(render(haloTree("trace")).markup)
+
+    expect(stylesheet).toContain(`.${LIBRARY_CLASS.haloTrace} {`)
+    expect(stylesheet).toMatch(
+      new RegExp(`\\.${LIBRARY_CLASS.haloTrace} \\{[^}]*animation: loom-halo-trace`)
+    )
+  })
+
+  /**
+   * The one thing a halo does that a backdrop is documented as unable to do
+   * (0130), and the reason it is a third wrapper rather than a sixth paint: the
+   * light is allowed out of the box. `overflow: hidden` here would clip every
+   * glow into a rectangle with four hard sides, and nothing else in the render
+   * would look wrong.
+   */
+  it("does not clip the light it exists to let out", () => {
+    /** Edit mode, because the type attribute is the only handle on the root node. */
+    const { tree: body } = splitStylesheet(render(haloTree("glow"), true).markup)
+    const root = body.match(/<div [^>]*data-loom-type="loom\.halo"[^>]*>/)?.[0] ?? ""
+
+    expect(root).not.toBe("")
+    expect(root).not.toContain("overflow:hidden")
+    expect(root).toContain("isolation:isolate")
+  })
+
+  /**
+   * The fix the first pair of screenshots forced, and the reason it is asserted
+   * rather than left to the picture: a rim drawn flush at `inset: 0` sits
+   * exactly on the card's own border, which is bright under `bold` and
+   * indistinguishable from an unlit tier under `editorial`. Standing it off the
+   * edge is what makes it read without any chroma at all.
+   *
+   * The radius has to grow with the offset or a concentric rim crosses the
+   * curve it is following, so both halves are pinned — and the bloom, which
+   * starts at the edge, is pinned to *not* have moved.
+   */
+  it("stands a rim off the edge it is lighting, and grows the radius with it", () => {
+    const layerOf = (light: string): string =>
+      splitStylesheet(render(haloTree(light)).markup).tree.match(
+        /<div [^>]*aria-hidden="true"[^>]*>/
+      )?.[0] ?? ""
+
+    for (const light of ["ring", "trace"]) {
+      expect(layerOf(light), light).toContain("inset:calc(-1 * 4px)")
+      expect(layerOf(light), light).toContain("border-radius:calc(var(--loom-radius-lg) + 4px)")
+    }
+
+    expect(layerOf("glow")).toContain("inset:0")
+    expect(layerOf("glow")).toContain("border-radius:inherit")
+  })
+
+  /**
+   * A wrapper that is not transparent to stretching is a wrapper that changes
+   * the layout of whatever is put in it. Three tiers in a grid are stretched to
+   * the tallest; a halo between the cell and the card absorbed that, and the
+   * rim ended up hugging the cell with the card short of it — which no
+   * assertion in this file saw and one photograph did.
+   */
+  it("passes a grid cell's stretch through to the child it is lighting", () => {
+    const { tree: body } = splitStylesheet(render(haloTree("ring"), true).markup)
+    const root = body.match(/<div [^>]*data-loom-type="loom\.halo"[^>]*>/)?.[0] ?? ""
+
+    expect(root).toContain("height:100%")
+    expect(root).toContain("display:grid")
+  })
+
+  /**
+   * Reduced motion removes movement and never feedback, so `trace` under it is
+   * still a lit rim — it simply stops travelling. Switching the class off
+   * entirely would leave the featured tier looking like the two beside it,
+   * which is the failure the primitive exists to prevent.
+   */
+  it("stops the light travelling for a reader who asked for calm, and leaves the rim lit", () => {
+    const { stylesheet } = splitStylesheet(render(haloTree("trace")).markup)
+    const calm = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    expect(calm).toContain(`.${LIBRARY_CLASS.haloTrace} {\n    animation: none;`)
+    /** The rim is untouched: nothing here repaints it, and the static one is never named at all. */
+    expect(calm).not.toContain(LIBRARY_CLASS.haloRing)
+    expect(calm).not.toContain("background-image: none")
+  })
+
+  /**
+   * `background-clip: text` with a transparent fill is one unsupported property
+   * away from a word nobody can see, and the same word disappears a second way
+   * under forced colours. Both fallbacks are rules rather than inline styles on
+   * purpose — an inline style would beat them — so the assertion is that the
+   * element carries no colour of its own and the stylesheet carries both
+   * escapes.
+   */
+  it("never paints a washed word into a corner it cannot come back from", () => {
+    const { markup } = render(atmospherePage(EDITORIAL))
+    const { stylesheet, tree: body } = splitStylesheet(markup)
+    const washed = body.match(/<strong [^>]*loom-washed[^>]*>/)?.[0] ?? ""
+
+    expect(washed).not.toBe("")
+    expect(washed).not.toContain("color:")
+    expect(stylesheet).toContain(`.${LIBRARY_CLASS.washed} {\n  color: var(--loom-accent-strong);`)
+    expect(stylesheet).toContain("@supports ((background-clip: text) or (-webkit-background-clip: text))")
+    expect(stylesheet).toContain("@media (forced-colors: active)")
+  })
+
+  /**
+   * The three tones that were here before `washed` render exactly as they did.
+   * A tone that needs no class emits no stylesheet, which is what keeps that
+   * true — and it is the reason the class and the stylesheet are derived from
+   * the same value rather than written in two places.
+   */
+  it("leaves the tones that need no stylesheet byte-identical", () => {
+    const spanOf = (tone: string): string => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.emphasis",
+              props: { tone },
+              children: [buildText(idFactory, "louder")],
+            }),
+          ],
+        }),
+        idFactory
+      )
+
+      return splitStylesheet(render(tree).markup).tree
+    }
+
+    for (const tone of ["strong", "subtle", "marked"]) {
+      expect(spanOf(tone), tone).not.toContain("<style")
+    }
   })
 
   it("renders under both starter palettes with no literal colour below the root", () => {
