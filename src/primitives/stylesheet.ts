@@ -465,6 +465,33 @@ export const LIBRARY_CLASS = {
    */
   listingSpecs: "loom-listing-specs",
   spec: "loom-spec",
+  /**
+   * A `loom.halo`'s lit rim, and the same rim with the light travelling round
+   * it. Both are here rather than inline for one reason each, and neither is a
+   * preference: a gradient *border* is two masks composited against each other,
+   * which is a property with no inline spelling that degrades safely, and a
+   * travelling light is an animation, which a tree may not carry — motion is a
+   * static stylesheet the primitive emits.
+   *
+   * The gradient rim lives inside an `@supports` test and the fallback outside
+   * it is a plain accent border. That order is deliberate rather than tidy:
+   * written the other way round, a browser without mask compositing paints the
+   * whole gradient as a filled rectangle *over* the content it is supposed to
+   * be ringing, because the rim layer sits above the content on purpose.
+   */
+  haloRing: "loom-halo-ring",
+  haloTrace: "loom-halo-trace",
+  /**
+   * A `loom.emphasis` set as a wash rather than as weight — the accent-washed
+   * display type nothing in this library could draw.
+   *
+   * `background-clip: text` with a transparent fill is one unsupported property
+   * away from an invisible word, so the wash is inside an `@supports` test and
+   * the declaration outside it is a solid `accent-strong`. The forced-colours
+   * rule after it is the second way the same word disappears, and it is the one
+   * that cannot be felt by testing in a browser that is behaving normally.
+   */
+  washed: "loom-washed",
 } as const
 
 /**
@@ -1458,7 +1485,55 @@ details[open] > summary .loom-marker {
 .loom-meter-fill, .loom-meter-arc {
   animation: loom-meter-sweep calc(var(--loom-motion-slow) * 2) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+@property --loom-halo-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 135deg;
+}
+@keyframes loom-halo-trace {
+  to { --loom-halo-angle: 495deg; }
+}
+.loom-halo-ring, .loom-halo-trace {
+  border: 2px solid var(--loom-border-accent);
+}
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .loom-halo-ring, .loom-halo-trace {
+    border: 0;
+    padding: 2px;
+    background-image: linear-gradient(135deg, var(--loom-accent-strong), var(--loom-brand-secondary));
+    -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+    mask-composite: exclude;
+  }
+  .loom-halo-trace {
+    background-image: conic-gradient(from var(--loom-halo-angle, 135deg), var(--loom-brand-secondary), var(--loom-accent-strong), var(--loom-brand-secondary));
+    animation: loom-halo-trace calc(var(--loom-motion-slow) * 8) linear infinite;
+  }
+}
+.loom-washed {
+  color: var(--loom-accent-strong);
+}
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .loom-washed {
+    background-image: linear-gradient(100deg, var(--loom-accent-strong), var(--loom-brand-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+@media (forced-colors: active) {
+  .loom-washed {
+    background-image: none;
+    color: currentColor;
+    -webkit-text-fill-color: currentColor;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .loom-halo-trace {
+    animation: none;
+  }
   .loom-orbit-spinner, .loom-orbit-item {
     animation: none;
   }

@@ -99,10 +99,10 @@ yourself in about fifteen lines.
    policy, and then say what a deployment that disagrees can actually do about
    it.
 
-4. The starter library registers ninety-one primitives. The runtime hands a node
+4. The starter library registers ninety-two primitives. The runtime hands a node
    that carries a usable anchor an attribute bundle to spread — `{...loom.anchor}`
    — exactly as it hands one the attributes that make it editable. **How many of
-   the ninety-one spread it?** Write a number, **rate your confidence 1–5**, and
+   the ninety-two spread it?** Write a number, **rate your confidence 1–5**, and
    then write what a page gets when a primitive does not.
 
 Do not read on until all four are written. Question 4 is this lesson's question,
@@ -819,14 +819,14 @@ The output:
   the prop, on two bands
     ids:         ["pricing","pricing"]
     diagnostics: none
-  primitives registered: 91
+  primitives registered: 92
   declaring an "anchor" prop: loom.section, loom.hero, loom.callout
   "loom:anchor" anywhere in the catalogue: false
 ```
 
 Read those six lines together, because each one is ordinary and the set is not.
 
-**The reserved key reaches nothing.** Not one of the ninety-one primitives in the
+**The reserved key reaches nothing.** Not one of the ninety-two primitives in the
 starter library spreads `loom.anchor`. The runtime checked the slug, claimed it in
 the ledger, built an attribute bundle and offered it, and the section dropped it —
 exercise B's third case, shipping. The answer to Predict 4 is **zero**.
