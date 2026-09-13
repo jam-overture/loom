@@ -8,18 +8,25 @@ import type { PrimitiveRegistry } from "./registry.js"
  *
  * Everything a model, a telemetry record or another service is told about a
  * deployment's primitives comes through here.
- *
- * The shape of the answer comes through here too, and until now it did not: a
- * host writing a function over what `catalogueOf` hands back imported the
- * function from `@loom/runtime/sdk` and the shape of its answer from
- * `@loom/runtime`. `Loom marketing` met that in the first hour of writing a page
- * that prints one catalogue entry. The three types are re-exported by name
- * rather than wholesale, because `catalogueFields` and `closedChoices` read a
- * Zod schema and belong to the root entry point where a registry is built —
- * `export type *` would put them on this door too, as names with signatures and
- * no values behind them.
  */
 
+/**
+ * The shape of what `catalogueOf` hands back, carried by the same entry point.
+ *
+ * Without this a host writing a function over the answer imports the function
+ * from `@loom/runtime/sdk` and the type of its result from `@loom/runtime`. Both
+ * are public doors and nothing was blocked, but it is a paper cut met in the
+ * first hour — found writing a page that prints one catalogue entry.
+ *
+ * Three names rather than `export type *`, which is what was asked for and is
+ * not what this should be: the reference generator resolves a star re-export by
+ * walking the target module, and does not honour the `type` modifier. Starring
+ * put `catalogueFields` and `closedChoices` on the published page as functions
+ * this door offers, and the door does not offer them — they are values, so
+ * `export type *` never carried them and `sdk.catalogueFields` is `undefined`.
+ * Naming the three types the catalogue is made of says the true thing in a way
+ * the generator reads correctly.
+ */
 export type { CataloguedPrimitive, CataloguedProp, PrimitiveCatalogue } from "../catalogue.js"
 
 /**

@@ -25,6 +25,7 @@ import {
   DIFFERENCE_LIMIT,
   RECYCLING_LIMIT,
 } from "./audit-view"
+import { runtimeWordsIn } from "../_test/plain-language"
 
 const pageOf = (labels: readonly string[]): LoomTree => {
   const ids = sequentialIdFactory("aud")
@@ -48,6 +49,26 @@ const drifted = (count: number) => {
 }
 
 describe("describeAudit", () => {
+  /**
+   * The mirror of `stoppedAt`, and the pairing a screen relies on to tell a
+   * verdict that weighed something from one that could not: a fold that stopped
+   * part-way replayed no number of changes anybody can print.
+   */
+  it("carries the revision it checked, and null exactly when nothing was compared", () => {
+    const { stored, replayed } = drifted(2)
+
+    expect(describeAudit({ outcome: "agrees", revision: 4, idReturns: [] }).revision).toBe(4)
+    expect(
+      describeAudit({ outcome: "diverged", revision: 2, stored, replayed, idReturns: [] }).revision
+    ).toBe(2)
+    expect(
+      describeAudit({
+        outcome: "unreplayable",
+        mismatch: { code: "revision-gap", expected: 3, found: 7 },
+      }).revision
+    ).toBeNull()
+  })
+
   it("says the log still produces the tree, and counts what it folded", () => {
     const report = describeAudit({ outcome: "agrees", revision: 4, idReturns: [] })
 
@@ -331,6 +352,36 @@ describe("readCheckup", () => {
     expect(verdict.tone).toBe("applied")
   })
 
+  /**
+   * The finding `Loom lessons` filed on 25 August, as a test. *"…so nothing on
+   * it is unexplained"* promised the history was intact; a fold compares end
+   * states, so a deployment holding a wrong starting shape sits on a green
+   * verdict from the moment a change replaces the part it was wrong about. The
+   * sentence's job is to claim exactly what was checked, which means naming the
+   * shape it started from.
+   */
+  it("does not promise a clean fold means nothing on the page is unexplained", () => {
+    const verdict = readCheckup(agreeing())
+
+    expect(verdict.meaning).not.toContain("unexplained")
+    expect(verdict.meaning).toContain("started from the shape it has on record")
+  })
+
+  /**
+   * The same miscount under a red verdict, and the more expensive one: "one of
+   * the two is wrong" sends a reviewer to look at the page and the history when
+   * the fault may be in the starting shape, which is in neither.
+   */
+  it("does not tell a reviewer the fault is in one of two things", () => {
+    const { stored, replayed } = drifted(2)
+    const verdict = readCheckup(
+      describeAudit({ outcome: "diverged", revision: 2, stored, replayed, idReturns: [] })
+    )
+
+    expect(verdict.meaning).not.toContain("One of the two")
+    expect(verdict.meaning).toContain("shape Loom has on record")
+  })
+
   it("says the page and its history disagree, and where to start", () => {
     const { stored, replayed } = drifted(2)
     const verdict = readCheckup(
@@ -415,8 +466,6 @@ describe("readCheckup", () => {
    */
   it("keeps the runtime's vocabulary out of all three sentences", () => {
     const { stored, replayed } = drifted(1)
-    const jargon =
-      /\b(fold|folding|folded|snapshot|seed|delta|node|nodes|tree|revision|log|gate|id|ids)\b/i
 
     const reports = [
       agreeing(),
@@ -432,14 +481,14 @@ describe("readCheckup", () => {
       const verdict = readCheckup(report)
 
       for (const sentence of [verdict.label, verdict.meaning, verdict.next]) {
-        expect(sentence, sentence).not.toMatch(jargon)
+        expect(runtimeWordsIn(sentence), sentence).toEqual([])
       }
     }
   })
 
-  /** Guards the guard: the technical reading must actually trip that regex. */
+  /** Guards the guard: the technical reading must actually trip the same list. */
   it("finds the vocabulary it bans in the reading it is kept out of", () => {
-    expect(agreeing().detail).toMatch(/\b(fold|folding|snapshot|seed)\b/i)
+    expect(runtimeWordsIn(agreeing().detail)).not.toEqual([])
   })
 })
 

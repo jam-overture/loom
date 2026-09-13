@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { memoryFileSystem } from "../testing/filesystem.js"
 
 import { CLI_USAGE, describeCliError, runCli, type CliReport } from "./run.js"
-import { CLI_ERROR_CODES, type CliError } from "./plan.js"
+import { CLI_ERROR_CODES, type CliError, type CliErrorCode } from "./plan.js"
 
 const reportOf = async (
   argv: readonly string[],
@@ -103,55 +103,44 @@ describe("runCli", () => {
 })
 
 /**
- * One fixture per code, so the list has something outside itself to agree with.
- * `everyMemberOf` fails the compile when `CLI_ERROR_CODES` stops naming the
- * union; this fails the run when a code is named and nothing can say it.
+ * One sample per code, keyed by the code. Being a `Record<CliErrorCode, …>`
+ * rather than an array is what makes a tenth code fail to compile here instead
+ * of quietly going undescribed, and it is the shape the published list exists to
+ * let a consumer outside `src/` use.
  */
-const everyCliError: readonly CliError[] = [
-  { code: "unknown-command", given: "deploy" },
-  { code: "missing-argument", argument: "<type>" },
-  { code: "unexpected-argument", given: "extra" },
-  { code: "invalid-primitive-type", type: "X" },
-  { code: "reserved-primitive-type", type: "registry" },
-  { code: "framework-namespace", type: "loom.card" },
-  { code: "already-registered", type: "app.card" },
-  { code: "file-exists", path: "a/b.ts" },
-  { code: "filesystem-failed", path: "a", detail: "EACCES" },
-]
-
-describe("CLI_ERROR_CODES", () => {
-  it("names each way a command can refuse exactly once", () => {
-    expect(new Set(CLI_ERROR_CODES).size).toBe(CLI_ERROR_CODES.length)
-  })
-
-  it("covers the whole CliError union", () => {
-    const codes = everyCliError.map((error) => error.code)
-
-    expect(new Set(codes).size).toBe(everyCliError.length)
-    expect([...codes].sort()).toEqual([...CLI_ERROR_CODES].sort())
-  })
-
-  it("describes every code it names", () => {
-    for (const code of CLI_ERROR_CODES) {
-      const fixture = everyCliError.find((error) => error.code === code)
-      expect(fixture, `no fixture for ${code}`).toBeDefined()
-      if (fixture === undefined) continue
-
-      expect(describeCliError(fixture).length).toBeGreaterThan(0)
-    }
-  })
-})
+const sampleErrors: Record<CliErrorCode, CliError> = {
+  "unknown-command": { code: "unknown-command", given: "deploy" },
+  "missing-argument": { code: "missing-argument", argument: "<type>" },
+  "unexpected-argument": { code: "unexpected-argument", given: "extra" },
+  "invalid-primitive-type": { code: "invalid-primitive-type", type: "X" },
+  "reserved-primitive-type": { code: "reserved-primitive-type", type: "registry" },
+  "framework-namespace": { code: "framework-namespace", type: "loom.card" },
+  "already-registered": { code: "already-registered", type: "app.card" },
+  "file-exists": { code: "file-exists", path: "a/b.ts" },
+  "filesystem-failed": { code: "filesystem-failed", path: "a", detail: "EACCES" },
+}
 
 describe("describeCliError", () => {
   it("says what was wrong and what to do about it", () => {
-    expect(describeCliError({ code: "unknown-command", given: "deploy" })).toContain("--help")
-    expect(describeCliError({ code: "missing-argument", argument: "<type>" })).toContain("<type>")
-    expect(describeCliError({ code: "unexpected-argument", given: "extra" })).toContain("extra")
-    expect(describeCliError({ code: "invalid-primitive-type", type: "X" })).toContain("kebab-case")
-    expect(describeCliError({ code: "reserved-primitive-type", type: "registry" })).toContain("overwrite")
-    expect(describeCliError({ code: "framework-namespace", type: "loom.card" })).toContain(`"app.card"`)
-    expect(describeCliError({ code: "already-registered", type: "app.card" })).toContain("already")
-    expect(describeCliError({ code: "file-exists", path: "a/b.ts" })).toContain("nothing was written")
-    expect(describeCliError({ code: "filesystem-failed", path: "a", detail: "EACCES" })).toContain("EACCES")
+    expect(describeCliError(sampleErrors["unknown-command"])).toContain("--help")
+    expect(describeCliError(sampleErrors["missing-argument"])).toContain("<type>")
+    expect(describeCliError(sampleErrors["unexpected-argument"])).toContain("extra")
+    expect(describeCliError(sampleErrors["invalid-primitive-type"])).toContain("kebab-case")
+    expect(describeCliError(sampleErrors["reserved-primitive-type"])).toContain("overwrite")
+    expect(describeCliError(sampleErrors["framework-namespace"])).toContain(`"app.card"`)
+    expect(describeCliError(sampleErrors["already-registered"])).toContain("already")
+    expect(describeCliError(sampleErrors["file-exists"])).toContain("nothing was written")
+    expect(describeCliError(sampleErrors["filesystem-failed"])).toContain("EACCES")
+  })
+
+  /**
+   * Walked from the published list rather than from a copy written here, which
+   * is the thing the list was added for: a consumer that reads
+   * `CLI_ERROR_CODES` gets a sentence for every one of them or this goes red.
+   */
+  it("has a sentence for every published code", () => {
+    for (const code of CLI_ERROR_CODES) {
+      expect(describeCliError(sampleErrors[code]).length).toBeGreaterThan(0)
+    }
   })
 })

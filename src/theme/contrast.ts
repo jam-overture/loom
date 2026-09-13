@@ -203,6 +203,25 @@ export const channelsOf = (colour: string): readonly [number, number, number] | 
   return r === undefined || g === undefined || b === undefined ? undefined : [r, g, b]
 }
 
+const luminance = ([r, g, b]: readonly [number, number, number]): number =>
+  0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+
+/**
+ * Relative luminance, or `undefined` for a form `channelsOf` declines to guess
+ * at.
+ *
+ * A ratio is a question about two colours; **how dark is this** is a question
+ * about one, and `measure.ts` has to ask it — a scrim is asked to darken what is
+ * under it, and darkening is a property of the wash rather than of a pair. It is
+ * computed here, with WCAG's curve, rather than a second time somewhere else
+ * against a curve half a rounding away from this one.
+ */
+export const relativeLuminance = (colour: string): number | undefined => {
+  const channels = channelsOf(colour)
+
+  return channels === undefined ? undefined : luminance(channels)
+}
+
 /**
  * The WCAG contrast ratio between two colours, or `undefined` when either is a
  * form `channelsOf` declines to guess at.
@@ -210,9 +229,6 @@ export const channelsOf = (colour: string): readonly [number, number, number] | 
 export const contrastRatio = (a: string, b: string): number | undefined => {
   const [first, second] = [a, b].map(channelsOf)
   if (!first || !second) return undefined
-
-  const luminance = ([r, g, b]: readonly [number, number, number]): number =>
-    0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
 
   const [high, low] = [luminance(first), luminance(second)].sort((x, y) => y - x)
 

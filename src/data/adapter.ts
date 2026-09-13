@@ -47,6 +47,15 @@ export interface DataAdapter<TParams = JsonObject, TAnswer extends JsonValue = J
  * Why a binding has no value. Every one of these is something a primitive may
  * be told about and a diagnostic says out loud; none of them is an exception
  * anyone catches.
+ *
+ * `no-such-source` and `not-resolved` are the pair worth keeping apart, and they
+ * were one code until 12 September. An unregistered source is fixed in the
+ * registry by whoever owns the data; a binding nothing resolved is fixed in the
+ * composition root by whoever wired the render — a caller that resolved a
+ * different plan than the one it is rendering. Sharing a code made a diagnostic
+ * say "no source is registered for it — this binding was never resolved", which
+ * is two sentences contradicting each other, and pooled the two for anything
+ * counting reasons.
  */
 export type DataUnavailable = {
   readonly reason:
@@ -63,19 +72,8 @@ export const describeDataUnavailable = (unavailable: DataUnavailable): string =>
   switch (unavailable.reason) {
     case "no-such-source":
       return `no source is registered for it — ${unavailable.detail}`
-    /**
-     * Split from `no-such-source` after `Loom lessons` found the two sharing a
-     * code on 3 September: the registry is intact and the caller resolved a
-     * different plan than the one it is rendering. Different fault, different
-     * fixer — a composition root rather than a registry — and the standing rule
-     * across these seams is that two failures with different downstream answers
-     * do not share a reason. Under the old code a host was told "no source is
-     * registered for it — this binding was never resolved", which is two
-     * sentences contradicting each other, and anything counting reasons pooled
-     * them.
-     */
     case "not-resolved":
-      return `it was not among the bindings this render resolved — ${unavailable.detail}`
+      return `nothing resolved it — ${unavailable.detail}`
     case "invalid-params":
       return `the params in the tree are not what the source accepts — ${unavailable.detail}`
     case "invalid-answer":

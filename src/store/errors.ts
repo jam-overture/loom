@@ -33,17 +33,18 @@ export type StoreError =
 export type StoreErrorCode = StoreError["code"]
 
 /**
- * The five ways persistence can refuse, as a list the runtime can hand you.
+ * Every way persistence can refuse, in the order a reader meets them.
  *
- * The sixth instance of a shape this project has now settled on
- * (`EPISODE_RESOLUTION_KINDS`, `UNJUDGED_REASONS`, `PALETTE_SLOTS`,
- * `STAKE_ORDER`, `WRITE_OUTCOME_KINDS`), so it is a line of code rather than a
- * decision. Filed by `Loom docs` on 2 September, who wanted to enumerate what a
- * store can say without reading the union out of a type they cannot iterate.
+ * A `switch` over a `StoreError` is exhaustive without this and always was. What
+ * needs a list is everything that *walks* the taxonomy rather than reacting to
+ * one member: a page that tells a host what it has to handle before going to
+ * production, a dashboard wanting a bucket per code, a conformance check written
+ * against the store contract. Each of those otherwise keeps its own copy, and a
+ * copy is a list that is silently wrong the day a sixth code lands.
  *
- * In the order a writer meets them rather than alphabetically: the two about
- * whether a tree is there, then the two about whether a delta may land, then the
- * one that is about the storage itself.
+ * The order is the order a deployment meets them rather than one of severity:
+ * the two that are about a tree's identity, then the two a write is refused by,
+ * then the one that is about the storage itself rather than anything in it.
  */
 export const STORE_ERROR_CODES: readonly StoreErrorCode[] = everyMemberOf<StoreErrorCode>()([
   "not-found",

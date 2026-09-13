@@ -1,0 +1,172 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { PolicyComparison, PolicyKnobs } from "@/app/(docs)/_components/policy"
+
+export const metadata = pageMetadata("building-with-loom", "what-ai-may-change")
+
+# What AI may change
+
+Your registry decides **which words exist**. Nothing in it says **which of them
+matter**.
+
+That is a real gap, and it is easiest to see on a shop. "Change the wording of
+this heading" and "change the price" are the same move: one `configure`, setting
+one prop on one node. The runtime cannot tell them apart, because it has never
+heard of your shop and has no way to learn that one of those two costs money.
+
+So you tell it, in a small object called a **policy**. It is the second list you
+write, after the registry, and it is the shortest interesting file in a Loom
+deployment.
+
+```ts
+import { gatePolicySchema } from "@loom/runtime"
+
+export const policy = gatePolicySchema.parse({
+  policyId: "acme-storefront-2026-09",
+  protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],
+})
+```
+
+Two lines of vocabulary, and every other setting left alone. That is a complete,
+working policy — the rest have defaults, and most deployments never touch them.
+
+<Callout kind="note">
+  [What the Gate decides](/docs/the-runtime/what-the-gate-decides) is about the
+  machinery: how a change is weighed and what the three answers mean. This page
+  is about the part you write.
+</Callout>
+
+## What one line of vocabulary buys
+
+Below is one ask — the same ask — judged twice. The tree is the same, the change
+is the same, and the two policies differ by that one list.
+
+<PolicyComparison id="what-you-protect" />
+
+Both runs were performed as this page was built, against the real Gate. Nothing
+here is a screenshot of a good day.
+
+The thing to take from it: **stakes are a property of what a change touches, not
+of how it is phrased.** Nobody asking to make a heading smaller is being
+careless, and the wording of the ask is identical in both columns. What differs
+is that one deployment had said, in advance, that headings are the kind of thing
+it wants to look at.
+
+## Held and refused are different words
+
+The obvious next question is how far this goes. If naming a primitive makes
+changes to it wait for a person, does naming enough primitives freeze the site?
+
+No — because the runtime distinguishes *changing* a protected thing from
+*destroying* one, and it does that on its own.
+
+<PolicyComparison id="where-it-stops" />
+
+Same policy as the column above, same protected primitive, one word different in
+the ask. Demoting a heading is high stakes and gets held; deleting one is
+critical and is refused outright. That ordering is the runtime's, not something
+your policy set — which means a short protected list gives you both behaviours
+without you having to describe either.
+
+<Callout kind="warning">
+  A refusal is not a strong hold. There is no button that turns it into a yes,
+  and no reviewer who can wave it through. If you find yourself wanting one, the
+  answer is to change the policy — under a new name — rather than to look for an
+  override.
+</Callout>
+
+## Who asked is part of the question
+
+Every ask says where it came from: a person typed it, a signal triggered it, a
+schedule ran it, or a developer did it. That is the intent's `origin`, and the
+policy gives each one its own ceiling.
+
+The effect is worth seeing on the most harmless change on this site — adding one
+sentence to the end of a page.
+
+<PolicyComparison id="who-asked" />
+
+The same policy, the same page, the same sentence. A person who asked for it
+gets it; a schedule nobody was watching has to check first.
+
+Look at what the Gate says about the change itself: it is **medium stakes in
+both columns**, because adding a block to the top level of a page is a
+structural change however innocent it reads. Nothing about the change was
+reassessed. What moved is the line it had to stay under.
+
+This is the setting most likely to matter to you and least likely to occur to
+you, because it only bites once something other than a human is proposing
+changes. The default is drawn where most deployments want it, and the direction
+to move it is downward: a source of changes you trust less gets a lower ceiling,
+never a higher one.
+
+## The whole of a policy
+
+Thirteen settings, and you have now met three of them. Here is all of it — what
+each one is, what you do about it, and what you get if you say nothing.
+
+Every default below is read out of the runtime as this page is built, so the
+number you see is the number in your build. The list itself is the policy's own
+type: a setting added to the runtime and not to this page stops the site
+compiling, rather than quietly leaving you a page that describes twelve of
+thirteen.
+
+<PolicyKnobs />
+
+## The one list you should not write by hand
+
+`interactiveTypes` is the exception in that table, and it is worth saying twice.
+It answers "which of my primitives render a thing the reader aims at?" — a link,
+a button — and every primitive already declared that about itself when it was
+defined.
+
+```ts alternative
+import { interactiveTypesFor } from "@loom/runtime/sdk"
+
+export const policy = gatePolicySchema.parse({
+  policyId: "acme-storefront-2026-09",
+  protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],
+  interactiveTypes: interactiveTypesFor(registry),
+})
+```
+
+A hand-typed copy of that map is wrong the first day somebody gives another
+component an `href`, and nothing anywhere would say so. Read it off the registry
+instead, and it cannot drift.
+
+## A name is a claim about contents
+
+`policyId` looks like a label and is closer to a version number.
+
+Every decision the Gate makes records the name of the policy that made it, so a
+change judged six months ago can still say what it was judged by. That only
+works while a name means one thing. **Change what a policy protects, and give it
+a new name** — otherwise every decision already written under the old one is
+claiming to have been judged by rules that no longer exist.
+
+The date in `acme-storefront-2026-09` above is one way to do that and not the
+only one. What matters is that you never quietly redefine a name somebody's
+audit trail is pointing at.
+
+## Handing it to the runtime
+
+A policy is a value, so something has to give it to the runtime. That is
+`policySource` — a function of the tree and the intent, because a deployment
+serving two kinds of page may not want to judge them the same way.
+
+```ts
+import { fixedPolicy } from "@loom/runtime"
+import type { CompositionRuntime } from "@loom/runtime"
+
+const runtime: CompositionRuntime = {
+  interpreter,
+  policySource: fixedPolicy(policy),
+  events,
+  clock,
+  idFactory,
+}
+```
+
+`fixedPolicy` is the one-policy answer and is what most sites want, this one
+included. [What your app has to
+do](/docs/the-runtime/what-your-app-has-to-do) is where that runtime object goes
+next, and what your own code owes a person for each way an ask can end.

@@ -3,11 +3,11 @@
 import Link from "next/link"
 
 import { calibrationOf } from "../_lib/calibration"
-import { correctionQueue, dueCorrections } from "../_lib/corrections"
+import { correctionQueue, dueCorrections, knownOnly } from "../_lib/corrections"
 import { dueNow, queueFor, type PartLessons, type QueueEntry, type ScheduledSet } from "../_lib/queue"
 import { CorrectionsPanel } from "./corrections"
 import * as style from "./style"
-import { today, useProgress } from "./store"
+import { useProgress } from "./store"
 
 /**
  * The tracking table at the bottom of `review-schedule.md`, kept by the thing
@@ -24,6 +24,12 @@ import { today, useProgress } from "./store"
 type QueueProps = {
   readonly sets: readonly ScheduledSet[]
   readonly parts: PartLessons
+  /**
+   * Every question the course still contains, keyed as the record keys them.
+   * Read off the repository on the server and handed down, because the two
+   * things on this page that count corrections have to count the same ones.
+   */
+  readonly questionKeys: readonly string[]
 }
 
 const BANDS: readonly (readonly [QueueEntry["status"], string, string])[] = [
@@ -65,15 +71,16 @@ const Row = ({ entry }: { readonly entry: QueueEntry }) => (
   </li>
 )
 
-export const Queue = ({ sets, parts }: QueueProps) => {
-  const { progress, ready } = useProgress()
+export const Queue = ({ sets, parts, questionKeys }: QueueProps) => {
+  const { progress, ready, today } = useProgress()
 
   if (!ready) return <p style={style.note}>Working out what is due&hellip;</p>
 
-  const entries = queueFor(sets, progress, parts, today())
+  const entries = queueFor(sets, progress, parts, today)
   const calibration = calibrationOf(progress)
   const [next, ...backlog] = dueNow(entries)
-  const corrections = dueCorrections(correctionQueue(progress, today()))
+  const known = new Set(questionKeys)
+  const corrections = dueCorrections(knownOnly(correctionQueue(progress, today), known))
 
   return (
     <div style={style.column(6)}>
@@ -115,7 +122,7 @@ export const Queue = ({ sets, parts }: QueueProps) => {
         * the second look like a backlog of the first — something to clear —
         * when it is the opposite: the list that is supposed to keep coming back.
         */}
-      <CorrectionsPanel />
+      <CorrectionsPanel keys={questionKeys} />
 
       {/*
         * Everything else that is late is listed, and listed second. A queue that
@@ -191,13 +198,14 @@ export const Queue = ({ sets, parts }: QueueProps) => {
 }
 
 /** The one line the index page needs: whether there is anything to do today. */
-export const DueSummary = ({ sets, parts }: QueueProps) => {
-  const { progress, ready } = useProgress()
+export const DueSummary = ({ sets, parts, questionKeys }: QueueProps) => {
+  const { progress, ready, today } = useProgress()
 
   if (!ready) return <p style={style.note}>&nbsp;</p>
 
-  const due = dueNow(queueFor(sets, progress, parts, today()))
-  const corrections = dueCorrections(correctionQueue(progress, today()))
+  const due = dueNow(queueFor(sets, progress, parts, today))
+  const known = new Set(questionKeys)
+  const corrections = dueCorrections(knownOnly(correctionQueue(progress, today), known))
 
   const setsLine =
     due.length === 0

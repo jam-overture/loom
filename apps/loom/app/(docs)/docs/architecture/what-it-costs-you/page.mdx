@@ -1,0 +1,77 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  AlternativesLeftOpen,
+  ArchitectureCosts,
+} from "@/app/(docs)/_components/architecture-costs"
+
+export const metadata = pageMetadata("architecture", "what-it-costs-you")
+
+# What it costs you
+
+Every framework is a shape, and a shape is mostly refusals. The rest of this
+site is about what Loom lets you do. This page is the other column, and it is
+the one to read before you commit anything to it.
+
+## The bargain, said once more
+
+Loom lets an AI change a page that is already running, and the reason that is
+not alarming is that it can only say a small number of things. The page is
+data. A change is data. The words a change may use are a list you wrote.
+
+**You give up the freedom to have the AI produce anything at all, and what you
+get back is a change you can read, measure, refuse and undo.** The other half of
+the same trade: what a thing *does* lives in the component you registered, never
+in the tree — so a proposal can move your checkout, rename it and take it away,
+and it can never change what happens when somebody presses the button.
+
+Everything below is that trade, itemised.
+
+<Callout kind="note">
+  [How it fits together](/docs/architecture/how-it-fits-together) is the same
+  system described from the other side — eight ideas, and where the reasoning
+  for each one lives. If you have not read it, read it first: this page is
+  shorter and more useful once you know what is being paid for.
+</Callout>
+
+## Eight things you can no longer do
+
+Under each one is the ruling that made it so, and what that ruling turned down
+instead. Those lists are read out of the records as this page builds — they are
+not a summary of them, and they never say *why*. The why is in the record, one
+click away, written on the day. Where a ruling has since been replaced in part,
+the box says so, because part of it is somebody else's now.
+
+<ArchitectureCosts />
+
+## What is not settled
+
+The eight above will read the same next year. Some of what Loom has turned down
+will not, because a record sometimes declines to close a question rather than
+answering it — *deferred*, *rejected for now*, *worth revisiting once*. Those
+are the constraints that might lift, and there is no reason to make you dig for
+them.
+
+<AlternativesLeftOpen />
+
+A row is here because the record's own paragraph says so, in the sentence
+printed under it. Nothing is judged for it: if a ruling changes its mind, this
+list changes with it, and if it never does, the row stays.
+
+## The cost nobody records
+
+There is one more, and it is not in any of the rulings because it is not a
+decision anybody made: **Loom is worth its price only if the same page changes
+more than once.** A page that ships and then sits there gets the whole bill —
+the registry, the policy, the store, the log — and none of the benefit, which
+only arrives the fourth time somebody asks for something and nobody has to open
+an editor.
+
+That is a judgement about your situation rather than about the framework, and it
+is the one thing on this page that no test can hold true.
+
+## Where the arguments are
+
+[Decision records](/docs/architecture/decision-records) is every ruling Loom has
+made, in the order they were made, with what each one replaced. The alternatives
+named on this page are all in there with their reasoning attached, and so are
+the several hundred that no cost above points at.

@@ -11,21 +11,17 @@ import { NAMESPACED_ID_PATTERN } from "../primitive-type.js"
  */
 
 /**
- * What a malformed source id is told, in one place because two seams say it.
+ * The grammar a source id has to satisfy, in words, said once.
  *
- * The registry described this properly and the render diagnostic did not: a node
- * whose `loom:data` named something ungrammatical reported `bio.source: Invalid`
- * — Zod's default for a failed `.regex()` — while the same mistake made at
- * registration time got the full sentence. The asymmetry ran the wrong way.
- * The registry error reaches somebody with the code open who could have guessed;
- * the diagnostic reaches somebody looking at a page that will not bind.
- *
- * Shared rather than written twice so the two cannot drift into describing the
- * same grammar differently. Filed by `Loom lessons` on 3 September, from a real
- * run of lesson 18's Exercise D.
+ * The same sentence reaches two very different readers. `describeDataRegistryError`
+ * tells a host that registered a bad id, and that reader has the code open. A
+ * misdeclared `loom:data` in a tree reaches somebody looking at a page that will
+ * not bind, through a render diagnostic — and Zod's default for a failed
+ * `.regex()` is the word `Invalid`, so the less informed reader was getting the
+ * less useful message. One constant rather than two strings, because the two
+ * drifting apart is the same defect wearing a different hat.
  */
-export const SOURCE_ID_EXPECTATION =
-  'expected dot-namespaced kebab-case, like "commerce.products"'
+export const SOURCE_ID_EXPECTATION = 'expected dot-namespaced kebab-case, like "commerce.products"'
 
 /**
  * The identifier of a registered data source — the contract between a binding
@@ -41,8 +37,8 @@ export const sourceIdSchema = z
   .brand<"SourceId">()
 export type SourceId = z.infer<typeof sourceIdSchema>
 
-/** The same gap `sourceIdSchema` had, for the same reason, in the name beside it. */
-export const BINDING_NAME_EXPECTATION = 'expected camelCase, like "featuredProducts"'
+/** The grammar a binding name has to satisfy, for the same reader. */
+export const BINDING_NAME_EXPECTATION = 'expected camelCase, like "services"'
 
 /**
  * The name a primitive reads an answer under — `loom.data.services`. camelCase,

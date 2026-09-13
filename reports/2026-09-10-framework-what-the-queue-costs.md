@@ -40,7 +40,7 @@ Two measured counterfactuals, run the same way against probe bases:
 
 So three lines in `.gitattributes` take the queue from seven to twenty-eight.
 Those three lines are in this change, with
-[0120](../decisions/0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md)
+[0139](../decisions/0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md)
 for why. `union` is a built-in git merge driver and needs no configuration at
 all; the `ours` driver used for the two generated files is not built in, so the
 root `prepare` script sets it and `pnpm install` — step five of every routine's
@@ -97,7 +97,7 @@ file except people.
 
 ## Records
 
-- **0120** added, `Accepted` — a shared ledger is union-merged, and a generated
+- **0139** (written as 0120, renumbered on merge) added, `Accepted` — a shared ledger is union-merged, and a generated
   file is regenerated. Four alternatives recorded with why each was rejected,
   including one-file-per-finding, which is better on the merits and was rejected
   on coordination cost across seven lanes.
@@ -150,7 +150,7 @@ those branches on it. Nothing failed and nothing was skipped.
   in this report should not be quoted next week.
 - **Union is a floor, not a ceiling.** If `findings:check` starts finding
   doubled statuses regularly, that is the signal that the one-file ledger has
-  outgrown a merge driver and wants the `findings/` directory 0120 rejected for
+  outgrown a merge driver and wants the `findings/` directory 0139 rejected for
   now.
 - **Nothing here can make anyone merge.** This run removes the reason not to and
   measures what removing it buys. Twenty-eight of thirty is the number.

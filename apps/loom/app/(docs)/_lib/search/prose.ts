@@ -1,3 +1,5 @@
+import { outsideFences } from "../fences/spans"
+
 import { headingAnchor } from "./anchor"
 import { readPageSource } from "./headings"
 
@@ -17,10 +19,13 @@ import { readPageSource } from "./headings"
  *
  * **Two things are deliberately not words, and both rules have a wrong answer.**
  *
- * - **Fenced code is skipped**, which is what `headings.ts` already does and for
- *   a related reason: a fence is a thing to copy rather than a thing to read,
- *   and a reader who searches `import` wants prose about importing, not the
- *   forty blocks that begin with the keyword.
+ * - **Fenced code is not prose**, which is what `headings.ts` already says and
+ *   for a related reason: a fence is a thing to copy rather than a thing to
+ *   read, and a reader who searches `import` wants prose about importing, not
+ *   the forty blocks that begin with the keyword. It is not lost, either — the
+ *   code under a heading travels beside its words in `code.ts`, in the band
+ *   below this one, so a name a reader saw in a block is findable as code and
+ *   never as a sentence.
  * - **Inline code is skipped too** — every span between backticks. This is the
  *   rule worth defending. The site already answers *which pages show this name*
  *   from exactly those spans, in the band at the top of every reference page,
@@ -41,7 +46,6 @@ export type ProseSection = {
   readonly text: string
 }
 
-const FENCE = /^\s*(?:```|~~~)/
 const HEADING = /^(#{1,6})\s+(.+?)\s*$/
 
 /** `import …` and `export const metadata = …`: an MDX page's machinery, not its prose. */
@@ -87,7 +91,6 @@ const plainText = (markdown: string): string =>
     .trim()
 
 type Reading = {
-  readonly fenced: boolean
   readonly anchor: string
   readonly lines: readonly string[]
   readonly sections: readonly ProseSection[]
@@ -105,17 +108,17 @@ const closed = (state: Reading): readonly ProseSection[] => {
  * Separated from the file read the way `headingsIn` is, so the rules above can
  * be held against markdown written to exercise them rather than against
  * whichever page happens to exercise them this week — which is what stops
- * another lane's ordinary writing turning this directory red.
+ * another lane's ordinary writing turning this directory red. The code arrives
+ * already blanked out by `outsideFences`, so there is no fence rule here to get
+ * wrong.
  *
  * A heading below the indexed levels does not open a section: an `####` is a
  * label inside a section a reader was already sent to, and a body that stopped
  * there would leave those words findable by nothing.
  */
 export const proseSectionsIn = (source: string): readonly ProseSection[] => {
-  const state = source.split("\n").reduce<Reading>(
+  const state = outsideFences(source).reduce<Reading>(
     (reading, line) => {
-      if (FENCE.test(line)) return { ...reading, fenced: !reading.fenced }
-      if (reading.fenced) return reading
       if (MDX_STATEMENT.test(line)) return reading
 
       const heading = HEADING.exec(line)
@@ -133,7 +136,7 @@ export const proseSectionsIn = (source: string): readonly ProseSection[] => {
         sections: closed(reading),
       }
     },
-    { fenced: false, anchor: "", lines: [], sections: [] }
+    { anchor: "", lines: [], sections: [] }
   )
 
   return closed(state)

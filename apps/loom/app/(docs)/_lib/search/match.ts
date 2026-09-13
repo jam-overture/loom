@@ -9,11 +9,13 @@ import type { SearchEntry, SearchIndex } from "./model"
  * from a search box without being told, and it is the reason a query like
  * `gate reversible` finds the one heading rather than everything about either.
  *
- * *Somewhere* now includes **the prose under the heading**, which is the field
- * added last and the cheapest place to be found. So `gate serverless` can be
- * answered by a section called neither, and the row shows the sentence that
+ * *Somewhere* includes **the prose under the heading** and, below that, **the
+ * code**. So `gate serverless` can be answered by a section called neither, and
+ * `commitIntent` by a page that only ever prints it in a block a reader was
+ * invited to copy. Either way the row shows the sentence or the line that
  * answered it — because a result a reader cannot account for is one they stop
- * trusting, and a heading offered for a word that is not in it is exactly that.
+ * trusting, and a heading offered for a word that is not in it is exactly
+ * that.
  *
  * There is no fuzzy matching and no stemming. Both would find more and both
  * would produce results a reader cannot account for — and this index is small
@@ -38,6 +40,24 @@ const SUMMARY = 12
  * paragraphs about it.
  */
 const BODY = 6
+
+/**
+ * A word in a code block: cheaper still, and the last band there is.
+ *
+ * The order is the same argument one step further down. A heading *called* what
+ * you typed beats one that mentions it in a sentence, which beats one that
+ * prints it in a snippet. What this band does is the same thing the prose band
+ * does — bring a page into the list at all, so that a reader who saw
+ * `commitIntent` in a block, or typed the install command off *Installation*,
+ * is handed the page instead of being told the site has never heard of it.
+ *
+ * It sits below the prose rather than above it for the reason `prose.ts` gives
+ * for leaving inline code out of the words: a name is the one query where the
+ * export itself should win, and the exports are already the band under
+ * everything. Code that could outrank a sentence would put a page that uses a
+ * call above the page that explains it.
+ */
+const CODE = 3
 
 /**
  * **Prose first, names second**, and this is the rule rather than a nudge.
@@ -65,6 +85,34 @@ const KIND_BONUS: Readonly<Record<SearchEntry["kind"], number>> = {
   heading: PROSE_BAND + 4,
   export: 0,
 }
+
+/**
+ * **A page that only shows a name in a snippet does not get the prose band**,
+ * and this is the one thing indexing the code had to be careful about.
+ *
+ * The band's argument is about English. Somebody who does not yet know what the
+ * Gate *is* should not have to scroll past three symbols to reach the page that
+ * tells them, and the band is what guarantees that. The prose index could take
+ * it for free because prose has no names in it — `prose.ts` elides every span
+ * between backticks for exactly this reason.
+ *
+ * Code has nothing but names, so the band it inherited was wrong the moment it
+ * arrived: typing `definePrimitive` returned a heading called *Defining one*
+ * ahead of the export spelled letter-for-letter, because a heading in the band
+ * outscores any name outside it. That is the failure the band exists to prevent,
+ * upside down.
+ *
+ * So an entry whose *whole* claim is a snippet drops out of the band and takes
+ * its place below the names, keeping the same order among themselves. The rule
+ * stays one a person can repeat: **a page that says it in words comes before
+ * the name; a page that only shows it in a block comes after.** An entry that
+ * matched on anything else — a title, a section, a sentence — is in the band as
+ * it always was, and a second word found in its code costs it nothing.
+ */
+const bandedBonus = (entry: SearchEntry, scores: readonly number[]): number =>
+  scores.every((score) => score === CODE)
+    ? KIND_BONUS[entry.kind] - PROSE_BAND
+    : KIND_BONUS[entry.kind]
 
 const NOT_WORD = /[^\p{L}\p{N}]+/u
 
@@ -108,6 +156,7 @@ const scoreTerm = (entry: SearchEntry, term: string): number => {
   if (entry.context.toLowerCase().includes(term)) return CONTEXT
   if (entry.summary.toLowerCase().includes(term)) return SUMMARY
   if (startsAWord(entry.body, term)) return BODY
+  if (startsAWord(entry.code, term)) return CODE
 
   return 0
 }
@@ -128,11 +177,22 @@ export type SearchHit = {
   readonly entry: SearchEntry
   readonly score: number
   /**
-   * The sentence the prose was found in, or nothing where the title already
-   * said it. Empty for every result whose title, section or summary carried the
-   * whole query — an excerpt there would repeat the row above it.
+   * The sentence the prose was found in, or the line of code, or nothing where
+   * the title already said it. Empty for every result whose title, section or
+   * summary carried the whole query — an excerpt there would repeat the row
+   * above it.
    */
   readonly excerpt: readonly ExcerptPart[]
+  /**
+   * Whether that excerpt is a line of code, so the row can set it in the
+   * typeface it was written in.
+   *
+   * A line of TypeScript in the site's prose face reads as prose that has gone
+   * wrong. It is also the whole account a reader gets of why a page about
+   * something else is in their list, so it has to be recognisable as a snippet
+   * at a glance.
+   */
+  readonly excerptIsCode: boolean
 }
 
 /** How much of the paragraph either side of the word is worth showing. */
@@ -179,25 +239,78 @@ const windowOf = (body: string, at: number): string => {
 }
 
 /**
- * The excerpt, built from the first place the prose answered the query.
+ * The one line of code a word was found on.
  *
- * Only the terms the *body* had to carry decide where the window sits — a word
- * that was already in the title is not why this result is here, and centring on
- * it would show the reader a sentence that does not contain the word they are
- * looking for. Every typed word inside the window is still marked, because a
- * reader scanning ten rows is looking for their own words in bold.
+ * A line rather than a window, because code is written in lines and a cut that
+ * ignored them would hand a reader half a call and half of the next one. A line
+ * long enough to be a paragraph is windowed as prose would be, which is the
+ * only case where the two rules meet.
  */
-const excerptOf = (entry: SearchEntry, terms: readonly string[]): readonly ExcerptPart[] => {
-  const carried = terms.filter((term) => scoreTerm(entry, term) === BODY)
+const lineOf = (code: string, at: number): string => {
+  const from = code.lastIndexOf("\n", at) + 1
+  const found = code.indexOf("\n", at)
+  const raw = code.slice(from, found === -1 ? code.length : found)
 
-  if (carried.length === 0) return []
+  /*
+   * Indentation is not information in a one-line excerpt, and dropping it moves
+   * the word — so it comes off before the offset is worked out rather than
+   * after, which is how a windowed line would otherwise be centred on the wrong
+   * character.
+   */
+  const line = raw.trimStart().trimEnd()
+  const within = at - from - (raw.length - raw.trimStart().length)
 
-  const first = Math.min(...carried.flatMap((term) => placesIn(entry.body, term).map(([at]) => at)))
+  return line.length <= BEFORE + AFTER ? line : windowOf(line, within)
+}
+
+/**
+ * The excerpt, built from the first place the page answered the query, and from
+ * the prose before the code.
+ *
+ * Only the terms a *field* had to carry decide where the cut sits — a word that
+ * was already in the title is not why this result is here, and centring on it
+ * would show the reader a sentence that does not contain the word they are
+ * looking for. Every typed word inside the cut is still marked, because a
+ * reader scanning ten rows is looking for their own words in bold.
+ *
+ * **Prose wins where both could answer.** A query whose words are split across
+ * a sentence and a snippet shows the sentence, which is the half more likely to
+ * mean something to somebody who does not have the model in their head — and it
+ * keeps the rule to one a person can repeat rather than an arithmetic nobody
+ * can predict from the screen.
+ */
+const cutFrom = (
+  text: string,
+  carried: readonly string[],
+  terms: readonly string[],
+  cut: (text: string, at: number) => string
+): readonly ExcerptPart[] => {
+  const first = Math.min(...carried.flatMap((term) => placesIn(text, term).map(([at]) => at)))
 
   if (!Number.isFinite(first)) return []
 
-  const text = windowOf(entry.body, first)
+  return marked(cut(text, first), terms)
+}
 
+const excerptOf = (
+  entry: SearchEntry,
+  terms: readonly string[]
+): { readonly parts: readonly ExcerptPart[]; readonly isCode: boolean } => {
+  const fromProse = terms.filter((term) => scoreTerm(entry, term) === BODY)
+
+  if (fromProse.length > 0) {
+    return { parts: cutFrom(entry.body, fromProse, terms, windowOf), isCode: false }
+  }
+
+  const fromCode = terms.filter((term) => scoreTerm(entry, term) === CODE)
+
+  if (fromCode.length === 0) return { parts: [], isCode: false }
+
+  return { parts: cutFrom(entry.code, fromCode, terms, lineOf), isCode: true }
+}
+
+/** The reader's own words picked out of the excerpt, in the order they appear. */
+const marked = (text: string, terms: readonly string[]): readonly ExcerptPart[] => {
   const marks = terms
     .flatMap((term) => placesIn(text, term))
     .sort(([a], [b]) => a - b)
@@ -247,7 +360,7 @@ export const searchDocs = (index: SearchIndex, query: string, limit: number): re
         position,
         score: scores.some((score) => score === 0)
           ? 0
-          : scores.reduce((total, score) => total + score, 0) + KIND_BONUS[entry.kind],
+          : scores.reduce((total, score) => total + score, 0) + bandedBonus(entry, scores),
       }
     })
     .filter((hit) => hit.score > 0)
@@ -263,5 +376,9 @@ export const searchDocs = (index: SearchIndex, query: string, limit: number): re
      * reading a paragraph is done for the ten rows a reader will see rather
      * than for the nine hundred entries they will not.
      */
-    .map(({ entry, score }) => ({ entry, score, excerpt: excerptOf(entry, terms) }))
+    .map(({ entry, score }) => {
+      const { parts, isCode } = excerptOf(entry, terms)
+
+      return { entry, score, excerpt: parts, excerptIsCode: isCode }
+    })
 }

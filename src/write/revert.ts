@@ -1,8 +1,8 @@
 import type { IdFactory, TreeId } from "../ids.js"
 import type { Clock } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
-import { inverseInterpreter } from "../runtime/inverse-interpreter.js"
 import type { ChangeInterpreter } from "../runtime/interpreter.js"
+import { inverseInterpreter } from "../runtime/inverse.js"
 import type { CompositionRuntime } from "../runtime/pipeline.js"
 import { describeRevertPlan, planRevert, type RevertPlan, type UnrevertablePlan } from "../store/revert.js"
 import type { LoomTree } from "../tree/tree.js"
@@ -59,17 +59,14 @@ const rationaleFor = (plan: RevertablePlan): string => {
 }
 
 /**
- * The stateless interpreter, given the two things only a log can supply.
+ * The same interpreter every undo uses, with the log's half filled in.
  *
- * Everything that makes an undo gateable on the same terms as an AI-authored
- * change — the empty interpretation seam, the head check, `authoredBy: runtime`
- * and a confidence of 1 — is `inverseInterpreter` and is argued there. What is
- * left here is what a store knows and a stateless caller does not: which
- * revision this undoes, and what applying it writes over.
- *
- * The plan's contest check was made against one head, so `headRevision` is the
- * revision the operations were computed against and the one the interpreter
- * declines to depart from.
+ * Everything specific to a revert is here — the stamp that says this came off a
+ * log, the rationale that names the revision and what it costs, and the work the
+ * plan found to declare. What is left is `inverseInterpreter`, which a surface
+ * with no store reaches for directly: the head check, the provenance of a
+ * computed change, and the shape of the proposal are one implementation rather
+ * than two that drift.
  */
 export const revertInterpreter = (
   plan: RevertablePlan,
@@ -77,8 +74,16 @@ export const revertInterpreter = (
   clock: Clock
 ): ChangeInterpreter =>
   inverseInterpreter(
-    { baseRevision: plan.headRevision, operations: plan.operations },
     {
+      operations: plan.operations,
+      /**
+       * The plan's contest check was made against one head. Judging it at a
+       * different one would be judging a different question, so the interpreter
+       * declines rather than proposing something whose reasoning has expired.
+       * The write path refuses a moved head before reaching here; this is what
+       * keeps the interpreter safe to wire into a runtime directly.
+       */
+      headRevision: plan.headRevision,
       interpreter: REVERT_INTERPRETER,
       rationale: rationaleFor(plan),
       /**

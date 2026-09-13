@@ -1,6 +1,8 @@
 import { plainEffect, type PlainOperation } from "@/app/(portal)/_lib/effect-view"
 import type { ProposalEffect, ValueChange } from "@/app/(portal)/_lib/proposal-effect"
+import { subjectReading } from "@/app/(portal)/_lib/vocabulary"
 
+import { PlainSentence } from "./plain-sentence"
 import { TechnicalDetail } from "./technical-detail"
 
 /**
@@ -62,15 +64,14 @@ const OperationRow = ({ operation }: { readonly operation: PlainOperation }) => 
   <li className="border-edge-subtle flex flex-col gap-1 border-l-2 pl-2.5">
     <p className="flex flex-wrap items-baseline gap-x-1.5">
       {/*
-        * One sentence, held as three pieces because the part's name in the
-        * middle of it is monospace and the sentence around it is not. `PlainLine`
-        * is why the spaces and the full stop belong to the sentence rather than
-        * to whichever span happens to sit next to them.
+        * One sentence, rendered by the component that owns the spread. This was
+        * three pieces set side by side here, which is what `PlainSentence` was
+        * written to stop and what a subject that is no longer always a bare
+        * identifier made impossible to keep: a named part is words *and* an id,
+        * and this markup would have set both in monospace.
         */}
       <span>
-        {operation.reading.before}
-        <span className="font-mono">{operation.reading.subject}</span>
-        {operation.reading.after}
+        <PlainSentence line={operation.reading} />
       </span>
 
       {operation.standing !== null && (
@@ -97,16 +98,19 @@ const OperationRow = ({ operation }: { readonly operation: PlainOperation }) => 
     )}
 
     {/*
-      * Where it sits, in the labels a reader recognises rather than the ids the
-      * delta names. An id addresses a part; it does not tell anyone where the
-      * part is, and "inside loom.page › loom.band" is a position a person can
-      * picture. The lead-in is there because a bare breadcrumb is a path and a
-      * reader has to be told what it is a path to.
+      * Where it sits. The lead-in is there because a bare breadcrumb is a path
+      * and a reader has to be told what it is a path to.
+      *
+      * `loom.page › loom.band` was defended here as "the labels a reader
+      * recognises rather than the ids the delta names", and against an id that
+      * was true. It stopped being the best available reading the moment the
+      * sentence above it started saying *the band*: one row, two names for one
+      * part, and the monospace one the larger. It reads `the page › the band`
+      * now and is no longer set as machinery — the labels are a click down,
+      * beside the operation they belong to.
       */}
     {operation.place.length > 0 && (
-      <p className="text-ink-muted">
-        Inside <span className="font-mono">{operation.place.join(" › ")}</span>
-      </p>
+      <p className="text-ink-muted">Inside {operation.place.join(" › ")}</p>
     )}
 
     {operation.changes.length > 0 && (
@@ -149,7 +153,7 @@ export const ProposalEffectView = ({ effect }: { readonly effect: ProposalEffect
       <ol className="flex flex-col gap-2">
         {plain.operations.map((operation, position) => (
           <OperationRow
-            key={`${operation.reading.subject}-${position}`}
+            key={`${subjectReading(operation.reading.subject)}-${position}`}
             operation={operation}
           />
         ))}
@@ -172,10 +176,15 @@ export const ProposalEffectView = ({ effect }: { readonly effect: ProposalEffect
       <TechnicalDetail summary="What the change record says">
         <ol className="flex flex-col gap-1">
           {plain.operations.map((operation, position) => (
-            <li key={`record-${operation.reading.subject}-${position}`} className="flex flex-col">
+            <li
+              key={`record-${subjectReading(operation.reading.subject)}-${position}`}
+              className="flex flex-col"
+            >
               <span className="font-mono">{operation.technical}</span>
-              {operation.place.length > 0 && (
-                <span className="text-ink-muted font-mono">{operation.place.join(" › ")}</span>
+              {operation.technicalPlace.length > 0 && (
+                <span className="text-ink-muted font-mono">
+                  {operation.technicalPlace.join(" › ")}
+                </span>
               )}
             </li>
           ))}

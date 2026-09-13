@@ -11,13 +11,18 @@
  * on a page, and a published export. That is the site's own table of contents
  * plus the runtime's own surface.
  *
- * Each of those entries also carries **the prose it sits above** (`body`), which
- * is the decision this file used to say was filed rather than taken. Taking it
- * costs what it was always going to cost — the site's words are shipped to the
- * browser a second time — and `payload.test.ts` is what keeps that cost a number
- * somebody chose rather than one that drifted. What it buys is that a reader
- * searching for a word the site plainly uses stops being told the site has never
+ * Each of those entries also carries the two things underneath it on the page:
+ * **the prose** (`body`) and **the code** (`code`). Both cost what they were
+ * always going to cost — the site's words and its blocks are shipped to the
+ * browser a second time — and the caps in `build.test.ts` are what keep that
+ * cost a number somebody chose rather than one that drifted. What they buy is
+ * that a reader searching for something the site plainly says, in a sentence or
+ * in a block they were invited to copy, stops being told the site has never
  * heard of it.
+ *
+ * **Three kinds of thing findable, three files.** The entries arrive first
+ * because nothing can be answered without them; the words and the code follow,
+ * separately, and each turns on one more band of the ranking when it lands.
  */
 
 export type SearchKind = "page" | "heading" | "export"
@@ -46,6 +51,17 @@ export type SearchEntry = {
    * explains why a result is in the list, never as the result's own title.
    */
   readonly body: string
+  /**
+   * The code under this entry — every fenced block below its heading, joined
+   * (`code.ts`). Empty for an export and for a page with no blocks on it.
+   *
+   * The cheapest band there is, below the prose, and the reason is the same one
+   * that puts prose below names: a heading that *mentions* a call in a snippet
+   * is a worse answer than one that is *called* what you typed. What it does is
+   * bring the page into the list at all, which is the difference between
+   * finding the install command and being told the site has never heard of it.
+   */
+  readonly code: string
 }
 
 export type SearchIndex = {
@@ -63,6 +79,48 @@ export type SearchIndex = {
  */
 export const SEARCH_INDEX_PATH = "/docs/search-index"
 
+/**
+ * Where the browser asks for the words, which arrive second and separately.
+ *
+ * **The index is two files, and it had to become two.** Indexing the prose put
+ * the site's words in the same payload as its table of contents, and four pages
+ * arriving at once took the whole thing to 46.7 KB compressed against a 48 KB
+ * cap — with the cap's own comment saying the run that hit it should split the
+ * index rather than raise the number.
+ *
+ * The split is along the line the two halves already grow on. What a reader
+ * needs to type the first letter is the table of contents and the runtime's
+ * surface: 998 entries, **14.6 KB compressed**, and it grows when a page is
+ * added or an export is published. The words under them are **35 KB**, and they
+ * grow every time anybody writes a paragraph. So the box opens on the first,
+ * which is the part that answers by title, section and summary — the top three
+ * bands of the ranking — and the prose lands a moment later and turns on the
+ * fourth.
+ *
+ * A reader on a slow connection therefore gets a working search box rather than
+ * a spinner, and the half that grows fastest is the half nothing waits for.
+ */
+export const SEARCH_PROSE_PATH = "/docs/search-index/prose"
+
+/** How many results the dialog shows. Beyond this a reader types more instead. */
+/**
+ * Where the browser asks for the code, which arrives with the words and is
+ * read after them.
+ *
+ * A third file rather than a third of one, for the reason the second exists:
+ * the halves grow at different speeds and for different reasons. The table of
+ * contents grows when a page is added or an export is published. The words grow
+ * every time anybody writes a paragraph. The code grows when somebody adds a
+ * block, which on this site is the slowest of the three and the one most likely
+ * to arrive in a lump — four pages of snippets at once is what took the prose to
+ * its cap.
+ *
+ * Keeping them apart is also what keeps the caps meaningful: a single number
+ * over all three would be a number that moved for three unrelated reasons and
+ * told nobody which.
+ */
+export const SEARCH_CODE_PATH = "/docs/search-index/code"
+
 /** How many results the dialog shows. Beyond this a reader types more instead. */
 export const SEARCH_RESULT_LIMIT = 10
 
@@ -71,7 +129,18 @@ const KINDS: readonly SearchKind[] = ["page", "heading", "export"]
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
-const isEntry = (value: unknown): value is SearchEntry =>
+/**
+ * An entry as it arrives, before its lowest band is filled in.
+ *
+ * `code` is read separately below rather than demanded here, and it is the only
+ * field that is. The entries file and the code file are written by the same
+ * `next build`, but a browser holding an index cached from the deployment
+ * before this one has entries with no `code` key at all — and demanding it
+ * would drop every one of them, turning a band that is not answering yet into a
+ * search box that finds nothing. A missing lowest band is what the split
+ * already asks a reader to tolerate for a moment; losing the box is not.
+ */
+const isArrivingEntry = (value: unknown): value is Omit<SearchEntry, "code"> =>
   isRecord(value) &&
   typeof value.href === "string" &&
   typeof value.title === "string" &&
@@ -79,6 +148,9 @@ const isEntry = (value: unknown): value is SearchEntry =>
   typeof value.summary === "string" &&
   typeof value.body === "string" &&
   KINDS.includes(value.kind as SearchKind)
+
+const codeOf = (value: unknown): string =>
+  isRecord(value) && typeof value.code === "string" ? value.code : ""
 
 /**
  * The index, checked on the way into the browser.
@@ -94,5 +166,76 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
     throw new Error("loom: the search index has no entries")
   }
 
-  return { entries: value.entries.filter(isEntry) }
+  return {
+    entries: value.entries
+      .filter(isArrivingEntry)
+      .map((entry) => ({ ...entry, code: codeOf(entry) })),
+  }
 }
+
+/**
+ * The words under the entries, as they travel.
+ *
+ * A pair rather than an object per entry, because there are two useful fields
+ * and one of them is the key: `href` already identifies an entry uniquely — a
+ * page by its path, a heading by its fragment — so the prose file is a list of
+ * `[href, words]` and nothing else. That is about a fifth of what repeating the
+ * entries would cost, and it cannot drift from the index, because an href it
+ * does not recognise is simply dropped.
+ */
+export type SearchProse = {
+  readonly bodies: readonly (readonly [string, string])[]
+}
+
+const isBody = (value: unknown): value is readonly [string, string] =>
+  Array.isArray(value) && value.length === 2 && typeof value[0] === "string" && typeof value[1] === "string"
+
+export const parseSearchProse = (value: unknown): SearchProse => {
+  if (!isRecord(value) || !Array.isArray(value.bodies)) {
+    throw new Error("loom: the search prose has no bodies")
+  }
+
+  return { bodies: value.bodies.filter(isBody) }
+}
+
+/**
+ * The two halves, put back together.
+ *
+ * An entry the prose file says nothing about keeps the empty body it arrived
+ * with, which is the ordinary case for the 863 published names — their words are
+ * the signature on the reference page rather than a paragraph.
+ */
+export const withProse = (index: SearchIndex, prose: SearchProse): SearchIndex => {
+  const bodies = new Map(prose.bodies)
+
+  return { entries: index.entries.map((entry) => ({ ...entry, body: bodies.get(entry.href) ?? entry.body })) }
+}
+
+/**
+ * The code, as it travels: the same `[href, text]` pairs the prose uses, for
+ * the same reasons.
+ *
+ * A separate type from `SearchProse` rather than one shared shape, because they
+ * are two different claims about a page and a function that took either would
+ * be a function that could put the words where the code goes. They are cheap
+ * to keep apart and the mistake is not cheap to find.
+ */
+export type SearchCode = {
+  readonly blocks: readonly (readonly [string, string])[]
+}
+
+export const parseSearchCode = (value: unknown): SearchCode => {
+  if (!isRecord(value) || !Array.isArray(value.blocks)) {
+    throw new Error("loom: the search code has no blocks")
+  }
+
+  return { blocks: value.blocks.filter(isBody) }
+}
+
+/** The entries and their code, put back together. */
+export const withCode = (index: SearchIndex, code: SearchCode): SearchIndex => {
+  const blocks = new Map(code.blocks)
+
+  return { entries: index.entries.map((entry) => ({ ...entry, code: blocks.get(entry.href) ?? entry.code })) }
+}
+

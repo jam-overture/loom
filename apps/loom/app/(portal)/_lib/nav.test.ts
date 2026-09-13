@@ -34,4 +34,15 @@ describe("isNavItemActive", () => {
     expect(isNavItemActive("/portal/pages/t_abc", "/portal/pages")).toBe(true)
     expect(isNavItemActive("/portal/pages", "/portal/pages")).toBe(true)
   })
+
+  /**
+   * `/portal` is a screen and also the prefix of every other route in the rail.
+   * Without `exact` it is the active item on every page in the portal, and a
+   * rail with two items lit is a rail that says nothing.
+   */
+  it("lets a screen claim its own path and nothing under it", () => {
+    expect(isNavItemActive("/portal", "/portal", true)).toBe(true)
+    expect(isNavItemActive("/portal/history", "/portal", true)).toBe(false)
+    expect(isNavItemActive("/portal/history", "/portal")).toBe(true)
+  })
 })

@@ -29,12 +29,49 @@ import type { Ask, AskId } from "./asks"
 
 export type Verdict = "landed" | "held" | "approved" | "refused" | "nothing-to-do"
 
-export type ChangeRecord = {
+/**
+ * The three things a record quotes rather than works out.
+ *
+ * Everything else below is computed from what the sequence returned. These are
+ * the words that came in with the request, and they are separated out because
+ * **not every request on this page is one of the five buttons.** Putting a
+ * change back is a change of its own
+ * ([0032](../../../../../../decisions/0032-an-undo-is-a-change-of-its-own-rather-than-a-rewind.md)),
+ * so it arrives here with its own sentence to quote and its own explanation of
+ * what it is about to do, and is otherwise reported exactly as anything else is.
+ *
+ * `ask` stays on it because an undo is always the undo *of* something: it is the
+ * request the panel's own links have to be able to name, and a record that
+ * forgot which of the five it belonged to could not offer the way back to it.
+ */
+export type Request = {
   readonly ask: AskId
-  /** The request, verbatim. */
+  /** What a person would have said, verbatim. */
   readonly asked: string
-  /** Why these changes answer it — the interpreter's own words. */
+  /** Why this change answers it, in the words the record will show a visitor. */
   readonly proposed: string
+  /**
+   * Whether this request is the undo of the change above it rather than one of
+   * the five the band offers.
+   *
+   * A fact about the request rather than something a band works out, because
+   * three places need it and they are in three files: the notice at the top of
+   * the page, the panel, and the address each of their buttons points at. An
+   * undo that was recognised by comparing its sentence to a string would be this
+   * site pattern-matching its own words.
+   */
+  readonly putBack: boolean
+}
+
+/** One of the five buttons, as a request. */
+export const requestOf = (ask: Ask): Request => ({
+  ask: ask.id,
+  asked: ask.utterance,
+  proposed: ask.rationale,
+  putBack: false,
+})
+
+export type ChangeRecord = Request & {
   /** How much moved, counted rather than characterised. */
   readonly measured: string
   /** What it was weighed as, and what raised it. */
@@ -225,7 +262,7 @@ const undoingOf = (assessment: ChangeAssessment, landed: boolean): string => {
  * ([0033](../../../../../../decisions/0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md)).
  */
 export const recordOf = (
-  ask: Ask,
+  request: Request,
   assessment: ChangeAssessment,
   disposition: Disposition,
   applied: boolean
@@ -234,9 +271,7 @@ export const recordOf = (
   const landed = applied
 
   return {
-    ask: ask.id,
-    asked: ask.utterance,
-    proposed: ask.rationale,
+    ...request,
     measured: measurementOf(assessment.analysis),
     weighed: weighingOf(assessment),
     verdict,
@@ -258,9 +293,8 @@ export const recordOf = (
  * "allowed" or "refused" here would be inventing a verdict, which is the one
  * thing a record may never do.
  */
-export const nothingHappened = (ask: Ask, proposed: string): ChangeRecord => ({
-  ask: ask.id,
-  asked: ask.utterance,
+export const nothingHappened = (request: Request, proposed: string): ChangeRecord => ({
+  ...request,
   proposed,
   measured: "Nothing changed, in no steps.",
   weighed: "Nothing was weighed, because nothing was proposed.",

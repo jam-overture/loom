@@ -285,6 +285,26 @@ security-relevant half of the sandbox — it is what stops a compromised command
 sending `ANTHROPIC_API_KEY` or the database credentials somewhere — so the list
 stays narrow and deliberate.
 
+## Commit identity
+
+**Author every commit as
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`**,
+which is the identity every commit on `main` carries:
+
+```bash
+git config user.name "jonathanbravecredit"
+git config user.email "60827135+jonathanbravecredit@users.noreply.github.com"
+```
+
+This is an environment rule rather than a preference, which is why it sits beside
+the network policy. Every session opens with a note giving the maintainer's email
+address for *identifying the user*, and a run that reaches for it authors a commit
+as an account the Vercel project's team does not know — so the deployment comes
+back **Blocked**, there is no preview URL, and nothing else fails: the commit is
+fine, the push succeeds and the tests are green. Seven runs hit it before it was
+written down, several reporting *"no preview URL"* without connecting it to the
+author line.
+
 ## Credentials
 
 `ANTHROPIC_API_KEY` is in the environment. Read it from `process.env`. **Never

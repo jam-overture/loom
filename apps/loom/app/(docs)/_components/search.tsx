@@ -5,11 +5,19 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 import { searchDocs, type SearchHit } from "@/app/(docs)/_lib/search/match"
 import {
+  parseSearchCode,
   parseSearchIndex,
+  parseSearchProse,
+  SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
+  SEARCH_PROSE_PATH,
   SEARCH_RESULT_LIMIT,
+  withCode,
+  withProse,
+  type SearchCode,
   type SearchIndex,
   type SearchKind,
+  type SearchProse,
 } from "@/app/(docs)/_lib/search/model"
 
 /**
@@ -105,14 +113,24 @@ const Results = ({
             </span>
 
             {/*
-             * The sentence that put this row in the list, shown only when the
-             * title did not already carry the query. It is why a reader can
-             * account for a heading that does not contain the word they typed —
-             * and it wraps to two lines rather than truncating, because half a
-             * sentence answers nothing.
+             * The sentence — or the line of code — that put this row in the
+             * list, shown only when the title did not already carry the query.
+             * It is why a reader can account for a heading that does not
+             * contain the word they typed, and it wraps to two lines rather
+             * than truncating, because half a sentence answers nothing.
+             *
+             * A code excerpt is set in the mono face, at the size the reference
+             * uses for a signature: a line of TypeScript in the prose face
+             * reads as prose that has gone wrong, and a reader scanning ten
+             * rows should be able to tell a snippet from a sentence without
+             * reading either.
              */}
             {hit.excerpt.length > 0 && (
-              <span className="text-ink-muted mt-1 line-clamp-2 block text-xs leading-snug">
+              <span
+                className={`text-ink-muted mt-1 line-clamp-2 block text-xs leading-snug ${
+                  hit.excerptIsCode ? "font-mono text-[0.6875rem]" : ""
+                }`}
+              >
                 {hit.excerpt.map((part, at) =>
                   part.match ? (
                     <mark key={at} className="text-ink bg-transparent font-semibold">
@@ -142,6 +160,8 @@ export const Search = () => {
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
   const [index, setIndex] = useState<SearchIndex | undefined>(undefined)
+  const [prose, setProse] = useState<SearchProse | undefined>(undefined)
+  const [code, setCode] = useState<SearchCode | undefined>(undefined)
   const [loading, setLoading] = useState<Loading>("idle")
 
   const trigger = useRef<HTMLButtonElement>(null)
@@ -180,26 +200,75 @@ export const Search = () => {
    * `idle` is the state that makes that true: the effect runs on every open and
    * does nothing after the first, so re-opening the dialog is free and a failed
    * fetch stays failed rather than retrying on every keystroke.
+   *
+   * **Three files leave together and only one is waited for.** The index is
+   * what the box needs to answer anything at all; the words under each entry
+   * and the code beside them are the two cheapest bands of the ranking and
+   * several times the size, so all three are asked for at the same moment and
+   * each is merged whenever it turns up. A reader typing in between gets the
+   * same results in the same order, without the bands that have not landed —
+   * and if either never arrives the box carries on as it did before the site
+   * indexed that half at all, rather than failing.
    */
   useEffect(() => {
     if (!open || loading !== "idle") return
 
     setLoading("loading")
 
-    void fetch(SEARCH_INDEX_PATH)
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+    const read = (path: string): Promise<unknown> =>
+      fetch(path).then((response) =>
+        response.ok ? response.json() : Promise.reject(new Error(String(response.status)))
+      )
+
+    void read(SEARCH_INDEX_PATH)
       .then((body: unknown) => {
         setIndex(parseSearchIndex(body))
         setLoading("ready")
       })
       .catch(() => setLoading("failed"))
+
+    void read(SEARCH_PROSE_PATH)
+      .then((body: unknown) => setProse(parseSearchProse(body)))
+      .catch(() => undefined)
+
+    void read(SEARCH_CODE_PATH)
+      .then((body: unknown) => setCode(parseSearchCode(body)))
+      .catch(() => undefined)
   }, [open, loading])
 
   useEffect(() => {
     if (open) field.current?.focus()
   }, [open])
 
-  const hits = index === undefined ? [] : searchDocs(index, query, SEARCH_RESULT_LIMIT)
+  /**
+   * The three files, folded together in the order they are ranked.
+   *
+   * Each fold is skipped while its file is missing rather than waited for, so
+   * the box is searchable the moment the entries land and gains a band as each
+   * of the other two arrives.
+   */
+  const searchable =
+    index === undefined
+      ? undefined
+      : [
+          (found: SearchIndex) => (prose === undefined ? found : withProse(found, prose)),
+          (found: SearchIndex) => (code === undefined ? found : withCode(found, code)),
+        ].reduce((found, fold) => fold(found), index)
+
+  const hits = searchable === undefined ? [] : searchDocs(searchable, query, SEARCH_RESULT_LIMIT)
+
+  /**
+   * What has not landed, in the words the empty state uses.
+   *
+   * Read off the two optional files rather than tracked as a fourth state,
+   * because the honest sentence is a list of what is missing and that is
+   * exactly what these two are. Built here so the claim under *nothing on the
+   * site says this* can never drift from what was really searched.
+   */
+  const pending: readonly string[] = [
+    ...(prose === undefined ? ["the words in them are"] : []),
+    ...(code === undefined ? ["the code in them is"] : []),
+  ]
 
   const go = (href: string): void => {
     close()
@@ -327,9 +396,19 @@ export const Search = () => {
                  * false, and a reader who could see the words on the page had no
                  * way to know the box had never read them.
                  */}
+                {/*
+                 * And it says less when it has looked at less. The words and the
+                 * code blocks arrive in two more files, so for the moment before
+                 * they land the claim above is narrower than it will be — and
+                 * saying otherwise would be the exact overclaim the sentence was
+                 * written to end. The last clause used to read "code blocks are
+                 * not", which was true and is the thing this file stopped being
+                 * able to say.
+                 */}
                 <p className="text-ink-faint mt-1 text-xs">
-                  Every page, every section, the words in them and every published name are searched.
-                  Code blocks are not.
+                  {pending.length === 0
+                    ? "Every page, every section, the words in them, the code in them and every published name are searched."
+                    : `Every page, every section and every published name are searched. ${pending.join(" and ")} still loading.`}
                 </p>
               </div>
             )}

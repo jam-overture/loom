@@ -13,7 +13,7 @@ import {
   type SiteThemeName,
 } from "../site"
 import { ASKS, askById, readAskId, type AskId } from "./asks"
-import { RECORD_VOCABULARY, type Verdict } from "./record"
+import { RECORD_VOCABULARY } from "./record"
 import { FRONT_DOOR_POLICY, PROTECTED_IN_PLAIN_WORDS, protectedInPlainWords, runAsk } from "./run"
 
 /**
@@ -67,27 +67,16 @@ describe("every choice the band offers", () => {
 /**
  * The three answers a set of rules can give, on one band.
  *
- * This is the table the whole design turns on, so it is written out rather than
- * derived: a change to the rules or to a choice that quietly collapsed all five
- * into "allowed" would leave the band demonstrating nothing while every other
- * test still passed.
+ * The table that used to be here — five ids to five verdicts, written out
+ * rather than derived so that a change collapsing all five into "allowed" could
+ * not pass — has moved onto the asks themselves as `answer`, and
+ * `answers.test.ts` holds each one against the sequence and holds the band's
+ * own sentence against the tally. It is the same guarantee in the one place the
+ * page can also read it: while it lived here, the suite knew one of the five
+ * stops and asks and the band said everything but one *"may rearrange on its
+ * own"*.
  */
-const EXPECTED: Readonly<Record<AskId, Verdict>> = {
-  calmer: "landed",
-  shorter: "landed",
-  proof: "landed",
-  problem: "held",
-  "drop-pitch": "refused",
-}
-
 describe("what this site's rules do with each request", () => {
-  it.each(Object.entries(EXPECTED))("answers %s with %s", async (id, verdict) => {
-    const ask = askById(id)
-    if (ask === undefined) throw new Error(`loom: ${id} is not a choice on the band`)
-
-    expect((await runAsk(basePage(), ask)).record.verdict).toBe(verdict)
-  })
-
   it("names the rules that decided, on every answer", async () => {
     for (const ask of ASKS) {
       expect((await runAsk(basePage(), ask)).record.verdictLine).toContain("front-door")

@@ -3,6 +3,7 @@ import { sequentialIdFactory, type LoomTree, type TreeDelta } from "@loom/runtim
 import { ASKS, askById, type Ask, type AskId } from "./asks"
 import type { ChangeRecord } from "./record"
 import { runAsk } from "./run"
+import { runUndo } from "./undo"
 
 /**
  * More than one change, in the order they were asked for.
@@ -55,23 +56,86 @@ export const CHANGE_SEPARATOR = "."
  */
 export const APPROVED_SUFFIX = "-yes"
 
+/**
+ * What putting one back looks like in the address.
+ *
+ * `problem-yes.shorter-back` is *the second request, and then its undo* — two
+ * requests, one of which happens to reverse the other, run in that order against
+ * the page each left behind. Until 6 September this page had no way to say that,
+ * and so said it a different way: **the button dropped the request from the
+ * address** and the page was rebuilt from the published one with that request
+ * never made.
+ *
+ * That reaches a page which looks the same and is not the same thing, and the
+ * difference is the entire product. The front door stopped doing it on
+ * 5 September; this is the grammar that lets the page whose subject is a
+ * *sequence* stop doing it too — and a sequence is the case that matters, because
+ * an undo appended to a list of four changes is the thing nothing else can show.
+ *
+ * A suffix rather than a parameter, for the reason `APPROVED_SUFFIX` gives: it
+ * belongs to *one* request, and a single `back=1` could not say which.
+ */
+export const PUT_BACK_SUFFIX = "-back"
+
 export type ChangeToken = {
   readonly ask: AskId
   /** Whether the visitor answered the rules holding this one back. */
   readonly approved: boolean
+  /** Whether the visitor asked for this one to be put back afterwards. */
+  readonly putBack: boolean
+  /**
+   * Whether they answered the rules holding *the undo* back.
+   *
+   * A separate answer from `approved`, because they are separate questions asked
+   * a moment apart. The interesting address on this site is the one where the
+   * rules hold a change, the visitor allows it, and then the rules hold the undo
+   * of that same change as well — which they do, because putting a protected
+   * band back is still moving a protected band. One flag could not carry both
+   * halves of that, and collapsing them would be the site arranging its own
+   * demonstration.
+   */
+  readonly putBackApproved: boolean
 }
+
+const writeToken = (token: ChangeToken): string =>
+  [
+    token.ask,
+    token.approved ? APPROVED_SUFFIX : "",
+    token.putBack ? PUT_BACK_SUFFIX : "",
+    token.putBack && token.putBackApproved ? APPROVED_SUFFIX : "",
+  ].join("")
 
 /** The sequence, as the address carries it. */
 export const writeChangeSequence = (tokens: readonly ChangeToken[]): string =>
-  tokens
-    .map((token) => `${token.ask}${token.approved ? APPROVED_SUFFIX : ""}`)
-    .join(CHANGE_SEPARATOR)
+  tokens.map(writeToken).join(CHANGE_SEPARATOR)
 
+const withoutSuffix = (given: string, suffix: string): string | undefined =>
+  given.endsWith(suffix) ? given.slice(0, -suffix.length) : undefined
+
+/**
+ * One token, read right to left, because that is the order the suffixes are
+ * written in and it is the only reading that is unambiguous.
+ *
+ * The trailing `-yes` is the undo's answer **only when what it leaves ends in
+ * `-back`**; otherwise it is the change's own. `history.test.ts` holds that no
+ * request this site offers is named in a way that could be mistaken for either.
+ */
 const readToken = (given: string): readonly ChangeToken[] => {
-  const approved = given.endsWith(APPROVED_SUFFIX)
-  const ask = askById(approved ? given.slice(0, -APPROVED_SUFFIX.length) : given)
+  const beforeUndoAnswer = withoutSuffix(given, APPROVED_SUFFIX)
+  const putBackApproved =
+    beforeUndoAnswer !== undefined && beforeUndoAnswer.endsWith(PUT_BACK_SUFFIX)
+  const answered = putBackApproved && beforeUndoAnswer !== undefined ? beforeUndoAnswer : given
 
-  return ask === undefined ? [] : [{ ask: ask.id, approved }]
+  const beforePutBack = withoutSuffix(answered, PUT_BACK_SUFFIX)
+  const putBack = beforePutBack !== undefined
+
+  const named = beforePutBack ?? answered
+  const beforeAnswer = withoutSuffix(named, APPROVED_SUFFIX)
+  const approved = beforeAnswer !== undefined
+
+  const ask = askById(beforeAnswer ?? named)
+
+  return ask === undefined ? [] : [{ ask: ask.id, approved, putBack, putBackApproved }]
 }
 
 /**
@@ -92,14 +156,18 @@ export const readChangeSequence = (
 }
 
 /** The sequence with one more request on the end of it. */
-export const withChange = (
-  tokens: readonly ChangeToken[],
-  ask: AskId
-): readonly ChangeToken[] => [...tokens, { ask, approved: false }]
+export const withChange = (tokens: readonly ChangeToken[], ask: AskId): readonly ChangeToken[] => [
+  ...tokens,
+  { ask, approved: false, putBack: false, putBackApproved: false },
+]
 
-/** The sequence without its most recent request, which is what putting one back is. */
-export const withoutLastChange = (tokens: readonly ChangeToken[]): readonly ChangeToken[] =>
-  tokens.slice(0, -1)
+/** One token in the sequence, with one of its two answers given. */
+const answering = (
+  tokens: readonly ChangeToken[],
+  position: number,
+  answer: Partial<ChangeToken>
+): readonly ChangeToken[] =>
+  tokens.map((token, index) => (index === position - 1 ? { ...token, ...answer } : token))
 
 /**
  * The sequence with one of its requests answered.
@@ -110,11 +178,42 @@ export const withoutLastChange = (tokens: readonly ChangeToken[]): readonly Chan
 export const withApproval = (
   tokens: readonly ChangeToken[],
   position: number
-): readonly ChangeToken[] =>
-  tokens.map((token, index) => (index === position - 1 ? { ...token, approved: true } : token))
+): readonly ChangeToken[] => answering(tokens, position, { approved: true })
+
+/**
+ * The sequence with one of its requests put back afterwards.
+ *
+ * This is not `tokens.slice(0, -1)`, and the difference is the page's subject.
+ * Dropping the request replays the history as though it had never been asked
+ * for; putting it back leaves it asked for, and adds the change that reverses
+ * it — measured, weighed by the same rules and written down, exactly like the
+ * change it reverses. The two arrive at the same arrangement of the page by
+ * routes that a record can tell apart, and this site is the one that tells them
+ * apart.
+ *
+ * By position, like `withApproval`, so the grammar can express *the second
+ * request, then its undo, then a third* — which is a coherent history and runs
+ * as one. The page only offers the button on the most recent request, and says
+ * why underneath it.
+ */
+export const withPutBack = (
+  tokens: readonly ChangeToken[],
+  position: number
+): readonly ChangeToken[] => answering(tokens, position, { putBack: true })
+
+/** The sequence with the rules' hold on one of its undos answered. */
+export const withPutBackApproval = (
+  tokens: readonly ChangeToken[],
+  position: number
+): readonly ChangeToken[] => answering(tokens, position, { putBackApproved: true })
 
 export type ChangeStep = {
-  /** Where it comes in the history, counting from one, as the page numbers it. */
+  /**
+   * Which request in the history this is about, counting from one, as the page
+   * numbers it. An undo carries the position of the change it reverses rather
+   * than one of its own — it is not a fifth thing the visitor asked the page to
+   * become, it is what happened to the fourth.
+   */
   readonly position: number
   readonly ask: Ask
   readonly approved: boolean
@@ -126,6 +225,16 @@ export type ChangeStep = {
    * says about putting a change back is checked against it.
    */
   readonly undo?: TreeDelta
+  /**
+   * Set on a step that *is* an undo, naming the position it puts back.
+   *
+   * An undo on this site is a request like any other — interpreted, measured,
+   * weighed by the same named rules, allowed or held or refused — so it is a
+   * step like any other and the record reads it out the same way. This field is
+   * what the page needs to say *whose* undo it is; nothing else distinguishes
+   * it, and nothing else should.
+   */
+  readonly putsBack?: number
 }
 
 export type ChangeHistory = {
@@ -188,23 +297,45 @@ export const runHistory = async (
       throw new Error(`loom: ${token.ask} is not a request this site offers`)
     }
 
+    const position = index + 1
+
     /**
      * A namespace per position, so two runs of the same request add two
      * different bands rather than the second asking the page to hold a piece it
      * is already holding. Lowercase letters and digits only.
      */
-    const run = await runAsk(page, ask, token.approved, `ask${index + 1}`)
+    const run = await runAsk(page, ask, token.approved, `ask${position}`)
+    const change: ChangeStep = {
+      position,
+      ask,
+      approved: token.approved,
+      record: run.record,
+      ...(run.undo === undefined ? {} : { undo: run.undo }),
+    }
+
+    /**
+     * Nothing landed, so there is nothing to reverse and the address asking for
+     * one is dropped rather than refused — a request the rules held or turned
+     * down has already told the visitor what happened, and a second entry saying
+     * the undo of it did not fit would be the page explaining its own grammar.
+     */
+    if (!token.putBack || run.undo === undefined) {
+      return { page: run.page, steps: [...steps, change] }
+    }
+
+    const back = await runUndo(run.page, ask, run.undo, token.putBackApproved, `back${position}`)
 
     return {
-      page: run.page,
+      page: back.page,
       steps: [
         ...steps,
+        change,
         {
-          position: index + 1,
+          position,
           ask,
-          approved: token.approved,
-          record: run.record,
-          ...(run.undo === undefined ? {} : { undo: run.undo }),
+          approved: token.putBackApproved,
+          record: back.record,
+          putsBack: position,
         },
       ],
     }
@@ -221,10 +352,19 @@ export const runHistory = async (
 
 /** How the history came out, for the line that sums it up above the list. */
 export type HistoryTally = {
+  /**
+   * Every request the page answered, undos included.
+   *
+   * An undo is counted because on this site it *is* a request — it went through
+   * the same five steps and got a verdict of its own — and a summary that quietly
+   * left it out would be the line above the list disagreeing with the list.
+   */
   readonly asked: number
   readonly landed: number
   readonly waiting: number
   readonly refused: number
+  /** How many of them were a change being put back. */
+  readonly putBack: number
 }
 
 export const tallyOf = (history: ChangeHistory): HistoryTally => ({
@@ -232,4 +372,5 @@ export const tallyOf = (history: ChangeHistory): HistoryTally => ({
   landed: history.steps.filter((step) => step.record.landed).length,
   waiting: history.steps.filter((step) => step.record.awaitingYou).length,
   refused: history.steps.filter((step) => step.record.verdict === "refused").length,
+  putBack: history.steps.filter((step) => step.putsBack !== undefined).length,
 })

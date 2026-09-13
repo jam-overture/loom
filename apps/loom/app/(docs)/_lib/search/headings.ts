@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { REPOSITORY_ROOT } from "../architecture/source"
+import { outsideFences } from "../fences/spans"
 
 import { headingAnchor } from "./anchor"
 
@@ -19,7 +20,8 @@ import { headingAnchor } from "./anchor"
  * **Fenced code is skipped**, which is not fussiness. Several pages on this
  * site show a shell prompt or a JSON tree inside a fence, and a `# install the
  * runtime` comment in one of them is a comment rather than a section — indexing
- * it would send a reader to an anchor that does not exist.
+ * it would send a reader to an anchor that does not exist. Where a fence is, is
+ * `fences/spans.ts`, which four separate scanners used to decide separately.
  */
 
 export type PageHeading = {
@@ -52,7 +54,6 @@ if (!existsSync(docsRoot)) {
   throw new Error(`loom: the documentation pages are not at ${docsRoot} — the search index cannot be built`)
 }
 
-const FENCE = /^\s*(?:```|~~~)/
 const HEADING = /^(#{2,3})\s+(.+?)\s*$/
 
 /**
@@ -68,37 +69,21 @@ const stripInline = (text: string): string => text.replace(/[`*_]/g, "")
 /**
  * The headings in a page's source, as a pure function of the text.
  *
- * Separated from the file read so the fence rule can be tested against markdown
- * written for the purpose — the one thing here that has a wrong answer, and the
- * one thing that no page on the site currently exercises.
+ * Separated from the file read so the rules can be tested against markdown
+ * written for the purpose. The fence rule was the one thing here with a wrong
+ * answer, and it is no longer here at all: `outsideFences` hands over the page
+ * with its code blanked out, so this reads for headings and nothing else.
  */
-export const headingsIn = (source: string): readonly PageHeading[] => {
-  const { headings } = source.split("\n").reduce<{
-    readonly fenced: boolean
-    readonly headings: readonly PageHeading[]
-  }>(
-    (state, line) => {
-      if (FENCE.test(line)) return { ...state, fenced: !state.fenced }
-      if (state.fenced) return state
+export const headingsIn = (source: string): readonly PageHeading[] =>
+  outsideFences(source).flatMap((line) => {
+    const match = HEADING.exec(line)
 
-      const match = HEADING.exec(line)
-      if (match === null) return state
+    if (match === null) return []
 
-      const text = stripInline(match[2] ?? "")
+    const text = stripInline(match[2] ?? "")
 
-      return {
-        ...state,
-        headings: [
-          ...state.headings,
-          { level: (match[1] ?? "").length, text, anchor: headingAnchor(text) },
-        ],
-      }
-    },
-    { fenced: false, headings: [] }
-  )
-
-  return headings
-}
+    return [{ level: (match[1] ?? "").length, text, anchor: headingAnchor(text) }]
+  })
 
 /**
  * A written page's source, read once.

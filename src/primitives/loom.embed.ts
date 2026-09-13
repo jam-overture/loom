@@ -5,6 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { ASPECT_NAMES, ASPECT_RATIOS, type AspectName } from "./layout.js"
+import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, family, radius, size, space } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
@@ -78,10 +79,46 @@ import { mediaUrlSchema } from "./url.js"
  * on. `allow-scripts` with `allow-same-origin` is a boundary only because the
  * framed document is cross-origin, and a host framing its own origin gets
  * nothing from it — *and nothing here could tell*. The outcome now carries
- * `sameOrigin`, and the seam says it out loud in the diagnostics. It stays a
- * disclosure rather than something this file acts on: dropping
- * `allow-same-origin` for a same-origin frame would give the document a null
- * origin and break the embed a host deliberately registered.
+ * `sameOrigin`, and the seam says it out loud in the diagnostics.
+ *
+ * **That paragraph used to end "it stays a disclosure rather than something
+ * this file acts on", and it no longer does.** `Loom marketing` filed on
+ * 4 September that §4d — *the site embeds the demo rather than describing it*,
+ * which is the whole reason the demo is public
+ * ([0056](../../decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md))
+ * — cannot be built, because every control in `/demo` is a server action
+ * reached through a `<form action={…}>`, and this sandbox has no `allow-forms`.
+ * The band was built, rendered perfectly, silently did nothing when pressed,
+ * and was withdrawn rather than shipped.
+ *
+ * So a frame the seam resolves as **same-origin** is granted `allow-forms`, and
+ * the argument for it is the one the paragraph above already makes rather than a
+ * new concession. For a same-origin frame the sandbox is **already not a
+ * boundary**: `allow-same-origin` beside `allow-scripts` hands the framed
+ * document its real origin, from which it can reach `parent.document` and the
+ * deployment's own cookies and storage. Withholding `allow-forms` on top of
+ * that buys no security whatsoever — it cannot, since the document can submit
+ * the same request with `fetch` and always could — and it costs the one thing
+ * a visitor tries. **It is not a widening of the sandbox so much as the removal
+ * of an inconsistency in it.**
+ *
+ * Two things are deliberately *not* done, and both are the reason this is
+ * narrow enough to be safe:
+ *
+ * - **Nothing in the tree can ask for it.** There is no prop. The only way to
+ *   be granted `allow-forms` is for the deployment's own frame registry to have
+ *   resolved the URL as `self` (0095) — a host decision, made in code the
+ *   maintainer wrote, never a prop a model can set. A deployment that has
+ *   registered no origin of its own gets today's sandbox exactly, byte for
+ *   byte, which is what keeps every existing tree unchanged.
+ * - **`allow-top-navigation` is still withheld**, from every frame including
+ *   this one. That is the grant that turns an embedded document into a
+ *   redirect, and a framed application has no business moving the page it is
+ *   sitting on.
+ *
+ * `allow-same-origin` is still never dropped for a same-origin frame: doing so
+ * would give the document a null origin and break the embed a host deliberately
+ * registered.
  */
 
 const props = z
@@ -89,8 +126,33 @@ const props = z
     src: mediaUrlSchema,
     /** The frame's accessible name — "Loom in ninety seconds", not "video". */
     title: z.string().min(1).max(160),
-    /** The shape the frame is held to, since the framed document has no say. */
-    aspect: z.enum(ASPECT_NAMES).optional(),
+    /**
+     * The shape the frame is held to, since the framed document has no say.
+     *
+     * The three fixed names are `layout.ts`'s, shared with `loom.media` and
+     * `loom.overlay`. **`adaptive` is this primitive's alone**, and it is not
+     * in that shared list on purpose: a photograph has an intrinsic shape and
+     * honouring it at every width is correct, so a fourth member there would be
+     * a shape offered to two primitives that have no use for it.
+     *
+     * What `adaptive` is for is the case a fixed ratio cannot serve — **a
+     * framed document that reflows.** `Loom marketing` measured it on
+     * 4 September, framing `/demo` in a 1080px band:
+     *
+     * | aspect | at 1440 | at 390 |
+     * | --- | --- | --- |
+     * | `wide` | 1080 × 608 — **12px short** of the one control the band promised | 350 × 197 |
+     * | `square` | 1080 × 1080 — correct | 350 × 350 — no control |
+     * | `portrait` | 1080 × 1440 — taller than a viewport | 350 × 467 |
+     *
+     * There is no single number in that table, which is the finding: a video
+     * has a shape and an application has a layout. `adaptive` is portrait while
+     * the frame is narrow and 16/10 once it is not — and the threshold is read
+     * off **the frame's own width rather than the window's**, so an embed in one
+     * column of a `loom.split` gets the narrow shape on a 1440px screen, which
+     * is where it is actually narrow.
+     */
+    aspect: z.enum([...ASPECT_NAMES, "adaptive"] as const).optional(),
     /** A sentence under the frame, the way `loom.media` captions a picture. */
     caption: z.string().min(1).max(240).optional(),
     /**
@@ -104,7 +166,41 @@ const props = z
 
 type Props = z.infer<typeof props>
 
+/** The three fixed shapes plus this primitive's own reflowing one. */
+type FrameShape = AspectName | "adaptive"
+
+/**
+ * How the frame is held to its shape, which is two different mechanisms for one
+ * prop and has to be, because **an inline style beats a rule**.
+ *
+ * A fixed shape is an inline `aspect-ratio`, exactly as before. `adaptive` is a
+ * class and *no* inline ratio at all — setting one would make the stylesheet's
+ * container query unreachable, which is the trap `stylesheet.ts` names first in
+ * its own list of mechanics.
+ */
+const shapeOf = (
+  aspect: FrameShape
+): { readonly className?: string; readonly aspectRatio?: string } =>
+  aspect === "adaptive"
+    ? { className: LIBRARY_CLASS.frameAdaptive }
+    : { aspectRatio: ASPECT_RATIOS[aspect] }
+
+/**
+ * The narrowest set every real provider needs: script, its own origin, and the
+ * presentation API that full-screen video uses. No form submission, no pointer
+ * lock, no downloads, and no top-level navigation.
+ */
 const SANDBOX = "allow-scripts allow-same-origin allow-presentation"
+
+/**
+ * The one grant added for a frame the deployment resolved as its own, argued at
+ * length in this file's opening comment. It is appended rather than being a
+ * second full string, so the base set above stays the single place the sandbox
+ * is stated and the two cannot drift.
+ */
+const SAME_ORIGIN_SANDBOX = `${SANDBOX} allow-forms`
+
+const sandboxFor = (sameOrigin: boolean): string => (sameOrigin ? SAME_ORIGIN_SANDBOX : SANDBOX)
 
 const ALLOW = "accelerometer; encrypted-media; picture-in-picture; fullscreen"
 
@@ -140,7 +236,7 @@ export const loomEmbed = definePrimitive({
   frames: ["src"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props, EmbedTextKey>) => {
     const flush = given.frame === "flush"
-    const aspect: AspectName = given.aspect ?? "wide"
+    const aspect: FrameShape = given.aspect ?? "wide"
     const outcome = loom.frames["src"]
 
     /**
@@ -151,18 +247,24 @@ export const loomEmbed = definePrimitive({
      * branch draws.
      */
     const framed = outcome !== undefined && outcome.status === "allowed" ? outcome : undefined
+    const shape = shapeOf(aspect)
 
     const frame = createElement(
       "div",
       {
         key: "frame",
+        className: shape.className,
         style: {
           /**
            * The ratio is the wrapper's rather than the iframe's, so the box
            * keeps its shape while the framed document is still loading and the
            * band above it does not jump when it arrives.
+           *
+           * Absent for `adaptive`, where the stylesheet sets it — see `shapeOf`.
            */
-          aspectRatio: ASPECT_RATIOS[aspect],
+          aspectRatio: shape.aspectRatio,
+          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
+          boxSizing: "border-box",
           width: "100%",
           overflow: "hidden",
           background: colour("bg-surface-muted"),
@@ -205,7 +307,7 @@ export const loomEmbed = definePrimitive({
             src: framed.url,
             title: given.title,
             loading: "lazy",
-            sandbox: SANDBOX,
+            sandbox: sandboxFor(framed.sameOrigin),
             allow: ALLOW,
             allowFullScreen: true,
             referrerPolicy: "strict-origin-when-cross-origin",
@@ -225,8 +327,25 @@ export const loomEmbed = definePrimitive({
           width: "100%",
           minWidth: "0",
           boxSizing: "border-box",
+          /**
+           * What `adaptive`'s query reads, declared here rather than in the
+           * stylesheet on `loom.card`'s precedent — and **only** for `adaptive`,
+           * so a frame holding a fixed ratio establishes no containment context
+           * it does not need and nothing about today's embeds changes.
+           *
+           * It is the figure rather than the frame because a container query
+           * is answered by an *ancestor*: an element cannot size itself from
+           * its own width. The two are the same width, since the frame is
+           * `width: 100%` of this box.
+           */
+          ...(aspect === "adaptive" ? { containerType: "inline-size" as const } : {}),
         },
       },
+      /**
+       * Only where a rule is actually needed. Every other shape is inline, so a
+       * page of videos emits no stylesheet on their account.
+       */
+      aspect === "adaptive" ? libraryStylesheet() : null,
       frame,
       given.caption === undefined
         ? null

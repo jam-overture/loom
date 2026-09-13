@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { buildSearchIndex } from "./build"
+import { buildSearchIndex, searchProse } from "./build"
 import { searchDocs, searchTerms } from "./match"
-import { SEARCH_RESULT_LIMIT, type SearchEntry, type SearchIndex } from "./model"
+import { SEARCH_RESULT_LIMIT, withProse, type SearchEntry, type SearchIndex } from "./model"
 
 /**
  * The ranking, checked twice over: on a handful of entries where the right
@@ -23,6 +23,7 @@ const entry = (over: Partial<SearchEntry>): SearchEntry => ({
   kind: "page",
   summary: "",
   body: "",
+  code: "",
   ...over,
 })
 
@@ -182,8 +183,62 @@ describe("the sentence a result is shown with", () => {
     expect(excerpt({ title: "Holds", body }, "holds serverless")).toContain("serverless")
   })
 
-  it("is nothing at all for an entry with no prose", () => {
+  it("is nothing at all for an entry with no prose and no code", () => {
     expect(excerpt({ title: "planReverts", kind: "export", context: "@loom/runtime" }, "planreverts")).toBe("")
+  })
+
+  /**
+   * The same field, cut by a different rule.
+   *
+   * Code is written in lines, so an excerpt from it is one line rather than a
+   * window: a cut that ignored them would hand a reader half a call and half of
+   * the next one, which is worse than useless in a row whose whole job is to
+   * account for why the result is there.
+   */
+  it("is the one line of code a name was found on", () => {
+    const code = [
+      'import { commitIntent } from "@loom/runtime/write"',
+      "",
+      "const outcome = await commitIntent(path, intent)",
+    ].join("\n")
+
+    expect(excerpt({ code }, "commitintent")).toBe('import { commitIntent } from "@loom/runtime/write"')
+    expect(hit({ code }, "commitintent")?.excerptIsCode).toBe(true)
+  })
+
+  it("drops the indentation, which is not information in one line", () => {
+    const code = ["const path = {", "  store,", "  interpret: withHermes,", "}"].join("\n")
+
+    expect(excerpt({ code }, "interpret")).toBe("interpret: withHermes,")
+  })
+
+  it("marks the typed word inside a line of code", () => {
+    const marked = (hit({ code: "const next = applyDelta(page, delta)" }, "applydelta")?.excerpt ?? [])
+      .filter((part) => part.match)
+      .map((part) => part.text)
+
+    expect(marked).toEqual(["applyDelta"])
+  })
+
+  /**
+   * Prose wins where both could answer, and says so rather than mixing them.
+   *
+   * A sentence means more to somebody who does not have the model in their head
+   * than a snippet does, and one rule a person can repeat beats an arithmetic
+   * nobody can predict from the screen.
+   */
+  it("shows the sentence rather than the snippet when both carried a word", () => {
+    const found = hit(
+      { body: "A hold waits for somebody to answer it.", code: "await confirmHeld(path, answer)" },
+      "waits confirmHeld"
+    )
+
+    expect(found?.excerptIsCode).toBe(false)
+    expect((found?.excerpt ?? []).map((part) => part.text).join("")).toContain("waits")
+  })
+
+  it("says the excerpt is not code when there is no excerpt", () => {
+    expect(hit({ title: "Holds", body: "A hold waits." }, "holds")?.excerptIsCode).toBe(false)
   })
 })
 
@@ -267,20 +322,20 @@ describe("what comes first", () => {
   })
 
   it("returns the same order for the same query, every time", () => {
-    const index = buildSearchIndex()
+    const index = withProse(buildSearchIndex(), searchProse())
 
     expect(titles(index, "tree")).toEqual(titles(index, "tree"))
   })
 
   it("shows no more than it said it would", () => {
-    expect(searchDocs(buildSearchIndex(), "a", SEARCH_RESULT_LIMIT).length).toBeLessThanOrEqual(
+    expect(searchDocs(withProse(buildSearchIndex(), searchProse()), "a", SEARCH_RESULT_LIMIT).length).toBeLessThanOrEqual(
       SEARCH_RESULT_LIMIT
     )
   })
 })
 
 describe("the queries a stranger arrives with", () => {
-  const index = buildSearchIndex()
+  const index = withProse(buildSearchIndex(), searchProse())
 
   const firstFew = (query: string): readonly string[] => titles(index, query).slice(0, 4)
 
@@ -300,6 +355,34 @@ describe("the queries a stranger arrives with", () => {
     const [first] = titles(index, "definePrimitive")
 
     expect(first).toBe("definePrimitive")
+  })
+
+  /**
+   * The query the site could not answer at all until the blocks were indexed.
+   *
+   * `pnpm` appears on this site in shell blocks and nowhere else — the prose
+   * elides every span between backticks — so before the code was searched a
+   * reader who typed it was told the site says nothing. Asserted as *something
+   * comes back* rather than as a page title, because which page carries the
+   * command is the site's business and that it is findable is this file's.
+   */
+  it("finds the install command, which lives only in a block", () => {
+    expect(titles(index, "pnpm").length).toBeGreaterThan(0)
+  })
+
+  /**
+   * And it does not do so at the expense of the rule above it.
+   *
+   * A published name typed letter-for-letter goes to the name. Pages that only
+   * print it in a snippet come after, never before — which is the whole of the
+   * care the code band needed, and the one thing about it that could regress
+   * without anything else noticing.
+   */
+  it("keeps a page that only shows a name in a block below the name itself", () => {
+    const ranked = titles(index, "commitIntent")
+
+    expect(ranked[0]).toBe("commitIntent")
+    expect(ranked.length).toBeGreaterThan(1)
   })
 
   /**

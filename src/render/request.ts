@@ -33,6 +33,11 @@ export type RenderRequest = {
   readonly treeId: TreeId
   /** Decoration is a property of the request, so one process can serve both. */
   readonly editMode: boolean
+  /**
+   * Identity on a published page's markup, so reader signals can name the node
+   * they are about. Off when absent (0136).
+   */
+  readonly addressed?: boolean
   /** Opaque host context — audience, locale, flags — passed through to the source. */
   readonly context?: JsonObject
 }
@@ -154,6 +159,7 @@ export const renderRequest = async (
   const rendered = renderLoomTree(tree, {
     resolver: dependencies.resolver,
     editMode: request.editMode,
+    ...(request.addressed ? { addressed: true } : {}),
     ...(dependencies.validator ? { validator: dependencies.validator } : {}),
     ...(dependencies.themes ? { themes: dependencies.themes } : {}),
     ...(data ? { data } : {}),

@@ -11,15 +11,17 @@ import type { ChangeRecord } from "./record"
  * only one the visitor performed.
  *
  * Read the two applied cards this surface can produce, side by side, as they
- * stood before this module existed:
+ * would stand without this module — in the rule sentences the portal's shared
+ * vocabulary prints for them today, rather than the ones it printed when this
+ * was written (`Loom portal`'s 1 September finding):
  *
  * > **Applied** · “Switch this page to the other palette.” · *This change is
  * > live on the page beside you.* · *Nothing this project watches for was
  * > involved, so it went ahead on its own.*
  *
  * > **Applied** · “Take the numbers band off the page.” · *This change is live
- * > on the page beside you.* · *Riskier than a request from here is allowed to
- * > be without asking.*
+ * > on the page beside you.* · *A change this big is not something Loom may make
+ * > on its own.*
  *
  * The first was made by Loom alone. The second was stopped, put to the visitor,
  * and applied only because they pressed a button. **Nothing on the second card

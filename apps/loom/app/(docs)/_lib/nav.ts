@@ -72,10 +72,12 @@ const apiReferenceSection: DocsSection = {
  * purpose.
  *
  * It comes after the reference because a reader who wants to know *why* has
- * usually already tried to build something. Two pages is the whole of it —
- * anything longer would be the third copy of an argument that already exists in
- * `lessons/` and `decisions/`, and the copy on a docs site is the one that goes
- * stale, because nothing fails when it does.
+ * usually already tried to build something. Three pages is the whole of it, and
+ * the limit that keeps it there is not a page count: **no page in this section
+ * may explain a ruling.** They may name one, count them, say what a stranger
+ * needs in order to decide whether to open one — and the argument itself has to
+ * stay in `lessons/` and `decisions/`, because the copy on a documentation site
+ * is the one that goes stale, since nothing fails when it does.
  */
 const architectureSection: DocsSection = {
   slug: "architecture",
@@ -87,6 +89,12 @@ const architectureSection: DocsSection = {
       title: "How it fits together",
       summary:
         "The eight ideas the whole system rests on, a paragraph each, and where to go for the reasoning and for the ruling.",
+    },
+    {
+      slug: "what-it-costs-you",
+      title: "What it costs you",
+      summary:
+        "Eight things you can no longer do, the ruling behind each one, and the handful of constraints that are not settled.",
     },
     {
       slug: "decision-records",
@@ -131,6 +139,12 @@ const orderedSections: readonly DocsSection[] = [
         summary:
           "Turn a tree into React through a registry, resolve a theme, and read the diagnostics a render leaves behind.",
       },
+      {
+        slug: "your-first-change",
+        title: "Your first change",
+        summary:
+          "Ask for a change and watch what the runtime does with it: accept it, hold it for a person, or refuse it — the whole loop, live in your browser.",
+      },
     ],
   },
   {
@@ -151,10 +165,22 @@ const orderedSections: readonly DocsSection[] = [
           "How a primitive holds other primitives: an ordered list of children, and named regions the primitive places itself.",
       },
       {
+        slug: "where-content-comes-from",
+        title: "Where the content comes from",
+        summary:
+          "A node can ask your app a question — for a list, a field, a price — and read the answer beside its props, with a named reason when there is none.",
+      },
+      {
         slug: "theming",
         title: "Making it look like yours",
         summary:
           "A palette, a font pack and a style preset, named by id on the root — and how to get your own brand colour into one without shipping a page nobody can read.",
+      },
+      {
+        slug: "what-ai-may-change",
+        title: "What AI may change",
+        summary:
+          "The second list you write: which of your primitives matter, how much latitude each kind of asker gets, and the thirteen settings that decide it.",
       },
     ],
   },
@@ -176,6 +202,12 @@ const orderedSections: readonly DocsSection[] = [
           "Yes, ask a person, or no — and the two questions the runtime asks about a change before it answers.",
       },
       {
+        slug: "answering-a-held-change",
+        title: "Answering a held change",
+        summary:
+          "The queue a person answers from: what is waiting in it, how to tell a change that can still be applied from one that cannot, and what saying yes actually does.",
+      },
+      {
         slug: "the-history-of-a-page",
         title: "The history of a page",
         summary:
@@ -192,6 +224,24 @@ const orderedSections: readonly DocsSection[] = [
         title: "What your app has to do",
         summary:
           "The one function that writes, the seven ways a write can end, and what your own code owes a person for each of them.",
+      },
+      {
+        slug: "what-every-ask-leaves-behind",
+        title: "What every ask leaves behind",
+        summary:
+          "The record of what was asked rather than of what happened: what a telemetry record keeps, the eight ways an ask can end, whether a confidence was worth anything, and how a journal is allowed to forget.",
+      },
+      {
+        slug: "going-to-production",
+        title: "Going to production",
+        summary:
+          "The three places a deployment keeps state, the tables Loom creates for them, and what your app is told when the database is not there.",
+      },
+      {
+        slug: "when-something-looks-wrong",
+        title: "When something looks wrong",
+        summary:
+          "Who put this node here, whether the page still matches its own history, and why a change nobody answered for three days can no longer be answered at all.",
       },
     ],
   },

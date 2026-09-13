@@ -1,8 +1,19 @@
 # 0109. An inverse in hand is proposable without a store, and the runtime never puts its own name on one it did not plan
 
-**Status:** Accepted
+**Status:** Superseded by [0137](0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md)
 **Date:** 2026-09-05
 **Section:** §2
+
+> **Superseded on 2026-09-12, when the branch that carried it (#230) was merged.**
+> This record was written on 5 September and sat on an unmerged branch. On 12
+> September 0137 reached `main` first with the same decision — a public,
+> store-free `inverseInterpreter`, `revertInterpreter` built on it, the
+> interpreter id always the caller's with no default, and absent `discards`
+> meaning nobody looked — under a different signature that the documentation and
+> other surfaces already use. The merge kept 0137's implementation and removed
+> this record's. Nothing here is reversed; it is decided once, in 0137. The one
+> addition this branch made on top, the `undoes` field (0111), was carried onto
+> 0137's `ComputedInverse`.
 
 ## Context
 

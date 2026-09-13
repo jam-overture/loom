@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 620" width="920" height="620" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="620" fill="#ffffff"/>
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">What a palette has to spend</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Two things a paint needed and CSS could not ask — both <tspan font-style="italic">measured</tspan> from slots the palette already declares.</text>
+
+  <text x="40" y="112" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">CHROMA OF ACCENT-STRONG, ALL 21 STARTER PALETTES — --loom-accent-strong-chroma</text>
+  <text x="40" y="131" font-size="11.5" fill="#5c5751">The same aurora at the same opacity: luminous on the full bars, a grey blob on the short ones. A stylesheet can now tell them apart.</text>
+  
+  <text x="102" y="159" font-size="11.5" fill="#5c5751" text-anchor="end">carbon</text>
+  <rect x="112" y="150" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="150" width="91.6" height="11" rx="2.5" fill="#9be61a"/>
+  <text x="252" y="159" font-size="11" fill="#15120e" font-weight="650">0.694</text>
+  <text x="102" y="180" font-size="11.5" fill="#5c5751" text-anchor="end">plum</text>
+  <rect x="112" y="171" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="171" width="91.1" height="11" rx="2.5" fill="#e849e8"/>
+  <text x="252" y="180" font-size="11" fill="#15120e" font-weight="650">0.690</text>
+  <text x="102" y="201" font-size="11.5" fill="#5c5751" text-anchor="end">slate</text>
+  <rect x="112" y="192" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="192" width="87.1" height="11" rx="2.5" fill="#2b42d4"/>
+  <text x="252" y="201" font-size="11" fill="#15120e" font-weight="650">0.660</text>
+  <text x="102" y="222" font-size="11.5" fill="#5c5751" text-anchor="end">lilac</text>
+  <rect x="112" y="213" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="213" width="81.7" height="11" rx="2.5" fill="#9a37c4"/>
+  <text x="252" y="222" font-size="11" fill="#15120e" font-weight="650">0.619</text>
+  <text x="102" y="243" font-size="11.5" fill="#5c5751" text-anchor="end">ember</text>
+  <rect x="112" y="234" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="234" width="81.0" height="11" rx="2.5" fill="#f5780a"/>
+  <text x="252" y="243" font-size="11" fill="#15120e" font-weight="650">0.614</text>
+  <text x="102" y="264" font-size="11.5" fill="#5c5751" text-anchor="end">bold</text>
+  <rect x="112" y="255" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="255" width="77.1" height="11" rx="2.5" fill="#e0b800"/>
+  <text x="252" y="264" font-size="11" fill="#15120e" font-weight="650">0.584</text>
+  <text x="102" y="285" font-size="11.5" fill="#5c5751" text-anchor="end">tide</text>
+  <rect x="112" y="276" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="276" width="71.9" height="11" rx="2.5" fill="#e6a21a"/>
+  <text x="252" y="285" font-size="11" fill="#15120e" font-weight="650">0.544</text>
+  <text x="102" y="306" font-size="11.5" fill="#5c5751" text-anchor="end">forest</text>
+  <rect x="112" y="297" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="297" width="67.3" height="11" rx="2.5" fill="#26d985"/>
+  <text x="252" y="306" font-size="11" fill="#15120e" font-weight="650">0.510</text>
+  <text x="102" y="327" font-size="11.5" fill="#5c5751" text-anchor="end">blush</text>
+  <rect x="112" y="318" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="318" width="62.5" height="11" rx="2.5" fill="#c2284e"/>
+  <text x="252" y="327" font-size="11" fill="#15120e" font-weight="650">0.473</text>
+  <text x="102" y="348" font-size="11.5" fill="#5c5751" text-anchor="end">paper</text>
+  <rect x="112" y="339" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="339" width="59.8" height="11" rx="2.5" fill="#b2471f"/>
+  <text x="252" y="348" font-size="11" fill="#15120e" font-weight="650">0.453</text>
+  <text x="102" y="369" font-size="11.5" fill="#5c5751" text-anchor="end">clay</text>
+  <rect x="112" y="360" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="112" y="360" width="58.5" height="11" rx="2.5" fill="#b24624"/>
+  <text x="252" y="369" font-size="11" fill="#15120e" font-weight="650">0.443</text>
+  <text x="382" y="159" font-size="11.5" fill="#5c5751" text-anchor="end">dusk</text>
+  <rect x="392" y="150" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="150" width="54.5" height="11" rx="2.5" fill="#e76278"/>
+  <text x="532" y="159" font-size="11" fill="#15120e" font-weight="650">0.413</text>
+  <text x="382" y="180" font-size="11.5" fill="#5c5751" text-anchor="end">harbour</text>
+  <rect x="392" y="171" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="171" width="52.1" height="11" rx="2.5" fill="#1d68bf"/>
+  <text x="532" y="180" font-size="11" fill="#8a8178" font-weight="400">0.395</text>
+  <text x="382" y="201" font-size="11.5" fill="#5c5751" text-anchor="end">citrus</text>
+  <rect x="392" y="192" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="192" width="48.4" height="11" rx="2.5" fill="#60751a"/>
+  <text x="532" y="201" font-size="11" fill="#8a8178" font-weight="400">0.367</text>
+  <text x="382" y="222" font-size="11.5" fill="#5c5751" text-anchor="end">sage</text>
+  <rect x="392" y="213" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="213" width="42.5" height="11" rx="2.5" fill="#1f7b4a"/>
+  <text x="532" y="222" font-size="11" fill="#8a8178" font-weight="400">0.322</text>
+  <text x="382" y="243" font-size="11.5" fill="#5c5751" text-anchor="end">midnight</text>
+  <rect x="392" y="234" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="234" width="39.9" height="11" rx="2.5" fill="#14c7eb"/>
+  <text x="532" y="243" font-size="11" fill="#8a8178" font-weight="400">0.302</text>
+  <text x="382" y="264" font-size="11.5" fill="#5c5751" text-anchor="end">minimal</text>
+  <rect x="392" y="255" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="255" width="38.7" height="11" rx="2.5" fill="#176e44"/>
+  <text x="532" y="264" font-size="11" fill="#8a8178" font-weight="400">0.293</text>
+  <text x="382" y="285" font-size="11.5" fill="#5c5751" text-anchor="end">linen</text>
+  <rect x="392" y="276" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="276" width="28.8" height="11" rx="2.5" fill="#8a613e"/>
+  <text x="532" y="285" font-size="11" fill="#8a8178" font-weight="400">0.218</text>
+  <text x="382" y="306" font-size="11.5" fill="#5c5751" text-anchor="end">editorial</text>
+  <rect x="392" y="297" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="297" width="15.9" height="11" rx="2.5" fill="#34425a"/>
+  <text x="532" y="306" font-size="11" fill="#8a8178" font-weight="400">0.121</text>
+  <text x="382" y="327" font-size="11.5" fill="#5c5751" text-anchor="end">graphite</text>
+  <rect x="392" y="318" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="318" width="7.1" height="11" rx="2.5" fill="#776666"/>
+  <text x="532" y="327" font-size="11" fill="#8a8178" font-weight="400">0.054</text>
+  <text x="382" y="348" font-size="11.5" fill="#5c5751" text-anchor="end">obsidian</text>
+  <rect x="392" y="339" width="132" height="11" rx="2.5" fill="#ffffff" stroke="#e4ded5"/>
+  <rect x="392" y="339" width="6.2" height="11" rx="2.5" fill="#a09090"/>
+  <text x="532" y="348" font-size="11" fill="#8a8178" font-weight="400">0.047</text>
+  <text x="600" y="160" font-size="11.5" fill="#5c5751">Fraction of the most chroma</text>
+  <text x="600" y="178" font-size="11.5" fill="#5c5751">sRGB can hold — pure blue is 1.</text>
+  <text x="600" y="208" font-size="11.5" fill="#5c5751">Bars are painted in the slot</text>
+  <text x="600" y="226" font-size="11.5" fill="#5c5751">they measure.</text>
+  <rect x="600" y="248" width="280" height="92" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="618" y="272" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">THE FINDING, AS A NUMBER</text>
+  <text x="618" y="296" font-size="12.5" fill="#5c5751">bold <tspan font-weight="650" fill="#15120e">0.584</tspan> · editorial <tspan font-weight="650" fill="#15120e">0.121</tspan></text>
+  <text x="618" y="318" font-size="12.5" fill="#5c5751">A factor of <tspan font-weight="650" fill="#15120e">4.8</tspan>, under one opacity.</text>
+
+  <text x="40" y="410" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">A DARK WASH, AS A PAIR — --loom-scrim AND --loom-scrim-fg</text>
+  <text x="40" y="429" font-size="11.5" fill="#5c5751">The palette's own body-copy pair, whichever way round is darker. No invented colour, and a contrast the contrast bar already asserts.</text>
+  
+  <rect x="40" y="444" width="404" height="150" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="470" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">EDITORIAL — LIGHT</text>
+  <rect x="58" y="484" width="78" height="44" rx="6" fill="#fafaf7" stroke="#e4ded5"/>
+  <text x="97" y="511" font-size="15" fill="#0a0a0a" text-anchor="middle">Aa</text>
+  <text x="97" y="542" font-size="9.5" fill="#8a8178" text-anchor="middle">the page</text>
+  <text x="152" y="511" font-size="15" fill="#8a8178">→</text>
+  <rect x="176" y="484" width="118" height="44" rx="6" fill="#0a0a0a"/>
+  <text x="235" y="511" font-size="15" fill="#fafaf7" text-anchor="middle">Aa</text>
+  <text x="235" y="542" font-size="9.5" fill="#8a8178" text-anchor="middle">--loom-scrim + -fg</text>
+  <text x="314" y="496" font-size="11.5" fill="#5c5751">ground <tspan font-weight="650" fill="#15120e">fg-default</tspan></text>
+  <text x="314" y="514" font-size="11.5" fill="#5c5751">ink <tspan font-weight="650" fill="#15120e">bg-canvas</tspan></text>
+  <text x="314" y="532" font-size="11.5" fill="#5c5751">18.93:1, lum 0.003</text>
+  <text x="58" y="572" font-size="11.5" fill="#5c5751">Light palette: the ink becomes the ground, the page becomes the ink.</text>
+  
+  <rect x="476" y="444" width="404" height="150" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="494" y="470" font-size="10.5" font-weight="700" fill="#8a8178" letter-spacing="0.06em">BOLD — DARK</text>
+  <rect x="494" y="484" width="78" height="44" rx="6" fill="#0a0a0a" stroke="#e4ded5"/>
+  <text x="533" y="511" font-size="15" fill="#f5f5f5" text-anchor="middle">Aa</text>
+  <text x="533" y="542" font-size="9.5" fill="#8a8178" text-anchor="middle">the page</text>
+  <text x="588" y="511" font-size="15" fill="#8a8178">→</text>
+  <rect x="612" y="484" width="118" height="44" rx="6" fill="#0a0a0a"/>
+  <text x="671" y="511" font-size="15" fill="#f5f5f5" text-anchor="middle">Aa</text>
+  <text x="671" y="542" font-size="9.5" fill="#8a8178" text-anchor="middle">--loom-scrim + -fg</text>
+  <text x="750" y="496" font-size="11.5" fill="#5c5751">ground <tspan font-weight="650" fill="#15120e">bg-canvas</tspan></text>
+  <text x="750" y="514" font-size="11.5" fill="#5c5751">ink <tspan font-weight="650" fill="#15120e">fg-default</tspan></text>
+  <text x="750" y="532" font-size="11.5" fill="#5c5751">18.16:1, lum 0.003</text>
+  <text x="494" y="572" font-size="11.5" fill="#5c5751">Dark palette: the page is already the darker end, so nothing turns over.</text>
+</svg>

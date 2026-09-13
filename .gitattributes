@@ -1,5 +1,5 @@
 # Why these three lines exist, and what they cost:
-# decisions/0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md
+# decisions/0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md
 #
 # Measured on 10 September 2026 with `pnpm queue`, over the thirty open branches:
 # 7 of 30 merged into main. With the union line alone, 24. With all three, 28.

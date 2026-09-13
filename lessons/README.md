@@ -101,7 +101,12 @@ what it adds is only the part paper cannot do:
   same question, asked again a day later, a week after you get it, and a month
   after that. Three clean retrievals retire one; missing it once sends it back
   to the start. This is the schedule's own instruction after a miss, which is
-  the hardest thing in this document to do by hand and the easiest to drop.
+  the hardest thing in this document to do by hand and the easiest to drop. It
+  draws on the lessons' own Warm-up and Self-check questions as well as the
+  review sets, so a question you got wrong on the way through lesson 09 comes
+  back beside one from Set D and does not announce which is which — and a
+  prediction you were **sure** about and wrong about comes back too, because
+  that is a belief rather than a gap.
 
 The lessons themselves run there too, at `/lessons/04` and so on, and reading
 one there differs from reading the file in exactly three ways — all of them
@@ -111,28 +116,52 @@ things this document asks you to do and cannot check:
   below Predict is the answer to Predict, and on the page below it is one scroll
   away. There it unlocks when the last prediction is committed, one question at
   a time, with the rating taken before you have read a word of the explanation.
-- **The printed answers are locked, and they have moved.** Lessons 01–11 end
-  with an `## Answers` section; the exercise half now stands under Try it and
-  the Self-check half under Self-check, each shut until the questions above it
-  have been attempted. Closer, and further away.
+- **The printed answers are not there.** Lessons 01–11 end with an `## Answers`
+  section; the exercise half now stands under Try it and the Self-check half
+  under Self-check, and neither is *in* the page — each is fetched from its own
+  address when the questions above it have been attempted. Closer, and further
+  away.
 - **Your predictions come back at Reflect**, verbatim, carrying the confidence
   you gave them beforehand — which is what makes "which were you most
   confidently wrong about" a question with an answer rather than a memory of
   one.
-- **The exercises have already run, and you cannot see what they printed.**
+- **The exercises have already run, and what they printed is not in the page.**
   Every fence in Try it that prints something takes a prediction first, one at a
   time, and every transcript appears at once when the last one is committed —
   because this section asks you to predict every output before running anything,
   and revealing them one by one would make each prediction easier than the last.
   What appears is the output of that code executed against `src/` when the page
-  was built. The paste-into-a-checkout route still works and is still worth it
-  if you want to change something and see what happens; what it is no longer for
-  is finding out what the printed answer was.
+  was built. The output the lesson prints for itself, in the fence a line under
+  "predict what this prints", is held with them. The paste-into-a-checkout route
+  still works and is still worth it if you want to change something and see what
+  happens; what it is no longer for is finding out what the printed answer was.
+
+**What "not in the page" means, and what it does not.** A lock that decides what
+to draw is a lock on your attention, and your attention is the thing the honour
+system already governs — an answer rendered and hidden is one `Ctrl-U` away, in
+the same document, searchable. So the three things above are absent from the
+page and fetched when they are earned. This is not secrecy and cannot be: the
+addresses are guessable and every answer is in this directory, which you own.
+It is the standard the review sets have always met — *nothing you have not
+earned is in the document you are reading, and going to get it is a deliberate
+act.* The explanation under Predict is the one thing still shipped with the page
+and merely held back, because an explanation is not an answer and is a scroll
+away in the markdown regardless.
 
 **The markdown here stays the source.** The surface reads these files; a lesson
 is still written, reviewed and versioned as text in this directory. Reading it
 here is reading the same words with none of that enforced, which is fine — it is
 the version you can read on a train, and the honour system is the cost.
+
+**Your record is yours, and that means keeping it is yours too.** Everything the
+surface computes — what is due, which questions come back, how often you were
+sure and wrong — comes from one value stored in your browser and sent nowhere.
+So clearing site data deletes it, and a second machine starts from zero. There is
+a page for that: `/lessons/record` saves the record as a file and merges one
+back in — later answers win, a lesson
+keeps the earlier day you did it, re-answers add up rather than overwrite, and
+importing the same file twice does nothing the second time. Save a copy the day
+you have something worth losing.
 
 ## The one-paragraph version
 
@@ -188,9 +217,50 @@ tree. Everything else in the system follows from protecting that one property.
 | [16](16-persistence.md) | Persistence | The log is the truth; the snapshot is a view you can rebuild — and the audit is what it costs to keep one. |
 | [17](17-telemetry.md) | Telemetry | How a self-graded confidence number eventually gets calibrated — and why the thing that measures it is not allowed to act on it. |
 
-That is the syllabus, complete. What is left is the [review
-schedule](review-schedule.md), which is where seventeen separate ideas become one
-system you can hold at once.
+### Part V — What the tree cannot hold
+
+| # | Lesson | You'll understand |
+| --- | --- | --- |
+| [18](18-data.md) | Data: the question the tree asks | Why an answer may never be in the tree, what a page stops being a function of, and what a reviewer's approval covers once it covers a question. |
+| [19](19-destinations.md) | Destinations: the address the tree never holds | Why validating a form action is the wrong shape of answer; why a binding may carry AI-authored params and a submission may not; and why moving a form's destination is held whoever asked. |
+| [20](20-origins.md) | Origins: whose document runs inside your page | Why the URL stays in the tree and the origins do not; why this seam has no plan and no resolve step; and why a sandbox is reported for a frame that worked. |
+| [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
+| [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
+| [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
+
+Parts I to IV are the system, and the [review
+schedule](review-schedule.md) is where those seventeen ideas become one thing you
+can hold at once. Part V is what came after the system was whole: places where a
+tree names something a deployment owns and holds none of it. After two lessons
+the shape looked stateable — *a name in the tree, an address in a registry,
+resolved before the walk* — and lesson 20 is the third instance, which breaks two
+of those three clauses and keeps the middle one. That is the more useful thing to
+have learned than the pattern would have been: which clause was load-bearing, and
+which two were two examples agreeing.
+
+Lesson 21 then satisfies all three clauses exactly, having been built before any
+of the three seams that produced them — so the pattern has now survived being
+broken once and confirmed once, which is more than four confirmations would have
+told you. What lesson 21 adds is a second question the first three never raised:
+where do you check a property that belongs to *no single party* — not the tree,
+not the registry, not the primitive?
+
+Lesson 22 is that question followed rather than the pattern followed, and it is
+where the pattern stops being the interesting thing: there is no document in a
+registry and nothing to resolve, because the property belongs to **two nodes**
+and neither can state it. What the registry holds is a predicate; what it is
+applied to is a pair; and the declaration that makes the pair visible is a claim
+that can be false — which, as the lesson's sixth exercise finds by running two
+decision records against each other, it currently is.
+
+Lesson 23 took that instruction — find another fact that exists only between two
+things — and found one where both ends are in the tree and nothing is registered
+at all. What makes it a Part V seam is not a missing document but a **scope**: an
+anchor has to be unique in a whole document, and the document includes a host
+page the runtime cannot see. So the pattern the first four lessons agreed on is
+now the minority reading, and the question to carry into a seventh seam is
+lesson 23's rather than lesson 22's: *what is the scope of the thing you just
+named, and is the checker allowed to see all of it?*
 
 ## Pacing
 

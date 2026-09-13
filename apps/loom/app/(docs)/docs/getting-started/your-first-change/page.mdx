@@ -1,0 +1,134 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("getting-started", "your-first-change")
+
+# Your first change
+
+You have a tree, and it renders. So far it has been a picture that does not
+move: you built it, you drew it on the screen, and nothing has touched it since.
+
+That is the part every framework can do. The reason Loom exists is the next
+one — letting somebody **ask** for a change to this page, and getting an answer
+you can trust. This page does that whole loop once, by hand, in front of you.
+Nothing here is set up specially; the box below is the same one that sits beside
+every example on this site.
+
+## Nobody edits the page. They ask, and something decides.
+
+Here is the one idea, and the rest of Loom is built on it:
+
+- You **ask** for something — "make the heading smaller", "add a line at the
+  end".
+- The ask becomes a **delta**: a short list of exact operations, like *configure
+  this node* or *insert that one*. It is written down before anything happens.
+- A rule called the **Gate** reads the delta and gives one of three answers:
+  **yes**, **ask a person first**, or **no**.
+- Whatever the Gate allows is applied, and the page is drawn again.
+
+The point of the middle steps is that the change is a thing you can look at
+*before* it happens, rather than a new version of the page you can only inspect
+*after*. Everything else follows from that. If you want the long version, it is
+[Proposing a change](/docs/the-runtime/proposing-a-change) — but you do not need
+it to try the box.
+
+## Try it
+
+This is the first tree again — a heading and a sentence. Press a chip under it
+and watch three things: **what you asked**, **what the runtime made of it**, and
+**what the Gate said**.
+
+<Example id="first-tree" />
+
+Three of the chips are worth pressing in order, because they get three different
+answers to the same kind of question:
+
+- **Add a sentence** is applied straight away. The Gate had no reason to stop a
+  new line at the end of the page, so it says yes, the page grows a sentence, and
+  a row appears in the log underneath.
+- **Demote the page's heading** is *held*. This site declared the heading
+  something worth protecting, so instead of applying the change the Gate puts it
+  aside and waits for a person. Nothing has changed on the page yet.
+- **Delete the page's heading** is *refused* outright. Destroying the protected
+  thing is a step further than shrinking it, and there is no version of that the
+  Gate will offer.
+
+<Callout kind="note">
+  The chips that show up under an example are only the ones that have something
+  to do to *this* tree. Once the heading is gone, the two heading chips
+  disappear — a button whose only outcome would be "nothing happened" is not
+  worth offering. Press **start over** any time to put the page back.
+</Callout>
+
+## Getting a held change accepted
+
+A held change is not a refused one. It is waiting for a yes, and you are the
+person who can give it. Press **Demote the page's heading**, and then press
+**Apply it anyway**.
+
+That second press is not a way *around* the Gate. It hands the same change back
+to be judged again, against the page as it stands now — and only then, if it
+still passes, is it applied. Saying yes answers the Gate's question; it does not
+overrule it. That is why a change the Gate would now refuse stays refused even
+after you press the button.
+
+So a proposal reaches the page one of two ways: the Gate accepts it on its own,
+or a person accepts one it held. You have now done both.
+
+## The same thing, in your own app
+
+Everything you just did is one function call. Your app does not run a special
+mode for this — the chips go through exactly what a request from a real user
+would:
+
+```ts
+import { commitIntent } from "@loom/runtime/write"
+
+const outcome = await commitIntent(path, intent)
+
+switch (outcome.kind) {
+  case "committed":
+    // The Gate said yes. Show the page it handed back.
+    break
+  case "held":
+    // A person has to answer. Put it in front of them and keep its id.
+    break
+  case "refused":
+    // The Gate said no. Tell the asker why, in the Gate's own words.
+    break
+}
+```
+
+And accepting a held change later — from a different person, in a different
+request — is its own call:
+
+```ts
+import { confirmHeld } from "@loom/runtime/write"
+
+const answered = await confirmHeld(path, { proposalId, actor: reviewer.id })
+```
+
+There are more than three ways that first call can end — a model can time out, a
+page can move under the asker, two tabs can answer at once — and each wants a
+different sentence in front of a person.
+[What your app has to do](/docs/the-runtime/what-your-app-has-to-do) is the whole
+list, and the small amount of code around it. If you are wondering *why* the
+heading was held and the deletion refused rather than the other way round, that
+is [What the Gate decides](/docs/the-runtime/what-the-gate-decides).
+
+<Callout>
+  An undo is not special either. It is a change like any other — the runtime
+  works out the delta that would put things back and sends it through the same
+  Gate. Try the **Undo** button in the log after you have applied something.
+  [The history of a page](/docs/the-runtime/the-history-of-a-page) is where that
+  lives.
+</Callout>
+
+## Where you are now
+
+Install, scaffold, build a tree, render it, change it, accept a change a person
+had to allow — that is the whole loop, and you have been through all of it.
+
+From here the two directions are: **[Building with Loom](/docs/building-with-loom/primitives)**,
+where you register components of your own so an ask has more it is allowed to
+say; and **[The runtime](/docs/the-runtime/proposing-a-change)**, which is this
+same loop with nothing left out.

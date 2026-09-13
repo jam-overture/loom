@@ -190,6 +190,84 @@ describe.each(ANSWERED)("%s", (_name, context) => {
 })
 
 /**
+ * The same link, once the visitor has put the change back.
+ *
+ * The address this band writes carried the request and the visitor's yes, and
+ * stopped there — so somebody who changed the page, put it back, and pressed
+ * *See the whole record* arrived at a list showing only the change. On the one
+ * step between two of this site's own pages, the site dropped the thing it says
+ * is never dropped. It could not do otherwise until 7 September, because the
+ * record page had no way to say *and then its undo*; it does now, so this holds
+ * the hand-off in both directions.
+ */
+describe("the record link, once a change has been put back", () => {
+  const putBack = (ask: AskId, approve: boolean, backApprove: boolean): PageContext => ({
+    origin: ORIGIN,
+    theme: THEME,
+    ask,
+    approve,
+    back: true,
+    backApprove,
+  })
+
+  const onwardFrom = async (context: PageContext): Promise<string> => {
+    const band = answerOf(await servedPage(context)) as ElementNode
+    const onward = actionsOf(band)
+      .map(hrefOf)
+      .find((href) => new URL(href).searchParams.has("changes"))
+
+    expect(onward).toBeDefined()
+
+    return onward as string
+  }
+
+  const replayOf = async (onward: string) =>
+    historyFor({
+      origin: ORIGIN,
+      theme: THEME,
+      changes: readChangeSequence(new URL(onward).searchParams.get("changes") ?? undefined),
+    })
+
+  it("carries the undo across, so the list has both entries", async () => {
+    const onward = await onwardFrom(putBack("proof", false, false))
+
+    expect(new URL(onward).searchParams.get("changes")).toBe("proof-back")
+
+    const replayed = await replayOf(onward)
+
+    expect(replayed?.steps.map((step) => step.putsBack)).toEqual([undefined, 1])
+    expect(replayed?.steps.map((step) => step.record.landed)).toEqual([true, true])
+  })
+
+  /**
+   * Both answers, kept apart. `problem` is held by the rules and so is its undo,
+   * so this address is the only one on the site carrying two separate yeses —
+   * and dropping either would replay a sequence the visitor never ran.
+   */
+  it("carries both of the visitor's answers, not one standing for both", async () => {
+    const onward = await onwardFrom(putBack("problem", true, true))
+
+    expect(new URL(onward).searchParams.get("changes")).toBe("problem-yes-back-yes")
+
+    const replayed = await replayOf(onward)
+
+    expect(replayed?.steps.map((step) => step.record.verdict)).toEqual(["approved", "approved"])
+    expect(replayed?.steps.map((step) => step.record.landed)).toEqual([true, true])
+  })
+
+  it("keeps the undo unanswered when the visitor has not answered it", async () => {
+    const onward = await onwardFrom(putBack("problem", true, false))
+
+    expect(new URL(onward).searchParams.get("changes")).toBe("problem-yes-back")
+
+    const replayed = await replayOf(onward)
+
+    expect(replayed?.steps[1]?.record.awaitingYou).toBe(true)
+    expect(replayed?.steps[1]?.record.landed).toBe(false)
+  })
+})
+
+/**
  * The register is **not** asserted here, and that is deliberate rather than an
  * omission. `adapt.test.ts` already holds every reserved word against the whole
  * served page in all ten of these states, so this band is covered by the

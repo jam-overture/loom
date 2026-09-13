@@ -131,6 +131,16 @@ export type RenderOptions = {
   readonly text?: TextResolver
   /** Off by default: decoration is opt-in per request, never ambient. */
   readonly editMode?: boolean
+  /**
+   * Stamp each element's identity on the markup without anything else edit mode
+   * means, so a published page can say which node a reader saw or clicked.
+   *
+   * Off by default, and the markup is byte-identical when it is off. It writes
+   * exactly the attributes edit mode writes — node id and type on every
+   * decorated element, the tree id and revision on the root — because those are
+   * the addresses an event about a reader has to carry (0136).
+   */
+  readonly addressed?: boolean
   readonly slots?: SlotContent
   /**
    * How the mounted theme reaches the elements: as the `var()` references
@@ -162,6 +172,8 @@ type RenderContext = {
   readonly resolver: PrimitiveResolver
   readonly validator: PropsValidator | undefined
   readonly editMode: boolean
+  /** Identity on the markup for a published page. See `RenderOptions.addressed`. */
+  readonly addressed: boolean
   readonly slots: SlotContent
   readonly tree: LoomTree
   /** Mounted on the root element, and nowhere else. */
@@ -276,6 +288,7 @@ const decorativeChildrenFor = (
       copy = renderChildren(node.children, {
         ...context,
         editMode: false,
+        addressed: false,
         decorative: true,
         collect: discardDiagnostic,
       })
@@ -311,7 +324,7 @@ const renderContextFor = (
     decorative: decorativeChildrenFor(node, context),
     ...(submit ? { submit } : {}),
     ...(anchor ? { anchor } : {}),
-    ...(context.editMode
+    ...(context.editMode || context.addressed
       ? { editable: editableAttributes(node, isRoot ? context.tree : undefined) }
       : {}),
     ...(theme ? { theme } : {}),
@@ -734,6 +747,7 @@ const renderFrom = (
     resolver: options.resolver,
     validator: options.validator,
     editMode: options.editMode ?? false,
+    addressed: options.addressed ?? false,
     slots: options.slots ?? {},
     tree,
     theme: theme ? themeStyle(theme) : undefined,

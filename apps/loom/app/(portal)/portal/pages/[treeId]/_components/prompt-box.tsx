@@ -59,9 +59,18 @@ export const PromptBox = ({
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg tracking-tight">Ask for a change</h2>
         <span className="text-ink-muted text-xs">
+          {/*
+            * `Just this part: n_shot2` told a reader which part they had
+            * scoped the ask to in the one vocabulary they cannot check it
+            * against — the whole point of this line is that they recognise the
+            * thing before they press a button that changes it. The rail names
+            * every part now, so the name leads and the id follows it, quieter,
+            * in the order 6 September settled.
+            */}
           {selected ? (
             <>
-              Just this part: <span className="font-mono">{selected.nodeId}</span>
+              Just this part: {selected.label}{" "}
+              <span className="font-mono">{selected.nodeId}</span>
             </>
           ) : (
             "Anywhere on this page"

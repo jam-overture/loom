@@ -1,0 +1,289 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  AskEndings,
+  ConfidenceCalibration,
+  EpisodeTrace,
+  EventTypeCount,
+  ForgettingPlan,
+  RecordedIntent,
+} from "@/app/(docs)/_components/telemetry"
+
+export const metadata = pageMetadata("the-runtime", "what-every-ask-leaves-behind")
+
+# What every ask leaves behind
+
+The pages before this one were about the runtime **deciding** things, and about
+what your own code does with the answer. This one is about what it
+**remembers**.
+
+Most of what happens when somebody asks for a change never reaches the page. A
+sentence becomes a plan, the plan gets measured, the Gate weighs it — and very
+often nothing is applied at all. The page's history has no room for any of that,
+because a history of a page is a list of what happened to the page.
+
+So there is a second record, and it is the one that keeps the asks.
+
+<Example id="first-tree" />
+
+Every number on this page comes from that tree. The site opened a journal, asked
+it for **ten changes over four weeks**, and everything below is read back out
+with the runtime's own functions.
+
+## Two records, and only one of them is about the page
+
+They are easy to confuse and they answer completely different questions.
+
+| | The log | The journal |
+| --- | --- | --- |
+| Kept by | `@loom/runtime/store` | `@loom/runtime/telemetry` |
+| One entry per | change that was **applied** | thing that was **asked** |
+| Holds a refusal | never | always |
+| What it is for | rebuilding the page | understanding the asking |
+| May be deleted | no | yes, and that is the point |
+
+*The history of a page* is the first column. This page is the second.
+
+The line that matters is the third row. **A refused change never touches the
+log** — the log is the truth about the page, and a change that was not applied
+is not part of that truth. If nothing else wrote it down, nobody could ever tell
+you how often the Gate says no, which is the first question anyone asks after
+turning it on.
+
+<Callout>
+  This is why deleting telemetry is safe and deleting the log is not. Everything
+  in the journal about an *applied* change is also in the log; what is unique to
+  the journal is the record of things that did not happen. Forgetting it loses
+  the account and cannot lose a page.
+</Callout>
+
+## Turning it on is six lines and one decision
+
+```ts
+import { commitIntent } from "@loom/runtime/write"
+import { collectTelemetry } from "@loom/runtime/telemetry"
+import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+
+const telemetry = collectTelemetry(postgresTelemetryJournal(db))
+
+const runtime = { interpreter, policySource, clock, idFactory, events: telemetry.sink }
+
+const outcome = await commitIntent({ store, holds, runtime }, intent)
+
+await telemetry.flush()
+```
+
+`telemetry.sink` goes in the `events` slot the runtime already has. That is the
+whole integration — there is no second place telemetry is wired in, and nothing
+between the intent and the outcome knows it is being watched.
+
+The decision is the last line. **Emitting does no I/O.** Every stage of the
+request puts a record in a list and returns immediately; the writing happens
+once, at `flush`, at a point you choose and can `await`. Both halves of that are
+deliberate:
+
+- An accepted change should not wait on a database to say it was accepted.
+- A write nobody awaits is a promise a serverless platform cancels the moment
+  the response ends — which loses telemetry silently, on exactly the requests
+  that finish fastest.
+
+<Callout kind="warning">
+  A collector that is never flushed grows. It stops at
+  `MAX_BUFFERED_RECORDS` and counts what it could not hold, so
+  `telemetry.dropped()` is a real number worth logging — an unbounded buffer in
+  the write path is a worse failure than lost telemetry. This site's corpus
+  flushes after every ask and dropped **0**.
+</Callout>
+
+## What a record keeps
+
+Here is one, printed exactly as the journal holds it — the moment the first of
+the ten asks arrived:
+
+<RecordedIntent />
+
+Read it once more and notice what is **not** there.
+
+The person typed *"Add a closing line to the end of this page."* The record says
+`utteranceLength: 43`. **The sentence is not kept.** Telemetry is aggregated and
+retained for weeks; what somebody typed is content, and content does not belong
+in a table you keep in order to count things.
+
+Three rules decide what crosses from the runtime's internal narration into a
+record, and each of them is one sentence:
+
+- **A proposal's delta is kept.** For a change that was refused, this journal is
+  the only place it ever existed.
+- **Anything the log already holds is dropped.** Storing an applied change's
+  inverse twice invites two stores to disagree about it.
+- **The utterance is not kept.** A length is enough to tell a one-word ask from
+  three paragraphs.
+
+<Callout kind="warning">
+  `actor` **is** kept, and that is not an inconsistency. An identity is something
+  a query groups by — *who asks for the most refusals* is a real question. A
+  sentence somebody typed is not something you group by, it is something you
+  read. If your deployment cannot keep an identifier for weeks, put a
+  pseudonym in `actor`; nothing in the runtime reads it.
+</Callout>
+
+## A record is not the story. An episode is.
+
+Records arrive one stage at a time, and no single one of them answers a question
+anybody has. Here is one ask — the one the Gate held and a person then allowed —
+as the twelve records it wrote:
+
+<EpisodeTrace />
+
+Two things in that list are worth stopping on.
+
+**It is two requests, not one.** Records 26 to 31 are somebody clicking; record
+32 is a different person, minutes or days later, saying yes. The fold does not
+care that they were separate — it is one ask, with one ending.
+
+**The Gate ran again.** Look at records 33, 34 and 35: after the confirmation,
+the policy is resolved again and the change is assessed again, against the page
+as it now stands. A person saying yes is permission to proceed, not permission
+to skip the check. A change the Gate would refuse today stays refused however
+enthusiastically it was approved yesterday.
+
+`episodesOf` does that fold, and it is **a derivation, not a second store**. The
+journal is what is written; episodes are computed from it when somebody asks.
+A stored episode table would be a second copy of the same facts, and the two
+would eventually disagree — silently, because nothing would be checking.
+
+<Callout>
+  It is honest about being partial. A page of records that begins in the middle
+  of an ask cannot attribute that ask's later records to anything, so they come
+  back as `unattributed` rather than being dropped. A refusal rate computed over
+  a window that quietly lost records is a rate over a denominator it changed
+  without saying so.
+</Callout>
+
+## Ten asks, and eight ways they can end
+
+This is the table a deployment actually reads. Every ending the runtime can
+reach, with what this site's corpus did:
+
+<AskEndings />
+
+Four of those eight are **not verdicts**, and folding them into "it failed"
+is the most common mistake a host makes here:
+
+- `not-interpreted` — nothing could be planned from the sentence. The Gate never
+  saw a change, because there was not one. A rising count is a signal about the
+  model, not about your users.
+- `not-writable` — the ask named a revision the page has moved past. Somebody's
+  tab was open too long. Nobody did anything wrong.
+- `failed` — a store, a hold or a commit broke. It says nothing at all about
+  whether the change was a good idea.
+- `open` — the window you read does not contain the ending.
+
+The zeroes are printed rather than hidden. An ending that has never happened and
+an ending this table forgot are different claims, and a reader looking at six
+rows would have no way to tell which they were being shown.
+
+## Was the confidence worth anything?
+
+[Connecting a model](/docs/the-runtime/connecting-a-model) ends on a promise it
+does not keep there. Of the interpreter this site runs on, it says a confidence
+nobody graded
+
+> must not walk into calibration as a model's perfect record.
+
+**Calibration is this report, and that sentence is a rule about what may enter
+it.** A model's own confidence is worth something on one condition — that it be
+measured against what actually happened — and this is the measuring.
+
+The idea is one sentence. Take every proposal that claimed about 0.9, and see
+what fraction of them actually survived. If a hundred claimed 0.9 and seventy
+survived, the model's 0.9 is really a 0.7 and the `gap` is `0.2`. Do it for ten
+bands and you know whether a number means anything at all.
+
+Now here is that report over this site's own journal:
+
+<ConfidenceCalibration />
+
+**Nothing was judged, and that is the correct answer.** This site's interpreter
+does not guess — it computes its operations from the tree, stamps
+`authoredBy: "runtime"` and a confidence of `1`, and eight proposals went
+through the Gate that way. `calibrationOf` sets every one of them aside and
+reports the count, because scoring them would measure a constant the runtime
+stamps rather than a claim anybody made.
+
+That is the whole discipline in one number. A confidence that nobody graded is
+not a claim, and a report that let eight of them in would show a model with a
+flawless record that does not exist.
+
+<Callout>
+  **Calibration changes nothing.** No threshold moves, no policy reads it. A
+  runtime that adjusted its own Gate from its own record of its own judgments
+  could drift somewhere nobody chose, and the only defence would be that the
+  drift was proposed to a person first. Measuring is the part that is safe to do
+  unsupervised; acting on the measurement is a change like any other.
+</Callout>
+
+Two things a real report splits that a first reading would pool. **Unjudged
+proposals are counted separately** — a commit that failed on the database says
+nothing about whether the model was right, and folding those into the rejections
+makes a runtime look overconfident every time infrastructure breaks. And
+**claims are grouped by the policy that judged them**, because survival is not a
+property of the model alone: a host that tightened its Gate moves the observed
+rate without the model having changed at all.
+
+## Forgetting is a feature, and it has rules
+
+A journal only grows. Retention is how it is allowed to shrink, and it is the
+only destructive operation anywhere in Loom's storage.
+
+```ts
+import { applyRetention } from "@loom/runtime/telemetry"
+
+const pruned = await applyRetention(journal, { policy: { maxAgeMs: 30 * 24 * 60 * 60 * 1000 } })
+```
+
+Here is what one run against this site's corpus would do, under a fortnight's
+policy:
+
+<ForgettingPlan />
+
+Two rules produced those numbers and neither is obvious.
+
+**Forgetting is a prefix.** A journal drops its oldest records or none; it never
+punches holes. A hole would make a record's position start meaning something a
+reader could misread, and it would make *"is this window complete?"*
+unanswerable.
+
+**An episode is never cut in half.** A window that kept a commit but forgot the
+proposal it committed reads as a change nobody proposed — which is precisely the
+fault `episodesOf` reports as `unattributed`. A journal that manufactured the
+exact fault its own fold exists to detect would not be worth trusting.
+
+Put together, they explain `keptBehind`. Those 24 records are old enough to go
+and completely finished; they are still here because **one ask from three weeks
+ago is still waiting for somebody to answer it**, and it sits in front of them.
+That number is a symptom, and a host watching it grow has learned something
+useful about their review queue rather than about their database.
+
+<Callout kind="warning">
+  The floor is an hour. `maxAgeMs: 7` is refused rather than obeyed, because the
+  most likely way to write it is a units mistake — days where milliseconds were
+  meant — and the consequence would be an empty journal on the next run.
+</Callout>
+
+## What this page is not showing you
+
+The journal here is `memoryTelemetryJournal`, which is a real implementation and
+lives for as long as this page took to build. A deployment swaps one line for
+`postgresTelemetryJournal(db)` — the same database the store uses — and nothing
+above that line changes. Both satisfy one interface and one shared contract
+test, which is what makes the swap boring.
+
+The corpus is ten asks. A real one is thousands, and the two numbers that get
+interesting at that size are the ones this page can only describe: the
+calibration gap per confidence band, and how the refusal rate moves when you
+change your policy.
+
+And <EventTypeCount /> event types appear in it. Ten ordinary asks against a
+three-node page exercise two thirds of what the runtime can narrate; the rest
+are failures nothing here provoked. The full list is in the reference, generated
+from the schema that validates them.

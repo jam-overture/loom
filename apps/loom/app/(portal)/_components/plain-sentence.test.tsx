@@ -42,4 +42,41 @@ describe("PlainSentence", () => {
 
     expect(container.textContent).toContain("t_a_very_long_looking_identifier")
   })
+
+  /**
+   * A subject that has been named is words *and* an id, and the two are set
+   * differently. This is the case the union in `PlainLine["subject"]` exists
+   * for, and it is why widening that type broke three components at compile
+   * time: each had its own `<span className="font-mono">` around the subject
+   * and would have set the words in monospace along with the id.
+   */
+  describe("a subject that has been named", () => {
+    const NAMED: PlainLine = {
+      before: "Deleted ",
+      subject: { name: "the card “Autumn arrivals”", nodeId: "n_seed9" },
+      after: " and everything inside it.",
+    }
+
+    it("renders exactly the sentence the line reads as", () => {
+      const { container } = render(<PlainSentence line={NAMED} />)
+
+      expect(container.textContent).toBe(readingOf(NAMED))
+      expect(container.textContent).toBe(
+        "Deleted the card “Autumn arrivals” n_seed9 and everything inside it."
+      )
+    })
+
+    it("sets only the id in monospace, so the words read as words", () => {
+      const { container } = render(<PlainSentence line={NAMED} />)
+      const mono = Array.from(container.querySelectorAll(".font-mono"), (el) => el.textContent)
+
+      expect(mono).toEqual(["n_seed9"])
+    })
+
+    it("keeps the id on the line, never trading it for the name", () => {
+      const { container } = render(<PlainSentence line={NAMED} />)
+
+      expect(container.textContent).toContain("n_seed9")
+    })
+  })
 })

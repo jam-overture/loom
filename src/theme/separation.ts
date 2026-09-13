@@ -1,4 +1,4 @@
-import { channelsOf } from "./contrast.js"
+import { labOf } from "./lab.js"
 import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
 
 /**
@@ -55,45 +55,19 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
 export const JUST_NOTICEABLE_DIFFERENCE = 2.3
 
 /**
- * sRGB channel, linearised.
- *
- * The knee is 0.04045, the sRGB specification's own value, where `contrast.ts`
- * uses WCAG's 0.03928 for the same curve. The two differ in the fourth decimal
- * of a rounding and each module keeps the constant its own standard publishes,
- * rather than one of them citing a standard it is not following.
- */
-const linear = (value: number): number => {
-  const c = value / 255
-
-  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-}
-
-/** CIE's cube-root transfer, with the linear segment near black. */
-const transfer = (t: number): number => (t > 216 / 24389 ? Math.cbrt(t) : (841 / 108) * t + 4 / 29)
-
-/** L*a*b* under D65, the white point sRGB is defined against. */
-const lab = ([red, green, blue]: readonly [number, number, number]): readonly [number, number, number] => {
-  const r = linear(red)
-  const g = linear(green)
-  const b = linear(blue)
-
-  const x = transfer((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047)
-  const y = transfer(0.2126 * r + 0.7152 * g + 0.0722 * b)
-  const z = transfer((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883)
-
-  return [116 * y - 16, 500 * (x - y), 200 * (y - z)]
-}
-
-/**
  * The CIE76 colour difference between two colours, or `undefined` when either
  * is a form `channelsOf` declines to guess at.
+ *
+ * The conversion is `lab.ts`'s, shared with the module that measures how much
+ * colour a single slot has: both are distances in the same space, and two
+ * copies of it would be two answers to where a colour sits.
  */
 export const colourDifference = (a: string, b: string): number | undefined => {
-  const [first, second] = [a, b].map(channelsOf)
+  const [first, second] = [a, b].map(labOf)
   if (!first || !second) return undefined
 
-  const [lightness, green, blue] = lab(first)
-  const [otherLightness, otherGreen, otherBlue] = lab(second)
+  const [lightness, green, blue] = first
+  const [otherLightness, otherGreen, otherBlue] = second
 
   return Math.sqrt(
     (lightness - otherLightness) ** 2 + (green - otherGreen) ** 2 + (blue - otherBlue) ** 2

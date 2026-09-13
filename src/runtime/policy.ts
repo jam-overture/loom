@@ -31,15 +31,15 @@ export const gatePolicySchema = z.object({
    */
   policyId: z.string().min(1).default("default"),
   /** Touching one of these elevates the change. Host vocabulary. */
-  protectedPrimitiveTypes: z.array(primitiveTypeSchema).default([]),
+  protectedPrimitiveTypes: z.array(primitiveTypeSchema).readonly().default([]),
   /**
    * Primitives whose configuration reaches outside the tree — a live payment
    * flow, a sent notification. Reverting the tree does not revert the effect,
    * so changes touching these are never treated as reversible.
    */
-  outOfTreeEffectTypes: z.array(primitiveTypeSchema).default([]),
+  outOfTreeEffectTypes: z.array(primitiveTypeSchema).readonly().default([]),
   /** Prop keys that carry meaning rather than presentation. Host vocabulary. */
-  protectedPropKeys: z.array(z.string().min(1)).default([]),
+  protectedPropKeys: z.array(z.string().min(1)).readonly().default([]),
   /**
    * Primitives that render a target the reader aims at — an anchor, a button —
    * and what makes them one. A change that leaves one of these inside another
@@ -89,47 +89,23 @@ export const gatePolicySchema = z.object({
 })
 
 /**
- * The policy as the schema states it, with the immutability the type used to
- * state separately.
+ * The policy's fields, stated once.
  *
- * `z.infer` gives the fields and their value types; what it does not give is
- * `readonly`, on the properties or on the arrays inside them. Both matter here:
- * a policy is passed to every judgement the Gate makes and none of them may
- * alter it, and `protectedPrimitiveTypes.push(…)` is the mistake that would
- * change what a deployment refuses halfway through a run.
+ * This was a hand-written mirror of the schema above until 12 September, and the
+ * line that looked like it held the two together — `defaultGatePolicy:
+ * GatePolicy = gatePolicySchema.parse({})` — only caught one direction. A field
+ * *removed* from the schema made the parsed value un-assignable and failed the
+ * build. A field *added* to the schema was an excess property on a returned
+ * value rather than on a fresh object literal, so it compiled, and
+ * `keyof GatePolicy` never heard about it. Every consumer keyed on the type —
+ * and two lanes now key documentation off it — silently omitted the new field.
  *
- * One level of nesting is deliberate rather than a general deep-readonly. Every
- * field below is a scalar, an array of scalars, or a record one level deep, so a
- * mapped type that handles those three cases covers the schema exactly and stays
- * something a reader can evaluate in their head. A field that nested deeper
- * would need this widened, and would be the moment to ask whether it belongs in
- * a policy at all.
+ * Deriving it makes the drift impossible rather than tested. The three
+ * host-vocabulary lists carry `.readonly()` in the schema so that the inferred
+ * type keeps the `readonly` arrays callers already pass, which is the one place
+ * `z.infer` and the old mirror disagreed.
  */
-type PolicyShape<T> = {
-  readonly [K in keyof T]: T[K] extends readonly (infer E)[] ? readonly E[] : Readonly<T[K]>
-}
-
-/**
- * Derived rather than declared, because stating it twice meant only one of the
- * two directions of drift was caught.
- *
- * `defaultGatePolicy: GatePolicy = gatePolicySchema.parse({})` looks like it
- * holds the schema and the type together and holds half of it: a field *removed*
- * from the schema makes the parsed value un-assignable and fails the build, and
- * a field *added* to the schema is an excess property on a returned value rather
- * than on a fresh object literal — so it is assignable, it compiles, and
- * `keyof GatePolicy` never hears about it. Every consumer keyed on the type,
- * including the documentation site's `Record<keyof GatePolicy, Knob>`, silently
- * omitted the new knob.
- *
- * Filed by `Loom docs` on 4 September, who caught it from outside with a test
- * comparing `KNOB_ORDER` to `Object.keys(gatePolicySchema.shape)`. That test is
- * right and is in the wrong repository layer — the docs site telling the runtime
- * about a mismatch inside the runtime — and a second consumer keying off
- * `keyof GatePolicy` would have got no such warning. With one list there is
- * nothing left to disagree.
- */
-export type GatePolicy = PolicyShape<z.infer<typeof gatePolicySchema>>
+export type GatePolicy = Readonly<z.infer<typeof gatePolicySchema>>
 
 /**
  * The structural knobs are opinionated; the vocabulary lists are empty because

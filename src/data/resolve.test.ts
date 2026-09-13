@@ -211,13 +211,11 @@ describe("buildDataResolution", () => {
   })
 
   /**
-   * The registry is intact here and `profile` is registered — what went wrong is
-   * that the caller resolved one plan and rendered another. Reported under
-   * `no-such-source` until `Loom lessons` found the two sharing a code, which
-   * sent anyone reading the diagnostic to the registry to look for a source that
-   * was already there.
+   * The fix for this is in the composition root and the fix for an unregistered
+   * source is in the registry, so they are not the same fault and must not share
+   * a code — which they did until 12 September.
    */
-  it("blames the plan rather than the registry when a binding was never resolved", () => {
+  it("calls a binding nothing resolved unresolved, and not unregistered", () => {
     const nodeId = "n_1" as NodeId
     const resolution = buildDataResolution(
       {

@@ -49,7 +49,7 @@ ordered list of rules and says how many — the first half is still exactly true
 and the second was wrong for three weeks.
 
 Superseding that would be false, because nothing was reversed. So **a record is
-amended in place when only the shape moved** (0096): a dated block under the
+amended in place when only the shape moved** (0099): a dated block under the
 header, before `## Context`, naming what moved, which records moved it, and
 saying that nothing is reversed. The record keeps its number, its status and its
 trail. The test is what a reader would do differently — a reader who would now
@@ -189,20 +189,37 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0103](0103-a-control-carries-a-class-and-its-display-is-a-custom-property.md) | A control carries a class, and its display is a custom property | Accepted | §4b |
 | [0104](0104-the-runtime-publishes-its-fixtures-and-its-contract-suites.md) | The runtime publishes its fixtures and its contract suites | Accepted | §1, §2, §6 |
 | [0105](0105-a-render-can-hand-back-values-instead-of-references.md) | A render can hand back values instead of references | Accepted | §3 |
-| 0106 | *No record on this branch* | — | — |
+| [0106](0106-a-band-asks-its-own-container-for-a-width-not-the-window.md) | A band asks its own container for a width, not the window | Proposed — **ARCHITECTURAL, needs review.** It reverses a named | §4b |
 | [0107](0107-a-font-pack-may-say-where-a-face-is-and-the-runtime-never-fetches-it.md) | A font pack may say where a face is, and the runtime never fetches it | Accepted | §3 |
 | [0108](0108-a-repair-restates-the-request-and-the-runtime-measures-it.md) | A repair restates the request, and the runtime measures it rather than making it cheaper | Accepted | §2 |
-| [0109](0109-an-inverse-in-hand-is-proposable-without-a-store-and-it-is-never-stamped-loom-revert.md) | An inverse in hand is proposable without a store, and the runtime never puts its own name on one it did not plan | Accepted | §2 |
-| 0110 | *No record on this branch* | — | — |
+| [0109](0109-an-inverse-in-hand-is-proposable-without-a-store-and-it-is-never-stamped-loom-revert.md) | An inverse in hand is proposable without a store, and the runtime never puts its own name on one it did not plan | Superseded by [0137](0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md) | §2 |
+| [0110](0110-an-entrance-the-reader-drives-is-a-wrapper-not-a-prop-on-every-band.md) | An entrance the reader drives is a wrapper primitive, not a prop on every band | Accepted | §4b |
 | [0111](0111-the-revision-an-undo-puts-back-is-a-field-on-provenance.md) | The revision an undo puts back is a field on provenance, because provenance is the part of a proposal a log keeps | Accepted | §2 |
 | [0112](0112-a-second-listing-on-the-hold-store-scoped-by-the-handle-and-keyed-by-two-columns.md) | A hold store lists what the handle can see, and its cursor is two columns because an instant is not a key | Accepted | §5 |
 | [0113](0113-the-pairings-probe-reports-where-it-stops-looking-rather-than-inventing-a-price.md) | The pairings probe reports where it stops looking, rather than inventing a price | Accepted | §4b |
 | [0114](0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md) | A primitive declares what part it plays, and the registry is what gets asked | Accepted | §1 |
-| [0115](0115-a-queue-can-be-told-which-of-its-holds-are-already-dead.md) | A queue can be told which of its holds are already dead, and a head it could not read is a third answer rather than an optimistic one | Accepted | §2 |
+| [0115](0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) | Three fields of one shape are a list wearing three names | Proposed — `ARCHITECTURAL — needs review` | §4b |
 | [0116](0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md) | A screenshot is taken by the repository, and Playwright is never a dependency | Accepted | §1 (process) |
 | [0117](0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md) | One harness, two subjects: a tree it renders and an address you serve | Accepted | §1 (process) |
 | [0118](0118-a-citation-is-a-claim-and-only-a-link-can-be-checked.md) | A citation is a claim, and only a link can be checked | Accepted | §1 (process) |
 | [0119](0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md) | The page a reader gets is the one `pnpm verify` reads last | Accepted | §1 (process) |
-| [0120](0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md) | A shared ledger is union-merged, and a generated file is regenerated | Accepted | §1 (process) |
+| [0120](0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md) | A starting composition is a subtree a catalogue hands to the ordinary seam | Accepted | §4b |
 | [0121](0121-part-of-a-tree-is-rendered-by-the-seam-and-the-seam-mounts-the-theme.md) | Part of a tree is rendered by the seam, and the seam is what mounts the theme | Accepted | §1 |
 | [0122](0122-a-primitive-says-which-of-its-props-a-reader-reads.md) | A primitive says which of its props a reader reads, and empty is not silence | Accepted | §1 |
+| 0123 | *No record on this branch* | — | — |
+| 0124 | *No record on this branch* | — | — |
+| [0125](0125-a-geometric-property-is-asserted-over-the-page-not-the-primitive.md) | A geometric property is asserted over the page, not the primitive | Accepted | §4b |
+| 0126 | *No record on this branch* | — | — |
+| 0127 | *No record on this branch* | — | — |
+| 0128 | *No record on this branch* | — | — |
+| 0129 | *No record on this branch* | — | — |
+| [0130](0130-atmosphere-is-a-wrapper-and-the-paints-are-one-vocabulary.md) | Atmosphere is a wrapper primitive, and the paints are one shared vocabulary | Accepted | §4b |
+| [0131](0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md) | What a palette cannot say about itself is measured from it, never declared on it | Accepted | §4b |
+| [0132](0132-a-type-that-mirrors-a-schema-is-derived-from-it.md) | A type that mirrors a schema is derived from it | Accepted | §2 |
+| 0133 | *No record on this branch* | — | — |
+| 0134 | *No record on this branch* | — | — |
+| [0135](0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md) | A same-origin frame is granted what its own document needs | Accepted — it changes no schema, no tree and no delta model, and | §4d |
+| [0136](0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md) | A published page broadcasts reader signals when its host asks | Accepted | §3, §6 |
+| [0137](0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md) | An undo already computed is assembled by the runtime, and stamped by its caller | Accepted | §2 |
+| [0138](0138-a-queue-can-be-told-which-of-its-holds-are-already-dead.md) | A queue can be told which of its holds are already dead, and a head it could not read is a third answer rather than an optimistic one | Accepted | §2 |
+| [0139](0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md) | A shared ledger is union-merged, and a generated file is regenerated | Accepted | §1 (process) |

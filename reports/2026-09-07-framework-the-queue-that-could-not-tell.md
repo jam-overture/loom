@@ -45,7 +45,7 @@ oldest first, indistinguishable. The only way to discover which is which was to
 read a change, decide, click yes, and be told it never could have worked.
 
 `@loom/runtime/write` now exports the comparison. Recorded as
-[0115](../decisions/0115-a-queue-can-be-told-which-of-its-holds-are-already-dead.md).
+[0138](../decisions/0138-a-queue-can-be-told-which-of-its-holds-are-already-dead.md).
 
 ```ts
 const { marked, unreadable } = await markHoldsFromStore(store, page.held)
@@ -159,7 +159,7 @@ attempt and it costs a build.
 ## Open questions
 
 - **Whether `not-found` should be `dead`.** My answer is no and the reasoning is
-  in 0115. It is the one call in this unit that a host could reasonably want the
+  in 0138. It is the one call in this unit that a host could reasonably want the
   other way, and it is cheap to change while there are no consumers.
 - **The journal's utterance is a retention decision** and is now the second thing
   in this lane's queue waiting on a person rather than on engineering.
@@ -169,7 +169,7 @@ attempt and it costs a build.
   utterance. The oldest is nineteen days.
 - **Nothing has merged since 1 September**, and this branch is now twelve units
   deep. Every finding closed in the last week is closed only here.
-- **The numbering.** 0115. `main`'s next free is 0106; 0106 and 0110 are claimed
+- **The numbering.** 0115 (renumbered 0138 when #230 merged, because `main` had claimed 0115 by then). `main`'s next free is 0106; 0106 and 0110 are claimed
   on branches that have not merged, and I took the next number free across every
   branch on the remote. Two holes, reported as notes, no failure — as 0097
   designed.

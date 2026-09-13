@@ -104,7 +104,7 @@ export const buildDataResolution = (
           status: "unavailable",
           unavailable: {
             reason: "not-resolved",
-            detail: "the plan that was resolved is not the plan being rendered",
+            detail: "the answers came from resolving a different plan than this tree",
           },
         }
       : answer.ok

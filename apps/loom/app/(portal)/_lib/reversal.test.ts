@@ -74,8 +74,8 @@ describe("describeRestoration", () => {
       })
     ).toEqual({
       before: "Puts ",
-      subject: "n_card",
-      after: ", a loom.card with the 2 things that were inside it, back inside n_page.",
+      subject: { name: "the card “Hi”", nodeId: "n_card" },
+      after: ", with the 2 things that were inside it, back inside n_page.",
     })
   })
 
@@ -87,7 +87,7 @@ describe("describeRestoration", () => {
         index: 0,
         node: { kind: "text", id: nodeId("n_t"), value: "Welcome" },
       }))
-    ).toBe("Puts n_t, the words, back inside n_page.")
+    ).toBe("Puts the words “Welcome” n_t, back inside n_page.")
   })
 
   /**
@@ -289,9 +289,20 @@ describe("previewReversal, end to end", () => {
     const reversal = await previewReversal(store, seed.treeId, seed, 1)
 
     if (reversal?.kind !== "revertable") throw new Error("removing a leaf card is revertable")
-    // The card holds a heading (with text) and a prose (with text): four nodes under it.
+    /*
+     * The card holds a heading (with text) and a prose (with text): four nodes
+     * under it. And the sentence names it — by what it *said*, which is the
+     * whole point of doing this here rather than anywhere else. The card is
+     * gone from the tree; the only surviving account of what it was is the
+     * inverse this line is a reading of.
+     *
+     * The two runs are joined by a space rather than concatenated. The tree
+     * holds no whitespace between a heading and the paragraph under it — the
+     * gap is a box, not a character — so `textOf` would say
+     * "…a deltaNothing here…" and the name would read as a typo.
+     */
     expect(reversal.restores[0] && readingOf(reversal.restores[0])).toBe(
-      `Puts ${card.id}, a loom.card with the 4 things that were inside it, back inside ${seed.root.id}.`
+      `Puts the card “Every change is a delta Nothing here was…” ${card.id}, with the 4 things that were inside it, back inside ${seed.root.id}.`
     )
   })
 

@@ -165,14 +165,16 @@ describe("defineSource", () => {
     }
   })
 
-  it("does not tell a host a source is unregistered when the registry is intact", () => {
-    const described = describeDataUnavailable({
-      reason: "not-resolved",
-      detail: "the plan that was resolved is not the plan being rendered",
-    })
+  /**
+   * The two were one code until 12 September, and the sentence it produced said
+   * both things at once. Different work for different people: a registry, or a
+   * composition root.
+   */
+  it("does not say a source is unregistered when nothing went looking for one", () => {
+    const notResolved = describeDataUnavailable({ reason: "not-resolved", detail: "why" })
 
-    expect(described).not.toContain("registered")
-    expect(described).toContain("not among the bindings this render resolved")
+    expect(notResolved).not.toContain("registered")
+    expect(notResolved).not.toBe(describeDataUnavailable({ reason: "no-such-source", detail: "why" }))
   })
 })
 

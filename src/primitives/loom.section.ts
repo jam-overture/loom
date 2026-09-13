@@ -62,6 +62,21 @@ export const loomSection = definePrimitive({
           boxSizing: "border-box",
           width: "100%",
           maxWidth: WIDTHS[width],
+          /**
+           * A band narrower than the page sits in the middle of it.
+           *
+           * `loom.page` lays its children out in a column and a flex item
+           * defaults to `stretch`, so a `readable` section inside a `wide` page
+           * capped itself at the measure and then sat flush against the left
+           * edge with a third of the page empty beside it. Nothing was wrong
+           * with either primitive on its own, which is why no assertion in
+           * ninety of them caught it: the section's width was right, the page's
+           * width was right, and the defect only exists in the pair.
+           *
+           * A no-op when the band is as wide as its container, which is every
+           * band that was rendering correctly before.
+           */
+          marginInline: "auto",
           paddingBlock: given.tone === undefined || given.tone === "canvas" ? space(3) : space(6),
           paddingInline: given.tone === undefined || given.tone === "canvas" ? "0" : space(5),
           borderRadius: given.tone === undefined || given.tone === "canvas" ? "0" : radius("lg"),

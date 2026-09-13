@@ -23,6 +23,14 @@ import { StateNotice } from "./_components/state-notice"
  * **Retry before anything else.** Most of what throws in this app is a read —
  * a store, a journal, a Postgres that was asleep. `reset()` re-runs the segment
  * without a full page load, so the cheapest true fix is the first offer.
+ *
+ * The heading and the button were lower case — `something here failed` and
+ * `try again` — and this was the last screen in the portal still written that
+ * way. It reads as a log line, which is the one voice an error screen must not
+ * be in: a person who has just hit a failure is deciding whether this software
+ * is looked after, and the screen that greets them was the one screen not
+ * holding to the portal's own sentence case. Every other action here reads
+ * "Apply this change", "No thanks", "Try the demo".
  */
 const ErrorBoundary = ({
   error,
@@ -32,18 +40,18 @@ const ErrorBoundary = ({
   readonly reset: () => void
 }) => (
   <div className="flex max-w-2xl flex-col gap-4 p-8">
-    <h1 className="text-2xl tracking-tight">something here failed</h1>
+    <h1 className="text-2xl tracking-tight">Something went wrong</h1>
 
     <StateNotice
       tone="failure"
-      title="The page did not finish loading."
+      title="This page didn&rsquo;t finish loading."
       action={
         <button
           type="button"
           onClick={reset}
           className="border-neutral-edge bg-neutral text-neutral-ink hover:bg-surface-active cursor-pointer rounded-md border px-3 py-1.5"
         >
-          try again
+          Try again
         </button>
       }
     >

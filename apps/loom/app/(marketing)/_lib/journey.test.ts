@@ -92,6 +92,12 @@ describe("the number of steps, as the site states it", () => {
  * how long it is. All three were typed, and two of them disagreed with each
  * other: the refusal band was headed *The same five lines* above a sentence
  * reading *the first four lines read exactly as they do above*.
+ *
+ * The three the refusal band states are positions in the **refused** run, and
+ * are checked here against each other rather than against the run printed above
+ * it — which is what they were quietly read off while that run could only ever
+ * be one length. `the-record-of-your-ask.test.ts` is where they are held against
+ * a page whose two runs differ.
  */
 describe("the number of lines, as the page printing them states it", () => {
   it("counts the trail it is showing rather than a number typed beside it", async () => {
@@ -107,8 +113,8 @@ describe("the number of lines, as the page printing them states it", () => {
   it("does not head the refusal with a different count from the sentence under it", async () => {
     const mechanism = await markupOf(HOW_IT_WORKS)
 
-    const heading = /The same (\w+) lines, and then a different answer/.exec(mechanism)
-    const sentence = /the first (\w+) lines read exactly as they do above/.exec(mechanism)
+    const heading = /The same (\w+) kinds of line, and then a different answer/.exec(mechanism)
+    const sentence = /it reaches the same (\w+) kinds of line as the run above/.exec(mechanism)
 
     expect(heading?.[1]).toBeDefined()
     expect(sentence?.[1]).toBeDefined()
@@ -128,8 +134,8 @@ describe("the number of lines, as the page printing them states it", () => {
   it("says the verdict line is the one after the lines that match", async () => {
     const mechanism = await markupOf(HOW_IT_WORKS)
 
-    const matching = /the first (\w+) lines read exactly/.exec(mechanism)?.[1]
-    const at = /This is the (\w+)\./.exec(mechanism)?.[1]
+    const matching = /reaches the same (\w+) kinds of line/.exec(mechanism)?.[1]
+    const at = /and then this, its (\w+)\./.exec(mechanism)?.[1]
     const absent = /There is no (\w+), because nothing happened/.exec(mechanism)?.[1]
 
     const count = ["no", "one", "two", "three", "four", "five", "six", "seven"].indexOf(

@@ -49,8 +49,8 @@ buildElement(ids, {
 A slot node is a child like any other, but its name is what the parent reads. In
 the component:
 
-```tsx
-component: ({ loom, children }) =>
+```tsx object-body
+component: ({ loom, children }: LoomPrimitiveProps) =>
   createElement(
     "section",
     { ...loom.editable },
@@ -67,7 +67,7 @@ rather than a position in the list.
 
 Declare the names you accept:
 
-```ts
+```ts object-body
 slots: ["heading", "actions", "media"]
 ```
 

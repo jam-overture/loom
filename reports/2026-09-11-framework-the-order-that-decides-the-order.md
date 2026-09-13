@@ -21,7 +21,7 @@ branches that only change files. It is the wrong strategy when one of the
 branches changes **how git merges**.
 
 `.gitattributes` is that file. `FINDINGS.md merge=union`
-([0120](../decisions/0120-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md),
+([0139](../decisions/0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md),
 landed on this branch on 10 September) does not change a byte of the tree a
 reader sees — it changes what git *does* when the next branch touches that path.
 And git reads merge attributes from the tree being merged **into**, not from the
@@ -142,8 +142,8 @@ is also where one of the two remaining conflicts comes from; filed for that lane
 
 **No new decision record.** The rule added here is how one tool orders its
 candidates — reversible in a line, and it does not define what Loom is. The
-decision it serves is already written: 0120 chose the union merge on 10
-September. This run is the discovery that 0120 cannot take effect until it
+decision it serves is already written: 0139 chose the union merge on 10
+September. This run is the discovery that 0139 cannot take effect until it
 lands, which is context for that record rather than a new direction. The
 reasoning lives in `tools/queue/plan.ts`, next to the code it governs.
 

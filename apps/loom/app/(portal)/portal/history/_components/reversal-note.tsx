@@ -1,4 +1,6 @@
+import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import type { Reversal } from "@/app/(portal)/_lib/reversal"
+import { readingOf } from "@/app/(portal)/_lib/vocabulary"
 
 /**
  * What undoing a revision would put back, and what it would cost, shown beside
@@ -40,12 +42,10 @@ export const ReversalNote = ({ reversal }: { readonly reversal: Reversal }) => {
         <ul className="flex flex-col gap-1">
           {reversal.restores.map((restoration, index) => (
             <li
-              key={`${restoration.subject}-${index}`}
+              key={`${readingOf(restoration)}-${index}`}
               className="border-edge-subtle text-2xs border-l-2 pl-3"
             >
-              {restoration.before}
-              <span className="font-mono">{restoration.subject}</span>
-              {restoration.after}
+              <PlainSentence line={restoration} />
             </li>
           ))}
         </ul>

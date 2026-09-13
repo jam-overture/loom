@@ -36,10 +36,20 @@ describe("ReviewQueue", () => {
     expect(document.querySelector("details")?.open).toBe(false)
   })
 
-  it("shows an empty queue as empty, never as a failure", () => {
+  /**
+   * Not a failure, and — since this run — not an emptiness either.
+   *
+   * "Nothing is waiting for you" is Loom having judged every change on this page
+   * and needed nothing from anybody. It rendered in the dashed box that means
+   * *nothing here yet*, which is the one reading that makes a clean queue look
+   * like an unfinished one, and the disclosure beneath it had grown a heading
+   * explaining that away. A result gets the tone for a result.
+   */
+  it("shows an answered queue as settled — not as a failure, and not as an empty slot", () => {
     const { container } = render(<ReviewQueue changes={[]} />)
 
-    expect(container.querySelector("[data-tone]")?.getAttribute("data-tone")).toBe("empty")
+    expect(container.querySelector("[data-tone]")?.getAttribute("data-tone")).toBe("settled")
+    expect(container.querySelector("[data-tone]")?.className).not.toContain("border-dashed")
     expect(screen.queryByRole("status")).toBeNull()
   })
 
