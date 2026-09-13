@@ -17,6 +17,7 @@ import {
   buildProposal,
   collectingEventSink,
   fixedClock,
+  hangingModelClient,
   scriptedModelClient,
   FIXED_INSTANT,
 } from "../testing/doubles.js"
@@ -36,8 +37,13 @@ import {
 } from "../testing/model-replies.js"
 import { applyDelta } from "../tree/apply.js"
 
-import type { ModelClientError, ModelCompletion } from "./client.js"
-import { DEFAULT_EFFORT, DEFAULT_INTERPRETER_MODEL, modelInterpreter } from "./interpreter.js"
+import type { ModelClient, ModelClientError, ModelCompletion } from "./client.js"
+import {
+  DEFAULT_EFFORT,
+  DEFAULT_INTERPRETER_CEILING_MS,
+  DEFAULT_INTERPRETER_MODEL,
+  modelInterpreter,
+} from "./interpreter.js"
 import { INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
 import { interpretationReplyJsonSchema } from "./schema.js"
 
@@ -415,6 +421,105 @@ describe("modelInterpreter — client failures", () => {
     const interpreted = await interpreter.interpret(intent, tree)
 
     expect(interpreted.ok ? "" : interpreted.error.code).toBe("malformed-proposal")
+  })
+})
+
+/**
+ * The sixth failure mode, which was not one of the five: no answer at all (0140).
+ *
+ * These tests would not have finished before the ceiling existed, which is the
+ * whole of the argument. A client that never settles is not an exotic case — it
+ * is every misrouted socket and every proxy a Node `fetch` declines to read.
+ */
+describe("modelInterpreter — a model that never answers", () => {
+  const hanging = (ceilingMs: number) => {
+    const { tree, ids } = sampleTree()
+    const idFactory = sequentialIdFactory("x")
+    const client = hangingModelClient()
+    const interpreter = modelInterpreter({ client, idFactory, clock: fixedClock(), ceilingMs })
+    const intent = buildIntent(idFactory, {
+      treeId: tree.treeId,
+      baseRevision: tree.revision,
+      utterance: "add a note to the footer saying Thanks for visiting",
+    })
+
+    return { tree, ids, client, interpreter, intent }
+  }
+
+  it("reports it as unavailable, naming the ceiling it reached", async () => {
+    const { interpreter, intent, tree } = hanging(5)
+    const interpreted = await interpreter.interpret(intent, tree)
+
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("interpreter-unavailable")
+    expect(interpreted.ok ? "" : interpreted.error.detail).toBe("no reply in 5ms")
+  })
+
+  it("bounds a repair as well as an interpretation, since they are one call path", async () => {
+    const { interpreter: answering, intent, tree } = harness(INSERT_NOTE_REPLY)
+    const first = await answering.interpret(intent, tree)
+    if (!first.ok) throw new Error("expected a proposal to refuse")
+
+    const bounded = modelInterpreter({
+      client: hangingModelClient(),
+      idFactory: sequentialIdFactory("y"),
+      clock: fixedClock(),
+      ceilingMs: 5,
+    })
+
+    const request: RepairRequest = {
+      intent,
+      refused: first.value,
+      disposition: {
+        kind: "rejected",
+        reason: { code: "stakes-at-refusal-floor", detail: "removes 14 nodes" },
+        stakes: "critical",
+        reversible: true,
+        confidence: 0.9,
+        policyId: "default",
+      },
+    }
+
+    const repaired = await bounded.repair(request, tree)
+
+    expect(repaired.ok ? "" : repaired.error.code).toBe("interpreter-unavailable")
+  })
+
+  it("aborts the call it stopped waiting for", async () => {
+    const { interpreter, intent, tree, client } = hanging(5)
+    await interpreter.interpret(intent, tree)
+
+    expect(client.abortedWith()).toBe("no answer in 5ms")
+  })
+
+  it("bounds a client the host wrote, not only the adapter Loom ships", async () => {
+    const { tree } = sampleTree()
+    const idFactory = sequentialIdFactory("x")
+
+    /** No signal handling, no Result, no knowledge that a ceiling exists. */
+    const hostClient: ModelClient = { complete: () => new Promise(() => undefined) }
+
+    const interpreter = modelInterpreter({
+      client: hostClient,
+      idFactory,
+      clock: fixedClock(),
+      ceilingMs: 5,
+    })
+
+    const interpreted = await interpreter.interpret(
+      buildIntent(idFactory, {
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        utterance: "add a note",
+      }),
+      tree
+    )
+
+    expect(interpreted.ok ? "" : interpreted.error.code).toBe("interpreter-unavailable")
+  })
+
+  it("defaults to a ceiling rather than to waiting forever", () => {
+    expect(DEFAULT_INTERPRETER_CEILING_MS).toBeGreaterThan(0)
+    expect(Number.isFinite(DEFAULT_INTERPRETER_CEILING_MS)).toBe(true)
   })
 })
 

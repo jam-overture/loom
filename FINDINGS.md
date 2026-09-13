@@ -13609,7 +13609,11 @@ holds both as well, if that turns out to be the answer there too.
 
 ## 2026-09-10 — a preview of a tree loses its theme, and there is no seam for "the words a node shows"
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-25-where-the-face-is` (#230) — `renderLoomExcerpt` mounts the
+theme on a subtree (0121) and a primitive declares which of its props a reader
+reads (0122). Both landed on 10 September, hours after this was filed, and the
+status line was never edited; marked on 13 September by the lane that owns it.
 
 Two small gaps found building a second rendering of one node of a page. Neither
 blocked the unit — both were worked around inside the demo's lane — and both are
@@ -13793,7 +13797,11 @@ that a link inside a record resolves to a file that exists.
 
 ## 2026-09-07 — the frame seam cites 0094 eight times and means 0095
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-25-where-the-face-is` (#230) — all eight now cite 0095, the three
+correct citations in `library.test.ts` were left alone, and the check this entry
+asked for is 0118: `pnpm test` fails on a citation in `src/` that resolves to no
+record. Verified on `main` on 13 September.
 
 Every doc comment in the framing seam that names its own decision record names
 the wrong one. Eight sites, all of them `(0094)` where the record is
@@ -13836,7 +13844,10 @@ is a better argument for it than one site was.
 
 ## 2026-09-07 — 0095 says no primitive uses the framing seam, and one has since 26 August
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-25-where-the-face-is` (#230) — 0095 carries an *Amended 2026-09-09*
+note under 0099, naming `loom.embed` as the consumer, which is what this entry
+asked for rather than a supersession. Verified on `main` on 13 September.
 
 0095's Consequences section says:
 
@@ -14885,6 +14896,24 @@ made on four consecutive runs.
 ---
 
 ## 2026-09-04 — a Node server in this sandbox cannot reach the model unless it is told to use the proxy, and the failure is a hang
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** the
+hang is closed by `framework-31-the-ceiling-on-a-foreign-call`; **open** for the
+recipe. Original status below.
+
+> **Closed half, 13 September.** *"The failure is a hang"* was a framework
+> defect and not only a sandbox fact, and it is fixed rather than documented:
+> `modelInterpreter` now bounds every call it makes and reports
+> `interpreter-unavailable` with *"no reply in 3m"*; `resolveDataPlan` and
+> `resolveSubmissionPlan` bound each source and each endpoint at ten seconds
+> (0140). The *"Working on it…"* button gets an answer now whether or not the
+> server was told about the proxy.
+>
+> **Open half.** The four traps in this entry — the environment variables, the
+> `pkill` pattern that kills its own shell, the submit button found by label, the
+> pending text as the only settled signal — are still a recipe nobody has written
+> down in code. They belong with the shared serve-and-shoot script the 8 September
+> entry asks for, and that script still has no owner.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
 a recipe, so the next run does not spend forty minutes rediscovering it
@@ -22404,3 +22433,41 @@ The two facts most worth a paragraph: **a signal carries no content** — words
 come from the tree at the revision the batch names — and **measurement is the
 host's setting, never a prop in the tree**. `prototypes/ski-apparel` is a working
 end-to-end example to read from, not to copy code out of.
+
+---
+
+## 2026-09-13 — the data seam can now say "the adapter never came back", and `/docs` has no row for it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+a consequence of 0140, filed with the change that produced it
+
+`app/(docs)/_lib/data/answers.ts` types every way an answer fails to arrive and
+prints a table of them. Two of its cells are now sometimes wrong, and they are
+wrong because of a change made in `src/` today rather than because anybody wrote
+them badly:
+
+```ts
+const REACHED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["reached"]>> = {
+  unavailable: "the adapter answered",
+}
+```
+
+`reached` has two members — *"the adapter was never called"* and *"the adapter
+answered"* — and until today those were the only two states there were. 0140
+adds a third: **the render gave up on a source that never came back.** The
+adapter was called, it did not answer, and nothing it did produced the outcome;
+the runtime's ceiling did, at ten seconds, and the detail reads `no answer in 10s`.
+
+`WHAT_HAPPENED["unavailable"]` is the other half, and it is the more interesting
+one. It says *"The query timed out"* — which was aspirational when it was
+written, because the only way to reach `unavailable` was for an adapter to report
+it, and an adapter that hangs reported nothing at all. **The page has been
+describing the timeout since before the seam could produce one.** It can now.
+
+No new reason code was added, deliberately: `unavailable` already means "ask
+again later, nobody has to act", and growing the union would have turned these
+two `Record`s red in your lane to split two states with the same remedy. The
+record says so in as many words and names the revisit condition — when something
+actually wants to count *slow* apart from *down*. So this is a page change and
+not a type change: a third `reached` member, and a row whose `when` is the
+integration that never replies, which is the one the portal lane lost a run to.

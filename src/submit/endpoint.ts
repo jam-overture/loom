@@ -128,6 +128,12 @@ export type SubmissionFailure = {
 export type EndpointRequest = {
   /** The render request's opaque host context — audience, locale, tenant. */
   readonly context: JsonObject | undefined
+  /**
+   * Aborted once the render has stopped waiting for this endpoint, which it
+   * will (0140). Pass it to whatever does the IO and the connection is let go;
+   * ignore it and the page is still answered on time, but the socket is not.
+   */
+  readonly signal: AbortSignal | undefined
 }
 
 export interface SubmissionEndpoint {
@@ -182,7 +188,8 @@ export type EndpointEntry = {
   readonly description: string
   /** Total: calls, catches, validates. Never rejects. */
   readonly resolve: (
-    context: JsonObject | undefined
+    context: JsonObject | undefined,
+    signal?: AbortSignal
   ) => Promise<Result<SubmissionTarget, SubmissionUnavailable>>
 }
 
@@ -206,7 +213,7 @@ const firstIssue = (error: {
 export const defineEndpoint = (definition: EndpointDefinition): EndpointEntry => ({
   id: definition.id,
   description: definition.description,
-  resolve: async (context) => {
+  resolve: async (context, signal) => {
     /**
      * The same single `try` the data seam makes, for the same reason: an
      * endpoint is not Loom's code, and a rejected promise from one host's token
@@ -214,7 +221,7 @@ export const defineEndpoint = (definition: EndpointDefinition): EndpointEntry =>
      */
     let answered: Result<SubmissionTarget, SubmissionFailure>
     try {
-      answered = await definition.endpoint.target({ context })
+      answered = await definition.endpoint.target({ context, signal })
     } catch (thrown) {
       return err({
         reason: "endpoint-threw",

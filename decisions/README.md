@@ -223,7 +223,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0137](0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md) | An undo already computed is assembled by the runtime, and stamped by its caller | Accepted | §2 |
 | [0138](0138-a-queue-can-be-told-which-of-its-holds-are-already-dead.md) | A queue can be told which of its holds are already dead, and a head it could not read is a third answer rather than an optimistic one | Accepted | §2 |
 | [0139](0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md) | A shared ledger is union-merged, and a generated file is regenerated | Accepted | §1 (process) |
-| 0140 | *No record on this branch* | — | — |
+| [0140](0140-a-call-into-foreign-code-has-a-ceiling-and-the-runtime-owns-it.md) | A call into foreign code has a ceiling, and the runtime owns it | Accepted | §2 (interpretation), §4c (the data seam) |
 | 0141 | *No record on this branch* | — | — |
 | 0142 | *No record on this branch* | — | — |
 | 0143 | *No record on this branch* | — | — |

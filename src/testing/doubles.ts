@@ -108,6 +108,35 @@ export const scriptedModelClient = (
   }
 }
 
+export type HangingModelClient = ModelClient & {
+  /** Whether the runtime's ceiling aborted the call, and what it said (0140). */
+  readonly abortedWith: () => string | undefined
+}
+
+/**
+ * A model that never answers — the failure mode a `try`/`catch` cannot see and
+ * the reason `modelInterpreter` has a ceiling (0140).
+ *
+ * Published because every surface with a prompt box has an "it did not come
+ * back" state to show, and this is the only way to reach it without waiting for
+ * one. Use it with a small `ceilingMs`: a test that needs three minutes to pass
+ * is a test nobody runs.
+ */
+export const hangingModelClient = (): HangingModelClient => {
+  let aborted: string | undefined
+
+  return {
+    complete: (_request, options) =>
+      new Promise(() => {
+        options?.signal?.addEventListener("abort", () => {
+          const { reason } = options.signal as AbortSignal
+          aborted = reason instanceof Error ? reason.message : "unnamed"
+        })
+      }),
+    abortedWith: () => aborted,
+  }
+}
+
 export type RecordingInterpreter = ChangeInterpreter & {
   readonly intents: readonly EditIntent[]
 }

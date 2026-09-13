@@ -194,6 +194,93 @@ describe("resolveDataPlan", () => {
   })
 })
 
+/**
+ * The ceiling (0140).
+ *
+ * Until it existed, the first of these tests did not finish: an adapter that
+ * never settles held `Promise.all`, which held the page. The assertion that
+ * matters most is the third — the page comes back with the *other* source's
+ * answer in it, which is the property this file's own module comment has claimed
+ * since the seam shipped.
+ */
+describe("a source that does not answer", () => {
+  const hangingSource = (id: string): SourceEntry =>
+    defineSource({
+      id,
+      description: "never answers",
+      params: z.object({}).partial(),
+      answers: z.string(),
+      adapter: { fetch: () => new Promise(() => undefined) },
+    })
+
+  const outcomeOf = async (
+    entries: readonly SourceEntry[],
+    bindings: Record<string, unknown>,
+    ceilingMs?: number
+  ) => {
+    const tree = boundTree(bindings)
+    const resolution = await resolveTreeData(tree, {
+      registry: registryOf(...entries),
+      ...(ceilingMs === undefined ? {} : { ceilingMs }),
+    })
+
+    return resolution.lookup(tree.root.id)
+  }
+
+  it("is reported as unavailable rather than waited out", async () => {
+    const answers = await outcomeOf([hangingSource("slow")], { bio: { source: "slow" } }, 5)
+    const outcome = answers["bio"]
+
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable).toEqual({ reason: "unavailable", detail: "no answer in 5ms" })
+    expect(describeDataUnavailable(outcome.unavailable)).toContain("no answer in 5ms")
+  })
+
+  it("is aborted, so the connection it holds is let go", async () => {
+    let aborted: string | undefined
+
+    const listening = defineSource({
+      id: "slow",
+      description: "never answers, but listens",
+      params: z.object({}).partial(),
+      answers: z.string(),
+      adapter: {
+        fetch: ({ signal }) =>
+          new Promise(() => {
+            signal?.addEventListener("abort", () => {
+              aborted = signal.reason instanceof Error ? signal.reason.message : "unnamed"
+            })
+          }),
+      },
+    })
+
+    await outcomeOf([listening], { bio: { source: "slow" } }, 5)
+
+    expect(aborted).toBe("no answer in 5ms")
+  })
+
+  it("costs its own region and not the page", async () => {
+    const answers = await outcomeOf(
+      [hangingSource("slow"), countingSource("profile", "Ada")],
+      { bio: { source: "slow" }, name: { source: "profile" } },
+      5
+    )
+
+    expect(answers["name"]).toEqual({ status: "ready", value: "Ada" })
+    expect(answers["bio"]?.status).toBe("unavailable")
+  })
+
+  it("does not bound a source that answers inside the ceiling", async () => {
+    const answers = await outcomeOf([countingSource("profile", "Ada")], {
+      bio: { source: "profile" },
+    })
+
+    expect(answers["bio"]).toEqual({ status: "ready", value: "Ada" })
+  })
+})
+
 describe("buildDataResolution", () => {
   it("reports a binding whose answer is missing rather than leaving the page quietly short", () => {
     const nodeId = "n_1" as NodeId
