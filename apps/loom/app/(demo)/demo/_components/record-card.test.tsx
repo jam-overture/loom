@@ -6,6 +6,7 @@ import { REVERT_INTERPRETER } from "@loom/runtime/write"
 import { ruleSentence } from "@/app/(portal)/_lib/vocabulary"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
+import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
 import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
@@ -495,23 +496,24 @@ describe("a record card", () => {
   })
 
   /**
-   * The rule sentence on this path ends *"riskier than a request from here is
-   * allowed to be without asking"*, and until this run nothing on the card said
-   * what *here* was. The one thing that came close was the origin code in the
-   * corner, which is a token rather than a claim — so the assertion is that the
-   * card now answers the question in the light and keeps the code, one click
-   * down, rather than that it says any particular words.
+   * The rule sentence on this path states a conclusion and not the two numbers
+   * it was drawn from, and the nearest thing the card ever had to them was the
+   * origin code in the corner — a token rather than a claim. So the assertion is
+   * that the comparison is answered in the light and the code is kept, one click
+   * down, rather than that either says any particular words: both strings come
+   * off `ceilingNote` itself.
    */
-  it("says what an ask from here may do on its own, under the rule that read it", () => {
+  it("says what an ask like this may do on its own, under the rule that read it", () => {
+    const note = ceilingNote(HELD)
+    if (note === undefined) throw new Error("the fixture is the ask the ceiling decided")
+
     const { container } = render(<RecordCard record={HELD} />)
 
     const disclosure = container.querySelector("details")
     if (!disclosure) throw new Error("the card has no disclosure")
 
-    const said = screen.getByText(/will not let an ask like that land on its own/)
-
-    expect(disclosure.contains(said)).toBe(false)
-    expect(disclosure.contains(screen.getByText("low, for user-instruction"))).toBe(true)
+    expect(disclosure.contains(screen.getByText(note.sentence))).toBe(false)
+    expect(disclosure.contains(screen.getByText(note.technical))).toBe(true)
   })
 
   /**
@@ -524,10 +526,19 @@ describe("a record card", () => {
   it("puts the ceiling between the weighing and the answer, under the rule that used it", () => {
     const { container } = render(<RecordCard record={HELD} />)
 
+    /*
+     * The sentence is read off the module rather than quoted, so a reword is a
+     * one-file change and this test keeps asserting the thing it is about —
+     * where the line sits — rather than what it says. It used to hold a fragment
+     * of the old wording, which is why rewording it broke a placement test.
+     */
+    const said = ceilingNote(HELD)?.sentence
+    if (said === undefined) throw new Error("the fixture is the ask the ceiling decided")
+
     const text = container.textContent ?? ""
     const weighed = text.indexOf(WEIGHED_QUESTIONS.damage)
     const rule = text.indexOf(ruleSentence("stakes-above-ceiling"))
-    const ceiling = text.indexOf("will not let an ask like that land on its own")
+    const ceiling = text.indexOf(said)
     const buttons = text.indexOf("Apply this change")
 
     expect(weighed).toBeGreaterThanOrEqual(0)
@@ -543,9 +554,20 @@ describe("a record card", () => {
    * comparison the Gate never made.
    */
   it("says nothing about a ceiling on a change the ceiling did not decide", () => {
-    render(<RecordCard record={APPLIED} />)
+    /*
+     * What this card would have said if the ceiling had decided it, so the
+     * absence is asserted against the module's own sentence rather than against
+     * a fragment of one wording of it.
+     */
+    const decidedByTheCeiling = HELD.disposition
+    if (decidedByTheCeiling === undefined) throw new Error("the held fixture carries a verdict")
 
-    expect(screen.queryByText(/land on its own above/)).toBeNull()
+    const wouldSay = ceilingNote({ ...APPLIED, disposition: decidedByTheCeiling })?.sentence
+    if (wouldSay === undefined) throw new Error("the ceiling rule should produce a sentence")
+
+    const { container } = render(<RecordCard record={APPLIED} />)
+
+    expect(container.textContent ?? "").not.toContain(wouldSay)
   })
 
   /**

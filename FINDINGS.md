@@ -8,6 +8,92 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-13 — the demo's best card printed two numbers and no operator, and one of its sentences did not agree with its own count
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
+`demo-16-the-comparison-the-card-made`; the **shape** is what is filed
+
+Both faults are on the one card the demo exists to produce — the held change,
+the surface's best sixty seconds — and both were invisible to a suite that was
+green the whole time.
+
+**One: a comparison shown as two unrelated facts.** `stakes-above-ceiling` is
+the only rule of the eight that reaches a verdict *by comparing two levels*, and
+the card printed both of them, three lines apart, in two sentences that never
+referred to each other:
+
+> **Some risk.** Worth a look before you say yes, but nothing drastic.
+> …
+> Somebody using the site asked for this, and Loom will not let an ask like that
+> land on its own above **Low risk**.
+
+Nothing anywhere said which of *Some* and *Low* was higher, or that they were
+points on one scale at all. The visitor was handed both sides of an inequality
+and left to supply the operator — and the operator **is** the verdict. Every
+term was correct, every term came from the shared table, and the card still did
+not say the thing it was about.
+
+**Two: the wrong person, on the one surface where it is knowable.** `ASK_ORIGINS`
+is the portal's table and *"Somebody using the site asked for this"* is right
+there — a review queue's reader is a colleague reading about somebody else's
+ask. On the demo the somebody **is** the reader; they pressed the button two
+seconds earlier, and the card says *"You said yes"* four lines below. The
+override `answer.ts` already makes to `ANSWERS.confirmed`, for the reason it
+states — *"the two surfaces must agree on what a state is called and cannot
+agree on who was in the room"* — had simply never been made to this table.
+
+**Three: a sentence that broke at one.** `weighed.ts` built *"The 4 pieces it
+takes off the page are kept"* through a helper that inflected the noun and left
+the verb behind, so a change retaining a single node read **"The 1 piece it
+takes off the page are kept."** Reachable on the free-text path, which is the
+one a curious visitor types into, and which is how it was found.
+
+**Why the suite could not see any of it.** The assertions that existed were
+assertions about *provenance* — this string came from the shared table, that
+code stayed in the disclosure — and all three faults are true of strings drawn
+correctly from the right table. The plural test was the sharpest case: it read
+`toContain("1 piece ")`, an assertion on the subject alone, so the one test
+covering the sentence was the one test the broken verb could satisfy.
+
+**The shape, for the lanes with the same kind of copy.** *A surface that prints
+two values a decision was made by has not shown the decision until it prints the
+relation between them* — and *an assertion on a fragment of a sentence cannot
+see a fault between two of its parts*. The portal's `/portal/checkup` and its
+review queue both print levels beside thresholds; four other lanes interpolate
+counts into prose. Whole clauses, not substrings.
+
+---
+## 2026-09-13 — `ASK_ORIGINS` is written for a reader who is not the asker, and one surface's reader always is
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open — a
+note, not a defect; nothing in `(portal)` is wrong and nothing is asked for
+
+Recording an override rather than requesting a change, so the portal lane learns
+it here rather than from a diff.
+
+`ASK_ORIGINS["user-instruction"].label` is *"Somebody using the site asked for
+this"*. That is correct in a review queue, where the reader is a colleague
+reading about an ask somebody else made, and it is the right default for a table
+in `(portal)/_lib/`. **The demo is the one surface where the somebody is always
+the reader** — a session has exactly one person in it, `actions.ts` writes
+`user-instruction` and nothing else, and the card says *"You said yes"* four
+lines below. So `_lib/ceiling.ts` now overrides the pronoun for that one origin
+and keeps the shared label for the other three.
+
+This is the second such override in this lane and the reason is the same one
+`answer.ts` recorded for the first: *"the two surfaces must agree on what a
+state is called and cannot agree on who was in the room."* Both are pronouns.
+Neither touches a level name, a state name or a rule sentence, which stay shared
+and must.
+
+**What is worth knowing rather than doing.** Two overrides is a pattern; three
+would be a second vocabulary growing in this lane by accretion. If the portal
+ever wants to head that off, the shape that would do it is a `PlainWord` with
+the *person* as a separate axis — the fact being named is the same in both
+surfaces, and only who is being addressed differs. Not proposed, not needed
+today, and cheaper to leave until a third case says which way it should go.
+
+---
 ## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
@@ -245,8 +331,18 @@ is the one still pointing at where it was. Eighth consecutive run to say so.
 
 ## 2026-09-12 — the demo's ceiling line is the second half of a sentence the portal has since rewritten
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — a
-question for a run with the screen in front of it, not a defect
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-16-the-comparison-the-card-made`** — the run with the screen in front of
+it found two faults rather than the one filed here, and the entry at the top of
+this file is what it was
+
+This entry asked whether the ceiling line still earned its place now that the
+rule above it had stopped saying *from here*. It does — it is still the only
+place either surface states the threshold the Gate compared against. What the
+run found by reading it on the built page is that **it was answering with one
+number where the card needed two**, and that it named the reader in the third
+person. Both are fixed; `ceiling.ts`'s narrative is rewritten rather than
+find-and-replaced, which is what this entry asked for.
 
 `Loom portal` filed on 1 September that `stakes-above-ceiling` changed from
 *"Riskier than a request from here is allowed to be without asking."* to
@@ -22169,7 +22265,8 @@ gap, and `spotlightCss` applied one geometry to two kinds of claim.
 ## 2026-09-11 — `21st.dev` re-verified blocked, from the demo lane a thirteenth time
 
 **Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
-open — re-verified, not re-argued
+open — re-verified 12 and **13 September** (fifteenth consecutive), not re-argued
+and not re-filed, because a third of this file is entries filed twice
 
 `WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` on the run of
 11 September. The standing answer is on the 21 August entry and nothing is added
@@ -22201,6 +22298,15 @@ separately for `Loom daily build` on 9 September and unchanged since.
 
 The brief's *second* problem — *"it is clunky"* — is live, and is what this unit
 and the thirteen before it are.
+
+**Re-verified 13 September**, ninth consecutive run, in the same entry rather
+than a new one. Twenty-three days. The cost is no longer nil: the brief's
+*"Two problems to fix before anything else"* is the first instruction a fresh
+session reads, and a session that takes it literally spends its opening minutes
+confirming a move that landed three weeks ago instead of opening the page. This
+run did exactly that before reaching the work. One line in the brief — *the move
+is done; start by using the page as a stranger* — would buy back the opening of
+every future run.
 
 ## 2026-09-11 — the review queue's own outline names parts the way the sentence beside it no longer does
 
