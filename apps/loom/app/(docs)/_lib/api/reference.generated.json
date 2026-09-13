@@ -4927,6 +4927,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/comparison-band",
+          "title": "Comparison band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "comparisonBand",
+              "kind": "value",
+              "signature": "const comparisonBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/composition",
           "title": "Composition",
           "summary": "",
@@ -5060,6 +5074,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/nav-band",
+          "title": "Nav band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "navBand",
+              "kind": "value",
+              "signature": "const navBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/pricing-band",
           "title": "Pricing band",
           "summary": "",
@@ -5082,6 +5110,34 @@
               "name": "proofBand",
               "kind": "value",
               "signature": "const proofBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/steps-band",
+          "title": "Steps band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "stepsBand",
+              "kind": "value",
+              "signature": "const stepsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/team-band",
+          "title": "Team band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "teamBand",
+              "kind": "value",
+              "signature": "const teamBand: Composition",
               "truncated": false,
               "summary": ""
             }
