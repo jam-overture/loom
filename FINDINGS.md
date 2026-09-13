@@ -22436,6 +22436,94 @@ end-to-end example to read from, not to copy code out of.
 
 ---
 
+## 2026-09-13 — `/the-rules` writes the order the Gate asks its questions in, and has stopped
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-24-who-can-ask`** — closes this lane's 28 August entry,
+*the Gate asks its rules in an order nothing outside the runtime can read*, and
+the note on it of 2 September saying the deletion was ours to make.
+
+`ESCALATION_LADDER` has been exported from `@loom/runtime` since #181 — derived
+from `ESCALATION_RULES` rather than declared beside them, so it cannot disagree
+with the order it describes — and the 2 September closure recorded that
+*"`app/(marketing)/_lib/pages/the-rules.ts` still writes the order by hand and
+can now stop"*. It did not stop, for eleven days, because nothing was red: the
+hand-written order was correct, and a correct copy of a list is wrong only from
+the first time the list changes.
+
+**What changed.** The seven questions are now written in `QUESTIONS`, in
+whatever order reads well, and `RULES` is `ESCALATION_LADDER.map(...)` — so the
+runtime's order is the one that reaches the page, and a rung with no question
+here throws while the page is being built rather than leaving the page claiming
+to list all of them.
+
+**The assertion is in two places and they are different assertions.** One holds
+`RULES` against the ladder; the other holds the **rendered page**, by finding
+each rung's sentence in the words a reader gets and requiring the positions to
+increase. A correctly ordered list printed in some other order passes the first
+and fails the second, and the band's whole claim — *the first no wins* — is
+about the order a reader sees.
+
+Verified by mutation: printing the list reversed takes 23 of the 28 marketing
+test files red.
+
+---
+
+## 2026-09-13 — four of the eight pages are now off the bar, and the bar still cannot group
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — not a new finding, a measurement on the one filed on 12 September
+
+The 12 September entry — *the bar cannot group, and `loom.nav` takes a flat run
+of `loom.link` children with nothing in the library that opens* — was filed when
+three of seven pages had been kept off the top bar. `/who-can-ask` is the eighth
+page and the fourth off it.
+
+**So the bar now carries half the site.** Each individual decision is defensible
+and the guarantee behind them holds — `chrome.test.ts` still holds *off the bar*
+to mean *in the footer's map, marked as the page the reader is on* — and the
+aggregate is a top bar that is no longer a map of the site. The footer is doing
+that job alone.
+
+Nothing here is a request to change the count. It is the number the 12 September
+finding asked to be told about, recorded on the run that moved it, so whoever
+picks that work up knows what it is worth: a menu that opens would let the eight
+pages sit under three headings, which is what `supabase.com` does with more
+pages than this and what the bar was measured against on #166.
+
+---
+
+## 2026-09-13 — a comparison is four subjects wide on a laptop and one subject wide on a phone
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — the band works, and a phone reader is getting a quarter of it
+
+`/who-can-ask` is built on `loom.comparison-table` with four subjects, which is
+the maximum the primitive documents (*"four is where a comparison stops being
+readable anyway; a fifth subject is a column a reader scrolls to"*). On a
+laptop it is the best band this lane has built: sixteen measured marks, and the
+whole argument readable at a glance.
+
+At 390px the table scrolls sideways **inside its own edge**, which is correct
+and is the 20 August phone-scrollbar finding being honoured — `scrollWidth` is
+exactly 390. The cost is that a phone reader sees the criterion column and *one*
+subject, with nothing announcing that three more exist to the right.
+
+**Worked around rather than filed against, for this page.** The sentence under
+the table is composed from the same runs and says in words what the marks say,
+so a phone reader gets the argument. That is a mitigation and not a fix: a
+reader who never scrolls the table never learns that the four askers were
+treated differently, which is the only thing the band is for.
+
+**What a fix might be**, from the outside and offered rather than prescribed: a
+comparison could stack on a narrow viewport — one block per criterion, each
+listing its subjects and marks down the page — the way the two-dimensional
+tables on every pricing page a reader has used already do. It is a static
+stylesheet decision rather than a prop (0008), which is the shape that already
+works for `loom.nav`'s collapse.
+
+**Nothing is blocked on this.** The page is shipped and the band is good on the
+viewport it was designed for.
 ## 2026-09-13 — the data seam can now say "the adapter never came back", and `/docs` has no row for it
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —

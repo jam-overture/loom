@@ -2,6 +2,7 @@ import {
   ceilingFor,
   dispositionKindSchema,
   dispositionReasonCodeSchema,
+  ESCALATION_LADDER,
   intentOriginSchema,
   type ElementNode,
   type LoomNode,
@@ -9,14 +10,15 @@ import {
 } from "@loom/runtime"
 import { describe, expect, it } from "vitest"
 
-import { BECAUSE, WEIGHT } from "../adapt/record"
+import { BECAUSE, NOT_A_RULE, WEIGHT } from "../adapt/record"
 import { FRONT_DOOR_POLICY, protectedInPlainWords } from "../adapt/run"
 import { RESERVED_VOCABULARY } from "../copy"
+import { spellCapitalised } from "../journey"
 import { treeFor } from "../render"
 import { askHref, DEFAULT_THEME, SITE_THEME_NAMES, THE_RULES } from "../site"
 import { uses, wordsOf } from "../words"
 
-import { NOT_A_RULE, RULES } from "./the-rules"
+import { RULES } from "./the-rules"
 
 /**
  * The page that explains what a rule is, held to the two things that make it
@@ -98,8 +100,34 @@ describe("the questions the page lists", () => {
     expect(new Set(RULES.map((rule) => rule.code)).size).toBe(RULES.length)
   })
 
+  /**
+   * The half of this band that was a promise until 13 September.
+   *
+   * The whole point of the list is *the first no wins*, which is a claim about
+   * precedence — and the order was written out by hand here, because
+   * `ESCALATION_RULES` was a module constant in `src/runtime/gate.ts` that
+   * nothing outside the runtime could read. This lane filed that on 28 August;
+   * #181 exported `ESCALATION_LADDER`, derived from the rules themselves.
+   *
+   * So the order is checked in two places and they are different checks. This
+   * one holds the list; the one below holds the **rendered page**, because a
+   * correctly ordered list printed in some other order would pass here and be
+   * wrong where a reader is standing.
+   */
+  it("asks them in the order the Gate asks them", () => {
+    expect(RULES.map((rule) => rule.code)).toEqual([...ESCALATION_LADDER])
+  })
+
+  it("prints them in that order too, where the reader is", () => {
+    const text = words()
+    const positions = ESCALATION_LADDER.map((code) => text.indexOf(BECAUSE[code]))
+
+    expect(positions.filter((at) => at < 0)).toEqual([])
+    expect([...positions].sort((left, right) => left - right)).toEqual(positions)
+  })
+
   it("tells the reader how many there are, off the list rather than by hand", () => {
-    expect(words()).toContain(`${RULES.length} questions, asked in this order`)
+    expect(words()).toContain(`${spellCapitalised(RULES.length)} questions, asked in this order`)
   })
 
   /**

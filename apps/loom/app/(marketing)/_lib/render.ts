@@ -5,6 +5,7 @@ import { askById, type Ask } from "./adapt/asks"
 import { runHistory, type ChangeHistory } from "./adapt/history"
 import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import type { ChangeRecord } from "./adapt/record"
+import { weighEachAsker, type WeighedRequest } from "./adapt/askers"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
 import { homePageTree } from "./pages/home"
@@ -19,6 +20,7 @@ import {
   type RefusalContext,
   type RefusedRun,
 } from "./pages/when-it-goes-wrong"
+import { whoCanAskPageTree, type AskersContext } from "./pages/who-can-ask"
 import { yourComponentsPageTree } from "./pages/your-components"
 import { siteRegistry, siteThemes } from "./registry"
 import {
@@ -28,6 +30,7 @@ import {
   THE_RULES,
   WHAT_YOU_RUN,
   WHEN_IT_GOES_WRONG,
+  WHO_CAN_ASK,
   YOUR_COMPONENTS,
   type SiteRoute,
 } from "./site"
@@ -50,7 +53,7 @@ import {
  * the front door for, and the run of changes the record page is reporting on —
  * so a page that does not read a field cannot be broken by one arriving.
  */
-export type SitePageContext = RecordContext & MechanismContext & RefusalContext
+export type SitePageContext = RecordContext & MechanismContext & RefusalContext & AskersContext
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
 
@@ -61,6 +64,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [THE_RECORD.path, theRecordPageTree],
   [WHEN_IT_GOES_WRONG.path, whenItGoesWrongPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
+  [WHO_CAN_ASK.path, whoCanAskPageTree],
   [YOUR_COMPONENTS.path, yourComponentsPageTree],
 ])
 
@@ -209,6 +213,25 @@ export const refusalFor = async (context: SitePageContext): Promise<RefusedRun |
   }
 }
 
+/**
+ * The sixteen runs `/who-can-ask` prints, made while the page is built.
+ *
+ * The same seam as the three above and the same reason — a page builder is
+ * synchronous and a request through the whole sequence is not. Like the refusal
+ * band, the requests are **fixed here rather than read off the address**: the
+ * page is an argument about what always happens rather than a place to try
+ * things, so every reader of it is looking at the same sixteen answers.
+ *
+ * The front door is built once and all sixteen are judged against it.
+ * `composeChange` returns a new page rather than touching the one it was given,
+ * so nothing drifts under the later runs — and the comparison is a comparison
+ * of askers rather than of sixteen slightly different pages.
+ */
+export const askersFor = async (
+  context: SitePageContext
+): Promise<readonly WeighedRequest[]> =>
+  weighEachAsker(treeFor(HOME, { origin: context.origin, theme: context.theme }))
+
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
@@ -227,6 +250,10 @@ export const pageTreeFor = async (
     const run = await askRunFor(context)
 
     return run === undefined ? treeFor(route, context) : run.page
+  }
+
+  if (route.path === WHO_CAN_ASK.path) {
+    return treeFor(route, { ...context, weighed: await askersFor(context) })
   }
 
   if (route.path === THE_RECORD.path) {

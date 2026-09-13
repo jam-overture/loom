@@ -162,8 +162,20 @@ describe("spelling a count", () => {
     expect(spell(10)).toBe("ten")
   })
 
+  /**
+   * Raised from ten to twenty on 13 September for `/who-can-ask`, whose band is
+   * four requests put by four askers and whose claim is *sixteen answers*. The
+   * boundary is still asserted rather than removed — past twenty a marketing
+   * sentence should not be counting, and a numeral is a better failure than a
+   * wrong word.
+   */
+  it("spells as far as a band on this site deliberately counts", () => {
+    expect(spell(16)).toBe("sixteen")
+    expect(spell(20)).toBe("twenty")
+  })
+
   it("falls back to digits rather than throwing on a page a visitor is loading", () => {
-    expect(spell(11)).toBe("11")
+    expect(spell(21)).toBe("21")
     expect(spell(-1)).toBe("-1")
     expect(spell(2.5)).toBe("2.5")
     expect(ordinal(99)).toBe("99th")
@@ -171,7 +183,8 @@ describe("spelling a count", () => {
 
   it("capitalises for the headline that opens with the count", () => {
     expect(spellCapitalised(JOURNEY.length)).toBe("Five")
-    expect(spellCapitalised(11)).toBe("11")
+    expect(spellCapitalised(16)).toBe("Sixteen")
+    expect(spellCapitalised(21)).toBe("21")
   })
 
   it("names the positions the refusal band points at", () => {
