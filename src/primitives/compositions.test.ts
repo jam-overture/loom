@@ -118,8 +118,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers thirteen bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(13)
+  it("offers seventeen bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(17)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)

@@ -1,10 +1,14 @@
 import type { Composition } from "./composition.js"
+import { articlesBand } from "./articles-band.js"
+import { bentoBand } from "./bento-band.js"
 import { comparisonBand } from "./comparison-band.js"
+import { contactBand } from "./contact-band.js"
 import { ctaBand } from "./cta-band.js"
 import { faqBand } from "./faq-band.js"
 import { featuresBand } from "./features-band.js"
 import { footerBand } from "./footer-band.js"
 import { heroBand } from "./hero-band.js"
+import { integrationsBand } from "./integrations-band.js"
 import { metricsBand } from "./metrics-band.js"
 import { navBand } from "./nav-band.js"
 import { pricingBand } from "./pricing-band.js"
@@ -17,12 +21,16 @@ export type { Composition, CompositionPlan, CompositionTarget } from "./composit
 export { COMPOSITION_INTERPRETER, compositionInterpreter, planComposition } from "./composition.js"
 
 export {
+  articlesBand,
+  bentoBand,
   comparisonBand,
+  contactBand,
   ctaBand,
   faqBand,
   featuresBand,
   footerBand,
   heroBand,
+  integrationsBand,
   metricsBand,
   navBand,
   pricingBand,
@@ -65,13 +73,17 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   heroBand,
   proofBand,
   featuresBand,
+  bentoBand,
   stepsBand,
+  integrationsBand,
   metricsBand,
   pricingBand,
   comparisonBand,
   testimonialsBand,
   teamBand,
+  articlesBand,
   faqBand,
+  contactBand,
   ctaBand,
   footerBand,
 ]

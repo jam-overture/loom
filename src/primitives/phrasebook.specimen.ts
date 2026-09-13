@@ -6,7 +6,7 @@ import { themeSelectionSchema, type ThemeSelection } from "../theme/theme.js"
 
 import { defineSpecimen } from "../../tools/specimen/specimen.js"
 
-import { comparisonBand, navBand, stepsBand, teamBand } from "./compositions/index.js"
+import { articlesBand, bentoBand, contactBand, integrationsBand } from "./compositions/index.js"
 
 /**
  * The four bands added on 13 September, in the order they sit in the page
@@ -25,15 +25,15 @@ const build = (theme: ThemeSelection) => {
     buildElement(ids, {
       type: "loom.page",
       props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-      children: [navBand, stepsBand, comparisonBand, teamBand].map((band) => band.build(ids)),
+      children: [bentoBand, integrationsBand, articlesBand, contactBand].map((band) => band.build(ids)),
     }),
     ids
   )
 }
 
 export default defineSpecimen({
-  name: "phrasebook",
-  title: "Four bands the page sequence was missing",
+  name: "phrasebook-two",
+  title: "Four more bands the page sequence was missing",
   build,
   themes: [
     {

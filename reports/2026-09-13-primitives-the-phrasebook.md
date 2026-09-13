@@ -88,4 +88,70 @@ it as a bug.
 
 ## Findings filed
 
-None. The two filed earlier today (#289) still stand.
+- **`Loom docs`** — the docs search index caps the library at one more band.
+  Blocking the 19 September target. Measured three ways, with the gzip
+  observation offered.
+
+The two filed earlier today (#289) still stand — and this is the third budget in
+one day that the library's growth walked into, all three the same shape: a
+number pinned elsewhere that this lane changes on purpose, with no way to see it
+coming.
+
+---
+
+## Second batch, and the wall it hit
+
+Four more bands after the first four — `bento`, `integrations`, `articles`,
+`contact` — taking the catalogue to **seventeen**. Two more were written,
+reviewed and **held back**, and the reason is the most important thing in this
+report.
+
+### The docs search index caps the library at one more band
+
+`app/(docs)/_lib/search/build.test.ts` caps the entries index at 200,000
+characters raw. Measured three ways today:
+
+| | entries, raw | headroom |
+| --- | --- | --- |
+| `main` | 199,114 | 886 |
+| `main` + 4 compositions (shipped) | **199,778** | **222** |
+| `main` + 6 compositions (written) | 200,118 | **−118, red** |
+
+**A composition costs about 167 characters of index.** The repository had five
+bands of room this morning and has **one** now. The eighteenth band anybody adds
+— in any lane — turns `pnpm verify` red for everybody.
+
+`changelog-band` and `credentials-band` are finished and out of this branch for
+that reason alone. Filed for `Loom docs`, whose own test comment names the
+remedy — *"the run that hits it should split the index rather than raise the
+number"* — and whose architecture the split is.
+
+Worth knowing before anybody looks at it: **the gzip cap is not close.** 17,946
+against 20,000, and four bands moved it by 44 characters. It is the raw cap that
+binds, and near-identical export entries are precisely what compresses — the
+same observation that test's comment already makes about why indexing the code
+was cheap. Offered, not decided.
+
+### The three inaccuracies the second screenshot caught
+
+All three were in prose or in a count, and every test passed on all of them:
+
+- **`bento` shipped with five features and claimed the fifth closed the shape.**
+  It did not: the fifth cell started a third row alone and narrow, which reads
+  as a mistake rather than a rhythm. Four is the count that closes it — one
+  across, three under. The doc comment said the opposite of what the page did.
+- **`credentials` at `columns: "four"` wrapped 3 + 1.** The notes are sentences
+  about scope rather than labels, so the cells want more room than a floor of
+  four gives them. Two columns, and the comment now says why.
+- **`contact` claimed that an untargeted form's button "does nothing".** It does
+  better than that: `loom.form` renders a notice — *"This form is not connected
+  yet, so it cannot be sent"* — above the fields. The band is honest on the page
+  rather than silently broken, which is a materially different thing to tell
+  somebody, and it was verified in the picture rather than read off the schema.
+
+### The rate, revised
+
+Eight bands in one session rather than the four the first batch suggested — so
+the earlier "four to eight a run" holds at the top of its range. **The rate is
+no longer the constraint.** The index is: at 167 characters a band, the ceiling
+is the eighteenth, and no amount of throughput gets past it.

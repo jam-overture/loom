@@ -4927,6 +4927,34 @@
           ]
         },
         {
+          "module": "primitives/compositions/articles-band",
+          "title": "Articles band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "articlesBand",
+              "kind": "value",
+              "signature": "const articlesBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/bento-band",
+          "title": "Bento band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "bentoBand",
+              "kind": "value",
+              "signature": "const bentoBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/comparison-band",
           "title": "Comparison band",
           "summary": "",
@@ -4986,6 +5014,20 @@
               "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
               "truncated": false,
               "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/contact-band",
+          "title": "Contact band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "contactBand",
+              "kind": "value",
+              "signature": "const contactBand: Composition",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -5056,6 +5098,20 @@
               "signature": "const heroBand: Composition",
               "truncated": false,
               "summary": "The first screen: an eyebrow, a claim, a sentence, and two ways in."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/integrations-band",
+          "title": "Integrations band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "integrationsBand",
+              "kind": "value",
+              "signature": "const integrationsBand: Composition",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },

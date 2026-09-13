@@ -8,6 +8,77 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+
+## 2026-09-13 — the docs search index caps the library, and there is room for one more band in the whole repository
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open —
+**blocking the maintainer's 19 September target**, and it stops the compositions
+plan at the next band anybody adds
+
+`app/(docs)/_lib/search/build.test.ts` caps the entries index at 200,000
+characters raw. Measured today, building the same index three ways:
+
+| | entries, raw | headroom |
+| --- | --- | --- |
+| `main` | 199,114 | 886 |
+| `main` + 4 compositions (shipped) | **199,778** | **222** |
+| `main` + 6 compositions (written) | 200,118 | **−118, red** |
+
+**A composition costs about 167 characters of index.** So the repository had
+five bands of room left this morning, has **one** now, and the sixth band
+anybody adds — in any lane, composition or page or export — turns
+`pnpm verify` red for everybody.
+
+Two bands were written, reviewed and held out of `primitives-30` for exactly
+this reason. They are finished work sitting in a scratch directory, not a
+plan.
+
+### Why this is filed rather than fixed
+
+The test says what to do, in its own comment, and it is not "raise the number":
+
+> The headroom is deliberate and finite: five more pages fit under it, fifty do
+> not, and **the run that hits it should split the index rather than raise the
+> number.** […] Four pages arrived at once and hit it, at 46.7 KB against the
+> 48. So the index was split rather than the number raised.
+
+That precedent is the remedy, and **splitting the docs search index is
+`Loom docs`' architecture** — which file shards, on what axis, and what the
+client loads for a query. This lane cannot make that call, and raising the
+number is forbidden by the comment and by every lane's rule against weakening a
+test to get green.
+
+### What is worth knowing before splitting it
+
+**The gzip cap is nowhere near.** 17,946 against 20,000 — 10% clear, and it
+barely moved (17,902 → 17,946 for four bands). It is the *raw* cap that binds,
+and the comment itself argues the honest cost to a reader is the compressed
+number. So one legitimate outcome of looking at this is that the raw cap is
+measuring the wrong thing for this kind of growth — repeated, near-identical
+export entries are exactly what compresses, which is the same observation the
+comment already makes about why indexing the code was cheap.
+
+That is offered, not decided. If the answer is "split it", the split is yours.
+If the answer is "the raw cap should track the compressed one", that is a change
+to a test's rationale and wants writing down rather than editing quietly.
+
+### The shape, which is the third instance today
+
+This is the **third** budget in one day that the library's growth walked into,
+and all three are the same shape: something elsewhere pins a number this lane
+changes on purpose, with no way for this lane to see it coming.
+
+- the interpretation prompt's primitives block — no ceiling at all (filed this
+  morning, `Loom daily build`)
+- three lessons printing the library's size (filed this morning, `Loom lessons`)
+- this one, a ceiling with 0.1% headroom and a hard stop
+
+Nothing is blocked *today*: `primitives-30` ships green at seventeen bands. What
+is blocked is the week — the plan the maintainer approved puts 30–50
+compositions in the catalogue by 19 September, and the eighteenth band does not
+fit.
+
+---
 ## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
