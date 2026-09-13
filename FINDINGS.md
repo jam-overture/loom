@@ -192,6 +192,15 @@ is yours:
 
 Nothing is blocked. Both lessons are correct on this branch.
 
+> **It recurred the same day, which settles the priority.** Lesson 24 landed on
+> `main` a few hours after this was filed, printing `primitives registered: 92`
+> and naming "ninety-two" in prose; `loom.stat-chart` on this same branch made
+> all three lessons wrong at once. **Three lessons now pin a number this lane
+> changes on purpose**, and the cost is paid by whoever adds the next primitive,
+> in a lane that is not theirs. The first of the three options below — have the
+> lesson print it and never say it — is the only one that stops this, and it
+> gets cheaper to do the sooner it is done.
+
 ---
 ## 2026-09-12 — the demo asked its leading question twice, and the duplicate was the one everything addressed
 

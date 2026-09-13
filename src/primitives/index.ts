@@ -88,6 +88,7 @@ import { loomSpec } from "./loom.spec.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
+import { loomStatChart } from "./loom.stat-chart.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
 import { loomTable } from "./loom.table.js"
 import { loomTableCell } from "./loom.table-cell.js"
@@ -401,6 +402,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomMilestoneRow,
   loomMilestone,
   loomStatGrid,
+  loomStatChart,
   loomStat,
   loomMeter,
   loomTierTable,
