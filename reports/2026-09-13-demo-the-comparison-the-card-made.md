@@ -256,7 +256,8 @@ the change. Not the preview deployment, which this environment cannot open
 (`vercel.app` is not on the sandbox's egress allowlist; the standing 19 August
 finding).
 
-**Preview:** REPLACE_PREVIEW
+**Preview:**
+`https://loom-git-demo-16-the-compari-25aa10-jpizzolato36-6341s-projects.vercel.app/demo`
 
 Read off the deployment comment on the pull request rather than opened, for the
 reason above.
