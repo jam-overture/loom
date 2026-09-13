@@ -3,10 +3,15 @@ import { describe, expect, it } from "vitest"
 import { sequentialIdFactory, type TreeId } from "../ids.js"
 import { FIXED_INSTANT, fixedClock } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
-import type { TreeOperation } from "../tree/delta.js"
+import { applyDelta } from "../tree/apply.js"
+import type { TreeDelta, TreeOperation } from "../tree/delta.js"
+
+import { analyzeDelta } from "./analysis.js"
 
 import type { EditIntent } from "./intent.js"
 import { inverseInterpreter, type ComputedInverse } from "./inverse.js"
+import { defaultGatePolicy } from "./policy.js"
+import { assessReversibility } from "./reversibility.js"
 
 const ids = sequentialIdFactory("inv")
 
@@ -31,6 +36,39 @@ describe("inverseInterpreter", () => {
     interpreter: "loom/test-undo",
     rationale: "Puts back the change above.",
     ...extra,
+  })
+
+  /**
+   * The whole reason this exists, end to end: a change is made, the runtime's own
+   * reversibility assessment computes its inverse, and that inverse — held in
+   * memory, with no store and no replay — becomes a proposal that restores the
+   * tree exactly.
+   */
+  it("proposes a delta that puts the tree back where it was", async () => {
+    const { tree: before, ids: nodes } = sampleTree()
+    const delta: TreeDelta = {
+      deltaId: ids.deltaId(),
+      treeId: before.treeId,
+      baseRevision: before.revision,
+      operations: [{ op: "remove", nodeId: nodes.card }],
+    }
+
+    const analysis = analyzeDelta(before, delta)
+    if (!analysis.ok) throw new Error(analysis.error.code)
+    const reversibility = assessReversibility(before, delta, analysis.value, defaultGatePolicy, ids.deltaId())
+    if (!reversibility.ok) throw new Error(reversibility.error.code)
+    const changed = applyDelta(before, delta)
+    if (!changed.ok) throw new Error(changed.error.code)
+
+    const interpreted = await inverseInterpreter(
+      inverseOf(reversibility.value.inverse.operations, changed.value.revision),
+      ids,
+      fixedClock()
+    ).interpret(intentAt(changed.value.treeId, changed.value.revision), changed.value)
+    if (!interpreted.ok) throw new Error(interpreted.error.detail)
+
+    const undone = applyDelta(changed.value, interpreted.value.delta)
+    expect(undone.ok && undone.value.root).toEqual(before.root)
   })
 
   it("proposes the operations it was given, against the tree in hand", async () => {
@@ -169,6 +207,36 @@ describe("inverseInterpreter", () => {
       if (!interpreted.ok) throw new Error(interpreted.error.detail)
 
       expect(interpreted.value.discards).toEqual(discards)
+    })
+  })
+  describe("undoes", () => {
+    /**
+     * A surface undoing a change it made in the same session has no revision to
+     * name — nothing was appended — and a number it does not have would be worse
+     * on the record than the absence (0111).
+     */
+    it("records no undone revision when the caller has none to name", async () => {
+      const { tree, ids: nodes } = sampleTree()
+
+      const interpreted = await inverseInterpreter(
+        inverseOf([{ op: "remove", nodeId: nodes.card }], tree.revision),
+        ids,
+        fixedClock()
+      ).interpret(intentAt(tree.treeId, tree.revision), tree)
+
+      expect(interpreted.ok && "undoes" in interpreted.value.provenance).toBe(false)
+    })
+
+    it("records the revision the caller named, on the provenance a log keeps", async () => {
+      const { tree, ids: nodes } = sampleTree()
+
+      const interpreted = await inverseInterpreter(
+        inverseOf([{ op: "remove", nodeId: nodes.card }], tree.revision, { undoes: 2 }),
+        ids,
+        fixedClock()
+      ).interpret(intentAt(tree.treeId, tree.revision), tree)
+
+      expect(interpreted.ok && interpreted.value.provenance.undoes).toBe(2)
     })
   })
 })

@@ -11,7 +11,7 @@ import { controlClass, controlDisplay } from "./control.js"
  * ([0008](../../decisions/0008-the-renderer-is-a-total-pure-projection.md)). A
  * copy button cannot be: writing to the clipboard is a click handler, and a
  * click handler is not expressible in JSON, which is what a primitive's props
- * are ([0009](../../decisions/0009-a-primitive-declares-its-props-and-the-seam-enforces-them.md)).
+ * are ([0009](../../decisions/0009-primitives-receive-props-in-a-bag.md)).
  * So it lives here, behind `"use client"`, and a primitive receives it already
  * built — see `behaviour.ts` for why that is the shape rather than a prop, a
  * host-installed script, or a primitive of its own.

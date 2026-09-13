@@ -8,6 +8,7 @@
 export * from "./apply.js"
 export * from "./contrast.js"
 export * from "./derive.js"
+export * from "./faces.js"
 export * from "./font-packs.js"
 export * from "./lab.js"
 export * from "./library.js"

@@ -140,7 +140,7 @@ const firstIssue = (error: z.ZodError): string =>
  * fact about a deployment — it does not vary by visitor, it is not minted per
  * request, and there is nothing to await — which is why this seam has no plan
  * and no resolve step, unlike the submission seam whose shape it otherwise
- * borrows (0094).
+ * borrows (0095).
  */
 export const createFrameOriginRegistry = (
   definitions: readonly FrameOriginDefinition[]

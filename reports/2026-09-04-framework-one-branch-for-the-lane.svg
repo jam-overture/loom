@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="660" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">One branch for the lane</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Five units were already built. None of them was blocked on engineering. All five are now one green tree.</text>
+
+  <!-- ================= THE FIVE UNITS ================= -->
+  <text x="40" y="116" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHAT THIS LANE HAS OPEN — FIVE UNITS, FIVE RECORDS, ONE TREE</text>
+
+  <!-- five stacked rows funnelling right -->
+  <rect x="40" y="132" width="330" height="42" rx="8" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="152" font-size="12" fill="#15120e">§4b — a handle on the control</text>
+  <text x="58" y="167" font-size="10.5" fill="#8a8178">#221 · a control carries a class, and its display is a property</text>
+  <text x="352" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a8178" text-anchor="end">0103</text>
+
+  <rect x="40" y="180" width="330" height="42" rx="8" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="200" font-size="12" fill="#15120e">§1 — the fixtures a host can import</text>
+  <text x="58" y="215" font-size="10.5" fill="#8a8178">#223 · the runtime publishes its fixtures and contract suites</text>
+  <text x="352" y="206" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a8178" text-anchor="end">0104</text>
+
+  <rect x="40" y="228" width="330" height="42" rx="8" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="248" font-size="12" fill="#15120e">§3 — a page where there is no CSS</text>
+  <text x="58" y="263" font-size="10.5" fill="#8a8178">#228 · a render can hand back values instead of references</text>
+  <text x="352" y="254" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a8178" text-anchor="end">0105</text>
+
+  <rect x="40" y="276" width="330" height="42" rx="8" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="58" y="296" font-size="12" fill="#15120e">§3 — where the face is</text>
+  <text x="58" y="311" font-size="10.5" fill="#8a8178">#230 · a font pack may say where a face is</text>
+  <text x="352" y="302" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a8178" text-anchor="end">0107</text>
+
+  <rect x="40" y="324" width="330" height="42" rx="8" fill="#fdf6ec" stroke="#dcc9a8"/>
+  <text x="58" y="344" font-size="12" fill="#15120e">§2 — what a refusal costs</text>
+  <text x="58" y="359" font-size="10.5" fill="#8a8178">#236 · merged into the branch by this run</text>
+  <text x="352" y="350" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a8178" text-anchor="end">0108</text>
+
+  <!-- funnel lines -->
+  <path d="M 370 153 C 420 153, 430 249, 470 249" fill="none" stroke="#cfc6ba" stroke-width="1.2"/>
+  <path d="M 370 201 C 420 201, 430 249, 470 249" fill="none" stroke="#cfc6ba" stroke-width="1.2"/>
+  <path d="M 370 249 L 470 249" fill="none" stroke="#cfc6ba" stroke-width="1.2"/>
+  <path d="M 370 297 C 420 297, 430 249, 470 249" fill="none" stroke="#cfc6ba" stroke-width="1.2"/>
+  <path d="M 370 345 C 420 345, 430 249, 470 249" fill="none" stroke="#b99a63" stroke-width="1.4"/>
+
+  <!-- the one branch -->
+  <rect x="470" y="196" width="410" height="106" rx="10" fill="#f3f8f3" stroke="#b8d4b8"/>
+  <text x="492" y="224" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#15120e">framework-25-where-the-face-is</text>
+  <line x1="492" y1="236" x2="858" y2="236" stroke="#d3e4d3"/>
+  <text x="492" y="258" font-size="12" fill="#2f5d2f" font-weight="650">pnpm verify — exit 0</text>
+  <text x="492" y="277" font-size="11.5" fill="#5c5751">Merging this one marks all five merged: their heads</text>
+  <text x="492" y="292" font-size="11.5" fill="#5c5751">are ancestors of it. No unit changed.</text>
+
+  <!-- ================= WHY NO SIXTH UNIT ================= -->
+  <text x="40" y="410" font-size="12" font-weight="700" fill="#8a8178" letter-spacing="0.08em">WHY THERE IS NO SIXTH UNIT — EVERY FINDING OWNED BY THIS LANE, READ</text>
+
+  <rect x="40" y="426" width="266" height="120" rx="10" fill="#f3f8f3" stroke="#b8d4b8"/>
+  <text x="58" y="452" font-size="30" font-weight="650" fill="#2f5d2f">4</text>
+  <text x="58" y="474" font-size="12" font-weight="650" fill="#15120e">already built, open, unmerged</text>
+  <text x="58" y="494" font-size="11" fill="#5c5751">the control&#8217;s class, the fixtures, the second</text>
+  <text x="58" y="509" font-size="11" fill="#5c5751">medium, the font face &#8212; #221, #223,</text>
+  <text x="58" y="524" font-size="11" fill="#5c5751">#228, #230</text>
+  <text x="58" y="539" font-size="11" fill="#8a8178">rebuilding one would repeat 30 August</text>
+
+  <rect x="326" y="426" width="266" height="120" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="344" y="452" font-size="30" font-weight="650" fill="#8a6a2f">3</text>
+  <text x="344" y="474" font-size="12" font-weight="650" fill="#15120e">waiting on your word, not on work</text>
+  <text x="344" y="494" font-size="11" fill="#5c5751">whether <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">clean</tspan> should widen; whether a</text>
+  <text x="344" y="509" font-size="11" fill="#5c5751">palette carries status slots; which fix</text>
+  <text x="344" y="524" font-size="11" fill="#5c5751">the failing pairings get</text>
+  <text x="344" y="539" font-size="11" fill="#8a8178">oldest is thirteen days old</text>
+
+  <rect x="612" y="426" width="268" height="120" rx="10" fill="#faf8f5" stroke="#e4ded5"/>
+  <text x="630" y="452" font-size="30" font-weight="650" fill="#5c5751">1</text>
+  <text x="630" y="474" font-size="12" font-weight="650" fill="#15120e">already fixed on <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">main</tspan></text>
+  <text x="630" y="494" font-size="11" fill="#5c5751"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">loom init</tspan> scaffolds <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">app.page</tspan>, not</text>
+  <text x="630" y="509" font-size="11" fill="#5c5751"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5">loom.page</tspan> &#8212; #195, 0101</text>
+  <text x="630" y="524" font-size="11" fill="#8a8178">verified in the code, closed this run</text>
+
+  <!-- ================= THE ONE LINE THAT MATTERS ================= -->
+  <line x1="40" y1="578" x2="880" y2="578" stroke="#e4ded5"/>
+  <text x="40" y="606" font-size="13.5" fill="#15120e" font-weight="650">This lane is blocked on review, not on work.</text>
+  <text x="40" y="628" font-size="12.5" fill="#5c5751">Twenty-two pull requests are open. Nothing has merged since 1 September. <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">main</tspan> is green and has been for three days.</text>
+</svg>

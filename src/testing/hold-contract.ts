@@ -257,6 +257,148 @@ export const describeHoldStoreContract = (
       expect(listed.value.map((entry) => entry.heldAt)).toEqual([earlier.heldAt, later.heldAt])
     })
 
+    /**
+     * The tiebreak, and it is not an edge case: every fixture shares one instant
+     * unless a test says otherwise, which is exactly the shape a real request
+     * produces when the Gate holds two changes in one judgement. Without it the
+     * two implementations sort ties however their backend happens to, and a
+     * cursor taken from one of those pages means nothing.
+     */
+    it("breaks a tie on the same instant by proposal id, in both listings", async () => {
+      const store = await makeStore()
+      const first = heldProposalFixture()
+      const second = heldProposalFixture()
+      const [earlier, later] =
+        first.proposalId < second.proposalId ? [first, second] : [second, first]
+
+      await store.hold(later)
+      await store.hold(earlier)
+
+      const listed = await store.forTree(first.treeId)
+      const page = await store.waiting()
+      if (!listed.ok || !page.ok) throw new Error("expected both listings")
+
+      expect(listed.value.map((entry) => entry.proposalId)).toEqual([
+        earlier.proposalId,
+        later.proposalId,
+      ])
+      expect(page.value.held.map((entry) => entry.proposalId)).toEqual([
+        earlier.proposalId,
+        later.proposalId,
+      ])
+    })
+
+    /**
+     * The read `forTree` cannot be assembled from: answering "does anything need
+     * me" by listing trees and asking each one is O(pages) queries over a listing
+     * that is itself bounded, so it is both slow and unable to be complete.
+     */
+    it("lists what is held across every tree, oldest first", async () => {
+      const store = await makeStore()
+      const mine = heldProposalFixture({ heldAt: "2026-07-30T12:00:00.000Z" })
+      const theirs = heldProposalFixture({
+        treeId: treeIdSchema.parse("t_elsewhere"),
+        heldAt: "2026-07-30T09:00:00.000Z",
+      })
+
+      await store.hold(mine)
+      await store.hold(theirs)
+
+      const page = await store.waiting()
+      if (!page.ok) throw new Error("expected a page")
+
+      expect(page.value.held.map((entry) => entry.proposalId)).toEqual([
+        theirs.proposalId,
+        mine.proposalId,
+      ])
+      expect(page.value.cursor).toBeNull()
+    })
+
+    it("reports an empty deployment as an empty page rather than as a failure", async () => {
+      const store = await makeStore()
+
+      expect(await store.waiting()).toEqual({ ok: true, value: { held: [], cursor: null } })
+    })
+
+    /**
+     * The property that makes a cursor worth having: every hold appears exactly
+     * once across the pages, in order, and the last page says it is the last.
+     */
+    it("pages through everything held without repeating or skipping one", async () => {
+      const store = await makeStore()
+      const holds = [0, 1, 2, 3, 4].map((minute) =>
+        heldProposalFixture({ heldAt: `2026-07-30T09:0${minute}:00.000Z` })
+      )
+      for (const held of holds) await store.hold(held)
+
+      const seen: string[] = []
+      let cursor: string | null = null
+
+      do {
+        const page: Awaited<ReturnType<HoldStore["waiting"]>> = await store.waiting({
+          limit: 2,
+          ...(cursor === null ? {} : { cursor }),
+        })
+        if (!page.ok) throw new Error("expected a page")
+
+        seen.push(...page.value.held.map((entry) => entry.proposalId))
+        cursor = page.value.cursor
+      } while (cursor !== null)
+
+      expect(seen).toEqual(holds.map((held) => held.proposalId))
+    })
+
+    /**
+     * A queue is paged through while people are emptying it, so the hold a
+     * cursor names is routinely gone by the time it is used. Resuming from the
+     * position rather than from the row is what makes that safe.
+     */
+    it("resumes from a cursor whose hold has since been answered", async () => {
+      const store = await makeStore()
+      const answered = heldProposalFixture({ heldAt: "2026-07-30T09:00:00.000Z" })
+      const next = heldProposalFixture({ heldAt: "2026-07-30T09:01:00.000Z" })
+      const last = heldProposalFixture({ heldAt: "2026-07-30T09:02:00.000Z" })
+      for (const held of [answered, next, last]) await store.hold(held)
+
+      const first = await store.waiting({ limit: 1 })
+      if (!first.ok || first.value.cursor === null) throw new Error("expected a first page")
+
+      await store.release(answered.proposalId)
+      const second = await store.waiting({ cursor: first.value.cursor })
+      if (!second.ok) throw new Error("expected a second page")
+
+      expect(second.value.held.map((entry) => entry.proposalId)).toEqual([
+        next.proposalId,
+        last.proposalId,
+      ])
+    })
+
+    /**
+     * Unreadable means the same thing to every implementation — start at the
+     * beginning — rather than one refusing what another silently accepts. A
+     * cursor is a value that has been through a URL, so this is the case that
+     * actually arrives.
+     */
+    it("starts at the beginning when handed a cursor it cannot read", async () => {
+      const store = await makeStore()
+      const held = heldProposalFixture()
+      await store.hold(held)
+
+      const page = await store.waiting({ cursor: "not a cursor" })
+      if (!page.ok) throw new Error("expected a page")
+
+      expect(page.value.held.map((entry) => entry.proposalId)).toEqual([held.proposalId])
+    })
+
+    it("drops a released proposal from the deployment-wide listing too", async () => {
+      const store = await makeStore()
+      const held = heldProposalFixture()
+      await store.hold(held)
+      await store.release(held.proposalId)
+
+      expect(await store.waiting()).toEqual({ ok: true, value: { held: [], cursor: null } })
+    })
+
     it("drops a released proposal from the listing", async () => {
       const store = await makeStore()
       const first = heldProposalFixture({ heldAt: "2026-07-30T09:00:00.000Z" })

@@ -21,11 +21,6 @@ describe("describeStoreError", () => {
     }
   })
 
-  it("covers the whole StoreError union", () => {
-    const codes = new Set(everyError.map((error) => error.code))
-    expect(codes.size).toBe(everyError.length)
-  })
-
   /**
    * A conflict message that named only one of the two revisions would be the
    * least useful version of the most useful error here: the point of the refusal
@@ -62,5 +57,18 @@ describe("describeStoreError", () => {
     })
 
     expect(described).toContain("index-out-of-range")
+  })
+})
+
+describe("STORE_ERROR_CODES", () => {
+  it("names each way persistence can refuse exactly once", () => {
+    expect(new Set(STORE_ERROR_CODES).size).toBe(STORE_ERROR_CODES.length)
+  })
+
+  it("describes every code it names", () => {
+    for (const code of STORE_ERROR_CODES) {
+      const described = everyError.find((error) => error.code === code)
+      expect(described, `no fixture for ${code}`).toBeDefined()
+    }
   })
 })

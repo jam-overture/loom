@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" width="960" height="470" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="960" height="470" fill="#fbfaf8"/>
+
+  <text x="40" y="42" font-size="20" font-weight="600" fill="#1c1a17">What a consumer can ask about a primitive</text>
+  <text x="40" y="66" font-size="14" fill="#6b645b">An identifier is not a category. The left column is what every host writes; the right is what it can ask instead.</text>
+
+  <!-- Divider -->
+  <line x1="480" y1="92" x2="480" y2="440" stroke="#e3ded6" stroke-width="1"/>
+
+  <!-- LEFT -->
+  <text x="40" y="116" font-size="13" font-weight="600" fill="#8a5a3b" letter-spacing="0.06em">BEFORE — MATCH ON THE TYPE STRING</text>
+
+  <rect x="40" y="132" width="400" height="84" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="58" y="157" font-size="13" font-weight="600" fill="#1c1a17">The host's own table</text>
+  <text x="58" y="180" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#3d3831">const TITLE_TYPES = ["loom.heading"]</text>
+  <text x="58" y="201" font-size="12" fill="#8a5a3b">correct here · wrong for a host that registered acme.hero</text>
+
+  <path d="M240 216 L240 244" stroke="#b9b0a4" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+
+  <rect x="40" y="248" width="400" height="72" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="58" y="273" font-size="13" font-weight="600" fill="#1c1a17">The registry</text>
+  <text x="58" y="296" font-size="12.5" fill="#6b645b">type · description · props · slots · interactive · submits · frames</text>
+  <text x="58" y="313" font-size="12" fill="#8a5a3b">nothing here answers “which of these is a heading?”</text>
+
+  <rect x="40" y="344" width="400" height="88" rx="8" fill="#f6f1e9" stroke="#e3ded6"/>
+  <text x="58" y="369" font-size="13" font-weight="600" fill="#1c1a17">How it fails</text>
+  <text x="58" y="391" font-size="12.5" fill="#3d3831">Silently. The array still parses, the page still renders,</text>
+  <text x="58" y="409" font-size="12.5" fill="#3d3831">and every page is named <tspan font-style="italic">Untitled</tspan> the day a second</text>
+  <text x="58" y="427" font-size="12.5" fill="#3d3831">heading primitive is registered.</text>
+
+  <!-- RIGHT -->
+  <text x="520" y="116" font-size="13" font-weight="600" fill="#3d6b4f" letter-spacing="0.06em">AFTER — ASK THE REGISTRY</text>
+
+  <rect x="520" y="132" width="400" height="84" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="538" y="157" font-size="13" font-weight="600" fill="#1c1a17">The author declares, where the author knows</text>
+  <text x="538" y="180" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#3d3831">definePrimitive({ type: "acme.hero",</text>
+  <text x="538" y="199" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#3d6b4f">  role: "heading", … })</text>
+
+  <path d="M720 216 L720 244" stroke="#b9b0a4" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+
+  <rect x="520" y="248" width="400" height="72" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="538" y="273" font-size="13" font-weight="600" fill="#1c1a17">The consumer asks, wherever it is</text>
+  <text x="538" y="296" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#3d3831">registry.typesWithRole("heading")</text>
+  <text x="538" y="313" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#3d6b4f">→ ["acme.hero"]</text>
+
+  <rect x="520" y="344" width="400" height="88" rx="8" fill="#f2f6f1" stroke="#dbe4d8"/>
+  <text x="538" y="369" font-size="13" font-weight="600" fill="#1c1a17">What it still is not</text>
+  <text x="538" y="391" font-size="12.5" fill="#3d3831">A role is not a <tspan font-weight="600">position</tspan>. A primitive can say it is a</text>
+  <text x="538" y="409" font-size="12.5" fill="#3d3831">heading; only a tree can say which heading leads.</text>
+  <text x="538" y="427" font-size="12.5" fill="#6b645b">That half stays with the host, and is already right.</text>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b9b0a4"/>
+    </marker>
+  </defs>
+</svg>

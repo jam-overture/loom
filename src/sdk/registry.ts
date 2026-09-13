@@ -18,7 +18,9 @@ import type { FrameResolver } from "../render/frame.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
+import { isPrimitiveRole, PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 
+import type { CopyDeclarations } from "./copy.js"
 import type { PrimitiveEntry } from "./definition.js"
 
 /**
@@ -59,16 +61,26 @@ export type RegisteredPrimitive = {
   readonly interactive: InteractiveWhen | undefined
   /** Whether its author says it posts (0065). `false` for most. */
   readonly submits: boolean
-  /** The props it puts in a frame (0094). Empty for all but one primitive. */
+  /** The props it puts in a frame (0095). Empty for all but one primitive. */
   readonly frames: readonly string[]
   /** The controls it takes from the runtime's vocabulary. Empty for most. */
   readonly behaviours: readonly BehaviourName[]
+  /** What part it plays (0114). `undefined` for most, which play none. */
+  readonly role: PrimitiveRole | undefined
+  /**
+   * The props a reader reads as words (0122). `undefined` where the primitive
+   * has not said, which is not the same answer as `[]` and is not rounded to
+   * it.
+   */
+  readonly copy: readonly string[] | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
 const NO_BEHAVIOUR_NAMES: readonly BehaviourName[] = Object.freeze([])
 
 const NO_FRAME_PROPS: readonly string[] = Object.freeze([])
+
+const NO_TYPES: readonly PrimitiveType[] = Object.freeze([])
 
 export type RegistryError =
   | { readonly code: "invalid-primitive-type"; readonly type: string }
@@ -77,6 +89,7 @@ export type RegistryError =
   | { readonly code: "blank-text"; readonly type: string; readonly key: string }
   | { readonly code: "undeclared-interactive-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "undeclared-frame-prop"; readonly type: string; readonly prop: string }
+  | { readonly code: "undeclared-copy-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "unknown-behaviour"; readonly type: string; readonly behaviour: string }
   | {
       readonly code: "unnamed-behaviour"
@@ -89,15 +102,30 @@ export type RegistryError =
       readonly type: string
       readonly behaviour: string
     }
+  | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
   PropsValidator &
   TextResolver &
   BehaviourResolver &
-  FrameResolver & {
+  FrameResolver &
+  CopyDeclarations & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
+    /**
+     * The types that declared a given role, in registration order (0114).
+     *
+     * Empty for a role nothing here declares, which is the honest answer and
+     * not a failure: a deployment that registered no heading has no heading,
+     * and a consumer deriving a page name from one should show what it shows
+     * for a page that has none.
+     *
+     * Types rather than whole registrations, because every consumer this exists
+     * for is matching nodes in a tree, and a node carries a type. A caller that
+     * wants the registration has `primitives` and this is not in its way.
+     */
+    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[]
   }
 
 export const describeRegistryError = (error: RegistryError): string => {
@@ -112,6 +140,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.key}" on "${error.type}" declares an empty string; a string worth translating has something in it, and a blank one renders as a control with no name`
     case "undeclared-frame-prop":
       return `"${error.type}" says it frames "${error.prop}", which its props schema does not declare; the seam would then check nothing and the frame would render whatever the tree said`
+    case "undeclared-copy-prop":
+      return `"${error.type}" says a reader reads "${error.prop}", which its props schema does not declare; a preview built on that declaration would report a word the page never shows, and go on reporting it after the prop was renamed`
     case "undeclared-interactive-prop":
       return `"${error.type}" says it renders a target when "${error.prop}" is set, and its schema declares no such prop; a trigger naming a prop that cannot arrive is a target the Gate will never see`
     case "unknown-behaviour":
@@ -120,6 +150,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" takes the "${error.behaviour}" behaviour and declares no "${error.key}" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent`
     case "undeclared-interactive-behaviour":
       return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
+    case "unknown-role":
+      return `"${error.type}" declares the role "${error.role}", which the runtime has none of; the vocabulary is closed and its members are ${PRIMITIVE_ROLES.map((role) => `"${role}"`).join(", ")} — and a misspelling accepted here would read to every consumer as a primitive that declares no role at all`
     case "duplicate-primitive-type":
       return `"${error.type}" is registered twice; a tree naming it would resolve to whichever registration won`
   }
@@ -170,6 +202,30 @@ const undeclaredFrameProp = (entry: PrimitiveEntry): string | undefined => {
 }
 
 /**
+ * A copy prop that the schema does not declare, if there is one.
+ *
+ * The third of these checks, and the one with the least riding on it: a drifted
+ * copy declaration makes a preview quieter than the page, where a drifted frame
+ * declaration makes an allowlist stop applying. It is here anyway because the
+ * failure has the same shape — a prop renamed, a declaration left pointing at
+ * nothing, and no way to see it from the outside — and because a reading that
+ * has silently stopped reporting a headline number is a reading somebody is
+ * approving changes against.
+ *
+ * A schema whose fields cannot be enumerated answers `undefined` and is left
+ * alone, and so is a primitive that declared no copy at all — there is nothing
+ * to check in either case, and `[]` has nothing to check by construction.
+ */
+const undeclaredCopyProp = (entry: PrimitiveEntry): string | undefined => {
+  const { copy, declaredProps } = entry
+  if (!copy || copy.length === 0 || !declaredProps) return undefined
+
+  const declared = new Set(declaredProps.map((prop) => prop.name))
+
+  return copy.find((prop) => !declared.has(prop))
+}
+
+/**
  * The declared behaviours, or the first thing wrong with them.
  *
  * Three checks, and each one is the whole of what can be known without calling
@@ -206,6 +262,25 @@ const registeredBehaviours = (
   return ok(names)
 }
 
+/**
+ * The declared role, checked — `undefined` for the primitive that declared none,
+ * which is most of them.
+ *
+ * Shaped like `registeredBehaviours` because it is the same job: an entry
+ * carries the declaration raw, the registry is the boundary that decides whether
+ * it is a member, and a string that is not one is refused rather than dropped.
+ */
+const registeredRole = (
+  entry: PrimitiveEntry
+): Result<PrimitiveRole | undefined, RegistryError> => {
+  const role = entry.role
+
+  if (role === undefined) return ok(undefined)
+  if (!isPrimitiveRole(role)) return err({ code: "unknown-role", type: entry.type, role })
+
+  return ok(role)
+}
+
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
   const type = primitiveTypeSchema.safeParse(entry.type)
   if (!type.success) return err({ code: "invalid-primitive-type", type: entry.type })
@@ -237,8 +312,16 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     return err({ code: "undeclared-frame-prop", type: entry.type, prop: unframeable })
   }
 
+  const unreadable = undeclaredCopyProp(entry)
+  if (unreadable !== undefined) {
+    return err({ code: "undeclared-copy-prop", type: entry.type, prop: unreadable })
+  }
+
   const behaviours = registeredBehaviours(entry)
   if (!behaviours.ok) return behaviours
+
+  const role = registeredRole(entry)
+  if (!role.ok) return role
 
   return ok({
     type: type.data,
@@ -252,6 +335,8 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     submits: entry.submits,
     frames: entry.frames,
     behaviours: behaviours.value,
+    role: role.value,
+    copy: entry.copy ? Object.freeze([...entry.copy]) : undefined,
     validate: entry.validate,
   })
 }
@@ -269,6 +354,7 @@ export const createPrimitiveRegistry = (
   entries: readonly PrimitiveEntry[]
 ): Result<PrimitiveRegistry, RegistryError> => {
   const byType = new Map<string, RegisteredPrimitive>()
+  const byRole = new Map<PrimitiveRole, PrimitiveType[]>()
   const primitives: RegisteredPrimitive[] = []
 
   for (const entry of entries) {
@@ -281,7 +367,25 @@ export const createPrimitiveRegistry = (
 
     byType.set(registered.value.type, registered.value)
     primitives.push(registered.value)
+
+    const { role } = registered.value
+
+    if (role !== undefined) {
+      const claimed = byRole.get(role)
+
+      if (claimed) claimed.push(registered.value.type)
+      else byRole.set(role, [registered.value.type])
+    }
   }
+
+  /**
+   * Frozen before anything can be handed one. `typesWithRole` returns the list
+   * itself rather than a copy — a consumer may call it per row of a listing —
+   * and an unfrozen array shared that way is one `push` away from a deployment's
+   * registry changing under a rendered page. The same reason `freezeText` copies
+   * and freezes, one collection along.
+   */
+  for (const types of byRole.values()) Object.freeze(types)
 
   return ok({
     primitives,
@@ -293,5 +397,14 @@ export const createPrimitiveRegistry = (
       byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
     framePropsFor: (type: PrimitiveType): readonly string[] =>
       byType.get(type)?.frames ?? NO_FRAME_PROPS,
+    /**
+     * `undefined` for a type nobody registered as well as for one that declared
+     * nothing, and the two collapsing here is correct: neither has said what a
+     * reader reads, and a consumer that treated an unknown type as showing no
+     * words would under-report the same way this exists to stop.
+     */
+    copyFor: (type: PrimitiveType): readonly string[] | undefined => byType.get(type)?.copy,
+    typesWithRole: (role: PrimitiveRole): readonly PrimitiveType[] =>
+      byRole.get(role) ?? NO_TYPES,
   })
 }

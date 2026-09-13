@@ -45,7 +45,7 @@ export type PrimitiveAudit = {
   readonly submission: SubmissionVerdict
   /** What the author declared, beside what the probe saw. */
   readonly declaresSubmits: boolean
-  /** The props this primitive declared it frames (0094). Empty for almost all. */
+  /** The props this primitive declared it frames (0095). Empty for almost all. */
   readonly framesProps: readonly string[]
 }
 

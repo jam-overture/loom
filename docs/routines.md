@@ -137,8 +137,12 @@ not done.
    them.
 2. **Maintainer comments outrank everything**, including the plan and the
    findings queue. Address them first and say how in the report.
-3. **Branch off `main`. Never stack** one branch on another — a stack once cost
-   four days of visibility. **Never merge to `main` yourself.**
+3. **Check whether you already have an open pull request.** If you do, **push
+   onto that branch** rather than opening a second one — two open branches from
+   one lane touching one file is a conflict the lane created for itself, and the
+   cost lands on the maintainer at merge time rather than on the run. If you do
+   not, **branch off `main`. Never stack** on another lane's branch — a stack
+   once cost four days of visibility. **Never merge to `main` yourself.**
 4. Build **one coherent unit**, with tests.
 5. `pnpm install && pnpm verify`. **Never open a pull request on red**; say so
    rather than weakening a test to get green.
@@ -156,6 +160,85 @@ not done.
 
 From the first rendered primitive onward, **include the deployed preview URL**,
 and a screenshot once there is a page worth looking at.
+
+### Taking the screenshot
+
+One harness, two entry points, added 6–8 September after five lanes had written
+nine private versions of it and filed the recipe four times. Which one you want
+depends on what you are looking at, and nothing else differs — the browser, the
+viewports, the reduced motion, the overflow measurement and the file naming are
+shared ([0117](../decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)).
+
+`playwright-core` is deliberately **not** a dependency of this repository, so
+install it once per session into a scratch directory and point the harness at it:
+
+```bash
+mkdir -p /tmp/shot && (cd /tmp/shot && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install playwright-core)
+```
+
+**A tree** — a composition of primitives, with no server anywhere:
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm specimen <module>.specimen.ts --out reports
+```
+
+`tools/specimen/README.md` has the shape of a specimen module. It is rendered
+through the render seam, served over `http://127.0.0.1` on an ephemeral port,
+and photographed under every theme it declares.
+
+**An address** — a page something else is already serving, which is the only way
+to photograph a screen needing a session, a database or a build behind it:
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm shoot <shot-list.json>
+```
+
+```json
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/the-record", "out": "2026-09-08-the-record-wide", "viewport": "wide", "waitFor": "h1" },
+    { "path": "/the-record", "out": "2026-09-08-the-record-phone", "viewport": "phone" }
+  ]
+}
+```
+
+`viewport` is `wide` (1280×900), `phone` (390×844) — both at 2× — or an explicit
+`{ width, height }`. `waitFor` is a selector; `fullPage` is optional. What the
+harness already handles, so nothing has to rediscover it: the browser the image
+ships is found rather than downloaded (**never run `playwright install`** — its
+host is not reachable from the sandbox), Chromium is launched with both flags it
+needs here, every shot is taken with reduced motion because a page that reveals
+on scroll is otherwise photographed blank below the fold, and every shot prints
+`scrollWidth` against `innerWidth` so a page wider than the phone says so
+instead of being eyeballed.
+
+One thing neither does, worth knowing before writing a list: **it does not start
+your application.** And one rule worth keeping in mind while writing one:
+**wait on a selector, not on the network.** A form driven by `useActionState`
+submits by fetch, so the page is idle *before* the cookie it sets exists — one
+run photographed a sign-in page believing it was the screen behind it.
+
+### The three files every lane writes to
+
+Almost every branch in this repository touches the same three, and almost every
+merge conflicts in them. None of the three is a disagreement about anything, and
+none is a reason to close a pull request.
+
+| File | What it is | How a conflict is resolved |
+| --- | --- | --- |
+| `FINDINGS.md` | an append-only channel | **take both sides.** Two lanes appending entries are not in conflict; git only thinks so because they appended in the same place |
+| `decisions/README.md` | **generated** by `pnpm decisions:index` | take either side, then **regenerate**. Never hand-merge a table git built |
+| `apps/loom/app/(docs)/_lib/api/reference.generated.json` | **generated** from `dist/` | take either side, then `pnpm build && pnpm --filter @loom/app docs:api`, **in that order** — the generator reads declaration files, not source |
+
+The last of those is also the answer to a red build that no source change
+explains: **a new export in `src/` leaves the API reference stale**, and stale is
+a failing test. Regenerate it in the same commit as the export.
+
+The one case that is a real conflict is two branches rewriting the same logic in
+the same file. That is what closed sixteen pull requests on 28 August, and step 3
+above is how a lane stops producing it.
 
 ## Standards
 
@@ -228,3 +311,32 @@ author line.
 commit it, and never echo it into logs, a report or a pull request body.** Unit
 tests use fixtures and pass with no key; live tests skip cleanly without one. Do
 not hardcode a model id from memory.
+
+## Commit identity, and the preview that goes missing
+
+**Do not set a commit author.** Use whatever the session is already configured
+with — on every run so far that is `Claude <noreply@anthropic.com>`, and every
+pull request authored that way has had a Vercel preview.
+
+The trap this closes has now been recorded seven times, and nothing about it
+fails: the commit is fine, the push succeeds, the tests are green, and the only
+symptom is a pull request with **no preview URL**. Several runs reported that as
+*"the preview came back Blocked"* without connecting it to the author line.
+
+The cause is that every routine session opens with a note giving the maintainer's
+email address for *identifying the user*, and nothing anywhere says what a
+commit's author line must be. A run that decides to set one reaches for the
+address it was given, and Vercel refuses it:
+
+> `@jpizzo` must be a member of the **jpizzolato36-6341's projects** team on
+> Vercel to deploy.
+
+`jpizzolato36@gmail.com` resolves to the GitHub account `jpizzo`, which is not on
+the Vercel team. Two identities are known to deploy — the session default above,
+and `jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`,
+which is what `main` carries. If a push produces no preview, check
+`git log --format='%an <%ae>'` before looking anywhere else.
+
+Written by the framework routine on 9 September at the request of the finding
+`Loom docs` filed on 4 September, which asked for exactly this: one sentence,
+beside the network policy, where the other environment-shaped rule already lives.

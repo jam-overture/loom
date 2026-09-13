@@ -7,7 +7,13 @@ import { err, ok } from "../result.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
-import { createDataRegistry, defineSource, type DataRegistry, type SourceEntry } from "./adapter.js"
+import {
+  createDataRegistry,
+  defineSource,
+  describeDataUnavailable,
+  type DataRegistry,
+  type SourceEntry,
+} from "./adapter.js"
 import { buildDataResolution } from "./resolution.js"
 import { planTreeData } from "./plan.js"
 import { resolveDataPlan, resolveTreeData } from "./resolve.js"
@@ -222,7 +228,11 @@ describe("buildDataResolution", () => {
 
     const outcome = resolution.lookup(nodeId)["bio"]
 
-    expect(outcome?.status === "unavailable" && outcome.unavailable.reason).toBe("not-resolved")
+    expect(outcome?.status).toBe("unavailable")
+    if (outcome?.status !== "unavailable") return
+
+    expect(outcome.unavailable.reason).toBe("not-resolved")
+    expect(describeDataUnavailable(outcome.unavailable)).not.toContain("registered")
   })
 
   it("answers a binding named after something on Object.prototype", () => {

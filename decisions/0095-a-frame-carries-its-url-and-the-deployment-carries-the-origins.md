@@ -4,6 +4,15 @@
 **Date:** 2026-08-26
 **Section:** §3, §4b
 
+> **Amended 2026-09-09**, under [0099](0099-a-record-is-amended-when-only-the-count-moved.md).
+> Two sentences in *Consequences* said the seam had no consumer and that its
+> ergonomics were untested. `Loom primitives` adopted it in `loom.embed` on 26
+> August — `frames: ["src"]`, a verdict read from `loom.frames`, and a notice
+> rendered on a refusal — so both had been false for two weeks. **Nothing here
+> is reversed:** the decision asked for exactly that adoption and got it. Found
+> by `Loom lessons` writing lesson 20, which teaches the seam and would have
+> taught a reader to weigh a cost that had already been paid.
+
 ## Context
 
 `Loom primitives` filed it on 25 August, in the doc comment of the primitive
@@ -104,15 +113,20 @@ complaint.
   out loud whose documents it runs. `auditRegistry` reports which registered
   primitives frame, so the requirement is discoverable before a page renders a
   refusal.
-- **No primitive in the starter library uses the seam yet.** `loom.embed` still
-  reads its own `src` prop and frames whatever passes `mediaUrlSchema`.
-  `src/primitives/` is another routine's lane and adopting this is a change to a
-  shipped primitive's behaviour — the frame that renders today would render a
-  refusal on a deployment with no allowlist. Filed for that lane rather than
-  done here, exactly as 0065 and 0093 left their own seams.
-- **Until it does, this record describes machinery with no consumer.** That is
-  the same state the submission seam shipped in and it is a real cost: a seam
-  nobody calls is a seam whose ergonomics have not been tested by anything.
+- **One primitive in the starter library uses the seam.** It was filed for that
+  lane rather than done here — `src/primitives/` is another routine's, and
+  adopting this changes a shipped primitive's behaviour, since the frame that
+  rendered before would render a refusal on a deployment with no allowlist —
+  exactly as 0065 and 0093 left their own seams. `loom.embed` took it on 26
+  August: it declares `frames: ["src"]`, reads the verdict on `loom.frames`
+  rather than its own prop, places the URL the seam hands back, and renders a
+  notice when the origin is refused.
+- **The ergonomics have been tested by one consumer, and one is not many.** For
+  the fortnight before that this record described machinery nobody called, which
+  is the state the submission seam shipped in too. What the one adoption
+  established is that a primitive can read a verdict where it used to read a
+  prop without its shape changing; what it cannot establish is how the seam
+  behaves under a second and a third.
 - **A fourth registry to wire.** `renderRequest` now takes `sources`, `themes`,
   `text`, `endpoints` and `origins`. The `LoomDeployment` object bundling them,
   recorded as worth considering under 0065 and still not built, is now more

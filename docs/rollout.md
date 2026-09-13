@@ -16,7 +16,7 @@ run. That is what fifty days of reports actually show.
 ## Where we are
 
 Sections 1–6 are functional end to end, on 1,173 passing tests. Eighteen
-primitives are registered and the demo is live at `apps/loom/app/(portal)/portal/demo`. The
+primitives are registered and the demo is live at `apps/loom/app/(demo)/demo`. The
 data seam landed as
 [0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md),
 so a primitive can now be fed from somewhere other than authored content.

@@ -10,9 +10,16 @@ import {
   describeDataRegistryError,
   describeDataUnavailable,
   type DataAdapter,
+  type DataUnavailable,
   type SourceEntry,
 } from "./adapter.js"
 import { dataCatalogue } from "./catalogue.js"
+import {
+  BINDING_NAME_EXPECTATION,
+  bindingNameSchema,
+  SOURCE_ID_EXPECTATION,
+  sourceIdSchema,
+} from "./source.js"
 
 const servicesSource = (adapter: DataAdapter<{ limit: number }, JsonObject>): SourceEntry =>
   defineSource({
@@ -136,18 +143,24 @@ describe("defineSource", () => {
     expect(seen).toEqual([{ field: "bio" }])
   })
 
+  /**
+   * A record rather than a list, so a seventh reason does not compile until it
+   * has a sentence. The list this replaced was hand-typed and would have gone on
+   * passing while `not-resolved` went undescribed — which is the same shape of
+   * hole `not-resolved` itself was, one level up.
+   */
   it("describes every reason a binding can go unanswered", () => {
-    const reasons = [
-      "no-such-source",
-      "not-resolved",
-      "invalid-params",
-      "invalid-answer",
-      "adapter-threw",
-      "unavailable",
-      "refused",
-    ] as const
+    const everyReason: Readonly<Record<DataUnavailable["reason"], true>> = {
+      "no-such-source": true,
+      "not-resolved": true,
+      "invalid-params": true,
+      "invalid-answer": true,
+      "adapter-threw": true,
+      unavailable: true,
+      refused: true,
+    }
 
-    for (const reason of reasons) {
+    for (const reason of Object.keys(everyReason) as DataUnavailable["reason"][]) {
       expect(describeDataUnavailable({ reason, detail: "why" })).toContain("why")
     }
   })
@@ -247,5 +260,51 @@ describe("dataCatalogue", () => {
     if (!registry.ok) return
 
     expect(dataCatalogue(registry.value)[0]?.params).toBeUndefined()
+  })
+})
+
+/**
+ * The two seams that judge a source id said different things about the same
+ * grammar: the registry gave the sentence, the render diagnostic gave Zod's
+ * `Invalid`. These hold them to one string rather than to two that happen to
+ * agree today.
+ */
+describe("the grammar a malformed name is told", () => {
+  it("tells a source id what was expected, rather than that it is invalid", () => {
+    const parsed = sourceIdSchema.safeParse("Catalogue Services")
+
+    expect(parsed.success).toBe(false)
+    if (parsed.success) return
+
+    expect(parsed.error.issues[0]?.message).toBe(SOURCE_ID_EXPECTATION)
+    expect(parsed.error.issues[0]?.message).not.toBe("Invalid")
+  })
+
+  it("tells a binding name what was expected", () => {
+    const parsed = bindingNameSchema.safeParse("Featured Products")
+
+    expect(parsed.success).toBe(false)
+    if (parsed.success) return
+
+    expect(parsed.error.issues[0]?.message).toBe(BINDING_NAME_EXPECTATION)
+  })
+
+  it("gives the registry and the diagnostic the same sentence about a source id", () => {
+    const registered = createDataRegistry([servicesSource({ fetch: () => Promise.resolve(ok({})) })])
+    expect(registered.ok).toBe(true)
+
+    const rejected = createDataRegistry([
+      { ...servicesSource({ fetch: () => Promise.resolve(ok({})) }), id: "Catalogue Services" },
+    ])
+    expect(rejected.ok).toBe(false)
+    if (rejected.ok) return
+
+    const fromRegistry = describeDataRegistryError(rejected.error)
+    const fromSchema = sourceIdSchema.safeParse("Catalogue Services")
+
+    expect(fromRegistry).toContain(SOURCE_ID_EXPECTATION)
+    expect(fromSchema.success).toBe(false)
+    if (fromSchema.success) return
+    expect(fromRegistry).toContain(fromSchema.error.issues[0]?.message ?? "")
   })
 })

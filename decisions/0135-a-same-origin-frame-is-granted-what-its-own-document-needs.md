@@ -121,6 +121,19 @@ fixture, so widening the constant instead of the case fails a test.
   `allow-same-origin` has already conceded, and show the grant adds nothing on
   top of it. A capability that fails that test is a different decision.
 
+## Alternatives considered
+
+Both are weighed in the body above; they are gathered here under the heading
+the record format requires, in the record's own reasoning and with nothing added.
+
+**Drop `allow-same-origin` instead,** so the sandbox becomes a real boundary
+again. Worse, and not taken: it gives the framed document a null origin and breaks
+the embed a host deliberately registered.
+
+**An explicit prop to request `allow-forms`.** Rejected: a prop a model can set
+would have to be gated on `sameOrigin` anyway to be safe, at which point it does
+nothing the flag does not already do, except give a proposal a lever to pull.
+
 ## What would reverse this
 
 One thing, and it is worth watching for: **a deployment registering an origin as

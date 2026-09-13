@@ -53,12 +53,39 @@ with the alternatives. The four things that cost eleven private rewrites:
 | an image URL may not be `file:` or `data:` (0053), so a specimen with an avatar will not render | serves the pages over `http://127.0.0.1` on an ephemeral port |
 | a band that reveals on scroll photographs blank | every context is opened with `reducedMotion: "reduce"` |
 
+## The other subject: `pnpm shoot`
+
+A specimen is a tree this harness renders itself. When the subject is a page
+something else is already serving — a `next start`, a preview deployment, a
+static directory — the entry point is `pnpm shoot`, and the list lives beside
+the lane that cares:
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm shoot shots.json
+```
+
+```json
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/the-record", "out": "2026-09-08-the-record", "viewport": "phone" },
+    { "path": "/portal", "out": "portal", "waitFor": "[data-signed-in]", "fullPage": true }
+  ]
+}
+```
+
+Everything after the plan is this directory's: the same browser, the same launch
+flags, the same reduced motion, the same overflow line, the same naming. Only
+what to point at differs. [0117](../../decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+is why the two are one harness and what it cost when they were two.
+
 ## What it does not do
 
-- **It does not photograph a running application.** A specimen is a tree
-  rendered by the render seam — no dev server, no hydration. Photographing a
-  signed-in portal screen needs `next build`, `next start` and that lane's
-  environment, and remains the portal's own recipe.
+- **It does not start your application.** `pnpm specimen` needs no server;
+  `pnpm shoot` photographs one you are already running. Getting a signed-in
+  portal screen up — `next build`, `next start`, that lane's environment —
+  remains the portal's own recipe.
 - **It does not diff against baselines.** Visual regression is a different
   project; this makes it possible later and presumes none of it.
 - **It runs in no CI job.** It is a tool a run drives when it has something to

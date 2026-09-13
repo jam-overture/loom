@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 620" width="920" height="620" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <rect width="920" height="620" fill="#ffffff"/>
+
+  <text x="40" y="46" font-size="21" font-weight="650" fill="#15120e">Seven of thirty, and one file is why</text>
+  <text x="40" y="70" font-size="13.5" fill="#5c5751">Measured on 10 September against <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">origin/main</tspan> at d7375ef, by performing all thirty merges. Oldest pull request first.</text>
+
+  <!-- ================= THE LADDER ================= -->
+  <text x="40" y="116" font-size="12" font-weight="650" fill="#8a8177" letter-spacing="0.08em">HOW MANY OF THE THIRTY OPEN BRANCHES MERGE</text>
+
+  <!-- row 1: today -->
+  <text x="40" y="156" font-size="13.5" fill="#15120e">Today</text>
+  <rect x="200" y="142" width="600" height="22" rx="3" fill="#f0ece6"/>
+  <rect x="200" y="142" width="140" height="22" rx="3" fill="#c0392b"/>
+  <text x="352" y="158" font-size="13" font-weight="650" fill="#c0392b">7</text>
+  <text x="812" y="158" font-size="12" fill="#8a8177">23 blocked</text>
+
+  <!-- row 2: union -->
+  <text x="40" y="206" font-size="13.5" fill="#15120e">+ <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">FINDINGS.md merge=union</tspan></text>
+  <text x="40" y="223" font-size="11.5" fill="#8a8177">one committed line, no setup</text>
+  <rect x="200" y="192" width="600" height="22" rx="3" fill="#f0ece6"/>
+  <rect x="200" y="192" width="480" height="22" rx="3" fill="#b8860b"/>
+  <text x="692" y="208" font-size="13" font-weight="650" fill="#a8790a">24</text>
+  <text x="812" y="208" font-size="12" fill="#8a8177">6 blocked</text>
+
+  <!-- row 3: + generated -->
+  <text x="40" y="266" font-size="13.5" fill="#15120e">+ generated files regenerated</text>
+  <text x="40" y="283" font-size="11.5" fill="#8a8177">two more lines, one <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">prepare</tspan> script</text>
+  <rect x="200" y="252" width="600" height="22" rx="3" fill="#f0ece6"/>
+  <rect x="200" y="252" width="560" height="22" rx="3" fill="#2d7a4f"/>
+  <text x="772" y="268" font-size="13" font-weight="650" fill="#2d7a4f">28</text>
+  <text x="812" y="268" font-size="12" fill="#8a8177">2 blocked</text>
+
+  <line x1="40" y1="316" x2="880" y2="316" stroke="#e6e0d8" stroke-width="1"/>
+
+  <!-- ================= WHAT BLOCKS WHAT ================= -->
+  <text x="40" y="352" font-size="12" font-weight="650" fill="#8a8177" letter-spacing="0.08em">WHAT THE 23 BLOCKED BRANCHES COLLIDE ON, TODAY</text>
+
+  <rect x="40" y="368" width="700" height="26" rx="3" fill="#c0392b" opacity="0.14"/>
+  <rect x="40" y="368" width="670" height="26" rx="3" fill="#c0392b" opacity="0.85"/>
+  <text x="52" y="386" font-size="13" font-weight="600" fill="#ffffff">FINDINGS.md — and nothing else</text>
+  <text x="752" y="386" font-size="13" font-weight="650" fill="#c0392b">22</text>
+
+  <rect x="40" y="402" width="700" height="26" rx="3" fill="#f0ece6"/>
+  <rect x="40" y="402" width="30" height="26" rx="3" fill="#8a8177"/>
+  <text x="82" y="420" font-size="13" fill="#5c5751">a real content conflict</text>
+  <text x="752" y="420" font-size="13" font-weight="650" fill="#5c5751">1</text>
+
+  <text x="40" y="462" font-size="13.5" fill="#3d3830">Seven lanes each append their entry to the bottom of the same file. Every pair of</text>
+  <text x="40" y="482" font-size="13.5" fill="#3d3830">branches writes different text at the same place, so git calls it a conflict every time.</text>
+  <text x="40" y="502" font-size="13.5" font-weight="600" fill="#15120e">The channel the routines use to talk to each other is what stops their work landing.</text>
+
+  <line x1="40" y1="534" x2="880" y2="534" stroke="#e6e0d8" stroke-width="1"/>
+
+  <text x="40" y="566" font-size="12.5" fill="#5c5751">Hand-resolving that file has already cost two ledger entries: one with two contradictory statuses, one a bare</text>
+  <text x="40" y="586" font-size="12.5" fill="#5c5751">heading whose body a merge dropped. Both repaired. <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5">pnpm findings:check</tspan> now reads the file on every verify.</text>
+</svg>

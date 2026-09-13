@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" width="960" height="500" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b9b0a4"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="500" fill="#fbfaf8"/>
+
+  <text x="40" y="42" font-size="20" font-weight="600" fill="#1c1a17">The queue that could not tell</text>
+  <text x="40" y="66" font-size="14" fill="#6b645b">Three changes waiting on an answer. Two of them can never happen. The list is the same list; only the badge is new.</text>
+
+  <line x1="480" y1="92" x2="480" y2="472" stroke="#e3ded6" stroke-width="1"/>
+
+  <!-- LEFT -->
+  <text x="40" y="116" font-size="13" font-weight="600" fill="#8a5a3b" letter-spacing="0.06em">BEFORE — holds.waiting()</text>
+
+  <rect x="40" y="132" width="400" height="52" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="58" y="155" font-size="13" font-weight="600" fill="#1c1a17">Remove the second section of the page</text>
+  <text x="58" y="174" font-size="12" fill="#6b645b">held 3 days ago · medium stakes</text>
+
+  <rect x="40" y="192" width="400" height="52" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="58" y="215" font-size="13" font-weight="600" fill="#1c1a17">Make the offer band say the new price</text>
+  <text x="58" y="234" font-size="12" fill="#6b645b">held 2 days ago · low stakes</text>
+
+  <rect x="40" y="252" width="400" height="52" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <text x="58" y="275" font-size="13" font-weight="600" fill="#1c1a17">Add a note under the header</text>
+  <text x="58" y="294" font-size="12" fill="#6b645b">held 4 hours ago · low stakes</text>
+
+  <rect x="40" y="332" width="400" height="104" rx="8" fill="#f6f1e9" stroke="#e3ded6"/>
+  <text x="58" y="357" font-size="13" font-weight="600" fill="#1c1a17">How you find out</text>
+  <text x="58" y="380" font-size="12.5" fill="#3d3831">Read it. Decide. Click yes. Then:</text>
+  <text x="58" y="403" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#8a5a3b">not-written — t_a moved on: the delta applies</text>
+  <text x="58" y="420" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#8a5a3b">to revision 3, but head is 4</text>
+
+  <text x="40" y="464" font-size="12" fill="#6b645b">Custody ends there, correctly. It is the first anyone hears of it.</text>
+
+  <!-- RIGHT -->
+  <text x="520" y="116" font-size="13" font-weight="600" fill="#3f6b4a" letter-spacing="0.06em">AFTER — markHoldsFromStore(store, page.held)</text>
+
+  <rect x="520" y="132" width="400" height="52" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <rect x="520" y="132" width="4" height="52" rx="2" fill="#a8a099"/>
+  <text x="540" y="155" font-size="13" font-weight="600" fill="#78716a">Remove the second section of the page</text>
+  <rect x="782" y="143" width="120" height="22" rx="11" fill="#efece7" stroke="#ddd7cd"/>
+  <text x="842" y="158" font-size="11.5" font-weight="600" fill="#6b645b" text-anchor="middle">the page moved on</text>
+  <text x="540" y="174" font-size="12" fill="#8a837b">held against 3 · the page is at 4</text>
+
+  <rect x="520" y="192" width="400" height="52" rx="8" fill="#ffffff" stroke="#e3ded6"/>
+  <rect x="520" y="192" width="4" height="52" rx="2" fill="#a8a099"/>
+  <text x="540" y="215" font-size="13" font-weight="600" fill="#78716a">Make the offer band say the new price</text>
+  <rect x="782" y="203" width="120" height="22" rx="11" fill="#efece7" stroke="#ddd7cd"/>
+  <text x="842" y="218" font-size="11.5" font-weight="600" fill="#6b645b" text-anchor="middle">the page moved on</text>
+  <text x="540" y="234" font-size="12" fill="#8a837b">held against 3 · the page is at 4</text>
+
+  <rect x="520" y="252" width="400" height="52" rx="8" fill="#ffffff" stroke="#cfe0d3"/>
+  <rect x="520" y="252" width="4" height="52" rx="2" fill="#3f6b4a"/>
+  <text x="540" y="275" font-size="13" font-weight="600" fill="#1c1a17">Add a note under the header</text>
+  <rect x="806" y="263" width="96" height="22" rx="11" fill="#e8f0e9" stroke="#cfe0d3"/>
+  <text x="854" y="278" font-size="11.5" font-weight="600" fill="#3f6b4a" text-anchor="middle">still applies</text>
+  <text x="540" y="294" font-size="12" fill="#6b645b">held against 4 · the page is at 4</text>
+
+  <path d="M720 304 L720 328" stroke="#b9b0a4" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="520" y="332" width="400" height="104" rx="8" fill="#f6f1e9" stroke="#e3ded6"/>
+  <text x="538" y="357" font-size="13" font-weight="600" fill="#1c1a17">What it cost</text>
+  <text x="538" y="380" font-size="12.5" fill="#3d3831">One head read per <tspan font-style="italic">tree</tspan>, not per hold. The order is</text>
+  <text x="538" y="398" font-size="12.5" fill="#3d3831">the order the store promised. Nothing was released,</text>
+  <text x="538" y="416" font-size="12.5" fill="#3d3831">confirmed or discarded — it is a read.</text>
+
+  <text x="520" y="464" font-size="12" fill="#6b645b">A tree whose head could not be read is <tspan font-weight="600">unknown</tspan>, never <tspan font-weight="600">live</tspan>. A badge is a claim.</text>
+</svg>

@@ -7,4 +7,5 @@
 
 export * from "./commit.js"
 export * from "./held.js"
+export * from "./liveness.js"
 export * from "./revert.js"

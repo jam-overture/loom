@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="900" height="560" rx="10" fill="#ffffff"/>
+  <rect x="0.5" y="0.5" width="899" height="559" rx="10" fill="none" stroke="#d8dee4"/>
+
+  <text x="32" y="44" font-size="21" font-weight="600" fill="#1f2328">The order that decides the order</text>
+  <text x="32" y="68" font-size="13.5" fill="#59636e">Nine open trees, one oracle. The only difference between these two columns is which branch was offered first.</text>
+
+  <!-- divider -->
+  <line x1="450" y1="92" x2="450" y2="470" stroke="#d8dee4" stroke-dasharray="4 4"/>
+
+  <!-- LEFT -->
+  <text x="32" y="112" font-size="13" font-weight="600" fill="#59636e">IN THE ORDER THEY WERE OPENED</text>
+  <text x="32" y="146" font-size="31" font-weight="700" fill="#bc4c00">1</text>
+  <text x="56" y="146" font-size="17" fill="#59636e">of 9 merge into main</text>
+
+  <g font-size="12.5">
+    <rect x="32" y="168" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="44" y="185.5" fill="#1a7f37">1.  demo-12                          #220</text>
+
+    <rect x="32" y="200" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="217.5" fill="#cf222e">framework-25   #230   FINDINGS.md</text>
+
+    <rect x="32" y="232" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="249.5" fill="#cf222e">marketing-22   #242   FINDINGS.md</text>
+
+    <rect x="32" y="264" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="281.5" fill="#cf222e">docs-21        #243   FINDINGS.md</text>
+
+    <rect x="32" y="296" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="313.5" fill="#cf222e">portal-23      #245   FINDINGS.md</text>
+
+    <rect x="32" y="328" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="345.5" fill="#cf222e">primitives-26  #248   FINDINGS.md</text>
+
+    <rect x="32" y="360" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="377.5" fill="#cf222e">demo-08        #253   FINDINGS.md</text>
+
+    <rect x="32" y="392" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="409.5" fill="#cf222e">lessons-31     #254   FINDINGS.md</text>
+
+    <rect x="32" y="424" width="386" height="26" rx="5" fill="#ffebe9" stroke="#ffcecb"/>
+    <text x="44" y="441.5" fill="#cf222e">demo-13        #255   FINDINGS.md +2</text>
+  </g>
+
+  <!-- RIGHT -->
+  <text x="482" y="112" font-size="13" font-weight="600" fill="#59636e">WITH .gitattributes OFFERED FIRST</text>
+  <text x="482" y="146" font-size="31" font-weight="700" fill="#1a7f37">7</text>
+  <text x="506" y="146" font-size="17" fill="#59636e">of 9 merge into main</text>
+
+  <g font-size="12.5">
+    <rect x="482" y="168" width="386" height="26" rx="5" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.6"/>
+    <text x="494" y="185.5" fill="#1a7f37" font-weight="600">1.  framework-25   #230   ← merge=union</text>
+
+    <rect x="482" y="200" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="494" y="217.5" fill="#1a7f37">2.  demo-12        #220</text>
+
+    <rect x="482" y="232" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="494" y="249.5" fill="#1a7f37">3.  marketing-22   #242</text>
+
+    <rect x="482" y="264" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="494" y="281.5" fill="#1a7f37">4.  docs-21        #243</text>
+
+    <rect x="482" y="296" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="494" y="313.5" fill="#1a7f37">5.  portal-23      #245</text>
+
+    <rect x="482" y="328" width="386" height="26" rx="5" fill="#fff8c5" stroke="#eac54f"/>
+    <text x="494" y="345.5" fill="#7d4e00">primitives-26  #248   (marketing)/copy.ts</text>
+
+    <rect x="482" y="360" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="494" y="377.5" fill="#1a7f37">6.  demo-08        #253</text>
+
+    <rect x="482" y="392" width="386" height="26" rx="5" fill="#dafbe1" stroke="#aceebb"/>
+    <text x="494" y="409.5" fill="#1a7f37">7.  lessons-31     #254</text>
+
+    <rect x="482" y="424" width="386" height="26" rx="5" fill="#fff8c5" stroke="#eac54f"/>
+    <text x="494" y="441.5" fill="#7d4e00">demo-13        #255   (demo)/page.tsx +1</text>
+  </g>
+
+  <!-- footer -->
+  <line x1="32" y1="486" x2="868" y2="486" stroke="#d8dee4"/>
+  <text x="32" y="509" font-size="12.5" fill="#59636e">Every red row is the same file: <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1f2328">FINDINGS.md</tspan>, which seven routines append to. The branch carrying its <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1f2328">merge=union</tspan> line</text>
+  <text x="32" y="528" font-size="12.5" fill="#59636e">was stuck behind the conflict it fixes — git reads merge attributes from the tree being merged <tspan font-style="italic">into</tspan>.</text>
+  <text x="32" y="547" font-size="12.5" fill="#59636e">The two amber rows are real content collisions, one file each, filed for the lanes that own them.</text>
+</svg>

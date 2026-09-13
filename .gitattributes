@@ -1,0 +1,15 @@
+# Why these three lines exist, and what they cost:
+# decisions/0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md
+#
+# Measured on 10 September 2026 with `pnpm queue`, over the thirty open branches:
+# 7 of 30 merged into main. With the union line alone, 24. With all three, 28.
+
+# Append-only, and appended to by seven routines that cannot see each other run.
+# Both sides are kept; nobody's entry is dropped, and nothing conflicts.
+FINDINGS.md merge=union
+
+# Generated. Never resolved by hand — take the tree's copy and regenerate, which
+# `pnpm verify` forces by failing on drift. Needs `merge.ours.driver`, which the
+# `prepare` script sets on install; without it these conflict as before.
+decisions/README.md merge=ours
+*.generated.json merge=ours

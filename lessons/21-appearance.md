@@ -995,17 +995,20 @@ The output:
   it rendered:               true
   diagnostics:               []
   pairings measured:         21
-  painted failures:          7
+  painted failures:          8
 house: fg-muted on bg-surface (loom.feature body) is 3.00:1, under 4.5:1
 house: fg-muted on bg-surface-muted (loom.form hint, loom.badge neutral) is 2.77:1, under 4.5:1
 house: fg-on-accent on accent (loom.action primary label) is 2.54:1, under 4.5:1
 house: accent on bg-surface (loom.quote attribution) is 2.54:1, under 4.5:1
 house: accent-strong on accent-subtle (loom.badge accent, loom.icon soft) is 3.12:1, under 4.5:1
+house: accent-strong on bg-surface (loom.offering price, loom.field inside a card) is 3.48:1, under 4.5:1
 house: fg-subtle on bg-surface (loom.footer note row) is 2.10:1, under 4.5:1
-house: fg-subtle on bg-surface-muted (loom.perk excluded marker) is 1.94:1, under 4.5:1
 ```
 
-**Seven painted failures and an empty diagnostics array.** Every layer this
+The program prints the first seven lines of the report; the eighth failure is
+`fg-subtle` on `bg-surface-muted`, the `loom.perk` excluded marker, at 1.94:1.
+
+**Eight painted failures and an empty diagnostics array.** Every layer this
 course has taught you to expect a refusal from lets it through, and each one for
 a defensible reason: the schema checked that every slot holds a colour, which it
 does; the registry checked that the ids resolve, which they do; the renderer
@@ -1014,7 +1017,7 @@ about. There is white label text on a light blue button at 2.54:1 and nobody
 objects.
 
 Look at what the failure lines carry, because it is the difference between a
-report and a warning. Not "seven contrast violations" — each one names a slot
+report and a warning. Not "eight contrast violations" — each one names a slot
 pair, a ratio, and **the place a reader meets it**: `loom.action primary label`,
 `loom.footer note row`. A host reading this fixes a page, not a number.
 
@@ -1067,7 +1070,7 @@ describe("F", () => {
 
 Predict: the three shipped palettes' painted counts, and then the last line —
 `house-hsl` differs from `house` in exactly one slot, so predict all three of its
-numbers against `house`'s 21 / 7.
+numbers against `house`'s 21 / 8.
 
 The output:
 
@@ -1083,7 +1086,7 @@ The output:
   hsl(210 20% 12%)   on #ffffff -> not measured
   rebeccapurple      on #ffffff -> not measured
   #1b1f2480          on #ffffff -> not measured
-  house-hsl: measured=17 painted=5 unmeasured=4
+  house-hsl: measured=17 painted=6 unmeasured=4
 ```
 
 `plum` and `carbon` ship with composed failures at 4.43 and 4.42 against a bar of
@@ -1095,7 +1098,7 @@ about pairings it would have failed.
 
 The bottom half is the more useful half to have run. One slot written in `hsl()`
 takes four pairings out of the measured set, and **two of them were failures**:
-`house` had seven painted failures and `house-hsl` has five, with four pairings
+`house` had eight painted failures and `house-hsl` has six, with four pairings
 moved into `unmeasured`. Nothing got better. If unmeasured had been folded into
 "pass", a host could have made two real failures disappear by rewriting one
 colour in a different notation — which is exactly why it is a third answer.
@@ -1136,7 +1139,7 @@ The output:
   editorial  peers=7 collapsed=0 unmarked=0
   house      peers=7 collapsed=1 unmarked=0
 house: bg-canvas and bg-surface (loom.section tone surface, which paints a band and no border) differ by 0.00, under 2.3 — nothing else tells them apart
-  house's painted contrast failures: 7
+  house's painted contrast failures: 8
 ```
 
 **1.00:1 between a red and a green.** In an accessibility report that number

@@ -37,7 +37,7 @@ const Touches = ({ placement }: { readonly placement: Placement }) =>
     <>
       {placement.since.map((touch) => (
         <span key={`${touch.revision}-${touch.effect}`} className="block">
-          {touch.effect} by {touch.actor} at r{touch.revision}
+          {touch.effect} by {touch.actor} at {`r${touch.revision}`}
         </span>
       ))}
     </>

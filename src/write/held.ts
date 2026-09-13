@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { proposalIdSchema, treeIdSchema, type ProposalId, type TreeId } from "../ids.js"
+import { clampLimit } from "../paging.js"
 import { err, ok, type Result } from "../result.js"
 import { dispositionSchema, type Disposition } from "../runtime/disposition.js"
 import { editIntentSchema, type EditIntent } from "../runtime/intent.js"
@@ -49,6 +50,13 @@ export type HeldProposal = {
  * about what is storable, and the contract suite would not catch it because both
  * would still round-trip their own writes.
  */
+/**
+ * Named rather than inlined because a cursor carries one back: a page of holds
+ * resumes from an instant and an id, and the instant it resumes from has to be
+ * held to the same shape on the way in as it was on the way out.
+ */
+const heldAtSchema = z.string().datetime()
+
 export const heldProposalSchema = z.object({
   proposalId: proposalIdSchema,
   treeId: treeIdSchema,
@@ -56,7 +64,7 @@ export const heldProposalSchema = z.object({
   intent: editIntentSchema,
   proposal: proposedChangeSchema,
   disposition: dispositionSchema,
-  heldAt: z.string().datetime(),
+  heldAt: heldAtSchema,
 })
 
 export type HoldError =
@@ -98,25 +106,129 @@ export const parseHeldProposal = (row: unknown): Result<HeldProposal, HoldError>
 }
 
 /**
+ * Where a page of holds resumes: an instant and an id, never an instant alone.
+ *
+ * `heldAt` is not unique and is not close to unique — two proposals judged in
+ * the same request share one, and every fixture in the contract suite shares
+ * one by default. A cursor naming only the instant would repeat a hold or skip
+ * one depending on which side of the comparison it fell, which is the failure a
+ * cursor exists to prevent. `proposalId` is the store's primary key, so
+ * `(heldAt, proposalId)` is total and stable — the property 0020 requires of
+ * anything a cursor is taken from.
+ */
+export type HoldPosition = {
+  readonly heldAt: string
+  readonly proposalId: ProposalId
+}
+
+const compareStrings = (left: string, right: string): number => {
+  if (left < right) return -1
+
+  return left > right ? 1 : 0
+}
+
+/**
+ * The order both listings are in: oldest first, then by id.
+ *
+ * Written once and shared for the reason `pageEnds` and `anchorBound` are — it
+ * is the part most likely to drift between two backends and least likely to be
+ * noticed when it does. `postgresHoldStore` is the one caller that cannot use
+ * it, because ordering has to happen in the statement for an index to be usable;
+ * its `ORDER BY` names this function, and the contract suite is what holds the
+ * two to the same answer.
+ */
+export const compareHolds = (left: HoldPosition, right: HoldPosition): number =>
+  compareStrings(left.heldAt, right.heldAt) || compareStrings(left.proposalId, right.proposalId)
+
+const CURSOR_SEPARATOR = " "
+
+export const holdCursor = (position: HoldPosition): string =>
+  `${position.heldAt}${CURSOR_SEPARATOR}${position.proposalId}`
+
+/**
+ * Reads a cursor back into the position it names, or says it cannot.
+ *
+ * Unreadable means the same thing here as everywhere else in Loom (see
+ * `cursorPosition`): start at the beginning, rather than one implementation
+ * refusing what another silently accepts. Both halves are checked, because a
+ * cursor that survived a URL is a value from outside — and a position built
+ * from an instant that is not one would compare against nonsense and page from
+ * somewhere no caller asked for. The separator is a space, which neither an
+ * RFC 3339 instant nor an id can contain.
+ */
+export const holdCursorPosition = (cursor: string | undefined): HoldPosition | undefined => {
+  if (cursor === undefined) return undefined
+
+  const separator = cursor.indexOf(CURSOR_SEPARATOR)
+  if (separator === -1) return undefined
+
+  const heldAt = heldAtSchema.safeParse(cursor.slice(0, separator))
+  const proposalId = proposalIdSchema.safeParse(cursor.slice(separator + 1))
+
+  return heldAt.success && proposalId.success
+    ? { heldAt: heldAt.data, proposalId: proposalId.data }
+    : undefined
+}
+
+/**
+ * Smaller than a tree listing's page, because a held proposal is the heaviest
+ * row this store keeps: a whole delta, the intent that asked for it, and the
+ * judgment that held it back. A reviewer reads them one at a time, so a page is
+ * sized for a screen rather than for a fold.
+ */
+export const DEFAULT_HOLD_LIMIT = 25
+export const MAX_HOLD_LIMIT = 100
+
+export const clampHoldLimit = (limit: number | undefined): number =>
+  clampLimit(limit, { fallback: DEFAULT_HOLD_LIMIT, max: MAX_HOLD_LIMIT })
+
+export type HoldListRequest = {
+  /**
+   * Opaque to the caller: the previous page's `cursor`, passed back unread. A
+   * cursor naming a hold that has since been answered is not an error — the
+   * page resumes from the next position after it, which is what makes a queue
+   * safe to page through while people are emptying it.
+   */
+  readonly cursor?: string
+  /** Clamped by the implementation — see `clampHoldLimit`. */
+  readonly limit?: number
+}
+
+export type HoldPage = {
+  readonly held: readonly HeldProposal[]
+  /** `null` when this was the last page. */
+  readonly cursor: string | null
+}
+
+/**
  * `release` is a take, not a read: it removes and returns in one step, which is
  * what makes answering a proposal exactly once a property of the store rather
  * than a rule every caller has to remember. Confirming and discarding both go
  * through it, so two confirmations racing cannot both apply the same delta.
  *
- * `forTree` is scoped by tree because that is the only listing a review queue
- * needs; like `TreeStore` (0020), a handle is the scope of what it can see.
+ * Two listings, and the difference between them is the question being asked.
+ * `forTree` answers *what is waiting on this page*, which a screen showing one
+ * tree already knows the scope of; it is unpaged because the holds against a
+ * single tree are bounded by how many changes one document can have in flight.
+ * `waiting` answers *does anything need me at all*, which is the portal's front
+ * door and cannot be assembled from the first: doing it that way is one query
+ * per tree, over a listing that is itself bounded, so the answer is O(pages)
+ * reads and still cannot be complete. Neither widens what a handle can see —
+ * both are the holds this handle could already reach one tree at a time, which
+ * is why 0020 permits the second.
  */
 export interface HoldStore {
   readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>
   readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>
   readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>
+  readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>
   readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>
 }
 
 /**
- * The reference implementation. Ordered by `heldAt` ascending, so a queue reads
- * oldest-first: a change that has been waiting longest is the one most likely to
- * be about to go stale.
+ * The reference implementation. Both listings are in `compareHolds` order, so a
+ * queue reads oldest-first: a change that has been waiting longest is the one
+ * most likely to be about to go stale.
  */
 export const memoryHoldStore = (): HoldStore => {
   const held = new Map<string, HeldProposal>()
@@ -144,9 +256,28 @@ export const memoryHoldStore = (): HoldStore => {
         ok(
           Array.from(held.values())
             .filter((proposal) => proposal.treeId === treeId)
-            .sort((left, right) => left.heldAt.localeCompare(right.heldAt))
+            .sort(compareHolds)
         )
       ),
+
+    waiting: (request) => {
+      const limit = clampHoldLimit(request?.limit)
+      const from = holdCursorPosition(request?.cursor)
+
+      const remaining = Array.from(held.values())
+        .sort(compareHolds)
+        .filter((proposal) => from === undefined || compareHolds(proposal, from) > 0)
+
+      const page = remaining.slice(0, limit)
+      const last = page.at(-1)
+
+      return Promise.resolve(
+        ok<HoldPage>({
+          held: page,
+          cursor: last !== undefined && remaining.length > page.length ? holdCursor(last) : null,
+        })
+      )
+    },
 
     release: (proposalId) => {
       const found = held.get(proposalId)

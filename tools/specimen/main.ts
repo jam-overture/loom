@@ -8,7 +8,7 @@ import { describeRenderDiagnostic } from "../../src/render/diagnostics.js"
 import { describeArgsError, parseSpecimenArgs } from "./args.js"
 import { browsersRoot, describeBrowserError, locateChromium } from "./browser.js"
 import { captureShots, describeShot } from "./capture.js"
-import { planShots } from "./plan.js"
+import { planShots, shotsAt } from "./plan.js"
 import { chromiumBrowser, describeLauncherError, loadChromium } from "./playwright.js"
 import { renderSpecimen } from "./render.js"
 import { serveDirectory } from "./serve.js"
@@ -74,8 +74,7 @@ try {
   try {
     const browser = await chromiumBrowser(chromium.value, executable.value)
     try {
-      const results = await captureShots(planShots(specimen), browser, {
-        origin: server.origin,
+      const results = await captureShots(shotsAt(server.origin, planShots(specimen)), browser, {
         outDir,
       })
 

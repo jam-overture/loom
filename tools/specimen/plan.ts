@@ -1,3 +1,4 @@
+import type { Shot } from "./capture.js"
 import {
   DEFAULT_VIEWPORTS,
   type Specimen,
@@ -57,3 +58,25 @@ export const planShots = (specimen: Specimen): readonly PlannedShot[] => {
     })
   )
 }
+
+/**
+ * The point at which a specimen stops being special.
+ *
+ * Everything above knows about themes and rendered documents; nothing below
+ * does. A planned shot becomes an address once there is a server to resolve it
+ * against, and from there it is the same value `pnpm shoot` hands the same
+ * capture loop.
+ *
+ * `fullPage` is not a choice here: a specimen is a composition, and the reason
+ * to photograph one is to see all of it. An address is photographed at the
+ * viewport unless its list says otherwise, because a page under test is often
+ * a screen rather than a document.
+ */
+export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly Shot[] =>
+  shots.map((shot) => ({
+    name: shot.name,
+    url: `${origin}/${shot.page.file}`,
+    file: shot.file,
+    viewport: shot.viewport,
+    fullPage: true,
+  }))

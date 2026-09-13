@@ -2,7 +2,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { PaletteSlot } from "../theme/theme.js"
 
 import { probeColourPairings, probeConfigurations } from "./conformance.js"
-import type { PrimitiveRegistry } from "./registry.js"
+import type { PrimitiveRegistry, RegisteredPrimitive } from "./registry.js"
 
 /**
  * Every foreground-on-background a registry can put on a page, read off the
@@ -67,6 +67,28 @@ export type ChildGround = {
   readonly types: readonly PrimitiveType[]
 }
 
+/**
+ * The props a primitive declares that no probe configuration sets, and which
+ * therefore mark the edge of what this derivation can see.
+ *
+ * It is not that the prop is unset — the probe sets nothing but closed choices,
+ * so a *required* prop is unset too. It is that a component written as
+ * `given.price === undefined ? null : …` produces no element at all under an
+ * absent optional prop, so any ink that element paints is invisible here, while
+ * a required prop's element still renders and still shows its colour. Optional
+ * and not a closed choice is exactly the set a component guards on and the probe
+ * cannot open.
+ *
+ * `undefined` for a primitive whose schema is not an object schema and whose
+ * props therefore cannot be enumerated — "I cannot tell you", which is not the
+ * same claim as "there are none", and the same distinction `declaredProps`
+ * makes.
+ */
+export type UnprobedProps = {
+  readonly type: PrimitiveType
+  readonly props: readonly string[] | undefined
+}
+
 /** What a registry's components paint, as the contrast bar needs to hear it. */
 export type RegistryPairings = {
   readonly pairings: readonly DerivedPairing[]
@@ -85,6 +107,17 @@ export type RegistryPairings = {
   readonly groundsOutsideTheRamp: readonly ChildGround[]
   /** The probe could not answer — neither a pass nor a failure. */
   readonly notProbeable: readonly PrimitiveType[]
+  /**
+   * Where this derivation stops seeing, by primitive. Only primitives with at
+   * least one such prop appear, so an empty list is a real claim: nothing in
+   * this registry hides an element behind a prop the probe cannot set.
+   *
+   * Reported rather than fixed, because the alternative is a probe that invents
+   * a price, a date and a URL — and a pairing derived from an invented value is
+   * a fact about the invention. A list that says it is read off the components
+   * should be able to say which part of them it read.
+   */
+  readonly unprobedProps: readonly UnprobedProps[]
 }
 
 type Seen = Map<string, { foreground: PaletteSlot; background: PaletteSlot; types: Set<PrimitiveType> }>
@@ -106,6 +139,20 @@ const asPairings = (seen: Seen, basis: PairingBasis): readonly DerivedPairing[] 
       basis,
       types: [...entry.types].sort(),
     }))
+
+/**
+ * The declared props no configuration sets: optional, and not a closed choice.
+ * `undefined` props enumerate to `undefined` rather than to nothing.
+ */
+const unprobed = (primitive: RegisteredPrimitive): readonly string[] | undefined => {
+  if (primitive.declaredProps === undefined) return undefined
+
+  const varied = new Set(primitive.choices.map((choice) => choice.name))
+
+  return primitive.declaredProps
+    .filter((prop) => !prop.required && !varied.has(prop.name))
+    .map((prop) => prop.name)
+}
 
 const asGrounds = (grounds: ReadonlyMap<PaletteSlot, Set<PrimitiveType>>): readonly ChildGround[] =>
   [...grounds.entries()]
@@ -167,5 +214,8 @@ export const registryPairings = (
     childGrounds: asGrounds(grounds),
     groundsOutsideTheRamp: asGrounds(new Map([...grounds].filter(([ground]) => !held.has(ground)))),
     notProbeable: probed.filter(({ verdict }) => verdict.outcome === "not-probeable").map(({ type }) => type),
+    unprobedProps: registry.primitives
+      .map((primitive) => ({ type: primitive.type, props: unprobed(primitive) }))
+      .filter((entry) => entry.props === undefined || entry.props.length > 0),
   }
 }

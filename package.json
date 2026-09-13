@@ -76,10 +76,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm --filter @loom/app verify",
+    "prepare": "git config merge.ours.driver true || true",
+    "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm findings:check && pnpm --filter @loom/app verify && pnpm prerender:check",
+    "findings:check": "tsx tools/findings/main.ts",
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "decisions:index": "tsx tools/decisions/build-index.ts",
+    "prerender:check": "tsx tools/prerender/main.ts",
+    "queue": "tsx tools/queue/main.ts",
+    "shoot": "tsx tools/screenshot/shoot.ts",
     "specimen": "tsx tools/specimen/main.ts"
   },
   "dependencies": {

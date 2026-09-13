@@ -73,7 +73,7 @@ export type RenderDependencies = {
   readonly endpoints?: EndpointRegistry
   /**
    * The origins this deployment will frame — see `RenderOptions.origins`.
-   * Absent means every framable prop is refused with a diagnostic (0094).
+   * Absent means every framable prop is refused with a diagnostic (0095).
    *
    * It sits here beside the other three registries and, unlike them, adds no
    * `await`: an allowlist is a static fact, so it is passed straight through to

@@ -1273,6 +1273,41 @@
           ]
         },
         {
+          "module": "role",
+          "title": "Role",
+          "summary": "What part a primitive plays, said by the author who knows and asked by every consumer that needs a semantic fact about a component rather than its name.",
+          "symbols": [
+            {
+              "name": "PrimitiveRole",
+              "kind": "type",
+              "signature": "type PrimitiveRole = \"heading\";",
+              "truncated": false,
+              "summary": "The vocabulary, and it has one member on purpose."
+            },
+            {
+              "name": "PRIMITIVE_ROLES",
+              "kind": "value",
+              "signature": "const PRIMITIVE_ROLES: readonly PrimitiveRole[]",
+              "truncated": false,
+              "summary": "Every role, so a host can render the vocabulary rather than keep its own copy of it — the same reason every other closed set in this package is exported."
+            },
+            {
+              "name": "describePrimitiveRole",
+              "kind": "function",
+              "signature": "const describePrimitiveRole: (role: PrimitiveRole) => string",
+              "truncated": false,
+              "summary": "One line per role, for a host putting the vocabulary in front of a person."
+            },
+            {
+              "name": "isPrimitiveRole",
+              "kind": "function",
+              "signature": "const isPrimitiveRole: (value: string) => value is PrimitiveRole",
+              "truncated": false,
+              "summary": "Whether a string a host wrote is a role the runtime knows."
+            }
+          ]
+        },
+        {
           "module": "runtime/analysis",
           "title": "Analysis",
           "summary": "Facts about what a delta does, extracted before anyone judges it.",
@@ -1560,7 +1595,7 @@
             {
               "name": "ComputedInverse",
               "kind": "type",
-              "signature": "type ComputedInverse = {\n    /** The undo, as operations. The delta's id and base belong to the proposal. */\n    readonly operations: readonly TreeOperation[];\n    /**\n     * The revision the operations were computed against.\n     *\n     * An inverse is only an inverse of one arrangement. Offered against another it\n     * would be proposing something whose reasoning has expired, so the interpreter\n     * declines rather than proposing it — which is what makes this safe to wire\n     * into a runtime directly, with no write path in front of it.\n     */\n    readonly headRevision: number;\n    /** What produced the delta, for `Provenance.interpreter`. Not a model. */\n    readonly interpreter: string;\n    /** Why, in the words the person answering a hold reads. */\n    readonly rationale: string;\n    /**\n     * Work this undo writes over, when the caller knows of some.\n     *\n     * Only a caller that read a log can know, so it is absent by default and\n     * absence keeps meaning \"nobody looked\" rather than \"a log was checked and was\n     * clean\".\n     */\n    readonly discards?: readonly DiscardedWork[];\n};",
+              "signature": "type ComputedInverse = {\n    /** The undo, as operations. The delta's id and base belong to the proposal. */\n    readonly operations: readonly TreeOperation[];\n    /**\n     * The revision the operations were computed against.\n     *\n     * An inverse is only an inverse of one arrangement. Offered against another it\n     * would be proposing something whose reasoning has expired, so the interpreter\n     * declines rather than proposing it — which is what makes this safe to wire\n     * into a runtime directly, with no write path in front of it.\n     */\n    readonly headRevision: number;\n    /** What produced the delta, for `Provenance.interpreter`. Not a model. */\n    readonly interpreter: string;\n    /** Why, in the words the person answering a hold reads. */\n    readonly rationale: string;\n    /**\n     * Work this undo writes over, when the caller knows of some.\n     *\n     * Only a caller that read a log can know, so it is absent by default and\n     * absence keeps meaning \"nobody looked\" rather than \"a log was checked and was\n     * clean\".\n     */\n    readonly discards?: readonly DiscardedWork[];\n    /**\n     * The revision this puts back, recorded on the provenance the log keeps.\n     *\n     * Optional because not every inverse has one to name. A stateless surface\n     * undoing a change it made in the same session has no revision — nothing was\n     * ever appended — and stamping a number it does not have would be worse than\n     * the absence. A caller that planned the undo off a log always does.\n     */\n    readonly undoes?: number;\n};",
               "truncated": false,
               "summary": "The operations that put something back, and what to say about them."
             },
@@ -1805,7 +1840,7 @@
             {
               "name": "Provenance",
               "kind": "type",
-              "signature": "type Provenance = {\n    readonly origin: IntentOrigin;\n    readonly actor?: string;\n    readonly interpreter: string;\n    readonly authoredBy: AuthorKind;\n    readonly promptHash?: string;\n    readonly confidence: number;\n    readonly interpretedAt: string;\n};",
+              "signature": "type Provenance = {\n    readonly origin: IntentOrigin;\n    readonly actor?: string;\n    readonly interpreter: string;\n    readonly authoredBy: AuthorKind;\n    readonly promptHash?: string;\n    /** The revision this change puts back; absent unless it puts one back. */\n    readonly undoes?: number;\n    readonly confidence: number;\n    readonly interpretedAt: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -2494,6 +2529,83 @@
               "signature": "const canCarryText: (colour: string, on: string) => boolean",
               "truncated": false,
               "summary": "Whether a brand colour can carry text on a given ground."
+            }
+          ]
+        },
+        {
+          "module": "theme/faces",
+          "title": "Faces",
+          "summary": "Where a face actually is, for anything that cannot look one up.",
+          "symbols": [
+            {
+              "name": "FaceRole",
+              "kind": "type",
+              "signature": "type FaceRole = \"heading\" | \"body\" | \"mono\";",
+              "truncated": false,
+              "summary": "The three roles a pack names a family for."
+            },
+            {
+              "name": "FACE_ROLES",
+              "kind": "value",
+              "signature": "const FACE_ROLES: readonly FaceRole[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "GENERIC_FAMILIES",
+              "kind": "value",
+              "signature": "const GENERIC_FAMILIES: readonly string[]",
+              "truncated": false,
+              "summary": "The CSS generic families, which name a face without addressing one."
+            },
+            {
+              "name": "isGenericFamily",
+              "kind": "function",
+              "signature": "const isGenericFamily: (family: string) => boolean",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "leadingFamily",
+              "kind": "function",
+              "signature": "const leadingFamily: (stack: string) => string",
+              "truncated": false,
+              "summary": "The first family a stack asks for, unquoted."
+            },
+            {
+              "name": "familyStackForRole",
+              "kind": "function",
+              "signature": "const familyStackForRole: (pack: FontPack, role: FaceRole) => string | undefined",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "declaredFaces",
+              "kind": "function",
+              "signature": "const declaredFaces: (pack: FontPack) => readonly FontFace[]",
+              "truncated": false,
+              "summary": "Every face the pack says where to find, in declaration order."
+            },
+            {
+              "name": "facesForRole",
+              "kind": "function",
+              "signature": "const facesForRole: (pack: FontPack, role: FaceRole) => readonly FontFace[]",
+              "truncated": false,
+              "summary": "The declared faces whose family is the one this role's stack leads with."
+            },
+            {
+              "name": "familiesWithoutSource",
+              "kind": "function",
+              "signature": "const familiesWithoutSource: (pack: FontPack) => readonly string[]",
+              "truncated": false,
+              "summary": "The families this pack asks for first and does not say where to find."
+            },
+            {
+              "name": "fontFaceRules",
+              "kind": "function",
+              "signature": "const fontFaceRules: (pack: FontPack) => string",
+              "truncated": false,
+              "summary": "The pack's declared faces as `@font-face` rules, for a host that wants them."
             }
           ]
         },
@@ -3220,6 +3332,20 @@
               "name": "Palette",
               "kind": "type",
               "signature": "type Palette = z.infer<typeof paletteSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "fontFaceSchema",
+              "kind": "schema",
+              "signature": "const fontFaceSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FontFace",
+              "kind": "type",
+              "signature": "type FontFace = z.infer<typeof fontFaceSchema>;",
               "truncated": false,
               "summary": ""
             },
@@ -4510,6 +4636,20 @@
               "signature": "const renderLoomTree: (tree: LoomTree, options: RenderOptions) => RenderOutput",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "ExcerptOutput",
+              "kind": "type",
+              "signature": "type ExcerptOutput = RenderOutput & {\n    /**\n     * Whether the tree holds the node asked for. `false` comes with a null\n     * element and an `excerpt-absent` diagnostic; it is here because it is the\n     * one thing every caller branches on, and scanning a diagnostic array to\n     * decide whether to render a fallback is worse than being told.\n     */\n    readonly found: boolean;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "renderLoomExcerpt",
+              "kind": "function",
+              "signature": "const renderLoomExcerpt: (tree: LoomTree, nodeId: NodeId, options: RenderOptions) => ExcerptOutput",
+              "truncated": false,
+              "summary": "Part of a tree, rendered on its own and wearing the tree's theme."
             }
           ]
         },
@@ -5235,6 +5375,41 @@
           ]
         },
         {
+          "module": "role",
+          "title": "Role",
+          "summary": "What part a primitive plays, said by the author who knows and asked by every consumer that needs a semantic fact about a component rather than its name.",
+          "symbols": [
+            {
+              "name": "PrimitiveRole",
+              "kind": "type",
+              "signature": "type PrimitiveRole = \"heading\";",
+              "truncated": false,
+              "summary": "The vocabulary, and it has one member on purpose."
+            },
+            {
+              "name": "PRIMITIVE_ROLES",
+              "kind": "value",
+              "signature": "const PRIMITIVE_ROLES: readonly PrimitiveRole[]",
+              "truncated": false,
+              "summary": "Every role, so a host can render the vocabulary rather than keep its own copy of it — the same reason every other closed set in this package is exported."
+            },
+            {
+              "name": "describePrimitiveRole",
+              "kind": "function",
+              "signature": "const describePrimitiveRole: (role: PrimitiveRole) => string",
+              "truncated": false,
+              "summary": "One line per role, for a host putting the vocabulary in front of a person."
+            },
+            {
+              "name": "isPrimitiveRole",
+              "kind": "function",
+              "signature": "const isPrimitiveRole: (value: string) => value is PrimitiveRole",
+              "truncated": false,
+              "summary": "Whether a string a host wrote is a role the runtime knows."
+            }
+          ]
+        },
+        {
           "module": "sdk/audit",
           "title": "Audit",
           "summary": "The registration-time check, as a function a host calls rather than a side effect of building a registry.",
@@ -5417,6 +5592,41 @@
           ]
         },
         {
+          "module": "sdk/copy",
+          "title": "Copy",
+          "summary": "The words a node shows.",
+          "symbols": [
+            {
+              "name": "CopyDeclarations",
+              "kind": "type",
+              "signature": "type CopyDeclarations = {\n    readonly copyFor: (type: PrimitiveType) => readonly string[] | undefined;\n};",
+              "truncated": false,
+              "summary": "A type's declared copy props, or `undefined` where it has not said."
+            },
+            {
+              "name": "UnreadCopy",
+              "kind": "type",
+              "signature": "type UnreadCopy = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Its string-valued props, in the order the node carries them. */\n    readonly props: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A node whose words this reading could not see, and the props it could not classify."
+            },
+            {
+              "name": "NodeCopy",
+              "kind": "type",
+              "signature": "type NodeCopy = {\n    /**\n     * In reading order: each element's own declared copy before its children's,\n     * because a stat's label is above the things under it and a card's title is\n     * above its body. Blank and whitespace-only values are left out — a caller\n     * composing a sentence wants words, and an empty string is not one.\n     */\n    readonly words: readonly string[];\n    /** What this reading could not see. Empty when every type under it declared. */\n    readonly unread: readonly UnreadCopy[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "copyIn",
+              "kind": "function",
+              "signature": "const copyIn: (node: LoomNode, declarations: CopyDeclarations) => NodeCopy",
+              "truncated": false,
+              "summary": "Reads a node and everything under it."
+            }
+          ]
+        },
+        {
           "module": "sdk/definition",
           "title": "Definition",
           "summary": "The registration contract: what an author declares to make a component something a Loom tree may name.",
@@ -5424,14 +5634,14 @@
             {
               "name": "PrimitiveDefinition",
               "kind": "type",
-              "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behaviour\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behaviour is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviours?: readonly TBehaviour[];\n    readonly component: LoomPrimitive<TProps, TText, TBehaviour>;\n};",
+              "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behaviour\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behaviour is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviours?: readonly TBehaviour[];\n    /**\n     * What part this primitive plays — `\"heading\"` on anything a reader takes as\n     * the title of what follows, whatever it is called. Optional, and absent on\n     * almost everything: most primitives are an arrangement or a surface and play\n     * no part a consumer asks about categorically.\n     *\n     * A role travels in the opposite direction from every other declaration here.\n     * `interactive` and `frames` are read by the runtime and constrain what a tree\n     * may do; a role is read by a *host* and constrains nothing. It is here rather\n     * than in a host's own table for the same reason `description` is: the author\n     * of the component is the one who knows, and a table maintained beside the\n     * registry goes stale the day somebody registers a second heading.\n     *\n     * Typed rather than free — see `role.ts` for why the vocabulary is closed and\n     * why it currently has one member. A host writing JavaScript can still hand\n     * over a string the runtime does not know, so the registry refuses one rather\n     * than letting a misspelling read as \"declares no role\".\n     */\n    readonly role?: PrimitiveRole;\n    /**\n     * The props whose values a reader reads as words — `[\"value\", \"label\",\n     * \"caption\"]` on a stat, `[]` on an arrangement that shows none of its own.\n     *\n     * Optional, and the distinction between `[]` and leaving it out is the whole\n     * of what it buys. `[]` says *this primitive shows no words of its\n     * own*; absence says *nobody has said*, and `copyIn` reports the second and\n     * trusts the first. A default would collapse them, which is why there is\n     * none.\n     *\n     * Read by nothing in the runtime, like `role` and `submits`: it changes no\n     * render and constrains no tree. The named props must be props the schema\n     * declares, and the registry refuses a declaration that names one it does\n     * not — the same drift `frames` and `interactive` are checked for, with less\n     * riding on it and the same silence when it happens.\n     */\n    readonly copy?: readonly string[];\n    readonly component: LoomPrimitive<TProps, TText, TBehaviour>;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
@@ -5485,9 +5695,16 @@
               "summary": "A ground a primitive puts its declared children and slots on."
             },
             {
+              "name": "UnprobedProps",
+              "kind": "type",
+              "signature": "type UnprobedProps = {\n    readonly type: PrimitiveType;\n    readonly props: readonly string[] | undefined;\n};",
+              "truncated": false,
+              "summary": "The props a primitive declares that no probe configuration sets, and which therefore mark the edge of what this derivation can see."
+            },
+            {
               "name": "RegistryPairings",
               "kind": "type",
-              "signature": "type RegistryPairings = {\n    readonly pairings: readonly DerivedPairing[];\n    /** Inks a primitive sets without painting a ground of its own. */\n    readonly floating: readonly PaletteSlot[];\n    /** Every ground a primitive places children on, whether or not the ramp is held to it. */\n    readonly childGrounds: readonly ChildGround[];\n    /**\n     * Grounds children land on that the text ramp is not held to. Not a failure:\n     * `accent` is here because `loom.action` fills it and answers the ink itself.\n     * It is reported because a *new* ground appearing here is the signal that\n     * either a primitive is painting somewhere unconsidered or the declared list\n     * has fallen behind the library — the same drift this module exists to catch,\n     * one level up.\n     */\n    readonly groundsOutsideTheRamp: readonly ChildGround[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n};",
+              "signature": "type RegistryPairings = {\n    readonly pairings: readonly DerivedPairing[];\n    /** Inks a primitive sets without painting a ground of its own. */\n    readonly floating: readonly PaletteSlot[];\n    /** Every ground a primitive places children on, whether or not the ramp is held to it. */\n    readonly childGrounds: readonly ChildGround[];\n    /**\n     * Grounds children land on that the text ramp is not held to. Not a failure:\n     * `accent` is here because `loom.action` fills it and answers the ink itself.\n     * It is reported because a *new* ground appearing here is the signal that\n     * either a primitive is painting somewhere unconsidered or the declared list\n     * has fallen behind the library — the same drift this module exists to catch,\n     * one level up.\n     */\n    readonly groundsOutsideTheRamp: readonly ChildGround[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Where this derivation stops seeing, by primitive. Only primitives with at\n     * least one such prop appear, so an empty list is a real claim: nothing in\n     * this registry hides an element behind a prop the probe cannot set.\n     *\n     * Reported rather than fixed, because the alternative is a probe that invents\n     * a price, a date and a URL — and a pairing derived from an invented value is\n     * a fact about the invention. A list that says it is read off the components\n     * should be able to say which part of them it read.\n     */\n    readonly unprobedProps: readonly UnprobedProps[];\n};",
               "truncated": false,
               "summary": "What a registry's components paint, as the contrast bar needs to hear it."
             },
@@ -5508,21 +5725,21 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "RegistryError",
               "kind": "type",
-              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
+              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "PrimitiveRegistry",
               "kind": "type",
-              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n};",
+              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6213,6 +6430,20 @@
               "summary": "The read half, for consumers that never write."
             }
           ]
+        },
+        {
+          "module": "store/undone",
+          "title": "Undone",
+          "summary": "Which changes in a log have been put back.",
+          "symbols": [
+            {
+              "name": "undoneRevisions",
+              "kind": "function",
+              "signature": "const undoneRevisions: (entries: readonly StoredRevision[]) => ReadonlyMap<number, StoredRevision>",
+              "truncated": false,
+              "summary": "Which revisions in this stretch of log are put back, and by which entry."
+            }
+          ]
         }
       ]
     },
@@ -6308,7 +6539,7 @@
               "kind": "schema",
               "signature": "const heldProposalSchema: z.ZodObject<…>",
               "truncated": false,
-              "summary": "The same shape, as something a stored row can be checked against."
+              "summary": ""
             },
             {
               "name": "HoldError",
@@ -6332,9 +6563,72 @@
               "summary": "Reads a hold back out of storage, or says why it could not."
             },
             {
+              "name": "HoldPosition",
+              "kind": "type",
+              "signature": "type HoldPosition = {\n    readonly heldAt: string;\n    readonly proposalId: ProposalId;\n};",
+              "truncated": false,
+              "summary": "Where a page of holds resumes: an instant and an id, never an instant alone."
+            },
+            {
+              "name": "compareHolds",
+              "kind": "function",
+              "signature": "const compareHolds: (left: HoldPosition, right: HoldPosition) => number",
+              "truncated": false,
+              "summary": "The order both listings are in: oldest first, then by id."
+            },
+            {
+              "name": "holdCursor",
+              "kind": "function",
+              "signature": "const holdCursor: (position: HoldPosition) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "holdCursorPosition",
+              "kind": "function",
+              "signature": "const holdCursorPosition: (cursor: string | undefined) => HoldPosition | undefined",
+              "truncated": false,
+              "summary": "Reads a cursor back into the position it names, or says it cannot."
+            },
+            {
+              "name": "DEFAULT_HOLD_LIMIT",
+              "kind": "value",
+              "signature": "const DEFAULT_HOLD_LIMIT = 25",
+              "truncated": false,
+              "summary": "Smaller than a tree listing's page, because a held proposal is the heaviest row this store keeps: a whole delta, the intent that asked for it, and the judgment that held it back. A reviewer reads them one at a time, so a page is sized for a screen rather than for a fold."
+            },
+            {
+              "name": "MAX_HOLD_LIMIT",
+              "kind": "value",
+              "signature": "const MAX_HOLD_LIMIT = 100",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "clampHoldLimit",
+              "kind": "function",
+              "signature": "const clampHoldLimit: (limit: number | undefined) => number",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "HoldListRequest",
+              "kind": "type",
+              "signature": "type HoldListRequest = {\n    /**\n     * Opaque to the caller: the previous page's `cursor`, passed back unread. A\n     * cursor naming a hold that has since been answered is not an error — the\n     * page resumes from the next position after it, which is what makes a queue\n     * safe to page through while people are emptying it.\n     */\n    readonly cursor?: string;\n    /** Clamped by the implementation — see `clampHoldLimit`. */\n    readonly limit?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "HoldPage",
+              "kind": "type",
+              "signature": "type HoldPage = {\n    readonly held: readonly HeldProposal[];\n    /** `null` when this was the last page. */\n    readonly cursor: string | null;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
               "name": "HoldStore",
               "kind": "interface",
-              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
+              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>;\n    readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
               "truncated": false,
               "summary": "`release` is a take, not a read: it removes and returns in one step, which is what makes answering a proposal exactly once a property of the store rather than a rule every caller has to remember. Confirming and discarding both go through it, so two confirmations racing cannot both apply the same delta."
             },
@@ -6343,7 +6637,70 @@
               "kind": "function",
               "signature": "const memoryHoldStore: () => HoldStore",
               "truncated": false,
-              "summary": "The reference implementation. Ordered by `heldAt` ascending, so a queue reads oldest-first: a change that has been waiting longest is the one most likely to be about to go stale."
+              "summary": "The reference implementation. Both listings are in `compareHolds` order, so a queue reads oldest-first: a change that has been waiting longest is the one most likely to be about to go stale."
+            }
+          ]
+        },
+        {
+          "module": "write/liveness",
+          "title": "Liveness",
+          "summary": "Which of the changes waiting for an answer can still happen.",
+          "symbols": [
+            {
+              "name": "HoldLiveness",
+              "kind": "type",
+              "signature": "type HoldLiveness = \"live\" | \"dead\" | \"unknown\";",
+              "truncated": false,
+              "summary": "What can be said about a hold, given what is known about its tree."
+            },
+            {
+              "name": "HOLD_LIVENESS",
+              "kind": "value",
+              "signature": "const HOLD_LIVENESS: readonly HoldLiveness[]",
+              "truncated": false,
+              "summary": "The three answers, as a list a host can walk."
+            },
+            {
+              "name": "holdLiveness",
+              "kind": "function",
+              "signature": "const holdLiveness: (hold: HeldProposal, headRevision: number | undefined) => HoldLiveness",
+              "truncated": false,
+              "summary": "The one comparison, in the direction `confirmHeld` makes it."
+            },
+            {
+              "name": "MarkedHold",
+              "kind": "type",
+              "signature": "type MarkedHold = {\n    readonly held: HeldProposal;\n    readonly liveness: HoldLiveness;\n    /** Absent exactly when `liveness` is `unknown`. */\n    readonly headRevision?: number;\n};",
+              "truncated": false,
+              "summary": "A hold and what is known about whether answering it could work."
+            },
+            {
+              "name": "markHolds",
+              "kind": "function",
+              "signature": "const markHolds: (holds: readonly HeldProposal[], heads: ReadonlyMap<TreeId, number>) => readonly MarkedHold[]",
+              "truncated": false,
+              "summary": "Marks a page of holds against the revisions the caller already knows."
+            },
+            {
+              "name": "treesAwaitingAnswer",
+              "kind": "function",
+              "signature": "const treesAwaitingAnswer: (holds: readonly HeldProposal[]) => readonly TreeId[]",
+              "truncated": false,
+              "summary": "The trees a page of holds is waiting on, each named once, in first-seen order."
+            },
+            {
+              "name": "MarkedHolds",
+              "kind": "type",
+              "signature": "type MarkedHolds = {\n    readonly marked: readonly MarkedHold[];\n    /**\n     * One per tree whose head could not be read. Those holds are `unknown`, and\n     * the errors are handed back rather than swallowed so a host can log them or\n     * say so on the page.\n     */\n    readonly unreadable: readonly StoreError[];\n};",
+              "truncated": false,
+              "summary": "The same page of holds, marked against heads read from the store."
+            },
+            {
+              "name": "markHoldsFromStore",
+              "kind": "function",
+              "signature": "const markHoldsFromStore: (reader: TreeReader, holds: readonly HeldProposal[]) => Promise<MarkedHolds>",
+              "truncated": false,
+              "summary": "Reads what it needs and never fails."
             }
           ]
         },
