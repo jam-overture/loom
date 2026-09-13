@@ -29,9 +29,13 @@ five bands of room left this morning, has **one** now, and the sixth band
 anybody adds — in any lane, composition or page or export — turns
 `pnpm verify` red for everybody.
 
-Two bands were written, reviewed and held out of `primitives-30` for exactly
-this reason. They are finished work sitting in a scratch directory, not a
-plan.
+Two bands were written, reviewed, screenshotted and held out of `primitives-30`
+for exactly this reason. They are finished work rather than a plan, and they are
+**parked on the branch `primitives-31-held-bands`** — deliberately not a pull
+request, because two unregistered modules are dead code. Registering them once
+the index is split is three lines in `compositions/index.ts` plus the count in
+`compositions.test.ts`; cherry-pick the two files rather than merging that
+branch as it stands.
 
 ### Why this is filed rather than fixed
 

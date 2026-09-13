@@ -122,7 +122,9 @@ bands of room this morning and has **one** now. The eighteenth band anybody adds
 — in any lane — turns `pnpm verify` red for everybody.
 
 `changelog-band` and `credentials-band` are finished and out of this branch for
-that reason alone. Filed for `Loom docs`, whose own test comment names the
+that reason alone, and parked on `primitives-31-held-bands` so the work survives
+the session that produced it — not a pull request, because two unregistered
+modules are dead code. Filed for `Loom docs`, whose own test comment names the
 remedy — *"the run that hits it should split the index rather than raise the
 number"* — and whose architecture the split is.
 
