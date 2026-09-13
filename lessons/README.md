@@ -227,6 +227,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
 | [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
 | [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
+| [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, and what shape an answer needs in order to say it; and why replacing a correct guess with an authoritative source is a regression until the authority has been told. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -261,6 +262,15 @@ page the runtime cannot see. So the pattern the first four lessons agreed on is
 now the minority reading, and the question to carry into a seventh seam is
 lesson 23's rather than lesson 22's: *what is the scope of the thing you just
 named, and is the checker allowed to see all of it?*
+
+Lesson 24 answers that question in a way the first six could not, and it is why
+Part V keeps going. The scope is one node; the reader can see all of it; and it
+still cannot answer, because what is missing is not a piece of the tree but the
+knowledge of what a piece of the tree *is*. That moves Part V off "a checker that
+cannot see enough" and onto a second axis — a checker that sees everything and
+cannot interpret it. It also moves the design question off the declaration
+itself and onto **the party that has not made one yet**, which on the day a seam
+ships is every party there is.
 
 ## Pacing
 
