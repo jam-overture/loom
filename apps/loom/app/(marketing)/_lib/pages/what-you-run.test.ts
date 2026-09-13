@@ -10,6 +10,7 @@ import {
   SITE_ROUTES,
   SITE_THEME_NAMES,
   WHAT_YOU_RUN,
+  WHO_CAN_ASK,
   YOUR_COMPONENTS,
 } from "../site"
 import { uses, wordsOf } from "../words"
@@ -266,15 +267,23 @@ describe("the front door, which asserted this twice and never showed it", () => 
  */
 describe("its place in the navigation", () => {
   /**
-   * Widened on 12 September, not relaxed: `HOME` came off the bar so that a
+   * Widened twice, never relaxed. On 12 September `HOME` came off the bar so a
    * seventh page could go on it without taking the count past the eight items
-   * #166 asked about. The list is still exact, so a fourth page leaving the bar
-   * still fails here and still has to be argued for.
+   * #166 asked about; on 13 September `/who-can-ask` was added off it, on the
+   * argument that it is the second question a reader of `/the-rules` asks
+   * rather than something anybody arrives wanting.
+   *
+   * **Four of eight is a bad answer to a real problem and it is not this
+   * assertion's job to hide that.** The good answer is a bar that groups, which
+   * `loom.nav` cannot — it takes a flat run of links and nothing in the library
+   * opens. Filed for `Loom primitives` on 12 September and still open. The list
+   * stays exact so a fifth fails here and has to be argued for.
    */
-  it("is off the bar deliberately, with two other pages", () => {
+  it("is off the bar deliberately, with three other pages", () => {
     expect(WHAT_YOU_RUN.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
+      WHO_CAN_ASK,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

@@ -8,6 +8,102 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around here, and the workaround does not generalise
+
+`tokens.ts` already carries the warning in prose: a token *"promises the value
+comes from the theme. It promises nothing about that value being different from
+the one beside it."* It was written after `loom.emphasis` marked a stressed word
+with `weight("heading")` and rendered it identically to the sentence around it
+under `bold-sans`. **The colour axis has the same hole, and this run walked
+into it.**
+
+`editorial` declares `accent: "#4a5b78"` and `brand-secondary: "#4a5b78"` — the
+same hex, legitimately, because a single-accent palette mirrors its accent into
+its secondary and `palettes.ts` says so on purpose. So the obvious spelling of
+an accent wash, `linear-gradient(accent, brand-secondary)`, is **a gradient
+between a colour and itself**: a flat fill, under one of the two starter
+palettes, in which every screenshot in this repository is taken first. Nothing
+fails. No test sees it. The render is correct, the tokens are correct, and the
+effect is invisible.
+
+**Worked around rather than fixed.** `loom.emphasis`'s `washed` tone and
+`loom.halo`'s rims both read `accent-strong` and `brand-secondary` instead —
+the pair `loom.hero`'s aurora already paints, which every palette gives real
+chroma because they are painted as areas — and `library.test.ts` now asserts
+those two differ in every registered palette. That closes it for the two things
+built here and for nothing else.
+
+**Why it is filed for the framework lane.** The workaround is a pair of slots
+this lane happened to check. The general fact — *which slots a palette has
+collapsed* — is knowable, and `src/theme/` is already the place that knows this
+kind of thing:
+[0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md)
+established that what a palette cannot say about itself is measured from it, and
+`measure.ts` already walks the slots. A distinctness measure is the same shape
+as the contrast one — a pair of slots, a threshold, a report — and would let a
+primitive that needs two visibly different colours say so, or at least let a
+palette author see which of their slots are collapsed before a page depends on
+it.
+
+The cheap version is a test rather than a seam: `contrast.test.ts` iterates
+`STARTER_PALETTES` already, and an assertion that the area pair is never
+collapsed would have caught this before any primitive did. That is worth having
+whether or not the measure is built, and it is `src/theme/`'s file rather than
+this lane's.
+
+**Not urgent, and nothing is blocked.** Both primitives ship correct under every
+registered palette. What is open is the next lane to reach for two slots and a
+gradient, who has no way to find out that one palette holds one colour in both.
+
+---
+## 2026-09-13 — a lesson transcript pins the size of the library, so every primitive added falsifies another lane's prose
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:** open
+— the mechanical half is done on `primitives-28-what-catches-the-eye`; the
+editorial half is yours
+
+`lessons/22-reach.md` and `lessons/23-anchors.md` each print
+`primitives registered: N` in a saved transcript, and
+`app/(lessons)/_lib/transcripts.test.ts` checks those lines against what the
+program actually prints. That is a good test and it did its job: adding
+`loom.halo` turned it red immediately, which is exactly when a stale transcript
+should be found.
+
+**What this run changed in your lane, and why it could not be filed instead.**
+`pnpm verify` green is the merge gate for every lane, so the two transcript
+lines had to move from 91 to 92 on this branch. Three prose sentences naming
+"ninety-one" went with them, because a lesson that prints 92 two paragraphs
+below a sentence saying ninety-one is worse than either number alone. Five
+one-word edits, no pedagogy touched, and none of the counts the lessons actually
+turn on — targets is still 12, the anchor answer is still zero, and `loom.halo`
+declares neither.
+
+**What is left, and it is genuinely yours.** `lessons/22-reach.md` line 468
+says *"Seventy primitives ship in the starter library"* immediately above a
+transcript that has printed a different number since at least 91. That one was
+already stale before this run and is not mechanical — it sets up a prediction
+the reader is asked to make, so rewriting it is an editorial call about the
+exercise rather than a find-and-replace.
+
+**The shape, which outlives both instances.** The library's size is a number
+this lane changes on purpose and a number your lessons quote in prose. It will
+drift again on the next primitive, and the next. Three options, and the choice
+is yours:
+
+- **Have the lesson print it and never say it** — the transcript is already
+  generated, so the prose could say *"however many the library registers"* and
+  the number would maintain itself.
+- **Keep the number and accept a one-word edit per primitive**, which is what
+  happened here and costs a cross-lane diff each time.
+- **Make it the point.** A lesson about a library that grows could quote the
+  number *and* the date it was true, which is honest and never goes stale.
+
+Nothing is blocked. Both lessons are correct on this branch.
+
+---
 ## 2026-09-12 — the demo asked its leading question twice, and the duplicate was the one everything addressed
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** closed by
@@ -13513,7 +13609,11 @@ holds both as well, if that turns out to be the answer there too.
 
 ## 2026-09-10 — a preview of a tree loses its theme, and there is no seam for "the words a node shows"
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-25-where-the-face-is` (#230) — `renderLoomExcerpt` mounts the
+theme on a subtree (0121) and a primitive declares which of its props a reader
+reads (0122). Both landed on 10 September, hours after this was filed, and the
+status line was never edited; marked on 13 September by the lane that owns it.
 
 Two small gaps found building a second rendering of one node of a page. Neither
 blocked the unit — both were worked around inside the demo's lane — and both are
@@ -13697,7 +13797,11 @@ that a link inside a record resolves to a file that exists.
 
 ## 2026-09-07 — the frame seam cites 0094 eight times and means 0095
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-25-where-the-face-is` (#230) — all eight now cite 0095, the three
+correct citations in `library.test.ts` were left alone, and the check this entry
+asked for is 0118: `pnpm test` fails on a citation in `src/` that resolves to no
+record. Verified on `main` on 13 September.
 
 Every doc comment in the framing seam that names its own decision record names
 the wrong one. Eight sites, all of them `(0094)` where the record is
@@ -13740,7 +13844,10 @@ is a better argument for it than one site was.
 
 ## 2026-09-07 — 0095 says no primitive uses the framing seam, and one has since 26 August
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** closed
+by `framework-25-where-the-face-is` (#230) — 0095 carries an *Amended 2026-09-09*
+note under 0099, naming `loom.embed` as the consumer, which is what this entry
+asked for rather than a supersession. Verified on `main` on 13 September.
 
 0095's Consequences section says:
 
@@ -14789,6 +14896,24 @@ made on four consecutive runs.
 ---
 
 ## 2026-09-04 — a Node server in this sandbox cannot reach the model unless it is told to use the proxy, and the failure is a hang
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** the
+hang is closed by `framework-31-the-ceiling-on-a-foreign-call`; **open** for the
+recipe. Original status below.
+
+> **Closed half, 13 September.** *"The failure is a hang"* was a framework
+> defect and not only a sandbox fact, and it is fixed rather than documented:
+> `modelInterpreter` now bounds every call it makes and reports
+> `interpreter-unavailable` with *"no reply in 3m"*; `resolveDataPlan` and
+> `resolveSubmissionPlan` bound each source and each endpoint at ten seconds
+> (0140). The *"Working on it…"* button gets an answer now whether or not the
+> server was told about the proxy.
+>
+> **Open half.** The four traps in this entry — the environment variables, the
+> `pkill` pattern that kills its own shell, the submit button found by label, the
+> pending text as the only settled signal — are still a recipe nobody has written
+> down in code. They belong with the shared serve-and-shoot script the 8 September
+> entry asks for, and that script still has no owner.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open —
 a recipe, so the next run does not spend forty minutes rediscovering it
@@ -22405,3 +22530,126 @@ The third is the one worth the entry. This lane's instinct with a browser-only
 seam would have been a code sample and a description, and the page would have
 been unfalsifiable — which is the failure mode §4c's registry rule exists to
 prevent for trees, and had no equivalent for behaviour until this page.
+## 2026-09-13 — `/the-rules` writes the order the Gate asks its questions in, and has stopped
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-24-who-can-ask`** — closes this lane's 28 August entry,
+*the Gate asks its rules in an order nothing outside the runtime can read*, and
+the note on it of 2 September saying the deletion was ours to make.
+
+`ESCALATION_LADDER` has been exported from `@loom/runtime` since #181 — derived
+from `ESCALATION_RULES` rather than declared beside them, so it cannot disagree
+with the order it describes — and the 2 September closure recorded that
+*"`app/(marketing)/_lib/pages/the-rules.ts` still writes the order by hand and
+can now stop"*. It did not stop, for eleven days, because nothing was red: the
+hand-written order was correct, and a correct copy of a list is wrong only from
+the first time the list changes.
+
+**What changed.** The seven questions are now written in `QUESTIONS`, in
+whatever order reads well, and `RULES` is `ESCALATION_LADDER.map(...)` — so the
+runtime's order is the one that reaches the page, and a rung with no question
+here throws while the page is being built rather than leaving the page claiming
+to list all of them.
+
+**The assertion is in two places and they are different assertions.** One holds
+`RULES` against the ladder; the other holds the **rendered page**, by finding
+each rung's sentence in the words a reader gets and requiring the positions to
+increase. A correctly ordered list printed in some other order passes the first
+and fails the second, and the band's whole claim — *the first no wins* — is
+about the order a reader sees.
+
+Verified by mutation: printing the list reversed takes 23 of the 28 marketing
+test files red.
+
+---
+
+## 2026-09-13 — four of the eight pages are now off the bar, and the bar still cannot group
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — not a new finding, a measurement on the one filed on 12 September
+
+The 12 September entry — *the bar cannot group, and `loom.nav` takes a flat run
+of `loom.link` children with nothing in the library that opens* — was filed when
+three of seven pages had been kept off the top bar. `/who-can-ask` is the eighth
+page and the fourth off it.
+
+**So the bar now carries half the site.** Each individual decision is defensible
+and the guarantee behind them holds — `chrome.test.ts` still holds *off the bar*
+to mean *in the footer's map, marked as the page the reader is on* — and the
+aggregate is a top bar that is no longer a map of the site. The footer is doing
+that job alone.
+
+Nothing here is a request to change the count. It is the number the 12 September
+finding asked to be told about, recorded on the run that moved it, so whoever
+picks that work up knows what it is worth: a menu that opens would let the eight
+pages sit under three headings, which is what `supabase.com` does with more
+pages than this and what the bar was measured against on #166.
+
+---
+
+## 2026-09-13 — a comparison is four subjects wide on a laptop and one subject wide on a phone
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — the band works, and a phone reader is getting a quarter of it
+
+`/who-can-ask` is built on `loom.comparison-table` with four subjects, which is
+the maximum the primitive documents (*"four is where a comparison stops being
+readable anyway; a fifth subject is a column a reader scrolls to"*). On a
+laptop it is the best band this lane has built: sixteen measured marks, and the
+whole argument readable at a glance.
+
+At 390px the table scrolls sideways **inside its own edge**, which is correct
+and is the 20 August phone-scrollbar finding being honoured — `scrollWidth` is
+exactly 390. The cost is that a phone reader sees the criterion column and *one*
+subject, with nothing announcing that three more exist to the right.
+
+**Worked around rather than filed against, for this page.** The sentence under
+the table is composed from the same runs and says in words what the marks say,
+so a phone reader gets the argument. That is a mitigation and not a fix: a
+reader who never scrolls the table never learns that the four askers were
+treated differently, which is the only thing the band is for.
+
+**What a fix might be**, from the outside and offered rather than prescribed: a
+comparison could stack on a narrow viewport — one block per criterion, each
+listing its subjects and marks down the page — the way the two-dimensional
+tables on every pricing page a reader has used already do. It is a static
+stylesheet decision rather than a prop (0008), which is the shape that already
+works for `loom.nav`'s collapse.
+
+**Nothing is blocked on this.** The page is shipped and the band is good on the
+viewport it was designed for.
+## 2026-09-13 — the data seam can now say "the adapter never came back", and `/docs` has no row for it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+a consequence of 0140, filed with the change that produced it
+
+`app/(docs)/_lib/data/answers.ts` types every way an answer fails to arrive and
+prints a table of them. Two of its cells are now sometimes wrong, and they are
+wrong because of a change made in `src/` today rather than because anybody wrote
+them badly:
+
+```ts
+const REACHED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["reached"]>> = {
+  unavailable: "the adapter answered",
+}
+```
+
+`reached` has two members — *"the adapter was never called"* and *"the adapter
+answered"* — and until today those were the only two states there were. 0140
+adds a third: **the render gave up on a source that never came back.** The
+adapter was called, it did not answer, and nothing it did produced the outcome;
+the runtime's ceiling did, at ten seconds, and the detail reads `no answer in 10s`.
+
+`WHAT_HAPPENED["unavailable"]` is the other half, and it is the more interesting
+one. It says *"The query timed out"* — which was aspirational when it was
+written, because the only way to reach `unavailable` was for an adapter to report
+it, and an adapter that hangs reported nothing at all. **The page has been
+describing the timeout since before the seam could produce one.** It can now.
+
+No new reason code was added, deliberately: `unavailable` already means "ask
+again later, nobody has to act", and growing the union would have turned these
+two `Record`s red in your lane to split two states with the same remedy. The
+record says so in as many words and names the revisit condition — when something
+actually wants to count *slow* apart from *down*. So this is a page change and
+not a type change: a third `reached` member, and a row whose `when` is the
+integration that never replies, which is the one the portal lane lost a run to.

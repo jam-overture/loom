@@ -121,6 +121,23 @@ export const BECAUSE = {
     "This weighs more than your rules let a request through on its own, so it waits for a person to say yes.",
 } satisfies Record<DispositionReasonCode, string>
 
+/**
+ * The one code above that is not a rule.
+ *
+ * It is what the record carries when none of the seven fired, so it belongs
+ * with the band about the three answers rather than in any list of questions —
+ * and naming it here rather than inline is what lets two pages say *every code
+ * is either a question we print or this one* without a literal in two files.
+ *
+ * It moved here from `pages/the-rules.ts` on 13 September, when a second reader
+ * needed it: `adapt/askers.ts` counts the rules whose answer changed with who
+ * was asking, and counting this one would report the **absence** of a rule as a
+ * rule. A page module importing another page module's constant is the wrong
+ * direction — pages read this layer, not each other — so it sits beside
+ * `BECAUSE`, whose keys it is one of.
+ */
+export const NOT_A_RULE: DispositionReasonCode = "within-policy"
+
 /** What raised the weight, one clause per code. Joined into the sentence below. */
 const RAISED_BY = {
   "protected-type-removed": "it destroys something you marked as protected",

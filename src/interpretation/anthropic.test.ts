@@ -57,6 +57,22 @@ const stub = (
   }
 }
 
+/** Remembers the request options the adapter passed, which is where the signal goes. */
+const watchingOptions = (): AnthropicMessages & {
+  readonly options: readonly ({ readonly signal?: AbortSignal } | undefined)[]
+} => {
+  const options: ({ readonly signal?: AbortSignal } | undefined)[] = []
+
+  return {
+    options,
+    create: (_params, given) => {
+      options.push(given)
+
+      return Promise.resolve(message({}))
+    },
+  }
+}
+
 describe("anthropicModelClient", () => {
   it("asks for the schema-constrained reply on a single user turn", async () => {
     const messages = stub(message({}))
@@ -185,6 +201,29 @@ describe("anthropicModelClient", () => {
 
     it("stays unavailable when nothing carried a status at all", async () => {
       expect(await codeFor(new Error("socket hang up"))).toBe("unavailable")
+    })
+  })
+
+  /**
+   * The adapter does not own the ceiling — `modelInterpreter` does (0140) — so
+   * all that is asked of it here is that it hands the signal on. Without that,
+   * giving up on a reply leaves the SDK holding the connection.
+   */
+  describe("the caller's signal", () => {
+    it("goes to the SDK, so giving up closes the connection", async () => {
+      const messages = watchingOptions()
+      const signal = AbortSignal.abort()
+
+      await anthropicModelClient(messages).complete(request, { signal })
+
+      expect(messages.options[0]?.signal).toBe(signal)
+    })
+
+    it("is omitted rather than passed as undefined when there is none", async () => {
+      const messages = watchingOptions()
+      await anthropicModelClient(messages).complete(request)
+
+      expect(messages.options).toEqual([undefined])
     })
   })
 })

@@ -62,7 +62,7 @@
             {
               "name": "SourceRequest",
               "kind": "type",
-              "signature": "type SourceRequest<TParams> = {\n    readonly params: TParams;\n    /** The render request's opaque host context — audience, locale, tenant. */\n    readonly context: JsonObject | undefined;\n};",
+              "signature": "type SourceRequest<TParams> = {\n    readonly params: TParams;\n    /** The render request's opaque host context — audience, locale, tenant. */\n    readonly context: JsonObject | undefined;\n    /**\n     * Aborted once the render has stopped waiting for this binding, which it will\n     *. An adapter that ignores it still cannot delay the page; what it holds\n     * on to is a connection whose answer nothing will read. Pass it to whatever\n     * does the IO — `fetch`, a driver's query options — and the pool gets it back.\n     */\n    readonly signal: AbortSignal | undefined;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -104,7 +104,7 @@
             {
               "name": "SourceEntry",
               "kind": "type",
-              "signature": "type SourceEntry = {\n    readonly id: string;\n    readonly description: string;\n    readonly declaredParams: readonly CataloguedProp[] | undefined;\n    /** Total: validates, calls, catches, validates again. Never rejects. */\n    readonly answer: (params: JsonObject, context: JsonObject | undefined) => Promise<Result<JsonValue, DataUnavailable>>;\n};",
+              "signature": "type SourceEntry = {\n    readonly id: string;\n    readonly description: string;\n    readonly declaredParams: readonly CataloguedProp[] | undefined;\n    /** Total: validates, calls, catches, validates again. Never rejects. */\n    readonly answer: (params: JsonObject, context: JsonObject | undefined, signal?: AbortSignal) => Promise<Result<JsonValue, DataUnavailable>>;\n};",
               "truncated": false,
               "summary": "A definition with its types erased, which is what a heterogeneous registry can hold. `defineSource` is the only way to build one, so the erasure happens once, where both schemas and the adapter are still in hand and can be proved to agree."
             },
@@ -349,9 +349,16 @@
             {
               "name": "ResolveDataOptions",
               "kind": "type",
-              "signature": "type ResolveDataOptions = {\n    readonly registry: DataRegistry;\n    /** Passed through to every adapter — the render request's host context. */\n    readonly context?: JsonObject;\n};",
+              "signature": "type ResolveDataOptions = {\n    readonly registry: DataRegistry;\n    /** Passed through to every adapter — the render request's host context. */\n    readonly context?: JsonObject;\n    /**\n     * How long any one source is given, each independently of the others. Defaults\n     * to `DEFAULT_SOURCE_CEILING_MS`; there is no way to wait forever.\n     */\n    readonly ceilingMs?: number;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "DEFAULT_SOURCE_CEILING_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_SOURCE_CEILING_MS = 10000",
+              "truncated": false,
+              "summary": "Ten seconds per source, which is already several times longer than a reader will wait for a page and generous for a query somebody has indexed."
             },
             {
               "name": "resolveDataPlan",
@@ -415,6 +422,34 @@
               "signature": "type BindingName = z.infer<typeof bindingNameSchema>;",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "deadline",
+          "title": "Deadline",
+          "summary": "A ceiling on an await into somebody else's code.",
+          "symbols": [
+            {
+              "name": "ceilingOf",
+              "kind": "function",
+              "signature": "const ceilingOf: (given: number | undefined, fallback: number) => number",
+              "truncated": false,
+              "summary": "The ceiling a caller named, or the default when it named nothing usable."
+            },
+            {
+              "name": "describeCeiling",
+              "kind": "function",
+              "signature": "const describeCeiling: (ms: number) => string",
+              "truncated": false,
+              "summary": "`250ms`, `10s`, `3m` — a ceiling in the unit somebody would say it in."
+            },
+            {
+              "name": "withCeiling",
+              "kind": "function",
+              "signature": "const withCeiling: <T>(ceilingMs: number, expired: () => T, attempt: (signal: AbortSignal) => Promise<T>) => Promise<T>",
+              "truncated": false,
+              "summary": "Runs `attempt` with a ceiling, and answers with `expired()` if it is reached first."
             }
           ]
         },
@@ -732,6 +767,13 @@
               "summary": ""
             },
             {
+              "name": "ModelCallOptions",
+              "kind": "type",
+              "signature": "type ModelCallOptions = {\n    readonly signal?: AbortSignal;\n};",
+              "truncated": false,
+              "summary": "How the call is being made, as distinct from what is being asked."
+            },
+            {
               "name": "ModelCompletion",
               "kind": "type",
               "signature": "type ModelCompletion = {\n    /** The reply body, expected to be JSON matching `outputSchema`. */\n    readonly text: string;\n    /** The model that actually served the request, which may differ from the one asked for. */\n    readonly servedBy: string;\n};",
@@ -748,9 +790,9 @@
             {
               "name": "ModelClient",
               "kind": "interface",
-              "signature": "interface ModelClient {\n    readonly complete: (request: ModelRequest) => Promise<Result<ModelCompletion, ModelClientError>>;\n}",
+              "signature": "interface ModelClient {\n    readonly complete: (request: ModelRequest, options?: ModelCallOptions) => Promise<Result<ModelCompletion, ModelClientError>>;\n}",
               "truncated": false,
-              "summary": ""
+              "summary": "An implementation is allowed to take as long as it likes; it is not allowed to decide how long the runtime waits. `modelInterpreter` puts a ceiling on every call it makes, so a client that hangs is reported as `unavailable` rather than becoming a page that never finishes loading — which is true of a host's own client as much as of the Anthropic adapter."
             }
           ]
         },
@@ -837,9 +879,16 @@
               "summary": ""
             },
             {
+              "name": "DEFAULT_INTERPRETER_CEILING_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_INTERPRETER_CEILING_MS = 180000",
+              "truncated": false,
+              "summary": "Three minutes, which is long enough that no interpretation this repository has measured comes near it and short enough that a request nobody is ever going to answer is reported while somebody is still looking at the screen."
+            },
+            {
               "name": "ModelInterpreterConfig",
               "kind": "type",
-              "signature": "type ModelInterpreterConfig = {\n    readonly client: ModelClient;\n    readonly idFactory: IdFactory;\n    readonly clock: Clock;\n    readonly model?: string;\n    readonly maxTokens?: number;\n    readonly effort?: ModelEffort;\n    readonly draftDepth?: number;\n    /**\n     * What this deployment can build with. Absent means the model is told only\n     * what the tree shows, which is what §2 shipped with; a host that has a §4\n     * registry projects it with `catalogueOf` and the model stops guessing at\n     * primitive names it has no way to know.\n     */\n    readonly catalogue?: PrimitiveCatalogue;\n    /**\n     * What this deployment may be themed with. Absent means the model is shown no\n     * theme vocabulary and cannot re-theme anything: the ids in the tree are the\n     * only ones it knows, so \"make it warmer\" has nowhere to go but an invented\n     * id that fails to resolve. A host with a §4b theme registry passes\n     * `themes.catalogue()`.\n     */\n    readonly themeCatalogue?: ThemeCatalogue;\n};",
+              "signature": "type ModelInterpreterConfig = {\n    readonly client: ModelClient;\n    readonly idFactory: IdFactory;\n    readonly clock: Clock;\n    readonly model?: string;\n    readonly maxTokens?: number;\n    readonly effort?: ModelEffort;\n    /**\n     * How long to wait for a reply before reporting that there was not one.\n     * Defaults to `DEFAULT_INTERPRETER_CEILING_MS`; there is no way to wait\n     * forever, deliberately.\n     */\n    readonly ceilingMs?: number;\n    readonly draftDepth?: number;\n    /**\n     * What this deployment can build with. Absent means the model is told only\n     * what the tree shows, which is what §2 shipped with; a host that has a §4\n     * registry projects it with `catalogueOf` and the model stops guessing at\n     * primitive names it has no way to know.\n     */\n    readonly catalogue?: PrimitiveCatalogue;\n    /**\n     * What this deployment may be themed with. Absent means the model is shown no\n     * theme vocabulary and cannot re-theme anything: the ids in the tree are the\n     * only ones it knows, so \"make it warmer\" has nowhere to go but an invented\n     * id that fails to resolve. A host with a §4b theme registry passes\n     * `themes.catalogue()`.\n     */\n    readonly themeCatalogue?: ThemeCatalogue;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -2148,7 +2197,7 @@
             {
               "name": "EndpointRequest",
               "kind": "type",
-              "signature": "type EndpointRequest = {\n    /** The render request's opaque host context — audience, locale, tenant. */\n    readonly context: JsonObject | undefined;\n};",
+              "signature": "type EndpointRequest = {\n    /** The render request's opaque host context — audience, locale, tenant. */\n    readonly context: JsonObject | undefined;\n    /**\n     * Aborted once the render has stopped waiting for this endpoint, which it\n     * will. Pass it to whatever does the IO and the connection is let go;\n     * ignore it and the page is still answered on time, but the socket is not.\n     */\n    readonly signal: AbortSignal | undefined;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -2183,7 +2232,7 @@
             {
               "name": "EndpointEntry",
               "kind": "type",
-              "signature": "type EndpointEntry = {\n    readonly id: string;\n    readonly description: string;\n    /** Total: calls, catches, validates. Never rejects. */\n    readonly resolve: (context: JsonObject | undefined) => Promise<Result<SubmissionTarget, SubmissionUnavailable>>;\n};",
+              "signature": "type EndpointEntry = {\n    readonly id: string;\n    readonly description: string;\n    /** Total: calls, catches, validates. Never rejects. */\n    readonly resolve: (context: JsonObject | undefined, signal?: AbortSignal) => Promise<Result<SubmissionTarget, SubmissionUnavailable>>;\n};",
               "truncated": false,
               "summary": "A definition with the host's own types erased, which is what a heterogeneous registry can hold. `defineEndpoint` is the only way to build one, so the validation of what the host answered happens in exactly one place."
             },
@@ -2330,9 +2379,16 @@
             {
               "name": "ResolveSubmissionsOptions",
               "kind": "type",
-              "signature": "type ResolveSubmissionsOptions = {\n    readonly registry: EndpointRegistry;\n    /** Passed through to every endpoint — the render request's host context. */\n    readonly context?: JsonObject;\n};",
+              "signature": "type ResolveSubmissionsOptions = {\n    readonly registry: EndpointRegistry;\n    /** Passed through to every endpoint — the render request's host context. */\n    readonly context?: JsonObject;\n    /**\n     * How long any one endpoint is given, each independently of the others.\n     * Defaults to `DEFAULT_ENDPOINT_CEILING_MS`; there is no way to wait forever\n     *.\n     */\n    readonly ceilingMs?: number;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "DEFAULT_ENDPOINT_CEILING_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_ENDPOINT_CEILING_MS = 10000",
+              "truncated": false,
+              "summary": "Ten seconds, the data seam's number and for its reason: this is a page being served, and a reader is waiting for it."
             },
             {
               "name": "resolveSubmissionPlan",
@@ -4066,7 +4122,7 @@
             {
               "name": "AnthropicMessages",
               "kind": "type",
-              "signature": "type AnthropicMessages = {\n    readonly create: (params: Anthropic.MessageCreateParamsNonStreaming) => Promise<Anthropic.Message>;\n};",
+              "signature": "type AnthropicMessages = {\n    readonly create: (params: Anthropic.MessageCreateParamsNonStreaming, options?: {\n        readonly signal?: AbortSignal;\n    }) => Promise<Anthropic.Message>;\n};",
               "truncated": false,
               "summary": "Structurally satisfied by an `Anthropic` instance, so production passes the real client and tests pass a stub, without either needing the other."
             },
@@ -7779,6 +7835,20 @@
               "signature": "const scriptedModelClient: (reply: string | Result<ModelCompletion, ModelClientError>, servedBy?: string) => RecordingModelClient",
               "truncated": false,
               "summary": "A model that answers from a script and remembers what it was asked, so the interpreter's request assembly and its reply handling can be tested separately, and neither needs a network or a key."
+            },
+            {
+              "name": "HangingModelClient",
+              "kind": "type",
+              "signature": "type HangingModelClient = ModelClient & {\n    /** Whether the runtime's ceiling aborted the call, and what it said. */\n    readonly abortedWith: () => string | undefined;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "hangingModelClient",
+              "kind": "function",
+              "signature": "const hangingModelClient: () => HangingModelClient",
+              "truncated": false,
+              "summary": "A model that never answers — the failure mode a `try`/`catch` cannot see and the reason `modelInterpreter` has a ceiling."
             },
             {
               "name": "RecordingInterpreter",

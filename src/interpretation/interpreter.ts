@@ -1,4 +1,5 @@
 import type { PrimitiveCatalogue } from "../catalogue.js"
+import { ceilingOf, describeCeiling, withCeiling } from "../deadline.js"
 import type { IdFactory } from "../ids.js"
 import { assertNever, err, ok, type Result } from "../result.js"
 import type { Clock } from "../runtime/events.js"
@@ -14,7 +15,7 @@ import type { ThemeCatalogue } from "../theme/registry.js"
 import { parseDelta, type TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import type { ModelClient, ModelClientError, ModelEffort } from "./client.js"
+import type { ModelClient, ModelClientError, ModelCompletion, ModelEffort } from "./client.js"
 import { interpretationReplySchema, type InterpretationReply } from "./draft.js"
 import { materializeDelta } from "./materialize.js"
 import { buildRepairMessage, buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
@@ -40,6 +41,18 @@ export const DEFAULT_INTERPRETER_MODEL = "claude-opus-5"
 export const DEFAULT_MAX_TOKENS = 16000
 export const DEFAULT_EFFORT: ModelEffort = "high"
 
+/**
+ * Three minutes, which is long enough that no interpretation this repository has
+ * measured comes near it and short enough that a request nobody is ever going to
+ * answer is reported while somebody is still looking at the screen.
+ *
+ * It is a default rather than a constant because the right number is a property
+ * of the deployment: a portal with a reader waiting wants less, a batch job
+ * rewriting a hundred pages can afford more. What is not a property of the
+ * deployment is whether to have one (0140).
+ */
+export const DEFAULT_INTERPRETER_CEILING_MS = 180_000
+
 export type ModelInterpreterConfig = {
   readonly client: ModelClient
   readonly idFactory: IdFactory
@@ -47,6 +60,12 @@ export type ModelInterpreterConfig = {
   readonly model?: string
   readonly maxTokens?: number
   readonly effort?: ModelEffort
+  /**
+   * How long to wait for a reply before reporting that there was not one.
+   * Defaults to `DEFAULT_INTERPRETER_CEILING_MS`; there is no way to wait
+   * forever, deliberately (0140).
+   */
+  readonly ceilingMs?: number
   readonly draftDepth?: number
   /**
    * What this deployment can build with. Absent means the model is told only
@@ -140,14 +159,31 @@ const propose = async (
   intent: EditIntent,
   userMessage: string
 ): Promise<Result<ProposedChange, InterpretationError>> => {
-  const completion = await config.client.complete({
-    model: config.model ?? DEFAULT_INTERPRETER_MODEL,
-    maxTokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
-    effort: config.effort ?? DEFAULT_EFFORT,
-    system: INTERPRETER_SYSTEM_PROMPT,
-    userMessage,
-    outputSchema: interpretationReplyJsonSchema(config.draftDepth ?? DEFAULT_DRAFT_DEPTH),
-  })
+  const ceiling = ceilingOf(config.ceilingMs, DEFAULT_INTERPRETER_CEILING_MS)
+
+  /**
+   * The ceiling is enforced here rather than in the Anthropic adapter, because
+   * the seam's promise is to a caller of the interpreter and not to a vendor: a
+   * host that brings its own `ModelClient` gets the same bound without having
+   * written one (0140).
+   */
+  const completion = await withCeiling(
+    ceiling,
+    (): Result<ModelCompletion, ModelClientError> =>
+      err({ code: "unavailable", detail: `no reply in ${describeCeiling(ceiling)}` }),
+    (signal) =>
+      config.client.complete(
+        {
+          model: config.model ?? DEFAULT_INTERPRETER_MODEL,
+          maxTokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
+          effort: config.effort ?? DEFAULT_EFFORT,
+          system: INTERPRETER_SYSTEM_PROMPT,
+          userMessage,
+          outputSchema: interpretationReplyJsonSchema(config.draftDepth ?? DEFAULT_DRAFT_DEPTH),
+        },
+        { signal }
+      )
+  )
 
   if (!completion.ok) return err(fromClientError(completion.error))
 

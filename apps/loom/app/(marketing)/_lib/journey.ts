@@ -67,9 +67,16 @@ export const JOURNEY: readonly JourneyStep[] = [
  * This is the missing half — the count, spelled — so the sentence can be
  * composed from the list and still read like a sentence.
  *
- * Bounded deliberately. Past ten a marketing sentence should not be counting at
- * all, and a numeral is a better failure than a wrong word, so anything larger
- * comes back as digits rather than throwing on a page a visitor is loading.
+ * Bounded deliberately, and a numeral is a better failure than a wrong word, so
+ * anything larger comes back as digits rather than throwing on a page a visitor
+ * is loading.
+ *
+ * **The bound was ten until 13 September**, on the reasoning that past ten a
+ * marketing sentence should not be counting at all. `/who-can-ask` is the
+ * counter-example: its whole band is four requests put by four askers, and
+ * *sixteen answers* is the claim rather than an incidental tally. So it runs to
+ * twenty — far enough for a page to count something it deliberately counted,
+ * and short of the range where the reasoning above starts being right again.
  */
 const NUMBER_WORDS: readonly string[] = [
   "no",
@@ -83,6 +90,16 @@ const NUMBER_WORDS: readonly string[] = [
   "eight",
   "nine",
   "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
 ]
 
 export const spell = (count: number): string =>
