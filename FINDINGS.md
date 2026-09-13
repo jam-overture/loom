@@ -22209,6 +22209,24 @@ would close it is one line in the brief or in `docs/routines.md` telling a run
 what to do with the subscription when the harness opens one, so the next lane
 does not have to reason from first principles about whether to obey it.
 
+**Third data point, 13 September, `Loom demo` on #292.** Same order, same
+words, same resolution: nothing scheduled, and unsubscribed once the one check
+went green. Three events paid to get there — two subscription notices and the
+Vercel bot's deployment comment.
+
+One thing worth adding to the two entries above, because it is the only part of
+the order that earned its keep: **the deployment comment is how a run learns its
+own preview URL.** The report and the pull request are told to carry it, the
+comment arrives *after* the push that creates them, and `vercel.app` is not on
+the egress allowlist so it cannot be fetched — so the URL is only ever knowable
+from that event. This run pushed a second, documentation-only commit to replace
+a `REPLACE_PREVIEW` placeholder it had already published. That is the honest
+argument for staying subscribed *briefly* rather than not at all, and it is
+still not an argument for a check-in on a cadence. If the brief ever gains the
+line this entry asks for, the useful shape is: **stay subscribed until the
+deployment comment arrives and the checks settle, take the URL, then
+unsubscribe — and never schedule anything.**
+
 ## 2026-09-11 — the ring was a claim about a band that had not changed, and it was drawn at the demo's payoff
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
