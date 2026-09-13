@@ -371,6 +371,7 @@ describe("the page itself", () => {
   it("did not cost the bar an item", () => {
     expect(SITE_ROUTES.filter((route) => !route.inMenu).map((route) => route.path)).toEqual([
       "/",
+      "/who-can-ask",
       "/what-you-run",
       "/your-components",
     ])

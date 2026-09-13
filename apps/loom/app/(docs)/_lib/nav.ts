@@ -232,6 +232,12 @@ const orderedSections: readonly DocsSection[] = [
           "The record of what was asked rather than of what happened: what a telemetry record keeps, the eight ways an ask can end, whether a confidence was worth anything, and how a journal is allowed to forget.",
       },
       {
+        slug: "what-your-readers-do",
+        title: "What your readers do",
+        summary:
+          "A published page can report how it is being read — four kinds of signal, no content in any of them, and nothing switched on until your own code asks for it.",
+      },
+      {
         slug: "going-to-production",
         title: "Going to production",
         summary:

@@ -472,7 +472,7 @@ name three you are sure of and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 91
+  primitives registered: 92
   of those, declaring a target: 12
     loom.nav         "always"
     loom.card        {"whenProps":["href"]}
@@ -488,7 +488,7 @@ The output:
     loom.link        "always"
 ```
 
-Twelve of ninety-one. Most of a component library arranges targets rather than
+Twelve of ninety-two. Most of a component library arranges targets rather than
 being one, which is the ratio that makes this check affordable.
 
 Two entries in that list should stop you. `loom.code` is a code block — an

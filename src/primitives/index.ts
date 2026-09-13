@@ -38,6 +38,7 @@ import { loomFooter } from "./loom.footer.js"
 import { loomFrame } from "./loom.frame.js"
 import { loomForm } from "./loom.form.js"
 import { loomGrid } from "./loom.grid.js"
+import { loomHalo } from "./loom.halo.js"
 import { loomHeading } from "./loom.heading.js"
 import { loomHero } from "./loom.hero.js"
 import { loomIcon } from "./loom.icon.js"
@@ -389,6 +390,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomReveal,
   loomBackdrop,
   loomOverlay,
+  loomHalo,
   loomCard,
   loomFrame,
   loomPin,

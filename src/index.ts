@@ -9,6 +9,7 @@
 
 export * from "./catalogue.js"
 export * from "./data/index.js"
+export * from "./deadline.js"
 export * from "./frame/index.js"
 export * from "./ids.js"
 export * from "./interactivity.js"

@@ -1,0 +1,274 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { ReaderSignalsLive } from "@/app/(docs)/_components/reader-signals-live"
+import {
+  OneBatch,
+  ReadingABatchBack,
+  TheFourKinds,
+  WhatAddressingCosts,
+} from "@/app/(docs)/_components/reader-signals"
+
+export const metadata = pageMetadata("the-runtime", "what-your-readers-do")
+
+# What your readers do
+
+Everything on this site so far has moved in one direction. Somebody asks for a
+change, the runtime writes it down, the Gate weighs it, and the page becomes a
+new revision of itself.
+
+This page is the other direction: the page saying something back.
+
+Here is an ordinary page. Nothing is measuring it.
+
+<Example id="a-page-a-reader-scrolls" />
+
+A person reads that. They linger on the first section, press **See the frames**,
+scroll down, open a question. Then they leave.
+
+Your app knows none of it. It served some HTML and the conversation ended.
+
+**Reader signals** are how a Loom page tells you what happened to it — which
+part someone looked at, what they stayed on, what they pressed, what they
+opened. Four things, and nothing else.
+
+<Callout>
+  **Why a framework about *changing* pages ships a way to *watch* them.** A page
+  that can be changed and cannot be observed can only be changed by somebody
+  guessing. The runtime has always been able to weigh a change that came from
+  something other than a person asking — an intent may arrive marked
+  `system-signal`, and the Gate gives that origin its own lower ceiling. There
+  was simply never anything on a published page that could produce one. This is
+  that end of the pipe, and it is the only end of it that exists so far.
+</Callout>
+
+## Four things a page may say
+
+<TheFourKinds />
+
+That is the whole vocabulary. There is no fifth kind and no way to add one from
+your own code: adding one is a change to the runtime and to the record that
+settles it ([0136](/docs/architecture/decision-records)), for the same reason
+there are four operations on a tree and not five.
+
+A closed list is worth more than it looks. It means anything receiving these can
+be written once, against four shapes it will still be handling next year — and
+it means nobody can quietly start sending something else through the same pipe.
+
+## What a signal does not carry
+
+Look at those four again. A signal names **a node and its type**. It does not
+carry the heading the reader saw, the URL the link pointed at, what they typed
+into a field, or anything at all about the person.
+
+That is not an omission somebody would fix later. It is checked:
+
+<ReadingABatchBack />
+
+The fourth row is the interesting one. A signal with the label of the button on
+it is **refused**, not trimmed — the whole batch is rejected, and your endpoint
+tells whatever sent it so.
+
+Two reasons, and the second is the one people miss.
+
+**A record of what a person read is a record of that person.** Loom keeps the
+same rule for the words somebody typed into a change request
+([0023](/docs/architecture/decision-records)). The moment signals could carry
+content they would become something you need a lawful basis to collect, and
+every host would inherit that whether they wanted it or not.
+
+**The content is already somewhere better.** Every batch names a tree and a
+revision. The words that were on screen are in that revision of that tree, and
+they will still be there after ten more changes have been applied. A signal that
+copied them would be a second copy that goes stale, and this is a site with
+opinions about second copies.
+
+That is also why the revision is on the batch rather than on each signal. A
+rendered page is one revision of one tree; "the fourth section" stops meaning
+anything the moment a proposal moves it, and `n_readersignals8` at revision 0
+means exactly one thing forever.
+
+<OneBatch />
+
+## Turning it on is two steps
+
+Nothing above happens by default. A page that never asks broadcasts nothing, and
+the library renders no script of its own.
+
+### One: let the page say which node is which
+
+A published Loom page deliberately carries no identity in its markup. Edit mode
+adds it, and edit mode promises that the markup is otherwise byte-identical
+([0010](/docs/architecture/decision-records)) — so a click on a live page lands
+on an element that says nothing about which node it belongs to.
+
+`addressed: true` asks for the identity and nothing else edit mode means:
+
+```ts
+import { renderLoomTree } from "@loom/runtime/react"
+
+const rendered = renderLoomTree(tree, {
+  resolver: registry,
+  validator: registry,
+  themes,
+  addressed: true,
+})
+```
+
+<WhatAddressingCosts />
+
+Two attributes per decorated element, and the tree and revision on the root.
+That is the entire difference, and both of those are identifiers the tree
+already assigned — neither is content.
+
+### Two: start the broadcaster, in the browser
+
+```tsx
+"use client"
+
+import { broadcastReaderSignals } from "@loom/runtime/signals/broadcast"
+import { useEffect, useRef } from "react"
+
+export const Measured = ({ children }: { readonly children: React.ReactNode }) => {
+  const frame = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const root = frame.current?.querySelector("[data-loom-tree]")
+
+    if (!(root instanceof Element)) return
+
+    const started = broadcastReaderSignals(root, {
+      kinds: ["dwelled", "activated"],
+      types: { dwelled: ["loom.section"], activated: ["loom.link", "loom.action"] },
+      send: (batch) => {
+        navigator.sendBeacon("/api/signals", JSON.stringify(batch))
+      },
+    })
+
+    if (!started.ok) {
+      console.warn(started.error.detail)
+      return
+    }
+
+    return started.value.stop
+  }, [])
+
+  return <div ref={frame}>{children}</div>
+}
+```
+
+<Callout>
+  **Import it from `@loom/runtime/signals/broadcast`, not from
+  `@loom/runtime/signals`.** They both have the broadcaster in them and the
+  difference is what comes with it: the plain entry point also carries the
+  schemas, and once a bundler has seen those it cannot leave the schema library
+  out — about 66 KB against about 5 KB for the broadcaster alone. Use
+  `@loom/runtime/signals` on the server that *receives* batches, where the
+  schemas are the thing you came for.
+</Callout>
+
+**It returns a `Result`, and the failure is worth handling.** An unaddressed page
+is the one misconfiguration nobody would ever notice: a broadcaster that quietly
+sent nothing looks exactly like a page nobody visited. So starting one on a page
+rendered without `addressed: true` is an error you get back, with a sentence
+saying what to do about it.
+
+## The same page, broadcasting
+
+Everything above this line was produced on a server. This cannot be — a
+broadcaster's whole subject is a browser with somebody in front of it.
+
+So here is the same tree again, rendered `addressed: true`, with a real
+broadcaster attached to it. Scroll it, press the button, open a question.
+Nothing is stored and nothing leaves this tab.
+
+<ReaderSignalsLive />
+
+That one asks for all four kinds, each about a different part of the page:
+`viewed` for the two sections and the questions band, `dwelled` for the sections
+only, `activated` for the link and the call to action, `disclosed` for the
+questions. Press or scroll something that is not on one of those lists and no
+batch mentions it.
+
+## Choosing what you measure
+
+`kinds` says which of the four to report. `types` says which primitives to report
+them about — and it can differ per kind, which is usually what you want:
+
+```ts object-body
+kinds: ["viewed", "dwelled", "activated"],
+types: {
+  dwelled: ["loom.section", "loom.hero"],
+  activated: ["loom.link", "loom.action"],
+},
+```
+
+A kind `types` does not name is reported for every type. A plain list instead of
+an object applies to every kind.
+
+The reason to bother is arithmetic. `dwelled` fires for every watched node on
+screen, every batch. A page asking for time on screen across every link and
+badge on it produces something like ten signals a second, most of which nobody
+will ever look at — paid for in the reader's browser, on the wire, and again in
+whatever stores them.
+
+<Callout>
+  **None of this is a prop, and that is deliberate.** Which kinds, which types,
+  how often, where batches go — all of it is an argument to a function your code
+  calls. It is not in the tree, so it is not something a proposal can change and
+  not something a model can ask for. "Start measuring readers" is a decision
+  belonging to whoever deploys the page, and putting it in the tree would have
+  made it a small reversible change the Gate would wave through.
+</Callout>
+
+## Reading a batch back
+
+A batch arrives at your endpoint as JSON from a browser, which is to say from
+somebody you have never met. Parse it:
+
+```ts
+import { parseReaderSignalBatch } from "@loom/runtime/signals"
+
+export const POST = async (request: Request): Promise<Response> => {
+  const read = parseReaderSignalBatch(await request.json())
+
+  if (!read.ok) {
+    return Response.json({ issues: read.error.issues }, { status: 400 })
+  }
+
+  await store(read.value)
+
+  return new Response(null, { status: 204 })
+}
+```
+
+Invalid input is a **value, not a throw** — the same shape as every other refusal
+in this runtime. The table further up is that function's real answers to five
+real inputs.
+
+## What this does not do yet
+
+This page documents a seam that shipped on 12 September 2026, and being straight
+about its edges is more useful than implying it is finished.
+
+**Nothing stores or interprets these.** Where batches live, how they are
+aggregated, how long they are kept, and how a signal becomes a proposed change
+are all explicitly undecided ([0136](/docs/architecture/decision-records)). The
+runtime broadcasts; everything after that is yours today.
+
+**A broadcaster watches the nodes that were there when it started.** It finds the
+addressed elements under its root once. A band that streams in behind a Suspense
+boundary, or a list that grows after hydration, is never watched for `viewed` or
+`dwelled` — though presses and disclosures inside it still report, because both
+are read from the root at the moment they happen.
+
+**A new revision is a new broadcast.** After a client-side navigation, or after a
+change is applied and the page re-renders at a new revision, `stop()` the
+broadcaster and start another. One left running on the old root keeps naming the
+old revision, which is a subtler problem than reporting nothing.
+
+<Callout kind="warning">
+  **A page that measures readers is a page with a consent obligation.** Loom
+  gives you an off switch that is off, node ids that are not content, and a
+  refusal for anything else. It does not give you a lawful basis, a banner, or a
+  retention policy. Those are yours, and they are the reason `addressed` and the
+  broadcaster are two separate decisions rather than one setting.
+</Callout>
