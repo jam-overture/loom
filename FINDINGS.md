@@ -8,6 +8,95 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+
+## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — **raised by the maintainer**, 13 September, as the thing to figure out
+before the library grows further
+
+The maintainer's target is 250 primitives by 19 September, with the instruction
+that *"if increasing the number of primitives is producing a scaling issue with
+the framework itself, we will have to figure this out."* This is that, measured.
+Nothing here is broken today; everything here gets worse linearly and nothing
+says when to stop.
+
+### What was measured
+
+`measurePrompt` on `main`, starter registry, starter themes:
+
+| block | characters per request | ceiling |
+| --- | --- | --- |
+| themes (18 palettes, packs, presets) | 6,155 | **8,000, enforced** |
+| primitives (92 entries) | **15,685** | **none** |
+
+~170 characters per entry, linear. At 250 entries the primitives block is about
+**42,600 characters — roughly 11k tokens on every interpretation request**, cache
+or no cache, before the tree or the request.
+
+**The asymmetry is the finding.** The smaller block is guarded and the larger one
+is not. That is not a decision anybody made — `prompt.test.ts`'s ceiling was
+written when the catalogue was 51 entries and the comment says it expected to
+fire *"another eighteen entries or so"* later. It never did, because it measures
+`themes` and the library grew on the other axis.
+
+### The answer is already in the repository, as a sentence
+
+The theme budget's failure message names three outs, and the first one is the
+designed answer to this:
+
+> *either the starter library has grown past what one deployment should register
+> all of, or 0077's cut order applies, or the ceiling moves and the reason is
+> written down*
+
+**The starter library is a set to choose from, not a set every deployment
+ships.** Growing it to 250 is then not a scaling problem at all — provided a
+deployment can take a coherent slice. Today it cannot, comfortably:
+`createStarterPrimitiveRegistry(additional)` only *adds*. A host wanting sixty of
+the ninety-two hand-filters `STARTER_PRIMITIVES`, and has nothing to filter on
+but type-string prefixes — which is exactly the pattern-match
+[0114](decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+was written to end.
+
+### What this lane thinks the shape is, offered rather than decided
+
+Three pieces, smallest first. All three are `src/`'s and none is this lane's.
+
+1. **A ceiling on the primitives block**, the way themes has one, so the next
+   forty entries are a test somebody reads rather than a latency nobody
+   attributes. The number matters less than its existence; today's 15,685 with
+   30% headroom mirrors how the themes ceiling was set.
+
+2. **The inverse of `additional`** — a way to build a registry from a named
+   subset of the starter library. One argument, no new concept.
+
+3. **A second `role` member, or a few.** 0114 closed its vocabulary at `heading`
+   and set the bar for widening it explicitly: *"a consumer that cannot answer
+   its question from the registry, written down as a finding."* **The
+   interpretation prompt is that consumer**, and this entry is that finding. A
+   role per part a primitive plays — `band`, `item`, `leaf`, `wrapper`,
+   `control` — would let a deployment register a coherent slice by asking the
+   registry, and would later let the prompt send a *relevant* slice rather than
+   all of it.
+
+The third is the one with a design question in it, and this lane is not the one
+to answer it: narrowing *per request* means knowing what an intent needs before
+the model has chosen, which is a retrieval step with its own failure mode (the
+primitive that was right but was not sent). Narrowing *per deployment* has no
+such problem and is most of the benefit. **Prefer the boring one.** Stated here
+so the framework lane does not have to rediscover that the ambitious version is
+the risky one.
+
+### What this lane is doing meanwhile
+
+Holding the vocabulary near 110 and taking the week's range in starting
+compositions, which add no entry to this block —
+`docs/primitive-gap-inventory.md` is the count and the reasoning. So nothing is
+blocked on this finding. What is at stake is the *next* person to grow the
+library past where anyone measured, which is now a documented number rather than
+a surprise.
+
+---
 ## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
