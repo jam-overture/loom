@@ -25,6 +25,13 @@ export type SourceRequest<TParams> = {
   readonly params: TParams
   /** The render request's opaque host context — audience, locale, tenant. */
   readonly context: JsonObject | undefined
+  /**
+   * Aborted once the render has stopped waiting for this binding, which it will
+   * (0140). An adapter that ignores it still cannot delay the page; what it holds
+   * on to is a connection whose answer nothing will read. Pass it to whatever
+   * does the IO — `fetch`, a driver's query options — and the pool gets it back.
+   */
+  readonly signal: AbortSignal | undefined
 }
 
 /** What an adapter says when it cannot answer. */
@@ -119,7 +126,8 @@ export type SourceEntry = {
   /** Total: validates, calls, catches, validates again. Never rejects. */
   readonly answer: (
     params: JsonObject,
-    context: JsonObject | undefined
+    context: JsonObject | undefined,
+    signal?: AbortSignal
   ) => Promise<Result<JsonValue, DataUnavailable>>
 }
 
@@ -143,7 +151,7 @@ export const defineSource = <TParams, TAnswer extends JsonValue>(
   id: definition.id,
   description: definition.description,
   declaredParams: catalogueFields(definition.params as ZodTypeAny),
-  answer: async (params, context) => {
+  answer: async (params, context, signal) => {
     const accepted = definition.params.safeParse(params)
     if (!accepted.success) {
       return err({ reason: "invalid-params", detail: firstIssue(accepted.error) })
@@ -156,7 +164,7 @@ export const defineSource = <TParams, TAnswer extends JsonValue>(
      */
     let fetched: Result<TAnswer, SourceFailure>
     try {
-      fetched = await definition.adapter.fetch({ params: accepted.data, context })
+      fetched = await definition.adapter.fetch({ params: accepted.data, context, signal })
     } catch (thrown) {
       return err({
         reason: "adapter-threw",

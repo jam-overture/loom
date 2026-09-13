@@ -2,7 +2,13 @@ import type Anthropic from "@anthropic-ai/sdk"
 
 import { err, ok, type Result } from "../result.js"
 
-import type { ModelClient, ModelClientError, ModelCompletion, ModelRequest } from "./client.js"
+import type {
+  ModelCallOptions,
+  ModelClient,
+  ModelClientError,
+  ModelCompletion,
+  ModelRequest,
+} from "./client.js"
 
 /**
  * The Anthropic adapter: the one module in Loom that knows a specific vendor
@@ -20,7 +26,8 @@ import type { ModelClient, ModelClientError, ModelCompletion, ModelRequest } fro
  */
 export type AnthropicMessages = {
   readonly create: (
-    params: Anthropic.MessageCreateParamsNonStreaming
+    params: Anthropic.MessageCreateParamsNonStreaming,
+    options?: { readonly signal?: AbortSignal }
   ) => Promise<Anthropic.Message>
 }
 
@@ -85,18 +92,27 @@ const toCompletion = (
 }
 
 export const anthropicModelClient = (messages: AnthropicMessages): ModelClient => ({
-  complete: async (request: ModelRequest) => {
+  complete: async (request: ModelRequest, options?: ModelCallOptions) => {
     try {
-      const message = await messages.create({
-        model: request.model,
-        max_tokens: request.maxTokens,
-        system: request.system,
-        output_config: {
-          effort: request.effort,
-          format: { type: "json_schema", schema: request.outputSchema },
+      const message = await messages.create(
+        {
+          model: request.model,
+          max_tokens: request.maxTokens,
+          system: request.system,
+          output_config: {
+            effort: request.effort,
+            format: { type: "json_schema", schema: request.outputSchema },
+          },
+          messages: [{ role: "user", content: request.userMessage }],
         },
-        messages: [{ role: "user", content: request.userMessage }],
-      })
+        /**
+         * The caller's ceiling, forwarded so the SDK closes the connection
+         * rather than holding one nobody is waiting on. It is the whole reason
+         * this adapter takes the options at all — the answer would arrive on
+         * time without it.
+         */
+        options?.signal === undefined ? undefined : { signal: options.signal }
+      )
 
       return toCompletion(message)
     } catch (cause) {
