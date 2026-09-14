@@ -803,8 +803,12 @@ because `sampleTree` has no form in it. This is the fixture that does. Six rows;
 Predict all six before running, and give rows 5 and 6 more than a moment — one of
 them is the same change as row 1 and the other very nearly is.
 
-Add `formTree` to the preamble's fixtures import — `import { formTree, sampleTree }
-from "./testing/fixtures.js"` — and everything else here is the preamble's.
+`formTree` is in the preamble's fixtures import already — `import { formTree,
+sampleTree } from "./testing/fixtures.js"` — and everything else here is the
+preamble's. It was not, when this lesson was written: this line used to say *add
+it*, which is an instruction a reader follows and a runner cannot — and the
+runner that executes these fences as one program was red on this lesson until
+somebody added the import here instead.
 
 ```ts
 describe("G", () => {

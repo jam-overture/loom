@@ -54,11 +54,13 @@ const TRY_IT = "Try it"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 81 since lesson 24 (silence) added eight — seven exercises, one of which
- * prints its transcript in two blocks. It was 73 after lesson 23, and 66 when
- * this was written.
+ * 83 since lesson 18 was repaired on 14 September: two exercises were added to
+ * it, one for the reason the runtime could not produce until the ceiling landed
+ * and one for the reason no tree and no source can cause. It was 81 after lesson
+ * 24 (silence), which added eight — seven exercises, one of which prints its
+ * transcript in two blocks — 73 after lesson 23, and 66 when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 81
+const RECOGNISED_TRANSCRIPTS = 83
 
 /** Printable, so that a byte a markdown file cannot hold compares as the space it is written as. */
 const printable = (line: string): string =>
