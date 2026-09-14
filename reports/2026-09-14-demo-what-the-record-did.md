@@ -175,10 +175,20 @@ is small and worth writing down: **typecheck after the last edit, not after the
 first** — the app suite ran green throughout, because a type error in a fixture
 is invisible to the runner that executes it.
 
-The demo lane's own suite goes from **29 files / 360 tests** to **29 files /
-377 tests**. Seventeen added, **one rewritten, none weakened**: the renamed
-component's test file carries all five of its original assertions verbatim and
-adds three.
+The demo lane's own suite goes from **29 files / 357 tests** to **29 files /
+377 tests**. **Twenty added, none weakened**, counted per file rather than
+remembered:
+
+| file | `main` | branch |
+| --- | --- | --- |
+| `_lib/plain-change.test.ts` | 20 | 25 |
+| `_lib/pipeline.test.ts` | 14 | 20 |
+| `demo/_components/record-card.test.tsx` | 51 | 57 |
+| `what-would-happen.test.tsx` → `plain-reading.test.tsx` | 5 | 8 |
+
+The renamed file carries **all five of its original assertions verbatim** and
+adds three; nothing was rewritten to accommodate the change, because nothing it
+asserted stopped being true.
 
 **Every defect was put back one at a time and the suite re-run.** Four of five
 were caught by exactly the test that should catch them:
@@ -257,8 +267,10 @@ open finding, and the standing entry says everything a new one would. It is in
 
 Nothing blocking. One carried forward from 13 September, unanswered:
 
-- **Does the record earn its repetition?** By the fourth press the rail is
-  ~3,500px of cards and the same ~75 words are on every one of them. Last run's
+- **Does the record earn its repetition?** Measured this run at 1280×900: the
+  rail's scroll height is **1,029px on arrival and 3,504px after five asks**,
+  growing a near-constant **~476px per card**, and the same ~75 words are on
+  every one of them. Last run's
   recommendation stands: on the *second and later* cards, collapse the weighing
   box and the rule to one line each with the full text one click down, and leave
   the newest card whole. **This run makes the case slightly stronger and also
