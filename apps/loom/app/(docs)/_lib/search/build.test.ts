@@ -25,6 +25,18 @@ import { parseSearchIndex, withCode, withProse } from "./model"
 
 const index = buildSearchIndex()
 
+/**
+ * The first file as a browser really receives it: serialised, parsed, and with
+ * the fields it left out filled back in.
+ *
+ * The two reassembly tests below go through here rather than through
+ * `searchIndexWithoutText` directly, because the thing they are checking is a
+ * seam a *network* sits in the middle of. Comparing the builder's own object to
+ * the builder's own object would have gone on passing on the day the file
+ * stopped carrying a field.
+ */
+const arrived = () => parseSearchIndex(JSON.parse(JSON.stringify(searchIndexWithoutText())))
+
 const hrefs = new Set(docsOrder.map((entry) => entry.href))
 
 const split = (href: string): { readonly path: string; readonly fragment?: string } => {
@@ -147,9 +159,25 @@ describe("what the index contains", () => {
    */
   it("keeps the words out of the half that ships first", () => {
     for (const entry of searchIndexWithoutText().entries) {
-      expect(entry.body, entry.href).toBe("")
-      expect(entry.code, entry.href).toBe("")
+      expect(entry.body, entry.href).toBeUndefined()
+      expect(entry.code, entry.href).toBeUndefined()
     }
+  })
+
+  /**
+   * And says nothing where there is nothing to say.
+   *
+   * The three text fields are left out rather than emptied, which is worth a
+   * test of its own because it is the only thing standing between this file and
+   * the 38 KB of `""` it used to carry. A builder that went back to spreading
+   * the whole entry would pass every other test here.
+   */
+  it("writes down no field that would arrive empty", () => {
+    const written = JSON.stringify(searchIndexWithoutText())
+
+    expect(written).not.toContain('"body"')
+    expect(written).not.toContain('"code"')
+    expect(written).not.toContain('"summary":""')
   })
 
   /**
@@ -180,6 +208,15 @@ describe("what the index contains", () => {
    * index was split rather than the number raised, and what is capped now is
    * each file separately — which is the only way the caps stay meaningful,
    * because the files grow at different speeds and for different reasons.
+   *
+   * **The raw cap on the first file failed next**, at 200,286 against 200,000,
+   * on the run that added a twenty-first page. Neither split nor raised: 38,156
+   * of those bytes were `summary`, `body` and `code` saying they were empty,
+   * 1,172 times over, and a field that carries nothing is not a payload anybody
+   * decided to send. They are left out now and filled back in on arrival, which
+   * took the file to about 162 KB. The **compressed** cap is the one to watch
+   * from here — it is at 91% of 20 KB and 84% of the entries are published
+   * names, so the lane that grows it is not this one.
    *
    * **Indexing the code was the third file**, and it is the cheap one: 13.4 KB
    * raw and **3.9 KB compressed** over 39 entries, about a ninth of what the
@@ -225,7 +262,7 @@ describe("what the index contains", () => {
    * `buildSearchIndex` said in the first place.
    */
   it("comes apart and goes back together without losing a word or a line", () => {
-    expect(withCode(withProse(searchIndexWithoutText(), searchProse()), searchCode())).toEqual(index)
+    expect(withCode(withProse(arrived(), searchProse()), searchCode())).toEqual(index)
   })
 
   /**
@@ -233,7 +270,7 @@ describe("what the index contains", () => {
    * hands them over.
    */
   it("does not mind which of the two lands first", () => {
-    expect(withProse(withCode(searchIndexWithoutText(), searchCode()), searchProse())).toEqual(index)
+    expect(withProse(withCode(arrived(), searchCode()), searchProse())).toEqual(index)
   })
 
   it("keys the words and the code by an href that names exactly one entry", () => {

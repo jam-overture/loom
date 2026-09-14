@@ -22675,8 +22675,10 @@ works for `loom.nav`'s collapse.
 viewport it was designed for.
 ## 2026-09-13 — the data seam can now say "the adapter never came back", and `/docs` has no row for it
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
-a consequence of 0140, filed with the change that produced it
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:**
+**closed by `docs-24-when-nothing-comes-back`** — the trouble page asks a seventh
+question, of a source that never answers, and the row is produced by the ceiling
+reporting it rather than by an adapter claiming to have timed out
 
 `app/(docs)/_lib/data/answers.ts` types every way an answer fails to arrive and
 prints a table of them. Two of its cells are now sometimes wrong, and they are
@@ -22708,3 +22710,115 @@ record says so in as many words and names the revisit condition — when somethi
 actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
+
+---
+## 2026-09-14 — the third door into foreign code has no page, and now there is a page that says so
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+next page in this section, filed rather than written because it is a page and not
+a paragraph
+
+0140 named three seams where Loom awaits code it did not write: the model client,
+a data source, and a **form's submission endpoint**. Two of the three have a
+guide. The third has nothing at all — not a page, not a section, not a sentence.
+Searching `app/(docs)` for `SubmissionEndpoint`, `resolveTreeSubmissions`,
+`EndpointRegistry` or `loom:submit` returns exactly one file, and it is the
+generated API reference.
+
+This run built *When nothing comes back*, which documents the endpoint ceiling
+because the ceiling is one rule across three doors and a page that covered two of
+them would be teaching a rule with an exception in it. So the site now has a page
+that produces a real submission resolution, names `resolveTreeSubmissions`, and
+tells a reader what `no answer in 10s` means for a form — on a site that has
+never said what a form **is**.
+
+That is the wrong order and it should not stay this way for long. A reader who
+follows the ceiling page to its endpoint row has nowhere to go next: there is no
+page explaining that a `loom.form` declares where it posts by naming an endpoint
+id, that the target is resolved while the page is being served so a token can be
+minted per request, that the id is what a model may change and the action is
+not — which is the whole reason for the indirection — or what the four
+`SubmissionUnavailable` reasons mean to whoever runs the deployment.
+
+**The shape it wants**, for whoever writes it: *What a form posts to*, under
+**The runtime**, beside *What your app has to do* — which is about the one
+function that writes, and is the closest thing the site has to a neighbour for
+it. The seam is symmetric with the data seam by construction, so the data page's
+structure transfers almost line for line: a declaration in the tree, your half as
+a registration, the resolve that happens before anything is drawn, what comes
+back, and the named ways it does not.
+
+**Nothing is blocked and nothing on the site is wrong.** What is open is a hole
+in the exit condition: a stranger working only from this site can build a page,
+change it, review the change and deploy it, and cannot put a form on it.
+
+---
+## 2026-09-14 — a page about a call that never returns is a page whose tests can hang instead of failing
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+recorded for the next page in this shape; this one is safe and the reason it is
+safe is the finding
+
+Every other producer on this site fails by throwing. The producers behind *When
+nothing comes back* are the first that can fail by **not finishing**: each one
+awaits a promise that is never resolved, and the only thing that makes the await
+end is the runtime's own ceiling. If a future change to `src/` stopped applying a
+ceiling on one of those three seams, the test that covers it would not go red. It
+would hang, and `pnpm verify` would sit there until a CI job timed out with no
+message naming the seam.
+
+That is the failure mode 0140 exists to close, reappearing one level up: the
+absence of an answer is not an answer, and a test suite is as vulnerable to it as
+a page render.
+
+**It is safe today** because every one of those awaits is given a
+five-millisecond ceiling by the producer itself, and vitest's own per-test
+timeout would eventually fire. What is missing is that the timeout would name a
+test rather than a seam, and a five-second wait for a five-millisecond ceiling is
+a long way past the point where something is wrong.
+
+**The cheap version**, for whoever next writes a producer that awaits a hang: put
+the produced value in a race of its own against a timer an order of magnitude
+above the ceiling, and throw with the name of the seam. Ten lines, and it turns
+a hung suite into a sentence. Not done here because it wants to be one helper
+that every such producer uses rather than three copies written inline, and
+deciding where that helper lives is a question for a run that has two of these
+pages rather than one.
+
+---
+## 2026-09-14 — `hangingModelClient` is published and its two siblings are not, so each surface writes them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+written by hand here rather than asked for, and the page says so
+
+`@loom/runtime/testing` publishes `hangingModelClient` for a good reason, stated
+in its own comment: *"every surface with a prompt box has an 'it did not come
+back' state to show, and this is the only way to reach it without waiting for
+one."* That is exactly right, and it is equally true of the other two seams 0140
+bounded.
+
+There is no `hangingSource` and no `hangingEndpoint`. This run wanted both — a
+page about the ceiling has to be able to reach one on every door it documents —
+so `(docs)` now carries its own:
+
+```ts
+fetch: ({ signal }) =>
+  new Promise(() => {
+    signal?.addEventListener("abort", () => { … })
+  })
+```
+
+written twice, once shaped as a `SourceEntry` and once as a
+`SubmissionEndpoint`. Neither is difficult. What each one carries that is worth
+publishing is the **`abortedWith()`** half, which is how the model client's
+version lets a caller assert that the runtime aborted what it walked away from —
+the property `withCeiling` exists for that nothing else can observe, and the one
+a test written by hand is most likely to leave out.
+
+**Not urgent and nothing is blocked.** This lane's copies are twenty lines and
+tested. What it costs is the shape 0117 was written about: three lanes writing a
+private version of one thing, the versions drifting, and the drift being invisible
+because each one passes its own tests. Two exports beside the one that already
+exists would close it — `hangingSource(id, description)` and
+`hangingEndpoint(id, description)`, each returning the entry and an
+`abortedWith()`, which is the signature `hangingModelClient` already has.

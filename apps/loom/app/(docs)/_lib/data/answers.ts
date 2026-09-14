@@ -12,6 +12,8 @@ import {
   type NodeId,
 } from "@loom/runtime"
 
+import { DOCS_CEILING_MS } from "@/app/(docs)/_lib/ceiling/page"
+
 import {
   boundPage,
   pageOfThingsThatGoWrong,
@@ -197,53 +199,126 @@ export const produceAnswers = async (): Promise<readonly BindingAnswer[]> => {
 
 /** One way an answer does not arrive, produced by making it not arrive. */
 export type MissingAnswer = {
+  /** Which question on the trouble page this row is, so prose can point at one. */
+  readonly binding: TroubleBinding
   readonly reason: DataUnavailable["reason"]
   /** What happened, in the words somebody would use about their own deployment. */
   readonly when: string
   /** What the runtime says about it, which is what a diagnostic prints. */
   readonly sentence: string
-  /** Whether the deployment's own code ever ran. */
-  readonly reached: "the adapter was never called" | "the adapter answered"
+  /** Whether the deployment's own code ever ran, and whether it ever finished. */
+  readonly reached:
+    | "the adapter was never called"
+    | "the adapter answered"
+    | "the adapter never came back"
 }
 
 /**
- * What a person did, for each reason the seam has. Written beside the produced
- * rows rather than inside them, because the reason code is the runtime's and
- * this sentence is the page's.
+ * The seven questions the trouble page asks, named by the page rather than by
+ * the runtime.
+ *
+ * A row is keyed by *which question it is* and not by the reason it came back
+ * with, because two of them come back with the same reason. `shop.stock` says it
+ * cannot answer; `courier.tracking` says nothing at all and the runtime's
+ * ceiling reports it. Both are `unavailable`, on purpose — the remedy is the
+ * same and the actor is the same — and a reader still has to be able to tell a
+ * database that is refusing connections from an integration nobody can get a
+ * word out of.
  */
-const WHAT_HAPPENED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["when"]>> = {
-  "no-such-source": "The plan named a source this deployment never registered.",
-  "not-resolved": "The render was handed answers resolved for a different tree than the one it drew.",
-  "invalid-params": "The plan asked for forty services, and the source accepts at most twelve.",
-  "invalid-answer": "A column was renamed, so the source answered with something its own schema refuses.",
-  "adapter-threw": "The integration threw instead of answering.",
-  unavailable: "The query timed out.",
-  refused: "Nobody is signed in, and these are somebody's own orders.",
+const TROUBLE_BINDINGS = [
+  "stock",
+  "orders",
+  "reviews",
+  "slots",
+  "services",
+  "testimonials",
+  "courier",
+] as const
+
+type TroubleBinding = (typeof TROUBLE_BINDINGS)[number]
+
+/**
+ * What a person did, for each question. Written beside the produced rows rather
+ * than inside them, because the reason code is the runtime's and this sentence
+ * is the page's.
+ */
+const WHAT_HAPPENED: Readonly<Record<TroubleBinding, MissingAnswer["when"]>> = {
+  testimonials: "The plan named a source this deployment never registered.",
+  services: "The plan asked for forty services, and the source accepts at most twelve.",
+  reviews: "A column was renamed, so the source answered with something its own schema refuses.",
+  slots: "The integration threw instead of answering.",
+  stock: "The database answered that it could not answer.",
+  courier: "The integration never replied at all, and the render stopped waiting.",
+  orders: "Nobody is signed in, and these are somebody's own orders.",
 }
 
-/** Whether the host's own code got as far as running. */
-const REACHED: Readonly<Record<DataUnavailable["reason"], MissingAnswer["reached"]>> = {
-  "no-such-source": "the adapter was never called",
-  "not-resolved": "the adapter was never called",
-  "invalid-params": "the adapter was never called",
-  "invalid-answer": "the adapter answered",
-  "adapter-threw": "the adapter answered",
-  unavailable: "the adapter answered",
-  refused: "the adapter answered",
+/** Whether the host's own code got as far as running, and as far as finishing. */
+const REACHED: Readonly<Record<TroubleBinding, MissingAnswer["reached"]>> = {
+  testimonials: "the adapter was never called",
+  services: "the adapter was never called",
+  reviews: "the adapter answered",
+  slots: "the adapter answered",
+  stock: "the adapter answered",
+  courier: "the adapter never came back",
+  orders: "the adapter answered",
 }
 
 /**
- * Six bindings, six reasons, one resolve.
+ * Every reason the seam has, and the question on the page that causes it.
+ *
+ * Nothing on the page is rendered from this map. It exists so that the
+ * exhaustive `Record` the two maps above used to be is not lost now that they
+ * are keyed by question instead of by reason: a seventh reason added to
+ * `DataUnavailable` fails to compile here, naming itself, instead of quietly not
+ * appearing on a page that says how many there are. `seam.test.ts` reads it, so
+ * a reason mapped to the wrong question is red as well.
+ */
+const CAUSED_BY: Readonly<Record<DataUnavailable["reason"], TroubleBinding | "nothing one page can do">> = {
+  "no-such-source": "testimonials",
+  "not-resolved": "nothing one page can do",
+  "invalid-params": "services",
+  "invalid-answer": "reviews",
+  "adapter-threw": "slots",
+  unavailable: "stock",
+  refused: "orders",
+}
+
+/**
+ * Which question a binding on the trouble page is, as a name this file has a row
+ * for. A binding renamed in the tree throws here rather than rendering a table
+ * with a blank column in it.
+ */
+const questionAsked = (name: string): TroubleBinding => {
+  const asked = TROUBLE_BINDINGS.find((candidate) => candidate === name)
+
+  if (asked === undefined) {
+    throw new Error(`loom: the trouble page asks "${name}" and this file has no row for it`)
+  }
+
+  return asked
+}
+
+/**
+ * Seven bindings, six reasons, one resolve.
  *
  * The page's claim is that a binding never merely goes missing — every failure
  * arrives with a name, and the names are different because a primitive shows
- * different things for them. The way to check that claim is to cause all six and
- * print what came back, which is this.
+ * different things for them. The way to check that claim is to cause all of them
+ * and print what came back, which is this.
  */
 export const produceMissingAnswers = async (): Promise<readonly MissingAnswer[]> => {
   const tree = pageOfThingsThatGoWrong()
   const plan = planTreeData(tree)
-  const resolution = await resolveTreeData(tree, { registry: troubleRegistry() })
+  const resolution = await resolveTreeData(tree, {
+    registry: troubleRegistry(),
+    /**
+     * The documented ceiling rather than the deployed one: ten seconds of
+     * evidence per build is how a produced table becomes a fixture. The row
+     * prints the sentence the runtime wrote at *this* ceiling, and *When
+     * nothing comes back* — which owns the number — says so.
+     */
+    ceilingMs: DOCS_CEILING_MS,
+  })
 
   return plan.bindings.map((binding) => {
     const outcome = resolution.lookup(binding.nodeId)[binding.name]
@@ -252,16 +327,20 @@ export const produceMissingAnswers = async (): Promise<readonly MissingAnswer[]>
       throw new Error(`loom: ${binding.name} was supposed to fail and did not`)
     }
 
-    const { reason } = outcome.unavailable
+    const asked = questionAsked(binding.name)
 
     return {
-      reason,
-      when: WHAT_HAPPENED[reason],
+      binding: asked,
+      reason: outcome.unavailable.reason,
+      when: WHAT_HAPPENED[asked],
       sentence: describeDataUnavailable(outcome.unavailable),
-      reached: REACHED[reason],
+      reached: REACHED[asked],
     }
   })
 }
+
+/** Which question on the page causes a given reason, for a test that reads it. */
+export const questionCausing = (reason: DataUnavailable["reason"]): string => CAUSED_BY[reason]
 
 /**
  * The other kind of failure: a `loom:data` that is not a binding map at all.

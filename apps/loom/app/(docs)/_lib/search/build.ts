@@ -4,7 +4,7 @@ import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageCode } from "./code"
 import { readPageHeadings } from "./headings"
-import type { SearchCode, SearchEntry, SearchIndex, SearchProse } from "./model"
+import type { SearchCode, SearchEntry, SearchIndex, SearchProse, TravellingIndex } from "./model"
 import { readPageProse } from "./prose"
 
 /**
@@ -150,14 +150,26 @@ export const buildSearchIndex = (): SearchIndex => ({
 /**
  * The part a reader waits for: everything but the words and the blocks.
  *
- * They are emptied rather than the fields removed, because what arrives in the
- * browser is a `SearchIndex` either way — one whose two cheapest ranking bands
- * are simply not answering yet. A reader who types before the other two files
- * land gets the same results, ranked by title, section and summary, and each
- * band turns on underneath them without the list flickering.
+ * What arrives in the browser is still a `SearchIndex` — one whose two cheapest
+ * ranking bands are simply not answering yet. A reader who types before the
+ * other two files land gets the same results, ranked by title, section and
+ * summary, and each band turns on underneath them without the list flickering.
+ *
+ * The two fields are **left out** rather than emptied, and so is a summary
+ * nobody wrote. They were emptied until 14 September, when the raw cap below
+ * failed at 200,286 bytes against 200,000 — of which 38,156 were the three
+ * fields saying, 1,172 times, that they had nothing in them. `parseSearchIndex`
+ * fills an absent field with the empty string on the way in, which is the
+ * tolerance `code` already had, so nothing downstream can tell the difference.
  */
-export const searchIndexWithoutText = (): SearchIndex => ({
-  entries: buildSearchIndex().entries.map((entry) => ({ ...entry, body: "", code: "" })),
+export const searchIndexWithoutText = (): TravellingIndex => ({
+  entries: buildSearchIndex().entries.map((entry) => ({
+    href: entry.href,
+    title: entry.title,
+    context: entry.context,
+    kind: entry.kind,
+    ...(entry.summary === "" ? {} : { summary: entry.summary }),
+  })),
 })
 
 /** The words nobody waits for, keyed by the entry they sit under. */
