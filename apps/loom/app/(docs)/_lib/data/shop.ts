@@ -245,7 +245,16 @@ const stock = defineSource({
   params: z.object({}),
   answers: z.array(z.string()),
   adapter: {
-    fetch: async () => ({ ok: false, error: { code: "unavailable", detail: "the query timed out" } }),
+    /**
+     * An integration that says, in as many words, that it cannot answer right
+     * now. It said so quickly and it said so itself, which is what separates
+     * this row from `courier.tracking` below: both come back `unavailable`, and
+     * only one of them came back at all.
+     */
+    fetch: async () => ({
+      ok: false,
+      error: { code: "unavailable", detail: "the stock database is not accepting connections" },
+    }),
   },
 })
 
@@ -287,13 +296,92 @@ const deliverySlots = defineSource({
   answers: z.array(z.string()),
 })
 
-/** The shop, plus four integrations having a bad afternoon. */
-export const troubleRegistry = (): DataRegistry =>
-  registryOf([services, profileField, openingHours, stock, myOrders, latestReviews, deliverySlots])
+export type SilentSource = {
+  readonly entry: SourceEntry
+  /**
+   * What the runtime's abort said once it gave up, or `undefined` while it is
+   * still waiting. An adapter hears this; it is how a deployment releases the
+   * connection nothing is going to read.
+   */
+  readonly abortedWith: () => string | undefined
+}
 
 /**
- * One page asking six questions, none of which gets an answer, for six different
- * reasons.
+ * An integration that never answers — the failure a `try` cannot catch, because
+ * nothing is thrown and nothing comes back.
+ *
+ * The four above all *answer*: badly, refusing, or by throwing. This one does
+ * none of those, which until 13 September meant it was not a failure at all —
+ * it was the page, held, with no diagnostic, for as long as the socket stayed
+ * open. The runtime's ceiling is what turns it into one of the ordinary values
+ * in this table.
+ *
+ * The promise is deliberately one that never settles. A `setTimeout` long enough
+ * to be interesting would make the documentation build wait for it, and a page
+ * whose evidence costs ten seconds a build is a page somebody eventually
+ * produces from a fixture instead.
+ */
+export const silentSource = (id: string, description: string): SilentSource => {
+  let aborted: string | undefined
+
+  return {
+    abortedWith: () => aborted,
+    entry: defineSource({
+      id,
+      description,
+      params: z.object({}),
+      answers: z.array(z.string()),
+      adapter: {
+        fetch: ({ signal }) =>
+          new Promise(() => {
+            signal?.addEventListener("abort", () => {
+              const { reason } = signal
+
+              aborted = reason instanceof Error ? reason.message : "unnamed"
+            })
+          }),
+      },
+    }),
+  }
+}
+
+/** The shop, plus five integrations having a bad afternoon. */
+export const troubleRegistry = (): DataRegistry =>
+  registryOf([
+    services,
+    profileField,
+    openingHours,
+    stock,
+    myOrders,
+    latestReviews,
+    deliverySlots,
+    silentSource("courier.tracking", "Where a delivery has got to.").entry,
+  ])
+
+export type SilentShop = {
+  readonly registry: DataRegistry
+  readonly abortedWith: () => string | undefined
+}
+
+/**
+ * The same shop, with the one source its page asks twice replaced by one that
+ * never answers.
+ *
+ * Everything else in the registry is untouched, which is the whole point of
+ * resolving it: the two regions bound to the other two sources are meant to come
+ * back with their answers while this one is still being waited for. A ceiling
+ * shared by the page would cost them that.
+ */
+export const shopWithASilentSource = (): SilentShop => {
+  const silent = silentSource("catalogue.services", "What this shop offers, most popular first.")
+
+  return { registry: registryOf([silent.entry, profileField, openingHours]), abortedWith: silent.abortedWith }
+}
+
+/**
+ * One page asking seven questions, none of which gets an answer, for six
+ * different reasons — two of the seven arrive at the same reason by different
+ * routes, and the page is about the difference.
  *
  * `limit: 40` is over `catalogue.services`' declared ceiling of twelve, so it is
  * refused before the adapter is called — the difference between a cap in a schema
@@ -322,6 +410,7 @@ export const pageOfThingsThatGoWrong = (): LoomTree => {
         asking("slots", "delivery.slots", {}),
         asking("services", "catalogue.services", { tag: "baking", limit: 40 }),
         asking("testimonials", "reviews.recent", { limit: 3 }),
+        asking("courier", "courier.tracking", {}),
       ],
     }),
     ids

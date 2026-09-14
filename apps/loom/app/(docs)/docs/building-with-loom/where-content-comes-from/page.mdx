@@ -177,17 +177,27 @@ one tells somebody their data is gone.
 
 ## When there is no answer
 
-Six ways a question goes unanswered, produced by causing all six:
+Seven ways a question goes unanswered, produced by causing all seven:
 
 <WhenThereIsNoAnswer />
 
 Two of those never reach your code at all. A source nobody registered and params
 the source refuses are both settled at the seam, which is what makes the schema
-worth writing. The other four are your deployment's own afternoon: a timeout, a
-refusal, an answer that no longer matches its own schema, and an integration that
-threw instead of answering.
+worth writing. The other five are your deployment's own afternoon: a database
+that says it is down, an integration that never replies, a refusal, an answer
+that no longer matches its own schema, and an integration that threw instead of
+answering.
 
-There is a seventh, `not-resolved`, and no single page can cause it: it means
+**Two rows come back with the same reason, and the third column is the
+difference.** `shop.stock` answered — quickly, and with "I cannot answer" —
+which is an integration doing its job badly but doing it. `courier.tracking`
+never answered at all, and the sentence beside it was written by the runtime
+when it stopped waiting. Both are `unavailable` on purpose: the remedy is the
+same and so is the person who has to act. What you do about it is in
+[when nothing comes back](/docs/the-runtime/when-nothing-comes-back), which is
+about the ceiling that produced that row.
+
+There is one more, `not-resolved`, and no single page can cause it: it means
 the render was handed answers resolved for a *different* tree than the one it
 drew. Nothing about your data is wrong. Whoever calls the render resolved one
 plan and rendered another, and that is where the fix goes.

@@ -159,19 +159,36 @@ export const WhatComesBack = async () => {
   )
 }
 
-/** Six bindings, six reasons, one resolve — and the declaration nobody could read. */
+/**
+ * Seven bindings, six reasons, one resolve — and the declaration nobody could
+ * read.
+ *
+ * Keyed by the **question** rather than by the reason, because two of the seven
+ * come back with the same one: a database that says it cannot answer and an
+ * integration that says nothing at all are both `unavailable`, and a table keyed
+ * by reason would render one of them and drop the other.
+ */
 export const WhenThereIsNoAnswer = async () => {
   const missing = await produceMissingAnswers()
   const misdeclared = produceMisdeclared()
 
   return (
-    <Panel caption="Six questions on one page, the six ways they went unanswered — and, last, a declaration nobody could read">
+    <Panel
+      caption={`${missing.length} questions on one page, coming back with ${
+        new Set(missing.map((row) => row.reason)).size
+      } different reasons — and, last, a declaration nobody could read`}
+    >
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <Head columns={["What happened", "Reason", "What the runtime says", "Your code"]} />
           <tbody>
             {missing.map((row) => (
-              <tr key={row.reason} className="border-edge border-b" data-reason={row.reason}>
+              <tr
+                key={row.binding}
+                className="border-edge border-b"
+                data-reason={row.reason}
+                data-binding={row.binding}
+              >
                 <Cell>{row.when}</Cell>
                 <Mono>{row.reason}</Mono>
                 <Cell>{row.sentence}</Cell>
