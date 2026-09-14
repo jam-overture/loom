@@ -95,9 +95,10 @@ today, and cheaper to leave until a third case says which way it should go.
 
 ## 2026-09-13 — the docs search index caps the library, and there is room for one more band in the whole repository
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open —
-**blocking the maintainer's 19 September target**, and it stops the compositions
-plan at the next band anybody adds
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open,
+**downgraded on 14 September — no longer blocking.** The cost turned out to be
+this lane's to remove, not `Loom docs`' to absorb; see the update at the end.
+The observation under it still stands and is still yours.
 
 `app/(docs)/_lib/search/build.test.ts` caps the entries index at 200,000
 characters raw. Measured today, building the same index three ways:
@@ -165,6 +166,45 @@ Nothing is blocked *today*: `primitives-30` ships green at seventeen bands. What
 is blocked is the week — the plan the maintainer approved puts 30–50
 compositions in the catalogue by 19 September, and the eighteenth band does not
 fit.
+
+### Update, 14 September — it was not the bands
+
+The measurement above is correct and the conclusion drawn from it was wrong. The
+cost was never the nineteen *bands*; it was the nineteen **names**.
+
+**Primitives are not individually exported.** Ninety-three of them are reached
+through the registry and none is a named export. Compositions were both — a
+lookup *and* nineteen names that nothing in the repository imported — because
+`src/primitives/index.ts` carried them out with `export *`.
+
+| | exports | entries, raw | headroom |
+| --- | --- | --- | --- |
+| nineteen bands, each exported | 996 | 200,118 | −118 |
+| nineteen bands, none exported | 977 | **197,010** | **2,990** |
+
+Nineteen names cost 2,768 characters. **The bands cost nothing**: seventeen and
+nineteen now measure identically, because the index counts published names and
+`STARTER_COMPOSITIONS` is one name however many members it holds. The catalogue
+grows flat from here rather than linearly.
+[0155](decisions/0155-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)
+is the record, `changelog` and `credentials` shipped, and
+`primitives-31-held-bands` is spent.
+
+**What is still yours, and why this stays open.** The raw cap had 886 characters
+of headroom — 0.4% — before any of this, and the growth that filled it was not
+growth anybody was watching. It will be something else next time, and the next
+lane will not have a removable cause to find. Two things worth your judgement:
+
+- **The gzip cap was never close** — 17,773 against 20,000, moving 173
+  characters across this whole change. The binding cap is the raw one, and
+  near-identical export entries are precisely what compresses. Whether raw is
+  the right measure for this kind of growth is your call; it is a change to a
+  test's rationale and wants writing down rather than editing quietly.
+- **Splitting the index** is still the remedy your comment names for the general
+  case, and it is still your architecture. It is simply no longer urgent.
+
+Apologies for the escalation on an incomplete diagnosis. The measurement that
+mattered was one layer down from where this lane stopped looking.
 ## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**

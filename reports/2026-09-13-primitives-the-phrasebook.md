@@ -157,3 +157,63 @@ Eight bands in one session rather than the four the first batch suggested — so
 the earlier "four to eight a run" holds at the top of its range. **The rate is
 no longer the constraint.** The index is: at 167 characters a band, the ceiling
 is the eighteenth, and no amount of throughput gets past it.
+
+
+---
+
+## 14 September — the ceiling was ours, and it is gone
+
+#289 merged, `main` was merged in, and the index measurement was taken one layer
+further down than it had been. **The conclusion in the section above is wrong,
+and this is the correction.**
+
+The cost was never the nineteen bands. It was nineteen **names**.
+
+**Primitives are not individually exported.** `src/primitives/index.ts` names
+ninety-three primitives in `STARTER_PRIMITIVES` and exports none of them; a
+consumer reaches one through the registry. Compositions were reachable *both*
+ways — through `compositionById` and as nineteen named exports that nothing in
+the repository imports — because `export * from "./compositions/index.js"`
+carried every name out to the package root.
+
+| | exports | entries, raw | headroom |
+| --- | --- | --- | --- |
+| nineteen bands, each exported | 996 | 200,118 | −118, red |
+| nineteen bands, none exported | 977 | **197,010** | **2,990** |
+
+Nineteen names cost **2,768 characters**. The bands cost **nothing** —
+seventeen and nineteen measure identically, because the index counts published
+names and `STARTER_COMPOSITIONS` is one name however many members it holds.
+
+**So the catalogue grows flat from here.** The next fifty bands cost what the
+last two did.
+
+### What shipped as a result
+
+- **Nineteen bands.** `changelog` and `credentials` came back off
+  `primitives-31-held-bands`, which is now spent.
+- **[0155](../decisions/0155-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)**
+  — the catalogue's public surface is the list and the lookup, not every band by
+  name. It is the shape primitives already had; the asymmetry was an accident of
+  `export *` rather than a design.
+- **The `Loom docs` finding downgraded**, not closed. The observation under it
+  is still true and still theirs: the raw cap had 0.4% headroom before any of
+  this, and the growth that filled it was not the growth anybody was watching.
+  The gzip cap was never close — 17,773 of 20,000 — so whether raw is the right
+  measure for this kind of growth is a question left with them, with the note
+  that it is a change to a test's rationale rather than a number to edit.
+
+### What this run got wrong, kept here because it is the useful part
+
+The escalation on 13 September was made on an incomplete diagnosis. The
+measurement was right, the arithmetic was right, and the cause was one layer
+below where this lane stopped looking — so a cost this lane was creating
+unnecessarily was reported as another lane's architecture to fix.
+
+The tell was visible in the numbers at the time and was not read: **a
+composition is four nodes and a doc comment, and 163 characters of *index* is
+not what four nodes cost.** That gap between what a thing is and what it
+measured was the thing to pull on. `export *` is what sat in it — a construct
+that grows the published surface whenever a module does, without anybody
+choosing it, which is exactly the class of thing that makes a budget move for
+reasons nobody can see.
