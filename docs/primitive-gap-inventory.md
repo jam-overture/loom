@@ -42,10 +42,33 @@ registered ([0057](../decisions/0057-a-preset-is-a-deterministic-interpreter.md)
 [0120](../decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md))
 and adds no type.
 
-## Tier A — genuinely missing, buildable today
+## Tier A — **closed, 14 September**
 
-Nothing here needs a framework change. This is the whole list; it is short, and
-the shortness is the finding.
+Nothing here needed a framework change, and all of it has now shipped. The table
+below is kept as written on 13 September, with what closed each row, because the
+*reasoning* for why each was missing is still the useful part. **Do not rebuild
+these.**
+
+| row | closed by |
+| --- | --- |
+| a figure drawn from numbers | `loom.stat-chart` over `loom.stat`, #289 |
+| a stat that carries its trend | `magnitude` on `loom.stat`, #289 — the figure now plots, which is what the row was for |
+| paging through a run of things | `loom.link-pager`, #294 |
+| the empty state | `loom.empty-state`, #294, and `cause` on it, #301 |
+| the waiting state | `loom.waiting-state`, #294 |
+| a consent checkbox | `checkbox` in `FIELD_TYPES`, #294 |
+| a radio group | **not shipped, and not cheap** — see the correction below |
+
+> **Why this heading was worth editing.** On 14 September two runs of
+> `Loom primitives` spent the same afternoon on this list: a scheduled run
+> finished it on #294 while an interactive session was building its own empty
+> state for #300, which was withdrawn. Nothing in the repository recorded that a
+> run was *working on* an item — only that one was done — and the list read as
+> open to both of them. Marking a tier closed the moment it closes is the
+> cheapest half of that, and it is why this section now leads with a verdict
+> rather than with a list.
+
+This is the whole list; it is short, and the shortness is the finding.
 
 | | what it is | why nothing covers it |
 | --- | --- | --- |
