@@ -21494,8 +21494,10 @@ code of its own is that it sends a different person to a different file.
 ---
 ## 2026-09-12 — `/portal/checkup` prints `loom.footer` on its surface, and the tree that could name it is in the same function
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-found while taking the rail on the page screen, deliberately not taken with it
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-26-the-checkup-names-the-part` on 13 September — taken as the unit this
+entry recommended, and the recycled-id sentence beside it, which had the same
+fault in prose
 
 `checkup-verdict.tsx:81` renders each difference as
 `<span className="font-mono">{difference.label}</span>` on the **surface**, and
@@ -21521,8 +21523,14 @@ One unit, on that screen, with the seeded checkup in front of it.
 ---
 ## 2026-09-12 — a part is named in three formats by three functions, and two of them were written eight days apart
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
-consolidation to make once #262 lands, and an argument for not making it before
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**#262 has landed, and the consolidation is still not worth making.** Revisited
+on 13 September by the run that would have been its fourth shape: a list row
+wanted the subject name with a capital on it, and what that took was
+`capitalised` in `part-name.ts` — one helper `asSentence` now shares, rather than
+a fourth format. Three call sites, three shapings, one `nounOf`. Unchanged
+otherwise; the argument below still holds and the condition for taking it is
+still a fourth genuine shape
 
 The same noun now reaches a reader three ways:
 
@@ -22887,6 +22895,56 @@ not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
 
 ---
+## 2026-09-13 — the portal's three most important screens cannot be photographed, because a healthy deployment never reaches their important state
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+filed by the third run in a row to hit it, with the fix named and deliberately
+not taken
+
+`/portal/checkup` has three verdicts and the seeded portal can only ever show
+one of them. A checkup folds a page's accepted changes from a seed and compares
+the result with the page being served; every write updates both, so a running
+portal **always agrees with itself**. The red path — *This page does not match
+its own history* — and the recycled-name warning under it are unreachable by any
+sequence of clicks, and so is the list of differences that is the whole reason
+the screen exists.
+
+This is not specific to the checkup. It is the shape of every screen in this
+portal whose value is in the bad news:
+
+| Screen | The state worth seeing | Reachable in the seeded portal? |
+| --- | --- | --- |
+| `/portal/checkup` | diverged, unreplayable, recycled ids | no |
+| `/portal/calibration` | a confidence band that has proved wrong | only if enough real asks have been graded |
+| the review queue | a refusal, a misunderstanding, a failure | only by asking for something the Gate will refuse |
+
+Three runs of this lane have now shipped a unit whose most important screen went
+unphotographed — the slot row on 12 September, and both lists on 13 September.
+The reports have been honest about it each time, and honesty is not the same as
+a maintainer being able to look at the thing.
+
+**What was done instead, and why it is a workaround.** The 13 September run
+photographed the live screen with the verdict panel rendered from the same
+commit and put in its place: real stylesheet, real shell, real rail, real page
+name and ids. Every string in the picture is a string the code produces. What it
+is not is a screen anybody can navigate to, and a picture that requires a
+paragraph explaining how it was taken is one the maintainer has to take on
+trust.
+
+**What a fix looks like, offered rather than prescribed.** `seeds.ts` registers
+exactly one tree. A **second seeded page that is deliberately drifted** — one
+whose recorded starting shape does not produce the page served, which is one
+entry in that map and a snapshot written past it — would make the red checkup a
+real screen with a real URL, reachable from the front door's own list, for this
+lane and for anybody evaluating Loom.
+
+**Not taken, because it is above this lane's line.** A portal that ships a
+visibly broken page on purpose is a product decision: it puts a red verdict in
+front of every person who opens the demo, and the thing that makes it useful —
+that it looks exactly like a real fault — is the thing that makes it dangerous
+if it is not obviously labelled. It also touches what the seeded deployment *is*,
+which is shared ground rather than this lane's. Worth a decision record if it is
+wanted, and cheap to build once it is.
 
 ## 2026-09-13 — the signals deferral is lifted, and four lanes have something approved waiting for them
 
