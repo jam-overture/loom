@@ -234,3 +234,9 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0148 | *No record on this branch* | — | — |
 | 0149 | *No record on this branch* | — | — |
 | [0150](0150-a-container-that-must-aggregate-publishes-a-custom-property-and-the-browser-does-the-arithmetic.md) | A container that must aggregate over its children publishes a custom property, and the browser does the arithmetic | Accepted | §4b |
+| 0151 | *No record on this branch* | — | — |
+| 0152 | *No record on this branch* | — | — |
+| 0153 | *No record on this branch* | — | — |
+| 0154 | *No record on this branch* | — | — |
+| [0155](0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md) | A container may only add to its children what they left unspoken, so a shared treatment lives in a class and never on the element | Accepted | §4b |
+| [0156](0156-the-two-states-a-bound-region-is-in-are-primitives-and-not-props-on-every-container.md) | The two states a bound region is in are primitives, and not props on every container | Accepted | §4b |

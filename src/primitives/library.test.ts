@@ -192,8 +192,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 93 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(93)
+  it("registers as 96 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(96)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -267,6 +267,9 @@ describe("the starter library", () => {
       "loom.footer",
       "loom.link-list",
       "loom.link-trail",
+      "loom.link-pager",
+      "loom.empty-state",
+      "loom.waiting-state",
       "loom.heading",
       "loom.prose",
       "loom.list",
@@ -301,7 +304,7 @@ describe("the starter library", () => {
      * `loom.tier-table` whose child got renamed — fails here rather than in a
      * catalogue a model misreads.
      */
-    const ARRANGEMENTS = ["grid", "list", "cloud", "table", "row", "carousel"]
+    const ARRANGEMENTS = ["grid", "list", "cloud", "table", "row", "carousel", "pager"]
 
     for (const type of types) {
       const arrangement = ARRANGEMENTS.find((word) => type.endsWith(`-${word}`))
@@ -426,6 +429,13 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.credential",
       "loom.faq",
+      /**
+       * A leaf for a different reason than the twenty-two around it. The others
+       * hold their copy in props; this one holds no copy at all — its whole
+       * content is a shape, and the only string in it is declared rather than
+       * given. A child node in it would be a node the reader never sees.
+       */
+      "loom.waiting-state",
       "loom.rating",
       "loom.avatar",
       "loom.perk",
@@ -889,6 +899,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(productPage(EDITORIAL)),
       ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(furniturePage(EDITORIAL)),
+      ...typesIn(boundPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -7368,6 +7379,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(productPage(EDITORIAL)),
       ...typesIn(shelfPage(EDITORIAL)),
       ...typesIn(atmospherePage(EDITORIAL)),
+      ...typesIn(boundPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -8515,5 +8527,372 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
     const body = splitStylesheet(render(tree).markup).tree
 
     expect([...body.matchAll(/z-index:(\d)/g)].map((match) => Number(match[1]))).toEqual([0, 1, 2])
+  })
+})
+
+/**
+ * The three states a region is in when its content is not simply there, built
+ * as one page because they are one subject: a list that arrived, a list that is
+ * still coming, a list that came back empty, and the control that walks along
+ * one that is longer than a screen.
+ *
+ * 0058 gave the tree a way to ask a question on 11 September and stated that a
+ * source with nothing to report answers `ready` with an empty list rather than
+ * failing. These are what the page says at the other end of that, and the
+ * fixture also carries the two smaller things the same run shipped: a consent
+ * checkbox, and a link that points at a heading on the page it is already on.
+ */
+const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const link = (href: string, label: string, props: JsonObject = {}) =>
+    buildElement(idFactory, { type: "loom.link", props: { href, ...props }, children: [text(label)] })
+
+  const waiting = (props: JsonObject) =>
+    buildElement(idFactory, { type: "loom.waiting-state", props })
+
+  const arriving = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Loading", anchor: "arriving" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("What the page holds open while it waits")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.grid",
+        props: { columns: "three", gap: "loose" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.card",
+            props: { padding: "normal" },
+            children: [waiting({ shape: "card" })],
+          }),
+          buildElement(idFactory, {
+            type: "loom.card",
+            props: { padding: "normal" },
+            children: [waiting({ shape: "profile" })],
+          }),
+          buildElement(idFactory, {
+            type: "loom.card",
+            props: { padding: "normal" },
+            children: [waiting({ shape: "lines", lines: 4 })],
+          }),
+        ],
+      }),
+      waiting({ shape: "media" }),
+    ],
+  })
+
+  const nothing = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Empty", anchor: "nothing" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("What the page says when the answer is none")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.empty-state",
+        props: { outline: "dashed", align: "center" },
+        children: [
+          buildSlot(idFactory, "media", [
+            buildElement(idFactory, {
+              type: "loom.icon",
+              props: { shape: "bare", tone: "neutral", size: "medium" },
+              children: [text("✶")],
+            }),
+          ]),
+          buildSlot(idFactory, "heading", [
+            buildElement(idFactory, {
+              type: "loom.heading",
+              props: { level: 3 },
+              children: [text("No proposals yet")],
+            }),
+          ]),
+          text("Every change a visitor asks for lands here first, with who asked and what it would cost."),
+          buildSlot(idFactory, "actions", [
+            buildElement(idFactory, {
+              type: "loom.action",
+              props: { href: "https://example.com/propose", variant: "primary" },
+              children: [text("Propose a change")],
+            }),
+          ]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.empty-state",
+        props: { outline: "none", align: "start", stature: "compact" },
+        children: [text("Nothing archived this quarter.")],
+      }),
+    ],
+  })
+
+  const along = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Archive", anchor: "along" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("What walks a reader along a run")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.link-pager",
+        props: { align: "center" },
+        children: [
+          buildSlot(idFactory, "previous", [link("/archive/1", "← Newer", { tone: "muted" })]),
+          link("/archive/1", "1"),
+          link("/archive/2", "2", { current: true }),
+          link("/archive/3", "3"),
+          text("…"),
+          link("/archive/9", "9"),
+          buildSlot(idFactory, "next", [link("/archive/3", "Older →", { tone: "muted" })]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.link-list",
+        props: { label: "On this page", direction: "row" },
+        children: [link("#arriving", "Waiting"), link("#nothing", "Empty"), link("#along", "Paging")],
+      }),
+    ],
+  })
+
+  const consent = buildElement(idFactory, {
+    type: "loom.form",
+    props: { layout: "stacked", width: "readable" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.field",
+        props: { name: "email", label: "Email", type: "email", required: true },
+      }),
+      buildElement(idFactory, {
+        type: "loom.field",
+        props: {
+          name: "consent",
+          label: "Email me when something I proposed is decided.",
+          type: "checkbox",
+          required: true,
+          hint: "One message per decision. Nothing else, ever.",
+        },
+      }),
+      buildSlot(idFactory, "submit", [
+        buildElement(idFactory, {
+          type: "loom.button",
+          props: { variant: "primary" },
+          children: [text("Subscribe")],
+        }),
+      ]),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide" },
+      children: [arriving, nothing, along, consent],
+    }),
+    idFactory
+  )
+}
+
+describe("the states a region is in when its content is not simply there", () => {
+  it("renders the waiting, empty and paging bands with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(boundPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("No proposals yet")
+    expect(markup).toContain("Nothing archived this quarter.")
+  })
+
+  /**
+   * The whole of what a waiting state is *for*: a reader is told once that
+   * something is coming, and is not read eleven rectangles. `role="status"`
+   * with `aria-busy` is the pairing, and the bars are hidden from it.
+   */
+  it("announces itself once and hides every bar it draws", () => {
+    const body = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+    const waiting = body.slice(body.indexOf('role="status"'))
+
+    expect(body).toContain('role="status"')
+    expect(body).toContain('aria-busy="true"')
+    expect(waiting).toContain("Loading")
+    expect([...body.matchAll(/class="loom-waiting-bar"/g)].length).toBeGreaterThan(6)
+
+    for (const bar of body.matchAll(/<div[^>]*class="loom-waiting-bar"[^>]*>/g)) {
+      expect(bar[0]).toContain('aria-hidden="true"')
+    }
+  })
+
+  /**
+   * `lines` counts bars and changes no node, which is the near-miss the
+   * granularity doc names: a bar is not addressable, nobody moves the second
+   * one, and there is nothing at the other end of a `move` that reached it.
+   * What is *not* a prop is `repeat` — three waiting cards are three nodes.
+   */
+  it("draws the bars a shape asks for without any of them being a node", () => {
+    const idFactory = sequentialIdFactory()
+    const barsFor = (props: JsonObject): number => {
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [buildElement(idFactory, { type: "loom.waiting-state", props })],
+        }),
+        idFactory
+      )
+
+      const body = splitStylesheet(render(tree, true).markup).tree
+
+      expect([...body.matchAll(/data-loom-type="([^"]+)"/g)].map((match) => match[1])).toEqual([
+        "loom.page",
+        "loom.waiting-state",
+      ])
+
+      return [...body.matchAll(/loom-waiting-bar/g)].length
+    }
+
+    expect(barsFor({ shape: "lines", lines: 1 })).toBe(1)
+    expect(barsFor({ shape: "lines", lines: 6 })).toBe(6)
+    expect(barsFor({ shape: "lines" })).toBe(3)
+    /** A cover plus the two lines under it. */
+    expect(barsFor({ shape: "card" })).toBe(3)
+    /** The disc plus a name and a role beside it. */
+    expect(barsFor({ shape: "profile" })).toBe(3)
+    /** One box, holding its aspect ratio and nothing else. */
+    expect(barsFor({ shape: "media" })).toBe(1)
+  })
+
+  /**
+   * A media placeholder reserves the geometry rather than a height, which is
+   * the only reason a skeleton beats a spinner: what replaces it lands in the
+   * same box and the page does not jump.
+   */
+  it("holds an aspect ratio open rather than a height", () => {
+    const body = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+
+    expect(body).toContain("aspect-ratio:16 / 10")
+  })
+
+  /**
+   * An empty state is an absence a reader is told about, not a thing shouting
+   * for attention: the glyph is dropped to `fg-subtle` on a muted disc, and the
+   * sentence to `fg-muted`. Asserted because "quiet" is the one property a
+   * screenshot makes obvious and no other test would catch regressing.
+   */
+  it("keeps an empty state quieter than the content that did arrive", () => {
+    const body = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+    const empty = body.slice(body.indexOf("No proposals yet") - 900, body.indexOf("No proposals yet"))
+
+    expect(empty).toContain("var(--loom-bg-surface-muted)")
+    expect(empty).toContain("var(--loom-fg-subtle)")
+    expect(body).toContain("border:2px dashed var(--loom-border-subtle)")
+  })
+
+  /**
+   * 0051's test, and `loom.nav`'s argument at a different scale: the ends are
+   * placed by the pager whatever the tree's child order is, so the numbers can
+   * grow and shrink by `insert` and `remove` without either end moving.
+   */
+  it("puts the pager's two ends outside the run of numbers", () => {
+    const body = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+    const pager = body.slice(body.indexOf('class="loom-pager"'))
+    const numbers = pager.indexOf("loom-pager-numbers")
+
+    expect(pager.indexOf("← Newer")).toBeLessThan(numbers)
+    expect(pager.indexOf("Older →")).toBeGreaterThan(pager.indexOf(">9<"))
+    expect(pager.slice(0, numbers)).not.toContain(">1<")
+
+    /**
+     * The landmark's name is declared by the primitive rather than asked of the
+     * tree (0060): a model has nothing to say here that "Pagination" does not
+     * already say, and a deployment in French has one string to replace.
+     */
+    expect(body).toContain('aria-label="Pagination"')
+  })
+
+  /**
+   * The mark on the current page is `loom.link`'s, which shipped for a site
+   * header and turns out to be the same fact at a different scale. The tile is
+   * the pager's, and every property in it is one `loom.link` leaves unspoken.
+   */
+  it("marks the page the reader is on, and can only do so with what the link left unsaid", () => {
+    const { stylesheet, tree } = splitStylesheet(render(boundPage(EDITORIAL)).markup)
+
+    expect(tree).toContain('aria-current="page"')
+    expect(stylesheet).toContain('.loom-pager .loom-link[aria-current="page"]')
+
+    /**
+     * The block padding is reachable from the stylesheet only because
+     * `loom.link` stopped setting it on the element. A link that took it back
+     * inline would leave the rule below silently doing nothing, which is this
+     * file's first documented trap and is invisible in a screenshot of the one
+     * page that does not use a pager.
+     */
+    expect(stylesheet).toContain(".loom-link {\n  padding-block-end: 2px;\n}")
+    expect(tree).not.toMatch(/padding-block-end:2px/)
+    expect(tree).toContain('class="loom-link loom-underline"')
+  })
+
+  /**
+   * The maintainer's finding of 12 September, closed: three primitives could
+   * mark a destination and nothing could link at one, so a page with a bar over
+   * its own sections wrote `/#helmets` and was right on the site root alone.
+   */
+  it("links at a heading on the page it is already on, and emits the id to land at", () => {
+    const body = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+
+    expect(body).toContain('href="#arriving"')
+    expect(body).toContain('id="arriving"')
+    expect(body).toContain('href="#nothing"')
+    expect(body).toContain('id="nothing"')
+  })
+
+  /**
+   * A consent tick is the one field whose control precedes its label, because a
+   * box after the sentence it governs is a box a reader has to look back for.
+   * The native control is themed by `accent-color` rather than redrawn.
+   */
+  it("puts a consent checkbox before its label and themes the browser's own control", () => {
+    const body = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+    const consent = body.slice(body.indexOf('type="checkbox"'))
+
+    expect(body).toContain('type="checkbox"')
+    expect(body).toContain("accent-color:var(--loom-accent)")
+    expect(body.indexOf('type="checkbox"')).toBeLessThan(body.indexOf("Email me when something"))
+    expect(consent).toContain("One message per decision.")
+    expect(body).not.toMatch(/type="checkbox"[^>]*width:100%/)
+  })
+
+  /**
+   * Reduced motion takes the sweep and leaves the bar. Unlike an entrance, a
+   * waiting state with no animation still says the whole of what it says, so
+   * this one is dropped outright rather than parked at its end.
+   */
+  it("keeps the shape and drops the sweep for a reader who asked for less motion", () => {
+    const { stylesheet } = splitStylesheet(render(boundPage(EDITORIAL)).markup)
+    const calmed = stylesheet.slice(stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"))
+
+    expect(stylesheet).toContain("@keyframes loom-waiting")
+    expect(calmed).toContain(".loom-waiting-bar {\n    animation: none;")
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(boundPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(render(boundPage(BOLD)).diagnostics).toEqual([])
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
   })
 })
