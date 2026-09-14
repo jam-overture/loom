@@ -93,6 +93,79 @@ the *person* as a separate axis — the fact being named is the same in both
 surfaces, and only who is being addressed differs. Not proposed, not needed
 today, and cheaper to leave until a third case says which way it should go.
 
+---
+
+## 2026-09-14 — a bound tree rendered against `EMPTY_DATA_RESOLUTION` drops every question in silence
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+— found while writing Exercise H for lesson 18. Latent rather than live: nothing
+in this repository passes it, and it is exported from the package root.
+
+There are three ways to hand a tree with bindings a render that has no answers
+for them, and they produce three different amounts of noise. The middle one
+produces none.
+
+| what the caller passes as `data` | the node renders | diagnostics |
+| --- | --- | --- |
+| nothing at all | `unbound` | 1 — `data-unresolved`, *"node n_1 asks for data and this render was given no resolution, so it rendered with none"* |
+| `EMPTY_DATA_RESOLUTION` | `unbound` | **0** |
+| `buildDataResolution(plan, new Map())` | `unavailable` | 1 — `data-unavailable`, reason `not-resolved` |
+
+All three are the same mistake — a page asking questions that nobody answered —
+and the runtime has a named diagnostic for one, a named reason for another, and
+nothing whatsoever for the third.
+
+The measurements are from a scratch file run against this checkout's `src/`;
+the table is its output, not a reading of the code.
+
+### Why it is worth a look rather than a shrug
+
+`EMPTY_DATA_RESOLUTION` exists so that `resolveDataPlan` can short-circuit an
+empty plan, and for that it is exactly right. But it is exported from
+`@loom/runtime`, its `lookup` answers `NO_DATA` for every node that asks, and
+`NO_DATA`'s own doc says *"Always answers; a node with no bindings gets
+`NO_DATA`"* — which is true of the constant's intended caller and false of any
+other. A host writing a composition root reaches for a neutral "no data" value,
+and this is the one with the obvious name.
+
+What it then does is the thing `resolution.ts` says in a comment it is arranged
+to prevent: *a page silently missing the data it asked for is the failure mode
+this whole module is arranged to prevent.* `not-resolved` was split out of
+`no-such-source` on 12 September precisely so that a binding nothing answered
+would name itself and send the right person to the composition root. This route
+reaches the same state and says nothing.
+
+It is also the shape lesson 24 left as the question to carry forward, arriving in
+a different seam: **the system answers "nothing", and "nothing" is doing the work
+of two different facts** — *this node has no bindings* and *nobody resolved
+anything*. `NO_DATA` cannot tell them apart, so neither can the walk.
+
+### Three shapes, smallest first — the choice is this lane's
+
+1. **Leave the value and fix the door.** `renderLoomTree` already knows how to
+   say `data-unresolved` when handed no resolution. It could say the same when
+   handed one whose `lookup` returns `NO_DATA` for a node the tree says has
+   bindings — the walk has the node's parsed bindings in hand at that point.
+   This costs nothing at the call sites that are right today.
+2. **Make the constant unreachable.** Un-export `EMPTY_DATA_RESOLUTION` and let
+   `resolveDataPlan` keep it privately. Smallest diff, and it removes the
+   attractive nuisance rather than the hazard: a host can still build an empty
+   resolution by hand, and would then get the same silence.
+3. **Give the constant a third answer.** A resolution that reports *"I was not
+   built from this plan"* for any node it is asked about and does not know. This
+   is the most honest and the most invasive, since `DataResolution` is an
+   interface a host may implement.
+
+I did not pick one, and the reason is the one this seam taught me: naming the
+absent case is a design decision about **what a reading owes a caller**, and the
+lane that owns `src/data/` has the standing to make it. Whatever is chosen,
+lesson 18's Exercise H is written against `buildDataResolution` and will keep
+working; if route 1 or 3 lands, the paragraph under it about *"the fault is
+between two calls, and both calls are correct"* gets a second instance rather
+than going stale.
+
+---
+
 ## 2026-09-13 — the docs search index caps the library, and there is room for one more band in the whole repository
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open —
@@ -13784,9 +13857,14 @@ merge should expect to be a repair run, which this one was.
 
 ## 2026-09-01 — lesson 09's preamble does not import what exercise G uses, and the runner executes fences rather than instructions
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:** open
-— **`main` is still red on this one test.** Diagnosed, not taken: both fixes are
-pedagogical choices rather than repairs.
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+closed by `lessons-35-the-seventh-reason` — fix **A**, and the prose at 806 now
+says the import is already there rather than telling a reader to add it. The
+red test was fixed before this run (the preamble at 524 imports `formTree` on
+`main`, and `run.test.ts > runs the exercises in lesson 9` passes); what was left
+was the sentence, which had become an instruction to do something already done.
+Recorded in the lesson rather than deleted, because *a runner executes fences and
+not prose* is worth a reader knowing about the course they are reading.
 
 `app/(lessons)/_lib/run.test.ts > runs the exercises in lesson 9` fails with
 `ReferenceError: formTree is not defined`. It is the one failure left on `main`
@@ -19543,7 +19621,14 @@ enough contested numbering already.
 
 ## 2026-09-05 — `DataUnavailable` has a seventh reason, and lesson 18 teaches six
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:** open
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+closed by `lessons-35-the-seventh-reason`, together with the 12 September entry
+that restates it. Lesson 18 teaches seven, and `not-resolved` got an exercise of
+its own rather than a seat in the list — it is the only one of the seven that no
+tree and no adapter can cause, so Exercise C cannot produce it and the reader is
+asked to try before being told why. The offer to export the reasons as a value
+is not taken up: a count in prose that goes stale is a prose problem, and
+`transcripts.test.ts` now catches the class of drift that made this worth filing.
 
 Closing the `no-such-source` finding added `not-resolved`, so the union is
 **seven** reasons rather than six. The finding that asked for it said the lesson
@@ -21557,7 +21642,13 @@ copy.
 ## 2026-09-12 — lesson 18 says there are six reasons, and as of today there are seven
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
-open — a consequence of your own 3 September finding, filed the moment it landed
+closed by `lessons-35-the-seventh-reason` — all four lines fixed, plus three more
+this entry did not have (the objectives at the top, the "In the code" pointer at
+`adapter.ts`, and "all six produce a diagnostic" in *Every failure is total*).
+The note at the end of this entry — that the seventh reason is the one the reader
+can never cause from the tree, and that it sends a different person to a
+different file — is the spine of what got written, and Exercise H exists because
+of it. Thank you for it.
 
 You filed *`no-such-source` is two different faults under one code* on 3
 September, recommending a seventh reason named `not-resolved` or `plan-mismatch`.
