@@ -170,16 +170,15 @@ export const RecordCard = ({
   /*
    * What the change did, for a card whose change has landed.
    *
-   * `plain` is the same sentence in the other tense and the two are never both
-   * on a card: `plain` is computed per render against the tree on the stage and
-   * the page supplies it only while the change is still answerable, and `did`
-   * was computed once against the tree this change was judged against. The
-   * condition is `plain.length === 0` rather than a second reading of the
-   * outcome, because that is the exact question — has the page stopped being
-   * able to describe this change live — and it is the one the other half is
-   * already answering.
+   * `plain` is the same sentence in the other tense, and the outcome is the
+   * whole of what keeps them apart. It is enough on its own: the page keys
+   * `plain` by `heldProposalId`, and a landed record does not have one — so a
+   * card can be handed the live reading or be `applied`, never both. Guarding
+   * on `plain.length` as well read as caution and was a branch no render could
+   * reach, which is worse than either: a condition nothing can make false is a
+   * claim no test can check.
    */
-  const did = plain.length === 0 && record.outcome === "applied" ? (record.did ?? []) : []
+  const did = record.outcome === "applied" ? (record.did ?? []) : []
 
   return (
     /*

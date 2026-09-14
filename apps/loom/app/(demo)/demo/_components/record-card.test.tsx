@@ -989,9 +989,12 @@ describe("the landed half of a card", () => {
   })
 
   /**
-   * Never both readings at once. `plain` is the live one and outranks the
-   * frozen copy wherever the page could supply it — a card printing a change as
-   * both about to happen and already done is worse than either alone.
+   * Never both readings at once, and the outcome is what keeps them apart.
+   *
+   * A card printing a change as both about to happen and already done is worse
+   * than either alone, and the record carries its frozen copy from the moment
+   * it is assessed — which is *before* the visitor has answered. So a held card
+   * holds both strings and must print only the live one.
    */
   it("shows the live reading and not the frozen one while the change is waiting", () => {
     render(
