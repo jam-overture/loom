@@ -81,6 +81,92 @@ Nothing is blocked *today*: `primitives-30` ships green at seventeen bands. What
 is blocked is the week — the plan the maintainer approved puts 30–50
 compositions in the catalogue by 19 September, and the eighteenth band does not
 fit.
+## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — **raised by the maintainer**, 13 September, as the thing to figure out
+before the library grows further
+
+The maintainer's target is 250 primitives by 19 September, with the instruction
+that *"if increasing the number of primitives is producing a scaling issue with
+the framework itself, we will have to figure this out."* This is that, measured.
+Nothing here is broken today; everything here gets worse linearly and nothing
+says when to stop.
+
+### What was measured
+
+`measurePrompt` on `main`, starter registry, starter themes:
+
+| block | characters per request | ceiling |
+| --- | --- | --- |
+| themes (18 palettes, packs, presets) | 6,155 | **8,000, enforced** |
+| primitives (92 entries) | **15,685** | **none** |
+
+~170 characters per entry, linear. At 250 entries the primitives block is about
+**42,600 characters — roughly 11k tokens on every interpretation request**, cache
+or no cache, before the tree or the request.
+
+**The asymmetry is the finding.** The smaller block is guarded and the larger one
+is not. That is not a decision anybody made — `prompt.test.ts`'s ceiling was
+written when the catalogue was 51 entries and the comment says it expected to
+fire *"another eighteen entries or so"* later. It never did, because it measures
+`themes` and the library grew on the other axis.
+
+### The answer is already in the repository, as a sentence
+
+The theme budget's failure message names three outs, and the first one is the
+designed answer to this:
+
+> *either the starter library has grown past what one deployment should register
+> all of, or 0077's cut order applies, or the ceiling moves and the reason is
+> written down*
+
+**The starter library is a set to choose from, not a set every deployment
+ships.** Growing it to 250 is then not a scaling problem at all — provided a
+deployment can take a coherent slice. Today it cannot, comfortably:
+`createStarterPrimitiveRegistry(additional)` only *adds*. A host wanting sixty of
+the ninety-two hand-filters `STARTER_PRIMITIVES`, and has nothing to filter on
+but type-string prefixes — which is exactly the pattern-match
+[0114](decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+was written to end.
+
+### What this lane thinks the shape is, offered rather than decided
+
+Three pieces, smallest first. All three are `src/`'s and none is this lane's.
+
+1. **A ceiling on the primitives block**, the way themes has one, so the next
+   forty entries are a test somebody reads rather than a latency nobody
+   attributes. The number matters less than its existence; today's 15,685 with
+   30% headroom mirrors how the themes ceiling was set.
+
+2. **The inverse of `additional`** — a way to build a registry from a named
+   subset of the starter library. One argument, no new concept.
+
+3. **A second `role` member, or a few.** 0114 closed its vocabulary at `heading`
+   and set the bar for widening it explicitly: *"a consumer that cannot answer
+   its question from the registry, written down as a finding."* **The
+   interpretation prompt is that consumer**, and this entry is that finding. A
+   role per part a primitive plays — `band`, `item`, `leaf`, `wrapper`,
+   `control` — would let a deployment register a coherent slice by asking the
+   registry, and would later let the prompt send a *relevant* slice rather than
+   all of it.
+
+The third is the one with a design question in it, and this lane is not the one
+to answer it: narrowing *per request* means knowing what an intent needs before
+the model has chosen, which is a retrieval step with its own failure mode (the
+primitive that was right but was not sent). Narrowing *per deployment* has no
+such problem and is most of the benefit. **Prefer the boring one.** Stated here
+so the framework lane does not have to rediscover that the ambitious version is
+the risky one.
+
+### What this lane is doing meanwhile
+
+Holding the vocabulary near 110 and taking the week's range in starting
+compositions, which add no entry to this block —
+`docs/primitive-gap-inventory.md` is the count and the reasoning. So nothing is
+blocked on this finding. What is at stake is the *next* person to grow the
+library past where anyone measured, which is now a documented number rather than
+a surprise.
 
 ---
 ## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
@@ -177,6 +263,15 @@ is yours:
   number *and* the date it was true, which is honest and never goes stale.
 
 Nothing is blocked. Both lessons are correct on this branch.
+
+> **It recurred the same day, which settles the priority.** Lesson 24 landed on
+> `main` a few hours after this was filed, printing `primitives registered: 92`
+> and naming "ninety-two" in prose; `loom.stat-chart` on this same branch made
+> all three lessons wrong at once. **Three lessons now pin a number this lane
+> changes on purpose**, and the cost is paid by whoever adds the next primitive,
+> in a lane that is not theirs. The first of the three options below — have the
+> lesson print it and never say it — is the only one that stops this, and it
+> gets cheaper to do the sooner it is done.
 
 ---
 ## 2026-09-12 — the demo asked its leading question twice, and the duplicate was the one everything addressed
@@ -22490,8 +22585,15 @@ Today the host must `stop()` and start again, and nothing says so.
 **What would close it:** a `MutationObserver` on the root for added and removed
 addressed elements (the broadcaster already runs one for disclosures), and a
 sentence in the module documentation that a new root or revision is a new
-broadcast. **Not in scope:** anything about storing or interpreting signals — the
-maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
+broadcast.
+
+> **Promoted 13 September.** The scope note here used to say storing and
+> interpreting signals were deferred. That deferral is lifted
+> ([`docs/signals.md`](docs/signals.md)), and this finding is now **step 1 of the
+> approved plan and the first thing to build** — because every band the Gate
+> changes is rendered after the broadcaster started, so *before versus after a
+> change* is precisely the measurement this gap breaks. Storage built on top of
+> it would understate every adapted region, quietly.
 
 ## 2026-09-12 — reader signals have an API reference and no guide
 
@@ -22783,3 +22885,41 @@ record says so in as many words and names the revisit condition — when somethi
 actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
+
+---
+
+## 2026-09-13 — the signals deferral is lifted, and four lanes have something approved waiting for them
+
+**Filed by:** `Loom daily build`, at the maintainer's instruction · **Owned by:**
+`Loom daily build`, `Loom portal`, `Loom docs`, `Loom lessons`, `Loom marketing`
+· **Status:** open — a direction change, not a defect
+
+`reports/2026-09-12-reader-signals.md` told every lane that capture, storage,
+aggregation and interpretation of reader signals were deferred, and told
+`Loom portal` specifically not to build a signals view. Four routines have been
+reading that as standing direction for a day.
+
+**The maintainer lifted it on 13 September.** The plan is
+[`docs/signals.md`](docs/signals.md) — five steps in order, each with the lane
+that owns it — and the shape it is built to is
+[0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md).
+The old section is marked superseded where it sits; nothing in it should be
+followed except the line about `prototypes/`.
+
+What each lane needs to know, so nobody reads the wrong document first:
+
+- **`Loom daily build`** — steps 1 to 3 are yours: the broadcaster's mutation
+  gap (the finding above, now promoted to first), a `completed` kind, then
+  ingestion, storage, rollup and the fold module. Build them in that order.
+- **`Loom portal`** — step 4 is approved and is the commercial reason the portal
+  gets opened daily. **It has no input until step 3 is on `main`**, so do not
+  start it yet; a screen built against an imagined shape is a screen rebuilt.
+- **`Loom docs`**, **`Loom lessons`**, **`Loom marketing`** — step 5, and the
+  same rule: after step 3 lands, not during. The broadcasting guide that landed
+  on 13 September stays correct; it will need the capture half added.
+
+Two things that are decided rather than open, so no lane spends a run
+re-litigating them: **a signal never identifies a reader**, and **a funnel is
+correlated inside one page view** by an opaque key that never persists. A kind
+carrying content, a visitor id, or a tree prop that turns measurement on are all
+supersessions of 0136 or 0146, not judgement calls inside a pull request.

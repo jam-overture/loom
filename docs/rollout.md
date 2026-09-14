@@ -64,6 +64,12 @@ The work nobody remembers until it blocks them.
 - **A getting-started path that works for a stranger**, verified by someone who
   did not build it.
 - **Somewhere for people to report things** — issues, a channel, an address.
+- **Reader signals, captured and shown** — approved 13 September and planned in
+  [`signals.md`](signals.md). It is in this phase rather than a later one for two
+  reasons: a model that cannot hear what readers did cannot adapt well, so it is
+  the input half of the premise; and a deployment that can see its own funnel is
+  the reason somebody opens the portal daily. Five steps, framework first,
+  portal fourth.
 
 The data adapter used to head this list as the most likely thing to move the
 date. [0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)
