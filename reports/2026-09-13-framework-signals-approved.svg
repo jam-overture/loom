@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 616" width="920" height="616" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="920" height="616" fill="#fbfaf8"/>
+
+  <text x="32" y="44" font-size="19" font-weight="650" fill="#1c1917">Reader signals — approved, in this order</text>
+  <text x="32" y="68" font-size="13.5" fill="#57534e">Broadcasting shipped on 12 September. Everything downstream of it was deferred for a day; it is approved now.</text>
+
+  <!-- the pipeline -->
+  <rect x="32" y="94" width="856" height="212" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="122" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">FROM A PUBLISHED PAGE TO A NUMBER SOMEBODY PAYS FOR</text>
+
+  <rect x="52" y="142" width="132" height="52" rx="7" fill="#f5f5f4" stroke="#d6d3d1"/>
+  <text x="118" y="166" font-size="12.5" text-anchor="middle" fill="#292524">the page</text>
+  <text x="118" y="184" font-size="11" text-anchor="middle" fill="#78716c">addressed render</text>
+
+  <path d="M 184 168 L 208 168" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 208 168 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <rect x="210" y="142" width="150" height="52" rx="7" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="285" y="166" font-size="12.5" text-anchor="middle" fill="#065f46">broadcaster · 4.8 KB</text>
+  <text x="285" y="184" font-size="11" text-anchor="middle" fill="#047857">built · steps 1 + 2 here</text>
+
+  <path d="M 360 168 L 384 168" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 384 168 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <rect x="386" y="142" width="150" height="52" rx="7" fill="#fef3c7" stroke="#d97706"/>
+  <text x="461" y="166" font-size="12.5" text-anchor="middle" fill="#78350f">ingest · store</text>
+  <text x="461" y="184" font-size="11" text-anchor="middle" fill="#92400e">step 3 · raw, briefly</text>
+
+  <path d="M 536 168 L 560 168" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 560 168 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <rect x="562" y="142" width="150" height="52" rx="7" fill="#fef3c7" stroke="#d97706"/>
+  <text x="637" y="166" font-size="12.5" text-anchor="middle" fill="#78350f">rollup · the fold</text>
+  <text x="637" y="184" font-size="11" text-anchor="middle" fill="#92400e">step 3 · what is kept</text>
+
+  <path d="M 712 168 L 736 168" stroke="#a8a29e" stroke-width="1.6" fill="none"/>
+  <path d="M 736 168 l -7 -4 v 8 z" fill="#a8a29e"/>
+
+  <rect x="738" y="142" width="130" height="52" rx="7" fill="#eff6ff" stroke="#3b82f6"/>
+  <text x="803" y="166" font-size="12.5" text-anchor="middle" fill="#1e3a8a">the portal</text>
+  <text x="803" y="184" font-size="11" text-anchor="middle" fill="#1d4ed8">step 4 · its lane</text>
+
+  <path d="M 461 202 L 461 226" stroke="#d97706" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
+  <text x="473" y="220" font-size="11.5" fill="#92400e">the view key lives here and nowhere else — never persisted</text>
+
+  <text x="52" y="258" font-size="12" font-weight="650" fill="#b91c1c" letter-spacing="0.04em">BLIND SPOT</text>
+  <rect x="140" y="242" width="352" height="26" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="156" y="260" font-size="12.5" fill="#7f1d1d">every band the Gate changes renders after it starts</text>
+  <text x="508" y="260" font-size="12" fill="#78716c">so before-and-after is the measurement that is broken</text>
+
+  <text x="52" y="294" font-size="12" font-weight="650" fill="#15803d" letter-spacing="0.04em">STEP 1</text>
+  <rect x="140" y="278" width="352" height="26" rx="6" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="156" y="296" font-size="12.5" fill="#14532d">a MutationObserver it already runs for disclosures</text>
+  <text x="508" y="296" font-size="12" fill="#78716c">first, before anything is stored on top of it</text>
+
+  <!-- the two lines -->
+  <rect x="32" y="322" width="420" height="184" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="350" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">NOT MOVING · 0136 AND 0146</text>
+
+  <text x="52" y="378" font-size="12.5" fill="#292524">A signal names a node at a revision.</text>
+  <text x="52" y="398" font-size="12" fill="#78716c">No text, no URLs, no typed values, nothing about the reader.</text>
+  <text x="52" y="424" font-size="12.5" fill="#292524">A funnel is correlated inside one page view.</text>
+  <text x="52" y="444" font-size="12" fill="#78716c">An opaque key that never persists and is never derived.</text>
+  <text x="52" y="470" font-size="12.5" fill="#292524">Measurement is never a prop in the tree.</text>
+  <text x="52" y="490" font-size="12" fill="#78716c">No delta can switch it on. So: no tracking component.</text>
+
+  <!-- what it buys -->
+  <rect x="468" y="322" width="420" height="184" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="488" y="350" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">WHAT THAT BUYS, AND WHAT IT REFUSES</text>
+
+  <text x="488" y="378" font-size="12.5" fill="#15803d">Answerable</text>
+  <text x="488" y="398" font-size="12" fill="#57534e">of the views that reached the pricing band, how many</text>
+  <text x="488" y="416" font-size="12" fill="#57534e">pressed the button — per app, per revision, before and after</text>
+
+  <text x="488" y="448" font-size="12.5" fill="#b91c1c">Refused, by construction</text>
+  <text x="488" y="468" font-size="12" fill="#57534e">who came back on Tuesday · session replay · cursor paths</text>
+  <text x="488" y="486" font-size="12" fill="#57534e">cohorts · anything that is a record of a person</text>
+
+  <text x="32" y="536" font-size="11.5" fill="#78716c">Steps 4 and 5 do not start until step 3 is on `main`. A screen or a lesson built against an imagined shape is one built twice.</text>
+  <text x="32" y="558" font-size="11.5" fill="#a8a29e">Retention is per-deployment configuration, not a constant — so a longer window can be sold later without migrating live data.</text>
+  <text x="32" y="590" font-size="11.5" fill="#a8a29e">docs/signals.md · 0146 · approved by the maintainer, 13 September 2026</text>
+</svg>

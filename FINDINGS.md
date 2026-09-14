@@ -93,6 +93,165 @@ the *person* as a separate axis — the fact being named is the same in both
 surfaces, and only who is being addressed differs. Not proposed, not needed
 today, and cheaper to leave until a third case says which way it should go.
 
+## 2026-09-13 — the docs search index caps the library, and there is room for one more band in the whole repository
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open —
+**blocking the maintainer's 19 September target**, and it stops the compositions
+plan at the next band anybody adds
+
+`app/(docs)/_lib/search/build.test.ts` caps the entries index at 200,000
+characters raw. Measured today, building the same index three ways:
+
+| | entries, raw | headroom |
+| --- | --- | --- |
+| `main` | 199,114 | 886 |
+| `main` + 4 compositions (shipped) | **199,778** | **222** |
+| `main` + 6 compositions (written) | 200,118 | **−118, red** |
+
+**A composition costs about 167 characters of index.** So the repository had
+five bands of room left this morning, has **one** now, and the sixth band
+anybody adds — in any lane, composition or page or export — turns
+`pnpm verify` red for everybody.
+
+Two bands were written, reviewed, screenshotted and held out of `primitives-30`
+for exactly this reason. They are finished work rather than a plan, and they are
+**parked on the branch `primitives-31-held-bands`** — deliberately not a pull
+request, because two unregistered modules are dead code. Registering them once
+the index is split is three lines in `compositions/index.ts` plus the count in
+`compositions.test.ts`; cherry-pick the two files rather than merging that
+branch as it stands.
+
+### Why this is filed rather than fixed
+
+The test says what to do, in its own comment, and it is not "raise the number":
+
+> The headroom is deliberate and finite: five more pages fit under it, fifty do
+> not, and **the run that hits it should split the index rather than raise the
+> number.** […] Four pages arrived at once and hit it, at 46.7 KB against the
+> 48. So the index was split rather than the number raised.
+
+That precedent is the remedy, and **splitting the docs search index is
+`Loom docs`' architecture** — which file shards, on what axis, and what the
+client loads for a query. This lane cannot make that call, and raising the
+number is forbidden by the comment and by every lane's rule against weakening a
+test to get green.
+
+### What is worth knowing before splitting it
+
+**The gzip cap is nowhere near.** 17,946 against 20,000 — 10% clear, and it
+barely moved (17,902 → 17,946 for four bands). It is the *raw* cap that binds,
+and the comment itself argues the honest cost to a reader is the compressed
+number. So one legitimate outcome of looking at this is that the raw cap is
+measuring the wrong thing for this kind of growth — repeated, near-identical
+export entries are exactly what compresses, which is the same observation the
+comment already makes about why indexing the code was cheap.
+
+That is offered, not decided. If the answer is "split it", the split is yours.
+If the answer is "the raw cap should track the compressed one", that is a change
+to a test's rationale and wants writing down rather than editing quietly.
+
+### The shape, which is the third instance today
+
+This is the **third** budget in one day that the library's growth walked into,
+and all three are the same shape: something elsewhere pins a number this lane
+changes on purpose, with no way for this lane to see it coming.
+
+- the interpretation prompt's primitives block — no ceiling at all (filed this
+  morning, `Loom daily build`)
+- three lessons printing the library's size (filed this morning, `Loom lessons`)
+- this one, a ceiling with 0.1% headroom and a hard stop
+
+Nothing is blocked *today*: `primitives-30` ships green at seventeen bands. What
+is blocked is the week — the plan the maintainer approved puts 30–50
+compositions in the catalogue by 19 September, and the eighteenth band does not
+fit.
+## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — **raised by the maintainer**, 13 September, as the thing to figure out
+before the library grows further
+
+The maintainer's target is 250 primitives by 19 September, with the instruction
+that *"if increasing the number of primitives is producing a scaling issue with
+the framework itself, we will have to figure this out."* This is that, measured.
+Nothing here is broken today; everything here gets worse linearly and nothing
+says when to stop.
+
+### What was measured
+
+`measurePrompt` on `main`, starter registry, starter themes:
+
+| block | characters per request | ceiling |
+| --- | --- | --- |
+| themes (18 palettes, packs, presets) | 6,155 | **8,000, enforced** |
+| primitives (92 entries) | **15,685** | **none** |
+
+~170 characters per entry, linear. At 250 entries the primitives block is about
+**42,600 characters — roughly 11k tokens on every interpretation request**, cache
+or no cache, before the tree or the request.
+
+**The asymmetry is the finding.** The smaller block is guarded and the larger one
+is not. That is not a decision anybody made — `prompt.test.ts`'s ceiling was
+written when the catalogue was 51 entries and the comment says it expected to
+fire *"another eighteen entries or so"* later. It never did, because it measures
+`themes` and the library grew on the other axis.
+
+### The answer is already in the repository, as a sentence
+
+The theme budget's failure message names three outs, and the first one is the
+designed answer to this:
+
+> *either the starter library has grown past what one deployment should register
+> all of, or 0077's cut order applies, or the ceiling moves and the reason is
+> written down*
+
+**The starter library is a set to choose from, not a set every deployment
+ships.** Growing it to 250 is then not a scaling problem at all — provided a
+deployment can take a coherent slice. Today it cannot, comfortably:
+`createStarterPrimitiveRegistry(additional)` only *adds*. A host wanting sixty of
+the ninety-two hand-filters `STARTER_PRIMITIVES`, and has nothing to filter on
+but type-string prefixes — which is exactly the pattern-match
+[0114](decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+was written to end.
+
+### What this lane thinks the shape is, offered rather than decided
+
+Three pieces, smallest first. All three are `src/`'s and none is this lane's.
+
+1. **A ceiling on the primitives block**, the way themes has one, so the next
+   forty entries are a test somebody reads rather than a latency nobody
+   attributes. The number matters less than its existence; today's 15,685 with
+   30% headroom mirrors how the themes ceiling was set.
+
+2. **The inverse of `additional`** — a way to build a registry from a named
+   subset of the starter library. One argument, no new concept.
+
+3. **A second `role` member, or a few.** 0114 closed its vocabulary at `heading`
+   and set the bar for widening it explicitly: *"a consumer that cannot answer
+   its question from the registry, written down as a finding."* **The
+   interpretation prompt is that consumer**, and this entry is that finding. A
+   role per part a primitive plays — `band`, `item`, `leaf`, `wrapper`,
+   `control` — would let a deployment register a coherent slice by asking the
+   registry, and would later let the prompt send a *relevant* slice rather than
+   all of it.
+
+The third is the one with a design question in it, and this lane is not the one
+to answer it: narrowing *per request* means knowing what an intent needs before
+the model has chosen, which is a retrieval step with its own failure mode (the
+primitive that was right but was not sent). Narrowing *per deployment* has no
+such problem and is most of the benefit. **Prefer the boring one.** Stated here
+so the framework lane does not have to rediscover that the ambitious version is
+the risky one.
+
+### What this lane is doing meanwhile
+
+Holding the vocabulary near 110 and taking the week's range in starting
+compositions, which add no entry to this block —
+`docs/primitive-gap-inventory.md` is the count and the reasoning. So nothing is
+blocked on this finding. What is at stake is the *next* person to grow the
+library past where anyone measured, which is now a documented number rather than
+a surprise.
+
 ---
 ## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
 
@@ -188,6 +347,15 @@ is yours:
   number *and* the date it was true, which is honest and never goes stale.
 
 Nothing is blocked. Both lessons are correct on this branch.
+
+> **It recurred the same day, which settles the priority.** Lesson 24 landed on
+> `main` a few hours after this was filed, printing `primitives registered: 92`
+> and naming "ninety-two" in prose; `loom.stat-chart` on this same branch made
+> all three lessons wrong at once. **Three lessons now pin a number this lane
+> changes on purpose**, and the cost is paid by whoever adds the next primitive,
+> in a lane that is not theirs. The first of the three options below — have the
+> lesson print it and never say it — is the only one that stops this, and it
+> gets cheaper to do the sooner it is done.
 
 ---
 ## 2026-09-12 — the demo asked its leading question twice, and the duplicate was the one everything addressed
@@ -21420,8 +21588,10 @@ code of its own is that it sends a different person to a different file.
 ---
 ## 2026-09-12 — `/portal/checkup` prints `loom.footer` on its surface, and the tree that could name it is in the same function
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-found while taking the rail on the page screen, deliberately not taken with it
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-26-the-checkup-names-the-part` on 13 September — taken as the unit this
+entry recommended, and the recycled-id sentence beside it, which had the same
+fault in prose
 
 `checkup-verdict.tsx:81` renders each difference as
 `<span className="font-mono">{difference.label}</span>` on the **surface**, and
@@ -21447,8 +21617,14 @@ One unit, on that screen, with the seeded checkup in front of it.
 ---
 ## 2026-09-12 — a part is named in three formats by three functions, and two of them were written eight days apart
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
-consolidation to make once #262 lands, and an argument for not making it before
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**#262 has landed, and the consolidation is still not worth making.** Revisited
+on 13 September by the run that would have been its fourth shape: a list row
+wanted the subject name with a capital on it, and what that took was
+`capitalised` in `part-name.ts` — one helper `asSentence` now shares, rather than
+a fourth format. Three call sites, three shapings, one `nounOf`. Unchanged
+otherwise; the argument below still holds and the condition for taking it is
+still a fourth genuine shape
 
 The same noun now reaches a reader three ways:
 
@@ -22539,8 +22715,15 @@ Today the host must `stop()` and start again, and nothing says so.
 **What would close it:** a `MutationObserver` on the root for added and removed
 addressed elements (the broadcaster already runs one for disclosures), and a
 sentence in the module documentation that a new root or revision is a new
-broadcast. **Not in scope:** anything about storing or interpreting signals — the
-maintainer has deferred that (see `reports/2026-09-12-reader-signals.md`).
+broadcast.
+
+> **Promoted 13 September.** The scope note here used to say storing and
+> interpreting signals were deferred. That deferral is lifted
+> ([`docs/signals.md`](docs/signals.md)), and this finding is now **step 1 of the
+> approved plan and the first thing to build** — because every band the Gate
+> changes is rendered after the broadcaster started, so *before versus after a
+> change* is precisely the measurement this gap breaks. Storage built on top of
+> it would understate every adapted region, quietly.
 
 ## 2026-09-12 — reader signals have an API reference and no guide
 
@@ -22832,3 +23015,91 @@ record says so in as many words and names the revisit condition — when somethi
 actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
+
+---
+## 2026-09-13 — the portal's three most important screens cannot be photographed, because a healthy deployment never reaches their important state
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+filed by the third run in a row to hit it, with the fix named and deliberately
+not taken
+
+`/portal/checkup` has three verdicts and the seeded portal can only ever show
+one of them. A checkup folds a page's accepted changes from a seed and compares
+the result with the page being served; every write updates both, so a running
+portal **always agrees with itself**. The red path — *This page does not match
+its own history* — and the recycled-name warning under it are unreachable by any
+sequence of clicks, and so is the list of differences that is the whole reason
+the screen exists.
+
+This is not specific to the checkup. It is the shape of every screen in this
+portal whose value is in the bad news:
+
+| Screen | The state worth seeing | Reachable in the seeded portal? |
+| --- | --- | --- |
+| `/portal/checkup` | diverged, unreplayable, recycled ids | no |
+| `/portal/calibration` | a confidence band that has proved wrong | only if enough real asks have been graded |
+| the review queue | a refusal, a misunderstanding, a failure | only by asking for something the Gate will refuse |
+
+Three runs of this lane have now shipped a unit whose most important screen went
+unphotographed — the slot row on 12 September, and both lists on 13 September.
+The reports have been honest about it each time, and honesty is not the same as
+a maintainer being able to look at the thing.
+
+**What was done instead, and why it is a workaround.** The 13 September run
+photographed the live screen with the verdict panel rendered from the same
+commit and put in its place: real stylesheet, real shell, real rail, real page
+name and ids. Every string in the picture is a string the code produces. What it
+is not is a screen anybody can navigate to, and a picture that requires a
+paragraph explaining how it was taken is one the maintainer has to take on
+trust.
+
+**What a fix looks like, offered rather than prescribed.** `seeds.ts` registers
+exactly one tree. A **second seeded page that is deliberately drifted** — one
+whose recorded starting shape does not produce the page served, which is one
+entry in that map and a snapshot written past it — would make the red checkup a
+real screen with a real URL, reachable from the front door's own list, for this
+lane and for anybody evaluating Loom.
+
+**Not taken, because it is above this lane's line.** A portal that ships a
+visibly broken page on purpose is a product decision: it puts a red verdict in
+front of every person who opens the demo, and the thing that makes it useful —
+that it looks exactly like a real fault — is the thing that makes it dangerous
+if it is not obviously labelled. It also touches what the seeded deployment *is*,
+which is shared ground rather than this lane's. Worth a decision record if it is
+wanted, and cheap to build once it is.
+
+## 2026-09-13 — the signals deferral is lifted, and four lanes have something approved waiting for them
+
+**Filed by:** `Loom daily build`, at the maintainer's instruction · **Owned by:**
+`Loom daily build`, `Loom portal`, `Loom docs`, `Loom lessons`, `Loom marketing`
+· **Status:** open — a direction change, not a defect
+
+`reports/2026-09-12-reader-signals.md` told every lane that capture, storage,
+aggregation and interpretation of reader signals were deferred, and told
+`Loom portal` specifically not to build a signals view. Four routines have been
+reading that as standing direction for a day.
+
+**The maintainer lifted it on 13 September.** The plan is
+[`docs/signals.md`](docs/signals.md) — five steps in order, each with the lane
+that owns it — and the shape it is built to is
+[0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md).
+The old section is marked superseded where it sits; nothing in it should be
+followed except the line about `prototypes/`.
+
+What each lane needs to know, so nobody reads the wrong document first:
+
+- **`Loom daily build`** — steps 1 to 3 are yours: the broadcaster's mutation
+  gap (the finding above, now promoted to first), a `completed` kind, then
+  ingestion, storage, rollup and the fold module. Build them in that order.
+- **`Loom portal`** — step 4 is approved and is the commercial reason the portal
+  gets opened daily. **It has no input until step 3 is on `main`**, so do not
+  start it yet; a screen built against an imagined shape is a screen rebuilt.
+- **`Loom docs`**, **`Loom lessons`**, **`Loom marketing`** — step 5, and the
+  same rule: after step 3 lands, not during. The broadcasting guide that landed
+  on 13 September stays correct; it will need the capture half added.
+
+Two things that are decided rather than open, so no lane spends a run
+re-litigating them: **a signal never identifies a reader**, and **a funnel is
+correlated inside one page view** by an opaque key that never persists. A kind
+carrying content, a visitor id, or a tree prop that turns measurement on are all
+supersessions of 0136 or 0146, not judgement calls inside a pull request.
