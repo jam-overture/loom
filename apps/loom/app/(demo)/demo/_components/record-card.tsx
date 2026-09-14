@@ -24,9 +24,9 @@ import { weighedOf } from "@/app/(demo)/_lib/weighed"
 
 import { answerHeld, undoRevision } from "../actions"
 import { PageMovedOn } from "./page-moved-on"
+import { PlainReading } from "./plain-reading"
 import { TechnicalDetail } from "./technical-detail"
 import { Weighed } from "./weighed"
-import { PlainReading } from "./plain-reading"
 
 /**
  * One ask, and the whole account of what became of it.
