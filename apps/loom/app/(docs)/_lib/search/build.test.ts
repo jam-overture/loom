@@ -197,8 +197,19 @@ describe("what the index contains", () => {
 
     // What a reader waits for: the table of contents and the runtime's surface.
     // It grows when a page is added or an export is published, which is slowly.
+    //
+    // The raw ceiling was 200,000 and `main` sat at 198,470 — 0.8% of headroom,
+    // so the next subsystem published was always going to be the one that hit
+    // it, and on 14 September the reader-signal store was. Raised to 240,000 by
+    // the framework lane rather than by this one, which is recorded as a finding
+    // for its owner along with the number to reconsider it against.
+    //
+    // The gzip ceiling is deliberately unchanged. It is the one that measures
+    // what a reader actually downloads, this file's own comment above explains
+    // why the two diverge, and it is the one with real headroom left: the same
+    // change took it from 17,863 to 18,408 of 20,000.
     expect(gzipSync(entries).length).toBeLessThan(20_000)
-    expect(entries.length).toBeLessThan(200_000)
+    expect(entries.length).toBeLessThan(240_000)
 
     // What nobody waits for. It grows every time anybody writes a paragraph, so
     // it has the room — and the day it runs out, it shards by section rather

@@ -13,6 +13,7 @@ import { err, ok, type Result } from "../result.js"
 import { createSignalLedger, type SignalAddress } from "./ledger.js"
 import { READER_SIGNAL_KINDS } from "./kinds.js"
 import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal.js"
+import { mintViewKey, type RandomBytes } from "./view.js"
 
 /**
  * Broadcasting reader signals from a rendered Loom page.
@@ -120,6 +121,12 @@ export type ReaderSignalOptions = {
   readonly observeVisibility?: ObserveVisibility
   /** The clock. `Date.now` when absent. */
   readonly now?: () => number
+  /**
+   * Where the view key's randomness comes from. The browser's
+   * `crypto.getRandomValues` when absent; a test passes its own so it can name
+   * the key it expects.
+   */
+  readonly random?: RandomBytes
 }
 
 export type ReaderSignalBroadcast = {
@@ -233,6 +240,15 @@ export const broadcastReaderSignals = (
   const wants = selectionOf(options.kinds, options.types)
   const document = root.ownerDocument
 
+  /**
+   * Minted once, here, and carried by every batch this broadcast sends — which
+   * is what makes the batches of one page view correlatable and two page views
+   * not (0146). A new broadcast is a new view, including the second one a
+   * client-side navigation needs, so the key cannot outlive the page it
+   * describes even by accident.
+   */
+  const view = mintViewKey(options.random)
+
 
   const ledger = createSignalLedger(document.visibilityState === "hidden")
   let stopped = false
@@ -260,6 +276,7 @@ export const broadcastReaderSignals = (
       treeId: page.value.treeId,
       revision: page.value.revision,
       sentAt: now(),
+      view,
       signals,
     }
 

@@ -6978,7 +6978,7 @@
             {
               "name": "ReaderSignalOptions",
               "kind": "type",
-              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n    /**\n     * Where the view key's randomness comes from. The browser's\n     * `crypto.getRandomValues` when absent; a test passes its own so it can name\n     * the key it expects.\n     */\n    readonly random?: RandomBytes;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -7006,6 +7006,181 @@
           ]
         },
         {
+          "module": "signals/fold",
+          "title": "Fold",
+          "summary": "Batches folded into what a node was read like: time on screen, whether it was reached, what readers did in it.",
+          "symbols": [
+            {
+              "name": "ReaderReadings",
+              "kind": "type",
+              "signature": "type ReaderReadings = {\n    /** Total time on screen. Summed across batches, because `dwelled` is per-batch. */\n    readonly dwellMs: Readonly<Record<NodeId, number>>;\n    /** Nodes that came into view at all. `viewed` fires once per node per page view. */\n    readonly reached: Readonly<Record<NodeId, true>>;\n    /** Links, buttons and fields used inside the node. */\n    readonly activations: Readonly<Record<NodeId, number>>;\n    readonly opens: Readonly<Record<NodeId, number>>;\n    readonly closes: Readonly<Record<NodeId, number>>;\n    /**\n     * What each node is, as its signals reported it. Kept because a consumer\n     * holding only readings would otherwise have to go back to the tree to render\n     * a row, and the signals already say.\n     */\n    readonly types: Readonly<Record<NodeId, PrimitiveType>>;\n    readonly batches: number;\n    readonly signals: number;\n};",
+              "truncated": false,
+              "summary": "What a set of batches says about each node they mention."
+            },
+            {
+              "name": "EMPTY_READINGS",
+              "kind": "value",
+              "signature": "const EMPTY_READINGS: ReaderReadings",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "foldReaderSignals",
+              "kind": "function",
+              "signature": "const foldReaderSignals: (readings: ReaderReadings, batch: ReaderSignalBatch) => ReaderReadings",
+              "truncated": false,
+              "summary": "One more batch, folded in."
+            },
+            {
+              "name": "readingsOf",
+              "kind": "function",
+              "signature": "const readingsOf: (batches: readonly ReaderSignalBatch[]) => ReaderReadings",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "NodeReading",
+              "kind": "type",
+              "signature": "type NodeReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly dwellMs: number;\n    readonly reached: boolean;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n};",
+              "truncated": false,
+              "summary": "One node's line, as something rendering a table wants it."
+            },
+            {
+              "name": "nodeReadingsOf",
+              "kind": "function",
+              "signature": "const nodeReadingsOf: (readings: ReaderReadings) => readonly NodeReading[]",
+              "truncated": false,
+              "summary": "Readings as rows, longest on screen first."
+            }
+          ]
+        },
+        {
+          "module": "signals/ingest",
+          "title": "Ingest",
+          "summary": "The doorway a browser's batches come through.",
+          "symbols": [
+            {
+              "name": "MAX_BATCHES_PER_DELIVERY",
+              "kind": "value",
+              "signature": "const MAX_BATCHES_PER_DELIVERY = 50",
+              "truncated": false,
+              "summary": "How many batches one delivery may carry."
+            },
+            {
+              "name": "IngestOutcome",
+              "kind": "type",
+              "signature": "type IngestOutcome = {\n    readonly batches: number;\n    readonly signals: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "IngestError",
+              "kind": "type",
+              "signature": "type IngestError = {\n    readonly code: \"invalid-delivery\";\n    /** Which batch of the delivery, so a sender with one bad batch can be told which. */\n    readonly index: number;\n    readonly issues: ReaderSignalParseError[\"issues\"];\n} | {\n    readonly code: \"too-many\";\n    readonly limit: number;\n    readonly given: number;\n} | ReaderSignalStoreError;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeIngestError",
+              "kind": "function",
+              "signature": "const describeIngestError: (error: IngestError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ingestReaderSignals",
+              "kind": "function",
+              "signature": "const ingestReaderSignals: (journal: ReaderSignalJournal, input: unknown) => Promise<Result<IngestOutcome, IngestError>>",
+              "truncated": false,
+              "summary": "Parse a delivery and keep it."
+            }
+          ]
+        },
+        {
+          "module": "signals/journal",
+          "title": "Journal",
+          "summary": "Where batches wait to be rolled up.",
+          "symbols": [
+            {
+              "name": "ReaderSignalStoreError",
+              "kind": "type",
+              "signature": "type ReaderSignalStoreError = {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": "The only way it fails. No `not-found` — reading a tree nothing has been received about is an empty page, because a buffer makes no claim that a tree exists. No conflict — receiving a batch cannot collide with another batch."
+            },
+            {
+              "name": "describeReaderSignalStoreError",
+              "kind": "function",
+              "signature": "const describeReaderSignalStoreError: (error: ReaderSignalStoreError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReceivedBatch",
+              "kind": "type",
+              "signature": "type ReceivedBatch = ReaderSignalBatch & {\n    readonly seq: number;\n    readonly receivedAt: string;\n};",
+              "truncated": false,
+              "summary": "A batch as it comes back out, with the position the buffer gave it."
+            },
+            {
+              "name": "ReaderSignalReadRequest",
+              "kind": "type",
+              "signature": "type ReaderSignalReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /** A cursor from a previous page's `older`/`newer`, passed back unread. */\n    readonly cursor?: string;\n    /** Default `newer`, which with no cursor is the oldest page — where rollup starts. */\n    readonly direction?: PageDirection;\n    readonly limit?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalPage",
+              "kind": "type",
+              "signature": "type ReaderSignalPage = PageEnds & {\n    /** Always ascending by `seq`, whichever end the page was taken from. */\n    readonly batches: readonly ReceivedBatch[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DEFAULT_READER_SIGNAL_LIMIT",
+              "kind": "value",
+              "signature": "const DEFAULT_READER_SIGNAL_LIMIT = 500",
+              "truncated": false,
+              "summary": "Larger than a telemetry page, because these are read only to be folded and a batch is small. Rollup walks the whole window, so the page size is purely how much of it is in memory at once."
+            },
+            {
+              "name": "MAX_READER_SIGNAL_LIMIT",
+              "kind": "value",
+              "signature": "const MAX_READER_SIGNAL_LIMIT = 2000",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "clampReaderSignalLimit",
+              "kind": "function",
+              "signature": "const clampReaderSignalLimit: (limit: number | undefined) => number",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ForgetBefore",
+              "kind": "type",
+              "signature": "type ForgetBefore = {\n    readonly before: number;\n};",
+              "truncated": false,
+              "summary": "What the buffer is asked to forget, as a position rather than a rule."
+            },
+            {
+              "name": "ForgetOutcome",
+              "kind": "type",
+              "signature": "type ForgetOutcome = {\n    readonly removed: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalJournal",
+              "kind": "interface",
+              "signature": "interface ReaderSignalJournal {\n    readonly receive: (batches: readonly ReaderSignalBatch[]) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly read: (request?: ReaderSignalReadRequest) => Promise<Result<ReaderSignalPage, ReaderSignalStoreError>>;\n    readonly forget: (request: ForgetBefore) => Promise<Result<ForgetOutcome, ReaderSignalStoreError>>;\n}",
+              "truncated": false,
+              "summary": "Three operations, mirroring the journal's."
+            }
+          ]
+        },
+        {
           "module": "signals/kinds",
           "title": "Kinds",
           "summary": "The four kinds of reader signal, with nothing else in the module.",
@@ -7016,6 +7191,90 @@
               "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\"]",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "signals/memory",
+          "title": "Memory",
+          "summary": "The buffer and the counters, in the process.",
+          "symbols": [
+            {
+              "name": "memoryReaderSignalJournal",
+              "kind": "function",
+              "signature": "const memoryReaderSignalJournal: (clock?: Clock) => ReaderSignalJournal",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "memoryReaderTallyStore",
+              "kind": "function",
+              "signature": "const memoryReaderTallyStore: () => ReaderTallyStore",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "signals/rollup",
+          "title": "Rollup",
+          "summary": "Many views, folded into the durable artefact: per-node-per-revision counters, and the funnel pairs a deployment asked about.",
+          "symbols": [
+            {
+              "name": "ReaderTally",
+              "kind": "type",
+              "signature": "type ReaderTally = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Distinct page views that produced any signal at all about this node. */\n    readonly views: number;\n    /** Distinct page views in which it came into view. The denominator of a funnel. */\n    readonly reached: number;\n    readonly dwellMs: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n};",
+              "truncated": false,
+              "summary": "One node at one revision, as every view of it added up."
+            },
+            {
+              "name": "FunnelEnd",
+              "kind": "type",
+              "signature": "type FunnelEnd = {\n    readonly nodeId: NodeId;\n    readonly kind: ReaderSignalKind;\n};",
+              "truncated": false,
+              "summary": "One end of a funnel: a node, and what a reader has to have done to it."
+            },
+            {
+              "name": "FunnelPair",
+              "kind": "type",
+              "signature": "type FunnelPair = {\n    readonly from: FunnelEnd;\n    readonly to: FunnelEnd;\n};",
+              "truncated": false,
+              "summary": "A question a deployment names, phrased about the tree rather than about anyone: *of the views that did X to node A, how many did Y to node B*."
+            },
+            {
+              "name": "FunnelAnswer",
+              "kind": "type",
+              "signature": "type FunnelAnswer = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly pair: FunnelPair;\n    /** Views that satisfied `from`. */\n    readonly reached: number;\n    /** Views that satisfied both. Never greater than `reached`. */\n    readonly converted: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "Rollup",
+              "kind": "type",
+              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "EMPTY_ROLLUP",
+              "kind": "value",
+              "signature": "const EMPTY_ROLLUP: Rollup",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "RollupOptions",
+              "kind": "type",
+              "signature": "type RollupOptions = {\n    /**\n     * The funnels this deployment asked for. Absent means none: a pair is a\n     * question somebody wrote down, and a rollup does not invent questions.\n     */\n    readonly pairs?: readonly FunnelPair[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "rollUp",
+              "kind": "function",
+              "signature": "const rollUp: (batches: readonly ReaderSignalBatch[], options?: RollupOptions) => Rollup",
+              "truncated": false,
+              "summary": "Fold a window of stored batches into the counters that outlive them."
             }
           ]
         },
@@ -7035,6 +7294,20 @@
               "name": "ReaderSignalKind",
               "kind": "type",
               "signature": "type ReaderSignalKind = z.infer<typeof readerSignalKindSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "viewKeySchema",
+              "kind": "schema",
+              "signature": "const viewKeySchema: z.ZodBranded<…>",
+              "truncated": false,
+              "summary": "The key that says two batches came from the same page view, and says nothing else."
+            },
+            {
+              "name": "ViewKey",
+              "kind": "type",
+              "signature": "type ViewKey = z.infer<typeof viewKeySchema>;",
               "truncated": false,
               "summary": ""
             },
@@ -7079,6 +7352,83 @@
               "signature": "const parseReaderSignalBatch: (input: unknown) => Result<ReaderSignalBatch, ReaderSignalParseError>",
               "truncated": false,
               "summary": "Read a batch that arrived from somewhere untrusted — a request body, a queue."
+            }
+          ]
+        },
+        {
+          "module": "signals/tally",
+          "title": "Tally",
+          "summary": "Where the counters live once the batches they came from are gone.",
+          "symbols": [
+            {
+              "name": "StoredTally",
+              "kind": "type",
+              "signature": "type StoredTally = ReaderTally & {\n    readonly updatedAt: string;\n};",
+              "truncated": false,
+              "summary": "One node's line as the store keeps it, which is a tally plus when it last changed."
+            },
+            {
+              "name": "StoredFunnel",
+              "kind": "type",
+              "signature": "type StoredFunnel = FunnelAnswer & {\n    readonly updatedAt: string;\n};",
+              "truncated": false,
+              "summary": "One funnel answer as the store keeps it."
+            },
+            {
+              "name": "TallyReadRequest",
+              "kind": "type",
+              "signature": "type TallyReadRequest = {\n    /** Absent reads every tree the handle can see, which is the scope rule. */\n    readonly treeId?: TreeId;\n    /**\n     * Absent reads every revision.\n     *\n     * Almost every question the portal asks is about one revision or about two\n     * being compared, and *before versus after a change* is the second of those —\n     * so this is a filter rather than a requirement, and a caller comparing\n     * revisions reads them all and groups.\n     */\n    readonly revision?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderTallyStore",
+              "kind": "interface",
+              "signature": "interface ReaderTallyStore {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n    }, at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n}",
+              "truncated": false,
+              "summary": "Counters are not paged."
+            }
+          ]
+        },
+        {
+          "module": "signals/view",
+          "title": "View",
+          "summary": "The one value in the reader-signal seam that correlates anything.",
+          "symbols": [
+            {
+              "name": "VIEW_KEY_BYTES",
+              "kind": "value",
+              "signature": "const VIEW_KEY_BYTES = 16",
+              "truncated": false,
+              "summary": "128 bits, the same width a UUID spends on randomness."
+            },
+            {
+              "name": "VIEW_KEY_LENGTH",
+              "kind": "value",
+              "signature": "const VIEW_KEY_LENGTH: number",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "viewKeyPattern",
+              "kind": "value",
+              "signature": "const viewKeyPattern: RegExp",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "RandomBytes",
+              "kind": "type",
+              "signature": "type RandomBytes = (count: number) => Uint8Array;",
+              "truncated": false,
+              "summary": "Where the randomness comes from. A parameter so a test can mint a key it can name, and for no other reason — a host has no business supplying this."
+            },
+            {
+              "name": "mintViewKey",
+              "kind": "function",
+              "signature": "const mintViewKey: (random?: RandomBytes) => ViewKey",
+              "truncated": false,
+              "summary": "A fresh view key. Called once per broadcast, never per batch — the whole point is that the batches of one page view agree."
             }
           ]
         }
@@ -7132,7 +7482,7 @@
             {
               "name": "ReaderSignalOptions",
               "kind": "type",
-              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n};",
+              "signature": "type ReaderSignalOptions = {\n    /** Called with every batch. A throw or rejection here is contained and never reaches the page. */\n    readonly send?: (batch: ReaderSignalBatch) => void | Promise<void>;\n    /** Which kinds to broadcast. Every kind when absent. */\n    readonly kinds?: readonly ReaderSignalKind[];\n    /**\n     * Which primitive types to broadcast about. Every addressed type when absent.\n     *\n     * A list applies to every kind. An object sets it per kind — time on screen\n     * for sections, activations for links — and a kind it does not name is\n     * reported for every type, exactly as if `types` were absent for that kind.\n     * Whether a kind is reported at all is still `kinds`.\n     */\n    readonly types?: ReaderSignalTypes;\n    /** How often a batch is delivered. Five seconds when absent. */\n    readonly flushEveryMs?: number;\n    /**\n     * How the broadcaster learns what is on screen. The browser's\n     * `IntersectionObserver` when absent; a test passes its own.\n     */\n    readonly observeVisibility?: ObserveVisibility;\n    /** The clock. `Date.now` when absent. */\n    readonly now?: () => number;\n    /**\n     * Where the view key's randomness comes from. The browser's\n     * `crypto.getRandomValues` when absent; a test passes its own so it can name\n     * the key it expects.\n     */\n    readonly random?: RandomBytes;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -7156,6 +7506,55 @@
               "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
               "truncated": false,
               "summary": "Start broadcasting reader signals from the page under `root`."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "specifier": "@loom/runtime/signals/postgres",
+      "slug": "signals-postgres",
+      "types": "./dist/signals/postgres.d.ts",
+      "groups": [
+        {
+          "module": "signals/migrate",
+          "title": "Migrate",
+          "summary": "Creating the three reader-signal tables, with row level security switched on.",
+          "symbols": [
+            {
+              "name": "READER_SIGNALS_DDL",
+              "kind": "value",
+              "signature": "const READER_SIGNALS_DDL: readonly string[]",
+              "truncated": false,
+              "summary": "The three tables, as statements a host can run."
+            },
+            {
+              "name": "ensureReaderSignalsSchema",
+              "kind": "function",
+              "signature": "const ensureReaderSignalsSchema: (db: LoomDatabase) => Promise<void>",
+              "truncated": false,
+              "summary": "Idempotent, so running it against a populated database is a no-op."
+            }
+          ]
+        },
+        {
+          "module": "signals/postgres",
+          "title": "Postgres",
+          "summary": "The Drizzle tables are **not** re-exported, unlike the journal's.",
+          "symbols": [
+            {
+              "name": "postgresReaderSignalJournal",
+              "kind": "function",
+              "signature": "const postgresReaderSignalJournal: (db: LoomDatabase) => ReaderSignalJournal",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "postgresReaderTallyStore",
+              "kind": "function",
+              "signature": "const postgresReaderTallyStore: (db: LoomDatabase) => ReaderTallyStore",
+              "truncated": false,
+              "summary": ""
             }
           ]
         }

@@ -8,6 +8,116 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
+— raised to keep `pnpm verify` green; the number is a placeholder for your
+judgement
+
+`app/(docs)/_lib/search/build.test.ts` caps the entries index two ways. On
+`main` this morning:
+
+| | `main` | after `framework-34-the-capture-half` | ceiling |
+| --- | --- | --- | --- |
+| raw | 198,470 | 206,671 | **200,000 → raised to 240,000** |
+| gzip | 17,863 | 18,408 | 20,000, unchanged |
+
+**The raw ceiling had 1,530 bytes of headroom, which is 0.8%.** Publishing the
+reader-signal store — one subsystem, one new entry point — added 8,201. Any
+comparable unit from any lane would have done the same, so this was not about
+what I published.
+
+**I raised it to 240,000 and left the gzip ceiling alone**, which is the one
+that measures what a reader downloads and the one your own comment explains is
+the meaningful half. Doing it from outside your lane is not something I am
+comfortable with; the alternative was leaving `pnpm verify` red, which is the
+merge gate for four surfaces.
+
+**What is actually yours to decide.** Whether 240,000 is the right number, or
+whether the entries index should shard the way the prose budget's comment
+already says it will — *"the day it runs out, it shards by section rather than
+taking the number up again"*. That sentence is about the prose half and it
+reads like the right answer for this half too.
+
+**And the real one is closer than it looks.** Gzip went 17,863 → 18,408, so one
+subsystem spent a quarter of the remaining 2,137. Two more and the ceiling that
+matters is the one that fires.
+
+I also cut what I could from my side rather than only moving your number: the
+three Drizzle table objects are no longer re-exported from
+`@loom/runtime/signals/postgres`, because a `PgTableWithColumns` signature is
+several kilobytes of generated type that says nothing a host can act on. That
+saved 564 bytes and is worth doing to the journal's entry point too — which is
+my lane, and is on my list rather than yours.
+
+---
+## 2026-09-14 — the capture half is built, so the portal's view has a shape to read
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— this is the unblock signal, not a defect
+
+Step 4 of `docs/signals.md` says *do not start before step 3 is on `main`*.
+Step 3 is built on `framework-34-the-capture-half`. When it lands, here is what
+there is to read, so a screen is not built against a guess.
+
+**Counters, from `ReaderTallyStore`** (`@loom/runtime/signals`, Postgres at
+`@loom/runtime/signals/postgres`):
+
+- `tallies({ treeId?, revision? })` → per node per revision: `views`,
+  `reached`, `dwellMs`, `activations`, `opens`, `closes`, plus the node's
+  `type` and an `updatedAt`. Not paged — the set is bounded by the tree.
+- `funnels({ treeId?, revision? })` → per pair per revision: the `pair` as two
+  `{ nodeId, kind }` ends, `reached` and `converted`.
+
+**Before versus after a change** is `tallies({ treeId })` grouped by
+`revision`, which is why revisions are kept apart everywhere rather than summed.
+
+**Two numbers need a caveat on screen, and they are not the same caveat.**
+`views` and `reached` over-count slightly, by the page views that straddle a
+rollup window — always upward, and [0147](decisions/0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md)
+says why that is accepted rather than fixed. Separately, `rollUp` reports
+`uncorrelated`: batches that carried no view key, whose occurrences are counted
+and whose views are not. A rate shown without saying which denominator it used
+is the failure mode here.
+
+**A live rail is `fold.ts`, not this.** `foldReaderSignals`/`nodeReadingsOf`
+fold batches as they arrive, for one page being watched now. The tally store is
+many views over time. They are deliberately different functions; using the
+wrong one gives a plausible number.
+
+---
+## 2026-09-14 — the raw signal buffer has no retention, so it grows until someone notices
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — a gap this lane left on purpose and must close next
+
+`docs/signals.md` rule 5 and
+[0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)
+both say the raw window is per-deployment configuration with a short default.
+`framework-34-the-capture-half` builds the buffer, the counters and the rollup
+between them, and **not** the thing that empties the buffer.
+`ReaderSignalJournal.forget` exists and nothing calls it.
+
+**Left out deliberately, and this is the argument.** Forgetting raw batches
+before the counters they feed are durable destroys data outright. The safe
+order is aggregates first, retention second, and the reverse order is a
+data-loss bug that looks like a feature working. So the buffer grows for now,
+which is visible and recoverable, rather than emptying before it has been read,
+which is neither.
+
+**What it costs until it is closed.** Two things, and the second is the one
+that matters. The buffer is the largest table a deployment will have, so it is
+a disk bill. And **the raw window expiring is the mechanism by which a view key
+stops existing** — 0146's anonymity argument rests on how briefly the key
+lives, and nothing currently makes it brief. Nothing is exposed today because
+nothing is deployed with signals on; it must not stay true when something is.
+
+**What closing it needs**, mirroring `src/telemetry/retention.ts`: a
+`windowMs` policy with a floor and a short default, a plan that never forgets
+past the last rolled-up position, and the scheduled caller that runs rollup and
+then retention in that order.
+
+---
 ## 2026-09-13 — two palette slots may hold the same colour, and the primitive that paints a gradient between them cannot tell
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
@@ -21462,7 +21572,15 @@ lanes away from it.
 
 ## 2026-09-12 — `ANCHOR_PROP_KEY` cites 0096, and the record is 0098
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-34-the-capture-half`** — one character, 0096 → 0098
+
+Worth one line on why it needed a person. `tools/decisions/citations.ts` checks
+that a cited number resolves, and 0096 resolves — to a real Accepted record
+about something else. Its own doc comment says exactly this: a bare `(NNNN)`
+carries one fact, and one fact cannot disagree with itself. Finding this one
+took a reader who knew what the key was for, which is what `Loom lessons` was
+doing when they found it.
 
 `src/reserved-props.ts:28`:
 
