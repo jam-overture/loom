@@ -47,11 +47,15 @@ let root: HTMLElement
 let clock: number
 let broadcast: ReaderSignalBroadcast | undefined
 let reportVisibility: (entries: readonly VisibilityEntry[]) => void
+let observed: Element[]
 
 const fakeVisibility: ObserveVisibility = (onChange) => {
   reportVisibility = onChange
-  return { observe: () => undefined, disconnect: () => undefined }
+  return { observe: (element) => void observed.push(element), disconnect: () => undefined }
 }
+
+/** A microtask, which is when a `MutationObserver` delivers what it saw. */
+const settle = () => Promise.resolve()
 
 const byId = (nodeId: string): Element => {
   const element =
@@ -80,7 +84,22 @@ beforeEach(() => {
   document.body.innerHTML = PAGE
   root = document.querySelector("main") as HTMLElement
   clock = 1_000
+  observed = []
 })
+
+/**
+ * A band the page did not have when the broadcast started — what a Suspense
+ * boundary resolving, a client component mounting, or an applied proposal all
+ * leave behind.
+ */
+const appendBand = (nodeId: string, type = "loom.section"): Element => {
+  const band = document.createElement("section")
+  band.setAttribute("data-loom-node", nodeId)
+  band.setAttribute("data-loom-type", type)
+  band.innerHTML = `<a href="/late"><span id="${nodeId}-link">Later</span></a>`
+  root.append(band)
+  return band
+}
 
 afterEach(() => {
   broadcast?.stop()
@@ -384,6 +403,87 @@ describe("broadcastReaderSignals", () => {
 
       expect(parseReaderSignalBatch(JSON.parse(JSON.stringify(batches[0]))).ok).toBe(true)
     })
+  })
+
+  it("watches a band that arrived after it started — the case every applied change is", async () => {
+    const batches = start()
+    const late = appendBand("n_9")
+
+    await settle()
+    expect(observed).toContain(late)
+
+    reportVisibility([{ target: late, visible: true }])
+    clock = 6_000
+    broadcast?.flush()
+
+    expect(kindsIn(batches).sort()).toEqual(["dwelled:n_9", "viewed:n_9"])
+  })
+
+  it("watches the addressed nodes inside a subtree that arrives whole", async () => {
+    const batches = start()
+    const wrapper = document.createElement("div")
+    wrapper.innerHTML =
+      '<section data-loom-node="n_10" data-loom-type="loom.section"><article data-loom-node="n_11" data-loom-type="loom.card"></article></section>'
+    root.append(wrapper)
+
+    await settle()
+    reportVisibility([{ target: byId("n_10"), visible: true }, { target: byId("n_11"), visible: true }])
+    broadcast?.flush()
+
+    expect(kindsIn(batches).sort()).toEqual(["viewed:n_10", "viewed:n_11"])
+  })
+
+  /**
+   * A removed element may never be reported as having gone out of view, so the
+   * stretch it was in the middle of has to be closed on the mutation. Left to
+   * the visibility observer it stays open, and every later batch credits a
+   * reader with time on a node that is not on the page.
+   */
+  it("stops counting time for a node that leaves the page, at the moment it leaves", async () => {
+    const batches = start()
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+    clock = 4_000
+    byId("n_2").remove()
+    await settle()
+    broadcast?.flush()
+
+    clock = 20_000
+    broadcast?.flush()
+
+    expect(batches.flatMap((batch) => batch.signals)).toEqual([
+      { kind: "viewed", nodeId: "n_2", type: "loom.section", at: 1_000 },
+      { kind: "dwelled", nodeId: "n_2", type: "loom.section", ms: 3_000 },
+    ])
+  })
+
+  it("reports a node that is taken out and put back as viewed once, not twice", async () => {
+    const batches = start()
+    const band = appendBand("n_9")
+
+    await settle()
+    reportVisibility([{ target: band, visible: true }])
+    band.remove()
+    await settle()
+    root.append(band)
+    await settle()
+    reportVisibility([{ target: band, visible: true }])
+    broadcast?.flush()
+
+    expect(kindsIn(batches)).toEqual(["viewed:n_9"])
+  })
+
+  it("watches nothing structurally when the host asked for no time on screen", async () => {
+    const batches = start({ kinds: ["activated"] })
+    appendBand("n_9")
+
+    await settle()
+    expect(observed).toEqual([])
+
+    ;(document.getElementById("n_9-link") as HTMLElement).click()
+    broadcast?.flush()
+
+    expect(kindsIn(batches)).toEqual(["activated:n_9"])
   })
 
   it("reads a page the render seam addressed", () => {

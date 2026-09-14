@@ -56,6 +56,14 @@ import { parseReaderSignalBatch } from "@loom/runtime/signals"   // receiver
 
 ## Maintainer direction — do not start these
 
+> **Superseded on 13 September 2026 by [`docs/signals.md`](../docs/signals.md).**
+> The maintainer has lifted this deferral: capture, storage, aggregation and a
+> portal view are approved, in the order that document sets out, and
+> [0146](../decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)
+> records the shape they are built to. The section below is kept as written —
+> a report is a record of its own day — but **do not follow it.** The one line
+> still in force is the last: `prototypes/` belongs to no lane.
+
 - **Capture, storage, aggregation and interpretation of signals are deferred by
   the maintainer.** "Capture and interpretation can come later." Do not build a
   signals table, an ingestion endpoint, or signal-to-intent derivation in any

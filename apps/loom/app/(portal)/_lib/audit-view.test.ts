@@ -18,6 +18,8 @@ import {
   describeRecycling,
   explainDifference,
   explainFacets,
+  explainRecycling,
+  nameOfDifference,
   readCheckup,
   stoppedAt,
   toneOfAudit,
@@ -283,6 +285,127 @@ describe("describeAudit and id identity", () => {
     expect(stopped.stoppedAt).toBe(7)
     expect(describeAudit({ outcome: "agrees", revision: 2, idReturns: [] }).stoppedAt).toBeNull()
   })
+
+  /**
+   * The names are taken here because here is the only place both trees exist at
+   * once. A page that had to read the head again to name a difference would be
+   * naming it out of a tree that may have moved since the verdict was formed.
+   */
+  it("names every part it lists a difference for", () => {
+    const { stored, replayed } = drifted(2)
+
+    const report = describeAudit({ outcome: "diverged", revision: 2, stored, replayed, idReturns: [] })
+
+    for (const difference of report.differences) {
+      expect(report.names.get(difference.nodeId)?.name).toBeTypeOf("string")
+    }
+  })
+
+  it("has nothing to name when there was no second tree to compare against", () => {
+    expect(describeAudit({ outcome: "agrees", revision: 4, idReturns: [] }).names.size).toBe(0)
+    expect(
+      describeAudit({
+        outcome: "unreplayable",
+        mismatch: { code: "revision-gap", expected: 3, found: 7 },
+      }).names.size
+    ).toBe(0)
+  })
+
+  /**
+   * The asymmetry that makes a difference different from a row on the page
+   * screen: the node is in one of the two trees and not the other, so naming
+   * from either alone leaves half the list unnamed.
+   */
+  it("names a part the fold produced and the served page does not have", () => {
+    const stored = pageOf([])
+    const replayed = pageOf(["only in the replay"])
+
+    const report = describeAudit({ outcome: "diverged", revision: 3, stored, replayed, idReturns: [] })
+    const extra = report.differences.find((difference) => difference.code === "extra")
+
+    expect(extra).toBeDefined()
+    expect(report.names.get(extra?.nodeId ?? "")?.name).toContain("only in the replay")
+  })
+
+  /**
+   * A `changed` node is the one kind both trees hold. The served tree is the
+   * page the reader is looking at, so its name is the one they can check.
+   */
+  it("names a changed part out of the page being served, not out of the replay", () => {
+    /** Two factories from one seed word mint the same ids, so the two trees join. */
+    const saying = (words: string): LoomTree => {
+      const ids = sequentialIdFactory("tie")
+
+      return createTree(
+        buildElement(ids, { type: "loom.page", children: [buildText(ids, words)] }),
+        ids
+      )
+    }
+
+    const stored = saying("what readers see")
+    const replayed = saying("what the replay says")
+
+    const report = describeAudit({ outcome: "diverged", revision: 5, stored, replayed, idReturns: [] })
+    const changed = report.differences.find((difference) => difference.code === "changed")
+
+    expect(changed).toBeDefined()
+    expect(report.names.get(changed?.nodeId ?? "")?.name).toContain("what readers see")
+  })
+})
+
+/**
+ * The defect this closed: the list under *This page does not match its own
+ * history* printed `loom.footer` at somebody who came to this screen because
+ * they think their site is broken.
+ */
+describe("nameOfDifference", () => {
+  const namedDifferences = (count: number) => {
+    const { stored, replayed } = drifted(count)
+    const report = describeAudit({ outcome: "diverged", revision: count, stored, replayed, idReturns: [] })
+
+    return report.differences.map((difference) => nameOfDifference(report.names, difference))
+  }
+
+  it("names a part by what it is and what it says, and never by a registered type", () => {
+    const named = namedDifferences(2)
+
+    expect(named.map((part) => part.name)).toContain("The prose “line 0”")
+    for (const part of named) expect(part.name).not.toContain("loom.")
+  })
+
+  /** A row begins a line, and a row beginning "the prose" reads as a fragment. */
+  it("starts the name with a capital", () => {
+    for (const part of namedDifferences(1)) expect(part.name.slice(0, 1)).toBe(part.name.slice(0, 1).toUpperCase())
+  })
+
+  /**
+   * Which part is identity rather than technical detail (22 August), so the id
+   * travels with the name rather than behind it.
+   */
+  it("keeps the id beside the name", () => {
+    const { stored, replayed } = drifted(1)
+    const report = describeAudit({ outcome: "diverged", revision: 1, stored, replayed, idReturns: [] })
+
+    for (const difference of report.differences) {
+      expect(nameOfDifference(report.names, difference).nodeId).toBe(difference.nodeId)
+    }
+  })
+
+  /**
+   * Unreachable in practice — a difference always comes out of one of the two
+   * trees — and the row still has to say something rather than nothing. The
+   * runtime's label read as words is less than the words and more than an id
+   * on its own.
+   */
+  it("falls back to the noun in the runtime's own label, and never to an empty name", () => {
+    expect(
+      nameOfDifference(new Map(), {
+        code: "missing",
+        nodeId: "n_gone" as NodeId,
+        label: "loom.footer",
+      }).name
+    ).toBe("The footer")
+  })
 })
 
 /** The parts as JSX joins them, with each revision put back where it belongs. */
@@ -313,6 +436,48 @@ describe("describeRecycling", () => {
     expect(account).toMatchObject({ leftAt: 1, returnedAt: 9 })
     expect(account.opening).not.toContain("1")
     expect(account.middle).not.toContain("9")
+  })
+})
+
+describe("explainRecycling", () => {
+  it("reads both labels as words, and keeps the runtime's own reading intact", () => {
+    expect(joinRecycling(explainRecycling(recyclingOf("n_4", 9)))).toBe(
+      "was a card until revision 1, and words from revision 9"
+    )
+    expect(joinRecycling(describeRecycling(recyclingOf("n_4", 9)))).toBe(
+      "was a loom.card until revision 1, and a text from revision 9"
+    )
+  })
+
+  /**
+   * A host's own primitive gets named without the portal knowing about it,
+   * which is the property that stops this being a table of the four types this
+   * deployment happens to register.
+   */
+  it("reads a host's own namespaced, hyphenated type as words", () => {
+    const found: IdReturn = {
+      code: "recycled",
+      nodeId: "n_4" as NodeId,
+      leftAs: "acme.buy-button",
+      returnedAs: "loom.card",
+      leftAt: 1,
+      returnedAt: 9,
+    }
+
+    expect(explainRecycling(found).opening).toBe("was a buy button until")
+  })
+
+  /**
+   * `text` is the one label that is not a registered type — it is what the
+   * runtime calls a node that only has words — so it loses the article rather
+   * than becoming "a text", which nobody says.
+   */
+  it("says words rather than a text", () => {
+    expect(joinRecycling(explainRecycling(recyclingOf("n_4", 9)))).not.toContain("a text")
+  })
+
+  it("leaves a restoration exactly as the runtime reads it, having no labels to translate", () => {
+    expect(explainRecycling(restorationOf("n_4"))).toEqual(describeRecycling(restorationOf("n_4")))
   })
 })
 

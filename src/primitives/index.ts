@@ -26,6 +26,7 @@ import { loomCredential } from "./loom.credential.js"
 import { loomCredentialGrid } from "./loom.credential-grid.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomEmbed } from "./loom.embed.js"
+import { loomEmptyState } from "./loom.empty-state.js"
 import { loomEmphasis } from "./loom.emphasis.js"
 import { loomEvent } from "./loom.event.js"
 import { loomEventGrid } from "./loom.event-grid.js"
@@ -45,6 +46,7 @@ import { loomIcon } from "./loom.icon.js"
 import { loomKbd } from "./loom.kbd.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
+import { loomLinkPager } from "./loom.link-pager.js"
 import { loomLinkTrail } from "./loom.link-trail.js"
 import { loomListing } from "./loom.listing.js"
 import { loomListingGrid } from "./loom.listing-grid.js"
@@ -67,6 +69,7 @@ import { loomOverlay } from "./loom.overlay.js"
 import { loomOffering } from "./loom.offering.js"
 import { loomOfferingGrid } from "./loom.offering-grid.js"
 import { loomOption } from "./loom.option.js"
+import { loomWaitingState } from "./loom.waiting-state.js"
 import { loomPage } from "./loom.page.js"
 import { loomPerk } from "./loom.perk.js"
 import { loomPerson } from "./loom.person.js"
@@ -88,6 +91,7 @@ import { loomSpec } from "./loom.spec.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
+import { loomStatChart } from "./loom.stat-chart.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
 import { loomTable } from "./loom.table.js"
 import { loomTableCell } from "./loom.table-cell.js"
@@ -401,6 +405,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomMilestoneRow,
   loomMilestone,
   loomStatGrid,
+  loomStatChart,
   loomStat,
   loomMeter,
   loomTierTable,
@@ -447,6 +452,9 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomFooter,
   loomLinkList,
   loomLinkTrail,
+  loomLinkPager,
+  loomEmptyState,
+  loomWaitingState,
   loomHeading,
   loomProse,
   loomList,
