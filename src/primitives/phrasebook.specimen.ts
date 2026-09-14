@@ -6,7 +6,19 @@ import { themeSelectionSchema, type ThemeSelection } from "../theme/theme.js"
 
 import { defineSpecimen } from "../../tools/specimen/specimen.js"
 
-import { articlesBand, bentoBand, contactBand, integrationsBand } from "./compositions/index.js"
+/**
+ * Imported from the band modules rather than from the catalogue's index,
+ * because a band is no longer a named export of this package — it is reached by
+ * id through `compositionById`, the way a primitive is reached through the
+ * registry. Inside the package the module path is the direct route and costs
+ * the published surface nothing.
+ */
+import { articlesBand } from "./compositions/articles-band.js"
+import { bentoBand } from "./compositions/bento-band.js"
+import { contactBand } from "./compositions/contact-band.js"
+import { changelogBand } from "./compositions/changelog-band.js"
+import { credentialsBand } from "./compositions/credentials-band.js"
+import { integrationsBand } from "./compositions/integrations-band.js"
 
 /**
  * The four bands added on 13 September, in the order they sit in the page
@@ -25,7 +37,9 @@ const build = (theme: ThemeSelection) => {
     buildElement(ids, {
       type: "loom.page",
       props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-      children: [bentoBand, integrationsBand, articlesBand, contactBand].map((band) => band.build(ids)),
+      children: [bentoBand, integrationsBand, credentialsBand, articlesBand, changelogBand, contactBand].map(
+        (band) => band.build(ids)
+      ),
     }),
     ids
   )
@@ -33,7 +47,7 @@ const build = (theme: ThemeSelection) => {
 
 export default defineSpecimen({
   name: "phrasebook-two",
-  title: "Four more bands the page sequence was missing",
+  title: "Six more bands the page sequence was missing",
   build,
   themes: [
     {
