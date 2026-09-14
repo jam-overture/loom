@@ -229,3 +229,14 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0143 | *No record on this branch* | — | — |
 | 0144 | *No record on this branch* | — | — |
 | [0145](0145-a-light-that-marks-one-of-several-is-a-wrapper-and-it-is-carried-by-distance.md) | A light that marks one of several is a wrapper, and it is carried by distance rather than by colour | Accepted | §4b |
+| 0146 | *No record on this branch* | — | — |
+| 0147 | *No record on this branch* | — | — |
+| 0148 | *No record on this branch* | — | — |
+| 0149 | *No record on this branch* | — | — |
+| 0150 | *No record on this branch* | — | — |
+| 0151 | *No record on this branch* | — | — |
+| 0152 | *No record on this branch* | — | — |
+| 0153 | *No record on this branch* | — | — |
+| 0154 | *No record on this branch* | — | — |
+| [0155](0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md) | A container may only add to its children what they left unspoken, so a shared treatment lives in a class and never on the element | Accepted | §4b |
+| [0156](0156-the-two-states-a-bound-region-is-in-are-primitives-and-not-props-on-every-container.md) | The two states a bound region is in are primitives, and not props on every container | Accepted | §4b |

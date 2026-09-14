@@ -22708,3 +22708,121 @@ record says so in as many words and names the revisit condition — when somethi
 actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
+
+---
+
+## 2026-09-14 — a container cannot tell its child which element to be, so a radio group is not a field type
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — Tier A's last item, built around rather than guessed at
+
+The 13 September gap inventory lists *"a consent checkbox / a radio group"* as
+**two members of `FIELD_TYPES`** — "not primitives… two enum members, not two
+files". `checkbox` is shipped and the inventory was right about it. **`radio` is
+not, and the reason is worth the entry.**
+
+A radio group's choices are the same content model as a `select`'s: a label and
+a value, exactly what `loom.option` already is, by every test 0052 sets. But a
+choice inside a `<select>` **must** be an `<option>`, and a choice in a radio
+group **must** be an `<input type="radio">` with a `<label>` — and the two are
+not substitutable in either direction. So the child has to render differently
+depending on which container it is in, and:
+
+- **A render is a pure function of one node (0008).** `loom.option` cannot see
+  its parent, and nothing in the contract offers it.
+- **React context is the obvious answer and is not available.** Primitives in
+  `src/primitives/` carry no `"use client"` and render as Server Components,
+  which cannot read a context. A `"use client"` on `loom.option` to fix a
+  *markup* choice would be paying for hydration to decide an element name.
+- **`cloneElement` over `children` does not reach either.** A container receives
+  its children as one rendered `ReactNode`; the elements in it are the render
+  seam's, not `loom.option`'s, so a container cannot inject a prop into them
+  without reaching into a shape the seam owns.
+
+**Three shapes, offered rather than decided**, smallest first:
+
+1. **A second primitive, `loom.choice`**, rendering `<input type="radio">` plus
+   its label, with `radio` as the field type beside it. Costs one entry in the
+   prompt block and one near-neighbour for a model to confuse with
+   `loom.option`; 0061 would say the names are honest, since they name the
+   markup. **The boring one, and the one to take if nothing else is wanted.**
+2. **A declared "shape" a container may ask of its children** — the general
+   version, and the one that also answers the tab strip, the segmented control
+   and the pricing toggle, which are Tier B's and blocked on the behaviour
+   vocabulary. Much the largest, and squarely the framework's.
+3. **A `choices` array prop on `loom.field`.** Named only to rule it out: it is
+   0052's first half exactly, and `loom.option` exists because Hermes' dropdown
+   made this mistake for a year.
+
+**Nothing is blocked.** A form that needs one choice of several uses a `select`,
+which is registered, works, and is what most contact forms use anyway.
+
+---
+
+## 2026-09-14 — the library has two states for a bound region and no way to say which one applies
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — the limit is stated in 0156 and the fix is not this lane's
+
+`loom.empty-state` and `loom.waiting-state` shipped today, and **both render
+whatever they were given, every time.** A page that places an empty state gets
+an empty state whether or not the list beside it is empty.
+
+The seam that would close it exists on one side only. 0058 resolves a binding
+before the walk and hands a primitive its `loom.data` beside `props`, and *"a
+source with nothing to report answers `ready` with an empty list"* — so the fact
+these two primitives need is already computed, already validated, and already at
+the node. **Nothing in the library reads it.** Checked: `loom.data` appears in
+no file under `src/primitives/`, ninety-five primitives in. The binding seam has
+no consumer.
+
+Two questions, and only the first is small:
+
+- **May a primitive read `loom.data`?** Presumably yes — the contract offers it.
+  Somebody should be the first, and these two are the natural candidates.
+- **May a primitive render nothing?** This is the real one. A waiting state
+  whose binding came back `ready` should draw nothing at all, and "renders
+  nothing" sits awkwardly beside the rule that rendering is total (0008), which
+  exists so a bad node degrades rather than blanks. The distinction is between
+  *failing* to render and *deciding* not to, and it is not one the seam
+  currently draws.
+
+**What it is not.** Not a request for conditionals in the tree — that is a
+template language and 0001's whole point is that Loom is not one. The narrow
+version is a primitive reading its own binding's cardinality and nothing else.
+
+Filed rather than built because the answer belongs to the render seam and the
+tree, and this lane may not decide either. **Nothing is blocked**: a page that
+knows its list is empty places an empty state and is correct.
+
+---
+
+## 2026-09-14 — the specimen harness cannot wire a submission, so every form it photographs is grey
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — small, and it silently degrades the one instrument this lane is judged on
+
+`tools/specimen/render.ts` wires a registry, a theme and origins. It does not
+wire endpoints or submissions — `resolveTreeSubmissions` appears nowhere under
+`tools/specimen/`.
+
+So a `loom.form` in a specimen can never name a destination the render can
+resolve, and it correctly draws the state it draws when nobody said where to
+post: a notice reading *"This form is not connected yet"* over a `disabled`
+fieldset at `opacity: 0.6`.
+
+That is `loom.form` being right. It is also a photograph in which every field
+inside the form is six-tenths visible — which is fine for a shot *of a form*,
+and useless for a shot of the control inside one. This run wanted a picture of
+the new `checkbox` field type and had to lift the fields out into a
+`loom.stack` to get one, which is a specimen that does not show the markup a
+real page would have.
+
+**What would close it:** let a specimen declare endpoints the way it already
+declares themes — `defineSpecimen({ endpoints })`, resolved through
+`resolveTreeSubmissions` before the render, the same three lines
+`library.test.ts` already runs. It is not a framework change; the harness is
+simply missing a seam the runtime already exposes.
+
+**Nothing is blocked.** Worked around in `states-and-paging.specimen.ts`, with
+the reason written where the workaround is.

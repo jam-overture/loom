@@ -180,7 +180,7 @@ from outside will get there.
 
 Now the turn, and it is the part that makes this a lesson rather than a feature.
 Suppose we add the declaration. The day it ships, **nothing declares it.** Not one
-of the ninety-two primitives in the starter library, because the lane that owns
+of the ninety-five primitives in the starter library, because the lane that owns
 them has not had a chance yet. So the reading is no better than it was — and the
 design question is not *how does a primitive say* at all. It is:
 
@@ -800,7 +800,7 @@ component this?", and it has to be answerable without reading the runtime.
 
 ### Exercise F — the same questions, asked of the library
 
-Ninety-two primitives, a seam for `copy` that is three days old and one for `role`
+Ninety-five primitives, a seam for `copy` that is three days old and one for `role`
 that is six. Predict two numbers, then predict what `copyIn` says about a band
 taken straight out of the starter catalogue.
 
@@ -827,7 +827,7 @@ describe("F", () => {
 The output:
 
 ```
-  primitives registered:     92
+  primitives registered:     95
   declaring copy:            0
   declaring any role:        0
   typesWithRole("heading"):  []

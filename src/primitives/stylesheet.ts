@@ -492,6 +492,37 @@ export const LIBRARY_CLASS = {
    * that cannot be felt by testing in a browser that is behaving normally.
    */
   washed: "loom-washed",
+  /**
+   * A `loom.waiting-state`. The region that is waiting, and one bar of the
+   * shape it is holding open.
+   *
+   * The sheen is a moving `background-position` over a gradient rather than a
+   * travelling pseudo-element, which is what lets one class cover a bar, a
+   * circle and a block: it inherits whatever `border-radius` the element sets
+   * inline, and a pseudo-element would have needed clipping on each of them.
+   *
+   * Reduced motion leaves the bar and removes the travel — a waiting state with
+   * its animation switched off entirely is still a correct waiting state, which
+   * is not true of an entrance, so this one is genuinely optional and is dropped
+   * rather than frozen mid-sweep.
+   */
+  waiting: "loom-waiting",
+  waitingBar: "loom-waiting-bar",
+  /**
+   * A `loom.link-pager`. The row of numbers, and the two ends it places.
+   *
+   * Every tile property here is one `loom.link` does **not** set inline, which
+   * is the file's first trap read forwards rather than discovered afterwards —
+   * a container in this library can only add to its children what they left
+   * unspoken. The block padding is reachable at all because `loom.link` moved
+   * its own 2px off the element and into `.loom-link` on the same day this
+   * landed; the underline is switched off here deliberately, since a tile and a
+   * wipe-in rule are two marks for one fact.
+   */
+  pager: "loom-pager",
+  pagerNumbers: "loom-pager-numbers",
+  /** `loom.link`'s own underline offset, off the element so a container can vary it. */
+  link: "loom-link",
 } as const
 
 /**
@@ -531,6 +562,38 @@ const CSS = `
 .loom-lift:hover {
   transform: translate3d(0, -4px, 0);
   box-shadow: 0 24px 48px -34px var(--loom-fg-default);
+  border-color: var(--loom-border-accent);
+}
+@keyframes loom-waiting {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.loom-waiting-bar {
+  background-color: var(--loom-bg-surface-muted);
+  background-image: linear-gradient(90deg, transparent 20%, var(--loom-bg-surface) 50%, transparent 80%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: loom-waiting calc(var(--loom-motion-slow) * 6) linear infinite;
+}
+.loom-link {
+  padding-block-end: 2px;
+}
+.loom-pager .loom-link {
+  padding-block: var(--loom-spacing-2);
+  padding-inline: var(--loom-spacing-3);
+  min-width: 1.25rem;
+  text-align: center;
+  border: 1px solid transparent;
+  border-radius: var(--loom-radius-md);
+  background-image: none;
+  transition: background-color var(--loom-motion-fast) ease, border-color var(--loom-motion-fast) ease;
+}
+.loom-pager .loom-link:hover, .loom-pager .loom-link:focus-visible {
+  background-color: var(--loom-bg-surface);
+  border-color: var(--loom-border-subtle);
+}
+.loom-pager .loom-link[aria-current="page"] {
+  background-color: var(--loom-bg-surface);
   border-color: var(--loom-border-accent);
 }
 .loom-underline {
@@ -1570,8 +1633,17 @@ details[open] > summary .loom-marker {
   .loom-marquee-echo {
     display: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play {
+  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play, .loom-pager .loom-link {
     transition: none;
+  }
+  /**
+   * The sweep goes and the bar stays. Unlike an entrance, a waiting state with
+   * no animation is still saying the whole of what it says — the shape is the
+   * message — so this one is dropped outright rather than parked at its end.
+   */
+  .loom-waiting-bar {
+    animation: none;
+    background: var(--loom-bg-surface-muted);
   }
   .loom-lift:hover {
     transform: none;
