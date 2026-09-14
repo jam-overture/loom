@@ -161,8 +161,16 @@ question is open, green once it has landed, matching the ring on the stage.
 
 ## Real test numbers
 
-`pnpm install && pnpm verify` — **green, exit 0**. Numbers in the pull request
-description, read off the run rather than remembered.
+`pnpm install && pnpm verify` — **green, exit 0**, read off the run rather than
+remembered:
+
+| suite | files | tests |
+| --- | --- | --- |
+| `@loom/runtime` | 149 | 2,571 |
+| `@loom/app` | — | 4,272 |
+
+626 findings, 0 malformed. 101 prerendered pages, 786 text junctions, 0 run
+together.
 
 **It was not green the first time, and the failure was mine.** `pnpm verify`
 exited 2 on a typecheck error in a test I had written twenty minutes after the
