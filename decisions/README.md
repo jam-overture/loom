@@ -230,7 +230,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0144 | *No record on this branch* | — | — |
 | [0145](0145-a-light-that-marks-one-of-several-is-a-wrapper-and-it-is-carried-by-distance.md) | A light that marks one of several is a wrapper, and it is carried by distance rather than by colour | Accepted | §4b |
 | [0146](0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md) | A reader signal stays anonymous, and a funnel is correlated inside one page view | Accepted | §4c (reader signals), §6 (telemetry) |
-| 0147 | *No record on this branch* | — | — |
+| [0147](0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md) | A rollup is added to what is stored, and a distinct-view count is therefore approximate | Accepted | §4c (reader signals), §6 (telemetry) |
 | 0148 | *No record on this branch* | — | — |
 | 0149 | *No record on this branch* | — | — |
 | [0150](0150-a-container-that-must-aggregate-publishes-a-custom-property-and-the-browser-does-the-arithmetic.md) | A container that must aggregate over its children publishes a custom property, and the browser does the arithmetic | Accepted | §4b |

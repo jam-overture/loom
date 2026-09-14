@@ -24,7 +24,7 @@ export const DATA_PROP_KEY = `${RESERVED_PROP_PREFIX}data`
 /** A node's submission — which registered endpoint a form posts to, on any node (0065). */
 export const SUBMIT_PROP_KEY = `${RESERVED_PROP_PREFIX}submit`
 
-/** The fragment a node answers to, so the page's own links can point at it, on any node (0096). */
+/** The fragment a node answers to, so the page's own links can point at it, on any node (0098). */
 export const ANCHOR_PROP_KEY = `${RESERVED_PROP_PREFIX}anchor`
 
 export const isReservedPropKey = (key: string): boolean => key.startsWith(RESERVED_PROP_PREFIX)

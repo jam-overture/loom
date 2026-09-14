@@ -65,6 +65,11 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "host",
   },
   {
+    specifier: "@loom/runtime/signals/postgres",
+    summary: "The Postgres buffer and counters, for a deployment that keeps what its readers did.",
+    audience: "host",
+  },
+  {
     specifier: "@loom/runtime/telemetry",
     summary: "The journal — proposal, provenance, disposition and outcome, recorded as they happen.",
     audience: "host",
