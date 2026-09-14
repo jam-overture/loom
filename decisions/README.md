@@ -234,3 +234,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0148 | *No record on this branch* | — | — |
 | 0149 | *No record on this branch* | — | — |
 | [0150](0150-a-container-that-must-aggregate-publishes-a-custom-property-and-the-browser-does-the-arithmetic.md) | A container that must aggregate over its children publishes a custom property, and the browser does the arithmetic | Accepted | §4b |
+| 0151 | *No record on this branch* | — | — |
+| 0152 | *No record on this branch* | — | — |
+| 0153 | *No record on this branch* | — | — |
+| 0154 | *No record on this branch* | — | — |
+| [0155](0155-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md) | The catalogue's public surface is the list and the lookup, not every band by name | Accepted | §4b |
