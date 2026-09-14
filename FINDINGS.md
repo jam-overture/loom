@@ -22699,7 +22699,16 @@ seam that exists. A decision record would amend 0136's configuration paragraph.
 
 ## 2026-09-12 — the reader-signal broadcaster observes only the nodes present when it starts
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-33-the-broadcaster-stops-going-blind`** — a
+`MutationObserver` on the root hands arriving addressed elements to the
+visibility observer and closes the dwell stretch of departing ones, so a band
+behind a Suspense boundary, a list that grows and every region a proposal
+changed are measured like the rest. Built only when a time-based kind is asked
+for; the other kinds never needed it. The half that is *not* closed is written
+down rather than fixed: the tree and revision are still read once, so a new
+root or a new revision in the same root is a new broadcast, and both the module
+and the function now say so. Step 1 of `docs/signals.md`.
 
 `broadcastReaderSignals` finds the addressed elements under its root once, when
 it is called, and observes those. Anything rendered later is never observed for
@@ -23016,6 +23025,76 @@ actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
 
+## 2026-09-13 — the fifth reader-signal kind is approved, and the guide to the four is what blocks it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+blocking step 2 of `docs/signals.md`
+
+`docs/signals.md` approves **`completed`** as the one addition to the reader-signal
+vocabulary: it fires when a form inside an addressed node submits successfully,
+and it is the difference between the portal showing engagement and showing
+conversion. It is step 2 and this lane owns it.
+
+It cannot land while */docs/the-runtime/what-your-readers-do* says there are four,
+and that page is yours. It does not merely *count* four — it **argues** four, and
+`claims.test.ts` holds it to the argument:
+
+- `page.mdx` contains the sentences *"Four things, and nothing else."* and
+  *"There is no fifth kind"*, both asserted verbatim by
+  `claims.test.ts` → *"says four kinds, and there are four"*.
+- That same test asserts `READER_SIGNAL_KINDS.length === 4` and
+  `produceKinds().length === 4`.
+- `page.ts` throws by design when a kind has no sentence — *"a kind was added to
+  the runtime and this page still says there are four"* — so `DESCRIPTIONS` and
+  `EXAMPLES` each need a `completed` member, and those are prose in your voice.
+
+**This is your tripwire working exactly as built**, on the first day something
+tripped it. It did its job: a runtime change that would have quietly left the
+guide wrong stopped instead, in a lane that could see why.
+
+**What would close it:** the fifth row and the prose around it — what `completed`
+means, what it carries (`at`, like `viewed` and `activated`; no more than the
+other four), and what it does *not* mean, which is the interesting sentence. The
+broadcaster can see that a form was submitted with its constraints satisfied. It
+cannot see that a server accepted it, and the kind should not pretend otherwise.
+
+**The closed-vocabulary argument does not weaken.** Five is still closed and a
+sixth is still a record; `hovered` was on the same list and was refused, which is
+the better story for that paragraph than four was. 0136 stays the citation, with
+`docs/signals.md` rule 6 as the amendment.
+
+**Order.** Land the page change first and this lane adds the kind on the next run
+— the reverse reds `pnpm verify` for every lane, since `claims.test.ts` fails the
+moment `READER_SIGNAL_KINDS` grows. Nothing else is waiting on this: step 1 is
+done and step 3 does not need `completed` to begin.
+
+## 2026-09-13 — a broadcaster keeps filing under the revision it started on, and now says so instead of noticing
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:** open —
+documented rather than fixed, deliberately
+
+Closing the broadcaster's blind spot to *nodes* left its blind spot to *pages*
+open. `broadcastReaderSignals` reads the tree id and revision once, off the root,
+and stamps every batch with them. A host that re-renders a new revision into the
+same root — or navigates client-side without unmounting — goes on broadcasting
+under the revision it left, and the signals are filed against nodes that have
+moved or gone.
+
+The module documentation and the function now both say a new root or a new
+revision is a new broadcast, which is what step 1 of `docs/signals.md` scoped.
+That is honest but it is still a rule a host has to have read.
+
+**Why it was not fixed here:** the fix is a choice, not a detail. The broadcaster
+could watch the revision attribute and re-stamp itself, or watch it and stop with
+an error, or refuse to care. Re-stamping silently is the same class of mistake
+the blind spot was — it would keep the ledger's accumulated dwell across a
+revision boundary and attribute it to the new one. Stopping loudly is probably
+right, and it changes the contract of a returned broadcast, which wants an
+argument rather than a commit.
+
+**What would close it:** a decision on which of the three, then a small change.
+Worth doing before step 4 — a portal reading per-revision counters is exactly
+what would be misled.
 ---
 ## 2026-09-13 — the portal's three most important screens cannot be photographed, because a healthy deployment never reaches their important state
 
