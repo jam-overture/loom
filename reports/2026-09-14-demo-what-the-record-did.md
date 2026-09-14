@@ -310,6 +310,12 @@ the change. Not the preview deployment, which this environment cannot open
 (`vercel.app` is not on the sandbox's egress allowlist; the standing 19 August
 finding).
 
+**Preview:**
+`https://loom-git-demo-17-what-the-re-662863-jpizzolato36-6341s-projects.vercel.app/demo`
+
+Read off the deployment comment on the pull request rather than opened, for the
+reason above.
+
 **To see it yourself:** open `/demo`, press **Take the numbers off**, then press
 **Apply this change**. On `main` the sentence quoting *“3,400” “24” “92%”*
 vanishes as the badge turns green. On this branch it stays, in the past tense,
