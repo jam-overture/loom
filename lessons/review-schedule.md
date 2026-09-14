@@ -1133,6 +1133,56 @@ over, you have restated the axis rather than used it.
 
 ---
 
+## Set AC — two days after lesson 24
+
+Interleaved with 04, 05, 12, 14, 15, 19, 22 and 23. Heavy on 15, because this is
+that lesson's registry being asked a kind of question it could not answer before;
+and heavy on 23, because the two lessons found the same defect from opposite ends
+and the comparison is where the general rule is.
+
+1. A reviewer is shown *3 pieces, no words* for a proposal deleting a band that
+   says six things. Say where the words are, name the rule that put them there,
+   and then give the four places a consumer could look for "which props are
+   words" and the reason each fails — including the one that works and the
+   callers it is unavailable to. *(15, 24)*
+2. `copy: []` and no `copy` at all are different answers. State what each one
+   says, give the shape of the value `copyIn` returns in order to keep them
+   apart, and say precisely what a consumer reading only the first field of that
+   value is unable to tell. *(24)*
+3. Name the other two seams in this course that answer three ways rather than
+   two, and state what each one refuses to round off. Then give the rule all
+   three are instances of, in one sentence that mentions neither copy nor
+   contrast. *(15, 24)*
+4. A declared copy prop holds the number `3400`. Say what comes back, what is
+   reported, and why each of the two rules producing that outcome is individually
+   correct. Then name the caller that can reach it, and say why the obvious fix
+   would make one field mean two things. *(05, 24)*
+5. A primitive declares that it is a heading; only a tree can say which heading
+   leads. Say why those two facts are kept in different places, name the
+   consumers the separation serves, and give the argument against deriving the
+   role by probing what the component renders. *(04, 14, 15, 24)*
+6. An unknown `role` is refused at registration rather than read as an absence,
+   and TypeScript already prevents it. Say who the runtime check is for, give the
+   failure it prevents in one sentence, and name two other registry refusals with
+   the same shape — then say what a *drifted* declaration has in common with a
+   misspelled one. *(15, 19, 24)*
+7. Swapping a hard-coded `TITLE_TYPES` for `registry.typesWithRole("heading")` is
+   strictly better and one line. Say what it does to this repository today, why,
+   and what order the two edits have to land in. Then state the general form of
+   that trap without mentioning headings. *(12, 24)*
+8. Lesson 23 found a mechanism that is correct, tested and reaches nothing;
+   lesson 24 found two declarations that are correct, tested and made by nobody.
+   Say what the two have in common, why neither can fail loudly, and what would
+   have to exist to notice either — given that no test in either lane is going to
+   say anything. *(22, 23, 24)*
+
+Question 2 is the point of the set. Question 4 is where a confident half-answer
+is most likely: if yours says the seam is wrong, reread what each rule is
+protecting — the interesting version says both are right and the composition is
+not.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1175,3 +1225,4 @@ renders this file rather than restating it.
 | Z | 2 days after L21 | | |
 | AA | 2 days after L22 | | |
 | AB | 2 days after L23 | | |
+| AC | 2 days after L24 | | |

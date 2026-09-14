@@ -22452,6 +22452,61 @@ come from the tree at the revision the batch names — and **measurement is the
 host's setting, never a prop in the tree**. `prototypes/ski-apparel` is a working
 end-to-end example to read from, not to copy code out of.
 
+## 2026-09-13 — a copy prop whose value is not a string vanishes from both halves of `copyIn`'s answer
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+— found while writing lesson 24, which teaches this seam and prints the case
+
+[0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md) makes
+`copyIn` report what it could not classify rather than under-reporting it, and it
+does, for the case the record is about. There is a second case it does not cover,
+and it is reached by two rules that are each individually right.
+
+`declaredWords` skips a declared copy prop whose value is not a string, because
+coercing `3400` to `"3400"` would print a figure the page does not show. Correct,
+and the record argues it well. `unread` carries only types that declared
+*nothing*, because a declaration is trusted about its exclusions. Also correct.
+Composed, a primitive that **has** declared `value` as copy and holds the number
+`3400` there produces:
+
+```
+  value: 3400, declared
+    words:  ["appointments"]
+    unread: none
+```
+
+The figure is gone and nothing anywhere says so — which is the shape of failure
+this seam's whole return type exists to prevent. The undeclared side has the same
+hole from the other direction: `stringProps` filters non-strings too, so the same
+node under a type that said nothing reports `unread: ["label"]` and never names
+`value` at all.
+
+**How it is reached.** `loom.stat`'s schema requires strings, so a validated tree
+cannot hold it — but the two callers 0122 was filed for are a queue row about a
+proposal and a preview of a node **nobody has approved**, which is exactly where
+props have not been through a schema. It is the same argument `resolveAnchor`
+makes when it answers `42` and `null` with readings instead of throwing.
+
+`copy.test.ts:156` pins `words` for this case and asserts nothing about `unread`,
+so the silence is tested in rather than overlooked.
+
+**What would close it, and why the obvious fix is not obviously right.** Naming
+the prop in `unread` would make that field mean two things — *nobody has said*
+and *said, and I could not read it* — which is this seam's own complaint about
+defaults, and it would also change what an empty `unread` asserts for every
+existing caller. A third field, or an `UnreadCopy` that carries a reason, are
+both larger than a lessons run should decide. Filed rather than fixed: `src/sdk/`
+is the framework lane's.
+
+**Two open findings this lesson confirms rather than re-files**, both still
+true on `main` today and both already owned: nothing in `src/primitives/`
+declares `copy` (10 September, `Loom primitives`) — 0 of 91, so `copyIn` reports
+the whole starter library under `unread` — and nothing declares `role`, so
+`typesWithRole("heading")` answers `[]` while `_lib/page-name.ts` still carries
+`TITLE_TYPES = ["loom.heading"]` and the queue still reads text children only.
+Exercise G in the lesson prints what a one-line switch to the registry would do
+to page names today, which is the reason the finding's stated order of edits
+matters.
 ---
 
 ## 2026-09-13 — the screenshot harness cannot photograph a block that only exists once you press it
