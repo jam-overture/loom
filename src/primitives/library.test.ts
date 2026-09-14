@@ -192,8 +192,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 93 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(93)
+  it("registers as 94 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(94)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -272,6 +272,7 @@ describe("the starter library", () => {
       "loom.list",
       "loom.list-item",
       "loom.callout",
+      "loom.placeholder",
       "loom.code",
       "loom.code-span",
       "loom.emphasis",
@@ -426,6 +427,7 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.credential",
       "loom.faq",
+      "loom.placeholder",
       "loom.rating",
       "loom.avatar",
       "loom.perk",
@@ -3202,6 +3204,28 @@ const technicalPage = (theme: Record<string, string>, idFactory: IdFactory = seq
         children: [proof, band, spaced, lead],
       }),
       buildElement(idFactory, { type: "loom.mosaic", props: { rhythm: "alternating" }, children: [] }),
+      /**
+       * Both states of a region that has nothing in it, side by side, because
+       * the whole claim of `loom.placeholder` is that these are two different
+       * things and 0058 says collapsing them is the mistake.
+       */
+      buildElement(idFactory, {
+        type: "loom.placeholder",
+        props: { state: "empty", title: "No deployments yet", body: "Point it at a repository and the first one appears here." },
+        children: [
+          buildSlot(idFactory, "action", [
+            buildElement(idFactory, {
+              type: "loom.action",
+              props: { href: "/start", variant: "primary" },
+              children: [text("Connect a repository")],
+            }),
+          ]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.placeholder",
+        props: { state: "unavailable", title: "We could not load your deployments", body: "The source did not answer. Nothing is lost — try again in a moment." },
+      }),
     ],
   })
 
@@ -7979,6 +8003,78 @@ const haloTree = (light: string, idFactory: IdFactory = sequentialIdFactory()): 
     }),
     idFactory
   )
+
+describe("a region with nothing in it", () => {
+  const placeholderOf = (props: JsonObject): string => {
+    const idFactory = sequentialIdFactory()
+    const tree = createTree(
+      buildElement(idFactory, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: EDITORIAL },
+        children: [buildElement(idFactory, { type: "loom.placeholder", props, children: [] })],
+      }),
+      idFactory
+    )
+
+    const { tree: body } = splitStylesheet(render(tree).markup)
+
+    /** Below the root, which is where the palette is mounted. */
+    return body.slice(body.indexOf(">"))
+  }
+
+  /**
+   * The distinction the primitive exists for, asserted where a reader who
+   * cannot see the page gets it. 0058 is explicit that an answer is `ready` or
+   * `unavailable` and that collapsing the two is the mistake; a placeholder
+   * that announced both, or neither, would put that mistake back at the last
+   * hop.
+   */
+  it("announces the region that failed and stays quiet about the one that is merely empty", () => {
+    expect(placeholderOf({ state: "unavailable", title: "Could not load" })).toContain('role="status"')
+    expect(placeholderOf({ state: "empty", title: "Nothing yet" })).not.toContain('role="status"')
+  })
+
+  /**
+   * And again in the one channel a sighted reader actually uses. A dashed edge
+   * is the convention for a space waiting to be filled; a solid one reads as a
+   * panel reporting something. Both borders come from slots every palette
+   * declares, so neither is a colour this file invented.
+   */
+  it("draws the two states differently without naming a colour", () => {
+    const empty = placeholderOf({ state: "empty", title: "Nothing yet" })
+    const failed = placeholderOf({ state: "unavailable", title: "Could not load" })
+
+    expect(empty).toContain("dashed")
+    expect(failed).toContain("solid")
+    expect(empty).not.toBe(failed)
+    for (const body of [empty, failed]) {
+      expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+    }
+  })
+
+  /**
+   * `state` has no default, which is the one deliberate friction in the schema:
+   * the two members mean opposite things to a visitor, so a guess is worse than
+   * a refusal. This is the assertion that keeps somebody from adding one.
+   */
+  it("refuses a placeholder that will not say which nothing it is", () => {
+    const idFactory = sequentialIdFactory()
+    const tree = createTree(
+      buildElement(idFactory, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: EDITORIAL },
+        children: [
+          buildElement(idFactory, { type: "loom.placeholder", props: { title: "Nothing yet" }, children: [] }),
+        ],
+      }),
+      idFactory
+    )
+
+    expect(render(tree).diagnostics).not.toEqual([])
+  })
+
+})
 
 describe("the atmosphere behind a band, the words over a picture, and the one among several", () => {
   it("paints every band and puts a word on a picture, with nothing left unhonoured", () => {

@@ -72,6 +72,7 @@ import { loomPerk } from "./loom.perk.js"
 import { loomPerson } from "./loom.person.js"
 import { loomPersonGrid } from "./loom.person-grid.js"
 import { loomPin } from "./loom.pin.js"
+import { loomPlaceholder } from "./loom.placeholder.js"
 import { loomPerkList } from "./loom.perk-list.js"
 import { loomPerkListItem } from "./loom.perk-list-item.js"
 import { loomProduct } from "./loom.product.js"
@@ -454,6 +455,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomList,
   loomListItem,
   loomCallout,
+  loomPlaceholder,
   loomCode,
   loomCodeSpan,
   loomEmphasis,

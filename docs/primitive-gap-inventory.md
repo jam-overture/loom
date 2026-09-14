@@ -54,10 +54,36 @@ the shortness is the finding.
 | **paging through a run of things** | a page-through control | `loom.link-trail` goes *out* of a page, `loom.nav` goes *across*; nothing goes *along*. By [0054](../decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md) this is probably `loom.link` plus an arrangement |
 | **the empty state** | what a region says when it holds nothing | with the binding seam ([0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)) a list can now legitimately arrive empty, and every surface will otherwise invent its own "no results yet" |
 | **the waiting state** | a placeholder with the shape of the thing | same reason. A bound region that has not answered has nowhere to say so |
-| **a consent checkbox / a radio group** | two members of `FIELD_TYPES` | **not primitives.** `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap, and it is two enum members, not two files |
+| **a consent checkbox / a radio group** | ~~two members of `FIELD_TYPES`~~ — **see the correction below** | `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap |
 
 **Tier A is five primitives and one enum widening.** That is the honest total of
 what this library is missing that it could build this afternoon.
+
+### Correction, 14 September — the enum widening is not an enum widening
+
+Counted as "two strings, not two files", and that is wrong for half of it.
+Adding the two members and rendering them was tried and the second one does not
+work:
+
+- **`checkbox` renders.** `loom.field` falls through to `<input type={type}>`,
+  so the consent box a contact form needs is genuinely two characters of enum —
+  though its label wants to sit *beside* the box rather than above it, which is
+  a layout change to the field.
+- **`radio` does not.** A radio group is one `<input type="radio">` **per
+  choice**, and the choices are `loom.option` children that render themselves.
+  For `select` that works because an `<option>` inside a `<select>` is what an
+  option *is*. A radio group needs each option to render as an input and a
+  label — and **no node can know it is inside a radio group**, because a render
+  is a total pure projection of one node
+  ([0008](../decisions/0008-the-renderer-is-a-total-pure-projection.md)). It is
+  the same wall `loom.stat-chart` met over its scale, and CSS cannot carry this
+  one: an element's *tag* is not a custom property.
+
+So it is one enum member and one open design question, not two strings. The
+honest options for `radio` are a second child type that knows what it is, or a
+field that renders the group itself from a prop — which would be repeated
+content in a prop bag and is what 0052 refuses. **Unbuilt, deliberately**, and
+this paragraph is here so the next run does not re-count it as cheap.
 
 ## Tier B — blocked on the behaviour vocabulary
 
