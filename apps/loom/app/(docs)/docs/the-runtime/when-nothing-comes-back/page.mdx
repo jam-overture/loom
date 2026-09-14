@@ -1,0 +1,216 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { OneSilentRegion, TheThreeDoors } from "@/app/(docs)/_components/ceiling"
+
+export const metadata = pageMetadata("the-runtime", "when-nothing-comes-back")
+
+# When nothing comes back
+
+Serving a Loom page is mostly Loom's own work, and three moments of it are not.
+Three times, the runtime stops and waits for code somebody else wrote:
+
+- it asks **a model** what to change,
+- it asks **your app** to answer a question a node asked,
+- and it asks **your app** where a form should post.
+
+Each of those is a call out of the framework and into a service, a database or
+an integration. Any of them can be slow, and being slow is fine — a query
+against a big table takes as long as it takes.
+
+What none of them may be is **silent forever**.
+
+This page is about the difference, because it is not the one most people expect.
+An integration that is *down* is easy: it answers, it says it cannot help, and
+every seam here has a name for that. An integration that is **not answering at
+all** does not look like a failure from the inside. There is no error to catch,
+no rejected promise to handle, nothing in the log. There is just a request that
+has not come back yet, and there is no moment at which that stops being true.
+
+Somebody is still waiting when that happens, and it is your reader.
+
+<Callout>
+  **The rule, in one sentence.** Every await into code Loom did not write has a
+  time limit, the runtime sets it, and reaching it produces one of the ordinary
+  failure values that seam already had — not an exception, not a special case,
+  and not something your code has to opt into.
+</Callout>
+
+## The three doors
+
+Here are all three, each one held open by an implementation that never replies.
+Every sentence in the last column was written by the runtime as this page was
+built, about a promise that is still unresolved:
+
+<TheThreeDoors />
+
+Two things in that table are worth slowing down for.
+
+**Nothing in the last column is a new kind of failure.** A model call that never
+came back is reported as `interpreter-unavailable`, which is the same code a
+model call gets when the provider is having an outage. A source that never came
+back is `unavailable`, which is what a source gets when it says it cannot answer.
+Your code was already handling these, and the reason for that is deliberate:
+*"ask again later, nobody has to act"* is the right advice for both, and a new
+code would have made every host write a second branch that does the same thing
+as the first.
+
+The difference between the two lives in the **detail**, which is a sentence
+rather than a code. `no answer in 10s` is the runtime saying, in words, that it
+was the one who gave up.
+
+**The middle column is what a deployment actually gets.** Those three numbers
+are read from the runtime's own published constants as this page is built, so
+they cannot drift from what your app will do. The sentences beside them were
+produced at a ceiling of five milliseconds, because a documentation build that
+waited the real ten seconds three times is a documentation build that eventually
+gets its evidence from a fixture instead.
+
+## Slow is a number. Silent is not a state.
+
+It is worth being concrete about how ordinary this is, because "an integration
+that never replies" sounds like something that happens to other people.
+
+The way it usually happens is not a crash. It is a socket that was opened and
+never answered: a misrouted request, a connection dropped with nothing sent
+back, a proxy that quietly swallows what it cannot route. Node's own `fetch`
+does not read `HTTPS_PROXY`, so a perfectly correct request from inside a
+sandboxed deployment is not refused — it is simply never answered. That is not
+an exotic failure. It cost a run of work on this repository before it had a
+name.
+
+From inside the runtime, every one of those looks identical to a query that is
+about to succeed.
+
+## One region, not the page
+
+The ceiling is per call, not per page, and that is the half of this that
+protects your reader.
+
+Below is the shop page from
+[where the content comes from](/docs/building-with-loom/where-content-comes-from),
+served with one of its three sources replaced by one that never answers. The
+questions are independent — a plan is a set of source-and-params pairs with
+nothing ordering them — so each one is given its own ceiling rather than a share
+of the page's:
+
+<OneSilentRegion />
+
+The two regions that could be answered were answered. The two bound to the silent
+source — which are one question, asked once, and handed to both — were told they
+had no value, and the page rendered.
+
+A budget shared by the whole page would read tidier and would be wrong: five
+quick sources would lose their answers to whichever slow one happened to be
+measured first, which is the failure being closed here, rearranged rather than
+fixed.
+
+<Callout>
+  **A ceiling is not a retry.** Reaching one produces a reportable failure and
+  stops. Whether to ask the same question again is your app's decision, and the
+  split between `unavailable` — ask later — and `refused` — do not bother — is
+  there so you can make it.
+</Callout>
+
+## Changing how long you are prepared to wait
+
+Every seam takes the number, and none of them takes "forever":
+
+```ts
+import { modelInterpreter, randomIdFactory, resolveTreeData, systemClock } from "@loom/runtime"
+
+/** An interpretation you know is long. Ten minutes instead of three. */
+export const interpreter = modelInterpreter({
+  client,
+  idFactory: randomIdFactory,
+  clock: systemClock,
+  ceilingMs: 600_000,
+})
+
+/** A page whose reader will not wait ten seconds. Three instead. */
+export const answers = await resolveTreeData(tree, { registry, ceilingMs: 3_000 })
+```
+
+There is deliberately **no way to switch a ceiling off**. `undefined`, zero, a
+negative number and `Infinity` all mean "you did not name one", and the default
+is used. A deployment that genuinely wants to wait twenty minutes says twenty
+minutes — a number the next person to read that call can see — because
+`undefined` meaning *forever* is a decision nobody can find later.
+
+## The half that is not about the answer
+
+Walking away from a promise does not stop the work behind it. The request is
+still open, the connection is still held, and the answer — when it finally
+arrives — is read by nobody.
+
+So the runtime hands your code an `AbortSignal`, and every seam does it the same
+way: a source's `fetch` receives one, and so does an endpoint's `target` and a
+model client's `complete`. Pass it to whatever does the IO and your connection
+pool gets the socket back:
+
+```ts
+import { defineSource } from "@loom/runtime"
+import { z } from "zod"
+
+export const deliveries = defineSource({
+  id: "courier.tracking",
+  description: "Where a delivery has got to.",
+  params: z.object({ order: z.string().min(1) }),
+  answers: z.array(z.string()),
+  adapter: {
+    /** The signal is the half people forget. Hand it to the thing that waits. */
+    fetch: async ({ params, signal }) => {
+      const stops = await db.deliveries.find(params.order, { signal })
+
+      return { ok: true, value: stops }
+    },
+  },
+})
+```
+
+Ignoring the signal is allowed and costs you exactly one thing: an adapter that
+ignores it cannot delay the page — the answer is already reported and the render
+has moved on — it can only fail to let go of what it is holding.
+
+## Seeing it in your own app
+
+The state your interface shows when nothing came back is a state you cannot
+reach by waiting for it, which is how it ends up being the one nobody has
+designed. So the runtime publishes a client that never replies:
+
+```ts
+import { hangingModelClient } from "@loom/runtime/testing"
+
+const neverReplies = hangingModelClient()
+
+const bounded = modelInterpreter({
+  client: neverReplies,
+  idFactory: randomIdFactory,
+  clock: systemClock,
+  /** Milliseconds, so a test that covers this finishes like any other test. */
+  ceilingMs: 50,
+})
+
+const outcome = await bounded.interpret(intent, tree)
+
+/** { ok: false, error: { code: "interpreter-unavailable", detail: "no reply in 50ms" } } */
+```
+
+That is the call the first row of the table at the top of this page makes. Point
+your prompt box at it, give it fifty milliseconds, and you will see what your
+reader sees on the afternoon a provider stops answering — without waiting three
+minutes to find out.
+
+There is no published equivalent for a source or an endpoint yet, and there is
+nothing to it: an adapter that never answers is a `fetch` returning
+`new Promise(() => {})`, which is four characters more than the one that answers
+straight away.
+
+## What this does not cover
+
+The ceiling is on calls **out** of Loom into code it did not write. It is not a
+budget for a whole request, and it is not a limit on anything Loom does itself.
+
+Your store is your own. Loom's store interfaces are implemented by your
+deployment against your database, and a query there is bounded by whatever your
+driver and your connection pool are configured to do — which is the right place
+for it, because the person who chose the database is the person who knows what
+slow means for it.

@@ -1,8 +1,10 @@
 import type { Composition } from "./composition.js"
 import { articlesBand } from "./articles-band.js"
 import { bentoBand } from "./bento-band.js"
+import { changelogBand } from "./changelog-band.js"
 import { comparisonBand } from "./comparison-band.js"
 import { contactBand } from "./contact-band.js"
+import { credentialsBand } from "./credentials-band.js"
 import { ctaBand } from "./cta-band.js"
 import { faqBand } from "./faq-band.js"
 import { featuresBand } from "./features-band.js"
@@ -23,8 +25,10 @@ export { COMPOSITION_INTERPRETER, compositionInterpreter, planComposition } from
 export {
   articlesBand,
   bentoBand,
+  changelogBand,
   comparisonBand,
   contactBand,
+  credentialsBand,
   ctaBand,
   faqBand,
   featuresBand,
@@ -39,6 +43,7 @@ export {
   teamBand,
   testimonialsBand,
 }
+
 
 /**
  * The bands, in the order a landing page uses them.
@@ -80,8 +85,10 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   pricingBand,
   comparisonBand,
   testimonialsBand,
+  credentialsBand,
   teamBand,
   articlesBand,
+  changelogBand,
   faqBand,
   contactBand,
   ctaBand,

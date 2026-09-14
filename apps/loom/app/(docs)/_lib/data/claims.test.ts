@@ -30,7 +30,15 @@ const page = readFileSync(
 /** The prose with its line breaks flattened — every sentence here is hard-wrapped. */
 const flowed = page.replace(/\s+/g, " ")
 
-const WORDS: Readonly<Record<number, string>> = { 1: "one", 2: "two", 3: "three", 4: "four", 6: "six" }
+const WORDS: Readonly<Record<number, string>> = {
+  1: "one",
+  2: "two",
+  3: "three",
+  4: "four",
+  5: "five",
+  6: "six",
+  7: "seven",
+}
 
 const wordFor = (value: number): string => {
   const word = WORDS[value]
@@ -67,6 +75,25 @@ describe("the counts this page writes out", () => {
     const missing = await produceMissingAnswers()
 
     expect(flowed).toContain(`${capitalised(wordFor(missing.length))} ways a question goes unanswered`)
+    expect(flowed).toContain(`produced by causing all ${wordFor(missing.length)}`)
+  })
+
+  /**
+   * The paragraph that tells a reader two rows of one table carry the same
+   * reason. It is the one sentence on this page that is about a *pair* of rows,
+   * so it goes wrong silently if either of them stops being what it is — and the
+   * page names both sources, which is what makes it checkable at all.
+   */
+  it("names both routes to the reason that has two", async () => {
+    const missing = await produceMissingAnswers()
+    const unavailable = missing.filter((row) => row.reason === "unavailable")
+
+    expect(unavailable).toHaveLength(2)
+    expect(flowed).toContain("Two rows come back with the same reason")
+
+    for (const row of unavailable) {
+      expect(flowed, `the page never says which question ${row.binding} is`).toContain(row.binding)
+    }
   })
 
   /**

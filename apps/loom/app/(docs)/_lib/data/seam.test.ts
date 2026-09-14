@@ -1,7 +1,8 @@
-import { planTreeData, resolveTreeData } from "@loom/runtime"
+import { describeCeiling, planTreeData, resolveTreeData } from "@loom/runtime"
 import { renderLoomTree } from "@loom/runtime/react"
 import { describe, expect, it } from "vitest"
 
+import { DOCS_CEILING_MS } from "../ceiling/page"
 import { docsRegistry, docsThemes } from "../loom/registry"
 
 import {
@@ -9,6 +10,7 @@ import {
   produceMisdeclared,
   produceMissingAnswers,
   produceQuestions,
+  questionCausing,
 } from "./answers"
 import { boundPage, shopRegistry } from "./shop"
 
@@ -115,9 +117,10 @@ describe("what comes back", () => {
 
 describe("when there is no answer", () => {
   /**
-   * One row per reason the seam has. The count is asserted against the union
-   * rather than against six, so a reason added to the runtime takes this page
-   * red instead of quietly going undocumented.
+   * At least one row per reason the seam has, and two for the one reason two
+   * different things arrive at. The list is asserted rather than counted, so a
+   * reason added to the runtime takes this page red instead of quietly going
+   * undocumented.
    */
   it("produces every reason a binding can have no value", async () => {
     const missing = await produceMissingAnswers()
@@ -129,7 +132,44 @@ describe("when there is no answer", () => {
       "no-such-source",
       "refused",
       "unavailable",
+      "unavailable",
     ])
+  })
+
+  /**
+   * The two routes to `unavailable`, which is the only reason with more than
+   * one. They are one code on purpose — the remedy and the actor are the same —
+   * and the page still has to be able to tell a database that says it is down
+   * from an integration that says nothing at all.
+   */
+  it("reaches one reason by two routes, and says which route each took", async () => {
+    const missing = await produceMissingAnswers()
+    const unavailable = missing.filter((row) => row.reason === "unavailable")
+
+    expect(unavailable.map((row) => row.binding)).toEqual(["stock", "courier"])
+    expect(unavailable.map((row) => row.reached)).toEqual([
+      "the adapter answered",
+      "the adapter never came back",
+    ])
+  })
+
+  /**
+   * The ceiling reported this one, and it says so in the runtime's own words.
+   * Before 13 September there was no way to reach it: the render waited, and the
+   * thing that eventually gave up was whoever was reading.
+   */
+  it("has the runtime report the integration that never replied", async () => {
+    const missing = await produceMissingAnswers()
+    const courier = missing.find((row) => row.binding === "courier")
+
+    expect(courier?.sentence).toContain(`no answer in ${describeCeiling(DOCS_CEILING_MS)}`)
+  })
+
+  /** Every reason is caused by a question on the page, except the one no page can cause. */
+  it("names the question behind each reason", () => {
+    expect(questionCausing("adapter-threw")).toBe("slots")
+    expect(questionCausing("unavailable")).toBe("stock")
+    expect(questionCausing("not-resolved")).toBe("nothing one page can do")
   })
 
   it("says something different about each of them", async () => {

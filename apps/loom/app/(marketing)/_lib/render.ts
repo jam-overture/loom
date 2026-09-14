@@ -6,16 +6,18 @@ import { runHistory, type ChangeHistory } from "./adapt/history"
 import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import type { ChangeRecord } from "./adapt/record"
 import { weighEachAsker, type WeighedRequest } from "./adapt/askers"
+import { roundTripsOn, type RoundTrip } from "./adapt/round-trip"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
+import { piecesIn } from "./measure"
 import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
+import { puttingItBackPageTree, type BackContext } from "./pages/putting-it-back"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { theRulesPageTree } from "./pages/the-rules"
 import { whatYouRunPageTree } from "./pages/what-you-run"
 import {
   DEMONSTRATED_ASK,
-  piecesIn,
   whenItGoesWrongPageTree,
   type RefusalContext,
   type RefusedRun,
@@ -26,6 +28,7 @@ import { siteRegistry, siteThemes } from "./registry"
 import {
   HOME,
   HOW_IT_WORKS,
+  PUTTING_IT_BACK,
   THE_RECORD,
   THE_RULES,
   WHAT_YOU_RUN,
@@ -53,7 +56,11 @@ import {
  * the front door for, and the run of changes the record page is reporting on —
  * so a page that does not read a field cannot be broken by one arriving.
  */
-export type SitePageContext = RecordContext & MechanismContext & RefusalContext & AskersContext
+export type SitePageContext = RecordContext &
+  MechanismContext &
+  RefusalContext &
+  AskersContext &
+  BackContext
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
 
@@ -65,6 +72,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [WHEN_IT_GOES_WRONG.path, whenItGoesWrongPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
   [WHO_CAN_ASK.path, whoCanAskPageTree],
+  [PUTTING_IT_BACK.path, puttingItBackPageTree],
   [YOUR_COMPONENTS.path, yourComponentsPageTree],
 ])
 
@@ -232,6 +240,24 @@ export const askersFor = async (
 ): Promise<readonly WeighedRequest[]> =>
   weighEachAsker(treeFor(HOME, { origin: context.origin, theme: context.theme }))
 
+/**
+ * The round trips `/putting-it-back` prints, made while the page is built.
+ *
+ * The same seam as the four above and the same reason — a page builder is
+ * synchronous and a request through the whole sequence is not. Like the refusal
+ * band and the comparison, the requests are **fixed here rather than read off
+ * the address**: the page is an argument about what always happens rather than a
+ * place to try things, so every reader of it is looking at the same trips.
+ *
+ * The front door is built once and every trip starts from it, so *the page came
+ * back as it was* is a comparison against the page this site publishes rather
+ * than against whatever the previous trip left behind.
+ */
+export const roundTripsFor = async (
+  context: SitePageContext
+): Promise<readonly RoundTrip[]> =>
+  roundTripsOn(treeFor(HOME, { origin: context.origin, theme: context.theme }))
+
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
@@ -254,6 +280,10 @@ export const pageTreeFor = async (
 
   if (route.path === WHO_CAN_ASK.path) {
     return treeFor(route, { ...context, weighed: await askersFor(context) })
+  }
+
+  if (route.path === PUTTING_IT_BACK.path) {
+    return treeFor(route, { ...context, trips: await roundTripsFor(context) })
   }
 
   if (route.path === THE_RECORD.path) {

@@ -53,7 +53,7 @@ const data = await resolveTreeData(page, { registry: sources })
 
 const rendered = renderLoomTree(page, { resolver: primitives, validator: primitives, data })
 
-// page.mdx:221 — a program
+// page.mdx:231 — a program
 const rows = z.array(z.object({ name: z.string(), price: z.string() }))
 
 export const serviceList = definePrimitive({
@@ -88,10 +88,10 @@ export const serviceList = definePrimitive({
   },
 })
 
-// page.mdx:300 — the inside of an object literal
-const objectAtLine300 = {
+// page.mdx:310 — the inside of an object literal
+const objectAtLine310 = {
 protectedPropKeys: ["loom:data"],
 }
 
-export { objectAtLine35, services, built, sources, data, rendered, rows, objectAtLine300, z, createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData, renderLoomTree, createElement, definePrimitive }
+export { objectAtLine35, services, built, sources, data, rendered, rows, objectAtLine310, z, createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData, renderLoomTree, createElement, definePrimitive }
 export type { LoomPrimitiveProps }
