@@ -117,7 +117,21 @@ describe("can it be taken back", () => {
     expect(reversal?.meaning).toContain("4 pieces")
   })
 
-  it("says piece rather than pieces for one", () => {
+  /**
+   * The whole clause at one, rather than the noun.
+   *
+   * This test used to read `toContain("1 piece ")` and `not.toContain("1
+   * pieces")` — the noun, inflected, asserted on its own — and it passed for a
+   * fortnight against *"The 1 piece it takes off the page **are** kept."* The
+   * helper under it pluralised the noun and left the verb behind, so the one
+   * assertion that existed was the one assertion the defect could satisfy.
+   *
+   * A subject-and-verb fault is not visible in a substring of the subject, so
+   * the clause is asserted whole. It is reachable on the free-text path — the
+   * one a curious visitor types into — whenever the model's delta retains
+   * exactly one node, which is how it was found.
+   */
+  it("agrees with its own number when a change keeps exactly one piece", () => {
     const one: ReversibilityView = {
       reversible: true,
       retainedNodeCount: 1,
@@ -126,8 +140,17 @@ describe("can it be taken back", () => {
     }
     const [, reversal] = weighedOf({ ...REMOVAL, reversibility: one }) ?? []
 
-    expect(reversal?.meaning).toContain("1 piece ")
-    expect(reversal?.meaning).not.toContain("1 pieces")
+    expect(reversal?.meaning).toContain("The one piece it takes off the page is kept")
+    expect(reversal?.meaning).not.toContain("pieces")
+    expect(reversal?.meaning).not.toContain("are kept")
+  })
+
+  /** And still agrees at every other count, which is the half that already worked. */
+  it("agrees with its own number when a change keeps more than one", () => {
+    const [, reversal] = weighedOf(REMOVAL) ?? []
+
+    expect(reversal?.meaning).toContain("The 4 pieces it takes off the page are kept")
+    expect(reversal?.meaning).not.toContain("is kept")
   })
 
   /**

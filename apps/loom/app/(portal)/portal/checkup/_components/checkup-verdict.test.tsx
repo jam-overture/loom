@@ -55,6 +55,22 @@ const diverged = (count: number) =>
   describeAudit({ outcome: "diverged", revision: count, ...drifted(count), idReturns: [] })
 
 /**
+ * What a reader meets without clicking anything: the rendered text with every
+ * disclosure's contents taken out.
+ *
+ * Written as a removal from a clone rather than by subtracting strings, because
+ * a screen with two disclosures on it needs both gone and `replace` takes the
+ * first.
+ */
+const surfaceOf = (container: HTMLElement): string => {
+  const shown = container.cloneNode(true) as HTMLElement
+
+  for (const disclosure of shown.querySelectorAll("details")) disclosure.remove()
+
+  return shown.textContent ?? ""
+}
+
+/**
  * The rule this surface is rebuilt on, asserted rather than trusted: **nothing
  * is removed to make a screen simple.** Every sentence the old audit verdict
  * printed on the surface is still rendered — the test finds it inside a closed
@@ -119,6 +135,48 @@ describe("CheckupVerdictPanel", () => {
     }
   })
 
+  /**
+   * The defect the 12 September run filed and did not take: this list printed
+   * `loom.prose` per row, in monospace, on the one screen somebody opens when
+   * they already think something is wrong.
+   *
+   * The surface is measured with every `<details>` removed, because a registered
+   * type one click down is the thing being asked for rather than a failure.
+   */
+  it("names every part in a person's words and prints no registered type on the surface", () => {
+    const report = diverged(2)
+    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} />)
+
+    expect(surfaceOf(container)).not.toContain("loom.")
+    expect(screen.getByTitle("The prose “line 0”")).toBeInstanceOf(HTMLElement)
+  })
+
+  /**
+   * The other half of the same rule, and the one that fails if a later run makes
+   * this screen simpler by losing the type rather than moving it.
+   */
+  it("keeps the registered type it used to print, one click down", () => {
+    const { container } = render(<CheckupVerdictPanel report={diverged(2)} treeId={TREE} />)
+
+    expect(container.textContent).toContain("loom.prose")
+    expect(screen.getByText(/with each part's type/)).toBeInstanceOf(HTMLElement)
+  })
+
+  /**
+   * Four identical plain sentences with four different names above them. The
+   * name is what tells the rows apart, so the words have to be in it — a list
+   * of four rows all reading *Prose* would be the same defect with better
+   * manners.
+   */
+  it("tells four rows apart by what each part says", () => {
+    const report = diverged(4)
+    const { container } = render(<CheckupVerdictPanel report={report} treeId={TREE} />)
+
+    const surface = surfaceOf(container)
+
+    for (const line of ["line 0", "line 1", "line 2", "line 3"]) expect(surface).toContain(line)
+  })
+
   it("keeps one disclosure for the whole list rather than one per row", () => {
     const { container } = render(<CheckupVerdictPanel report={diverged(4)} treeId={TREE} />)
 
@@ -157,6 +215,25 @@ describe("CheckupVerdictPanel", () => {
 
     expect(container.textContent).toContain("recycled ids")
     expect(container.textContent).toContain("0038")
+  })
+
+  /**
+   * The second place a registered type reached this screen's surface. Unlike a
+   * difference, neither node is in the tree any more — so the label is all
+   * there is, and what changes is that the surface reads the noun inside it
+   * while the disclosure keeps the label whole.
+   */
+  it("says what the two parts were in words, and keeps the runtime's labels one click down", () => {
+    const { container } = render(
+      <CheckupVerdictPanel report={agreeing([recyclingOf("n_4")])} treeId={TREE} />
+    )
+
+    const surface = surfaceOf(container)
+
+    expect(surface).toContain("was a card until")
+    expect(surface).not.toContain("loom.card")
+    expect(surface).not.toContain("a text from")
+    expect(container.textContent).toContain("was a loom.card until 1, and a text from 9")
   })
 
   it("says nothing to do when a clean fold found nothing to look at", () => {

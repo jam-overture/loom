@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { anchorSchema } from "./anchor.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 const accepts = (schema: typeof linkUrlSchema, value: string): boolean => schema.safeParse(value).success
@@ -73,20 +74,73 @@ describe("a destination on the site's own origin", () => {
     }
   })
 
-  it("refuses a fragment on its own, because no primitive emits an id for one to reach", () => {
-    expect(accepts(linkUrlSchema, "#pricing")).toBe(false)
-  })
-
   it("refuses an empty destination rather than reading it as this page", () => {
     expect(accepts(linkUrlSchema, "")).toBe(false)
   })
 
-  it("says both of the things a destination may be when it refuses one that is neither", () => {
-    expect(messageFrom(linkUrlSchema, "pricing")).toBe("must be an absolute URL, or a path beginning with / on this site")
+  it("says all three of the things a destination may be when it refuses one that is none", () => {
+    expect(messageFrom(linkUrlSchema, "pricing")).toBe(
+      "must be an absolute URL, a path beginning with / on this site, or #an-anchor on this page"
+    )
   })
 
   it("still names the scheme when the scheme is what was wrong", () => {
     expect(messageFrom(linkUrlSchema, "ftp://files.example.com")).toContain("scheme ftp: is not allowed here")
+  })
+
+  /**
+   * The half of the anchor seam that was missing for seventeen days: three
+   * primitives could mark a destination and nothing could link at one, so a
+   * page with a nav bar over its own sections wrote `/#helmets` and was correct
+   * on the site root alone.
+   */
+  it("takes a bare fragment, which is the one href that cannot leave the page", () => {
+    for (const value of ["#top", "#helmets", "#how-it-works", "#faq-2"]) {
+      expect(accepts(linkUrlSchema, value)).toBe(true)
+      expect(linkUrlSchema.parse(value)).toBe(value)
+    }
+  })
+
+  /**
+   * The grammar is `anchorSchema`'s and not a looser one, so what may be linked
+   * at is exactly what may be marked. Were these two regexes, a tree could
+   * write `#Helmets` at one end and get `id="helmets"` at the other.
+   */
+  it("holds a fragment to the grammar an anchor is written in, character for character", () => {
+    for (const anchor of ["top", "helmets", "how-it-works", "faq-2"]) {
+      expect(anchorSchema.safeParse(anchor).success).toBe(true)
+      expect(accepts(linkUrlSchema, `#${anchor}`)).toBe(true)
+    }
+
+    for (const refused of ["#Helmets", "#my section", "#-leading", "#trailing-", "#a--b", "#"]) {
+      expect(anchorSchema.safeParse(refused.slice(1)).success).toBe(false)
+      expect(accepts(linkUrlSchema, refused)).toBe(false)
+    }
+  })
+
+  /**
+   * The allowlist's argument does not reach a bare fragment — it leaves no
+   * origin to check — and it still reaches everything that only looks like one.
+   * `javascript:` fails on its first character rather than on its scheme.
+   */
+  it("refuses a scheme wearing a fragment, since only a leading # is a fragment", () => {
+    for (const value of ["javascript:#x", "javascript:void(0)#top", "data:text/html,#x", "#javascript:alert(1)"]) {
+      expect(accepts(linkUrlSchema, value)).toBe(false)
+    }
+  })
+
+  /**
+   * A `src` is fetched, and a bare fragment fetches the document already open.
+   * The one real use for a fragment in a `src` — an SVG sprite — carries the
+   * file's path in front of it and is an ordinary URL here.
+   */
+  it("keeps the fragment on the link side, because media is fetched", () => {
+    expect(accepts(mediaUrlSchema, "#helmets")).toBe(false)
+    expect(accepts(linkUrlSchema, "#helmets")).toBe(true)
+    expect(accepts(mediaUrlSchema, "/sprite.svg#helmet")).toBe(true)
+    expect(messageFrom(mediaUrlSchema, "#helmets")).toBe(
+      "must be an absolute URL, or a path beginning with / on this site"
+    )
   })
 
   /**

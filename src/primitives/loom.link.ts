@@ -85,7 +85,7 @@ export const loomLink = definePrimitive({
          * page is marked by the same mark hovering makes rather than by a
          * second treatment a reader has to learn.
          */
-        className: LIBRARY_CLASS.underline,
+        className: `${LIBRARY_CLASS.link} ${LIBRARY_CLASS.underline}`,
         style: {
           /**
            * `inline-block`, not `inline`. The underline is a background the
@@ -95,8 +95,15 @@ export const loomLink = definePrimitive({
            * mid-phrase wrapping costs nothing.
            */
           display: "inline-block",
-          /** Room for the 2px underline to sit below the text rather than through it. */
-          paddingBlockEnd: "2px",
+          /**
+           * Room for the 2px underline to sit below the text rather than
+           * through it — in `.loom-link` rather than here, and that placement
+           * is load-bearing. An inline value beats a rule, so block padding set
+           * on the element is block padding no container can ever vary, and
+           * `loom.link-pager` needs exactly that to give a page number a hit
+           * area rather than a word with a box drawn tight around it. The
+           * stylesheet's first trap, applied before it was sprung.
+           */
           fontFamily: family("body"),
           fontWeight: current ? weight("heading") : weight("body"),
           fontSize: size(SCALES[given.scale ?? "medium"]),

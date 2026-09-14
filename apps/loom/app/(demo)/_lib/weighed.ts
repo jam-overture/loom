@@ -12,7 +12,9 @@ import type { ChangeRecord, ReversibilityView, StakesView } from "./record"
  *
  * **Then the card answered neither of them.** In plain view a held change
  * reported the rule's conclusion — *"Riskier than a request from here is
- * allowed to be without asking."* — and stopped. Both answers had been on the
+ * allowed to be without asking."*, which is what the shared vocabulary printed
+ * for `stakes-above-ceiling` when this was written and not what it prints today
+ * — and stopped. Both answers had been on the
  * record since this surface was built, one click down, in the runtime's own
  * shorthand: `stakes: medium`, `reversible: yes`, `undo carries: 4 nodes`. So a
  * stranger was told what would be weighed, watched a verdict arrive, and never
@@ -67,8 +69,24 @@ export type WeighedAnswer = {
   readonly meaning: string
 }
 
-const plural = (count: number, one: string, many: string): string =>
-  `${count} ${count === 1 ? one : many}`
+/**
+ * What the record is holding, as a clause that agrees with its own number.
+ *
+ * The count came through a `plural` helper that inflected the noun and left the
+ * verb behind, so a change retaining one node read *"The 1 piece it takes off
+ * the page **are** kept"* — on the free-text path, which is the one a curious
+ * visitor types into, and in the one box on this card written to be the plain
+ * half of the record. Both halves of the agreement are here now, in one place,
+ * because splitting a number from its verb is how they came apart.
+ *
+ * The numeral is spelled at one for the same reason the rest of this box has no
+ * digits in it: *"The 1 piece"* is a field value in a sentence, and everything
+ * around it is prose.
+ */
+const keptClause = (count: number): string =>
+  count === 1
+    ? "The one piece it takes off the page is kept"
+    : `The ${count} pieces it takes off the page are kept`
 
 /**
  * How much damage, in the portal's words for the level rather than the level.
@@ -119,7 +137,7 @@ const reversalAnswer = (reversibility: ReversibilityView): WeighedAnswer => {
     verdict: "Yes",
     meaning:
       reversibility.retainedNodeCount > 0
-        ? `The ${plural(reversibility.retainedNodeCount, "piece", "pieces")} it takes off the page are kept, so the exact opposite of this change already exists.`
+        ? `${keptClause(reversibility.retainedNodeCount)}, so the exact opposite of this change already exists.`
         : "Nothing is destroyed by it, so the exact opposite of this change already exists.",
   }
 }

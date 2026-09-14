@@ -5,6 +5,7 @@ import { primitiveTypeSchema } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 
 import { READER_SIGNAL_KINDS } from "./kinds.js"
+import { viewKeyPattern } from "./view.js"
 
 /**
  * What a published page may say about how it is being read.
@@ -36,6 +37,20 @@ export const readerSignalKindSchema = z.enum(READER_SIGNAL_KINDS)
 export type ReaderSignalKind = z.infer<typeof readerSignalKindSchema>
 
 const instantSchema = z.number().int().nonnegative()
+
+/**
+ * The key that says two batches came from the same page view, and says nothing
+ * else (0146).
+ *
+ * Branded like an id, but deliberately not one: it is minted by a browser
+ * rather than an id factory, it is not stable, nothing may be addressed by it,
+ * and it is dropped when the raw window expires. `view.ts` holds the pattern
+ * and the minting, because the broadcaster needs both and cannot load this
+ * module.
+ */
+export const viewKeySchema = z.string().regex(viewKeyPattern).brand<"ViewKey">()
+
+export type ViewKey = z.infer<typeof viewKeySchema>
 
 const addressSchema = {
   nodeId: nodeIdSchema,
@@ -73,6 +88,17 @@ export const readerSignalBatchSchema = z
     treeId: treeIdSchema,
     revision: z.number().int().nonnegative(),
     sentAt: instantSchema,
+    /**
+     * Which page view these signals came from, when the sender minted one.
+     *
+     * Optional because correlation is a capability rather than a requirement: a
+     * batch synthesised on a server, replayed from a fixture, or sent by a host
+     * that wants totals and no funnel has nothing to correlate, and refusing it
+     * would make the funnel mandatory rather than available. Rollup counts the
+     * batches it could not correlate instead of quietly treating each as its own
+     * view, which would inflate every funnel denominator.
+     */
+    view: viewKeySchema.optional(),
     signals: z.array(readerSignalSchema).min(1),
   })
   .strict()

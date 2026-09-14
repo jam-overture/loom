@@ -9,14 +9,18 @@ import { demoPolicy } from "./session"
 import { weighedOf } from "./weighed"
 
 /**
- * The sentence that gives "from here" a referent, and the four states it stays
- * quiet on.
+ * The comparison the card shows, and the four states it stays quiet on.
  *
- * Nothing here asserts a wording. What is asserted is where the words came
- * from — the shared origin table, the shared stakes table, and the runtime's own
- * `ceilingFor` — because the defect this replaced was a surface printing a
- * runtime code it had never translated, and the way that returns is a surface
- * writing its own translation beside the one four other screens already use.
+ * Almost nothing here asserts a wording. What is asserted is where the words
+ * came from — the shared stakes table and the runtime's own `ceilingFor` —
+ * because the defect this line replaced was a surface printing a runtime code
+ * it had never translated, and the way that returns is a surface writing its
+ * own translation beside the one four other screens already use.
+ *
+ * The **one** override is the person, and it is asserted in both directions:
+ * the demo's own origin must not be described in the third person, and every
+ * other origin must still read exactly as the portal says it. That pair is what
+ * stops the override from spreading into a second vocabulary.
  */
 
 const HELD_BY_THE_CEILING: DispositionView = {
@@ -54,8 +58,35 @@ describe("what an ask from here may do", () => {
     expect(ceilingNote(HELD)?.sentence).toContain(allowed)
   })
 
-  it("says what kind of ask it was in the words every other surface uses", () => {
-    expect(ceilingNote(HELD)?.sentence).toContain(ASK_ORIGINS["user-instruction"].label)
+  /**
+   * The override, and the whole of it.
+   *
+   * `ASK_ORIGINS["user-instruction"]` reads *"Somebody using the site asked for
+   * this"*, which is right in a review queue and wrong on the one surface where
+   * the somebody is the person reading the card — the same override `answer.ts`
+   * makes to `ANSWERS.confirmed`, for the same stated reason. Asserted as a
+   * *refusal* of the shared label rather than as a literal, so a rewording of
+   * this sentence is free and a quiet return to the third person is not.
+   */
+  it("speaks to the visitor who asked, rather than about a stranger", () => {
+    const sentence = ceilingNote(HELD)?.sentence ?? ""
+
+    expect(sentence).not.toContain(ASK_ORIGINS["user-instruction"].label)
+    expect(sentence).toMatch(/\bYou\b/)
+  })
+
+  /**
+   * And the override stops there. Every origin the demo does not produce
+   * describes somebody or something that really is not the reader, so those keep
+   * the shared table verbatim — which is what makes this a pronoun override
+   * rather than a second vocabulary growing in this lane.
+   */
+  it("keeps the shared words for every origin that is not the visitor", () => {
+    for (const origin of ["developer", "system-signal", "scheduled-adaptation"] as const) {
+      const sentence = ceilingNote({ ...HELD, origin })?.sentence ?? ""
+
+      expect(sentence, origin).toContain(ASK_ORIGINS[origin].label)
+    }
   })
 
   /**
@@ -74,23 +105,60 @@ describe("what an ask from here may do", () => {
   })
 
   /**
-   * The card now prints both halves of the Gate's comparison in the light —
-   * `weighed.ts` says how much risk, this says how much is allowed unasked — and
-   * the two have to be the same measure or the visitor is reading a false
-   * inequality. One table, and a real `isAbove` between the two levels: if a
-   * policy change ever made the demo's headline ask land on its own, this fails
+   * The sentence carries **both** levels, in the same words the box three lines
+   * above used for one of them, and the comparison it narrates is real.
+   *
+   * This is the unit. The card printed the stakes in one place and the ceiling
+   * in another and never said which was higher — two numbers and no operator —
+   * so a visitor held both halves of an inequality and was left to guess the
+   * sign. One table for both terms, and a real `isAbove` between them: if a
+   * policy retune ever made the demo's headline ask land on its own, this fails
    * rather than leaving the card explaining a hold that no longer happens.
    */
-  it("is the other half of a comparison the card has already shown, and the comparison holds", () => {
+  it("names both levels the Gate compared, in the words the card already used", () => {
     const stakes = HELD.stakes
     if (stakes === undefined) throw new Error("the fixture is the held ask, which was assessed")
 
     const ceiling = ceilingFor(demoPolicy, HELD.origin)
-    const damage = weighedOf(HELD)?.[0]
+    const sentence = ceilingNote(HELD)?.sentence ?? ""
 
-    expect(damage?.verdict).toBe(STAKES[stakes.level].label)
-    expect(ceilingNote(HELD)?.sentence).toContain(STAKES[ceiling].label)
+    expect(weighedOf(HELD)?.[0]?.verdict).toBe(STAKES[stakes.level].label)
+    expect(sentence).toContain(STAKES[ceiling].label)
+    expect(sentence).toContain(STAKES[stakes.level].label)
     expect(isAbove(stakes.level, ceiling)).toBe(true)
+  })
+
+  /** And says, in a word a reader does not have to be told twice, which way. */
+  it("says which of the two is higher", () => {
+    expect(ceilingNote(HELD)?.sentence).toContain("higher")
+  })
+
+  /**
+   * The comparison is gated on the comparison, not on the rule code.
+   *
+   * `stakes-above-ceiling` guarantees the stakes are above the ceiling, which is
+   * exactly why the claim is checked rather than inherited: a card that says
+   * *came in higher* because a rule code told it to is narrating arithmetic it
+   * did not do. A record with a verdict but no assessment on it still gets the
+   * threshold — the half this sentence carried before there was a second term.
+   */
+  it("claims nothing about stakes on a record that carries none", () => {
+    const { stakes: _none, ...unassessed } = HELD
+    const sentence = ceilingNote(unassessed)?.sentence ?? ""
+
+    expect(sentence).toContain(STAKES[ceilingFor(demoPolicy, HELD.origin)].label)
+    expect(sentence).not.toContain("higher")
+  })
+
+  /**
+   * The same guard from the other side: stakes that are *not* above the ceiling
+   * are a state the rule should never produce, and the sentence must not invent
+   * a comparison for it.
+   */
+  it("claims nothing about stakes that are not above the ceiling", () => {
+    const lowStakes = { ...HELD, stakes: { level: "low" as const, factors: [] } }
+
+    expect(ceilingNote(lowStakes)?.sentence).not.toContain("higher")
   })
 
   it("keeps the level and the origin together in the runtime's own words", () => {
