@@ -18,7 +18,7 @@ import {
   type UnaddressableReason,
 } from "@loom/runtime/react"
 
-import { partReading, type PartName } from "./part-name"
+import { capitalised, partReading, type PartName } from "./part-name"
 
 import { screenName } from "./screen-names"
 
@@ -470,8 +470,7 @@ export const reversibilityWord = (reversible: boolean): string =>
  * same thing in the standalone case is exactly the drift this module exists to
  * prevent: one wording, capitalised and stopped where a sentence is wanted.
  */
-export const asSentence = (clause: string): string =>
-  `${clause.slice(0, 1).toUpperCase()}${clause.slice(1)}.`
+export const asSentence = (clause: string): string => `${capitalised(clause)}.`
 
 /**
  * What became of one ask, in the portal's words.

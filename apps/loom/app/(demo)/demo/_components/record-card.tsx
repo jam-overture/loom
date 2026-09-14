@@ -316,23 +316,25 @@ export const RecordCard = ({
       )}
 
       {/*
-        * And what "from here" is, on the one verdict that turns on it.
+        * And the comparison the rule above reached its verdict by.
         *
-        * The rule above is the only one of the eight that compares an ask
-        * against what its *origin* is allowed to do alone, and its sentence —
-        * "Riskier than a request from here is allowed to be without asking" —
-        * names that allowance without ever saying what it is. This is the
-        * allowance, read from the same policy through the same `ceilingFor` the
-        * Gate called.
+        * That rule is the only one of the eight that weighs an ask against what
+        * its *origin* is allowed to do alone, and its sentence — today, *"A
+        * change this big is not something Loom may make on its own"* — states
+        * the conclusion without the two numbers it was drawn from. This is the
+        * comparison: the ceiling, read from the same policy through the same
+        * `ceilingFor` the Gate called, and the stakes `Weighed` printed three
+        * lines above, in one sentence with the direction between them.
         *
-        * With `Weighed` directly above it, the three lines are now the Gate's
-        * whole arithmetic in the order it happened: *some risk*, then *this much
-        * is allowed unasked*, then the rule saying the first exceeded the
-        * second. Before this line the card printed both sides of an inequality
-        * and never the threshold between them.
+        * So the three lines are the Gate's whole arithmetic in the order it
+        * happened: *this much risk*, then *the rule saying it may not land
+        * alone*, then *what alone would have allowed, and by which way this one
+        * went past it*. Before this line the card printed one side of an
+        * inequality; before this line said both levels it printed two numbers
+        * and no operator.
         *
         * Quieter than the rule and directly under it, because it is that
-        * sentence's second half rather than a claim of its own. `_lib/ceiling.ts`
+        * sentence's evidence rather than a claim of its own. `_lib/ceiling.ts`
         * decides when there is one; on seven of the eight rules there is not.
         */}
       {ceiling && <p className="text-ink-muted text-xs">{ceiling.sentence}</p>}

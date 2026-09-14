@@ -13,6 +13,7 @@ import {
 } from "@loom/runtime"
 
 import {
+  capitalised,
   firstNamed,
   namesInOperations,
   namesInTree,
@@ -317,5 +318,25 @@ describe("subjectFor", () => {
    */
   it("hands back the bare id when there is not, rather than a stand-in phrase", () => {
     expect(subjectFor(names, "n_gone")).toBe("n_gone")
+  })
+})
+
+/**
+ * The one place a capital comes from. `asSentence` in `vocabulary.ts`
+ * capitalises through this too, so a name starting a list row and a clause
+ * starting a sentence cannot end up with two answers.
+ */
+describe("capitalised", () => {
+  it("starts a name that was written for the middle of a sentence", () => {
+    expect(capitalised("the card “Autumn arrivals”")).toBe("The card “Autumn arrivals”")
+  })
+
+  it("leaves a name that already starts with one alone", () => {
+    expect(capitalised("Body space")).toBe("Body space")
+  })
+
+  /** Nothing to capitalise is not a crash, it is nothing. */
+  it("survives an empty name", () => {
+    expect(capitalised("")).toBe("")
   })
 })

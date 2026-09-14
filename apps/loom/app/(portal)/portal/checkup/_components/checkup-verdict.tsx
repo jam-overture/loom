@@ -1,11 +1,14 @@
 import type { TreeId } from "@loom/runtime"
 
+import { PartName } from "@/app/(portal)/_components/part-name"
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import {
   describeDifference,
   describeRecycling,
   explainDifference,
+  explainRecycling,
+  nameOfDifference,
   readCheckup,
   toneOfAudit,
   type AuditReport,
@@ -78,8 +81,7 @@ export const CheckupVerdictPanel = ({
           <ul className="flex flex-col gap-2">
             {report.differences.map((difference) => (
               <li key={difference.nodeId} className="border-edge-subtle border-l-2 pl-3 text-xs">
-                <span className="font-mono">{difference.label}</span>{" "}
-                <span className="text-ink-muted font-mono">{difference.nodeId}</span>
+                <PartName part={nameOfDifference(report.names, difference)} />
                 <span className="text-ink-secondary mt-1 block">
                   {explainDifference(difference)}
                 </span>
@@ -100,8 +102,15 @@ export const CheckupVerdictPanel = ({
            *
            * So the list leads with the name, and the runtime's own phrasing of
            * every row is under one disclosure that reads on its own.
+           *
+           * What the name *is* changed on 13 September. It was
+           * `difference.label` — the registered type, `loom.footer`, in
+           * monospace — which is the runtime's word for the part printed at
+           * somebody who opened this page because they think their site is
+           * broken. It is now what that part is and what it says, and the type
+           * is one click down, in the list below, where the summary says so.
            */}
-          <TechnicalDetail summary="The same list in the runtime's words">
+          <TechnicalDetail summary="The same list in the runtime's words, with each part's type">
             <ul className="flex flex-col gap-2">
               {report.differences.map((difference) => (
                 <li key={difference.nodeId}>
@@ -139,7 +148,7 @@ export const CheckupVerdictPanel = ({
           </p>
           <ul className="flex flex-col gap-2">
             {report.recycled.map((found) => {
-              const account = describeRecycling(found)
+              const account = explainRecycling(found)
 
               return (
                 <li key={`${found.nodeId}-${found.returnedAt}`} className="text-xs">
@@ -168,6 +177,28 @@ export const CheckupVerdictPanel = ({
                 A node id that left the tree and came back naming something else (0038).
               </span>
             </p>
+            {/*
+             * The same rows in the runtime's words, which here means the two
+             * labels it recorded — `loom.card`, `text` — rather than the nouns
+             * inside them. Neither node is in the tree any more, so unlike a
+             * difference there is nothing left to ask what it said: the label
+             * is the whole of what is known, and it stays on the page.
+             */}
+            <ul className="flex flex-col gap-2">
+              {report.recycled.map((found) => {
+                const account = describeRecycling(found)
+
+                return (
+                  <li key={`${found.nodeId}-${found.returnedAt}`}>
+                    <span className="font-mono">{found.nodeId}</span>{" "}
+                    <span className="text-ink-muted">
+                      {account.opening} {account.leftAt}
+                      {account.middle} {account.returnedAt}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
             <p className="text-ink-muted">
               The verdict above answers whether the log still produces the snapshot. This answers
               whether the log can be read by id, and a tree can pass the first and fail the

@@ -7,6 +7,8 @@ import {
 } from "@loom/runtime"
 import type { ReplayMismatch, SnapshotAudit } from "@loom/runtime/store"
 
+import { capitalised, firstNamed, namesInTree, nounOf, type PartName } from "./part-name"
+
 import type { OutcomeTone } from "./outcome"
 
 /**
@@ -31,6 +33,23 @@ export type AuditReport = {
   /** Why the verdict is what it is, and what it means for the tree being served. */
   readonly detail: string
   readonly differences: readonly TreeDifference[]
+  /**
+   * Every part the differences name, in a person's words, by id.
+   *
+   * A difference is a *comparison*, so unlike a row on the page screen it
+   * cannot be named from itself: by definition the node is in one of the two
+   * trees and not the other. The fold has both trees in hand at the moment the
+   * verdict is formed, and this is the only moment it does — the page would
+   * have to read the head again to get one of them back, and by then it may
+   * have moved. So the names are taken here, from the pair that was actually
+   * compared.
+   *
+   * The served tree wins a tie, which matters only for a `changed` node, since
+   * that is the one kind of difference both trees hold. What people are being
+   * served is the page the reader is looking at, so it is the one they can
+   * check the name against.
+   */
+  readonly names: ReadonlyMap<string, PartName>
   /**
    * How many differences were found beyond the ones listed. Never silently
    * dropped: a report that truncated without saying so would read as a short
@@ -156,6 +175,38 @@ export const explainDifference = (difference: TreeDifference): string => {
   }
 }
 
+/** No tree was compared, so there is nothing to name. */
+const NO_NAMES: ReadonlyMap<string, PartName> = new Map()
+
+/**
+ * What to call the part one difference is about.
+ *
+ * The list under *This page does not match its own history* printed
+ * `difference.label` on its surface — the runtime's own word for the part,
+ * `loom.footer`, in monospace, on the one screen somebody opens when they
+ * already think something is wrong. It is the same defect the page screen's
+ * rail had on 12 September and it wanted a different fix, because a rail holds
+ * nodes and a difference holds only the id of one.
+ *
+ * The words are what tell two rows apart. A page with four cards on it produces
+ * four rows reading *Card* and one reading *The card “Autumn arrivals”*, and
+ * only the second says which card to go and look at — which is why this is the
+ * subject shape (`partNameOf`) rather than the place shape the rail uses.
+ *
+ * **The fallback is the runtime's label, read as words rather than printed.**
+ * A difference always comes out of one of the two trees, so a name is always
+ * found in practice; if one ever is not, `loom.footer` still says *the footer*,
+ * which is less than the words and more than nothing. No row can end up with no
+ * name at all.
+ */
+export const nameOfDifference = (
+  names: ReadonlyMap<string, PartName>,
+  difference: TreeDifference
+): PartName => ({
+  name: capitalised(names.get(difference.nodeId)?.name ?? `the ${nounOf(difference.label)}`),
+  nodeId: difference.nodeId,
+})
+
 /**
  * One difference, said from the snapshot's point of view — because the snapshot
  * is what is being served, and the fold is the check. "The log does not produce
@@ -242,6 +293,35 @@ export const describeRecycling = (found: IdReturn): RecyclingAccount =>
         returnedAt: found.returnedAt,
       }
 
+/**
+ * What the two nodes sharing one name were, in words.
+ *
+ * The runtime records what a returning id *was* and what it *came back as* by
+ * label — `loom.card`, then `text` — and `describeRecycling` above prints them
+ * verbatim, which is right for the technical reading and is the second place on
+ * this screen a registered type was reaching the surface.
+ *
+ * A recycled id cannot be named the way a difference is: both nodes are gone
+ * from the tree by the time this is read, so there is nothing to ask what it
+ * said. The label is all there is, and the noun inside it is the honest plain
+ * reading of it.
+ *
+ * `text` is the one label that is not a registered type — it is the runtime's
+ * word for a node that only has words — so it gets the article dropped rather
+ * than being called *a text*, which is not something anybody says.
+ */
+const recycledAs = (label: string): string => (label === "text" ? "words" : `a ${nounOf(label)}`)
+
+export const explainRecycling = (found: IdReturn): RecyclingAccount =>
+  found.code === "recycled"
+    ? {
+        opening: `was ${recycledAs(found.leftAs)} until`,
+        leftAt: found.leftAt,
+        middle: `, and ${recycledAs(found.returnedAs)} from`,
+        returnedAt: found.returnedAt,
+      }
+    : describeRecycling(found)
+
 /** Long enough to see the shape of the problem, short enough to read. */
 export const RECYCLING_LIMIT = 10
 
@@ -271,6 +351,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         headline: "The log produces the tree being served.",
         detail: `Folding ${changeCount(audit.revision)} from the seed reproduces the snapshot exactly, so the record of what happened and the thing readers see are still the same tree.`,
         differences: [],
+        names: NO_NAMES,
         omitted: 0,
         stoppedAt: null,
         revision: audit.revision,
@@ -285,6 +366,7 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
         headline: "The log no longer produces the tree being served.",
         detail: `Folding ${changeCount(audit.revision)} from the seed produced a different tree. The snapshot is what readers get; the log is what the runtime claims happened. One of them is wrong, and until that is settled the history of this tree cannot be trusted to explain it.`,
         differences: found.slice(0, DIFFERENCE_LIMIT),
+        names: firstNamed(namesInTree(audit.stored), namesInTree(audit.replayed)),
         omitted: Math.max(found.length - DIFFERENCE_LIMIT, 0),
         stoppedAt: null,
         revision: audit.revision,
@@ -303,6 +385,8 @@ export const describeAudit = (audit: SnapshotAudit): AuditReport => {
          */
         detail: `The fold stopped before it finished, so there is no replayed tree to compare against — ${describeMismatch(audit.mismatch)}. This says nothing about whether the served tree is correct; it says the log can no longer be used to check it.`,
         differences: [],
+        /** Nothing was replayed, so there is no second tree and no comparison to name. */
+        names: NO_NAMES,
         omitted: 0,
         stoppedAt: stoppedAt(audit.mismatch),
         /** Nothing was compared, so there is no revision this verdict is about. */
