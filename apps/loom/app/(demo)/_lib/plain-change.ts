@@ -143,6 +143,33 @@ const shown = (words: readonly string[]): Pick<PlainChange, "words" | "more"> =>
 })
 
 /**
+ * Whether this reading is of a change being offered or of one that has landed.
+ *
+ * **Both tenses of every sentence are written next to each other, deliberately.**
+ * The card used to have only the first: a held change said *"This comes off the
+ * page, and everything under it goes too"*, and the moment the visitor pressed
+ * **Apply this change** that line went away, because the only reading the page
+ * could compute was one against the tree as it is *now* — and against that tree
+ * the change has already happened and reads as doing nothing. So the record
+ * described the change while it was a question and fell silent the moment it
+ * became a fact, which is the one moment the record is the whole product.
+ *
+ * A change Loom applies on its own never had the sentence at all. Two presses of
+ * *Repaint the top band* produce opposite changes and, before this, produced two
+ * cards identical to the word.
+ *
+ * Pairs rather than a past-tense table of its own, because these are one fact
+ * said twice and the failure worth preventing is the two drifting apart. A
+ * sentence reworded in one tense and not the other is a diff nobody can read as
+ * wrong; side by side it is obvious.
+ */
+export type PlainTense = "proposed" | "done"
+
+type Tensed = { readonly proposed: string; readonly done: string }
+
+const say = (tense: PlainTense, pair: Tensed): string => pair[tense]
+
+/**
  * One operation, said plainly against the tree the operations before it left.
  *
  * A change the tree cannot honour is described as one rather than skipped: the
@@ -173,7 +200,8 @@ const shown = (words: readonly string[]): Pick<PlainChange, "words" | "more"> =>
 const restoringOperation = (
   root: LoomNode,
   operation: TreeOperation,
-  settings: ReadonlySet<string>
+  settings: ReadonlySet<string>,
+  tense: PlainTense
 ): PlainChange | undefined => {
   switch (operation.op) {
     case "insert": {
@@ -182,8 +210,14 @@ const restoringOperation = (
       return {
         sentence:
           words.length === 0
-            ? "What came off the page goes back on, exactly as it was."
-            : "This goes back on the page, exactly as it was before.",
+            ? say(tense, {
+                proposed: "What came off the page goes back on, exactly as it was.",
+                done: "What came off the page went back on, exactly as it was.",
+              })
+            : say(tense, {
+                proposed: "This goes back on the page, exactly as it was before.",
+                done: "This went back on the page, exactly as it was before.",
+              }),
         ...shown(words),
       }
     }
@@ -197,8 +231,14 @@ const restoringOperation = (
       return {
         sentence:
           words.length === 0
-            ? "What was added comes back off, leaving the page as it was."
-            : "This comes back off the page, leaving it as it was before.",
+            ? say(tense, {
+                proposed: "What was added comes back off, leaving the page as it was.",
+                done: "What was added came back off, leaving the page as it was.",
+              })
+            : say(tense, {
+                proposed: "This comes back off the page, leaving it as it was before.",
+                done: "This came back off the page, leaving it as it was before.",
+              }),
         ...shown(words),
       }
     }
@@ -208,7 +248,10 @@ const restoringOperation = (
       if (node === null) return undefined
 
       return {
-        sentence: "This goes back where it was. Not a word of it changes.",
+        sentence: say(tense, {
+          proposed: "This goes back where it was. Not a word of it changes.",
+          done: "This went back where it was. Not a word of it changed.",
+        }),
         ...shown(wordsIn(node, settings)),
       }
     }
@@ -217,8 +260,14 @@ const restoringOperation = (
       return {
         sentence:
           operation.nodeId === root.id
-            ? "The whole page goes back to how it looked. Not a word on it changes."
-            : "One part of the page goes back to how it looked. Not a word on it changes.",
+            ? say(tense, {
+                proposed: "The whole page goes back to how it looked. Not a word on it changes.",
+                done: "The whole page went back to how it looked. Not a word on it changed.",
+              })
+            : say(tense, {
+                proposed: "One part of the page goes back to how it looked. Not a word on it changes.",
+                done: "One part of the page went back to how it looked. Not a word on it changed.",
+              }),
         words: [],
         more: 0,
       }
@@ -229,10 +278,11 @@ const plainOperation = (
   root: LoomNode,
   operation: TreeOperation,
   settings: ReadonlySet<string>,
-  restoring: boolean
+  restoring: boolean,
+  tense: PlainTense
 ): PlainChange => {
   if (restoring) {
-    const back = restoringOperation(root, operation, settings)
+    const back = restoringOperation(root, operation, settings, tense)
     if (back) return back
   }
 
@@ -243,8 +293,14 @@ const plainOperation = (
       return {
         sentence:
           words.length === 0
-            ? "Something new goes onto the page."
-            : "This goes onto the page, and nothing already on it is touched.",
+            ? say(tense, {
+                proposed: "Something new goes onto the page.",
+                done: "Something new went onto the page.",
+              })
+            : say(tense, {
+                proposed: "This goes onto the page, and nothing already on it is touched.",
+                done: "This went onto the page, and nothing already on it was touched.",
+              }),
         ...shown(words),
       }
     }
@@ -252,7 +308,14 @@ const plainOperation = (
     case "remove": {
       const node = findNode(root, operation.nodeId)
       if (node === null) {
-        return { sentence: "This would take off something the page no longer has.", words: [], more: 0 }
+        return {
+          sentence: say(tense, {
+            proposed: "This would take off something the page no longer has.",
+            done: "This took off something the page no longer had.",
+          }),
+          words: [],
+          more: 0,
+        }
       }
 
       const words = wordsIn(node, settings)
@@ -260,8 +323,14 @@ const plainOperation = (
       return {
         sentence:
           words.length === 0
-            ? "Something comes off the page."
-            : "This comes off the page, and everything under it goes too.",
+            ? say(tense, {
+                proposed: "Something comes off the page.",
+                done: "Something came off the page.",
+              })
+            : say(tense, {
+                proposed: "This comes off the page, and everything under it goes too.",
+                done: "This came off the page, and everything under it went too.",
+              }),
         ...shown(words),
       }
     }
@@ -269,11 +338,21 @@ const plainOperation = (
     case "move": {
       const node = findNode(root, operation.nodeId)
       if (node === null) {
-        return { sentence: "This would move something the page no longer has.", words: [], more: 0 }
+        return {
+          sentence: say(tense, {
+            proposed: "This would move something the page no longer has.",
+            done: "This moved something the page no longer had.",
+          }),
+          words: [],
+          more: 0,
+        }
       }
 
       return {
-        sentence: "This moves to a different place on the page. Not a word of it changes.",
+        sentence: say(tense, {
+          proposed: "This moves to a different place on the page. Not a word of it changes.",
+          done: "This moved to a different place on the page. Not a word of it changed.",
+        }),
         ...shown(wordsIn(node, settings)),
       }
     }
@@ -289,8 +368,14 @@ const plainOperation = (
       return {
         sentence:
           operation.nodeId === root.id
-            ? "How the whole page looks changes. Not a word on it changes."
-            : "How one part of the page looks changes. Not a word on it changes.",
+            ? say(tense, {
+                proposed: "How the whole page looks changes. Not a word on it changes.",
+                done: "How the whole page looks changed. Not a word on it changed.",
+              })
+            : say(tense, {
+                proposed: "How one part of the page looks changes. Not a word on it changes.",
+                done: "How one part of the page looks changed. Not a word on it changed.",
+              }),
         words: [],
         more: 0,
       }
@@ -314,18 +399,28 @@ const plainOperation = (
  * ones. It comes from the record's provenance (`undo.ts`'s `isUndo`), which is
  * the runtime's own stamp and the same source the card's quotation reads.
  * Defaulted, so a caller describing an ordinary change need not say so.
+ *
+ * **`tree` must be the tree the delta was judged against, in either tense.** For
+ * a change still waiting that is the tree on the stage, which is why the page
+ * computes it per render. For one that has landed it is the tree as it stood
+ * *before* — the same tree, one revision back — so the reading is computed once,
+ * at the moment the change is assessed, and kept on the record (`record.ts`).
+ * Resolving a landed delta against the tree it produced is the mistake this
+ * guards: every node it removed is already gone, so the honest answer against
+ * that tree is that the change did nothing.
  */
 export const plainChange = (
   tree: LoomTree,
   delta: TreeDelta,
   settings: ReadonlySet<string>,
-  restoring = false
+  restoring = false,
+  tense: PlainTense = "proposed"
 ): readonly PlainChange[] => {
   const lines: PlainChange[] = []
   let state: LoomNode = tree.root
 
   for (const operation of delta.operations) {
-    lines.push(plainOperation(state, operation, settings, restoring))
+    lines.push(plainOperation(state, operation, settings, restoring, tense))
 
     const advanced = applyOperation(state, operation)
     if (advanced.ok) state = advanced.value

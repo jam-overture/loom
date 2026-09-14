@@ -26,7 +26,7 @@ import { answerHeld, undoRevision } from "../actions"
 import { PageMovedOn } from "./page-moved-on"
 import { TechnicalDetail } from "./technical-detail"
 import { Weighed } from "./weighed"
-import { WhatWouldHappen } from "./what-would-happen"
+import { PlainReading } from "./plain-reading"
 
 /**
  * One ask, and the whole account of what became of it.
@@ -167,6 +167,19 @@ export const RecordCard = ({
   const applied = appliedWords(record)
   const weighed = weighedOf(record)
   const ceiling = ceilingNote(record)
+  /*
+   * What the change did, for a card whose change has landed.
+   *
+   * `plain` is the same sentence in the other tense and the two are never both
+   * on a card: `plain` is computed per render against the tree on the stage and
+   * the page supplies it only while the change is still answerable, and `did`
+   * was computed once against the tree this change was judged against. The
+   * condition is `plain.length === 0` rather than a second reading of the
+   * outcome, because that is the exact question — has the page stopped being
+   * able to describe this change live — and it is the one the other half is
+   * already answering.
+   */
+  const did = plain.length === 0 && record.outcome === "applied" ? (record.did ?? []) : []
 
   return (
     /*
@@ -392,7 +405,27 @@ export const RecordCard = ({
         * instead is the plain half, which is the order the rest of this card is
         * built in and the rule this whole surface follows.
         */}
-      {plain.length > 0 && <WhatWouldHappen lines={plain} />}
+      {plain.length > 0 && <PlainReading lines={plain} />}
+
+      {/*
+        * Or, on a card whose change has landed, the same sentence in the past
+        * tense — and this is the half the record was missing.
+        *
+        * **Every other line on an applied card is about the decision.** The
+        * badge, the weighing, the rule, the ceiling comparison and the answer
+        * note all say why the change was allowed; not one of them says what it
+        * was. That was survivable while the plain reading was on the card
+        * before the press and gone after it, and it was never survivable for a
+        * change Loom applies on its own, which is half the presets: those cards
+        * never carried the sentence at all. Two presses of *Repaint the top
+        * band* make opposite changes to the page and printed two cards
+        * identical to the word.
+        *
+        * Same slot as the reading it replaces, so the card's order is unchanged
+        * — what happened, then what can still be done about it. In the applied
+        * tone, matching the ring left on the stage.
+        */}
+      {did.length > 0 && <PlainReading lines={did} tone="applied" />}
 
       {/*
         * Or, where the two buttons would have been, what happened to the page
