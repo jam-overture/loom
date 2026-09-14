@@ -192,10 +192,64 @@ const build = (theme: ThemeSelection) => {
     ],
   })
 
+  const bar = (label: string, value: string, magnitude: number) =>
+    buildElement(idFactory, {
+      type: "loom.stat",
+      props: { value, label, magnitude },
+    })
+
+  const plotted = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "A series, not a figure", width: "wide" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("Nothing here could plot anything")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { measured: true, tone: "muted" },
+        children: [
+          text("The same loom.stat children a grid prints in a row. Re-plotting the band is one configure on the container and no change to the numbers."),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.stat-chart",
+        props: { max: 120, plot: "standard" },
+        children: [
+          bar("Apr", "$18k", 18),
+          bar("May", "$31k", 31),
+          bar("Jun", "$44k", 44),
+          bar("Jul", "$52k", 52),
+          bar("Aug", "$79k", 79),
+          bar("Sep", "$112k", 112),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { measured: true, tone: "muted" },
+        children: [
+          text("The same six children, handed to a loom.stat-grid instead. Nothing about the numbers changed — only which container was asked to arrange them."),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.stat-grid",
+        props: {},
+        children: [
+          bar("Apr", "$18k", 18),
+          bar("Sep", "$112k", 112),
+        ],
+      }),
+    ],
+  })
+
   const page = buildElement(idFactory, {
     type: "loom.page",
     props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
-    children: [headline, pricing, rims, inside],
+    children: [headline, plotted, pricing, rims, inside],
   })
 
   return createTree(page, idFactory)

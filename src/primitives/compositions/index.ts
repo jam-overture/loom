@@ -1,26 +1,42 @@
 import type { Composition } from "./composition.js"
+import { articlesBand } from "./articles-band.js"
+import { bentoBand } from "./bento-band.js"
+import { comparisonBand } from "./comparison-band.js"
+import { contactBand } from "./contact-band.js"
 import { ctaBand } from "./cta-band.js"
 import { faqBand } from "./faq-band.js"
 import { featuresBand } from "./features-band.js"
 import { footerBand } from "./footer-band.js"
 import { heroBand } from "./hero-band.js"
+import { integrationsBand } from "./integrations-band.js"
 import { metricsBand } from "./metrics-band.js"
+import { navBand } from "./nav-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { proofBand } from "./proof-band.js"
+import { stepsBand } from "./steps-band.js"
+import { teamBand } from "./team-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
 
 export type { Composition, CompositionPlan, CompositionTarget } from "./composition.js"
 export { COMPOSITION_INTERPRETER, compositionInterpreter, planComposition } from "./composition.js"
 
 export {
+  articlesBand,
+  bentoBand,
+  comparisonBand,
+  contactBand,
   ctaBand,
   faqBand,
   featuresBand,
   footerBand,
   heroBand,
+  integrationsBand,
   metricsBand,
+  navBand,
   pricingBand,
   proofBand,
+  stepsBand,
+  teamBand,
   testimonialsBand,
 }
 
@@ -34,18 +50,40 @@ export {
  * offering a menu should offer it in this order, because the sequence is the
  * part somebody who has not assembled a landing page before does not know.
  *
- * Nine is not a target and not a ceiling. It is the set that assembles one
- * complete page with nothing missing and nothing repeated, which is the only
- * size that demonstrates what the catalogue claims.
+ * Nine was not a target and not a ceiling, and it is now thirteen. The property
+ * that made nine worth having is the one being preserved rather than the number:
+ * **taken in sequence these are one complete page, with nothing missing and
+ * nothing repeated.** The four added on 13 September each close a gap in that
+ * sequence rather than offering a second way to do something already in it — a
+ * page could not open (`nav`), could not say what happens next (`steps`), could
+ * not argue against the thing a reader already uses (`comparison`), and could
+ * not say who is behind it (`team`).
+ *
+ * **This list stops being a page before it stops being useful**, and that is the
+ * thing for the next run to watch. A second hero, a two-tier pricing band, a
+ * testimonial wall as a marquee — all legitimate, none of them insertable into a
+ * sequence that is meant to read as one document. At that point the catalogue is
+ * a phrasebook rather than a page and wants two lists: everything on offer, and
+ * the ordered subset that assembles a page. It is not split here because
+ * thirteen still assembles one, and splitting it before it breaks would be
+ * inventing a structure ahead of its reader.
  */
 export const STARTER_COMPOSITIONS: readonly Composition[] = [
+  navBand,
   heroBand,
   proofBand,
   featuresBand,
+  bentoBand,
+  stepsBand,
+  integrationsBand,
   metricsBand,
   pricingBand,
+  comparisonBand,
   testimonialsBand,
+  teamBand,
+  articlesBand,
   faqBand,
+  contactBand,
   ctaBand,
   footerBand,
 ]

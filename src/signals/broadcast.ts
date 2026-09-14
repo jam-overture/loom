@@ -13,6 +13,7 @@ import { err, ok, type Result } from "../result.js"
 import { createSignalLedger, type SignalAddress } from "./ledger.js"
 import { READER_SIGNAL_KINDS } from "./kinds.js"
 import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal.js"
+import { mintViewKey, type RandomBytes } from "./view.js"
 
 /**
  * Broadcasting reader signals from a rendered Loom page.
@@ -35,6 +36,15 @@ import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal
  * from the elements HTML gives targets, and a disclosure from the attribute the
  * disclose control stamps. No primitive is instrumented, so no primitive can
  * forget to be.
+ *
+ * **It keeps up with a page that changes.** Nodes that arrive after it started
+ * are watched and nodes that leave stop counting, so a band behind a Suspense
+ * boundary, a list that grows, and every region a proposal has just changed are
+ * measured like the rest. What it does *not* follow is the page becoming a
+ * different page: the tree and revision are read once, off the root, and every
+ * batch is filed under them. **A new root, or a new revision in the same root,
+ * is a new broadcast** — `stop()` the old one and start another, or a
+ * client-side navigation files its signals under the revision it left.
  */
 
 /** The DOM event a batch is dispatched as, on the root element. It bubbles. */
@@ -120,6 +130,12 @@ export type ReaderSignalOptions = {
   readonly observeVisibility?: ObserveVisibility
   /** The clock. `Date.now` when absent. */
   readonly now?: () => number
+  /**
+   * Where the view key's randomness comes from. The browser's
+   * `crypto.getRandomValues` when absent; a test passes its own so it can name
+   * the key it expects.
+   */
+  readonly random?: RandomBytes
 }
 
 export type ReaderSignalBroadcast = {
@@ -221,6 +237,12 @@ const deliverSafely = (send: ReaderSignalOptions["send"], batch: ReaderSignalBat
  * Returns an error rather than broadcasting nothing when the page is not
  * addressed, because a silent broadcaster on an unaddressed page is exactly the
  * misconfiguration nobody would notice.
+ *
+ * Nodes added under `root` afterwards are picked up and nodes removed stop
+ * counting. The tree and revision are not: they are read once, here, and a page
+ * that becomes a different page — a client-side navigation, a re-render at a new
+ * revision into the same root — needs `stop()` and a new broadcast, or its
+ * signals are filed under the revision it left.
  */
 export const broadcastReaderSignals = (
   root: Element,
@@ -232,6 +254,15 @@ export const broadcastReaderSignals = (
   const now = options.now ?? Date.now
   const wants = selectionOf(options.kinds, options.types)
   const document = root.ownerDocument
+
+  /**
+   * Minted once, here, and carried by every batch this broadcast sends — which
+   * is what makes the batches of one page view correlatable and two page views
+   * not (0146). A new broadcast is a new view, including the second one a
+   * client-side navigation needs, so the key cannot outlive the page it
+   * describes even by accident.
+   */
+  const view = mintViewKey(options.random)
 
 
   const ledger = createSignalLedger(document.visibilityState === "hidden")
@@ -260,6 +291,7 @@ export const broadcastReaderSignals = (
       treeId: page.value.treeId,
       revision: page.value.revision,
       sentAt: now(),
+      view,
       signals,
     }
 
@@ -292,15 +324,69 @@ export const broadcastReaderSignals = (
       })
     : undefined
 
-  if (visibility !== undefined) {
-    const candidates = [root, ...Array.from(root.querySelectorAll(`[${LOOM_NODE_ATTRIBUTE}]`))]
-    for (const element of candidates) {
-      const address = addressOf(element)
-      if (address === undefined || !watched(address.type)) continue
-      addresses.set(element, address)
-      visibility.observe(element)
-    }
+  /** An element and every addressed element under it, which is what a subtree arriving or leaving amounts to. */
+  const addressedWithin = (element: Element): readonly Element[] => [
+    element,
+    ...Array.from(element.querySelectorAll(`[${LOOM_NODE_ATTRIBUTE}]`)),
+  ]
+
+  /** Hand an element to the visibility observer, if time on screen is wanted for what it is. */
+  const watchForTime = (element: Element): void => {
+    if (visibility === undefined) return
+    const address = addressOf(element)
+    if (address === undefined || !watched(address.type)) return
+    addresses.set(element, address)
+    visibility.observe(element)
   }
+
+  /**
+   * A node left the page, so the stretch it was in the middle of ends here.
+   *
+   * Closed on the mutation rather than left to the visibility observer: a
+   * removed element may never be reported as having gone out of view, and a
+   * stretch that is never closed is time a reader is credited with forever.
+   */
+  const departed = (element: Element, at: number): void => {
+    const address = addresses.get(element)
+    if (address !== undefined) ledger.left(address.nodeId, at)
+  }
+
+  for (const element of addressedWithin(root)) watchForTime(element)
+
+  /**
+   * What the page grows and sheds after the broadcast started.
+   *
+   * `activated` and `disclosed` reach a node that did not exist yet on their
+   * own, because both are delegated from the root and read the nearest addressed
+   * element at the moment they happen. Time on screen is the one kind that needs
+   * each element handed to an observer, so a broadcaster that looked once
+   * reported nothing about anything rendered afterwards — a band behind a
+   * Suspense boundary, a region a client component mounts, a list that grows,
+   * **and every region a proposal has just changed.**
+   *
+   * That last one is why this is not a nicety. *Before versus after a change* is
+   * the measurement Loom exists to make, and it was the one measurement that did
+   * not work: an applied change renders after the broadcaster started, so every
+   * adapted region was invisible to `viewed` and `dwelled` while the rest of the
+   * page was counted normally. Numbers that understate only the changed bands
+   * are worse than no numbers, because they look like data.
+   *
+   * Only built when time is being watched at all: the other kinds need no help.
+   */
+  const arrivals =
+    visibility === undefined
+      ? undefined
+      : new MutationObserver((mutations) => {
+          const at = now()
+          for (const mutation of mutations) {
+            for (const added of Array.from(mutation.addedNodes)) {
+              if (added instanceof Element) for (const element of addressedWithin(added)) watchForTime(element)
+            }
+            for (const gone of Array.from(mutation.removedNodes)) {
+              if (gone instanceof Element) for (const element of addressedWithin(gone)) departed(element, at)
+            }
+          }
+        })
 
   const onActivated = record("activated", (address) => ({ kind: "activated", ...address, at: now() }))
 
@@ -383,6 +469,7 @@ export const broadcastReaderSignals = (
     attributeOldValue: true,
     subtree: true,
   })
+  arrivals?.observe(root, { childList: true, subtree: true })
   document.addEventListener("visibilitychange", onVisibility)
   document.defaultView?.addEventListener("pagehide", onPageHide)
   if (document.visibilityState !== "hidden") startTimer()
@@ -394,6 +481,7 @@ export const broadcastReaderSignals = (
     stopTimer()
     visibility?.disconnect()
     disclosures.disconnect()
+    arrivals?.disconnect()
     root.removeEventListener("click", onClick)
     root.removeEventListener("toggle", onToggle, true)
     document.removeEventListener("visibilitychange", onVisibility)

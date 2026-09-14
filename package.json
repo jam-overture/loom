@@ -50,6 +50,10 @@
       "types": "./dist/signals/broadcast.d.ts",
       "default": "./dist/signals/broadcast.js"
     },
+    "./signals/postgres": {
+      "types": "./dist/signals/postgres.d.ts",
+      "default": "./dist/signals/postgres.js"
+    },
     "./telemetry": {
       "types": "./dist/telemetry/index.d.ts",
       "default": "./dist/telemetry/index.js"
