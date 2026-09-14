@@ -244,17 +244,6 @@ export type RefusedRun = {
 
 export type WrongContext = PageContext & RefusalContext
 
-/**
- * How many pieces a page is made of, counted by walking it.
- *
- * The site says *pieces* wherever the machinery says nodes — the front door's
- * panel has reported *"11 pieces moved"* since the band was written — so this
- * counts the same thing that sentence counts, and a reader comparing the two
- * numbers is comparing like with like.
- */
-export const piecesIn = (node: LoomNode): number =>
-  node.kind === "text" ? 1 : 1 + node.children.reduce((sum, child) => sum + piecesIn(child), 0)
-
 const hero = (ids: IdFactory, context: WrongContext): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",

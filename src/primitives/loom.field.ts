@@ -29,6 +29,24 @@ import { colour, family, radius, size, space, weight } from "./tokens.js"
  * primitive declines to follow 0059: a node whose children mean one thing for
  * six of its seven types and another for the seventh is a node nobody can read.
  *
+ * **`checkbox` is the ninth type and the only one whose control comes before
+ * its label.** A contact form that cannot ask for consent is a real gap — every
+ * form with a privacy line has one — and it is an enum member rather than a
+ * primitive because the content model is this one exactly: a name, a label, a
+ * requirement and a hint. What it is not is a *group* of tick boxes. One
+ * consent line is one field; a set of them is a set of fields, each addressable,
+ * which is 0052 giving the right answer without being asked.
+ *
+ * **A radio group is the tenth type and is not here**, deliberately. Its
+ * choices are the same content model as a `select`'s — a label and a value, so
+ * `loom.option` by every test that matters — and a choice inside a `<select>`
+ * must be an `<option>` while a choice in a radio group must be an `<input>`
+ * with a label. Nothing in this library lets a container tell a child which
+ * element to be: a render is a pure function of one node, and the two ways
+ * round it are a context a Server Component cannot read and a second primitive
+ * that differs from `loom.option` by its markup alone. Filed rather than
+ * guessed at, with both shapes written down.
+ *
  * Two things here are better than what Hermes had, rather than a port of it.
  * Hermes' `dropdown` type had **nowhere to put its options** — a select with no
  * choices, in a registry that shipped for a year — and here they are child
@@ -46,6 +64,7 @@ const FIELD_TYPES = [
   "date",
   "textarea",
   "select",
+  "checkbox",
 ] as const
 
 type FieldType = (typeof FIELD_TYPES)[number]
@@ -147,6 +166,34 @@ const controlFor = (
 
   const autocomplete = given.autocomplete ?? IMPLIED_AUTOCOMPLETE[type]
 
+  if (type === "checkbox") {
+    /**
+     * The one control in this file that is not a box you type in, so it takes
+     * none of `CONTROL` — a consent tick stretched to `width: 100%` is a
+     * rectangle with a tick lost at one end of it.
+     *
+     * `accent-color` is why this is two enum members rather than a hand-drawn
+     * control: it themes the native checkbox from the palette, so the tick is
+     * the browser's — with the browser's focus ring, the browser's touch
+     * behaviour and the platform's idea of what a checkbox looks like — and it
+     * is still `accent` under every registered palette. Drawing our own would
+     * have meant re-implementing all three to change one colour.
+     */
+    return createElement("input", {
+      ...shared,
+      type: "checkbox",
+      style: {
+        flex: "0 0 auto",
+        width: size(4),
+        height: size(4),
+        accentColor: colour("accent"),
+        /** Sat on the first line of the label rather than on the box's top edge. */
+        marginBlockStart: "0.1em",
+        cursor: "pointer",
+      },
+    })
+  }
+
   if (type === "textarea") {
     return createElement("textarea", {
       ...shared,
@@ -217,6 +264,88 @@ export const loomField = definePrimitive({
     const control = String(loom.nodeId)
     const hint = given.hint === undefined ? undefined : `${control}-hint`
 
+    const label = createElement(
+      "label",
+      {
+        htmlFor: control,
+        style: {
+          fontFamily: family("body"),
+          /**
+           * A consent line is a sentence the reader agrees to, not a name for a
+           * box above it, so it is set in the body weight and the reading size.
+           * Every other field's label is a name and takes the heading weight.
+           */
+          fontWeight: type === "checkbox" ? weight("body") : weight("heading"),
+          fontSize: type === "checkbox" ? size(3) : size(2),
+          lineHeight: type === "checkbox" ? 1.5 : undefined,
+          color: type === "checkbox" ? colour("fg-muted") : colour("fg-default"),
+          ...(type === "checkbox" ? { cursor: "pointer" } : {}),
+        },
+      },
+      given.label,
+      /**
+       * The mark is decoration: `required` on the control is what actually
+       * announces the requirement, and an asterisk read aloud as "star" in
+       * the middle of a label is noise.
+       */
+      given.required !== true
+        ? null
+        : createElement(
+            "span",
+            { "aria-hidden": true, style: { color: colour("accent-strong") } },
+            " *"
+          )
+    )
+
+    const note =
+      hint === undefined
+        ? null
+        : createElement(
+            "p",
+            {
+              id: hint,
+              style: { margin: "0", fontSize: size(2), color: colour("fg-muted") },
+            },
+            given.hint
+          )
+
+    /**
+     * A checkbox is the one field whose control comes *before* its label, and
+     * that is not a styling preference — a tick box after the sentence it
+     * governs is a box a reader has to look back for. The hint is indented to
+     * the label's edge so the three parts read as one paragraph.
+     */
+    if (type === "checkbox") {
+      return createElement(
+        "div",
+        {
+          ...loom.editable,
+          className: LIBRARY_CLASS.field,
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            gap: space(2),
+            minWidth: "0",
+            ...(given.span === "row" ? { gridColumn: "1 / -1" } : {}),
+          },
+        },
+        libraryStylesheet(),
+        createElement(
+          "div",
+          { style: { display: "flex", alignItems: "flex-start", gap: space(3) } },
+          controlFor(given, type, { control, hint }, children),
+          label
+        ),
+        note === null
+          ? null
+          : createElement(
+              "div",
+              { style: { paddingInlineStart: `calc(${size(4)} + ${space(3)})` } },
+              note
+            )
+      )
+    }
+
     return createElement(
       "div",
       {
@@ -232,41 +361,8 @@ export const loomField = definePrimitive({
         },
       },
       libraryStylesheet(),
-      createElement(
-        "label",
-        {
-          htmlFor: control,
-          style: {
-            fontFamily: family("body"),
-            fontWeight: weight("heading"),
-            fontSize: size(2),
-            color: colour("fg-default"),
-          },
-        },
-        given.label,
-        /**
-         * The mark is decoration: `required` on the control is what actually
-         * announces the requirement, and an asterisk read aloud as "star" in
-         * the middle of a label is noise.
-         */
-        given.required !== true
-          ? null
-          : createElement(
-              "span",
-              { "aria-hidden": true, style: { color: colour("accent-strong") } },
-              " *"
-            )
-      ),
-      hint === undefined
-        ? null
-        : createElement(
-            "p",
-            {
-              id: hint,
-              style: { margin: "0", fontSize: size(2), color: colour("fg-muted") },
-            },
-            given.hint
-          ),
+      label,
+      note,
       controlFor(given, type, { control, hint }, children)
     )
   },

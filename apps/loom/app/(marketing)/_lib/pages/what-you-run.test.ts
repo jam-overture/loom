@@ -6,6 +6,7 @@ import { treeFor } from "../render"
 import {
   DEFAULT_THEME,
   HOME,
+  PUTTING_IT_BACK,
   internalHref,
   SITE_ROUTES,
   SITE_THEME_NAMES,
@@ -273,17 +274,20 @@ describe("its place in the navigation", () => {
    * argument that it is the second question a reader of `/the-rules` asks
    * rather than something anybody arrives wanting.
    *
-   * **Four of eight is a bad answer to a real problem and it is not this
-   * assertion's job to hide that.** The good answer is a bar that groups, which
-   * `loom.nav` cannot — it takes a flat run of links and nothing in the library
-   * opens. Filed for `Loom primitives` on 12 September and still open. The list
-   * stays exact so a fifth fails here and has to be argued for.
+   * **Five of nine is a bad answer to a real problem and it is not this
+   * assertion's job to hide that.** It was four of eight on 13 September and
+   * `/putting-it-back` made it worse rather than better. The good answer is a
+   * bar that groups, which `loom.nav` cannot — it takes a flat run of links and
+   * nothing in the library opens. Filed for `Loom primitives` on 12 September
+   * and still open. The list stays exact so a sixth fails here and has to be
+   * argued for.
    */
-  it("is off the bar deliberately, with three other pages", () => {
+  it("is off the bar deliberately, with four other pages", () => {
     expect(WHAT_YOU_RUN.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
       WHO_CAN_ASK,
+      PUTTING_IT_BACK,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

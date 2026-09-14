@@ -69,6 +69,28 @@ export type SearchIndex = {
 }
 
 /**
+ * An entry as the first file writes it down: the four fields that are always
+ * there, and the three text fields only where they hold something.
+ *
+ * The three are omitted rather than emptied, and the difference is 38 KB. A
+ * published export carries no summary, no prose and no code — its words are the
+ * signature on its own reference page — and there are 986 of them, so
+ * `"summary":"","body":"","code":""` was a fifth of the file a reader waits for
+ * and said nothing at all.
+ *
+ * Nothing downstream notices, because `parseSearchIndex` fills an absent field
+ * with the empty string it would have carried. That tolerance is not new: it is
+ * what `code` has always had, for a browser holding an index cached from a
+ * deployment made before the code file existed.
+ */
+export type TravellingEntry = Omit<SearchEntry, "summary" | "body" | "code"> &
+  Partial<Pick<SearchEntry, "summary" | "body" | "code">>
+
+export type TravellingIndex = {
+  readonly entries: readonly TravellingEntry[]
+}
+
+/**
  * Where the browser asks for the index.
  *
  * It sits under `/docs/` because it belongs to this surface and to no other,
@@ -130,27 +152,32 @@ const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
 /**
- * An entry as it arrives, before its lowest band is filled in.
+ * An entry as it arrives: the four fields that identify it, and nothing else
+ * demanded.
  *
- * `code` is read separately below rather than demanded here, and it is the only
- * field that is. The entries file and the code file are written by the same
- * `next build`, but a browser holding an index cached from the deployment
- * before this one has entries with no `code` key at all — and demanding it
- * would drop every one of them, turning a band that is not answering yet into a
- * search box that finds nothing. A missing lowest band is what the split
- * already asks a reader to tolerate for a moment; losing the box is not.
+ * **What is demanded here is what a result cannot be shown without.** A row with
+ * no href goes nowhere and a row with no title has nothing to read, so an entry
+ * missing either is dropped rather than passed on. The three text fields are
+ * read separately below, because every one of them is a *band of the ranking*
+ * that may legitimately not be answering yet: the file that carries it may not
+ * have landed, may not have existed when this browser cached the index, or — for
+ * the 986 published names — may never have had anything to say. Demanding one
+ * would drop entries over a field whose absence the search box already handles,
+ * turning a band that is quiet into a search box that finds nothing.
  */
-const isArrivingEntry = (value: unknown): value is Omit<SearchEntry, "code"> =>
+const isArrivingEntry = (value: unknown): value is Readonly<Record<string, unknown>> =>
   isRecord(value) &&
   typeof value.href === "string" &&
   typeof value.title === "string" &&
   typeof value.context === "string" &&
-  typeof value.summary === "string" &&
-  typeof value.body === "string" &&
   KINDS.includes(value.kind as SearchKind)
 
-const codeOf = (value: unknown): string =>
-  isRecord(value) && typeof value.code === "string" ? value.code : ""
+/** One of the three text fields, or the empty string it stands in for. */
+const textAt = (value: Readonly<Record<string, unknown>>, key: "summary" | "body" | "code"): string => {
+  const text = value[key]
+
+  return typeof text === "string" ? text : ""
+}
 
 /**
  * The index, checked on the way into the browser.
@@ -167,9 +194,15 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
   }
 
   return {
-    entries: value.entries
-      .filter(isArrivingEntry)
-      .map((entry) => ({ ...entry, code: codeOf(entry) })),
+    entries: value.entries.filter(isArrivingEntry).map((entry) => ({
+      href: String(entry.href),
+      title: String(entry.title),
+      context: String(entry.context),
+      kind: entry.kind as SearchKind,
+      summary: textAt(entry, "summary"),
+      body: textAt(entry, "body"),
+      code: textAt(entry, "code"),
+    })),
   }
 }
 

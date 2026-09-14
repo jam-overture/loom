@@ -345,6 +345,66 @@ describe("broadcastReaderSignals", () => {
     }
   })
 
+  describe("the view key", () => {
+    it("puts one on every batch, so a funnel can be correlated inside a page view", () => {
+      const batches = start()
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches).toHaveLength(2)
+      expect(batches[0]?.view).toBe(batches[1]?.view)
+      expect(batches[0]?.view).toMatch(/^[0-9a-f]{32}$/)
+    })
+
+    /**
+     * The property that keeps it from being identity: a second broadcast is a
+     * second view, so nothing correlates across a reload or a client-side
+     * navigation (0146).
+     */
+    it("gives a second broadcast of the same page a different key", () => {
+      const first = start()
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+      broadcast?.stop()
+
+      const second = start()
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(first[0]?.view).not.toBe(second[0]?.view)
+    })
+
+    it("mints exactly one key per broadcast, however many batches it sends", () => {
+      let minted = 0
+      start({
+        random: (count) => {
+          minted += 1
+
+          return new Uint8Array(count).fill(minted)
+        },
+      })
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(minted).toBe(1)
+    })
+
+    it("sends a batch the parser accepts, key and all", () => {
+      const batches = start()
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(parseReaderSignalBatch(JSON.parse(JSON.stringify(batches[0]))).ok).toBe(true)
+    })
+  })
+
   it("watches a band that arrived after it started — the case every applied change is", async () => {
     const batches = start()
     const late = appendBand("n_9")

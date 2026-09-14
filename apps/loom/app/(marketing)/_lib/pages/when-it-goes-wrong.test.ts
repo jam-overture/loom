@@ -23,6 +23,7 @@ import { FRONT_DOOR_POLICY, protectedInPlainWords, runAsk } from "../adapt/run"
 import { pageTreeFor, refusalFor, treeFor } from "../render"
 import { DEFAULT_THEME, HOME, SITE_ROUTES, WHEN_IT_GOES_WRONG } from "../site"
 import { RESERVED_VOCABULARY } from "../copy"
+import { piecesIn } from "../measure"
 import { uses, wordsOf } from "../words"
 
 import {
@@ -30,7 +31,6 @@ import {
   endingsLeavingThePageAlone,
   endingsOf,
   inWords,
-  piecesIn,
   REFUSAL_ANCHOR,
 } from "./when-it-goes-wrong"
 
@@ -372,6 +372,7 @@ describe("the page itself", () => {
     expect(SITE_ROUTES.filter((route) => !route.inMenu).map((route) => route.path)).toEqual([
       "/",
       "/who-can-ask",
+      "/putting-it-back",
       "/what-you-run",
       "/your-components",
     ])

@@ -1,7 +1,9 @@
 import { z } from "zod"
 
+import { anchorSchema } from "./anchor.js"
+
 /**
- * The schemes a URL in an AI-authored tree may use, and the one kind of
+ * The schemes a URL in an AI-authored tree may use, and the two kinds of
  * relative destination it may hold.
  *
  * Zod's `.url()` asks whether the string parses as a URL, which
@@ -55,9 +57,47 @@ const isSameOriginPath = (value: string): boolean => {
   }
 }
 
-const withScheme = (allowed: readonly string[]): z.ZodEffects<z.ZodString, string, string> =>
+/**
+ * A destination on the page the reader is already on, written as a bare
+ * fragment.
+ *
+ * `loom.section`, `loom.hero` and `loom.callout` have taken an `anchor` since
+ * 26 August, so the library could **mark a destination it had no way to link
+ * at**: `#helmets` is not a path and not a URL, so it was refused, and a page
+ * with a nav bar over six sections had to write `/#helmets` instead. That is
+ * worse than the refusal it replaces — it is correct only on the site root, and
+ * anywhere else it silently leaves the page the reader is on and lands them at
+ * the front door's anchor. Nothing reports it, because nothing is wrong.
+ * Maintainer-filed on 12 September, building `prototypes/ski-apparel`.
+ *
+ * **Why the allowlist's argument does not reach it.** 0053 refuses what it
+ * cannot check the origin of. A bare fragment reaches no origin at all — it is
+ * the one href that provably cannot leave the document — so there is nothing
+ * for a scheme check to have an opinion about. `javascript:#x` is a scheme and
+ * fails the test below on its first character.
+ *
+ * **The grammar is `anchorSchema`'s, deliberately not a looser one.** What may
+ * be linked at is exactly what may be marked, in one regex read from one file,
+ * so the two halves cannot drift into a library that accepts `#Helmets` at the
+ * link end and writes `id="helmets"` at the other. It also inherits that
+ * schema's reason for being narrow: an anchor is the one value a model writes
+ * straight into the document as markup.
+ *
+ * **It does not check that the anchor exists.** That is the same fact about a
+ * tree rather than about a node that `anchor.ts` records for uniqueness, and it
+ * belongs to whatever walks the whole tree. A schema that pretended to enforce
+ * it would be enforcing nothing.
+ */
+const isSamePageFragment = (value: string): boolean =>
+  value.startsWith("#") && anchorSchema.safeParse(value.slice(1)).success
+
+const withScheme = (
+  allowed: readonly string[],
+  { fragments }: { readonly fragments: boolean }
+): z.ZodEffects<z.ZodString, string, string> =>
   z.string().superRefine((value, context) => {
     if (isSameOriginPath(value)) return
+    if (fragments && isSamePageFragment(value)) return
 
     const parsed = ((): URL | undefined => {
       try {
@@ -70,7 +110,9 @@ const withScheme = (allowed: readonly string[]): z.ZodEffects<z.ZodString, strin
     if (!parsed) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "must be an absolute URL, or a path beginning with / on this site",
+        message: fragments
+          ? "must be an absolute URL, a path beginning with / on this site, or #an-anchor on this page"
+          : "must be an absolute URL, or a path beginning with / on this site",
       })
       return
     }
@@ -84,11 +126,18 @@ const withScheme = (allowed: readonly string[]): z.ZodEffects<z.ZodString, strin
   })
 
 /** Where a call to action may point. `mailto:` and `tel:` are ordinary CTAs. */
-export const linkUrlSchema = withScheme(["http:", "https:", "mailto:", "tel:"])
+export const linkUrlSchema = withScheme(["http:", "https:", "mailto:", "tel:"], {
+  fragments: true,
+})
 
 /**
  * Where an image may come from. Narrower than a link on purpose: `data:` is
  * excluded because an inline SVG document is a script host, and the size of the
  * thing would sit in the tree and in every delta that touched it.
+ *
+ * It is narrower by one more thing since the fragment landed: a `src` is
+ * fetched, and `#helmets` fetches the document that is already open. The one
+ * real use for a fragment in a `src` is an SVG sprite reference, which needs
+ * the file's path in front of it and so is an ordinary URL here.
  */
-export const mediaUrlSchema = withScheme(["http:", "https:"])
+export const mediaUrlSchema = withScheme(["http:", "https:"], { fragments: false })

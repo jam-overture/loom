@@ -220,6 +220,12 @@ const orderedSections: readonly DocsSection[] = [
           "The one step that guesses: what a model is shown, what it is allowed to say back, what a request costs, and who has to act when it fails.",
       },
       {
+        slug: "when-nothing-comes-back",
+        title: "When nothing comes back",
+        summary:
+          "Loom waits for code you wrote in three places, and none of those waits is unbounded: what happens when a model, a source or an endpoint never answers, and how to change how long it is given.",
+      },
+      {
         slug: "what-your-app-has-to-do",
         title: "What your app has to do",
         summary:
