@@ -1,8 +1,15 @@
-# 0155. The catalogue's public surface is the list and the lookup, not every band by name
+# 0157. The catalogue's public surface is the list and the lookup, not every band by name
 
 **Status:** Accepted
 **Date:** 2026-09-14
 **Section:** §4b
+
+> **Renumbered on 2026-09-14**, from 0155, when this branch (#298) was merged.
+> `main` had meanwhile accepted a different 0155 — *a container may only add to
+> its children what they left unspoken*, from #294 — and two records sharing a
+> number is fatal ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> The record already on `main` keeps its number. Nothing in this record changed
+> but its number; the citations of it were updated with it.
 
 > **Why this number.** `0151`–`0154` are left free deliberately, which
 > [0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)

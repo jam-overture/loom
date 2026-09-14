@@ -192,7 +192,7 @@ last two did.
 
 - **Nineteen bands.** `changelog` and `credentials` came back off
   `primitives-31-held-bands`, which is now spent.
-- **[0155](../decisions/0155-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)**
+- **[0157](../decisions/0157-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)**
   — the catalogue's public surface is the list and the lookup, not every band by
   name. It is the shape primitives already had; the asymmetry was an accident of
   `export *` rather than a design.

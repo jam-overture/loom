@@ -294,7 +294,7 @@ Nineteen names cost 2,768 characters. **The bands cost nothing**: seventeen and
 nineteen now measure identically, because the index counts published names and
 `STARTER_COMPOSITIONS` is one name however many members it holds. The catalogue
 grows flat from here rather than linearly.
-[0155](decisions/0155-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)
+[0157](decisions/0157-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md)
 is the record, `changelog` and `credentials` shipped, and
 `primitives-31-held-bands` is spent.
 
