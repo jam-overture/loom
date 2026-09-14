@@ -8,6 +8,97 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of the unit that landed beside it
+
+`demo-17-what-the-record-did` gives a landed card the sentence it never had:
+what the change did to the page, in the words on the page. For an insert, a
+remove and a move it is specific, because those operations have a subtree and a
+subtree has words —
+
+> This came off the page, and everything under it went too. **“3,400” “24” “92%”**
+
+**A `configure` has none, and both of the demo's unattended presets are one.**
+*Re-theme the whole page* and *Repaint the top band* each read:
+
+> How one part of the page looks changed. Not a word on it changed.
+
+Which is true, and is the same string in both directions. The two presets are
+**toggles** — `backdrop` swaps `aurora` for `panel` and back, `palette` swaps
+the theme ids and back — so a visitor who presses either one twice gets two
+cards that make opposite changes to the page and are identical to the word.
+That was true of the whole card before this unit and is now true of one line of
+it, which is progress and is not the finish.
+
+**Why it was not fixed here.** Naming the direction means naming the values, and
+the values are `aurora` and `panel` — the registry's own enum, deliberately
+excluded from the quoted words by `settingsOf`, because a setting is not
+something a visitor reads off the page. So the fix is not "quote the prop", it
+is a decision about whether this surface has a plain-language name for a
+setting, and that is a vocabulary question rather than a rendering one.
+
+**Three shapes, none obviously right:**
+
+1. **The registry names its own choices.** A `choice` gains a human label, and
+   the card reads *"the top band went from the soft wash to the flat panel"*.
+   Truest, and it is a `Loom primitives` change, not this lane's.
+2. **The card says which press this was.** *"Back to how it was before your
+   last change"* when the delta returns the node to a value an earlier record
+   moved it off. Local to this lane, needs no vocabulary, and only works where
+   the history is in hand — which on this surface it is.
+3. **Leave it.** A visitor who presses the same button twice can see the page
+   change back, and the mark is drawn both times.
+
+**Recommendation: 2**, if the maintainer wants it. It is the only one of the
+three that is this lane's to build, and it answers the question a visitor
+actually has on the second press, which is *did that do anything*.
+
+---
+## 2026-09-14 — `actions.ts` is the one file in this lane a test cannot reach, and it is now load-bearing
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
+by putting the defect back, which is the only reason it is known
+
+Every unit in this lane is checked by restoring each defect in turn and
+confirming the suite catches it. On `demo-17-what-the-record-did`, four of five
+were caught by exactly the test that should catch them. **The fifth was caught
+by nothing:**
+
+| defect restored | what fails |
+| --- | --- |
+| `draftFrom` stops carrying the record's account forward | 1 test |
+| the tense table is ignored and every reading comes back present-tense | 8 tests |
+| the frozen reading is printed without checking the outcome | 2 tests |
+| a landed change is drawn in the waiting colour | 1 test |
+| **`actions.ts` stops telling the undo path it is restoring** | **nothing — 377 passed** |
+
+`pipeline.test.ts` covers the write path end to end and it is a good test, but
+it *replicates* what the server action does rather than calling it: it reads the
+head, calls `commitIntent`, and hands the result to `recordFromEvents` itself.
+So every argument `actions.ts` passes is asserted in the test's own copy of the
+call and nowhere in the file that ships.
+
+**What that costs, concretely.** Delete `true` from one call in `actions.ts` and
+the demo's payoff silently regresses: press *Put it back*, allow it, and the
+card reads *"This went onto the page, and nothing already on it was touched"*
+over three figures the visitor has just watched come back. Green suite, shipped
+page, the one frame this surface exists for, said backwards.
+
+This is not new — `actions.ts` has never had a test — but it was cheap while the
+file only forwarded form fields to the runtime. It now carries two decisions of
+its own: which tree a change is judged against, and which direction it is going.
+
+**The shape that would fix it** is not a mock of `next/cache` and `cookies`. It
+is moving the two decisions out of the action and into `_lib/`, where the
+pipeline test can call the same function the action calls rather than a copy of
+it. `assessedAgainst` is already a named function; it is on the wrong side of
+the `"use server"` boundary. Left for the next run rather than folded into this
+one, because it is a refactor with its own argument and this unit was already
+five files.
+
+---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
@@ -705,16 +796,23 @@ two presses. No reference gallery can tell you that a card has rendered twice.
 ## 2026-09-12 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, twenty-two days on
 
 **Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
-open — re-verified on this branch rather than re-dated
+**closed — fixed on `main`**, verified on `f62b9bc` by
+`demo-17-what-the-record-did` (14 September)
 
-Line 19, verified on `140f150` this run:
+Line 19, verified on `140f150` when this was filed:
 
 > Eighteen primitives are registered and the demo is live at
 > `apps/loom/app/(portal)/portal/demo`.
 
 It moved to a public `/demo` on 21 August. `rollout.md` names this lane the
 conversion artifact for launch, so the one document saying what the demo is *for*
-is the one still pointing at where it was. Eighth consecutive run to say so.
+was the one still pointing at where it was. Eighth consecutive run to say so.
+
+**It now reads `apps/loom/app/(demo)/demo`.** Closed here rather than re-filed;
+the three earlier copies of this entry below are the same finding and are closed
+by the same fix. **Nine runs of this lane filed it and the tenth is the one that
+got to delete it** — which is the argument for the channel working, and also for
+re-verifying before re-filing rather than after.
 
 ---
 
