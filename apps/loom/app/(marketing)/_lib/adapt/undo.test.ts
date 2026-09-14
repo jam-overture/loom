@@ -1,4 +1,5 @@
 import {
+  inverseInterpreter,
   sequentialIdFactory,
   systemClock,
   type EditIntent,
@@ -17,7 +18,7 @@ import { BAND } from "../bands"
 import { ASKS, askById, type Ask } from "./asks"
 import type { ChangeRecord } from "./record"
 import { FRONT_DOOR_POLICY, runAsk } from "./run"
-import { PUT_IT_BACK, runUndo, undoInterpreter } from "./undo"
+import { frontDoorUndo, PUT_IT_BACK, runUndo } from "./undo"
 
 /**
  * The button that says *Put it back*, doing it.
@@ -213,7 +214,7 @@ describe("the undo is a change, and is judged like one", () => {
     if (run.undo === undefined) throw new Error("loom: the change landed without an undo")
 
     const ids = sequentialIdFactory("stale")
-    const interpreter = undoInterpreter(run.undo, ids, systemClock)
+    const interpreter = inverseInterpreter(frontDoorUndo(run.undo), ids, systemClock)
     const intent: EditIntent = {
       intentId: ids.intentId(),
       treeId: run.page.treeId,

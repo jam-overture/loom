@@ -1,18 +1,15 @@
 import {
   composeChange,
   confirmChange,
-  err,
   fixedPolicy,
+  inverseInterpreter,
   noopEventSink,
-  ok,
   sequentialIdFactory,
   systemClock,
-  type ChangeInterpreter,
-  type Clock,
+  type ComputedInverse,
   type CompositionRuntime,
   type EditIntent,
   type EventSink,
-  type IdFactory,
   type LoomTree,
   type TreeDelta,
 } from "@loom/runtime"
@@ -56,16 +53,23 @@ import { FRONT_DOOR_POLICY } from "./run"
  *
  * It does not need one. The change and its undo are computed in the same request
  * here, so the inverse is already in hand and nothing has been built on it —
- * there is no log to replay and nothing to contest. What is missing is only the
- * short piece between *here is an inverse* and *here is a proposal the Gate can
- * weigh*, and that piece is below. Filed for `Loom daily build` as well, because
- * every stateless surface that ever offers an undo will write it again.
+ * there is no log to replay and nothing to contest. What was missing was only
+ * the short piece between *here is an inverse* and *here is a proposal the Gate
+ * can weigh*, and this module wrote it by hand for a week, filed as a finding
+ * for `Loom daily build` because every stateless surface that ever offers an
+ * undo would write it again.
+ *
+ * **It came back as `inverseInterpreter`, and the hand-written copy is gone**
+ * ([0137](../../../../../../decisions/0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md)).
+ * `revertInterpreter` is that same function with a log's half filled in, which
+ * is the property worth having: the portal's undo and the front door's are one
+ * implementation of the head check rather than two readings of one rule.
  *
  * The one thing not borrowed is the runtime's `REVERT_INTERPRETER` stamp. That
  * is what `revertInterpreter` puts on a delta *it* planned off a store, and
  * claiming it for a delta planned somewhere else would be this site lying in its
  * own provenance — on the page whose entire argument is that provenance is worth
- * something.
+ * something. So the field has no default and this module names it.
  */
 
 /** What produced the delta, for `Provenance.interpreter`. Not a model, and not a guess. */
@@ -107,59 +111,34 @@ export const undoRequest = (ask: Ask, inverse: TreeDelta): Request => ({
 })
 
 /**
- * An interpreter with nothing to interpret, which is the case that proves the
- * seam is drawn in the right place.
+ * What the sequence is handed, for an undo this page already has in hand.
  *
- * Interpretation is the one non-deterministic step
- * ([0005](../../../../../../decisions/0005-interpretation-is-the-only-non-deterministic-step.md)),
- * not necessarily a model — and everything downstream of this cannot tell that
- * no model was involved. That is what makes an undo gateable on exactly the same
- * terms as an AI-authored change, which is the property the panel is about to
- * put in front of a stranger.
+ * The thirty lines that used to sit here are gone, and the reason is the best
+ * kind: this lane filed on 5 September that *a stateless surface can compute an
+ * undo and cannot assemble one*, and `Loom daily build` answered it with
+ * `inverseInterpreter`
+ * ([0137](../../../../../../decisions/0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md)).
+ * `revertInterpreter` is now that same function with a log's half filled in, so
+ * the portal's undo and this one are one implementation of the head check, the
+ * record of where the change came from, and the shape of what is put to the
+ * rules.
  *
- * The head check is not defensive coding. An inverse is computed against one
- * arrangement of the page, and offering it against another would be proposing
- * something whose reasoning has expired — the stale proposal the whole sequence
- * exists to catch. `revertInterpreter` declines for the same reason and in the
- * same place.
+ * **The stamp stays ours, and that is deliberate.** The interpreter id has no
+ * default and never will: the runtime's own means *this came off a log*, and a
+ * page that claimed it for a change it planned itself would be this site lying
+ * in the one field its whole argument is about.
+ *
+ * The head check is not defensive coding, and it is why this is safe to hand
+ * straight to the sequence with no write path in front of it. The change that
+ * reverses a change is written against one arrangement of the page, and offering
+ * it against another would be proposing something whose reasoning has expired —
+ * the stale proposal the whole sequence exists to catch.
  */
-export const undoInterpreter = (
-  inverse: TreeDelta,
-  ids: IdFactory,
-  clock: Clock
-): ChangeInterpreter => ({
-  interpret: (intent: EditIntent, page: LoomTree) =>
-    Promise.resolve(
-      page.revision === inverse.baseRevision
-        ? ok({
-            proposalId: ids.proposalId(),
-            intentId: intent.intentId,
-            delta: {
-              deltaId: ids.deltaId(),
-              treeId: page.treeId,
-              baseRevision: page.revision,
-              operations: inverse.operations,
-            },
-            rationale: `Reverses the change applied at revision ${inverse.baseRevision}.`,
-            provenance: {
-              origin: intent.origin,
-              ...(intent.actor === undefined ? {} : { actor: intent.actor }),
-              interpreter: FRONT_DOOR_UNDO_INTERPRETER,
-              /**
-               * Computed rather than guessed, so `authoredBy` is the runtime and
-               * calibration leaves the 1 out of the model's score
-               * ([0031](../../../../../../decisions/0031-calibration-is-a-reader-not-a-controller.md)).
-               */
-              authoredBy: "runtime" as const,
-              confidence: 1,
-              interpretedAt: clock.now(),
-            },
-          })
-        : err({
-            code: "refused",
-            detail: `the undo was written against revision ${inverse.baseRevision}, and this page is at ${page.revision}`,
-          })
-    ),
+export const frontDoorUndo = (inverse: TreeDelta): ComputedInverse => ({
+  operations: inverse.operations,
+  headRevision: inverse.baseRevision,
+  interpreter: FRONT_DOOR_UNDO_INTERPRETER,
+  rationale: `Reverses the change applied at revision ${inverse.baseRevision}.`,
 })
 
 export type UndoRun = {
@@ -197,7 +176,7 @@ export const runUndo = async (
 ): Promise<UndoRun> => {
   const idFactory = sequentialIdFactory(namespace)
   const runtime: CompositionRuntime = {
-    interpreter: undoInterpreter(inverse, idFactory, systemClock),
+    interpreter: inverseInterpreter(frontDoorUndo(inverse), idFactory, systemClock),
     policySource: fixedPolicy(FRONT_DOOR_POLICY),
     events,
     clock: systemClock,

@@ -9,6 +9,7 @@ import { pageTreeFor, treeFor } from "../render"
 import {
   DEFAULT_THEME,
   HOME,
+  PUTTING_IT_BACK,
   internalHref,
   SITE_ROUTES,
   WHAT_YOU_RUN,
@@ -55,17 +56,18 @@ describe("the page about your own components", () => {
    * held.
    */
   /**
-   * Widened twice, never relaxed, for the reason recorded on the same assertion
-   * in `what-you-run.test.ts`: on 12 September `HOME` came off the bar to make
-   * room for a seventh page, and on 13 September `/who-can-ask` was added off
-   * it. Still an exact list, so a fifth still fails here and still has to be
-   * argued for.
+   * Widened three times, never relaxed, for the reason recorded on the same
+   * assertion in `what-you-run.test.ts`: on 12 September `HOME` came off the bar
+   * to make room for a seventh page, on 13 September `/who-can-ask` was added
+   * off it, and on 14 September `/putting-it-back`. Still an exact list, so a
+   * sixth still fails here and still has to be argued for.
    */
-  it("is kept off the bar deliberately, and is one of the four pages that are", () => {
+  it("is kept off the bar deliberately, and is one of the five pages that are", () => {
     expect(YOUR_COMPONENTS.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
       WHO_CAN_ASK,
+      PUTTING_IT_BACK,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])
