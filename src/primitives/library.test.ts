@@ -192,8 +192,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 92 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(92)
+  it("registers as 93 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(93)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -220,6 +220,7 @@ describe("the starter library", () => {
       "loom.milestone-row",
       "loom.milestone",
       "loom.stat-grid",
+      "loom.stat-chart",
       "loom.stat",
       "loom.meter",
       "loom.tier-table",
@@ -2770,7 +2771,29 @@ describe("the targets the library declares", () => {
 })
 
 describe("the re-theme guarantee", () => {
-  const styleOf = (markup: string): string => markup.slice(0, markup.indexOf(">"))
+  /**
+   * The root's opening tag, which is where the palette is mounted — reached past
+   * the hoisted stylesheet rather than from the first byte of the markup.
+   *
+   * It used to be the first byte, and stopped being it when `loom.stat` moved
+   * its type into the shared stylesheet so a chart could restyle it: this
+   * fixture now contains a primitive that emits one, and React hoists it to the
+   * front. That changes nothing these tests are about — the sheet is
+   * byte-identical under every theme, which is the `re-theme` guarantee holding
+   * rather than bending — so it is stripped exactly as every other test here
+   * strips it.
+   */
+  const styleOf = (markup: string): string => {
+    const { tree } = splitStylesheet(markup)
+
+    return tree.slice(0, tree.indexOf(">"))
+  }
+
+  const bodyOf = (markup: string): string => {
+    const { tree } = splitStylesheet(markup)
+
+    return tree.slice(tree.indexOf(">"))
+  }
 
   it("changes only the root's variables when the palette changes", () => {
     const editorial = render(samplePage(EDITORIAL)).markup
@@ -2778,13 +2801,15 @@ describe("the re-theme guarantee", () => {
 
     expect(editorial).not.toBe(bold)
     expect(styleOf(editorial)).not.toBe(styleOf(bold))
-    expect(editorial.slice(editorial.indexOf(">"))).toBe(bold.slice(bold.indexOf(">")))
+    expect(bodyOf(editorial)).toBe(bodyOf(bold))
+    /** And the sheet itself is the same bytes under both, which is the other half. */
+    expect(splitStylesheet(editorial).stylesheet).toBe(splitStylesheet(bold).stylesheet)
   })
 
   it("mounts every palette slot at the root and reads colour only from there", () => {
     const { markup } = render(samplePage(BOLD))
     const root = styleOf(markup)
-    const body = markup.slice(markup.indexOf(">"))
+    const body = bodyOf(markup)
 
     for (const slot of PALETTE_SLOTS) expect(root).toContain(`--loom-${slot}:`)
 
@@ -3029,8 +3054,16 @@ describe("the root primitive", () => {
 
     const element = rendered.element as ReactElement<{ style?: Record<string, string> }>
     const markup = renderToStaticMarkup(createElement("div", null, element))
+    /**
+     * The hoisted stylesheet is not a wrapper — it is the metadata element
+     * `stylesheet.ts` describes, which siblings do not count and which React
+     * lifts out of the flow entirely in a real document. The claim under test is
+     * that nothing was added to *carry the theme*, so it is removed before the
+     * shape is read.
+     */
+    const mounted = markup.replace(/<style[^>]*>[\s\S]*?<\/style>/, "")
 
-    expect(markup.startsWith("<div><div style=")).toBe(true)
+    expect(mounted.startsWith("<div><div style=")).toBe(true)
   })
 })
 
@@ -7196,6 +7229,36 @@ const atmospherePage = (
         }),
         buildElement(idFactory, {
           type: "loom.section",
+          props: { eyebrow: "A series, not a figure", width: "wide" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [text("Six months of it, plotted")],
+              }),
+            ]),
+            buildElement(idFactory, {
+              type: "loom.stat-chart",
+              props: { max: 100, plot: "standard" },
+              children: [
+                ["Apr", "71%", 71],
+                ["May", "78%", 78],
+                ["Jun", "74%", 74],
+                ["Jul", "88%", 88],
+                ["Aug", "93%", 93],
+                ["Sep", "99%", 99],
+              ].map(([label, value, magnitude]) =>
+                buildElement(idFactory, {
+                  type: "loom.stat",
+                  props: { value: value as string, label: label as string, magnitude: magnitude as number },
+                })
+              ),
+            }),
+          ],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
           props: { eyebrow: "One among several", width: "wide" },
           children: [
             buildSlot(idFactory, "heading", [
@@ -8053,6 +8116,109 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
 
     expect(root).toContain("height:100%")
     expect(root).toContain("display:grid")
+  })
+
+  /**
+   * The scale a chart cannot compute. A render is a total pure projection of one
+   * node, so the container cannot read its children's magnitudes — the ceiling
+   * goes down as an inherited custom property and each bar resolves its own
+   * height against it in the stylesheet. These two assertions are the whole
+   * mechanism: the parent publishes, the child carries its own number, and
+   * nothing in either render reads the other.
+   */
+  it("sends the ceiling down by inheritance and lets each bar read it", () => {
+    const { markup } = render(atmospherePage(EDITORIAL))
+    const { stylesheet, tree: body } = splitStylesheet(markup)
+
+    expect(body).toContain("--loom-chart-max:100")
+    expect(body).toContain("--loom-stat-magnitude:71")
+    expect(body).toContain("--loom-stat-magnitude:99")
+
+    expect(stylesheet).toContain(
+      "height: calc(var(--loom-chart-plot) * min(1, max(0, var(--loom-stat-magnitude, 0) / var(--loom-chart-max, 100))))"
+    )
+  })
+
+  /**
+   * A value over the ceiling fills the plot and stops. A bar drawn out through
+   * the band above it is a broken page; a full bar beside a printed value larger
+   * than the axis is a chart scaled wrong, and only the second is recoverable by
+   * looking at it. `min(1, …)` is where that is decided, and `max(0, …)` is the
+   * same argument at the other end.
+   */
+  it("clamps a bar to the plot rather than letting it out", () => {
+    const { stylesheet } = splitStylesheet(render(atmospherePage(EDITORIAL)).markup)
+    const rule = stylesheet.slice(stylesheet.indexOf(`.${LIBRARY_CLASS.statChart} > .${LIBRARY_CLASS.statPlotted}::before`))
+
+    expect(rule).toContain("min(1,")
+    expect(rule).toContain("max(0,")
+  })
+
+  /**
+   * A stat with no magnitude grows no bar, rather than a zero-height stub. The
+   * class is the switch, and it is derived from the prop being present so the
+   * two cannot disagree — which is also what keeps every stat in every stored
+   * tree rendering exactly as it did before the chart existed.
+   */
+  it("plots only the stats that can be plotted", () => {
+    const statOf = (props: JsonObject): string => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [buildElement(idFactory, { type: "loom.stat", props, children: [] })],
+        }),
+        idFactory
+      )
+
+      return splitStylesheet(render(tree).markup).tree
+    }
+
+    const plain = statOf({ value: "99.9%", label: "uptime" })
+    const plotted = statOf({ value: "99.9%", label: "uptime", magnitude: 99.9 })
+
+    expect(plain).not.toContain(LIBRARY_CLASS.statPlotted)
+    expect(plain).not.toContain("--loom-stat-magnitude")
+    expect(plotted).toContain(LIBRARY_CLASS.statPlotted)
+    expect(plotted).toContain("--loom-stat-magnitude:99.9")
+  })
+
+  /**
+   * The claim that makes this a second container rather than a second pair: a
+   * grid and a chart take the *same* children, so re-plotting a metrics band is
+   * one `configure` on the container and no change to the numbers. If the two
+   * ever needed different children, 0054 would have been the wrong rule to apply
+   * and this test is where that shows up.
+   */
+  it("takes the same children as the grid over the same child", () => {
+    const withContainer = (type: string): readonly unknown[] => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [
+            buildElement(idFactory, {
+              type,
+              props: {},
+              children: [
+                buildElement(idFactory, {
+                  type: "loom.stat",
+                  props: { value: "99.9%", label: "uptime", magnitude: 99.9 },
+                }),
+              ],
+            }),
+          ],
+        }),
+        idFactory
+      )
+
+      return render(tree).diagnostics
+    }
+
+    expect(withContainer("loom.stat-grid")).toEqual([])
+    expect(withContainer("loom.stat-chart")).toEqual([])
   })
 
   /**
