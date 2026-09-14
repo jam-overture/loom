@@ -4927,6 +4927,48 @@
           ]
         },
         {
+          "module": "primitives/compositions/articles-band",
+          "title": "Articles band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "articlesBand",
+              "kind": "value",
+              "signature": "const articlesBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/bento-band",
+          "title": "Bento band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "bentoBand",
+              "kind": "value",
+              "signature": "const bentoBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/comparison-band",
+          "title": "Comparison band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "comparisonBand",
+              "kind": "value",
+              "signature": "const comparisonBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/composition",
           "title": "Composition",
           "summary": "",
@@ -4972,6 +5014,20 @@
               "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
               "truncated": false,
               "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/contact-band",
+          "title": "Contact band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "contactBand",
+              "kind": "value",
+              "signature": "const contactBand: Composition",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -5046,6 +5102,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/integrations-band",
+          "title": "Integrations band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "integrationsBand",
+              "kind": "value",
+              "signature": "const integrationsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/metrics-band",
           "title": "Metrics band",
           "summary": "",
@@ -5054,6 +5124,20 @@
               "name": "metricsBand",
               "kind": "value",
               "signature": "const metricsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/nav-band",
+          "title": "Nav band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "navBand",
+              "kind": "value",
+              "signature": "const navBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -5082,6 +5166,34 @@
               "name": "proofBand",
               "kind": "value",
               "signature": "const proofBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/steps-band",
+          "title": "Steps band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "stepsBand",
+              "kind": "value",
+              "signature": "const stepsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/team-band",
+          "title": "Team band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "teamBand",
+              "kind": "value",
+              "signature": "const teamBand: Composition",
               "truncated": false,
               "summary": ""
             }

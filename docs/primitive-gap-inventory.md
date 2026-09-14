@@ -1,0 +1,154 @@
+# What is actually missing from this library
+
+**Measured 2026-09-13, at 92 primitives**, against shadcn/ui's component list and
+21st.dev's block taxonomy, for a maintainer target of **250 by 2026-09-19**.
+
+Three consecutive runs in August read `docs/hermes-port-map.md`'s empty tables as
+*the range is finished* and went hunting for a ninetieth content model; each came
+back with a definition list. Two runs since found real gaps by other instruments
+— asking what a *page* could not do, and reading what other lanes had
+*measured*. Neither instrument produces a number. **This document is the count**,
+so the week's target is planned against something rather than guessed at twice
+more.
+
+The short answer: **the honest ceiling on distinct primitives is about 110–120,
+not 250.** The number 250 is reachable, and the rest of it is compositions. The
+arithmetic is at the end.
+
+## The thing that makes 250 look reasonable, and why it misleads
+
+21st.dev advertises **1152 hero components, 216 pricing sections, 161
+testimonials, 318 features**. Read as a component count that is overwhelming, and
+it is the number behind the maintainer's target.
+
+**It is not a count of primitives. It is a count of _designs of one block_.**
+Those 1152 heroes are one thing — the block a visitor reads first — drawn 1152
+ways: centred, split, full-bleed, gradient mesh, typing effect. A registry whose
+unit is the *design* grows without limit and has to, because a user picks one and
+pastes it.
+
+Loom's unit is not the design. A hero here is `loom.hero` plus a composition plus
+props plus a theme, and the same four axes produce the same visual range without
+a second primitive. **So the axis that matches 21st.dev's numbers is
+compositions × themes, not the primitive count**, and comparing 92 to 1152 is
+comparing a vocabulary to a phrasebook.
+
+This matters practically, not just semantically. A 250-entry vocabulary is
+[measured below](#what-the-count-costs) to cost every interpretation request
+about 42,600 characters, and the model must pick one entry from 250 descriptions
+that are, by construction, mostly near-neighbours. A 250-entry *phrasebook* costs
+nothing per request, because a composition is assembled from primitives already
+registered ([0057](../decisions/0057-a-preset-is-a-deterministic-interpreter.md),
+[0120](../decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md))
+and adds no type.
+
+## Tier A — genuinely missing, buildable today
+
+Nothing here needs a framework change. This is the whole list; it is short, and
+the shortness is the finding.
+
+| | what it is | why nothing covers it |
+| --- | --- | --- |
+| **a figure drawn from numbers** | bar, line, sparkline | the single largest hole. `loom.stat` prints one number and `loom.meter` draws one proportion; **nothing in 92 plots a series**, and a metrics band that cannot show a trend is the one marketing claim this library cannot make |
+| **a stat that carries its trend** | figure + delta + direction | today `loom.stat` is figure and label. "↑ 24% MoM" is the form every dashboard-shaped marketing page uses |
+| **paging through a run of things** | a page-through control | `loom.link-trail` goes *out* of a page, `loom.nav` goes *across*; nothing goes *along*. By [0054](../decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md) this is probably `loom.link` plus an arrangement |
+| **the empty state** | what a region says when it holds nothing | with the binding seam ([0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)) a list can now legitimately arrive empty, and every surface will otherwise invent its own "no results yet" |
+| **the waiting state** | a placeholder with the shape of the thing | same reason. A bound region that has not answered has nowhere to say so |
+| **a consent checkbox / a radio group** | two members of `FIELD_TYPES` | **not primitives.** `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap, and it is two enum members, not two files |
+
+**Tier A is five primitives and one enum widening.** That is the honest total of
+what this library is missing that it could build this afternoon.
+
+## Tier B — blocked on the behaviour vocabulary
+
+Every one of these is a thing a marketing page genuinely has, and every one needs
+the framework to name a behaviour the tree can declare. A tab strip has been
+filed for this since at least 11 September (*"wants a `select` member in the
+behaviour vocabulary"*).
+
+tabs · tooltip · popover / hover card · dialog or modal · dropdown menu ·
+toast · lightbox gallery · a monthly/annual pricing toggle · a filter or
+segmented control
+
+**Roughly nine**, and they arrive together or not at all, because they are one
+framework decision rather than nine. They are `Loom daily build`'s to open, not
+this lane's to work around — and working around them individually, with a
+`<details>` here and a CSS-only tab strip there, is how a library ends up with
+nine different answers to one question.
+
+## Tier C — things that look missing and are not
+
+Checked so the next run does not re-propose them. Each is covered, and the
+covering primitive is named.
+
+accordion → `loom.faq` (*"a disclosure a reader opens"*) · alert → `loom.callout`
+· announcement bar → `loom.banner` · breadcrumb → `loom.link-trail` · progress →
+`loom.meter` (*"a bar or a ring"*) · steps / how-it-works → `loom.milestone-row`
+· navigation menu → `loom.nav` · separator → `loom.divider` · data table →
+`loom.table` · testimonial → `loom.quote` · typography → `loom.prose` +
+`loom.heading` · social links → `loom.link-list` · logo wall → `loom.logo-cloud`
++ `loom.marquee` · bento → `loom.mosaic` · press / awards → `loom.credential` ·
+video → `loom.embed` · map → `loom.media` (static) or `loom.embed` (live) ·
+newsletter → `loom.form` · changelog → `loom.milestone-list` · integrations →
+`loom.orbit` · comparison → `loom.comparison-table` · gallery → `loom.mosaic`
+
+A **general** `loom.disclosure` and a **general** `loom.definition-list` were
+both considered again and both rejected again: the first is `loom.faq` with the
+marketing shape filed off, and the second is the thing three August runs kept
+returning with. Adding either is
+[0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)'s
+shades-of-one mistake.
+
+## What the count costs
+
+Measured on `main` at 92 entries, with `measurePrompt`:
+
+| | entries | characters in the primitives block, per request |
+| --- | --- | --- |
+| today | 92 | **15,685** (~170 per entry) |
+| Tier A + B built | ~110 | ~18,800 |
+| a padded 250 | 250 | **~42,600** (~11k tokens) |
+
+Two facts about that table matter more than the numbers.
+
+**The themes block has an enforced ceiling and the primitives block does not.**
+`prompt.test.ts` holds the theme catalogue under 8,000 characters and explains
+why. The primitives block is at 15,685 — nearly twice the guarded one — with no
+test naming a limit. That asymmetry is not a decision anybody made; it is the
+ceiling nobody has had to write yet.
+
+**The framework already anticipated this and left the answer in a comment.** The
+theme budget's own failure message says one possibility is *"the starter library
+has grown past what one deployment should register all of."* That is the designed
+answer: **the starter library is a set to choose from, not a set every deployment
+ships.** What is missing is the affordance —
+`createStarterPrimitiveRegistry(additional)` only *adds*, so taking a coherent
+slice means a host hand-filtering `STARTER_PRIMITIVES` with nothing to filter on.
+
+[0114](../decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+is the shape that would fix it. Its `role` vocabulary has one member, `heading`,
+and it says the bar for a second is *"a consumer that cannot answer its question
+from the registry, written down as a finding."* The interpretation prompt is now
+that consumer. Filed for `Loom daily build`.
+
+## The arithmetic to 250
+
+| | today | by 2026-09-19 |
+| --- | --- | --- |
+| primitives | 92 | **~110** — Tier A now, Tier B if the behaviour vocabulary opens |
+| starting compositions | 9 | **~140** |
+| **droppable things** | **101** | **250** |
+
+250 is reachable this week **and every one of them is real** — provided the
+second row does the work. That is also the row that matches what 21st.dev's
+numbers actually count, costs nothing per request, and needs no framework
+decision to start.
+
+The alternative reading of the target — 250 primitives — requires about 140 that
+do not exist, which means splitting things 0052 says not to split and shipping
+shades of one. It would also triple the per-request cost of every page this
+system ever changes, and make the model choose from 250 mostly-identical
+descriptions, which degrades the proposals the demo is built to show.
+
+**Recommendation: hold the vocabulary near 110 and spend the week on
+compositions.**

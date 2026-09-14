@@ -523,6 +523,36 @@ export const LIBRARY_CLASS = {
   pagerNumbers: "loom-pager-numbers",
   /** `loom.link`'s own underline offset, off the element so a container can vary it. */
   link: "loom-link",
+  /**
+   * A `loom.stat` and its three parts, moved off the element and into here so a
+   * second arrangement of the same content model can restyle them.
+   *
+   * This is `loom.milestone`'s lesson applied a second time, and the rule it
+   * rests on is the first mechanic above: **an inline style beats a rule**, so
+   * every property a parent might need to change must not also be set on the
+   * element. A stat that kept its type inline could be put in a chart and would
+   * render its figure at the headline size inside a 12-pixel-wide column.
+   */
+  stat: "loom-stat",
+  statValue: "loom-stat-value",
+  statLabel: "loom-stat-label",
+  statCaption: "loom-stat-caption",
+  /** A stat carrying a magnitude, so only a stat that can be plotted grows a bar. */
+  statPlotted: "loom-stat-plotted",
+  /**
+   * A `loom.stat-chart`: the same stats a grid would print in a row, plotted
+   * against a scale instead.
+   *
+   * **The scale is the whole reason this is here rather than inline.** A render
+   * is a total pure projection of one node, so the chart cannot read its
+   * children's magnitudes and cannot compute a maximum from them. What it can do
+   * is declare the ceiling as a custom property and let each bar work out its own
+   * height against it — custom properties inherit, so the *browser* does the
+   * cross-child arithmetic that the render function is forbidden from doing. It
+   * is the bargain a layout CSS alone can express already makes for the mosaic's
+   * rhythm, and the one a heading's container-query cap makes for its own width.
+   */
+  statChart: "loom-stat-chart",
 } as const
 
 /**
@@ -1592,6 +1622,61 @@ details[open] > summary .loom-marker {
     color: currentColor;
     -webkit-text-fill-color: currentColor;
   }
+}
+.loom-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--loom-spacing-1);
+}
+.loom-stat-value {
+  font-family: var(--loom-heading-family);
+  font-weight: var(--loom-heading-weight);
+  font-size: var(--loom-scale-7);
+  line-height: 1.05;
+  color: var(--loom-accent);
+}
+.loom-stat-label {
+  font-family: var(--loom-body-family);
+  font-size: var(--loom-scale-3);
+  color: var(--loom-fg-default);
+}
+.loom-stat-caption {
+  font-family: var(--loom-body-family);
+  font-size: var(--loom-scale-2);
+  color: var(--loom-fg-muted);
+}
+.loom-stat-chart {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: end;
+  gap: var(--loom-spacing-3);
+  border-bottom: 1px solid var(--loom-border-default);
+  padding-bottom: var(--loom-spacing-2);
+}
+.loom-stat-chart > .loom-stat {
+  display: grid;
+  grid-template-rows: var(--loom-chart-plot) auto auto;
+  align-items: end;
+  gap: var(--loom-spacing-1);
+  min-width: 0;
+}
+.loom-stat-chart > .loom-stat-plotted::before {
+  content: "";
+  display: block;
+  align-self: end;
+  width: 100%;
+  border-radius: var(--loom-radius-sm) var(--loom-radius-sm) 0 0;
+  background-image: linear-gradient(to top, var(--loom-accent-strong), var(--loom-brand-secondary));
+  height: calc(var(--loom-chart-plot) * min(1, max(0, var(--loom-stat-magnitude, 0) / var(--loom-chart-max, 100))));
+}
+.loom-stat-chart > .loom-stat > .loom-stat-value {
+  font-size: var(--loom-scale-4);
+}
+.loom-stat-chart > .loom-stat > .loom-stat-label {
+  font-size: var(--loom-scale-2);
+  color: var(--loom-fg-muted);
+  overflow-wrap: anywhere;
 }
 @media (prefers-reduced-motion: reduce) {
   .loom-halo-trace {

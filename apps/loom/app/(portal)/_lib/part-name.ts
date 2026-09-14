@@ -193,6 +193,24 @@ export const placeNameOf = (node: LoomNode): string => {
 }
 
 /**
+ * The same name, starting a line rather than sitting inside one.
+ *
+ * Every name above is written to be read mid-sentence — *"Deletes the card
+ * “Starter…”"* — and the article is what makes that work. A list row is the
+ * other case: it begins something, and a row beginning with a lowercase article
+ * reads as a fragment of a sentence somebody cut.
+ *
+ * A capital rather than a fourth name. 12 September filed the three shapes a
+ * part is named in and the argument for not consolidating them yet; this adds no
+ * fourth, it shapes the one that already exists. `asSentence` in
+ * `vocabulary.ts` capitalises through this too, so the portal has one answer to
+ * "where does a capital come from" rather than two `slice(0, 1)` calls that
+ * could drift.
+ */
+export const capitalised = (value: string): string =>
+  `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`
+
+/**
  * How a named part reads, as one string.
  *
  * The component renders the two halves as two elements — the words, then the id
