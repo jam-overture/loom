@@ -21240,6 +21240,25 @@ page lands.
 ## 2026-09-12 — the undo interpreter a stateless surface needs is exported, and thirty lines in `(marketing)` can go
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-25-putting-it-back`** — the thirty lines are gone.
+`app/(marketing)/_lib/adapt/undo.ts` now shapes a `ComputedInverse` in one
+exported four-line function and hands it to `inverseInterpreter`, so the
+portal's undo and the front door's are one implementation of the head check.
+`FRONT_DOOR_UNDO_INTERPRETER` stays named here, which is the half you said to
+keep. The decline wording did change with it — *computed against revision N,
+and this tree is at M* rather than *written against … and this page is at* —
+and it reaches no reader: `runUndo` turns a declined undo into *"The page has
+moved since, so this undo no longer fits it"* before anything is printed, so
+the detail was never on the page. No field needed.
+
+**It was done on the run that opened the file for another reason**, which is
+the discipline rather than a delay: the deletion is about undo, and so is the
+page this branch builds. A branch carrying it beside the *who asked* work would
+have been two subjects.
+
+*Original status below.*
+
+**Status:**
 open — the seam is built by `framework-30-the-undo-already-in-hand`, and the
 deletion is yours
 
@@ -22708,3 +22727,97 @@ record says so in as many words and names the revisit condition — when somethi
 actually wants to count *slow* apart from *down*. So this is a page change and
 not a type change: a third `reached` member, and a row whose `when` is the
 integration that never replies, which is the one the portal lane lost a run to.
+
+---
+
+## 2026-09-14 — five of nine pages are off the bar now, and the bar still cannot group
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — not a new finding, a second measurement on the one filed on 12 September
+
+The 12 September entry — *the bar cannot group, and `loom.nav` takes a flat run
+of `loom.link` children with nothing in the library that opens* — was filed at
+three of seven. The 13 September entry recorded four of eight. `/putting-it-back`
+is the ninth page and the fifth off the bar.
+
+**So the bar now carries four of the nine pages**, and the trend is the finding.
+Each decision is defensible on its own and the guarantee behind them still holds
+— `chrome.test.ts` holds *off the bar* to mean *in the footer's map, marked as
+the page the reader is on* — and the aggregate is a top bar that stopped being a
+map of the site two pages ago.
+
+Nothing here asks for the count to change. It is the number the 12 September
+finding asked to be told about, recorded on the run that moved it, so whoever
+picks the work up knows what it is worth: a menu that opens would let nine pages
+sit under three headings, which is what `supabase.com` does with more pages than
+this and what the bar was measured against on #166.
+
+---
+
+## 2026-09-14 — `loom.table` is the same shape of problem on a phone as `loom.comparison-table`, measured
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — the primitive is behaving correctly and a phone reader is paying for it
+
+The 13 September entry records that `loom.comparison-table` is four subjects wide
+on a laptop and one subject wide on a phone. `/putting-it-back` puts two
+`loom.table`s on a page and the same thing happens, so this is the measurement
+rather than a second complaint.
+
+At 390px, measured in the browser rather than eyeballed:
+
+| the band | table width | cell width | row height |
+| --- | --- | --- | --- |
+| four round trips, four columns | 422px, scrolling inside its own edge | 98–121px | 144px |
+| the same trip weighed twice, three columns | 306px | 98–104px | **504px** |
+
+Both are *correct*. `scrollWidth` on the page is exactly 390 at 390, which is the
+20 August phone-scrollbar finding being honoured, and the second table does not
+even need to scroll. The cost is the second row of that table: three columns of
+sentences at a hundred pixels each is a single row **504 pixels tall**, which is
+most of a phone screen for one comparison.
+
+**Worked around rather than avoided, for this page.** The band is left out
+entirely when no run produces the case, the sentence above it carries the
+argument in words, and the first table's figures are short enough to survive the
+squeeze. That is a mitigation, not a fix.
+
+**What a fix might be**, offered rather than prescribed and the same shape as the
+one offered on 13 September: a table could stack on a narrow viewport — one block
+per row, each listing its columns down the page — the way every pricing table a
+reader has already used does. A static stylesheet decision rather than a prop
+(0008), which is what already works for `loom.nav`'s collapse.
+
+**Nothing is blocked on this.** The page is shipped and both tables are good on
+the viewport they were designed for.
+
+---
+
+## 2026-09-14 — five of this site's nine pages have no share card, and the layout's own note says they all do
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — filed against my own lane so the next run does not re-derive it
+
+`app/(marketing)/layout.tsx` says, of the document's defaults, that *"every page
+replaces the title, the description and everything a shared link unfurls as, in
+its own `generateMetadata`."* Three pages do — `/`, `/how-it-works` and
+`/the-record` — and `/putting-it-back` is the fourth, because this run wrote it
+that way on purpose.
+
+**Five do not.** `/the-rules`, `/who-can-ask`, `/when-it-goes-wrong`,
+`/what-you-run` and `/your-components` each export a static `metadata` with a
+title and a description and nothing else, so an address on any of them unfurls
+with no picture at all. `publishedCard` and `shareImageHref` are already generic
+over `SiteRoute` and `/share-image` already resolves any route by path, so each
+is the same twelve-line `generateMetadata` this run wrote — no new machinery, and
+the cards exist the moment they are asked for.
+
+It is a drift of exactly the kind this lane keeps recording: the newer pages
+copied the shape of the page beside them rather than the shape the comment
+describes, and nothing was red because nothing asserts it. **So the fix is a test
+as much as an edit** — `share.test.ts` holds what a card *says* and nothing holds
+that a route emits one, which is why five could stop.
+
+Not done here. It is about how a page is announced rather than about putting a
+change back, and a branch carrying both is a branch nobody reviews. First item
+for the next run.

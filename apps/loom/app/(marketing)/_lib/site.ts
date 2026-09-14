@@ -291,6 +291,60 @@ export const WHO_CAN_ASK: SiteRoute = {
 }
 
 /**
+ * The page for the fourth quarter of the one thing this project says is the
+ * difference.
+ *
+ * The recorded positioning is four clauses long: Loom can say **what changed,
+ * who asked, which rule allowed it, and how to put it back.** Three of those
+ * have had a page of their own since August. The fourth had a sentence in a
+ * panel — *putting it back restores every word rather than writing them out
+ * again* — and the only place it was ever checked was a test file, which is the
+ * one audience it does nothing for.
+ *
+ * So this page runs it. Every request the front door offers that changes
+ * anything is applied and then put back while the page is being built, and what
+ * is printed is what came back: how much each change moved, what putting it back
+ * was weighed as, what the rules said about *that*, and whether the page
+ * afterwards is the page the visitor arrived on — compared piece by piece and
+ * name by name, because *the same pieces, not new ones that read the same* is a
+ * claim about names and a count cannot tell those two apart.
+ *
+ * **Two of its three bands are the ones a reader does not expect**, and neither
+ * was arranged for. Putting back a change the rules had already asked about asks
+ * about it again, because moving a protected band back is still moving a
+ * protected band. And putting something back is weighed on what *it* does rather
+ * than handed the verdict of the change it reverses — so undoing an addition
+ * carries a removal's weight, and the site can show a reader the counter-case to
+ * *undo is always safe* on its own front door.
+ *
+ * It is a description of code rather than a position, like every page here and
+ * unlike anything about audience or price, so it did not wait on the licence
+ * line. Nothing on it says what Loom costs or who it is for.
+ *
+ * **It is `inMenu: false`, and that is the one judgement call in it.** See the
+ * flag's note on `HOME`: the bar is the eight items the maintainer asked about
+ * on #166, and the honest reading of this page is that it is the second question
+ * a reader of `/the-record` asks rather than something anybody arrives wanting —
+ * exactly as `/who-can-ask` is the second question of `/the-rules`. That now
+ * makes five of nine pages off the bar, which is worse than four of eight and is
+ * a measurement the 12 September finding asked to be told. The good answer is
+ * still a bar that groups, which no primitive in the library can do.
+ */
+export const PUTTING_IT_BACK: SiteRoute = {
+  path: "/putting-it-back",
+  label: "Putting it back",
+  /**
+   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
+   * only the half of a title that is exactly the wordmark, so the name inside a
+   * clause prints twice on the card.
+   */
+  title: "Putting it back — the change that reverses a change, written before you ask for it",
+  description:
+    "Every change that lands on a Loom page comes with the change that reverses it, worked out at the same moment. Pressing undo puts the same pieces back rather than building a page that reads the same — and your rules weigh it like anything else.",
+  inMenu: false,
+}
+
+/**
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
@@ -306,8 +360,16 @@ export const WHO_CAN_ASK: SiteRoute = {
  * reader who has not yet been told a change is weighed at all has no use for
  * the news that it is weighed differently for a timer.
  *
- * **Then the objection**, which arrives the moment a reader believes the four
- * above rather than before it: *and when it doesn't work?* It sits fifth
+ * **`/putting-it-back` sits directly after the record**, for the same reason and
+ * in the same shape: it is the second half of one question rather than a subject
+ * of its own. The record page says what you are left holding; this one says that
+ * what you are holding includes the way back, and shows every request on the
+ * front door being put through and returned. A reader who has not yet been told
+ * that anything is written down has no use for the news that one of the things
+ * written down is reversible.
+ *
+ * **Then the objection**, which arrives the moment a reader believes the five
+ * above rather than before it: *and when it doesn't work?* It sits where it does
  * because a reader who has not yet understood that a change is weighed at all
  * has no use for the list of ways one can fail to happen.
  *
@@ -330,6 +392,7 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
   THE_RULES,
   WHO_CAN_ASK,
   THE_RECORD,
+  PUTTING_IT_BACK,
   WHEN_IT_GOES_WRONG,
   WHAT_YOU_RUN,
   YOUR_COMPONENTS,
