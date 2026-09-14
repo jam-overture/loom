@@ -77,10 +77,38 @@ This is the whole list; it is short, and the shortness is the finding.
 | **paging through a run of things** | a page-through control | `loom.link-trail` goes *out* of a page, `loom.nav` goes *across*; nothing goes *along*. By [0054](../decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md) this is probably `loom.link` plus an arrangement |
 | **the empty state** | what a region says when it holds nothing | with the binding seam ([0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)) a list can now legitimately arrive empty, and every surface will otherwise invent its own "no results yet" |
 | **the waiting state** | a placeholder with the shape of the thing | same reason. A bound region that has not answered has nowhere to say so |
-| **a consent checkbox / a radio group** | two members of `FIELD_TYPES` | **not primitives.** `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap, and it is two enum members, not two files |
+| **a consent checkbox / a radio group** | ~~two members of `FIELD_TYPES`~~ — **wrong, see below** | `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap |
 
 **Tier A is five primitives and one enum widening.** That is the honest total of
 what this library is missing that it could build this afternoon.
+
+### The correction the last row needed
+
+Counted as "two strings, not two files". That is right for one of them and wrong
+for the other, and it was found by building both.
+
+- **`checkbox` is genuinely two characters of enum.** `loom.field` falls through
+  to `<input type={type}>`, so it shipped on #294. Its label wants to sit
+  *beside* the box rather than above it, which is a layout change the field has
+  not had.
+- **`radio` is not, and is still unbuilt.** A radio group is one
+  `<input type="radio">` **per choice**, and the choices are `loom.option`
+  children that render themselves. That works for `select` because an
+  `<option>` inside a `<select>` is what an option *is*; a radio group needs each
+  choice to render as an input and a label, and **no node can know it is inside a
+  radio group** — a render is a total pure projection of one node
+  ([0008](../decisions/0008-the-renderer-is-a-total-pure-projection.md)).
+
+  Two runs reached that independently on 14 September. #294's account is the one
+  to read, and it closes the three escapes: **React context is unavailable
+  because these are Server Components**, `cloneElement` over `children` reaches
+  elements the render seam owns, and CSS cannot carry it because an element's
+  *tag* is not a custom property. It offers three shapes, smallest first, with a
+  `loom.choice` primitive as the boring one.
+
+**Nothing is blocked**: a form that needs one of several uses a `select`. But it
+is one enum member and one open design question, not two strings, and this
+paragraph is here so the next run does not re-count it as cheap.
 
 ## Tier B — blocked on the behaviour vocabulary
 
