@@ -164,6 +164,17 @@ question is open, green once it has landed, matching the ring on the stage.
 `pnpm install && pnpm verify` — **green, exit 0**. Numbers in the pull request
 description, read off the run rather than remembered.
 
+**It was not green the first time, and the failure was mine.** `pnpm verify`
+exited 2 on a typecheck error in a test I had written twenty minutes after the
+last time I ran `tsc`: `heldProposalId: undefined` on a fixture, which
+`exactOptionalPropertyTypes` refuses — a discarded ask has no proposal, it does
+not have a blank one. The file already had the right pattern three fixtures
+above (`ANSWERED` drops the key rather than blanking it) and I did not reach for
+it. Fixed, and re-run from the top rather than from the failing step. The lesson
+is small and worth writing down: **typecheck after the last edit, not after the
+first** — the app suite ran green throughout, because a type error in a fixture
+is invisible to the runner that executes it.
+
 The demo lane's own suite goes from **29 files / 360 tests** to **29 files /
 377 tests**. Seventeen added, **one rewritten, none weakened**: the renamed
 component's test file carries all five of its original assertions verbatim and

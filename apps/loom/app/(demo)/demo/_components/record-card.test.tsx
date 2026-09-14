@@ -1030,7 +1030,17 @@ describe("the landed half of a card", () => {
    * it under a badge saying nothing happened.
    */
   it("says nothing about what a discarded ask did", () => {
-    render(<RecordCard record={{ ...HELD, outcome: "discarded", heldProposalId: undefined, did: DID }} />)
+    /* The hold is dropped rather than set to `undefined`, which
+     * `exactOptionalPropertyTypes` refuses and `ANSWERED` above already avoids
+     * the same way: an answered ask has no proposal, it does not have a blank
+     * one. */
+    const discarded: ChangeRecord = (({ heldProposalId: _gone, ...rest }) => ({
+      ...rest,
+      outcome: "discarded" as const,
+      did: DID,
+    }))(HELD)
+
+    render(<RecordCard record={discarded} />)
 
     expect(screen.queryByText(/This came off the page/)).toBeNull()
   })
