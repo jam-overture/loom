@@ -152,8 +152,16 @@ The document head, on the running build, for each of the five:
 
 The cards above are those five addresses fetched from that build, at the
 1200×630 the tag declares. The origin reads `localhost:3000` because that is
-where they were drawn; on the preview it is the preview's own host, which is
-what `siteOrigin()` is for.
+where they were drawn.
+
+**On the preview it should be the preview's own host, and I could not check
+that.** `siteOrigin()` prefers `LOOM_SITE_ORIGIN`, then `VERCEL_URL`, and the
+deployment for this branch went green while the run was still open — but
+`*.vercel.app` is not in the sandbox's allowed domains, so fetching it returns
+nothing at all. That is the policy working as intended rather than anything
+broken, and it is filed. Every screenshot and every measurement above is from
+the local build; the preview is unverified from here, as it is in every report
+this project has published.
 
 Every card is in the renderer's own face rather than Geist, as every card this
 lane has published has been — `ImageResponse` draws without fetching a font,

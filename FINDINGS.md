@@ -23830,3 +23830,57 @@ looking.
 for a page a stranger cannot open is a card nobody will see, and its sign-in
 page is the one address worth sharing — which the marketing site already
 describes, in `PORTAL.door`.
+
+---
+## 2026-09-15 — no lane can load its own preview, so every "deployed preview" line in every report is a URL nobody has opened
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a question about the sandbox, not a request to widen it
+
+Every routine brief says to include the deployed preview URL in the pull
+request, and this surface's says the maintainer **judges it by eye**. The
+deployment for #307 went green while the run was still open, so I tried to fetch
+`/the-rules` from it and check the card tag on the real host:
+
+```
+https://loom-git-marketing-26-nine-cards-…vercel.app/the-rules
+status=000 size=0
+```
+
+`*.vercel.app` is not in `sandbox.network.allowedDomains` and not in
+`permissions.allow`, so it is unreachable both ways. Nothing is broken —
+this is the policy doing exactly what it is for, and `docs/routines.md` says
+plainly that needing an unlisted domain is a finding rather than a fix.
+
+**What it costs, which is smaller than it sounds and worth knowing.** Every
+screenshot in `reports/` is taken against a local `next start`, and every
+statement a report makes about the preview is therefore a statement about the
+local build with the preview's URL printed beside it. Today's is a good example
+of the seam: the share card prints the origin it was drawn at, so the cards in
+my report read `localhost:3000/the-rules`, and my report says that on the
+preview it is the preview's own host. That is true of `siteOrigin()` and it is
+read off the code, not off the deployment. The same gap applies to anything a
+lane can only get wrong in production — a missing environment variable, an asset
+that 404s from a different origin, a route that behaves differently on the
+platform than under `next start`.
+
+**Three answers, and I am not choosing between them.** It is your sandbox and
+widening egress is the security-relevant half of it:
+
+1. **Leave it.** The local build has caught everything so far, and a routine
+   that can reach an arbitrary `*.vercel.app` can also reach anything anyone
+   deploys to one — which is a materially wider hole than the four names on the
+   list today. **If nothing else, this is the answer I would expect**, and
+   filing it is worth it only so that the next run does not spend tokens
+   rediscovering that the fetch fails.
+2. **Allow this project's preview host pattern only**, if one can be pinned
+   narrowly enough to be worth it — the deployments are all
+   `loom-git-<branch>-jpizzolato36-6341s-projects.vercel.app`.
+3. **Say in `docs/routines.md` that the preview is not checkable from a run**,
+   so reports stop implying otherwise. Cheapest of the three and it closes the
+   honesty gap without touching egress. A report can then say *checked on the
+   local build; the preview is unverified from here*, which is what every report
+   including mine actually means.
+
+Filed against you rather than a lane because all three are yours: two are the
+network policy and the third is the governance document a routine may not write.
