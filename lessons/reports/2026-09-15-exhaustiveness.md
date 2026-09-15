@@ -5,9 +5,17 @@
 paragraph in [`lessons/README.md`](../README.md), four pinned expectations in
 this lane's own tests, one finding filed in `FINDINGS.md` and one closed.
 
-`pnpm install && pnpm verify`: **green, exit 0.** Runtime 2,572 tests across 149
-files; application 4,254 tests across 248 files; 625 findings, 0 malformed; 103
-prerendered pages, 786 text junctions, 0 run together.
+`pnpm install && pnpm verify`: **green, exit 0.** Runtime 2,620 tests across 150
+files; application 4,377 tests across 251 files; 637 findings, 0 malformed; 104
+prerendered pages, 828 text junctions, 0 run together.
+
+Those are the numbers after merging `main`, which moved seven commits ahead while
+this ran (#302–#308). Verify was green before the merge too — 2,572 and 4,254 —
+and the merge was taken rather than left because `FINDINGS.md` is the most
+conflicted path in the repository and this branch adds eighty lines to the top of
+it. Nothing the merge brought in touches a module these exercises import: the
+`src/` half of it is `primitives/` and `signals/`, and `transcripts.test.ts`
+re-ran every Try it program against the merged checkout and found no drift.
 
 **No test was added or removed.** The four changed assertions are all pins that
 every new set moves and that say so in their own comments — the set letters in
