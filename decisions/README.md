@@ -241,6 +241,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0155](0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md) | A container may only add to its children what they left unspoken, so a shared treatment lives in a class and never on the element | Accepted | §4b |
 | [0156](0156-the-two-states-a-bound-region-is-in-are-primitives-and-not-props-on-every-container.md) | The two states a bound region is in are primitives, and not props on every container | Accepted | §4b |
 | [0157](0157-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md) | The catalogue's public surface is the list and the lookup, not every band by name | Accepted | §4b |
-| 0158 | *No record on this branch* | — | — |
+| [0158](0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md) | Counting a window of reader signals and forgetting it are one operation | Accepted | §4c (reader signals) |
 | 0159 | *No record on this branch* | — | — |
 | [0160](0160-a-prop-that-unblocks-a-rendering-names-the-content-and-never-the-layout.md) | Where a rendering depends on a fact about the content that no rule can observe, the tree declares the fact and never the layout | Accepted | §4b |
