@@ -42,10 +42,33 @@ registered ([0057](../decisions/0057-a-preset-is-a-deterministic-interpreter.md)
 [0120](../decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md))
 and adds no type.
 
-## Tier A — genuinely missing, buildable today
+## Tier A — **closed, 14 September**
 
-Nothing here needs a framework change. This is the whole list; it is short, and
-the shortness is the finding.
+Nothing here needed a framework change, and all of it has now shipped. The table
+below is kept as written on 13 September, with what closed each row, because the
+*reasoning* for why each was missing is still the useful part. **Do not rebuild
+these.**
+
+| row | closed by |
+| --- | --- |
+| a figure drawn from numbers | `loom.stat-chart` over `loom.stat`, #289 |
+| a stat that carries its trend | `magnitude` on `loom.stat`, #289 — the figure now plots, which is what the row was for |
+| paging through a run of things | `loom.link-pager`, #294 |
+| the empty state | `loom.empty-state`, #294, and `cause` on it, #301 |
+| the waiting state | `loom.waiting-state`, #294 |
+| a consent checkbox | `checkbox` in `FIELD_TYPES`, #294 |
+| a radio group | **not shipped, and not cheap** — see the correction below |
+
+> **Why this heading was worth editing.** On 14 September two runs of
+> `Loom primitives` spent the same afternoon on this list: a scheduled run
+> finished it on #294 while an interactive session was building its own empty
+> state for #300, which was withdrawn. Nothing in the repository recorded that a
+> run was *working on* an item — only that one was done — and the list read as
+> open to both of them. Marking a tier closed the moment it closes is the
+> cheapest half of that, and it is why this section now leads with a verdict
+> rather than with a list.
+
+This is the whole list; it is short, and the shortness is the finding.
 
 | | what it is | why nothing covers it |
 | --- | --- | --- |
@@ -54,10 +77,38 @@ the shortness is the finding.
 | **paging through a run of things** | a page-through control | `loom.link-trail` goes *out* of a page, `loom.nav` goes *across*; nothing goes *along*. By [0054](../decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md) this is probably `loom.link` plus an arrangement |
 | **the empty state** | what a region says when it holds nothing | with the binding seam ([0058](../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)) a list can now legitimately arrive empty, and every surface will otherwise invent its own "no results yet" |
 | **the waiting state** | a placeholder with the shape of the thing | same reason. A bound region that has not answered has nowhere to say so |
-| **a consent checkbox / a radio group** | two members of `FIELD_TYPES` | **not primitives.** `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap, and it is two enum members, not two files |
+| **a consent checkbox / a radio group** | ~~two members of `FIELD_TYPES`~~ — **wrong, see below** | `loom.field` takes `text email tel url number date textarea select`; a contact form that cannot ask for consent is a real gap |
 
 **Tier A is five primitives and one enum widening.** That is the honest total of
 what this library is missing that it could build this afternoon.
+
+### The correction the last row needed
+
+Counted as "two strings, not two files". That is right for one of them and wrong
+for the other, and it was found by building both.
+
+- **`checkbox` is genuinely two characters of enum.** `loom.field` falls through
+  to `<input type={type}>`, so it shipped on #294. Its label wants to sit
+  *beside* the box rather than above it, which is a layout change the field has
+  not had.
+- **`radio` is not, and is still unbuilt.** A radio group is one
+  `<input type="radio">` **per choice**, and the choices are `loom.option`
+  children that render themselves. That works for `select` because an
+  `<option>` inside a `<select>` is what an option *is*; a radio group needs each
+  choice to render as an input and a label, and **no node can know it is inside a
+  radio group** — a render is a total pure projection of one node
+  ([0008](../decisions/0008-the-renderer-is-a-total-pure-projection.md)).
+
+  Two runs reached that independently on 14 September. #294's account is the one
+  to read, and it closes the three escapes: **React context is unavailable
+  because these are Server Components**, `cloneElement` over `children` reaches
+  elements the render seam owns, and CSS cannot carry it because an element's
+  *tag* is not a custom property. It offers three shapes, smallest first, with a
+  `loom.choice` primitive as the boring one.
+
+**Nothing is blocked**: a form that needs one of several uses a `select`. But it
+is one enum member and one open design question, not two strings, and this
+paragraph is here so the next run does not re-count it as cheap.
 
 ## Tier B — blocked on the behaviour vocabulary
 

@@ -70,6 +70,31 @@ const props = z
      * whitespace reads as a rendering fault rather than as a considered space.
      */
     stature: z.enum(["compact", "standard"]).optional(),
+    /**
+     * **Which nothing this is**, and the only prop here a sighted reader cannot
+     * see.
+     *
+     * This file's own opening quotes the half of 0058 that motivated it — *a
+     * source with nothing to report answers `ready` with an empty list* — and
+     * the sentence ends **"rather than failing"**. That record is explicit that
+     * the two are different answers and that *"collapsing those two is the
+     * mistake"*, and until this prop the library collapsed them at the last
+     * step: a region that could not load rendered identically to one that was
+     * legitimately empty, and a reader who was not looking at it was told
+     * nothing either way.
+     *
+     * `outline: "solid"` already lets a page *look* like it is reporting
+     * something. What it cannot do is **say so**, which is the half that
+     * reaches somebody using a screen reader — so `unavailable` is announced as
+     * a `role="status"` and `empty` is not. A region with nothing in it yet is
+     * not an event; a region that failed to load is.
+     *
+     * It changes no node, so it is a prop under the granularity test, and it is
+     * two members rather than a `failed: boolean` for the reason the enum above
+     * gives: a third answer is thinkable — a region a viewer is not permitted to
+     * see is neither empty nor broken — and a boolean could not hold it.
+     */
+    cause: z.enum(["empty", "unavailable"]).optional(),
   })
   .strict()
 
@@ -102,6 +127,12 @@ export const loomEmptyState = definePrimitive({
       "div",
       {
         ...loom.editable,
+        /**
+         * Polite rather than assertive: it waits for a pause instead of cutting
+         * across what is being read. A region that failed to load is worth
+         * knowing about and is not worth interrupting a sentence for.
+         */
+        ...(given.cause === "unavailable" ? { role: "status" } : {}),
         style: {
           display: "flex",
           flexDirection: "column",
