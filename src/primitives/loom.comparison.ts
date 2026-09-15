@@ -100,12 +100,28 @@ const MARKS: Readonly<Record<MarkKey, { glyph: string; className: string }>> = {
 }
 
 /**
- * A criterion column that is wide enough to read and value columns narrow
- * enough that four of them fit a laptop. Together they are what makes the band
- * overflow its wrapper on a phone rather than crushing itself into it — the
- * intrinsic answer to a narrow screen, with no width query to declare (0079).
+ * **The width this cell will not go below is not here any more**, and where it
+ * went is [0155](../../decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)'s
+ * rule applied to the second place it has been found.
+ *
+ * It used to be `min-width: 7rem`, set inline, one line below this comment. The
+ * comment argued that the pair of minimums — this one and the criterion
+ * column's — were "the intrinsic answer to a narrow screen, with no width query
+ * to declare", and half of that is still true: the arithmetic belongs to the
+ * content and not to a breakpoint. The half that was wrong is that it never
+ * varies. A criterion column sized to read as a sentence at 1280 is a criterion
+ * column that leaves 44 blank pixels of the next subject at 390, and the band
+ * spent a month telling a phone reader there was one subject when there were
+ * four.
+ *
+ * An inline style beats a rule, so while these two numbers were here the file
+ * that draws the band could not reach either of them. They are now
+ * `.loom-compare th, .loom-compare td` and `.loom-compare .loom-compare-key` in
+ * `stylesheet.ts`, at the same values, and the narrow rendering is a media
+ * query over there. **Do not set a width on this element again** — the failure
+ * mode is silent, and the test that would catch it asserts the absence rather
+ * than the presence.
  */
-const VALUE_MIN_WIDTH = "7rem"
 
 export const loomComparison = definePrimitive({
   type: "loom.comparison",
@@ -156,7 +172,6 @@ export const loomComparison = definePrimitive({
         ...loom.editable,
         ...(subject ? { scope: "col" } : {}),
         style: {
-          minWidth: VALUE_MIN_WIDTH,
           /**
            * No padding here. Density is the table's decision — one band is a
            * spec to scan and another is a page to read, and neither is a
