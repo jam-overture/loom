@@ -8,6 +8,97 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of the unit that landed beside it
+
+`demo-17-what-the-record-did` gives a landed card the sentence it never had:
+what the change did to the page, in the words on the page. For an insert, a
+remove and a move it is specific, because those operations have a subtree and a
+subtree has words —
+
+> This came off the page, and everything under it went too. **“3,400” “24” “92%”**
+
+**A `configure` has none, and both of the demo's unattended presets are one.**
+*Re-theme the whole page* and *Repaint the top band* each read:
+
+> How one part of the page looks changed. Not a word on it changed.
+
+Which is true, and is the same string in both directions. The two presets are
+**toggles** — `backdrop` swaps `aurora` for `panel` and back, `palette` swaps
+the theme ids and back — so a visitor who presses either one twice gets two
+cards that make opposite changes to the page and are identical to the word.
+That was true of the whole card before this unit and is now true of one line of
+it, which is progress and is not the finish.
+
+**Why it was not fixed here.** Naming the direction means naming the values, and
+the values are `aurora` and `panel` — the registry's own enum, deliberately
+excluded from the quoted words by `settingsOf`, because a setting is not
+something a visitor reads off the page. So the fix is not "quote the prop", it
+is a decision about whether this surface has a plain-language name for a
+setting, and that is a vocabulary question rather than a rendering one.
+
+**Three shapes, none obviously right:**
+
+1. **The registry names its own choices.** A `choice` gains a human label, and
+   the card reads *"the top band went from the soft wash to the flat panel"*.
+   Truest, and it is a `Loom primitives` change, not this lane's.
+2. **The card says which press this was.** *"Back to how it was before your
+   last change"* when the delta returns the node to a value an earlier record
+   moved it off. Local to this lane, needs no vocabulary, and only works where
+   the history is in hand — which on this surface it is.
+3. **Leave it.** A visitor who presses the same button twice can see the page
+   change back, and the mark is drawn both times.
+
+**Recommendation: 2**, if the maintainer wants it. It is the only one of the
+three that is this lane's to build, and it answers the question a visitor
+actually has on the second press, which is *did that do anything*.
+
+---
+## 2026-09-14 — `actions.ts` is the one file in this lane a test cannot reach, and it is now load-bearing
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
+by putting the defect back, which is the only reason it is known
+
+Every unit in this lane is checked by restoring each defect in turn and
+confirming the suite catches it. On `demo-17-what-the-record-did`, four of five
+were caught by exactly the test that should catch them. **The fifth was caught
+by nothing:**
+
+| defect restored | what fails |
+| --- | --- |
+| `draftFrom` stops carrying the record's account forward | 1 test |
+| the tense table is ignored and every reading comes back present-tense | 8 tests |
+| the frozen reading is printed without checking the outcome | 2 tests |
+| a landed change is drawn in the waiting colour | 1 test |
+| **`actions.ts` stops telling the undo path it is restoring** | **nothing — 377 passed** |
+
+`pipeline.test.ts` covers the write path end to end and it is a good test, but
+it *replicates* what the server action does rather than calling it: it reads the
+head, calls `commitIntent`, and hands the result to `recordFromEvents` itself.
+So every argument `actions.ts` passes is asserted in the test's own copy of the
+call and nowhere in the file that ships.
+
+**What that costs, concretely.** Delete `true` from one call in `actions.ts` and
+the demo's payoff silently regresses: press *Put it back*, allow it, and the
+card reads *"This went onto the page, and nothing already on it was touched"*
+over three figures the visitor has just watched come back. Green suite, shipped
+page, the one frame this surface exists for, said backwards.
+
+This is not new — `actions.ts` has never had a test — but it was cheap while the
+file only forwarded form fields to the runtime. It now carries two decisions of
+its own: which tree a change is judged against, and which direction it is going.
+
+**The shape that would fix it** is not a mock of `next/cache` and `cookies`. It
+is moving the two decisions out of the action and into `_lib/`, where the
+pipeline test can call the same function the action calls rather than a copy of
+it. `assessedAgainst` is already a named function; it is on the wrong side of
+the `"use server"` boundary. Left for the next run rather than folded into this
+one, because it is a refactor with its own argument and this unit was already
+five files.
+
+---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
@@ -89,7 +180,10 @@ wrong one gives a plausible number.
 ## 2026-09-14 — the raw signal buffer has no retention, so it grows until someone notices
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — a gap this lane left on purpose and must close next
+**closed by `framework-35-the-window-that-empties`** — `collectReaderSignals`
+empties it, and the last paragraph below turned out to be wrong about the shape;
+[0158](decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+says why and is the correction
 
 `docs/signals.md` rule 5 and
 [0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)
@@ -705,16 +799,23 @@ two presses. No reference gallery can tell you that a card has rendered twice.
 ## 2026-09-12 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, twenty-two days on
 
 **Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
-open — re-verified on this branch rather than re-dated
+**closed — fixed on `main`**, verified on `f62b9bc` by
+`demo-17-what-the-record-did` (14 September)
 
-Line 19, verified on `140f150` this run:
+Line 19, verified on `140f150` when this was filed:
 
 > Eighteen primitives are registered and the demo is live at
 > `apps/loom/app/(portal)/portal/demo`.
 
 It moved to a public `/demo` on 21 August. `rollout.md` names this lane the
 conversion artifact for launch, so the one document saying what the demo is *for*
-is the one still pointing at where it was. Eighth consecutive run to say so.
+was the one still pointing at where it was. Eighth consecutive run to say so.
+
+**It now reads `apps/loom/app/(demo)/demo`.** Closed here rather than re-filed;
+the three earlier copies of this entry below are the same finding and are closed
+by the same fix. **Nine runs of this lane filed it and the tenth is the one that
+got to delete it** — which is the argument for the channel working, and also for
+re-verifying before re-filing rather than after.
 
 ---
 
@@ -22809,8 +22910,9 @@ runtime's, and it is not finished.
 
 ## 2026-09-11 — a card is named by its heading *and* its body, and the body crowds the heading out
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-cosmetic, and the first thing a reader's eye lands on
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-27-named-by-what-it-leads-with` on 14 September — and neither candidate
+rule survived contact, for the reason the entry said it would
 
 `saidBy` joins every text run under a node with a space, which is right and was
 found the hard way — concatenating them produced *the card “Every change is a
@@ -22835,6 +22937,36 @@ more than one", and they disagree on a card holding two paragraphs.
 
 `saidBy`'s current behaviour is load-bearing for `page-name.ts` as well, so
 whoever takes this should read both callers before changing the join.
+
+**How it was decided, 14 September.** Neither candidate rule survived contact,
+and for the reason this entry half-saw: both were written about the *number* of
+runs, and the case that separates a name from a mangling is not a count. A
+paragraph holding *"Free returns on"* and a link saying *"everything"* has two
+runs and one sentence; a card holding a heading and a paragraph has two runs and
+two things. Counting cannot tell them apart, and either rule truncates the
+paragraph mid-sentence.
+
+What decides it is whether the node says anything **itself**:
+
+> A part that says something itself is named by everything it says. A part that
+> says nothing itself is named by the first thing inside it that does.
+
+A direct text child makes a node a passage whatever else it holds, so the inline
+link stays inside the sentence. A node with no text of its own is a container,
+and it is named by the first child that says anything — recursively, which is
+what makes a page lead with its card's heading rather than needing a rule per
+depth, and which lets it skip a silent first child rather than coming back empty
+at an image.
+
+**`saidBy` is gone rather than kept beside the new rule.** The warning above was
+right that `page-name.ts` was load-bearing, and wrong about the direction:
+`pageNameOf` never called `saidBy` at all: it used the runtime's `textOf`, which
+concatenates. A heading re-authored into two runs was therefore `Autumnarrivals`
+in the largest text on the screen while every sentence below it said *Autumn
+arrivals* — the same defect of 10 September, surviving in the one caller that
+had never been looked at. Both callers now read `leadOf`, so there is one answer
+to *what does this part say* rather than two that had agreed only by coincidence,
+on headings that happened to hold a single run.
 
 ---
 
@@ -23865,3 +23997,193 @@ pixels wide and scrolling, which is trading a measured defect for a new one. CSS
 cannot see the difference between a cell holding a sentence and a cell holding a
 date, so something has to say which it is, and the only thing that can is the
 tree.
+## 2026-09-14 — the buffer has a drain and no filler: nothing in the application receives a batch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — deliberately not built in `framework-35`, because it is a public write
+endpoint and deserves a decision rather than a file
+
+`collectReaderSignals` now empties the buffer and `pnpm --filter @loom/app
+signals:collect` runs it. `ingestReaderSignals` has been published since #295
+and **no route handler calls it**, so the buffer is never filled: on `main`
+today a collection run finds nothing and correctly says so.
+
+Building the endpoint at the end of the run that built the drain would have been
+the obvious thing and it is the wrong thing. Everything else in this subsystem
+is written by a deployment's own server. **This one is written by any browser
+that can reach the URL**, which is a different kind of surface and the only one
+Loom has:
+
+- **Who may post.** A published page is public, so the endpoint is public — a
+  session check is not available. `parseReaderSignalBatch` already refuses a
+  malformed batch and `view.ts` refuses anything but 32 hex characters, so what
+  gets through is well-formed and anonymous. It is still an unauthenticated
+  write to the largest table in the database.
+- **How often.** `MAX_BATCHES_PER_DELIVERY` caps one delivery at 50 and nothing
+  caps deliveries. A rate limit keyed on what, given that 0146 forbids anything
+  that identifies the sender, is the actual question, and it is the one I did not
+  want to answer in a hurry. The nearest existing shape is
+  `(portal)/_lib/auth/attempts-postgres.ts`.
+- **Where it lives.** `sendBeacon` posts to a URL the host configures, so the
+  path is a deployment's choice rather than a framework constant — but a
+  deployment with no opinion needs a default that works, and a default that
+  works is a route in this application.
+- **Whether an unconfigured deployment refuses.** Signals are off by default and
+  an unaddressed render is byte-identical (0136). An endpoint that accepts
+  batches for a deployment that never asked for them is a table filling up for
+  no reason, so the switch that turns broadcasting on probably has to be
+  readable by the endpoint too.
+
+**Nothing is blocked by this today.** The drain, the counters and the tally
+reads are all real and testable without it, and `prototypes/ski-apparel` has
+been the end-to-end example all along. What is blocked is a *live* deployment
+measuring anything, and the portal's step 4 screen having real rows rather than
+the shape of rows.
+
+---
+
+## 2026-09-14 — the tallies lag the buffer by a window, and a screen that does not say so will look broken
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+open — a property of step 4's input, not a defect
+
+The entry above this morning listed what `ReaderTallyStore` offers step 4. One
+thing it could not list, because it had not been decided yet, is **when a number
+appears**.
+
+[0158](decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+makes counting and forgetting one operation, so a batch is counted once it has
+been held for the collection window — an hour by default — and not before. A
+reader who is on the page right now is in `loom_reader_signals` and in no tally,
+and will be in one after the next run past their window.
+
+**Why this is a screen problem rather than a number problem.** *Before versus
+after a change* is the measurement the portal exists to show, and it is the
+measurement someone will go looking for **immediately after making the change**.
+On a deployment collecting hourly they will find the old revision's counters and
+a new revision with nothing against it, which looks exactly like a change that
+broke the measurement. The truthful reading is *"nothing has been counted for
+this revision yet"*, and only the screen can say it.
+
+Two things are available to say it with. `StoredTally.updatedAt` is when a
+revision's row last took a rollup, so *"counted up to 14:05"* is answerable
+without new plumbing. And a revision with no row at all is different from a
+revision with zeroes — the first has not been counted, the second was counted
+and nobody read it.
+
+A live rail is the other half and is not this: `foldReaderSignals` folds batches
+as they arrive for one page being watched now. Step 4 is the durable view.
+Showing the fold's freshness beside the store's numbers would be two different
+questions with one label.
+## 2026-09-14 — step 3 of the signal plan is on `main`, nothing in the deployment calls any of it, and so step 4 still has no input
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— filed by the lane that came to start step 4 and found the seam unwired
+
+[`docs/signals.md`](docs/signals.md) gates the portal's reader view on step 3
+being on `main`: *"Do not start before step 3 is on `main` — there is nothing to
+read until then."* #295 landed step 3 on 14 September, so the gate reads as
+lifted. It is not, because **step 3 built modules and no deployment calls them.**
+
+`ingestReaderSignals`, `rollUp` and `ReaderTallyStore` exist, are tested, and are
+published from `@loom/runtime/signals`. Across `apps/loom` the only two things
+that mention reader signals at all are a compiled docs fence and the docs' live
+rail component, and both exercise the **broadcaster**. There is no route handler
+that receives a batch anywhere in the application; nothing constructs a signal
+journal or a tally store the way `_lib/store.ts` and `_lib/telemetry.ts`
+construct theirs; nothing runs a rollup on any schedule; and `src/signals/
+migrate.ts` is not reached by `scripts/db-push.ts`.
+
+So a portal screen written today would read a store that no code path ever
+writes to. It would be correct, tested, permanently empty, and the fourth unit in
+a row from this lane whose most important state cannot be photographed — which is
+the open finding of 13 September arrived at by a different road.
+
+**What is missing, named so it can be split.** Three pieces, and none of them is
+a screen:
+
+1. **A receiver.** Something the broadcaster's delivery reaches, calling
+   `parseReaderSignalBatch` and then `ingestReaderSignals`. It is not a portal
+   route: the pages readers actually read in this deployment are `(demo)`,
+   `(marketing)` and `(docs)`, so the endpoint belongs to the application rather
+   than to any one surface — which is why this is filed against `Loom daily
+   build` rather than taken here.
+2. **The two stores, constructed.** A signal journal and a `ReaderTallyStore` on
+   `portalDatabase`'s handle, plus `src/signals/migrate.ts` reached by
+   `db:push`. Whether those tables land in the same push as the tree store and
+   the telemetry journal is a question about shared ground, not about a screen.
+3. **Something that runs the rollup.** `rollUp` is pure and nothing invokes it.
+   `scripts/telemetry-prune.ts` is the shape periodic work against this
+   deployment already has, and retention — deferred out of #295 on the ground
+   that forgetting raw batches before their counters are durable destroys data —
+   is the same schedule and probably the same unit.
+
+**Why this is said rather than worked around.** The obvious workaround is to seed
+tallies the way the tree is seeded, and it is the wrong one. A seeded tree
+demonstrates a *structure*, and anybody reading it can check it against the
+builder in source. Seeded reader counts are fabricated measurements of people who
+did not exist, shown on the one screen whose entire value is that its numbers are
+real — and a plausible false number is worse than no number, because nothing on
+the screen can tell a reader which they are looking at. A permanently empty
+screen is the better failure.
+
+**What this lane did instead, and what it will do next**, unless told otherwise:
+built a screen whose input already exists, and will take step 4 in the run after
+a batch can reach a counter. Nothing about the shape needs re-litigating — 0146,
+0147 and `rollup.ts` settle it, and the view is a run's work once there is
+anything in the table.
+
+---
+
+## 2026-09-14 — the screenshot harness cannot sign in and cannot press anything, so every picture of the portal is taken by a private script
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+the fourth thing in this lane's recipe that is not in the shared harness
+
+[0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+folded nine private screenshot scripts into one harness, and `pnpm shoot` is the
+half meant for "a page something else is already serving, which is the only way
+to photograph a screen needing a session, a database or a build behind it". The
+portal is that screen and `pnpm shoot` cannot photograph it.
+
+Two reasons, both structural rather than missing features:
+
+1. **A shot list is addresses, and a session is not one.** `/portal/sign-in`
+   posts a form driven by `useActionState`; there is no URL that signs a reviewer
+   in, deliberately — 0027 makes the key the identity and there is nowhere to put
+   a key but a POST body.
+2. **`captureShots` opens a fresh context per shot** (`playwright.ts:102`), so
+   even a shot that could sign in would leave the cookie behind when the next one
+   started.
+
+And a third that is this lane's alone: the states worth photographing on the
+review queue and on `What's changed` **do not exist until somebody asks for a
+change**, which is a fill and a click, not an address.
+
+So every portal picture in `reports/` since the harness landed was taken by a
+per-run script that drives Playwright directly. This run's is in the scratchpad,
+it is about a hundred lines, and roughly ninety of them are the harness's own job:
+finding Chromium under `/opt/pw-browsers` without naming a build, the viewports,
+`reducedMotion`, the overflow measurement, the file naming. That is the exact
+duplication 0117 was written to end, re-created because the one thing the harness
+does not do is the one thing this surface needs.
+
+**It also re-created a hazard the harness would have avoided.** The first attempt
+clicked `form button[type="submit"]` for the prompt box and hit the topbar's
+**sign out** instead, then photographed the sign-in page believing it was the
+screen behind it — which is the failure the `Shot.waitFor` documentation already
+warns about, arrived at from a direction that documentation does not cover.
+
+**What would close it, offered rather than prescribed.** A shot list step that is
+not an address: something like an optional `before` on the list — a small,
+declarative sequence of `fill` and `click` and `waitFor` applied in one context
+that is then kept for the shots that follow. That is a real design question (a
+shot list is *a value rather than a script*, which the plan's own documentation
+says twice and is right about), and it is why this is filed rather than taken
+inside a unit about naming. A narrower version that would cover most of it: let a
+shot list declare **one** sign-in step and share the context across shots.
+
+**Not this lane's to decide alone** — five surfaces use the harness and two of
+them have no session at all, so an option only one lane needs may belong
+somewhere else entirely. Worth half an hour of somebody's judgement before
+anybody builds it.

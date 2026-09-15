@@ -5,8 +5,10 @@ import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@loom/ru
 
 import { answerNote } from "./answer"
 import { movedOn } from "./moved"
+import { settingsOf } from "./plain-change"
 import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
+import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
 import { askedLine } from "./undo"
 
@@ -32,6 +34,11 @@ const headOf = async (session: DemoSession): Promise<LoomTree> => {
   return head.value
 }
 
+/**
+ * The registry's closed choices, read once, exactly as `actions.ts` reads them.
+ */
+const SETTINGS = settingsOf(demoRegistry)
+
 const ask = async (session: DemoSession, presetId: string): Promise<ChangeRecord> => {
   const preset = presetById(presetId)
   if (!preset) throw new Error(`no preset ${presetId}`)
@@ -49,7 +56,16 @@ const ask = async (session: DemoSession, presetId: string): Promise<ChangeRecord
     observedAt: systemClock.now(),
   })
 
-  const record = recordFromEvents(write.narrated())
+  /*
+   * The head read *before* the write is handed in, which is the whole of what
+   * `actions.ts` does and the only reason a landed change can be described at
+   * all. Threaded through this helper rather than asserted in one test, so every
+   * case below runs the path the server action runs.
+   */
+  const record = recordFromEvents(write.narrated(), undefined, {
+    before: head,
+    settings: SETTINGS,
+  })
   if (!record) throw new Error("the runtime narrated nothing")
 
   return record
@@ -162,6 +178,38 @@ describe("answering a hold", () => {
   })
 
   /**
+   * The press that makes the change true must not be the press that stops the
+   * card describing it.
+   *
+   * The plain reading a held card shows is computed per render against the tree
+   * on the stage, so the moment the change lands it becomes impossible to
+   * compute — the delta has already been applied there, and resolving it
+   * reports a change that did nothing. The record's own copy is frozen at
+   * assessment; this is the fold that could drop it, because answering a hold
+   * narrates no assessment and arrives with no tree in hand.
+   */
+  it("keeps the record's account of what the change does when the visitor says yes", async () => {
+    const session = await sessionFor("did-survives-confirm")
+    const held = await ask(session, "band")
+    const proposalId = held.heldProposalId
+    if (!proposalId) throw new Error("nothing was held")
+
+    expect(held.did?.length).toBeGreaterThan(0)
+
+    const write = beginDemoWrite(session)
+    await confirmHeld(write.path, {
+      proposalId: proposalIdSchema.parse(proposalId),
+      actor: "a demo visitor",
+    })
+
+    /* No tree handed in, exactly as `answerHeld` hands none. */
+    const record = recordFromEvents(write.narrated(), held)
+
+    expect(record?.outcome).toBe("applied")
+    expect(record?.did).toEqual(held.did)
+  })
+
+  /**
    * The end of the demo's argument, asserted through the real write path rather
    * than off a fixture.
    *
@@ -222,6 +270,90 @@ describe("answering a hold", () => {
   })
 })
 
+/**
+ * What the record says the change *was*, as opposed to what it was asked to be.
+ *
+ * Every other line on a landed card is about the decision — the badge, the two
+ * axes, the rule, the ceiling, the answer note. Not one of them says what the
+ * change did to the page. That was invisible while the plain reading sat on the
+ * card before the press, and it was never true for a change the Gate applies on
+ * its own: those cards are landed from the first render and carried the ask, the
+ * verdict, and nothing in between.
+ */
+describe("the record of a change that has landed", () => {
+  it("says what an unattended change did, in the past tense", async () => {
+    const session = await sessionFor("did-unattended")
+    const record = await ask(session, "backdrop")
+
+    expect(record.outcome).toBe("applied")
+    expect(record.heldProposalId).toBeUndefined()
+
+    const sentences = (record.did ?? []).map((line) => line.sentence)
+
+    expect(sentences.length).toBeGreaterThan(0)
+    expect(sentences.join(" ")).toContain("looks changed")
+  })
+
+  /**
+   * The words are the page's, and they are the reason this is worth freezing
+   * rather than recomputing: every one of them names a node the change removed,
+   * so the tree that could answer for them is the one the change replaced.
+   */
+  it("quotes what a removal took off, from the tree the change was judged against", async () => {
+    const session = await sessionFor("did-removal")
+    const record = await ask(session, DEMO_LEADING_PRESET)
+
+    const line = (record.did ?? [])[0]
+
+    expect(line?.sentence).toContain("came off the page")
+    expect(line?.words).toContain("3,400")
+  })
+
+  /**
+   * The tense is the assertion. The same delta read live off the stage is what
+   * the held card shows, and the two readings must not be the same string —
+   * a landed change described as one about to happen is the defect this fixes,
+   * turned around.
+   */
+  it("reads in a different tense from the reading the held card shows", async () => {
+    const session = await sessionFor("did-tense")
+    const record = await ask(session, DEMO_LEADING_PRESET)
+
+    const sentence = (record.did ?? [])[0]?.sentence ?? ""
+
+    expect(sentence).toContain("came off")
+    expect(sentence).not.toContain("comes off")
+  })
+
+  /**
+   * An ask that never produced a delta has nothing to describe, and must not
+   * invent a sentence saying so. Absent, not empty prose.
+   */
+  it("says nothing about a change that never happened", async () => {
+    const session = await sessionFor("did-absent")
+    const record = recordFromEvents([
+      {
+        treeId: session.seed.treeId,
+        occurredAt: "2026-09-14T00:00:00.000Z",
+        event: {
+          type: "intent-received",
+          intent: {
+            intentId: randomIdFactory.intentId(),
+            treeId: session.seed.treeId,
+            baseRevision: 0,
+            origin: "user-instruction",
+            actor: "a demo visitor",
+            utterance: "Something the interpreter never answered.",
+            observedAt: "2026-09-14T00:00:00.000Z",
+          },
+        },
+      },
+    ])
+
+    expect(record?.did).toBeUndefined()
+  })
+})
+
 describe("undo", () => {
   it("is a change like any other, and puts the page back", async () => {
     const session = await sessionFor("undo")
@@ -249,6 +381,52 @@ describe("undo", () => {
     expect(record?.interpretation?.interpreter).toBe("loom/revert")
     expect(record?.interpretation?.authoredBy).toBe("runtime")
     expect(JSON.stringify((await headOf(session)).root)).toBe(before)
+  })
+
+  /**
+   * The demo's payoff, narrated as a return rather than as an arrival.
+   *
+   * An undo's operations are ordinary inserts and removes (0032), so a record
+   * describing one from the delta alone says *this went onto the page* over
+   * three figures the visitor has just watched come back. `restoring` is the
+   * one thing only the call site knows, and this asserts it is actually
+   * supplied — the property that rots here is the supply, not the table.
+   */
+  it("says the record put something back, rather than that something arrived", async () => {
+    const session = await sessionFor("undo-restoring")
+    const held = await ask(session, DEMO_LEADING_PRESET)
+    const proposalId = held.heldProposalId
+    if (!proposalId) throw new Error("nothing was held")
+
+    const yes = beginDemoWrite(session)
+    await confirmHeld(yes.path, {
+      proposalId: proposalIdSchema.parse(proposalId),
+      actor: "a demo visitor",
+    })
+
+    const landed = await headOf(session)
+    const write = beginDemoWrite(session)
+
+    await revertRevision(write.path, {
+      treeId: session.seed.treeId,
+      revision: landed.revision,
+      seed: session.seed,
+      origin: "user-instruction",
+      actor: "a demo visitor",
+    })
+
+    const record = recordFromEvents(write.narrated(), undefined, {
+      before: landed,
+      settings: SETTINGS,
+      restoring: true,
+    })
+
+    const line = (record?.did ?? [])[0]
+
+    expect(line?.sentence).toContain("went back on the page")
+    expect(line?.sentence).not.toContain("nothing already on it")
+    /** The same three figures, quoted from the subtree that came back. */
+    expect(line?.words).toContain("3,400")
   })
 
   /**

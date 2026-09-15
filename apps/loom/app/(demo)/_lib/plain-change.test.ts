@@ -347,3 +347,114 @@ describe("the plain half stays plain", () => {
     }
   })
 })
+
+/**
+ * The same delta, said in the tense the card is in.
+ *
+ * A held card asks a visitor to allow something and a landed one tells them
+ * what they allowed, and until this run the second had no sentence at all: the
+ * reading was computed live against the tree on the stage, and a landed delta
+ * resolved against the tree it produced describes a change that did nothing.
+ *
+ * What is tested here is that the two tables stay one table. Every sentence is
+ * written as a pair so a reword cannot touch one tense and miss the other, and
+ * the assertion that keeps that honest is that **no reading is the same string
+ * in both tenses** — which is exactly what a half-finished reword would produce.
+ */
+describe("the tense of a plain reading", () => {
+  const everyOperation = (): readonly { readonly id: string; readonly tree: LoomTree }[] =>
+    ["trim", "band", "promote", "palette", "backdrop"].map((id) => ({ id, tree: demoPageTree() }))
+
+  it("says a removal in the past tense once it has happened", () => {
+    const tree = demoPageTree()
+    const delta = deltaOf(tree, planOf("trim", tree))
+
+    const [proposed] = plainChange(tree, delta, settings)
+    const [done] = plainChange(tree, delta, settings, false, "done")
+
+    expect(proposed?.sentence).toBe("This comes off the page, and everything under it goes too.")
+    expect(done?.sentence).toBe("This came off the page, and everything under it went too.")
+    /** The words are the page's either way; only the verb moves. */
+    expect(done?.words).toEqual(proposed?.words)
+  })
+
+  it("says an arrival, a move and a setting in the past tense too", () => {
+    const tree = demoPageTree()
+
+    const said = (id: string): string => {
+      const delta = deltaOf(tree, planOf(id, tree))
+
+      return plainChange(tree, delta, settings, false, "done")
+        .map((line) => line.sentence)
+        .join(" ")
+    }
+
+    expect(said("band")).toContain("went onto the page")
+    expect(said("promote")).toContain("moved to a different place")
+    expect(said("palette")).toContain("looks changed")
+  })
+
+  /**
+   * Both directions, because the pairs do not line up: undoing a removal puts
+   * something back, and undoing an arrival takes something off. The half worth
+   * asserting is that neither reads as an ordinary change — *"went onto the
+   * page, and nothing already on it was touched"* over three figures the
+   * visitor just watched come back is the demo's own payoff, said backwards.
+   */
+  it("says an undo in the past tense as a return, not as an ordinary change", () => {
+    const tree = demoPageTree()
+
+    /* `trim` plans a remove and `band` plans an insert, so these are the two
+     * shapes an undo's own delta can take, each read as the return it is. */
+    const [takingOff] = plainChange(tree, deltaOf(tree, planOf("trim", tree)), settings, true, "done")
+    const [puttingOn] = plainChange(tree, deltaOf(tree, planOf("band", tree)), settings, true, "done")
+
+    expect(takingOff?.sentence).toBe("This came back off the page, leaving it as it was before.")
+    expect(puttingOn?.sentence).toBe("This went back on the page, exactly as it was before.")
+
+    for (const line of [takingOff, puttingOn]) {
+      expect(line?.sentence).not.toContain("nothing already on it")
+      expect(line?.sentence).not.toContain("everything under it")
+    }
+  })
+
+  /**
+   * The guard on the pairs. Every reading this surface can produce must differ
+   * between the two tenses — a sentence that reads identically in both is one
+   * whose past tense was never written, and it would reach a card saying a
+   * landed change is about to happen.
+   */
+  it("never reads the same in both tenses, on any operation, in either direction", () => {
+    for (const { id, tree } of everyOperation()) {
+      for (const restoring of [false, true]) {
+        const delta = deltaOf(tree, planOf(id, tree))
+        const proposed = plainChange(tree, delta, settings, restoring)
+        const done = plainChange(tree, delta, settings, restoring, "done")
+
+        expect(done).toHaveLength(proposed.length)
+
+        proposed.forEach((line, at) => {
+          expect(
+            done[at]?.sentence,
+            `${id}${restoring ? " (restoring)" : ""} reads the same in both tenses`
+          ).not.toBe(line.sentence)
+        })
+      }
+    }
+  })
+
+  /** Plain in both tenses, held to the same bar the proposed half is held to. */
+  it("stays plain in the past tense", () => {
+    const RESERVED = ["loom.", "delta", "node", "revision", "proposal", "n_", "i_"]
+
+    for (const { id, tree } of everyOperation()) {
+      for (const restoring of [false, true]) {
+        for (const line of plainChange(tree, deltaOf(tree, planOf(id, tree)), settings, restoring, "done")) {
+          for (const reserved of RESERVED) {
+            expect(line.sentence.toLowerCase()).not.toContain(reserved)
+          }
+        }
+      }
+    }
+  })
+})

@@ -296,13 +296,14 @@ describe("previewReversal, end to end", () => {
      * gone from the tree; the only surviving account of what it was is the
      * inverse this line is a reading of.
      *
-     * The two runs are joined by a space rather than concatenated. The tree
-     * holds no whitespace between a heading and the paragraph under it — the
-     * gap is a box, not a character — so `textOf` would say
-     * "…a deltaNothing here…" and the name would read as a typo.
+     * The card is named by its heading and not by a join of everything under
+     * it. This line read *“Every change is a delta Nothing here was…”* until
+     * 14 September: the quote's budget was spent on the paragraph, the run-on
+     * read as a transcription error, and the one phrase that says which card
+     * was destroyed was the half that got truncated away.
      */
     expect(reversal.restores[0] && readingOf(reversal.restores[0])).toBe(
-      `Puts the card “Every change is a delta Nothing here was…” ${card.id}, with the 4 things that were inside it, back inside ${seed.root.id}.`
+      `Puts the card “Every change is a delta” ${card.id}, with the 4 things that were inside it, back inside ${seed.root.id}.`
     )
   })
 

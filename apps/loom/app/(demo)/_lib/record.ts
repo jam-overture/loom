@@ -4,6 +4,7 @@ import type {
   DispositionReasonCode,
   EditIntent,
   IrreversibilityReason,
+  LoomTree,
   RuntimeEvent,
   RuntimeEventEnvelope,
   StakeFactor,
@@ -11,6 +12,7 @@ import type {
   TreeDelta,
 } from "@loom/runtime"
 
+import { plainChange, type PlainChange } from "./plain-change"
 import { touchedBy, type TouchedNode } from "./touched"
 
 /**
@@ -152,6 +154,52 @@ export type ChangeRecord = {
    * and empty forever for an ask that never produced a delta.
    */
   readonly touched: readonly TouchedNode[]
+  /**
+   * What the change did to the page, in the words on the page, in the past
+   * tense — computed once against the tree it was judged against, and kept.
+   *
+   * **The record's plain half used to exist only while the change was a
+   * question.** The page computes that reading per render against the tree on
+   * the stage, which is the only tree it has; that is right for a change still
+   * waiting and impossible for one that has landed, because the delta has
+   * already been applied to that tree and resolving it there reports a change
+   * that did nothing. So the one line written in the page's own words rather
+   * than the Gate's was dropped at exactly the moment the change became real —
+   * and for a change Loom applied on its own it was never shown at all. Two
+   * presses of *Repaint the top band* make opposite changes and produced two
+   * cards identical to the word.
+   *
+   * It is frozen here rather than recomputed because the tree it describes is
+   * gone by the time anything reads it. Same reason `touched` is frozen one
+   * field up, and it arrives on the same event: the assessment carries the
+   * delta, and the caller supplies the tree the runtime judged it against.
+   *
+   * Absent when the caller did not name that tree — which a caller that cannot
+   * name it honestly should not. An absent reading prints nothing; a wrong one
+   * would print a confident account of a change that did not happen.
+   */
+  readonly did?: readonly PlainChange[]
+}
+
+/**
+ * The tree a change was judged against, and how to read words off it.
+ *
+ * Handed in by the caller rather than found here, because it is the one thing
+ * the event stream does not carry: the runtime narrates the delta, never the
+ * tree the delta was planned against. The server action holds both — it reads
+ * the head before it writes — and is the only place in this lane that does.
+ *
+ * `restoring` travels with it for the reason `plainChange` gives: an undo's
+ * operations are ordinary inserts and removes (0032), so nothing in the delta
+ * says which direction it is going and only the ask that raised it knows.
+ */
+export type AssessedAgainst = {
+  /** The tree as it stood before this change, which is what the delta resolves against. */
+  readonly before: LoomTree
+  /** The registry's closed choices, so a setting is not quoted back as words. */
+  readonly settings: ReadonlySet<string>
+  /** Whether this change puts something back rather than making it. */
+  readonly restoring?: boolean
 }
 
 const describeOperation = (operation: TreeDelta["operations"][number]): string => {
@@ -242,6 +290,8 @@ type Draft = {
   failure?: string
   repaired: boolean
   touched: readonly TouchedNode[]
+  /** Carried for the same reason `touched` is: the tree it describes is gone. */
+  did?: readonly PlainChange[]
 }
 
 const identityOf = (intent: EditIntent, askedAt: string): NonNullable<Draft["identity"]> => ({
@@ -275,6 +325,14 @@ const draftFrom = (base: ChangeRecord | undefined): Draft =>
         discarded: base.outcome === "discarded",
         repaired: base.repaired,
         touched: base.touched,
+        /*
+         * Carried, and this is the fold that made it worth carrying: a held
+         * change is assessed when it is asked for and answered later, so the
+         * only moment its "before" tree exists is the first fold. Answering
+         * `yes` re-folds onto this record with no tree in hand, and a drop here
+         * would empty the line at the exact press that makes it true.
+         */
+        ...(base.did === undefined ? {} : { did: base.did }),
       }
 
 const failureOf = (event: RuntimeEvent): string | undefined => {
@@ -298,7 +356,11 @@ const failureOf = (event: RuntimeEvent): string | undefined => {
   }
 }
 
-const assessed = (draft: Draft, assessment: ChangeAssessment): Draft => ({
+const assessed = (
+  draft: Draft,
+  assessment: ChangeAssessment,
+  against: AssessedAgainst | undefined
+): Draft => ({
   ...draft,
   interpretation: interpretationOf(assessment),
   stakes: { level: assessment.stakes.level, factors: assessment.stakes.factors },
@@ -310,70 +372,93 @@ const assessed = (draft: Draft, assessment: ChangeAssessment): Draft => ({
    * removal left costs nothing beyond reading a field that already exists.
    */
   touched: touchedBy(assessment.proposal.delta, assessment.reversibility.inverse),
+  /*
+   * And the same delta in the words on the page, past tense, against the tree
+   * the runtime judged it against.
+   *
+   * This is the only fold where that tree can be named. Assessment is the moment
+   * the delta and the tree it was planned against are both true at once; one
+   * event later the change has either landed — and the tree is a revision
+   * behind — or it is waiting, and will be answered by a fold with no tree at
+   * all. So it is computed here and carried, never recomputed.
+   */
+  ...(against === undefined
+    ? {}
+    : {
+        did: plainChange(
+          against.before,
+          assessment.proposal.delta,
+          against.settings,
+          against.restoring ?? false,
+          "done"
+        ),
+      }),
 })
 
-const fold = (draft: Draft, envelope: RuntimeEventEnvelope): Draft => {
-  const { event } = envelope
+const fold =
+  (against: AssessedAgainst | undefined) =>
+  (draft: Draft, envelope: RuntimeEventEnvelope): Draft => {
+    const { event } = envelope
 
-  switch (event.type) {
-    case "intent-received":
-      return { ...draft, identity: identityOf(event.intent, envelope.occurredAt) }
-    case "change-assessed":
-      return assessed(draft, event.assessment)
-    case "disposition-decided":
-      return { ...draft, disposition: dispositionOf(event.disposition) }
-    case "change-committed":
-      return { ...draft, revision: { produced: event.revision, replaced: event.revision - 1 } }
-    case "proposal-held":
-      return { ...draft, held: event.proposalId }
-    /**
-     * A hold that has been answered is no longer a hold. Clearing it here rather
-     * than leaving the surface to notice is what keeps a card from offering
-     * buttons for a decision that has already been made.
-     */
-    case "hold-confirmed":
-      return { ...draft, held: undefined, ...(event.actor === undefined ? {} : { answeredBy: event.actor }) }
-    case "hold-discarded":
-      return {
-        ...draft,
-        held: undefined,
-        discarded: true,
-        ...(event.actor === undefined ? {} : { answeredBy: event.actor }),
+    switch (event.type) {
+      case "intent-received":
+        return { ...draft, identity: identityOf(event.intent, envelope.occurredAt) }
+      case "change-assessed":
+        return assessed(draft, event.assessment, against)
+      case "disposition-decided":
+        return { ...draft, disposition: dispositionOf(event.disposition) }
+      case "change-committed":
+        return { ...draft, revision: { produced: event.revision, replaced: event.revision - 1 } }
+      case "proposal-held":
+        return { ...draft, held: event.proposalId }
+      /**
+       * A hold that has been answered is no longer a hold. Clearing it here rather
+       * than leaving the surface to notice is what keeps a card from offering
+       * buttons for a decision that has already been made.
+       */
+      case "hold-confirmed":
+        return { ...draft, held: undefined, ...(event.actor === undefined ? {} : { answeredBy: event.actor }) }
+      case "hold-discarded":
+        return {
+          ...draft,
+          held: undefined,
+          discarded: true,
+          ...(event.actor === undefined ? {} : { answeredBy: event.actor }),
+        }
+      case "repair-requested":
+        return { ...draft, repaired: true }
+      /**
+       * A commit that failed is a hold that is over.
+       *
+       * Both places the runtime narrates this have already released custody —
+       * `persist` is reached only after `confirmHeld` took the hold, and the
+       * revision-conflict branch releases it first, saying why: *"A hold names a
+       * revision, so a hold whose tree has moved on can never apply again — it is
+       * not stale pending a retry, it is dead."*
+       *
+       * Leaving `held` set made the record outlive the custody it described. The
+       * card went on reading **Waiting on you** and *"Loom will not make this
+       * change until you say yes"* over a proposal no yes could reach, with the
+       * conflict code in the smallest type on the card as the only correction.
+       * Cleared here, the same record reads `no-change` — *"The change no longer
+       * fits this page"* — which is what happened, in the words the portal and
+       * the demo already share.
+       *
+       * The failure itself still lands, through the default branch below: this
+       * clears custody and says nothing about why, which is `failureOf`'s to say.
+       */
+      case "commit-failed": {
+        const failure = failureOf(event)
+
+        return { ...draft, held: undefined, ...(failure === undefined ? {} : { failure }) }
       }
-    case "repair-requested":
-      return { ...draft, repaired: true }
-    /**
-     * A commit that failed is a hold that is over.
-     *
-     * Both places the runtime narrates this have already released custody —
-     * `persist` is reached only after `confirmHeld` took the hold, and the
-     * revision-conflict branch releases it first, saying why: *"A hold names a
-     * revision, so a hold whose tree has moved on can never apply again — it is
-     * not stale pending a retry, it is dead."*
-     *
-     * Leaving `held` set made the record outlive the custody it described. The
-     * card went on reading **Waiting on you** and *"Loom will not make this
-     * change until you say yes"* over a proposal no yes could reach, with the
-     * conflict code in the smallest type on the card as the only correction.
-     * Cleared here, the same record reads `no-change` — *"The change no longer
-     * fits this page"* — which is what happened, in the words the portal and
-     * the demo already share.
-     *
-     * The failure itself still lands, through the default branch below: this
-     * clears custody and says nothing about why, which is `failureOf`'s to say.
-     */
-    case "commit-failed": {
-      const failure = failureOf(event)
+      default: {
+        const failure = failureOf(event)
 
-      return { ...draft, held: undefined, ...(failure === undefined ? {} : { failure }) }
-    }
-    default: {
-      const failure = failureOf(event)
-
-      return failure === undefined ? draft : { ...draft, failure }
+        return failure === undefined ? draft : { ...draft, failure }
+      }
     }
   }
-}
 
 const outcomeOf = (draft: Draft): RecordOutcome => {
   if (draft.revision !== undefined) return "applied"
@@ -401,12 +486,19 @@ const outcomeOf = (draft: Draft): RecordOutcome => {
  * interpret — so without the record it is completing, those events describe an
  * ask nobody can name. With it, the card a visitor is looking at stops saying
  * "waiting on you" and starts saying which revision it produced.
+ *
+ * `against` is the tree this ask was judged against, and it is optional for the
+ * same reason `base` is: the second fold of a held change — the one that answers
+ * it — has no such tree, and must not invent one. A fold given no tree keeps
+ * whatever reading the first fold left (`draftFrom`), so the line survives the
+ * press that makes it true.
  */
 export const recordFromEvents = (
   envelopes: readonly RuntimeEventEnvelope[],
-  base?: ChangeRecord
+  base?: ChangeRecord,
+  against?: AssessedAgainst
 ): ChangeRecord | undefined => {
-  const draft = envelopes.reduce<Draft>(fold, draftFrom(base))
+  const draft = envelopes.reduce<Draft>(fold(against), draftFrom(base))
   const { identity } = draft
 
   if (identity === undefined) return undefined
@@ -426,5 +518,6 @@ export const recordFromEvents = (
     ...(draft.failure === undefined ? {} : { failure: draft.failure }),
     repaired: draft.repaired,
     touched: draft.touched,
+    ...(draft.did === undefined ? {} : { did: draft.did }),
   }
 }
