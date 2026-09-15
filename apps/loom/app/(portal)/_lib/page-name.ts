@@ -1,5 +1,7 @@
-import { outlineTree, textOf, type LoomTree, type TreeId } from "@loom/runtime"
+import { outlineTree, type LoomTree, type TreeId } from "@loom/runtime"
 import type { TreeReader } from "@loom/runtime/store"
+
+import { leadOf } from "./part-name"
 
 /**
  * What to call a page, in words a person recognises — and the id, kept beside it.
@@ -87,8 +89,6 @@ const TITLE_TYPES: readonly string[] = ["loom.heading"]
 /** Long enough for a real headline, short enough to sit in a row without wrapping. */
 const NAME_LIMIT = 60
 
-const tidy = (value: string): string => value.replace(/\s+/gu, " ").trim()
-
 const shorten = (value: string): string =>
   value.length > NAME_LIMIT ? `${value.slice(0, NAME_LIMIT).trimEnd()}…` : value
 
@@ -101,13 +101,23 @@ const shorten = (value: string): string =>
  * would name the page after something nobody sees first. `outlineTree` walks in
  * exactly the order the renderer emits, which is why it is the walk used here
  * rather than a bespoke one.
+ *
+ * **What the heading says is read through `part-name.ts`, not through `textOf`.**
+ * This module asked the runtime for the exact characters under the heading, and
+ * the runtime answers by concatenating them — which is correct for what `textOf`
+ * is for and wrong for a name the moment a heading is more than one run. A
+ * heading holding *"Autumn"* and *"arrivals"* as two runs, which is what
+ * re-authoring half of one produces, was named `Autumnarrivals` here while the
+ * sentences on the same screen said *Autumn arrivals*: one page, two spellings,
+ * and the wrong one in the largest text on it. `part-name.ts` settled the rule
+ * on 10 September and this is the second caller of it rather than a second copy.
  */
 export const pageNameOf = (tree: LoomTree): PageName => {
   const heading = outlineTree(tree.root).find(
     (entry) => entry.node.kind === "element" && TITLE_TYPES.includes(entry.node.type)
   )
 
-  const text = heading === undefined ? "" : tidy(textOf(heading.node))
+  const text = heading === undefined ? "" : leadOf(heading.node)
 
   return text === ""
     ? { name: UNTITLED, treeId: tree.treeId, derived: false }
