@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { MAX_WAIT_MS } from "../specimen/capture.js"
 import { DEFAULT_VIEWPORTS, PHONE, WIDE } from "../specimen/specimen.js"
 
 import { planShots, shotListSchema, VIEWPORTS } from "./plan.js"
@@ -149,5 +150,88 @@ describe("planning a shot list", () => {
       shotListSchema.safeParse({ baseUrl: "localhost:3000", shots: [{ path: "/x", out: "x" }] })
         .success
     ).toBe(false)
+  })
+})
+
+describe("reaching the state worth photographing", () => {
+  it("carries the steps through to the shot, in the order they were written", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "http://localhost:3000/what-your-readers-do",
+            out: "signals",
+            do: [{ click: "[data-cta]" }, { wait: 400 }],
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.do).toEqual([{ click: "[data-cta]" }, { wait: 400 }])
+  })
+
+  it("gives a shot that asks for nothing an empty step list rather than undefined", () => {
+    const planned = planShots(listOf({ shots: [{ path: "/x", out: "x" }] }))
+
+    expect(planned[0]?.do).toEqual([])
+  })
+
+  it("carries a clip through, and omits the key entirely when there is none", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          { path: "/x", out: "x", clip: "[data-figure]" },
+          { path: "/y", out: "y" },
+        ],
+      })
+    )
+
+    expect(planned[0]?.clip).toBe("[data-figure]")
+    expect(planned[1] && "clip" in planned[1]).toBe(false)
+  })
+
+  /**
+   * The misspelling is the whole reason this is a schema: a permissive object
+   * would parse `clik` as an empty step, run it, do nothing, and photograph the
+   * page the load produced without a word.
+   */
+  it("refuses a misspelled step rather than running an empty one", () => {
+    expect(
+      shotListSchema.safeParse({
+        shots: [{ path: "/x", out: "x", do: [{ clik: "[data-cta]" }] }],
+      }).success
+    ).toBe(false)
+  })
+
+  it("refuses a step that is both a click and a wait", () => {
+    expect(
+      shotListSchema.safeParse({
+        shots: [{ path: "/x", out: "x", do: [{ click: "[data-cta]", wait: 10 }] }],
+      }).success
+    ).toBe(false)
+  })
+
+  /** No way to wait forever, for 0140's reason applied to an instrument. */
+  it("refuses a wait longer than the ceiling, and a wait that is not a positive integer", () => {
+    const wait = (ms: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", do: [{ wait: ms }] }] }).success
+
+    expect(wait(MAX_WAIT_MS)).toBe(true)
+    expect(wait(MAX_WAIT_MS + 1)).toBe(false)
+    expect(wait(0)).toBe(false)
+    expect(wait(1.5)).toBe(false)
+  })
+
+  /**
+   * Refused rather than resolved by precedence: the two mean opposite things,
+   * so picking a winner hands a lane the picture it did not ask for silently.
+   */
+  it("refuses a shot that asks for all of the page and one element of it", () => {
+    const parsed = shotListSchema.safeParse({
+      shots: [{ path: "/x", out: "x", clip: "[data-figure]", fullPage: true }],
+    })
+
+    expect(parsed.success).toBe(false)
+    expect(!parsed.success && parsed.error.issues[0]?.message).toContain("cannot set both")
   })
 })

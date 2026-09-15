@@ -46,6 +46,18 @@ So:
 The test to apply: *the maintainer must be able to step away for days without
 the bill moving.* A run that ends with something scheduled fails it.
 
+## Reading the merge gate
+
+**Never pipe a gate into `tail`.** `pnpm verify 2>&1 | tail -35` reports the
+exit code of the *pipe*, which is `tail`'s, which is 0 — so a failed verify
+reads as a passed one. The `ELIFECYCLE` lines are in the output and easy to read
+past when you are looking for a test count. Redirect to a file and check `$?`,
+or read the whole thing.
+
+Filed by `Loom primitives` on 12 September after it cost that run fifteen
+minutes, and written here rather than in any lane's code because it is a thing a
+**run** does, not a thing the repository contains.
+
 ## Lanes
 
 Each routine owns one part of the repository and does not edit another's.

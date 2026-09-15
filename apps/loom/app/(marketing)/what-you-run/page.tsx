@@ -1,14 +1,8 @@
-import type { Metadata } from "next"
-
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = {
-  title: WHAT_YOU_RUN.title,
-  description: WHAT_YOU_RUN.description,
-}
-
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
+export const generateMetadata = routeMetadata(WHAT_YOU_RUN)
 
 /**
  * The page that says what the thing on your own machine would be.

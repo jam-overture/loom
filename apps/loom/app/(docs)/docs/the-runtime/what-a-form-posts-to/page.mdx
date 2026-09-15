@@ -1,0 +1,266 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import {
+  AnAddressInTheTree,
+  TheConnectedForm,
+  WhatAModelMayName,
+  WhatAnActionMayBe,
+  WhatTheVisitorReads,
+  WhenThereIsNoTarget,
+  WhoMayMoveAForm,
+} from "@/app/(docs)/_components/submit-seam"
+
+export const metadata = pageMetadata("the-runtime", "what-a-form-posts-to")
+
+# What a form posts to
+
+Most of a page tells a visitor something. Sooner or later one of them has to
+**ask** — a name, an email address, a sentence about what they want — and then
+that typing has to go somewhere.
+
+Here is a form, built out of the same registered primitives as everything else
+on this site:
+
+<Example id="a-form-nobody-has-connected" />
+
+Look at what it says. The fields are greyed out, the button cannot be pressed,
+and there is a line above them explaining why.
+
+That is not a bug and it is not a half-finished example. **Nothing in that tree
+says where the form posts**, so the form will not pretend it can send anything.
+A form that looked ready and quietly dropped what somebody typed would be the
+worst possible failure here, and it is the one this whole page is arranged to
+prevent.
+
+## The address is not in the tree
+
+Everything else a page needs is in its tree. The heading is, the fields are, the
+label on the button is. The address a form posts to is not, and never can be.
+
+The reason is the difference between reading and writing. If a node asks your
+app the wrong question, a visitor sees the wrong list of prices. If a form posts
+to the wrong address, **a visitor's name, email and message are sent to whoever
+owns that address**. Those are not the same kind of mistake, and they do not
+deserve the same kind of protection.
+
+So a tree names a destination instead of carrying one:
+
+```ts object-body
+"loom:submit": { "to": "contact.enquiry" },
+```
+
+One key, and deliberately nothing else. `contact.enquiry` is not a URL. It is a
+name your deployment registered, the way a primitive type is a name your
+registry registered, and it reaches exactly as far as whatever you put behind
+it.
+
+<Callout>
+  **Say this part out loud, because it is the bargain in miniature.** A proposal
+  may pick a destination from a list you wrote. It cannot compose one, extend
+  one, append to one, or pass anything that reaches one. The widest a mistake can
+  be is *the wrong registered destination* — which is a mistake a person can see
+  in a diff, and a mistake you can undo.
+</Callout>
+
+## Your half: registering an endpoint
+
+An endpoint is a name, a line about itself, and a function that says where the
+form should post.
+
+```ts
+import { createEndpointRegistry, defineEndpoint, describeEndpointRegistryError } from "@loom/runtime"
+
+const enquiry = defineEndpoint({
+  id: "contact.enquiry",
+  description: "Sends an enquiry to the team's shared inbox.",
+  endpoint: {
+    /** Called once per page that has this form on it, before anything is drawn. */
+    target: async ({ context, signal }) => {
+      const token = await tokens.mint(context, { signal })
+
+      return {
+        ok: true,
+        value: {
+          action: "/contact",
+          method: "post",
+          fields: [{ name: "csrf", value: token }],
+        },
+      }
+    },
+  },
+})
+
+const built = createEndpointRegistry([enquiry])
+
+if (!built.ok) throw new Error(describeEndpointRegistryError(built.error))
+
+const endpoints = built.value
+```
+
+If that shape looks familiar it is meant to: it is `defineSource` from
+[where the content comes from](/docs/building-with-loom/where-content-comes-from)
+with the arrow pointing the other way. A deployment declares what exists, a
+registry is the allowlist, and nothing in a tree reaches past it.
+
+**Three things come back, and the third is the one people are surprised by.**
+`action` is where to post. `method` is `get` or `post`. `fields` are hidden
+inputs the form renders for you, in order — which is how a CSRF token gets onto
+a form nobody typed it into.
+
+That token is also the answer to *why is any of this asynchronous*. Minting one
+usually means a round trip to a session store, and a seam that could not wait for
+one would push every deployment into minting it somewhere else and threading it
+through by hand.
+
+## The same form, connected
+
+Here is the identical tree with `loom:submit` on its form, resolved against the
+endpoint above as this page was built:
+
+<TheConnectedForm />
+
+Nothing about the form changed. The fields are the same nodes, the button is the
+same node, the layout prop is the same. What changed is that somebody answered,
+and the seam had a target to hand the primitive.
+
+The `action`, the `method` and the hidden field under the frame were written by
+the endpoint, not by this page. The token is a fixed string here because a
+documentation build that minted a different one every time would serve HTML that
+disagreed with itself — a real one comes out of your session store.
+
+## When it is resolved, and why not later
+
+Rendering a tree is **synchronous**. `renderLoomTree` walks the nodes and
+returns an element; it never waits for anything, because a render that could
+wait is a render that can hang halfway down a page.
+
+So the asking happens first, in its own step:
+
+```ts
+import { renderLoomTree } from "@loom/runtime/react"
+import { resolveTreeSubmissions } from "@loom/runtime"
+
+const submissions = await resolveTreeSubmissions(tree, { registry: endpoints })
+
+const { element } = renderLoomTree(tree, { resolver, validator, themes, submissions })
+```
+
+`resolveTreeSubmissions` reads the tree once, collects every endpoint it names,
+asks all of them at the same time, and hands back a lookup the walk can use
+without waiting. Two forms naming one endpoint are **one** question and one
+shared answer — which is not only cheaper but correct, since a nonce minted twice
+would break whichever of the two a visitor did not use.
+
+If you are serving a whole request, `renderRequest` does both halves for you:
+give it `sources` and `endpoints` and it resolves the data seam and this one
+together, rather than one after the other.
+
+<Callout>
+  **Leave the registry out and every form is untargeted.** That is the state the
+  example at the top of this page is in, and it is reported: the render
+  diagnostics carry `submit-unresolved` for each node that declared a destination
+  nobody was asked about. A page with no forms on it pays nothing either way.
+</Callout>
+
+## What a model may name
+
+This is the whole of what a model is shown when it is asked to put a form on a
+page:
+
+<WhatAModelMayName />
+
+An id and a line. No address, no method, no fields, nothing to compose. Whether
+the endpoint posts or gets, where it posts to and what it carries are resolved
+after the choice has been made, and none of them is the model's business.
+
+## Moving a form is never quiet
+
+Picking the wrong destination out of your own list is still a real change, so
+the runtime treats it as one. Below are two asks against the same form, judged by
+the policy a deployment has **before it has configured anything**:
+
+<WhoMayMoveAForm />
+
+Repointing a form is held for a person on every origin, with nothing registered
+and nothing switched on. That is a rule in the Gate rather than a stakes level,
+and the difference matters: a level alone cannot say *never apply this without
+asking*, because how much latitude an origin gets is a setting, and where a
+visitor's typing is sent should not depend on who asked for it to move.
+
+Note what is **not** refused. Splitting one mailing list into two and repointing
+the forms is an ordinary thing to want, and a runtime that made it impossible
+would just mean nobody used the seam. The requirement is that a person sees it.
+
+## Writing an address into the tree does not work either
+
+The obvious way around all of this is to stop naming a destination and start
+carrying one. It is worth seeing what happens, because the answer is not *the
+Gate catches it*:
+
+<AnAddressInTheTree />
+
+The declaration is refused where it is read. `loom:submit` accepts one key, and
+anything else makes the whole declaration unreadable — so a form carrying an
+address has no target at all, rather than an address somebody sneaked past.
+
+Most parsing of stored JSON is forgiving, and this deliberately is not. Dropping
+an unknown key quietly is right for a document written by an older schema; here
+the one thing being kept out of a tree **is** an address, so a declaration
+carrying one is refused out loud.
+
+## The named ways there is no target
+
+Registering an endpoint is not a promise that it will answer. Every way that can
+go wrong has a name, and here is each one, reached by an endpoint that really
+behaves that way:
+
+<WhenThereIsNoTarget />
+
+Five reasons, and they matter to two different people.
+
+**To you**, they are different problems. `no-such-endpoint` is a typo or a tree
+that outlived a registration. `endpoint-threw` is a bug in your code.
+`invalid-target` is your own composition mistake. `unavailable` is worth trying
+again and `refused` is not — which is the one distinction the codes exist to
+let you act on.
+
+**To a visitor**, there is nothing to act on at all, so they are told something
+a person can use:
+
+<WhatTheVisitorReads />
+
+Three sentences, and not one of them says "endpoint". They belong to
+`loom.form` rather than to the seam — declared text, so a deployment serving
+another language replaces them through a dictionary. A form that is *refused*
+gets its own sentence because it is the one case where trying again in a minute
+is bad advice.
+
+## What the seam will carry as an address
+
+The last check happens after your endpoint has already said yes.
+
+Your code wrote that string, so this is not the suspicion the runtime has of an
+AI-authored URL. It is the check that a base URL that was empty, or a path
+joined out of a config value, does not become a live form action:
+
+<WhatAnActionMayBe />
+
+The two middle rows are the reason this is a schema and not an `if`. Both begin
+with a slash. Both look like paths. Both reach a different origin —
+`//forms.example.net` is scheme-relative, and `/\forms.example.net` is the same
+thing with a backslash the browser straightens out on the way.
+
+Leaving your origin is still allowed. It has to be **said**, as a full `https://`
+URL, so that crossing an origin is a thing somebody wrote down rather than a
+thing that happened.
+
+## What this page does not cover
+
+**What happens after the post.** The form posts to your route, with your fields,
+and everything from there — validating, storing, replying, rate limiting — is
+your application's, exactly as it would be without Loom. The seam ends at the
+`action` attribute.
+
+**An endpoint that never answers.** Waiting is bounded, and it is bounded here
+the same way it is for a model and for a data source:
+[when nothing comes back](/docs/the-runtime/when-nothing-comes-back) is the page
+about that, and a form's endpoint is the third of the three doors on it.

@@ -76,6 +76,95 @@ and is yours. `everyMemberOf<StakeLevel>()([...])` keeps the order explicit and
 only forces the list to be complete, which may be the smaller and better change.
 There is also a third option nobody has to choose between: make `rankOf` refuse
 to answer `-1`.
+## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of the unit that landed beside it
+
+`demo-17-what-the-record-did` gives a landed card the sentence it never had:
+what the change did to the page, in the words on the page. For an insert, a
+remove and a move it is specific, because those operations have a subtree and a
+subtree has words —
+
+> This came off the page, and everything under it went too. **“3,400” “24” “92%”**
+
+**A `configure` has none, and both of the demo's unattended presets are one.**
+*Re-theme the whole page* and *Repaint the top band* each read:
+
+> How one part of the page looks changed. Not a word on it changed.
+
+Which is true, and is the same string in both directions. The two presets are
+**toggles** — `backdrop` swaps `aurora` for `panel` and back, `palette` swaps
+the theme ids and back — so a visitor who presses either one twice gets two
+cards that make opposite changes to the page and are identical to the word.
+That was true of the whole card before this unit and is now true of one line of
+it, which is progress and is not the finish.
+
+**Why it was not fixed here.** Naming the direction means naming the values, and
+the values are `aurora` and `panel` — the registry's own enum, deliberately
+excluded from the quoted words by `settingsOf`, because a setting is not
+something a visitor reads off the page. So the fix is not "quote the prop", it
+is a decision about whether this surface has a plain-language name for a
+setting, and that is a vocabulary question rather than a rendering one.
+
+**Three shapes, none obviously right:**
+
+1. **The registry names its own choices.** A `choice` gains a human label, and
+   the card reads *"the top band went from the soft wash to the flat panel"*.
+   Truest, and it is a `Loom primitives` change, not this lane's.
+2. **The card says which press this was.** *"Back to how it was before your
+   last change"* when the delta returns the node to a value an earlier record
+   moved it off. Local to this lane, needs no vocabulary, and only works where
+   the history is in hand — which on this surface it is.
+3. **Leave it.** A visitor who presses the same button twice can see the page
+   change back, and the mark is drawn both times.
+
+**Recommendation: 2**, if the maintainer wants it. It is the only one of the
+three that is this lane's to build, and it answers the question a visitor
+actually has on the second press, which is *did that do anything*.
+
+---
+## 2026-09-14 — `actions.ts` is the one file in this lane a test cannot reach, and it is now load-bearing
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
+by putting the defect back, which is the only reason it is known
+
+Every unit in this lane is checked by restoring each defect in turn and
+confirming the suite catches it. On `demo-17-what-the-record-did`, four of five
+were caught by exactly the test that should catch them. **The fifth was caught
+by nothing:**
+
+| defect restored | what fails |
+| --- | --- |
+| `draftFrom` stops carrying the record's account forward | 1 test |
+| the tense table is ignored and every reading comes back present-tense | 8 tests |
+| the frozen reading is printed without checking the outcome | 2 tests |
+| a landed change is drawn in the waiting colour | 1 test |
+| **`actions.ts` stops telling the undo path it is restoring** | **nothing — 377 passed** |
+
+`pipeline.test.ts` covers the write path end to end and it is a good test, but
+it *replicates* what the server action does rather than calling it: it reads the
+head, calls `commitIntent`, and hands the result to `recordFromEvents` itself.
+So every argument `actions.ts` passes is asserted in the test's own copy of the
+call and nowhere in the file that ships.
+
+**What that costs, concretely.** Delete `true` from one call in `actions.ts` and
+the demo's payoff silently regresses: press *Put it back*, allow it, and the
+card reads *"This went onto the page, and nothing already on it was touched"*
+over three figures the visitor has just watched come back. Green suite, shipped
+page, the one frame this surface exists for, said backwards.
+
+This is not new — `actions.ts` has never had a test — but it was cheap while the
+file only forwarded form fields to the runtime. It now carries two decisions of
+its own: which tree a change is judged against, and which direction it is going.
+
+**The shape that would fix it** is not a mock of `next/cache` and `cookies`. It
+is moving the two decisions out of the action and into `_lib/`, where the
+pipeline test can call the same function the action calls rather than a copy of
+it. `assessedAgainst` is already a named function; it is on the wrong side of
+the `"use server"` boundary. Left for the next run rather than folded into this
+one, because it is a refactor with its own argument and this unit was already
+five files.
 
 ---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
@@ -159,7 +248,10 @@ wrong one gives a plausible number.
 ## 2026-09-14 — the raw signal buffer has no retention, so it grows until someone notices
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — a gap this lane left on purpose and must close next
+**closed by `framework-35-the-window-that-empties`** — `collectReaderSignals`
+empties it, and the last paragraph below turned out to be wrong about the shape;
+[0158](decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+says why and is the correction
 
 `docs/signals.md` rule 5 and
 [0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)
@@ -775,16 +867,23 @@ two presses. No reference gallery can tell you that a card has rendered twice.
 ## 2026-09-12 — `docs/rollout.md` still says the demo lives at `apps/loom/app/(portal)/portal/demo`, twenty-two days on
 
 **Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
-open — re-verified on this branch rather than re-dated
+**closed — fixed on `main`**, verified on `f62b9bc` by
+`demo-17-what-the-record-did` (14 September)
 
-Line 19, verified on `140f150` this run:
+Line 19, verified on `140f150` when this was filed:
 
 > Eighteen primitives are registered and the demo is live at
 > `apps/loom/app/(portal)/portal/demo`.
 
 It moved to a public `/demo` on 21 August. `rollout.md` names this lane the
 conversion artifact for launch, so the one document saying what the demo is *for*
-is the one still pointing at where it was. Eighth consecutive run to say so.
+was the one still pointing at where it was. Eighth consecutive run to say so.
+
+**It now reads `apps/loom/app/(demo)/demo`.** Closed here rather than re-filed;
+the three earlier copies of this entry below are the same finding and are closed
+by the same fix. **Nine runs of this lane filed it and the tenth is the one that
+got to delete it** — which is the argument for the channel working, and also for
+re-verifying before re-filing rather than after.
 
 ---
 
@@ -22518,9 +22617,10 @@ lane that ships the surface outranks a primitive nobody has asked for.
 ## 2026-09-12 — a specimen cannot be put "beside the code it photographs" for any lane whose code is under `src/`
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/` and
-the build config) · **Status:** open in its general form — unblocked here by one
-line, which is in this branch and is the whole of its diff outside
-`src/primitives/`
+the build config) · **Status:** still open in its general form, and **the fix it
+proposes is refused** — see the owner's note at the end of this entry
+(`framework-36-the-instruments`, 15 September). The one-line unblock it shipped
+is right and stays.
 
 `tools/specimen/README.md` says, under *Writing a specimen*:
 
@@ -22569,6 +22669,34 @@ reports **exit 0 on a failed verify**, because the exit code is the pipe's. The
 repository does this; it is a thing a *run* does, so it belongs in
 `docs/routines.md` next to the token discipline rather than in any lane's code:
 **redirect and check `$?`, never pipe a gate into `tail`.**
+
+> **Owner's note, 15 September (`Loom daily build`).** The general form asked
+> whether *"a glob for anything with a compound extension under `src/`"* should
+> replace the two exclude patterns. **It must not, and it would have taken the
+> whole starter library out of the published build.** `src/**/*.*.ts` matches
+> `src/primitives/loom.card.ts`. Counted on `main` today: **97 files under
+> `src/` carry a compound extension and are runtime code** — every registered
+> primitive, by the naming convention 0061 settled. The glob is one line instead
+> of two and it silently stops emitting the library.
+>
+> The real invariant is not about file names at all. It is: **nothing the build
+> includes may import from outside `src/`.** That is the condition TS6059 was
+> reporting, and it is checkable directly — walk the files
+> `tsconfig.build.json` includes, and refuse a relative import that escapes
+> `src/`. The failure then names the file and the choice ("this is not runtime
+> code, so add its convention to the exclude list — or it should not be
+> importing from `tools/`") instead of arriving as a merge gate going red on a
+> lane that was following a README, which is how both halves of this finding
+> were discovered.
+>
+> Left open rather than built, with the shape named, because it is a third
+> subsystem in a run whose unit is the harness and a migration PR that also
+> does something else is unreviewable. It is this lane's and nobody is blocked;
+> the two-places-must-agree cost stands until someone writes it.
+>
+> The `pnpm verify 2>&1 | tail -35` observation is separate, correct, and cost
+> this lane fifteen minutes too. It is now in `docs/routines.md` beside the
+> token discipline, which is where the finding said it belonged.
 
 ---
 
@@ -22890,8 +23018,9 @@ runtime's, and it is not finished.
 
 ## 2026-09-11 — a card is named by its heading *and* its body, and the body crowds the heading out
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-cosmetic, and the first thing a reader's eye lands on
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-27-named-by-what-it-leads-with` on 14 September — and neither candidate
+rule survived contact, for the reason the entry said it would
 
 `saidBy` joins every text run under a node with a space, which is right and was
 found the hard way — concatenating them produced *the card “Every change is a
@@ -22916,6 +23045,36 @@ more than one", and they disagree on a card holding two paragraphs.
 
 `saidBy`'s current behaviour is load-bearing for `page-name.ts` as well, so
 whoever takes this should read both callers before changing the join.
+
+**How it was decided, 14 September.** Neither candidate rule survived contact,
+and for the reason this entry half-saw: both were written about the *number* of
+runs, and the case that separates a name from a mangling is not a count. A
+paragraph holding *"Free returns on"* and a link saying *"everything"* has two
+runs and one sentence; a card holding a heading and a paragraph has two runs and
+two things. Counting cannot tell them apart, and either rule truncates the
+paragraph mid-sentence.
+
+What decides it is whether the node says anything **itself**:
+
+> A part that says something itself is named by everything it says. A part that
+> says nothing itself is named by the first thing inside it that does.
+
+A direct text child makes a node a passage whatever else it holds, so the inline
+link stays inside the sentence. A node with no text of its own is a container,
+and it is named by the first child that says anything — recursively, which is
+what makes a page lead with its card's heading rather than needing a rule per
+depth, and which lets it skip a silent first child rather than coming back empty
+at an image.
+
+**`saidBy` is gone rather than kept beside the new rule.** The warning above was
+right that `page-name.ts` was load-bearing, and wrong about the direction:
+`pageNameOf` never called `saidBy` at all: it used the runtime's `textOf`, which
+concatenates. A heading re-authored into two runs was therefore `Autumnarrivals`
+in the largest text on the screen while every sentence below it said *Autumn
+arrivals* — the same defect of 10 September, surviving in the one caller that
+had never been looked at. Both callers now read `leadOf`, so there is one answer
+to *what does this part say* rather than two that had agreed only by coincidence,
+on headings that happened to hold a single run.
 
 ---
 
@@ -23167,8 +23326,19 @@ matters.
 
 ## 2026-09-13 — the screenshot harness cannot photograph a block that only exists once you press it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-worked around this run with a throwaway script, and the workaround is the finding
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-36-the-instruments`** — `do` and `clip` both landed as
+this finding proposed them, and [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+records the boundary they sit inside: an instrument may **reach** a state and
+may never **assert** one, which is the line to quote when the next request is
+for `expect` in a shot list. The note about a click on a real `a[href]` was
+right and is now the harness's own behaviour rather than a lane's to remember:
+a `do` list pins the page for its duration, by `preventDefault` on anchor
+clicks in the capture phase — never `stopPropagation`, so a broadcaster
+delegating from the root still sees every click and the picture stays one of
+the page rather than of the instrument. One thing the finding did not ask for
+and got: overflow is measured **after** the steps, because a disclosure that
+opens is exactly what pushes a page past the phone.
 
 `pnpm shoot` takes a path, a viewport and a selector to wait for. It has no way
 to **do** anything before the shutter, and no way to photograph **one element**
@@ -23308,6 +23478,15 @@ pages than this and what the bar was measured against on #166.
 ## 2026-09-13 — a comparison is four subjects wide on a laptop and one subject wide on a phone
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-35-a-table-a-phone-can-read` — the criterion column narrows
+to 9rem below 48rem, which puts 92 pixels of the second subject on screen at
+rest instead of 44 blank ones, and the region a reader scrolls is now focusable,
+named and snapped. **The suggested fix was not the one taken and the reason is
+measured**: a stacked rendering needs every answer labelled with its subject,
+the subject's name is a node in another row, and nothing in the library can get
+it there — filed as its own entry below. Original status below.
+
+**Status:**
 open — the band works, and a phone reader is getting a quarter of it
 
 `/who-can-ask` is built on `loom.comparison-table` with four subjects, which is
@@ -23377,9 +23556,23 @@ integration that never replies, which is the one the portal lane lost a run to.
 ---
 ## 2026-09-14 — the third door into foreign code has no page, and now there is a page that says so
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
-next page in this section, filed rather than written because it is a page and not
-a paragraph
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+`docs-25-what-a-form-posts-to`** — */docs/the-runtime/what-a-form-posts-to*,
+between *What your app has to do* and *What every ask leaves behind*, which is
+the position this entry asked for. It was written to the structure this entry
+proposed and it transferred almost line for line: a declaration in the tree,
+your half as a registration, the resolve that happens before anything is drawn,
+what comes back, and the named ways it does not. Every fact the entry said was
+missing has a section — that the tree names an endpoint rather than carrying an
+address, that resolution happens per request so a token can be minted, that the
+id is what a model may change and the action is not, and what each of the five
+`SubmissionUnavailable` reasons means to whoever runs the deployment. Three
+things the entry did not ask for and the page has anyway, each because the seam
+turned out to answer a question a reader would ask next: what the Gate does when
+a proposal moves a form (held for a person on every origin, by a rule in the
+Gate rather than by stakes), what happens when a declaration carries an address
+instead of a name (refused at the plan, so the form has no target at all), and
+which strings the seam will carry as an action.
 
 0140 named three seams where Loom awaits code it did not write: the model client,
 a data source, and a **form's submission endpoint**. Two of the three have a
@@ -23513,6 +23706,16 @@ this and what the bar was measured against on #166.
 ## 2026-09-14 — `loom.table` is the same shape of problem on a phone as `loom.comparison-table`, measured
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-35-a-table-a-phone-can-read` — `loom.table` takes a `prose`
+prop, and a table that declares it gives its body cells a 12rem measure below
+48rem: the 360-pixel row in the reproduction becomes 193 and the band scrolls
+492 inside 348 instead of crushing itself to fit. **It is a prop rather than the
+stylesheet decision the finding suggested, and that was measured rather than
+preferred** — the rule that needs no prop is ignored by Chromium, and the
+unconditional one costs the table that was already right. Both numbers are in
+the entry below. Original status below.
+
+**Status:**
 open — the primitive is behaving correctly and a phone reader is paying for it
 
 The 13 September entry records that `loom.comparison-table` is four subjects wide
@@ -23552,7 +23755,8 @@ the viewport they were designed for.
 ## 2026-09-14 — five of this site's nine pages have no share card, and the layout's own note says they all do
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — filed against my own lane so the next run does not re-derive it
+closed by `marketing-26-nine-cards` on 15 September — all five, plus the test the
+entry asked for and the removal of the twelve lines that were being copied
 
 `app/(marketing)/layout.tsx` says, of the document's defaults, that *"every page
 replaces the title, the description and everything a shared link unfurls as, in
@@ -23666,7 +23870,21 @@ knows its list is empty places an empty state and is correct.
 ## 2026-09-14 — the specimen harness cannot wire a submission, so every form it photographs is grey
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — small, and it silently degrades the one instrument this lane is judged on
+**closed by `framework-36-the-instruments`** — `defineSpecimen({ endpoints })`
+resolves through `resolveTreeSubmissions` before the render, as asked. One
+change from the shape proposed: it takes a **`SubmissionTarget` per endpoint
+id**, not a `SubmissionEndpoint`. An endpoint is an async call free to mint a
+token against a store, which is a photograph that depends on a network — free
+to be slow, to fail on a bad afternoon, and to make two runs of one specimen
+produce two different pictures. A specimen declares the answer instead. It is
+still validated: the declared targets go through `defineEndpoint`, so one
+naming an off-origin action is refused at the harness rather than in review.
+`renderSpecimen` is async as a consequence; nothing else about writing a
+specimen changed. **The two workarounds are now retakeable and they are yours,
+not this lane's:** the `checkbox` specimen that lifted its fields out into a
+`loom.stack`, and the note in `states-and-paging.specimen.ts`.
+[0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+records it with the alternatives.
 
 `tools/specimen/render.ts` wires a registry, a theme and origins. It does not
 wire endpoints or submissions — `resolveTreeSubmissions` appears nowhere under
@@ -23849,3 +24067,457 @@ re-litigating them: **a signal never identifies a reader**, and **a funnel is
 correlated inside one page view** by an opaque key that never persists. A kind
 carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
+
+## 2026-09-15 — a form can ask for nine kinds of answer and not for a file, and a target cannot say so either
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+— found writing *What a form posts to*, which documents every field a
+`SubmissionTarget` has and could not find the one this needs
+
+`loom.field`'s `type` is a closed enum of nine: `text`, `email`, `tel`, `url`,
+`number`, `date`, `textarea`, `select`, `checkbox`. A file is not among them,
+which is a gap in `src/primitives/` and is the smaller half.
+
+The larger half is in the seam, and it is the one that has to move first.
+`SubmissionTarget` is `{ action, method, fields }`, and `loom.form` puts exactly
+those on the `<form>` element. There is no `enctype`. A browser posting a form
+with no `enctype` sends `application/x-www-form-urlencoded`, in which a file
+input contributes **its filename and nothing else** — so a form that grew a file
+field before the target grew an `enctype` would post successfully, return 200,
+and deliver a string where the deployment expected a document. That is the exact
+shape of failure this seam's three-state outcome exists to prevent, reached from
+the other end: not a button that goes nowhere, but a button that goes somewhere
+and arrives empty.
+
+**Why this is the seam's and not the primitive's.** `enctype` is a property of
+where the form posts, not of what it asks for: an endpoint that cannot take
+multipart should not be reachable by a form that sends it, and the host is the
+only party that knows. Putting it on `loom.form` as a prop would also put it in
+the space a proposal writes, which is the one thing 0065 arranged the whole
+declaration to avoid.
+
+**What would close it**, in order: `enctype?: "application/x-www-form-urlencoded"
+| "multipart/form-data"` on `SubmissionTarget`, defaulted and emitted by
+`loom.form`; then a `file` member of `loom.field`'s enum, for `Loom primitives`.
+Neither is large. Doing the second without the first is the failure above.
+
+**Not blocking, and the page does not mention it.** A contact form that asks for
+a name, an address and a paragraph — which is the shape the starter library's
+`contactBand` composition ships and the shape the documentation page uses —
+needs none of it.
+
+## 2026-09-15 — the site cannot show a form that both posts somewhere and can be changed
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — worked
+around this run by showing two frames instead of one, and the workaround is
+legible enough that this is a want rather than a fault
+
+§4c settles that every rendered example on this site is a real `LoomTree` with a
+working propose-a-change box beside it, and `Example` delivers that by holding
+the tree in React state and walking it in the browser. A **connected form**
+cannot go through it, for two reasons that compound:
+
+- `renderLoomTree` takes a `SubmissionResolution`, which is an object of two
+  functions. It cannot cross a server/client boundary as a prop.
+- Producing one means `await resolveTreeSubmissions(...)`, and `Example` renders
+  synchronously — an effect would make the server's HTML show the unconnected
+  state and then flip, which is a flash and a `submit-unresolved` diagnostic in
+  the markup a crawler reads.
+
+So *What a form posts to* shows the form **twice**: once as a catalogue example
+that names no endpoint, changeable, disabled and saying so; and once as a
+produced block, resolved for real on the server, rendered through the runtime,
+with no propose box. The pair happens to teach better than one frame would —
+the second is the first with one prop added, which is the page's whole argument
+— so this cost nothing here. It will cost something on the page after next.
+
+**What would close it, and the reason none of it was done this run.** The honest
+version is a `targets` prop on `Example` carrying plain `SubmissionTarget`s from
+a server parent, rebuilt into a resolution in the browser with
+`buildSubmissionResolution` — which is exported, pure, and the same fold the
+runtime uses. Two things stopped it. `content.test.ts` requires every example to
+be named as `<Example id="…"` in the page source, so a server wrapper around it
+would take that check red and the fix is a change to a shared check rather than
+to this page. And `catalogue.test.tsx` mounts every example with no submissions
+and refuses a diagnostic, so the catalogue would have to learn about endpoints
+too. Both are this lane's and neither belongs in a run whose subject is a page.
+---
+## 2026-09-15 — the other four surfaces unfurl as nothing, and the one that would draw them a card draws the wrong one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom demo`,
+`Loom lessons` · **Status:** open — measured while closing the same fault on my
+own lane, and offered rather than requested
+
+Nine marketing pages now emit a share card. **Nothing else in this application
+does.** `openGraph`, `twitter:` and `opengraph-image` do not appear anywhere in
+`(docs)`, `(demo)`, `(lessons)` or `(portal)`, so a link to `/docs/…`, `/demo`
+or `/lessons/03` pasted into a channel previews as a bare address: no picture,
+and a title only because Next puts one in the document.
+
+That matters more than it did when these were four sites. 0067 made them one
+application and 0070 put the marketing site at `/`, so the four are now one
+thing a visitor is meant not to feel the seams of — and the seam a stranger
+meets first is the one in their own chat window, where five of the four
+surfaces' links look like a product with a front door and four dead ends.
+
+**The trap, and it is the reason this is a finding rather than a note.**
+`/share-image` already answers for any path and is already generic, so the
+obvious move is to point another surface's `generateMetadata` at it. Do not do
+that unchanged: `routeFor` in `(marketing)/_lib/share-image.ts` resolves the
+`page` parameter against `SITE_ROUTES` and **falls back to the front door for
+anything it does not recognise** — deliberately, so an address mangled in a
+paste still unfurls as this site rather than as a broken picture. A docs page
+wired to it today would therefore unfurl as *"Loom — every change your AI makes,
+written down"*, with the front door's sentence and the front door's address,
+which is worse than no card: it is a card that is confidently about a different
+page.
+
+**What each of you actually needs**, smallest first. None of it is mine to do —
+the route, the fallback and the drawing are all in my lane, and what a docs page
+or a lesson should say about itself is not:
+
+1. **Tell me what your routes are**, as a list I can resolve alongside
+   `SITE_ROUTES` — a path, a title and a sentence is the whole of what
+   `publishedCard` reads. Then `/share-image` answers for your pages too and the
+   fallback stops being a trap, because your paths stop being unrecognised. I
+   will take this as a request the moment one of you files it.
+2. **Or draw your own**, which is the right answer if a docs card should carry
+   something a marketing card does not — a section, a version, a code fence. The
+   card is `shareCardImage` in `(marketing)/_lib/share-card.tsx` and it is a
+   `ShareCard` and a `ResolvedTheme` in, an element out; the shape is worth
+   copying even if the drawing is not shared.
+
+**The test is the half worth stealing whichever you pick.** This lane had the
+machinery, a test holding what a card *says*, and five pages silently not
+calling any of it — for three weeks, with everything green. `announced.test.ts`
+is nine routes, a module import each and one assertion that the page's own
+`generateMetadata` equals what the library would have produced; it is about
+forty lines and it would have caught all five on the day. A card is the one
+artefact on this project that is only ever seen by somebody who does not work
+here, so it is the one that has to be checked by measurement rather than by
+looking.
+
+**`(portal)` is named above only to be ruled out.** It is behind a door, a card
+for a page a stranger cannot open is a card nobody will see, and its sign-in
+page is the one address worth sharing — which the marketing site already
+describes, in `PORTAL.door`.
+
+---
+## 2026-09-15 — no lane can load its own preview, so every "deployed preview" line in every report is a URL nobody has opened
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a question about the sandbox, not a request to widen it
+
+Every routine brief says to include the deployed preview URL in the pull
+request, and this surface's says the maintainer **judges it by eye**. The
+deployment for #307 went green while the run was still open, so I tried to fetch
+`/the-rules` from it and check the card tag on the real host:
+
+```
+https://loom-git-marketing-26-nine-cards-…vercel.app/the-rules
+status=000 size=0
+```
+
+`*.vercel.app` is not in `sandbox.network.allowedDomains` and not in
+`permissions.allow`, so it is unreachable both ways. Nothing is broken —
+this is the policy doing exactly what it is for, and `docs/routines.md` says
+plainly that needing an unlisted domain is a finding rather than a fix.
+
+**What it costs, which is smaller than it sounds and worth knowing.** Every
+screenshot in `reports/` is taken against a local `next start`, and every
+statement a report makes about the preview is therefore a statement about the
+local build with the preview's URL printed beside it. Today's is a good example
+of the seam: the share card prints the origin it was drawn at, so the cards in
+my report read `localhost:3000/the-rules`, and my report says that on the
+preview it is the preview's own host. That is true of `siteOrigin()` and it is
+read off the code, not off the deployment. The same gap applies to anything a
+lane can only get wrong in production — a missing environment variable, an asset
+that 404s from a different origin, a route that behaves differently on the
+platform than under `next start`.
+
+**Three answers, and I am not choosing between them.** It is your sandbox and
+widening egress is the security-relevant half of it:
+
+1. **Leave it.** The local build has caught everything so far, and a routine
+   that can reach an arbitrary `*.vercel.app` can also reach anything anyone
+   deploys to one — which is a materially wider hole than the four names on the
+   list today. **If nothing else, this is the answer I would expect**, and
+   filing it is worth it only so that the next run does not spend tokens
+   rediscovering that the fetch fails.
+2. **Allow this project's preview host pattern only**, if one can be pinned
+   narrowly enough to be worth it — the deployments are all
+   `loom-git-<branch>-jpizzolato36-6341s-projects.vercel.app`.
+3. **Say in `docs/routines.md` that the preview is not checkable from a run**,
+   so reports stop implying otherwise. Cheapest of the three and it closes the
+   honesty gap without touching egress. A report can then say *checked on the
+   local build; the preview is unverified from here*, which is what every report
+   including mine actually means.
+
+Filed against you rather than a lane because all three are yours: two are the
+network policy and the third is the governance document a routine may not write.
+
+## 2026-09-15 — a cell cannot be labelled by its column heading, so no table in this library can stack
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is blocked; both phone findings were closed another way, and this
+is the door that was shut on the way past
+
+Two findings asked, independently, for the same fix: a table that **stacks** on a
+narrow viewport, one block per row, the way every pricing table a reader has
+already used does. Neither got it, and the reason is the same one both times.
+
+**A stacked row is unreadable without labels.** Laid out as blocks, a row of a
+general table is three sentences with nothing saying which column each came
+from, and a row of a comparison is four marks with nothing saying which subject
+each belongs to. The label a reader needs is the column heading — and it is a
+node in a *different row*, inside the `columns` region.
+
+Four ways to get it there were considered and each fails for its own reason:
+
+| route | why not |
+| --- | --- |
+| a CSS rule copies the heading text | there is no such rule. `content` can print a string, and nothing can read one out of another element |
+| a custom property carries it down | properties inherit **downwards**, and a heading is a cell's cousin rather than its ancestor |
+| the container reads its own `columns` slot and passes the strings on | the slot arrives as a rendered `ReactNode`; a primitive that introspected it would be parsing its own output, and the first node that was not a bare string would break it |
+| the cell takes a `label` prop | the heading said twice, in two nodes, with nothing keeping them in step — and a `move` on the header row silently makes every label wrong |
+
+**This is the same shape as the finding this lane filed on 14 September** — *a
+container cannot tell its child which element to be, so a radio group is not a
+field type.* Both are a container holding something its child needs to render
+and having no way to hand it over. That is now two instances, which is the bar
+[0114](decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+sets for taking a seam seriously, and it is the framework's to open rather than
+this lane's to work around: a per-primitive answer here would be a `label` prop
+on one cell type and a different dodge on the next.
+
+**Worth stating plainly: stacking may still be the wrong rendering even if it
+becomes possible.** `loom.table`'s own documentation was written against it —
+`Loom lessons` degraded thirteen lessons' tables into one card per row and lost
+the column-wise scan that made the author write a table. So this is a door that
+should exist, not a fix that is owed.
+
+---
+
+## 2026-09-15 — the rule that would have needed no prop is ignored, and the one that needs none costs the table that was right
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-35-a-table-a-phone-can-read` — recorded because the next
+run to meet a narrow table will reach for one of these two first, and both of
+them were tried
+
+`loom.table` now takes a `prose` prop, and a prop is the answer nobody wants:
+the marketing lane's finding explicitly suggested a static stylesheet decision
+instead, and that was the right instinct. Measured in Chromium at 390px, against
+a three-column table of sentences and a four-column table of figures on one
+page:
+
+| rule | prose table | the table that was already right |
+| --- | --- | --- |
+| today, before any change | 348px wide, tallest row **360px**, no scroll | 350px, rows 41px |
+| `min-inline-size: fit-content(12rem)` | **no effect at all** — 348px, row 360px | no effect |
+| `min-inline-size: 12rem`, unconditional | 492px, row 193px | **744px, and it scrolls** |
+| `min-inline-size: 12rem` behind `prose` | 492px, row 193px | untouched |
+
+`fit-content(<length>)` is exactly the rule this wants —
+`min(max-content, max(min-content, L))`, so a cell holding "1,204" keeps its own
+40-pixel width and a cell holding a sentence is lifted to twelve rem. It is
+valid CSS Sizing 3 and Chromium drops it on the floor for `min-inline-size`. If
+that changes, the prop can become a default and then a no-op, and this entry is
+the note saying so.
+
+The third row is the one that decides it. A minimum applied to every table makes
+the four-column table of figures — the one with nothing wrong with it — 744
+pixels wide and scrolling, which is trading a measured defect for a new one. CSS
+cannot see the difference between a cell holding a sentence and a cell holding a
+date, so something has to say which it is, and the only thing that can is the
+tree.
+## 2026-09-14 — the buffer has a drain and no filler: nothing in the application receives a batch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — deliberately not built in `framework-35`, because it is a public write
+endpoint and deserves a decision rather than a file
+
+`collectReaderSignals` now empties the buffer and `pnpm --filter @loom/app
+signals:collect` runs it. `ingestReaderSignals` has been published since #295
+and **no route handler calls it**, so the buffer is never filled: on `main`
+today a collection run finds nothing and correctly says so.
+
+Building the endpoint at the end of the run that built the drain would have been
+the obvious thing and it is the wrong thing. Everything else in this subsystem
+is written by a deployment's own server. **This one is written by any browser
+that can reach the URL**, which is a different kind of surface and the only one
+Loom has:
+
+- **Who may post.** A published page is public, so the endpoint is public — a
+  session check is not available. `parseReaderSignalBatch` already refuses a
+  malformed batch and `view.ts` refuses anything but 32 hex characters, so what
+  gets through is well-formed and anonymous. It is still an unauthenticated
+  write to the largest table in the database.
+- **How often.** `MAX_BATCHES_PER_DELIVERY` caps one delivery at 50 and nothing
+  caps deliveries. A rate limit keyed on what, given that 0146 forbids anything
+  that identifies the sender, is the actual question, and it is the one I did not
+  want to answer in a hurry. The nearest existing shape is
+  `(portal)/_lib/auth/attempts-postgres.ts`.
+- **Where it lives.** `sendBeacon` posts to a URL the host configures, so the
+  path is a deployment's choice rather than a framework constant — but a
+  deployment with no opinion needs a default that works, and a default that
+  works is a route in this application.
+- **Whether an unconfigured deployment refuses.** Signals are off by default and
+  an unaddressed render is byte-identical (0136). An endpoint that accepts
+  batches for a deployment that never asked for them is a table filling up for
+  no reason, so the switch that turns broadcasting on probably has to be
+  readable by the endpoint too.
+
+**Nothing is blocked by this today.** The drain, the counters and the tally
+reads are all real and testable without it, and `prototypes/ski-apparel` has
+been the end-to-end example all along. What is blocked is a *live* deployment
+measuring anything, and the portal's step 4 screen having real rows rather than
+the shape of rows.
+
+---
+
+## 2026-09-14 — the tallies lag the buffer by a window, and a screen that does not say so will look broken
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+open — a property of step 4's input, not a defect
+
+The entry above this morning listed what `ReaderTallyStore` offers step 4. One
+thing it could not list, because it had not been decided yet, is **when a number
+appears**.
+
+[0158](decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+makes counting and forgetting one operation, so a batch is counted once it has
+been held for the collection window — an hour by default — and not before. A
+reader who is on the page right now is in `loom_reader_signals` and in no tally,
+and will be in one after the next run past their window.
+
+**Why this is a screen problem rather than a number problem.** *Before versus
+after a change* is the measurement the portal exists to show, and it is the
+measurement someone will go looking for **immediately after making the change**.
+On a deployment collecting hourly they will find the old revision's counters and
+a new revision with nothing against it, which looks exactly like a change that
+broke the measurement. The truthful reading is *"nothing has been counted for
+this revision yet"*, and only the screen can say it.
+
+Two things are available to say it with. `StoredTally.updatedAt` is when a
+revision's row last took a rollup, so *"counted up to 14:05"* is answerable
+without new plumbing. And a revision with no row at all is different from a
+revision with zeroes — the first has not been counted, the second was counted
+and nobody read it.
+
+A live rail is the other half and is not this: `foldReaderSignals` folds batches
+as they arrive for one page being watched now. Step 4 is the durable view.
+Showing the fold's freshness beside the store's numbers would be two different
+questions with one label.
+## 2026-09-14 — step 3 of the signal plan is on `main`, nothing in the deployment calls any of it, and so step 4 still has no input
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— filed by the lane that came to start step 4 and found the seam unwired
+
+[`docs/signals.md`](docs/signals.md) gates the portal's reader view on step 3
+being on `main`: *"Do not start before step 3 is on `main` — there is nothing to
+read until then."* #295 landed step 3 on 14 September, so the gate reads as
+lifted. It is not, because **step 3 built modules and no deployment calls them.**
+
+`ingestReaderSignals`, `rollUp` and `ReaderTallyStore` exist, are tested, and are
+published from `@loom/runtime/signals`. Across `apps/loom` the only two things
+that mention reader signals at all are a compiled docs fence and the docs' live
+rail component, and both exercise the **broadcaster**. There is no route handler
+that receives a batch anywhere in the application; nothing constructs a signal
+journal or a tally store the way `_lib/store.ts` and `_lib/telemetry.ts`
+construct theirs; nothing runs a rollup on any schedule; and `src/signals/
+migrate.ts` is not reached by `scripts/db-push.ts`.
+
+So a portal screen written today would read a store that no code path ever
+writes to. It would be correct, tested, permanently empty, and the fourth unit in
+a row from this lane whose most important state cannot be photographed — which is
+the open finding of 13 September arrived at by a different road.
+
+**What is missing, named so it can be split.** Three pieces, and none of them is
+a screen:
+
+1. **A receiver.** Something the broadcaster's delivery reaches, calling
+   `parseReaderSignalBatch` and then `ingestReaderSignals`. It is not a portal
+   route: the pages readers actually read in this deployment are `(demo)`,
+   `(marketing)` and `(docs)`, so the endpoint belongs to the application rather
+   than to any one surface — which is why this is filed against `Loom daily
+   build` rather than taken here.
+2. **The two stores, constructed.** A signal journal and a `ReaderTallyStore` on
+   `portalDatabase`'s handle, plus `src/signals/migrate.ts` reached by
+   `db:push`. Whether those tables land in the same push as the tree store and
+   the telemetry journal is a question about shared ground, not about a screen.
+3. **Something that runs the rollup.** `rollUp` is pure and nothing invokes it.
+   `scripts/telemetry-prune.ts` is the shape periodic work against this
+   deployment already has, and retention — deferred out of #295 on the ground
+   that forgetting raw batches before their counters are durable destroys data —
+   is the same schedule and probably the same unit.
+
+**Why this is said rather than worked around.** The obvious workaround is to seed
+tallies the way the tree is seeded, and it is the wrong one. A seeded tree
+demonstrates a *structure*, and anybody reading it can check it against the
+builder in source. Seeded reader counts are fabricated measurements of people who
+did not exist, shown on the one screen whose entire value is that its numbers are
+real — and a plausible false number is worse than no number, because nothing on
+the screen can tell a reader which they are looking at. A permanently empty
+screen is the better failure.
+
+**What this lane did instead, and what it will do next**, unless told otherwise:
+built a screen whose input already exists, and will take step 4 in the run after
+a batch can reach a counter. Nothing about the shape needs re-litigating — 0146,
+0147 and `rollup.ts` settle it, and the view is a run's work once there is
+anything in the table.
+
+---
+
+## 2026-09-14 — the screenshot harness cannot sign in and cannot press anything, so every picture of the portal is taken by a private script
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+the fourth thing in this lane's recipe that is not in the shared harness
+
+[0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+folded nine private screenshot scripts into one harness, and `pnpm shoot` is the
+half meant for "a page something else is already serving, which is the only way
+to photograph a screen needing a session, a database or a build behind it". The
+portal is that screen and `pnpm shoot` cannot photograph it.
+
+Two reasons, both structural rather than missing features:
+
+1. **A shot list is addresses, and a session is not one.** `/portal/sign-in`
+   posts a form driven by `useActionState`; there is no URL that signs a reviewer
+   in, deliberately — 0027 makes the key the identity and there is nowhere to put
+   a key but a POST body.
+2. **`captureShots` opens a fresh context per shot** (`playwright.ts:102`), so
+   even a shot that could sign in would leave the cookie behind when the next one
+   started.
+
+And a third that is this lane's alone: the states worth photographing on the
+review queue and on `What's changed` **do not exist until somebody asks for a
+change**, which is a fill and a click, not an address.
+
+So every portal picture in `reports/` since the harness landed was taken by a
+per-run script that drives Playwright directly. This run's is in the scratchpad,
+it is about a hundred lines, and roughly ninety of them are the harness's own job:
+finding Chromium under `/opt/pw-browsers` without naming a build, the viewports,
+`reducedMotion`, the overflow measurement, the file naming. That is the exact
+duplication 0117 was written to end, re-created because the one thing the harness
+does not do is the one thing this surface needs.
+
+**It also re-created a hazard the harness would have avoided.** The first attempt
+clicked `form button[type="submit"]` for the prompt box and hit the topbar's
+**sign out** instead, then photographed the sign-in page believing it was the
+screen behind it — which is the failure the `Shot.waitFor` documentation already
+warns about, arrived at from a direction that documentation does not cover.
+
+**What would close it, offered rather than prescribed.** A shot list step that is
+not an address: something like an optional `before` on the list — a small,
+declarative sequence of `fill` and `click` and `waitFor` applied in one context
+that is then kept for the shots that follow. That is a real design question (a
+shot list is *a value rather than a script*, which the plan's own documentation
+says twice and is right about), and it is why this is filed rather than taken
+inside a unit about naming. A narrower version that would cover most of it: let a
+shot list declare **one** sign-in step and share the context across shots.
+
+**Not this lane's to decide alone** — five surfaces use the harness and two of
+them have no session at all, so an option only one lane needs may belong
+somewhere else entirely. Worth half an hour of somebody's judgement before
+anybody builds it.

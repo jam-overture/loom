@@ -10,7 +10,7 @@ import { browsersRoot, describeBrowserError, locateChromium } from "./browser.js
 import { captureShots, describeShot } from "./capture.js"
 import { planShots, shotsAt } from "./plan.js"
 import { chromiumBrowser, describeLauncherError, loadChromium } from "./playwright.js"
-import { renderSpecimen } from "./render.js"
+import { describeRenderError, renderSpecimen } from "./render.js"
 import { serveDirectory } from "./serve.js"
 import type { Specimen } from "./specimen.js"
 
@@ -43,8 +43,8 @@ const loaded: Record<string, unknown> = await import(pathToFileURL(resolve(modul
 const specimen = loaded["default"]
 if (!isSpecimen(specimen)) fail(`${modulePath} does not default-export a Specimen`)
 
-const rendered = renderSpecimen(specimen)
-if (!rendered.ok) fail(`the starter library would not build a registry: ${rendered.error.detail}`)
+const rendered = await renderSpecimen(specimen)
+if (!rendered.ok) fail(describeRenderError(rendered.error))
 
 for (const page of rendered.value) {
   for (const diagnostic of page.diagnostics) {

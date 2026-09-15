@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
 import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@loom/runtime/postgres"
+import { ensureReaderSignalsSchema } from "@loom/runtime/signals/postgres"
 import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
 
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
@@ -56,10 +57,18 @@ try {
    */
   await ensureHoldStoreSchema(db)
   await ensureTelemetrySchema(db)
+  /**
+   * The buffer and the two counters. Created even on a deployment that never
+   * switches signals on, because the alternative is a deployment that does
+   * switch them on discovering the tables are missing from a route handler that
+   * cannot do anything about it.
+   */
+  await ensureReaderSignalsSchema(db)
   /** The portal's own table, not the runtime's — see `lib/auth/attempts-postgres.ts`. */
   await ensureSignInAttemptsSchema(db)
   console.log(
-    "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry and loom_signin_attempts are present"
+    "loom: loom_trees, loom_revisions, loom_holds, loom_telemetry, loom_reader_signals, " +
+      "loom_reader_tallies, loom_reader_funnels and loom_signin_attempts are present"
   )
 } finally {
   await client.end()

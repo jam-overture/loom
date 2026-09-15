@@ -4158,10 +4158,95 @@ describe("the comparison band", () => {
      * on the way, because a row of ticks whose question has scrolled away is
      * the phone rendering of every comparison table nobody tried on a phone.
      */
-    expect(markup).toMatch(/<div[^>]*overflow-x:auto[^>]*min-width:0/)
+    expect(markup).toContain(`class="${LIBRARY_CLASS.scrollX} ${LIBRARY_CLASS.compareScroll}"`)
+    expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.scrollX} \\{[^}]*overflow-x: auto`))
     expect(markup).toContain(".loom-compare-key")
     expect(markup).toContain("position: sticky")
     expect(markup).toContain("inset-inline-start: 0")
+
+    /**
+     * The region is reachable and named, which it was not until 15 September.
+     * A scroll container is focusable by default in some browsers and not in
+     * others, so the band makes it focusable rather than hoping — and names it,
+     * because an unnamed focus stop is worse than none. That pair is
+     * `loom.carousel`'s, decided on 28 August; this band had the overflow and
+     * none of the rest of it for three weeks.
+     */
+    expect(markup).toMatch(/<div class="loom-scroll-x loom-compare-scroll" tabindex="0" role="group" aria-labelledby="/)
+
+    /**
+     * And the ring is drawn inside the region rather than outside it. The
+     * wrapper clips — it rounds the panel's corners with `overflow: hidden` —
+     * so an outward offset would put the focus ring in the two pixels the
+     * parent is cutting off, and the focus stop added above would light up
+     * nothing at all. Asserted as the negative offset rather than as a
+     * screenshot, because this is exactly the failure a screenshot of an
+     * unfocused band cannot show.
+     */
+    expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.scrollX}:focus-visible \\{[^}]*outline-offset: -2px`))
+  })
+
+  it("sets neither of its two widths inline, so a narrow screen can have different ones", () => {
+    const editorial = render(comparisonPage(EDITORIAL)).markup
+    const bold = render(comparisonPage(BOLD)).markup
+
+    /**
+     * [0155](../../decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)
+     * in the second place it has been found, and the first where it was costing
+     * a reader something.
+     *
+     * `loom.comparison` set `min-width: 7rem` on every answer and
+     * `loom.comparison-row` set `min-width: 12rem` on every criterion. Both
+     * comments called the pair the intrinsic answer to a narrow screen with no
+     * width query to declare — and an inline style beats a rule, so the two
+     * numbers that decide what a 390px reader sees were the only two in the
+     * band that no rule in this library could reach.
+     *
+     * **Both halves are asserted**, and the second is the one that matters. A
+     * width put back on either element would leave the media query below
+     * quietly doing nothing: no error, no warning, no failing test anywhere
+     * else, and a phone rendering that is merely wrong. This is the assertion
+     * that would notice, so it checks the absence as well as the presence, and
+     * under both palettes because a width is not a colour and neither palette
+     * is allowed to have its own.
+     */
+    for (const markup of [editorial, bold]) {
+      const body = markup.slice(markup.indexOf("<tbody>"))
+      expect(body).not.toMatch(/<t[dh][^>]*min-width:/)
+      expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.compare} th, \\.${LIBRARY_CLASS.compare} td \\{[^}]*min-width: 7rem`))
+      expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.compare} \\.${LIBRARY_CLASS.compareKey} \\{\\s*min-width: 12rem`))
+    }
+  })
+
+  it("narrows the criterion column on a phone so the next subject has ink in it", () => {
+    const { markup } = render(comparisonPage(EDITORIAL))
+
+    /**
+     * The 13 September finding, and the shape of its fix.
+     *
+     * At 390px the criterion took 192 of the band's 348 pixels and the first
+     * subject took 112, leaving 44 pixels of the second — and the sliver was
+     * blank, because an answer is centred in its cell and 44 pixels of a
+     * 112-pixel cell is its padding. So the band had a peek all along and the
+     * peek had nothing in it, which is how a reader looked straight at four
+     * subjects and came away certain there was one.
+     *
+     * Nine rem puts 92 pixels of the second subject on screen at rest, which is
+     * past the centre of that cell and so past its mark. That is
+     * `loom.carousel`'s affordance rather than a new one — the next thing along
+     * is always visibly cut off — and it is only sayable because the widths
+     * above stopped being inline styles.
+     *
+     * The scroll padding moves with it. A subject snapped to the start of the
+     * region would otherwise land *underneath* the criterion that stays put,
+     * which is the sticky column eating the answer instead of the edge of the
+     * screen doing it.
+     */
+    expect(markup).toMatch(
+      new RegExp(
+        `@media \\(max-width: 47\\.99rem\\) \\{\\s*\\.${LIBRARY_CLASS.compare} \\.${LIBRARY_CLASS.compareKey} \\{\\s*min-width: 9rem;\\s*\\}\\s*\\.${LIBRARY_CLASS.compareScroll} \\{\\s*scroll-padding-inline-start: 9rem;`
+      )
+    )
   })
 
   it("holds no list in any of the three schemas, which is 0052 for a two-dimensional band", () => {
@@ -4411,7 +4496,15 @@ describe("the general table", () => {
       match[1] === undefined ? [] : [match[1]]
     )
 
-    expect(labelled).toHaveLength(2)
+    /**
+     * Four for two tables: the caption names the `<table>` *and* the region it
+     * scrolls inside. The second one arrived with the focus stop on 15
+     * September and it is the same id deliberately — a region a reader can tab
+     * to has to say which table it is, and minting a second name for it would
+     * be the caption said twice with nothing keeping the two in step.
+     */
+    expect(labelled).toHaveLength(4)
+    expect(new Set(labelled).size).toBe(2)
     expect(markup).not.toContain("<caption")
     for (const id of labelled) expect(markup).toContain(`id="${id}"`)
   })
@@ -4419,10 +4512,55 @@ describe("the general table", () => {
   it("scrolls a wide table inside its own edge and keeps the row heading in view", () => {
     const { markup } = render(tablePage(EDITORIAL))
 
-    expect(markup).toMatch(/<div[^>]*overflow-x:auto[^>]*min-width:0/)
+    expect(markup).toContain(`class="${LIBRARY_CLASS.scrollX}"`)
+    expect(markup).toMatch(new RegExp(`\\.${LIBRARY_CLASS.scrollX} \\{[^}]*overflow-x: auto`))
+
+    /** Reachable and named, for the reasons the comparison band's own test gives. */
+    expect(markup).toMatch(/<div class="loom-scroll-x" tabindex="0" role="group" aria-labelledby="/)
+
+    /**
+     * **No scroll padding here, and there is some on the comparison band.** A
+     * criterion column is a declared width so a snap can be told how much room
+     * to leave it; a general table's heading column is as wide as whatever
+     * somebody typed. Asserted so that a later run copying the comparison
+     * band's rule across has to decide to, rather than drift into it.
+     */
+    expect(markup).not.toMatch(new RegExp(`\\.${LIBRARY_CLASS.scrollX} \\{[^}]*scroll-padding`))
     expect(markup).toContain(`.${LIBRARY_CLASS.tablePanel} .${LIBRARY_CLASS.tableKey} {`)
     /** Only in a panel: a sticky cell needs an opaque ground, and a plain table has none of its own. */
     expect(markup).not.toMatch(new RegExp(`\n\\.${LIBRARY_CLASS.tableKey} \\{`))
+  })
+
+  it("gives a table of sentences a readable measure on a phone, and a table of values nothing", () => {
+    const plain = render(tablePage(EDITORIAL)).markup
+
+    /**
+     * The 14 September finding. Three prose columns squeezed to about 110
+     * pixels each turned one row into 360 — 43% of a phone screen for a single
+     * row, and the band did not even have to scroll to do it. Twelve rem below
+     * 48rem takes the same row to 193 and lets the band scroll instead, which
+     * is horizontal travel a reader controls in place of vertical height they
+     * do not.
+     *
+     * **The rule is scoped to the body**, because a row heading is a label and
+     * not a sentence: giving "Sep 8" a twelve-rem measure would spend a third
+     * of a phone's width on two words and push the first real column off the
+     * screen, which is the same defect with a different cell in it.
+     */
+    expect(plain).toMatch(
+      new RegExp(
+        `@media \\(max-width: 47\\.99rem\\) \\{\\s*\\.${LIBRARY_CLASS.tableProse} tbody > tr > td \\{\\s*min-width: 12rem`
+      )
+    )
+
+    /**
+     * And the table only wears the class when it was told to. This is the half
+     * that keeps the prop honest: the fixture's tables hold values, so a rule
+     * that reached them would be the regression this prop exists to avoid —
+     * measured at 350px becoming 744px, on the one table that was already right.
+     */
+    expect(plain).not.toContain(`class="${LIBRARY_CLASS.table} ${LIBRARY_CLASS.tableProse}`)
+    expect(plain).not.toMatch(new RegExp(`<table[^>]*class="[^"]*${LIBRARY_CLASS.tableProse}`))
   })
 
   it("holds no list in any of the three schemas, and no count", () => {
@@ -4431,7 +4569,7 @@ describe("the general table", () => {
      * decides how many exist, which is the question `docs/primitive-granularity.md`
      * says to ask instead of matching on a prop's name.
      */
-    expect(propsOfType("loom.table")).toEqual(["caption", "density", "rules", "tone"])
+    expect(propsOfType("loom.table")).toEqual(["caption", "density", "prose", "rules", "tone"])
     expect(propsOfType("loom.table-row")).toEqual(["tone"])
     expect(propsOfType("loom.table-cell")).toEqual(["align", "numeric", "role"])
 

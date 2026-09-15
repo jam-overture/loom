@@ -67,6 +67,19 @@ const props = z
 
 type Props = z.infer<typeof props>
 
+/**
+ * The name the scrolling region falls back to when the band has no caption.
+ *
+ * Declared rather than asked of the tree (0060): there is nothing a model could
+ * say here that the band does not already say, and a deployment in French has
+ * one string to replace. A caption is better and the primitive prefers it —
+ * this is the floor, so that a band nobody captioned still has a name on the
+ * focus stop it now has.
+ */
+const BAND_TEXT = { band: "Comparison" } as const
+
+type BandTextKey = keyof typeof BAND_TEXT
+
 const FEATURE_CLASS: Readonly<Record<NonNullable<Props["feature"]>, string | undefined>> = {
   none: undefined,
   first: LIBRARY_CLASS.compareFeatureFirst,
@@ -81,7 +94,8 @@ export const loomComparisonTable = definePrimitive({
     "A feature-by-feature comparison — a region of loom.comparison subjects across the top, and a loom.comparison-row per criterion.",
   props,
   slots: ["columns"],
-  component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
+  text: BAND_TEXT,
+  component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, BandTextKey>) => {
     const columns = loom.slots["columns"]
     const feature = FEATURE_CLASS[given.feature ?? "none"]
     const captionId = given.caption === undefined ? undefined : `${String(loom.nodeId)}-caption`
@@ -164,18 +178,33 @@ export const loomComparisonTable = definePrimitive({
       createElement(
         "div",
         {
-          style: {
-            /**
-             * The band scrolls sideways inside its own edge rather than
-             * widening the page, which is the 20 August phone-scrollbar finding
-             * answered the way `loom.code` answers it: a comparison of four
-             * subjects is wider than a phone and nothing about that is a fault
-             * to design away. `min-width: 0` is what lets this be narrower than
-             * its content when the band is a flex or grid track.
-             */
-            overflowX: "auto",
-            minWidth: "0",
-          },
+          /**
+           * The band scrolls sideways inside its own edge rather than widening
+           * the page, which is the 20 August phone-scrollbar finding answered
+           * the way `loom.code` answers it: a comparison of four subjects is
+           * wider than a phone and nothing about that is a fault to design
+           * away. What was a fault is that **nothing said so** — the region had
+           * `overflow-x` and not one of the four things a scroller owes a
+           * reader, which `loom.carousel` had already worked out on 28 August
+           * and this band never picked up.
+           *
+           * A scroll container is focusable by default in some browsers and not
+           * in others, so it is made focusable here and named to match; an
+           * unnamed focus stop is worse than none, which is why the name is the
+           * caption where there is one and a declared word where there is not.
+           * `group` rather than `region`: a region is a landmark, and four
+           * comparison bands on a marketing page would put four of them in a
+           * screen reader's landmark list ahead of the page's own.
+           *
+           * It is not declared `interactive`. 0064 is about HTML's rule that a
+           * target may not sit inside a target, and a `div` with a `tabindex`
+           * is not one — the same call `loom.carousel` makes for the same
+           * reason.
+           */
+          className: [LIBRARY_CLASS.scrollX, LIBRARY_CLASS.compareScroll].join(" "),
+          tabIndex: 0,
+          role: "group",
+          ...(captionId === undefined ? { "aria-label": loom.text.band } : { "aria-labelledby": captionId }),
         },
         table
       )
