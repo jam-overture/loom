@@ -54,6 +54,27 @@ describe("what a page is called", () => {
     expect(pageNameOf(seedTree()).name).toBe("Loom")
   })
 
+  /**
+   * This module asked the runtime for the exact characters under the heading,
+   * and `textOf` answers by concatenating them — correct for what it is for and
+   * wrong for a name the moment a heading is more than one run, which is what
+   * re-authoring half of one produces. The sentences elsewhere on the same
+   * screen read through `part-name.ts` and said *Autumn arrivals*; the largest
+   * text on the page said `Autumnarrivals`. One rule, two callers.
+   */
+  it("puts a space between two runs of one heading rather than running them together", () => {
+    const tree = pageOf("tworuns", (ids) => [
+      buildElement(ids, {
+        type: "loom.heading",
+        props: { level: 1 },
+        children: [buildText(ids, "Autumn"), buildText(ids, "arrivals")],
+      }),
+    ])
+
+    expect(pageNameOf(tree).name).toBe("Autumn arrivals")
+    expect(pageNameOf(tree).name).not.toBe("Autumnarrivals")
+  })
+
   it("keeps the id beside the name rather than replacing it", () => {
     const tree = seedTree()
     const named = pageNameOf(tree)
