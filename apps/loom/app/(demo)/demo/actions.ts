@@ -7,8 +7,10 @@ import { proposalIdSchema, randomIdFactory, systemClock } from "@loom/runtime"
 import { commitIntent, confirmHeld, discardHeld, describeHoldError, revertRevision } from "@loom/runtime/write"
 
 import { demoModelInterpreter } from "@/app/(demo)/_lib/interpreter"
+import { settingsOf } from "@/app/(demo)/_lib/plain-change"
 import { askedWith, presetById, presetInterpreter } from "@/app/(demo)/_lib/presets"
-import { recordFromEvents } from "@/app/(demo)/_lib/record"
+import { recordFromEvents, type AssessedAgainst } from "@/app/(demo)/_lib/record"
+import { demoRegistry } from "@/app/(demo)/_lib/registry"
 import {
   beginDemoWrite,
   demoSession,
@@ -16,6 +18,7 @@ import {
   recordAwaiting,
   rememberRecord,
   spendModelCall,
+  type DemoSession,
 } from "@/app/(demo)/_lib/session"
 import { undoOf } from "@/app/(demo)/_lib/undo"
 import { DEMO_ACTOR, DEMO_PATH, readVisitorId, rememberVisitorId } from "@/app/(demo)/_lib/visitor"
@@ -76,6 +79,39 @@ const currentSession = async () => {
   return demoSession(minted)
 }
 
+/**
+ * Which props are a closed choice rather than words on the page.
+ *
+ * Read once per module rather than per write: it is a fact about the registry,
+ * and the registry does not change between two asks.
+ */
+const DEMO_SETTINGS = settingsOf(demoRegistry)
+
+/**
+ * The tree this write is about to change, read before it changes.
+ *
+ * **This is the only moment it exists.** A change's plain reading — the sentence
+ * saying what it does in the words on the page — resolves the delta against the
+ * tree it was planned against, and one line below this that tree is a revision
+ * behind. So the record's copy is computed at assessment (`record.ts`), and this
+ * is the one caller that can honestly say what to compute it against.
+ *
+ * `undefined` when the head cannot be read, and that is the whole error
+ * handling: the reading is an addition to the card, not a precondition for the
+ * write. A failed read costs one sentence on one card. Refusing the ask because
+ * a sentence could not be composed would cost the visitor the demo.
+ */
+const assessedAgainst = async (
+  session: DemoSession,
+  restoring = false
+): Promise<AssessedAgainst | undefined> => {
+  const head = await session.store.head(session.seed.treeId)
+
+  return head.ok
+    ? { before: head.value, settings: DEMO_SETTINGS, ...(restoring ? { restoring } : {}) }
+    : undefined
+}
+
 export const askForChange = async (
   _previous: WriteReport | null,
   form: FormData
@@ -116,6 +152,9 @@ export const askForChange = async (
 
   const write = beginDemoWrite(session, interpreter)
 
+  /* Read before the write, because after it the tree the delta describes is gone. */
+  const against = await assessedAgainst(session)
+
   const outcome = await commitIntent(write.path, {
     intentId: randomIdFactory.intentId(),
     treeId: session.seed.treeId,
@@ -126,7 +165,7 @@ export const askForChange = async (
     observedAt: systemClock.now(),
   })
 
-  const record = recordFromEvents(write.narrated())
+  const record = recordFromEvents(write.narrated(), undefined, against)
 
   /**
    * Which button was pressed, kept on the record because nothing downstream can
@@ -214,6 +253,15 @@ export const undoRevision = async (
   const session = await currentSession()
   const write = beginDemoWrite(session)
 
+  /*
+   * `restoring`, because this is the one call site that knows. An undo's
+   * operations are ordinary inserts and removes (0032), so the delta cannot say
+   * which way it is going — and a sentence reading "This went onto the page"
+   * over three figures the visitor watched come *back* is the demo's own payoff,
+   * narrated as an arrival.
+   */
+  const against = await assessedAgainst(session, true)
+
   const outcome = await revertRevision(write.path, {
     treeId: session.seed.treeId,
     revision: parsed.data.revision,
@@ -230,7 +278,7 @@ export const undoRevision = async (
    * card know whether its undo is still to be had, still waiting, or already
    * spent — none of which the card can see from its own press.
    */
-  const record = recordFromEvents(write.narrated())
+  const record = recordFromEvents(write.narrated(), undefined, against)
   if (record) rememberRecord(session, undoOf(record, parsed.data.revision))
 
   revalidatePath(DEMO_PATH)
