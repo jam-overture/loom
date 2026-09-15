@@ -8,6 +8,76 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-15 — two published lists still claim completeness with nothing checking either, and one of them is what the Gate ranks with
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — latent, and the second half is one line of schema away from being live
+
+Found while writing lesson 25, which teaches `everyMemberOf` and therefore had to
+rank every completeness check in the runtime in order to explain why the helper
+exists. `src/` is your lane and nothing here is fixed.
+
+`framework-29` on 12 September closed *"four unions that could be reacted to and
+not walked"*. The sweep was right and the four are done. What it did not do —
+reasonably, it was not the unit — is go back over the lists that already existed.
+Ranked by what would actually fail on the day the union grows:
+
+| list | what checks it | what fails when a member is added |
+| --- | --- | --- |
+| `PALETTE_SLOTS` | it *is* `paletteSlotSchema.options` | nothing can drift |
+| `STORE_ERROR_CODES`, `CLI_ERROR_CODES`, `WRITE_OUTCOME_KINDS`, `EPISODE_RESOLUTION_KINDS`, `HOLD_LIVENESS`, `FACE_ROLES`, `PRIMITIVE_ROLES` | `everyMemberOf`, at the declaration | `pnpm typecheck`, in the file that is wrong |
+| `COMPOSITION_OUTCOME_KINDS` | a `Record<Kind, true>` in `pipeline.test.ts` | that test file's compile |
+| `TREE_OPERATIONS`, `TELEMETRY_EVENT_TYPES` | a test against `schema.options` | that test, at run time |
+| **`STAKE_ORDER`** | `stake-level.test.ts` asserts it equals a hand-written literal | **nothing** |
+| **`UNJUDGED_REASONS`** | nothing | **nothing** |
+
+**`UNJUDGED_REASONS` is the smaller half and the odder one**, because
+`src/tree/delta.ts`'s own doc comment names it as an exemplar of the remedy —
+*"the same one `EPISODE_RESOLUTION_KINDS` and `UNJUDGED_REASONS` already are"* —
+and it is a bare literal. `EPISODE_RESOLUTION_KINDS` is guarded; its neighbour in
+that sentence is not. Three members, one consumer, no consequence beyond a
+telemetry bucket going missing: an `everyMemberOf` call and a comma.
+
+**`STAKE_ORDER` is the one worth a few minutes.** It is a hand-written copy of a
+union that *does* have a schema, and its test compares it against a third copy of
+the same four strings — so a fifth member added to `stakeLevelSchema` breaks
+neither. `rankOf` is `STAKE_ORDER.indexOf(level)`, and `indexOf` answers `-1`.
+Executed this morning against this checkout, with a fifth level cast in to stand
+for the day somebody adds one:
+
+```
+indexOf: -1
+compareStakes(fifth, critical): -4
+compareStakes(fifth, low): -1
+isAtLeast(fifth, critical): false
+isAtLeast(fifth, low): false
+highestStake([low, fifth]): low
+```
+
+A level meant to sit above `critical` ranks *beneath* `low`. So
+`rejectAtRefusalFloor` (`gate.ts:96`) asks `isAtLeast(level, refusalFloor)`, gets
+`false`, and returns `null`; `confirmAboveCeiling` (`gate.ts:159`) asks `isAbove`
+and gets the same silence. `highestStake` folds with `isAbove` from a `"low"` seed,
+so the factor never leaves the analysis — the Gate would not be wrong about a
+change at the new level, it would never be told the change was at it.
+
+**Not live, and I want to be precise about that.** `stakeLevelSchema` has four
+members and refuses a fifth at the boundary, which is the last line of the
+lesson's exercise. Nothing is broken today. What is here is that the mechanism
+protecting the Gate's ranking from a one-line schema edit is a test that restates
+its own subject.
+
+**The fix is not obviously `everyMemberOf`, which is why this is filed and not
+fixed.** `STAKE_ORDER` is an *order*, not a set, and the two coincide today only
+because the schema happens to be written in severity order. Deriving it as
+`stakeLevelSchema.options` makes the declaration order load-bearing for the
+Gate's arithmetic, which is a real decision with a real argument on both sides
+and is yours. `everyMemberOf<StakeLevel>()([...])` keeps the order explicit and
+only forces the list to be complete, which may be the smaller and better change.
+There is also a third option nobody has to choose between: make `rankOf` refuse
+to answer `-1`.
+
+---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
@@ -10373,6 +10443,17 @@ it is the reason for dating rather than dropping it: the cost is small per run
 and it is now certain to recur, because nothing in the repository can fix it.
 A routine cannot rewrite the brief it is bound by.
 ## 2026-08-26 — the Gate grew a seventh rule on 19 August and lesson 09 still says six
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:** closed
+by `lessons-36-exhaustiveness`, as bookkeeping only — the work was done on 27
+August by `lessons-15-the-seventh-rung`, which corrected the count in eleven
+places in lesson 09 and one in lesson 08, renumbered every rung below position
+five, and amended Set K question 1 and Set M question 5. This entry was never
+updated to say so, and a routine reading the ledger for its next job has been
+finding an open finding against a lesson that is right. Verified before closing:
+lessons 08 and 09 and both review sets say seven.
+
+**Original status below.**
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:** open —
 this is the next lessons run's first job, filed rather than fixed because the

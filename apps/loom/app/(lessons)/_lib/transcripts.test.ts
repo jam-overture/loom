@@ -54,13 +54,16 @@ const TRY_IT = "Try it"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 83 since lesson 18 was repaired on 14 September: two exercises were added to
- * it, one for the reason the runtime could not produce until the ceiling landed
- * and one for the reason no tree and no source can cause. It was 81 after lesson
- * 24 (silence), which added eight — seven exercises, one of which prints its
- * transcript in two blocks — 73 after lesson 23, and 66 when this was written.
+ * 89 since lesson 25 (exhaustiveness), which added six — one per exercise, with
+ * its two compiler diagnostics and its pair of type-check counts fenced as
+ * `text` rather than plain, because no program in this course prints them. It
+ * was 83 after lesson 18 was repaired on 14 September (two exercises added, one
+ * for the reason the runtime could not produce until the ceiling landed and one
+ * for the reason no tree and no source can cause), 81 after lesson 24 (silence),
+ * which added eight — seven exercises, one of which prints its transcript in two
+ * blocks — 73 after lesson 23, and 66 when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 83
+const RECOGNISED_TRANSCRIPTS = 89
 
 /** Printable, so that a byte a markdown file cannot hold compares as the space it is written as. */
 const printable = (line: string): string =>
