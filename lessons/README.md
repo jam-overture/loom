@@ -221,7 +221,7 @@ tree. Everything else in the system follows from protecting that one property.
 
 | # | Lesson | You'll understand |
 | --- | --- | --- |
-| [18](18-data.md) | Data: the question the tree asks | Why an answer may never be in the tree, what a page stops being a function of, and what a reviewer's approval covers once it covers a question. |
+| [18](18-data.md) | Data: the question the tree asks | Why an answer may never be in the tree, what a page stops being a function of, what a reviewer's approval covers once it covers a question — and what it meant that one of the seven named ways a question goes unanswered sat in the list for a month with nothing able to produce it. |
 | [19](19-destinations.md) | Destinations: the address the tree never holds | Why validating a form action is the wrong shape of answer; why a binding may carry AI-authored params and a submission may not; and why moving a form's destination is held whoever asked. |
 | [20](20-origins.md) | Origins: whose document runs inside your page | Why the URL stays in the tree and the origins do not; why this seam has no plan and no resolve step; and why a sandbox is reported for a frame that worked. |
 | [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
