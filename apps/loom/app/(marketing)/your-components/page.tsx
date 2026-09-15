@@ -1,14 +1,8 @@
-import type { Metadata } from "next"
-
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, YOUR_COMPONENTS } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = {
-  title: YOUR_COMPONENTS.title,
-  description: YOUR_COMPONENTS.description,
-}
-
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
+export const generateMetadata = routeMetadata(YOUR_COMPONENTS)
 
 /**
  * The components page: what a host hands over, what this site handed over for

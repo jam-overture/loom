@@ -1,23 +1,8 @@
-import type { Metadata } from "next"
-
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
-import { pageMetadata } from "@/app/(marketing)/_lib/share"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { PUTTING_IT_BACK, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
-
-export const generateMetadata = async ({
-  searchParams,
-}: {
-  readonly searchParams: SearchParams
-}): Promise<Metadata> => {
-  const params = await searchParams
-
-  return pageMetadata(PUTTING_IT_BACK, {
-    origin: siteOrigin(),
-    theme: readThemeName(params["theme"]),
-  })
-}
+export const generateMetadata = routeMetadata(PUTTING_IT_BACK)
 
 /**
  * The page that puts every change on the front door back.

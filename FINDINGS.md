@@ -23662,7 +23662,8 @@ the viewport they were designed for.
 ## 2026-09-14 — five of this site's nine pages have no share card, and the layout's own note says they all do
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — filed against my own lane so the next run does not re-derive it
+closed by `marketing-26-nine-cards` on 15 September — all five, plus the test the
+entry asked for and the removal of the twelve lines that were being copied
 
 `app/(marketing)/layout.tsx` says, of the document's defaults, that *"every page
 replaces the title, the description and everything a shared link unfurls as, in
@@ -23975,6 +23976,119 @@ carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
 ---
+## 2026-09-15 — the other four surfaces unfurl as nothing, and the one that would draw them a card draws the wrong one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom demo`,
+`Loom lessons` · **Status:** open — measured while closing the same fault on my
+own lane, and offered rather than requested
+
+Nine marketing pages now emit a share card. **Nothing else in this application
+does.** `openGraph`, `twitter:` and `opengraph-image` do not appear anywhere in
+`(docs)`, `(demo)`, `(lessons)` or `(portal)`, so a link to `/docs/…`, `/demo`
+or `/lessons/03` pasted into a channel previews as a bare address: no picture,
+and a title only because Next puts one in the document.
+
+That matters more than it did when these were four sites. 0067 made them one
+application and 0070 put the marketing site at `/`, so the four are now one
+thing a visitor is meant not to feel the seams of — and the seam a stranger
+meets first is the one in their own chat window, where five of the four
+surfaces' links look like a product with a front door and four dead ends.
+
+**The trap, and it is the reason this is a finding rather than a note.**
+`/share-image` already answers for any path and is already generic, so the
+obvious move is to point another surface's `generateMetadata` at it. Do not do
+that unchanged: `routeFor` in `(marketing)/_lib/share-image.ts` resolves the
+`page` parameter against `SITE_ROUTES` and **falls back to the front door for
+anything it does not recognise** — deliberately, so an address mangled in a
+paste still unfurls as this site rather than as a broken picture. A docs page
+wired to it today would therefore unfurl as *"Loom — every change your AI makes,
+written down"*, with the front door's sentence and the front door's address,
+which is worse than no card: it is a card that is confidently about a different
+page.
+
+**What each of you actually needs**, smallest first. None of it is mine to do —
+the route, the fallback and the drawing are all in my lane, and what a docs page
+or a lesson should say about itself is not:
+
+1. **Tell me what your routes are**, as a list I can resolve alongside
+   `SITE_ROUTES` — a path, a title and a sentence is the whole of what
+   `publishedCard` reads. Then `/share-image` answers for your pages too and the
+   fallback stops being a trap, because your paths stop being unrecognised. I
+   will take this as a request the moment one of you files it.
+2. **Or draw your own**, which is the right answer if a docs card should carry
+   something a marketing card does not — a section, a version, a code fence. The
+   card is `shareCardImage` in `(marketing)/_lib/share-card.tsx` and it is a
+   `ShareCard` and a `ResolvedTheme` in, an element out; the shape is worth
+   copying even if the drawing is not shared.
+
+**The test is the half worth stealing whichever you pick.** This lane had the
+machinery, a test holding what a card *says*, and five pages silently not
+calling any of it — for three weeks, with everything green. `announced.test.ts`
+is nine routes, a module import each and one assertion that the page's own
+`generateMetadata` equals what the library would have produced; it is about
+forty lines and it would have caught all five on the day. A card is the one
+artefact on this project that is only ever seen by somebody who does not work
+here, so it is the one that has to be checked by measurement rather than by
+looking.
+
+**`(portal)` is named above only to be ruled out.** It is behind a door, a card
+for a page a stranger cannot open is a card nobody will see, and its sign-in
+page is the one address worth sharing — which the marketing site already
+describes, in `PORTAL.door`.
+
+---
+## 2026-09-15 — no lane can load its own preview, so every "deployed preview" line in every report is a URL nobody has opened
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — a question about the sandbox, not a request to widen it
+
+Every routine brief says to include the deployed preview URL in the pull
+request, and this surface's says the maintainer **judges it by eye**. The
+deployment for #307 went green while the run was still open, so I tried to fetch
+`/the-rules` from it and check the card tag on the real host:
+
+```
+https://loom-git-marketing-26-nine-cards-…vercel.app/the-rules
+status=000 size=0
+```
+
+`*.vercel.app` is not in `sandbox.network.allowedDomains` and not in
+`permissions.allow`, so it is unreachable both ways. Nothing is broken —
+this is the policy doing exactly what it is for, and `docs/routines.md` says
+plainly that needing an unlisted domain is a finding rather than a fix.
+
+**What it costs, which is smaller than it sounds and worth knowing.** Every
+screenshot in `reports/` is taken against a local `next start`, and every
+statement a report makes about the preview is therefore a statement about the
+local build with the preview's URL printed beside it. Today's is a good example
+of the seam: the share card prints the origin it was drawn at, so the cards in
+my report read `localhost:3000/the-rules`, and my report says that on the
+preview it is the preview's own host. That is true of `siteOrigin()` and it is
+read off the code, not off the deployment. The same gap applies to anything a
+lane can only get wrong in production — a missing environment variable, an asset
+that 404s from a different origin, a route that behaves differently on the
+platform than under `next start`.
+
+**Three answers, and I am not choosing between them.** It is your sandbox and
+widening egress is the security-relevant half of it:
+
+1. **Leave it.** The local build has caught everything so far, and a routine
+   that can reach an arbitrary `*.vercel.app` can also reach anything anyone
+   deploys to one — which is a materially wider hole than the four names on the
+   list today. **If nothing else, this is the answer I would expect**, and
+   filing it is worth it only so that the next run does not spend tokens
+   rediscovering that the fetch fails.
+2. **Allow this project's preview host pattern only**, if one can be pinned
+   narrowly enough to be worth it — the deployments are all
+   `loom-git-<branch>-jpizzolato36-6341s-projects.vercel.app`.
+3. **Say in `docs/routines.md` that the preview is not checkable from a run**,
+   so reports stop implying otherwise. Cheapest of the three and it closes the
+   honesty gap without touching egress. A report can then say *checked on the
+   local build; the preview is unverified from here*, which is what every report
+   including mine actually means.
+
+Filed against you rather than a lane because all three are yours: two are the
+network policy and the third is the governance document a routine may not write.
 
 ## 2026-09-15 — a cell cannot be labelled by its column heading, so no table in this library can stack
 
