@@ -2,6 +2,8 @@
 
 **Routine:** `Loom daily build` · **Date:** 2026-09-15 · **Branch:** `framework-37-the-mouth`
 **Section:** §4c (reader signals), §5 (the application)
+**Pull request:** [#312](https://github.com/jam-overture/loom/pull/312) ·
+**Preview:** <https://loom-git-framework-37-the-mouth-jpizzolato36-6341s-projects.vercel.app>
 
 ## What was done
 
@@ -132,6 +134,12 @@ POST → 503  LOOM_SIGNAL_INTAKE is "enabled", which is neither on nor off, so n
             batch is being kept. Set it to "on" or remove it.
 GET  → {"intake":"unusable", …}
 ```
+
+On the deployed preview, `GET /api/reader-signals` answers `{"intake":"off"…}`
+and a `POST` answers `404`, because `LOOM_SIGNAL_INTAKE` is not set there. **That
+is the endpoint working**, and it is worth saying because it is the one unit in
+this repository whose correct behaviour on a preview is indistinguishable from a
+broken route.
 
 **There is no screenshot, and the reason is worth saying rather than leaving as
 an omission.** The unit has no page. I took one — the `GET` status rendered in
@@ -273,6 +281,16 @@ the exports map against the docs rail — the right failure, and the reason the
 entry point is gone.
 
 ## Open questions
+
+0. **The preview alias has no hash in it, and I said it did.** My first comment
+   on #312 claimed the alias carried a per-deployment hash I could not
+   reconstruct, on the evidence of recent reports whose URLs read
+   `portal-27-named-by-0b618b` and `demo-17-what-the-re-662863`. The alias is
+   `loom-git-<branch>-<team>.vercel.app` verbatim, and is truncated and hashed
+   only when that exceeds the label limit — which those two branch names did and
+   `framework-37-the-mouth` does not. Corrected on the PR. It also means the
+   standing 15 September finding, *no lane can load its own preview*, is about
+   reachability from the sandbox and not about knowing the address.
 
 1. **`docs/signals.md` step 4's gate is what misled the portal lane**, and it is
    an approved plan document rather than this lane's file. It says *"do not start
