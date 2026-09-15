@@ -1,14 +1,8 @@
-import type { Metadata } from "next"
-
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, WHEN_IT_GOES_WRONG } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = {
-  title: WHEN_IT_GOES_WRONG.title,
-  description: WHEN_IT_GOES_WRONG.description,
-}
-
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
+export const generateMetadata = routeMetadata(WHEN_IT_GOES_WRONG)
 
 /**
  * The page that says what happens the other four times.

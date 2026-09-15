@@ -3,7 +3,14 @@ import type { Metadata } from "next"
 import type { Ask } from "./adapt/asks"
 import type { ChangeRecord } from "./adapt/record"
 import { toneFor } from "./pages/answer"
-import { HOME, internalHref, type SiteRoute, type SiteThemeName } from "./site"
+import {
+  HOME,
+  internalHref,
+  readThemeName,
+  siteOrigin,
+  type SiteRoute,
+  type SiteThemeName,
+} from "./site"
 
 /**
  * What this site looks like when somebody sends it to somebody else.
@@ -243,3 +250,32 @@ export const pageMetadata = (route: SiteRoute, context: ShareContext): Metadata 
     },
   }
 }
+
+/** The address a page is reached at, as Next hands it to a route's exports. */
+export type PageSearchParams = Promise<Record<string, string | string[] | undefined>>
+
+/**
+ * The `generateMetadata` a page of this site exports, given the route it is.
+ *
+ * **Eight of the nine are this and nothing else**, because what a page unfurls
+ * as is a function of the route and the palette and `pageMetadata` already takes
+ * both. Written out per page it was twelve lines of identical glue, and twelve
+ * lines of identical glue is how five pages came to have none of it: the layout
+ * says *every page replaces everything a shared link unfurls as, in its own
+ * `generateMetadata`*, and the pages added after that machinery landed copied
+ * the shape of the page beside them — which did not have it — rather than the
+ * shape of the comment. Nothing was red, because what was tested was
+ * `pageMetadata`, and a page that never calls it fails no test of it.
+ *
+ * So what a tenth page copies is **one line naming its own route**, and there is
+ * nothing in it left to leave out. The front door is the ninth and keeps its
+ * own: its card is a function of what the visitor asked for as well, which is
+ * the one thing this cannot take off an address it does not read.
+ */
+export const routeMetadata =
+  (route: SiteRoute) =>
+  async ({ searchParams }: { readonly searchParams: PageSearchParams }): Promise<Metadata> => {
+    const params = await searchParams
+
+    return pageMetadata(route, { origin: siteOrigin(), theme: readThemeName(params["theme"]) })
+  }

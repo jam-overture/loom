@@ -23471,7 +23471,8 @@ the viewport they were designed for.
 ## 2026-09-14 — five of this site's nine pages have no share card, and the layout's own note says they all do
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — filed against my own lane so the next run does not re-derive it
+closed by `marketing-26-nine-cards` on 15 September — all five, plus the test the
+entry asked for and the removal of the twelve lines that were being copied
 
 `app/(marketing)/layout.tsx` says, of the document's defaults, that *"every page
 replaces the title, the description and everything a shared link unfurls as, in
@@ -23768,3 +23769,64 @@ re-litigating them: **a signal never identifies a reader**, and **a funnel is
 correlated inside one page view** by an opaque key that never persists. A kind
 carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
+
+---
+## 2026-09-15 — the other four surfaces unfurl as nothing, and the one that would draw them a card draws the wrong one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom demo`,
+`Loom lessons` · **Status:** open — measured while closing the same fault on my
+own lane, and offered rather than requested
+
+Nine marketing pages now emit a share card. **Nothing else in this application
+does.** `openGraph`, `twitter:` and `opengraph-image` do not appear anywhere in
+`(docs)`, `(demo)`, `(lessons)` or `(portal)`, so a link to `/docs/…`, `/demo`
+or `/lessons/03` pasted into a channel previews as a bare address: no picture,
+and a title only because Next puts one in the document.
+
+That matters more than it did when these were four sites. 0067 made them one
+application and 0070 put the marketing site at `/`, so the four are now one
+thing a visitor is meant not to feel the seams of — and the seam a stranger
+meets first is the one in their own chat window, where five of the four
+surfaces' links look like a product with a front door and four dead ends.
+
+**The trap, and it is the reason this is a finding rather than a note.**
+`/share-image` already answers for any path and is already generic, so the
+obvious move is to point another surface's `generateMetadata` at it. Do not do
+that unchanged: `routeFor` in `(marketing)/_lib/share-image.ts` resolves the
+`page` parameter against `SITE_ROUTES` and **falls back to the front door for
+anything it does not recognise** — deliberately, so an address mangled in a
+paste still unfurls as this site rather than as a broken picture. A docs page
+wired to it today would therefore unfurl as *"Loom — every change your AI makes,
+written down"*, with the front door's sentence and the front door's address,
+which is worse than no card: it is a card that is confidently about a different
+page.
+
+**What each of you actually needs**, smallest first. None of it is mine to do —
+the route, the fallback and the drawing are all in my lane, and what a docs page
+or a lesson should say about itself is not:
+
+1. **Tell me what your routes are**, as a list I can resolve alongside
+   `SITE_ROUTES` — a path, a title and a sentence is the whole of what
+   `publishedCard` reads. Then `/share-image` answers for your pages too and the
+   fallback stops being a trap, because your paths stop being unrecognised. I
+   will take this as a request the moment one of you files it.
+2. **Or draw your own**, which is the right answer if a docs card should carry
+   something a marketing card does not — a section, a version, a code fence. The
+   card is `shareCardImage` in `(marketing)/_lib/share-card.tsx` and it is a
+   `ShareCard` and a `ResolvedTheme` in, an element out; the shape is worth
+   copying even if the drawing is not shared.
+
+**The test is the half worth stealing whichever you pick.** This lane had the
+machinery, a test holding what a card *says*, and five pages silently not
+calling any of it — for three weeks, with everything green. `announced.test.ts`
+is nine routes, a module import each and one assertion that the page's own
+`generateMetadata` equals what the library would have produced; it is about
+forty lines and it would have caught all five on the day. A card is the one
+artefact on this project that is only ever seen by somebody who does not work
+here, so it is the one that has to be checked by measurement rather than by
+looking.
+
+**`(portal)` is named above only to be ruled out.** It is behind a door, a card
+for a page a stranger cannot open is a card nobody will see, and its sign-in
+page is the one address worth sharing — which the marketing site already
+describes, in `PORTAL.door`.
