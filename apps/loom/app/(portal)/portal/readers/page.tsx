@@ -47,7 +47,7 @@ import { PageReadingCard } from "./_components/page-reading"
  *
  * There is no visitor here and there never will be. A signal is anonymous and
  * node-shaped, and a page view is correlated only by an opaque key that never
- * persists ([0146](../../../../../decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)).
+ * persists ([0146](../../../../../../decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)).
  * So this screen counts visits and never people, and the sentence it can never
  * print — *this reader did that* — is refused in the runtime rather than
  * declined here.
