@@ -13,7 +13,8 @@
     "docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
     "docs:fences": "tsx \"app/(docs)/_lib/fences/generate.ts\"",
     "db:push": "tsx scripts/db-push.ts",
-    "telemetry:prune": "tsx scripts/telemetry-prune.ts"
+    "telemetry:prune": "tsx scripts/telemetry-prune.ts",
+    "signals:collect": "tsx scripts/signals-collect.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

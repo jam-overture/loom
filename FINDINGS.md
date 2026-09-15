@@ -180,7 +180,10 @@ wrong one gives a plausible number.
 ## 2026-09-14 — the raw signal buffer has no retention, so it grows until someone notices
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — a gap this lane left on purpose and must close next
+**closed by `framework-35-the-window-that-empties`** — `collectReaderSignals`
+empties it, and the last paragraph below turned out to be wrong about the shape;
+[0158](decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+says why and is the correction
 
 `docs/signals.md` rule 5 and
 [0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md)
@@ -23900,6 +23903,84 @@ supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
 ---
 
+## 2026-09-14 — the buffer has a drain and no filler: nothing in the application receives a batch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — deliberately not built in `framework-35`, because it is a public write
+endpoint and deserves a decision rather than a file
+
+`collectReaderSignals` now empties the buffer and `pnpm --filter @loom/app
+signals:collect` runs it. `ingestReaderSignals` has been published since #295
+and **no route handler calls it**, so the buffer is never filled: on `main`
+today a collection run finds nothing and correctly says so.
+
+Building the endpoint at the end of the run that built the drain would have been
+the obvious thing and it is the wrong thing. Everything else in this subsystem
+is written by a deployment's own server. **This one is written by any browser
+that can reach the URL**, which is a different kind of surface and the only one
+Loom has:
+
+- **Who may post.** A published page is public, so the endpoint is public — a
+  session check is not available. `parseReaderSignalBatch` already refuses a
+  malformed batch and `view.ts` refuses anything but 32 hex characters, so what
+  gets through is well-formed and anonymous. It is still an unauthenticated
+  write to the largest table in the database.
+- **How often.** `MAX_BATCHES_PER_DELIVERY` caps one delivery at 50 and nothing
+  caps deliveries. A rate limit keyed on what, given that 0146 forbids anything
+  that identifies the sender, is the actual question, and it is the one I did not
+  want to answer in a hurry. The nearest existing shape is
+  `(portal)/_lib/auth/attempts-postgres.ts`.
+- **Where it lives.** `sendBeacon` posts to a URL the host configures, so the
+  path is a deployment's choice rather than a framework constant — but a
+  deployment with no opinion needs a default that works, and a default that
+  works is a route in this application.
+- **Whether an unconfigured deployment refuses.** Signals are off by default and
+  an unaddressed render is byte-identical (0136). An endpoint that accepts
+  batches for a deployment that never asked for them is a table filling up for
+  no reason, so the switch that turns broadcasting on probably has to be
+  readable by the endpoint too.
+
+**Nothing is blocked by this today.** The drain, the counters and the tally
+reads are all real and testable without it, and `prototypes/ski-apparel` has
+been the end-to-end example all along. What is blocked is a *live* deployment
+measuring anything, and the portal's step 4 screen having real rows rather than
+the shape of rows.
+
+---
+
+## 2026-09-14 — the tallies lag the buffer by a window, and a screen that does not say so will look broken
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+open — a property of step 4's input, not a defect
+
+The entry above this morning listed what `ReaderTallyStore` offers step 4. One
+thing it could not list, because it had not been decided yet, is **when a number
+appears**.
+
+[0158](decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)
+makes counting and forgetting one operation, so a batch is counted once it has
+been held for the collection window — an hour by default — and not before. A
+reader who is on the page right now is in `loom_reader_signals` and in no tally,
+and will be in one after the next run past their window.
+
+**Why this is a screen problem rather than a number problem.** *Before versus
+after a change* is the measurement the portal exists to show, and it is the
+measurement someone will go looking for **immediately after making the change**.
+On a deployment collecting hourly they will find the old revision's counters and
+a new revision with nothing against it, which looks exactly like a change that
+broke the measurement. The truthful reading is *"nothing has been counted for
+this revision yet"*, and only the screen can say it.
+
+Two things are available to say it with. `StoredTally.updatedAt` is when a
+revision's row last took a rollup, so *"counted up to 14:05"* is answerable
+without new plumbing. And a revision with no row at all is different from a
+revision with zeroes — the first has not been counted, the second was counted
+and nobody read it.
+
+A live rail is the other half and is not this: `foldReaderSignals` folds batches
+as they arrive for one page being watched now. Step 4 is the durable view.
+Showing the fold's freshness beside the store's numbers would be two different
+questions with one label.
 ## 2026-09-14 — step 3 of the signal plan is on `main`, nothing in the deployment calls any of it, and so step 4 still has no input
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
