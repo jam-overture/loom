@@ -352,7 +352,7 @@ describe("the record, once it repeats itself", () => {
    */
   it("folds a hold the page has moved past", () => {
     const moved: ReadonlyMap<string, HeldReading> = new Map([
-      [HELD.recordId, { moved: movedOn(0, 2) }],
+      [HELD.recordId, { moved: movedOn(0, 2)! }],
     ])
 
     const { container } = render(

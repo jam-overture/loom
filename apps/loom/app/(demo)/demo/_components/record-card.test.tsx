@@ -1085,7 +1085,7 @@ describe("a card whose reasoning has already been made", () => {
       ],
     }
 
-    const { container } = render(<RecordCard record={record} reasoning="folded" />)
+    render(<RecordCard record={record} reasoning="folded" />)
 
     expect(screen.getByText(WEIGHED_QUESTIONS.damage)).toBeTruthy()
     expect(screen.getByText(WEIGHED_QUESTIONS.reversal)).toBeTruthy()
