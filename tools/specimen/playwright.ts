@@ -25,10 +25,18 @@ import type { SpecimenViewport } from "./specimen.js"
  * test rather than discovered by a lane whose screenshots came out wrong.
  */
 
+/** One element, which is the only thing Playwright will photograph on its own. */
+export type LaunchedLocator = {
+  readonly screenshot: (options: { readonly path: string }) => Promise<unknown>
+}
+
 export type LaunchedPage = {
   readonly goto: (url: string, options: { readonly waitUntil: "load" }) => Promise<unknown>
   readonly waitForSelector: (selector: string) => Promise<unknown>
   readonly evaluate: <TValue>(body: () => TValue) => Promise<TValue>
+  readonly click: (selector: string) => Promise<unknown>
+  readonly waitForTimeout: (ms: number) => Promise<unknown>
+  readonly locator: (selector: string) => LaunchedLocator
   readonly screenshot: (options: {
     readonly path: string
     readonly fullPage: boolean
@@ -91,6 +99,33 @@ const measureOverflow = (): Overflow => ({
   innerWidth: window.innerWidth,
 })
 
+/**
+ * Run in the page before the first step of a `do` list: hold the page still.
+ *
+ * A click on a real `a[href]` in the starter library navigates, and every step
+ * after it then runs on a different page — so a three-step shot silently
+ * photographs somewhere else, which is the single failure mode this harness
+ * exists to prevent. A `do` list is a sequence against *one* page by
+ * construction, so the navigation is refused rather than the lane being asked
+ * to remember.
+ *
+ * Capture phase, and `preventDefault` rather than `stopPropagation`: the page's
+ * own delegated listeners must still see the click. A reader-signal broadcaster
+ * is precisely a delegated listener on the root, and suppressing the event
+ * would make the picture a photograph of the instrument rather than of the
+ * page.
+ */
+const pinNavigation = (): void => {
+  document.addEventListener(
+    "click",
+    (event) => {
+      const target = event.target
+      if (target instanceof Element && target.closest("a[href]")) event.preventDefault()
+    },
+    true
+  )
+}
+
 export const chromiumBrowser = async (
   launcher: ChromiumLauncher,
   executablePath: string
@@ -107,15 +142,26 @@ export const chromiumBrowser = async (
           await page.goto(url, { waitUntil: "load" })
           if (waitFor !== undefined) await page.waitForSelector(waitFor)
         },
+        act: async (steps) => {
+          await page.evaluate(pinNavigation)
+          for (const step of steps) {
+            if ("click" in step) await page.click(step.click)
+            else await page.waitForTimeout(step.wait)
+          }
+        },
         measure: () => page.evaluate(measureOverflow),
         /**
          * The directory is made here rather than in the capture loop, because
          * this is the file that writes and the loop is exercised against a
          * double that should not touch a disk.
          */
-        capture: async (file, fullPage) => {
+        capture: async (file, target) => {
           await mkdir(dirname(file), { recursive: true })
-          await page.screenshot({ path: file, fullPage })
+          if (target.clip !== undefined) {
+            await page.locator(target.clip).screenshot({ path: file })
+            return
+          }
+          await page.screenshot({ path: file, fullPage: target.fullPage })
         },
         close: () => context.close(),
       }

@@ -28,10 +28,47 @@ export type Overflow = {
 export const overflows = (measurement: Overflow): boolean =>
   measurement.scrollWidth > measurement.innerWidth
 
+/**
+ * One thing to do to a page before the shutter.
+ *
+ * Two members and no more, deliberately. The moment this grows a way to type,
+ * to assert or to branch, the harness has become a test runner with a camera
+ * attached and every lane will write its journeys here instead of in Vitest.
+ * What a shot needs is the *state* a reader reaches, not the reaching: press
+ * the thing, let the thing settle, take the picture.
+ */
+export type ShotStep = { readonly click: string } | { readonly wait: number }
+
+/**
+ * The longest a single `wait` step may ask for.
+ *
+ * There is no way to wait forever here, for [0140](../../decisions/0140-a-call-into-foreign-code-has-a-ceiling-and-the-runtime-owns-it.md)'s
+ * reason applied to an instrument rather than a render: a harness that hangs
+ * reports nothing at all, and a merge gate that hangs is indistinguishable from
+ * a merge gate that is slow. Thirty seconds is far past anything a settled
+ * animation or a batched broadcast needs.
+ */
+export const MAX_WAIT_MS = 30_000
+
+/** Where the shutter points: the viewport, the whole page, or one element. */
+export type CaptureTarget = {
+  readonly fullPage: boolean
+  /**
+   * A selector to photograph instead of the viewport.
+   *
+   * Every lane has been cropping by hand or shipping a picture of a page when
+   * it meant a picture of a table. Mutually exclusive with `fullPage`, which
+   * the shot list refuses rather than silently resolving.
+   */
+  readonly clip?: string
+}
+
 export type SpecimenPage = {
   readonly goto: (url: string, waitFor?: string) => Promise<void>
+  /** Runs the steps in order. Anchor navigation is pinned; see `playwright.ts`. */
+  readonly act: (steps: readonly ShotStep[]) => Promise<void>
   readonly measure: () => Promise<Overflow>
-  readonly capture: (file: string, fullPage: boolean) => Promise<void>
+  readonly capture: (file: string, target: CaptureTarget) => Promise<void>
   readonly close: () => Promise<void>
 }
 
@@ -68,7 +105,22 @@ export type Shot = {
    * the screen behind it. Wait on something only the destination has.
    */
   readonly waitFor?: string
+  /**
+   * What to do after `waitFor` and before the shutter, in order.
+   *
+   * The block worth photographing is often not the one a load produces. A
+   * reader-signal figure is empty until somebody scrolls, presses or opens
+   * something; a disclosure's open state exists only once it is opened. Before
+   * this existed the run that wanted such a picture wrote forty lines of
+   * Playwright in `/tmp` against flags and a viewport that were *copies* of the
+   * harness's rather than the harness's — which is the drift
+   * [0117](../../decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+   * consolidated two harnesses to stop, reappearing for the one thing it left
+   * out.
+   */
+  readonly do: readonly ShotStep[]
   readonly fullPage: boolean
+  readonly clip?: string
 }
 
 export type ShotResult = {
@@ -102,9 +154,20 @@ export const captureShots = async (
     const page = await browser.open(shot.viewport)
     try {
       await page.goto(shot.url, shot.waitFor)
+      if (shot.do.length > 0) await page.act(shot.do)
+      /**
+       * After the steps, not before. The steps are what produce the state being
+       * photographed, and a disclosure that opens or a list that grows is
+       * exactly the kind of thing that pushes a page past the phone — so
+       * measuring the page the load produced would report the width of
+       * something nobody is looking at.
+       */
       const overflow = await page.measure()
       const file = join(outDir, shot.file)
-      await page.capture(file, shot.fullPage)
+      await page.capture(file, {
+        fullPage: shot.fullPage,
+        ...(shot.clip === undefined ? {} : { clip: shot.clip }),
+      })
       results.push({
         name: shot.name,
         file,

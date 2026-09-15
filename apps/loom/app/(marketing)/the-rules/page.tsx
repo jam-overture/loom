@@ -1,11 +1,8 @@
-import type { Metadata } from "next"
-
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, THE_RULES } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = { title: THE_RULES.title, description: THE_RULES.description }
-
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
+export const generateMetadata = routeMetadata(THE_RULES)
 
 /**
  * The rules page: what a rule is, what this site's own rules say, and two

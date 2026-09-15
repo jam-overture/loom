@@ -17,11 +17,11 @@ import {
   firstNamed,
   namesInOperations,
   namesInTree,
+  leadOf,
   nounOf,
   partNameOf,
   partReading,
   placeNameOf,
-  saidBy,
   subjectFor,
 } from "./part-name"
 
@@ -82,34 +82,104 @@ describe("nounOf", () => {
   })
 })
 
-describe("saidBy", () => {
+describe("leadOf", () => {
   it("reads the words a leaf says", () => {
-    expect(saidBy(text("n_t", "Autumn arrivals"))).toBe("Autumn arrivals")
+    expect(leadOf(text("n_t", "Autumn arrivals"))).toBe("Autumn arrivals")
   })
 
   /**
-   * The defect this function exists for. The runtime's `textOf` concatenates,
-   * which is correct for the exact characters under a node and wrong for a
-   * name: a card holding a heading and a paragraph has no whitespace between
-   * them in the tree, because the gap between them is a box in the layout
-   * rather than a character in the content.
+   * The defect this function exists for, and the reason it is not `textOf`. The
+   * runtime concatenates, which is correct for the exact characters under a
+   * node and wrong for a name: two runs of one sentence have no whitespace
+   * between them in the tree, because the gap is a box in the layout rather
+   * than a character in the content.
    */
-  it("joins two runs with a space rather than running them together", () => {
-    const card = element("n_card", "loom.card", [
-      element("n_h", "loom.heading", [text("n_t1", "Autumn arrivals")]),
-      element("n_p", "loom.prose", [text("n_t2", "Free returns on everything.")]),
+  it("joins a passage's own runs with a space rather than running them together", () => {
+    const prose = element("n_p", "loom.prose", [
+      text("n_t1", "Autumn arrivals"),
+      text("n_t2", "Free returns on everything."),
     ])
 
-    expect(saidBy(card)).toBe("Autumn arrivals Free returns on everything.")
-    expect(saidBy(card)).not.toContain("arrivalsFree")
+    expect(leadOf(prose)).toBe("Autumn arrivals Free returns on everything.")
+    expect(leadOf(prose)).not.toContain("arrivalsFree")
+  })
+
+  /**
+   * The finding of 11 September. A card holding a heading and a paragraph is
+   * named by the heading — the one word that identifies it — and not by a join
+   * that spends the quote's budget on a run-on.
+   */
+  it("names a container by the first thing inside it that says anything", () => {
+    const card = element("n_card", "loom.card", [
+      element("n_h", "loom.heading", [text("n_t1", "Starter")]),
+      element("n_p", "loom.prose", [text("n_t2", "Free for personal projects.")]),
+    ])
+
+    expect(leadOf(card)).toBe("Starter")
+  })
+
+  /**
+   * At any depth. A page leads with its card, which leads with its heading —
+   * which is what makes this one rule rather than a special case for cards.
+   */
+  it("descends until it finds something said", () => {
+    const page = element("n_page", "loom.page", [
+      element("n_card", "loom.card", [
+        element("n_h", "loom.heading", [text("n_t", "Loom")]),
+      ]),
+    ])
+
+    expect(leadOf(page)).toBe("Loom")
+  })
+
+  /**
+   * The case that decides between the two candidate rules the finding named. A
+   * paragraph with an inline link has a text child *and* an element child, and
+   * the link's words are part of the sentence rather than a thing inside it —
+   * so a direct run makes this a passage and the whole of it is the name.
+   */
+  it("reads a passage whole when an element is inline inside it", () => {
+    const prose = element("n_p", "loom.prose", [
+      text("n_t1", "Free returns on"),
+      element("n_link", "loom.link", [text("n_t2", "everything")]),
+    ])
+
+    expect(leadOf(prose)).toBe("Free returns on")
+  })
+
+  /**
+   * A container whose first child says nothing is not a container that says
+   * nothing. Skipping the silent ones is what stops a name coming back empty
+   * for a part a reader can plainly read.
+   */
+  it("skips a silent child rather than giving up at it", () => {
+    const card = element("n_card", "loom.card", [
+      element("n_img", "loom.image"),
+      element("n_h", "loom.heading", [text("n_t", "Starter")]),
+    ])
+
+    expect(leadOf(card)).toBe("Starter")
   })
 
   it("collapses the whitespace a run happens to carry", () => {
-    expect(saidBy(text("n_t", "  Autumn\n  arrivals  "))).toBe("Autumn arrivals")
+    expect(leadOf(text("n_t", "  Autumn\n  arrivals  "))).toBe("Autumn arrivals")
   })
 
   it("says nothing for a part that says nothing", () => {
-    expect(saidBy(element("n_card", "loom.card"))).toBe("")
+    expect(leadOf(element("n_card", "loom.card"))).toBe("")
+    expect(leadOf(element("n_card", "loom.card", [element("n_img", "loom.image")]))).toBe("")
+  })
+
+  /** A slot holds things the same way an element does, and leads the same way. */
+  it("leads a slot by what was put in it", () => {
+    const body: SlotNode = {
+      kind: "slot",
+      id: nodeId("n_s"),
+      name: slotNameSchema.parse("body"),
+      children: [element("n_h", "loom.heading", [text("n_t", "Starter")])],
+    }
+
+    expect(leadOf(body)).toBe("Starter")
   })
 })
 
@@ -178,20 +248,21 @@ describe("placeNameOf", () => {
    * The defect this function exists for, pinned with the two readings side by
    * side.
    *
-   * `saidBy` walks the subtree, which is what lets a card be named by the
-   * heading inside it — and what makes *the page “Autumn arrivals Free
-   * returns”* the reading of the page a change lands in. A container's words
-   * are its contents' words, so quoting a place names the contents and claims
-   * to name the place. The noun alone is the part of that reading which is true
-   * at every depth.
+   * `leadOf` descends, which is what lets a card be named by the heading inside
+   * it — and what makes *the page “Autumn arrivals”* the reading of the page a
+   * change lands in. A container's words are its contents' words however few of
+   * them a name takes, so quoting a place still names the contents while
+   * claiming to name the place, and it goes stale the moment that heading is
+   * re-authored. The noun alone is the part of that reading which is true at
+   * every depth and at every revision.
    */
-  it("does not quote a container by the words of everything inside it", () => {
+  it("does not quote a container by the words of anything inside it", () => {
     const page = element("n_page", "loom.page", [
       element("n_h", "loom.heading", [text("n_t1", "Autumn arrivals")]),
       element("n_p", "loom.prose", [text("n_t2", "Free returns")]),
     ])
 
-    expect(partNameOf(page).name).toBe("the page “Autumn arrivals Free returns”")
+    expect(partNameOf(page).name).toBe("the page “Autumn arrivals”")
     expect(placeNameOf(page)).toBe("the page")
   })
 

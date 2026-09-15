@@ -1,14 +1,8 @@
-import type { Metadata } from "next"
-
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, WHO_CAN_ASK } from "@/app/(marketing)/_lib/site"
 
-export const metadata: Metadata = {
-  title: WHO_CAN_ASK.title,
-  description: WHO_CAN_ASK.description,
-}
-
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
+export const generateMetadata = routeMetadata(WHO_CAN_ASK)
 
 /**
  * The page that says who a change may come from, and what that changes.

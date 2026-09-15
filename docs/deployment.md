@@ -333,6 +333,70 @@ This deletes the *account* of what happened — proposals, dispositions, rationa
 It cannot touch a tree or a revision: those live in `loom_trees` and
 `loom_revisions`, which this never reads (0016, 0023).
 
+### 8. Reader signals — the buffer only empties when you run this
+
+Different from retention above, and the difference matters. Telemetry pruning is
+optional housekeeping; this is the **only** thing that turns reader signals into
+numbers. A deployment with signals switched on and nothing running this counts
+nothing at all — the tallies stay at zero while `loom_reader_signals` becomes the
+largest table it owns.
+
+```bash
+pnpm --filter @loom/app signals:collect
+```
+
+It counts every batch older than the window into `loom_reader_tallies` and
+`loom_reader_funnels`, then forgets exactly those. Counting and forgetting are
+one operation on purpose (0158): a rollup reports what its window *added*, so a
+batch counted twice is counted twice forever.
+
+The three tables it reads and writes are created by `db:push` in step 3, with row
+level security on like the rest — so if you granted policies to a non-owner role
+there, grant them here too. The check in step 5 already lists them.
+
+Defaults to a **one-hour** window; set `LOOM_SIGNAL_WINDOW_MS` to change it.
+Windows below a minute are refused. That one number decides three things at once,
+and they do not all want the same answer:
+
+| The window is also… | Longer | Shorter |
+| --- | --- | --- |
+| how long a page view has to finish | fewer views straddle a boundary, so `views` over-counts less (0147) | more of them do |
+| how long a view key lives | it lives longer | it expires sooner, which is 0146's argument |
+| how far the tallies lag the buffer | more lag | fresher numbers |
+
+Safe to run on a schedule and safe to interrupt. It is incremental — a buffer
+far behind is caught up over several runs — and it says when there is more:
+
+```
+loom: counted 214 batches into 38 tallies over 96 views, and forgot 214 — more is waiting
+```
+
+**Two collections must not overlap.** Both would count the same batches and the
+counters would double. The script takes a Postgres advisory lock, so a second
+run says so and does nothing: a cron that overruns its own interval is harmless,
+and so are two hosts running it against one database, because the lock is held
+in the database rather than in the process. What is **not** covered is calling
+`collectReaderSignals` from your own route handler without taking that lock —
+the runtime cannot serialise it for you, since a journal and a store are two
+handles with no shared transaction between them.
+
+One line needs acting on rather than reading:
+
+```
+loom: counted 214 batches and could not forget them, so the next run counts them
+again unless the buffer is pruned below 91422: …
+```
+
+The counters took the window and the buffer would not drop it. Delete
+`loom_reader_signals` rows below the position it names, or fix the database
+before the next run; a second run over the same batches doubles those counters
+permanently.
+
+**Nothing fills the buffer yet.** `ingestReaderSignals` is published and no route
+handler calls it, so on today's `main` this finds an empty buffer and says so.
+The endpoint a browser posts to is not built — it is a public write surface and
+wants its own decision about who may post and how often.
+
 ### If the password leaks
 
 Rotate it in Project Settings → Database → Reset database password, then update

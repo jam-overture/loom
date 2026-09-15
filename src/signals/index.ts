@@ -18,6 +18,7 @@
  */
 
 export * from "./broadcast.js"
+export * from "./collect.js"
 export * from "./fold.js"
 export * from "./ingest.js"
 export * from "./journal.js"
