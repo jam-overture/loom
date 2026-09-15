@@ -23359,6 +23359,15 @@ pages than this and what the bar was measured against on #166.
 ## 2026-09-13 — a comparison is four subjects wide on a laptop and one subject wide on a phone
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-35-a-table-a-phone-can-read` — the criterion column narrows
+to 9rem below 48rem, which puts 92 pixels of the second subject on screen at
+rest instead of 44 blank ones, and the region a reader scrolls is now focusable,
+named and snapped. **The suggested fix was not the one taken and the reason is
+measured**: a stacked rendering needs every answer labelled with its subject,
+the subject's name is a node in another row, and nothing in the library can get
+it there — filed as its own entry below. Original status below.
+
+**Status:**
 open — the band works, and a phone reader is getting a quarter of it
 
 `/who-can-ask` is built on `loom.comparison-table` with four subjects, which is
@@ -23564,6 +23573,16 @@ this and what the bar was measured against on #166.
 ## 2026-09-14 — `loom.table` is the same shape of problem on a phone as `loom.comparison-table`, measured
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-35-a-table-a-phone-can-read` — `loom.table` takes a `prose`
+prop, and a table that declares it gives its body cells a 12rem measure below
+48rem: the 360-pixel row in the reproduction becomes 193 and the band scrolls
+492 inside 348 instead of crushing itself to fit. **It is a prop rather than the
+stylesheet decision the finding suggested, and that was measured rather than
+preferred** — the rule that needs no prop is ignored by Chromium, and the
+unconditional one costs the table that was already right. Both numbers are in
+the entry below. Original status below.
+
+**Status:**
 open — the primitive is behaving correctly and a phone reader is paying for it
 
 The 13 September entry records that `loom.comparison-table` is four subjects wide
@@ -23903,6 +23922,81 @@ supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
 ---
 
+## 2026-09-15 — a cell cannot be labelled by its column heading, so no table in this library can stack
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is blocked; both phone findings were closed another way, and this
+is the door that was shut on the way past
+
+Two findings asked, independently, for the same fix: a table that **stacks** on a
+narrow viewport, one block per row, the way every pricing table a reader has
+already used does. Neither got it, and the reason is the same one both times.
+
+**A stacked row is unreadable without labels.** Laid out as blocks, a row of a
+general table is three sentences with nothing saying which column each came
+from, and a row of a comparison is four marks with nothing saying which subject
+each belongs to. The label a reader needs is the column heading — and it is a
+node in a *different row*, inside the `columns` region.
+
+Four ways to get it there were considered and each fails for its own reason:
+
+| route | why not |
+| --- | --- |
+| a CSS rule copies the heading text | there is no such rule. `content` can print a string, and nothing can read one out of another element |
+| a custom property carries it down | properties inherit **downwards**, and a heading is a cell's cousin rather than its ancestor |
+| the container reads its own `columns` slot and passes the strings on | the slot arrives as a rendered `ReactNode`; a primitive that introspected it would be parsing its own output, and the first node that was not a bare string would break it |
+| the cell takes a `label` prop | the heading said twice, in two nodes, with nothing keeping them in step — and a `move` on the header row silently makes every label wrong |
+
+**This is the same shape as the finding this lane filed on 14 September** — *a
+container cannot tell its child which element to be, so a radio group is not a
+field type.* Both are a container holding something its child needs to render
+and having no way to hand it over. That is now two instances, which is the bar
+[0114](decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)
+sets for taking a seam seriously, and it is the framework's to open rather than
+this lane's to work around: a per-primitive answer here would be a `label` prop
+on one cell type and a different dodge on the next.
+
+**Worth stating plainly: stacking may still be the wrong rendering even if it
+becomes possible.** `loom.table`'s own documentation was written against it —
+`Loom lessons` degraded thirteen lessons' tables into one card per row and lost
+the column-wise scan that made the author write a table. So this is a door that
+should exist, not a fix that is owed.
+
+---
+
+## 2026-09-15 — the rule that would have needed no prop is ignored, and the one that needs none costs the table that was right
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+closed by `primitives-35-a-table-a-phone-can-read` — recorded because the next
+run to meet a narrow table will reach for one of these two first, and both of
+them were tried
+
+`loom.table` now takes a `prose` prop, and a prop is the answer nobody wants:
+the marketing lane's finding explicitly suggested a static stylesheet decision
+instead, and that was the right instinct. Measured in Chromium at 390px, against
+a three-column table of sentences and a four-column table of figures on one
+page:
+
+| rule | prose table | the table that was already right |
+| --- | --- | --- |
+| today, before any change | 348px wide, tallest row **360px**, no scroll | 350px, rows 41px |
+| `min-inline-size: fit-content(12rem)` | **no effect at all** — 348px, row 360px | no effect |
+| `min-inline-size: 12rem`, unconditional | 492px, row 193px | **744px, and it scrolls** |
+| `min-inline-size: 12rem` behind `prose` | 492px, row 193px | untouched |
+
+`fit-content(<length>)` is exactly the rule this wants —
+`min(max-content, max(min-content, L))`, so a cell holding "1,204" keeps its own
+40-pixel width and a cell holding a sentence is lifted to twelve rem. It is
+valid CSS Sizing 3 and Chromium drops it on the floor for `min-inline-size`. If
+that changes, the prop can become a default and then a no-op, and this entry is
+the note saying so.
+
+The third row is the one that decides it. A minimum applied to every table makes
+the four-column table of figures — the one with nothing wrong with it — 744
+pixels wide and scrolling, which is trading a measured defect for a new one. CSS
+cannot see the difference between a cell holding a sentence and a cell holding a
+date, so something has to say which it is, and the only thing that can is the
+tree.
 ## 2026-09-14 — the buffer has a drain and no filler: nothing in the application receives a batch
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
