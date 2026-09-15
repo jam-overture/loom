@@ -71,6 +71,13 @@ export const planShots = (specimen: Specimen): readonly PlannedShot[] => {
  * to photograph one is to see all of it. An address is photographed at the
  * viewport unless its list says otherwise, because a page under test is often
  * a screen rather than a document.
+ *
+ * `do` is empty here and is not a specimen's to fill, for a stronger reason
+ * than economy: a specimen page is `renderToStaticMarkup` with no dev server
+ * and no hydration (`render.ts`), so **there is no script in it to press**.
+ * Steps belong to `pnpm shoot`, whose subject is an application something else
+ * is running. Offering them here would offer a lane a list that silently does
+ * nothing.
  */
 export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly Shot[] =>
   shots.map((shot) => ({
@@ -78,5 +85,6 @@ export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly
     url: `${origin}/${shot.page.file}`,
     file: shot.file,
     viewport: shot.viewport,
+    do: [],
     fullPage: true,
   }))

@@ -22538,9 +22538,10 @@ lane that ships the surface outranks a primitive nobody has asked for.
 ## 2026-09-12 — a specimen cannot be put "beside the code it photographs" for any lane whose code is under `src/`
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/` and
-the build config) · **Status:** open in its general form — unblocked here by one
-line, which is in this branch and is the whole of its diff outside
-`src/primitives/`
+the build config) · **Status:** still open in its general form, and **the fix it
+proposes is refused** — see the owner's note at the end of this entry
+(`framework-36-the-instruments`, 15 September). The one-line unblock it shipped
+is right and stays.
 
 `tools/specimen/README.md` says, under *Writing a specimen*:
 
@@ -22589,6 +22590,34 @@ reports **exit 0 on a failed verify**, because the exit code is the pipe's. The
 repository does this; it is a thing a *run* does, so it belongs in
 `docs/routines.md` next to the token discipline rather than in any lane's code:
 **redirect and check `$?`, never pipe a gate into `tail`.**
+
+> **Owner's note, 15 September (`Loom daily build`).** The general form asked
+> whether *"a glob for anything with a compound extension under `src/`"* should
+> replace the two exclude patterns. **It must not, and it would have taken the
+> whole starter library out of the published build.** `src/**/*.*.ts` matches
+> `src/primitives/loom.card.ts`. Counted on `main` today: **97 files under
+> `src/` carry a compound extension and are runtime code** — every registered
+> primitive, by the naming convention 0061 settled. The glob is one line instead
+> of two and it silently stops emitting the library.
+>
+> The real invariant is not about file names at all. It is: **nothing the build
+> includes may import from outside `src/`.** That is the condition TS6059 was
+> reporting, and it is checkable directly — walk the files
+> `tsconfig.build.json` includes, and refuse a relative import that escapes
+> `src/`. The failure then names the file and the choice ("this is not runtime
+> code, so add its convention to the exclude list — or it should not be
+> importing from `tools/`") instead of arriving as a merge gate going red on a
+> lane that was following a README, which is how both halves of this finding
+> were discovered.
+>
+> Left open rather than built, with the shape named, because it is a third
+> subsystem in a run whose unit is the harness and a migration PR that also
+> does something else is unreviewable. It is this lane's and nobody is blocked;
+> the two-places-must-agree cost stands until someone writes it.
+>
+> The `pnpm verify 2>&1 | tail -35` observation is separate, correct, and cost
+> this lane fifteen minutes too. It is now in `docs/routines.md` beside the
+> token discipline, which is where the finding said it belonged.
 
 ---
 
@@ -23218,8 +23247,19 @@ matters.
 
 ## 2026-09-13 — the screenshot harness cannot photograph a block that only exists once you press it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-worked around this run with a throwaway script, and the workaround is the finding
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-36-the-instruments`** — `do` and `clip` both landed as
+this finding proposed them, and [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+records the boundary they sit inside: an instrument may **reach** a state and
+may never **assert** one, which is the line to quote when the next request is
+for `expect` in a shot list. The note about a click on a real `a[href]` was
+right and is now the harness's own behaviour rather than a lane's to remember:
+a `do` list pins the page for its duration, by `preventDefault` on anchor
+clicks in the capture phase — never `stopPropagation`, so a broadcaster
+delegating from the root still sees every click and the picture stays one of
+the page rather than of the instrument. One thing the finding did not ask for
+and got: overflow is measured **after** the steps, because a disclosure that
+opens is exactly what pushes a page past the phone.
 
 `pnpm shoot` takes a path, a viewport and a selector to wait for. It has no way
 to **do** anything before the shutter, and no way to photograph **one element**
@@ -23736,7 +23776,21 @@ knows its list is empty places an empty state and is correct.
 ## 2026-09-14 — the specimen harness cannot wire a submission, so every form it photographs is grey
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — small, and it silently degrades the one instrument this lane is judged on
+**closed by `framework-36-the-instruments`** — `defineSpecimen({ endpoints })`
+resolves through `resolveTreeSubmissions` before the render, as asked. One
+change from the shape proposed: it takes a **`SubmissionTarget` per endpoint
+id**, not a `SubmissionEndpoint`. An endpoint is an async call free to mint a
+token against a store, which is a photograph that depends on a network — free
+to be slow, to fail on a bad afternoon, and to make two runs of one specimen
+produce two different pictures. A specimen declares the answer instead. It is
+still validated: the declared targets go through `defineEndpoint`, so one
+naming an off-origin action is refused at the harness rather than in review.
+`renderSpecimen` is async as a consequence; nothing else about writing a
+specimen changed. **The two workarounds are now retakeable and they are yours,
+not this lane's:** the `checkbox` specimen that lifted its fields out into a
+`loom.stack`, and the note in `states-and-paging.specimen.ts`.
+[0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+records it with the alternatives.
 
 `tools/specimen/render.ts` wires a registry, a theme and origins. It does not
 wire endpoints or submissions — `resolveTreeSubmissions` appears nowhere under
