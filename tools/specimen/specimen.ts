@@ -1,3 +1,4 @@
+import type { SubmissionTarget } from "../../src/submit/endpoint.js"
 import type { LoomTree } from "../../src/tree/tree.js"
 import type { ThemeSelection } from "../../src/theme/theme.js"
 
@@ -48,6 +49,29 @@ export type Specimen = {
   readonly themes: readonly SpecimenTheme[]
   /** Absent takes `DEFAULT_VIEWPORTS`, which is what the reports already mean. */
   readonly viewports?: readonly SpecimenViewport[]
+  /**
+   * Where the forms in this specimen post, by endpoint id.
+   *
+   * Without it a `loom.form` can never name a destination the render can
+   * resolve, so it correctly draws the state it draws when nobody said where to
+   * post — a notice reading *"This form is not connected yet"* over a
+   * `disabled` fieldset at six-tenths opacity. That is the form being right and
+   * the photograph being useless: every control inside it is greyed, which is
+   * fine for a picture *of a form* and worthless for a picture of the field
+   * inside one. The lane that shipped the `checkbox` field type had to lift the
+   * fields out into a `loom.stack` to photograph it, producing a specimen of
+   * markup no real page has.
+   *
+   * **A target, not an endpoint.** The seam takes a `SubmissionEndpoint`, whose
+   * `target` is an async call that may mint a token against a store. A specimen
+   * declares the answer instead, because a photograph must not depend on a
+   * network: an endpoint free to do IO is an endpoint free to be slow, to fail
+   * on a bad afternoon, and to make two runs of the same specimen produce
+   * different pictures. It is still validated — these go through
+   * `defineEndpoint`, so a specimen naming an off-origin action is refused
+   * exactly as a host's would be.
+   */
+  readonly endpoints?: Readonly<Record<string, SubmissionTarget>>
 }
 
 /**

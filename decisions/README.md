@@ -241,3 +241,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0155](0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md) | A container may only add to its children what they left unspoken, so a shared treatment lives in a class and never on the element | Accepted | §4b |
 | [0156](0156-the-two-states-a-bound-region-is-in-are-primitives-and-not-props-on-every-container.md) | The two states a bound region is in are primitives, and not props on every container | Accepted | §4b |
 | [0157](0157-the-catalogues-public-surface-is-the-list-and-the-lookup-not-every-band-by-name.md) | The catalogue's public surface is the list and the lookup, not every band by name | Accepted | §4b |
+| 0158 | *No record on this branch* | — | — |
+| [0159](0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md) | An instrument may reach a state, and may never assert one | Accepted | §1 (process) |
