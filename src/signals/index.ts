@@ -19,8 +19,10 @@
 
 export * from "./broadcast.js"
 export * from "./collect.js"
+export * from "./deliver.js"
 export * from "./fold.js"
 export * from "./ingest.js"
+export * from "./intake.js"
 export * from "./journal.js"
 export * from "./memory.js"
 export * from "./rollup.js"
