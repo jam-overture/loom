@@ -6,8 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
 import { themeSelectionSchema, type ThemeSelection } from "../../src/theme/theme.js"
 import { sequentialIdFactory } from "../../src/ids.js"
-import { THEME_PROP_KEY } from "../../src/reserved-props.js"
-import { buildElement, buildText } from "../../src/tree/builders.js"
+import { SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
+import { buildElement, buildSlot, buildText } from "../../src/tree/builders.js"
 import { createTree } from "../../src/tree/tree.js"
 
 import { describeArgsError, parseSpecimenArgs } from "./args.js"
@@ -21,6 +21,8 @@ import {
   captureShots,
   describeShot,
   overflows,
+  type CaptureTarget,
+  type Shot,
   type SpecimenBrowser,
   type SpecimenPage,
 } from "./capture.js"
@@ -38,7 +40,7 @@ import {
   type ContextOptions,
   type LaunchOptions,
 } from "./playwright.js"
-import { renderSpecimen } from "./render.js"
+import { describeRenderError, renderSpecimen } from "./render.js"
 import { contentTypeFor, resolveServedPath, serveDirectory } from "./serve.js"
 import { defineSpecimen, PHONE, WIDE, type Specimen } from "./specimen.js"
 
@@ -239,11 +241,23 @@ describe("serving the pages", () => {
   })
 })
 
+const describeTarget = (file: string, target: CaptureTarget): string => {
+  if (target.clip !== undefined) return `${file} (clipped to ${target.clip})`
+  return target.fullPage ? file : `${file} (viewport only)`
+}
+
 const fakeBrowser = (
   measurements: readonly { scrollWidth: number; innerWidth: number }[]
-): { browser: SpecimenBrowser; visited: string[]; written: string[] } => {
+): {
+  browser: SpecimenBrowser
+  visited: string[]
+  written: string[]
+  /** Every step, and every measurement, in the order the loop reached them. */
+  journal: string[]
+} => {
   const visited: string[] = []
   const written: string[] = []
+  const journal: string[] = []
   let opened = 0
 
   const browser: SpecimenBrowser = {
@@ -255,9 +269,17 @@ const fakeBrowser = (
         goto: async (url, waitFor) => {
           visited.push(waitFor === undefined ? url : `${url} after ${waitFor}`)
         },
-        measure: async () => measurement,
-        capture: async (file, fullPage) => {
-          written.push(fullPage ? file : `${file} (viewport only)`)
+        act: async (steps) => {
+          for (const step of steps) {
+            journal.push("click" in step ? `click ${step.click}` : `wait ${step.wait}`)
+          }
+        },
+        measure: async () => {
+          journal.push("measure")
+          return measurement
+        },
+        capture: async (file, target) => {
+          written.push(describeTarget(file, target))
         },
         close: async () => {},
       }
@@ -265,8 +287,19 @@ const fakeBrowser = (
     close: async () => {},
   }
 
-  return { browser, visited, written }
+  return { browser, visited, written, journal }
 }
+
+/** A shot at an address, with the defaults `shoot` gives one. */
+const shotAt = (overrides: Partial<Shot> = {}): Shot => ({
+  name: "a-shot",
+  url: "http://127.0.0.1:1234/page",
+  file: "a-shot.png",
+  viewport: WIDE,
+  do: [],
+  fullPage: false,
+  ...overrides,
+})
 
 describe("taking the shots", () => {
   it("visits every planned page and writes every planned file under the out directory", async () => {
@@ -311,6 +344,7 @@ describe("taking the shots", () => {
         goto: async () => {
           throw new Error("net::ERR_CONNECTION_REFUSED")
         },
+        act: async () => {},
         measure: async () => ({ scrollWidth: 0, innerWidth: 0 }),
         capture: async () => {},
         close: async () => {
@@ -324,6 +358,53 @@ describe("taking the shots", () => {
       captureShots(shotsAt("http://x", planShots(specimenOf())), browser, { outDir: "reports" })
     ).rejects.toThrow("ERR_CONNECTION_REFUSED")
     expect(closed).toBe(1)
+  })
+
+  it("runs a shot's steps after the load and before the shutter", async () => {
+    const { browser, journal, written } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ do: [{ click: "[data-open]" }, { wait: 400 }] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["click [data-open]", "wait 400", "measure"])
+    expect(written).toEqual(["reports/a-shot.png (viewport only)"])
+  })
+
+  /**
+   * A disclosure that opens or a list that grows is exactly the kind of thing
+   * that pushes a page past the phone, so measuring the page the load produced
+   * would report the width of something nobody is looking at.
+   */
+  it("measures the page the steps produced, not the one the load did", async () => {
+    const { browser, journal } = fakeBrowser([{ scrollWidth: 1420, innerWidth: 390 }])
+
+    const [result] = await captureShots(
+      [shotAt({ viewport: PHONE, do: [{ click: "[data-open]" }] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal.indexOf("click [data-open]")).toBeLessThan(journal.indexOf("measure"))
+    expect(result?.overflowed).toBe(true)
+  })
+
+  it("never touches the page when a shot has no steps", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots([shotAt()], browser, { outDir: "reports" })
+
+    expect(journal).toEqual(["measure"])
+  })
+
+  it("points the shutter at one element when a shot clips", async () => {
+    const { browser, written } = fakeBrowser([])
+
+    await captureShots([shotAt({ clip: "[data-figure]" })], browser, { outDir: "reports" })
+
+    expect(written).toEqual(["reports/a-shot.png (clipped to [data-figure])"])
   })
 
   it("reports a shot as one line a report can paste", () => {
@@ -352,12 +433,17 @@ describe("the browser adapter", () => {
     screenshots: { path: string; fullPage: boolean }[]
     waits: string[]
     selectors: string[]
+    /** Steps and evaluations, in the order the adapter reached them. */
+    journal: string[]
+    elementShots: { selector: string; path: string }[]
   } => {
     const launches: LaunchOptions[] = []
     const contexts: ContextOptions[] = []
     const screenshots: { path: string; fullPage: boolean }[] = []
     const waits: string[] = []
     const selectors: string[] = []
+    const journal: string[] = []
+    const elementShots: { selector: string; path: string }[] = []
 
     return {
       launches,
@@ -365,6 +451,8 @@ describe("the browser adapter", () => {
       screenshots,
       waits,
       selectors,
+      journal,
+      elementShots,
       launcher: {
         launch: async (options) => {
           launches.push(options)
@@ -379,8 +467,21 @@ describe("the browser adapter", () => {
                   waitForSelector: async (selector: string) => {
                     selectors.push(selector)
                   },
-                  evaluate: async <TValue,>(): Promise<TValue> =>
-                    ({ scrollWidth: 390, innerWidth: 390 }) as TValue,
+                  evaluate: async <TValue,>(body: () => TValue): Promise<TValue> => {
+                    journal.push(`evaluate ${body.name}`)
+                    return { scrollWidth: 390, innerWidth: 390 } as TValue
+                  },
+                  click: async (selector: string) => {
+                    journal.push(`click ${selector}`)
+                  },
+                  waitForTimeout: async (ms: number) => {
+                    journal.push(`wait ${ms}`)
+                  },
+                  locator: (selector: string) => ({
+                    screenshot: async (options: { path: string }) => {
+                      elementShots.push({ selector, path: options.path })
+                    },
+                  }),
                   screenshot: async (options: { path: string; fullPage: boolean }) => {
                     screenshots.push(options)
                   },
@@ -430,7 +531,7 @@ describe("the browser adapter", () => {
     const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "a.png")
 
     await page.goto("http://127.0.0.1:1/a.html")
-    await page.capture(file, true)
+    await page.capture(file, { fullPage: true })
 
     expect(recorder.waits).toEqual(["load"])
     expect(recorder.screenshots).toEqual([{ path: file, fullPage: true }])
@@ -459,9 +560,49 @@ describe("the browser adapter", () => {
     const page = await browser.open(WIDE)
     const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "b.png")
 
-    await page.capture(file, false)
+    await page.capture(file, { fullPage: false })
 
     expect(recorder.screenshots).toEqual([{ path: file, fullPage: false }])
+  })
+
+  it("drives the steps in the order they were written", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ click: "[data-cta]" }, { wait: 250 }, { click: "[data-question]" }])
+
+    expect(recorder.journal.slice(1)).toEqual([
+      "click [data-cta]",
+      "wait 250",
+      "click [data-question]",
+    ])
+  })
+
+  /**
+   * A click on a real `a[href]` navigates, and every step after it then runs on
+   * a different page — the silent wrong picture the harness exists to prevent.
+   */
+  it("holds the page still before the first step, not after it", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ click: "[data-cta]" }])
+
+    expect(recorder.journal).toEqual(["evaluate pinNavigation", "click [data-cta]"])
+  })
+
+  it("photographs the element a clip names, and never the page as well", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+    const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "c.png")
+
+    await page.capture(file, { fullPage: false, clip: "[data-figure]" })
+
+    expect(recorder.elementShots).toEqual([{ selector: "[data-figure]", path: file }])
+    expect(recorder.screenshots).toEqual([])
   })
 
   it("collects the search paths from both variables, since NODE_PATH is what lanes reach for", () => {
@@ -514,8 +655,8 @@ describe("the command line", () => {
 })
 
 describe("rendering a specimen", () => {
-  it("mounts the theme it was built with, so three palettes are three documents", () => {
-    const rendered = renderSpecimen(
+  it("mounts the theme it was built with, so three palettes are three documents", async () => {
+    const rendered = await renderSpecimen(
       specimenOf({
         themes: [
           { label: "Editorial", selection: selection("editorial") },
@@ -533,16 +674,16 @@ describe("rendering a specimen", () => {
     expect(rendered.value.every((page) => page.diagnostics.length === 0)).toBe(true)
   })
 
-  it("titles each document with the specimen and the theme it is wearing", () => {
-    const rendered = renderSpecimen(specimenOf())
+  it("titles each document with the specimen and the theme it is wearing", async () => {
+    const rendered = await renderSpecimen(specimenOf())
 
     expect(rendered.ok && rendered.value[0]?.html).toContain(
       "<title>A band — Editorial serif</title>"
     )
   })
 
-  it("renders the specimen this repository ships, clean, under all three palettes", () => {
-    const rendered = renderSpecimen(exampleSpecimen)
+  it("renders the specimen this repository ships, clean, under all three palettes", async () => {
+    const rendered = await renderSpecimen(exampleSpecimen)
 
     expect(rendered.ok).toBe(true)
     if (!rendered.ok) return
@@ -552,5 +693,125 @@ describe("rendering a specimen", () => {
       expect(page.diagnostics).toEqual([])
       expect(page.html).toContain("One tree, three palettes, two viewports")
     }
+  })
+})
+
+describe("wiring a submission into a specimen", () => {
+  const formSpecimen = (endpoints?: Specimen["endpoints"]): Specimen =>
+    specimenOf({
+      build: (theme) => {
+        const idFactory = sequentialIdFactory()
+        const form = buildElement(idFactory, {
+          type: "loom.form",
+          props: { [SUBMIT_PROP_KEY]: { to: "contact.enquiry" } },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.field",
+              props: { name: "email", label: "Email", type: "email", required: true },
+              children: [],
+            }),
+            buildSlot(idFactory, "submit", [
+              buildElement(idFactory, {
+                type: "loom.button",
+                props: { label: "Send", variant: "primary" },
+                children: [],
+              }),
+            ]),
+          ],
+        })
+        const page = buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: theme },
+          children: [form],
+        })
+        return createTree(page, idFactory)
+      },
+      ...(endpoints === undefined ? {} : { endpoints }),
+    })
+
+  const TARGET = { action: "/contact", method: "post", fields: [] } as const
+
+  /**
+   * The state the finding is about: correct, and a photograph in which every
+   * control inside the form is six-tenths visible.
+   */
+  it("greys the whole fieldset when a specimen declares no endpoints", async () => {
+    const rendered = await renderSpecimen(formSpecimen())
+
+    expect(rendered.ok).toBe(true)
+    const html = (rendered.ok && rendered.value[0]?.html) || ""
+    /** The defect, exactly: every control inside is six-tenths visible. */
+    expect(html).toContain("<fieldset disabled")
+    expect(html).toContain("opacity:0.6")
+  })
+
+  it("posts to the target a specimen declared, so the fields are photographable", async () => {
+    const rendered = await renderSpecimen(formSpecimen({ "contact.enquiry": TARGET }))
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    const html = rendered.value[0]?.html ?? ""
+    expect(html).toContain('action="/contact"')
+    expect(html).toContain('method="post"')
+    expect(html).not.toContain("<fieldset disabled")
+    expect(html).not.toContain("opacity:0.6")
+  })
+
+  it("renders the hidden fields a target carries, in the order it names them", async () => {
+    const rendered = await renderSpecimen(
+      formSpecimen({
+        "contact.enquiry": {
+          ...TARGET,
+          fields: [
+            { name: "csrf", value: "a-token" },
+            { name: "locale", value: "en" },
+          ],
+        },
+      })
+    )
+
+    const html = (rendered.ok && rendered.value[0]?.html) || ""
+    expect(html.indexOf('name="csrf"')).toBeGreaterThan(-1)
+    expect(html.indexOf('name="csrf"')).toBeLessThan(html.indexOf('name="locale"'))
+    expect(html).toContain('value="a-token"')
+  })
+
+  /**
+   * Through `defineEndpoint`, so a specimen's target meets the same schema a
+   * host's answer does — an off-origin action is the costliest composition
+   * mistake in the seam and the one least likely to be noticed in review.
+   */
+  it("refuses a target that leaves the origin, exactly as a host's would be", async () => {
+    const rendered = await renderSpecimen(
+      formSpecimen({ "contact.enquiry": { ...TARGET, action: "//evil.example" } })
+    )
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    /** No action reached the markup, and the fieldset is grey again. */
+    expect(rendered.value[0]?.html).not.toContain("evil.example")
+    expect(rendered.value[0]?.html).toContain("<fieldset disabled")
+  })
+
+  it("says which endpoint id it refused rather than rendering half a page", async () => {
+    const rendered = await renderSpecimen(formSpecimen({ "Not An Id": TARGET }))
+
+    expect(rendered.ok).toBe(false)
+    if (rendered.ok) return
+
+    expect(rendered.error.code).toBe("endpoints")
+    expect(describeRenderError(rendered.error)).toContain("Not An Id")
+  })
+
+  it("leaves a specimen with no forms in it exactly as it was", async () => {
+    const withRegistry = await renderSpecimen(specimenOf({ endpoints: {} }))
+    const without = await renderSpecimen(specimenOf())
+
+    expect(withRegistry.ok && without.ok).toBe(true)
+    expect(withRegistry.ok && withRegistry.value[0]?.html).toBe(
+      without.ok ? without.value[0]?.html : "mismatch"
+    )
   })
 })

@@ -37,6 +37,26 @@ export default defineSpecimen({
 })
 ```
 
+### Photographing a form
+
+A `loom.form` whose destination nothing resolved draws a notice over a
+`disabled` fieldset at six-tenths opacity — correct, and useless as a picture of
+the control *inside* the form. Declare where it posts:
+
+```ts
+export default defineSpecimen({
+  // …
+  endpoints: {
+    "contact.enquiry": { action: "/contact", method: "post", fields: [] },
+  },
+})
+```
+
+A **target**, not an endpoint: the seam takes an async call that may mint a
+token, and a photograph must not depend on a network. It is still validated the
+way a host's answer is, so an action that leaves the origin is refused here
+rather than in review.
+
 Put it beside the code it photographs. Nothing in this directory is any lane's
 content, and the harness imports no specimen but the example.
 
@@ -74,6 +94,33 @@ LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm shoot shots.json
   ]
 }
 ```
+
+### Reaching a state a load does not produce
+
+The block worth photographing is often three presses in — a figure that is empty
+until a reader scrolls, a disclosure that exists only once opened. `do` runs
+after `waitFor` and before the shutter; `clip` points the shutter at one element
+instead of the viewport:
+
+```json
+{
+  "path": "/what-your-readers-do",
+  "out": "signals-figure",
+  "do": [{ "click": "[data-cta]" }, { "wait": 400 }],
+  "clip": "[data-figure]"
+}
+```
+
+Two steps and no more: `click` and `wait`. The moment this grows a way to assert
+or to branch, the harness has become a test runner with a camera attached.
+
+A `do` list is a sequence against **one** page, so anchor navigation is
+prevented for its duration — otherwise step two runs somewhere else and the
+picture is silently of another page. The page's own delegated listeners still
+see every click, which is what keeps a reader-signal broadcaster measurable
+under the shutter. The page is measured for overflow **after** the steps, since
+the steps are what produce the state being photographed. `clip` and `fullPage`
+are refused together rather than resolved by precedence.
 
 Everything after the plan is this directory's: the same browser, the same launch
 flags, the same reduced motion, the same overflow line, the same naming. Only

@@ -5151,7 +5151,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compareTight: \"loom-compare-tight\";\n    /** One `loom.comparison-row`, so the whole row can answer a pointer. */\n    readonly compareRow: \"loom-compare-row\";\n    /** Its leading cell — the criterion, which stays put while the band scrolls. */\n    readonly compareKey: \"loom-compare-key\";\n    /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */\n    readonly compareNote: \"loom-compare-note\";\n    /**\n     * The three verdicts. Their colour is here rather than on the element because\n     * a tinted column re-inks the two that recede — `fg-subtle` on `accent-subtle`\n     * measures 3.76:1 across the registered palettes, under the bar a palette\n     * slot carrying text is held to — and an inline colour would beat the rule that does it.\n     */\n    readonly compareYes: \"loom-compare-yes\";\n    readonly compareNo: \"loom-compare-no\";\n    readonly comparePartial: \"loom-compare-partial\";\n    /**\n     * The subject column a page is steering towards, by position. A column is\n     * not a node — in a two-dimensional band rows are\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a table\n     * with a column that stays put cannot do without.\n     */\n    readonly scrollX: \"loom-scroll-x\";\n    /**\n     * The comparison band's scroller, which differs from the general table's in\n     * one line: it holds its criterion column in place, so a snap has to land a\n     * subject *beside* that column rather than behind it.\n     */\n    readonly compareScroll: \"loom-compare-scroll\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly com\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -6876,6 +6876,111 @@
               "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
               "truncated": false,
               "summary": "Start broadcasting reader signals from the page under `root`."
+            }
+          ]
+        },
+        {
+          "module": "signals/collect",
+          "title": "Collect",
+          "summary": "The one operation that empties the buffer.",
+          "symbols": [
+            {
+              "name": "DEFAULT_READER_SIGNAL_WINDOW_MS",
+              "kind": "value",
+              "signature": "const DEFAULT_READER_SIGNAL_WINDOW_MS: number",
+              "truncated": false,
+              "summary": "The window is the age a batch reaches before it is counted and dropped, and it is two arguments pulling opposite ways."
+            },
+            {
+              "name": "MIN_READER_SIGNAL_WINDOW_MS",
+              "kind": "value",
+              "signature": "const MIN_READER_SIGNAL_WINDOW_MS: number",
+              "truncated": false,
+              "summary": "A minute, and the floor is not a style choice."
+            },
+            {
+              "name": "readerSignalWindowSchema",
+              "kind": "schema",
+              "signature": "const readerSignalWindowSchema: z.ZodObject<…>",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ReaderSignalWindow",
+              "kind": "type",
+              "signature": "type ReaderSignalWindow = z.infer<typeof readerSignalWindowSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DEFAULT_COLLECTION_SCAN",
+              "kind": "value",
+              "signature": "const DEFAULT_COLLECTION_SCAN = 5000",
+              "truncated": false,
+              "summary": "How much of the buffer one run will look at."
+            },
+            {
+              "name": "MAX_COLLECTION_SCAN",
+              "kind": "value",
+              "signature": "const MAX_COLLECTION_SCAN = 50000",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CollectionRequest",
+              "kind": "type",
+              "signature": "type CollectionRequest = {\n    readonly windowMs?: number;\n    /**\n     * The funnels this deployment asks about. Absent means none — a pair is a\n     * question somebody wrote down, and rollup does not invent questions.\n     *\n     * A pair added later applies to windows collected after it, never to the ones\n     * already folded, because the batches those answers came from are gone. That\n     * is the price of aggregates being the durable artefact and it is worth\n     * knowing before a deployment waits a day for a number it will not get.\n     */\n    readonly pairs?: readonly FunnelPair[];\n    readonly clock?: Clock;\n    readonly scanLimit?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CollectionPlan",
+              "kind": "type",
+              "signature": "type CollectionPlan = {\n    /** Old enough to count, in ascending `seq`. */\n    readonly ripe: readonly ReceivedBatch[];\n    /** The position to forget below, once the counters are durable. `null` when nothing is ripe. */\n    readonly before: number | null;\n    /** Seen by this scan and too young. A floor rather than a total — the scan stops at the first. */\n    readonly waiting: number;\n};",
+              "truncated": false,
+              "summary": "What one run may take, as a pure function of batches and an instant."
+            },
+            {
+              "name": "collectionPlanOf",
+              "kind": "function",
+              "signature": "const collectionPlanOf: (scanned: readonly ReceivedBatch[], horizon: string) => CollectionPlan",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "horizonOf",
+              "kind": "function",
+              "signature": "const horizonOf: (configured: ReaderSignalWindow, now: string) => string | null",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CollectionSummary",
+              "kind": "type",
+              "signature": "type CollectionSummary = {\n    readonly counted: number;\n    readonly tallies: number;\n    readonly funnels: number;\n    /** Distinct page views the window held. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key, whose occurrences counted and whose views\n     * did not. A rate shown without saying which denominator it used is the\n     * failure mode here, so the number travels with the run that produced it.\n     */\n    readonly uncorrelated: number;\n};",
+              "truncated": false,
+              "summary": "The half of the outcome a caller shows or logs, with nothing in it about a reader."
+            },
+            {
+              "name": "CollectionOutcome",
+              "kind": "type",
+              "signature": "type CollectionOutcome = {\n    readonly outcome: \"collected\";\n    readonly summary: CollectionSummary;\n    /** Rows the buffer removed. Below `counted` only if something else pruned first. */\n    readonly removed: number;\n    /** The scan filled its limit with ripe batches, so another run has work now. */\n    readonly more: boolean;\n}\n/** Nothing is old enough yet, which is the ordinary answer on a quiet deployment. */\n | {\n    readonly outcome: \"nothing-ripe\";\n    readonly waiting: number;\n}\n/**\n * The counters took the window and the buffer would not drop it.\n *\n * Its own outcome because it is the one state that gets worse if it is\n * ignored: the batches are durable in the counters and still in the buffer,\n * so the next run counts them again. An operator seeing this prunes below the\n * reported position by hand, or fixes the buffer before the next run.\n */\n | {\n    readonly outcome: \"counted-not-forgotten\";\n    readonly summary: CollectionSummary;\n    readonly before: number;\n    readonly error: ReaderSignalStoreError;\n}\n/** The window was not usable. Nothing was read, counted or deleted. */\n | {\n    readonly outcome: \"refused\";\n    readonly reason: string;\n}\n/** Read or write failed before anything became durable. Nothing was deleted. */\n | {\n    readonly outcome: \"unavailable\";\n    readonly error: ReaderSignalStoreError;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "collectReaderSignals",
+              "kind": "function",
+              "signature": "const collectReaderSignals: (journal: ReaderSignalJournal, store: ReaderTallyStore, request?: CollectionRequest) => Promise<CollectionOutcome>",
+              "truncated": false,
+              "summary": "Count a window of the buffer into the durable counters, then drop it."
+            },
+            {
+              "name": "describeCollection",
+              "kind": "function",
+              "signature": "const describeCollection: (outcome: CollectionOutcome) => string",
+              "truncated": false,
+              "summary": "One line for an operator, because an outcome nobody can read is one nobody acts on."
             }
           ]
         },

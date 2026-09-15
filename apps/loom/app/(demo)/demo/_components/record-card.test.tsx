@@ -942,3 +942,106 @@ describe("the card's own mark", () => {
     expect(screen.getByText("Waiting on you")).toBeTruthy()
   })
 })
+
+/**
+ * What the change did, on the card of a change that has landed.
+ *
+ * The plain reading used to be the one thing on this card that did not survive
+ * the press it was about. The page can only compute it against the tree on the
+ * stage, so it was supplied while the change was still answerable and absent
+ * the moment it applied — and for a change the Gate applies unattended it was
+ * never supplied at all. Every other line on a landed card is about the
+ * decision; this is the only one about the change.
+ */
+describe("the landed half of a card", () => {
+  const DID: readonly PlainChange[] = [
+    {
+      sentence: "This came off the page, and everything under it went too.",
+      words: ["3,400", "24", "92%"],
+      more: 0,
+    },
+  ]
+
+  it("says what the change did, in the words on the page", () => {
+    render(<RecordCard record={{ ...APPLIED, did: DID }} />)
+
+    expect(screen.getByText(/This came off the page/)).toBeTruthy()
+    expect(screen.getByText("“3,400”")).toBeTruthy()
+  })
+
+  /**
+   * The case the whole unit is for: a change the Gate let through on its own is
+   * landed from its first render, so it has never had a held card to carry the
+   * sentence and this is its only chance to say what it was.
+   */
+  it("says it for a change nobody was asked about", () => {
+    render(<RecordCard record={{ ...APPLIED, did: DID }} />)
+
+    expect(screen.queryByRole("button", { name: /Apply this change/ })).toBeNull()
+    expect(screen.getByText(/This came off the page/)).toBeTruthy()
+  })
+
+  it("says it on a card the visitor answered yes to", () => {
+    render(<RecordCard record={{ ...ANSWERED, did: DID }} />)
+
+    expect(screen.getByText(/You said yes/)).toBeTruthy()
+    expect(screen.getByText(/This came off the page/)).toBeTruthy()
+  })
+
+  /**
+   * Never both readings at once, and the outcome is what keeps them apart.
+   *
+   * A card printing a change as both about to happen and already done is worse
+   * than either alone, and the record carries its frozen copy from the moment
+   * it is assessed — which is *before* the visitor has answered. So a held card
+   * holds both strings and must print only the live one.
+   */
+  it("shows the live reading and not the frozen one while the change is waiting", () => {
+    render(
+      <RecordCard
+        record={{ ...HELD, did: DID }}
+        plain={[
+          {
+            sentence: "This comes off the page, and everything under it goes too.",
+            words: ["3,400"],
+            more: 0,
+          },
+        ]}
+      />
+    )
+
+    expect(screen.getByText(/This comes off the page/)).toBeTruthy()
+    expect(screen.queryByText(/This came off the page/)).toBeNull()
+  })
+
+  /**
+   * A record from before this field existed, or one whose head could not be
+   * read, prints nothing rather than an empty rule.
+   */
+  it("draws nothing when the record has no account of what it did", () => {
+    render(<RecordCard record={APPLIED} />)
+
+    expect(screen.queryByText(/came off the page/)).toBeNull()
+  })
+
+  /**
+   * And a change that never landed has nothing to report either. A refused or
+   * discarded ask carries no reading, and one that somehow did must not print
+   * it under a badge saying nothing happened.
+   */
+  it("says nothing about what a discarded ask did", () => {
+    /* The hold is dropped rather than set to `undefined`, which
+     * `exactOptionalPropertyTypes` refuses and `ANSWERED` above already avoids
+     * the same way: an answered ask has no proposal, it does not have a blank
+     * one. */
+    const discarded: ChangeRecord = (({ heldProposalId: _gone, ...rest }) => ({
+      ...rest,
+      outcome: "discarded" as const,
+      did: DID,
+    }))(HELD)
+
+    render(<RecordCard record={discarded} />)
+
+    expect(screen.queryByText(/This came off the page/)).toBeNull()
+  })
+})

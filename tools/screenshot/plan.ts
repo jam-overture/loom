@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import type { Shot } from "../specimen/capture.js"
+import { MAX_WAIT_MS, type Shot } from "../specimen/capture.js"
 import { PHONE, WIDE, type SpecimenViewport } from "../specimen/specimen.js"
 
 /**
@@ -49,16 +49,44 @@ const viewportSchema = z.union([
   }),
 ])
 
-export const shotSchema = z.object({
-  /** Appended to `baseUrl`, or a whole URL when there is no base. */
-  path: z.string().min(1),
-  /** The file to write, relative to `outDir`. `.png` is added if it is missing. */
-  out: z.string().min(1),
-  viewport: viewportSchema.default("wide"),
-  /** A selector to wait for before the shutter. `Shot.waitFor` says why. */
-  waitFor: z.string().min(1).optional(),
-  fullPage: z.boolean().default(false),
-})
+/**
+ * One step of a `do` list, as a lane writes it in JSON.
+ *
+ * `strict` on both members is what makes a misspelling loud: `{ "clik": "..." }`
+ * against a permissive object parses as an empty step, runs, does nothing, and
+ * photographs the page the load produced — the silent wrong picture this whole
+ * file is Zod rather than a hand-written type to prevent.
+ */
+const stepSchema = z.union([
+  z.object({ click: z.string().min(1) }).strict(),
+  z.object({ wait: z.number().int().positive().max(MAX_WAIT_MS) }).strict(),
+])
+
+export const shotSchema = z
+  .object({
+    /** Appended to `baseUrl`, or a whole URL when there is no base. */
+    path: z.string().min(1),
+    /** The file to write, relative to `outDir`. `.png` is added if it is missing. */
+    out: z.string().min(1),
+    viewport: viewportSchema.default("wide"),
+    /** A selector to wait for before the shutter. `Shot.waitFor` says why. */
+    waitFor: z.string().min(1).optional(),
+    /** What to press and how long to let it settle. `Shot.do` says why. */
+    do: z.array(stepSchema).default([]),
+    fullPage: z.boolean().default(false),
+    /** A selector to photograph instead of the viewport. `CaptureTarget.clip`. */
+    clip: z.string().min(1).optional(),
+  })
+  /**
+   * Refused rather than resolved by precedence. The two mean opposite things —
+   * *all of the page* and *this one element* — so a shot asking for both is a
+   * lane that believes something untrue about what it is about to get, and
+   * picking a winner would hand it the picture it did not want without a word.
+   */
+  .refine((shot) => shot.clip === undefined || !shot.fullPage, {
+    message: "cannot set both: clip photographs one element, fullPage photographs all of the page",
+    path: ["clip"],
+  })
 
 /**
  * `z.string().url()` is not enough on its own: it accepts `localhost:3000`,
@@ -114,5 +142,7 @@ export const planShots = (list: ShotList): readonly Shot[] =>
     file: withExtension(shot.out),
     viewport: typeof shot.viewport === "string" ? VIEWPORTS[shot.viewport] : shot.viewport,
     ...(shot.waitFor === undefined ? {} : { waitFor: shot.waitFor }),
+    do: shot.do,
     fullPage: shot.fullPage,
+    ...(shot.clip === undefined ? {} : { clip: shot.clip }),
   }))
