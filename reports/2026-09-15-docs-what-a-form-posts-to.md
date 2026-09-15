@@ -2,6 +2,13 @@
 
 **Routine:** `Loom docs` · **Branch:** `docs-25-what-a-form-posts-to` · **Section:** §4c
 
+**Preview:**
+<https://loom-git-docs-25-what-a-form-f81335-jpizzolato36-6341s-projects.vercel.app/docs/the-runtime/what-a-form-posts-to>
+— Vercel reports Ready. Read off the deployment rather than opened: `vercel.app`
+is still off this sandbox's egress allowlist, which is the standing 19 August
+finding and is not re-filed. Every screenshot below is a production build of this
+commit, served locally.
+
 Yesterday's run built *When nothing comes back*, and finished by filing a
 finding against itself: the ceiling page documents a **form's submission
 endpoint** because the ceiling is one rule across three doors, and it had to do
