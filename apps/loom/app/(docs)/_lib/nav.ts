@@ -232,6 +232,12 @@ const orderedSections: readonly DocsSection[] = [
           "The one function that writes, the seven ways a write can end, and what your own code owes a person for each of them.",
       },
       {
+        slug: "what-a-form-posts-to",
+        title: "What a form posts to",
+        summary:
+          "A form in a tree names a destination and never carries one: how a page asks a visitor for something, where the address comes from, and what happens when nobody can supply it.",
+      },
+      {
         slug: "what-every-ask-leaves-behind",
         title: "What every ask leaves behind",
         summary:

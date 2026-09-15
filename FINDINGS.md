@@ -23296,9 +23296,23 @@ integration that never replies, which is the one the portal lane lost a run to.
 ---
 ## 2026-09-14 — the third door into foreign code has no page, and now there is a page that says so
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
-next page in this section, filed rather than written because it is a page and not
-a paragraph
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+`docs-25-what-a-form-posts-to`** — */docs/the-runtime/what-a-form-posts-to*,
+between *What your app has to do* and *What every ask leaves behind*, which is
+the position this entry asked for. It was written to the structure this entry
+proposed and it transferred almost line for line: a declaration in the tree,
+your half as a registration, the resolve that happens before anything is drawn,
+what comes back, and the named ways it does not. Every fact the entry said was
+missing has a section — that the tree names an endpoint rather than carrying an
+address, that resolution happens per request so a token can be minted, that the
+id is what a model may change and the action is not, and what each of the five
+`SubmissionUnavailable` reasons means to whoever runs the deployment. Three
+things the entry did not ask for and the page has anyway, each because the seam
+turned out to answer a question a reader would ask next: what the Gate does when
+a proposal moves a form (held for a person on every origin, by a rule in the
+Gate rather than by stakes), what happens when a declaration carries an address
+instead of a name (refused at the plan, so the form has no target at all), and
+which strings the seam will carry as an action.
 
 0140 named three seams where Loom awaits code it did not write: the model client,
 a data source, and a **form's submission endpoint**. Two of the three have a
@@ -23768,3 +23782,77 @@ re-litigating them: **a signal never identifies a reader**, and **a funnel is
 correlated inside one page view** by an opaque key that never persists. A kind
 carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
+
+## 2026-09-15 — a form can ask for nine kinds of answer and not for a file, and a target cannot say so either
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+— found writing *What a form posts to*, which documents every field a
+`SubmissionTarget` has and could not find the one this needs
+
+`loom.field`'s `type` is a closed enum of nine: `text`, `email`, `tel`, `url`,
+`number`, `date`, `textarea`, `select`, `checkbox`. A file is not among them,
+which is a gap in `src/primitives/` and is the smaller half.
+
+The larger half is in the seam, and it is the one that has to move first.
+`SubmissionTarget` is `{ action, method, fields }`, and `loom.form` puts exactly
+those on the `<form>` element. There is no `enctype`. A browser posting a form
+with no `enctype` sends `application/x-www-form-urlencoded`, in which a file
+input contributes **its filename and nothing else** — so a form that grew a file
+field before the target grew an `enctype` would post successfully, return 200,
+and deliver a string where the deployment expected a document. That is the exact
+shape of failure this seam's three-state outcome exists to prevent, reached from
+the other end: not a button that goes nowhere, but a button that goes somewhere
+and arrives empty.
+
+**Why this is the seam's and not the primitive's.** `enctype` is a property of
+where the form posts, not of what it asks for: an endpoint that cannot take
+multipart should not be reachable by a form that sends it, and the host is the
+only party that knows. Putting it on `loom.form` as a prop would also put it in
+the space a proposal writes, which is the one thing 0065 arranged the whole
+declaration to avoid.
+
+**What would close it**, in order: `enctype?: "application/x-www-form-urlencoded"
+| "multipart/form-data"` on `SubmissionTarget`, defaulted and emitted by
+`loom.form`; then a `file` member of `loom.field`'s enum, for `Loom primitives`.
+Neither is large. Doing the second without the first is the failure above.
+
+**Not blocking, and the page does not mention it.** A contact form that asks for
+a name, an address and a paragraph — which is the shape the starter library's
+`contactBand` composition ships and the shape the documentation page uses —
+needs none of it.
+
+## 2026-09-15 — the site cannot show a form that both posts somewhere and can be changed
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — worked
+around this run by showing two frames instead of one, and the workaround is
+legible enough that this is a want rather than a fault
+
+§4c settles that every rendered example on this site is a real `LoomTree` with a
+working propose-a-change box beside it, and `Example` delivers that by holding
+the tree in React state and walking it in the browser. A **connected form**
+cannot go through it, for two reasons that compound:
+
+- `renderLoomTree` takes a `SubmissionResolution`, which is an object of two
+  functions. It cannot cross a server/client boundary as a prop.
+- Producing one means `await resolveTreeSubmissions(...)`, and `Example` renders
+  synchronously — an effect would make the server's HTML show the unconnected
+  state and then flip, which is a flash and a `submit-unresolved` diagnostic in
+  the markup a crawler reads.
+
+So *What a form posts to* shows the form **twice**: once as a catalogue example
+that names no endpoint, changeable, disabled and saying so; and once as a
+produced block, resolved for real on the server, rendered through the runtime,
+with no propose box. The pair happens to teach better than one frame would —
+the second is the first with one prop added, which is the page's whole argument
+— so this cost nothing here. It will cost something on the page after next.
+
+**What would close it, and the reason none of it was done this run.** The honest
+version is a `targets` prop on `Example` carrying plain `SubmissionTarget`s from
+a server parent, rebuilt into a resolution in the browser with
+`buildSubmissionResolution` — which is exported, pure, and the same fold the
+runtime uses. Two things stopped it. `content.test.ts` requires every example to
+be named as `<Example id="…"` in the page source, so a server wrapper around it
+would take that check red and the fix is a change to a shared check rather than
+to this page. And `catalogue.test.tsx` mounts every example with no submissions
+and refuses a diagnostic, so the catalogue would have to learn about endpoints
+too. Both are this lane's and neither belongs in a run whose subject is a page.
