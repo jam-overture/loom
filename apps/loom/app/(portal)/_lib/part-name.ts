@@ -76,33 +76,83 @@ const shorten = (value: string): string =>
   value.length > QUOTE_LIMIT ? `${value.slice(0, QUOTE_LIMIT).trimEnd()}…` : value
 
 /**
- * What a part says, as one line — **its text runs joined by a space**, not
- * concatenated.
+ * What a part **leads with** — the first thing it says, rather than everything
+ * underneath it.
  *
- * The runtime's `textOf` concatenates, which is right for what it is for: the
- * exact characters under a node, with nothing invented between them. It is
- * wrong for a name. A card holding a heading *"Every change is a delta"* and a
- * paragraph *"Nothing here was written by hand"* has no whitespace between the
- * two runs in the tree, because the gap between them is a box in the layout
- * rather than a character in the content — so `textOf` says
- * `Every change is a deltaNothing here was written by hand` and a name built
- * from it reads as a typo.
+ * ## Two nodes, two questions, one answer each
  *
- * Found by a test on this module's first run, against the seeded card the demo
- * ships. Nothing else in the portal had asked a *container* what it says; the
- * page name reads a heading, which is a single run and never shows this.
+ * This module's first version asked every node the same question — *what text
+ * is under you?* — and joined the answer. That is right for a paragraph and
+ * wrong for a card, and the wrongness is what a reader meets first. The seeded
+ * card holds a heading *"Every change is a delta"* and a paragraph *"Nothing
+ * here was written as markup. A proposal produced it."*, and joining them
+ * inside a 40-character quote named it
+ *
+ * > the card “Every change is a delta Nothing here wa…”
+ *
+ * The one word that identifies the card — its heading — is followed by a
+ * run-on that reads as a transcription error, and the budget a name has is
+ * spent on the half that identifies nothing. Three of the five rows on the live
+ * review queue looked like this on 11 September.
+ *
+ * So the question is asked of the node's own shape rather than of its subtree:
+ *
+ * > **A part that says something itself is named by everything it says. A part
+ * > that says nothing itself is named by the first thing inside it that does.**
+ *
+ * A paragraph has text of its own — possibly several runs, possibly with an
+ * inline link between them — and all of it is one sentence a reader reads
+ * straight through, so all of it is the name. A card has no text of its own;
+ * what it *is* is the things inside it, and the first of those is what a reader
+ * sees at the top of it. The recursion is what makes that work at any depth: a
+ * page leads with its card, which leads with its heading, which says *Loom*.
+ *
+ * **The join stays, and it is still load-bearing.** The runtime's `textOf`
+ * concatenates, which is right for what it is for — the exact characters under
+ * a node, with nothing invented between them — and wrong for a name: the gap
+ * between two runs is a box in the layout rather than a character in the
+ * content, so `textOf` says `Autumn arrivalsFree returns` and a name built from
+ * it reads as a typo. That was found the hard way on 10 September and the rule
+ * below keeps it, for the passage case where it is the whole answer.
+ *
+ * ## Nothing is hidden by naming less
+ *
+ * A name was always a 40-character quote, so no reader ever saw a card's body
+ * here — what changed is *which* 40 characters they get. What a part says in
+ * full is on the page itself, and on `/portal/pages/[treeId]` it is in the rail
+ * beside it, where every text run under a container is its own row. The id is
+ * untouched, on the surface, exactly as 22 August settled.
  */
-export const saidBy = (node: LoomNode): string => {
+export const leadOf = (node: LoomNode): string => {
+  if (node.kind === "text") return tidy(node.value)
+
+  /*
+   * Its own runs, in order. A direct text child makes this a passage whatever
+   * else it holds — a paragraph with an inline link has both, and the link's
+   * words are part of the sentence rather than a thing inside it.
+   */
   const runs: string[] = []
+  for (const child of node.children) {
+    if (child.kind !== "text") continue
 
-  for (const found of walkTree(node)) {
-    if (found.kind !== "text") continue
-
-    const run = tidy(found.value)
+    const run = tidy(child.value)
     if (run !== "") runs.push(run)
   }
 
-  return runs.join(" ")
+  if (runs.length > 0) return runs.join(" ")
+
+  /*
+   * A container: the first child that says anything at all. Not the first child
+   * — a card whose first child is an image says nothing until the heading under
+   * it, and skipping the silent ones is what stops a name coming back empty for
+   * a part that plainly says something.
+   */
+  for (const child of node.children) {
+    const said = leadOf(child)
+    if (said !== "") return said
+  }
+
+  return ""
 }
 
 /**
@@ -136,7 +186,7 @@ export const nounOf = (type: string): string => {
  * too. Text has no name and never needed one: it *is* its words.
  */
 export const partNameOf = (node: LoomNode): PartName => {
-  const said = shorten(saidBy(node))
+  const said = shorten(leadOf(node))
 
   switch (node.kind) {
     case "element":
@@ -168,12 +218,13 @@ export const partNameOf = (node: LoomNode): PartName => {
  *
  * There is a harder reason than length, and it is why this is a separate
  * function rather than a shorter format of the same one. **A container's words
- * are its contents' words.** `saidBy` walks the subtree, which is exactly right
- * for naming a card by the heading inside it and exactly wrong for naming the
- * page a change lands in: *the page “Autumn arrivals Nothing here was written
- * by…”* names the page's contents while claiming to name the place. The noun on
- * its own — *the page*, *the band* — is the part of that reading which is true
- * at every depth.
+ * are its contents' words.** `leadOf` descends, which is exactly right for
+ * naming a card by the heading inside it and exactly wrong for naming the page
+ * a change lands in: *the page “Loom”* names what the page's first heading
+ * happens to say while claiming to name the place a card was inserted into, and
+ * it goes stale the moment that heading is re-authored. The noun on its own —
+ * *the page*, *the band* — is the part of that reading which is true at every
+ * depth and at every revision.
  *
  * An id is not carried for the same reason a place is not quoted: the
  * identifier that matters on a row is the one belonging to the part being

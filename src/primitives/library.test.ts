@@ -8705,6 +8705,45 @@ const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequent
 }
 
 describe("the states a region is in when its content is not simply there", () => {
+  /**
+   * The distinction 0058 insists on, surviving to the one reader who cannot see
+   * the outline. That record says a source with nothing to report answers
+   * `ready` with an empty list *rather than failing*, and that collapsing the
+   * two is the mistake — and until `cause` existed the library collapsed them
+   * at the last step: a region that could not load and a region that is
+   * legitimately empty rendered identically, and somebody using a screen reader
+   * was told nothing either way.
+   *
+   * Asserted in both directions, because the failure that matters is the one
+   * where everything gets announced as much as the one where nothing does.
+   */
+  it("announces a region that could not load, and stays quiet about one that is merely empty", () => {
+    const stateOf = (props: JsonObject): string => {
+      const idFactory = sequentialIdFactory()
+      const tree = createTree(
+        buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: EDITORIAL },
+          children: [
+            buildElement(idFactory, {
+              type: "loom.empty-state",
+              props,
+              children: [buildText(idFactory, "Nothing here")],
+            }),
+          ],
+        }),
+        idFactory
+      )
+
+      return splitStylesheet(render(tree).markup).tree
+    }
+
+    expect(stateOf({ cause: "unavailable" })).toContain('role="status"')
+    expect(stateOf({ cause: "empty" })).not.toContain('role="status"')
+    /** The default is the common case, and the common case is not an event. */
+    expect(stateOf({})).not.toContain('role="status"')
+  })
+
   it("renders the waiting, empty and paging bands with nothing left unhonoured", () => {
     const { markup, diagnostics } = render(boundPage(EDITORIAL))
 

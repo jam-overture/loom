@@ -22907,8 +22907,9 @@ runtime's, and it is not finished.
 
 ## 2026-09-11 — a card is named by its heading *and* its body, and the body crowds the heading out
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-cosmetic, and the first thing a reader's eye lands on
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-27-named-by-what-it-leads-with` on 14 September — and neither candidate
+rule survived contact, for the reason the entry said it would
 
 `saidBy` joins every text run under a node with a space, which is right and was
 found the hard way — concatenating them produced *the card “Every change is a
@@ -22933,6 +22934,36 @@ more than one", and they disagree on a card holding two paragraphs.
 
 `saidBy`'s current behaviour is load-bearing for `page-name.ts` as well, so
 whoever takes this should read both callers before changing the join.
+
+**How it was decided, 14 September.** Neither candidate rule survived contact,
+and for the reason this entry half-saw: both were written about the *number* of
+runs, and the case that separates a name from a mangling is not a count. A
+paragraph holding *"Free returns on"* and a link saying *"everything"* has two
+runs and one sentence; a card holding a heading and a paragraph has two runs and
+two things. Counting cannot tell them apart, and either rule truncates the
+paragraph mid-sentence.
+
+What decides it is whether the node says anything **itself**:
+
+> A part that says something itself is named by everything it says. A part that
+> says nothing itself is named by the first thing inside it that does.
+
+A direct text child makes a node a passage whatever else it holds, so the inline
+link stays inside the sentence. A node with no text of its own is a container,
+and it is named by the first child that says anything — recursively, which is
+what makes a page lead with its card's heading rather than needing a rule per
+depth, and which lets it skip a silent first child rather than coming back empty
+at an image.
+
+**`saidBy` is gone rather than kept beside the new rule.** The warning above was
+right that `page-name.ts` was load-bearing, and wrong about the direction:
+`pageNameOf` never called `saidBy` at all: it used the runtime's `textOf`, which
+concatenates. A heading re-authored into two runs was therefore `Autumnarrivals`
+in the largest text on the screen while every sentence below it said *Autumn
+arrivals* — the same defect of 10 September, surviving in the one caller that
+had never been looked at. Both callers now read `leadOf`, so there is one answer
+to *what does this part say* rather than two that had agreed only by coincidence,
+on headings that happened to hold a single run.
 
 ---
 
@@ -23866,3 +23897,118 @@ re-litigating them: **a signal never identifies a reader**, and **a funnel is
 correlated inside one page view** by an opaque key that never persists. A kind
 carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
+
+---
+
+## 2026-09-14 — step 3 of the signal plan is on `main`, nothing in the deployment calls any of it, and so step 4 still has no input
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— filed by the lane that came to start step 4 and found the seam unwired
+
+[`docs/signals.md`](docs/signals.md) gates the portal's reader view on step 3
+being on `main`: *"Do not start before step 3 is on `main` — there is nothing to
+read until then."* #295 landed step 3 on 14 September, so the gate reads as
+lifted. It is not, because **step 3 built modules and no deployment calls them.**
+
+`ingestReaderSignals`, `rollUp` and `ReaderTallyStore` exist, are tested, and are
+published from `@loom/runtime/signals`. Across `apps/loom` the only two things
+that mention reader signals at all are a compiled docs fence and the docs' live
+rail component, and both exercise the **broadcaster**. There is no route handler
+that receives a batch anywhere in the application; nothing constructs a signal
+journal or a tally store the way `_lib/store.ts` and `_lib/telemetry.ts`
+construct theirs; nothing runs a rollup on any schedule; and `src/signals/
+migrate.ts` is not reached by `scripts/db-push.ts`.
+
+So a portal screen written today would read a store that no code path ever
+writes to. It would be correct, tested, permanently empty, and the fourth unit in
+a row from this lane whose most important state cannot be photographed — which is
+the open finding of 13 September arrived at by a different road.
+
+**What is missing, named so it can be split.** Three pieces, and none of them is
+a screen:
+
+1. **A receiver.** Something the broadcaster's delivery reaches, calling
+   `parseReaderSignalBatch` and then `ingestReaderSignals`. It is not a portal
+   route: the pages readers actually read in this deployment are `(demo)`,
+   `(marketing)` and `(docs)`, so the endpoint belongs to the application rather
+   than to any one surface — which is why this is filed against `Loom daily
+   build` rather than taken here.
+2. **The two stores, constructed.** A signal journal and a `ReaderTallyStore` on
+   `portalDatabase`'s handle, plus `src/signals/migrate.ts` reached by
+   `db:push`. Whether those tables land in the same push as the tree store and
+   the telemetry journal is a question about shared ground, not about a screen.
+3. **Something that runs the rollup.** `rollUp` is pure and nothing invokes it.
+   `scripts/telemetry-prune.ts` is the shape periodic work against this
+   deployment already has, and retention — deferred out of #295 on the ground
+   that forgetting raw batches before their counters are durable destroys data —
+   is the same schedule and probably the same unit.
+
+**Why this is said rather than worked around.** The obvious workaround is to seed
+tallies the way the tree is seeded, and it is the wrong one. A seeded tree
+demonstrates a *structure*, and anybody reading it can check it against the
+builder in source. Seeded reader counts are fabricated measurements of people who
+did not exist, shown on the one screen whose entire value is that its numbers are
+real — and a plausible false number is worse than no number, because nothing on
+the screen can tell a reader which they are looking at. A permanently empty
+screen is the better failure.
+
+**What this lane did instead, and what it will do next**, unless told otherwise:
+built a screen whose input already exists, and will take step 4 in the run after
+a batch can reach a counter. Nothing about the shape needs re-litigating — 0146,
+0147 and `rollup.ts` settle it, and the view is a run's work once there is
+anything in the table.
+
+---
+
+## 2026-09-14 — the screenshot harness cannot sign in and cannot press anything, so every picture of the portal is taken by a private script
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+the fourth thing in this lane's recipe that is not in the shared harness
+
+[0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+folded nine private screenshot scripts into one harness, and `pnpm shoot` is the
+half meant for "a page something else is already serving, which is the only way
+to photograph a screen needing a session, a database or a build behind it". The
+portal is that screen and `pnpm shoot` cannot photograph it.
+
+Two reasons, both structural rather than missing features:
+
+1. **A shot list is addresses, and a session is not one.** `/portal/sign-in`
+   posts a form driven by `useActionState`; there is no URL that signs a reviewer
+   in, deliberately — 0027 makes the key the identity and there is nowhere to put
+   a key but a POST body.
+2. **`captureShots` opens a fresh context per shot** (`playwright.ts:102`), so
+   even a shot that could sign in would leave the cookie behind when the next one
+   started.
+
+And a third that is this lane's alone: the states worth photographing on the
+review queue and on `What's changed` **do not exist until somebody asks for a
+change**, which is a fill and a click, not an address.
+
+So every portal picture in `reports/` since the harness landed was taken by a
+per-run script that drives Playwright directly. This run's is in the scratchpad,
+it is about a hundred lines, and roughly ninety of them are the harness's own job:
+finding Chromium under `/opt/pw-browsers` without naming a build, the viewports,
+`reducedMotion`, the overflow measurement, the file naming. That is the exact
+duplication 0117 was written to end, re-created because the one thing the harness
+does not do is the one thing this surface needs.
+
+**It also re-created a hazard the harness would have avoided.** The first attempt
+clicked `form button[type="submit"]` for the prompt box and hit the topbar's
+**sign out** instead, then photographed the sign-in page believing it was the
+screen behind it — which is the failure the `Shot.waitFor` documentation already
+warns about, arrived at from a direction that documentation does not cover.
+
+**What would close it, offered rather than prescribed.** A shot list step that is
+not an address: something like an optional `before` on the list — a small,
+declarative sequence of `fill` and `click` and `waitFor` applied in one context
+that is then kept for the shots that follow. That is a real design question (a
+shot list is *a value rather than a script*, which the plan's own documentation
+says twice and is right about), and it is why this is filed rather than taken
+inside a unit about naming. A narrower version that would cover most of it: let a
+shot list declare **one** sign-in step and share the context across shots.
+
+**Not this lane's to decide alone** — five surfaces use the harness and two of
+them have no session at all, so an option only one lane needs may belong
+somewhere else entirely. Worth half an hour of somebody's judgement before
+anybody builds it.
