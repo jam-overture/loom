@@ -24617,3 +24617,74 @@ shot list declare **one** sign-in step and share the context across shots.
 them have no session at all, so an option only one lane needs may belong
 somewhere else entirely. Worth half an hour of somebody's judgement before
 anybody builds it.
+
+## 2026-09-15 — the demo's leading question is destroyed by the next button a visitor presses
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Two presses, in the order the panel puts them in, driven against a real
+`next build` at 1280×900:
+
+| | the rail |
+| --- | --- |
+| press **Take the numbers off** — the big green leading button | `Waiting on you` · *“Take the numbers band off the page.”* |
+| then press **Repaint the top band** — the second entry under *or ask for one of these* | `Applied` · *“Repaint the band at the top.”*<br>`Nothing changed` · *“Take the numbers band off the page.”* |
+
+The demo asks a stranger a question, and the very next thing the panel invites
+them to do **answers it for them, with no**. Nothing warns them before the
+press and nothing about the second button suggests it has anything to do with
+the first.
+
+**Why it happens, and why every step is correct.** The two low-risk presets land
+unattended, which moves the tree's revision. A hold is judged against a base
+revision, and `HeldProposal.baseRevision` going stale is the runtime's own way
+of saying *Loom will not apply a decision to a page it has not seen* — which is
+right, and is the property `movedOn` and `PageMovedOn` were built to read. The
+demo then reports it accurately. Nobody is wrong and the visitor loses the
+question anyway.
+
+**It is worse than one lost card.** Driven with all five presets in order, three
+of the five cards end `Nothing changed` — measured, and they are the tallest
+cards in the rail at 570–593px against 496px for one that landed. So a visitor
+who presses every button, which is what the panel is for, ends with a record
+three-fifths composed of asks that went nowhere.
+
+**Three shapes, narrowest first, and this lane can do all three.**
+
+1. **Say it before the press, not after.** One line under the secondary list
+   while a question is open: *asking for something else now will set this
+   question aside*. Cheapest, changes no behaviour, and it is the same fix
+   `AskPanel` and `UNDO_CAUTION` already applied one control earlier — say what
+   the press will do, under the control it is about.
+2. **Do not offer the press.** Disable the secondary presets while a hold is
+   live, with the reason on them. Honest, and it makes the demo feel narrower
+   than it is at exactly the moment a visitor is exploring.
+3. **Ask it again automatically.** The dead card already offers **Ask for this
+   again**, which produces a new ask weighed against the page as it stands — so
+   the machinery exists and this would only be spending it without waiting to be
+   asked. It is the best experience and the most arguable: a surface re-asking on
+   a visitor's behalf is the demo making a decision, on the one surface whose
+   argument is that decisions are recorded rather than assumed.
+
+**Recommend (1) now and (3) as its own unit**, because (1) costs one line and
+cannot be wrong, and (3) needs an argument about whether an automatic re-ask
+gets its own record — which it must, and that is the interesting part.
+
+Not filed for `Loom daily build`: nothing in `src/` is behaving incorrectly here,
+and the demo's own sequencing is what makes this reachable in two presses.
+
+## 2026-09-15 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a seventeenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would, and a third of this file being entries filed twice
+is itself an open finding.
+
+**The cost was nil again, and for the seventeenth run the reason is the same.**
+What decided this unit was a measurement — a rail 3,851px long against 857px of
+screen, and a card twelve of whose fourteen lines were word for word the card
+above it. No reference gallery answers that. It is worth saying plainly at this
+point that the brief's instruction to consult `21st.dev` for the visual standard
+has never once been executable, and the lane has not been held back by it.

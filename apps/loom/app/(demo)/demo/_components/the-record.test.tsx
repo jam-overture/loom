@@ -295,3 +295,79 @@ describe("the question waiting on an answer", () => {
     expect(awaitingAnswer([HELD, APPLIED], moved)).toBeUndefined()
   })
 })
+
+/**
+ * Which cards argue their case, counted over a real list.
+ *
+ * `reasoning.test.ts` checks the rule; this checks that the rail applies it —
+ * that the newest card and a live question are whole and the rest are folded,
+ * on the same list a visitor's fifth ask produces. It is the same kind of gap
+ * this file exists for: every module can be right about one card and the list
+ * still wrong.
+ */
+const foldedIn = (container: HTMLElement): readonly boolean[] =>
+  cardsIn(container).map((card) =>
+    [...card.querySelectorAll("summary")].some((s) =>
+      (s.textContent ?? "").includes("the rule that read it")
+    )
+  )
+
+describe("the record, once it repeats itself", () => {
+  it("argues the newest card in full and folds the ones under it", () => {
+    const { container } = render(
+      <TheRecord
+        records={[APPLIED, OTHER, { ...OTHER, recordId: "i_4" }]}
+        marked={NOTHING_MARKED}
+        held={NO_READINGS}
+        revision={3}
+      />
+    )
+
+    expect(foldedIn(container)).toEqual([false, true, true])
+  })
+
+  /**
+   * The safety property, at the level that decides it. A visitor can leave a
+   * question open and ask for something else, which pushes the question down
+   * the rail — and the sentence that makes **Apply this change** safe to press
+   * goes with it.
+   */
+  it("keeps a card still waiting on an answer whole, wherever it has ended up", () => {
+    const { container } = render(
+      <TheRecord
+        records={[APPLIED, HELD]}
+        marked={NOTHING_MARKED}
+        held={NO_READINGS}
+        revision={2}
+      />
+    )
+
+    expect(foldedIn(container)).toEqual([false, false])
+  })
+
+  /**
+   * And a hold nobody can answer folds like any other read card. It is the same
+   * `moved` reading `awaitingAnswer` uses to decide the rail must not scroll to
+   * it, so the two cannot disagree about whether this question is live.
+   */
+  it("folds a hold the page has moved past", () => {
+    const moved: ReadonlyMap<string, HeldReading> = new Map([
+      [HELD.recordId, { moved: movedOn(0, 2)! }],
+    ])
+
+    const { container } = render(
+      <TheRecord records={[APPLIED, HELD]} marked={NOTHING_MARKED} held={moved} revision={2} />
+    )
+
+    expect(foldedIn(container)).toEqual([false, true])
+  })
+
+  /** One ask is never a repetition. */
+  it("folds nothing when there is only one card", () => {
+    const { container } = render(
+      <TheRecord records={[APPLIED]} marked={NOTHING_MARKED} held={NO_READINGS} revision={1} />
+    )
+
+    expect(foldedIn(container)).toEqual([false])
+  })
+})

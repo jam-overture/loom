@@ -9,6 +9,7 @@ import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 import { answerNote } from "@/app/(demo)/_lib/answer"
 import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
 import type { MovedNote } from "@/app/(demo)/_lib/moved"
+import type { Reasoning } from "@/app/(demo)/_lib/reasoning"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
@@ -20,13 +21,13 @@ import {
   type AskedLine,
   type UndoOffer,
 } from "@/app/(demo)/_lib/undo"
-import { weighedOf } from "@/app/(demo)/_lib/weighed"
+import { weighedBrief, weighedOf } from "@/app/(demo)/_lib/weighed"
 
 import { answerHeld, undoRevision } from "../actions"
 import { PageMovedOn } from "./page-moved-on"
 import { PlainReading } from "./plain-reading"
 import { TechnicalDetail } from "./technical-detail"
-import { Weighed } from "./weighed"
+import { TheReasoning } from "./the-reasoning"
 
 /**
  * One ask, and the whole account of what became of it.
@@ -73,8 +74,19 @@ export const RecordCard = ({
   offer = "offer",
   asked,
   mark,
+  reasoning = "open",
 }: {
   readonly record: ChangeRecord
+  /**
+   * Whether this card shows the Gate's working or folds it under one line —
+   * a fact about this card's *place in the rail*, which is the one thing about
+   * itself a card cannot see. `_lib/reasoning.ts` decides it and says why.
+   *
+   * Defaulted to `open`, which is what a card rendered on its own should be: a
+   * single card is always the newest one, and a caller that has not thought
+   * about repetition should get the whole account rather than a fold.
+   */
+  readonly reasoning?: Reasoning
   /**
    * The line this card quotes, when the page has worked it out from the whole
    * record list.
@@ -167,6 +179,8 @@ export const RecordCard = ({
   const applied = appliedWords(record)
   const weighed = weighedOf(record)
   const ceiling = ceilingNote(record)
+  /* The pair in one line, which is all a folded card shows of them. */
+  const brief = weighedBrief(record)
   /*
    * What the change did, for a card whose change has landed.
    *
@@ -297,59 +311,44 @@ export const RecordCard = ({
       </header>
 
       {/*
-        * What the Gate weighed, before the rule that read it.
+        * What the Gate weighed, the rule that read it, and the comparison that
+        * rule reached its verdict by — the three blocks that are one argument.
         *
-        * The rail promises two questions and then a named rule; this is the
-        * card keeping that promise, in that order. Both answers were already on
-        * the record and both were behind the disclosure in the runtime's
-        * shorthand — `stakes: medium`, `undo carries: 4 nodes` — so a visitor
-        * met the verdict and never met the weighing.
+        * The rail promises two questions and then a named rule; this keeps that
+        * promise, in that order. All three were on the record and all three
+        * were behind the technical disclosure in the runtime's shorthand —
+        * `stakes: medium`, `undo carries: 4 nodes` — so a visitor met the
+        * verdict and never met the weighing.
         *
-        * It stays on an answered card as well as a held one. The weighing is
+        * They stay on an answered card as well as a held one. The weighing is
         * what the Gate did with this ask, which is a fact about the record and
         * not a control: a card that dropped it once the change had landed would
         * be a record that forgets its own reasoning the moment the reasoning
-        * stops being urgent.
+        * stops being urgent. **`folded` drops nothing** — it moves the three
+        * under a line that states their conclusion, on a card whose reader has
+        * the same three open above it.
         *
-        * `_lib/weighed.ts` decides the words, and returns nothing for an ask
-        * that never reached assessment.
+        * The rule that used to be written here — *a demo whose whole argument
+        * is that the runtime can account for itself must not put the account
+        * behind a click* — was right about the card a visitor reads as the
+        * account, and `reasoning.ts` is what now decides which card that is.
+        * Measured, five asks printed this argument five times in a rail four and
+        * a half screens long.
+        *
+        * `_lib/weighed.ts` decides the two answers and the folded line, and
+        * returns nothing for an ask that never reached assessment;
+        * `_lib/ceiling.ts` decides the comparison, and on seven of the eight
+        * rules there is none.
         */}
-      {weighed && <Weighed answers={weighed} />}
-
-      {/*
-        * The verdict, in the words of the rule that produced it, above the
-        * disclosure rather than inside it — a demo whose whole argument is that
-        * the runtime can account for itself must not put the account behind a
-        * click. What is behind the click is the *evidence*: the codes, the
-        * fingerprint, the operations and the inverse.
-        */}
-      {record.disposition && (
-        <p className="text-ink-secondary text-xs">{ruleSentence(record.disposition.ruleCode)}</p>
-      )}
-
-      {/*
-        * And the comparison the rule above reached its verdict by.
-        *
-        * That rule is the only one of the eight that weighs an ask against what
-        * its *origin* is allowed to do alone, and its sentence — today, *"A
-        * change this big is not something Loom may make on its own"* — states
-        * the conclusion without the two numbers it was drawn from. This is the
-        * comparison: the ceiling, read from the same policy through the same
-        * `ceilingFor` the Gate called, and the stakes `Weighed` printed three
-        * lines above, in one sentence with the direction between them.
-        *
-        * So the three lines are the Gate's whole arithmetic in the order it
-        * happened: *this much risk*, then *the rule saying it may not land
-        * alone*, then *what alone would have allowed, and by which way this one
-        * went past it*. Before this line the card printed one side of an
-        * inequality; before this line said both levels it printed two numbers
-        * and no operator.
-        *
-        * Quieter than the rule and directly under it, because it is that
-        * sentence's evidence rather than a claim of its own. `_lib/ceiling.ts`
-        * decides when there is one; on seven of the eight rules there is not.
-        */}
-      {ceiling && <p className="text-ink-muted text-xs">{ceiling.sentence}</p>}
+      <TheReasoning
+        reasoning={reasoning}
+        {...(weighed === undefined ? {} : { answers: weighed })}
+        {...(record.disposition === undefined
+          ? {}
+          : { rule: ruleSentence(record.disposition.ruleCode) })}
+        {...(ceiling === undefined ? {} : { ceiling: ceiling.sentence })}
+        {...(brief === undefined ? {} : { brief })}
+      />
 
       {/*
         * And what the visitor did about it, which is the sentence above's
