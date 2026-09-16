@@ -204,7 +204,19 @@ export const RecordCard = ({
      */
     <li
       id={record.recordId}
-      className="border-edge-subtle bg-surface-raised flex flex-col gap-3 rounded-md border p-3.5"
+      /*
+       * `scroll-mt-28` because the rail has something pinned to its top while a
+       * question is open. `AskPanel`'s caution sticks to the scroller's top edge
+       * for as long as any ask control is in view, and it is that caution's
+       * **Answer it first** that this card is the destination of — so without a
+       * scroll margin the fragment lands the card's top *underneath* the band
+       * that sent the visitor to it, with the `Waiting on you` badge and the
+       * utterance behind it. Measured: the strip is 103px at 1280×900, and the
+       * card arrives at 156 against a rail top of 44. Both scrollers honour it —
+       * a fragment navigation and `AnswerInView`'s `scrollIntoView` read the
+       * same property.
+       */
+      className="border-edge-subtle bg-surface-raised flex scroll-mt-28 flex-col gap-3 rounded-md border p-3.5"
     >
       <header className="flex flex-col gap-2">
         {/*
