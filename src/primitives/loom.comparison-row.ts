@@ -51,8 +51,17 @@ const props = z
 
 type Props = z.infer<typeof props>
 
-/** Wide enough for a criterion to read as a sentence rather than as a stack of words. */
-const KEY_MIN_WIDTH = "12rem"
+/**
+ * **The criterion column's width is no longer here**, and the move is
+ * [0155](../../decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)
+ * in the second place it has bitten.
+ *
+ * It was `min-width: 12rem`, set inline on the cell below, and at 390px it took
+ * 192 of the band's 348 pixels — leaving one subject and a blank sliver of the
+ * next. A rule could have narrowed it for a phone and no rule could reach it,
+ * because an inline style beats one. It is `.loom-compare .loom-compare-key` in
+ * `stylesheet.ts` now, at twelve rem still, and nine on a narrow screen.
+ */
 
 export const loomComparisonRow = definePrimitive({
   type: "loom.comparison-row",
@@ -70,7 +79,6 @@ export const loomComparisonRow = definePrimitive({
           ...(given.heading === undefined ? {} : { scope: "row" }),
           className: LIBRARY_CLASS.compareKey,
           style: {
-            minWidth: KEY_MIN_WIDTH,
             /** The table sets it — see `loom.comparison` for why not here. */
             textAlign: "start",
             verticalAlign: "middle",

@@ -2,10 +2,8 @@ import type { Metadata } from "next"
 
 import { askById, readAskId } from "@/app/(marketing)/_lib/adapt/asks"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
-import { pageMetadata } from "@/app/(marketing)/_lib/share"
+import { type PageSearchParams as SearchParams, pageMetadata } from "@/app/(marketing)/_lib/share"
 import { HOME, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
-
-type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 /**
  * What this address unfurls as when somebody sends it to somebody else.

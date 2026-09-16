@@ -146,6 +146,26 @@ export const LIBRARY_CLASS = {
    * card's, which is a hair off and the honest limit of a static stylesheet.
    */
   cluster: "loom-cluster",
+  /**
+   * The region a band too wide for the screen scrolls inside — `loom.table`'s
+   * and `loom.comparison-table`'s, which had one each and neither had anything
+   * but `overflow-x`.
+   *
+   * It is a class rather than the inline pair it replaces because three of the
+   * four things a scroller needs cannot be said on the element: the snap
+   * positions belong to the children, the focus ring is a state selector, and
+   * the scrollbar is the browser's own furniture. `loom.carousel` worked all of
+   * this out on 28 August and the only thing added here is
+   * `scroll-padding-inline-start`, which a carousel has no use for and a table
+   * with a column that stays put cannot do without.
+   */
+  scrollX: "loom-scroll-x",
+  /**
+   * The comparison band's scroller, which differs from the general table's in
+   * one line: it holds its criterion column in place, so a snap has to land a
+   * subject *beside* that column rather than behind it.
+   */
+  compareScroll: "loom-compare-scroll",
   /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */
   compare: "loom-compare",
   /** The same table set as a spec to scan rather than a page to read. */
@@ -200,6 +220,21 @@ export const LIBRARY_CLASS = {
   /** Vertical rules as well as horizontal ones, and no rules at all. */
   tableGrid: "loom-table-grid",
   tableFlush: "loom-table-flush",
+  /**
+   * A table whose cells hold sentences rather than values, which is the one
+   * thing about a table's *content* that changes what its narrow rendering
+   * should be and the one thing no rule here can see.
+   *
+   * It gives the body cells a readable measure below the width where a phone
+   * starts squeezing them, so the band overflows and scrolls instead of
+   * crushing three sentences into a hundred pixels each. It is switched by a
+   * prop because it had to be: measured in Chromium, `min-inline-size:
+   * fit-content(10rem)` — which is exactly this rule conditioned on the
+   * content, and would have needed no prop at all — is ignored outright, and an
+   * unconditional minimum takes a four-column table of figures from 350px to
+   * 744px and makes *it* scroll. The numbers are in the 15 September report.
+   */
+  tableProse: "loom-table-prose",
   /** One `loom.table-row`, so the whole row can answer a pointer. */
   tableRow: "loom-table-row",
   /** A row the page is pointing at, which keeps its tint under that pointer. */
@@ -826,8 +861,116 @@ details[open] > summary .loom-marker {
 .loom-cluster > * {
   box-shadow: 0 0 0 2px var(--loom-bg-canvas);
 }
+/*
+ * The scrolling region, shared by the two tables that have one.
+ *
+ * loom.carousel settled the shape of this on 28 August and the reasoning is
+ * in that file: a scroll container is focusable by default in some browsers and
+ * not in others, so it is made focusable and named rather than left to the
+ * browser, and it does not fade at its edges because a mask at rest washes out
+ * content that has fully arrived. The affordance is the peek instead -- the
+ * next thing along is always visibly cut off -- which is why the criterion
+ * column narrows further down this file rather than a gradient being drawn over
+ * the band's trailing edge.
+ *
+ * scroll-padding-inline-start is the one line here a carousel has no use for.
+ * A comparison keeps its criterion in place while the subjects travel under it,
+ * so a subject scrolled to the start of the region arrives *underneath* the
+ * question it is answering. The padding is the sticky column's own width, so a
+ * snap lands the subject beside its criterion instead of behind it.
+ *
+ * Proximity rather than the carousel's mandatory, and it is the one place
+ * the two deliberately differ. A carousel is read one item at a time. A
+ * comparison is read by holding two subjects side by side, and mandatory snap
+ * takes that position away from a reader the moment they let go.
+ */
+.loom-scroll-x {
+  overflow-x: auto;
+  min-width: 0;
+  scroll-snap-type: inline proximity;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--loom-border-subtle) transparent;
+}
+/*
+ * The ring is drawn *inside* the region, which is the one place this differs
+ * from the carousel's and it is not a preference.
+ *
+ * Both bands clip themselves: a panel rounds its corners and sets overflow:
+ * hidden to make the table's corners follow, and that wrapper is the scroller's
+ * parent. An outline offset outwards is therefore drawn in the two pixels the
+ * parent is clipping, so the focus stop this run added would have been a focus
+ * stop with no visible ring -- which is worse than the unreachable region it
+ * replaced, because a keyboard reader would now land somewhere and be told
+ * nothing. Negative offset puts the ring on the region's own inside edge, where
+ * nothing is clipping it.
+ */
+.loom-scroll-x:focus-visible {
+  outline: 2px solid var(--loom-accent);
+  outline-offset: -2px;
+}
+.loom-compare-scroll {
+  scroll-padding-inline-start: 12rem;
+}
 .loom-compare th, .loom-compare td {
   padding: var(--loom-spacing-3) var(--loom-spacing-4);
+}
+/*
+ * Every cell is a snap position except the one that never moves. A sticky
+ * element is a poor snap target -- it is at the start of the region by
+ * definition, so snapping to it is snapping to where the reader already is --
+ * and the positions worth landing on are the subjects travelling under it.
+ */
+.loom-compare tbody > tr > *:not(.loom-compare-key), .loom-compare thead > tr > * {
+  scroll-snap-align: start;
+}
+/*
+ * The two widths that decide whether this band fits a phone, moved here from
+ * the elements that used to set them inline.
+ *
+ * That was [0155](../../decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)
+ * being broken in the second place it has now been found: loom.comparison
+ * set min-width: 7rem on every answer and loom.comparison-row set
+ * min-width: 12rem on every criterion, so the two numbers that decide what a
+ * 390px reader sees were the only two in the band no rule in this file could
+ * reach. Both comments called the pair "the intrinsic answer to a narrow
+ * screen, with no width query to declare" -- and they were right that the
+ * arithmetic belongs to the content, and wrong that it never varies, because a
+ * criterion that reads as a sentence at 1280 is a criterion that eats the
+ * answer beside it at 390.
+ *
+ * Nothing about the band's wide rendering changes: these are the same two
+ * values, in the same two places, said somewhere a media query can reach them.
+ */
+.loom-compare th, .loom-compare td {
+  min-width: 7rem;
+}
+.loom-compare .loom-compare-key {
+  min-width: 12rem;
+}
+/*
+ * The peek, which is the whole of the 13 September finding's fix.
+ *
+ * At 390px the criterion took 192 of the band's 348 pixels and the first
+ * subject took 112, leaving a 44-pixel sliver of the second -- and the sliver
+ * was *blank*, because an answer is centred in its cell and 44 pixels of a
+ * 112-pixel cell is its padding. So the band did have a peek and the peek had
+ * no ink in it, which is why a reader could look straight at a four-subject
+ * comparison and come away certain there was one.
+ *
+ * Nine rem instead of twelve puts 92 pixels of the second subject on screen at
+ * rest, which is past the centre of that cell and therefore past its mark. It
+ * is the same affordance loom.carousel chose over a fade -- the next thing
+ * along is always visibly cut off -- and it is only sayable at all because the
+ * two widths above stopped being inline styles.
+ */
+@media (max-width: 47.99rem) {
+  .loom-compare .loom-compare-key {
+    min-width: 9rem;
+  }
+  .loom-compare-scroll {
+    scroll-padding-inline-start: 9rem;
+  }
 }
 .loom-compare-tight th, .loom-compare-tight td {
   padding: var(--loom-spacing-2) var(--loom-spacing-3);
@@ -914,6 +1057,37 @@ details[open] > summary .loom-marker {
 }
 .loom-table-flush thead > tr > *, .loom-table-flush tbody > tr + tr > * {
   border-block: 0;
+}
+.loom-table tbody > tr > *:not(.loom-table-key), .loom-table thead > tr > * {
+  scroll-snap-align: start;
+}
+/*
+ * A table of sentences, below the width where a phone starts squeezing them.
+ *
+ * Measured at 390px before this rule: three prose columns at 108, 116 and 125
+ * pixels, and one row 360 pixels tall -- 43% of the screen for a single row,
+ * and the band did not even have to scroll to do it. With this measure the same
+ * row is 193 and the band scrolls 492 inside 348, which is the trade the rule
+ * makes: about a screen and a half of horizontal travel a reader controls, in
+ * place of vertical height they do not.
+ *
+ * **Twelve rem rather than ten, chosen by measuring both.** Ten cut the row to
+ * 241 and twelve cuts it to 193, for 64 more pixels of travel -- and twelve is
+ * the criterion column's own width one rule up, picked there for the same
+ * reason a year earlier: wide enough to read as a sentence rather than as a
+ * stack of words.
+ *
+ * **Scoped to the body deliberately.** A row heading is a label rather than a
+ * sentence -- "In the tree", "Sep 8" -- and giving it the same measure would
+ * spend twelve rem of a phone's width on two words and push the first real
+ * column off the screen, which is the defect above with a different cell in
+ * it. Measured: the heading column stays at 108 pixels and the two prose
+ * columns take 192 each.
+ */
+@media (max-width: 47.99rem) {
+  .loom-table-prose tbody > tr > td {
+    min-width: 12rem;
+  }
 }
 .loom-table-row > * {
   transition: background-color var(--loom-motion-medium) ease;

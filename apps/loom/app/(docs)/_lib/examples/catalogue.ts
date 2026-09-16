@@ -4,6 +4,7 @@ import {
   buildText,
   createTree,
   sequentialIdFactory,
+  SUBMIT_PROP_KEY,
   type IdFactory,
   type JsonObject,
   type LoomNode,
@@ -336,6 +337,86 @@ const derivedTheme = (): LoomTree => {
   ])
 }
 
+/**
+ * A page that asks the reader for something, and has nowhere to send it.
+ *
+ * This is the one example on the site whose point is a state rather than a
+ * shape. `loom.form` reads three conditions off the submission seam — a target,
+ * a deployment that could not give one, and **nobody has said where this posts**
+ * — and the third is what a form looks like before anybody registers an
+ * endpoint. It renders disabled, with a sentence saying so, rather than drawing
+ * a button that swallows what a visitor typed.
+ *
+ * So the tree here names **no endpoint at all**, which is not an oversight and
+ * is why it produces no render diagnostic: a node that never declared
+ * `loom:submit` is not a node whose submission failed. *What a form posts to*
+ * shows the same tree with an endpoint named beside it, resolved for real, and
+ * the difference between the two frames is the whole of that page.
+ *
+ * `to` is how the second one is built. Passing an id puts `loom:submit` on the
+ * form and nothing else changes — which is the claim, made by there being one
+ * builder.
+ */
+export const contactExampleTree = (to?: string): LoomTree => {
+  const ids = sequentialIdFactory("contactform")
+
+  const field = (props: JsonObject): LoomNode =>
+    buildElement(ids, { type: "loom.field", props })
+
+  return page(ids, MINIMAL, { width: "readable" }, [
+    buildElement(ids, {
+      type: "loom.section",
+      props: { tone: "surface", width: "readable", eyebrow: "Contact" },
+      children: [
+        buildSlot(ids, "heading", [heading(ids, 2, "Tell us what you are building")]),
+        prose(ids, "A paragraph is plenty. One of us reads every one of these.", {
+          measured: true,
+          tone: "muted",
+        }),
+        buildElement(ids, {
+          type: "loom.form",
+          props: {
+            layout: "stacked",
+            width: "readable",
+            ...(to === undefined ? {} : { [SUBMIT_PROP_KEY]: { to } }),
+          },
+          children: [
+            field({ name: "name", label: "Your name", required: true, autocomplete: "name" }),
+            field({
+              name: "email",
+              label: "Email",
+              type: "email",
+              required: true,
+              autocomplete: "email",
+              hint: "We reply to this address and to nothing else.",
+            }),
+            field({
+              name: "message",
+              label: "What are you building?",
+              type: "textarea",
+              required: true,
+              span: "row",
+            }),
+            buildSlot(ids, "submit", [
+              buildElement(ids, {
+                type: "loom.button",
+                props: { variant: "primary", scale: "large", width: "full" },
+                children: [buildText(ids, "Send it")],
+              }),
+            ]),
+            buildSlot(ids, "note", [
+              buildElement(ids, {
+                type: "loom.perk",
+                props: { label: "We reply within two working days", state: "included" },
+              }),
+            ]),
+          ],
+        }),
+      ],
+    }),
+  ])
+}
+
 const entries: readonly DocsExample[] = [
   {
     id: "first-tree",
@@ -378,6 +459,13 @@ const entries: readonly DocsExample[] = [
     caption:
       "A perfectly ordinary composition: a surface with a heading, a sentence and a button on it. Ask to make the whole card a link and watch what the Gate says.",
     build: cardWithAControl,
+  },
+  {
+    id: "a-form-nobody-has-connected",
+    title: "A form with nowhere to send anything",
+    caption:
+      "Three questions and a button, composed from registered primitives. Nothing in this tree says where it posts, so the form disables itself and says so rather than drawing a button that goes nowhere.",
+    build: () => contactExampleTree(),
   },
   {
     id: "a-page-a-reader-scrolls",
