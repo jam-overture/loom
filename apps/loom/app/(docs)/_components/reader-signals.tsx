@@ -1,13 +1,26 @@
 import { produceAddressedMarkup } from "@/app/(docs)/_lib/signals/markup"
-import { produceBatch, produceKinds, produceReadBack } from "@/app/(docs)/_lib/signals/page"
+import {
+  produceApproved,
+  produceBatch,
+  produceKinds,
+  producePlainly,
+  produceReadBack,
+} from "@/app/(docs)/_lib/signals/page"
 
 /**
  * The produced blocks on *What your readers do*.
  *
- * Three of them, and each prints what the runtime actually did rather than what
- * this file believes it does: the four kinds come from the closed list the
- * schema is built from, the markup comparison is one tree rendered twice, and
- * the read-back is `parseReaderSignalBatch` given five inputs.
+ * Each prints what the runtime actually did rather than what this file believes
+ * it does: the kinds come from the closed list the schema is built from, the
+ * markup comparison is one tree rendered twice, and the read-back is
+ * `parseReaderSignalBatch` given five inputs.
+ *
+ * Two of them exist because the vocabulary is closed and **not finished**. The
+ * page may not state its own size — `WhatAPageMaySay` writes the opening
+ * sentence's list from the runtime's kinds, and `TheApprovedAddition` prints the
+ * kinds this page has prose for that the runtime has not got yet. The second
+ * renders nothing once there are none, which is the point of it: the day a kind
+ * lands, the announcement of it removes itself.
  *
  * The fourth block on that page — the live one — is a client component, because
  * a broadcaster with no browser has nothing to report and a table of invented
@@ -51,14 +64,24 @@ const Cell = ({ children }: { readonly children: React.ReactNode }) => (
 )
 
 /**
- * The four kinds, and one real signal of each.
+ * The opening sentence's list of what a page may say, in plain words.
+ *
+ * Inline rather than in a panel, because it is a clause in a sentence a reader
+ * is already halfway through. It is produced for the same reason the panel below
+ * it is: it is an enumeration, and an enumeration typed into prose is the size
+ * of the vocabulary written out in a place nothing checks.
+ */
+export const WhatAPageMaySay = () => <>{producePlainly()}</>
+
+/**
+ * The kinds, and one real signal of each.
  *
  * The signals are printed beside the sentences because the sentences are the
  * easy half. "A region was opened" is a thing anybody could write; the JSON
  * under it is the runtime's schema having accepted that exact object, with the
  * node id of a node on the page above.
  */
-export const TheFourKinds = () => {
+export const TheVocabulary = () => {
   const kinds = produceKinds()
 
   return (
@@ -83,6 +106,58 @@ export const TheFourKinds = () => {
         ))}
       </ul>
     </Panel>
+  )
+}
+
+/**
+ * The kinds that are agreed on and not built, or nothing at all.
+ *
+ * Deliberately **not** a heading and not part of the vocabulary panel. A reader
+ * counting what a page may say today should count the panel above and stop; this
+ * is a note about the future, and it is styled as one — dashed, muted, and
+ * clearly outside the list.
+ *
+ * It returns `null` when there is nothing pending, and that is the whole reason
+ * it is a component rather than a paragraph. The prose around it says nothing
+ * about a coming addition, so the day the addition arrives there is no sentence
+ * left over talking about it in the future tense. That failure — an announcement
+ * outliving the thing it announced — is the ordinary way a roadmap note rots,
+ * and the only reliable fix is for the note to be unable to survive.
+ */
+export const TheApprovedAddition = () => {
+  const approved = produceApproved()
+
+  if (approved.length === 0) return null
+
+  return (
+    <div
+      className="not-prose border-edge text-ink-muted my-6 rounded-lg border border-dashed px-4 py-3"
+      data-approved={approved.length}
+    >
+      <p className="text-ink m-0 text-sm font-semibold">
+        {approved.length === 1 ? "One more is agreed on, and not built yet." : "More are agreed on, and not built yet."}
+      </p>
+      <p className="m-0 mt-1 text-xs">
+        The runtime does not accept {approved.length === 1 ? "it" : "them"} today, so nothing above this
+        line mentions {approved.length === 1 ? "it" : "them"} and no page of yours can send one. This is
+        here so that the list you just read is the whole list, rather than the whole list as far as
+        anyone got round to saying.
+      </p>
+      <ul className="m-0 mt-3 flex list-none flex-col gap-3 p-0">
+        {approved.map((row) => (
+          <li key={row.kind} className="m-0" data-kind={row.kind}>
+            <p className="m-0 flex flex-wrap items-baseline gap-2">
+              <span className="border-edge text-ink rounded-full border border-dashed px-2 py-0.5 font-mono text-xs">
+                {row.kind}
+              </span>
+              <span className="text-ink text-sm">{row.means}</span>
+            </p>
+            <p className="text-ink-faint m-0 mt-1 font-mono text-xs">{row.carries}</p>
+            <p className="m-0 mt-1 text-xs">{row.doesNotMean}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

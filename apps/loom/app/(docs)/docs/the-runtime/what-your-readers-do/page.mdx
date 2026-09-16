@@ -3,7 +3,9 @@ import { ReaderSignalsLive } from "@/app/(docs)/_components/reader-signals-live"
 import {
   OneBatch,
   ReadingABatchBack,
-  TheFourKinds,
+  TheApprovedAddition,
+  TheVocabulary,
+  WhatAPageMaySay,
   WhatAddressingCosts,
 } from "@/app/(docs)/_components/reader-signals"
 
@@ -26,9 +28,8 @@ scroll down, open a question. Then they leave.
 
 Your app knows none of it. It served some HTML and the conversation ended.
 
-**Reader signals** are how a Loom page tells you what happened to it — which
-part someone looked at, what they stayed on, what they pressed, what they
-opened. Four things, and nothing else.
+**Reader signals** are how a Loom page tells you what happened to it: <WhatAPageMaySay />.
+A short list of things, and nothing else.
 
 <Callout>
   **Why a framework about *changing* pages ships a way to *watch* them.** A page
@@ -40,22 +41,32 @@ opened. Four things, and nothing else.
   that end of the pipe, and it is the only end of it that exists so far.
 </Callout>
 
-## Four things a page may say
+## What a page may say
 
-<TheFourKinds />
+<TheVocabulary />
 
-That is the whole vocabulary. There is no fifth kind and no way to add one from
-your own code: adding one is a change to the runtime and to the record that
-settles it ([0136](/docs/architecture/decision-records)), for the same reason
-there are four operations on a tree and not five.
+That is the whole vocabulary, and there is no way to add to it from your own
+code: a new kind is a change to the runtime and to the record that settles it
+([0136](/docs/architecture/decision-records)), for the same reason there are four
+operations on a tree and not five.
+
+<TheApprovedAddition />
 
 A closed list is worth more than it looks. It means anything receiving these can
-be written once, against four shapes it will still be handling next year — and
-it means nobody can quietly start sending something else through the same pipe.
+be written once, against shapes it will still be handling next year — and it
+means nobody can quietly start sending something else through the same pipe.
+
+The best evidence that the list is really closed is a kind that was asked for and
+refused. **`hovered`** was: it does not exist on a touchscreen, so it would
+measure phone readers as having wanted nothing; it fires continuously, which is
+the one thing this seam promises not to do to a reader's browser; and what anyone
+actually wants from it is *hovered with intent* — held for long enough to mean
+something — which is a different measurement wearing the same name. A list that
+takes every reasonable suggestion is not closed, it is just short so far.
 
 ## What a signal does not carry
 
-Look at those four again. A signal names **a node and its type**. It does not
+Look at those again. A signal names **a node and its type**. It does not
 carry the heading the reader saw, the URL the link pointed at, what they typed
 into a field, or anything at all about the person.
 
@@ -182,7 +193,7 @@ Nothing is stored and nothing leaves this tab.
 
 <ReaderSignalsLive />
 
-That one asks for all four kinds, each about a different part of the page:
+That one asks for four kinds, each about a different part of the page:
 `viewed` for the two sections and the questions band, `dwelled` for the sections
 only, `activated` for the link and the call to action, `disclosed` for the
 questions. Press or scroll something that is not on one of those lists and no
@@ -190,8 +201,8 @@ batch mentions it.
 
 ## Choosing what you measure
 
-`kinds` says which of the four to report. `types` says which primitives to report
-them about — and it can differ per kind, which is usually what you want:
+`kinds` says which to report. `types` says which primitives to report them
+about — and it can differ per kind, which is usually what you want:
 
 ```ts object-body
 kinds: ["viewed", "dwelled", "activated"],
