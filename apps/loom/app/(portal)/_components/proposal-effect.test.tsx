@@ -18,6 +18,8 @@ const operation = (over: Partial<OperationEffect> = {}): OperationEffect => ({
   from: null,
   changes: [{ key: "title", before: `"Ship faster"`, after: `"Ship safer"`, inert: false }],
   text: [],
+  textTotal: 0,
+  unreadable: [],
   carries: null,
   missing: false,
   inert: false,
@@ -280,6 +282,51 @@ describe("ProposalEffectView", () => {
     expect(surfaceOf(container)).toContain(
       "The words it takes away: “Ship faster” · “Talk to us”"
     )
+  })
+
+  /**
+   * The caveat is on the surface and the names of the types are one click down,
+   * which is this lane's rule applied to a case that looks like an exception
+   * and is not. A reviewer who reads *"Deletes the stat grid, and the 3 pieces
+   * inside it"* as a complete account of a deletion has been misled by the
+   * plain half — and the plain half is the one half that is never allowed to
+   * mislead. `loom.stat` is the record: it says what to declare to end the
+   * caveat, and it is addressed to whoever maintains the primitives.
+   */
+  it("says on the surface that some words could not be read, and names the types below", () => {
+    const { container } = render(
+      <ProposalEffectView
+        effect={effect({
+          operations: [
+            operation({
+              op: "remove",
+              verb: "delete",
+              subject: { name: "the stat grid", nodeId: "n_g1" },
+              label: "loom.stat-grid",
+              changes: [],
+              carries: 4,
+              unreadable: [
+                { type: "loom.stat", parts: 3, settings: ["value", "label", "caption"] },
+              ],
+            }),
+          ],
+        })}
+      />
+    )
+
+    expect(surfaceOf(container)).toContain(
+      "Loom can’t list the words in 3 parts of this: nobody has said which of their settings a reader reads."
+    )
+    expect(surfaceOf(container)).not.toContain("loom.stat")
+    expect(recordOf(container)).toContain("no copy declared: loom.stat ×3 — value, label, caption")
+  })
+
+  /** Absent on the ordinary step, or it would stop being a caveat. */
+  it("says nothing about unread words when every part has been spoken for", () => {
+    const { container } = render(<ProposalEffectView effect={effect()} />)
+
+    expect(surfaceOf(container)).not.toContain("can’t list the words")
+    expect(recordOf(container)).not.toContain("no copy declared")
   })
 
   it("renders one step per operation, in the order they would be applied", () => {
