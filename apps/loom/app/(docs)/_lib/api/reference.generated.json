@@ -4915,7 +4915,7 @@
               "kind": "value",
               "signature": "const STARTER_COMPOSITIONS: readonly Composition[]",
               "truncated": false,
-              "summary": "The bands, in the order a landing page uses them."
+              "summary": "Every band on offer — the phrasebook, not the page."
             },
             {
               "name": "compositionById",
@@ -4923,6 +4923,20 @@
               "signature": "const compositionById: (id: string) => Composition | undefined",
               "truncated": false,
               "summary": "The band with this id, or `undefined`."
+            },
+            {
+              "name": "compositionsForPart",
+              "kind": "function",
+              "signature": "const compositionsForPart: (part: CompositionPart) => readonly Composition[]",
+              "truncated": false,
+              "summary": "Every design of one band, in catalogue order, canonical design first."
+            },
+            {
+              "name": "PAGE_SEQUENCE",
+              "kind": "value",
+              "signature": "const PAGE_SEQUENCE: readonly Composition[]",
+              "truncated": false,
+              "summary": "One design of each band, in the order a page uses them."
             }
           ]
         },
@@ -4932,9 +4946,23 @@
           "summary": "",
           "symbols": [
             {
+              "name": "COMPOSITION_PARTS",
+              "kind": "value",
+              "signature": "const COMPOSITION_PARTS: readonly [\"nav\", \"hero\", \"proof\", \"features\", \"bento\", \"steps\", \"integrations\", \"metrics\", \"pricing\", \"comparison\", \"testimonials\", \"credentials\", \"team\", \"articles\", \"changelog\", \"faq\", \"contact\", \"cta\", \"footer\"]",
+              "truncated": false,
+              "summary": "The bands a page is made of, in the order a page uses them."
+            },
+            {
+              "name": "CompositionPart",
+              "kind": "type",
+              "signature": "type CompositionPart = (typeof COMPOSITION_PARTS)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
               "name": "Composition",
               "kind": "type",
-              "signature": "type Composition = {\n    /** Lower-case words joined by hyphens, the way an anchor or a slot name is. */\n    readonly id: string;\n    /** What a person choosing it from a list reads. */\n    readonly label: string;\n    /**\n     * What lands on the page, in one clause, said before it happens.\n     *\n     * About the page and never about the verdict, for the reason the demo's\n     * presets give: whether the Gate applies a band or holds it is computed from\n     * the tree at assessment time, so a promise about the outcome would be a\n     * surface predicting a decision it does not make.\n     */\n    readonly promise: string;\n    /** The interpreter's own words about why this subtree answers that ask. */\n    readonly rationale: string;\n    /** Every primitive type the subtree uses, for the catalogue and the audit. */\n    readonly uses: readonly string[];\n    readonly build: (ids: IdFactory) => ElementNode;\n};",
+              "signature": "type Composition = {\n    /**\n     * Lower-case words joined by hyphens, the way an anchor or a slot name is.\n     *\n     * **A part's canonical design has the part's own name as its id**, and every\n     * other design of that part is the part name plus what makes it different —\n     * `hero` and `hero-split`. That convention is not cosmetic: it is what lets\n     * the page sequence be *derived* rather than maintained as a second hand-kept\n     * list that could disagree with the first. There is a test on it.\n     */\n    readonly id: string;\n    /** Which band of a page this is a design of. */\n    readonly part: CompositionPart;\n    /** What a person choosing it from a list reads. */\n    readonly label: string;\n    /**\n     * What lands on the page, in one clause, said before it happens.\n     *\n     * About the page and never about the verdict, for the reason the demo's\n     * presets give: whether the Gate applies a band or holds it is computed from\n     * the tree at assessment time, so a promise about the outcome would be a\n     * surface predicting a decision it does not make.\n     */\n    readonly promise: string;\n    /** The interpreter's own words about why this subtree answers that ask. */\n    readonly rationale: string;\n    /** Every primitive type the subtree uses, for the catalogue and the audit. */\n    readonly uses: readonly string[];\n    readonly build: (ids: IdFactory) => ElementNode;\n};",
               "truncated": false,
               "summary": "A band of a page, dropped in whole as one operation."
             },
@@ -5147,6 +5175,13 @@
               "signature": "const STYLESHEET_PRECEDENCE = \"loom\"",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "MARQUEE_GAP",
+              "kind": "value",
+              "signature": "const MARQUEE_GAP = \"--loom-marquee-gap\"",
+              "truncated": false,
+              "summary": "The space a `loom.marquee` puts between its items, declared by the primitive and applied by the rules below."
             },
             {
               "name": "LIBRARY_CLASS",

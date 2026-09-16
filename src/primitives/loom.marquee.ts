@@ -1,11 +1,11 @@
-import { createElement } from "react"
+import { createElement, type CSSProperties } from "react"
 import { z } from "zod"
 
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { GAPS } from "./layout.js"
-import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
+import { libraryStylesheet, LIBRARY_CLASS, MARQUEE_GAP } from "./stylesheet.js"
 
 /**
  * A band whose children travel past, forever — the logo wall that drifts, the
@@ -115,8 +115,22 @@ export const loomMarquee = definePrimitive({
      * on the track instead would put half a gap either side of the seam, and
      * the loop would jump by that much once a cycle — the kind of defect that
      * is invisible in a screenshot and unmistakable on a page.
+     *
+     * **The gap is declared here and applied by the stylesheet**, which is
+     * 0155's shape and is load-bearing rather than tidy. The trailing padding
+     * is for *tiling*, and there are two renderings with nothing to tile
+     * against: the still one, and the reduced-motion one, where the track is a
+     * block and the run wraps. Written inline it beat both of those rules and
+     * cost the band a column — measured at 1280px, a wrapped run of quote cards
+     * had 1048px of content box for two 512px cards and a 32px gap, which needs
+     * 1056. **Eight pixels**, and the wall fell from two columns to one with
+     * half the band empty and nothing anywhere reporting it.
+     *
+     * A custom property rather than a class per density, because the value is a
+     * prop and a rule cannot enumerate six of them without six rules — and a
+     * custom property is the one thing a rule *can* read back off an element.
      */
-    const runStyle = still ? { gap } : { gap, paddingInlineEnd: gap }
+    const runStyle = { [MARQUEE_GAP]: gap } as CSSProperties
 
     const run = createElement(
       "div",
