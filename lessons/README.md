@@ -229,6 +229,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
 | [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, and what shape an answer needs in order to say it; and why replacing a correct guess with an authoritative source is a regression until the authority has been told. |
 | [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; and why a test that restates the value it is testing is a second copy with a tick beside it. |
+| [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -283,6 +284,18 @@ question it answered yes produce the same output, which is none. So Part V's
 seams are no longer only about facts somebody else owns: this one is a fact
 nobody owns, and the remedy is not a declaration but a *place to put a claim
 where getting it wrong is an event*.
+
+Lesson 26 is the third kind, and it is the one the first eight make look
+impossible: a fact that **two** parties own, both of them inside Loom, both
+correct, both willing to answer. A hold records the revision it was judged
+against; a tree records the revision it is at. Neither is missing anything, and
+neither may read the other, because a store handle is a scope (0020) — so the
+fact that decides whether a waiting change can still be applied lives in neither
+store, and the review queue the documentation tells you to build lists dead
+changes and live ones indistinguishably. Nothing needs declaring here. The remedy
+is a *function*, and the design question moves to who is allowed to hold two
+stores next to each other — and what they are obliged to say when they could only
+reach one of them.
 
 ## Pacing
 

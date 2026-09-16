@@ -465,9 +465,10 @@ describe("A", () => {
 })
 ```
 
-Predict the second number before you run it. Seventy primitives ship in the
-starter library; write down how many of them you expect to be targets, and then
-name three you are sure of and one you are unsure about.
+Predict the second number before you run it — and predict it as a *fraction* of
+the first, which the first line is about to tell you and which is larger every
+month. Write the fraction down, then name three primitives you are sure declare
+a target and one you are unsure about.
 
 The output:
 
@@ -488,8 +489,9 @@ The output:
     loom.link        "always"
 ```
 
-Twelve of ninety-six. Most of a component library arranges targets rather than
-being one, which is the ratio that makes this check affordable.
+Twelve, out of whatever the line above it printed. Most of a component library
+arranges targets rather than being one, and it is that ratio — not either number
+on its own — that makes this check affordable.
 
 Two entries in that list should stop you. `loom.code` is a code block — an
 `"always"` target, which is not what a block of text sounds like. And

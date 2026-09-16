@@ -1230,6 +1230,56 @@ them has memorised the result rather than the rule.
 
 ---
 
+## Set AE — two days after lesson 26
+
+Interleaved with 05, 09, 10, 16, 18, 22, 24 and 25. Heavy on 10, because lesson
+26 is unreadable if `confirmHeld`'s behaviour is not solid; and heavy on 24,
+because the rule about what a reading owes a caller appears here in its second
+form and the two are worth holding side by side.
+
+1. Name the three answers a liveness check can give about a held change. Say
+   which one most queues do not have, give the reason folding it into `live` is
+   worse than it looks, and then state the general check that reason is an
+   instance of — the one you would run on any remedy that has to report on
+   itself. *(26)*
+2. Write `holdLiveness` from memory. Say exactly what changes if the comparison
+   becomes `headRevision > hold.baseRevision`, name the input that tells the two
+   apart, and name the code that decides which version is correct — and how far
+   away from it the comparison lives. *(26)*
+3. A hold against a deleted tree is marked `unknown` and not `dead`, although
+   every consequence of the two is identical. Give the argument in terms of what
+   a badge *claims* rather than what it causes, and then name the rung behaviour
+   in the Gate that is the same discipline. *(09, 26)*
+4. Nothing in this runtime throws, and every failure is a member of a closed set
+   — and yet `markHoldsFromStore` hands back no `Result` at all. Say why, state
+   the rule generally in one sentence, and then say how `unknown` differs from
+   the `unavailable` that sat in a union for a month with nothing able to produce
+   it. *(05, 18, 26)*
+5. A colleague proposes putting `headRevision` on the hold row, written when the
+   change is held. Say why it does not work, without using the word "stale" — the
+   version that transfers is about which of the two numbers moves, and when.
+   Then say what `revision` counts and what a listing can say about a tree
+   without loading it. *(10, 16, 26)*
+6. A reading owes a caller the difference between *no* and *nobody has said*.
+   State that rule for a primitive that has not declared the words it shows, and
+   then for a store whose head could not be read — and say what is the same about
+   the two, given that one is a declaration nobody made and the other is a
+   computation nobody could finish. *(24, 26)*
+7. Lesson 22 met a fault belonging to two nodes; lesson 26 met a fact belonging
+   to two stores. Say where each remedy is allowed to live and why the second
+   one cannot be where the first one is, and name the decision record that
+   forbids it. *(22, 26)*
+8. `HOLD_LIVENESS` is a three-member list built through `everyMemberOf`, and the
+   legend beside it is a `Record` keyed by the same type. Say what each of those
+   two checks, what neither checks, and exactly what goes red if a fourth answer
+   is added to the union. *(25, 26)*
+
+Question 2 is the point of the set. Question 6 is where a confident half-answer
+is most likely: an answer that restates the rule in both settings without saying
+what makes them the same rule has recognised it rather than retrieved it.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1274,3 +1324,4 @@ renders this file rather than restating it.
 | AB | 2 days after L23 | | |
 | AC | 2 days after L24 | | |
 | AD | 2 days after L25 | | |
+| AE | 2 days after L26 | | |
