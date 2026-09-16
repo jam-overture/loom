@@ -51,6 +51,7 @@ const ENTRIES = [
 
 export const changelogBand: Composition = {
   id: "changelog",
+  part: "changelog",
   label: "Changelog",
   promise: "Five recent releases running down a rail, newest first, set tight to scan.",
   rationale:

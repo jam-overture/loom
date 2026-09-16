@@ -4873,6 +4873,45 @@ describe("the band that moves", () => {
     }
   })
 
+  it("declares its gap and lets a rule decide where the trailing one applies", () => {
+    const published = render(motionPage(EDITORIAL)).markup
+    const editing = render(motionPage(EDITORIAL), true).markup
+
+    /**
+     * [0155](../../decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)
+     * in the **third** place this lane has found it, and the second where it was
+     * costing a reader something.
+     *
+     * The run's trailing gap exists so the run and its echo tile seamlessly.
+     * There are two renderings with nothing to tile against — the still one and
+     * the reduced-motion one, where the track becomes a block and the run wraps
+     * — and written inline the padding beat the rules that cancel it for both.
+     * Measured at 1280px: a wrapped run of quote cards had **1048px of content
+     * box for two 512px cards and a 32px gap, which needs 1056.** Eight pixels,
+     * and a testimonial wall fell from two columns to one with half the band
+     * empty. Cancelling it takes that band from four rows to two and its height
+     * from 789px to 378px, with the animated rendering unchanged.
+     *
+     * **Both halves**, for the reason the comparison band's version gives: a
+     * `padding-inline-end` put back inline would leave the two rules below
+     * quietly doing nothing, with no error and no other failing test.
+     */
+    for (const markup of [published, editing]) {
+      expect(markup).not.toMatch(/<div class="loom-marquee-run[^"]*"[^>]*padding-inline-end/)
+      expect(markup).toMatch(/<div class="loom-marquee-run[^"]*"[^>]*--loom-marquee-gap:/)
+    }
+
+    const { stylesheet } = splitStylesheet(published)
+    expect(stylesheet).toMatch(
+      /\.loom-marquee-run \{[^}]*gap: var\(--loom-marquee-gap\);[^}]*padding-inline-end: var\(--loom-marquee-gap\)/
+    )
+    /** The two renderings that have no echo to tile against, each cancelling it. */
+    expect(stylesheet).toMatch(/\.loom-marquee-still \.loom-marquee-run \{[^}]*padding-inline-end: 0/)
+    expect(stylesheet).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.loom-marquee-run \{[^}]*padding-inline-end: 0/
+    )
+  })
+
   it("takes its pace from the item count rather than from a prop in the tree", () => {
     const { markup } = render(motionPage(EDITORIAL))
     const { stylesheet } = splitStylesheet(markup)

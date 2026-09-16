@@ -8,6 +8,163 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-16 — an inline style beat a rule for the third time in three days, and this one cost a band half its width
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed by `primitives-36-the-phrasebook-and-the-page`** — filed because the
+*pattern* is now three instances and wants naming, not because the defect is open
+
+[0155](decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)
+was written on 14 September from the pager's side. On 15 September it turned up
+again in `loom.comparison` and `loom.comparison-row`, where two inline
+`min-width`s were the only two numbers in the band no rule could reach. **This
+is the third, on 16 September**, and the shape is identical every time: a value
+the primitive knows, written inline because that is where a component naturally
+puts it, in a place where some *other* rendering needs to cancel it.
+
+`loom.marquee` set `padding-inline-end` on its run so the run and its echo tile
+seamlessly while travelling. Two renderings have nothing to tile against — the
+still one and the reduced-motion one, where the track becomes a block and the
+run wraps — and both have rules that would have cancelled it. Inline beat both.
+
+**What it cost, measured at 1280px:**
+
+| | run content box | item | gap | needs for two |
+| --- | --- | --- | --- | --- |
+| before | **1048px** | 512px | 32px | **1056px** |
+
+Eight pixels. A testimonial wall went from two columns to one, 789px tall with
+half the band empty, and `loom.logo-cloud` has had the same dead column in its
+reduced-motion rendering since it shipped. Nothing reported it, nothing could:
+the animated rendering — which is what everybody looks at — was always correct.
+
+**The fix is the shape 0155 prescribes** and is worth reusing: the primitive
+declares the value as a **custom property** (`--loom-marquee-gap`) and the
+stylesheet decides where it applies. A custom property rather than a class per
+density, because the value is a prop and a rule cannot enumerate six densities
+without six rules — and a custom property is the one thing a rule *can* read
+back off an element. After: 2 rows × 2, 378px, with the animated rendering
+byte-identical.
+
+**Why this is filed rather than just fixed.** Three instances in three days, all
+found by accident and each by a different accident — a pager's tile, a
+screenshot at 390px, a screenshot that looked ugly. **Nothing in the repository
+looks for this.** An inline property that a rule tries to override fails
+silently: no error, no warning, no test. A check that walked the rendered markup
+for inline properties also named in the stylesheet would have found all three at
+once, and is a `Loom daily build` shaped thing rather than a primitive. Offered,
+not asked for.
+
+---
+## 2026-09-16 — every screenshot this lane takes forces reduced motion, so a moving band has never been photographed moving
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit of the instrument, named so a reviewer knows what a picture is
+not telling them
+
+`tools/specimen/playwright.ts` sets `reducedMotion: "reduce"`, and it is right
+to: an entrance animation photographed mid-flight is a blank band, and a
+screenshot that differs run to run is not a check. Every shot in every
+`reports/` file has been taken this way.
+
+The consequence was invisible while the only moving band was a logo wall, whose
+static fallback looks like the moving one with the motion removed. It is not
+invisible now. `testimonials-wall` **is** its motion — the claim it makes is
+*there are more of these than you are going to read* — and the photograph shows
+a static two-column grid of quotes, which is a different band making a different
+claim.
+
+So a reviewer approving that band from its picture has approved something else.
+The static rendering is now good (see the finding above, which is where the
+eight pixels were found), and that half genuinely matters more, because a reader
+who asked for calm is a real audience and the travelling version is one they
+never see. But **the band the picture shows is not the band most readers get**,
+and no report has ever said so.
+
+**Three shapes, none obviously right, smallest first:**
+
+1. **Say so in the report.** One line under any shot containing a marquee. Free,
+   and relies on every future run remembering.
+2. **A second shot per specimen, with motion allowed, at a pinned animation
+   time.** Playwright can pause an animation at a timestamp, so it is
+   deterministic. Costs a flag on `defineSpecimen` and a second file per theme.
+3. **Leave it.** Defensible: 0055 makes motion a static stylesheet precisely so
+   the *page* does not depend on it, and the still rendering is the honest floor.
+
+**Recommendation: 2**, but only when a second band's subject is its motion.
+Today it is one, and building the affordance for one caller is inventing a
+structure ahead of its reader — which is the mistake the catalogue's own doc
+comment avoided on 13 September and was right to.
+
+---
+## 2026-09-15 — two published lists still claim completeness with nothing checking either, and one of them is what the Gate ranks with
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — latent, and the second half is one line of schema away from being live
+
+Found while writing lesson 25, which teaches `everyMemberOf` and therefore had to
+rank every completeness check in the runtime in order to explain why the helper
+exists. `src/` is your lane and nothing here is fixed.
+
+`framework-29` on 12 September closed *"four unions that could be reacted to and
+not walked"*. The sweep was right and the four are done. What it did not do —
+reasonably, it was not the unit — is go back over the lists that already existed.
+Ranked by what would actually fail on the day the union grows:
+
+| list | what checks it | what fails when a member is added |
+| --- | --- | --- |
+| `PALETTE_SLOTS` | it *is* `paletteSlotSchema.options` | nothing can drift |
+| `STORE_ERROR_CODES`, `CLI_ERROR_CODES`, `WRITE_OUTCOME_KINDS`, `EPISODE_RESOLUTION_KINDS`, `HOLD_LIVENESS`, `FACE_ROLES`, `PRIMITIVE_ROLES` | `everyMemberOf`, at the declaration | `pnpm typecheck`, in the file that is wrong |
+| `COMPOSITION_OUTCOME_KINDS` | a `Record<Kind, true>` in `pipeline.test.ts` | that test file's compile |
+| `TREE_OPERATIONS`, `TELEMETRY_EVENT_TYPES` | a test against `schema.options` | that test, at run time |
+| **`STAKE_ORDER`** | `stake-level.test.ts` asserts it equals a hand-written literal | **nothing** |
+| **`UNJUDGED_REASONS`** | nothing | **nothing** |
+
+**`UNJUDGED_REASONS` is the smaller half and the odder one**, because
+`src/tree/delta.ts`'s own doc comment names it as an exemplar of the remedy —
+*"the same one `EPISODE_RESOLUTION_KINDS` and `UNJUDGED_REASONS` already are"* —
+and it is a bare literal. `EPISODE_RESOLUTION_KINDS` is guarded; its neighbour in
+that sentence is not. Three members, one consumer, no consequence beyond a
+telemetry bucket going missing: an `everyMemberOf` call and a comma.
+
+**`STAKE_ORDER` is the one worth a few minutes.** It is a hand-written copy of a
+union that *does* have a schema, and its test compares it against a third copy of
+the same four strings — so a fifth member added to `stakeLevelSchema` breaks
+neither. `rankOf` is `STAKE_ORDER.indexOf(level)`, and `indexOf` answers `-1`.
+Executed this morning against this checkout, with a fifth level cast in to stand
+for the day somebody adds one:
+
+```
+indexOf: -1
+compareStakes(fifth, critical): -4
+compareStakes(fifth, low): -1
+isAtLeast(fifth, critical): false
+isAtLeast(fifth, low): false
+highestStake([low, fifth]): low
+```
+
+A level meant to sit above `critical` ranks *beneath* `low`. So
+`rejectAtRefusalFloor` (`gate.ts:96`) asks `isAtLeast(level, refusalFloor)`, gets
+`false`, and returns `null`; `confirmAboveCeiling` (`gate.ts:159`) asks `isAbove`
+and gets the same silence. `highestStake` folds with `isAbove` from a `"low"` seed,
+so the factor never leaves the analysis — the Gate would not be wrong about a
+change at the new level, it would never be told the change was at it.
+
+**Not live, and I want to be precise about that.** `stakeLevelSchema` has four
+members and refuses a fifth at the boundary, which is the last line of the
+lesson's exercise. Nothing is broken today. What is here is that the mechanism
+protecting the Gate's ranking from a one-line schema edit is a test that restates
+its own subject.
+
+**The fix is not obviously `everyMemberOf`, which is why this is filed and not
+fixed.** `STAKE_ORDER` is an *order*, not a set, and the two coincide today only
+because the schema happens to be written in severity order. Deriving it as
+`stakeLevelSchema.options` makes the declaration order load-bearing for the
+Gate's arithmetic, which is a real decision with a real argument on both sides
+and is yours. `everyMemberOf<StakeLevel>()([...])` keeps the order explicit and
+only forces the list to be complete, which may be the smaller and better change.
+There is also a third option nobody has to choose between: make `rankOf` refuse
+to answer `-1`.
 ## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
@@ -10474,6 +10631,17 @@ it is the reason for dating rather than dropping it: the cost is small per run
 and it is now certain to recur, because nothing in the repository can fix it.
 A routine cannot rewrite the brief it is bound by.
 ## 2026-08-26 — the Gate grew a seventh rule on 19 August and lesson 09 still says six
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:** closed
+by `lessons-36-exhaustiveness`, as bookkeeping only — the work was done on 27
+August by `lessons-15-the-seventh-rung`, which corrected the count in eleven
+places in lesson 09 and one in lesson 08, renumbered every rung below position
+five, and amended Set K question 1 and Set M question 5. This entry was never
+updated to say so, and a routine reading the ledger for its next job has been
+finding an open finding against a lesson that is right. Verified before closing:
+lessons 08 and 09 and both review sets say seven.
+
+**Original status below.**
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom lessons` · **Status:** open —
 this is the next lessons run's first job, filed rather than fixed because the
@@ -24007,6 +24175,102 @@ correlated inside one page view** by an opaque key that never persists. A kind
 carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
+## 2026-09-15 — the capture half has no mouth: nothing in the deployment receives a batch, so step 4's counters can never be anything but empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— found by building step 4 against it
+
+Step 3 of [`docs/signals.md`](docs/signals.md) landed on `main` in #295:
+`ingestReaderSignals`, a `ReaderSignalJournal` and a `ReaderTallyStore` with two
+implementations each, `rollUp`, and the fold module. Every piece of it is real
+and this lane has now built the portal view on top of it.
+
+**Nothing connects it to the outside.** `ingestReaderSignals` is called by its
+own test and by nothing else in this repository:
+
+```
+$ grep -rn "ingestReaderSignals" apps/ prototypes/ tools/
+(no matches)
+```
+
+There is no route handler anywhere in `apps/loom/app` that a published page can
+POST a batch to, and nothing anywhere calls `rollUp` on the window a journal
+holds. So on a real deployment the chain is: a page broadcasts → the batch has
+nowhere to go → the journal stays empty → no rollup runs → the tally store stays
+empty → `/portal/readers` shows its empty state, correctly and for ever.
+
+**This is not a defect in step 3 and it is not in this lane's reach.** Step 3's
+text scopes exactly what it delivered, and the two missing pieces are both
+application shell rather than portal:
+
+- **An endpoint.** Something a `broadcastReaderSignals` call can be pointed at,
+  which parses with `parseReaderSignalBatch`, calls `ingestReaderSignals`, and
+  says nothing back. It is a public route — the pages that post to it are
+  public — so it is the one piece of this whose shape is a security question as
+  well as a plumbing one: a rate limit, a size cap, and the fact that
+  `MAX_BATCHES_PER_DELIVERY` already exists suggests the runtime was written
+  expecting one.
+- **Something that runs the rollup.** `rollUp` is pure and the tally store's
+  `apply` is atomic; what is absent is the thing that reads a window and calls
+  them. `src/telemetry/retention.ts` and `apps/loom/scripts/telemetry-prune.ts`
+  are the shape that already exists for the other subsystem's equivalent.
+
+**What it costs until then.** The portal view is complete, tested and honest —
+its empty state distinguishes *nothing has arrived* from *something arrived and
+has not been counted*, and tells a reader how to make a page report back. What
+it cannot do is be non-empty, on any deployment, including the one the
+maintainer opens. The commercial argument in `docs/signals.md` — *"a deployment
+that can see, app by app, which bands readers reach has a reason to open the
+portal every day"* — is one route handler and one scheduled fold away, and not a
+step closer than that.
+
+**Not built here**, because an ingestion endpoint is the application shell's and
+a rollup runner is the framework's, and because a public write path added from
+the lane that owns the read path is exactly the boundary 0018 draws.
+
+## 2026-09-15 — the populated state of a portal screen can be photographed without staging any markup, and was
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe worth keeping, filed against the standing finding of 13 September
+
+13 September filed that *the portal's three most important screens cannot be
+photographed, because a healthy deployment never reaches their important state*,
+and worked around it by rendering the component from that commit into the live
+screen. That is honest and it requires a paragraph of explanation and the
+maintainer's trust.
+
+`/portal/readers` is the fourth screen with the same shape and the sharpest case
+yet — the finding above means it is empty on **every** deployment, not merely on
+a healthy one — and this run photographed its populated state without staging any
+markup at all:
+
+```
+NODE_OPTIONS="--import file:///tmp/shot/preload.mjs" next start
+```
+
+where the preload builds a `memoryReaderTallyStore()`, `apply`s a rollup to it,
+and assigns it to `globalThis[Symbol.for("loom.portal.readerTallies")]` before
+the application's own module memoises one. `_lib/reader-signals.ts` picks it up
+through the same `??=` carrier every other store in this portal uses.
+
+**What that buys over the 13 September technique.** The shipped page code runs:
+the real read, the real grouping, the real naming out of the served tree, the
+real Next render, the real shell and stylesheet. Nothing is injected into the
+DOM and no component is rendered out of context. The only fiction is *who put
+the counters there* — a script rather than a reader — which is precisely the
+fiction a fixture is.
+
+**Why it generalises.** Every store in this portal is memoised on a
+`Symbol.for` carrier for the serverless reasons `store.ts` sets out, and that
+same carrier is a supported seam from outside the process. `/portal/checkup`'s
+red path is reachable the same way: the tree store's carrier, with a snapshot
+that disagrees with its own log.
+
+**Why it is not the answer to the standing finding.** It photographs a state;
+it does not make one reachable. A person evaluating Loom still cannot click to
+any of these screens and see them populated, and that is what 13 September asked
+for. This is a better tool for making the report, not a substitute for a
+deployment that can show its own interesting states.
 ## 2026-09-15 — a form can ask for nine kinds of answer and not for a file, and a target cannot say so either
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
@@ -24273,8 +24537,13 @@ tree.
 ## 2026-09-14 — the buffer has a drain and no filler: nothing in the application receives a batch
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — deliberately not built in `framework-35`, because it is a public write
-endpoint and deserves a decision rather than a file
+**closed by `framework-37-the-mouth`** — all four questions answered in
+[0161](decisions/0161-a-public-page-writes-to-one-application-endpoint-and-is-counted-by-a-key-that-outlives-nothing.md)
+and built: `/api/reader-signals`, off unless `LOOM_SIGNAL_INTAKE=on`, 120
+deliveries a minute per sender and 64 KB each, counted by a digest keyed with
+random bytes that are minted per process and never stored. The delay was worth
+it — the first answer to "keyed on what" was the view key, which a sender mints
+themselves
 
 `collectReaderSignals` now empties the buffer and `pnpm --filter @loom/app
 signals:collect` runs it. `ingestReaderSignals` has been published since #295
@@ -24350,8 +24619,13 @@ Showing the fold's freshness beside the store's numbers would be two different
 questions with one label.
 ## 2026-09-14 — step 3 of the signal plan is on `main`, nothing in the deployment calls any of it, and so step 4 still has no input
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— filed by the lane that came to start step 4 and found the seam unwired
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-37-the-mouth`** — piece 1, the receiver, is built and
+wired. Pieces 2 and 3 were already done and this finding was written before they
+landed: `ensureReaderSignalsSchema` has been reached by `db:push` and
+`signals:collect` has run the rollup since `framework-35`. What remains is not
+this lane's and is filed below — **no page on this deployment has been told to
+broadcast**, so the endpoint is open and nobody is posting to it
 
 [`docs/signals.md`](docs/signals.md) gates the portal's reader view on step 3
 being on `main`: *"Do not start before step 3 is on `main` — there is nothing to
@@ -24593,3 +24867,152 @@ remaining four restorations were free.
 Recorded rather than fixed because there is nothing in `src/` to change. Worth a
 line in `docs/routines.md` under the verification section, where every lane that
 restores defects would read it — which is all of them.
+
+## 2026-09-15 — the door is open and nobody is speaking through it: no page on this deployment broadcasts
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom demo`, `Loom marketing`,
+`Loom docs`, `Loom lessons` · **Status:** open — the last piece between the
+portal's reader screen and a number on it, and it is one call per surface
+
+`framework-37-the-mouth` built `/api/reader-signals`, so a batch posted to this
+deployment is now parsed, kept, counted by `signals:collect` and read by the
+portal's screen. Every link in that chain is real and tested. **Nothing enters
+it**, because a page broadcasts only when its own code says so (0136) and no
+page's code says so.
+
+Two calls, both in the surface's hands and neither of them framework work:
+
+1. **Render addressed.** `addressed: true` on the render — without it the markup
+   carries no node id and the broadcaster refuses to start rather than
+   broadcasting nothing, which is the one misconfiguration nobody would notice.
+   0010's byte-identical promise holds for every page that does not ask.
+2. **Start a broadcaster with a delivery.**
+
+   ```ts
+   import { broadcastReaderSignals, deliverReaderSignals } from "@loom/runtime/signals/broadcast"
+
+   broadcastReaderSignals(root, { send: deliverReaderSignals() })
+   ```
+
+   `deliverReaderSignals` is new and exists so that this is one line rather than
+   fifteen: `sendBeacon` where the browser has it, so the last batch of a page
+   view survives the page closing, a `keepalive` fetch where it does not, and
+   never a throw either way. The two `send` implementations already in this
+   repository both draw the batch on screen rather than posting it, which is
+   right for what they are and is why neither can be reused here.
+
+**Which pages is each lane's own call, and it is a real one.** Time on screen
+for `(docs)` sections says which of twenty-one pages a reader finishes;
+activations on `(marketing)` say which of nine cards is pressed. `(demo)` is the
+interesting one — it is the surface whose entire argument is that a page can
+account for itself, and it is currently the only one that could show reader
+signals and the record of a change side by side.
+
+**Nothing is switched on by shipping it.** The endpoint answers 404 until
+`LOOM_SIGNAL_INTAKE=on` is set on the deployment, which is the maintainer's to
+set, so a broadcaster merged before then posts into a 404 and costs a page
+nothing. That is the safe order and it is deliberate: the surfaces can land this
+whenever they like.
+
+---
+
+## 2026-09-15 — reading a forwarded-for header is a fact about the deployment, and it lives in the portal's sign-in code
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is blocked; noted because a second caller arrived today and a
+third would be the moment to move it
+
+`clientAddress`, `resolveTrustedHops`, `SHARED_SUBJECT` and
+`LOOM_PORTAL_TRUSTED_PROXY_HOPS` live in
+`apps/loom/app/(portal)/_lib/auth/subject.ts`. They decide **how many proxies
+sit in front of this deployment and which forwarded-for entry is therefore the
+one a caller cannot forge** — which is a fact about the deployment and not about
+signing in. The sign-in throttle was simply the first thing that needed it.
+
+`app/_lib/reader-signals/subject.ts` is the second, and imports them rather than
+copying them. Counting from the right by the trusted hop count is subtle, it is
+already tested, and a second copy would be a second place for it to be quietly
+wrong — a copy that read the leftmost entry would hand every caller a
+rate-limit bucket they choose themselves.
+
+So this is an import from the application shell into a route group, which the
+`db:push` and `signals:collect` scripts already do to `_lib/connection.ts` for
+the same reason. It is consistent and it is still a lane boundary crossed by a
+file whose content is not the portal's.
+
+**Not moved here**, because moving a tested module out of another lane's
+directory inside a pull request about a write endpoint is exactly the diff that
+is hard to review, and because the variable is named `LOOM_PORTAL_…` — renaming
+it is a change a live deployment's configuration feels. The three things that
+would move together are the module, the variable name and the `.env.example`
+entry, and that is its own small unit for a run with nothing better to do.
+## 2026-09-15 — the demo's leading question is destroyed by the next button a visitor presses
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Two presses, in the order the panel puts them in, driven against a real
+`next build` at 1280×900:
+
+| | the rail |
+| --- | --- |
+| press **Take the numbers off** — the big green leading button | `Waiting on you` · *“Take the numbers band off the page.”* |
+| then press **Repaint the top band** — the second entry under *or ask for one of these* | `Applied` · *“Repaint the band at the top.”*<br>`Nothing changed` · *“Take the numbers band off the page.”* |
+
+The demo asks a stranger a question, and the very next thing the panel invites
+them to do **answers it for them, with no**. Nothing warns them before the
+press and nothing about the second button suggests it has anything to do with
+the first.
+
+**Why it happens, and why every step is correct.** The two low-risk presets land
+unattended, which moves the tree's revision. A hold is judged against a base
+revision, and `HeldProposal.baseRevision` going stale is the runtime's own way
+of saying *Loom will not apply a decision to a page it has not seen* — which is
+right, and is the property `movedOn` and `PageMovedOn` were built to read. The
+demo then reports it accurately. Nobody is wrong and the visitor loses the
+question anyway.
+
+**It is worse than one lost card.** Driven with all five presets in order, three
+of the five cards end `Nothing changed` — measured, and they are the tallest
+cards in the rail at 570–593px against 496px for one that landed. So a visitor
+who presses every button, which is what the panel is for, ends with a record
+three-fifths composed of asks that went nowhere.
+
+**Three shapes, narrowest first, and this lane can do all three.**
+
+1. **Say it before the press, not after.** One line under the secondary list
+   while a question is open: *asking for something else now will set this
+   question aside*. Cheapest, changes no behaviour, and it is the same fix
+   `AskPanel` and `UNDO_CAUTION` already applied one control earlier — say what
+   the press will do, under the control it is about.
+2. **Do not offer the press.** Disable the secondary presets while a hold is
+   live, with the reason on them. Honest, and it makes the demo feel narrower
+   than it is at exactly the moment a visitor is exploring.
+3. **Ask it again automatically.** The dead card already offers **Ask for this
+   again**, which produces a new ask weighed against the page as it stands — so
+   the machinery exists and this would only be spending it without waiting to be
+   asked. It is the best experience and the most arguable: a surface re-asking on
+   a visitor's behalf is the demo making a decision, on the one surface whose
+   argument is that decisions are recorded rather than assumed.
+
+**Recommend (1) now and (3) as its own unit**, because (1) costs one line and
+cannot be wrong, and (3) needs an argument about whether an automatic re-ask
+gets its own record — which it must, and that is the interesting part.
+
+Not filed for `Loom daily build`: nothing in `src/` is behaving incorrectly here,
+and the demo's own sequencing is what makes this reachable in two presses.
+
+## 2026-09-15 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a seventeenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would, and a third of this file being entries filed twice
+is itself an open finding.
+
+**The cost was nil again, and for the seventeenth run the reason is the same.**
+What decided this unit was a measurement — a rail 3,851px long against 857px of
+screen, and a card twelve of whose fourteen lines were word for word the card
+above it. No reference gallery answers that. It is worth saying plainly at this
+point that the brief's instruction to consult `21st.dev` for the visual standard
+has never once been executable, and the lane has not been held back by it.

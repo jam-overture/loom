@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
 import type { ChangeRecord, ReversibilityView } from "./record"
-import { WEIGHED_QUESTIONS, weighedOf } from "./weighed"
+import { WEIGHED_QUESTIONS, weighedBrief, weighedOf } from "./weighed"
 
 /**
  * The two answers a visitor was promised, and the ways this module could
@@ -215,5 +215,84 @@ describe("an ask that was never weighed", () => {
 
     expect(weighedOf(withoutInverse)).toBeUndefined()
     expect(weighedOf(withoutStakes)).toBeUndefined()
+  })
+})
+
+/**
+ * The same pair in one line, on a card a visitor has already read.
+ *
+ * What these guard is drift. The brief is a *summary of the panel one click
+ * under it*, so the failure worth catching is the two saying different things —
+ * a level reworded here and not there, a reversal that reads yes in the line
+ * and no in the box. Every assertion below compares the brief against the
+ * answers rather than against a string written in this file, which is the only
+ * way the check survives a change to either wording.
+ */
+describe("the pair in one line", () => {
+  it("names the same level the open panel names", () => {
+    const [damage] = weighedOf(ASSESSED) ?? []
+
+    expect(weighedBrief(ASSESSED)).toContain(damage?.verdict ?? "")
+    expect(weighedBrief(ASSESSED)).toContain(STAKES.low.label)
+  })
+
+  it("agrees with the panel about every level, not just the one in the fixture", () => {
+    for (const level of ["low", "medium", "high"] as const) {
+      const record = { ...ASSESSED, stakes: { level, factors: [] } }
+      const [damage] = weighedOf(record) ?? []
+
+      expect(weighedBrief(record)).toContain(damage?.verdict ?? "")
+    }
+  })
+
+  it("says the change can be undone when the panel says yes", () => {
+    const [, reversal] = weighedOf(REMOVAL) ?? []
+
+    expect(reversal?.verdict).toBe("Yes")
+    expect(weighedBrief(REMOVAL)).toBe("Some risk, and you could undo it.")
+  })
+
+  it("says the opposite when the panel says no, and never both", () => {
+    const irreversible = {
+      ...REMOVAL,
+      reversibility: {
+        reversible: false,
+        retainedNodeCount: 40,
+        reasons: ["the inverse would carry 40 nodes, past a budget of 24"],
+        inverseOperations: [],
+      },
+    }
+    const [, reversal] = weighedOf(irreversible) ?? []
+
+    expect(reversal?.verdict).toBe("No")
+    expect(weighedBrief(irreversible)).toBe("Some risk, and this one can't be undone.")
+  })
+
+  /**
+   * It is a sentence in a summary line rather than a clause following a label,
+   * so it has to stop. The front door shipped `you could undo it` in grey beside
+   * a button once, which reads as a caption somebody forgot to finish.
+   */
+  it("is a whole sentence", () => {
+    expect(weighedBrief(ASSESSED)).toMatch(/\.$/)
+  })
+
+  /**
+   * Absent on exactly the same terms as the pair. A folded card with no verdict
+   * to summarise names what is behind the arrow instead (`the-reasoning.tsx`),
+   * rather than being handed an invented one.
+   */
+  it("has nothing to say about an ask that was never weighed", () => {
+    const { stakes: _stakes, reversibility: _reversibility, ...rest } = ASSESSED
+
+    expect(weighedBrief({ ...rest, outcome: "not-interpreted" })).toBeUndefined()
+  })
+
+  it("says nothing when only one half of the pair arrived", () => {
+    const { reversibility: _reversibility, ...withoutInverse } = ASSESSED
+    const { stakes: _stakes, ...withoutStakes } = ASSESSED
+
+    expect(weighedBrief(withoutInverse)).toBeUndefined()
+    expect(weighedBrief(withoutStakes)).toBeUndefined()
   })
 })

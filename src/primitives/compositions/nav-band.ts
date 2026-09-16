@@ -44,6 +44,7 @@ const MENU = ["Product", "Pricing", "Docs", "Changelog"] as const
 
 export const navBand: Composition = {
   id: "nav",
+  part: "nav",
   label: "Navigation bar",
   promise: "A sticky bar across the top: a wordmark, four menu links, and one action.",
   rationale:

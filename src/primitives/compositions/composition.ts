@@ -10,6 +10,55 @@ import type { LoomTree } from "../../tree/tree.js"
 import type { InsertOperation, TreeOperation } from "../../tree/delta.js"
 
 /**
+ * The bands a page is made of, in the order a page uses them.
+ *
+ * This tuple is doing two jobs and it is worth separating them, because the
+ * second is the one that was not here before.
+ *
+ * **It is the page order.** That was previously carried by the order of
+ * `STARTER_COMPOSITIONS` itself, which worked exactly as long as the catalogue
+ * held one design of each band — and the catalogue's own doc comment said so on
+ * 13 September: *"this list stops being a page before it stops being useful."*
+ * A second hero is a legitimate thing to offer and is not insertable into a
+ * sequence meant to read as one document, and the repository already had the
+ * measurement: `compositions.test.ts` asserts the assembled page has exactly
+ * one level-one heading, and two heroes give it two.
+ *
+ * **It is the vocabulary a design declares itself against.** `hero-split` is
+ * not a twentieth band, it is a second design of the band a page opens with,
+ * and the thing that says so is `part: "hero"`. This is
+ * [0114](../../../decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)'s
+ * shape one level up — a member declares what part it plays and the catalogue
+ * is asked, rather than a caller matching on ids it has to know in advance.
+ *
+ * The order is the whole of the extra information this carries, and it is the
+ * part somebody who has not assembled a landing page before does not know.
+ */
+export const COMPOSITION_PARTS = [
+  "nav",
+  "hero",
+  "proof",
+  "features",
+  "bento",
+  "steps",
+  "integrations",
+  "metrics",
+  "pricing",
+  "comparison",
+  "testimonials",
+  "credentials",
+  "team",
+  "articles",
+  "changelog",
+  "faq",
+  "contact",
+  "cta",
+  "footer",
+] as const
+
+export type CompositionPart = (typeof COMPOSITION_PARTS)[number]
+
+/**
  * A band of a page, dropped in whole as one operation.
  *
  * ## Why this exists
@@ -79,8 +128,18 @@ import type { InsertOperation, TreeOperation } from "../../tree/delta.js"
  * a plan rather than a recording.
  */
 export type Composition = {
-  /** Lower-case words joined by hyphens, the way an anchor or a slot name is. */
+  /**
+   * Lower-case words joined by hyphens, the way an anchor or a slot name is.
+   *
+   * **A part's canonical design has the part's own name as its id**, and every
+   * other design of that part is the part name plus what makes it different —
+   * `hero` and `hero-split`. That convention is not cosmetic: it is what lets
+   * the page sequence be *derived* rather than maintained as a second hand-kept
+   * list that could disagree with the first. There is a test on it.
+   */
   readonly id: string
+  /** Which band of a page this is a design of. */
+  readonly part: CompositionPart
   /** What a person choosing it from a list reads. */
   readonly label: string
   /**
