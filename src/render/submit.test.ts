@@ -11,10 +11,12 @@ import {
   type EndpointEntry,
   type EndpointRegistry,
 } from "../submit/endpoint.js"
+import { EMPTY_SUBMISSION_RESOLUTION } from "../submit/resolution.js"
 import { resolveTreeSubmissions } from "../submit/resolve.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
+import { describeRenderDiagnostic, type RenderDiagnostic } from "./diagnostics.js"
 import { staticPrimitiveResolver, type LoomPrimitive, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 import { renderRequest, type TreeSource } from "./request.js"
@@ -175,6 +177,65 @@ describe("a primitive's submission target", () => {
 
     expect(renderToStaticMarkup(rendered.element)).toContain('data-state="untargeted"')
     expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["submit-unresolved"])
+    expect(rendered.diagnostics[0]).toMatchObject({ resolution: "absent" })
+  })
+
+  /**
+   * The data seam's silent route, in the seam nobody had looked at. A form whose
+   * target went missing this way rendered a submit button pointing nowhere, and
+   * the deployment was told nothing at all.
+   */
+  describe("a render with no target for a form that named one", () => {
+    it("says so when the resolution was built from a different tree's plan", () => {
+      const rendered = renderLoomTree(treePosting({ to: "contact.enquiry" }), {
+        resolver,
+        submissions: EMPTY_SUBMISSION_RESOLUTION,
+      })
+
+      expect(renderToStaticMarkup(rendered.element)).toContain('data-state="untargeted"')
+      expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+        "submit-unresolved",
+      ])
+      expect(rendered.diagnostics[0]).toMatchObject({ resolution: "unrelated" })
+    })
+
+    it("sends a reader to the composition root rather than to the registry", () => {
+      const { diagnostics } = renderLoomTree(treePosting({ to: "contact.enquiry" }), {
+        resolver,
+        submissions: EMPTY_SUBMISSION_RESOLUTION,
+      })
+
+      expect(describeRenderDiagnostic(diagnostics[0] as RenderDiagnostic)).toContain(
+        "a different plan than this tree"
+      )
+    })
+
+    it("stays silent for a node that named no endpoint", () => {
+      const rendered = renderLoomTree(treePosting(), {
+        resolver,
+        submissions: EMPTY_SUBMISSION_RESOLUTION,
+      })
+
+      expect(rendered.diagnostics).toEqual([])
+    })
+
+    it("says it once for a malformed declaration a real resolution already reported", async () => {
+      const rendered = await renderWith(treePosting({ to: 42 }), registryOf(enquiryEndpoint))
+
+      expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+        "submit-misdeclared",
+      ])
+    })
+
+    it("stays silent when the target is the one this tree asked for", async () => {
+      const rendered = await renderWith(
+        treePosting({ to: "contact.enquiry" }),
+        registryOf(enquiryEndpoint)
+      )
+
+      expect(rendered.diagnostics).toEqual([])
+      expect(renderToStaticMarkup(rendered.element)).toContain('data-state="ready"')
+    })
   })
 
   /**

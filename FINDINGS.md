@@ -8,6 +8,69 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-16 — the submit seam never got the reason split the data seam got, and the page that counts to five is why it is worth planning
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, then
+`Loom daily build` · **Status:** open — **not a defect today**; it is a change
+that cannot be made from one lane alone, filed so the two halves are done in the
+right order.
+
+Found while closing the 14 September `EMPTY_DATA_RESOLUTION` finding, whose fix
+is [0164](decisions/0164-a-resolution-that-cannot-answer-is-not-a-node-that-did-not-ask.md).
+
+On 12 September `not-resolved` was split out of `no-such-source` in
+`DataUnavailable`, and `src/data/adapter.ts` records why at length: an
+unregistered source is fixed in the registry by whoever owns the data, a binding
+nothing resolved is fixed in the composition root by whoever wired the render,
+and sharing a code made a diagnostic say *"no source is registered for it — this
+binding was never resolved"*, which is two sentences contradicting each other.
+
+**`SubmissionUnavailable` never got that split, and carries the same contradiction
+today.** `buildSubmissionResolution` gives a planned submission with no answer:
+
+```ts
+reason: "no-such-endpoint",
+detail: "this submission was never resolved",
+```
+
+and `describeSubmissionUnavailable` renders that as *"no endpoint is registered
+for it — this submission was never resolved"*. Word for word the sentence the
+data seam's comment holds up as the thing not to say. Nothing behaves wrongly:
+the form renders untargeted either way and the diagnostic is emitted. What is
+wrong is that it sends a reader to the registry for a fault in their composition
+root, and that anything counting reasons pools the two.
+
+**Why this is not in the fix that found it.** Adding `not-resolved` to
+`SubmissionUnavailable` widens a published union, and `(docs)` is built on its
+being exactly five:
+
+| where | what breaks |
+| --- | --- |
+| `(docs)/_lib/submit/claims.test.ts:75` | `Record<SubmissionUnavailable["reason"], true>` — fails to compile, naming the new reason. The comment above it says it is *"kept where a sixth reason would be added"*, so this is working exactly as designed |
+| `(docs)/_lib/submit/claims.test.ts` | *"says five ways there is no target, and prints five"* — asserts `trouble.length === 5` and that the page's source contains `"Five reasons"` |
+| `(docs)/_lib/submit/seam.test.tsx:181` | asserts the sorted list of the five reason names |
+| `(docs)/_lib/submit/endpoints.ts:96` | a comment calling `no-such-endpoint` *"the fifth"* |
+
+The compile failure is mechanical. The rest is not: the page has to produce a
+sixth trouble row and its prose has to stop saying five, and that is **surface
+content in the documentation lane**, which the framework brief says not to write.
+`Loom docs` also owns the page whose argument changes, so it should decide how a
+sixth row reads rather than be handed one.
+
+**Suggested order, and it only works this way round.** `Loom docs` says whether
+the page wants the sixth reason and what it says; then this lane adds
+`not-resolved` to the union, gives `buildSubmissionResolution` the honest reason,
+and fixes the sentence — in one pull request with the fixtures, because between
+the two halves the build is red. Doing it in the other order breaks `(docs)` on
+`main`.
+
+**Not urgent.** No page is wrong, no form misbehaves, and 0164 deliberately routed
+around it: the new `submit-unresolved` diagnostic carries `resolution:
+"unrelated"` and says *"came from resolving a different plan than this tree"*
+without needing a new reason at all. This finding is about the older, narrower
+sentence inside `buildSubmissionResolution`, which is still contradicting itself.
+
+---
 ## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -519,7 +582,22 @@ today, and cheaper to leave until a third case says which way it should go.
 
 ## 2026-09-14 — a bound tree rendered against `EMPTY_DATA_RESOLUTION` drops every question in silence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-39-a-resolution-that-cannot-answer` on 16 September —
+shape (1), fix the door, recorded as
+[0164](decisions/0164-a-resolution-that-cannot-answer-is-not-a-node-that-did-not-ask.md).
+The middle row now reports, and the walk reports the same way for the submit
+seam, which had the identical hole and which this finding did not look at.
+Shape (3) is rejected in the record with reasons; shape (2) is rejected too and
+`EMPTY_DATA_RESOLUTION` stays exported. Exercise H keeps working — nothing about
+`buildDataResolution` changed — and the paragraph under it gets its second
+instance rather than going stale, as this finding predicted. One residual is
+named in the record and not fixed: a hand-written resolution answering *some* of
+a node's bindings stays silent, because catching it means parsing on every
+render.
+
+*The original finding follows, unchanged.*
+
 — found while writing Exercise H for lesson 18. Latent rather than live: nothing
 in this repository passes it, and it is exported from the package root.
 
