@@ -24430,8 +24430,13 @@ tree.
 ## 2026-09-14 — the buffer has a drain and no filler: nothing in the application receives a batch
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — deliberately not built in `framework-35`, because it is a public write
-endpoint and deserves a decision rather than a file
+**closed by `framework-37-the-mouth`** — all four questions answered in
+[0161](decisions/0161-a-public-page-writes-to-one-application-endpoint-and-is-counted-by-a-key-that-outlives-nothing.md)
+and built: `/api/reader-signals`, off unless `LOOM_SIGNAL_INTAKE=on`, 120
+deliveries a minute per sender and 64 KB each, counted by a digest keyed with
+random bytes that are minted per process and never stored. The delay was worth
+it — the first answer to "keyed on what" was the view key, which a sender mints
+themselves
 
 `collectReaderSignals` now empties the buffer and `pnpm --filter @loom/app
 signals:collect` runs it. `ingestReaderSignals` has been published since #295
@@ -24507,8 +24512,13 @@ Showing the fold's freshness beside the store's numbers would be two different
 questions with one label.
 ## 2026-09-14 — step 3 of the signal plan is on `main`, nothing in the deployment calls any of it, and so step 4 still has no input
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— filed by the lane that came to start step 4 and found the seam unwired
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-37-the-mouth`** — piece 1, the receiver, is built and
+wired. Pieces 2 and 3 were already done and this finding was written before they
+landed: `ensureReaderSignalsSchema` has been reached by `db:push` and
+`signals:collect` has run the rollup since `framework-35`. What remains is not
+this lane's and is filed below — **no page on this deployment has been told to
+broadcast**, so the endpoint is open and nobody is posting to it
 
 [`docs/signals.md`](docs/signals.md) gates the portal's reader view on step 3
 being on `main`: *"Do not start before step 3 is on `main` — there is nothing to
@@ -24618,6 +24628,86 @@ them have no session at all, so an option only one lane needs may belong
 somewhere else entirely. Worth half an hour of somebody's judgement before
 anybody builds it.
 
+---
+
+## 2026-09-15 — the door is open and nobody is speaking through it: no page on this deployment broadcasts
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom demo`, `Loom marketing`,
+`Loom docs`, `Loom lessons` · **Status:** open — the last piece between the
+portal's reader screen and a number on it, and it is one call per surface
+
+`framework-37-the-mouth` built `/api/reader-signals`, so a batch posted to this
+deployment is now parsed, kept, counted by `signals:collect` and read by the
+portal's screen. Every link in that chain is real and tested. **Nothing enters
+it**, because a page broadcasts only when its own code says so (0136) and no
+page's code says so.
+
+Two calls, both in the surface's hands and neither of them framework work:
+
+1. **Render addressed.** `addressed: true` on the render — without it the markup
+   carries no node id and the broadcaster refuses to start rather than
+   broadcasting nothing, which is the one misconfiguration nobody would notice.
+   0010's byte-identical promise holds for every page that does not ask.
+2. **Start a broadcaster with a delivery.**
+
+   ```ts
+   import { broadcastReaderSignals, deliverReaderSignals } from "@loom/runtime/signals/broadcast"
+
+   broadcastReaderSignals(root, { send: deliverReaderSignals() })
+   ```
+
+   `deliverReaderSignals` is new and exists so that this is one line rather than
+   fifteen: `sendBeacon` where the browser has it, so the last batch of a page
+   view survives the page closing, a `keepalive` fetch where it does not, and
+   never a throw either way. The two `send` implementations already in this
+   repository both draw the batch on screen rather than posting it, which is
+   right for what they are and is why neither can be reused here.
+
+**Which pages is each lane's own call, and it is a real one.** Time on screen
+for `(docs)` sections says which of twenty-one pages a reader finishes;
+activations on `(marketing)` say which of nine cards is pressed. `(demo)` is the
+interesting one — it is the surface whose entire argument is that a page can
+account for itself, and it is currently the only one that could show reader
+signals and the record of a change side by side.
+
+**Nothing is switched on by shipping it.** The endpoint answers 404 until
+`LOOM_SIGNAL_INTAKE=on` is set on the deployment, which is the maintainer's to
+set, so a broadcaster merged before then posts into a 404 and costs a page
+nothing. That is the safe order and it is deliberate: the surfaces can land this
+whenever they like.
+
+---
+
+## 2026-09-15 — reading a forwarded-for header is a fact about the deployment, and it lives in the portal's sign-in code
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — nothing is blocked; noted because a second caller arrived today and a
+third would be the moment to move it
+
+`clientAddress`, `resolveTrustedHops`, `SHARED_SUBJECT` and
+`LOOM_PORTAL_TRUSTED_PROXY_HOPS` live in
+`apps/loom/app/(portal)/_lib/auth/subject.ts`. They decide **how many proxies
+sit in front of this deployment and which forwarded-for entry is therefore the
+one a caller cannot forge** — which is a fact about the deployment and not about
+signing in. The sign-in throttle was simply the first thing that needed it.
+
+`app/_lib/reader-signals/subject.ts` is the second, and imports them rather than
+copying them. Counting from the right by the trusted hop count is subtle, it is
+already tested, and a second copy would be a second place for it to be quietly
+wrong — a copy that read the leftmost entry would hand every caller a
+rate-limit bucket they choose themselves.
+
+So this is an import from the application shell into a route group, which the
+`db:push` and `signals:collect` scripts already do to `_lib/connection.ts` for
+the same reason. It is consistent and it is still a lane boundary crossed by a
+file whose content is not the portal's.
+
+**Not moved here**, because moving a tested module out of another lane's
+directory inside a pull request about a write endpoint is exactly the diff that
+is hard to review, and because the variable is named `LOOM_PORTAL_…` — renaming
+it is a change a live deployment's configuration feels. The three things that
+would move together are the module, the variable name and the `.env.example`
+entry, and that is its own small unit for a run with nothing better to do.
 ## 2026-09-15 — the demo's leading question is destroyed by the next button a visitor presses
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
