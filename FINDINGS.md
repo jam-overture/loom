@@ -24442,3 +24442,106 @@ shot list declare **one** sign-in step and share the context across shots.
 them have no session at all, so an option only one lane needs may belong
 somewhere else entirely. Worth half an hour of somebody's judgement before
 anybody builds it.
+
+---
+
+## 2026-09-16 — the largest type on the front door is copy nothing on this site could read
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom lessons`,
+`Loom demo` · **Status:** closed on this lane's own files, filed for the three
+that may have the same hole
+
+`words.ts` is this route group's idea of *what a reader actually reads* — text
+nodes, plus an allowlist of the props that hold sentences rather than settings.
+Its own note records that the allowlist has been short twice before and says why
+the failure is silent: **copy a scanner cannot see is copy no check applies to.**
+
+Two props were missing and one of them has been missing since the site was
+written:
+
+| prop | where | what it holds |
+| --- | --- | --- |
+| `loom.stat.value` | the front door's *Built in the open* band | **96**, **100+**, **4** — the biggest characters on the site |
+| `loom.meter.readout` | nine meters on `/what-readers-do` | *12 of 12*, *2 of 12* — the whole content of the band |
+
+Nothing showed it up, for the reason that makes this worth writing down.
+`facts.test.ts` checks those three figures against the registry and the
+decisions directory, so the numbers on the front door were **right the whole
+time** — and invisible to every other check the site has. The register test, the
+reserved-vocabulary test and every assertion of the form *the page prints what
+the arithmetic produced* were all reading a page with its largest figures
+removed.
+
+It was found by writing an assertion that could only fail: *the funnel figure the
+page prints equals the one `rollUp` returns*. It failed, on a page where the
+figure was plainly there in the screenshot.
+
+**Both are now in `PROSE_PROPS`.** The trade on `value` is recorded beside it:
+`loom.option`'s `value` is what a form submits rather than what a reader reads,
+so it is now scanned too. Nothing on this site uses that primitive, an option's
+value is still a string somebody here wrote, and having it checked for jargon it
+should not contain costs far less than two figures-only primitives staying
+unreadable. `loom.meter`'s own `value` is a number and is unaffected.
+
+**Why this is filed rather than only fixed.** Three other surfaces are built from
+the same library, and if any of them scans its own copy — for a register, for a
+vocabulary rule, for a "no percentage" check — the same two props are invisible
+there too, and the symptom is identical: everything green, and the most
+prominent figures on the page outside every check. `PROSE_PROPS` is
+`(marketing)/_lib/words.ts` and is worth copying rather than re-deriving.
+
+---
+
+## 2026-09-16 — six of ten pages are off the bar now, and the bar still cannot group
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — not a new finding, the third measurement on the one filed on 12 September
+
+The 12 September entry — *the bar cannot group, and `loom.nav` takes a flat run
+of `loom.link` children with nothing in the library that opens* — was filed at
+three of seven. It was four of eight on 13 September and five of nine on
+14 September. `/what-readers-do` is the tenth page and the sixth off it.
+
+**So the bar now carries four of the site's ten pages**, and the footer's map is
+the only complete map of the site there has ever been. Every individual decision
+is still defensible and the guarantee still holds — `chrome.test.ts` holds *off
+the bar* to mean *in the footer's map, marked as the page the reader is on* — and
+the aggregate is a top bar that stopped being a map of the site three pages ago.
+
+Nothing here is a request to change the count, and nothing is blocked. It is the
+number the 12 September finding asked to be told about, recorded on the run that
+moved it: ten pages under three headings is what `supabase.com` does with more
+pages than this, and it is the shape this lane's brief names as the one to study.
+
+---
+
+## 2026-09-16 — the marketing site can describe reader signals and cannot yet send one, and the reason is a branch
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — deliberately not done this run, recorded so the next run does not
+re-derive it
+
+`/what-readers-do` is the marketing half of step 5 of
+[`docs/signals.md`](docs/signals.md), and the other half — **this surface
+actually broadcasting** — is the finding `Loom daily build` filed on #312, *the
+door is open and nobody is speaking through it*, owned by this lane among four.
+
+It was not done, and the reason is step 5's own precondition rather than a
+judgement about its worth: **its input is not on `main`.** The address a browser
+delivers a batch to, `/api/reader-signals`, is on `framework-37-the-mouth` and
+unmerged. A page wired to it from `main` today would render `addressed: true`,
+start a broadcaster, and post every batch into a 404 — which is the endpoint's
+designed answer when intake is off, and indistinguishable here from the endpoint
+not existing.
+
+Confirmed by measurement while photographing the new page: `data-loom-node`,
+`data-loom-tree` and `data-loom-revision` appear on **no** element of any page
+this route group serves. `broadcastReaderSignals` returns `unaddressed` against
+markup like that, by design, so the two halves have to land in this order.
+
+**What this lane will do once #312 is on `main`**, so it is written down rather
+than rediscovered: `addressed: true` on this route group's render call, one
+broadcast started from a client component in the layout, and the delivery
+posting to `/api/reader-signals`. Two calls, both this surface's own (0136). It
+is not large and it is not this run's, because a unit whose whole subject is a
+page should not also be the first caller of an endpoint that is still in review.

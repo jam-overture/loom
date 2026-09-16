@@ -12,6 +12,7 @@ import {
   PUTTING_IT_BACK,
   internalHref,
   SITE_ROUTES,
+  WHAT_READERS_DO,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
   YOUR_COMPONENTS,
@@ -68,6 +69,7 @@ describe("the page about your own components", () => {
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
+      WHAT_READERS_DO,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

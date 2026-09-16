@@ -373,6 +373,7 @@ describe("the page itself", () => {
       "/",
       "/who-can-ask",
       "/putting-it-back",
+      "/what-readers-do",
       "/what-you-run",
       "/your-components",
     ])
