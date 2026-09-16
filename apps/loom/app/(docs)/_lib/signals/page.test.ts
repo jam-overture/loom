@@ -2,11 +2,20 @@ import {
   READER_SIGNAL_KINDS,
   parseReaderSignalBatch,
   readerSignalBatchSchema,
+  readerSignalSchema,
 } from "@loom/runtime/signals"
 import { describe, expect, it } from "vitest"
 
 import { produceAddressedMarkup } from "./markup"
-import { produceBatch, produceKinds, produceReadBack } from "./page"
+import {
+  documentedExample,
+  produceApproved,
+  produceBatch,
+  produceKinds,
+  producePlainly,
+  produceReadBack,
+  subjectContains,
+} from "./page"
 
 /**
  * What *What your readers do* shows, held against the runtime it claims to be
@@ -21,7 +30,7 @@ import { produceBatch, produceKinds, produceReadBack } from "./page"
  * addressing ever started doing more than it says.
  */
 
-describe("the four kinds block", () => {
+describe("the vocabulary block", () => {
   it("covers the runtime's whole vocabulary, in its order", () => {
     expect(produceKinds().map((row) => row.kind)).toEqual([...READER_SIGNAL_KINDS])
   })
@@ -180,5 +189,110 @@ describe("the endpoint the page shows", () => {
   it("answers 400 with at least one issue for anything else", () => {
     expect(handle({ hello: "there" }).status).toBe(400)
     expect(handle({ hello: "there" }).issues).toBeGreaterThan(0)
+  })
+})
+
+/**
+ * The day `completed` lands, rehearsed.
+ *
+ * `completed` is approved and not built. The page carries its prose already, and
+ * the point of doing it that way is that adding the kind to the runtime should
+ * be step 2's own one-line change rather than a change that reds this lane and
+ * blocks four surfaces until somebody writes a paragraph.
+ *
+ * **Every test here passes on both sides of that day**, which took two goes to
+ * get right. Written the obvious way they pinned the pre-landing state — that
+ * `completed` is announced, that the schema refuses it — and pinning those is
+ * the same mistake as pinning the number four, one file further back. So each
+ * one below asserts either an invariant that does not care, or the correct
+ * behaviour *for whichever state the runtime is in*.
+ *
+ * This was checked by adding the kind and its schema member locally and running
+ * the suite, not by reasoning about it.
+ */
+describe("the kind that is agreed on and not built", () => {
+  const vocabulary: readonly string[] = READER_SIGNAL_KINDS
+  const landed = vocabulary.includes("completed")
+
+  /** The vocabulary as it will be, whichever it is now. */
+  const AFTER = [...new Set([...vocabulary, "completed"])]
+
+  /**
+   * The invariant the whole design rests on: a documented kind is on exactly one
+   * of the two lists. On neither, and a reader never hears of it; on both, and
+   * the page announces something it is already showing.
+   */
+  it("is on exactly one of the two lists, and it is the one the runtime decides", () => {
+    const inVocabulary = produceKinds().some((row) => row.kind === "completed")
+    const announced = produceApproved().some((row) => row.kind === "completed")
+
+    expect(inVocabulary).toBe(landed)
+    expect(announced).toBe(!landed)
+  })
+
+  /**
+   * The block that announces it removes itself. If this ever fails, the page has
+   * a note about a coming addition that has already come.
+   */
+  it("stops being announced once the runtime has it", () => {
+    expect(produceApproved(AFTER)).toEqual([])
+  })
+
+  /**
+   * The opening sentence is an enumeration, so it is the other thing that has to
+   * grow. Nobody edits it; it is read off the same table.
+   */
+  it("joins the opening sentence without anybody editing the opening sentence", () => {
+    expect(producePlainly(AFTER)).toBe(
+      "which part someone looked at, what they stayed on, what they pressed, what they opened and what they finished"
+    )
+    expect(producePlainly().split(/, | and /)).toHaveLength(vocabulary.length)
+  })
+
+  /** Whichever list it is on, it is described well enough to print. */
+  it("has complete prose on whichever list it is on", () => {
+    const row = [...produceKinds(), ...produceApproved()].find((one) => one.kind === "completed")
+
+    expect(row, "completed has fallen off both lists").toBeDefined()
+    expect(row?.means.length ?? 0).toBeGreaterThan(20)
+    expect(row?.carries ?? "").toContain("at")
+  })
+
+  /**
+   * While it is only agreed on, the sentence worth printing is the one a name
+   * cannot carry. Once it ships, the signals beside it say what it does and the
+   * caveat is no longer the page's job.
+   */
+  it.skipIf(landed)("says what it is not, while it is still only agreed on", () => {
+    const row = produceApproved().find((one) => one.kind === "completed")
+
+    expect(row?.doesNotMean).toContain("does not mean a server accepted it")
+  })
+
+  /**
+   * The example signal is one schema variant away from valid, and this says so
+   * without pretending it is valid now.
+   *
+   * `readerSignalSchema` is a discriminated union, so the kind list is not the
+   * only thing that grows — step 2 adds a `completed` member carrying an address
+   * and an instant, which is the shape below. So: the schema accepts this object
+   * exactly when the runtime has the kind, and in both states the *only* thing
+   * standing in its way is the discriminator.
+   */
+  it("has an example signal the schema accepts exactly when the runtime has the kind", () => {
+    const pending = documentedExample("completed") as Record<string, unknown>
+
+    expect(readerSignalSchema.safeParse(pending).success).toBe(landed)
+    expect(readerSignalSchema.safeParse({ ...pending, kind: "activated" }).success).toBe(true)
+  })
+
+  /**
+   * `completed`'s row tells a reader that nothing on the page above can produce
+   * one, which is a claim about the example tree rather than about the runtime.
+   * A run that gives that tree a form — the right way to make the row
+   * demonstrable — is told here that the sentence has to change with it.
+   */
+  it("is honest that the tree at the top of the page cannot produce one", () => {
+    expect(subjectContains("loom.form")).toBe(false)
   })
 })

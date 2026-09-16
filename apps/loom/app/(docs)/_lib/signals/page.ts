@@ -37,53 +37,87 @@ const buildSubject = () => {
   return example.build()
 }
 
+/**
+ * A kind this page has prose for, which is not the same list as the runtime's.
+ *
+ * The vocabulary is closed but it is not finished: `completed` is approved and
+ * not built. Writing the union this way means the page carries its sentences
+ * before the runtime carries the kind, and that the type **erases itself** on
+ * the day it lands — once `ReaderSignalKind` includes `completed`, this union is
+ * `ReaderSignalKind` and every table below still has exactly the right keys.
+ *
+ * The alternative was a page that argues there are four, which is what this
+ * page used to do and what stopped the runtime growing for three days.
+ */
+export type DocumentedKind = ReaderSignalKind | "completed"
+
 export type KindRow = {
-  readonly kind: ReaderSignalKind
+  readonly kind: DocumentedKind
   /** The sentence a person could repeat back. */
   readonly means: string
   /** What a reader did, in this page's own example tree. */
   readonly here: string
   /** The field this kind carries beyond the address every kind carries. */
   readonly carries: string
+  /** The same thing in the words the page opens with, before any of them are named. */
+  readonly plainly: string
   /** One real signal of this kind, as JSON, having been through the schema. */
   readonly example: string
 }
 
 /**
- * The four kinds, each with a real signal of that kind behind it.
+ * Every kind this page can describe, whether or not the runtime has it yet.
  *
- * Built by walking `READER_SIGNAL_KINDS` rather than by listing four rows, so a
- * fifth kind added to the runtime fails here — with the message naming it —
- * instead of quietly not appearing on a page that says there are four.
+ * `produceKinds` walks `READER_SIGNAL_KINDS` rather than this table, so what a
+ * reader sees as *the vocabulary* is the runtime's list and never this one. What
+ * this table adds is that a kind arriving in the runtime finds its prose already
+ * written — and `produceApproved` shows the difference between the two lists to
+ * the reader instead of hiding it.
  *
  * Every example signal is parsed by `readerSignalSchema` on the way out. A field
  * that gets renamed in the runtime takes this producer down; a table of
  * plausible-looking JSON would have survived it.
  */
 const DESCRIPTIONS: Readonly<
-  Record<ReaderSignalKind, { readonly means: string; readonly here: string; readonly carries: string }>
+  Record<
+    DocumentedKind,
+    { readonly means: string; readonly here: string; readonly carries: string; readonly plainly: string }
+  >
 > = {
   viewed: {
     means: "It came into view. Once, the first time, for the life of the page.",
     here: "The reader scrolled far enough for the questions band to be on screen.",
     carries: "at — when it happened",
+    plainly: "which part someone looked at",
   },
   dwelled: {
     means: "It was on screen this long, since the last batch went out.",
     here: "They stayed on the first section for eleven seconds before scrolling.",
     carries: "ms — milliseconds, this batch only",
+    plainly: "what they stayed on",
   },
   activated: {
     means: "A reader used a link, a button or a field inside it.",
     here: "They pressed “See the frames”.",
     carries: "at — when it happened",
+    plainly: "what they pressed",
   },
   disclosed: {
     means: "A region was opened, or closed.",
     here: "They opened “How long does a frame take?”.",
     carries: "open — true for opened, false for closed",
+    plainly: "what they opened",
+  },
+  completed: {
+    means: "A form inside it was submitted, and the browser let it go.",
+    here: "Nothing on the page above can produce one: there is no form in it.",
+    carries: "at — when it happened",
+    plainly: "what they finished",
   },
 }
+
+/** The order the tables are written in, taken from the table rather than retyped. */
+const DOCUMENTED_KINDS = Object.keys(DESCRIPTIONS) as readonly DocumentedKind[]
 
 /**
  * The address of the first node of a given type in the example tree.
@@ -129,36 +163,155 @@ const firstOfType = (
  */
 const AT = 1_757_720_400_000
 
-const EXAMPLES: Readonly<Record<ReaderSignalKind, ReaderSignal>> = {
+/**
+ * One example signal per documented kind, judged by the schema rather than by
+ * the compiler.
+ *
+ * The values are `unknown` for one reason, and it is the honest one: the entry
+ * for `completed` is **not** a `ReaderSignal` today, because the schema's enum
+ * does not have that member yet. Typing this table as `ReaderSignal` would mean
+ * either leaving the kind out — which is the problem — or asserting a lie past
+ * the compiler.
+ *
+ * Nothing is lost by it. Every value is run through `readerSignalSchema` before
+ * it reaches a page, and the schema is the stricter of the two: it checks the
+ * fields a kind must carry, which the type alone would not.
+ */
+const EXAMPLES: Readonly<Record<DocumentedKind, unknown>> = {
   viewed: { kind: "viewed", ...addressOf("loom.faq-list"), at: AT },
   dwelled: { kind: "dwelled", ...addressOf("loom.section"), ms: 11_000 },
   activated: { kind: "activated", ...addressOf("loom.action"), at: AT + 11_000 },
   disclosed: { kind: "disclosed", ...addressOf("loom.faq"), open: true, at: AT + 18_000 },
+  /**
+   * Addressed to the section, which is where a form would sit on a page that had
+   * one. The shape is real; the scenario is the only invented thing here, and
+   * the block that prints it says so.
+   */
+  completed: { kind: "completed", ...addressOf("loom.section"), at: AT + 19_000 },
 }
 
+/** What this page would show for a kind, whether or not the runtime has it. */
+export const documentedExample = (kind: DocumentedKind): unknown => EXAMPLES[kind]
+
+/**
+ * Whether the tree at the top of this page contains a node of a given type.
+ *
+ * `completed`'s row says there is no form on the page above it, which is the one
+ * sentence in `DESCRIPTIONS` that is a claim about the example rather than about
+ * the runtime. This is how it is held to it: a docs run that adds a form to that
+ * tree — which would be the right way to make the row demonstrable — is told
+ * that the sentence beside it has stopped being true.
+ */
+export const subjectContains = (type: string): boolean =>
+  firstOfType(buildSubject().root, type) !== undefined
+
+/**
+ * The example signal for a kind the runtime does have, having been through the
+ * schema.
+ *
+ * The throw is the tripwire that survives this change: a kind in
+ * `READER_SIGNAL_KINDS` with no sentence here, or with an example the schema
+ * refuses, takes the build down naming itself. What it no longer does is fire
+ * for `completed` — that one has its sentence already.
+ */
+const acceptedExample = (kind: ReaderSignalKind): ReaderSignal => {
+  const checked = readerSignalSchema.safeParse(EXAMPLES[kind])
+
+  if (!checked.success) {
+    throw new Error(
+      `loom: this page's example ${kind} signal is not a ${kind} signal — ${checked.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join("; ")}`
+    )
+  }
+
+  return checked.data
+}
+
+/**
+ * The vocabulary, as the runtime publishes it today.
+ *
+ * Walks `READER_SIGNAL_KINDS`, so this is the runtime's list and never this
+ * file's. A kind added to the runtime appears here on the day it is added, and
+ * appears with prose because `DESCRIPTIONS` is allowed to run ahead.
+ */
 export const produceKinds = (): readonly KindRow[] =>
   READER_SIGNAL_KINDS.map((kind) => {
     const description = DESCRIPTIONS[kind]
-    const example = EXAMPLES[kind]
 
-    if (description === undefined || example === undefined) {
+    if (description === undefined) {
       throw new Error(
-        `loom: the reader-signals page has no sentence for the "${kind}" signal — a kind was added to the runtime and this page still says there are ${READER_SIGNAL_KINDS.length}`
+        `loom: the reader-signals page has no sentence for the "${kind}" signal — a kind was added to the runtime and this page cannot describe it`
       )
     }
 
-    const checked = readerSignalSchema.safeParse(example)
-
-    if (!checked.success) {
-      throw new Error(
-        `loom: this page's example ${kind} signal is not a ${kind} signal — ${checked.error.issues
-          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-          .join("; ")}`
-      )
-    }
-
-    return { kind, ...description, example: JSON.stringify(checked.data) }
+    return { kind, ...description, example: JSON.stringify(acceptedExample(kind)) }
   })
+
+/**
+ * The half of an approved kind's meaning that a name cannot carry, which is the
+ * half worth printing.
+ *
+ * Only a kind that is not in the runtime needs one: once it ships, what it does
+ * is visible in the signals beside it.
+ */
+const NOT_MEANT: Partial<Readonly<Record<DocumentedKind, string>>> = {
+  completed: "It does not mean a server accepted it. The broadcaster watches the page, never the reply — it can see that a form was let go with its constraints satisfied, and a kind that implied more than that would be measuring something it cannot see.",
+}
+
+export type ApprovedRow = {
+  readonly kind: DocumentedKind
+  readonly means: string
+  readonly carries: string
+  /** The sentence that stops a reader over-reading it. */
+  readonly doesNotMean: string
+}
+
+/**
+ * Kinds this page describes that the runtime does not accept yet.
+ *
+ * Today that is `completed`, and this is the whole mechanism by which the page
+ * stops lying about the size of the vocabulary: the list above is the runtime's,
+ * this one is the difference, and **this one empties itself**. On the day
+ * `completed` joins `READER_SIGNAL_KINDS` it moves from here into `produceKinds`
+ * and the block that prints it renders nothing at all — so the announcement is
+ * not a paragraph anybody has to remember to delete.
+ *
+ * `live` is an argument so that the day can be rehearsed in a test rather than
+ * waited for.
+ */
+export const produceApproved = (
+  live: readonly string[] = READER_SIGNAL_KINDS
+): readonly ApprovedRow[] =>
+  DOCUMENTED_KINDS.filter((kind) => !live.includes(kind)).map((kind) => {
+    const description = DESCRIPTIONS[kind]
+
+    if (description === undefined) throw new Error(`loom: no sentence for the "${kind}" signal`)
+
+    return {
+      kind,
+      means: description.means,
+      carries: description.carries,
+      doesNotMean: NOT_MEANT[kind] ?? "",
+    }
+  })
+
+
+/**
+ * The opening sentence's list of what a page may say, in plain words.
+ *
+ * Produced because it is an enumeration, and an enumeration in prose is a count
+ * written out longhand. This one grew by a member on the day `completed` landed
+ * and nobody edited a paragraph.
+ */
+export const producePlainly = (live: readonly string[] = READER_SIGNAL_KINDS): string => {
+  const phrases = DOCUMENTED_KINDS.filter((kind) => live.includes(kind)).map(
+    (kind) => DESCRIPTIONS[kind]?.plainly ?? ""
+  )
+  const last = phrases.at(-1)
+
+  return phrases.length < 2 ? (last ?? "") : `${phrases.slice(0, -1).join(", ")} and ${last}`
+}
 
 export type BatchShape = {
   readonly treeId: string
@@ -182,13 +335,7 @@ const goodBatch = (): ReaderSignalBatch => {
     treeId: tree.treeId,
     revision: tree.revision,
     sentAt: AT + 20_000,
-    signals: READER_SIGNAL_KINDS.map((kind) => {
-      const signal = EXAMPLES[kind]
-
-      if (signal === undefined) throw new Error(`loom: no example signal for "${kind}"`)
-
-      return signal
-    }),
+    signals: READER_SIGNAL_KINDS.map((kind) => acceptedExample(kind)),
   }
 }
 
@@ -234,15 +381,15 @@ const suspectBatches = (
   { what: "A batch with nothing in it", input: { ...good, signals: [] } },
   {
     what: "A kind nobody registered",
-    input: { ...good, signals: [{ ...EXAMPLES.activated, kind: "purchased" }] },
+    input: { ...good, signals: [{ ...acceptedExample("activated"), kind: "purchased" }] },
   },
   {
     what: "A signal carrying the words a reader saw",
-    input: { ...good, signals: [{ ...EXAMPLES.activated, label: "See the frames" }] },
+    input: { ...good, signals: [{ ...acceptedExample("activated"), label: "See the frames" }] },
   },
   {
     what: "A page that never said which revision",
-    input: { treeId: good.treeId, sentAt: good.sentAt, signals: [EXAMPLES.viewed] },
+    input: { treeId: good.treeId, sentAt: good.sentAt, signals: [acceptedExample("viewed")] },
   },
 ]
 
