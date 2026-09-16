@@ -5,19 +5,26 @@ import { READER_SIGNAL_KINDS } from "@loom/runtime/signals"
 import { describe, expect, it } from "vitest"
 
 import { produceAddressedMarkup } from "./markup"
-import { produceBatch, produceKinds, produceReadBack } from "./page"
+import { produceApproved, produceBatch, produceKinds, produceReadBack } from "./page"
 
 /**
  * What *What your readers do* says in its own words, held against what it shows.
  *
  * The blocks on that page are produced and cannot lie. The prose around them
- * can: it counts the kinds, it tells a reader which row of a table to look at,
- * it quotes a node id out of the batch below it, and it names the two entry
- * points and the size difference between them. Every one of those is typed by
- * hand and is a claim about something further down the same page.
+ * can: it tells a reader which row of a table to look at, it quotes a node id
+ * out of the batch below it, and it names the two entry points and the size
+ * difference between them. Every one of those is typed by hand and is a claim
+ * about something further down the same page.
  *
  * A number that drifted would leave the page confidently wrong rather than
  * merely out of date, and nothing renders differently when it does.
+ *
+ * The first group below is the opposite check, and it is here because the page
+ * got one of these wrong in the direction nobody guards against. The prose was
+ * *accurate* — it said four, and there were four — and it was pinned, and being
+ * pinned to an accurate number is what made a correct runtime change into a
+ * broken build for every lane. So that group asserts what the page may **not**
+ * say about itself.
  */
 
 const page = readFileSync(
@@ -28,18 +35,113 @@ const page = readFileSync(
 /** The prose with its line breaks flattened — every sentence here is hard-wrapped. */
 const flowed = page.replace(/\s+/g, " ")
 
-describe("the counts this page writes out", () => {
-  it("says four kinds, and there are four", () => {
-    expect(READER_SIGNAL_KINDS.length).toBe(4)
-    expect(produceKinds().length).toBe(4)
-    expect(flowed).toContain("Four things, and nothing else.")
-    expect(flowed).toContain("There is no fifth kind")
+describe("the size of the vocabulary, which this page may not state", () => {
+  /**
+   * This page used to open *"Four things, and nothing else"* and close the
+   * section with *"There is no fifth kind"*, and both were pinned here. They
+   * were true, they were well written, and between them they stopped the runtime
+   * from growing for three days: `completed` was approved, and adding it would
+   * have reddened this suite for every lane at once.
+   *
+   * The rule that replaced them is that **the page never counts out loud.** The
+   * count is the runtime's to state, and it states it in the caption of a block
+   * that is built by walking `READER_SIGNAL_KINDS`. A sentence in prose cannot
+   * do that, so prose does not get to try.
+   */
+  it("prints as many kinds as the runtime publishes", () => {
+    expect(produceKinds().length).toBe(READER_SIGNAL_KINDS.length)
   })
 
-  it("names each kind in the prose or in the block it prints", () => {
-    for (const kind of READER_SIGNAL_KINDS) {
-      expect(flowed, `the page never mentions ${kind}`).toContain(kind)
+  it("no longer argues a number in its prose", () => {
+    expect(flowed).not.toContain("Four things, and nothing else.")
+    expect(flowed).not.toContain("There is no fifth kind")
+  })
+
+  /**
+   * The one surviving "N kinds" on the page is the sentence describing what the
+   * *live block* asks for, which is a property of that component's `TYPES` and is
+   * pinned against it further down this file. It is not a claim about how many
+   * kinds exist, and it stays true when a fifth arrives.
+   *
+   * Anything else matching would be a new count somebody typed into a paragraph,
+   * which is the thing this page is not allowed to have.
+   */
+  it("counts kinds in exactly one sentence, and that sentence is about the live block", () => {
+    const counted = [...flowed.matchAll(/\b(one|two|three|four|five|six|seven)\s+kinds\b/gi)].map(
+      (found) => found[0]?.toLowerCase() ?? ""
+    )
+
+    expect(counted).toEqual(["four kinds"])
+    expect(flowed).toContain("That one asks for four kinds, each about a different part of the page")
+  })
+
+  /**
+   * This replaced a test that required every kind to be named **in the prose**,
+   * and that test was the second thing standing in `completed`'s way: a kind
+   * whose whole design is that it reaches the page through a producer rather
+   * than through a paragraph could never satisfy it. It was noticed by adding
+   * the kind to the runtime locally and running this suite, which is the only
+   * way it would have been noticed before the day it mattered.
+   *
+   * What replaces it is the check that is still worth making now that the prose
+   * is not allowed to enumerate: the prose may fall *behind* the runtime, naming
+   * a kind that has been dropped. Every kind this page names in code voice is
+   * either one the runtime has, or `hovered` — the one that was asked for and
+   * turned down, which the page names on purpose.
+   */
+  const CANDIDATE_KINDS = [
+    "viewed",
+    "dwelled",
+    "activated",
+    "disclosed",
+    "completed",
+    "hovered",
+    "scrolled",
+    "purchased",
+  ] as const
+
+  it("names no kind the runtime does not have, except the one it turned down", () => {
+    const named = CANDIDATE_KINDS.filter((kind) => flowed.includes(`\`${kind}\``))
+    const notInTheRuntime = named.filter(
+      (kind) => !(READER_SIGNAL_KINDS as readonly string[]).includes(kind)
+    )
+
+    expect(named.length).toBeGreaterThan(1)
+    expect(notInTheRuntime).toEqual(["hovered"])
+  })
+
+  /**
+   * The opening sentence's plain-words list is produced, so the page's first
+   * description of what a signal is grows with the vocabulary. If somebody
+   * inlines it back into the prose this fails, which is the point.
+   */
+  it("writes its opening list from the runtime rather than typing it", () => {
+    expect(flowed).toContain("what happened to it: <WhatAPageMaySay />")
+    expect(flowed).not.toContain("which part someone looked at")
+  })
+
+  /**
+   * The coming addition is announced only by a component that empties itself.
+   * A sentence in the prose saying one is coming would outlive the thing it
+   * announced, and there is no way to make MDX notice that it had.
+   */
+  it("keeps the coming addition out of the prose entirely", () => {
+    expect(flowed).toContain("<TheApprovedAddition />")
+
+    for (const kind of produceApproved().map((row) => row.kind)) {
+      expect(flowed, `the prose names ${kind}, which it cannot un-name later`).not.toContain(kind)
     }
+  })
+
+  /**
+   * The refused kind is the argument the count used to be making, and it does it
+   * better: a list that has turned something down is closed, a list that is
+   * merely short is not.
+   */
+  it("makes the closed-list argument with the kind that was refused", () => {
+    expect(flowed).toContain("`hovered`")
+    expect(flowed).toContain("it does not exist on a touchscreen")
+    expect(flowed).toContain("A list that takes every reasonable suggestion is not closed")
   })
 })
 

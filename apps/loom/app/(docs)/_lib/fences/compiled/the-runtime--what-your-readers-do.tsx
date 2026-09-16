@@ -15,7 +15,7 @@ import { parseReaderSignalBatch } from "@loom/runtime/signals"
 
 import { registry, store, themes, tree } from "../context/the-runtime--what-your-readers-do"
 
-// page.mdx:105 — a program
+// page.mdx:116 — a program
 const rendered = renderLoomTree(tree, {
   resolver: registry,
   validator: registry,
@@ -23,7 +23,7 @@ const rendered = renderLoomTree(tree, {
   addressed: true,
 })
 
-// page.mdx:124 — a program
+// page.mdx:135 — a program
 "use client"
 
 export const Measured = ({ children }: { readonly children: React.ReactNode }) => {
@@ -53,8 +53,8 @@ export const Measured = ({ children }: { readonly children: React.ReactNode }) =
   return <div ref={frame}>{children}</div>
 }
 
-// page.mdx:196 — the inside of an object literal
-const objectAtLine196 = {
+// page.mdx:207 — the inside of an object literal
+const objectAtLine207 = {
 kinds: ["viewed", "dwelled", "activated"],
 types: {
   dwelled: ["loom.section", "loom.hero"],
@@ -62,7 +62,7 @@ types: {
 },
 }
 
-// page.mdx:227 — a program
+// page.mdx:238 — a program
 export const POST = async (request: Request): Promise<Response> => {
   const read = parseReaderSignalBatch(await request.json())
 
@@ -75,4 +75,4 @@ export const POST = async (request: Request): Promise<Response> => {
   return new Response(null, { status: 204 })
 }
 
-export { rendered, objectAtLine196, renderLoomTree, broadcastReaderSignals, useEffect, useRef, parseReaderSignalBatch }
+export { rendered, objectAtLine207, renderLoomTree, broadcastReaderSignals, useEffect, useRef, parseReaderSignalBatch }

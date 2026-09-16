@@ -23833,8 +23833,93 @@ simply missing a seam the runtime already exposes.
 the reason written where the workaround is.
 ## 2026-09-13 — the fifth reader-signal kind is approved, and the guide to the four is what blocks it
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
-blocking step 2 of `docs/signals.md`
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:**
+**closed by `docs-26-the-fifth-kind`** — step 2 is unblocked, and the page no
+longer states the size of the vocabulary at all.
+
+**What changed, and why it is not simply "the fifth row".** The finding asked for
+a row and the prose around it. Writing that would have moved the problem rather
+than removed it: a page that argues five is a page that blocks the sixth. So the
+page stopped counting out loud. `produceKinds` still walks `READER_SIGNAL_KINDS`
+and the count now reaches a reader only through that block's caption; the opening
+sentence's plain-words list is produced from the same table by `WhatAPageMaySay`;
+and `hovered` — asked for and refused — now carries the closed-list argument that
+the number four was carrying, which is the better story the finding predicted.
+
+`completed` is described today, in `TheApprovedAddition`, as agreed on and not
+built. That block **empties itself**: it renders `null` once the kind is in
+`READER_SIGNAL_KINDS`, and the prose says nothing about it, so no paragraph
+outlives the announcement.
+
+**What step 2 must change, measured rather than guessed.** The change was made
+locally, built, and the whole `(docs)` suite run against it, then reverted —
+`src/` is not touched by this branch. Two edits, not one:
+
+1. `completed` in `READER_SIGNAL_KINDS` (`src/signals/kinds.ts`).
+2. **A `completed` member in `readerSignalSchema`** — it is a discriminated
+   union, so the enum alone leaves every example signal refused by its own
+   discriminator. `z.object({ kind: z.literal("completed"), ...addressSchema, at:
+   instantSchema }).strict()` is the shape this page already has an example for.
+
+With both, `app/(docs)/` is **green with no documentation change at all**: the row
+moves into the vocabulary block, the announcement disappears, and the opening
+sentence gains *"and what they finished"*. The one thing that then needs doing is
+the standing one — `pnpm --filter @loom/app docs:api` in the same commit as the
+export, per `docs/routines.md`.
+
+**Two sentences the page is holding for you**, in case step 2 would rather write
+its own: `completed` means *a form inside it was submitted, and the browser let it
+go*; it does **not** mean a server accepted it, because the broadcaster watches
+the page and never the reply. Also recorded: the example tree at the top of that
+page has no form in it, so nothing there can produce a `completed` — asserted, so
+a later run that adds one is told the row's sentence has to change with it.
+
+---
+
+## 2026-09-16 — a claims test that pins a correct number is how a docs page blocks the thing it documents
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`, `Loom marketing`,
+`Loom lessons`, `Loom primitives` · **Status:** open — a habit to check for, not
+a defect anybody has to fix today
+
+The entry above took three days to close and none of them were spent writing
+prose. *What your readers do* said **"Four things, and nothing else"** and
+**"There is no fifth kind"**, and `claims.test.ts` asserted both, verbatim,
+alongside `READER_SIGNAL_KINDS.length === 4`.
+
+Every part of that was correct. The page was accurate, the test was real, and it
+held prose against the runtime exactly the way this lane keeps saying prose should
+be held. It was also the reason an approved runtime change could not land: adding
+the kind reds `pnpm verify` for **four surfaces**, so the lane that owned the
+vocabulary had to wait for the lane that owned the sentence.
+
+**The distinction worth taking away.** A claims test is right to pin a sentence
+that is a *claim about something else on the page* — which row to look at, which
+node id is quoted, what the live block asks for. It is wrong to pin a sentence
+that **states the size of a set the runtime owns**, because that is not a claim
+about the page, it is a copy of the runtime's data written in English, and the
+test turns the copy into a lock.
+
+The fix is not a better number. It is that **the page may not say the number**:
+produce the count where it is shown, produce the enumeration if the prose
+enumerates, and let the prose make the argument that does not depend on arity. On
+this page the replacement argument is stronger than the one it replaced — a list
+that turned `hovered` down is demonstrably closed, where a list of four is merely
+short.
+
+**Why it is filed against four lanes.** Every surface with a `claims.test.ts` has
+the same shape in it, and the failure is invisible until something grows: the test
+is green, the prose is true, and the cost lands on a different lane on a day
+nobody is expecting it. Worth one grep each for a written-out number next to a
+noun the runtime owns — kinds, operations, primitives, levels, dispositions,
+reasons — rather than a rewrite.
+
+**A second-order one, recorded because it cost the second attempt.** The first
+version of the replacement tests pinned the *pre-landing* state — that `completed`
+is announced, that the schema refuses it — which is the identical mistake one file
+further back. They are now written to pass on both sides of the change, and the
+way that was established was to make the runtime change locally and run the suite,
+which is a cheap thing to do and was the only thing that found it.
 
 `docs/signals.md` approves **`completed`** as the one addition to the reader-signal
 vocabulary: it fires when a form inside an addressed node submits successfully,
