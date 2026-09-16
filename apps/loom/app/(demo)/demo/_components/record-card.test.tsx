@@ -390,13 +390,13 @@ describe("a record card", () => {
   })
 
   /**
-   * The other half of a property that spans two files: there is exactly one
-   * `bg-affirm` control on this rail at a time, and it is always the demo's next
-   * step. While a question is open it is this one, and `AskPanel` gives its own
-   * up (`set-aside.ts`). The class is asserted rather than the look because it is
-   * the only thing the two files share.
+   * The other half of a property that spans two files: the green on this rail
+   * belongs to the demo's next step, and while a question is open that step is
+   * this card's answer rather than a new ask — so a waiting card carries exactly
+   * one, and `AskPanel` gives its own up (`set-aside.ts`). The class is asserted
+   * rather than the look because it is the only thing the two files share.
    */
-  it("carries the rail's one green button while it is the question waiting", () => {
+  it("carries one green button while it is the question waiting", () => {
     const { container } = render(<RecordCard record={HELD} />)
 
     const answer = screen.getByRole("button", { name: "Apply this change" })

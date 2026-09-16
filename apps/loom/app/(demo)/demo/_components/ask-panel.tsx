@@ -103,13 +103,18 @@ export const AskPanel = ({
   /**
    * The green button, and it steps aside while a question is open.
    *
-   * **There is exactly one `bg-affirm` control on this rail at a time, and it is
-   * always the demo's next step.** With nothing open that is *Take the numbers
-   * off* — the press that meets the Gate. With a question open it is **Apply
-   * this change**, down inside the card (`record-card.tsx`), which is the press
-   * that gets past it. Two greens at once would have the panel competing with
-   * the question it just produced, and the one that costs the visitor least is
-   * the one that wins by size.
+   * **The green on this rail belongs to the demo's next step, and once a
+   * question exists that step is not a new ask.** With nothing open the green is
+   * *Take the numbers off* — the press that meets the Gate. With a question open
+   * it is **Apply this change**, down inside the card (`record-card.tsx`), which
+   * is the press that gets past it. A green here at the same time would have the
+   * panel competing with the question it just produced, at the size that wins,
+   * for the press that costs the visitor the question.
+   *
+   * So the claim is about this panel rather than about the count: a card that is
+   * waiting carries exactly one green (`record-card.test.tsx`), and while any is,
+   * this panel carries none. A visitor holding two questions has two cards
+   * offering an answer, which is right — each is the next step for its own ask.
    *
    * The preset is not withdrawn — it drops into the list below, at the position
    * the table gives it, so the four asks already there do not move under the

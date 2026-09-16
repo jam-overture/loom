@@ -179,11 +179,12 @@ describe("the ask panel, while a question is waiting", () => {
     render(<AskPanel revision={3} available={ALL} modelConfigured={true} waiting={WAITING} />)
 
   /**
-   * There is exactly one `bg-affirm` control on this rail at a time and it is
-   * always the demo's next step: *Take the numbers off* with nothing open, and
-   * **Apply this change** once something is (`record-card.tsx`, which holds the
-   * other half of this). Two greens at once is the panel competing with the
-   * question it just produced.
+   * The green on this rail belongs to the demo's next step, and once a question
+   * exists that step is not a new ask: *Take the numbers off* with nothing open,
+   * **Apply this change** once something is (`record-card.tsx` holds the other
+   * half — a waiting card carries exactly one). A green here at the same time is
+   * the panel competing with the question it just produced, at the size that
+   * wins, for the press that costs the visitor the question.
    */
   it("gives up its green button while the question below has one", () => {
     const { container } = open()
