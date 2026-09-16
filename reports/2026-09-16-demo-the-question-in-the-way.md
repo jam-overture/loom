@@ -2,6 +2,10 @@
 
 **Routine:** `Loom demo` · **Branch:** `demo-19-the-question-in-the-way` · **16 September 2026**
 
+**Deployed preview:**
+https://loom-git-demo-19-the-questio-906a22-jpizzolato36-6341s-projects.vercel.app/demo
+— public, no sign-in. Press **Take the numbers off**.
+
 The nineteenth run of this lane. It takes the finding the eighteenth filed as
 *"the largest thing I found this run and not what I fixed"*.
 
