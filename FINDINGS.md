@@ -22194,7 +22194,25 @@ already follows — absent when the host wired none.
 
 ## 2026-09-12 — a repointed form is weighed by the runtime; a repointed binding is not
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-38-the-other-end-of-the-pipe`** ([0163](decisions/0163-a-binding-is-weighed-like-a-destination.md)).
+Built as the asymmetry argued for and **not** as the recommendation specified:
+`repointed-binding` is a `high` factor plus a rung below the refusal floor,
+exactly the shape `redirectedSubmission` has. The one departure is that **params
+count**. The recommendation said "a node that bound one source before and
+another after"; this repository's own documented binding is
+`profile.field` asked with `{ "field": "bio" }`, so source-only would have let
+`bio` become `salary` unremarked on the very example the reference teaches
+bindings with. The cost, recorded rather than hidden: widening a `limit` now asks
+for confirmation too, because the runtime cannot tell a selecting param from a
+shaping one without source vocabulary it deliberately does not have.
+
+The page's workaround still works and is no longer the only thing in the way. The
+section on it was rewritten — see the entry filed for `Loom docs` below.
+
+*Original status below.*
+
+**Status:** open —
 worked around on the page, and the workaround is one line of policy
 
 A binding decides which of a deployment's data appears on a public page.
@@ -24442,3 +24460,136 @@ shot list declare **one** sign-in step and share the context across shots.
 them have no session at all, so an option only one lane needs may belong
 somewhere else entirely. Worth half an hour of somebody's judgement before
 anybody builds it.
+
+---
+## 2026-09-16 — the binding section of *Where the content comes from* was rewritten from outside your lane, because its premise inverted
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+done rather than asked for, because the alternative was a red build or a page
+telling readers a lie
+
+Your page was right and is now wrong, which is the best possible outcome of the
+finding you filed. *Who may change a question* compared two policies that differ
+by one line and said: out of the box the Gate applies a repointed binding, so add
+`protectedPropKeys: ["loom:data"]`. [0163](decisions/0163-a-binding-is-weighed-like-a-destination.md)
+makes the runtime weigh it, so both columns became `requires-confirmation` and
+the comparison stopped comparing anything.
+
+**Your own instrument caught it.** `judge` asserts each expected disposition, and
+the module's comment says exactly why:
+
+> a change to the Gate that made either of these untrue stops the build rather
+> than leaving the page printing a confident lie about what a deployment is
+> protected from.
+
+That is the check working, and it is the reason this entry exists rather than a
+silently stale page.
+
+**What was changed, minimally, to keep `pnpm verify` green:**
+
+| file | what |
+| --- | --- |
+| `_lib/data/repointing.ts` | second column is now `refusalFloor: "high"` → `rejected`, instead of the guarded-prop policy. Keeps the page's shape — two verdicts, one line of difference, computed as the page builds |
+| `page.mdx` | the two paragraphs under `<WhoMayRepointIt />`, and the warning callout, which asked a reader to add a line they no longer need |
+| `_lib/data/claims.test.ts` | the two assertions pinning that prose to those verdicts |
+
+The new second column shows the floor staying sovereign over the escalation,
+which is the thing a reader now needs in that slot. **It is a framework
+engineer's choice of what your page should demonstrate, which is your call and
+not mine** — if a different comparison teaches it better, take it. The callout
+was replaced with one about params counting, which is the half of 0163 a reader
+of this page is most likely to be surprised by.
+
+Nothing else on the page was touched, and the compiled fence was regenerated with
+`pnpm --filter @loom/app docs:fences` rather than by hand.
+
+---
+## 2026-09-16 — the ladder is eight rungs, and eight strings across three surfaces said seven
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
+open — counts corrected mechanically, the claim behind one of them is yours to
+re-check
+
+Adding a rung made every sentence that counts them wrong. `record-claims.test.ts`
+caught the two in `decisions/` and nothing guards the ones on the surfaces, which
+is the general form 0099 named and did not close: *nothing in this repository
+connects a list in `src/` to a sentence that counts it* outside the records.
+
+Corrected in this branch, all in `(marketing)`:
+
+- **`who-can-ask.ts:410` — `"The seven, one by one"` → `"The eight, one by one"`.**
+  The only one of these that is **rendered**: a link label on a live page.
+- Doc comments in `site.ts`, `adapt/record.ts`, `adapt/askers.ts`,
+  `pages/the-rules.ts` and `pages/the-rules.test.ts`.
+
+**One is a claim rather than a count, and it is the one to check.** `site.ts` and
+`who-can-ask.ts` both said *three of the seven rules refuse to consult who asked
+at all*. `repointed-binding` is host-independent and ignores origin like the two
+beside it, so this branch wrote **four of the eight**. That is arithmetic I did
+by reading the ladder, not a measurement — and your page's whole virtue is that
+its numbers are read off sixteen real runs rather than typed. **Re-derive it.**
+
+`the-rules.ts` needed a real addition, not a count: it throws at module load for
+a rung with no question, so it got
+*"Would this change which of your data the page shows?"* in the voice of the
+seven beside it. Reword freely.
+
+---
+## 2026-09-16 — the portal's rules screen gained a card written by the framework lane
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— written to keep the screen complete, and your test is why it could not be
+skipped
+
+`rulesOf` is held to name every reason the Gate can record, exactly once, and the
+comment on that test says what it is for:
+
+> A rule added to the runtime with a new code fails here, which is the moment
+> somebody can still write the sentence for it. Without this, a new rule would
+> refuse changes on a deployment whose own screen said nothing about it.
+
+It fired on the first run of `pnpm verify` and did exactly that. The card is
+`which-data-a-page-shows` in `_lib/rules-view.ts`, with a matching `RuleId`, and
+sentences were added to `vocabulary.ts` (`RULE_SENTENCES`) and
+`calibration-view.ts` (`MISS_CAUSE_LABELS`, `MISS_CAUSE_NOTES`).
+
+**The prose is a framework engineer's, in your registers rather than yours.** It
+is the one thing here worth a second pass: `RULE_SENTENCES` speaks to somebody
+being asked to overrule a rule, and `MISS_CAUSE_NOTES` to somebody reading a
+calibration miss, and those are two different readers I matched by imitation.
+
+Nothing is blocked and no screen is broken. The card carries the params half of
+[0163](decisions/0163-a-binding-is-weighed-like-a-destination.md) in its last
+sentence, because a reader who repoints a `limit` and gets asked will otherwise
+think the screen is lying to them.
+
+---
+## 2026-09-16 — a `git checkout` to undo a restored defect silently reverted two files to `HEAD`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — the same trap `Loom primitives` hit on #313, walked into from the other
+lane eight hours later
+
+#313's report records it exactly: *"a `git checkout` used to undo a defect
+reverted `hero-band.ts` to `HEAD` and silently dropped an uncommitted `part`
+field. Green `verify` before, broken after."*
+
+This run did the same thing to `src/runtime/stakes.ts` and `src/runtime/gate.ts`
+while restoring defects, and lost the entire factor and the entire rung. It was
+caught immediately — the restoration loop re-runs the suite, and 137 passing
+became 137 passing *for the wrong reason* — but only because the next command
+happened to look.
+
+**The cause is that defect restoration and version control use the same verb.**
+`git checkout <path>` means "undo my defect" to the person typing it and "discard
+everything uncommitted in this file" to git, and those are the same thing only
+when the file is already committed.
+
+**The remedy is one line of procedure, not tooling: commit the unit before
+restoring defects into it.** Restoration is then `git checkout` against a real
+baseline and cannot cost anything. This branch did that after the fact and the
+remaining four restorations were free.
+
+Recorded rather than fixed because there is nothing in `src/` to change. Worth a
+line in `docs/routines.md` under the verification section, where every lane that
+restores defects would read it — which is all of them.

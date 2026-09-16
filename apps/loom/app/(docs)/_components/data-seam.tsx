@@ -1,3 +1,5 @@
+import type { DispositionKind } from "@loom/runtime"
+
 import {
   produceAnswers,
   produceMisdeclared,
@@ -209,6 +211,19 @@ export const WhenThereIsNoAnswer = async () => {
 }
 
 /** One repointed binding, judged under two policies that differ in one line. */
+/**
+ * What each disposition reads as in this block.
+ *
+ * Derived from the kind rather than asked about it, because the block was a
+ * binary — accepted, or held — until 0163 made the comparison beside it produce
+ * a refusal, and "held for a person" is the opposite of what a refusal means.
+ */
+const VERDICT_READS: Readonly<Record<DispositionKind, string>> = {
+  accepted: "Applied, without asking anybody",
+  "requires-confirmation": "Held for a person",
+  rejected: "Refused outright — nobody is asked",
+}
+
 export const WhoMayRepointIt = async () => {
   const verdicts = await produceRepointing()
 
@@ -225,9 +240,7 @@ export const WhoMayRepointIt = async () => {
               {verdict.label}
             </p>
             <p className="text-ink-muted m-0 font-mono text-xs">{verdict.difference}</p>
-            <p className="text-ink m-0 text-sm font-semibold">
-              {verdict.kind === "accepted" ? "Applied, without asking anybody" : "Held for a person"}
-            </p>
+            <p className="text-ink m-0 text-sm font-semibold">{VERDICT_READS[verdict.kind]}</p>
             <p className="text-ink-muted m-0 font-mono text-xs">
               {verdict.reasonCode} · stakes {verdict.stakes}
             </p>
